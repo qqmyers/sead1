@@ -6,7 +6,7 @@ Bundle-Version: 0.0.1
 Bundle-Activator: ncsa.mmdb.ui.osgi.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.tupeloproject.core;bundle-version="2.4.3",
+ org.tupeloproject.core;bundle-version="0.0.0",
  edu.uiuc.ncsa.cet.bean.tupelo;bundle-version="1.0.0",
  edu.uiuc.ncsa.cet.bean;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy

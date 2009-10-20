@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="mimeTypeImages" name="Mime Type Images" schema="schema/mimeTypeImages.exsd"/>
 
    <extension
          id="application"
@@ -35,9 +36,9 @@
          point="org.eclipse.ui.views">
       <view
             category="ncsa.mmdb.ui.category"
-            class="ncsa.mmdb.ui.CollectionsView"
+            class="ncsa.mmdb.ui.views.CollectionsView"
             icon="icons/books_stack.png"
-            id="ncsa.mmdb.ui.CollectionsView"
+            id="ncsa.mmdb.ui.views.CollectionsView"
             name="Collections"
             restorable="true">
       </view>
@@ -45,6 +46,38 @@
             id="ncsa.mmdb.ui.category"
             name="MMDB">
       </category>
+   </extension>
+   <extension
+         id="productmmdb"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="ncsa.mmdb.ui.application"
+            name="MMDB">
+         <property
+               name="windowImages"
+               value="icons/alt_window_16.gif,icons/alt_window_32.gif">
+         </property>
+         <property
+               name="appName"
+               value="MMDB">
+         </property>
+      </product>
+   </extension>
+   <extension
+         point="ncsa.mmdb.ui.mimeTypeImages">
+      <mimeTypeImage
+            image="icons/image.png"
+            mimeType="image">
+      </mimeTypeImage>
+   </extension>
+   <extension
+         point="org.eclipse.ui.services">
+      <serviceFactory
+            factoryClass="ncsa.mmdb.ui.services.MimeTypeImageServiceFactory">
+         <service
+               serviceClass="ncsa.mmdb.ui.services.IMimeTypeImageService">
+         </service>
+      </serviceFactory>
    </extension>
 
 </plugin>
