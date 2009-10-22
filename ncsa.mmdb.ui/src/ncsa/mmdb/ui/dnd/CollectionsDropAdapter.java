@@ -1,7 +1,9 @@
 package ncsa.mmdb.ui.dnd;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 
+import ncsa.mmdb.ui.MMDBFrame;
 import ncsa.mmdb.ui.utils.MMDBUtils;
 
 import org.eclipse.jface.viewers.Viewer;
@@ -9,6 +11,8 @@ import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.tupeloproject.kernel.BeanSession;
+
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class CollectionsDropAdapter extends ViewerDropAdapter
 {
@@ -28,7 +32,9 @@ public class CollectionsDropAdapter extends ViewerDropAdapter
             MMDBUtils.importDatasetFromFile( session, fileName );            
         }
         
-        getViewer().refresh();        
+        getViewer().refresh();
+        MMDBFrame.getInstance().setCurrentData( new LinkedList<DatasetBean>() );
+        
         return true;
     }
 

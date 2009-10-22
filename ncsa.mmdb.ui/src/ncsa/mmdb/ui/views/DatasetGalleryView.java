@@ -52,13 +52,15 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
     private int count = 5;
 
     private MMDBFrame frame = MMDBFrame.getInstance();
+    private ISelectionChangedListener scl = new MySelectionChangedListener();
     
 //    private List<ImageHolder> holders = Collections.synchronizedList( new ArrayList<ImageHolder>() );
     private Map<ImageHolder, Image> images = Collections.synchronizedMap( new HashMap<ImageHolder, Image>() );
     private Set<ImageHolder> loadingThreads = Collections.synchronizedSet( new HashSet<ImageHolder>() );
     private Map<ISelectionChangedListener, WrappedSelectionAdapter> listeners = new HashMap<ISelectionChangedListener, WrappedSelectionAdapter>();
     private ThreadPoolExecutor e;
-
+    
+    
     public DatasetGalleryView()
     {
 //        for ( int i = 0; i < count; i++ ) {
@@ -142,19 +144,21 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
 //                    item.setItemCount( count );
                     
                     // **** XXX: TEST OTHER
-                    item.setItemCount( frame.getCurrentData().size() );
+                    item.setItemCount( frame.getAllData().size() );
                 } else {
                     // It's an item
                     int index = gallery.indexOf( item );
                     System.err.println( "Setting data for: " + index );
 
-                    ImageHolder imageHolder = new DatasetImageHolder( MMDBUtils.getDefaultBeanSession(), frame.getCurrentData().get( index ) );
+                    ImageHolder imageHolder = new DatasetImageHolder( MMDBUtils.getDefaultBeanSession(), frame.getAllData().get( index ) );
                     item.setData( "holder", imageHolder );
                 }
             }
         } );
 
         hookContextMenu();
+        
+        frame.addSelectionChangedListener( scl );
     }
 
     public void setFocus()
@@ -166,6 +170,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
         for ( Image i : images.values() ) {
             i.dispose();
         }
+        frame.removeSelectionChangedListener( scl );
     }
 
     // SELECTION PROVIDER
@@ -276,6 +281,14 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
         {
             SelectionChangedEvent event = new SelectionChangedEvent( DatasetGalleryView.this, new StructuredSelection( gallery.getSelection() ) );
             l.selectionChanged( event );
+        }
+    }
+    
+    private class MySelectionChangedListener implements ISelectionChangedListener
+    {
+        public void selectionChanged( SelectionChangedEvent event )
+        {
+            gallery.clearAll( );
         }
     }
 }
