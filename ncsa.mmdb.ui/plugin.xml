@@ -109,6 +109,14 @@
                commandId="ncsa.mmdb.ui.command.galleryItemTest"
                label="Gallery Item Test"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <iterate>
+                  <instanceof
+                        value="org.eclipse.nebula.widgets.gallery.GalleryItem">
+                  </instanceof>
+               </iterate>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
