@@ -1,8 +1,8 @@
 package ncsa.mmdb.ui.views;
 
-import ncsa.mmdb.ui.MMDBUtils;
 import ncsa.mmdb.ui.dnd.CollectionsDropAdapter;
 import ncsa.mmdb.ui.providers.MimeTypeImageProvider;
+import ncsa.mmdb.ui.utils.MMDBUtils;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;

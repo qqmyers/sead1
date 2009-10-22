@@ -3,7 +3,7 @@ package ncsa.mmdb.ui.dnd;
 import java.util.Arrays;
 import java.util.Calendar;
 
-import ncsa.mmdb.ui.MMDBUtils;
+import ncsa.mmdb.ui.utils.MMDBUtils;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;

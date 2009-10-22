@@ -8,7 +8,7 @@
          point="org.eclipse.core.runtime.applications">
       <application>
          <run
-               class="ncsa.mmdb.ui.MMDB">
+               class="ncsa.mmdb.ui.rcp.MMDB">
          </run>
       </application>
    </extension>
@@ -16,7 +16,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             name="RCP Perspective"
-            class="ncsa.mmdb.ui.Perspective"
+            class="ncsa.mmdb.ui.rcp.Perspective"
             id="ncsa.mmdb.ui.perspective">
       </perspective>
    </extension>
@@ -46,6 +46,14 @@
             id="ncsa.mmdb.ui.category"
             name="MMDB">
       </category>
+      <view
+            category="ncsa.mmdb.ui.category"
+            class="ncsa.mmdb.ui.views.DatasetGalleryView"
+            icon="icons/application_view_tile.png"
+            id="ncsa.mmdb.ui.views.DatasetGalleryView"
+            name="Gallery"
+            restorable="true">
+      </view>
    </extension>
    <extension
          id="productmmdb"

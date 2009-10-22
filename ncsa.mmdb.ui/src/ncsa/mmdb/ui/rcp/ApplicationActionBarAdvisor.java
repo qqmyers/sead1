@@ -1,4 +1,4 @@
-package ncsa.mmdb.ui;
+package ncsa.mmdb.ui.rcp;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.ui.IWorkbenchWindow;

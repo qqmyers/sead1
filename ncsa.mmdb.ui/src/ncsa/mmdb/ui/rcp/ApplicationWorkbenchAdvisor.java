@@ -1,4 +1,4 @@
-package ncsa.mmdb.ui;
+package ncsa.mmdb.ui.rcp;
 
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchAdvisor;

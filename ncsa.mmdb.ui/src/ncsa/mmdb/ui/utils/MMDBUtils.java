@@ -1,4 +1,4 @@
-package ncsa.mmdb.ui;
+package ncsa.mmdb.ui.utils;
 
 import java.io.File;
 import java.util.HashMap;

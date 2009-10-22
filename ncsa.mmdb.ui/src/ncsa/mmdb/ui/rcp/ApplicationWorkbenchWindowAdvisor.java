@@ -1,4 +1,4 @@
-package ncsa.mmdb.ui;
+package ncsa.mmdb.ui.rcp;
 
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.application.ActionBarAdvisor;
