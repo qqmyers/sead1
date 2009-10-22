@@ -1,5 +1,6 @@
 package ncsa.mmdb.ui.rcp;
 
+import ncsa.bard.ui.views.AnnotationView;
 import ncsa.mmdb.ui.views.CollectionsView;
 import ncsa.mmdb.ui.views.DatasetGalleryView;
 
@@ -13,5 +14,6 @@ public class Perspective implements IPerspectiveFactory
         layout.setEditorAreaVisible( false );
         layout.addView( CollectionsView.class.getName(), IPageLayout.LEFT, 0.33f, layout.getEditorArea() );
         layout.addView( DatasetGalleryView.class.getName(), IPageLayout.RIGHT, 0.67f, layout.getEditorArea() );
+        layout.addView( AnnotationView.class.getName(), IPageLayout.BOTTOM, 0.67f, DatasetGalleryView.class.getName() );
     }
 }

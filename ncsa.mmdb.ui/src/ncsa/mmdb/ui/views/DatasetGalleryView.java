@@ -55,7 +55,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
     private ISelectionChangedListener scl = new MySelectionChangedListener();
     
 //    private List<ImageHolder> holders = Collections.synchronizedList( new ArrayList<ImageHolder>() );
-    private Map<ImageHolder, Image> images = Collections.synchronizedMap( new HashMap<ImageHolder, Image>() );
+    private Map<ImageHolder, Image> images = frame.getImageCache();
     private Set<ImageHolder> loadingThreads = Collections.synchronizedSet( new HashSet<ImageHolder>() );
     private Map<ISelectionChangedListener, WrappedSelectionAdapter> listeners = new HashMap<ISelectionChangedListener, WrappedSelectionAdapter>();
     private ThreadPoolExecutor e;
@@ -157,6 +157,8 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
         } );
 
         hookContextMenu();
+        
+        getSite().setSelectionProvider( this );
         
         frame.addSelectionChangedListener( scl );
     }

@@ -4,6 +4,10 @@ import ncsa.mmdb.ui.dnd.CollectionsDropAdapter;
 import ncsa.mmdb.ui.providers.MimeTypeImageProvider;
 import ncsa.mmdb.ui.utils.MMDBUtils;
 
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -13,6 +17,8 @@ import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.ViewPart;
 import org.tupeloproject.kernel.BeanSession;
 
@@ -23,6 +29,7 @@ public class CollectionsView extends ViewPart
 {
     private BeanSession session = MMDBUtils.getDefaultBeanSession();
     private DatasetBeanUtil util = new DatasetBeanUtil( session );
+    private TreeViewer viewer;
 
     public CollectionsView()
     {
@@ -30,15 +37,37 @@ public class CollectionsView extends ViewPart
 
     public void createPartControl( Composite parent )
     {
-        TreeViewer viewer = new TreeViewer( parent );
+        viewer = new TreeViewer( parent );
         viewer.setContentProvider( new MyContentProvider() );
         viewer.setLabelProvider( new MyLabelProvider() );
         viewer.setInput( "Test" );
         
-        hookDragAndDrop( viewer );
+        getSite().setSelectionProvider( viewer );
+        
+        hookContextMenu();
+        hookDragAndDrop();
     }
 
-    private void hookDragAndDrop( TreeViewer viewer )
+    private void hookContextMenu()
+    {
+        MenuManager menuMgr = new MenuManager( "#PopupMenu" ); //$NON-NLS-1$
+        menuMgr.setRemoveAllWhenShown( true );
+        menuMgr.addMenuListener( new IMenuListener() {
+            public void menuAboutToShow( IMenuManager manager )
+            {
+            }
+        } );
+
+        GroupMarker marker = new GroupMarker( IWorkbenchActionConstants.MB_ADDITIONS );
+        menuMgr.add( marker );
+
+        Menu menu = menuMgr.createContextMenu( viewer.getControl() );
+
+        viewer.getControl().setMenu( menu );
+        getSite().registerContextMenu( menuMgr, viewer );
+    }
+
+    private void hookDragAndDrop( )
     {
         int ops = DND.DROP_COPY | DND.DROP_MOVE;
         Transfer[] transfers = new Transfer[] { FileTransfer.getInstance() };

@@ -2,9 +2,12 @@ package ncsa.mmdb.ui;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import ncsa.mmdb.ui.utils.MMDBUtils;
@@ -15,6 +18,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.graphics.Image;
 import org.tupeloproject.kernel.BeanSession;
 
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -24,6 +28,7 @@ public class MMDBFrame implements ISelectionChangedListener, ISelectionProvider
 {
     private static MMDBFrame instance;
 
+    private Map<ImageHolder, Image> images = Collections.synchronizedMap( new HashMap<ImageHolder, Image>() );
     private List<DatasetBean> current = new ArrayList<DatasetBean>();
     private Set<ISelectionChangedListener> listeners = new HashSet<ISelectionChangedListener>();
 
@@ -38,6 +43,11 @@ public class MMDBFrame implements ISelectionChangedListener, ISelectionProvider
             instance = new MMDBFrame();
 
         return instance;
+    }
+
+    public Map<ImageHolder, Image> getImageCache()
+    {
+        return images;
     }
 
     public List<DatasetBean> getCurrentData()

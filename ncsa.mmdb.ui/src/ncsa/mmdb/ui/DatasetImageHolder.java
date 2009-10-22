@@ -22,6 +22,11 @@ public class DatasetImageHolder extends ImageHolder
         this.util = new DatasetBeanUtil( session );
     }
 
+    public DatasetBean getBean()
+    {
+        return bean;
+    }
+
     protected Image realizeOriginal()
     {
         try {
