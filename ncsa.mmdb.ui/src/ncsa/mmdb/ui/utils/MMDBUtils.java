@@ -5,6 +5,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import ncsa.bard.tupelo.contexts.ContextManager;
+
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
@@ -24,14 +26,16 @@ public class MMDBUtils
 
     private static BeanSession localBean;
     private static BeanSession remoteBean;
+    
+    private static BeanSession defaultBean;
 
     private static Map<String, String> mimeTypes = new HashMap<String, String>();
 
     public static Context getLocalContext()
     {
-        if ( localContext == null )
+        if ( localContext == null ) {
             localContext = new MemoryContext();
-
+        }
         return localContext;
     }
 
@@ -42,7 +46,12 @@ public class MMDBUtils
 
     public static Context getDefaultContext()
     {
-        return getLocalContext();
+        Context defaultContext = ContextManager.getInstance().getDefaultContext();
+        if ( defaultContext == null ) {
+            defaultContext = new MemoryContext();
+            ContextManager.getInstance().addContext( "memory", defaultContext );
+        }
+        return defaultContext;
     }
 
     public static BeanSession getLocalBeanSession()
@@ -77,7 +86,16 @@ public class MMDBUtils
 
     public static BeanSession getDefaultBeanSession()
     {
-        return getLocalBeanSession();
+        if ( defaultBean == null ) {
+            try {
+                defaultBean = CETBeans.createBeanSession( getDefaultContext() );
+            } catch ( OperatorException e ) {
+                e.printStackTrace();
+            } catch ( ClassNotFoundException e ) {
+                e.printStackTrace();
+            }
+        }
+        return defaultBean;
     }
 
     public static PersonBean getCurrentUser()
@@ -96,7 +114,7 @@ public class MMDBUtils
         String extension = getExtension( name );
         return getMimeTypeForExtension( extension );
     }
-    
+
     public static String getMimeTypeForExtension( String extension )
     {
         if ( mimeTypes.isEmpty() ) {
@@ -124,20 +142,20 @@ public class MMDBUtils
             mimeTypes.put( "xpm", "image/x-xpixmap" );
             mimeTypes.put( "xwd", "image/x-xwindowdump" );
         }
-        
+
         if ( extension.startsWith( "." ) )
             extension = extension.substring( 1 );
-        
+
         String type = mimeTypes.get( extension );
         if ( type == null )
             type = "unk";
-        
+
         return type;
     }
-    
+
     public static String getName( File file )
     {
-        String s = file.getName();        
+        String s = file.getName();
         int i = s.lastIndexOf( "." );
         s = s.substring( 0, i );
         return s;
@@ -147,7 +165,7 @@ public class MMDBUtils
     {
         return getExtension( file.getName() );
     }
-    
+
     public static String getName( String name )
     {
         File f = new File( name );
@@ -158,10 +176,10 @@ public class MMDBUtils
     {
         int i = name.lastIndexOf( "." );
         name = name.substring( i + 1 );
-        
+
         return name;
     }
-    
+
     public static DatasetBean importDatasetFromFile( BeanSession session, String fileName )
     {
         DatasetBeanUtil util = new DatasetBeanUtil( session );
@@ -177,9 +195,8 @@ public class MMDBUtils
         } catch ( Throwable t ) {
             t.printStackTrace();
         }
-        
+
         return bean;
     }
-
 
 }
