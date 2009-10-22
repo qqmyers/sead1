@@ -1,5 +1,6 @@
 package ncsa.mmdb.ui;
 
+import org.eclipse.nebula.widgets.gallery.GalleryItem;
 import org.eclipse.swt.graphics.Image;
 
 public abstract class ImageHolder
@@ -19,4 +20,6 @@ public abstract class ImageHolder
     {
         return realizeThumbnail();
     }
+    
+    public abstract void updateOverlays( GalleryItem item );
 }

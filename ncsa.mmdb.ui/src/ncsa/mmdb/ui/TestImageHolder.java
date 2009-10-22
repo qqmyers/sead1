@@ -7,6 +7,7 @@ import java.util.Random;
 import ncsa.mmdb.ui.utils.ImageUtils;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.nebula.widgets.gallery.GalleryItem;
 import org.eclipse.swt.graphics.Image;
 
 public class TestImageHolder extends ImageHolder
@@ -20,6 +21,10 @@ public class TestImageHolder extends ImageHolder
     public TestImageHolder()
     {
         key = Long.toString( rnd.nextLong() );
+    }
+
+    public void updateOverlays( GalleryItem item )
+    {
     }
 
     protected Image realizeOriginal()

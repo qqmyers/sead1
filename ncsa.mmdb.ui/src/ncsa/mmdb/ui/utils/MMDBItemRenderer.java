@@ -2,6 +2,7 @@ package ncsa.mmdb.ui.utils;
 
 import java.util.Map;
 
+import ncsa.mmdb.ui.DatasetImageHolder;
 import ncsa.mmdb.ui.ImageHolder;
 import ncsa.mmdb.ui.osgi.Activator;
 
@@ -58,6 +59,7 @@ public class MMDBItemRenderer extends DefaultGalleryItemRenderer
         if ( item.getData( "holder" ) instanceof ImageHolder ) {
             ImageHolder h = (ImageHolder) item.getData( "holder" );
             itemImage = images.get( h );
+            h.updateOverlays( item );
         }
 
         if ( itemImage == null )
