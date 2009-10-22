@@ -1,6 +1,7 @@
 package ncsa.mmdb.ui.utils;
 
 import java.io.File;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,9 +9,12 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.impl.MemoryContext;
+import org.tupeloproject.rdf.Resource;
 
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
+import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 public class MMDBUtils
@@ -157,5 +161,25 @@ public class MMDBUtils
         
         return name;
     }
+    
+    public static DatasetBean importDatasetFromFile( BeanSession session, String fileName )
+    {
+        DatasetBeanUtil util = new DatasetBeanUtil( session );
+        DatasetBean bean = new DatasetBean();
+        bean.setCreator( MMDBUtils.getCurrentUser() );
+        bean.setDate( Calendar.getInstance().getTime() );
+        bean.setTitle( MMDBUtils.getName( fileName ) );
+        bean.setMimeType( MMDBUtils.getMimeType( fileName ) );
+
+        try {
+            Resource subject = session.registerAndSave( bean );
+            util.setData( bean, fileName );
+        } catch ( Throwable t ) {
+            t.printStackTrace();
+        }
+        
+        return bean;
+    }
+
 
 }

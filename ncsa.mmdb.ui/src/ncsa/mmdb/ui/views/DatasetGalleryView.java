@@ -1,19 +1,19 @@
 package ncsa.mmdb.ui.views;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import ncsa.mmdb.ui.DatasetImageHolder;
 import ncsa.mmdb.ui.ImageHolder;
-import ncsa.mmdb.ui.TestImageHolder;
+import ncsa.mmdb.ui.MMDBFrame;
 import ncsa.mmdb.ui.utils.MMDBItemRenderer;
+import ncsa.mmdb.ui.utils.MMDBUtils;
 
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuListener;
@@ -51,7 +51,9 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
 
     private int count = 5;
 
-    private List<ImageHolder> holders = Collections.synchronizedList( new ArrayList<ImageHolder>() );
+    private MMDBFrame frame = MMDBFrame.getInstance();
+    
+//    private List<ImageHolder> holders = Collections.synchronizedList( new ArrayList<ImageHolder>() );
     private Map<ImageHolder, Image> images = Collections.synchronizedMap( new HashMap<ImageHolder, Image>() );
     private Set<ImageHolder> loadingThreads = Collections.synchronizedSet( new HashSet<ImageHolder>() );
     private Map<ISelectionChangedListener, WrappedSelectionAdapter> listeners = new HashMap<ISelectionChangedListener, WrappedSelectionAdapter>();
@@ -59,9 +61,9 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
 
     public DatasetGalleryView()
     {
-        for ( int i = 0; i < count; i++ ) {
-            holders.add( new TestImageHolder() );
-        }
+//        for ( int i = 0; i < count; i++ ) {
+//            holders.add( new TestImageHolder() );
+//        }
 
         LinkedBlockingDeque<Runnable> lbq = new LinkedBlockingDeque<Runnable>() {
             public boolean add( Runnable e )
@@ -101,7 +103,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
         groupRenderer.setMinMargin( 2 );
         gallery.setGroupRenderer( groupRenderer );
 
-        // 1 group
+        // **** XXX TEST: 1 group
         gallery.setItemCount( 1 );
 
         ScrollingSmoother ss = new ScrollingSmoother( gallery, new ExpoOut() );
@@ -127,7 +129,6 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
                 }
             }
         } );
-
         gallery.addListener( SWT.SetData, new Listener() {
             public void handleEvent( Event event )
             {
@@ -135,15 +136,19 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
 
                 if ( item.getParentItem() == null ) {
                     // It's a group
-                    item.setText( "Some Group" );
-
-                    item.setItemCount( count );
+                    
+                    // **** XXX: TEST
+//                    item.setText( "Some Group" );
+//                    item.setItemCount( count );
+                    
+                    // **** XXX: TEST OTHER
+                    item.setItemCount( frame.getCurrentData().size() );
                 } else {
                     // It's an item
                     int index = gallery.indexOf( item );
                     System.err.println( "Setting data for: " + index );
 
-                    ImageHolder imageHolder = holders.get( index );
+                    ImageHolder imageHolder = new DatasetImageHolder( MMDBUtils.getDefaultBeanSession(), frame.getCurrentData().get( index ) );
                     item.setData( "holder", imageHolder );
                 }
             }
@@ -161,25 +166,6 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
         for ( Image i : images.values() ) {
             i.dispose();
         }
-    }
-
-    private void hookContextMenu()
-    {
-        MenuManager menuMgr = new MenuManager( "#PopupMenu" ); //$NON-NLS-1$
-        menuMgr.setRemoveAllWhenShown( true );
-        menuMgr.addMenuListener( new IMenuListener() {
-            public void menuAboutToShow( IMenuManager manager )
-            {
-            }
-        } );
-
-        GroupMarker marker = new GroupMarker( IWorkbenchActionConstants.MB_ADDITIONS );
-        menuMgr.add( marker );
-
-        Menu menu = menuMgr.createContextMenu( gallery );
-
-        gallery.setMenu( menu );
-        getSite().registerContextMenu( menuMgr, this );
     }
 
     // SELECTION PROVIDER
@@ -211,6 +197,8 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
     {
     }
 
+    // AUXILIARY METHODS FOR IMAGE MANAGEMENT
+    
     private void updateItem( final GalleryItem item )
     {
         Display.getDefault().syncExec( new Runnable() {
@@ -245,6 +233,29 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
         loadingThreads.add( holder );
     }
 
+    // AUXILIARY METHODS
+    
+    private void hookContextMenu()
+    {
+        MenuManager menuMgr = new MenuManager( "#PopupMenu" ); //$NON-NLS-1$
+        menuMgr.setRemoveAllWhenShown( true );
+        menuMgr.addMenuListener( new IMenuListener() {
+            public void menuAboutToShow( IMenuManager manager )
+            {
+            }
+        } );
+
+        GroupMarker marker = new GroupMarker( IWorkbenchActionConstants.MB_ADDITIONS );
+        menuMgr.add( marker );
+
+        Menu menu = menuMgr.createContextMenu( gallery );
+
+        gallery.setMenu( menu );
+        getSite().registerContextMenu( menuMgr, this );
+    }
+
+    // PRIVATE CLASSES
+    
     private class WrappedSelectionAdapter implements SelectionListener
     {
         private ISelectionChangedListener l;
