@@ -2,7 +2,6 @@ package ncsa.mmdb.ui.utils;
 
 import java.util.Map;
 
-import ncsa.mmdb.ui.DatasetImageHolder;
 import ncsa.mmdb.ui.ImageHolder;
 import ncsa.mmdb.ui.osgi.Activator;
 

@@ -6,10 +6,12 @@ import ncsa.mmdb.ui.osgi.Activator;
 import ncsa.mmdb.ui.utils.ImageUtils;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.nebula.widgets.gallery.AbstractGalleryItemRenderer;
 import org.eclipse.nebula.widgets.gallery.GalleryItem;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.rdf.Resource;
 
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -25,7 +27,7 @@ public class DatasetImageHolder extends ImageHolder
         ImageDescriptor imageDescriptor = Activator.getImageDescriptor( "icons/note.png" );
         Activator.getDefault().getImageRegistry().put( "note", imageDescriptor );
     }
-    
+
     public DatasetImageHolder( BeanSession session, DatasetBean bean )
     {
         this.session = session;
@@ -41,13 +43,18 @@ public class DatasetImageHolder extends ImageHolder
     public void updateOverlays( GalleryItem item )
     {
         try {
-            util.update( bean );
+            session.refetch( Resource.resource( bean.getUri() ) );
         } catch ( Exception e ) {
             e.printStackTrace();
         }
 
         Set<AnnotationBean> annotations = bean.getAnnotations();
         System.err.println( "Annotations: " + annotations );
+
+        if ( annotations.size() > 0 )
+            item.setData( AbstractGalleryItemRenderer.OVERLAY_BOTTOM_RIGHT, Activator.getDefault().getImageRegistry().get( "note" ) );
+        else
+            item.setData( AbstractGalleryItemRenderer.OVERLAY_BOTTOM_RIGHT, null );
     }
 
     protected Image realizeOriginal()
