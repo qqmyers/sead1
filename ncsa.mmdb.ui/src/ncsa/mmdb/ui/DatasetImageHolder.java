@@ -40,6 +40,10 @@ public class DatasetImageHolder extends ImageHolder
         return bean;
     }
 
+    /**
+     * This should really only be called on a per item basis as it makes a heavyweight call
+     * to the underlying system.
+     */
     public void updateOverlays( GalleryItem item )
     {
         try {
