@@ -34,7 +34,7 @@ public class MMDBFrame implements ISelectionChangedListener, ISelectionProvider
     private DatasetBeanUtil util;
 
     private Map<ImageHolder, Image> images = Collections.synchronizedMap( new HashMap<ImageHolder, Image>() );
-    private List<DatasetBean> current = new ArrayList<DatasetBean>();
+    private List<DatasetBean> current;
     private Set<ISelectionChangedListener> listeners = new HashSet<ISelectionChangedListener>();
 
     private MMDBFrame()
@@ -60,17 +60,24 @@ public class MMDBFrame implements ISelectionChangedListener, ISelectionProvider
 
     public List<DatasetBean> getCurrentData()
     {
+        if ( current == null ) {
+            try {
+                current = new ArrayList<DatasetBean>( util.getAll() );
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            }
+        }
         return current;
     }
 
-    public List<DatasetBean> getAllData()
-    {
-        try {
-            return new ArrayList<DatasetBean>( util.getAll() );
-        } catch ( Exception e ) {
-            return new ArrayList<DatasetBean>( 0 );
-        }
-    }
+//    public List<DatasetBean> getAllData()
+//    {
+//        try {
+//            return new ArrayList<DatasetBean>( util.getAll() );
+//        } catch ( Exception e ) {
+//            return new ArrayList<DatasetBean>( 0 );
+//        }
+//    }
     
     public void setCurrentData( List<DatasetBean> list )
     {
@@ -82,6 +89,12 @@ public class MMDBFrame implements ISelectionChangedListener, ISelectionProvider
 
     // SELECTION CHANGED LISTENER
     
+    private void update()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
     public void addSelectionChangedListener( ISelectionChangedListener listener )
     {
         listeners.add( listener );

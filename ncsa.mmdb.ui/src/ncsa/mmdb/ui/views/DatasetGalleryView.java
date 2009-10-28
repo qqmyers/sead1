@@ -5,9 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import ncsa.bard.ui.Refreshable;
 import ncsa.bard.ui.services.IContextService;
@@ -45,6 +44,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.tupeloproject.kernel.BeanSession;
 
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
+
 public class DatasetGalleryView extends ViewPart implements ISelectionProvider, Refreshable
 {
     private Gallery gallery;
@@ -56,27 +57,29 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
     private MMDBFrame frame = MMDBFrame.getInstance();
     private BeanSession session;
     private ISelectionChangedListener scl = new MySelectionChangedListener();
-    
-//    private List<ImageHolder> holders = Collections.synchronizedList( new ArrayList<ImageHolder>() );
+
+    //    private List<ImageHolder> holders = Collections.synchronizedList( new ArrayList<ImageHolder>() );
+    private Map<DatasetBean, ImageHolder> datasetMap = new HashMap<DatasetBean, ImageHolder>();
     private Map<ImageHolder, Image> images = frame.getImageCache();
     private Set<ImageHolder> loadingThreads = Collections.synchronizedSet( new HashSet<ImageHolder>() );
     private Map<ISelectionChangedListener, WrappedSelectionAdapter> listeners = new HashMap<ISelectionChangedListener, WrappedSelectionAdapter>();
-    private ThreadPoolExecutor e;
-    
-    
+    private ExecutorService e;
+
     public DatasetGalleryView()
     {
         IContextService contextService = (IContextService) PlatformUI.getWorkbench().getService( IContextService.class );
         session = contextService.getDefaultBeanSession();
-        
-        LinkedBlockingDeque<Runnable> lbq = new LinkedBlockingDeque<Runnable>() {
-            public boolean add( Runnable e )
-            {
-                addFirst( e );
-                return true;
-            }
-        };
-        e = new ThreadPoolExecutor( 5, 30, 60, TimeUnit.SECONDS, lbq );
+
+//        LinkedBlockingDeque<Runnable> lbq = new LinkedBlockingDeque<Runnable>() {
+//            public boolean add( Runnable e )
+//            {
+//                addFirst( e );
+//                return true;
+//            }
+//        };
+//        
+//        e = new ThreadPoolExecutor( 3, 3, 60, TimeUnit.SECONDS, lbq );
+        e = Executors.newFixedThreadPool( 3 );
     }
 
     public void refresh()
@@ -137,24 +140,29 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
 
                 if ( item.getParentItem() == null ) {
                     // It's a group
-                    
+
                     // **** XXX: TEST
-                    item.setItemCount( frame.getAllData().size() );
+                    item.setItemCount( frame.getCurrentData().size() );
                 } else {
                     // It's an item
                     int index = gallery.indexOf( item );
-                    System.err.println( "Setting data for: " + index );
+                    DatasetBean bean = frame.getCurrentData().get( index );
+                    System.err.println( "Setting data for: " + index + " to " + bean );
 
-                    ImageHolder imageHolder = new DatasetImageHolder( session, frame.getAllData().get( index ) );
+                    ImageHolder imageHolder = datasetMap.get( bean );
+                    if ( imageHolder == null ) {
+                        imageHolder = new DatasetImageHolder( session, bean );
+                        datasetMap.put( bean, imageHolder );
+                    }
                     item.setData( "holder", imageHolder );
                 }
             }
         } );
 
         hookContextMenu();
-        
+
         getSite().setSelectionProvider( this );
-        
+
         frame.addSelectionChangedListener( scl );
     }
 
@@ -200,7 +208,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
     }
 
     // AUXILIARY METHODS FOR IMAGE MANAGEMENT
-    
+
     private void updateItem( final GalleryItem item )
     {
         Display.getDefault().syncExec( new Runnable() {
@@ -223,10 +231,14 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
         Runnable r = new Runnable() {
             public void run()
             {
+                long first = System.currentTimeMillis();
+                System.err.println( "Here at: " + first + " for " + index );
                 Image thumbnail = holder.getThumbnail();
                 images.put( holder, thumbnail );
                 updateItem( item );
                 loadingThreads.remove( holder );
+                long second = System.currentTimeMillis();
+                System.err.println( "Took: " + ( second - first ) + " for " + index );
             }
         };
 
@@ -236,7 +248,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
     }
 
     // AUXILIARY METHODS
-    
+
     private void hookContextMenu()
     {
         MenuManager menuMgr = new MenuManager( "#PopupMenu" ); //$NON-NLS-1$
@@ -257,7 +269,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
     }
 
     // PRIVATE CLASSES
-    
+
     private class WrappedSelectionAdapter implements SelectionListener
     {
         private ISelectionChangedListener l;
@@ -280,12 +292,12 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
             l.selectionChanged( event );
         }
     }
-    
+
     private class MySelectionChangedListener implements ISelectionChangedListener
     {
         public void selectionChanged( SelectionChangedEvent event )
         {
-            gallery.clearAll( );
+            gallery.clearAll();
         }
     }
 }

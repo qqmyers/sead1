@@ -1,7 +1,7 @@
 package ncsa.mmdb.ui.dnd;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 
 import ncsa.bard.ui.services.IContextService;
 import ncsa.mmdb.ui.MMDBFrame;
@@ -20,10 +20,12 @@ import org.eclipse.ui.PlatformUI;
 import org.tupeloproject.kernel.BeanSession;
 
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
 public class CollectionsDropAdapter extends ViewerDropAdapter
 {
     private BeanSession session;
+    private DatasetBeanUtil util;
 
     public CollectionsDropAdapter( Viewer viewer )
     {
@@ -32,6 +34,7 @@ public class CollectionsDropAdapter extends ViewerDropAdapter
         IContextService contextService = (IContextService) PlatformUI.getWorkbench().getService( IContextService.class );
 
         session = contextService.getDefaultBeanSession();
+        util = new DatasetBeanUtil( session );
     }
 
     public boolean performDrop( Object data )
@@ -80,7 +83,11 @@ public class CollectionsDropAdapter extends ViewerDropAdapter
             Display.getDefault().asyncExec( new Runnable() {
                 public void run()
                 {
-                    MMDBFrame.getInstance().setCurrentData( new LinkedList<DatasetBean>() );
+                    try {
+                        MMDBFrame.getInstance().setCurrentData( new ArrayList<DatasetBean>( util.getAll() ) );
+                    } catch ( Exception e ) {
+                        e.printStackTrace();
+                    }
                 }
             } );
 

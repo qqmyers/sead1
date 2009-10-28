@@ -13,6 +13,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
@@ -48,7 +49,7 @@ public class CollectionsView extends ViewPart implements Refreshable
         session = imageService.getDefaultBeanSession();
         util = new DatasetBeanUtil( session );
         
-        viewer = new TreeViewer( parent );
+        viewer = new TreeViewer( parent, SWT.VIRTUAL );
         viewer.setContentProvider( new MyContentProvider() );
         viewer.setLabelProvider( new MyLabelProvider() );
         viewer.setInput( "Test" );
