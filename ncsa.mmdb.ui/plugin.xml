@@ -86,6 +86,11 @@
                serviceClass="ncsa.mmdb.ui.services.IMimeTypeImageService">
          </service>
       </serviceFactory>
+      <serviceFactory
+            factoryClass="ncsa.mmdb.ui.services.ContextBeanContextServiceFactory">
+         <service
+               serviceClass="ncsa.bard.ui.services.IContextService"></service>
+      </serviceFactory>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -118,6 +123,30 @@
                </iterate>
             </visibleWhen>
          </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               label="File">
+         </menu>
+         <menu
+               label="MMDB">
+            <dynamic
+                  class="edu.uiuc.ncsa.cet.tupelo.actions.ContextMenu"
+                  id="ncsa.mmdb.ui.dynamic.context">
+            </dynamic>
+         </menu>
+         <menu
+               label="Window">
+            <command
+                  commandId="org.eclipse.ui.views.showView"
+                  style="push">
+            </command>
+            <command
+                  commandId="org.eclipse.ui.window.preferences"
+                  style="push">
+            </command>
+         </menu>
       </menuContribution>
    </extension>
    <extension

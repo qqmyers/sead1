@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import ncsa.bard.ui.services.IContextService;
 import ncsa.mmdb.ui.utils.MMDBUtils;
 
 import org.eclipse.jface.viewers.ISelection;
@@ -19,6 +20,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.PlatformUI;
 import org.tupeloproject.kernel.BeanSession;
 
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -27,6 +29,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 public class MMDBFrame implements ISelectionChangedListener, ISelectionProvider
 {
     private static MMDBFrame instance;
+    
+    private BeanSession session;
+    private DatasetBeanUtil util;
 
     private Map<ImageHolder, Image> images = Collections.synchronizedMap( new HashMap<ImageHolder, Image>() );
     private List<DatasetBean> current = new ArrayList<DatasetBean>();
@@ -34,7 +39,10 @@ public class MMDBFrame implements ISelectionChangedListener, ISelectionProvider
 
     private MMDBFrame()
     {
+        IContextService contextService = (IContextService) PlatformUI.getWorkbench().getService( IContextService.class );
 
+        session = contextService.getDefaultBeanSession();
+        util = new DatasetBeanUtil( session );
     }
 
     public static MMDBFrame getInstance()
@@ -57,8 +65,6 @@ public class MMDBFrame implements ISelectionChangedListener, ISelectionProvider
 
     public List<DatasetBean> getAllData()
     {
-        BeanSession session = MMDBUtils.getDefaultBeanSession();
-        DatasetBeanUtil util = new DatasetBeanUtil( session );
 
         try {
             return new ArrayList<DatasetBean>( util.getAll() );
@@ -122,7 +128,7 @@ public class MMDBFrame implements ISelectionChangedListener, ISelectionProvider
 
         File[] list = testData.listFiles();
         for ( File f : list ) {
-            current.add( MMDBUtils.importDatasetFromFile( MMDBUtils.getDefaultBeanSession(), f.getAbsolutePath() ) );
+            current.add( MMDBUtils.importDatasetFromFile( session, f.getAbsolutePath() ) );
         }
     }
 }

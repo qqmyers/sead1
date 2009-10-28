@@ -1,8 +1,8 @@
 package ncsa.mmdb.ui.views;
 
+import ncsa.bard.ui.services.IContextService;
 import ncsa.mmdb.ui.dnd.CollectionsDropAdapter;
 import ncsa.mmdb.ui.providers.MimeTypeImageProvider;
-import ncsa.mmdb.ui.utils.MMDBUtils;
 
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuListener;
@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.tupeloproject.kernel.BeanSession;
 
@@ -27,8 +28,8 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
 public class CollectionsView extends ViewPart
 {
-    private BeanSession session = MMDBUtils.getDefaultBeanSession();
-    private DatasetBeanUtil util = new DatasetBeanUtil( session );
+    private BeanSession session;
+    private DatasetBeanUtil util;
     private TreeViewer viewer;
 
     public CollectionsView()
@@ -37,6 +38,10 @@ public class CollectionsView extends ViewPart
 
     public void createPartControl( Composite parent )
     {
+        IContextService imageService = (IContextService) PlatformUI.getWorkbench().getService( IContextService.class );
+        session = imageService.getDefaultBeanSession();
+        util = new DatasetBeanUtil( session );
+        
         viewer = new TreeViewer( parent );
         viewer.setContentProvider( new MyContentProvider() );
         viewer.setLabelProvider( new MyLabelProvider() );

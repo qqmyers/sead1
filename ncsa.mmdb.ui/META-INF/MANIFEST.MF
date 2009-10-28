@@ -12,5 +12,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.nebula.widgets.gallery;bundle-version="0.5.2",
  ncsa.bard;bundle-version="0.0.1",
  ncsa.bard.model;bundle-version="1.0.0",
- ncsa.bard.ui;bundle-version="0.0.1"
+ ncsa.bard.ui;bundle-version="0.0.1",
+ edu.uiuc.ncsa.cet.tupelo;bundle-version="1.0.0",
+ edu.uiuc.ncsa.cet.tupelo.contexts;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy

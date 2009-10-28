@@ -9,11 +9,11 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import ncsa.bard.ui.services.IContextService;
 import ncsa.mmdb.ui.DatasetImageHolder;
 import ncsa.mmdb.ui.ImageHolder;
 import ncsa.mmdb.ui.MMDBFrame;
 import ncsa.mmdb.ui.utils.MMDBItemRenderer;
-import ncsa.mmdb.ui.utils.MMDBUtils;
 
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuListener;
@@ -41,7 +41,9 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.tupeloproject.kernel.BeanSession;
 
 public class DatasetGalleryView extends ViewPart implements ISelectionProvider
 {
@@ -52,6 +54,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
     private int count = 5;
 
     private MMDBFrame frame = MMDBFrame.getInstance();
+    private BeanSession session;
     private ISelectionChangedListener scl = new MySelectionChangedListener();
     
 //    private List<ImageHolder> holders = Collections.synchronizedList( new ArrayList<ImageHolder>() );
@@ -67,6 +70,9 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
 //            holders.add( new TestImageHolder() );
 //        }
 
+        IContextService contextService = (IContextService) PlatformUI.getWorkbench().getService( IContextService.class );
+        session = contextService.getDefaultBeanSession();
+        
         LinkedBlockingDeque<Runnable> lbq = new LinkedBlockingDeque<Runnable>() {
             public boolean add( Runnable e )
             {
@@ -150,7 +156,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
                     int index = gallery.indexOf( item );
                     System.err.println( "Setting data for: " + index );
 
-                    ImageHolder imageHolder = new DatasetImageHolder( MMDBUtils.getDefaultBeanSession(), frame.getAllData().get( index ) );
+                    ImageHolder imageHolder = new DatasetImageHolder( session, frame.getAllData().get( index ) );
                     item.setData( "holder", imageHolder );
                 }
             }

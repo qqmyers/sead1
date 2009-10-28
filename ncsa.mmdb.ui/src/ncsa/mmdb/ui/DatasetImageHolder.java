@@ -1,5 +1,7 @@
 package ncsa.mmdb.ui;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Set;
 
 import ncsa.mmdb.ui.osgi.Activator;
@@ -53,7 +55,6 @@ public class DatasetImageHolder extends ImageHolder
         }
 
         Set<AnnotationBean> annotations = bean.getAnnotations();
-        System.err.println( "Annotations: " + annotations );
 
         if ( annotations.size() > 0 )
             item.setData( AbstractGalleryItemRenderer.OVERLAY_BOTTOM_RIGHT, Activator.getDefault().getImageRegistry().get( "note" ) );
@@ -64,7 +65,13 @@ public class DatasetImageHolder extends ImageHolder
     protected Image realizeOriginal()
     {
         try {
-            Image i = new Image( Display.getDefault(), util.getData( bean ) );
+            // XXX: Hacks...not sure why but you get a "Unsupported or unrecognized format" if you read the stream directly into an image
+            File dataFile = util.getDataFile( bean, File.createTempFile( "mmdb", ".tmp" ) );
+            System.err.println( "Datafile: " + dataFile.getAbsolutePath() );
+            dataFile.deleteOnExit();
+            
+//            InputStream data = util.getData( bean );            
+            Image i = new Image( Display.getDefault(), new FileInputStream( dataFile ) );
             return i;
         } catch ( Throwable e ) {
             e.printStackTrace();

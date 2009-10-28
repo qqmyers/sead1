@@ -55,6 +55,7 @@ public class MMDBItemRenderer extends DefaultGalleryItemRenderer
 
         Image itemImage = null;
 
+        // This seems like a bad place to do this as its a heavyweight operation called in a painting thread
         if ( item.getData( "holder" ) instanceof ImageHolder ) {
             ImageHolder h = (ImageHolder) item.getData( "holder" );
             itemImage = images.get( h );

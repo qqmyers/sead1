@@ -5,98 +5,17 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import ncsa.bard.tupelo.contexts.ContextManager;
-
 import org.tupeloproject.kernel.BeanSession;
-import org.tupeloproject.kernel.Context;
-import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.rdf.Resource;
 
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 public class MMDBUtils
 {
-    private static Context localContext;
-    private static Context remoteContext;
-
-    private static BeanSession localBean;
-    private static BeanSession remoteBean;
-    
-    private static BeanSession defaultBean;
-
     private static Map<String, String> mimeTypes = new HashMap<String, String>();
-
-    public static Context getLocalContext()
-    {
-        if ( localContext == null ) {
-            localContext = new MemoryContext();
-        }
-        return localContext;
-    }
-
-    public static Context getRemoteContext()
-    {
-        return null;
-    }
-
-    public static Context getDefaultContext()
-    {
-        Context defaultContext = ContextManager.getInstance().getDefaultContext();
-        if ( defaultContext == null ) {
-            defaultContext = new MemoryContext();
-            ContextManager.getInstance().addContext( "memory", defaultContext );
-        }
-        return defaultContext;
-    }
-
-    public static BeanSession getLocalBeanSession()
-    {
-        if ( localBean == null ) {
-            try {
-                localBean = CETBeans.createBeanSession( getLocalContext() );
-            } catch ( OperatorException e ) {
-                e.printStackTrace();
-            } catch ( ClassNotFoundException e ) {
-                e.printStackTrace();
-            }
-        }
-
-        return localBean;
-    }
-
-    public static BeanSession getRemoteBeanSession()
-    {
-        if ( remoteBean == null ) {
-            try {
-                remoteBean = CETBeans.createBeanSession( getRemoteContext() );
-            } catch ( OperatorException e ) {
-                e.printStackTrace();
-            } catch ( ClassNotFoundException e ) {
-                e.printStackTrace();
-            }
-        }
-
-        return remoteBean;
-    }
-
-    public static BeanSession getDefaultBeanSession()
-    {
-        if ( defaultBean == null ) {
-            try {
-                defaultBean = CETBeans.createBeanSession( getDefaultContext() );
-            } catch ( OperatorException e ) {
-                e.printStackTrace();
-            } catch ( ClassNotFoundException e ) {
-                e.printStackTrace();
-            }
-        }
-        return defaultBean;
-    }
 
     public static PersonBean getCurrentUser()
     {
