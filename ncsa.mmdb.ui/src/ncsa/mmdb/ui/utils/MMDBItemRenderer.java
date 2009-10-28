@@ -37,10 +37,14 @@ public class MMDBItemRenderer extends DefaultGalleryItemRenderer
         super();
         this.images = images;
 
-        ImageDescriptor imageDescriptor = Activator.getImageDescriptor( "icons/loading.png" );
-        Activator.getDefault().getImageRegistry().put( "loading", imageDescriptor );
         defaultImage = Activator.getDefault().getImageRegistry().get( "loading" );
 
+        if ( defaultImage == null ) {
+            ImageDescriptor imageDescriptor = Activator.getImageDescriptor( "icons/loading.png" );
+            Activator.getDefault().getImageRegistry().put( "loading", imageDescriptor );
+            defaultImage = Activator.getDefault().getImageRegistry().get( "loading" );
+        }
+        
         foregroundColor = Display.getDefault().getSystemColor( SWT.COLOR_LIST_FOREGROUND );
         backgroundColor = Display.getDefault().getSystemColor( SWT.COLOR_LIST_BACKGROUND );
 
@@ -60,7 +64,7 @@ public class MMDBItemRenderer extends DefaultGalleryItemRenderer
             itemImage = images.get( h );
             // This seems like a bad place to do this as its a heavyweight operation called in a painting thread
             // But somewhere we need to manage this...
-//            h.updateOverlays( item );
+            //            h.updateOverlays( item );
         }
 
         if ( itemImage == null )

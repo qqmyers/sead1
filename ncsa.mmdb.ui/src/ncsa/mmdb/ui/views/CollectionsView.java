@@ -1,5 +1,6 @@
 package ncsa.mmdb.ui.views;
 
+import ncsa.bard.ui.Refreshable;
 import ncsa.bard.ui.services.IContextService;
 import ncsa.mmdb.ui.dnd.CollectionsDropAdapter;
 import ncsa.mmdb.ui.providers.MimeTypeImageProvider;
@@ -26,7 +27,7 @@ import org.tupeloproject.kernel.BeanSession;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
-public class CollectionsView extends ViewPart
+public class CollectionsView extends ViewPart implements Refreshable
 {
     private BeanSession session;
     private DatasetBeanUtil util;
@@ -34,6 +35,11 @@ public class CollectionsView extends ViewPart
 
     public CollectionsView()
     {
+    }
+    
+    public void refresh()
+    {
+        viewer.refresh();
     }
 
     public void createPartControl( Composite parent )

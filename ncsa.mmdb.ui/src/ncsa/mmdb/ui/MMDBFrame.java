@@ -65,7 +65,6 @@ public class MMDBFrame implements ISelectionChangedListener, ISelectionProvider
 
     public List<DatasetBean> getAllData()
     {
-
         try {
             return new ArrayList<DatasetBean>( util.getAll() );
         } catch ( Exception e ) {

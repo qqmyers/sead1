@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import ncsa.bard.ui.Refreshable;
 import ncsa.bard.ui.services.IContextService;
 import ncsa.mmdb.ui.DatasetImageHolder;
 import ncsa.mmdb.ui.ImageHolder;
@@ -44,7 +45,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.tupeloproject.kernel.BeanSession;
 
-public class DatasetGalleryView extends ViewPart implements ISelectionProvider
+public class DatasetGalleryView extends ViewPart implements ISelectionProvider, Refreshable
 {
     private Gallery gallery;
     private int itemWidth = 64;
@@ -65,10 +66,6 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
     
     public DatasetGalleryView()
     {
-//        for ( int i = 0; i < count; i++ ) {
-//            holders.add( new TestImageHolder() );
-//        }
-
         IContextService contextService = (IContextService) PlatformUI.getWorkbench().getService( IContextService.class );
         session = contextService.getDefaultBeanSession();
         
@@ -80,6 +77,11 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
             }
         };
         e = new ThreadPoolExecutor( 5, 30, 60, TimeUnit.SECONDS, lbq );
+    }
+
+    public void refresh()
+    {
+        gallery.layout();
     }
 
     public void createPartControl( Composite parent )

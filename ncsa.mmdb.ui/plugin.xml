@@ -98,12 +98,20 @@
             id="ncsa.mmdb.ui.command.galleryItemTest"
             name="Gallery Item Test">
       </command>
+      <command
+            id="ncsa.mmdb.ui.command.deleteDataset"
+            name="Delete">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="ncsa.mmdb.ui.handlers.GalleryItemTestHandler"
             commandId="ncsa.mmdb.ui.command.galleryItemTest">
+      </handler>
+      <handler
+            class="ncsa.mmdb.ui.handlers.DeleteImageHandler"
+            commandId="ncsa.mmdb.ui.command.deleteDataset">
       </handler>
    </extension>
    <extension
@@ -135,6 +143,10 @@
                   class="edu.uiuc.ncsa.cet.tupelo.actions.ContextMenu"
                   id="ncsa.mmdb.ui.dynamic.context">
             </dynamic>
+            <command
+                  commandId="ncsa.bard.ui.command.clearContext"
+                  style="push">
+            </command>
          </menu>
          <menu
                label="Window">
@@ -147,6 +159,27 @@
                   style="push">
             </command>
          </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:ncsa.mmdb.ui.views.CollectionsView">
+         <command
+               commandId="ncsa.bard.ui.commands.refresh"
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:ncsa.mmdb.ui.views.DatasetGalleryView">
+         <command
+               commandId="ncsa.bard.ui.commands.refresh"
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="popup:ncsa.mmdb.ui.views.CollectionsView">
+         <command
+               commandId="ncsa.mmdb.ui.command.deleteDataset"
+               style="push">
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -165,6 +198,13 @@
                type="ncsa.bard.model.ISubjectSource">
          </adapter>
       </factory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="ncsa.mmdb.ui.command.deleteDataset"
+            icon="icons/delete.gif">
+      </image>
    </extension>
 
 </plugin>
