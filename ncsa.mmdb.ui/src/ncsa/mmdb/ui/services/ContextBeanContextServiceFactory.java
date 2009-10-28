@@ -50,7 +50,7 @@ public class ContextBeanContextServiceFactory extends AbstractServiceFactory
                 ContextBeanUtil.getContextBeanStore().addContext( b, true );
             } else {
                 List<ContextBean> l = new ArrayList<ContextBean>( collection );
-                System.err.println( "Using existing contextL " + l.get( 0 ) );
+                System.err.println( "Using existing context: " + l.get( 0 ) );
                 context = ContextBeanUtil.getContextBeanStore().getContext( l.get( 0 ) );
             }
             

@@ -30,7 +30,6 @@ import org.eclipse.nebula.widgets.gallery.Gallery;
 import org.eclipse.nebula.widgets.gallery.GalleryItem;
 import org.eclipse.nebula.widgets.gallery.NoGroupRenderer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -80,7 +79,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
                 return true;
             }
         };
-        e = new ThreadPoolExecutor( 3, 30, 60, TimeUnit.SECONDS, lbq );
+        e = new ThreadPoolExecutor( 5, 30, 60, TimeUnit.SECONDS, lbq );
     }
 
     public void createPartControl( Composite parent )
@@ -94,14 +93,6 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
         gallery.setVirtualGroups( true );
         gallery.setVirtualGroupDefaultItemCount( 100 );
         gallery.setVirtualGroupsCompatibilityMode( true );
-
-        gallery.getVerticalBar().addSelectionListener( new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent e )
-            {
-                System.err.println( "Selection: " + e );
-                super.widgetSelected( e );
-            }
-        } );
 
         gallery.setItemRenderer( new MMDBItemRenderer( images ) );
 
@@ -146,10 +137,6 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider
                     // It's a group
                     
                     // **** XXX: TEST
-//                    item.setText( "Some Group" );
-//                    item.setItemCount( count );
-                    
-                    // **** XXX: TEST OTHER
                     item.setItemCount( frame.getAllData().size() );
                 } else {
                     // It's an item

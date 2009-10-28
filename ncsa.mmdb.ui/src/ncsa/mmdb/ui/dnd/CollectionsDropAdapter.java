@@ -7,10 +7,15 @@ import ncsa.bard.ui.services.IContextService;
 import ncsa.mmdb.ui.MMDBFrame;
 import ncsa.mmdb.ui.utils.MMDBUtils;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.tupeloproject.kernel.BeanSession;
 
@@ -34,18 +39,54 @@ public class CollectionsDropAdapter extends ViewerDropAdapter
         String[] fileNames = (String[]) data;
         System.err.println( "Data: " + Arrays.asList( fileNames ) );
 
-        for ( String fileName : fileNames ) {
-            MMDBUtils.importDatasetFromFile( session, fileName );
-        }
-
-        getViewer().refresh();
-        MMDBFrame.getInstance().setCurrentData( new LinkedList<DatasetBean>() );
-
+        ImportJob j = new ImportJob( fileNames );
+        j.setUser( true );
+        j.schedule();
+        
         return true;
     }
 
     public boolean validateDrop( Object target, int operation, TransferData transferType )
     {
         return FileTransfer.getInstance().isSupportedType( transferType );
+    }
+
+    private class ImportJob extends Job
+    {
+        private final String[] fileNames;
+
+        public ImportJob( String[] fileNames )
+        {
+            super( "Importing datasets..." );
+            this.fileNames = fileNames;
+        }
+
+        protected IStatus run( IProgressMonitor monitor )
+        {
+            monitor.beginTask( "Importing datasets", fileNames.length );
+            for ( String fileName : fileNames ) {
+                monitor.setTaskName( fileName );
+                MMDBUtils.importDatasetFromFile( session, fileName );
+                monitor.worked( 1 );
+                
+                Display.getDefault().asyncExec( new Runnable() {
+                    public void run()
+                    {
+                        getViewer().refresh();
+                    }
+                } );
+            }
+
+            Display.getDefault().asyncExec( new Runnable() {
+                public void run()
+                {
+                    MMDBFrame.getInstance().setCurrentData( new LinkedList<DatasetBean>() );
+                }
+            } );
+
+            monitor.done();
+            
+            return Status.OK_STATUS;
+        }
     }
 }
