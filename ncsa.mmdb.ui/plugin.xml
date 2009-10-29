@@ -136,6 +136,10 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
                label="File">
+            <command
+                  commandId="org.eclipse.ui.newWizard"
+                  style="push">
+            </command>
          </menu>
          <menu
                label="MMDB">
@@ -205,6 +209,20 @@
             commandId="ncsa.mmdb.ui.command.deleteDataset"
             icon="icons/delete.gif">
       </image>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="ncsa.mmdb.ui.category.newwizard"
+            name="MMDB">
+      </category>
+      <wizard
+            category="ncsa.mmdb.ui.category.newwizard"
+            class="edu.uiuc.ncsa.cet.tupelo.wizards.ContextWizard"
+            icon="icons/basket_add.png"
+            id="edu.uiuc.ncsa.cet.tupelo.wizards.ContextWizard"
+            name="Context">
+      </wizard>
    </extension>
 
 </plugin>

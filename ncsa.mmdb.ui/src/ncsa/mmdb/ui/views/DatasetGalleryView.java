@@ -6,7 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import ncsa.bard.ui.Refreshable;
 import ncsa.bard.ui.services.IContextService;
@@ -70,16 +72,18 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
         IContextService contextService = (IContextService) PlatformUI.getWorkbench().getService( IContextService.class );
         session = contextService.getDefaultBeanSession();
 
-//        LinkedBlockingDeque<Runnable> lbq = new LinkedBlockingDeque<Runnable>() {
-//            public boolean add( Runnable e )
-//            {
-//                addFirst( e );
-//                return true;
-//            }
-//        };
-//        
-//        e = new ThreadPoolExecutor( 3, 3, 60, TimeUnit.SECONDS, lbq );
-        e = Executors.newFixedThreadPool( 3 );
+        //        LinkedBlockingDeque<Runnable> lbq = new LinkedBlockingDeque<Runnable>() {
+        //            public boolean add( Runnable e )
+        //            {
+        //                addFirst( e );
+        //                return true;
+        //            }
+        //        };
+        //        
+        //        e = new ThreadPoolExecutor( 3, 3, 60, TimeUnit.SECONDS, lbq );
+        // e = Executors.newFixedThreadPool( 3 );
+        e = new ThreadPoolExecutor( 3, 3, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>() );
+
     }
 
     public void refresh()
@@ -238,7 +242,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
                 updateItem( item );
                 loadingThreads.remove( holder );
                 long second = System.currentTimeMillis();
-                System.err.println( "Took: " + ( second - first ) + " for " + index );
+                System.err.println( "Took: " + (second - first) + " for " + index );
             }
         };
 
