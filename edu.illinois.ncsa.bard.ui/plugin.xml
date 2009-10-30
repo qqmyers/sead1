@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="mimeTypeImages" name="Mime Type Images" schema="schema/mimeTypeImages.exsd"/>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="edu.illinois.ncsa.bard.ui.category"
+            id="edu.illinois.ncsa.bard.ui.command.refresh"
+            name="Refresh">
+      </command>
+      <category
+            id="edu.illinois.ncsa.bard.ui.category"
+            name="Bard">
+      </category>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="edu.illinois.ncsa.bard.ui.command.refresh"
+            icon="icons/common/refresh.png">
+      </image>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="edu.illinois.ncsa.bard.ui.handlers.RefreshRefreshableHandler"
+            commandId="edu.illinois.ncsa.bard.ui.command.refresh">
+      </handler>
+   </extension>
+
+</plugin>
