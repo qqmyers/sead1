@@ -69,9 +69,12 @@ public class DatasetImageHolder extends ImageHolder
             File dataFile = util.getDataFile( bean, File.createTempFile( "mmdb", ".tmp" ) );
             System.err.println( "Datafile: " + dataFile.getAbsolutePath() );
             dataFile.deleteOnExit();
-            
-//            InputStream data = util.getData( bean );            
             Image i = new Image( Display.getDefault(), new FileInputStream( dataFile ) );
+
+            // XXX: What I think should work.
+//            InputStream data = util.getData( bean );
+//            Image i = new Image( Display.getDefault(), data );
+
             return i;
         } catch ( Throwable e ) {
             e.printStackTrace();

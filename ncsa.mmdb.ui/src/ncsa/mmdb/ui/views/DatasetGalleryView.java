@@ -17,10 +17,12 @@ import ncsa.mmdb.ui.ImageHolder;
 import ncsa.mmdb.ui.MMDBFrame;
 import ncsa.mmdb.ui.utils.MMDBItemRenderer;
 
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -112,7 +114,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
         gallery.setGroupRenderer( groupRenderer );
 
         // **** XXX TEST: 1 group
-        gallery.setItemCount( 1 );
+        handleGroupCount();
 
         ScrollingSmoother ss = new ScrollingSmoother( gallery, new ExpoOut() );
         ss.smoothControl( true );
@@ -122,15 +124,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
             {
                 switch ( event.type ) {
                     case SWT.PaintItem:
-                        final GalleryItem item = (GalleryItem) event.item;
-                        if ( item != null && item.getParentItem() != null ) {
-                            ImageHolder holder = (ImageHolder) item.getData( "holder" );
-                            Image i = images.get( holder );
-
-                            if ( i == null ) {
-                                loadItem( item );
-                            }
-                        }
+                        paintItem( event );
                         break;
                     default:
                         break;
@@ -144,21 +138,10 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
 
                 if ( item.getParentItem() == null ) {
                     // It's a group
-
-                    // **** XXX: TEST
-                    item.setItemCount( frame.getCurrentData().size() );
+                    handleGroup( item );
                 } else {
                     // It's an item
-                    int index = gallery.indexOf( item );
-                    DatasetBean bean = frame.getCurrentData().get( index );
-                    System.err.println( "Setting data for: " + index + " to " + bean );
-
-                    ImageHolder imageHolder = datasetMap.get( bean );
-                    if ( imageHolder == null ) {
-                        imageHolder = new DatasetImageHolder( session, bean );
-                        datasetMap.put( bean, imageHolder );
-                    }
-                    item.setData( "holder", imageHolder );
+                    handleItem( item );
                 }
             }
         } );
@@ -168,6 +151,11 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
         getSite().setSelectionProvider( this );
 
         frame.addSelectionChangedListener( scl );
+    }
+
+    protected void handleGroupCount()
+    {
+        gallery.setItemCount( 1 );
     }
 
     public void setFocus()
@@ -213,7 +201,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
 
     // AUXILIARY METHODS FOR IMAGE MANAGEMENT
 
-    private void updateItem( final GalleryItem item )
+    protected void updateItem( final GalleryItem item )
     {
         Display.getDefault().syncExec( new Runnable() {
             public void run()
@@ -224,7 +212,7 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
         } );
     }
 
-    private synchronized void loadItem( final GalleryItem item )
+    protected synchronized void loadItem( final GalleryItem item )
     {
         final ImageHolder holder = (ImageHolder) item.getData( "holder" );
         final int index = gallery.indexOf( item );
@@ -274,7 +262,39 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
 
     // PRIVATE CLASSES
 
-    private class WrappedSelectionAdapter implements SelectionListener
+    private void paintItem( Event event )
+    {
+        final GalleryItem item = (GalleryItem) event.item;
+        if ( item != null && item.getParentItem() != null ) {
+            ImageHolder holder = (ImageHolder) item.getData( "holder" );
+            Image i = images.get( holder );
+
+            if ( i == null ) {
+                loadItem( item );
+            }
+        }
+    }
+
+    protected void handleGroup( GalleryItem item )
+    {
+        item.setItemCount( frame.getCurrentData().size() );
+    }
+
+    protected void handleItem( GalleryItem item )
+    {
+        int index = gallery.indexOf( item );
+        DatasetBean bean = frame.getCurrentData().get( index );
+        System.err.println( "Setting data for: " + index + " to " + bean );
+
+        ImageHolder imageHolder = datasetMap.get( bean );
+        if ( imageHolder == null ) {
+            imageHolder = new DatasetImageHolder( session, bean );
+            datasetMap.put( bean, imageHolder );
+        }
+        item.setData( "holder", imageHolder );
+    }
+
+    protected class WrappedSelectionAdapter implements SelectionListener
     {
         private ISelectionChangedListener l;
 
@@ -292,12 +312,22 @@ public class DatasetGalleryView extends ViewPart implements ISelectionProvider, 
 
         public void widgetSelected( SelectionEvent e )
         {
-            SelectionChangedEvent event = new SelectionChangedEvent( DatasetGalleryView.this, new StructuredSelection( gallery.getSelection() ) );
-            l.selectionChanged( event );
+            SafeRunnable.run( new ISafeRunnable() {
+                public void run() throws Exception
+                {
+                    SelectionChangedEvent event = new SelectionChangedEvent( DatasetGalleryView.this, new StructuredSelection( gallery.getSelection() ) );
+                    l.selectionChanged( event );
+                }
+                
+                @Override
+                public void handleException( Throwable exception )
+                {
+                }
+            });            
         }
     }
 
-    private class MySelectionChangedListener implements ISelectionChangedListener
+    protected class MySelectionChangedListener implements ISelectionChangedListener
     {
         public void selectionChanged( SelectionChangedEvent event )
         {

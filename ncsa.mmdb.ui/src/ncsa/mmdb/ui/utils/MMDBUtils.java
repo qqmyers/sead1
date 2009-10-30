@@ -36,6 +36,8 @@ public class MMDBUtils
 
     public static String getMimeTypeForExtension( String extension )
     {
+        extension = extension.toLowerCase();
+        
         if ( mimeTypes.isEmpty() ) {
             mimeTypes.put( "bmp", "image/bmp" );
             mimeTypes.put( "cod", "image/cis-cod" );
