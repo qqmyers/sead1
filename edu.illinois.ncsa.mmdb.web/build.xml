@@ -94,7 +94,7 @@
 	<target name="prepare-hudson" description="setup for hudson build and deployment">
 		<property name="webxml" value="web-basic.xml"/>
 		<property name="buildtag" value="${env.BUILD_TAG}"/>
-		<available file="src/edu/illinois/ncsa/mmdb/client/MMDB.tmp" property="mmdb_tmp_exists"/>
+		<available file="src/edu/illinois/ncsa/mmdb/web/client/MMDB.tmp" property="mmdb_tmp_exists"/>
 	</target>
 	
  	<target name="checkstyle">
@@ -113,7 +113,7 @@
 			<entry key="build_tag" value="${env.BUILD_TAG}"/>
 		</propertyfile>
 		
-		<copy file="src/edu/illinois/ncsa/mmdb/client/MMDB.tmp" tofile="src/edu/illinois/ncsa/mmdb/client/MMDB.java" overwrite="true">
+		<copy file="src/edu/illinois/ncsa/mmdb/web/client/MMDB.tmp" tofile="src/edu/illinois/ncsa/mmdb/web/client/MMDB.java" overwrite="true">
 			<filterset>
 				<filter token="BUILD_TAG" value="${env.BUILD_TAG}"/>
 				<filter token="BUILD_NUMBER" value="${env.BUILD_NUMBER}"/>
@@ -122,7 +122,7 @@
 	</target>
 
     <target name="copy_mmdb_java" unless="mmdb_tmp_exists">
-		<copy file="src/edu/illinois/ncsa/mmdb/client/MMDB.java" tofile="src/edu/illinois/ncsa/mmdb/client/MMDB.tmp"/>
+		<copy file="src/edu/illinois/ncsa/mmdb/web/client/MMDB.java" tofile="src/edu/illinois/ncsa/mmdb/web/client/MMDB.tmp"/>
     </target>
 	
 	<target name="compile" depends="prepare" description="compiles Java source files to bytecode">	
