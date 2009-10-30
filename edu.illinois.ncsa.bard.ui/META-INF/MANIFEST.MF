@@ -7,13 +7,14 @@ Bundle-Activator: edu.illinois.ncsa.bard.ui.osgi.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  edu.uiuc.ncsa.cet.bean.tupelo;bundle-version="1.0.0",
- edu.uiuc.ncsa.cet.tupelo;bundle-version="1.0.0",
  org.tupeloproject.core;bundle-version="2.4.2",
- edu.illinois.ncsa.bard;bundle-version="2.0.0"
+ edu.illinois.ncsa.bard;bundle-version="2.0.0",
+ edu.uiuc.ncsa.cet.bean;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: edu.illinois.ncsa.bard.ui,
  edu.illinois.ncsa.bard.ui.handlers,
+ edu.illinois.ncsa.bard.ui.services.bardframe,
  edu.illinois.ncsa.bard.ui.services.context,
  edu.illinois.ncsa.bard.ui.services.mimetype,
  edu.illinois.ncsa.bard.ui.services.predicate
