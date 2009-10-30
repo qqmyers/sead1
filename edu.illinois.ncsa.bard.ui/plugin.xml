@@ -28,5 +28,30 @@
             commandId="edu.illinois.ncsa.bard.ui.command.refresh">
       </handler>
    </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:edu.illinois.ncsa.bard.ui.views.RdfXmlView">
+         <command
+               commandId="edu.illinois.ncsa.bard.ui.command.refresh"
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="edu.illinois.ncsa.bard.ui.category"
+            name="Bard">
+      </category>
+      <view
+            category="edu.illinois.ncsa.bard.ui.category"
+            class="edu.illinois.ncsa.bard.ui.views.RdfXmlView"
+            icon="icons/common/xml_view.png"
+            id="edu.illinois.ncsa.bard.ui.views.RdfXmlView"
+            name="RDF XML"
+            restorable="true">
+      </view>
+   </extension>
 
 </plugin>

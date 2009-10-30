@@ -65,7 +65,7 @@ public class BardFrame
         this.beanSesion = beanSesion;
     }
 
-    public TupeloBeanUtil<? extends CETBean> getUtil( Class<?> beanClass )
+    public TupeloBeanUtil<?> getUtil( Class<?> beanClass )
     {
         return utilMap.get( beanClass );
     }

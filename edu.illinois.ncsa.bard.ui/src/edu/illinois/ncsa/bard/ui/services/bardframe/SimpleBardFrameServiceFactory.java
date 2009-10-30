@@ -16,12 +16,14 @@ import edu.illinois.ncsa.bard.ui.BardFrame;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.ContextBean;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.TagBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.AnnotationBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextListner;
+import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagBeanUtil;
 
@@ -45,7 +47,7 @@ public class SimpleBardFrameServiceFactory extends AbstractServiceFactory
 
         Context defaultContext = getDefaultContext();
         BeanSession defaultBeanSession = getDefaultBeanSession( defaultContext );
-        createDefaultUtils( frame );
+        createDefaultUtils( frame, defaultBeanSession );
 
         frame.setBeanSesion( defaultBeanSession );
         frame.setContext( defaultContext );
@@ -97,13 +99,14 @@ public class SimpleBardFrameServiceFactory extends AbstractServiceFactory
         return s;
     }
 
-    protected void createDefaultUtils( BardFrame frame )
+    protected void createDefaultUtils( BardFrame frame, BeanSession session )
     {
-        frame.registerUtil( CETBean.class, new CETBeanUtil( frame.getBeanSesion() ) );
-        frame.registerUtil( PersonBean.class, new PersonBeanUtil( frame.getBeanSesion() ) );
-        frame.registerUtil( AnnotationBean.class, new AnnotationBeanUtil( frame.getBeanSesion() ) );
-        frame.registerUtil( TagBean.class, new TagBeanUtil( frame.getBeanSesion() ) );
-        frame.registerUtil( ContextBean.class, new ContextBeanUtil( frame.getBeanSesion() ) );
+        frame.registerUtil( DatasetBean.class, new DatasetBeanUtil( session ) );
+        frame.registerUtil( CETBean.class, new CETBeanUtil( session ) );
+        frame.registerUtil( PersonBean.class, new PersonBeanUtil( session ) );
+        frame.registerUtil( AnnotationBean.class, new AnnotationBeanUtil( session ) );
+        frame.registerUtil( TagBean.class, new TagBeanUtil( session ) );
+        frame.registerUtil( ContextBean.class, new ContextBeanUtil( session ) );
     }
 
     protected void populateBeanSession( BeanSession s )
@@ -117,6 +120,7 @@ public class SimpleBardFrameServiceFactory extends AbstractServiceFactory
             return;
         }
 
+        cache.put( DatasetBeanUtil.getMapping() );
         cache.put( CETBeanUtil.getMapping() );
         cache.put( PersonBeanUtil.getMapping() );
         cache.put( AnnotationBeanUtil.getMapping() );
@@ -135,7 +139,7 @@ public class SimpleBardFrameServiceFactory extends AbstractServiceFactory
             BardFrame defaultFrame = service.getDefaultFrame();
 
             BeanSession defaultBeanSession = getDefaultBeanSession( context );
-            createDefaultUtils( defaultFrame );
+            createDefaultUtils( defaultFrame, defaultBeanSession );
 
             defaultFrame.setBeanSesion( defaultBeanSession );
             defaultFrame.setContext( context );

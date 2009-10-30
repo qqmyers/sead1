@@ -17,4 +17,5 @@ Export-Package: edu.illinois.ncsa.bard.ui,
  edu.illinois.ncsa.bard.ui.services.bardframe,
  edu.illinois.ncsa.bard.ui.services.context,
  edu.illinois.ncsa.bard.ui.services.mimetype,
- edu.illinois.ncsa.bard.ui.services.predicate
+ edu.illinois.ncsa.bard.ui.services.predicate,
+ edu.illinois.ncsa.bard.ui.views
