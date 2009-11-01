@@ -37,7 +37,7 @@ public class MimeTypeImageService implements IMimeTypeImageService
         final IConfigurationElement[][] indexedConfigurationElements = new IConfigurationElement[1][];
 
         // Sort the commands extension point based on element name.
-        final IConfigurationElement[] commandImagesExtensionPoint = registry.getConfigurationElementsFor( "ncsa.mmdb.ui.mimeTypeImages" );
+        final IConfigurationElement[] commandImagesExtensionPoint = registry.getConfigurationElementsFor( "edu.illinois.ncsa.bard.ui.mimeTypeImages" );
         for ( int i = 0; i < commandImagesExtensionPoint.length; i++ ) {
             final IConfigurationElement configurationElement = commandImagesExtensionPoint[i];
             String mimeType = configurationElement.getAttribute( "mimeType" );
@@ -50,7 +50,6 @@ public class MimeTypeImageService implements IMimeTypeImageService
             ImageDescriptor descriptor = ImageDescriptor.createFromURL( entry );
             if ( imageRegistry.get( mimeType ) == null ) {
                 imageRegistry.put( mimeType, descriptor );
-                System.err.println( "registered image for: " + mimeType );
             } else {
                 // Add a warning in case this is a bug and two images are assigned to the same key
                 System.err.println( "warning: image key " + mimeType + " already exists in image registry, skipping.  Two images might be assigned the same registry key." );

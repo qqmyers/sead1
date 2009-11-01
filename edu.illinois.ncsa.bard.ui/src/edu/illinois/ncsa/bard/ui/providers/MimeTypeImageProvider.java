@@ -40,7 +40,7 @@ public class MimeTypeImageProvider
             if ( t != null )
                 mimeType = t.getMimeType();
         }
-
+        
         IMimeTypeImageService imageService = (IMimeTypeImageService) PlatformUI.getWorkbench().getService( IMimeTypeImageService.class );
 
         String[] parts = mimeType.toLowerCase().split( "[/ ]" ); //$NON-NLS-1$

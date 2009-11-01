@@ -53,5 +53,12 @@
             restorable="true">
       </view>
    </extension>
+   <extension
+         point="edu.illinois.ncsa.bard.ui.mimeTypeImages">
+      <mimeTypeImage
+            image="icons/common/unknown.png"
+            mimeType="unk">
+      </mimeTypeImage>
+   </extension>
 
 </plugin>
