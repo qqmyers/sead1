@@ -53,6 +53,15 @@
             class="edu.illinois.ncsa.bard.ui.handlers.AddTagHandler"
             commandId="edu.illinois.ncsa.bard.ui.command.tag">
       </handler>
+      <handler
+            class="edu.illinois.ncsa.bard.ui.handlers.DeleteTagHandler"
+            commandId="org.eclipse.ui.edit.delete">
+         <activeWhen>
+            <reference
+                  definitionId="edu.illinois.ncsa.bard.ui.definition.tagSelected">
+            </reference>
+         </activeWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -84,6 +93,16 @@
                   checkEnabled="false">
                <reference
                      definitionId="edu.illinois.ncsa.bard.ui.definition.isSubjectSource">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.ui.edit.delete"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="edu.illinois.ncsa.bard.ui.definition.tagSelected">
                </reference>
             </visibleWhen>
          </command>
@@ -139,6 +158,19 @@
                <instanceof
                      value="edu.illinois.ncsa.bard.ISubjectSource">
                </instanceof>
+            </or>
+         </iterate>
+      </definition>
+      <definition
+            id="edu.illinois.ncsa.bard.ui.definition.tagSelected">
+         <iterate>
+            <or>
+               <instanceof
+                     value="edu.uiuc.ncsa.cet.bean.TagBean">
+               </instanceof>
+               <adapt
+                     type="edu.uiuc.ncsa.cet.bean.TagBean">
+               </adapt>
             </or>
          </iterate>
       </definition>

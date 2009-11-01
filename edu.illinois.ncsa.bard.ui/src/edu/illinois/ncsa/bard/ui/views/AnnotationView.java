@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ISelection;
@@ -16,6 +17,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -139,23 +141,24 @@ public class AnnotationView extends BardFrameView
 
         ToolBarManager toolbarManager = new ToolBarManager( SWT.FLAT | SWT.HORIZONTAL );
 
-        String key = "edu.illinois.ncsa.bard.ui.command.annotate";
-        ImageRegistry imageRegistry = Activator.getDefault().getImageRegistry();
-
-        if ( imageRegistry.get( key ) == null ) {
-            ICommandImageService imageService = (ICommandImageService) PlatformUI.getWorkbench().getService( ICommandImageService.class );
-            ImageDescriptor id = imageService.getImageDescriptor( key );
-            imageRegistry.put( key, id.createImage() );
-        }
-
         ToolBar bar = toolbarManager.createControl( section );
         bar.setBackground( bgg );
         bar.setForeground( fg );
         section.setTextClient( bar );
 
+        String key = "edu.illinois.ncsa.bard.ui.command.annotate";
+        Image image = retrieveImage( key );
         ToolItem item = new ToolItem( bar, SWT.PUSH );
-        item.setImage( imageRegistry.get( key ) );
+        item.setImage( image );
+        item.setToolTipText( "Reply to this annotation." );
         item.addSelectionListener( new AnnotateListener( bean ) );
+
+        key = "org.eclipse.ui.edit.delete";
+        image = retrieveImage( key );
+        item = new ToolItem( bar, SWT.PUSH );
+        item.setImage( image );
+        item.setToolTipText( "Delete this annotation." );
+        item.addSelectionListener( new DeleteListener( bean ) );
 
         Collection<AnnotationBean> children = getBeans( Resource.resource( bean.getUri() ) );
         for ( AnnotationBean child : children ) {
@@ -163,6 +166,19 @@ public class AnnotationView extends BardFrameView
         }
 
         sections.add( section );
+    }
+
+    private Image retrieveImage( String key )
+    {
+        ImageRegistry imageRegistry = Activator.getDefault().getImageRegistry();
+
+        if ( imageRegistry.get( key ) == null ) {
+            ICommandImageService imageService = (ICommandImageService) PlatformUI.getWorkbench().getService( ICommandImageService.class );
+            ImageDescriptor id = imageService.getImageDescriptor( key );
+            imageRegistry.put( key, id.createImage() );
+        }
+        
+        return imageRegistry.get( key );
     }
 
     public void setSubject( Resource subject )
@@ -231,6 +247,21 @@ public class AnnotationView extends BardFrameView
             } catch ( OperatorException e1 ) {
                 e1.printStackTrace();
             }
+        }
+    }
+
+    private class DeleteListener extends SelectionAdapter
+    {
+        private AnnotationBean bean;
+
+        public DeleteListener( AnnotationBean bean )
+        {
+            this.bean = bean;
+        }
+
+        public void widgetSelected( SelectionEvent e )
+        {
+            MessageDialog.openInformation( getSite().getShell(), "Not Implemented", "Delete annotation not implemented."  );
         }
     }
 

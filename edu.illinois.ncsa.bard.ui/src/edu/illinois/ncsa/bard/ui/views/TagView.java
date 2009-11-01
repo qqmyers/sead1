@@ -3,6 +3,7 @@ package edu.illinois.ncsa.bard.ui.views;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ISelection;
@@ -18,6 +19,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.bard.ISubjectSource;
+import edu.uiuc.ncsa.cet.bean.TagBean;
 import edu.uiuc.ncsa.cet.bean.TagEventBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
@@ -41,9 +43,12 @@ public class TagView extends BardFrameView
     {
         viewer = new ListViewer( parent );
         viewer.setContentProvider( new MyContentProvider() );
-        viewer.setLabelProvider( new LabelProvider() );
+        viewer.setLabelProvider( new MyLabelProvider() );
         viewer.setInput( getSite() );
 
+        getSite().setSelectionProvider( viewer );
+        
+        hookContextMenu( viewer );
         hookSelection();
     }
 
@@ -74,7 +79,7 @@ public class TagView extends BardFrameView
     {
         public void selectionChanged( IWorkbenchPart part, ISelection selection )
         {
-            if ( selection.isEmpty() )
+            if ( selection.isEmpty() || part.equals( TagView.this ) )
                 return;
 
             IStructuredSelection s = (IStructuredSelection) selection;
@@ -94,20 +99,30 @@ public class TagView extends BardFrameView
         }
     }
 
-    public Collection<String> getBeans( Resource subject )
+    public Collection<TagBean> getBeans( Resource subject )
     {
         if ( subject == null )
-            return new ArrayList<String>( 0 );
+            return new ArrayList<TagBean>( 0 );
 
         TagEventBeanUtil util = (TagEventBeanUtil) frame.getUtil( TagEventBean.class );
+        Collection<TagBean> tags = new HashSet<TagBean>();
+        
         try {
             // XXX: Performance
             Collection<TagEventBean> a = util.getAssociationsFor( subject );
-            return util.getTags( subject );
+
+            for ( TagEventBean t : a ) {
+                Set<TagBean> beans = t.getTags();
+                for ( TagBean tagBean : beans ) {
+                    tags.add( tagBean );
+                }
+            }
+            
+            return tags;
         } catch ( Exception e ) {
             // XXX: Exception handling
             e.printStackTrace();
-            return new ArrayList<String>( 0 );
+            return new ArrayList<TagBean>( 0 );
         }
     }
 
@@ -127,6 +142,19 @@ public class TagView extends BardFrameView
         @Override
         public void inputChanged( Viewer viewer, Object oldInput, Object newInput )
         {
+        }
+    }
+    
+    private class MyLabelProvider extends LabelProvider
+    {
+        @Override
+        public String getText( Object element )
+        {
+            if ( element instanceof TagBean ) {
+                TagBean t = (TagBean) element;
+                return t.getTagString();
+            }
+            return super.getText( element );
         }
     }
 }
