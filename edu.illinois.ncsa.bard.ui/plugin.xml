@@ -13,12 +13,21 @@
             id="edu.illinois.ncsa.bard.ui.category"
             name="Bard">
       </category>
+      <command
+            category="edu.illinois.ncsa.bard.ui.category"
+            id="edu.illinois.ncsa.bard.ui.command.annotate"
+            name="Add Annotation">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
       <image
             commandId="edu.illinois.ncsa.bard.ui.command.refresh"
             icon="icons/common/refresh.png">
+      </image>
+      <image
+            commandId="edu.illinois.ncsa.bard.ui.command.annotate"
+            icon="icons/annotations/sticky_note__plus.png">
       </image>
    </extension>
    <extension
@@ -27,6 +36,10 @@
             class="edu.illinois.ncsa.bard.ui.handlers.RefreshRefreshableHandler"
             commandId="edu.illinois.ncsa.bard.ui.command.refresh">
       </handler>
+      <handler
+            class="edu.illinois.ncsa.bard.ui.handlers.AddAnnotationHandler"
+            commandId="edu.illinois.ncsa.bard.ui.command.annotate">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -34,6 +47,14 @@
             locationURI="menu:edu.illinois.ncsa.bard.ui.views.RdfXmlView">
          <command
                commandId="edu.illinois.ncsa.bard.ui.command.refresh"
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any">
+         <command
+               commandId="edu.illinois.ncsa.bard.ui.command.annotate"
+               label="Add Annotation"
                style="push">
          </command>
       </menuContribution>
@@ -52,6 +73,14 @@
             name="RDF XML"
             restorable="true">
       </view>
+      <view
+            category="edu.illinois.ncsa.bard.ui.category"
+            class="edu.illinois.ncsa.bard.ui.views.AnnotationView"
+            icon="icons/annotations/sticky_notes.png"
+            id="edu.illinois.ncsa.bard.ui.views.AnnotationView"
+            name="Annotations"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="edu.illinois.ncsa.bard.ui.mimeTypeImages">
@@ -59,6 +88,17 @@
             image="icons/common/unknown.png"
             mimeType="unk">
       </mimeTypeImage>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.definitions">
+      <definition
+            id="edu.illinois.ncsa.bard.ui.definition.isSubjectSource">
+         <iterate>
+            <adapt
+                  type="ncsa.bard.model.ISubjectSource">
+            </adapt>
+         </iterate>
+      </definition>
    </extension>
 
 </plugin>

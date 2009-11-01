@@ -9,7 +9,9 @@ Require-Bundle: org.eclipse.ui,
  edu.uiuc.ncsa.cet.bean.tupelo;bundle-version="1.0.0",
  org.tupeloproject.core;bundle-version="2.4.2",
  edu.illinois.ncsa.bard;bundle-version="2.0.0",
- edu.uiuc.ncsa.cet.bean;bundle-version="1.0.0"
+ edu.uiuc.ncsa.cet.bean;bundle-version="1.0.0",
+ org.eclipse.ui.forms;bundle-version="3.4.0",
+ org.eclipse.core.expressions;bundle-version="3.4.100"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: edu.illinois.ncsa.bard.ui,
