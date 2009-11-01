@@ -18,7 +18,7 @@ import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.ContextBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.TagBean;
+import edu.uiuc.ncsa.cet.bean.TagEventBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.AnnotationBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextBeanUtil;
@@ -26,6 +26,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.ContextListner;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 public class SimpleBardFrameServiceFactory extends AbstractServiceFactory
 {
@@ -105,7 +106,7 @@ public class SimpleBardFrameServiceFactory extends AbstractServiceFactory
         frame.registerUtil( CETBean.class, new CETBeanUtil( session ) );
         frame.registerUtil( PersonBean.class, new PersonBeanUtil( session ) );
         frame.registerUtil( AnnotationBean.class, new AnnotationBeanUtil( session ) );
-        frame.registerUtil( TagBean.class, new TagBeanUtil( session ) );
+        frame.registerUtil( TagEventBean.class, new TagEventBeanUtil( session ) );
         frame.registerUtil( ContextBean.class, new ContextBeanUtil( session ) );
     }
 
@@ -125,6 +126,7 @@ public class SimpleBardFrameServiceFactory extends AbstractServiceFactory
         cache.put( PersonBeanUtil.getMapping() );
         cache.put( AnnotationBeanUtil.getMapping() );
         cache.put( TagBeanUtil.getMapping() );
+        cache.put( TagEventBeanUtil.getMapping() );
         cache.put( ContextBeanUtil.getMapping() );
     }
 

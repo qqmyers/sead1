@@ -14,9 +14,14 @@
             name="Bard">
       </category>
       <command
-            category="edu.illinois.ncsa.bard.ui.category"
+            categoryId="edu.illinois.ncsa.bard.ui.category"
             id="edu.illinois.ncsa.bard.ui.command.annotate"
             name="Add Annotation">
+      </command>
+      <command
+            categoryId="edu.illinois.ncsa.bard.ui.category"
+            id="edu.illinois.ncsa.bard.ui.command.tag"
+            name="Add Tag">
       </command>
    </extension>
    <extension
@@ -29,6 +34,10 @@
             commandId="edu.illinois.ncsa.bard.ui.command.annotate"
             icon="icons/annotations/sticky_note__plus.png">
       </image>
+      <image
+            commandId="edu.illinois.ncsa.bard.ui.command.tag"
+            icon="icons/tags/tag__plus.png">
+      </image>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -39,6 +48,10 @@
       <handler
             class="edu.illinois.ncsa.bard.ui.handlers.AddAnnotationHandler"
             commandId="edu.illinois.ncsa.bard.ui.command.annotate">
+      </handler>
+      <handler
+            class="edu.illinois.ncsa.bard.ui.handlers.AddTagHandler"
+            commandId="edu.illinois.ncsa.bard.ui.command.tag">
       </handler>
    </extension>
    <extension
@@ -56,6 +69,23 @@
                commandId="edu.illinois.ncsa.bard.ui.command.annotate"
                label="Add Annotation"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="edu.illinois.ncsa.bard.ui.definition.isSubjectSource">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="edu.illinois.ncsa.bard.ui.command.tag"
+               label="Add Tag"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="edu.illinois.ncsa.bard.ui.definition.isSubjectSource">
+               </reference>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
@@ -81,6 +111,14 @@
             name="Annotations"
             restorable="true">
       </view>
+      <view
+            category="edu.illinois.ncsa.bard.ui.category"
+            class="edu.illinois.ncsa.bard.ui.views.TagView"
+            icon="icons/tags/tags.png"
+            id="edu.illinois.ncsa.bard.ui.views.TagView"
+            name="Tags"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="edu.illinois.ncsa.bard.ui.mimeTypeImages">
@@ -94,9 +132,14 @@
       <definition
             id="edu.illinois.ncsa.bard.ui.definition.isSubjectSource">
          <iterate>
-            <adapt
-                  type="ncsa.bard.model.ISubjectSource">
-            </adapt>
+            <or>
+               <adapt
+                     type="edu.illinois.ncsa.bard.ISubjectSource">
+               </adapt>
+               <instanceof
+                     value="edu.illinois.ncsa.bard.ISubjectSource">
+               </instanceof>
+            </or>
          </iterate>
       </definition>
    </extension>
