@@ -10,7 +10,10 @@ import java.util.Set;
 import org.eclipse.jface.util.SafeRunnable;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.OperatorException;
 
+import edu.illinois.ncsa.bard.ui.query.FrameQuery;
+import edu.illinois.ncsa.bard.ui.query.tag.GroupByTagQuery;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.TupeloBeanUtil;
 
@@ -34,19 +37,26 @@ public class BardFrame
     protected BeanSession beanSesion;
     protected Map<Class<?>, TupeloBeanUtil<? extends CETBean>> utilMap = new HashMap<Class<?>, TupeloBeanUtil<? extends CETBean>>();
     protected List<VirtualBardGroup> data = new ArrayList<VirtualBardGroup>();
+
+    protected FrameQuery query;
     
     protected Set<IFrameListener> frameListeners = new HashSet<IFrameListener>();
+
+    public BardFrame()
+    {
+        query = new GroupByTagQuery( this );
+    }
 
     public void addFrameListener( IFrameListener listener )
     {
         frameListeners.add( listener );
     }
-    
+
     public void removeFrameListener( IFrameListener listener )
     {
         frameListeners.remove( listener );
     }
-    
+
     public Context getContext()
     {
         return context;
@@ -55,7 +65,9 @@ public class BardFrame
     public void setContext( Context context )
     {
         System.err.println( "Frame context now: " + context );
+
         this.context = context;
+        createTestData();
     }
 
     public BeanSession getBeanSesion()
@@ -72,7 +84,7 @@ public class BardFrame
     {
         return utilMap.get( beanClass );
     }
-    
+
     public void registerUtil( Class<?> beanClass, TupeloBeanUtil<? extends CETBean> util )
     {
         utilMap.put( beanClass, util );
@@ -82,17 +94,29 @@ public class BardFrame
     {
         return data;
     }
-    
+
     // AUXILIARY METHOD
-    
-    public void fireContextChanged( )
+
+    public void fireContextChanged()
     {
         for ( final IFrameListener l : frameListeners ) {
-            SafeRunnable.run(new SafeRunnable() {
-                public void run() {
+            SafeRunnable.run( new SafeRunnable() {
+                public void run()
+                {
                     l.contextChanged();
                 }
-            });
+            } );
+        }
+    }
+
+    // TEST DATA
+    
+    private void createTestData()
+    {
+        try {
+            query.execute();
+        } catch ( OperatorException e ) {
+            e.printStackTrace();
         }
     }
 }

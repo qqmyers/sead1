@@ -1,12 +1,17 @@
 package edu.illinois.ncsa.bard.ui.tree;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.illinois.ncsa.bard.ui.BardFrame;
 import edu.illinois.ncsa.bard.ui.VirtualBardGroup;
 
 public class RootBardTreeNode extends VirtualBardTreeNode
 {
-    private final BardFrame frame;
+    protected final BardFrame frame;
 
+    protected Map<VirtualBardGroup, VirtualBardTreeNode> nodeMap = new HashMap<VirtualBardGroup, VirtualBardTreeNode>();
+    
     public RootBardTreeNode( BardFrame frame )
     {
         this.frame = frame;        
@@ -14,10 +19,19 @@ public class RootBardTreeNode extends VirtualBardTreeNode
     
     public Object getChild( int index )
     {
-        VirtualBardGroup g = new VirtualBardGroup();
-        g.setLabel( "Label" );
+        VirtualBardGroup g = frame.getData().get( index );
+        VirtualBardTreeNode n = nodeMap.get( g );
         
-        VirtualBardTreeNode n = new VirtualBardTreeNode( g );
+        if ( n == null ) {
+            n = new VirtualBardTreeNode( frame, g );
+            nodeMap.put( g, n );
+        }
+        
         return n;
+    }
+    
+    public int getChildCount()
+    {
+        return frame.getData().size();
     }
 }

@@ -1,14 +1,19 @@
 package edu.illinois.ncsa.bard.ui;
 
+import java.util.List;
+
+import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.UriRef;
 
 import edu.illinois.ncsa.bard.ISubjectSource;
+import edu.illinois.ncsa.bard.ui.query.MemberQuery;
 
 public class VirtualBardGroup implements ISubjectSource, Refreshable
 {
     protected Resource subject;
     protected String label;
+    protected MemberQuery query;
+    protected List<Resource> members;
 
     @Override
     public Resource getSubject()
@@ -41,8 +46,44 @@ public class VirtualBardGroup implements ISubjectSource, Refreshable
      * @param index
      * @return
      */
-    public Object getChild( int index )
+    public Resource getMember( int index )
     {
-        return UriRef.uriRef();
+        if ( members == null ) {
+            try {
+                query.execute();
+            } catch ( OperatorException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return members.get( index );
+    }
+
+    public int getMemberCount()
+    {
+        if ( members == null ) {
+            try {
+                query.execute();
+            } catch ( OperatorException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return members.size();
+    }
+
+    public void setMembers( List<Resource> members )
+    {
+        this.members = members;
+    }
+
+    public MemberQuery getQuery()
+    {
+        return query;
+    }
+
+    public void setQuery( MemberQuery query )
+    {
+        this.query = query;
     }
 }

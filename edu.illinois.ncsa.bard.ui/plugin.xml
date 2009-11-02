@@ -145,6 +145,10 @@
             image="icons/common/unknown.png"
             mimeType="unk">
       </mimeTypeImage>
+      <mimeTypeImage
+            image="icons/common/folder_page_white.png"
+            mimeType="group">
+      </mimeTypeImage>
    </extension>
    <extension
          point="org.eclipse.core.expressions.definitions">
