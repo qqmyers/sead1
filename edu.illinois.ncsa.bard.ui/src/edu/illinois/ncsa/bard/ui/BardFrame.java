@@ -13,7 +13,7 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 
 import edu.illinois.ncsa.bard.ui.query.FrameQuery;
-import edu.illinois.ncsa.bard.ui.query.tag.GroupByTagQuery;
+import edu.illinois.ncsa.bard.ui.query.creator.GroupByCreatorQuery;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.TupeloBeanUtil;
 
@@ -44,7 +44,8 @@ public class BardFrame
 
     public BardFrame()
     {
-        query = new GroupByTagQuery( this );
+//        query = new GroupByTagQuery( this );
+        query = new GroupByCreatorQuery( this );
     }
 
     public void addFrameListener( IFrameListener listener )
