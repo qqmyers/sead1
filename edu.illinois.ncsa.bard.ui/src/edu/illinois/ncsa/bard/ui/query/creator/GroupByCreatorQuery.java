@@ -35,7 +35,13 @@ public class GroupByCreatorQuery extends FrameQuery
             String name = resource.getString();
             VirtualBardGroup g = groups.get( name );
             if ( g == null ) {
-                g = new VirtualBardGroup();                
+                g = new VirtualBardGroup(); 
+                
+                CreatorMemberQuery query = new CreatorMemberQuery( frame, g );
+                query.setName( name );                
+                g.setQuery( query );
+                
+                g.setLabel( name );
                 groups.put( name, g );
             }
         }

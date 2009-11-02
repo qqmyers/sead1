@@ -61,14 +61,15 @@ public class VirtualBardGroup implements ISubjectSource, Refreshable
 
     public int getMemberCount()
     {
-        if ( members == null ) {
+        if ( members == null && query != null ) {
             try {
                 query.execute();
             } catch ( OperatorException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        }
+        } 
+        
         return members.size();
     }
 

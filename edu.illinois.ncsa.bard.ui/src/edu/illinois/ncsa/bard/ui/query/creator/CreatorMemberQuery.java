@@ -6,7 +6,8 @@ import java.util.List;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Tags;
+import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tuple;
 
@@ -16,21 +17,21 @@ import edu.illinois.ncsa.bard.ui.query.MemberQuery;
 
 public class CreatorMemberQuery extends MemberQuery
 {
-    protected String tag;
+    protected String name;
 
     public CreatorMemberQuery( BardFrame frame, VirtualBardGroup group )
     {
         super( frame, group );
     }
 
-    public String getTag()
+    public String getName()
     {
-        return tag;
+        return name;
     }
 
-    public void setTag( String tag )
+    public void setName( String name )
     {
-        this.tag = tag;
+        this.name = name;
     }
 
     public void execute() throws OperatorException
@@ -52,10 +53,9 @@ public class CreatorMemberQuery extends MemberQuery
     protected Unifier createUnifier()
     {
         Unifier u = new Unifier();
-        u.addPattern( "subject", Tags.HAS_TAGGING_EVENT, "tevent" );
-        u.addPattern( "tevent", Tags.HAS_TAG_OBJECT, "tag" );
-        u.addPattern( "tag", Tags.HAS_TAG_TITLE, Resource.literal( tag ) );
-        u.addColumnName( "subject" );
+        u.addPattern( "beanSubject", Dc.CREATOR , "creator" ); 
+        u.addPattern( "creator", Foaf.NAME, Resource.literal( name ) ); 
+        u.addColumnName( "beanSubject" );
 
         return u;
     }
