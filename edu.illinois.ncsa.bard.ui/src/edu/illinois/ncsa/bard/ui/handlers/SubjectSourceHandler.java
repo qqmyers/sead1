@@ -39,6 +39,8 @@ public abstract class SubjectSourceHandler extends BardAbstractHandler
         IBardFrameService service = (IBardFrameService) PlatformUI.getWorkbench().getService( IBardFrameService.class );
 
         frame = service.getDefaultFrame();
+        
+        wrappedExecute();
 
         return null;
     }
