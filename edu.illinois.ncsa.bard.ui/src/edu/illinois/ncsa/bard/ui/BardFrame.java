@@ -1,7 +1,9 @@
 package edu.illinois.ncsa.bard.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +33,7 @@ public class BardFrame
     protected Context context;
     protected BeanSession beanSesion;
     protected Map<Class<?>, TupeloBeanUtil<? extends CETBean>> utilMap = new HashMap<Class<?>, TupeloBeanUtil<? extends CETBean>>();
+    protected List<VirtualBardGroup> data = new ArrayList<VirtualBardGroup>();
     
     protected Set<IFrameListener> frameListeners = new HashSet<IFrameListener>();
 
@@ -75,6 +78,11 @@ public class BardFrame
         utilMap.put( beanClass, util );
     }
 
+    public List<VirtualBardGroup> getData()
+    {
+        return data;
+    }
+    
     // AUXILIARY METHOD
     
     public void fireContextChanged( )
