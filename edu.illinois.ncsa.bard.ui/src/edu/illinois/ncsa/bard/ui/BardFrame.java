@@ -31,7 +31,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TupeloBeanUtil;
  * @author shawn
  *
  */
-public class BardFrame
+public class BardFrame implements Refreshable
 {
     protected Context context;
     protected BeanSession beanSesion;
@@ -46,6 +46,13 @@ public class BardFrame
     {
 //        query = new GroupByTagQuery( this );
         query = new GroupByCreatorQuery( this );
+    }
+
+    @Override
+    public void refresh()
+    {
+        executeQuery( query );
+        fireDataChanged();
     }
 
     public void addFrameListener( IFrameListener listener )
