@@ -2,6 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="mimeTypeImages" name="Mime Type Images" schema="schema/mimeTypeImages.exsd"/>
+   <extension-point id="bardFrameQueries" name="Bard Frame Queries" schema="schema/bardFrameQueries.exsd"/>
    <extension
          point="org.eclipse.ui.commands">
       <command
@@ -178,6 +179,21 @@
             </or>
          </iterate>
       </definition>
+   </extension>
+   <extension
+         point="edu.illinois.ncsa.bard.ui.bardFrameQueries">
+      <bardFrameQuery
+            class="edu.illinois.ncsa.bard.ui.query.tag.GroupByTagQuery"
+            icon="icons/tags/tags__arrow.png"
+            id="edu.illinois.ncsa.bard.ui.query.tag.GroupByTagQuery"
+            label="Group by Tag">
+      </bardFrameQuery>
+      <bardFrameQuery
+            class="edu.illinois.ncsa.bard.ui.query.creator.GroupByCreatorQuery"
+            icon="icons/common/user__arrow.png"
+            id="edu.illinois.ncsa.bard.ui.query.creator.GroupByCreatorQuery"
+            label="Group by Creator">
+      </bardFrameQuery>
    </extension>
 
 </plugin>

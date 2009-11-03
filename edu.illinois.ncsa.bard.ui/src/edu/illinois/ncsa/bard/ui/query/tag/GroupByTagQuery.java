@@ -16,6 +16,11 @@ import edu.illinois.ncsa.bard.ui.query.FrameQuery;
 
 public class GroupByTagQuery extends FrameQuery
 {
+    public GroupByTagQuery()
+    {
+        super();
+    }
+
     public GroupByTagQuery( BardFrame frame )
     {
         super( frame );

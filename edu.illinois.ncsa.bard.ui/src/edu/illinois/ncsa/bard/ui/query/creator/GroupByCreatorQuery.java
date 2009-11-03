@@ -22,6 +22,10 @@ public class GroupByCreatorQuery extends FrameQuery
         super( frame );
     }
 
+    public GroupByCreatorQuery()
+    {
+    }
+
     public void execute() throws OperatorException
     {
         Unifier unifier = createUnifier();

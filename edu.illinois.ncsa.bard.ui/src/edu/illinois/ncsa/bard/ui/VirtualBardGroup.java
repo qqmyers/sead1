@@ -65,7 +65,7 @@ public class VirtualBardGroup implements ISubjectSource, Refreshable
             try {
                 query.execute();
             } catch ( OperatorException e ) {
-                // TODO Auto-generated catch block
+                // XXX: Exception handling
                 e.printStackTrace();
             }
         } 

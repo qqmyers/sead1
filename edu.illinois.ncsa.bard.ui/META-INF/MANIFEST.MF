@@ -17,6 +17,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: edu.illinois.ncsa.bard.ui,
  edu.illinois.ncsa.bard.ui.handlers,
  edu.illinois.ncsa.bard.ui.providers,
+ edu.illinois.ncsa.bard.ui.query,
  edu.illinois.ncsa.bard.ui.services.bardframe,
  edu.illinois.ncsa.bard.ui.services.context,
  edu.illinois.ncsa.bard.ui.services.mimetype,

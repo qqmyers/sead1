@@ -58,6 +58,17 @@ public class BardFrame
         frameListeners.remove( listener );
     }
 
+    public FrameQuery getQuery()
+    {
+        return query;
+    }
+
+    public void setQuery( FrameQuery query )
+    {
+        this.query = query;
+        executeQuery( query );
+    }
+
     public Context getContext()
     {
         return context;
@@ -68,7 +79,7 @@ public class BardFrame
         System.err.println( "Frame context now: " + context );
 
         this.context = context;
-        createTestData();
+        executeQuery( query );
     }
 
     public BeanSession getBeanSesion()
@@ -110,13 +121,25 @@ public class BardFrame
         }
     }
 
-    // TEST DATA
-    
-    private void createTestData()
+    public void fireDataChanged()
+    {
+        for ( final IFrameListener l : frameListeners ) {
+            SafeRunnable.run( new SafeRunnable() {
+                public void run()
+                {
+                    l.dataChanged();
+                }
+            } );
+        }
+    }
+
+    private void executeQuery( FrameQuery query2 )
     {
         try {
             query.execute();
+            fireDataChanged();
         } catch ( OperatorException e ) {
+            // XXX: Exception handling
             e.printStackTrace();
         }
     }

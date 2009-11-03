@@ -7,4 +7,10 @@ public class FrameListenerAdapter implements IFrameListener
     {
         // no op for adapter
     }
+
+    @Override
+    public void dataChanged()
+    {
+        // no op for adapter
+    }
 }

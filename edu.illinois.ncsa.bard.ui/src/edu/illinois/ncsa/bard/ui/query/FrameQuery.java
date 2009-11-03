@@ -9,7 +9,21 @@ public abstract class FrameQuery extends BardQuery
 {
     protected BardFrame frame;
 
+    public FrameQuery()
+    {
+    }
+    
     public FrameQuery( BardFrame frame )
+    {
+        this.frame = frame;
+    }
+    
+    public BardFrame getFrame()
+    {
+        return frame;
+    }
+
+    public void setFrame( BardFrame frame )
     {
         this.frame = frame;
     }

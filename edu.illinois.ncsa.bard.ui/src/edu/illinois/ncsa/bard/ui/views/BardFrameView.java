@@ -73,5 +73,11 @@ public abstract class BardFrameView extends ViewPart implements Refreshable
         {
             refresh();
         }
+
+        @Override
+        public void dataChanged()
+        {
+            refresh();
+        }
     }
 }
