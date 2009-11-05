@@ -69,7 +69,7 @@ public class RestServlet extends HttpServlet {
     }
 
     String getSuffix(String uri, String infix, HttpServletRequest request) throws ServletException {
-        return uri.substring(canonicalizeUri("",infix,request).length() + 1);
+        return uri.substring(canonicalizeUri("",infix,request).length());
     }
     String getSuffix(String infix, HttpServletRequest request) throws ServletException {
         return getSuffix(request.getRequestURL().toString(), infix, request);
@@ -98,7 +98,8 @@ public class RestServlet extends HttpServlet {
                 // TODO if that assumption is not correct, will need a way to track canonical URL's per-resource
                 // TODO if the collection is huge, this will bloat memory, may need different API to stage
                 List<String> canonicalMembers = new LinkedList<String>();
-                for(String member : restService.retrieveCollection(getSuffix("/collection/",request))) {
+                String collectionUri = getSuffix("/collection/",request);
+                for(String member : restService.retrieveCollection(collectionUri)) {
                     canonicalMembers.add(canonicalizeUri(member, "/image/", request));
                 }
                 response.getWriter().write(formatList(canonicalMembers));
