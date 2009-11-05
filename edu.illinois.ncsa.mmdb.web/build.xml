@@ -27,7 +27,7 @@
 		<delete dir="build" />
 	</target>
 
-	<target name="hudson" depends="cetbean, update_version, war, checkstyle"/>
+	<target name="hudson" depends="update_version, war, checkstyle"/>
 
 	<!-- copy the tupelo jar files -->
 	<target name="tupeloidsa" description="Copy the latest tupelo jar on hudson">
@@ -94,7 +94,7 @@
 	<target name="prepare-hudson" description="setup for hudson build and deployment">
 		<property name="webxml" value="web-basic.xml"/>
 		<property name="buildtag" value="${env.BUILD_TAG}"/>
-		<available file="src/edu/illinois/ncsa/mmdb/web/client/MMDB.tmp" property="mmdb_tmp_exists"/>
+		<available file="war/mmdb.tmp" property="mmdb_tmp_exists"/>
 	</target>
 	
  	<target name="checkstyle">
@@ -107,13 +107,13 @@
 		</checkstyle>
 	</target>
 
-	<target name="update_version" depends="prepare-hudson, copy_mmdb_java" description="update the build version in MMDB.java">
+	<target name="update_version" depends="prepare-hudson, copy_mmdb_html" description="update the build version in MMDB.java">
 		<propertyfile file="war/WEB-INF/info.properties">
 			<entry key="build_number" value="${env.BUILD_NUMBER}"/>
 			<entry key="build_tag" value="${env.BUILD_TAG}"/>
 		</propertyfile>
 		
-		<copy file="src/edu/illinois/ncsa/mmdb/web/client/MMDB.tmp" tofile="src/edu/illinois/ncsa/mmdb/web/client/MMDB.java" overwrite="true">
+		<copy file="war/mmbd.tmp" tofile="war/mmbd.html" overwrite="true">
 			<filterset>
 				<filter token="BUILD_TAG" value="${env.BUILD_TAG}"/>
 				<filter token="BUILD_NUMBER" value="${env.BUILD_NUMBER}"/>
@@ -121,8 +121,8 @@
 		</copy>
 	</target>
 
-    <target name="copy_mmdb_java" unless="mmdb_tmp_exists">
-		<copy file="src/edu/illinois/ncsa/mmdb/web/client/MMDB.java" tofile="src/edu/illinois/ncsa/mmdb/web/client/MMDB.tmp"/>
+    <target name="copy_mmdb_html" unless="mmdb_tmp_exists">
+		<copy file="war/mmdb.html" tofile="war/mmdb.tmp"/>
     </target>
 	
 	<target name="compile" depends="prepare" description="compiles Java source files to bytecode">	
