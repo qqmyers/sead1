@@ -52,7 +52,7 @@
   <!--  Servlet context listener -->
   <listener>
   	<listener-class>
-  		edu.illinois.ncsa.mmdb.web.server.MyServletContextListener
+  		edu.illinois.ncsa.mmdb.web.server.TupeloContextListener
   	</listener-class>
   </listener>
   
