@@ -113,7 +113,7 @@
 			<entry key="build_tag" value="${env.BUILD_TAG}"/>
 		</propertyfile>
 		
-		<copy file="war/mmbd.tmp" tofile="war/mmbd.html" overwrite="true">
+		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
 			<filterset>
 				<filter token="BUILD_TAG" value="${env.BUILD_TAG}"/>
 				<filter token="BUILD_NUMBER" value="${env.BUILD_NUMBER}"/>
