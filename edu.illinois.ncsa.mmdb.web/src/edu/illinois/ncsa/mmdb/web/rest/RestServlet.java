@@ -6,6 +6,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -53,7 +54,7 @@ public class RestServlet extends HttpServlet {
                 prefix = prefix + ":" + requestUrl.getPort();
             }
             String canonical = prefix + request.getContextPath() + request.getServletPath() + infix + uri;
-            System.out.println("canonical URI for "+uri+" with infix "+infix+" = "+canonical);//FIXME debug
+            //System.out.println("canonical URI for "+uri+" with infix "+infix+" = "+canonical);//FIXME debug
             return canonical;
         } catch(MalformedURLException x) {
             throw new ServletException("unexpected error: servlet URL is not a URL");
@@ -82,10 +83,19 @@ public class RestServlet extends HttpServlet {
         System.out.println("requestURL = "+request.getRequestURL());
         System.out.println("localAddr = "+request.getLocalAddr());
     }
-    
+
+    void dumpHeaders(HttpServletRequest request) {
+        Enumeration headerNames = request.getHeaderNames();
+        while(headerNames.hasMoreElements()) {
+            String headerName = (String) headerNames.nextElement();
+            System.out.println(headerName+": "+request.getHeader(headerName));
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        dumpCrap(request); // FIXME debug
+        //dumpCrap(request); // FIXME debug
+        dumpHeaders(request); // FIXME debug
         if(hasPrefix("/image/",request)) {
             try {
                 CopyFile.copy(restService.retrieveImage(getSuffix("/image/",request)), response.getOutputStream());
@@ -113,7 +123,8 @@ public class RestServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        dumpCrap(request); // FIXME debug
+        //dumpCrap(request); // FIXME debug
+        dumpHeaders(request); // FIXME debug
         if(hasPrefix("/image/",request)) {
             try {
                 restService.updateImage(getSuffix("/image/",request),request.getInputStream());
@@ -127,7 +138,7 @@ public class RestServlet extends HttpServlet {
             } catch(RestServiceException e) {
                 throw new ServletException("failed to create image",e);
             }
-            response.getWriter().write(uri+"\n");
+            response.getWriter().write(canonicalizeUri(uri,"/image/",request)+"\n");
         } else if(hasPrefix("/collection",request)) {
             // TODO currently assumes that everything in a collection is an image
             // TODO if that assumption is not correct, will need a way to track canonical URL's per-resource
@@ -154,7 +165,7 @@ public class RestServlet extends HttpServlet {
                     restService.updateCollection(getSuffix("/collection/",request),members);
                 } else { // mint a new URI
                     String uri = restService.createCollection(members);
-                    response.getWriter().write(uri+"\n");
+                    response.getWriter().write(canonicalizeUri(uri,"/collection/",request)+"\n");
                 }
             } catch(RestServiceException e) {
                 throw new ServletException("could not modify collection",e);
