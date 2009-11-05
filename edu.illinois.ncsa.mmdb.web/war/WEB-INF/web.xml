@@ -16,6 +16,24 @@
     <servlet-class>edu.illinois.ncsa.mmdb.web.rest.RestServlet</servlet-class>
   </servlet>
   
+  <servlet>
+    <servlet-name>tupelo</servlet-name>
+    <servlet-class>org.tupeloproject.server.HttpTupeloServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  
+  <servlet>
+	<servlet-name>Dataset</servlet-name>
+	<servlet-class>
+		edu.illinois.ncsa.mmdb.web.server.DatasetServiceImpl
+	</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>tupelo</servlet-name>
+    <url-pattern>/tupelo/*</url-pattern>
+  </servlet-mapping>
+  
   <servlet-mapping>
     <servlet-name>greetServlet</servlet-name>
     <url-pattern>/mmdb/greet</url-pattern>
@@ -26,6 +44,18 @@
     <url-pattern>/api/*</url-pattern>
   </servlet-mapping>
 
+  <servlet-mapping>
+	<servlet-name>Dataset</servlet-name>
+	<url-pattern>/mmdb/dataset</url-pattern>
+  </servlet-mapping>
+  
+  <!--  Servlet context listener -->
+  <listener>
+  	<listener-class>
+  		edu.illinois.ncsa.mmdb.web.server.MyServletContextListener
+  	</listener-class>
+  </listener>
+  
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>mmdb.html</welcome-file>

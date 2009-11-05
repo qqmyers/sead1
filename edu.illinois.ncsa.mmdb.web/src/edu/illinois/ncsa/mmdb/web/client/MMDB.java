@@ -1,5 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
+import java.util.HashSet;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -10,13 +12,18 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
+
 /**
- * Entry point classes define <code>onModuleLoad()</code>.
+ * MMDB entry point.
+ * 
+ * @author Luigi Marini
  */
 public class MMDB implements EntryPoint {
 	/**
@@ -27,17 +34,26 @@ public class MMDB implements EntryPoint {
 			+ "attempting to contact the server. Please check your network "
 			+ "connection and try again.";
 
-	
 	/**
-	 * Create a remote service proxy to talk to the server-side Greeting service.
+	 * Create a remote service proxy to talk to the server-side Greeting
+	 * service.
 	 */
 	private final GreetingServiceAsync greetingService = GWT
 			.create(GreetingService.class);
 
 	/**
+	 * Remote service proxy to talk to the server-side Dataset service.
+	 */
+	private final DatasetServiceAsync datasetService = GWT
+			.create(DatasetService.class);
+
+	/**
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
+
+		listDatasets();
+
 		final Button sendButton = new Button("Test");
 
 		// We can add style names to widgets
@@ -91,7 +107,8 @@ public class MMDB implements EntryPoint {
 			}
 
 			/**
-			 * Send the name from the nameField to the server and wait for a response.
+			 * Send the name from the nameField to the server and wait for a
+			 * response.
 			 */
 			private void sendNameToServer() {
 				sendButton.setEnabled(false);
@@ -126,5 +143,36 @@ public class MMDB implements EntryPoint {
 		// Add a handler to send the name to the server
 		MyHandler handler = new MyHandler();
 		sendButton.addClickHandler(handler);
+	}
+
+	/**
+	 * A simple testing method to add the list of dataset names
+	 * to the page. This is only to check that the connection with
+	 * the tupelo repository works properly. 
+	 */
+	private void listDatasets() {
+
+		datasetService.getDatasets(new AsyncCallback<HashSet<DatasetBean>>() {
+
+			@Override
+			public void onSuccess(HashSet<DatasetBean> result) {
+
+				FlowPanel panel = new FlowPanel();
+
+				RootPanel.get("datasetListContainer").add(panel);
+
+				for (DatasetBean dataset : result) {
+					panel.add(new Label(dataset.getTitle()));
+				}
+
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
 	}
 }

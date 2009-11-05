@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:a="http://cet.ncsa.uiuc.edu/2007/context/" xmlns:b="tag:tupeloproject.org,2006:/2.0/beans/2.0/" xmlns:cet="http://cet.ncsa.uiuc.edu/2007/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <cet:Context rdf:about="tag:cet.ncsa.uiuc.edu,2008:/bean/Context/20e8de49-da4b-4e94-9b1f-d91cab8a21c2">
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:75ee18d75511a350aa9186a2422b200be85d7741">
+        <b:storageTypeMapKey>Local.folder</b:storageTypeMapKey>
+        <b:storageTypeMapValue>C:\Users\lmarini\Documents\repository</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:cfc36bba89f22fce1c5f8f536a1ccbe3f37982ef">
+        <b:storageTypeMapKey>type</b:storageTypeMapKey>
+        <b:storageTypeMapValue>Local</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:f6f1ec1557cf885ce105ecfe18296a053df74b11">
+        <b:storageTypeMapKey>http</b:storageTypeMapKey>
+        <b:storageTypeMapValue>true</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <dc:creator>
+      <foaf:Person rdf:about="http://cet.ncsa.uiuc.edu/2007/person/anonymous">
+        <dc:identifier>http://cet.ncsa.uiuc.edu/2007/person/anonymous</dc:identifier>
+        <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry"/>
+        <foaf:mbox/>
+        <foaf:name>Anonymous</foaf:name>
+        <b:propertyImplementationMappingSubject rdf:resource="tag:tupeloproject.org,2006:3e42cf0b26fa9fc8adf4559a0a318e66b8629e0d"/>
+        <b:propertyValueImplementationClassName>edu.uiuc.ncsa.cet.bean.PersonBean</b:propertyValueImplementationClassName>
+      </foaf:Person>
+    </dc:creator>
+    <dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-02T21:19:39.141Z</dc:date>
+    <dc:description>Local context on disk</dc:description>
+    <dc:identifier>tag:cet.ncsa.uiuc.edu,2008:/bean/Context/20e8de49-da4b-4e94-9b1f-d91cab8a21c2</dc:identifier>
+    <dc:title>Local on disk</dc:title>
+    <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/DefaultContext"/>
+    <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry"/>
+    <b:propertyImplementationMappingSubject rdf:resource="tag:tupeloproject.org,2006:c89f4fc712f19c03fb766699df75156b56c467dc"/>
+    <b:propertyValueImplementationClassName>edu.uiuc.ncsa.cet.bean.ContextBean</b:propertyValueImplementationClassName>
+  </cet:Context>
+</rdf:RDF>
