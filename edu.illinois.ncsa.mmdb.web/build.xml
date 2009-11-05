@@ -27,7 +27,7 @@
 		<delete dir="build" />
 	</target>
 
-	<target name="hudson" depends="tupeloidsa, cetbean, update_version, war, checkstyle"/>
+	<target name="hudson" depends="cetbean, update_version, war, checkstyle"/>
 
 	<!-- copy the tupelo jar files -->
 	<target name="tupeloidsa" description="Copy the latest tupelo jar on hudson">
