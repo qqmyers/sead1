@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.tupeloproject.kernel.BlobRemover;
 import org.tupeloproject.kernel.Context;
-import org.tupeloproject.kernel.ContextFacade;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.SubjectRemover;
 import org.tupeloproject.kernel.Thing;
@@ -19,19 +18,21 @@ import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+
 /**
  * SimpleRestService
  */
-public class RestServiceImpl implements RestService, ContextFacade {
-    Context context = new MemoryContext();
-
+public class RestServiceImpl implements RestService {
     // FIXME replace these with agreed-upon predicates from relevant vocabularies
     static final Resource IMAGE_TYPE = Cet.cet("mmdb/Image");
     static final Resource COLLECTION_TYPE = Cet.cet("mmdb/Collection");
     static final Resource HAS_MEMBER = Cet.cet("mmdb/hasMember"); // maybe dcterms:hasPart?
 
-    public Context getContext() { return context; }
-    public void setContext(Context c) { context = c; }
+    Context c = new MemoryContext();
+    Context getContext() {
+        return TupeloStore.getInstance().getContext();
+    }
 
     /**
      * Create an image
