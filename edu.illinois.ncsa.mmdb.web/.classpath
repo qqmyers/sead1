@@ -3,5 +3,15 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.tupelo.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-kernel-2.5-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-mysql-2.5-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-rdf-ntriples-2.5-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-sql-2.5-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-util-2.5-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/mysql-connector-java-5.0.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/contexts.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
