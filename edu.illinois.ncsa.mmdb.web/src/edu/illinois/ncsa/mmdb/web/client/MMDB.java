@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -63,6 +62,10 @@ public class MMDB implements EntryPoint {
 		// Use RootPanel.get() to get the entire body element
 		RootPanel.get("sendButtonContainer").add(sendButton);
 
+            final DownloadButton dw = new DownloadButton("urn:foo");
+            dw.addStyleName("sendButton");
+            RootPanel.get("sendButtonContainer").add(dw);
+            
 		// Create the popup dialog box
 		final DialogBox dialogBox = new DialogBox();
 		dialogBox.setText("Server Response");
