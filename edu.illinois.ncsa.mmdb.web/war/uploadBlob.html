@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Tupelo Blob Uploader</title>
+<script type="text/javascript" src="lib/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="lib/jquery.form.js"></script>
+<script language="javascript" type="text/javascript">
+function CheckUploadProgress() {
+    $.ajax({
+        url: 'UploadBlob',
+        type: 'GET',
+        datatype: 'json',
+        error: function(e,xhr) {
+            $('#status').text("upload error: "+xhr.statusText);
+            alert( xhr.statusText );
+        },
+        success: function(r,statuss) {
+                r = eval('(' + r + ')');
+          
+                var hasStarted = r.hasStarted;      
+                var isFinished = r.isFinished;
+                var percentComplete = r.percentComplete;
+                var uris = r.uris;
+                var names = r.filenames;
+                var isUploaded = r.isUploaded
+                var bytesRead = r.bytesRead;
+                var contentLength = r.contentLength;
+                var serverUrl = r.serverUrl;
+                processStateChange( hasStarted, isFinished, percentComplete, uris, names, isUploaded,
+                    serverUrl, bytesRead, contentLength );
+        }
+    });
+}
+
+function processStateChange( hasStarted, isFinished, percentComplete, blobUris, fileNames, isUploaded,
+        serverUrl, bytesRead, contentLength ) {
+    // Check to see if it has started
+    if (hasStarted == false) {
+        setTimeout("CheckUploadProgress();", 1000);
+    }
+    else {
+        // disable the submit button
+        showDisplay();
+        $("#progressBar").css( "width", "0%" );
+        $("#progressBarTable").show();
+        $("#bytesReadTable").show();
+        
+        // It's started, display the status of the upload
+        $("#progressBar").css( "width", percentComplete+"%" );
+        $("#bytesRead").text( bytesRead+" of "+contentLength + " bytes read");
+            
+        // display completed files
+        $("#blobUrl").empty();
+        for (var j=0; j < fileNames.length; j++) {
+          if (isUploaded[j] == true) {
+            // display links to blobs
+            $("#blobUrl").append( fileNames[j]+": " );
+            $("#blobUrl").append( "<a href=\""+serverUrl+"?uri="+blobUris[j]+"\">"+blobUris[j]+"<\/a><br/>\n" );
+          }
+        }
+        
+        if (isFinished == false) {    
+            // Sleep 1 second then call the function again
+            setTimeout("CheckUploadProgress();", 1000);
+        }
+        else {  // done!
+            $("#progressBar").css("width","100%");
+            $("#bytesRead").fadeOut("slow");
+
+
+            $("#progressBarTable").fadeOut("slow");
+            $("#moreFiles").show();
+        }
+    }
+}
+</script>
+<script type="text/javascript">
+      var uc;
+      function addFileUpload() {
+        // remove onchange from last newlo-populated file input field
+        $("#uploads div:last input:first").removeAttr( "onChange" );
+        // show the remove button on it
+        $("#uploads input:last").show();
+        // add a new file input field with onChange functionality
+        uc = uc + 1;
+        $("#uploads").append("<div id='u"+uc
+           +"'><input type='file' name='f"+uc+"' size='64' "
+           +"onChange='enableSubmit(); $(\"#b"+uc+"\").show(); addFileUpload()'>"
+           +"<input type='button' value='-' id='b"+uc+"' style='display:none' "
+           +"onClick='removeFileUpload("+uc+");'>"
+           +"<\/div>" );
+      }
+      
+      function removeFileUpload(n) {
+        $("#u"+n).remove();
+        numFileFields = $("#uploads div").size();
+        if (numFileFields == 1) {
+            // last one should be blank, so disable submit button
+            disableSubmit();
+        }
+        // should never be true, but just in case...
+        if ($("#uploads div").size() == 0) {
+          doReset();
+        }
+      }
+ 
+      $(function() {
+        doReset();
+      });
+ 
+      function doReset() {
+        // clear fields and areas
+        $("#uploads").empty();
+        $("#blobUrl").empty();
+        $("#progressBarTable").fadeOut("fast");
+        $("#bytesReadTable").fadeOut("fast");
+        uc = 1;
+        addFileUpload();
+        // re-disable the submit button
+        disableSubmit();
+      }
+    
+      function enableSubmit () {
+        $("#submitId").removeAttr( "disabled" );
+      }
+      function disableSubmit () {
+        $("#submitId").attr( "disabled", "disabled" );
+      }
+      function doSubmit () {
+        $("#blobUploadForm").ajaxSubmit();
+        CheckUploadProgress();
+        disableSubmit();
+      }
+      function showForm () {
+        $("#formPart").show();
+        $("#displayPart").hide();
+        doReset();
+      }
+      function showDisplay () {
+        $("#formPart").hide();
+        $("#displayPart").show();
+      }
+</script>
+
+</head>
+<body>
+  <h1>Tupelo Blob Uploader</h1>
+  <div id="formPart">
+  <iframe id="uploadFrameID" name="uploadFrame" height="0" width="0" frameborder="0" scrolling="yes"></iframe>
+  <form id="blobUploadForm" name="blobUploadForm" enctype="multipart/form-data"
+      action="UploadBlob" method="post" target="uploadFrame" onsubmit="CheckUploadProgress()">
+  <div id="uploads"></div>
+  <input type="button" id="submitId" name="submitId" value="Upload"
+      onclick="doSubmit();">
+  <input type="button" id="clearId" value="Reset" onClick="doReset();">
+  </form>
+  <div id="status" class="outputTextArea"></div>
+  </div>
+
+<div id="displayPart" style="display:none" >
+  <div id="progressBarTable" style="display:none">
+    <table width="400"
+        style="border: 1px; background-color: black; color: white;">
+      <tr>
+        <td id="progressBar"
+            style="border: 1px; width: 0%; background-color: blue;">
+            &nbsp;</td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </div>
+  <div id="bytesReadTable" style="display:none">
+    <table width="100%" style="background-color: white; color: black;">
+      <tr>
+        <td nowrap="nowrap"><span id="bytesRead">&nbsp;</span></td>
+      </tr>
+    </table>
+  </div>
+  <div id="blobUrl"></div>
+  <input type="button" name="moreFiles" id="moreFiles" value="Upload more..."
+       style="display:none" onClick="showForm();">
+</div>
+<p>
+</p>
+</body>
+</html>
