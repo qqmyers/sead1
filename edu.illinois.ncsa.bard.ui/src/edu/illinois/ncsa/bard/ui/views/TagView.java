@@ -19,11 +19,12 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.bard.ISubjectSource;
+import edu.illinois.ncsa.bard.ui.ISubjectProvider;
 import edu.uiuc.ncsa.cet.bean.TagBean;
 import edu.uiuc.ncsa.cet.bean.TagEventBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
-public class TagView extends BardFrameView
+public class TagView extends BardFrameView implements ISubjectProvider
 {
     // STATE
     protected Collection<TagEventBean> annotations = new HashSet<TagEventBean>();
@@ -39,6 +40,11 @@ public class TagView extends BardFrameView
         viewer.refresh();
     }
 
+    public Resource getSubject()
+    {
+        return subject;
+    }
+    
     protected void wrappedCreatePartControl( Composite parent )
     {
         viewer = new ListViewer( parent );
