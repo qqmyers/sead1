@@ -62,7 +62,7 @@ public class MMDB implements EntryPoint {
 		// Use RootPanel.get() to get the entire body element
 		RootPanel.get("sendButtonContainer").add(sendButton);
 
-            final DownloadButton dw = new DownloadButton("urn:foo");
+            final DownloadButton dw = new DownloadButton("http://www.ncsa.uiuc.edu/");
             dw.addStyleName("sendButton");
             RootPanel.get("sendButtonContainer").add(dw);
             

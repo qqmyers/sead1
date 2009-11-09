@@ -70,7 +70,11 @@ public class RestServlet extends HttpServlet {
     }
 
     String getSuffix(String uri, String infix, HttpServletRequest request) throws ServletException {
-        return uri.substring(canonicalizeUri("",infix,request).length());
+        String prefix = canonicalizeUri("",infix,request);
+        while(uri.startsWith(prefix)) {
+            uri = uri.substring(prefix.length());
+        }
+        return uri;
     }
     String getSuffix(String infix, HttpServletRequest request) throws ServletException {
         return getSuffix(request.getRequestURL().toString(), infix, request);
@@ -99,6 +103,13 @@ public class RestServlet extends HttpServlet {
         if(hasPrefix("/image/",request)) {
             try {
                 CopyFile.copy(restService.retrieveImage(getSuffix("/image/",request)), response.getOutputStream());
+            } catch(RestServiceException e) {
+                throw new ServletException("failed to retrieve "+request.getRequestURI());
+            }
+        } if(hasPrefix("/image/download/",request)) {
+            response.setHeader("content-disposition","attachment; filename=foo.bar");
+            try {
+                CopyFile.copy(restService.retrieveImage(getSuffix("/image/download/",request)), response.getOutputStream());
             } catch(RestServiceException e) {
                 throw new ServletException("failed to retrieve "+request.getRequestURI());
             }

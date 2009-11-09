@@ -33,6 +33,8 @@ public class DownloadButton extends Button implements ClickHandler {
      */
     @Override
     public void onClick(ClickEvent event) {
-        Window.alert("user wants to download "+getUri());
+        // this is sort of download-y, but we need to bounce off a service that sets content-disposition,
+        // best candidate is REST service
+        Window.open(getUri(), "_blank", "");
     }
 }
