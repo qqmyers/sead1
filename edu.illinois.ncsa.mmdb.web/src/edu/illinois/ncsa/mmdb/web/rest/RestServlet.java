@@ -23,6 +23,7 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.util.CopyFile;
 import org.tupeloproject.util.Xml;
 
+import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -42,6 +43,45 @@ public class RestServlet extends HttpServlet {
         // TODO make that service aware of the Context
     }
 
+    final String IMAGE_INFIX = "/image/";
+    final String IMAGE_CREATE_ANON_INFIX = "/image";
+    final String IMAGE_DOWNLOAD_INFIX = "/image/download/";
+
+    final String COLLECTION_INFIX = "/collection/";
+    final String COLLECTION_CREATE_ANON_INFIX = "/collection";
+    final String COLLECTION_ADD_INFIX = "/collection/add/";
+    final String COLLECTION_REMOVE_INFIX = "/collection/remove/";
+
+    final String INFIXES[] = new String[] {
+            IMAGE_INFIX,
+            IMAGE_CREATE_ANON_INFIX,
+            IMAGE_DOWNLOAD_INFIX,
+            COLLECTION_INFIX,
+            COLLECTION_CREATE_ANON_INFIX,
+            COLLECTION_ADD_INFIX,
+            COLLECTION_REMOVE_INFIX
+    };
+
+    UriCanonicalizer canon = null;
+    UriCanonicalizer getCanon(HttpServletRequest request) throws ServletException {
+        if(canon == null) {
+            canon = new UriCanonicalizer();
+            try {
+                URL requestUrl = new URL(request.getRequestURL().toString());
+                String prefix = requestUrl.getProtocol()+"://"+requestUrl.getHost();
+                if(requestUrl.getPort() != -1) {
+                    prefix = prefix + ":" + requestUrl.getPort();
+                }
+                for(String infix : INFIXES) {
+                    canon.setCanonicalUrlPrefix(infix, prefix + request.getContextPath() + request.getServletPath() + infix);
+                }
+            } catch(MalformedURLException x) {
+                throw new ServletException("unexpected error: servlet URL is not a URL");
+            }
+        }
+        return canon;
+    }
+
     /**
      * the canonical URL of a resource is
      * {servlet path}{infix}{uri}
@@ -56,18 +96,7 @@ public class RestServlet extends HttpServlet {
      * @return the canonical URL of the resource
      */
     String canonicalizeUri(String uri, String infix, HttpServletRequest request) throws ServletException {
-        try {
-            URL requestUrl = new URL(request.getRequestURL().toString());
-            String prefix = requestUrl.getProtocol()+"://"+requestUrl.getHost();
-            if(requestUrl.getPort() != -1) {
-                prefix = prefix + ":" + requestUrl.getPort();
-            }
-            String canonical = prefix + request.getContextPath() + request.getServletPath() + infix + uri;
-            //System.out.println("canonical URI for "+uri+" with infix "+infix+" = "+canonical);//FIXME debug
-            return canonical;
-        } catch(MalformedURLException x) {
-            throw new ServletException("unexpected error: servlet URL is not a URL");
-        }
+        return getCanon(request).canonicalize(infix,uri);
     }
 
     boolean hasPrefix(String uri, String infix, HttpServletRequest request) throws ServletException {
