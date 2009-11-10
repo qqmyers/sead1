@@ -10,12 +10,13 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  * The async counterpart of <code>DatasetService</code>.
  *
  * @author Luigi Marini
+ * 
+ * @deprecated use gwt-dispatch
  */
 public interface DatasetServiceAsync {
 
-	/**
-	 * The async counterpart of <code>DatasetService</code>.
-	 */
 	public void getDatasets(AsyncCallback<HashSet<DatasetBean>> callback);
+
+	void getDatasetIds(AsyncCallback<HashSet<String>> callback);
 
 }

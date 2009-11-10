@@ -15,6 +15,7 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  * 
  * @author Luigi Marini
  * 
+ * @deprecated use gwt-dispatch
  */
 @RemoteServiceRelativePath("dataset")
 public interface DatasetService extends RemoteService {
@@ -25,5 +26,10 @@ public interface DatasetService extends RemoteService {
 	 * @return a set of datasets
 	 */
 	HashSet<DatasetBean> getDatasets();
+	
+	/**
+	 * Retrieve all dataset resources in repository
+	 */
+	HashSet<String> getDatasetIds();
 
 }

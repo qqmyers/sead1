@@ -1,18 +1,56 @@
 /** Add css rules here for your application. */
 
+.datasetTable {
+	width: 500px;
+	border: 1px solid grey;
+	vertical-align: top;
+}
+
+.datasetTable .topRow {
+	color: white;
+	background-color: blue;
+}
+
+.datasetTable .evenRow {
+	color: black;
+	background-color: grey;
+}
+
+.datasetTable .oddRow {
+	color: black;
+}
+
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
   font-size: 2em;
   font-weight: bold;
   color: #777777;
-  margin: 40px 0px 70px;
-  text-align: center;
+  margin: 40px 0px 40px 10px;
+  text-align: left;
+}
+
+h2 {
+  font-size: 1.5em;
+  color: #7F7F7F;
+  margin: 0px 0px 0px 20px;
+  text-align: left;
 }
 
 .sendButton {
   display: block;
   font-size: 16pt;
+}
+
+.mainTable {
+	width: 100%;
+	height: 500px;
+	border-top: 1px black solid;
+	border-bottom: 1px black solid;
+}
+
+.bottomTable {
+	width: 100%;
 }
 
 /** Most GWT widgets already have a style name defined */

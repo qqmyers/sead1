@@ -18,6 +18,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
  * 
  * @author Luigi Marini
  *
+ * @deprecated use gwt-dispatch
  */
 public class DatasetServiceImpl extends RemoteServiceServlet implements
 		DatasetService {
@@ -27,15 +28,30 @@ public class DatasetServiceImpl extends RemoteServiceServlet implements
 	/** Tupelo bean session **/
 	private static final BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
+	private static DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+	
 	@Override
 	public HashSet<DatasetBean> getDatasets() {
 
-		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-		
 		HashSet<DatasetBean> datasets = new HashSet<DatasetBean>();
 		
 		try {
 			datasets = new HashSet<DatasetBean>(dbu.getAll());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return datasets;
+	}
+
+	@Override
+	public HashSet<String> getDatasetIds() {
+		
+		HashSet<String> datasets = new HashSet<String>();
+		
+		try {
+			datasets = new HashSet<String>(dbu.getIDs());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
