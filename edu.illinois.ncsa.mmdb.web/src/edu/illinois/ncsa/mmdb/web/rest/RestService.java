@@ -2,11 +2,19 @@ package edu.illinois.ncsa.mmdb.web.rest;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Dc;
 
 /**
  * RestService
  */
 public interface RestService {
+    static final Resource LABEL_PROPERTY = Dc.TITLE;
+    static final Resource DATE_PROPERTY = Dc.DATE;
+    static final Resource FORMAT_PROPERTY = Dc.FORMAT;
+
     // image CRUD
     /**
      * Create an image
@@ -17,10 +25,25 @@ public interface RestService {
 
     /**
      * Create an image
+     * @param metadata to give it
+     * @param imageData a stream containing image data
+     */
+    String createImage(Map<Resource,Object> metadata, InputStream imageData) throws RestServiceException;
+
+    /**
+     * Create an image
      * @param imageUri the URI to give it
      * @param imageData a stream containing image data
      */
     void createImage(String imageUri, InputStream imageData) throws RestServiceException;
+
+    /**
+     * Create an image
+     * @param imageUri the URI to give it
+     * @param metadata to give it
+     * @param imageData a stream containing image data
+     */
+    void createImage(String imageUri, Map<Resource,Object> metadata, InputStream imageData) throws RestServiceException;
 
     /**
      * Retrieve an image
@@ -35,6 +58,14 @@ public interface RestService {
      * @param imageData a stream on the data to replace it with
      */
     void updateImage(String imageUri, InputStream imageData) throws RestServiceException;
+
+    /**
+     * Update an image
+     * @param imageUri the image URI
+     * @param metadata to give it
+     * @param imageData a stream on the data to replace it with
+     */
+    void updateImage(String imageUri, Map<Resource,Object> metadata, InputStream imageData) throws RestServiceException;
 
     /**
      * Delete an image

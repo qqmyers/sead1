@@ -1,9 +1,11 @@
 package edu.illinois.ncsa.mmdb.web.rest;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.tupeloproject.kernel.BlobRemover;
@@ -19,13 +21,14 @@ import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.workflow.Cyberintegrator;
 
 /**
  * SimpleRestService
  */
 public class RestServiceImpl implements RestService {
     // FIXME replace these with agreed-upon predicates from relevant vocabularies
-    static final Resource IMAGE_TYPE = Cet.cet("mmdb/Image");
+    static final Resource IMAGE_TYPE = Cyberintegrator.DATASET;
     static final Resource COLLECTION_TYPE = Cet.cet("mmdb/Collection");
     static final Resource HAS_MEMBER = Cet.cet("mmdb/hasMember"); // maybe dcterms:hasPart?
 
@@ -41,8 +44,22 @@ public class RestServiceImpl implements RestService {
      * @return a new URI identifying the image
      */
     public String createImage(InputStream imageData) throws RestServiceException {
+        return createImage((Map<Resource,Object>)null,imageData);
+    }
+
+    /**
+     * Create an image
+     *
+     * @param metadata  to give it
+     * @param imageData a stream containing image data
+     */
+    @Override
+    public String createImage(Map<Resource, Object> metadata, InputStream imageData) throws RestServiceException {
         String uri = Resource.uriRef().getString();
-        createImage(uri,imageData);
+        if(metadata.get(LABEL_PROPERTY) == null) {
+            metadata.put(LABEL_PROPERTY,uri);
+        }
+        createImage(uri,metadata,imageData);
         return uri;
     }
 
@@ -53,7 +70,20 @@ public class RestServiceImpl implements RestService {
      * @param imageData a stream containing image data
      */
     public void createImage(String imageUri, InputStream imageData) throws RestServiceException {
-        updateImage(imageUri, imageData);
+        Map<Resource,Object> md = new HashMap<Resource,Object>();
+        md.put(LABEL_PROPERTY, imageUri);
+        updateImage(imageUri, md, imageData);
+    }
+
+    /**
+     * Create an image
+     *
+     * @param imageUri  the URI to give it
+     * @param md     metadata to give it
+     * @param imageData a stream containing image data
+     */
+    public void createImage(String imageUri, Map<Resource,Object> md, InputStream imageData) throws RestServiceException {
+        updateImage(imageUri, md, imageData);
     }
 
     /**
@@ -77,10 +107,31 @@ public class RestServiceImpl implements RestService {
      * @param imageData a stream on the data to replace it with
      */
     public void updateImage(String imageUri, InputStream imageData) throws RestServiceException {
+        Map<Resource,Object> md = new HashMap<Resource,Object>();
+        md.put(LABEL_PROPERTY, imageUri);
+        updateImage(imageUri, md, imageData);
+    }
+
+    /**
+     * Update an image
+     *
+     * @param imageUri  the image URI
+     * @param metadata metadata to give it
+     * @param imageData a stream on the data to replace it with
+     */
+    public void updateImage(String imageUri, Map<Resource,Object> metadata, InputStream imageData) throws RestServiceException {
         try {
             Resource subject = Resource.uriRef(imageUri);
-            getContext().write(subject, imageData);
-            getContext().addTriples(Triple.create(subject, Rdf.TYPE, IMAGE_TYPE));
+            ThingSession s = new ThingSession(getContext());
+            s.write(subject, imageData);
+            Thing image = s.fetchThing(subject);
+            image.setValue(Rdf.TYPE, IMAGE_TYPE);
+            if(metadata != null) {
+                for(Resource property : metadata.keySet()) {
+                    image.setValue(property, metadata.get(property));
+                }
+            }
+            s.save();
         } catch(OperatorException e) {
             throw new RestServiceException("failed to write image "+imageUri,e);
         }
