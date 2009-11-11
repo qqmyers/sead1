@@ -43,19 +43,23 @@ public class RestServlet extends HttpServlet {
         // TODO make that service aware of the Context
     }
 
+    final String ANY_IMAGE_INFIX = "/image";
     final String IMAGE_INFIX = "/image/";
     final String IMAGE_CREATE_ANON_INFIX = "/image";
     final String IMAGE_DOWNLOAD_INFIX = "/image/download/";
 
+    final String ANY_COLLECTION_INFIX = "/collection";
     final String COLLECTION_INFIX = "/collection/";
     final String COLLECTION_CREATE_ANON_INFIX = "/collection";
     final String COLLECTION_ADD_INFIX = "/collection/add/";
     final String COLLECTION_REMOVE_INFIX = "/collection/remove/";
 
     final String INFIXES[] = new String[] {
+            ANY_IMAGE_INFIX,
             IMAGE_INFIX,
             IMAGE_CREATE_ANON_INFIX,
             IMAGE_DOWNLOAD_INFIX,
+            ANY_COLLECTION_INFIX,
             COLLECTION_INFIX,
             COLLECTION_CREATE_ANON_INFIX,
             COLLECTION_ADD_INFIX,
@@ -73,7 +77,8 @@ public class RestServlet extends HttpServlet {
                     prefix = prefix + ":" + requestUrl.getPort();
                 }
                 for(String infix : INFIXES) {
-                    canon.setCanonicalUrlPrefix(infix, prefix + request.getContextPath() + request.getServletPath() + infix);
+                    String cp = prefix + request.getContextPath() + request.getServletPath() + infix;
+                    canon.setCanonicalUrlPrefix(infix, cp);
                 }
             } catch(MalformedURLException x) {
                 throw new ServletException("unexpected error: servlet URL is not a URL");
@@ -100,22 +105,18 @@ public class RestServlet extends HttpServlet {
     }
 
     boolean hasPrefix(String uri, String infix, HttpServletRequest request) throws ServletException {
-        return uri.startsWith(canonicalizeUri("",infix,request));
+        return getCanon(request).hasPrefix(infix,uri);
     }
 
     boolean hasPrefix(String infix, HttpServletRequest request) throws ServletException {
-        return hasPrefix(request.getRequestURL().toString(),infix,request);
+        return getCanon(request).hasPrefix(infix,request.getRequestURL().toString());
     }
 
-    String decanonicalizeUrl(String uri, String infix, HttpServletRequest request) throws ServletException {
-        String prefix = canonicalizeUri("",infix,request);
-        while(uri.startsWith(prefix)) {
-            uri = uri.substring(prefix.length());
-        }
-        return uri;
+    String decanonicalizeUrl(String url, HttpServletRequest request) throws ServletException {
+        return getCanon(request).decanonicalize(url);
     }
-    String decanonicalizeUrl(String infix, HttpServletRequest request) throws ServletException {
-        return decanonicalizeUrl(request.getRequestURL().toString(), infix, request);
+    String decanonicalizeUrl(HttpServletRequest request) throws ServletException {
+        return getCanon(request).decanonicalize(request.getRequestURL().toString());
     }
 
     void dumpCrap(HttpServletRequest request) {
@@ -134,32 +135,35 @@ public class RestServlet extends HttpServlet {
         }
     }
 
-    @Override
+    @Override  
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
-        dumpHeaders(request); // FIXME debug
-        if(hasPrefix("/image/",request)) {
-            try {
-                CopyFile.copy(restService.retrieveImage(decanonicalizeUrl("/image/",request)), response.getOutputStream());
-            } catch(RestServiceException e) {
-                throw new ServletException("failed to retrieve "+request.getRequestURI());
-            }
-        } if(hasPrefix("/image/download/",request)) {
+        //dumpHeaders(request); // FIXME debug
+        String uri = decanonicalizeUrl(request);
+        if(hasPrefix(IMAGE_DOWNLOAD_INFIX,request)) {
+            log("DOWNLOAD IMAGE "+uri);
             response.setHeader("content-disposition","attachment; filename=foo.bar");
             try {
-                CopyFile.copy(restService.retrieveImage(decanonicalizeUrl("/image/download/",request)), response.getOutputStream());
+                CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
             } catch(RestServiceException e) {
                 throw new ServletException("failed to retrieve "+request.getRequestURI());
             }
-        } else if(hasPrefix("/collection/",request)) {
+        } else if(hasPrefix(IMAGE_INFIX,request)) {
+            log("GET IMAGE "+uri);
+            try {
+                CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
+            } catch(RestServiceException e) {
+                throw new ServletException("failed to retrieve "+request.getRequestURI());
+            }
+        } else if(hasPrefix(COLLECTION_INFIX,request)) {
+            log("LIST COLLECTION"+uri);
             try {
                 // TODO currently assumes that everything in a collection is an image
                 // TODO if that assumption is not correct, will need a way to track canonical URL's per-resource
                 // TODO if the collection is huge, this will bloat memory, may need different API to stage
                 List<String> canonicalMembers = new LinkedList<String>();
-                String collectionUri = decanonicalizeUrl("/collection/",request);
-                for(String member : restService.retrieveCollection(collectionUri)) {
-                    canonicalMembers.add(canonicalizeUri(member, "/image/", request));
+                for(String member : restService.retrieveCollection(uri)) {
+                    canonicalMembers.add(canonicalizeUri(member, IMAGE_INFIX, request));
                 }
                 response.getWriter().write(formatList(canonicalMembers));
             } catch(RestServiceException e) {
@@ -197,20 +201,23 @@ public class RestServlet extends HttpServlet {
             md.put(RestService.FORMAT_PROPERTY, "image/*");
             imageData = request.getInputStream();
         }
-        if(hasPrefix("/image/",request)) {
+        if(hasPrefix(IMAGE_INFIX,request)) {
             try {
-                restService.updateImage(decanonicalizeUrl("/image/",request),md,imageData);
+                String uri = this.decanonicalizeUrl(request);
+                log("UPLOAD IMAGE "+uri);
+                restService.updateImage(uri,md,imageData);
             } catch(RestServiceException e) {
                 throw new ServletException("failed to write "+request.getRequestURI());
             }
-        } else if(hasPrefix("/image",request)) {
+        } else if(hasPrefix(IMAGE_CREATE_ANON_INFIX,request)) {
             String uri = null;
             try {
+                log("UPLOAD IMAGE (anonymous)");
                 uri = restService.createImage(md,imageData);
             } catch(RestServiceException e) {
                 throw new ServletException("failed to create image",e);
             }
-            response.getWriter().write(canonicalizeUri(uri,"/image/",request)+"\n");
+            response.getWriter().write(canonicalizeUri(uri,IMAGE_INFIX,request)+"\n");
         } else {
             // not sure how we would hit this case
             throw new ServletException("server error: impossible case in image upload");
@@ -220,21 +227,18 @@ public class RestServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
-        dumpHeaders(request); // FIXME debug
-        if(hasPrefix("/image",request)) {
+        //dumpHeaders(request); // FIXME debug
+        if(hasPrefix(ANY_IMAGE_INFIX,request)) {
             doPostImage(request,response);
-        } else if(hasPrefix("/collection",request)) {
+        } else if(hasPrefix(ANY_COLLECTION_INFIX,request)) {
             // TODO accept multipart uploads
             // TODO currently assumes that everything in a collection is an image
             // TODO if that assumption is not correct, will need a way to track canonical URL's per-resource
             List<String> members = new LinkedList<String>();
             try {
                 for(String member : parseList(request.getInputStream())) {
-                    if(hasPrefix(member,"/image/",request)) {
-                        members.add(decanonicalizeUrl(member,"/image/",request));
-                    } else {
-                        members.add(member);
-                    }
+                    String uri = decanonicalizeUrl(member,request);
+                    members.add(uri);
                 }
             } catch(XPathExpressionException e) {
                 throw new ServletException("could not parse collection parameter",e);
@@ -242,15 +246,22 @@ public class RestServlet extends HttpServlet {
                 throw new ServletException("could not parse collection parameter",e);
             }
             try {
-                if(hasPrefix("/collection/add/",request)) {
-                    restService.addToCollection(decanonicalizeUrl("/collection/add/",request),members);
-                } else if(hasPrefix("/collection/remove/",request)) {
-                    restService.removeFromCollection(decanonicalizeUrl("/collection/add/",request),members);
-                } else if(hasPrefix("/collection/",request)) {
-                    restService.updateCollection(decanonicalizeUrl("/collection/",request),members);
+                if(hasPrefix(COLLECTION_ADD_INFIX,request)) {
+                    String uri = decanonicalizeUrl(request);
+                    log("COLLECTION ADD "+uri);
+                    restService.addToCollection(uri,members);
+                } else if(hasPrefix(COLLECTION_REMOVE_INFIX,request)) {
+                    String uri = decanonicalizeUrl(request);
+                    log("COLLECTION REMOVE "+uri);
+                    restService.removeFromCollection(uri,members);
+                } else if(hasPrefix(COLLECTION_INFIX,request)) { // Update
+                    String uri = decanonicalizeUrl(request);
+                    log("COLLECTION UPDATE "+uri);
+                    restService.updateCollection(uri,members);
                 } else { // mint a new URI
+                    log("COLLECTION CREATE (anonymous)");
                     String uri = restService.createCollection(members);
-                    response.getWriter().write(canonicalizeUri(uri,"/collection/",request)+"\n");
+                    response.getWriter().write(canonicalizeUri(uri,COLLECTION_INFIX,request)+"\n");
                 }
             } catch(RestServiceException e) {
                 throw new ServletException("could not modify collection",e);
