@@ -76,7 +76,7 @@
 	    </javac>
 		<jar jarfile="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.tupelo.jar" basedir="beanclass"/>
 
-		<!-- compile the contexts -->
+		<!-- compile the contexts 
 		<delete dir="beanclass"/>
 		<mkdir dir="beanclass"/>		
 	    <javac destdir="beanclass" debug="${debug}" deprecation="${deprecation}" target="1.5" source="1.5">
@@ -86,7 +86,7 @@
     		</classpath>
 	    </javac>
 		<jar jarfile="war/WEB-INF/lib/edu.uiuc.ncsa.cet.tupelo.contexts.jar" basedir="beanclass"/>
-
+-->
 		<!-- remove the temp folder -->
 		<delete dir="beanclass"/>
 	</target>
