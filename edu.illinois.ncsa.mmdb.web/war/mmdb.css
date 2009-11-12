@@ -1,4 +1,6 @@
-/** Add css rules here for your application. */
+body {
+	font-family: arial,verdana,sans-serif;
+}
 
 .datasetTable {
 	width: 500px;
@@ -8,20 +10,176 @@
 
 .datasetTable .topRow {
 	color: white;
-	background-color: blue;
+	background-color: black;
+	margin: 0px;
+	padding: 5px;
 }
 
 .datasetTable .evenRow {
 	color: black;
-	background-color: grey;
+	background-color: #F6F9ED;
+	height: 50px;
 }
 
 .datasetTable .oddRow {
 	color: black;
+	height: 50px;
 }
 
+.alignRight {
+	position: relative;
+	float: right;
+}
 
-/** Example rules used by the template application (remove for your app) */
+.tagsView {
+	display: inline;
+	width: 760px;
+	padding: 10px;
+	float: left;
+	position: relative;
+	vertical-align: middle;
+	border-top: 1px dashed gray;
+	border-bottom: 1px dashed gray;
+}
+
+.tagsView div {
+	float: left;
+}
+
+.tagsHeading {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 0px;
+	font-size: 1.5em;
+	font-family: arial,verdana,sans-serif;
+}
+
+.tagsLinks {
+	width: 200px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 0px;
+}
+
+.tag {
+	padding-left: 5px;
+}
+
+.tagsButton {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 0px;
+}
+
+.datasetTitle {
+	font-size: 1.5em;
+  	color: black;
+  	margin: 20px;
+  	text-align: left;
+}
+
+.datasetMainContainer {
+	display: block;
+	width: 800px;
+	border-left: solid 1px black;
+	border-right: solid 1px black;
+	padding: 10px;
+	spacing: 10px;
+	height: auto;
+}
+
+.previewPanel {
+	display: inline;
+	position: relative;
+	float: left;
+	spacing: 0px;
+	padding: 0px;
+	height: auto;
+}
+
+.imagePreviewPanel {
+	width: 500px;
+	height: 400px;
+}
+
+.imagePreview {
+	display: block;
+	margin-left: auto;
+    margin-right: auto;
+	vertical-align: middle;
+}
+
+.metadataPreview {
+	height: 400px;
+	border-left: 1px dashed gray;
+	padding: 10px;
+}
+
+.metadataPreview div {
+	padding-top: 20px;
+}
+
+.metadataEntry {
+	vertical-align: middle;
+}
+
+.downloadButton {
+	vertical-align: bottom;
+}
+
+.downloadButtonContainer {
+	border-top: 1px dashed gray;
+	margin: 0px;
+	padding: 20px;
+}
+
+.commentsView {
+	height: auto;
+	clear: both;
+	padding: 20px;
+}
+
+/*================= Annotations / Comments ============== */
+.commentsHeading {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 0px;
+	font-size: 1.5em;
+	font-family: arial,verdana,sans-serif;
+}
+
+.annotationMainPanel {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 5px;
+	border-top: 1px solid #959596;
+}
+
+.annotationTitle {
+	font-weight:bold;
+}
+
+.annotationAttributes {
+	font-style: italic;
+}
+
+.annotationBody {
+
+}
+
+.newCommentHeader {
+	font-weight:bold;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.newAnnotationMainPanel {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 5px;
+	border-top: 1px solid #959596;
+}
+
 h1 {
   font-size: 2em;
   font-weight: bold;
@@ -37,11 +195,6 @@ h2 {
   text-align: left;
 }
 
-.sendButton {
-  display: block;
-  font-size: 16pt;
-}
-
 .mainTable {
 	width: 100%;
 	height: 500px;
@@ -49,24 +202,3 @@ h2 {
 	border-bottom: 1px black solid;
 }
 
-.bottomTable {
-	width: 100%;
-}
-
-/** Most GWT widgets already have a style name defined */
-.gwt-DialogBox {
-  width: 400px;
-}
-
-.dialogVPanel {
-  margin: 5px;
-}
-
-.serverResponseLabelError {
-  color: red;
-}
-
-/** Set ids using widget.getElement().setId("idOfElement") */
-#closeButton {
-  margin: 15px 6px 6px;
-}

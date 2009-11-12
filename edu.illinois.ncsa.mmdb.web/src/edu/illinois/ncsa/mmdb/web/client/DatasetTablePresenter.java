@@ -36,14 +36,17 @@ public class DatasetTablePresenter extends
 					@Override
 					public void onAddNewDataset(AddNewDatasetEvent event) {
 						DatasetBean dataset = event.getDataset();
-						display.addRow(dataset.getTitle(), dataset
-								.getMimeType(), dataset.getDate());
+						String id = dataset.getUri();
+						String title = dataset.getTitle();
+						String type = dataset.getMimeType();
+						Date date = dataset.getDate();
+						display.addRow(id, title, type, date);
 					}
 				});
 	}
 
 	interface Display extends View {
-		void addRow(String text, String string, Date date);
+		void addRow(String id, String text, String string, Date date);
 	}
 
 	public Widget getWidget() {

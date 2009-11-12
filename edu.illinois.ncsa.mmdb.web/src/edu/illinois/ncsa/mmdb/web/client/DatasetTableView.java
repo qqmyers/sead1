@@ -37,10 +37,10 @@ public class DatasetTableView extends FlexTable implements Display {
 	}
 
 	@Override
-	public void addRow(String name, String type, Date date) {
+	public void addRow(String id, String name, String type, Date date) {
 		GWT.log("Adding dataset " + name, null);
 		int row = this.getRowCount();
-		Hyperlink hyperlink = new Hyperlink(name, "dataset");
+		Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
 		datasetLinks.add(hyperlink);
 		this.setWidget(row, 0, hyperlink);
 		this.setWidget(row, 1, new Label(type));

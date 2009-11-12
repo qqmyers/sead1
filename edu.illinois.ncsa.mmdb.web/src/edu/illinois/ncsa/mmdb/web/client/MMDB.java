@@ -5,6 +5,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -16,6 +17,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
+import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
+import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -44,6 +47,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	
 	/** Main content panel **/
 	private FlowPanel mainContainer = new FlowPanel();
+
+	/** Place support for history management **/
+	private PlaceService placeService;
 	
 	/**
 	 * This is the entry point method.
@@ -51,16 +57,18 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	public void onModuleLoad() {
 		
 		RootPanel.get("mainContainer").add(mainContainer);
-		
-		// testing method
-		listDatasets();
 
 		// log events
 		logEvent(eventBus);
 		
-        final DownloadButton dw = new DownloadButton("http://www.ncsa.uiuc.edu/");
-        dw.addStyleName("sendButton");
-        mainContainer.add(dw);
+		// place support for history management
+//		placeService = new PlaceService(eventBus);
+		
+		// history support
+		History.addValueChangeHandler(this);
+		
+		parseHistoryToken(History.getToken());
+
 	}
 
 	/**
@@ -127,23 +135,41 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	}
 	
 	/**
-	 * Show information about a partiucular dataset.
+	 * Show information about a particular dataset.
 	 */
 	private void showDataset() {
 
-		DatasetView datasetWidget = new DatasetView();
-		DatasetPresenter datasetPresenter = new DatasetPresenter(datasetWidget, eventBus);
-		datasetPresenter.bind();
+//		DatasetView datasetWidget = new DatasetView();
+//		DatasetPresenter datasetPresenter = new DatasetPresenter(datasetWidget, eventBus, dispatchAsync);
+//		datasetPresenter.bind();
+//		
+//		mainContainer.clear();
+//		mainContainer.add(datasetWidget.asWidget());
 		
+		DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync);
 		mainContainer.clear();
-		mainContainer.add(datasetWidget.asWidget());
+		mainContainer.add(datasetWidget);
+		
+		String params = History.getToken().substring(History.getToken().lastIndexOf("?")+1);
+		
+		String[] tokens = params.split("=");
+		
+		if (tokens[0].equals("id")) {
+			datasetWidget.showDataset(tokens[1]);
+		}
 	}
 	
+	/**
+	 * History handler.
+	 */
 	@Override
 	public void onValueChange(ValueChangeEvent<String> event) {
 		String token = event.getValue();
 		GWT.log("History changed: " + event.getValue(), null);
-		
+		parseHistoryToken(token);
+	}
+	
+	private void parseHistoryToken(String token) {
 		if (token.startsWith("dataset")) {
 			showDataset();
 		} else {
