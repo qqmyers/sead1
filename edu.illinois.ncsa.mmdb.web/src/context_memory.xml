@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:a="tag:tupeloproject.org,2006:/2.0/">
+  <a:DefaultContext rdf:about="tag:cet.ncsa.uiuc.edu,2008:/bean/Context/2430eb34-8c86-41a4-9a4b-ed501d335ab4"/>
+</rdf:RDF>

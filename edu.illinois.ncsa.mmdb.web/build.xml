@@ -150,12 +150,9 @@
 			<fileset dir="src">
 				<include name="logging.properties"/>
 				<include name="configuration.xml"/>
-				<include name="default.rdf"/>
-				<include name="local.rdf"/>
-				<include name="tupelo_isda.rdf"/>
-				<include name="plantgrowth_isda.nt"/>
 			</fileset>
 		</copy>
+		<copy tofile="war/WEB-INF/classes/context.xml" file="src/context_mysql.xml" />
 	</target>
 
 	<target name="deploy" depends="war" description="deploys the war file to Tomcat">
