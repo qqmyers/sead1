@@ -23,7 +23,7 @@
 
 	<servlet>
 		<servlet-name>tupelo</servlet-name>
-		<servlet-class>org.tupeloproject.server.HttpTupeloServlet</servlet-class>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.server.TupeloServlet</servlet-class>
 	</servlet>
 
 	<servlet>

@@ -71,6 +71,11 @@ public class TupeloStore {
 			// setup context creators
 			ContextCreators.register();
 			context = createSerializeContext();
+                    if(context == null) {
+                        log.error("no context deserialized!");
+                    } else {
+                        log.info("context deserialized: "+context);
+                    }
 			ContextConvert.updateContext(context);
 			beanSession = CETBeans.createBeanSession(context);
 		} catch (OperatorException e) {
