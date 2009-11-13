@@ -29,18 +29,22 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.SAXException;
 
 /**
  * RestServlet
  */
 public class RestServlet extends HttpServlet {
+    Log log = LogFactory.getLog(RestServlet.class);
+
     static RestService restService; // TODO manage this lifecycle better
 
     public void init() throws ServletException {
         super.init();
         restService = new RestServiceImpl();
-        // TODO make that service aware of the Context
+        log.info("REST servlet initialized");
     }
 
     final String ANY_IMAGE_INFIX = "/image";

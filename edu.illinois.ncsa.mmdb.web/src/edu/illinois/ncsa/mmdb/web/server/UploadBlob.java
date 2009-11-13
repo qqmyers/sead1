@@ -6,6 +6,7 @@ package edu.illinois.ncsa.mmdb.web.server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 import javax.servlet.ServletException;
@@ -17,9 +18,12 @@ import javax.servlet.http.HttpSession;
 import org.tupeloproject.kernel.BlobWriter;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Thing;
+import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.rdf.Resource;
 import static org.tupeloproject.rdf.terms.Rdfs.LABEL;
 
+import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -141,7 +145,7 @@ public class UploadBlob extends HttpServlet {
     }
 
     void log(Object o) {
-        log.trace(o);
+        log.info(o);
     }
 
     /**
@@ -218,8 +222,17 @@ public class UploadBlob extends HttpServlet {
                         c.perform(bw);
                         log("Wrote: " + bw.getSize());
 
-                        // add an rdfs:label triple for it
-                        c.addTriple(uri, LABEL, fileName);
+                        // add metadata
+                        ThingSession ts = c.getThingSession();
+                        Thing t = ts.newThing(Resource.uriRef(uri));
+                        t.addType(RestService.IMAGE_TYPE);
+                        t.setValue(LABEL, fileName);
+                        t.setValue(RestService.LABEL_PROPERTY, fileName);
+                        t.setValue(RestService.DATE_PROPERTY, new Date());
+                        t.setValue(RestService.FORMAT_PROPERTY, contentType);
+                        t.save();
+                        ts.close();
+
                         u.setUploaded(true);
                     }
                     catch (OperatorException e) {

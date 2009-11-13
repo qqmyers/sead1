@@ -5,15 +5,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
+
+import edu.uiuc.ncsa.cet.bean.tupelo.workflow.Cyberintegrator;
 
 /**
  * RestService
  */
 public interface RestService {
-    static final Resource LABEL_PROPERTY = Dc.TITLE;
-    static final Resource DATE_PROPERTY = Dc.DATE;
-    static final Resource FORMAT_PROPERTY = Dc.FORMAT;
+    public static final Resource IMAGE_TYPE = Cyberintegrator.DATASET;
+    public static final Resource COLLECTION_TYPE = Cet.cet("mmdb/Collection");
+    public static final Resource HAS_MEMBER = Cet.cet("mmdb/hasMember"); // maybe dcterms:hasPart?
+    public static final Resource LABEL_PROPERTY = Dc.TITLE;
+    public static final Resource DATE_PROPERTY = Dc.DATE;
+    public static final Resource FORMAT_PROPERTY = Dc.FORMAT;
 
     // image CRUD
     /**

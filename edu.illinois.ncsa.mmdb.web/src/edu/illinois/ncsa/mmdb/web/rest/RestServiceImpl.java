@@ -17,21 +17,14 @@ import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
-import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.tupelo.workflow.Cyberintegrator;
 
 /**
  * SimpleRestService
  */
 public class RestServiceImpl implements RestService {
-    // FIXME replace these with agreed-upon predicates from relevant vocabularies
-    static final Resource IMAGE_TYPE = Cyberintegrator.DATASET;
-    static final Resource COLLECTION_TYPE = Cet.cet("mmdb/Collection");
-    static final Resource HAS_MEMBER = Cet.cet("mmdb/hasMember"); // maybe dcterms:hasPart?
-
     Context c = new MemoryContext();
     Context getContext() {
         return TupeloStore.getInstance().getContext();
@@ -53,7 +46,6 @@ public class RestServiceImpl implements RestService {
      * @param metadata  to give it
      * @param imageData a stream containing image data
      */
-    @Override
     public String createImage(Map<Resource, Object> metadata, InputStream imageData) throws RestServiceException {
         String uri = Resource.uriRef().getString();
         if(metadata.get(LABEL_PROPERTY) == null) {
