@@ -1,7 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.List;
-import java.util.Set;
+import java.util.ArrayList;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,6 +13,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResourceResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotations;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotationsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 
@@ -51,7 +52,7 @@ public class CommentsView extends Composite {
 		this.service = service;
 
 		initWidget(mainPanel);
-		
+
 		mainPanel.addStyleName("commentsView");
 
 		layoutPanel = new VerticalPanel();
@@ -65,7 +66,7 @@ public class CommentsView extends Composite {
 		layoutPanel.add(commentsHeader);
 
 		commentsPanel = new VerticalPanel();
-		
+
 		commentsPanel.setWidth("100%");
 
 		layoutPanel.add(commentsPanel);
@@ -76,23 +77,25 @@ public class CommentsView extends Composite {
 		newAnnotationView.addClickHandler(new ClickHandler() {
 
 			public void onClick(ClickEvent arg0) {
-				
-				service.execute(new AnnotateResource(resource, newAnnotationView.getAnnotationBean()), new AsyncCallback<AnnotateResourceResult>() {
 
-					@Override
-					public void onFailure(Throwable caught) {
-						GWT.log("Failed to annotate resource "
-								+ resource, caught);
-					}
+				service.execute(new AnnotateResource(resource,
+						newAnnotationView.getAnnotationBean()),
+						new AsyncCallback<AnnotateResourceResult>() {
 
-					@Override
-					public void onSuccess(AnnotateResourceResult result) {
-						newAnnotationView.clear();
+							@Override
+							public void onFailure(Throwable caught) {
+								GWT.log("Failed to annotate resource "
+										+ resource, caught);
+							}
 
-						refresh();
-						
-					}
-				});
+							@Override
+							public void onSuccess(AnnotateResourceResult result) {
+								newAnnotationView.clear();
+
+								refresh();
+
+							}
+						});
 
 			}
 
@@ -111,43 +114,30 @@ public class CommentsView extends Composite {
 
 		commentsPanel.clear();
 
-		
-		// TODO add annotations to panel
-		
-/*		AnnotationService.getInstance().getAnnotationsByDate(resource,
-				new AsyncCallback<List<AnnotationBean>>() {
+		service.execute(new GetAnnotations(resource),
+				new AsyncCallback<GetAnnotationsResult>() {
 
+					@Override
 					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
-
+						GWT.log("Error retrieving annotations", caught);
 					}
 
-					public void onSuccess(List<AnnotationBean> annotations) {
-
-						if (annotations.size() == 0) {
-
-							commentsPanel.add(new Label("No comments... yet!"));
-
-						} else {
-
-							for (AnnotationBean annotation : annotations) {
-
-								commentsPanel
-										.add(new AnnotationView(annotation));
-
-							}
-
-						}
+					@Override
+					public void onSuccess(GetAnnotationsResult result) {
+						
+						ArrayList<AnnotationBean> annotations = result
+								.getAnnotations();
+						
+						show(annotations);
 					}
-
-				});*/
+				});
 	}
 
 	/**
 	 * 
 	 * @param annotations
 	 */
-	public void show(Set<AnnotationBean> annotations) {
+	public void show(ArrayList<AnnotationBean> annotations) {
 		commentsPanel.clear();
 		if (annotations.size() == 0) {
 
@@ -157,8 +147,7 @@ public class CommentsView extends Composite {
 
 			for (AnnotationBean annotation : annotations) {
 
-				commentsPanel
-						.add(new AnnotationView(annotation));
+				commentsPanel.add(new AnnotationView(annotation));
 
 			}
 

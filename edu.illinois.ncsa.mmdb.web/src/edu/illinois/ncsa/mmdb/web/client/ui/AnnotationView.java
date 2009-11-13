@@ -45,13 +45,27 @@ public class AnnotationView extends Composite {
 
 		flexCellFormatter.addStyleName(0, 0, "annotationTitle");
 
-		String mediumDate = DateTimeFormat.getMediumDateFormat().format(
-				annotationBean.getDate());
+		String mediumDate = "";
 
-		String shortTime = DateTimeFormat.getShortTimeFormat().format(
-				annotationBean.getDate());
+		String shortTime = "";
 
-		mainTable.setHTML(1, 0, "By " + annotationBean.getCreator().getName()
+		if (annotationBean.getDate() != null) {
+
+			mediumDate = DateTimeFormat.getMediumDateFormat().format(
+					annotationBean.getDate());
+
+			shortTime = DateTimeFormat.getShortTimeFormat().format(
+					annotationBean.getDate());
+		}
+
+		String creator = "Anonymous";
+		
+		if (annotationBean.getCreator() != null) {
+			
+			creator = annotationBean.getCreator().getName();
+		}
+		
+		mainTable.setHTML(1, 0, "By " + creator
 				+ " on " + mediumDate + " " + shortTime);
 
 		flexCellFormatter.setColSpan(1, 0, 2);

@@ -4,15 +4,8 @@
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -20,11 +13,12 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TextBox;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
 
 /**
- * @author lmarini
+ * Popup to tag a resource. Submit button doesn't have a default
+ * click handler attached to it.
+ * 
+ * @author Luigi Marini
  *
  */
 public class TagDialogBox extends DialogBox {
@@ -79,12 +73,19 @@ public class TagDialogBox extends DialogBox {
 		return submitButton;
 	}
 
-
 	public String getTags() {
 		return tagBox.getText();
 	}
 
 	public FocusWidget getTagBox() {
 		return tagBox;
+	}
+
+	public MyDispatchAsync getService() {
+		return service;
+	}
+
+	public String getId() {
+		return id;
 	}
 }

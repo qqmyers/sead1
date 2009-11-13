@@ -15,17 +15,21 @@ import org.tupeloproject.rdf.Resource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
+/**
+ * Retrieve tags for a specific resource.
+ * 
+ * @author Luigi Mairini
+ *
+ */
 public class TagResourceHandler implements ActionHandler<TagResource, TagResourceResult>{
 	
 	/** Tupelo bean session **/
 	private static final BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 	
-	/** Datasets DAO **/
-	private static DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+	/** TagEvents DAO **/
+	private static TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
 	
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(TagResourceHandler.class);
@@ -37,8 +41,6 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
 		String uri = arg0.getId();
 		
 		Set<String> tags = arg0.getTags();
-		
-		TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
 
 		try {
 			tebu.addTags(Resource.uriRef(uri), null, tags);
@@ -46,15 +48,7 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
 		} catch (OperatorException e) {
 			e.printStackTrace();
 		}
-
-		// make sure cached datasetbean contains the tag event
-		try {
-			DatasetBean datasetBean = dbu.get(uri);
-			datasetBean = dbu.update(datasetBean);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		return new TagResourceResult();
 	}
 

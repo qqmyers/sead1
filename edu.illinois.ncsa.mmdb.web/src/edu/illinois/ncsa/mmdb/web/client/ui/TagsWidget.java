@@ -20,11 +20,11 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTags;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
-import edu.uiuc.ncsa.cet.bean.TagBean;
-import edu.uiuc.ncsa.cet.bean.TagEventBean;
 
 /**
  * A widget listing tags and providing a way to add a new one.
@@ -37,7 +37,6 @@ public class TagsWidget extends Composite {
 	private FlowPanel mainPanel;
 	private FlowPanel tagsPanel;
 	private final String id;
-	private final Set<TagEventBean> tagEvents;
 	private Button tagButton;
 	private final MyDispatchAsync service;
 	private Label tagLabel;
@@ -46,13 +45,11 @@ public class TagsWidget extends Composite {
 	 * A widget listing tags and providing a way to add a new one.
 	 * 
 	 * @param id
-	 * @param tagEvents
 	 * @param service
 	 */
-	public TagsWidget(final String id, Set<TagEventBean> tagEvents, final MyDispatchAsync service) {
+	public TagsWidget(final String id, final MyDispatchAsync service) {
 		
 		this.id = id;
-		this.tagEvents = tagEvents;
 		this.service = service;
 		
 		mainPanel = new FlowPanel();
@@ -66,12 +63,6 @@ public class TagsWidget extends Composite {
 		
 		mainPanel.add(tagLabel);
 		mainPanel.add(tagsPanel);
-		
-		for (TagEventBean tagEvent : tagEvents) {
-			for (TagBean tag : tagEvent.getTags()) {
-				tagsPanel.add(tagHyperlink(tag.getTagString()));
-			}
-		}
 		
 		tagButton = new Button("Tag");
 		tagButton.addStyleName("tagsButton");
@@ -109,8 +100,32 @@ public class TagsWidget extends Composite {
 			}
 		});
 		
+		getTags();
+		
 	}
 	
+	/**
+	 * Use service to retrieve tags from server.
+	 */
+	private void getTags() {
+		
+		service.execute(new GetTags(id), new AsyncCallback<GetTagsResult>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				GWT.log("Error retrieving tags", caught);
+			}
+
+			@Override
+			public void onSuccess(GetTagsResult result) {
+				for (String tag : result.getTags()) {
+					tagsPanel.add(tagHyperlink(tag));
+				}
+			}
+		});
+
+	}
+
 	/**
 	 * Submit tags to the server.
 	 * @param tags

@@ -127,12 +127,12 @@ public class DatasetWidget extends Composite {
 		
 		dateLabel = new Label("Date: " + DATE_TIME_FORMAT.format(dataset.getDate()));
 		
-		tagsWidget = new TagsWidget(dataset.getUri(), dataset.getTagEvents(), service);
+		tagsWidget = new TagsWidget(dataset.getUri(), service);
 		
-		annotationsWidget = new AnnotationsWidget(dataset.getUri(), dataset.getAnnotations(), service);
+		annotationsWidget = new AnnotationsWidget(dataset.getUri(), service);
 		
 		// TODO change to DOWNLOAD_URL once we have the proper url
-        downloadButton = new DownloadButton(BLOB_URL + dataset.getUri());
+        downloadButton = new DownloadButton(DOWNLOAD_URL + dataset.getUri());
         
         downloadButton.addStyleName("downloadButton");
         

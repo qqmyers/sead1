@@ -7,7 +7,6 @@ import java.util.Date;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
@@ -18,7 +17,9 @@ import com.google.gwt.user.client.ui.TextBox;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 
 /**
- * @author Luigi Marini <lmarini@ncsa.uiuc.edu>
+ * Add new annotation widget.
+ * 
+ * @author Luigi Marini
  * 
  */
 public class NewAnnotationView extends Composite {
@@ -33,6 +34,9 @@ public class NewAnnotationView extends Composite {
 
 	private Button submitButton;
 
+	/**
+	 *  Add new annotation widget.
+	 */
 	public NewAnnotationView() {
 
 		initWidget(mainPanel);
@@ -70,6 +74,10 @@ public class NewAnnotationView extends Composite {
 		mainTable.setWidget(3, 1, submitButton);
 	}
 
+	/**
+	 * Create an AnnotationBean based on values in widgets.
+	 * @return
+	 */
 	public AnnotationBean getAnnotationBean() {
 
 		AnnotationBean annotation = new AnnotationBean();
@@ -83,6 +91,10 @@ public class NewAnnotationView extends Composite {
 		return annotation;
 	}
 
+	/**
+	 * Add a click handler to the submit button.
+	 * @param clickHandler
+	 */
 	public void addClickHandler(ClickHandler clickHandler) {
 		submitButton.addClickHandler(clickHandler);
 	}
