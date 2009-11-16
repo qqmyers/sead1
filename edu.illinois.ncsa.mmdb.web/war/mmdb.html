@@ -18,7 +18,7 @@
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
-    <title>medici</title>
+    <title>Medici</title>
     
     <!--                                           -->
     <!-- This script loads your compiled module.   -->
@@ -46,20 +46,18 @@
       </div>
     </noscript>
 
-    <h1>medici</h1>
-    <h2>manage your research artifacts</h2>
+    <div class="header">
+      <div class="title">Medici</div>
+      <div class="navMenu">
+	      <a href="mmdb.html" class="navMenuLink">List All</a> &#8226; 
+	      <a href="uploadBlob.html" class="navMenuLink">Upload</a>
+	  </div>
+    </div>
 
-    <table align="center" class="mainTable">
-      <tr>
-        <td id="mainContainer" align="center"></td>
-      </tr>
-    </table>
+    <div id="mainContainer" class="mainContainer"></div>
     
-    <table align="center" class="bottomTable">
-      <tr>
-      	<td>Build: <a href='http://isda.ncsa.uiuc.edu:8090/job/MMDB Web/@BUILD_NUMBER@/'>@BUILD_TAG@</a>
-      	</td>
-      </tr>
-    </table>
+	<div class="bottomMenu">
+		Build: <a href='http://isda.ncsa.uiuc.edu:8090/job/MMDB Web/@BUILD_NUMBER@/'>@BUILD_TAG@</a>
+	</div>
   </body>
 </html>
