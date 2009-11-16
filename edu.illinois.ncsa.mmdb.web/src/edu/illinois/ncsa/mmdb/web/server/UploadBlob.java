@@ -214,7 +214,8 @@ public class UploadBlob extends HttpServlet {
                     // generate a new pseudorandom URI
                     uri = Resource.uriRef().getUri();
                     bw.setUri(uri);
-                    UploadInfo u = listener.addUploadInfo(uri, trimFilename(fileName));
+                    String url = TupeloStore.getInstance().getUriCanonicalizer(request).canonicalize("dataset",uri.toString());
+                    UploadInfo u = listener.addUploadInfo(URI.create(url), trimFilename(fileName));
                     bw.setInputStream(item.getInputStream());
 
                     try {

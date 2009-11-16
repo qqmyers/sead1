@@ -20,8 +20,8 @@ public interface RestService {
     public static final Resource LABEL_PROPERTY = Dc.TITLE;
     public static final Resource DATE_PROPERTY = Dc.DATE;
     public static final Resource FORMAT_PROPERTY = Dc.FORMAT;
-
-    // image CRUD
+    
+	// image CRUD
     /**
      * Create an image
      * @param imageData a stream containing image data

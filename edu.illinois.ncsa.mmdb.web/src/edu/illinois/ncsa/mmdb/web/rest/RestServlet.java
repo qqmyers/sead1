@@ -43,6 +43,24 @@ import org.xml.sax.SAXException;
 public class RestServlet extends HttpServlet {
     Log log = LogFactory.getLog(RestServlet.class);
 
+	public static final String COLLECTION_REMOVE_INFIX = "/collection/remove/";
+
+	public static final String COLLECTION_ADD_INFIX = "/collection/add/";
+
+	public static final String COLLECTION_CREATE_ANON_INFIX = "/collection";
+
+	public static final String COLLECTION_INFIX = "/collection/";
+
+	public static final String ANY_COLLECTION_INFIX = "/collection";
+
+	public static final String IMAGE_DOWNLOAD_INFIX = "/image/download/";
+
+	public static final String IMAGE_CREATE_ANON_INFIX = "/image";
+
+	public static final String IMAGE_INFIX = "/image/";
+
+	public static final String ANY_IMAGE_INFIX = "/image";
+
     static RestService restService; // TODO manage this lifecycle better
 
     public void init() throws ServletException {
@@ -51,48 +69,8 @@ public class RestServlet extends HttpServlet {
         log.info("REST servlet initialized");
     }
 
-    final String ANY_IMAGE_INFIX = "/image";
-    final String IMAGE_INFIX = "/image/";
-    final String IMAGE_CREATE_ANON_INFIX = "/image";
-    final String IMAGE_DOWNLOAD_INFIX = "/image/download/";
-
-    final String ANY_COLLECTION_INFIX = "/collection";
-    final String COLLECTION_INFIX = "/collection/";
-    final String COLLECTION_CREATE_ANON_INFIX = "/collection";
-    final String COLLECTION_ADD_INFIX = "/collection/add/";
-    final String COLLECTION_REMOVE_INFIX = "/collection/remove/";
-
-    final String INFIXES[] = new String[] {
-            ANY_IMAGE_INFIX,
-            IMAGE_INFIX,
-            IMAGE_CREATE_ANON_INFIX,
-            IMAGE_DOWNLOAD_INFIX,
-            ANY_COLLECTION_INFIX,
-            COLLECTION_INFIX,
-            COLLECTION_CREATE_ANON_INFIX,
-            COLLECTION_ADD_INFIX,
-            COLLECTION_REMOVE_INFIX
-    };
-
-    UriCanonicalizer canon = null;
-    UriCanonicalizer getCanon(HttpServletRequest request) throws ServletException {
-        if(canon == null) {
-            canon = new UriCanonicalizer();
-            try {
-                URL requestUrl = new URL(request.getRequestURL().toString());
-                String prefix = requestUrl.getProtocol()+"://"+requestUrl.getHost();
-                if(requestUrl.getPort() != -1) {
-                    prefix = prefix + ":" + requestUrl.getPort();
-                }
-                for(String infix : INFIXES) {
-                    String cp = prefix + request.getContextPath() + request.getServletPath() + infix;
-                    canon.setCanonicalUrlPrefix(infix, cp);
-                }
-            } catch(MalformedURLException x) {
-                throw new ServletException("unexpected error: servlet URL is not a URL");
-            }
-        }
-        return canon;
+    UriCanonicalizer getUriCanonicalizer(HttpServletRequest request) throws ServletException {
+    	return TupeloStore.getInstance().getUriCanonicalizer(request);
     }
 
     /**
@@ -109,22 +87,22 @@ public class RestServlet extends HttpServlet {
      * @return the canonical URL of the resource
      */
     String canonicalizeUri(String uri, String infix, HttpServletRequest request) throws ServletException {
-        return getCanon(request).canonicalize(infix,uri);
+        return getUriCanonicalizer(request).canonicalize(infix,uri);
     }
 
     boolean hasPrefix(String uri, String infix, HttpServletRequest request) throws ServletException {
-        return getCanon(request).hasPrefix(infix,uri);
+        return getUriCanonicalizer(request).hasPrefix(infix,uri);
     }
 
     boolean hasPrefix(String infix, HttpServletRequest request) throws ServletException {
-        return getCanon(request).hasPrefix(infix,request.getRequestURL().toString());
+        return getUriCanonicalizer(request).hasPrefix(infix,request.getRequestURL().toString());
     }
 
     String decanonicalizeUrl(String url, HttpServletRequest request) throws ServletException {
-        return getCanon(request).decanonicalize(url);
+        return getUriCanonicalizer(request).decanonicalize(url);
     }
     String decanonicalizeUrl(HttpServletRequest request) throws ServletException {
-        return getCanon(request).decanonicalize(request.getRequestURL().toString());
+        return getUriCanonicalizer(request).decanonicalize(request.getRequestURL().toString());
     }
 
     void dumpCrap(HttpServletRequest request) {

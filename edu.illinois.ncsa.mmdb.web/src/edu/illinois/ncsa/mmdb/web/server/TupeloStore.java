@@ -1,8 +1,12 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,10 +14,12 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 
+import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.ContextBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextConvert;
+import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.tupelo.contexts.ContextCreators;
 
 /**
@@ -143,4 +149,49 @@ public class TupeloStore {
 	public Collection<ContextBean> getContextBeans() {
 		return contextBeans;
 	}
+
+	// URL canonicalization
+
+	// these hardcoded strings make sure the right paths are used
+	// TODO: figure out how to get these from the server config or incoming requests
+	
+	static final String REST_SERVLET_PATH = "/api";
+	static final String MMDB_WEBAPP_PATH = "/mmdb.html";
+
+	static final String INFIXES[] = new String[] {
+            RestServlet.ANY_IMAGE_INFIX,
+            RestServlet.IMAGE_INFIX,
+            RestServlet.IMAGE_CREATE_ANON_INFIX,
+            RestServlet.IMAGE_DOWNLOAD_INFIX,
+            RestServlet.ANY_COLLECTION_INFIX,
+            RestServlet.COLLECTION_INFIX,
+            RestServlet.COLLECTION_CREATE_ANON_INFIX,
+            RestServlet.COLLECTION_ADD_INFIX,
+            RestServlet.COLLECTION_REMOVE_INFIX
+    };
+
+	UriCanonicalizer canon;
+	
+    public UriCanonicalizer getUriCanonicalizer(HttpServletRequest request) throws ServletException {
+        if(canon == null) {
+            canon = new UriCanonicalizer();
+            try {
+                URL requestUrl = new URL(request.getRequestURL().toString());
+                String prefix = requestUrl.getProtocol()+"://"+requestUrl.getHost();
+                if(requestUrl.getPort() != -1) {
+                    prefix = prefix + ":" + requestUrl.getPort();
+                }
+                for(String infix : INFIXES) {
+                    String cp = prefix + request.getContextPath() + REST_SERVLET_PATH + infix;
+                    canon.setCanonicalUrlPrefix(infix, cp);
+                }
+                // now handle GWT dataset stuff, hardcoding the HTML path
+                canon.setCanonicalUrlPrefix("dataset",prefix + MMDB_WEBAPP_PATH + "#dataset?id=");
+            } catch(MalformedURLException x) {
+                throw new ServletException("unexpected error: servlet URL is not a URL");
+            }
+        }
+        return canon;
+    }
 }
+
