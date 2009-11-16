@@ -43,9 +43,14 @@ public class DatasetTableView extends FlexTable implements Display {
 		Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
 		datasetLinks.add(hyperlink);
 		this.setWidget(row, 0, hyperlink);
+		
 		this.setWidget(row, 1, new Label(type));
 		this.setWidget(row, 2, new Label(DATE_TIME_FORMAT.format(date)));
 		this.setWidget(row, 3, new Label("*"));
+		
+		for (int col=0; col<4; col++) {
+			getCellFormatter().addStyleName(row, col, "cell");
+		}
 		
 		if (row % 2 == 0) {
 			getRowFormatter().addStyleName(row, "evenRow");

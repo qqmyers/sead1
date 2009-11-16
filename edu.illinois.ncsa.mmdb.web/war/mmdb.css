@@ -72,17 +72,27 @@ body {
 
 .datasetTable {
 	width: 800px;
-	border: 1px solid grey;
+	border: #CCC solid 1px;
 	vertical-align: top;
-	margin: 20px auto 20px auto;
+	margin: 100px auto 150px auto;
 	padding: 0px;
+	border-spacing:0px;
 }
 
 .datasetTable .topRow {
-	color: white;
-	background-color: black;
+	font-weight: bold;
 	margin: 0px;
-	padding: 5px;
+	padding: 8px;
+	background:#FFF url(images/sprites-t1.gif) repeat-x 0px -545px;
+	height: 30px;
+	text-align: center;
+}
+
+.datasetTable .cell {
+	margin: 0px;
+	padding: 8px;
+	border-top: #CCC solid 1px;
+	text-align: center;
 }
 
 .datasetTable .evenRow {
