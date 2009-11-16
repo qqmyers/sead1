@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rmap xmlns="http://www.eclipse.org/buckminster/RMap-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mp="http://www.eclipse.org/buckminster/MavenProvider-1.0"
+	xmlns:pmp="http://www.eclipse.org/buckminster/PDEMapProvider-1.0"
+	xmlns:bc="http://www.eclipse.org/buckminster/Common-1.0">
+
+	<searchPath name="edu.illinois.ncsa.cet">
+		<provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
+			<uri
+				format="https://svn.ncsa.uiuc.edu/svn/cet/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+				<bc:propertyRef key="buckminster.component" />
+			</uri>
+		</provider>
+	</searchPath>
+
+	<searchPath name="edu.illinois.ncsa.mmdb">
+		<provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
+			<uri
+				format="https://svn.ncsa.uiuc.edu/svn/mmdb/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+				<bc:propertyRef key="buckminster.component" />
+			</uri>
+		</provider>
+	</searchPath>
+
+	<searchPath name="org.tupeloproject">
+		<provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
+	      <uri format="https://svn.ncsa.uiuc.edu/svn/tupelo/trunk/tupelo-all/{0}?moduleAfterTag&amp;moduleAfterBranch">
+	        <bc:replace>
+	          <bc:propertyRef key="buckminster.component" />
+	          <bc:match pattern="^org\.tupeloproject\.((?:.\w+)*)$" replacement="tupelo-$1" />
+	        </bc:replace>
+	      </uri>
+		</provider>
+	</searchPath>
+
+    <searchPath name="ncsa-orbit">
+      <provider readerType="svn" componentTypes="eclipse.feature,osgi.bundle,buckminster" source="true" mutable="true">
+        <uri format="https://svn.ncsa.uiuc.edu/svn/ncsa-orbit/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+          <bc:propertyRef key="buckminster.component" />
+        </uri>
+     </provider>
+    </searchPath>
+
+	<locator searchPathRef="edu.illinois.ncsa.mmdb" pattern="^edu\.illinois\.ncsa\.mmdb(\..+)?"/>
+	<locator searchPathRef="edu.illinois.ncsa.cet" pattern="^edu\.illinois\.ncsa(\..+)?"/>
+	<locator searchPathRef="edu.illinois.ncsa.cet" pattern="^edu\.uiuc\.ncsa(\..+)?"/>
+	<locator searchPathRef="org.tupeloproject" pattern="^org\.tupeloproject(\..+)?"/>
+	<locator searchPathRef="ncsa-orbit" />
+    <!-- <redirect href="eclipse.rmap" /> -->
+</rmap>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="edu.illinois.mmdb.desktop.feature"
+      label="Feature"
+      version="1.0.0.qualifier">
+
+   <description url="http://www.example.com/description">
+      [Enter Feature Description here.]
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <includes
+         id="org.eclipse.rcp"
+         version="0.0.0"/>
+
+   <includes
+         id="edu.uiuc.ncsa.cet.logging.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="edu.uiuc.ncsa.cet.tupelo.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="edu.illinois.ncsa.eclipse"
+         version="0.0.0"/>
+
+   <plugin
+         id="edu.illinois.ncsa.mmdb.desktop.rcp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.illinois.ncsa.mmdb.desktop.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.illinois.ncsa.bard"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.illinois.ncsa.bard.eclipse"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.illinois.ncsa.bard.eclipse.h2"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.illinois.ncsa.bard.eclipse.tupeloserver"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.illinois.ncsa.bard.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.uiuc.ncsa.cet.bean"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.uiuc.ncsa.cet.bean.tupelo"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.uiuc.ncsa.cet.tupelo"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.joda.time"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.uiuc.ncsa.cet.tupelo.contexts"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
