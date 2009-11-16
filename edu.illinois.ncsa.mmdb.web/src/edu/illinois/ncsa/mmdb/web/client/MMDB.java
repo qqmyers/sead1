@@ -1,5 +1,9 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -122,7 +126,28 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 			@Override
 			public void onSuccess(GetDatasetsResult result) {
-				for (DatasetBean dataset : result.getDatasets()) {
+				SortedSet<DatasetBean> orderedResult = new TreeSet<DatasetBean>(new Comparator<DatasetBean>() {
+					public int compare(DatasetBean arg0, DatasetBean arg1) {
+						if(arg0 == arg1) { return 0; }
+						String t0 = arg0.getTitle();
+						String t1 = arg1.getTitle();
+						if(t0 == null && t1 != null) {
+							return 1;
+						}
+						if(t0 != null && t1 == null) {
+							return -1;
+						}
+						if(t0.equals(t1)) {
+							return arg0.hashCode() < arg1.hashCode() ? -1 : 1;
+							// we already know they're not the same object
+							// and they came from a hashset so hash collisions
+							// are already a problem before this point
+						}
+						return t0.compareTo(t1);
+					}
+				});
+				orderedResult.addAll(result.getDatasets());
+				for (DatasetBean dataset : orderedResult) {
 					GWT.log("Sending event add dataset " + dataset.getTitle(),
 							null);
 					AddNewDatasetEvent event = new AddNewDatasetEvent();
