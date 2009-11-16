@@ -19,10 +19,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Document;
 
+import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.util.CopyFile;
 import org.tupeloproject.util.Xml;
 
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -139,6 +143,14 @@ public class RestServlet extends HttpServlet {
         }
     }
 
+    Context getContext() {
+    	return TupeloStore.getInstance().getContext();
+    }
+    
+    Thing getImageThing(String uri) {
+    	return getContext().getThingSession().fetchThing(Resource.uriRef(uri));
+    }
+    
     @Override  
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
@@ -146,12 +158,15 @@ public class RestServlet extends HttpServlet {
         String uri = decanonicalizeUrl(request);
         if(hasPrefix(IMAGE_DOWNLOAD_INFIX,request)) {
             log("DOWNLOAD IMAGE "+uri);
-            response.setHeader("content-disposition","attachment; filename=foo.bar");
             try {
+                String filename = getImageThing(uri).getString(RestService.LABEL_PROPERTY);
+                response.setHeader("content-disposition","attachment; filename="+filename);
                 CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
             } catch(RestServiceException e) {
-                throw new ServletException("failed to retrieve "+request.getRequestURI());
-            }
+            	throw new ServletException("failed to retrieve "+request.getRequestURI());
+            } catch (OperatorException e) {
+            	throw new ServletException("failed to retrieve metadata for "+request.getRequestURI());
+			}
         } else if(hasPrefix(IMAGE_INFIX,request)) {
             log("GET IMAGE "+uri);
             try {
