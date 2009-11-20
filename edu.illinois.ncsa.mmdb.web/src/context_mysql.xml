@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:a="http://cet.ncsa.uiuc.edu/2007/context/" xmlns:b="tag:tupeloproject.org,2006:/2.0/beans/2.0/" xmlns:cet="http://cet.ncsa.uiuc.edu/2007/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <cet:Context rdf:about="tag:cet.ncsa.uiuc.edu,2008:/bean/Context/20e8de49-da4b-4e94-9b1f-d91cab8a21c2">
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:9c6764b80dd7ebf65f5f76453ea33d5ffe797bb5">
+        <b:storageTypeMapKey>MySQL.password</b:storageTypeMapKey>
+        <b:storageTypeMapValue>tupelo</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:a0ff69e30a06ae309ca8fcbe856a7c55dfff9683">
+        <b:storageTypeMapKey>MySQL.user</b:storageTypeMapKey>
+        <b:storageTypeMapValue>tupelo</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:cfc36bba89f22fce1c5f8f536a1ccbe3f37982ef">
+        <b:storageTypeMapKey>type</b:storageTypeMapKey>
+        <b:storageTypeMapValue>MySQL</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:d375c0d755070b224225584c48d0cb434f4f415e">
+        <b:storageTypeMapKey>MySQL.ssl</b:storageTypeMapKey>
+        <b:storageTypeMapValue>false</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:e94abdcbf967e4df7fb158b52f4f40cd62ff700f">
+        <b:storageTypeMapKey>MySQL.host</b:storageTypeMapKey>
+        <b:storageTypeMapValue>localhost</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:f46fb261c22c87af3033e559026f1619248b3478">
+        <b:storageTypeMapKey>MySQL.database</b:storageTypeMapKey>
+        <b:storageTypeMapValue>tupelo</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:f6f1ec1557cf885ce105ecfe18296a053df74b11">
+        <b:storageTypeMapKey>http</b:storageTypeMapKey>
+        <b:storageTypeMapValue>true</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <dc:creator>
+      <foaf:Person rdf:about="http://cet.ncsa.uiuc.edu/2007/person/anonymous">
+        <dc:identifier>http://cet.ncsa.uiuc.edu/2007/person/anonymous</dc:identifier>
+        <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry"/>
+        <foaf:mbox/>
+        <foaf:name>Anonymous</foaf:name>
+        <b:propertyImplementationMappingSubject rdf:resource="tag:tupeloproject.org,2006:3e42cf0b26fa9fc8adf4559a0a318e66b8629e0d"/>
+        <b:propertyImplementationMappingSubject rdf:resource="tag:tupeloproject.org,2006:858a96fd79dfffc2a73462b247a824237af0edf0"/>
+        <b:propertyImplementationMappingSubject rdf:resource="tag:tupeloproject.org,2006:cbf3aa5bfe916dbe167e85ced7108b662b05677c"/>
+        <b:propertyImplementationMappingSubject rdf:resource="tag:tupeloproject.org,2006:e29dd1980cb7daf2d4b025e687c8c5c1ee47ee0e"/>
+        <b:propertyValueImplementationClassName>edu.uiuc.ncsa.cet.bean.PersonBean</b:propertyValueImplementationClassName>
+      </foaf:Person>
+    </dc:creator>
+    <dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-12T20:38:54.660Z</dc:date>
+    <dc:description>tupelo</dc:description>
+    <dc:identifier>tag:cet.ncsa.uiuc.edu,2008:/bean/Context/20e8de49-da4b-4e94-9b1f-d91cab8a21c2</dc:identifier>
+    <dc:title>tupelo</dc:title>
+    <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/DefaultContext"/>
+    <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry"/>
+    <b:propertyImplementationMappingSubject rdf:resource="tag:tupeloproject.org,2006:0aae8884ddf1584ddb1f8781022a8f899b7a1187"/>
+    <b:propertyImplementationMappingSubject rdf:resource="tag:tupeloproject.org,2006:1560b2a0406adbadff8ecbf6f985382b58dae2f6"/>
+    <b:propertyImplementationMappingSubject rdf:resource="tag:tupeloproject.org,2006:81974c1511c82f721c6d2035529624b99eea15f1"/>
+    <b:propertyImplementationMappingSubject rdf:resource="tag:tupeloproject.org,2006:c89f4fc712f19c03fb766699df75156b56c467dc"/>
+    <b:propertyValueImplementationClassName>edu.uiuc.ncsa.cet.bean.ContextBean</b:propertyValueImplementationClassName>
+  </cet:Context>
+</rdf:RDF>

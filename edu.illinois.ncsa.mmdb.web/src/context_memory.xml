@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:a="http://cet.ncsa.uiuc.edu/2007/context/" xmlns:b="tag:tupeloproject.org,2006:/2.0/beans/2.0/" xmlns:cet="http://cet.ncsa.uiuc.edu/2007/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+  <cet:Context rdf:about="tag:cet.ncsa.uiuc.edu,2008:/bean/Context/af93fb87-25fa-43a1-93ea-915eb747f2ae">
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:3d171beff7232c6d3a81ea9e193c5ff201c09265">
+        <b:storageTypeMapKey>type</b:storageTypeMapKey>
+        <b:storageTypeMapValue>Serialized</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:9070b29199887615d431ec8f4feb8073aaf232fe">
+        <b:storageTypeMapKey>Serialized.text</b:storageTypeMapKey>
+        <b:storageTypeMapValue>&lt;tag:tupeloproject.org,2006:f2a068675024d54f7c64e315cad82b85dcc39fb7&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyMapPropertyName&gt; "children" .
+&lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.Context&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/classMapClassName&gt; "org.tupeloproject.kernel.Context" .
+&lt;tag:tupeloproject.org,2006:f2a068675024d54f7c64e315cad82b85dcc39fb7&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyMapGetter&gt; &lt;tag:tupeloproject.org,2006:353c96339c91db4e98fe12310d6ce7f6445ae5a9&gt; .
+&lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.impl.MemoryContext&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/classMapHasPropertyMap&gt; &lt;tag:tupeloproject.org,2006:f2a068675024d54f7c64e315cad82b85dcc39fb7&gt; .
+&lt;tag:tupeloproject.org,2006:cfb536b6e31de3e6dca0ee3b46927729af225024&gt; &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; &lt;tag:tupeloproject.org,2006:/2.0/Context&gt; .
+&lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.impl.MemoryContext&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/classMapClassName&gt; "org.tupeloproject.kernel.impl.MemoryContext" .
+&lt;tag:tupeloproject.org,2006:353c96339c91db4e98fe12310d6ce7f6445ae5a9&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapJavaClassName&gt; "java.util.List" .
+&lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.Context&gt; &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/ClassMap&gt; .
+&lt;tag:tupeloproject.org,2006:cfb536b6e31de3e6dca0ee3b46927729af225024&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyValueImplementationClassName&gt; "org.tupeloproject.kernel.impl.MemoryContext" .
+&lt;tag:tupeloproject.org,2006:cfb536b6e31de3e6dca0ee3b46927729af225024&gt; &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; &lt;tag:tupeloproject.org,2006:/2.0/DefaultContext&gt; .
+&lt;tag:tupeloproject.org,2006:ea0f26771fc31e56a9215b84853b9a81140395d1&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapName&gt; "setChildren" .
+&lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.impl.MemoryContext&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/classMapRdfType&gt; &lt;tag:tupeloproject.org,2006:/2.0/Context&gt; .
+&lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.Context&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/classMapHasPropertyMap&gt; &lt;tag:tupeloproject.org,2006:7267277c6c7f28ef2780265a89696833914aab64&gt; .
+&lt;tag:tupeloproject.org,2006:8447fcb4a1043b27c1ebd1dd45b6ba2f7c77b5a9&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapJavaClassName&gt; "java.util.List" .
+&lt;tag:tupeloproject.org,2006:353c96339c91db4e98fe12310d6ce7f6445ae5a9&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapName&gt; "getChildren" .
+&lt;tag:tupeloproject.org,2006:15b69f4fa7fa7a7ff1a4240264b7a9f2c6d633b1&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapStorageType&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection&gt; .
+&lt;tag:tupeloproject.org,2006:cfb536b6e31de3e6dca0ee3b46927729af225024&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyImplementationMappingSubject&gt; &lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.impl.MemoryContext&gt; .
+&lt;tag:tupeloproject.org,2006:7267277c6c7f28ef2780265a89696833914aab64&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyMapSetter&gt; &lt;tag:tupeloproject.org,2006:ea0f26771fc31e56a9215b84853b9a81140395d1&gt; .
+&lt;tag:tupeloproject.org,2006:ea0f26771fc31e56a9215b84853b9a81140395d1&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapStorageType&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection&gt; .
+&lt;tag:tupeloproject.org,2006:15b69f4fa7fa7a7ff1a4240264b7a9f2c6d633b1&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapName&gt; "setChildren" .
+&lt;tag:tupeloproject.org,2006:6f00231e288d77fcc5fcc64d62d5a91879976e77&gt; &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq&gt; .
+&lt;tag:tupeloproject.org,2006:353c96339c91db4e98fe12310d6ce7f6445ae5a9&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapValueParameter&gt; &lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.Context&gt; .
+&lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.impl.MemoryContext&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/classModifier&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/classModifierRegular&gt; .
+&lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.Context&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/classMapRdfType&gt; &lt;http://java.sun.com/org.tupeloproject.kernel.Context&gt; .
+&lt;tag:tupeloproject.org,2006:ea0f26771fc31e56a9215b84853b9a81140395d1&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapValueParameter&gt; &lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.Context&gt; .
+&lt;tag:tupeloproject.org,2006:15b69f4fa7fa7a7ff1a4240264b7a9f2c6d633b1&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapValueParameter&gt; &lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.Context&gt; .
+&lt;tag:tupeloproject.org,2006:8447fcb4a1043b27c1ebd1dd45b6ba2f7c77b5a9&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapName&gt; "getChildren" .
+&lt;tag:tupeloproject.org,2006:15b69f4fa7fa7a7ff1a4240264b7a9f2c6d633b1&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapJavaClassName&gt; "java.util.List" .
+&lt;tag:tupeloproject.org,2006:ea0f26771fc31e56a9215b84853b9a81140395d1&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapJavaClassName&gt; "java.util.List" .
+&lt;tag:tupeloproject.org,2006:353c96339c91db4e98fe12310d6ce7f6445ae5a9&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapStorageType&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection&gt; .
+&lt;tag:tupeloproject.org,2006:f2a068675024d54f7c64e315cad82b85dcc39fb7&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyMapSetter&gt; &lt;tag:tupeloproject.org,2006:15b69f4fa7fa7a7ff1a4240264b7a9f2c6d633b1&gt; .
+&lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.impl.MemoryContext&gt; &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/ClassMap&gt; .
+&lt;tag:tupeloproject.org,2006:7267277c6c7f28ef2780265a89696833914aab64&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyMapGetter&gt; &lt;tag:tupeloproject.org,2006:8447fcb4a1043b27c1ebd1dd45b6ba2f7c77b5a9&gt; .
+&lt;tag:tupeloproject.org,2006:7267277c6c7f28ef2780265a89696833914aab64&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyMapPredicate&gt; &lt;http://java.sun.com/org.tupeloproject.kernel.Context#children&gt; .
+&lt;tag:tupeloproject.org,2006:8447fcb4a1043b27c1ebd1dd45b6ba2f7c77b5a9&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapValueParameter&gt; &lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.Context&gt; .
+&lt;tag:tupeloproject.org,2006:cfb536b6e31de3e6dca0ee3b46927729af225024&gt; &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; &lt;tag:tupeloproject.org,2006:/2.0/RootContext&gt; .
+&lt;tag:tupeloproject.org,2006:cfb536b6e31de3e6dca0ee3b46927729af225024&gt; &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry&gt; .
+&lt;tag:tupeloproject.org,2006:8447fcb4a1043b27c1ebd1dd45b6ba2f7c77b5a9&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/methodMapStorageType&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection&gt; .
+&lt;tag:tupeloproject.org,2006:7267277c6c7f28ef2780265a89696833914aab64&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyMapPropertyName&gt; "children" .
+&lt;tag:tupeloproject.org,2006:cfb536b6e31de3e6dca0ee3b46927729af225024&gt; &lt;http://java.sun.com/org.tupeloproject.kernel.Context#children&gt; &lt;tag:tupeloproject.org,2006:6f00231e288d77fcc5fcc64d62d5a91879976e77&gt; .
+&lt;tag:tupeloproject.org,2006:f2a068675024d54f7c64e315cad82b85dcc39fb7&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyMapPredicate&gt; &lt;http://java.sun.com/org.tupeloproject.kernel.Context#children&gt; .
+&lt;http://org.tupeloproject/bean#org.tupeloproject.kernel.Context&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/classModifier&gt; &lt;tag:tupeloproject.org,2006:/2.0/beans/2.0/classModifierRegular&gt; .
+</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-13T18:46:09.559Z</dc:date>
+    <dc:description/>
+    <dc:identifier>tag:cet.ncsa.uiuc.edu,2008:/bean/Context/af93fb87-25fa-43a1-93ea-915eb747f2ae</dc:identifier>
+    <dc:title>MemoryContext</dc:title>
+    <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/DefaultContext"/>
+    <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry"/>
+    <rdfs:label>MemoryContext</rdfs:label>
+    <b:propertyImplementationMappingSubject rdf:resource="tag:cet.ncsa.uiuc.edu,2009:/mapping/http://cet.ncsa.uiuc.edu/2007/Context"/>
+    <b:propertyValueImplementationClassName>edu.uiuc.ncsa.cet.bean.ContextBean</b:propertyValueImplementationClassName>
+  </cet:Context>
+</rdf:RDF>

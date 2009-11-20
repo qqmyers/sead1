@@ -1,0 +1,263 @@
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	margin: 0px;
+	padding: 0px;
+}
+
+.title {
+  font-size: 2em;
+  font-weight: bold;
+  color: #036;
+  padding: 20px 0px 10px 10px;
+  text-align: left;
+}
+
+.header {
+	background: #F8F8F8;
+}
+
+.mainContainer {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-top: 1px black solid;
+	border-bottom: 1px black solid;
+	margin: 0px;
+	text-align: center;
+}
+
+.bottomMenu {
+	background: #F8F8F8;
+	height: 100px;
+	margin: 0px;
+	padding: 10px;
+}
+
+.tagline {
+	float: right;
+	font-size: 1.5em;
+	color: #7F7F7F;
+	padding: 0px 0px 5px 0px;
+	text-align: left;
+}
+
+.navMenu {
+	padding: 0px 0px 5px 50px;
+}
+
+.navMenuLink:link {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #069;
+	font-weight: bold;
+	text-decoration: none;
+	margin: 5px;
+	font-size: 1.2em;
+}
+
+.navMenuLink:visited {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #069;
+	font-weight: bold;
+	text-decoration: none;
+	margin: 5px;
+	font-size: 1.2em;
+}
+
+.navMenuLink:active {
+ 	color: #069;
+}
+
+.navMenuLink:hover {
+	color: #036;
+}
+
+.datasetTable {
+	width: 800px;
+	border: #CCC solid 1px;
+	vertical-align: top;
+	margin: 100px auto 150px auto;
+	padding: 0px;
+	border-spacing:0px;
+}
+
+.datasetTable .topRow {
+	font-weight: bold;
+	margin: 0px;
+	padding: 8px;
+	background:#FFF url(images/sprites-t1.gif) repeat-x 0px -545px;
+	height: 30px;
+	text-align: center;
+}
+
+.datasetTable .cell {
+	margin: 0px;
+	padding: 8px;
+	border-top: #CCC solid 1px;
+	text-align: center;
+}
+
+.datasetTable .evenRow {
+	color: black;
+	background-color: #F6F9ED;
+	height: 50px;
+}
+
+.datasetTable .oddRow {
+	color: black;
+	height: 50px;
+}
+
+.alignRight {
+	position: relative;
+	float: right;
+}
+
+.tagsView {
+	display: inline;
+	width: 760px;
+	padding: 10px;
+	float: left;
+	position: relative;
+	vertical-align: middle;
+	border-top: 1px dashed gray;
+	border-bottom: 1px dashed gray;
+}
+
+.tagsView div {
+	float: left;
+}
+
+.tagsHeading {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 0px;
+	font-size: 1.5em;
+	font-family: arial,verdana,sans-serif;
+}
+
+.tagsLinks {
+	width: 200px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 0px;
+}
+
+.tag {
+	padding-left: 5px;
+}
+
+.tagsButton {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 0px;
+}
+
+.datasetTitle {
+	font-size: 1.5em;
+  	color: black;
+  	margin: 20px;
+  	text-align: left;
+}
+
+.datasetMainContainer {
+	display: block;
+	width: 800px;
+	border-left: solid 1px black;
+	border-right: solid 1px black;
+	margin: 20px auto 20px auto;
+	padding: 0px;
+}
+
+.previewPanel {
+	display: inline;
+	position: relative;
+	float: left;
+	spacing: 0px;
+	padding: 0px;
+	height: auto;
+}
+
+.imagePreviewPanel {
+	width: 500px;
+	height: 400px;
+	overflow: auto;
+}
+
+.imagePreview {
+	display: block;
+	margin-left: auto;
+    margin-right: auto;
+	vertical-align: middle;
+}
+
+.metadataPreview {
+	height: 400px;
+	border-left: 1px dashed gray;
+	padding: 10px;
+}
+
+.metadataPreview div {
+	padding-top: 20px;
+}
+
+.metadataEntry {
+	vertical-align: middle;
+}
+
+.downloadButton {
+	vertical-align: bottom;
+}
+
+.downloadButtonContainer {
+	border-top: 1px dashed gray;
+	margin: 0px;
+	padding: 20px;
+}
+
+.commentsView {
+	height: auto;
+	clear: both;
+	padding: 20px;
+}
+
+/*================= Annotations / Comments ============== */
+.commentsHeading {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 0px;
+	font-size: 1.5em;
+	font-family: arial,verdana,sans-serif;
+}
+
+.annotationMainPanel {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 5px;
+	border-top: 1px solid #959596;
+}
+
+.annotationTitle {
+	font-weight:bold;
+}
+
+.annotationAttributes {
+	font-style: italic;
+}
+
+.annotationBody {
+
+}
+
+.newCommentHeader {
+	font-weight:bold;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.newAnnotationMainPanel {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 5px;
+	border-top: 1px solid #959596;
+}
+
