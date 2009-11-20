@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Ui Plug-in
+Bundle-SymbolicName: ncsa.mmdb.ui; singleton:=true
+Bundle-Version: 0.0.1
+Bundle-Activator: ncsa.mmdb.ui.osgi.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.tupeloproject.core;bundle-version="0.0.0",
+ edu.uiuc.ncsa.cet.bean.tupelo;bundle-version="1.0.0",
+ edu.uiuc.ncsa.cet.bean;bundle-version="1.0.0",
+ org.eclipse.nebula.widgets.gallery;bundle-version="0.5.2",
+ ncsa.bard;bundle-version="0.0.1",
+ ncsa.bard.model;bundle-version="1.0.0",
+ ncsa.bard.ui;bundle-version="0.0.1",
+ edu.uiuc.ncsa.cet.tupelo;bundle-version="1.0.0",
+ edu.uiuc.ncsa.cet.tupelo.contexts;bundle-version="1.0.0"
+Bundle-ActivationPolicy: lazy
