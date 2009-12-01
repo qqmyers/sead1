@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,6 +26,8 @@ import org.tupeloproject.rdf.Resource;
 import static org.tupeloproject.rdf.terms.Rdfs.LABEL;
 
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
+import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -194,7 +198,7 @@ public class UploadBlob extends HttpServlet {
         session.setAttribute(LISTENER_NAME, listener);
         log("Session (post): " + session.getId());
 
-        URI uri = null;
+        String uri = null;
         // Parse the request
         try {
             List<FileItem> items = upload.parseRequest(request);
@@ -211,9 +215,13 @@ public class UploadBlob extends HttpServlet {
                 if (!item.isFormField() && (sizeInBytes > 0)) {
                     BlobWriter bw = new BlobWriter();
 
-                    // generate a new pseudorandom URI
-                    uri = Resource.uriRef().getUri();
-                    bw.setUri(uri);
+                    // generate a URI based on the request using the REST service's minter
+                    Map<Resource,Object> md = new HashMap<Resource,Object>();
+                    md.put(RestService.LABEL_PROPERTY,fileName);
+                    uri = RestUriMinter.getInstance().mintUri(md);
+                    log.info("upload minted uri =" + uri);
+                    //
+                    bw.setUri(URI.create(uri));
                     String url = TupeloStore.getInstance().getUriCanonicalizer(request).canonicalize("dataset",uri.toString());
                     UploadInfo u = listener.addUploadInfo(URI.create(url), trimFilename(fileName));
                     bw.setInputStream(item.getInputStream());

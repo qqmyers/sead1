@@ -17,7 +17,10 @@ import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.Minter;
+import org.tupeloproject.util.TagUriFactory;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
@@ -40,14 +43,21 @@ public class RestServiceImpl implements RestService {
         return createImage((Map<Resource,Object>)null,imageData);
     }
 
-    /**
+    
+    @Override
+	public String mintUri(Map<Resource, Object> metadata) {
+    	return RestUriMinter.getInstance().mintUri(metadata);
+	}
+
+	/**
      * Create an image
      *
      * @param metadata  to give it
      * @param imageData a stream containing image data
      */
     public String createImage(Map<Resource, Object> metadata, InputStream imageData) throws RestServiceException {
-        String uri = Resource.uriRef().getString();
+        metadata.put(Rdf.TYPE, RestService.IMAGE_TYPE); // override any other type for now
+        String uri = mintUri(metadata);
         if(metadata.get(LABEL_PROPERTY) == null) {
             metadata.put(LABEL_PROPERTY,uri);
         }
@@ -154,7 +164,9 @@ public class RestServiceImpl implements RestService {
      * @return a new URI identifying the collection
      */
     public String createCollection(Iterable<String> members) throws RestServiceException {
-        String subject = Resource.uriRef().getString();
+    	Map<Resource,Object> md = new HashMap<Resource,Object>();
+    	md.put(Rdf.TYPE, RestService.COLLECTION_TYPE);
+        String subject = RestUriMinter.getInstance().mintUri(md);
         updateCollection(subject, members);
         return subject;
     }

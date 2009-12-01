@@ -155,4 +155,11 @@ public interface RestService {
      * @return the rating (1-5)
      */
     int getRating(String resourceUri);
+    
+    /**
+     * Generate a URI for an entity (e.g., image) with the given metadata
+     * @param metadata
+     * @return
+     */
+    String mintUri(Map<Resource,Object> metadata);
 }

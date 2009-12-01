@@ -6,15 +6,20 @@ import java.util.TreeSet;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsResult;
@@ -184,6 +189,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		}
 	}
 	
+	void uploadDatasets() {
+		UploadWidget uploadWidget = new UploadWidget();
+		mainContainer.clear();
+		mainContainer.add(uploadWidget);
+	}
+	
 	/**
 	 * History handler.
 	 */
@@ -197,6 +208,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private void parseHistoryToken(String token) {
 		if (token.startsWith("dataset")) {
 			showDataset();
+		} else if(token.startsWith("upload")) {
+			uploadDatasets();
+		} else if(token.startsWith("listDatasets")) {
+			listDatasets();
 		} else {
 			listDatasets();
 		}
