@@ -26,6 +26,8 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.ProgressBar;
 
 public class UploadWidget extends Composite {
@@ -147,7 +149,9 @@ public class UploadWidget extends Composite {
 													statusLabel.setText("upload complete.");
 													// uri
 													String uri = dict.get("uris").isArray().get(0).isString().stringValue();
-													History.newItem("dataset?id="+uri);
+													DatasetUploadedEvent event = new DatasetUploadedEvent();
+													event.setDatasetUri(uri);
+													fireEvent(event);
 													refire = false;
 												}
 											}
@@ -181,5 +185,9 @@ public class UploadWidget extends Composite {
 		});
 		// make it go
 		initWidget(uploadStackPanel);
+	}
+	
+	public void addDatasetUploadedHandler(DatasetUploadedHandler h) {
+		addHandler(h, DatasetUploadedEvent.TYPE);
 	}
 }
