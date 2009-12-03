@@ -26,6 +26,8 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
+import edu.illinois.ncsa.mmdb.web.client.event.CancelEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.CancelHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.ProgressBar;
@@ -81,19 +83,28 @@ public class UploadWidget extends Composite {
 		final HorizontalPanel formContents = new HorizontalPanel();
 		uploadForm.setWidget(formContents);
 		formContents.add(fu);
+		uploadPanel.add(uploadForm);
 		// add a submit button
 		Button submit = new Button("Submit");
-		uploadPanel.add(uploadForm);
 		uploadPanel.add(submit);
+		// and a cancel button
+		Button cancel = new Button("Cancel");
+		uploadPanel.add(cancel);
 		// add a status label (for now)
 		final Label statusLabel = new Label();
 		uploadPanel.add(statusLabel);
 		final ProgressBar progressBar = new ProgressBar();
 		uploadPanel.add(progressBar);
+		progressBar.setVisible(false);
 		uploadStackPanel.add(uploadPanel);
 		// button behavior:
+		cancel.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				CancelEvent ce = new CancelEvent();
+				fireEvent(ce);
+			}
+		});
 		submit.addClickHandler(new ClickHandler() {
-			@Override
 			public void onClick(ClickEvent event) {
 				final String uploadServletUrl = GWT.getModuleBaseURL() + "UploadBlob";
 				try {
@@ -136,6 +147,7 @@ public class UploadWidget extends Composite {
 											}
 											if(dict.containsKey("percentComplete") &&
 													dict.get("percentComplete").isNumber() != null) {
+												progressBar.setVisible(true);
 												int percentComplete = (int) dict.get("percentComplete").isNumber().doubleValue();
 												progressBar.setProgress(percentComplete);
 												if(percentComplete == 100) {
@@ -189,5 +201,9 @@ public class UploadWidget extends Composite {
 	
 	public void addDatasetUploadedHandler(DatasetUploadedHandler h) {
 		addHandler(h, DatasetUploadedEvent.TYPE);
+	}
+	
+	public void addCancelHandler(CancelHandler h) {
+		addHandler(h, CancelEvent.TYPE);
 	}
 }

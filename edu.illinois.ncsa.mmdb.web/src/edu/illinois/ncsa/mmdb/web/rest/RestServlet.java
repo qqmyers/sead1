@@ -66,7 +66,7 @@ public class RestServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         restService = new RestServiceImpl();
-        log.info("REST servlet initialized");
+        log.trace("REST servlet initialized");
     }
 
     UriCanonicalizer getUriCanonicalizer(HttpServletRequest request) throws ServletException {

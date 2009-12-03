@@ -21,6 +21,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.CancelEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.CancelHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
@@ -51,6 +53,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	/** Event bus for propagating events in the interface **/
 	private HandlerManager eventBus = new HandlerManager(null);
 	
+	/** Toolbar above main content panel */
+	private FlowPanel toolbar = new FlowPanel();
+	
 	/** Main content panel **/
 	private FlowPanel mainContainer = new FlowPanel();
 
@@ -62,6 +67,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	public void onModuleLoad() {
 		
+		RootPanel.get("toolbar").add(toolbar);
 		RootPanel.get("mainContainer").add(mainContainer);
 
 		// log events
@@ -75,7 +81,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		
 		parseHistoryToken(History.getToken());
 	}
-
+	
 	/**
 	 * For debugging purposes. Monitor events of interest.
 	 * 
@@ -110,6 +116,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		datasetTablePresenter.bind();
 
 		mainContainer.clear();
+		
 		mainContainer.add(datasetTableWidget.asWidget());
 		
 		dispatchAsync.execute(new GetDatasets(), new AsyncCallback<GetDatasetsResult>() {
@@ -186,14 +193,21 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	}
 	
 	void uploadDatasets() {
+		toolbar.clear();
 		UploadWidget uploadWidget = new UploadWidget();
 		uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
 			public void onDatasetUploaded(DatasetUploadedEvent event) {
 				History.newItem("dataset?id="+event.getDatasetUri());
+				toolbar.clear();
 			}
 		});
-		mainContainer.clear();
-		mainContainer.add(uploadWidget);
+		uploadWidget.addCancelHandler(new CancelHandler() {
+			public void onCancel(CancelEvent event) {
+				toolbar.clear();
+				History.back();
+			}
+		});
+		toolbar.add(uploadWidget);
 	}
 	
 	/**
