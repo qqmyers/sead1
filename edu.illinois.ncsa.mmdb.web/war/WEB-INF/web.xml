@@ -69,6 +69,12 @@
 		<servlet-name>UploadBlob</servlet-name>
 		<url-pattern>/UploadBlob</url-pattern>
 	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>UploadBlob</servlet-name>
+		<url-pattern>/mmdb/UploadBlob</url-pattern>
+		<!--  this additional mapping is kludgy, but necessary for GWT -->
+	</servlet-mapping>
 
 	<!--  Servlet context listener -->
 	<listener>

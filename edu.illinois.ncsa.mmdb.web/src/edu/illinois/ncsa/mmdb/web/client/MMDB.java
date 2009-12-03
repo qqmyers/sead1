@@ -26,6 +26,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -77,7 +79,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		History.addValueChangeHandler(this);
 		
 		parseHistoryToken(History.getToken());
-
 	}
 
 	/**

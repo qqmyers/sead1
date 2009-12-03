@@ -3,6 +3,7 @@
  */
 package edu.illinois.ncsa.mmdb.web.server;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
@@ -23,6 +24,8 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.util.SecureHashMinter;
+
 import static org.tupeloproject.rdf.terms.Rdfs.LABEL;
 
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
@@ -45,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
 public class UploadBlob extends HttpServlet {
 
     private static final long  serialVersionUID = 6448203283400080791L;
-    public static final String LISTENER_NAME    = "uploadListener";
+    public static final String UPLOAD_LISTENER_NAME    = "uploadListener";
 
     Log log = LogFactory.getLog(UploadBlob.class);
 
@@ -70,8 +73,10 @@ public class UploadBlob extends HttpServlet {
      * A listener for file upload progress
      */
     class FileUploadListener implements ProgressListener {
-        private volatile long bytesRead     = 0L;
-        private volatile long contentLength = 0L;
+    	private volatile long bytesRead     = 0L;
+    	private volatile long bytesWritten  = 0L;
+    	private volatile long contentLength = 0L;
+    	private volatile long itemsLength = 0L;
         private volatile long item          = 0L;
         private volatile Vector<UploadInfo> uploadInfo    = new Vector<UploadInfo>();
 
@@ -79,16 +84,32 @@ public class UploadBlob extends HttpServlet {
             super();
         }
 
+        int debugPrune = 0;
+        
         public void update ( long aBytesRead, long aContentLength, int anItem ) {
             bytesRead = aBytesRead;
+            if(debugPrune++ % 50 == 0) {
+            	debug("bytesRead = "+bytesRead+" ("+percentComplete()+"%)");
+            }
             contentLength = aContentLength;
             item = anItem;
         }
 
+        public void wrote(long aBytesWritten) {
+        	bytesWritten += aBytesWritten;
+            if(debugPrune++ % 50 == 0) {
+            	debug("bytesWritten = "+bytesWritten+" ("+percentComplete()+"%)");
+            }
+        }
+        
         public long getBytesRead ( ) {
             return bytesRead;
         }
 
+        public long getBytesWritten() {
+        	return bytesWritten;
+        }
+        
         public long getContentLength ( ) {
             return contentLength;
         }
@@ -101,9 +122,10 @@ public class UploadBlob extends HttpServlet {
             uploadInfo.add(info);
         }
 
-        public UploadInfo addUploadInfo ( URI uri, String filename ) {
+        public UploadInfo addUploadInfo ( URI uri, String filename, long length ) {
             UploadInfo u = new UploadInfo(uri, filename);
             uploadInfo.add(u);
+            itemsLength += length;
             return u;
         }
 
@@ -136,7 +158,7 @@ public class UploadBlob extends HttpServlet {
         }
 
         public boolean allDone ( ) {
-            if ((bytesRead >= contentLength)) {
+            if (percentComplete() == 100) {
                 for (UploadInfo u : uploadInfo) {
                     if (!u.isUploaded) {
                         return false;
@@ -146,6 +168,19 @@ public class UploadBlob extends HttpServlet {
             }
             return false;
         }
+        
+        public int percentComplete() {
+        	long pct = (int) (contentLength == 0L ? 0 : ((bytesRead * 50) / contentLength)) +
+        	                 (itemsLength == 0L ? 0 : ((bytesWritten * 50) / itemsLength));
+        	debug(bytesRead +" read / "+bytesWritten+" written = "+pct+"%");
+        	return (int) pct;
+        }
+    }
+
+    Map<String,FileUploadListener> listeners = new HashMap<String,FileUploadListener>();
+    
+    void debug(String s) {
+    	log.trace(s);
     }
 
     void log(Object o) {
@@ -187,17 +222,18 @@ public class UploadBlob extends HttpServlet {
 
         // Create a factory for disk-based file items
         FileItemFactory factory = new DiskFileItemFactory();
-
-        // Create a new file upload handler & listener
-        HttpSession session = request.getSession();
-        FileUploadListener listener = new FileUploadListener();
         ServletFileUpload upload = new ServletFileUpload(factory);
-        upload.setProgressListener(listener);
-
-        // set the listener attribute
-        session.setAttribute(LISTENER_NAME, listener);
-        log("Session (post): " + session.getId());
-
+        String sessionKey = request.getParameter("session");
+        FileUploadListener listener = null;
+        if(sessionKey == null) {
+        	log.info("NOOOOOOOOOOOOOOOOOOOOO!");
+        } else {
+            debug("POST: upload session key = "+sessionKey);
+            listener = new FileUploadListener();
+            upload.setProgressListener(listener);
+        	listeners.put(sessionKey, listener);
+        }
+        
         String uri = null;
         // Parse the request
         try {
@@ -209,27 +245,46 @@ public class UploadBlob extends HttpServlet {
                 String contentType = item.getContentType();
                 boolean isInMemory = item.isInMemory();
                 long sizeInBytes = item.getSize();
-                log("Post: " + item.isFormField() + "|" + fieldName + "|" + fileName + "|" + isInMemory + "|"
+                debug("Post: " + item.isFormField() + "|" + fieldName + "|" + fileName + "|" + isInMemory + "|"
                         + contentType + "|" + sizeInBytes);
+                if(item.isFormField() && fieldName.equals("session")) {
+                	sessionKey = item.getString();
+                	log.info("the hidden session field is set to "+sessionKey); // FIXME remove
+                }
                 // if it's a field from a form and the size is non-zero...
                 if (!item.isFormField() && (sizeInBytes > 0)) {
                     BlobWriter bw = new BlobWriter();
-
                     // generate a URI based on the request using the REST service's minter
                     Map<Resource,Object> md = new HashMap<Resource,Object>();
                     md.put(RestService.LABEL_PROPERTY,fileName);
                     uri = RestUriMinter.getInstance().mintUri(md);
-                    log.info("upload minted uri =" + uri);
                     //
                     bw.setUri(URI.create(uri));
                     String url = TupeloStore.getInstance().getUriCanonicalizer(request).canonicalize("dataset",uri.toString());
-                    UploadInfo u = listener.addUploadInfo(URI.create(url), trimFilename(fileName));
-                    bw.setInputStream(item.getInputStream());
+                    UploadInfo u = listener.addUploadInfo(URI.create(url), trimFilename(fileName), sizeInBytes);
+                    final FileUploadListener _listener = listener;
+                    bw.setInputStream(new FilterInputStream(item.getInputStream()) {
+                    	int wrote(int written) {
+                    		if(written > 0) {
+                    			_listener.wrote(written);
+                    		}
+                    		return written;
+                    	}
+						public int read() throws IOException {
+							return wrote(super.read());
+						}
+						public int read(byte[] arg0, int arg1, int arg2)
+								throws IOException {
+							return wrote(super.read(arg0, arg1, arg2));
+						}
+						public int read(byte[] arg0) throws IOException {
+							return wrote(super.read(arg0));
+						}
+                    });
 
                     try {
                         // write the blob
                         c.perform(bw);
-                        log("Wrote: " + bw.getSize());
 
                         // add metadata
                         ThingSession ts = c.getThingSession();
@@ -240,6 +295,7 @@ public class UploadBlob extends HttpServlet {
                         t.setValue(RestService.DATE_PROPERTY, new Date());
                         t.setValue(RestService.FORMAT_PROPERTY, contentType);
                         t.save();
+                        log.info("user uploaded "+fileName+" ("+sizeInBytes+" bytes), uri="+uri);
                         ts.close();
 
                         u.setUploaded(true);
@@ -303,6 +359,7 @@ public class UploadBlob extends HttpServlet {
 
         buffer.append("\"serverUrl\":\"" + getBaseUrl(req) + "/tupelo" + "\",");
         buffer.append("\"hasStarted\":" + hasStarted + ",");
+        int percentComplete = 0;
         if (listener == null) {
             buffer.append( "\"uris\":[],");
             buffer.append("\"filenames\":[],");
@@ -314,16 +371,12 @@ public class UploadBlob extends HttpServlet {
             buffer.append(toJsonArray("uris", listener.getBlobUris()) + ",");
             buffer.append(toJsonArray("filenames", listener.getFilenames()) + ",");
             buffer.append(toJsonArray("isUploaded", listener.getIsUploaded()) + ",");
+            percentComplete = listener.percentComplete();
         }
         buffer.append("\"bytesRead\":" + bytesRead + ",");
         buffer.append("\"contentLength\":" + contentLength + ",");
         buffer.append("\"isFinished\":" + isFinished + ",");
 
-        // Calculate the percent complete
-        long percentComplete = 0;
-        if (contentLength != 0) {
-            percentComplete = ((100 * bytesRead) / contentLength);
-        }
         buffer.append("\"percentComplete\":" + percentComplete);
         buffer.append("}");
 
@@ -349,45 +402,50 @@ public class UploadBlob extends HttpServlet {
      */
     public void doGet ( HttpServletRequest request,
             HttpServletResponse response ) throws ServletException, IOException {
-        HttpSession session = request.getSession();
-
         response.setContentType("application/json");
-        // Make sure the session has started
-        if (session == null) {
-            log("(get): session null");
-            returnZeroedJSON(response);
-            return;
+        if(!request.getParameterMap().containsKey("session")) {
+        	String sessionKey = SecureHashMinter.getMinter().mint();
+        	PrintWriter out = response.getWriter();
+        	out.println("{\"session\":\""+sessionKey+"\"}");
+        	debug("GET: set upload session key = "+sessionKey);
+        } else {
+        	String sessionKey = request.getParameter("session");
+        	debug("GET: upload session key = "+sessionKey);
+            // Make sure the session has started
+        	if(listeners.get(sessionKey) == null) {
+        		log("(get): session null");
+        		returnZeroedJSON(response);
+        		return;
+        	}
+        	long bytesRead = 0;
+        	long contentLength = 0;
+        	//Vector<URI> blobUris = null;
+        	FileUploadListener listener = null;
+        	// Check to see if we've created the listener object yet
+        	listener = (FileUploadListener) listeners.get(sessionKey);
+        	if (listener == null) {
+        		log("(get): listener null");
+        		returnZeroedJSON(response);
+        		return;
+        	}
+        	
+        	// Get the meta information
+        	bytesRead = listener.getBytesRead();
+        	contentLength = listener.getContentLength();
+        	//Vector<UploadInfo> u = listener.getUploadInfo();
+        	//blobUris = listener.getUris();
+        	
+        	if (listener.allDone()) {
+        		// No reason to keep listener in session since we're done
+        		listeners.put(sessionKey, null);
+        	}
+        	log("Progress: " + bytesRead + "/" + contentLength);
+        	PrintWriter out = response.getWriter();
+        	out.print(stateToJSON(true, listener, request));
+        	log("(get): " + stateToJSON(true, listener, request));
+        	out.flush();
+        	out.close();
         }
-        log("Session (get): " + session.getId());
-
-        long bytesRead = 0;
-        long contentLength = 0;
-        //Vector<URI> blobUris = null;
-        FileUploadListener listener = null;
-        // Check to see if we've created the listener object yet
-        listener = (FileUploadListener) session.getAttribute(LISTENER_NAME);
-        if (listener == null) {
-            log("(get): listener null");
-            returnZeroedJSON(response);
-            return;
-        }
-
-        // Get the meta information
-        bytesRead = listener.getBytesRead();
-        contentLength = listener.getContentLength();
-        //Vector<UploadInfo> u = listener.getUploadInfo();
-        //blobUris = listener.getUris();
-
-        if (listener.allDone()) {
-            // No reason to keep listener in session since we're done
-            session.removeAttribute(LISTENER_NAME);
-        }
-        log("Progress: " + bytesRead + "/" + contentLength);
-        PrintWriter out = response.getWriter();
-        out.print(stateToJSON(true, listener, request));
-        log("(get): " + stateToJSON(true, listener, request));
-        out.flush();
-        out.close();
     }
 
     /**
