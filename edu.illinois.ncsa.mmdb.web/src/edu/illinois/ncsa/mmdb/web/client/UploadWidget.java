@@ -1,7 +1,5 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
-import org.mortbay.log.Log;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -15,13 +13,11 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -29,6 +25,8 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
+
+import edu.illinois.ncsa.mmdb.web.client.ui.ProgressBar;
 
 public class UploadWidget extends Composite {
 	interface JSONCallback {
@@ -88,6 +86,8 @@ public class UploadWidget extends Composite {
 		// add a status label (for now)
 		final Label statusLabel = new Label();
 		uploadPanel.add(statusLabel);
+		final ProgressBar progressBar = new ProgressBar();
+		uploadPanel.add(progressBar);
 		uploadStackPanel.add(uploadPanel);
 		// button behavior:
 		submit.addClickHandler(new ClickHandler() {
@@ -135,6 +135,7 @@ public class UploadWidget extends Composite {
 											if(dict.containsKey("percentComplete") &&
 													dict.get("percentComplete").isNumber() != null) {
 												int percentComplete = (int) dict.get("percentComplete").isNumber().doubleValue();
+												progressBar.setProgress(percentComplete);
 												if(percentComplete == 100) {
 													statusLabel.setText("uploaded, saving "+dots());
 												} else {
