@@ -24,6 +24,7 @@ body {
 	border-bottom: 1px black solid;
 	margin: 0px;
 	text-align: center;
+	minHeight: 600px;
 }
 
 .bottomMenu {
@@ -114,20 +115,15 @@ body {
 
 .tagsView {
 	display: inline;
-	width: 760px;
+	width: 100%;
 	padding: 10px;
-	float: left;
-	position: relative;
 	vertical-align: middle;
 	border-top: 1px dashed gray;
 	border-bottom: 1px dashed gray;
 }
 
-.tagsView div {
-	float: left;
-}
-
 .tagsHeading {
+	width: 100px;
 	margin-top: 10px;
 	margin-bottom: 10px;
 	padding: 0px;
@@ -136,7 +132,7 @@ body {
 }
 
 .tagsLinks {
-	width: 200px;
+	width: 300px;
 	margin-top: 10px;
 	margin-bottom: 10px;
 	padding: 0px;
@@ -147,9 +143,15 @@ body {
 }
 
 .tagsButton {
+	margin: 10px;
+	padding: 0px;
+}
+
+.addTags {
 	margin-top: 10px;
 	margin-bottom: 10px;
 	padding: 0px;
+	margin: 0px;
 }
 
 .datasetTitle {
