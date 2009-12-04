@@ -47,6 +47,7 @@ public class GetDatasetsHandler implements
 		try {
 			datasets = new HashSet<DatasetBean>(dbu.getAll());
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new ActionException(
 					"Error retrieving datasets from Tupelo repository", e);
 		}
