@@ -60,6 +60,10 @@ public class TupeloStore {
 	 * Return singleton instance.
 	 * 
 	 * @return singleton TupeloStore
+	 * 
+	 * FIXME if there are any problems creating the context or the beansession,
+	 * these objects remain null. Should this method throw an exception when 
+	 * there is an error creating an instance of the Tupelo store?
 	 */
 	public static TupeloStore getInstance() {
 		if (instance == null) {
