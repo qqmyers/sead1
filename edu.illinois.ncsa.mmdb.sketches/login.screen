@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Master" x="64" y="48">
+    <screen href="master.screen#/"/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="369" y="271" text="Login">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:TextField" x="432" y="271" width="113" text="Text field"/>
+  <widgets xsi:type="model:TextField" x="432" y="304" width="113" text="*****"/>
+  <widgets xsi:type="model:Label" x="369" y="304" text="Password">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" x="432" y="343" text="Submit"/>
+  <widgets xsi:type="model:Label" x="160" y="184" text="Login">
+    <font size="24" bold="false"/>
+  </widgets>
+  <widgets xsi:type="model:HLine" x="200" y="424" width="617"/>
+  <widgets xsi:type="model:Placeholder" x="248" y="551" width="131" height="66" text="Activity graph"/>
+  <widgets xsi:type="model:Placeholder" x="616" y="551" width="131" height="66" text="Activity graph"/>
+  <widgets xsi:type="model:Placeholder" x="432" y="551" width="131" height="66" text="Activity graph"/>
+  <widgets xsi:type="model:Label" x="296" y="512" text="# users">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="473" y="512" text="# datasets">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="648" y="512" text="# collections">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="200" y="456" text="Status">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Link" x="616" y="271" text="sign up">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Link" x="616" y="304" text="forgot password">
+    <font/>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font/>
+</model:Screen>

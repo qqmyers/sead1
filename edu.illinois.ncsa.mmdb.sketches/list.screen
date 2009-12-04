@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Master" x="48" y="40">
+    <screen href="master.screen#/"/>
+  </widgets>
+  <widgets xsi:type="model:Panel" x="168" y="240" width="633" height="201"/>
+  <widgets xsi:type="model:Placeholder" x="178" y="250" width="161" height="127" text="thumbnail"/>
+  <widgets xsi:type="model:Label" x="360" y="250" width="105" text="Title">
+    <font size="13" bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Text" x="360" y="288" width="431" height="89" dummyText="true">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Menu" x="729" y="250" text="&amp;Options"/>
+  <widgets xsi:type="model:Combo" x="747" y="200" text="Views"/>
+  <widgets xsi:type="model:Label" x="360" y="392" text="1 year ago">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="440" y="392" text="666,666 views">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Link" x="538" y="392" text="username">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Panel" x="168" y="438" width="633" height="201"/>
+  <widgets xsi:type="model:Placeholder" x="178" y="448" width="161" height="127" text="thumbnail"/>
+  <widgets xsi:type="model:Label" x="360" y="448" width="105" text="Title">
+    <font size="13" bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Text" x="360" y="486" width="431" height="89" dummyText="true">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Menu" x="729" y="448" text="&amp;Options"/>
+  <widgets xsi:type="model:Label" x="360" y="590" text="1 year ago">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="440" y="590" text="666,666 views">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Link" x="538" y="590" text="username">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Panel" x="168" y="638" width="633" height="201"/>
+  <widgets xsi:type="model:Placeholder" x="178" y="648" width="161" height="127" text="thumbnail"/>
+  <widgets xsi:type="model:Label" x="360" y="648" width="105" text="Title">
+    <font size="13" bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Text" x="360" y="686" width="431" height="89" dummyText="true">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Menu" x="729" y="648" text="&amp;Options"/>
+  <widgets xsi:type="model:Label" x="360" y="790" text="1 year ago">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="440" y="790" text="666,666 views">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Link" x="538" y="790" text="username">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Panel" x="168" y="838" width="633" height="201"/>
+  <widgets xsi:type="model:Placeholder" x="178" y="848" width="161" height="127" text="thumbnail"/>
+  <widgets xsi:type="model:Label" x="360" y="848" width="105" text="Title">
+    <font size="13" bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Text" x="360" y="886" width="431" height="89" dummyText="true">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Menu" x="729" y="848" text="&amp;Options"/>
+  <widgets xsi:type="model:Label" x="360" y="990" text="1 year ago">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="440" y="990" text="666,666 views">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Link" x="538" y="990" text="username">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="168" y="169" text="List All">
+    <font size="18"/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="703" y="200" text="Sort by:">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="440" y="1048" text="Pages: 1 2 3 ... NEXT">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="418" y="208" text="Pages: 1 2 3 ... NEXT">
+    <font/>
+  </widgets>
+  <hRuler/>
+  <vRuler>
+    <guides position="248"/>
+    <guides position="369"/>
+  </vRuler>
+  <font/>
+</model:Screen>

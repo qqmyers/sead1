@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Master" x="48" y="32">
+    <screen href="master.screen#/"/>
+  </widgets>
+  <widgets xsi:type="model:Placeholder" x="152" y="216" width="665" height="297" text="Viewer"/>
+  <widgets xsi:type="model:Label" x="152" y="168" text="Dataset Title">
+    <font size="18"/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="680" y="699" text="Tags">
+    <font size="13" bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="162" y="687" text="Annotations">
+    <font size="13" bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="688" y="734" text="tag">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:HLine" x="680" y="724"/>
+  <widgets xsi:type="model:Label" x="688" y="754" text="tag">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="688" y="776" text="tag">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="688" y="798" text="tag">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="688" y="820" text="tag">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="688" y="842" text="tag">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:VLine" x="659" y="699" height="366"/>
+  <widgets xsi:type="model:Label" x="680" y="883" text="Copyright">
+    <font size="13" bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:HLine" x="680" y="908"/>
+  <widgets xsi:type="model:Text" x="680" y="931" width="137" height="73" dummyText="true">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:TabbedPane" x="152" y="524" width="665" text="Information,Attributes" selection="0"/>
+  <widgets xsi:type="model:HLine" x="162" y="712" width="102"/>
+  <widgets xsi:type="model:Text" x="169" y="566" width="464" height="75" dummyText="true">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Link" x="721" y="566" text="username">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="695" y="566" text="By:">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Icon" x="793" y="520" icon="thumbs-up (medium)"/>
+  <widgets xsi:type="model:Label" x="695" y="592" text="3 mothns ago">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="695" y="620" text="333,333 views">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="162" y="734" text="Title">
+    <font bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Text" x="162" y="782" width="455" height="91" dummyText="true">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Link" x="188" y="754" text="username">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="162" y="754" text="By:">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="256" y="754" text="2 months ago">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="162" y="896" text="Title">
+    <font bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Text" x="162" y="944" width="455" height="91" dummyText="true">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Link" x="188" y="916" text="username">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="162" y="916" text="By:">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="256" y="916" text="2 months ago">
+    <font/>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font/>
+</model:Screen>

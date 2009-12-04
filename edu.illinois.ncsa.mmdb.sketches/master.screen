@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Browser" x="64" y="56" width="881" height="1200" text="Medici&#xD;&#xA;http://mmdb-dev.ncsa.uiuc.edu:8080/mmdb/"/>
+  <widgets xsi:type="model:Panel" x="64" y="152" width="881" height="993" background="#d8d8d8" border="false"/>
+  <widgets xsi:type="model:Panel" x="64" y="108" width="881" height="45" background="#7b7b93"/>
+  <widgets xsi:type="model:Label" x="160" y="108" text="medici">
+    <font size="20" bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:Panel" x="136" y="176" width="729" height="929"/>
+  <widgets xsi:type="model:Panel" x="64" y="1144" width="881" height="112" background="#353535"/>
+  <widgets xsi:type="model:Label" x="336" y="130" text="List All">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="392" y="130" text="Upload">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="283" y="130" text="Home">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:SearchField" x="728" y="121" width="113" text="Search..."/>
+  <hRuler/>
+  <vRuler/>
+  <font/>
+</model:Screen>
