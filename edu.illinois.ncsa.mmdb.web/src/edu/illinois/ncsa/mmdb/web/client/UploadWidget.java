@@ -13,12 +13,15 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
@@ -90,6 +93,7 @@ public class UploadWidget extends Composite {
 		// and a cancel button
 		Button cancel = new Button("Cancel");
 		uploadPanel.add(cancel);
+		// end debug
 		// add a status label (for now)
 		final Label statusLabel = new Label();
 		uploadPanel.add(statusLabel);

@@ -6,13 +6,20 @@ import java.util.TreeSet;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -67,6 +74,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	public void onModuleLoad() {
 		
+		initNavMenu();
 		RootPanel.get("toolbar").add(toolbar);
 		RootPanel.get("mainContainer").add(mainContainer);
 
@@ -80,6 +88,26 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		History.addValueChangeHandler(this);
 		
 		parseHistoryToken(History.getToken());
+	}
+	
+	void initNavMenu() {
+		RootPanel.get("navMenu").clear();
+		HorizontalPanel navMenu = new HorizontalPanel();
+		RootPanel.get("navMenu").add(navMenu);
+		Hyperlink listButton = new Hyperlink("List all","listDatasets");
+		// style setting workaround because hyperlinks are wrapped in div's
+		DOM.getChild(listButton.getElement(),0).setClassName("navMenuLink");
+		navMenu.add(listButton);
+		HTML bullet = new HTML("&bull;");
+		navMenu.add(bullet);
+		Anchor uploadButton = new Anchor("Upload");
+		uploadButton.setStyleName("navMenuLink");
+		uploadButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent click) {
+				uploadDatasets();
+			}
+		});
+		navMenu.add(uploadButton);
 	}
 	
 	/**
@@ -204,7 +232,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		uploadWidget.addCancelHandler(new CancelHandler() {
 			public void onCancel(CancelEvent event) {
 				toolbar.clear();
-				History.back();
 			}
 		});
 		toolbar.add(uploadWidget);
@@ -223,8 +250,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private void parseHistoryToken(String token) {
 		if (token.startsWith("dataset")) {
 			showDataset();
-		} else if(token.startsWith("upload")) {
-			uploadDatasets();
 		} else if(token.startsWith("listDatasets")) {
 			listDatasets();
 		} else {
