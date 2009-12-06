@@ -1,6 +1,8 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -194,6 +196,16 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		});
 
 	}
+
+	Map<String,String> getParams() {
+		Map<String,String> params = new HashMap<String,String>();
+		String paramString = History.getToken().substring(History.getToken().lastIndexOf("?")+1);
+		for(String paramEntry : paramString.split("&")) {
+			String[] terms = paramEntry.split("=");
+			params.put(terms[0],terms[1]);
+		}
+		return params;
+	}
 	
 	/**
 	 * Show information about a particular dataset.
@@ -211,16 +223,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		mainContainer.clear();
 		mainContainer.add(datasetWidget);
 		
-		String params = History.getToken().substring(History.getToken().lastIndexOf("?")+1);
-		
-		String[] tokens = params.split("=");
-		
-		if (tokens[0].equals("id")) {
-			datasetWidget.showDataset(tokens[1]);
+		String datasetUri = getParams().get("id"); // FIXME should use "uri?"
+		if(datasetUri != null) {
+			datasetWidget.showDataset(datasetUri);
 		}
 	}
 	
-	void uploadDatasets() {
+	UploadWidget uploadDatasets() {
 		toolbar.clear();
 		UploadWidget uploadWidget = new UploadWidget();
 		uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
@@ -235,6 +244,21 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			}
 		});
 		toolbar.add(uploadWidget);
+		return uploadWidget;
+	}
+	
+	// this is for when the POST doesn't come from an HTML form but from a client
+	// that also controls the browser (e.g., an AJAX client or Java applet); in
+	// that case said client can direct the browser to #upload?session={sessionkey}
+	// to trigger the GWT upload progress bar for the upload
+	void showUploadProgress() {
+		String sessionKey = getParams().get("session");
+		if(sessionKey != null) {
+			UploadWidget upload = uploadDatasets(); // pop up the upload interface
+			// show the progress bar for the session key
+			String uploadServletUrl = GWT.getModuleBaseURL() + "UploadBlob";
+			upload.showProgress(sessionKey, uploadServletUrl);
+		}
 	}
 	
 	/**
@@ -252,6 +276,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			showDataset();
 		} else if(token.startsWith("listDatasets")) {
 			listDatasets();
+		} else if(token.startsWith("upload")) { // experimental js->json
+			showUploadProgress();
 		} else {
 			listDatasets();
 		}

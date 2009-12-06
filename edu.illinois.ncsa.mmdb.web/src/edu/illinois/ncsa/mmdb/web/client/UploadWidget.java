@@ -1,6 +1,8 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
@@ -11,17 +13,12 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
@@ -71,36 +68,33 @@ public class UploadWidget extends Composite {
 		}).schedule(delay);
 	}
 	
+	// has a file upload form
+	FormPanel uploadForm = new FormPanel();
+	FileUpload fu = new FileUpload();
+	// status
+	Label statusLabel = new Label();
+	// progress bar
+	ProgressBar progressBar = new ProgressBar();
+	
 	public UploadWidget() {
 		// multiple uploads
 		VerticalPanel uploadStackPanel = new VerticalPanel();
-		// each upload
-		FlowPanel uploadPanel = new FlowPanel();
-		// has a file upload form
-		final FormPanel uploadForm = new FormPanel();
+		HorizontalPanel uploadPanel = new HorizontalPanel();
 		uploadForm.setAction("UploadBlob");
 		uploadForm.setEncoding(FormPanel.ENCODING_MULTIPART);
 		uploadForm.setMethod(FormPanel.METHOD_POST);
-		FileUpload fu = new FileUpload();
 		fu.setName("f1"); // upload servlet expects the data to be named f{n} starting with 1
 		final HorizontalPanel formContents = new HorizontalPanel();
 		uploadForm.setWidget(formContents);
 		formContents.add(fu);
 		uploadPanel.add(uploadForm);
-		// add a submit button
-		Button submit = new Button("Submit");
-		uploadPanel.add(submit);
 		// and a cancel button
 		Button cancel = new Button("Cancel");
 		uploadPanel.add(cancel);
-		// end debug
-		// add a status label (for now)
-		final Label statusLabel = new Label();
-		uploadPanel.add(statusLabel);
-		final ProgressBar progressBar = new ProgressBar();
-		uploadPanel.add(progressBar);
-		progressBar.setVisible(false);
 		uploadStackPanel.add(uploadPanel);
+		uploadStackPanel.add(statusLabel);
+		uploadStackPanel.add(progressBar);
+		progressBar.setVisible(false);
 		// button behavior:
 		cancel.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
@@ -108,8 +102,8 @@ public class UploadWidget extends Composite {
 				fireEvent(ce);
 			}
 		});
-		submit.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
+		fu.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
 				final String uploadServletUrl = GWT.getModuleBaseURL() + "UploadBlob";
 				try {
 					jsonRequest(uploadServletUrl, new JSONCallback() {
@@ -121,64 +115,8 @@ public class UploadWidget extends Composite {
 								uploadForm.setAction("UploadBlob?session="+sessionKey);
 								// now that we have a session key, submit the POST
 								uploadForm.submit();
-								// now start asking for updates
-								final String updateUrl = uploadServletUrl + "?session="+sessionKey;
-								final JSONCallback handleUpdate = new JSONCallback() {
-									int twiddle = 0;
-									String dots[] = new String[] { "", ".", "..", "..." };
-									String dots() { return dots[twiddle++ % 3]; }
-									public void error(Throwable t) {
-									}
-									public void gotJSON(JSONObject dict) {
-										/* will get something like this:
-										 * {"serverUrl":"http://localhost:8080/tupelo",
-										 * "hasStarted":true,"uris":[
-										 * "http://localhost:8080/mmdb.html#dataset?id=tag:medici@uiuc.edu,2009:data_EtV6RYfBLq6D9Q6W-pJ0hg"
-										 * ], "filenames":["ideaLogo.jpg"],
-										 * "isUploaded":[true], "bytesRead":1397,
-										 * "contentLength":1397, "isFinished":true,
-										 * "percentComplete":100}
-										 */
-										boolean refire = true; // whether to continue checking status
-										if(dict == null) {
-											statusLabel.setText("error reading upload status");
-											refire = false;
-										} else {
-											if(dict.containsKey("hasStarted") && dict.get("hasStarted").isBoolean() != null) {
-												if(!dict.get("hasStarted").isBoolean().booleanValue()) {
-													statusLabel.setText("waiting to upload "+dots());
-												}
-											}
-											if(dict.containsKey("percentComplete") &&
-													dict.get("percentComplete").isNumber() != null) {
-												progressBar.setVisible(true);
-												int percentComplete = (int) dict.get("percentComplete").isNumber().doubleValue();
-												progressBar.setProgress(percentComplete);
-												if(percentComplete == 100) {
-													statusLabel.setText("uploaded, saving "+dots());
-												} else {
-													statusLabel.setText("uploading, "+percentComplete+"% complete");
-												}
-											}
-											if(dict.containsKey("isFinished") && dict.get("isFinished").isBoolean() != null) {
-												if(dict.get("isFinished").isBoolean().booleanValue()) {
-													statusLabel.setText("upload complete.");
-													// uri
-													String uri = dict.get("uris").isArray().get(0).isString().stringValue();
-													DatasetUploadedEvent event = new DatasetUploadedEvent();
-													event.setDatasetUri(uri);
-													fireEvent(event);
-													refire = false;
-												}
-											}
-										}
-										//refire = false; // FIXME
-										if(refire) {
-											jsonRequest(updateUrl, this, 250);
-										}
-									}
-								}; 
-								jsonRequest(updateUrl, handleUpdate, 100);
+								// now show progress
+								showProgress(sessionKey, uploadServletUrl);
 							}
 						}
 					});
@@ -201,6 +139,67 @@ public class UploadWidget extends Composite {
 		});
 		// make it go
 		initWidget(uploadStackPanel);
+	}
+	
+	void showProgress(String sessionKey, String uploadServletUrl) {
+		// now start asking for updates
+		final String updateUrl = uploadServletUrl + "?session="+sessionKey;
+		final JSONCallback handleUpdate = new JSONCallback() {
+			int twiddle = 0;
+			String dots[] = new String[] { "", ".", "..", "..." };
+			String dots() { return dots[twiddle++ % 3]; }
+			public void error(Throwable t) {
+			}
+			public void gotJSON(JSONObject dict) {
+				/* will get something like this:
+				 * {"serverUrl":"http://localhost:8080/tupelo",
+				 * "hasStarted":true,"uris":[
+				 * "http://localhost:8080/mmdb.html#dataset?id=tag:medici@uiuc.edu,2009:data_EtV6RYfBLq6D9Q6W-pJ0hg"
+				 * ], "filenames":["ideaLogo.jpg"],
+				 * "isUploaded":[true], "bytesRead":1397,
+				 * "contentLength":1397, "isFinished":true,
+				 * "percentComplete":100}
+				 */
+				boolean refire = true; // whether to continue checking status
+				if(dict == null) {
+					statusLabel.setText("error reading upload status");
+					refire = false;
+				} else {
+					if(dict.containsKey("hasStarted") && dict.get("hasStarted").isBoolean() != null) {
+						if(!dict.get("hasStarted").isBoolean().booleanValue()) {
+							statusLabel.setText("waiting to upload "+dots());
+						}
+					}
+					if(dict.containsKey("percentComplete") &&
+							dict.get("percentComplete").isNumber() != null) {
+						progressBar.setVisible(true);
+						int percentComplete = (int) dict.get("percentComplete").isNumber().doubleValue();
+						progressBar.setProgress(percentComplete);
+						if(percentComplete == 100) {
+							statusLabel.setText("uploaded, saving "+dots());
+						} else {
+							statusLabel.setText("uploading, "+percentComplete+"% complete");
+						}
+					}
+					if(dict.containsKey("isFinished") && dict.get("isFinished").isBoolean() != null) {
+						if(dict.get("isFinished").isBoolean().booleanValue()) {
+							statusLabel.setText("upload complete.");
+							// uri
+							String uri = dict.get("uris").isArray().get(0).isString().stringValue();
+							DatasetUploadedEvent event = new DatasetUploadedEvent();
+							event.setDatasetUri(uri);
+							fireEvent(event);
+							refire = false;
+						}
+					}
+				}
+				//refire = false; // FIXME
+				if(refire) {
+					jsonRequest(updateUrl, this, 250);
+				}
+			}
+		}; 
+		jsonRequest(updateUrl, handleUpdate, 100);
 	}
 	
 	public void addDatasetUploadedHandler(DatasetUploadedHandler h) {

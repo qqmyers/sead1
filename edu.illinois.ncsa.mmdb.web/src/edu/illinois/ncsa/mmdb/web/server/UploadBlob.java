@@ -3,6 +3,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.server;
 
+import static org.tupeloproject.rdf.terms.Rdfs.LABEL;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,24 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.tupeloproject.kernel.BlobWriter;
-import org.tupeloproject.kernel.Context;
-import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.kernel.Thing;
-import org.tupeloproject.kernel.ThingSession;
-import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.util.SecureHashMinter;
-
-import static org.tupeloproject.rdf.terms.Rdfs.LABEL;
-
-import edu.illinois.ncsa.mmdb.web.rest.RestService;
-import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -39,6 +28,16 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.BlobWriter;
+import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Thing;
+import org.tupeloproject.kernel.ThingSession;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.util.SecureHashMinter;
+
+import edu.illinois.ncsa.mmdb.web.rest.RestService;
+import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 
 
 /**
@@ -180,7 +179,8 @@ public class UploadBlob extends HttpServlet {
     Map<String,FileUploadListener> listeners = new HashMap<String,FileUploadListener>();
     
     void debug(String s) {
-    	log.trace(s);
+    	//log.trace(s);
+    	log.info(s);
     }
 
     void log(Object o) {
@@ -201,6 +201,21 @@ public class UploadBlob extends HttpServlet {
         return fullname.trim();
     }
 
+    FileUploadListener trackProgress(ServletFileUpload upload, String sessionKey) {
+        FileUploadListener listener = null;
+        if(sessionKey == null) {
+        	log.warn("no session key, progress will not be reported to client");
+        	return new FileUploadListener();
+        } else if(listeners.containsKey(sessionKey)) {
+        	return listeners.get(sessionKey); // shouldn't happen, but this is safe
+        } else {
+        	listener = new FileUploadListener();
+        	listeners.put(sessionKey, listener);
+        	upload.setProgressListener(listener);
+        	return listener;
+        }
+    }
+    
     /**
      * Handle POST request.<br>
      * A post should only be be the initial upload request, i.e., a form with multipart content
@@ -226,12 +241,10 @@ public class UploadBlob extends HttpServlet {
         String sessionKey = request.getParameter("session");
         FileUploadListener listener = null;
         if(sessionKey == null) {
-        	log.info("NOOOOOOOOOOOOOOOOOOOOO!");
+        	log.warn("no session key, progress will not be reported to client");
         } else {
-            debug("POST: upload session key = "+sessionKey);
-            listener = new FileUploadListener();
-            upload.setProgressListener(listener);
-        	listeners.put(sessionKey, listener);
+            debug("POST: upload session key (param) = "+sessionKey);
+            listener = trackProgress(upload, sessionKey);
         }
         
         String uri = null;
@@ -249,7 +262,8 @@ public class UploadBlob extends HttpServlet {
                         + contentType + "|" + sizeInBytes);
                 if(item.isFormField() && fieldName.equals("session")) {
                 	sessionKey = item.getString();
-                	log.info("the hidden session field is set to "+sessionKey); // FIXME remove
+                    debug("POST: upload session key (part) = "+sessionKey);
+                    listener = trackProgress(upload, sessionKey);
                 }
                 // if it's a field from a form and the size is non-zero...
                 if (!item.isFormField() && (sizeInBytes > 0)) {
@@ -293,6 +307,9 @@ public class UploadBlob extends HttpServlet {
                         t.setValue(LABEL, fileName);
                         t.setValue(RestService.LABEL_PROPERTY, fileName);
                         t.setValue(RestService.DATE_PROPERTY, new Date());
+                        // httpclient also gives the content type a "charset"; ignore that.
+                        contentType = contentType.replaceFirst("; charset=.*","");
+                        // FIXME parse this properly and set the charset accordingly!
                         t.setValue(RestService.FORMAT_PROPERTY, contentType);
                         t.save();
                         log.info("user uploaded "+fileName+" ("+sizeInBytes+" bytes), uri="+uri);
@@ -402,49 +419,37 @@ public class UploadBlob extends HttpServlet {
      */
     public void doGet ( HttpServletRequest request,
             HttpServletResponse response ) throws ServletException, IOException {
-        response.setContentType("application/json");
-        if(!request.getParameterMap().containsKey("session")) {
-        	String sessionKey = SecureHashMinter.getMinter().mint();
+        if(!request.getParameterMap().containsKey("session")) { // no session?
+        	String sessionKey = SecureHashMinter.getMinter().mint(); // mint a session key
+        	// report
         	PrintWriter out = response.getWriter();
         	out.println("{\"session\":\""+sessionKey+"\"}");
-        	debug("GET: set upload session key = "+sessionKey);
+        	debug("GET: minted session key = "+sessionKey);
         } else {
         	String sessionKey = request.getParameter("session");
-        	debug("GET: upload session key = "+sessionKey);
-            // Make sure the session has started
+        	debug("GET: session key = "+sessionKey);
+            // return if there's no progress yet
         	if(listeners.get(sessionKey) == null) {
-        		log("(get): session null");
+        		log("GET: no upload for session key "+sessionKey);
         		returnZeroedJSON(response);
         		return;
         	}
-        	long bytesRead = 0;
-        	long contentLength = 0;
-        	//Vector<URI> blobUris = null;
-        	FileUploadListener listener = null;
-        	// Check to see if we've created the listener object yet
-        	listener = (FileUploadListener) listeners.get(sessionKey);
-        	if (listener == null) {
-        		log("(get): listener null");
-        		returnZeroedJSON(response);
-        		return;
-        	}
-        	
-        	// Get the meta information
-        	bytesRead = listener.getBytesRead();
-        	contentLength = listener.getContentLength();
-        	//Vector<UploadInfo> u = listener.getUploadInfo();
-        	//blobUris = listener.getUris();
-        	
+        	// get the listener
+        	FileUploadListener listener = listeners.get(sessionKey);
+        	// get progress from the listener
+        	long bytesRead = listener.getBytesRead();
+        	long contentLength = listener.getContentLength();
+        	// are we done?
         	if (listener.allDone()) {
-        		// No reason to keep listener in session since we're done
+        		// clean up
         		listeners.put(sessionKey, null);
         	}
-        	log("Progress: " + bytesRead + "/" + contentLength);
+        	// report progress
+        	log("progress: " + bytesRead + "/" + contentLength);
+            response.setContentType("application/json");
         	PrintWriter out = response.getWriter();
         	out.print(stateToJSON(true, listener, request));
-        	log("(get): " + stateToJSON(true, listener, request));
-        	out.flush();
-        	out.close();
+        	log("GET: reported " + stateToJSON(true, listener, request));
         }
     }
 
