@@ -121,9 +121,9 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	}
 
 	String getContextUrl() {
-		String contextUrl = getParameter("moduleBaseUrl");
+		String contextUrl = getStatusPage().replaceFirst("/[^/]+$","/");
 		if(contextUrl == null) {
-			return "http://localhost:8080/"; // this is the top-level binding (hosted)
+			return "http://localhost:8080/"; // development: hosted
 		} else {
 			return contextUrl;
 		}
@@ -131,7 +131,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	String getStatusPage() {
 		String statusPage = getParameter("statusPage");
 		if(statusPage == null) {
-			return "mmdb.html";
+			return "http://localhost:8080/mmdb.html"; // development: hosted
 		} else {
 			return statusPage;
 		}
@@ -166,7 +166,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		// acquire the session key
 		String sessionKey = getSessionKey();
 		// redirect the browser to start checking progress
-		getAppletContext().showDocument(new URL(getContextUrl()+getStatusPage()+"#upload?session="+sessionKey)); // FIXME parameterize
+		getAppletContext().showDocument(new URL(getStatusPage()+"#upload?session="+sessionKey)); // FIXME parameterize
 		// post the data
 		PostMethod post = new PostMethod();
 		setUrl(post,sessionKey);
