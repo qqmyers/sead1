@@ -63,10 +63,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private HandlerManager eventBus = new HandlerManager(null);
 	
 	/** Toolbar above main content panel */
-	private FlowPanel toolbar = new FlowPanel();
+	private FlowPanel toolbar;
 	
 	/** Main content panel **/
-	private FlowPanel mainContainer = new FlowPanel();
+	private FlowPanel mainContainer;
 
 	/** Place support for history management **/
 	private PlaceService placeService;
@@ -76,8 +76,15 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	public void onModuleLoad() {
 		
+		// navigation menu
 		initNavMenu();
+		
+		// toolbar
+		toolbar = new FlowPanel();
 		RootPanel.get("toolbar").add(toolbar);
+		
+		// main content
+		mainContainer = new FlowPanel();
 		RootPanel.get("mainContainer").add(mainContainer);
 
 		// log events
@@ -92,6 +99,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		parseHistoryToken(History.getToken());
 	}
 	
+	/**
+	 * Navigation menu at the top of the page.
+	 */
 	void initNavMenu() {
 		RootPanel.get("navMenu").clear();
 		HorizontalPanel navMenu = new HorizontalPanel();
@@ -144,8 +154,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		DatasetTablePresenter datasetTablePresenter = new DatasetTablePresenter(
 				datasetTableWidget, eventBus);
 		datasetTablePresenter.bind();
-
+		
 		mainContainer.clear();
+		
+		Label titleLabel = new Label("List all");
+		
+		titleLabel.addStyleName("titleLabel");
+		
+		mainContainer.add(titleLabel);
 		
 		mainContainer.add(datasetTableWidget.asWidget());
 		
@@ -229,6 +245,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		}
 	}
 	
+	/**
+	 * Show toolbar to upload datasets.
+	 * 
+	 * @return
+	 */
 	UploadWidget uploadDatasets() {
 		toolbar.clear();
 		UploadWidget uploadWidget = new UploadWidget();

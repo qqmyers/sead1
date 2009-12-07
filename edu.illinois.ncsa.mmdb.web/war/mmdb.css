@@ -2,35 +2,65 @@ body {
 	font-family: Arial, Helvetica, sans-serif;
 	margin: 0px;
 	padding: 0px;
+	background-color: #E3E3E3;
+	text-align: center;
+}
+
+.background {
+	background-color: #E3E3E3;
 }
 
 .title {
   font-size: 2em;
   font-weight: bold;
-  color: #036;
+  color: white;
   padding: 20px 0px 10px 10px;
   text-align: left;
 }
 
 .header {
-	background: #F8F8F8;
+	background: #002B55;
+	padding: 0px;
+	margin: 0px;
+	border-bottom: #888888 solid 1px;
+}
+
+.mainMenu {
+	width: 800px;
+	margin: 0px auto 0px auto;
+	padding: 0px;
+	text-align: left;
+}
+
+.toolbar {
+	width: 800px;
+	background-color: #069;
+	margin: 0px auto 0px auto;
+	padding: 0px;
+}
+
+.uploadMainPanel {
+	width: 100%;
+	padding: 20px;
 }
 
 .mainContainer {
-	width: 100%;
 	height: auto;
-	border-top: 1px black solid;
-	border-bottom: 1px black solid;
-	margin: 0px;
 	text-align: center;
-	minHeight: 600px;
+	minHeight: 600px;	
+	width: 800px;
+	border: solid 1px #888888;
+	margin: 20px auto 20px auto;
+	padding: 0px;
+	background-color: white;
 }
 
 .bottomMenu {
-	background: #F8F8F8;
-	height: 100px;
-	margin: 0px;
+	background-color: #E3E3E3;
+	width: 800px;
+	margin: 20px auto 20px auto;
 	padding: 10px;
+	text-align: left;
 }
 
 .tagline {
@@ -47,7 +77,8 @@ body {
 
 .navMenuLink:link {
 	font-family: Arial, Helvetica, sans-serif;
-	color: #069;
+	/**color: #069;**/
+	color: white;
 	font-weight: bold;
 	text-decoration: none;
 	margin: 5px;
@@ -56,7 +87,7 @@ body {
 
 .navMenuLink:visited {
 	font-family: Arial, Helvetica, sans-serif;
-	color: #069;
+	color: white;
 	font-weight: bold;
 	text-decoration: none;
 	margin: 5px;
@@ -64,18 +95,30 @@ body {
 }
 
 .navMenuLink:active {
- 	color: #069;
+ 	color: white;
 }
 
 .navMenuLink:hover {
-	color: #036;
+	color: white;
+	text-decoration: underline;
+}
+
+.borderDebug div {
+	border: 1px solid red;
+}
+
+.titleLabel {
+	text-align:left;
+	font-size: 1.5em;
+  	color: black;
+  	margin: 20px;
 }
 
 .datasetTable {
-	width: 800px;
+	width: 700px;
 	border: #CCC solid 1px;
 	vertical-align: top;
-	margin: 100px auto 150px auto;
+	margin: 20px auto 100px auto;
 	padding: 0px;
 	border-spacing:0px;
 }
@@ -159,11 +202,7 @@ body {
 }
 
 .datasetMainContainer {
-	width: 800px;
-	border-left: solid 1px black;
-	border-right: solid 1px black;
-	margin: 20px auto 20px auto;
-	padding: 0px;
+	width: 100%;
 }
 
 .previewPanel {
@@ -179,6 +218,7 @@ body {
 	width: 500px;
 	height: 400px;
 	overflow: auto;
+	margin: 10px;
 }
 
 .imagePreview {

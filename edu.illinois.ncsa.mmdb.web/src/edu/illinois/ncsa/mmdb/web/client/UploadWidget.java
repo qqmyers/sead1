@@ -79,6 +79,7 @@ public class UploadWidget extends Composite {
 	public UploadWidget() {
 		// multiple uploads
 		VerticalPanel uploadStackPanel = new VerticalPanel();
+		uploadStackPanel.addStyleName("uploadMainPanel");
 		HorizontalPanel uploadPanel = new HorizontalPanel();
 		uploadForm.setAction("UploadBlob");
 		uploadForm.setEncoding(FormPanel.ENCODING_MULTIPART);

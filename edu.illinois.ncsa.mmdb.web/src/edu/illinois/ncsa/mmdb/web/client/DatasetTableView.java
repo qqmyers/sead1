@@ -31,7 +31,6 @@ public class DatasetTableView extends FlexTable implements Display {
 		this.setWidget(0, 0, new Label("Name"));
 		this.setWidget(0, 1, new Label("Type"));
 		this.setWidget(0, 2, new Label("Date"));
-		this.setWidget(0, 3, new Label("*"));
 		addStyleName("datasetTable");
 		getRowFormatter().addStyleName(0, "topRow");
 	}
@@ -46,9 +45,8 @@ public class DatasetTableView extends FlexTable implements Display {
 		
 		this.setWidget(row, 1, new Label(type));
 		this.setWidget(row, 2, new Label(DATE_TIME_FORMAT.format(date)));
-		this.setWidget(row, 3, new Label("*"));
 		
-		for (int col=0; col<4; col++) {
+		for (int col=0; col<3; col++) {
 			getCellFormatter().addStyleName(row, col, "cell");
 		}
 		
