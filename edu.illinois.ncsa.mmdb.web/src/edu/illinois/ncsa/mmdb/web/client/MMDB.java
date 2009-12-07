@@ -276,8 +276,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			showDataset();
 		} else if(token.startsWith("listDatasets")) {
 			listDatasets();
-		} else if(token.startsWith("upload")) { // experimental js->json
+		} else if(token.startsWith("upload")) { // upload applet support
 			showUploadProgress();
+		} else if(token.startsWith("schneertz")) {
+			listDatasets(); // FIXME remove this case
 		} else {
 			listDatasets();
 		}

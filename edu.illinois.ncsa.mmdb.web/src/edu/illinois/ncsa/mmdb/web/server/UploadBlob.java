@@ -179,8 +179,7 @@ public class UploadBlob extends HttpServlet {
     Map<String,FileUploadListener> listeners = new HashMap<String,FileUploadListener>();
     
     void debug(String s) {
-    	//log.trace(s);
-    	log.info(s);
+    	log.trace(s);
     }
 
     void log(Object o) {
@@ -436,20 +435,16 @@ public class UploadBlob extends HttpServlet {
         	}
         	// get the listener
         	FileUploadListener listener = listeners.get(sessionKey);
-        	// get progress from the listener
-        	long bytesRead = listener.getBytesRead();
-        	long contentLength = listener.getContentLength();
         	// are we done?
         	if (listener.allDone()) {
         		// clean up
         		listeners.put(sessionKey, null);
         	}
         	// report progress
-        	log("progress: " + bytesRead + "/" + contentLength);
             response.setContentType("application/json");
         	PrintWriter out = response.getWriter();
         	out.print(stateToJSON(true, listener, request));
-        	log("GET: reported " + stateToJSON(true, listener, request));
+        	debug("GET: reported " + stateToJSON(true, listener, request));
         }
     }
 

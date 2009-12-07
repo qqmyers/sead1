@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<jnlp spec="1.0+" codebase="dnd" href="">
+  <information>
+    <title>Drop Uploader for Medici</title>
+    <vendor>National Center for Supercomputing Applications</vendor>
+  </information>
+  <security> 
+    <all-permissions/>
+  </security>
+  <resources>
+    <j2se version="1.5+"
+	  href="http://java.sun.com/products/autodl/j2se"/>
+    <jar href="lib/commons-codec-1.2.jar"/>
+    <jar href="lib/commons-httpclient-3.0.1.jar"/>
+    <jar href="lib/commons-httpclient-contrib-ssl-3.1.jar"/>
+    <jar href="lib/commons-logging-1.0.4.jar"/>
+    <jar href="DropUploader.jar" main="true"/>
+  </resources>
+  <applet-desc
+     name="Drop Uploader for Medici"
+		main-class="edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader"
+		width="100" height="100"/>
+  <update check="background">
+</jnlp>
