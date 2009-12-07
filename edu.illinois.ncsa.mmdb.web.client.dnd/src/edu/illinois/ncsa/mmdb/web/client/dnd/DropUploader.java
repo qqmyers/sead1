@@ -17,6 +17,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		setSize(600, 300);
 
 		ta = new JTextArea();
-		ta.setText("Drop files here #4.");
+		ta.setText("5:Drop files here");
 		ta.setBackground(Color.white);
 		getContentPane().add(ta, BorderLayout.CENTER);
 
@@ -112,6 +113,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			if(files.size()==0) {
 				System.out.println("Drop failed: " + dtde);
 			} else {
+				files = expandDirectories(files,false); // expand directories 
 				ta.setText(files.size()+" file(s) dropped: "+files);
 				uploadFiles(files);
 			}
@@ -120,14 +122,29 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}
 	}
 
-	String getContextUrl() {
-		String contextUrl = getStatusPage().replaceFirst("/[^/]+$","/");
-		if(contextUrl == null) {
-			return "http://localhost:8080/"; // development: hosted
-		} else {
-			return contextUrl;
+	List<File> expandDirectories(List<File> files, boolean recursive) {
+		List<File> expanded = new LinkedList<File>();
+		for(File f : files) {
+			if(f.isDirectory()) {
+				if(recursive) {
+					expanded.addAll(expandDirectories(Arrays.asList(f.listFiles()),true));
+				} else {
+					for(File kid : f.listFiles()) {
+						if(!kid.isDirectory()) {
+							expanded.add(kid);
+						}
+					}
+				}
+			} else {
+				expanded.add(f);
+			}
 		}
+		return expanded;
 	}
+	String getContextUrl() {
+		return getStatusPage().replaceFirst("/[^/]+$","/");
+	}
+	
 	String getStatusPage() {
 		String statusPage = getParameter("statusPage");
 		if(statusPage == null) {
