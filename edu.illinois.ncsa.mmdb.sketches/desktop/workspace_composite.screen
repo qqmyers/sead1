@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Master" x="8" y="8">
+    <screen href="main.screen#/"/>
+  </widgets>
+  <widgets xsi:type="model:Master" x="168" y="53">
+    <screen href="collection.screen#/"/>
+  </widgets>
+  <widgets xsi:type="model:Master" x="592" y="52">
+    <screen href="dataset.screen#/"/>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font/>
+</model:Screen>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:TabbedPane" x="8" y="8" width="417" height="476" text="Collection One, Search Results"/>
+  <widgets xsi:type="model:WidgetGroup" x="15" y="72">
+    <widgets xsi:type="model:Panel" width="397" height="113"/>
+    <widgets xsi:type="model:Icon" x="363" y="45" icon="arrow-right (medium)"/>
+    <widgets xsi:type="model:Icon" x="10" y="45" icon="arrow-left (medium)"/>
+    <widgets xsi:type="model:Placeholder" x="41" y="16" width="97" height="81" text="one"/>
+    <widgets xsi:type="model:Placeholder" x="150" y="16" width="97" height="81" text="thumbnail"/>
+    <widgets xsi:type="model:Placeholder" x="257" y="16" width="97" height="81" text="thumbnail"/>
+  </widgets>
+  <widgets xsi:type="model:WidgetGroup" x="18" y="199">
+    <widgets xsi:type="model:Icon" x="209" y="20" icon="user (small)"/>
+    <widgets xsi:type="model:Placeholder" width="74" height="87" text=" image?"/>
+    <widgets xsi:type="model:Label" x="88" text="Title of the Collection">
+      <font/>
+    </widgets>
+    <widgets xsi:type="model:Text" x="88" y="39" width="308" height="33" dummyText="true">
+      <font/>
+    </widgets>
+    <widgets xsi:type="model:Label" x="88" y="71" text="tag, tag, tag, tag, ...">
+      <font/>
+    </widgets>
+    <widgets xsi:type="model:Label" x="205" y="71" text="123 children(?)">
+      <font/>
+    </widgets>
+    <widgets xsi:type="model:Label" x="316" y="71" text="15 annotations">
+      <font/>
+    </widgets>
+    <widgets xsi:type="model:Label" x="227" y="17" text="kooper">
+      <font/>
+    </widgets>
+    <widgets xsi:type="model:Label" x="88" y="17" text="Created: 10/2/2009 by:">
+      <font/>
+    </widgets>
+  </widgets>
+  <widgets xsi:type="model:Tree" x="18" y="320" width="394" height="154" text="Camera Settings&#xA;-File One&#xA;-File Two&#xA;-File Three&#xA;[-] Other Metadata&#xA;"/>
+  <widgets xsi:type="model:Breadcrumbs" x="18" y="45" text="Home, Experiments, Bar">
+    <font/>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font/>
+</model:Screen>

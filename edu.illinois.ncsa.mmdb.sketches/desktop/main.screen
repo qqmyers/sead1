@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Window" x="8" y="8" width="1017" height="545" text="Medici"/>
+  <widgets xsi:type="model:Group" x="8" y="53" width="161" height="68" text="Search"/>
+  <widgets xsi:type="model:Menu" x="8" y="27" width="1017" text="&amp;File,&amp;Edit,&amp;View,&amp;Help"/>
+  <widgets xsi:type="model:Panel" x="8" y="528" width="1017" height="25"/>
+  <widgets xsi:type="model:Label" x="976" y="529" width="49" text="shawn">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Icon" x="957" y="533" icon="user (small)"/>
+  <widgets xsi:type="model:SearchField" x="24" y="80" width="135" text="Search"/>
+  <widgets xsi:type="model:Group" x="8" y="354" width="161" height="94" text="Recent Activity"/>
+  <widgets xsi:type="model:Group" x="8" y="447" width="161" height="82" text="Statistics"/>
+  <widgets xsi:type="model:Group" x="8" y="250" width="161" height="105" text="Bookmarks"/>
+  <widgets xsi:type="model:Group" x="8" y="120" width="161" height="131" text="Collections"/>
+  <widgets xsi:type="model:List" x="8" y="137" width="161" height="114" text="|Item One&#xA;Item Two&#xA;Item Three"/>
+  <widgets xsi:type="model:VScrollbar" x="152" y="137" height="114"/>
+  <widgets xsi:type="model:List" x="8" y="268" width="145" height="87" text="Query: &quot;tag:foo&quot;&#xD;&#xA;Collection: &quot;Title&quot;&#xD;&#xA;Dataset:&quot;Label&quot;"/>
+  <widgets xsi:type="model:VScrollbar" x="152" y="268" height="87"/>
+  <widgets xsi:type="model:List" x="8" y="371" width="145" height="77" text="Search: &quot;tag:feh&quot;&#xD;&#xA;Upload: &quot;image&quot;&#xD;&#xA;Tag: &quot;image&quot; with &quot;foo&quot;"/>
+  <widgets xsi:type="model:VScrollbar" x="152" y="371" height="77"/>
+  <widgets xsi:type="model:List" x="8" y="464" width="145" height="67" text="98 (1.2M) datasets.&#xD;&#xA;123 (800K) queries.&#xD;&#xA;12 (125K) tags."/>
+  <widgets xsi:type="model:VScrollbar" x="152" y="464" height="67"/>
+  <hRuler/>
+  <vRuler/>
+  <font/>
+</model:Screen>
