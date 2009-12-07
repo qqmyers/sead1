@@ -17,7 +17,6 @@ body {
 }
 
 .mainContainer {
-	display: block;
 	width: 100%;
 	height: auto;
 	border-top: 1px black solid;
@@ -114,10 +113,8 @@ body {
 }
 
 .tagsView {
-	display: inline;
 	width: 100%;
 	padding: 10px;
-	vertical-align: middle;
 	border-top: 1px dashed gray;
 	border-bottom: 1px dashed gray;
 }
@@ -162,7 +159,6 @@ body {
 }
 
 .datasetMainContainer {
-	display: block;
 	width: 800px;
 	border-left: solid 1px black;
 	border-right: solid 1px black;
