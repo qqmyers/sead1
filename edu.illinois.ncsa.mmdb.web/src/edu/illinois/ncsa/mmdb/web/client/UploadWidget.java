@@ -79,7 +79,7 @@ public class UploadWidget extends Composite {
 	String getModuleBaseUrl() {
 		String baseUrl = GWT.getModuleBaseURL();
 		// uncomment next line for hosted
-		baseUrl = baseUrl.replaceFirst("/[^/]+/$", "/");
+		//baseUrl = baseUrl.replaceFirst("/[^/]+/$", "/");
 		return baseUrl;
 	}
 	
