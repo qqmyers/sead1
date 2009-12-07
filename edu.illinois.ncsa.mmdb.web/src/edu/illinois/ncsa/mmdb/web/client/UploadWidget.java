@@ -76,6 +76,13 @@ public class UploadWidget extends Composite {
 	// progress bar
 	ProgressBar progressBar = new ProgressBar();
 	
+	String getModuleBaseUrl() {
+		String baseUrl = GWT.getModuleBaseURL();
+		// uncomment next line for hosted
+		baseUrl = baseUrl.replaceFirst("/[^/]+/$", "/");
+		return baseUrl;
+	}
+	
 	public UploadWidget() {
 		// multiple uploads
 		VerticalPanel uploadStackPanel = new VerticalPanel();

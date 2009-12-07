@@ -65,6 +65,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	/** Toolbar above main content panel */
 	private FlowPanel toolbar;
 	
+	/** The upload widget in the upload toolbar */
+	private FlowPanel uploadPanel;
+	
 	/** Main content panel **/
 	private FlowPanel mainContainer;
 
@@ -82,6 +85,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		// toolbar
 		toolbar = new FlowPanel();
 		RootPanel.get("toolbar").add(toolbar);
+		
+		// upload panel
+		uploadPanel = new FlowPanel();
+		RootPanel.get("uploadPanel").add(uploadPanel);
 		
 		// main content
 		mainContainer = new FlowPanel();
@@ -252,19 +259,23 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	UploadWidget uploadDatasets() {
 		toolbar.clear();
+		uploadPanel.clear();
 		UploadWidget uploadWidget = new UploadWidget();
 		uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
 			public void onDatasetUploaded(DatasetUploadedEvent event) {
 				History.newItem("dataset?id="+event.getDatasetUri());
-				toolbar.clear();
+				DOM.getElementById("uploadToolbar").addClassName("hidden");
+				uploadPanel.clear();
 			}
 		});
 		uploadWidget.addCancelHandler(new CancelHandler() {
 			public void onCancel(CancelEvent event) {
-				toolbar.clear();
+				DOM.getElementById("uploadToolbar").addClassName("hidden");
+				uploadPanel.clear();
 			}
 		});
-		toolbar.add(uploadWidget);
+		uploadPanel.add(uploadWidget);
+		DOM.getElementById("uploadToolbar").removeClassName("hidden");
 		return uploadWidget;
 	}
 	

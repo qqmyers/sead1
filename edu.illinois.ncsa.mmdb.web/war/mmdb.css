@@ -39,6 +39,10 @@ body {
 	padding: 0px;
 }
 
+.hidden {
+	display: none;
+}
+
 .uploadMainPanel {
 	width: 100%;
 	padding: 20px;

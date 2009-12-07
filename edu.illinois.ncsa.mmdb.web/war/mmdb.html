@@ -26,6 +26,9 @@
     <!-- be added before this line.                -->
     <!--                                           -->
     <script type="text/javascript" language="javascript" src="mmdb/mmdb.nocache.js"></script>
+    
+    <!--  this script allows for deploying JNLP-based applets -->
+    <script src="http://www.java.com/js/deployJava.js"></script>
   </head>
 
   <!--                                           -->
@@ -49,19 +52,28 @@
     <div class="header">
     <div class="mainMenu">
       <div class="title">Medici</div>
-      <!--div class="dropUpload">
-	    <script src="http://www.java.com/js/deployJava.js"></script>
-		<script>
-  			var attributes = { code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader', archive:'dnd/DropUploader-0.9.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar', width:600, height:60 };
-  			var parameters = { jnlp_href: 'dropuploader.jnlp' };
-  			deployJava.runApplet(attributes, parameters, '1.5');
-		</script>
-      </div-->
       <div class="navMenu" id="navMenu"></div>
     </div>
     </div>
 
 	<div id="toolbar" class="toolbar"></div>
+	
+	<div id="uploadToolbar" class="toolbar hidden">
+		<table> <!--  FIXME do with css positioning instead of tables ... -->
+			<tr>
+				<td width="62px">
+				 	<script>
+  						var attributes = { code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader', archive:'dnd/DropUploader-0.9.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar', width:60, height:60 };
+  						var parameters = { jnlp_href: 'dropuploader.jnlp' };
+  						deployJava.runApplet(attributes, parameters, '1.5');
+					</script>
+				</td>
+				<td>
+				    <span id="uploadPanel"></span>
+				</td>
+			</tr>
+		</table>
+	</div>
 	
     <div id="mainContainer" class="mainContainer"></div>
     
