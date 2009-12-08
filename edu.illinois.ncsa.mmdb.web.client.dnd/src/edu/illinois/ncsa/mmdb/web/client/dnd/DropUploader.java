@@ -15,8 +15,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.net.FileNameMap;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,7 +54,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		setSize(600, 300);
 
 		ta = new JTextArea();
-		ta.setText("5:Drop files here");
+		ta.setText("6:Drop files here");
 		ta.setBackground(Color.white);
 		getContentPane().add(ta, BorderLayout.CENTER);
 
@@ -189,8 +191,10 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		setUrl(post,sessionKey);
 		Part parts[] = new Part[files.size()];
 		for(int i = 0; i < files.size(); i++) {
-			String mimeType = "image/jpg"; // FIXME base on file extension
-			FilePart part = new FilePart("f"+(i+1), files.get(i), mimeType, null);
+			File file = files.get(i);
+			FileNameMap fileNameMap = URLConnection.getFileNameMap();
+			String mimeType = fileNameMap.getContentTypeFor(file.getName());
+			FilePart part = new FilePart("f"+(i+1), file, mimeType, null);
 			parts[i] = part;
 		}
 		post.setRequestEntity(new MultipartRequestEntity(parts, post.getParams()));
