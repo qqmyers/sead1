@@ -62,6 +62,8 @@ public class NewAnnotationView extends Composite {
 		mainTable.setHTML(2, 0, "Description: ");
 
 		descriptionTextArea = new TextArea();
+		
+		descriptionTextArea.addStyleName("newCommentTextArea");
 
 		descriptionTextArea.setWidth("500px");
 

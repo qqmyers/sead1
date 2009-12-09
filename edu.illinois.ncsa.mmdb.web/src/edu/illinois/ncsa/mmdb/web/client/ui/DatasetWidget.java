@@ -9,17 +9,16 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.DownloadButton;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
  * Show one datasets and related information about it.
@@ -34,7 +33,7 @@ public class DatasetWidget extends Composite {
 	
 	private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDateTimeFormat();
 
-	private VerticalPanel mainPanel;
+	private FlowPanel mainPanel;
 
 	private Label titleLabel;
 
@@ -48,19 +47,27 @@ public class DatasetWidget extends Composite {
 
 	private DownloadButton downloadButton;
 
-	private Image placeholderImage;
-
-	private HorizontalPanel previewPanel;
+	private Image imagePreview;
 
 	private FlowPanel metadataPanel;
 
 	private SimplePanel imageContainer;
 
 	private SimplePanel downloadButtonPanel;
+
+	private FlowPanel leftColumn;
+
+	private FlowPanel rightColumn;
 	
 	private static final String BLOB_URL = "./api/image/";
 	
 	private static final String DOWNLOAD_URL = "./api/image/download/";
+
+	private PersonBean creator;
+
+	private Label authorLabel;
+
+	private Label sizeLabel;
 	
 	/**
 	 * 
@@ -69,15 +76,30 @@ public class DatasetWidget extends Composite {
 	public DatasetWidget(MyDispatchAsync dispatchAsync) {
 		this.service = dispatchAsync;
 		
-		mainPanel = new VerticalPanel();
+		mainPanel = new FlowPanel();
 		
 		mainPanel.addStyleName("datasetMainContainer");
 		
 		initWidget(mainPanel);
 		
-		previewPanel = new HorizontalPanel();
+		leftColumn = new FlowPanel();
 		
-		previewPanel.addStyleName("previewPanel");
+		leftColumn.addStyleName("datasetMainContainerLeftColumn");
+		
+		mainPanel.add(leftColumn);
+		
+		rightColumn = new FlowPanel();
+		
+		rightColumn.addStyleName("datasetMainContainerRightColumn");
+		
+		mainPanel.add(rightColumn);
+		
+		// necessary so that the main conteinar wraps around the two columns
+		SimplePanel clearFloat = new SimplePanel();
+		
+		clearFloat.addStyleName("clearFloat");
+		
+		mainPanel.add(clearFloat);
 	}
 	
 	/**
@@ -106,26 +128,49 @@ public class DatasetWidget extends Composite {
 	 */
 	public void showDataset(DatasetBean dataset) {
 		
-		// create widgets
-        placeholderImage = new Image(BLOB_URL + dataset.getUri());
+		// image preview
         
-        placeholderImage.addStyleName("imagePreview");
+		imagePreview = new Image(BLOB_URL + dataset.getUri());
+        
+        imagePreview.addStyleName("imagePreview");
         
         imageContainer = new SimplePanel();
         
         imageContainer.addStyleName("imagePreviewPanel");
         
-        imageContainer.add(placeholderImage);
+        imageContainer.add(imagePreview);
 		
+        // metadata
 		titleLabel = new Label(dataset.getTitle());
 		
         titleLabel.addStyleName("datasetTitle");
+        
+        creator = dataset.getCreator();
+        
+		tagsWidget = new TagsWidget(dataset.getUri(), service);
+
+        authorLabel = new Label("Author: ");
+        
+    	authorLabel.addStyleName("metadataEntry");
+        
+        if (creator != null) {
+        
+        	authorLabel.setTitle(creator.getEmail());
+        
+        	authorLabel.setText("Author: " + creator.getName());
+        }
+        
+        sizeLabel = new Label("Size: ");
+        
+        sizeLabel.addStyleName("metadataEntry");
 		
 		typeLabel = new Label("Type: " + dataset.getMimeType());
 		
 		typeLabel.addStyleName("metadataEntry");
 		
 		dateLabel = new Label("Date: " + DATE_TIME_FORMAT.format(dataset.getDate()));
+		
+		dateLabel.addStyleName("metadataEntry");
 		
 		tagsWidget = new TagsWidget(dataset.getUri(), service);
 		
@@ -142,12 +187,10 @@ public class DatasetWidget extends Composite {
         
         downloadButtonPanel.add(downloadButton);
         
-        // lay them out
-        mainPanel.add(titleLabel);
+        // layout
+        leftColumn.add(titleLabel);
         
-        mainPanel.add(previewPanel);
-        
-        previewPanel.add(imageContainer);
+        leftColumn.add(imageContainer);
         
         metadataPanel = new FlowPanel();
         
@@ -155,17 +198,21 @@ public class DatasetWidget extends Composite {
         
         metadataPanel.addStyleName("alignRight");
         
-        previewPanel.add(metadataPanel);
-		
+        metadataPanel.add(authorLabel);
+        
+        metadataPanel.add(sizeLabel);
+        
         metadataPanel.add(typeLabel);
 		
         metadataPanel.add(dateLabel);
         
-		mainPanel.add(downloadButtonPanel);
+        rightColumn.add(metadataPanel);
+        
+		leftColumn.add(downloadButtonPanel);
 		
-		mainPanel.add(tagsWidget);
-
-		mainPanel.add(annotationsWidget);
+		leftColumn.add(annotationsWidget);
+		
+		rightColumn.add(tagsWidget);
 		
 	}
 }

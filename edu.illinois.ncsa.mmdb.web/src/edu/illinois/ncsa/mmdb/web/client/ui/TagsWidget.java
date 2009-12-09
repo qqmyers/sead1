@@ -14,13 +14,13 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTags;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
@@ -36,12 +36,12 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
  */
 public class TagsWidget extends Composite {
 
-	private HorizontalPanel mainPanel;
+	private VerticalPanel mainPanel;
 	private FlowPanel tagsPanel;
 	private final String id;
-	private Button tagButton;
 	private final MyDispatchAsync service;
 	private Label tagLabel;
+	private Anchor addTag;
 	
 	/**
 	 * A widget listing tags and providing a way to add a new one.
@@ -54,30 +54,27 @@ public class TagsWidget extends Composite {
 		this.id = id;
 		this.service = service;
 		
-		mainPanel = new HorizontalPanel();
+		mainPanel = new VerticalPanel();
 		mainPanel.addStyleName("tagsView");
 		initWidget(mainPanel);
 		
-		tagLabel = new Label("Tags:");
+		tagLabel = new Label("Tags");
 		tagLabel.addStyleName("tagsHeading");
 		mainPanel.add(tagLabel);
-		mainPanel.setCellWidth(tagLabel, "100px");
 		
 		tagsPanel = new FlowPanel();
 		tagsPanel.addStyleName("tagsLinks");
 		mainPanel.add(tagsPanel);
 		
-		tagButton = new Button("Tag");
-		tagButton.addStyleName("tagsButton");
-		mainPanel.add(tagButton);
-		mainPanel.setCellHorizontalAlignment(tagButton, HasHorizontalAlignment.ALIGN_RIGHT);
+		addTag = new Anchor("Add tag");
+		mainPanel.add(addTag);
 		
-		tagButton.addClickHandler(new ClickHandler() {
+		addTag.addClickHandler(new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
 				
-				mainPanel.remove(tagButton);
+				mainPanel.remove(addTag);
 				
 				final AddTagWidget tagWidget = new AddTagWidget(id, service);
 				
@@ -87,8 +84,7 @@ public class TagsWidget extends Composite {
 					public void onClick(ClickEvent event) {
 						submitTag(tagWidget.getTags());
 						mainPanel.remove(tagWidget);
-						mainPanel.add(tagButton);
-						mainPanel.setCellHorizontalAlignment(tagButton, HasHorizontalAlignment.ALIGN_RIGHT);
+						mainPanel.add(addTag);
 					}
 				});
 				
@@ -99,8 +95,7 @@ public class TagsWidget extends Composite {
 						if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
 							submitTag(tagWidget.getTags());
 							mainPanel.remove(tagWidget);
-							mainPanel.add(tagButton);
-							mainPanel.setCellHorizontalAlignment(tagButton, HasHorizontalAlignment.ALIGN_RIGHT);
+							mainPanel.add(addTag);
 						}
 						
 					}
@@ -111,8 +106,7 @@ public class TagsWidget extends Composite {
 					@Override
 					public void onClick(ClickEvent event) {
 						mainPanel.remove(tagWidget);
-						mainPanel.add(tagButton);
-						mainPanel.setCellHorizontalAlignment(tagButton, HasHorizontalAlignment.ALIGN_RIGHT);
+						mainPanel.add(addTag);
 					}
 				});
 				

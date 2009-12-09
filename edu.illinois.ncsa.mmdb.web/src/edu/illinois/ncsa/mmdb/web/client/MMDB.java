@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsResult;
@@ -92,6 +93,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		
 		// main content
 		mainContainer = new FlowPanel();
+		mainContainer.addStyleName("relativePosition");
 		RootPanel.get("mainContainer").add(mainContainer);
 
 		// log events

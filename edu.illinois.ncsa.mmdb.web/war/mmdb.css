@@ -6,6 +6,10 @@ body {
 	text-align: center;
 }
 
+.redBorder {
+	border: 1px solid red;
+}
+
 .background {
 	background-color: #E3E3E3;
 }
@@ -26,14 +30,14 @@ body {
 }
 
 .mainMenu {
-	width: 800px;
+	width: 975px;
 	margin: 0px auto 0px auto;
 	padding: 0px;
 	text-align: left;
 }
 
 .toolbar {
-	width: 800px;
+	width: 975px;
 	background-color: #069;
 	margin: 0px auto 0px auto;
 	padding: 0px;
@@ -43,25 +47,32 @@ body {
 	display: none;
 }
 
+.relativePosition {
+	position: relative;
+}
+
 .uploadMainPanel {
 	width: 100%;
 	padding: 20px;
 }
 
 .mainContainer {
-	height: auto;
 	text-align: center;
 	minHeight: 600px;	
-	width: 800px;
+	width: 975px;
 	border: solid 1px #888888;
 	margin: 20px auto 20px auto;
 	padding: 0px;
 	background-color: white;
 }
 
+.clearFloat {
+	clear: both;
+}
+
 .bottomMenu {
 	background-color: #E3E3E3;
-	width: 800px;
+	width: 975px;
 	margin: 20px auto 20px auto;
 	padding: 10px;
 	text-align: left;
@@ -159,11 +170,14 @@ body {
 	float: right;
 }
 
+.datasetSocialPanel {
+	width: 100px;
+}
+
 .tagsView {
-	width: 100%;
-	padding: 10px;
-	border-top: 1px dashed gray;
-	border-bottom: 1px dashed gray;
+	width:100%;
+	padding: 0px;
+	margin: 20px 5px 20px 5px;
 }
 
 .tagsHeading {
@@ -176,9 +190,8 @@ body {
 }
 
 .tagsLinks {
-	width: 300px;
 	margin-top: 10px;
-	margin-bottom: 10px;
+	margin-bottom: 20px;
 	padding: 0px;
 }
 
@@ -206,23 +219,40 @@ body {
 }
 
 .datasetMainContainer {
+	position: relative;
 	width: 100%;
+}
+
+.datasetMainContainerLeftColumn {
+	float: left;
+	width: 700px;
+}
+
+.datasetMainContainerRightColumn {
+	float: right;
+	width: 250px;
+	height: 100%;
+	border-left: 1px dotted gray;
 }
 
 .previewPanel {
 	display: inline;
 	position: relative;
 	float: left;
-	spacing: 0px;
+	margin: 0px;
 	padding: 0px;
 	height: auto;
 }
 
 .imagePreviewPanel {
 	width: 500px;
-	height: 400px;
+	height: 333px;
 	overflow: auto;
-	margin: 10px;
+	margin: 30px;
+	border: 1px solid #888888;
+	margin-left: auto;
+    margin-right: auto;
+	vertical-align: middle;
 }
 
 .imagePreview {
@@ -233,17 +263,15 @@ body {
 }
 
 .metadataPreview {
-	height: 400px;
-	border-left: 1px dashed gray;
-	padding: 10px;
-}
-
-.metadataPreview div {
-	padding-top: 20px;
+	width:100%;
+	margin: 20px 0px 20px 0px;
 }
 
 .metadataEntry {
 	vertical-align: middle;
+	text-align: left;
+	padding: 5px;
+	font-family: Arial, Helvetica, sans-serif;
 }
 
 .downloadButton {
@@ -251,7 +279,8 @@ body {
 }
 
 .downloadButtonContainer {
-	border-top: 1px dashed gray;
+	border-top: 1px dotted gray;
+	border-bottom: 1px dotted gray;
 	margin: 0px;
 	padding: 20px;
 }
@@ -294,6 +323,10 @@ body {
 	font-weight:bold;
 	margin-top: 5px;
 	margin-bottom: 5px;
+}
+
+.newCommentTextArea {
+	font-family: Arial, Helvetica, sans-serif;
 }
 
 .newAnnotationMainPanel {
