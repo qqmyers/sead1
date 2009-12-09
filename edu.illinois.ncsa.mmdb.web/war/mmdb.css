@@ -14,14 +14,13 @@ body {
 	background-color: #E3E3E3;
 }
 
-.title {
-  font-size: 2em;
-  font-weight: bold;
-  color: white;
-  padding: 20px 0px 10px 10px;
-  text-align: left;
+.hidden {
+	display: none;
 }
 
+.relativePosition {
+	position: relative;
+}
 .header {
 	background: #002B55;
 	padding: 0px;
@@ -36,57 +35,40 @@ body {
 	text-align: left;
 }
 
-.toolbar {
-	width: 975px;
-	background-color: #069;
-	margin: 0px auto 0px auto;
-	padding: 0px;
+.title {
+  float: left;
+  font-size: 2em;
+  font-weight: bold;
+  color: white;
+  padding: 20px 0px 10px 10px;
+  text-align: left;
 }
 
-.hidden {
-	display: none;
-}
-
-.relativePosition {
-	position: relative;
-}
-
-.uploadMainPanel {
-	width: 100%;
-	padding: 20px;
-}
-
-.mainContainer {
-	text-align: center;
-	minHeight: 600px;	
-	width: 975px;
-	border: solid 1px #888888;
-	margin: 20px auto 20px auto;
-	padding: 0px;
-	background-color: white;
-}
-
-.clearFloat {
-	clear: both;
-}
-
-.bottomMenu {
-	background-color: #E3E3E3;
-	width: 975px;
-	margin: 20px auto 20px auto;
-	padding: 10px;
-	text-align: left;
-}
-
-.tagline {
+.loginMenu {
+	width: 200px;
 	float: right;
-	font-size: 1.5em;
-	color: #7F7F7F;
-	padding: 0px 0px 5px 0px;
-	text-align: left;
+	text-align: right;
+	color: white;
+	padding: 10px;
+	margin: 0px;
+}
+
+.loginMenu div {
+	display:inline;
+}
+
+.loginMenuLink:link {
+	color: white;
+	text-decoration: none;
+}
+
+.loginMenuLink:hover {
+	color: white;
+	text-decoration: underline;
 }
 
 .navMenu {
+	clear: both;
 	padding: 0px 0px 5px 50px;
 }
 
@@ -116,6 +98,69 @@ body {
 .navMenuLink:hover {
 	color: white;
 	text-decoration: underline;
+}
+
+.toolbar {
+	width: 975px;
+	background-color: #069;
+	margin: 0px auto 0px auto;
+	padding: 0px;
+}
+
+.uploadMainPanel {
+	width: 100%;
+	padding: 20px;
+}
+
+.mainContainer {
+	text-align: center;
+	minHeight: 600px;	
+	width: 975px;
+	border: solid 1px #888888;
+	margin: 20px auto 20px auto;
+	padding: 0px;
+	background-color: white;
+}
+
+.page {
+	width: 100%;
+	text-align: center;
+	minHeight: 600px;
+	margin: 0px;
+	padding: 5px;
+}
+
+.textBoxWatermark {
+	font-style: italic;
+	color: gray;	
+}
+
+.loginForm {
+	margin: 20px auto 100px auto;
+}
+
+.loginError {
+	padding: 5px;
+	background: #FFFCCA;
+}
+
+.pageTitle {
+	font-size: 1.5em;
+  	color: black;
+  	margin: 20px;
+  	text-align: left;
+}
+
+.bottomMenu {
+	background-color: #E3E3E3;
+	width: 975px;
+	margin: 20px auto 20px auto;
+	padding: 10px;
+	text-align: left;
+}
+
+.clearFloat {
+	clear: both;
 }
 
 .borderDebug div {

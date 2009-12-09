@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsResult;
@@ -37,6 +36,8 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
+import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -52,6 +53,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private static final String SERVER_ERROR = "An error occurred while "
 			+ "attempting to contact the server. Please check your network "
 			+ "connection and try again.";
+
+	public static String sessionID;
 
 	/**
 	 * Dispatch service. Should be the only service needed. All commands
@@ -74,6 +77,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 	/** Place support for history management **/
 	private PlaceService placeService;
+
+	public static LoginStatusWidget loginStatusWidget;
 	
 	/**
 	 * This is the entry point method.
@@ -129,6 +134,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			}
 		});
 		navMenu.add(uploadButton);
+		
+		// login menu
+		loginStatusWidget = new LoginStatusWidget();
+		RootPanel.get("loginMenu").add(loginStatusWidget);
+		
 	}
 	
 	/**
@@ -222,9 +232,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 	}
 
+	/**
+	 * Parse the parameters in the history token after the '?'
+	 * 
+	 * @return
+	 */
 	Map<String,String> getParams() {
 		Map<String,String> params = new HashMap<String,String>();
-		String paramString = History.getToken().substring(History.getToken().lastIndexOf("?")+1);
+		String paramString = History.getToken().substring(History.getToken().indexOf("?")+1);
 		for(String paramEntry : paramString.split("&")) {
 			String[] terms = paramEntry.split("=");
 			params.put(terms[0],terms[1]);
@@ -237,6 +252,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	private void showDataset() {
 
+
 //		DatasetView datasetWidget = new DatasetView();
 //		DatasetPresenter datasetPresenter = new DatasetPresenter(datasetWidget, eventBus, dispatchAsync);
 //		datasetPresenter.bind();
@@ -244,13 +260,15 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 //		mainContainer.clear();
 //		mainContainer.add(datasetWidget.asWidget());
 		
-		DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync);
-		mainContainer.clear();
-		mainContainer.add(datasetWidget);
-		
-		String datasetUri = getParams().get("id"); // FIXME should use "uri?"
-		if(datasetUri != null) {
-			datasetWidget.showDataset(datasetUri);
+		if (checkLogin()) {
+			DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync);
+			mainContainer.clear();
+			mainContainer.add(datasetWidget);
+			
+			String datasetUri = getParams().get("id"); // FIXME should use "uri?"
+			if(datasetUri != null) {
+				datasetWidget.showDataset(datasetUri);
+			}
 		}
 	}
 	
@@ -281,10 +299,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		return uploadWidget;
 	}
 	
-	// this is for when the POST doesn't come from an HTML form but from a client
-	// that also controls the browser (e.g., an AJAX client or Java applet); in
-	// that case said client can direct the browser to #upload?session={sessionkey}
-	// to trigger the GWT upload progress bar for the upload
+	/** 
+	 * This is for when the POST doesn't come from an HTML form but from a client
+	 * that also controls the browser (e.g., an AJAX client or Java applet); in
+	 * that case said client can direct the browser to #upload?session={sessionkey}
+	 * to trigger the GWT upload progress bar for the upload.
+	 */
 	void showUploadProgress() {
 		String sessionKey = getParams().get("session");
 		if(sessionKey != null) {
@@ -305,6 +325,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		parseHistoryToken(token);
 	}
 	
+	/**
+	 * Parse history token and show the proper widgets.
+	 * 
+	 * @param token history token (everything after the #)
+	 */
 	private void parseHistoryToken(String token) {
 		if (token.startsWith("dataset")) {
 			showDataset();
@@ -312,10 +337,36 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			listDatasets();
 		} else if(token.startsWith("upload")) { // upload applet support
 			showUploadProgress();
-		} else if(token.startsWith("schneertz")) {
-			listDatasets(); // FIXME remove this case
+		} else if(token.startsWith("login")) {
+			showLoginPage();
 		} else {
 			listDatasets();
 		}
+	}
+	
+	/**
+	 * Show a set of widgets to authenticate with the server.
+	 * 
+	 * FIXME currently uses a adhoc parsing of the history token. The generic
+	 * parameter parsing gets confused with parsing a parameter inside a parameter
+	 * (multiple '=')
+	 * 
+	 */
+	private void showLoginPage() {
+		mainContainer.clear();
+		mainContainer.add(new LoginPage());
+	}
+
+	/**
+	 * If user not logged in redirect to the required login page.
+	 * 
+	 * @return true if logged in already, false if not
+	 */
+	public boolean checkLogin() {
+		if (MMDB.sessionID == null) {
+			History.newItem("login?p=" + History.getToken());
+			return false;
+		}
+		return true;
 	}
 }

@@ -12,6 +12,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -112,6 +114,13 @@ public class TagsWidget extends Composite {
 				
 				mainPanel.add(tagWidget);
 				mainPanel.setCellHorizontalAlignment(tagWidget, HasHorizontalAlignment.ALIGN_RIGHT);
+				
+				DeferredCommand.addCommand(new Command() {
+					@Override
+					public void execute() {
+						tagWidget.getTagBox().setFocus(true);
+					}
+				});
 				
 			}
 		});
