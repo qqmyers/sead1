@@ -289,6 +289,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		uploadWidget.addCancelHandler(new CancelHandler() {
 			public void onCancel(CancelEvent event) {
 				DOM.getElementById("uploadToolbar").addClassName("hidden");
+				uploadMenuVisible = false;
 				uploadPanel.clear();
 			}
 		});
