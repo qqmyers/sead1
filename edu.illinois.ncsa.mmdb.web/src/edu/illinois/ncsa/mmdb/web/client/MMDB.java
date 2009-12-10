@@ -69,6 +69,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	/** Toolbar above main content panel */
 	private FlowPanel toolbar;
 	
+	/** The upload button */
+	private Anchor uploadButton;
+	
 	/** The upload widget in the upload toolbar */
 	private FlowPanel uploadPanel;
 	
@@ -126,11 +129,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		navMenu.add(listButton);
 		HTML bullet = new HTML("&bull;");
 		navMenu.add(bullet);
-		Anchor uploadButton = new Anchor("Upload");
+		uploadButton = new Anchor("Upload");
 		uploadButton.setStyleName("navMenuLink");
 		uploadButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent click) {
-				uploadDatasets();
+				toggleUploadMenu();
 			}
 		});
 		navMenu.add(uploadButton);
@@ -272,14 +275,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		}
 	}
 	
-	/**
-	 * Show toolbar to upload datasets.
-	 * 
-	 * @return
-	 */
-	UploadWidget uploadDatasets() {
-		toolbar.clear();
-		uploadPanel.clear();
+	private boolean uploadMenuVisible = false;
+	
+	UploadWidget showUploadMenu() {
 		UploadWidget uploadWidget = new UploadWidget();
 		uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
 			public void onDatasetUploaded(DatasetUploadedEvent event) {
@@ -299,6 +297,23 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		return uploadWidget;
 	}
 	
+	/**
+	 * Show toolbar to upload datasets.
+	 * 
+	 * @return
+	 */
+	void toggleUploadMenu() {
+		toolbar.clear();
+		uploadPanel.clear();
+		if(!uploadMenuVisible) {
+			showUploadMenu();
+			uploadMenuVisible = true;
+		} else {
+			DOM.getElementById("uploadToolbar").addClassName("hidden");
+			uploadMenuVisible = false;
+		}
+	}
+	
 	/** 
 	 * This is for when the POST doesn't come from an HTML form but from a client
 	 * that also controls the browser (e.g., an AJAX client or Java applet); in
@@ -308,7 +323,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	void showUploadProgress() {
 		String sessionKey = getParams().get("session");
 		if(sessionKey != null) {
-			UploadWidget upload = uploadDatasets(); // pop up the upload interface
+			UploadWidget upload = showUploadMenu(); // pop up the upload interface
 			// show the progress bar for the session key
 			String uploadServletUrl = GWT.getModuleBaseURL() + "UploadBlob";
 			upload.showProgress(sessionKey, uploadServletUrl);
