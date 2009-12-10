@@ -2,6 +2,7 @@ package edu.illinois.ncsa.mmdb.web.client.dnd;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -23,7 +24,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JApplet;
+import javax.swing.JLabel;
 import javax.swing.JTextArea;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -51,16 +54,37 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	}
 
 	public void duInit() throws Exception {
-		setSize(600, 300);
+		setSize(64, 64);
 
-		ta = new JTextArea();
-		ta.setText("6:Drop files here");
-		ta.setBackground(Color.white);
-		getContentPane().add(ta, BorderLayout.CENTER);
-
+		URL iconUrl = getClass().getResource("/edu/illinois/ncsa/mmdb/web/client/dnd/Load.png");
+		ImageIcon icon = new ImageIcon(iconUrl, "Upload");
+		Image i = icon.getImage();
+		
+		JLabel dropLabel = new JLabel(icon);
+		dropLabel.setOpaque(true);
+		try {
+			String bgColor = getParameter("background");
+			if(bgColor != null && !bgColor.equals("")) {
+				Color c = Color.decode(bgColor); 
+				dropLabel.setBackground(c);
+			}
+		} catch(Exception x) {
+			// fall through
+			x.printStackTrace();
+		}
+		getContentPane().add(dropLabel, BorderLayout.CENTER);
 		// Set up our text area to receive drops...
 		// This class will handle the drop events
-		dt = new DropTarget(ta, this);
+		dt = new DropTarget(dropLabel, this);
+		
+		//
+		ta = new JTextArea();
+		ta.setText("7:Drop files here");
+		ta.setBackground(Color.white);
+		/*
+		getContentPane().add(ta, BorderLayout.SOUTH);
+		*/
+		
 		setVisible(true);
 	}
 
