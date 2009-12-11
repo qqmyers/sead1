@@ -30,7 +30,7 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
  */
 public class LoginPage extends Composite {
 
-	private FlowPanel mainPanel;
+	private final FlowPanel mainPanel;
 	private Label pageTitle;
 	private TextBox usernameBox;
 	private PasswordTextBox passwordBox;
@@ -60,9 +60,7 @@ public class LoginPage extends Composite {
 	 */
 	private Widget createPageTitle() {
 		pageTitle = new Label("Login");
-
 		pageTitle.addStyleName("pageTitle");
-
 		return pageTitle;
 	}
 

@@ -14,7 +14,6 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
@@ -38,12 +37,12 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
  */
 public class TagsWidget extends Composite {
 
-	private VerticalPanel mainPanel;
-	private FlowPanel tagsPanel;
+	private final VerticalPanel mainPanel;
+	private final FlowPanel tagsPanel;
 	private final String id;
 	private final MyDispatchAsync service;
-	private Label tagLabel;
-	private Anchor addTag;
+	private final Label tagLabel;
+	private final Anchor addTag;
 	
 	/**
 	 * A widget listing tags and providing a way to add a new one.
@@ -184,7 +183,7 @@ public class TagsWidget extends Composite {
 	 * @return hyperlink
 	 */
 	private Hyperlink tagHyperlink(String tag) {
-		Hyperlink link = new Hyperlink(tag, History.getToken());
+		Hyperlink link = new Hyperlink(tag, "tag?title=" + tag);
 		link.addStyleName("tag");
 		return link;
 	}

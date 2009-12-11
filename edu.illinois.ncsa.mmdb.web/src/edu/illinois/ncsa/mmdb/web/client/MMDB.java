@@ -38,6 +38,7 @@ import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
+import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -61,10 +62,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * should go through this endpoint. To learn more look up gwt-dispatch
 	 * and the command pattern.
 	 */
-	private MyDispatchAsync dispatchAsync = new MyDispatchAsync();
+	private final MyDispatchAsync dispatchAsync = new MyDispatchAsync();
 	
 	/** Event bus for propagating events in the interface **/
-	private HandlerManager eventBus = new HandlerManager(null);
+	private final HandlerManager eventBus = new HandlerManager(null);
 	
 	/** Toolbar above main content panel */
 	private FlowPanel toolbar;
@@ -82,6 +83,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private PlaceService placeService;
 
 	public static LoginStatusWidget loginStatusWidget;
+	
+	/** Session id - user login for when the user is logged in,
+	 *  null if the user hasn't been authenticated
+	 */
+	private final String sessionId = null;
 	
 	/**
 	 * This is the entry point method.
@@ -358,11 +364,18 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			showUploadProgress();
 		} else if(token.startsWith("login")) {
 			showLoginPage();
+		} else if (token.startsWith("tag")) {
+			showTagPage();
 		} else {
 			listDatasets();
 		}
 	}
 	
+	private void showTagPage() {
+		mainContainer.clear();
+		mainContainer.add(new TagPage(getParams().get("title"), dispatchAsync, eventBus));
+	}
+
 	/**
 	 * Show a set of widgets to authenticate with the server.
 	 * 
