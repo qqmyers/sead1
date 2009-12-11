@@ -276,9 +276,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	}
 	
 	private boolean uploadMenuVisible = false;
+	private UploadWidget uploadWidget; 
 	
 	UploadWidget showUploadMenu() {
-		UploadWidget uploadWidget = new UploadWidget();
+		uploadWidget = new UploadWidget();
 		uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
 			public void onDatasetUploaded(DatasetUploadedEvent event) {
 				History.newItem("dataset?id="+event.getDatasetUri());
@@ -324,10 +325,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	void showUploadProgress() {
 		String sessionKey = getParams().get("session");
 		if(sessionKey != null) {
-			UploadWidget upload = showUploadMenu(); // pop up the upload interface
+			if(!uploadMenuVisible) {
+				showUploadMenu(); // pop up the upload interface
+			}
 			// show the progress bar for the session key
 			String uploadServletUrl = GWT.getModuleBaseURL() + "UploadBlob";
-			upload.showProgress(sessionKey, uploadServletUrl);
+			uploadWidget.showProgress(sessionKey, uploadServletUrl);
 		}
 	}
 	
