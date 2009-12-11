@@ -37,6 +37,7 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.util.SecureHashMinter;
 
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
+import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 
 
@@ -88,7 +89,7 @@ public class UploadBlob extends HttpServlet {
         public void update ( long aBytesRead, long aContentLength, int anItem ) {
             bytesRead = aBytesRead;
             if(debugPrune++ % 50 == 0) {
-            	debug("bytesRead = "+bytesRead+" ("+percentComplete()+"%)");
+            	log.trace("bytesRead = "+bytesRead+" ("+percentComplete()+"%)");
             }
             contentLength = aContentLength;
             item = anItem;
@@ -97,7 +98,7 @@ public class UploadBlob extends HttpServlet {
         public void wrote(long aBytesWritten) {
         	bytesWritten += aBytesWritten;
             if(debugPrune++ % 50 == 0) {
-            	debug("bytesWritten = "+bytesWritten+" ("+percentComplete()+"%)");
+            	log.trace("bytesWritten = "+bytesWritten+" ("+percentComplete()+"%)");
             }
         }
         
@@ -157,7 +158,7 @@ public class UploadBlob extends HttpServlet {
         }
 
         public boolean allDone ( ) {
-            if (percentComplete() == 100) {
+            if (percentComplete() >= 100) {
                 for (UploadInfo u : uploadInfo) {
                     if (!u.isUploaded) {
                         return false;
@@ -171,7 +172,9 @@ public class UploadBlob extends HttpServlet {
         public int percentComplete() {
         	long pct = (int) (contentLength == 0L ? 0 : ((bytesRead * 50) / contentLength)) +
         	                 (itemsLength == 0L ? 0 : ((bytesWritten * 50) / itemsLength));
-        	debug(bytesRead +" read / "+bytesWritten+" written = "+pct+"%");
+        	if(pct < 99) {
+        		log.trace(bytesRead +" read / "+bytesWritten+" written = "+pct+"%");
+        	}
         	return (int) pct;
         }
     }
@@ -242,7 +245,7 @@ public class UploadBlob extends HttpServlet {
         if(sessionKey == null) {
         	log.warn("no session key, progress will not be reported to client");
         } else {
-            debug("POST: upload session key (param) = "+sessionKey);
+            log.trace("POST: upload session key (param) = "+sessionKey);
             listener = trackProgress(upload, sessionKey);
         }
         
@@ -257,11 +260,11 @@ public class UploadBlob extends HttpServlet {
                 String contentType = item.getContentType();
                 boolean isInMemory = item.isInMemory();
                 long sizeInBytes = item.getSize();
-                debug("Post: " + item.isFormField() + "|" + fieldName + "|" + fileName + "|" + isInMemory + "|"
+                log.trace("Post: " + item.isFormField() + "|" + fieldName + "|" + fileName + "|" + isInMemory + "|"
                         + contentType + "|" + sizeInBytes);
                 if(item.isFormField() && fieldName.equals("session")) {
                 	sessionKey = item.getString();
-                    debug("POST: upload session key (part) = "+sessionKey);
+                    log.trace("POST: upload session key (part) = "+sessionKey);
                     listener = trackProgress(upload, sessionKey);
                 }
                 // if it's a field from a form and the size is non-zero...
@@ -273,7 +276,7 @@ public class UploadBlob extends HttpServlet {
                     uri = RestUriMinter.getInstance().mintUri(md);
                     //
                     bw.setUri(URI.create(uri));
-                    String url = TupeloStore.getInstance().getUriCanonicalizer(request).canonicalize("dataset",uri.toString());
+                    String url = TupeloStore.getInstance().getUriCanonicalizer(request).canonicalize(RestServlet.IMAGE_INFIX,uri.toString());
                     UploadInfo u = listener.addUploadInfo(URI.create(url), trimFilename(fileName), sizeInBytes);
                     final FileUploadListener _listener = listener;
                     bw.setInputStream(new FilterInputStream(item.getInputStream()) {
@@ -297,8 +300,10 @@ public class UploadBlob extends HttpServlet {
 
                     try {
                         // write the blob
+                    	log.trace("writing "+fileName+" to "+uri);
                         c.perform(bw);
 
+                        log.trace("writing metadata for "+uri);
                         // add metadata
                         ThingSession ts = c.getThingSession();
                         Thing t = ts.newThing(Resource.uriRef(uri));
@@ -423,10 +428,10 @@ public class UploadBlob extends HttpServlet {
         	// report
         	PrintWriter out = response.getWriter();
         	out.println("{\"session\":\""+sessionKey+"\"}");
-        	debug("GET: minted session key = "+sessionKey);
+        	log.trace("GET: minted session key = "+sessionKey);
         } else {
         	String sessionKey = request.getParameter("session");
-        	debug("GET: session key = "+sessionKey);
+        	log.trace("GET: session key = "+sessionKey);
             // return if there's no progress yet
         	if(listeners.get(sessionKey) == null) {
         		log("GET: no upload for session key "+sessionKey);
@@ -444,7 +449,7 @@ public class UploadBlob extends HttpServlet {
             response.setContentType("application/json");
         	PrintWriter out = response.getWriter();
         	out.print(stateToJSON(true, listener, request));
-        	debug("GET: reported " + stateToJSON(true, listener, request));
+        	log.trace("GET: reported " + stateToJSON(true, listener, request));
         }
     }
 

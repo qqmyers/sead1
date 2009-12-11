@@ -4,30 +4,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.xpath.XPathExpressionException;
-import org.w3c.dom.Document;
 
-import org.tupeloproject.kernel.Context;
-import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.kernel.Thing;
-import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.util.CopyFile;
-import org.tupeloproject.util.Xml;
-
-import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -35,7 +24,17 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Thing;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.util.CopyFile;
+import org.tupeloproject.util.Xml;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 
 /**
  * RestServlet
@@ -102,7 +101,10 @@ public class RestServlet extends HttpServlet {
         return getUriCanonicalizer(request).decanonicalize(url);
     }
     String decanonicalizeUrl(HttpServletRequest request) throws ServletException {
-        return getUriCanonicalizer(request).decanonicalize(request.getRequestURL().toString());
+    	String canonical = request.getRequestURL().toString();
+    	String decanonicalized = getUriCanonicalizer(request).decanonicalize(canonical);
+    	log.trace("canonical url "+canonical+" decanonicalized as "+decanonicalized);
+        return decanonicalized;
     }
 
     void dumpCrap(HttpServletRequest request) {
@@ -135,7 +137,7 @@ public class RestServlet extends HttpServlet {
         //dumpHeaders(request); // FIXME debug
         String uri = decanonicalizeUrl(request);
         if(hasPrefix(IMAGE_DOWNLOAD_INFIX,request)) {
-            log("DOWNLOAD IMAGE "+uri);
+            log.trace("DOWNLOAD IMAGE "+uri);
             try {
                 String filename = getImageThing(uri).getString(RestService.LABEL_PROPERTY);
                 response.setHeader("content-disposition","attachment; filename="+filename);
@@ -146,14 +148,14 @@ public class RestServlet extends HttpServlet {
             	throw new ServletException("failed to retrieve metadata for "+request.getRequestURI());
 			}
         } else if(hasPrefix(IMAGE_INFIX,request)) {
-            log("GET IMAGE "+uri);
+            log.trace("GET IMAGE "+uri);
             try {
                 CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
             } catch(RestServiceException e) {
                 throw new ServletException("failed to retrieve "+request.getRequestURI());
             }
         } else if(hasPrefix(COLLECTION_INFIX,request)) {
-            log("LIST COLLECTION"+uri);
+            log.trace("LIST COLLECTION"+uri);
             try {
                 // TODO currently assumes that everything in a collection is an image
                 // TODO if that assumption is not correct, will need a way to track canonical URL's per-resource
@@ -183,7 +185,7 @@ public class RestServlet extends HttpServlet {
             try {
                 List<FileItem> items = upload.parseRequest(request);
                 if(items.size() > 1) {
-                    log("warning: ignoring all but first content item in multi-part POST");
+                    log.trace("warning: ignoring all but first content item in multi-part POST");
                 } else if(items.size() == 0) {
                     throw new ServletException("no file data in multi-part POST");
                 }
@@ -201,7 +203,7 @@ public class RestServlet extends HttpServlet {
         if(hasPrefix(IMAGE_INFIX,request)) {
             try {
                 String uri = this.decanonicalizeUrl(request);
-                log("UPLOAD IMAGE "+uri);
+                log.trace("UPLOAD IMAGE "+uri);
                 restService.updateImage(uri,md,imageData);
             } catch(RestServiceException e) {
                 throw new ServletException("failed to write "+request.getRequestURI());
@@ -209,7 +211,7 @@ public class RestServlet extends HttpServlet {
         } else if(hasPrefix(IMAGE_CREATE_ANON_INFIX,request)) {
             String uri = null;
             try {
-                log("UPLOAD IMAGE (anonymous)");
+                log.trace("UPLOAD IMAGE (anonymous)");
                 uri = restService.createImage(md,imageData);
             } catch(RestServiceException e) {
                 throw new ServletException("failed to create image",e);
@@ -245,18 +247,18 @@ public class RestServlet extends HttpServlet {
             try {
                 if(hasPrefix(COLLECTION_ADD_INFIX,request)) {
                     String uri = decanonicalizeUrl(request);
-                    log("COLLECTION ADD "+uri);
+                    log.trace("COLLECTION ADD "+uri);
                     restService.addToCollection(uri,members);
                 } else if(hasPrefix(COLLECTION_REMOVE_INFIX,request)) {
                     String uri = decanonicalizeUrl(request);
-                    log("COLLECTION REMOVE "+uri);
+                    log.trace("COLLECTION REMOVE "+uri);
                     restService.removeFromCollection(uri,members);
                 } else if(hasPrefix(COLLECTION_INFIX,request)) { // Update
                     String uri = decanonicalizeUrl(request);
-                    log("COLLECTION UPDATE "+uri);
+                    log.trace("COLLECTION UPDATE "+uri);
                     restService.updateCollection(uri,members);
                 } else { // mint a new URI
-                    log("COLLECTION CREATE (anonymous)");
+                    log.trace("COLLECTION CREATE (anonymous)");
                     String uri = restService.createCollection(members);
                     response.getWriter().write(canonicalizeUri(uri,COLLECTION_INFIX,request)+"\n");
                 }

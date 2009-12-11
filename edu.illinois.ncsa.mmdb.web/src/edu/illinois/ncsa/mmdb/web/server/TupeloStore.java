@@ -126,7 +126,7 @@ public class TupeloStore {
 
 		// load default context
 		Context context = contextBeanUtil.getDefaultContext();
-
+		
 		contextBeans = contextBeanUtil.getAll();
 
 		return context;
