@@ -109,6 +109,14 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		System.out.println(s);
 	}
 	
+	void addFile(URI uri, List<File> files) {
+		if(uri != null && uri.isAbsolute() && uri.getScheme().equals("file")) {
+			File f = new File(uri);
+			log("adding file "+f);
+			files.add(f);
+		}
+	}
+	
 	public void drop(DropTargetDropEvent dtde) {
 		try {
 			dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
@@ -128,19 +136,16 @@ public class DropUploader extends JApplet implements DropTargetListener {
 					String s = null;
 					while((s = br.readLine()) != null) {
 						uri = new URI(s);
-						log("dropped text = "+s);
+						addFile(uri, files);
+						break;
 					}
 					break;
 				} else if(flavor.isMimeTypeEqual("application/x-java-url")) {
 					URI url = URI.create(tr.getTransferData(flavor)+"");
-					log("dropped url = "+url);
+					addFile(url, files);
+					break;
 				} else {
 					log("unknown "+flavor);
-				}
-				if(uri != null && uri.isAbsolute() && uri.getScheme().equals("file")) {
-					File f = new File(uri);
-					log("adding file "+f);
-					files.add(f);
 				}
 			}
 			if(files.size()==0) {
