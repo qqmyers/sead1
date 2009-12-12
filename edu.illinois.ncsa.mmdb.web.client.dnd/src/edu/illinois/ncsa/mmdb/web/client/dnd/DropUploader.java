@@ -111,7 +111,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	
 	void addFile(URI uri, List<File> files) {
 		if(uri != null && uri.isAbsolute() && uri.getScheme().equals("file")) {
-			File f = new File(uri);
+			File f = new File(uri.getPath());
 			log("adding file "+f);
 			files.add(f);
 		}
