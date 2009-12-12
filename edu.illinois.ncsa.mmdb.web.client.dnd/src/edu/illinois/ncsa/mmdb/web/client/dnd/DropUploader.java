@@ -116,8 +116,10 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			Transferable tr = dtde.getTransferable();
 			List<File> files = new LinkedList<File>();
 			for(DataFlavor flavor : tr.getTransferDataFlavors()) {
+				URI uri = null;
 				if (flavor.isFlavorJavaFileListType()) {
 					for(File file : (List<File>) tr.getTransferData(flavor)) {
+						log("adding file "+file);
 						files.add(file);
 					}
 					break;
@@ -125,17 +127,22 @@ public class DropUploader extends JApplet implements DropTargetListener {
 					BufferedReader br = new BufferedReader(flavor.getReaderForText(tr));
 					String s = null;
 					while((s = br.readLine()) != null) {
-						URI uri = new URI(s);
-						if(uri.isAbsolute() && uri.getScheme().equals("file")) {
-							files.add(new File(uri));
-						}
+						uri = new URI(s);
+						log("dropped text = "+s);
 					}
 					break;
+				} else if(flavor.isMimeTypeEqual("application/x-java-url")) {
+					URI url = URI.create(tr.getTransferData(flavor)+"");
+					log("dropped url = "+url);
 				} else {
 					log("unknown "+flavor);
 				}
+				if(uri != null && uri.isAbsolute() && uri.getScheme().equals("file")) {
+					File f = new File(uri);
+					log("adding file "+f);
+					files.add(f);
+				}
 			}
-			dtde.dropComplete(true);
 			if(files.size()==0) {
 				System.out.println("Drop failed: " + dtde);
 			} else {
@@ -145,6 +152,8 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			dtde.dropComplete(true);
 		}
 	}
 
