@@ -22,8 +22,6 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -212,30 +210,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				for (DatasetBean dataset : result.getDatasets()) {
 					GWT.log("Sending event add dataset " + dataset.getTitle(),
 							null);
-					
-					// FIXME: this is overkill.
-					// FIXME: async call means results come back out of order
-					dispatchAsync.execute(new GetDataset(dataset.getUri()), new AsyncCallback<GetDatasetResult>() {
-
-						@Override
-						public void onFailure(Throwable caught) {
-							// TODO Auto-generated method stub
-							
-						}
-
-						@Override
-						public void onSuccess(GetDatasetResult result) {
-
-							AddNewDatasetEvent event = new AddNewDatasetEvent();
-							event.setDataset(result.getDataset());
-							event.setPreviews(result.getPreviews());
-							eventBus.fireEvent(event);
-						}
-					});
+					AddNewDatasetEvent event = new AddNewDatasetEvent();
+					event.setDataset(dataset);
+					event.setPreviews(result.getPreviews().get(dataset));
+					eventBus.fireEvent(event);
 				}
 			}
 		});
-
 	}
 
 	/**
