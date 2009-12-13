@@ -91,18 +91,22 @@ public class UploadBlob extends HttpServlet {
         
         public void update ( long aBytesRead, long aContentLength, int anItem ) {
             bytesRead = aBytesRead;
+            /*
             if(debugPrune++ % 50 == 0) {
             	log.trace("bytesRead = "+bytesRead+" ("+percentComplete()+"%)");
             }
+            */
             contentLength = aContentLength;
             item = anItem;
         }
 
         public void wrote(long aBytesWritten) {
         	bytesWritten += aBytesWritten;
+        	/*
             if(debugPrune++ % 50 == 0) {
             	log.trace("bytesWritten = "+bytesWritten+" ("+percentComplete()+"%)");
             }
+            */
         }
         
         public long getBytesRead ( ) {
