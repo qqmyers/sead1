@@ -8,11 +8,12 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter.Display;
@@ -25,54 +26,41 @@ import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter.Display;
  */
 public class DatasetTableOneColumnView extends FlexTable implements Display {
 
-	private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDateTimeFormat();
+private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDateTimeFormat();
 	
-	private ArrayList<Hyperlink> datasetLinks = new ArrayList<Hyperlink>();
+	private final ArrayList<Hyperlink> datasetLinks = new ArrayList<Hyperlink>();
+
+	private final String BLOB_URL = "./api/image/";
 	
 	public DatasetTableOneColumnView() {
 		super();
-		this.setWidget(0, 0, new Label("Name"));
-		this.setWidget(0, 1, new Label("Type"));
-		this.setWidget(0, 2, new Label("Date"));
-		this.setWidget(0, 3, new Label("*"));
 		addStyleName("datasetTable");
-		getRowFormatter().addStyleName(0, "topRow");
 	}
 
 	@Override
-	public void addRow(String id, String name, String type, Date date) {
+	public void addRow(String id, String name, String type, Date date, String preview) {
+		
 		GWT.log("Adding dataset " + name, null);
+		
 		int row = this.getRowCount();
-		Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
-		datasetLinks.add(hyperlink);
-		this.setWidget(row, 0, hyperlink);
 		
-		this.setWidget(row, 1, new Label(type));
-		this.setWidget(row, 2, new Label(DATE_TIME_FORMAT.format(date)));
-		
-		// menu
-		MenuBar iconBar = new MenuBar();
-		MenuBar menuBar = new MenuBar(true);
-		iconBar.addItem("Actions", menuBar);
-		menuBar.addItem("Add tag", new Command() {
-			
-			@Override
-			public void execute() {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-		this.setWidget(row, 3, iconBar);
-		
-		for (int col=0; col<4; col++) {
-			getCellFormatter().addStyleName(row, col, "cell");
-		}
-		
-		if (row % 2 == 0) {
-			getRowFormatter().addStyleName(row, "evenRow");
+		if (preview != null) {
+			setWidget(row, 0, new Image(BLOB_URL + preview));
 		} else {
-			getRowFormatter().addStyleName(row, "oddRow");
+			setWidget(row, 0, new Image("images/preview-100.gif"));
 		}
+		
+		VerticalPanel verticalPanel = new VerticalPanel();
+		setWidget(row, 1, verticalPanel);
+		
+		Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
+		verticalPanel.add(hyperlink);	
+		verticalPanel.add(new Label(DATE_TIME_FORMAT.format(date)));
+		
+		getCellFormatter().addStyleName(row, 0, "cell");
+		getCellFormatter().addStyleName(row, 1, "cell");
+		getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP);
+		getRowFormatter().addStyleName(row, "oddRow");
 	}
 
 	@Override

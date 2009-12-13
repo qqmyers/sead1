@@ -305,6 +305,15 @@ body {
 	vertical-align: middle;
 }
 
+.imagePreviewNoOverflow {
+	width: 500px;
+	height: 333px;
+	display: block;
+	margin: 30px auto 30px auto;
+	vertical-align: middle;
+	border: 1px solid #888888;
+}
+
 .imagePreview {
 	display: block;
 	margin-left: auto;

@@ -28,6 +28,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.BlobWriter;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
@@ -39,6 +40,8 @@ import org.tupeloproject.util.SecureHashMinter;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
+import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 
 
 /**
@@ -223,7 +226,8 @@ public class UploadBlob extends HttpServlet {
      * A post should only be be the initial upload request, i.e., a form with multipart content
      * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
      */
-    public void doPost ( HttpServletRequest request,
+    @Override
+	public void doPost ( HttpServletRequest request,
             HttpServletResponse response ) throws ServletException, IOException {
         Context c = TupeloStore.getInstance().getContext();
 
@@ -286,13 +290,16 @@ public class UploadBlob extends HttpServlet {
                     		}
                     		return written;
                     	}
+						@Override
 						public int read() throws IOException {
 							return wrote(super.read());
 						}
+						@Override
 						public int read(byte[] arg0, int arg1, int arg2)
 								throws IOException {
 							return wrote(super.read(arg0, arg1, arg2));
 						}
+						@Override
 						public int read(byte[] arg0) throws IOException {
 							return wrote(super.read(arg0));
 						}
@@ -320,6 +327,9 @@ public class UploadBlob extends HttpServlet {
                         ts.close();
 
                         u.setUploaded(true);
+                        
+                        // submit to extraction service
+                        submitToExtractionService(uri);
                     }
                     catch (OperatorException e) {
                         log("Error writing blob/label: " + e.getMessage());
@@ -334,6 +344,26 @@ public class UploadBlob extends HttpServlet {
         }
     }
 
+
+    /**
+     * Submit image URI to extraction service for processing.
+     * 
+     * @param imageUri the URI of the image we want to process
+     */
+    private void submitToExtractionService(String imageUri) {
+    	String extractionServiceURL = "http://localhost:9856/";
+    	log.debug("Submitting to extraction service URI " + extractionServiceURL);
+        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+        PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
+        try {
+			pbu.callExtractor(extractionServiceURL, dbu.get(imageUri));
+		} catch (Exception e) {
+			log.error("Extraction service " + extractionServiceURL + " unavailable");
+			e.printStackTrace();
+		}
+	}
+    
     /**
      * Convert a vector of values into a Jason array of strings
      * @param name the name of the array
@@ -421,7 +451,8 @@ public class UploadBlob extends HttpServlet {
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
      *    javax.servlet.http.HttpServletResponse)
      */
-    public void doGet ( HttpServletRequest request,
+    @Override
+	public void doGet ( HttpServletRequest request,
             HttpServletResponse response ) throws ServletException, IOException {
         if(!request.getParameterMap().containsKey("session")) { // no session?
         	String sessionKey = SecureHashMinter.getMinter().mint(); // mint a session key

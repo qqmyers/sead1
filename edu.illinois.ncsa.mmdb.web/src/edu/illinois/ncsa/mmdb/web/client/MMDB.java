@@ -22,6 +22,8 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -175,7 +177,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	private void listDatasets() {
 
-		DatasetTableView datasetTableWidget = new DatasetTableView();
+		// TODO add a way to switch between the two views
+//		DatasetTableView datasetTableWidget = new DatasetTableView();
+		DatasetTableOneColumnView datasetTableWidget = new DatasetTableOneColumnView();
 		DatasetTablePresenter datasetTablePresenter = new DatasetTablePresenter(
 				datasetTableWidget, eventBus);
 		datasetTablePresenter.bind();
@@ -208,9 +212,25 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				for (DatasetBean dataset : result.getDatasets()) {
 					GWT.log("Sending event add dataset " + dataset.getTitle(),
 							null);
-					AddNewDatasetEvent event = new AddNewDatasetEvent();
-					event.setDataset(dataset);
-					eventBus.fireEvent(event);
+					
+					// FIXME: this is overkill
+					dispatchAsync.execute(new GetDataset(dataset.getUri()), new AsyncCallback<GetDatasetResult>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void onSuccess(GetDatasetResult result) {
+
+							AddNewDatasetEvent event = new AddNewDatasetEvent();
+							event.setDataset(result.getDataset());
+							event.setPreviews(result.getPreviews());
+							eventBus.fireEvent(event);
+						}
+					});
 				}
 			}
 		});

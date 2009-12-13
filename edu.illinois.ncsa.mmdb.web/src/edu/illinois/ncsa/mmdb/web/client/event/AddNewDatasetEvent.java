@@ -3,9 +3,12 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.event;
 
+import java.util.Collection;
+
 import com.google.gwt.event.shared.GwtEvent;
 
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 
 /**
  * Triggered when a new dataset is added to the interface.
@@ -18,7 +21,9 @@ public class AddNewDatasetEvent extends GwtEvent<AddNewDatasetHandler> {
 	public static final GwtEvent.Type<AddNewDatasetHandler> TYPE = new GwtEvent.Type<AddNewDatasetHandler>();
 
 	private DatasetBean dataset = new DatasetBean();
-	
+
+	private Collection<PreviewImageBean> previews;
+
 	@Override
 	protected void dispatch(AddNewDatasetHandler handler) {
 		handler.onAddNewDataset(this);
@@ -35,6 +40,14 @@ public class AddNewDatasetEvent extends GwtEvent<AddNewDatasetHandler> {
 
 	public DatasetBean getDataset() {
 		return dataset;
+	}
+
+	public void setPreviews(Collection<PreviewImageBean> previews) {
+		this.previews = previews;
+	}
+
+	public Collection<PreviewImageBean> getPreviews() {
+		return previews;
 	}
 
 }

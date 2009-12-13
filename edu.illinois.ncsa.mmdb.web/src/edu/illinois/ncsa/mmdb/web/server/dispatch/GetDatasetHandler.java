@@ -3,42 +3,67 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.Collection;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 
 /**
  * Retrieve a specific dataset.
  * 
  * @author Luigi Marini
- *
+ * 
  */
-public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetResult>{
+public class GetDatasetHandler implements
+		ActionHandler<GetDataset, GetDatasetResult> {
 
 	/** Tupelo bean session **/
-	private static final BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+	private static final BeanSession beanSession = TupeloStore.getInstance()
+			.getBeanSession();
 
 	/** Datasets DAO **/
 	private static DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-	
+
+	/** Commons logging **/
+	private static Log log = LogFactory.getLog(GetDatasetHandler.class);
+
 	@Override
 	public GetDatasetResult execute(GetDataset arg0, ExecutionContext arg1)
 			throws ActionException {
 		try {
 			DatasetBean datasetBean = dbu.get(arg0.getId());
 			datasetBean = dbu.update(datasetBean);
-			return new GetDatasetResult(datasetBean);
+
+			// preview
+			PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(beanSession);
+			Collection<PreviewImageBean> previews = pibu
+					.getAssociationsFor(arg0.getId());
+			for (PreviewImageBean preview : previews) {
+				log.debug("Preview " + preview.getLabel() + " "
+						+ preview.getWidth() + "x" + preview.getHeight());
+			}
+			if (previews.isEmpty()) {
+				log.debug("No image previews available for " + arg0.getId());
+			}
+
+			return new GetDatasetResult(datasetBean, previews);
 		} catch (Exception e) {
 			throw new ActionException(e);
 		}
+
 	}
 
 	@Override
@@ -50,7 +75,7 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
 	public void rollback(GetDataset arg0, GetDatasetResult arg1,
 			ExecutionContext arg2) throws ActionException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
