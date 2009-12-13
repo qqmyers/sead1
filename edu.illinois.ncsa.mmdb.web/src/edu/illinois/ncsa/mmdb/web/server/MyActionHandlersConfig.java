@@ -12,6 +12,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetTagsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
 
 /**
@@ -29,6 +30,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
 		DispatchUtil.registerHandler(new GetTagsHandler());
 		DispatchUtil.registerHandler(new GetAnnotationsHandler());
 		DispatchUtil.registerHandler(new GetDatasetsByTagHandler());
+		DispatchUtil.registerHandler(new ListDatasetsHandler());
 	}
 
 	public void contextDestroyed(ServletContextEvent evt) {

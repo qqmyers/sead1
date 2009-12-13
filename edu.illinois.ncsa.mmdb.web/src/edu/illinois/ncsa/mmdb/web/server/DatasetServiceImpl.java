@@ -4,8 +4,16 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.Tables;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -60,5 +68,34 @@ public class DatasetServiceImpl extends RemoteServiceServlet implements
 		return datasets;
 	}
 
+	public List<String> listDatasetUris(String orderBy, boolean desc,
+			int limit, int offset) {
+		Unifier u = new Unifier();
+		u.setColumnNames("s");
+		u.addPattern("s",Rdf.TYPE,Cet.DATASET);
+		u.addPattern("s",Resource.uriRef(orderBy),"o");
+		u.setLimit(limit);
+		u.setOffset(offset);
+		if(!desc) { u.addOrderBy("o"); }
+		else { u.addOrderByDesc("o"); }
+		try {
+			TupeloStore.getInstance().getContext().perform(u);
+			List<String> result = new LinkedList<String>();
+			for(Resource r : Tables.getColumn(u.getResult(),0)) {
+				result.add(r.getString());
+			}
+			return result;
+		} catch(OperatorException x) {
+			return new LinkedList<String>();
+		}
+	}
 
+	public List<DatasetBean> listDatasets(String orderBy, boolean desc,
+			int limit, int offset) {
+		try {
+			return dbu.get(listDatasetUris(orderBy,desc,limit,offset));
+		} catch(Exception x) {
+			return new LinkedList<DatasetBean>();
+		}
+	}
 }

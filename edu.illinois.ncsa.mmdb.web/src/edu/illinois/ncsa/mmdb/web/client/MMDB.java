@@ -1,10 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -25,8 +22,8 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasets;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
@@ -193,8 +190,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		
 		mainContainer.add(datasetTableWidget.asWidget());
 		
-		dispatchAsync.execute(new GetDatasets(), new AsyncCallback<GetDatasetsResult>() {
-
+		dispatchAsync.execute(new ListDatasets("http://purl.org/dc/elements/1.1/date",true,0,0), new AsyncCallback<ListDatasetsResult>() {
+		
 			@Override
 			public void onFailure(Throwable caught) {
 				GWT.log("Error retrieving datasets", null);
@@ -207,29 +204,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			}
 
 			@Override
-			public void onSuccess(GetDatasetsResult result) {
-				SortedSet<DatasetBean> orderedResult = new TreeSet<DatasetBean>(new Comparator<DatasetBean>() {
-					public int compare(DatasetBean arg0, DatasetBean arg1) {
-						if(arg0 == arg1) { return 0; }
-						String t0 = arg0.getTitle();
-						String t1 = arg1.getTitle();
-						if(t0 == null && t1 != null) {
-							return 1;
-						}
-						if(t0 != null && t1 == null) {
-							return -1;
-						}
-						if(t0.equals(t1)) {
-							return arg0.hashCode() < arg1.hashCode() ? -1 : 1;
-							// we already know they're not the same object
-							// and they came from a hashset so hash collisions
-							// are already a problem before this point
-						}
-						return t0.compareTo(t1);
-					}
-				});
-				orderedResult.addAll(result.getDatasets());
-				for (DatasetBean dataset : orderedResult) {
+			public void onSuccess(ListDatasetsResult result) {
+				for (DatasetBean dataset : result.getDatasets()) {
 					GWT.log("Sending event add dataset " + dataset.getTitle(),
 							null);
 					AddNewDatasetEvent event = new AddNewDatasetEvent();
