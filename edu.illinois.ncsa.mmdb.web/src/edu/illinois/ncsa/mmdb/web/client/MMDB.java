@@ -213,7 +213,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 					GWT.log("Sending event add dataset " + dataset.getTitle(),
 							null);
 					
-					// FIXME: this is overkill
+					// FIXME: this is overkill.
+					// FIXME: async call means results come back out of order
 					dispatchAsync.execute(new GetDataset(dataset.getUri()), new AsyncCallback<GetDatasetResult>() {
 
 						@Override
@@ -286,6 +287,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			public void onDatasetUploaded(DatasetUploadedEvent event) {
 				History.newItem("dataset?id="+event.getDatasetUri());
 				DOM.getElementById("uploadToolbar").addClassName("hidden");
+				uploadMenuVisible = false;
 				uploadPanel.clear();
 			}
 		});
@@ -318,6 +320,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		}
 	}
 	
+	public native void uploadAppletCallback(String sessionKey) /*-{
+        this.@edu.illinois.ncsa.mmdb.web.client.MMDB::showUploadProgress(Ljava/lang/String;)(sessionKey);
+    }-*/;
+
 	/** 
 	 * This is for when the POST doesn't come from an HTML form but from a client
 	 * that also controls the browser (e.g., an AJAX client or Java applet); in
@@ -326,6 +332,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	void showUploadProgress() {
 		String sessionKey = getParams().get("session");
+		if(sessionKey != null) {
+			showUploadProgress(sessionKey);
+		}
+	}
+	
+	void showUploadProgress(String sessionKey) {
 		if(sessionKey != null) {
 			if(!uploadMenuVisible) {
 				showUploadMenu(); // pop up the upload interface
