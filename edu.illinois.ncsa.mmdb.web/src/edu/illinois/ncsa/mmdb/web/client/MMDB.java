@@ -212,7 +212,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 							null);
 					AddNewDatasetEvent event = new AddNewDatasetEvent();
 					event.setDataset(dataset);
-					event.setPreviews(result.getPreviews().get(dataset));
+					//event.setPreviews(result.getPreviews().get(dataset));
 					eventBus.fireEvent(event);
 				}
 			}

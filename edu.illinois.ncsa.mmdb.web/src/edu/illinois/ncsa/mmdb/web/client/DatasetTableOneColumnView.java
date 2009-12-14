@@ -31,6 +31,7 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 	private final ArrayList<Hyperlink> datasetLinks = new ArrayList<Hyperlink>();
 
 	private final String BLOB_URL = "./api/image/";
+	private final String PREVIEW_URL = "./api/image/preview/small/";
 	
 	public DatasetTableOneColumnView() {
 		super();
@@ -44,11 +45,14 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		
 		int row = this.getRowCount();
 		
+		setWidget(row, 0, new Image(PREVIEW_URL + id));
+		/*
 		if (preview != null) {
 			setWidget(row, 0, new Image(BLOB_URL + preview));
 		} else {
 			setWidget(row, 0, new Image("images/preview-100.gif"));
 		}
+		*/
 		
 		VerticalPanel verticalPanel = new VerticalPanel();
 		setWidget(row, 1, verticalPanel);

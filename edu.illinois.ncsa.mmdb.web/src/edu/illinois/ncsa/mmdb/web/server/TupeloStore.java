@@ -165,6 +165,9 @@ public class TupeloStore {
 	static final String INFIXES[] = new String[] {
             RestServlet.ANY_IMAGE_INFIX,
             RestServlet.IMAGE_INFIX,
+            RestServlet.PREVIEW_ANY,
+            RestServlet.PREVIEW_SMALL,
+            RestServlet.PREVIEW_LARGE,
             RestServlet.IMAGE_CREATE_ANON_INFIX,
             RestServlet.IMAGE_DOWNLOAD_INFIX,
             RestServlet.ANY_COLLECTION_INFIX,

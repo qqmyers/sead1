@@ -1,10 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -19,13 +16,10 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tables;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
 public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListDatasetsResult> {
@@ -68,12 +62,7 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 			int limit, int offset) {
 		try {
 			List<String> uris = listDatasetUris(orderBy,desc,limit,offset);
-			// FIXME debug
-			for(String uri : uris) {
-				DatasetBean dataset = dbu.get(uri);
-				log.info(dataset.getDate()+": "+dataset.getLabel());
-			}
-			// FIXME end debug
+			log.debug("listed "+uris.size()+" dataset(s)");
 			return dbu.get(uris);
 		} catch(Exception x) {
 			return new LinkedList<DatasetBean>();
@@ -82,23 +71,7 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 
 	public ListDatasetsResult execute(ListDatasets arg0, ExecutionContext arg1)
 			throws ActionException {
-		// TODO Auto-generated method stub
-		List<String> datasetUris = listDatasetUris(arg0.getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0.getOffset());
-		List<DatasetBean> datasets = new LinkedList<DatasetBean>();
-		Map<DatasetBean,Collection<PreviewImageBean>> previews = new HashMap<DatasetBean,Collection<PreviewImageBean>>();
-		for(String datasetUri : datasetUris) {
-			// FIXME in this kludge, a server-side call is made directly
-			// against the get dataset command handler (not using the
-			// dispatch mechanism). the code for fetching previews should
-			// be abstracted above both commands.
-			GetDataset gd = new GetDataset(datasetUri);
-			GetDatasetHandler handler = new GetDatasetHandler();
-			GetDatasetResult result = handler.execute(gd, null);
-			DatasetBean dataset = result.getDataset();
-			datasets.add(dataset);
-			previews.put(dataset, result.getPreviews());
-		}
-		return new ListDatasetsResult(datasets, previews);
+		return new ListDatasetsResult(listDatasets(arg0.getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0.getOffset()));
 	}
 
 	public Class<ListDatasets> getActionType() {

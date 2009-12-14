@@ -13,7 +13,6 @@ import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
 import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 
 /**
  * List datasets in repository.
@@ -43,12 +42,13 @@ public class DatasetTablePresenter extends
 						String type = dataset.getMimeType();
 						Date date = dataset.getDate();
 						String previewUri = null;
+						/*
 						for (PreviewImageBean preview : event.getPreviews()) {
 							if (preview.getWidth() == 100) {
 								previewUri = preview.getUri();
 							}
 						}
-						
+						*/
 						display.addRow(id, title, type, date, previewUri);
 					}
 				});

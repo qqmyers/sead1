@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
@@ -34,6 +36,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 
 /**
@@ -59,6 +63,12 @@ public class RestServlet extends HttpServlet {
 	public static final String IMAGE_INFIX = "/image/";
 
 	public static final String ANY_IMAGE_INFIX = "/image";
+	
+	public static final String PREVIEW_ANY = "/image/preview/";
+	
+	public static final String PREVIEW_SMALL = "/image/preview/small/";
+	
+	public static final String PREVIEW_LARGE = "/image/preview/large/";
 
     static RestService restService; // TODO manage this lifecycle better
 
@@ -103,7 +113,9 @@ public class RestServlet extends HttpServlet {
     String decanonicalizeUrl(HttpServletRequest request) throws ServletException {
     	String canonical = request.getRequestURL().toString();
     	String decanonicalized = getUriCanonicalizer(request).decanonicalize(canonical);
-    	log.trace("canonical url "+canonical+" decanonicalized as "+decanonicalized);
+    	if(!decanonicalized.matches("^[a-z]+:.*")) {
+    		log.warn("canonical url "+canonical+" decanonicalized as "+decanonicalized);
+    	}
         return decanonicalized;
     }
 
@@ -131,6 +143,33 @@ public class RestServlet extends HttpServlet {
     	return getContext().getThingSession().fetchThing(Resource.uriRef(uri));
     }
     
+    String getPreview(String uri, String infix) {
+    	BeanSession bs = TupeloStore.getInstance().getBeanSession();
+    	PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(bs);
+    	try {
+    		Collection<PreviewImageBean> previews = pibu.getAssociationsFor(uri);
+    		long maxArea = 0L;
+    		long minArea = 0L;
+    		String maxUri = null;
+    		String minUri = null;
+    		for(PreviewImageBean preview : previews) {
+    			long area = preview.getHeight() * preview.getWidth();
+    			//log.debug("found "+preview.getWidth()+"x"+preview.getHeight()+" ("+area+"px) preview ="+preview.getUri());
+    			if(area > maxArea) { maxArea = area; maxUri = preview.getUri(); }
+    			if(minArea == 0 || area < minArea) { minArea = area; minUri = preview.getUri(); }
+    		}
+    		if(infix.equals(PREVIEW_LARGE)) {
+    			//log.debug("large preview = "+maxArea+"px "+maxUri);
+    			return maxUri;
+    		} else {
+    			//if(minUri != null) { log.debug("small preview = "+minArea+"px "+minUri); }
+    			return minUri;
+    		}
+    	} catch(OperatorException x) {
+    		return null;
+    	}
+    }
+    
     @Override  
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
@@ -147,12 +186,39 @@ public class RestServlet extends HttpServlet {
             } catch (OperatorException e) {
             	throw new ServletException("failed to retrieve metadata for "+request.getRequestURI());
 			}
+        } else if(hasPrefix(PREVIEW_ANY,request)) {
+        	String previewUri = null;
+        	if(hasPrefix(PREVIEW_SMALL,request)) {
+        		log.trace("GET PREVIEW (small) "+uri);
+        		previewUri = getPreview(uri, PREVIEW_SMALL);
+        	} else if(hasPrefix(PREVIEW_LARGE,request)) {
+        		log.trace("GET PREVIEW (large) "+uri);
+        		previewUri = getPreview(uri, PREVIEW_LARGE);
+        	} else {
+        		log.trace("GET PREVIEW (any) "+uri);
+        		previewUri = getPreview(uri, PREVIEW_ANY);
+        	}
+        	if(previewUri != null) {
+        		try {
+        			CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
+        		} catch(RestServiceException e) {
+        			if(e.isNotFound()) {
+        				response.setStatus(404);
+        			} else {
+        				throw new ServletException("failed to retrieve "+request.getRequestURI()); // FIXME return 404
+        			}
+        		}
+        	}
         } else if(hasPrefix(IMAGE_INFIX,request)) {
             log.trace("GET IMAGE "+uri);
             try {
                 CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
             } catch(RestServiceException e) {
-                throw new ServletException("failed to retrieve "+request.getRequestURI());
+            	if(e.isNotFound()) {
+            		response.setStatus(404);
+            	} else {
+            		throw new ServletException("failed to retrieve "+request.getRequestURI()); // FIXME return 404
+            	}
             }
         } else if(hasPrefix(COLLECTION_INFIX,request)) {
             log.trace("LIST COLLECTION"+uri);
@@ -166,7 +232,11 @@ public class RestServlet extends HttpServlet {
                 }
                 response.getWriter().write(formatList(canonicalMembers));
             } catch(RestServiceException e) {
-                throw new ServletException("failed to retrieve "+request.getRequestURI());
+            	if(e.isNotFound()) {
+            		response.setStatus(404);
+            	} else {
+            		throw new ServletException("failed to retrieve "+request.getRequestURI());
+            	}
             }
         } else {
             throw new ServletException("unrecognized API call "+request.getRequestURI());

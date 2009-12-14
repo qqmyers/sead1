@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter.Display;
@@ -29,6 +28,7 @@ public class DatasetTableView extends FlexTable implements Display {
 	private final ArrayList<Hyperlink> datasetLinks = new ArrayList<Hyperlink>();
 
 	private final String BLOB_URL = "./api/image/";
+	private final String PREVIEW_URL = "./api/image/preview/small/";
 	
 	public DatasetTableView() {
 		super();
@@ -50,12 +50,15 @@ public class DatasetTableView extends FlexTable implements Display {
 		
 		this.setWidget(row, 1, new Label(type));
 		this.setWidget(row, 2, new Label(DATE_TIME_FORMAT.format(date)));
+		this.setWidget(row, 3, new Image(PREVIEW_URL + id));
 		
+		/*
 		if (preview != null) {
 			this.setWidget(row, 3, new Image(BLOB_URL + preview));
 		} else {
 			this.setWidget(row, 3, new SimplePanel());
 		}
+		*/
 		
 		for (int col=0; col<4; col++) {
 			getCellFormatter().addStyleName(row, col, "cell");
