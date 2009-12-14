@@ -128,8 +128,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		HorizontalPanel navMenu = new HorizontalPanel();
 		RootPanel.get("navMenu").add(navMenu);
 		Hyperlink listButton = new Hyperlink("List all","listDatasets");
+		listButton.addStyleName("navMenuLink");
 		// style setting workaround because hyperlinks are wrapped in div's
-		DOM.getChild(listButton.getElement(),0).setClassName("navMenuLink");
+		//DOM.getChild(listButton.getElement(),0).setClassName("navMenuLink");
 		navMenu.add(listButton);
 		HTML bullet = new HTML("&bull;");
 		navMenu.add(bullet);

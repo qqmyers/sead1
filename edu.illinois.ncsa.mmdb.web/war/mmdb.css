@@ -95,6 +95,29 @@ body {
  	color: white;
 }
 
+.navMenuLink a:link {
+	font-family: Arial, Helvetica, sans-serif;
+	/**color: #069;**/
+	color: white;
+	font-weight: bold;
+	text-decoration: none;
+	margin: 5px;
+	font-size: 1.2em;
+}
+
+.navMenuLink a:visited {
+	font-family: Arial, Helvetica, sans-serif;
+	color: white;
+	font-weight: bold;
+	text-decoration: none;
+	margin: 5px;
+	font-size: 1.2em;
+}
+
+.navMenuLink a:active {
+ 	color: white;
+}
+
 .navMenuLink:hover {
 	color: white;
 	text-decoration: underline;
