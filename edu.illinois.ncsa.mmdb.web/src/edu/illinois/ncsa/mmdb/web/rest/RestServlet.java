@@ -200,7 +200,7 @@ public class RestServlet extends HttpServlet {
         	}
         	if(previewUri != null) {
         		try {
-        			CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
+        			CopyFile.copy(restService.retrieveImage(previewUri), response.getOutputStream());
         		} catch(RestServiceException e) {
         			if(e.isNotFound()) {
         				response.setStatus(404);
