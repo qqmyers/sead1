@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.tupelo.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-kernel-2.5-SNAPSHOT.jar"/>
@@ -43,5 +42,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-server-2.5-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-sparql-2.5-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-webdav-2.5-SNAPSHOT.jar"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
