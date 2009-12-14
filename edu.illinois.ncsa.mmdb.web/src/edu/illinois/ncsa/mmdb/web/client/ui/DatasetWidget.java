@@ -135,6 +135,8 @@ public class DatasetWidget extends Composite {
 			Collection<PreviewImageBean> previews) {
 
 		// image preview
+		imageContainer = new SimplePanel();
+		
 		showPreview(dataset, previews);
 
 		// metadata
@@ -219,7 +221,6 @@ public class DatasetWidget extends Composite {
 		
 		for (PreviewImageBean preview : previews) {
 			if (preview.getWidth() == 800) {
-				imageContainer = new SimplePanel();
 				Image imagePreview = new Image(BLOB_URL + preview.getUri());
 				imagePreview.addStyleName("imagePreviewNoOverflow");
 				imageContainer.add(imagePreview);
@@ -227,10 +228,7 @@ public class DatasetWidget extends Composite {
 		}
 		
 		if (previews.isEmpty()) {
-			imageContainer = new SimplePanel();
-//			imageContainer.addStyleName("imagePreviewPanel");
 			image = new Image(BLOB_URL + dataset.getUri());
-//			image.addStyleName("imagePreview");
 			image.addStyleName("imagePreviewNoOverflow");
 			imageContainer.add(image);
 		}
