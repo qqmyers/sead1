@@ -14,6 +14,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -173,26 +174,38 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * @param eventBus
 	 * @param dispatchAsync 
 	 */
+	int pageOffset = 0;
+	int pageSize = 10;
+	
 	private void listDatasets() {
+		listDatasets(true);
+	}
+	private void listDatasets(boolean clear) {
+		if(clear) {
+			pageOffset = 0;
+			DatasetTableOneColumnView datasetTableWidget = new DatasetTableOneColumnView();
+			DatasetTablePresenter datasetTablePresenter = new DatasetTablePresenter(
+					datasetTableWidget, eventBus);
+			datasetTablePresenter.bind();
+			mainContainer.clear();
+			Label titleLabel = new Label("List all");
+			titleLabel.addStyleName("titleLabel");
+			mainContainer.add(titleLabel);
+			mainContainer.add(datasetTableWidget.asWidget());
+			Button moreButton = new Button("More...");
+			mainContainer.add(moreButton);
+			moreButton.addClickHandler(new ClickHandler() {
+				public void onClick(ClickEvent event) {
+					pageOffset += pageSize;
+					listDatasets(false);
+				}
+			});
+		}
 
 		// TODO add a way to switch between the two views
 //		DatasetTableView datasetTableWidget = new DatasetTableView();
-		DatasetTableOneColumnView datasetTableWidget = new DatasetTableOneColumnView();
-		DatasetTablePresenter datasetTablePresenter = new DatasetTablePresenter(
-				datasetTableWidget, eventBus);
-		datasetTablePresenter.bind();
 		
-		mainContainer.clear();
-		
-		Label titleLabel = new Label("List all");
-		
-		titleLabel.addStyleName("titleLabel");
-		
-		mainContainer.add(titleLabel);
-		
-		mainContainer.add(datasetTableWidget.asWidget());
-		
-		dispatchAsync.execute(new ListDatasets("http://purl.org/dc/elements/1.1/date",true,0,0), new AsyncCallback<ListDatasetsResult>() {
+		dispatchAsync.execute(new ListDatasets("http://purl.org/dc/elements/1.1/date",true,pageSize,pageOffset), new AsyncCallback<ListDatasetsResult>() {
 		
 			@Override
 			public void onFailure(Throwable caught) {
@@ -212,7 +225,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 							null);
 					AddNewDatasetEvent event = new AddNewDatasetEvent();
 					event.setDataset(dataset);
-					//event.setPreviews(result.getPreviews().get(dataset));
 					eventBus.fireEvent(event);
 				}
 			}
