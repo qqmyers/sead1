@@ -7,6 +7,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAnnotationsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
@@ -31,6 +32,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
 		DispatchUtil.registerHandler(new GetAnnotationsHandler());
 		DispatchUtil.registerHandler(new GetDatasetsByTagHandler());
 		DispatchUtil.registerHandler(new ListDatasetsHandler());
+		DispatchUtil.registerHandler(new AuthenticateHandler());
 	}
 
 	public void contextDestroyed(ServletContextEvent evt) {

@@ -42,6 +42,9 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-server-2.5-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-sparql-2.5-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-webdav-2.5-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.illinois.ncsa.bard.jaas.always.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.illinois.ncsa.bard.jaas.context.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.illinois.ncsa.bard.jaas.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

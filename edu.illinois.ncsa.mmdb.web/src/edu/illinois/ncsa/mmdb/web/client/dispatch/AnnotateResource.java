@@ -3,11 +3,13 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 import net.customware.gwt.dispatch.shared.Action;
+import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 
 /**
- * @author lmarini
+ * Requests the user to be authenticated on the server side.
+ * 
+ * @author Luigi Marini
  *
  */
 public class AnnotateResource implements Action<AnnotateResourceResult>{
