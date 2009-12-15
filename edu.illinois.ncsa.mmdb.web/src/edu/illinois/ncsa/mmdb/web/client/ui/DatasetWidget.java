@@ -3,8 +3,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -20,7 +18,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 
 /**
  * Show one datasets and related information about it.
@@ -63,7 +60,7 @@ public class DatasetWidget extends Composite {
 	private final FlowPanel rightColumn;
 
 	private static final String BLOB_URL = "./api/image/";
-
+	private static final String PREVIEW_URL = "./api/image/preview/large/";
 	private static final String DOWNLOAD_URL = "./api/image/download/";
 
 	private PersonBean creator;
@@ -120,7 +117,7 @@ public class DatasetWidget extends Composite {
 
 					@Override
 					public void onSuccess(GetDatasetResult result) {
-						showDataset(result.getDataset(), result.getPreviews());
+						showDataset(result.getDataset());
 
 					}
 				});
@@ -131,13 +128,12 @@ public class DatasetWidget extends Composite {
 	 * @param dataset
 	 * @param collection
 	 */
-	public void showDataset(DatasetBean dataset,
-			Collection<PreviewImageBean> previews) {
+	public void showDataset(DatasetBean dataset) {
 
 		// image preview
 		imageContainer = new SimplePanel();
 		
-		showPreview(dataset, previews);
+		showPreview(dataset);
 
 		// metadata
 		titleLabel = new Label(dataset.getTitle());
@@ -216,21 +212,9 @@ public class DatasetWidget extends Composite {
 
 	}
 
-	private void showPreview(DatasetBean dataset,
-			Collection<PreviewImageBean> previews) {
-		
-		for (PreviewImageBean preview : previews) {
-			if (preview.getWidth() == 800) {
-				Image imagePreview = new Image(BLOB_URL + preview.getUri());
-				imagePreview.addStyleName("imagePreviewNoOverflow");
-				imageContainer.add(imagePreview);
-			}
-		}
-		
-		if (previews.isEmpty()) {
-			image = new Image(BLOB_URL + dataset.getUri());
-			image.addStyleName("imagePreviewNoOverflow");
-			imageContainer.add(image);
-		}
+	private void showPreview(DatasetBean dataset) {
+		image = new Image(PREVIEW_URL + dataset.getUri());
+		image.addStyleName("imagePreviewNoOverflow");
+		imageContainer.add(image);
 	}
 }
