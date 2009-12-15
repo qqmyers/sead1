@@ -28,7 +28,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.BlobWriter;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
@@ -40,8 +39,6 @@ import org.tupeloproject.util.SecureHashMinter;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
-import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 
 
 /**
@@ -333,7 +330,7 @@ public class UploadBlob extends HttpServlet {
                         u.setUploaded(true);
                         
                         // submit to extraction service
-                        submitToExtractionService(uri);
+                        TupeloStore.getInstance().extractPreviews(uri);
                     }
                     catch (OperatorException e) {
                         log("Error writing blob/label: " + e.getMessage());
@@ -349,25 +346,6 @@ public class UploadBlob extends HttpServlet {
     }
 
 
-    /**
-     * Submit image URI to extraction service for processing.
-     * 
-     * @param imageUri the URI of the image we want to process
-     */
-    private void submitToExtractionService(String imageUri) {
-    	String extractionServiceURL = "http://localhost:9856/";
-    	log.debug("Submitting to extraction service URI " + extractionServiceURL);
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-        PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
-        try {
-			pbu.callExtractor(extractionServiceURL, dbu.get(imageUri));
-		} catch (Exception e) {
-			log.error("Extraction service " + extractionServiceURL + " unavailable");
-			e.printStackTrace();
-		}
-	}
-    
     /**
      * Convert a vector of values into a Jason array of strings
      * @param name the name of the array

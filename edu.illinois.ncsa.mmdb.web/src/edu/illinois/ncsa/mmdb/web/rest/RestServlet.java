@@ -148,22 +148,27 @@ public class RestServlet extends HttpServlet {
     	PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(bs);
     	try {
     		Collection<PreviewImageBean> previews = pibu.getAssociationsFor(uri);
-    		long maxArea = 0L;
-    		long minArea = 0L;
-    		String maxUri = null;
-    		String minUri = null;
-    		for(PreviewImageBean preview : previews) {
-    			long area = preview.getHeight() * preview.getWidth();
-    			//log.debug("found "+preview.getWidth()+"x"+preview.getHeight()+" ("+area+"px) preview ="+preview.getUri());
-    			if(area > maxArea) { maxArea = area; maxUri = preview.getUri(); }
-    			if(minArea == 0 || area < minArea) { minArea = area; minUri = preview.getUri(); }
-    		}
-    		if(infix.equals(PREVIEW_LARGE)) {
-    			//log.debug("large preview = "+maxArea+"px "+maxUri);
-    			return maxUri;
+    		if(previews.size()==0) {
+    			TupeloStore.getInstance().extractPreviews(uri);
+    			return uri; // FIXME return an image indicating that there's no preview
     		} else {
-    			//if(minUri != null) { log.debug("small preview = "+minArea+"px "+minUri); }
-    			return minUri;
+    			long maxArea = 0L;
+    			long minArea = 0L;
+    			String maxUri = null;
+    			String minUri = null;
+    			for(PreviewImageBean preview : previews) {
+    				long area = preview.getHeight() * preview.getWidth();
+    				//log.debug("found "+preview.getWidth()+"x"+preview.getHeight()+" ("+area+"px) preview ="+preview.getUri());
+    				if(area > maxArea) { maxArea = area; maxUri = preview.getUri(); }
+    				if(minArea == 0 || area < minArea) { minArea = area; minUri = preview.getUri(); }
+    			}
+    			if(infix.equals(PREVIEW_LARGE)) {
+    				//log.debug("large preview = "+maxArea+"px "+maxUri);
+    				return maxUri;
+    			} else {
+    				//if(minUri != null) { log.debug("small preview = "+minArea+"px "+minUri); }
+    				return minUri;
+    			}
     		}
     	} catch(OperatorException x) {
     		return null;

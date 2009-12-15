@@ -19,6 +19,8 @@ import edu.uiuc.ncsa.cet.bean.ContextBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextConvert;
+import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.tupelo.contexts.ContextCreators;
 
@@ -199,6 +201,20 @@ public class TupeloStore {
             }
         }
         return canon;
+    }
+    
+    public void extractPreviews(String uri) {
+    	String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
+    	log.debug("Submitting to extraction service URI " + extractionServiceURL);
+        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+        PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
+        try {
+			pbu.callExtractor(extractionServiceURL, dbu.get(uri));
+		} catch (Exception e) {
+			log.error("Extraction service " + extractionServiceURL + " unavailable");
+			e.printStackTrace();
+		}
     }
 }
 
