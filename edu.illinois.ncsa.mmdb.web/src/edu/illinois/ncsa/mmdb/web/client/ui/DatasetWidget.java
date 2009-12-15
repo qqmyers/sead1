@@ -3,10 +3,14 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.ArrayList;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -15,6 +19,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import edu.illinois.ncsa.mmdb.web.client.DownloadButton;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
@@ -69,6 +75,12 @@ public class DatasetWidget extends Composite {
 
 	private Label sizeLabel;
 
+	private DisclosurePanel informationPanel;
+
+	private String id;
+
+	private FlexTable informationTable;
+
 	/**
 	 * 
 	 * @param dispatchAsync
@@ -107,6 +119,7 @@ public class DatasetWidget extends Composite {
 	 * @param id
 	 */
 	public void showDataset(String id) {
+		this.id = id;
 		service.execute(new GetDataset(id),
 				new AsyncCallback<GetDatasetResult>() {
 
@@ -182,6 +195,21 @@ public class DatasetWidget extends Composite {
 		downloadButtonPanel.addStyleName("downloadButtonContainer");
 
 		downloadButtonPanel.add(downloadButton);
+		
+		// information panel with extra metadata
+		informationPanel = new DisclosurePanel("Extracted Information");
+		
+		informationPanel.addStyleName("downloadButtonContainer");
+		
+		informationPanel.setAnimationEnabled(true);
+		
+		informationPanel.setWidth("100%");
+		
+		informationTable = new FlexTable();
+		
+		informationTable.setWidth("100%");
+		
+		informationPanel.add(informationTable);
 
 		// layout
 		leftColumn.add(titleLabel);
@@ -205,11 +233,38 @@ public class DatasetWidget extends Composite {
 		rightColumn.add(metadataPanel);
 
 		leftColumn.add(downloadButtonPanel);
+		
+		leftColumn.add(informationPanel);
 
 		leftColumn.add(annotationsWidget);
 
 		rightColumn.add(tagsWidget);
+		
+		loadMetadata();
 
+	}
+
+	private void loadMetadata() {
+		if (id != null) {
+			service.execute(new GetMetadata(id), new AsyncCallback<GetMetadataResult>() {
+
+				@Override
+				public void onFailure(Throwable arg0) {
+					GWT.log("Error retrieving metadata about dataset " + id, null);
+					
+				}
+
+				@Override
+				public void onSuccess(GetMetadataResult arg0) {
+					ArrayList<ArrayList<String>> metadata = arg0.getMetadata();
+					for (ArrayList<String> tuple : metadata) {
+						int row = informationTable.getRowCount()+1;
+						informationTable.setText(row, 0, tuple.get(0));
+						informationTable.setText(row, 1, tuple.get(1));
+					}
+				}
+			});
+		}
 	}
 
 	private void showPreview(DatasetBean dataset) {

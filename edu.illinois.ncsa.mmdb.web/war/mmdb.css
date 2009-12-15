@@ -21,7 +21,8 @@ body {
 .relativePosition {
 	position: relative;
 }
-.header {
+
+.pageHeader {
 	background: #002B55;
 	padding: 0px;
 	margin: 0px;
@@ -361,7 +362,6 @@ body {
 }
 
 .downloadButtonContainer {
-	border-top: 1px dotted gray;
 	border-bottom: 1px dotted gray;
 	margin: 0px;
 	padding: 20px;

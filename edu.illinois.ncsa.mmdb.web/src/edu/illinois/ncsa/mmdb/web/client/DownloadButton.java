@@ -10,7 +10,7 @@ public class DownloadButton extends Button implements ClickHandler {
 
     public DownloadButton(String uri) {
         this();
-        setText("Download");
+        setText("Download full size");
         setUri(uri);
     }
 
