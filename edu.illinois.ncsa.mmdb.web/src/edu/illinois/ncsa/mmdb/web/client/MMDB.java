@@ -14,7 +14,6 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -36,6 +35,7 @@ import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
+import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
@@ -179,36 +179,36 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	int pageSize = 10;
 	
 	private void listDatasets() {
-		listDatasets(true);
-	}
-	private void listDatasets(boolean clear) {
-		if(clear) {
-			pageOffset = 0;
-			DatasetTableOneColumnView datasetTableWidget = new DatasetTableOneColumnView();
-			DatasetTablePresenter datasetTablePresenter = new DatasetTablePresenter(
-					datasetTableWidget, eventBus);
-			datasetTablePresenter.bind();
-			mainContainer.clear();
-			Label titleLabel = new Label("List all");
-			titleLabel.addStyleName("titleLabel");
-			mainContainer.add(titleLabel);
-			mainContainer.add(datasetTableWidget.asWidget());
-			Button moreButton = new Button("More...");
-			mainContainer.add(moreButton);
-			moreButton.addClickHandler(new ClickHandler() {
-				public void onClick(ClickEvent event) {
-					pageOffset += pageSize;
-					listDatasets(false);
-				}
-			});
+		Map<String,String> params = getParams();
+		int page = 1;
+		if(params.containsKey("page")) {
+			try {
+				page = Integer.parseInt(params.get("page"));
+			} catch(Exception x) { }
 		}
+		pageOffset = (page - 1) * pageSize;
+		DatasetTableOneColumnView datasetTableWidget = new DatasetTableOneColumnView();
+		DatasetTablePresenter datasetTablePresenter = new DatasetTablePresenter(
+				datasetTableWidget, eventBus);
+		datasetTablePresenter.bind();
+		mainContainer.clear();
+		Label titleLabel = new Label("List all");
+		titleLabel.addStyleName("titleLabel");
+		mainContainer.add(titleLabel);
+		mainContainer.add(datasetTableWidget.asWidget());
+		PagingWidget pager = new PagingWidget(page);
+		pager.addValueChangeHandler(new ValueChangeHandler<Integer>() {
+			public void onValueChange(ValueChangeEvent<Integer> event) {
+				History.newItem("listDatasets?page="+event.getValue());
+			}
+		});
+		mainContainer.add(pager);
 
 		// TODO add a way to switch between the two views
 //		DatasetTableView datasetTableWidget = new DatasetTableView();
 		
-		dispatchAsync.execute(new ListDatasets("http://purl.org/dc/elements/1.1/date",true,pageSize,pageOffset), new AsyncCallback<ListDatasetsResult>() {
-		
-			@Override
+		dispatchAsync.execute(new ListDatasets("http://purl.org/dc/elements/1.1/date",true,pageSize,pageOffset),
+				new AsyncCallback<ListDatasetsResult>() {
 			public void onFailure(Throwable caught) {
 				GWT.log("Error retrieving datasets", null);
 				DialogBox dialogBox = new DialogBox();
@@ -240,9 +240,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	Map<String,String> getParams() {
 		Map<String,String> params = new HashMap<String,String>();
 		String paramString = History.getToken().substring(History.getToken().indexOf("?")+1);
-		for(String paramEntry : paramString.split("&")) {
-			String[] terms = paramEntry.split("=");
-			params.put(terms[0],terms[1]);
+		if(!paramString.isEmpty()) {
+			for(String paramEntry : paramString.split("&")) {
+				String[] terms = paramEntry.split("=");
+				if(terms.length==2) {
+					params.put(terms[0],terms[1]);
+				}
+			}
 		}
 		return params;
 	}
