@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -39,13 +42,19 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 	}
 
 	@Override
-	public void addRow(String id, String name, String type, Date date, String preview) {
+	public void addRow(final String id, String name, String type, Date date, String preview) {
 		
 		GWT.log("Adding dataset " + name, null);
 		
 		int row = this.getRowCount();
 		
-		setWidget(row, 0, new Image(PREVIEW_URL + id));
+		Image previewImage = new Image(PREVIEW_URL + id);
+		previewImage.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				History.newItem("dataset?id="+id);
+			}
+		});
+		setWidget(row, 0, previewImage);
 		/*
 		if (preview != null) {
 			setWidget(row, 0, new Image(BLOB_URL + preview));
