@@ -23,9 +23,9 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
  */
 public class LoginStatusWidget extends Composite {
 
-	private FlowPanel mainPanel;
-	private Anchor loginAnchor;
-	private Anchor logoutAnchor;
+	private final FlowPanel mainPanel;
+	private final Anchor loginAnchor;
+	private final Anchor logoutAnchor;
 	
 	/**
 	 * Create a main panel and show the appropriate
@@ -54,7 +54,7 @@ public class LoginStatusWidget extends Composite {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				MMDB.sessionID = null;
+				LoginPage.logout();
 				logout();
 				History.newItem("");
 			}

@@ -1,5 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -33,6 +35,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
+import edu.illinois.ncsa.mmdb.web.client.ui.GalleryWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
@@ -221,13 +224,19 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 			@Override
 			public void onSuccess(ListDatasetsResult result) {
+//				ArrayList<String> uris = new ArrayList<String>();
 				for (DatasetBean dataset : result.getDatasets()) {
 					GWT.log("Sending event add dataset " + dataset.getTitle(),
 							null);
 					AddNewDatasetEvent event = new AddNewDatasetEvent();
 					event.setDataset(dataset);
 					eventBus.fireEvent(event);
+//					uris.add(dataset.getUri());
 				}
+				
+//				// FIXME temporary testing
+//				GalleryWidget gallery = new GalleryWidget(uris);
+//				mainContainer.add(gallery);
 			}
 		});
 	}
@@ -401,10 +410,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * @return true if logged in already, false if not
 	 */
 	public boolean checkLogin() {
+		String cookieSID = Cookies.getCookie("sid");
+		if (cookieSID != null) {
+			LoginPage.login(cookieSID);
+		}
 		if (MMDB.sessionID == null) {
 			History.newItem("login?p=" + History.getToken());
 			return false;
-		}
+		} 
 		return true;
 	}
 }

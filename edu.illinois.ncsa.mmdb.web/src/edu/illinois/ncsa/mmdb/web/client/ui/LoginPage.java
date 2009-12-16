@@ -3,6 +3,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.Date;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -10,6 +12,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -162,6 +165,7 @@ public class LoginPage extends Composite {
 					public void onSuccess(AuthenticateResult arg0) {
 						if (arg0.getAuthenticated()) {
 							login(arg0.getSessionId());
+							redirect();
 						} else {
 							Label message = new Label(
 									"Incorrect username/password combination");
@@ -172,28 +176,38 @@ public class LoginPage extends Composite {
 
 					}
 				});
-		//		
-		//		
-		// if (usernameBox.getText().equals("guest")
-		// && passwordBox.getText().equals("guest")) {
-		// login();
-		// } else {
-		// Label message = new Label("Incorrect username/password combination");
-		// message.addStyleName("loginError");
-		// feedbackPanel.add(message);
-		// }
-
 	}
 
 	/**
+	 * Redirect to previous page.
+	 */
+	protected void redirect() {
+		String previousHistory = History.getToken().substring(
+				History.getToken().indexOf("?p=") + 3);
+		History.newItem(previousHistory);
+	}
+
+	/**
+	 * Set the session id, add a cookie and add history token.
+	 * 
 	 * @param sessionId 
 	 * 
 	 */
-	protected void login(String sessionId) {
-		String previousHistory = History.getToken().substring(
-				History.getToken().indexOf("?p=") + 3);
+	public static void login(String sessionId) {
 		MMDB.sessionID = sessionId;
 		MMDB.loginStatusWidget.login(MMDB.sessionID);
-		History.newItem(previousHistory);
+		
+		// set cookie
+		final long DURATION = 1000 * 60 * 5 ; // 5 minutes
+	    Date expires = new Date(System.currentTimeMillis() + DURATION);
+	    Cookies.setCookie("sid", sessionId, expires, null, "/", false);
+	}
+	
+	/**
+	 * Set sessionID to null and remove cookie.
+	 */
+	public static void logout() {
+		MMDB.sessionID = null;
+		Cookies.removeCookie("sid");
 	}
 }
