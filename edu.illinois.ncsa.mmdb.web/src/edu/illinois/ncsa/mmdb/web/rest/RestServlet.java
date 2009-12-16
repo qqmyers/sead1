@@ -150,7 +150,7 @@ public class RestServlet extends HttpServlet {
     		Collection<PreviewImageBean> previews = pibu.getAssociationsFor(uri);
     		if(previews.size()==0) {
     			TupeloStore.getInstance().extractPreviews(uri);
-    			return uri; // FIXME return an image indicating that there's no preview
+    			return null;
     		} else {
     			long maxArea = 0L;
     			long minArea = 0L;
