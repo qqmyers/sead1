@@ -27,23 +27,25 @@
 		<delete dir="build" />
 	</target>
 
-	<target name="hudson" depends="update_version, cetbean, war, checkstyle" />
+	<target name="hudson" depends="tupeloidsa, cetbean, update_version, war, checkstyle" />
 
 	<!-- copy the tupelo jar files -->
 	<target name="tupeloidsa" description="Copy the latest tupelo jar on hudson">
+		<delete  dir="war/WEB-INF/lib" includes="**/tupelo*.jar"/>
 		<copy todir="war/WEB-INF/lib" preservelastmodified="true" overwrite="true" verbose="true" flatten="true">
-			<fileset dir="/home/hudson/work/jobs/Tupelo 2.4.2/lastSuccessful">
-				<include name="**/tupelo*.jar" />
-				<exclude name="**/tupelo-kernel-2.4.2-SNAPSHOT-tests.jar" />
+			<fileset dir="/home/hudson/work/jobs/Tupelo 2.5/lastSuccessful">
+				<include name="**/tupelo*.jar"/>
+				<exclude name="**/tupelo*-2.5-tests.jar"/>
 			</fileset>
 		</copy>
 	</target>
-
+		
 	<target name="tupeloshared" description="Copy the latest tupelo jar from shared">
+		<delete  dir="war/WEB-INF/lib" includes="**/tupelo*.jar"/>
 		<copy todir="war/WEB-INF/lib" preservelastmodified="true" overwrite="true" verbose="true" flatten="true">
-			<fileset dir="\\isda\shared\build\tupelo\2.4.2">
-				<include name="**/tupelo*.jar" />
-				<exclude name="**/tupelo-kernel-2.4.2-SNAPSHOT-tests.jar" />
+			<fileset dir="\\isda\shared\build\tupelo\2.5">
+				<include name="**/tupelo*.jar"/>
+				<exclude name="**/*-2.5-tests.jar"/>
 			</fileset>
 		</copy>
 	</target>
