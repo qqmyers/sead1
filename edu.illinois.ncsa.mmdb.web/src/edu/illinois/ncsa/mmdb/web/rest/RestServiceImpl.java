@@ -17,10 +17,7 @@ import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
-import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
-import org.tupeloproject.util.Minter;
-import org.tupeloproject.util.TagUriFactory;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
@@ -86,6 +83,11 @@ public class RestServiceImpl implements RestService {
      */
     public void createImage(String imageUri, Map<Resource,Object> md, InputStream imageData) throws RestServiceException {
         updateImage(imageUri, md, imageData);
+        try {
+        	TupeloStore.getInstance().extractPreviews(imageUri);
+        } catch(Exception x) {
+        	x.printStackTrace();
+        }
     }
 
     /**

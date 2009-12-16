@@ -208,18 +208,15 @@ public class UploadBlob extends HttpServlet {
     }
 
     FileUploadListener trackProgress(ServletFileUpload upload, String sessionKey) {
-        FileUploadListener listener = null;
-        if(sessionKey == null) {
-        	log.warn("no session key, progress will not be reported to client");
-        	return new FileUploadListener();
-        } else if(listeners.containsKey(sessionKey)) {
-        	return listeners.get(sessionKey); // shouldn't happen, but this is safe
-        } else {
-        	listener = new FileUploadListener();
+    	if(sessionKey != null && listeners.containsKey(sessionKey)) {
+    		return listeners.get(sessionKey); // shouldn't happen, but this is safe
+    	}
+        FileUploadListener listener = new FileUploadListener();
+        upload.setProgressListener(listener);
+        if(sessionKey != null) {
         	listeners.put(sessionKey, listener);
-        	upload.setProgressListener(listener);
-        	return listener;
         }
+        return listener;
     }
     
     /**
@@ -236,9 +233,9 @@ public class UploadBlob extends HttpServlet {
             throw new ServletException("Tupelo server has no context");
         }
 
-        log("Content type: " + request.getContentType());
+        log.trace("Content type: " + request.getContentType());
         if (!ServletFileUpload.isMultipartContent(request)) {
-            log("Content is not multipart/form-data");
+            log.error("Content is not multipart/form-data");
             throw new ServletException("Content is not multipart/form-data");
         }
 
@@ -246,13 +243,7 @@ public class UploadBlob extends HttpServlet {
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
         String sessionKey = request.getParameter("session");
-        FileUploadListener listener = null;
-        if(sessionKey == null) {
-        	log.warn("no session key, progress will not be reported to client");
-        } else {
-            log.trace("POST: upload session key (param) = "+sessionKey);
-            listener = trackProgress(upload, sessionKey);
-        }
+        FileUploadListener listener = trackProgress(upload, sessionKey);
         
         String uri = null;
         // Parse the request
@@ -267,7 +258,7 @@ public class UploadBlob extends HttpServlet {
                 long sizeInBytes = item.getSize();
                 log.trace("Post: " + item.isFormField() + "|" + fieldName + "|" + fileName + "|" + isInMemory + "|"
                         + contentType + "|" + sizeInBytes);
-                if(item.isFormField() && fieldName.equals("session")) {
+                if(item.isFormField() && fieldName.equals("session") && listener==null) {
                 	sessionKey = item.getString();
                     log.trace("POST: upload session key (part) = "+sessionKey);
                     listener = trackProgress(upload, sessionKey);
@@ -282,11 +273,14 @@ public class UploadBlob extends HttpServlet {
                     //
                     bw.setUri(URI.create(uri));
                     String url = TupeloStore.getInstance().getUriCanonicalizer(request).canonicalize(RestServlet.IMAGE_INFIX,uri.toString());
-                    UploadInfo u = listener.addUploadInfo(URI.create(url), trimFilename(fileName), sizeInBytes);
+                    UploadInfo u = null;
+                    if(listener != null) {
+                    	listener.addUploadInfo(URI.create(url), trimFilename(fileName), sizeInBytes);
+                    }
                     final FileUploadListener _listener = listener;
                     bw.setInputStream(new FilterInputStream(item.getInputStream()) {
                     	int wrote(int written) {
-                    		if(written > 0) {
+                    		if(written > 0 && _listener != null) {
                     			_listener.wrote(written);
                     		}
                     		return written;
@@ -319,28 +313,32 @@ public class UploadBlob extends HttpServlet {
                         t.setValue(LABEL, fileName);
                         t.setValue(RestService.LABEL_PROPERTY, fileName);
                         t.setValue(RestService.DATE_PROPERTY, new Date());
-                        // httpclient also gives the content type a "charset"; ignore that.
-                        contentType = contentType.replaceFirst("; charset=.*","");
-                        // FIXME parse this properly and set the charset accordingly!
-                        t.setValue(RestService.FORMAT_PROPERTY, contentType);
+                        if(contentType != null) {
+                        	// httpclient also gives the content type a "charset"; ignore that.
+                        	contentType = contentType.replaceFirst("; charset=.*","");
+                        	// FIXME parse this properly and set the charset accordingly!
+                        	t.setValue(RestService.FORMAT_PROPERTY, contentType);
+                        }
                         t.save();
-                        log.info("user uploaded "+fileName+" ("+sizeInBytes+" bytes), uri="+uri);
                         ts.close();
+                        log.info("user uploaded "+fileName+" ("+sizeInBytes+" bytes), uri="+uri);
 
-                        u.setUploaded(true);
+                        if(u != null) {
+                        	u.setUploaded(true);
+                        }
                         
                         // submit to extraction service
                         TupeloStore.getInstance().extractPreviews(uri);
                     }
                     catch (OperatorException e) {
-                        log("Error writing blob/label: " + e.getMessage());
+                        log.error("Error writing blob/label: " + e.getMessage());
                         throw new ServletException(e);
                     }
                 }
             }
         }
         catch (FileUploadException e1) {
-            log(e1.getLocalizedMessage());
+            log.error("file upload error: "+e1.getLocalizedMessage());
             e1.printStackTrace();
         }
     }
