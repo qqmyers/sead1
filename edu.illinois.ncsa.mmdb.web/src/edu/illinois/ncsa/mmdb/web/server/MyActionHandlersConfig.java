@@ -12,6 +12,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAnnotationsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoPointHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
@@ -34,7 +35,8 @@ public class MyActionHandlersConfig implements ServletContextListener {
 		DispatchUtil.registerHandler(new GetDatasetsByTagHandler());
 		DispatchUtil.registerHandler(new ListDatasetsHandler());
 		DispatchUtil.registerHandler(new AuthenticateHandler());
-		DispatchUtil.registerHandler(new GetMetadataHandler());
+        DispatchUtil.registerHandler(new GetMetadataHandler());
+        DispatchUtil.registerHandler(new GetGeoPointHandler());
 	}
 
 	public void contextDestroyed(ServletContextEvent evt) {

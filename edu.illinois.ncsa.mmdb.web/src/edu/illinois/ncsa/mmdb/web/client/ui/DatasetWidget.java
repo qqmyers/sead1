@@ -7,6 +7,10 @@ import java.util.ArrayList;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.maps.client.overlay.Marker;
+import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
@@ -19,11 +23,14 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import edu.illinois.ncsa.mmdb.web.client.DownloadButton;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 
 /**
  * Show one datasets and related information about it.
@@ -80,6 +87,8 @@ public class DatasetWidget extends Composite {
 	private String id;
 
 	private FlexTable informationTable;
+
+    private MapWidget mapWidget;
 
 	/**
 	 * 
@@ -185,6 +194,13 @@ public class DatasetWidget extends Composite {
 
 		annotationsWidget = new AnnotationsWidget(dataset.getUri(), service);
 
+        // map
+        mapWidget = new MapWidget();
+        mapWidget.setSize( "250px", "250px" );
+        mapWidget.setUIToDefault();
+        mapWidget.setVisible( false );
+        showMap();
+
 		// TODO change to DOWNLOAD_URL once we have the proper url
 		downloadButton = new DownloadButton(DOWNLOAD_URL + dataset.getUri());
 
@@ -238,10 +254,12 @@ public class DatasetWidget extends Composite {
 
 		leftColumn.add(annotationsWidget);
 
-		rightColumn.add(tagsWidget);
-		
-		loadMetadata();
+        rightColumn.add(tagsWidget);
 
+        rightColumn.add( mapWidget );
+        
+        loadMetadata();
+        
 	}
 
 	private void loadMetadata() {
@@ -266,6 +284,42 @@ public class DatasetWidget extends Composite {
 			});
 		}
 	}
+
+   private void showMap() {
+        if ( id != null ) {
+            service.execute( new GetGeoPoint( id ), new AsyncCallback<GetGeoPointResult>() {
+
+                @Override
+                public void onFailure( Throwable arg0 )
+                {
+                    GWT.log( "Error retrieving geolocations for " + id, arg0 );
+
+                }
+
+                @Override
+                public void onSuccess( GetGeoPointResult arg0 )
+                {
+                    if (arg0.getGeoPoints().isEmpty()) {
+                        return;
+                    }
+                                        
+                    // drop marker on the map
+                    LatLng center = LatLng.newInstance( 0, 0 );
+                    for(GeoPointBean gpb : arg0.getGeoPoints()) {
+                        MarkerOptions options = MarkerOptions.newInstance();
+                        options.setTitle( "lat=" + gpb.getLatitude() +  " lon=" + gpb.getLongitude() + " alt=" + gpb.getAltitude());
+                        LatLng loc = LatLng.newInstance( gpb.getLatitude(), gpb.getLongitude() );
+                        mapWidget.addOverlay( new Marker( loc, options ) );
+                        center = loc;
+                    }
+
+                    mapWidget.setCenter( center, 15 );
+                    mapWidget.setVisible( true );
+                    mapWidget.checkResizeAndCenter();
+                }
+            } );
+        }
+    }
 
 	private void showPreview(DatasetBean dataset) {
 		image = new Image(PREVIEW_URL + dataset.getUri());
