@@ -4,6 +4,8 @@
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -177,7 +179,7 @@ public class DatasetWidget extends Composite {
 			authorLabel.setText("Author: " + creator.getName());
 		}
 
-		sizeLabel = new Label("Size: ");
+		sizeLabel = new Label("Size: " + humanBytes(dataset.getSize()));
 
 		sizeLabel.addStyleName("metadataEntry");
 
@@ -261,6 +263,26 @@ public class DatasetWidget extends Composite {
         loadMetadata();
         
 	}
+	
+    private String humanBytes( long x )
+    {
+        if ( x == Integer.MAX_VALUE ) {
+            return "No limit";
+        }
+        if ( x < 1e3 ) {
+            return x + " bytes";
+        } else if ( x < 1e6 ) {
+            return (int)(x / 1e3 * 100) / 100.0 + " Kb";
+        } else if ( x < 1e9 ) {
+            return(int)(x / 1e6 * 100) / 100.0 + " Mb";
+        } else if ( x < 1e12 ) {
+            return (int)(x / 1e9 * 100) / 100.0 + " Gb";
+        } else if ( x < 1e15 ) {
+            return (int)(x / 1e12 * 100) / 100.0 + " Tb";
+        } else {
+            return x + " bytes";
+        }
+    }
 
 	private void loadMetadata() {
 		if (id != null) {
@@ -275,6 +297,14 @@ public class DatasetWidget extends Composite {
 				@Override
 				public void onSuccess(GetMetadataResult arg0) {
 					ArrayList<ArrayList<String>> metadata = arg0.getMetadata();
+					Collections.sort( metadata, new Comparator<ArrayList<String>>() {
+                        @Override
+                        public int compare( ArrayList<String> o1, ArrayList<String> o2 )
+                        {
+                            return o1.get(0).compareTo( o2.get( 0 ) );
+                        }
+					    
+					});
 					for (ArrayList<String> tuple : metadata) {
 						int row = informationTable.getRowCount()+1;
 						informationTable.setText(row, 0, tuple.get(0));
