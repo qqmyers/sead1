@@ -13,6 +13,9 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Foaf;
+import org.tupeloproject.rdf.terms.Rdf;
 
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.ContextBean;
@@ -20,6 +23,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.tupelo.contexts.ContextCreators;
@@ -83,11 +87,12 @@ public class TupeloStore {
 			// setup context creators
 			ContextCreators.register();
 			context = createSerializeContext();
-                    if(context == null) {
-                        log.error("no context deserialized!");
-                    } else {
-                        log.info("context deserialized: "+context);
-                    }
+			if(context == null) {
+				log.error("no context deserialized!");
+			} else {
+				log.info("context deserialized: "+context);
+				initializeContext(context);
+			}
 			ContextConvert.updateContext(context);
 			beanSession = CETBeans.createBeanSession(context);
 		} catch (OperatorException e) {
@@ -102,6 +107,16 @@ public class TupeloStore {
 		}
 	}
 
+	void initializeContext(Context context) {
+		try {
+			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Resource.uriRef( "http://cet.ncsa.uiuc.edu/2007/foaf/context/password" ), "guest" );
+			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Rdf.TYPE, Foaf.PERSON );
+			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Foaf.NAME, "guest" );
+		} catch(Exception x) {
+			log.error("failed to initialize context",x);
+		}
+	}
+	
 	/**
 	 * Load context from disk.
 	 * 
