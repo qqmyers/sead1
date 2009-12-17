@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:a="http://cet.ncsa.uiuc.edu/2007/context/" xmlns:b="tag:tupeloproject.org,2006:/2.0/beans/2.0/" xmlns:cet="http://cet.ncsa.uiuc.edu/2007/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+  <cet:Context rdf:about="tag:cet.ncsa.uiuc.edu,2008:/bean/Context/28ca545a-2a8c-48fc-b8ad-5427c119aa03">
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:11153b7c7a85b8a899925f018127bcec06680dc2">
+        <b:storageTypeMapKey>TupeloServer.URL</b:storageTypeMapKey>
+        <b:storageTypeMapValue>http://mmdb-dev.ncsa.uiuc.edu:8080/mmdb/tupelo</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:62de63aa0ca5368c491287abb25c2a7e91f7df37">
+        <b:storageTypeMapKey>http</b:storageTypeMapKey>
+        <b:storageTypeMapValue>false</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:a8d69700bc0fd2eccc4af545271d9721adca9149">
+        <b:storageTypeMapKey>TupeloServer.user</b:storageTypeMapKey>
+        <b:storageTypeMapValue>tupelo</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:ed93c21a600bff48bc4c92b16aa1d581fe874377">
+        <b:storageTypeMapKey>type</b:storageTypeMapKey>
+        <b:storageTypeMapValue>TupeloServer</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <a:hasProperties>
+      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:f790a9c55b185586b876bfa973430a563024ce18">
+        <b:storageTypeMapKey>TupeloServer.password</b:storageTypeMapKey>
+        <b:storageTypeMapValue>tupelo</b:storageTypeMapValue>
+      </b:storageTypeMapEntry>
+    </a:hasProperties>
+    <dc:creator>
+      <foaf:Person rdf:about="http://cet.ncsa.uiuc.edu/2007/person/anonymous">
+        <dc:identifier>http://cet.ncsa.uiuc.edu/2007/person/anonymous</dc:identifier>
+        <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry"/>
+        <rdfs:label>Anonymous</rdfs:label>
+        <foaf:mbox/>
+        <foaf:name>Anonymous</foaf:name>
+        <b:propertyImplementationMappingSubject rdf:resource="tag:cet.ncsa.uiuc.edu,2009:/mapping/http://xmlns.com/foaf/0.1/Person"/>
+        <b:propertyValueImplementationClassName>edu.uiuc.ncsa.cet.bean.PersonBean</b:propertyValueImplementationClassName>
+      </foaf:Person>
+    </dc:creator>
+    <dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-11-30T19:54:17.795Z</dc:date>
+    <dc:description/>
+    <dc:identifier>tag:cet.ncsa.uiuc.edu,2008:/bean/Context/28ca545a-2a8c-48fc-b8ad-5427c119aa03</dc:identifier>
+    <dc:title>MMDB-DEV server</dc:title>
+    <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/DefaultContext"/>
+    <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry"/>
+    <rdfs:label>MMDB-DEV server</rdfs:label>
+    <b:propertyImplementationMappingSubject rdf:resource="tag:cet.ncsa.uiuc.edu,2009:/mapping/http://cet.ncsa.uiuc.edu/2007/Context"/>
+    <b:propertyValueImplementationClassName>edu.uiuc.ncsa.cet.bean.ContextBean</b:propertyValueImplementationClassName>
+  </cet:Context>
+</rdf:RDF>
