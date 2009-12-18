@@ -1,6 +1,5 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +34,6 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
-import edu.illinois.ncsa.mmdb.web.client.ui.GalleryWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
@@ -132,8 +130,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		RootPanel.get("navMenu").add(navMenu);
 		Hyperlink listButton = new Hyperlink("List all","listDatasets");
 		listButton.addStyleName("navMenuLink");
-		// style setting workaround because hyperlinks are wrapped in div's
-		//DOM.getChild(listButton.getElement(),0).setClassName("navMenuLink");
 		navMenu.add(listButton);
 		HTML bullet = new HTML("&bull;");
 		navMenu.add(bullet);
@@ -198,14 +194,15 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		Label titleLabel = new Label("List all");
 		titleLabel.addStyleName("titleLabel");
 		mainContainer.add(titleLabel);
-		mainContainer.add(datasetTableWidget.asWidget());
 		PagingWidget pager = new PagingWidget(page);
 		pager.addValueChangeHandler(new ValueChangeHandler<Integer>() {
 			public void onValueChange(ValueChangeEvent<Integer> event) {
 				History.newItem("listDatasets?page="+event.getValue());
 			}
 		});
+		pager.addStyleName("centered"); // special IE-friendly centering style
 		mainContainer.add(pager);
+		mainContainer.add(datasetTableWidget.asWidget());
 
 		// TODO add a way to switch between the two views
 //		DatasetTableView datasetTableWidget = new DatasetTableView();
