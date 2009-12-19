@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -70,6 +71,11 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
 		verticalPanel.add(hyperlink);	
 		verticalPanel.add(new Label(DATE_TIME_FORMAT.format(date)));
+		
+		// FIXME debug
+		Anchor zoomLink = new Anchor("zoom", GWT.getHostPageBaseURL()+"pyramid/uri/"+id);
+		verticalPanel.add(zoomLink);
+		// FIXME end debug
 		
 		getCellFormatter().addStyleName(row, 0, "cell");
 		getCellFormatter().addStyleName(row, 1, "cell");

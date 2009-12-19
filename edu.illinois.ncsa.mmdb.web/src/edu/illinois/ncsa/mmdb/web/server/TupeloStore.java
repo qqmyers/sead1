@@ -1,6 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -13,11 +14,15 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Thing;
+import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.rdf.terms.Rdf;
 
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
+import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.ContextBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextBeanUtil;
@@ -171,6 +176,43 @@ public class TupeloStore {
 		return contextBeans;
 	}
 
+	// static utility methods
+	
+	public static Object fetchBean(String uri) throws OperatorException {
+		return fetchBean(Resource.uriRef(uri));
+	}
+	public static Object fetchBean(Resource uri) throws OperatorException {
+		return getInstance().getBeanSession().fetchBean(uri);
+	}
+	public static Thing fetchThing(Resource uri) throws OperatorException {
+		return getInstance().getBeanSession().getThingSession().fetchThing(uri);
+	}
+	public static Thing fetchThing(String uri) throws OperatorException {
+		return fetchThing(Resource.uriRef(uri));
+	}
+	public static Collection<Thing> getThings(Resource predicate, Object object) throws OperatorException {
+		return getInstance().getBeanSession().getThingSession().getThings(predicate, object);
+	}
+	public static Collection<Resource> match(Resource predicate, Object object) throws OperatorException {
+		Context c = getInstance().getContext();
+		return Triple.getSubjectVisitor().visitAll(c.match(null, predicate, ObjectResourceMapping.resource(object)));
+	}
+	public static InputStream read(CETBean bean) throws OperatorException {
+		return read(bean.getUri());
+	}
+	public static InputStream read(String uri) throws OperatorException {
+		return read(Resource.uriRef(uri));
+	}
+	public static InputStream read(Resource uri) throws OperatorException {
+		return getInstance().getContext().read(uri);
+	}
+	public static void write(String uri, InputStream is) throws OperatorException {
+		write(Resource.uriRef(uri),is);
+	}
+	public static void write(Resource uri, InputStream is) throws OperatorException {
+		getInstance().getContext().write(uri,is);
+	}
+	
 	// URL canonicalization
 
 	// these hardcoded strings make sure the right paths are used
