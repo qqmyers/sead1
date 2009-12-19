@@ -73,6 +73,7 @@ public class ImagePyramidServlet extends HttpServlet {
 	void die(HttpServletResponse resp, String message) throws IOException {
     	PrintWriter pw = new PrintWriter(resp.getOutputStream());
     	pw.println("<h1>Not Found</h1>");
+    	log.error("404: "+message);
     	pw.println(message);
     	pw.flush();
     	resp.setStatus(404);
@@ -110,7 +111,7 @@ public class ImagePyramidServlet extends HttpServlet {
         		for(ImagePyramidTileBean tile : ipb.getTiles()) {
         			log.debug("has tile: "+tile.getLevel()+","+tile.getRow()+","+tile.getCol());
         		}
-        		log.debug("got image pyramid for "+uri);
+        		log.info("GET PYRAMID "+uri);
         		produceHtml(ipb,resp,prefix+"/");
         		//resp.setStatus(resp.SC_MOVED_PERMANENTLY);
         		//resp.setHeader("Location",prefix+"/"+label+".html");
@@ -123,13 +124,13 @@ public class ImagePyramidServlet extends HttpServlet {
 			int level = Integer.parseInt(url.replaceFirst(".*/.*_files/([0-9]+)/.*","$1"));
 			int col = Integer.parseInt(url.replaceFirst(".*/.*_files/[0-9]+/([0-9]+)_.*","$1"));
 			int row = Integer.parseInt(url.replaceFirst(".*/.*_files/[0-9]+/[0-9]+_([0-9]+).*","$1"));
-			log.debug("GET TILE "+label+" level "+level+", ("+row+","+col+")");
 			try {
 				ImagePyramidBean pyramid = getPyramidForLabel(label);
 				for(ImagePyramidTileBean tile : pyramid.getTiles()) {
 					if(tile.getLevel()==level &&
 							tile.getRow()==row &&
 							tile.getCol()==col) {
+						log.info("GET TILE "+label+" level "+level+", ("+row+","+col+")");
 						resp.setContentType("image/jpg");
 						CopyFile.copy(TupeloStore.read(tile), resp.getOutputStream());
 						return;
@@ -137,12 +138,13 @@ public class ImagePyramidServlet extends HttpServlet {
 				}
 				resp.setStatus(404);
 			} catch(OperatorException x) {
-				log.error("died",x);
+				log.error("failed",x);
+				resp.setStatus(500);
+				PrintWriter pw = new PrintWriter(resp.getOutputStream());
+				x.printStackTrace(pw);
 			}
 		} else {
-			log.debug("GET "+url);
-        	PrintWriter pw = new PrintWriter(resp.getOutputStream());
-        	pw.println("<h1>"+url+"</h1>");
+			die(resp,"GET (unrecognized) "+url);
         }
 	}
 	
