@@ -15,12 +15,14 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.NotFoundException;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.CopyFile;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.ImagePyramidBean;
 import edu.uiuc.ncsa.cet.bean.ImagePyramidTileBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.ImagePyramidBeanUtil;
@@ -78,6 +80,17 @@ public class ImagePyramidServlet extends HttpServlet {
     	pw.flush();
     	resp.setStatus(404);
 	}
+
+	ImagePyramidTileBean getTile(ImagePyramidBean pyramid, int level, int row, int col) {
+		for(ImagePyramidTileBean tile : pyramid.getTiles()) {
+			if(tile.getLevel()==level &&
+					tile.getRow()==row &&
+					tile.getCol()==col) {
+				return tile;
+			}
+		}
+		return null;
+	}
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -104,14 +117,15 @@ public class ImagePyramidServlet extends HttpServlet {
         		return;
         	}
         	try {
-        		Resource pyramidUri =
-        			TupeloStore.fetchThing(uri)
-        			.getResource(ImagePyramidBeanUtil.HAS_PYRAMID);
+        		Thing dataset = TupeloStore.fetchThing(uri);
+        		Resource pyramidUri = dataset.getResource(ImagePyramidBeanUtil.HAS_PYRAMID);
+        		if(pyramidUri == null) {
+        			TupeloStore.refetch(uri);
+        			dataset = TupeloStore.fetchThing(uri);
+            		pyramidUri = dataset.getResource(ImagePyramidBeanUtil.HAS_PYRAMID);
+        		}
         		ImagePyramidBean ipb =
         			(ImagePyramidBean) TupeloStore.fetchBean(pyramidUri);
-        		for(ImagePyramidTileBean tile : ipb.getTiles()) {
-        			log.debug("has tile: "+tile.getLevel()+","+tile.getRow()+","+tile.getCol());
-        		}
         		log.info("GET PYRAMID "+uri);
         		produceHtml(ipb,resp,prefix+"/");
         		//resp.setStatus(resp.SC_MOVED_PERMANENTLY);
@@ -127,17 +141,18 @@ public class ImagePyramidServlet extends HttpServlet {
 			int row = Integer.parseInt(url.replaceFirst(".*/.*_files/[0-9]+/[0-9]+_([0-9]+).*","$1"));
 			try {
 				ImagePyramidBean pyramid = getPyramidForLabel(label);
-				for(ImagePyramidTileBean tile : pyramid.getTiles()) {
-					if(tile.getLevel()==level &&
-							tile.getRow()==row &&
-							tile.getCol()==col) {
-						log.info("GET TILE "+label+" level "+level+", ("+row+","+col+")");
-						resp.setContentType("image/jpg");
-						CopyFile.copy(TupeloStore.read(tile), resp.getOutputStream());
-						return;
-					}
+				ImagePyramidTileBean tile = getTile(pyramid,level,row,col);
+				if(tile==null) {
+					TupeloStore.refetch(pyramid);
+					tile = getTile(pyramid,level,row,col);
 				}
-				resp.setStatus(404);
+				if(tile==null) {
+					die(resp,"tile not found");
+				}
+				log.info("GET TILE "+label+" level "+level+", ("+row+","+col+")");
+				resp.setContentType("image/jpg");
+				CopyFile.copy(TupeloStore.read(tile), resp.getOutputStream());
+				return;
 			} catch(OperatorException x) {
 				log.error("failed",x);
 				resp.setStatus(500);

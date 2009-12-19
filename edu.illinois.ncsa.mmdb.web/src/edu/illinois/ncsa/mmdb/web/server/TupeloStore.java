@@ -24,6 +24,7 @@ import org.tupeloproject.rdf.terms.Rdf;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.ContextBean;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.ContextConvert;
@@ -184,6 +185,9 @@ public class TupeloStore {
 	public static Object fetchBean(Resource uri) throws OperatorException {
 		return getInstance().getBeanSession().fetchBean(uri);
 	}
+	public static DatasetBean fetchDataset(Resource uri) throws OperatorException {
+		return (DatasetBean) fetchBean(uri);
+	}
 	public static Thing fetchThing(Resource uri) throws OperatorException {
 		return getInstance().getBeanSession().getThingSession().fetchThing(uri);
 	}
@@ -211,6 +215,15 @@ public class TupeloStore {
 	}
 	public static void write(Resource uri, InputStream is) throws OperatorException {
 		getInstance().getContext().write(uri,is);
+	}
+	public static void refetch(CETBean bean) throws OperatorException {
+		refetch(bean.getUri());
+	}
+	public static void refetch(String uri) throws OperatorException {
+		refetch(Resource.uriRef(uri));
+	}
+	public static void refetch(Resource uri) throws OperatorException {
+		getInstance().getBeanSession().refetch(uri);
 	}
 	
 	// URL canonicalization
