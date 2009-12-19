@@ -56,11 +56,11 @@ public class TagsWidget extends Composite {
 		this.service = service;
 		
 		mainPanel = new VerticalPanel();
-		mainPanel.addStyleName("tagsView");
+		mainPanel.addStyleName("datasetRightColSection");
 		initWidget(mainPanel);
 		
 		tagLabel = new Label("Tags");
-		tagLabel.addStyleName("tagsHeading");
+		tagLabel.addStyleName("datasetRightColHeading");
 		mainPanel.add(tagLabel);
 		
 		tagsPanel = new FlowPanel();

@@ -18,6 +18,10 @@ body {
 	display: none;
 }
 
+.whiteText {
+	color: white;
+}
+
 .relativePosition {
 	position: relative;
 }
@@ -43,6 +47,7 @@ body {
   color: white;
   padding: 20px 0px 10px 10px;
   text-align: left;
+  text-shadow: 2px 2px 3px #999;
 }
 
 .loginMenu {
@@ -75,7 +80,6 @@ body {
 
 .navMenuLink:link {
 	font-family: Arial, Helvetica, sans-serif;
-	/**color: #069;**/
 	color: white;
 	font-weight: bold;
 	text-decoration: none;
@@ -191,6 +195,7 @@ body {
   	color: black;
   	margin: 20px;
   	text-align: left;
+  	text-shadow: 2px 2px 3px #999;
 }
 
 .bottomMenu {
@@ -261,6 +266,44 @@ body {
 	width: 100px;
 }
 
+.datasetRightColHeading {
+	width: 200px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 0px;
+	font-size: 1.5em;
+	font-family: arial,verdana,sans-serif;
+	text-align: left;
+	/**background: #EC8E00;**/
+}
+
+.datasetRightColSection {
+	width:100%;
+	padding: 0px;
+	margin: 20px 5px 20px 5px;
+	text-align: left;
+}
+
+.gallery {
+	width: 350px;
+	padding: 10px;
+	margin: 5px auto 5px auto;
+	border: 1px solid gray;
+	}
+	
+.galleryPager {
+	margin: 5px auto 0px auto;
+}
+
+.galleryImages div {
+	padding: 5px;
+	}
+
+.collectionInfo {
+	text-align: left;
+	margin: 20px;
+	}
+
 .tagsView {
 	width:100%;
 	padding: 0px;
@@ -313,6 +356,11 @@ body {
 .datasetMainContainerLeftColumn {
 	float: left;
 	width: 700px;
+}
+
+.datasetMainContainerLeftColumn div {
+	display: block;
+	width: 100%;
 }
 
 .datasetMainContainerRightColumn {
@@ -372,10 +420,11 @@ body {
 
 .downloadButton {
 	vertical-align: bottom;
+	border: 1px red solid;
 }
 
 .downloadButtonContainer {
-	border-bottom: 1px dotted gray;
+	width: 100%;
 	margin: 0px;
 	padding: 20px;
 }
@@ -384,6 +433,19 @@ body {
 	height: auto;
 	clear: both;
 	padding: 20px;
+}
+
+.addToCollectionDialog {
+	text-align: center;
+	}
+	
+.addToCollectionDialog div {
+	margin: 5px;
+	padding: 5px;
+	}
+	
+.thumbnail {
+	cursor: hand;
 }
 
 /*================= Annotations / Comments ============== */

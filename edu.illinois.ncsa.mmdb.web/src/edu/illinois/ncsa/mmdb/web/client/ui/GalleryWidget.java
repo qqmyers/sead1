@@ -5,8 +5,11 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.ArrayList;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -28,12 +31,15 @@ public class GalleryWidget extends Composite {
 		this.uris = uris;
 		this.pageNum = 1;
 		mainPanel = new FlowPanel();
+		mainPanel.addStyleName("gallery");
 		initWidget(mainPanel);
 		
 		imagePanel = new FlowPanel();
+		imagePanel.addStyleName("galleryImages");
 		mainPanel.add(imagePanel);
 		
 		PagingWidget pager = new PagingWidget(pageNum);
+		pager.addStyleName("galleryPager");
 		pager.addValueChangeHandler(new ValueChangeHandler<Integer>() {
 			public void onValueChange(ValueChangeEvent<Integer> event) {
 				changePage(event.getValue());
@@ -45,15 +51,44 @@ public class GalleryWidget extends Composite {
 		
 	}
 
+	/**
+	 * 
+	 * @param value
+	 */
 	private void changePage(int value) {
 		pageNum = value;
 		showImages();
 	}
 
+	/**
+	 * 
+	 */
 	private void showImages() {
 		imagePanel.clear();
-		for (int i=0; i<pageSize; i++) {
-			imagePanel.add(new Image(PREVIEW_URL + uris.get((pageNum - 1) * pageSize + i)));
+		if (uris.size() > pageSize) {
+			for (int i=0; i<pageSize; i++) {
+				final String uri = uris.get((pageNum - 1) * pageSize + i);
+				Image image = new Image(PREVIEW_URL + uri);
+				image.addStyleName("thumbnail");
+				image.addClickHandler(new ClickHandler() {
+					public void onClick(ClickEvent event) {
+						History.newItem("dataset?id="+uri);
+					}
+				});
+				imagePanel.add(image);
+			}
+		} else {
+			for (int i=0; i<uris.size(); i++) {
+				final String uri = uris.get((i));
+				Image image = new Image(PREVIEW_URL + uri);
+				image.addStyleName("thumbnail");
+				image.addClickHandler(new ClickHandler() {
+					public void onClick(ClickEvent event) {
+						History.newItem("dataset?id="+uri);
+					}
+				});
+				imagePanel.add(image);
+			}
 		}
 	}
 	

@@ -49,6 +49,7 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		int row = this.getRowCount();
 		
 		Image previewImage = new Image(PREVIEW_URL + id);
+		previewImage.addStyleName("thumbnail");
 		previewImage.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				History.newItem("dataset?id="+id);

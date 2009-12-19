@@ -6,9 +6,13 @@ package edu.illinois.ncsa.mmdb.web.server;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AddCollectionHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAnnotationsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
@@ -37,6 +41,10 @@ public class MyActionHandlersConfig implements ServletContextListener {
 		DispatchUtil.registerHandler(new AuthenticateHandler());
         DispatchUtil.registerHandler(new GetMetadataHandler());
         DispatchUtil.registerHandler(new GetGeoPointHandler());
+		DispatchUtil.registerHandler(new GetCollectionsHandler());
+		DispatchUtil.registerHandler(new AddCollectionHandler());
+		DispatchUtil.registerHandler(new GetCollectionHandler());
+		DispatchUtil.registerHandler(new AddToCollectionHandler());
 	}
 
 	public void contextDestroyed(ServletContextEvent evt) {

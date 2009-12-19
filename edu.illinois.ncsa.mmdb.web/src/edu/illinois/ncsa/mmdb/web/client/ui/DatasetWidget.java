@@ -4,16 +4,21 @@
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -23,6 +28,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 import edu.illinois.ncsa.mmdb.web.client.DownloadButton;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
@@ -30,6 +37,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
@@ -68,7 +76,7 @@ public class DatasetWidget extends Composite {
 
 	private SimplePanel imageContainer;
 
-	private SimplePanel downloadButtonPanel;
+	private FlowPanel actionsPanel;
 
 	private final FlowPanel leftColumn;
 
@@ -90,7 +98,19 @@ public class DatasetWidget extends Composite {
 
 	private FlexTable informationTable;
 
+	private Button addToCollectionButton;
+
+	private Label metadataHeader;
+
+	protected CollectionMembershipWidget collectionWidget;
+
+	private AddToCollectionDialog addToCollectionDialog;
+
     private MapWidget mapWidget;
+
+	private Label mapHeader;
+
+	private FlowPanel mapPanel;
 
 	/**
 	 * 
@@ -155,22 +175,23 @@ public class DatasetWidget extends Composite {
 	public void showDataset(DatasetBean dataset) {
 
 		// image preview
-		imageContainer = new SimplePanel();
-		
 		showPreview(dataset);
 
-		// metadata
+		// title
 		titleLabel = new Label(dataset.getTitle());
 
 		titleLabel.addStyleName("datasetTitle");
 
-		creator = dataset.getCreator();
+		// metadata
+		metadataHeader = new Label("Info");
 
-		tagsWidget = new TagsWidget(dataset.getUri(), service);
+		metadataHeader.addStyleName("datasetRightColHeading");
 
 		authorLabel = new Label("Author: ");
 
 		authorLabel.addStyleName("metadataEntry");
+
+		creator = dataset.getCreator();
 
 		if (creator != null) {
 
@@ -192,53 +213,11 @@ public class DatasetWidget extends Composite {
 
 		dateLabel.addStyleName("metadataEntry");
 
-		tagsWidget = new TagsWidget(dataset.getUri(), service);
-
-		annotationsWidget = new AnnotationsWidget(dataset.getUri(), service);
-
-        // map
-        mapWidget = new MapWidget();
-        mapWidget.setSize( "250px", "250px" );
-        mapWidget.setUIToDefault();
-        mapWidget.setVisible( false );
-        showMap();
-
-		// TODO change to DOWNLOAD_URL once we have the proper url
-		downloadButton = new DownloadButton(DOWNLOAD_URL + dataset.getUri());
-
-		downloadButton.addStyleName("downloadButton");
-
-		downloadButtonPanel = new SimplePanel();
-
-		downloadButtonPanel.addStyleName("downloadButtonContainer");
-
-		downloadButtonPanel.add(downloadButton);
-		
-		// information panel with extra metadata
-		informationPanel = new DisclosurePanel("Extracted Information");
-		
-		informationPanel.addStyleName("downloadButtonContainer");
-		
-		informationPanel.setAnimationEnabled(true);
-		
-		informationPanel.setWidth("100%");
-		
-		informationTable = new FlexTable();
-		
-		informationTable.setWidth("100%");
-		
-		informationPanel.add(informationTable);
-
-		// layout
-		leftColumn.add(titleLabel);
-
-		leftColumn.add(imageContainer);
-
 		metadataPanel = new FlowPanel();
 
-		metadataPanel.addStyleName("metadataPreview");
+		metadataPanel.addStyleName("datasetRightColSection");
 
-		metadataPanel.addStyleName("alignRight");
+		metadataPanel.add(metadataHeader);
 
 		metadataPanel.add(authorLabel);
 
@@ -248,20 +227,108 @@ public class DatasetWidget extends Composite {
 
 		metadataPanel.add(dateLabel);
 
+		// tags
+		tagsWidget = new TagsWidget(dataset.getUri(), service);
+
+		// annotations
+		annotationsWidget = new AnnotationsWidget(dataset.getUri(), service);
+
+        // map
+        showMap();
+
+		// TODO change to DOWNLOAD_URL once we have the proper url
+		downloadButton = new DownloadButton(DOWNLOAD_URL + dataset.getUri());
+
+		downloadButton.addStyleName("downloadButton");
+
+		addToCollectionButton = new Button("Add to collection",
+				new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent arg0) {
+						showAddToCollectionDialog();
+					}
+				});
+
+		actionsPanel = new FlowPanel();
+
+		actionsPanel.addStyleName("downloadButtonContainer");
+
+		actionsPanel.add(downloadButton);
+
+		actionsPanel.add(addToCollectionButton);
+
+		// information panel with extra metadata
+		informationPanel = new DisclosurePanel("Extracted Information");
+
+		informationPanel.addStyleName("downloadButtonContainer");
+
+		informationPanel.setAnimationEnabled(true);
+
+		informationPanel.setWidth("100%");
+
+		informationTable = new FlexTable();
+
+		informationTable.setWidth("100%");
+
+		informationPanel.add(informationTable);
+
+		// layout
+		leftColumn.add(titleLabel);
+
+		leftColumn.add(imageContainer);
+
 		rightColumn.add(metadataPanel);
 
-		leftColumn.add(downloadButtonPanel);
-		
+		leftColumn.add(actionsPanel);
+
 		leftColumn.add(informationPanel);
 
 		leftColumn.add(annotationsWidget);
 
-        rightColumn.add(tagsWidget);
+		rightColumn.add(tagsWidget);
 
-        rightColumn.add( mapWidget );
-        
-        loadMetadata();
-        
+		loadMetadata();
+
+		loadCollections();
+	}
+
+	private void loadCollections() {
+		service.execute(new GetCollections(id),
+				new AsyncCallback<GetCollectionsResult>() {
+
+					@Override
+					public void onFailure(Throwable arg0) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onSuccess(GetCollectionsResult arg0) {
+						ArrayList<CollectionBean> collections = arg0
+								.getCollections();
+						if (collections.size() > 0) {
+							if (collectionWidget != null) {
+								rightColumn.remove(collectionWidget);
+							}
+							collectionWidget = new CollectionMembershipWidget();
+							for (CollectionBean collection : collections) {
+								collectionWidget.addCollection(collection);
+							}
+							rightColumn.add(collectionWidget);
+						}
+					}
+				});
+	}
+
+	/**
+	 * Popup dialog to add the dataset to a collection. User selects collection
+	 * from a list box.
+	 */
+	protected void showAddToCollectionDialog() {
+		addToCollectionDialog = new AddToCollectionDialog(service,
+				new AddToCollectionHandler());
+		addToCollectionDialog.center();
 	}
 	
     private String humanBytes( long x )
@@ -284,15 +351,37 @@ public class DatasetWidget extends Composite {
         }
     }
 
+	protected void addToCollection(String value) {
+		GWT.log("Adding " + id + " to collection " + value, null);
+		Collection<String> datasets = new HashSet<String>();
+		datasets.add(id);
+		service.execute(new AddToCollection(value, datasets),
+				new AsyncCallback<AddToCollectionResult>() {
+
+					@Override
+					public void onFailure(Throwable arg0) {
+						GWT.log("Error adding dataset to collection", arg0);
+					}
+
+					@Override
+					public void onSuccess(AddToCollectionResult arg0) {
+						GWT.log("Datasets successfully added to collection",
+								null);
+						loadCollections();
+					}
+				});
+	}
+
 	private void loadMetadata() {
 		if (id != null) {
-			service.execute(new GetMetadata(id), new AsyncCallback<GetMetadataResult>() {
+			service.execute(new GetMetadata(id),
+					new AsyncCallback<GetMetadataResult>() {
 
-				@Override
-				public void onFailure(Throwable arg0) {
-					GWT.log("Error retrieving metadata about dataset " + id, null);
-					
-				}
+						@Override
+						public void onFailure(Throwable arg0) {
+							GWT.log("Error retrieving metadata about dataset "
+									+ id, null);
+						}
 
 				@Override
 				public void onSuccess(GetMetadataResult arg0) {
@@ -332,7 +421,20 @@ public class DatasetWidget extends Composite {
                     if (arg0.getGeoPoints().isEmpty()) {
                         return;
                     }
-                                        
+                           
+                    mapWidget = new MapWidget();
+                    mapWidget.setSize( "230px", "230px" );
+                    mapWidget.setUIToDefault();
+                    mapWidget.setVisible( false );
+
+            		mapPanel = new FlowPanel();
+            		mapPanel.addStyleName("datasetRightColSection");
+               		mapHeader = new Label("Location");
+            		mapHeader.addStyleName("datasetRightColHeading");
+            		mapPanel.add(mapHeader);
+                    mapPanel.add(mapWidget);
+                    rightColumn.add(mapPanel);
+             
                     // drop marker on the map
                     LatLng center = LatLng.newInstance( 0, 0 );
                     for(GeoPointBean gpb : arg0.getGeoPoints()) {
@@ -342,7 +444,7 @@ public class DatasetWidget extends Composite {
                         mapWidget.addOverlay( new Marker( loc, options ) );
                         center = loc;
                     }
-
+                    
                     mapWidget.setCenter( center, 15 );
                     mapWidget.setVisible( true );
                     mapWidget.checkResizeAndCenter();
@@ -352,8 +454,41 @@ public class DatasetWidget extends Composite {
     }
 
 	private void showPreview(DatasetBean dataset) {
+		imageContainer = new SimplePanel();
 		image = new Image(PREVIEW_URL + dataset.getUri());
 		image.addStyleName("imagePreviewNoOverflow");
 		imageContainer.add(image);
+	}
+
+	class AddToCollectionHandler implements ClickHandler {
+
+		@Override
+		public void onClick(ClickEvent arg0) {
+			String value = addToCollectionDialog.getSelectedValue();
+			if (value != null) {
+				GWT.log("Adding " + id + " to collection " + value, null);
+				Collection<String> datasets = new HashSet<String>();
+				datasets.add(id);
+				service.execute(new AddToCollection(value, datasets),
+						new AsyncCallback<AddToCollectionResult>() {
+
+							@Override
+							public void onFailure(Throwable arg0) {
+								GWT.log("Error adding dataset to collection",
+										arg0);
+							}
+
+							@Override
+							public void onSuccess(AddToCollectionResult arg0) {
+								GWT
+										.log(
+												"Datasets successfully added to collection",
+												null);
+								addToCollectionDialog.hide();
+								loadCollections();
+							}
+						});
+			}
+		}
 	}
 }

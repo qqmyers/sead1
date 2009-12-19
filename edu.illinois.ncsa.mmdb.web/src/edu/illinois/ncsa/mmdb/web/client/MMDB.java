@@ -33,7 +33,9 @@ import edu.illinois.ncsa.mmdb.web.client.event.CancelHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
+import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
+import edu.illinois.ncsa.mmdb.web.client.ui.ListCollectionsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
@@ -128,11 +130,23 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		RootPanel.get("navMenu").clear();
 		HorizontalPanel navMenu = new HorizontalPanel();
 		RootPanel.get("navMenu").add(navMenu);
-		Hyperlink listButton = new Hyperlink("List all","listDatasets");
-		listButton.addStyleName("navMenuLink");
-		navMenu.add(listButton);
+		// datasets
+		Hyperlink listLink = new Hyperlink("Datasets","listDatasets");
+		listLink.addStyleName("navMenuLink");
+		navMenu.add(listLink);
+		// bullet
 		HTML bullet = new HTML("&bull;");
+		bullet.addStyleName("whiteText");
 		navMenu.add(bullet);
+		// collections
+		Hyperlink collectionsLink = new Hyperlink("Collections","listCollections");
+		collectionsLink.addStyleName("navMenuLink");
+		navMenu.add(collectionsLink);
+		// bullet
+		HTML bullet2 = new HTML("&bull;");
+		bullet2.addStyleName("whiteText");
+		navMenu.add(bullet2);
+		// upload link
 		uploadButton = new Anchor("Upload");
 		uploadButton.setStyleName("navMenuLink");
 		uploadButton.addClickHandler(new ClickHandler() {
@@ -192,7 +206,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		datasetTablePresenter.bind();
 		mainContainer.clear();
 		Label titleLabel = new Label("List all");
-		titleLabel.addStyleName("titleLabel");
+		titleLabel.addStyleName("pageTitle");
 		mainContainer.add(titleLabel);
 		PagingWidget pager = new PagingWidget(page);
 		pager.addValueChangeHandler(new ValueChangeHandler<Integer>() {
@@ -378,11 +392,34 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			showLoginPage();
 		} else if (token.startsWith("tag")) {
 			showTagPage();
+		} else if (token.startsWith("listCollections")) {
+			showListCollectionsPage();
+		} else if (token.startsWith("collection")) {
+			showCollectionPage();
 		} else {
 			listDatasets();
 		}
 	}
 	
+	/**
+	 * List all collections.
+	 */
+	private void showListCollectionsPage() {
+		mainContainer.clear();
+		mainContainer.add(new ListCollectionsPage(dispatchAsync, eventBus));
+	}
+
+	/**
+	 * Show a specific collection.
+	 */
+	private void showCollectionPage() {
+		mainContainer.clear();
+		mainContainer.add(new CollectionPage(getParams().get("uri"), dispatchAsync, eventBus));
+	}
+
+	/**
+	 * Show a specific tag page.
+	 */
 	private void showTagPage() {
 		mainContainer.clear();
 		mainContainer.add(new TagPage(getParams().get("title"), dispatchAsync, eventBus));
