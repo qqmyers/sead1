@@ -88,6 +88,7 @@ public class ImagePyramidServlet extends HttpServlet {
         if(requestUrl.getPort() != -1) {
             prefix = prefix + ":" + requestUrl.getPort();
         }
+        prefix += req.getContextPath();
         prefix += req.getServletPath();
         if(prefix.length() >= url.length()) {
         	die(resp,"Illegal pyramid URL "+url);
