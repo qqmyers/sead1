@@ -337,7 +337,33 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		stopProgressThread();
 	}
 	
+	class PostThread extends Thread {
+		public PostMethod post;
+		public void run() {
+			try {
+				HttpClient client = new HttpClient();
+				client.executeMethod(post);
+				if(post.getStatusCode() != 200) {
+					log("post failed! "+post.getStatusLine());
+					showCard("error");
+				} else {
+					log("post complete with status "+post.getStatusLine());
+					showCard("done");
+				}
+				progressThread.stopShowingProgress();
+			} catch(Exception x) {
+				showCard("error");
+			}
+		}
+	}
+	PostThread postThread;
+	
 	void uploadFiles(List<File> files) throws HttpException, IOException {
+		if(postThread != null) {
+			if(!postThread.isAlive()) { postThread = null; }
+			else { return; }
+		} // can't post while posting
+		postThread = new PostThread();
 		// redirect the browser to start checking progress
 		//getAppletContext().showDocument(new URL(getStatusPage()+"#upload?session="+sessionKey));
 		//getAppletContext().showDocument(new URL("javascript:uploadAppletCallback('"+sessionKey+"')"));
@@ -360,13 +386,10 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				FilePart part = new FilePart("f"+(i+1), file, mimeType, null);
 				parts[i] = part;
 			}
-			post.setRequestEntity(new MultipartRequestEntity(parts, post.getParams()));
-			HttpClient client = new HttpClient();
+			postThread.post = post;
+			post.setRequestEntity(new MultipartRequestEntity(parts, post.getParams())); 
 			log("posting data for "+files.size()+" file(s)");
-			client.executeMethod(post);
-			log("post complete with status "+post.getStatusLine());
-			progressThread.stopShowingProgress();
-			showCard("done");
+			postThread.start();
 		} catch(Exception x) {
 			showCard("error");
 		} finally {
