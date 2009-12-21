@@ -144,7 +144,13 @@ public class RestServlet extends HttpServlet {
     	return getContext().getThingSession().fetchThing(Resource.uriRef(uri));
     }
     
-    String getPreview(String uri, String infix) {
+    public static String getSmallPreviewUri(String datasetUri) {
+    	return getPreview(datasetUri, PREVIEW_SMALL);
+    }
+    public static String getLargePreviewUri(String datasetUri) {
+    	return getPreview(datasetUri, PREVIEW_LARGE);
+    }
+    static String getPreview(String uri, String infix) {
     	BeanSession bs = TupeloStore.getInstance().getBeanSession();
     	PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(bs);
     	try {

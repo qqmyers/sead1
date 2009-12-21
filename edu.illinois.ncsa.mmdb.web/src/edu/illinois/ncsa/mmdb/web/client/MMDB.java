@@ -340,13 +340,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		uploadComplete.addStyleName("invisible");
 		uploadPanel.add(uploadComplete);
 
-		String appletScript = "<script>"+
-		"var attributes = { code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader', archive:'dnd/DropUploader.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar', width:60, height:60 };"+
-		"var parameters = { jnlp_href: 'dropuploader.jnlp', statusPage: document.URL, background: '0x006699' };"+
-		"deployJava.runApplet(attributes, parameters, '1.5');"+
-		"</script>";
-		DOM.getElementById("uploadAppletContainer").setInnerHTML(appletScript);
-		
 		return uploadWidget;
 	}
 	

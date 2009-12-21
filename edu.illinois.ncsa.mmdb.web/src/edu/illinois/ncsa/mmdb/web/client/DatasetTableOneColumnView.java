@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter.Display;
+import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
 /**
  * List datasets in repository using a youtube-like list. A one column
@@ -49,21 +50,14 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		
 		int row = this.getRowCount();
 		
-		Image previewImage = new Image(PREVIEW_URL + id);
-		previewImage.addStyleName("thumbnail");
-		previewImage.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				History.newItem("dataset?id="+id);
-			}
-		});
-		setWidget(row, 0, previewImage);
-		/*
-		if (preview != null) {
-			setWidget(row, 0, new Image(BLOB_URL + preview));
-		} else {
-			setWidget(row, 0, new Image("images/preview-100.gif"));
-		}
-		*/
+		PreviewWidget pre = new PreviewWidget(id,PreviewWidget.SMALL); 
+		setWidget(row, 0, pre);
+		pre.getTarget().addClickHandler(new ClickHandler() {
+				public void onClick(ClickEvent event) {
+					History.newItem("dataset?id="+id);
+				}
+			});
+		setWidget(row, 0, pre);
 		
 		VerticalPanel verticalPanel = new VerticalPanel();
 		setWidget(row, 1, verticalPanel);
