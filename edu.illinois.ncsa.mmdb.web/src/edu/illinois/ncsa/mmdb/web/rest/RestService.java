@@ -7,7 +7,9 @@ import java.util.Map;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.DcTerms;
 
+import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.workflow.Cyberintegrator;
 
 /**
@@ -15,8 +17,8 @@ import edu.uiuc.ncsa.cet.bean.tupelo.workflow.Cyberintegrator;
  */
 public interface RestService {
     public static final Resource IMAGE_TYPE = Cyberintegrator.DATASET;
-    public static final Resource COLLECTION_TYPE = Cet.cet("mmdb/Collection");
-    public static final Resource HAS_MEMBER = Cet.cet("mmdb/hasMember"); // maybe dcterms:hasPart?
+    public static final Resource COLLECTION_TYPE = CollectionBeanUtil.COLLECTION_TYPE;
+    public static final Resource HAS_MEMBER = CollectionBeanUtil.DCTERMS_HAS_PART;
     public static final Resource LABEL_PROPERTY = Dc.TITLE;
     public static final Resource DATE_PROPERTY = Dc.DATE;
     public static final Resource FORMAT_PROPERTY = Dc.FORMAT;

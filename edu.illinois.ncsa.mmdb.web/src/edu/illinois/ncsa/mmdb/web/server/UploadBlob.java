@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -34,6 +35,9 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.DcTerms;
+import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.SecureHashMinter;
 
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
@@ -245,10 +249,12 @@ public class UploadBlob extends HttpServlet {
         String sessionKey = request.getParameter("session");
         FileUploadListener listener = trackProgress(upload, sessionKey);
         
+        List<String> uris = new LinkedList<String>();
         String uri = null;
         // Parse the request
         try {
             List<FileItem> items = upload.parseRequest(request);
+            String collectionName = null;
             for (FileItem item : items) {
                 // process a file
                 String fieldName = item.getFieldName();
@@ -256,12 +262,16 @@ public class UploadBlob extends HttpServlet {
                 String contentType = item.getContentType();
                 boolean isInMemory = item.isInMemory();
                 long sizeInBytes = item.getSize();
-                log.trace("Post: " + item.isFormField() + "|" + fieldName + "|" + fileName + "|" + isInMemory + "|"
+                log.info("Post: " + item.isFormField() + "|" + fieldName + "|" + fileName + "|" + isInMemory + "|"
                         + contentType + "|" + sizeInBytes);
                 if(item.isFormField() && fieldName.equals("session") && listener==null) {
                 	sessionKey = item.getString();
                     log.trace("POST: upload session key (part) = "+sessionKey);
                     listener = trackProgress(upload, sessionKey);
+                }
+                if(item.isFormField() && fieldName.equals("collection")) {
+                	collectionName = item.getString();
+                	log.debug("POST: upload collection name = "+collectionName);
                 }
                 // if it's a field from a form and the size is non-zero...
                 if (!item.isFormField() && (sizeInBytes > 0)) {
@@ -323,6 +333,8 @@ public class UploadBlob extends HttpServlet {
                         ts.close();
                         log.info("user uploaded "+fileName+" ("+sizeInBytes+" bytes), uri="+uri);
 
+                        uris.add(uri);
+                        
                         if(u != null) {
                         	u.setUploaded(true);
                         }
@@ -335,6 +347,31 @@ public class UploadBlob extends HttpServlet {
                         throw new ServletException(e);
                     }
                 }
+            }
+            // add a collection, if necessary
+            if(collectionName != null) {
+            	try {
+            		Map<Resource,Object> md = new HashMap<Resource,Object>();
+            		md.put(RestService.LABEL_PROPERTY, collectionName);
+            		md.put(Rdf.TYPE, RestService.COLLECTION_TYPE);
+            		String collectionUri = RestUriMinter.getInstance().mintUri(md);
+        			ThingSession ts = TupeloStore.getInstance().getContext().getThingSession();
+        			Thing t = ts.newThing(Resource.uriRef(collectionUri));
+        			t.addType(RestService.COLLECTION_TYPE);
+        			t.setLabel(collectionName);
+        			t.setValue(Dc.TITLE, collectionName);
+        			t.setValue(DcTerms.DATE_CREATED, new Date());
+        			t.setValue(DcTerms.DATE_MODIFIED, new Date());
+        			log.debug("created collection '"+collectionName+"' @ "+collectionUri);
+            		for(String itemUri : uris) {
+            			log.debug("added "+itemUri+" to collection "+collectionUri);
+            			t.addValue(RestService.HAS_MEMBER, Resource.uriRef(itemUri));
+            		}
+            		ts.save();
+            	} catch(OperatorException x) {
+            		//
+            		x.printStackTrace();
+            	}
             }
         }
         catch (FileUploadException e1) {
