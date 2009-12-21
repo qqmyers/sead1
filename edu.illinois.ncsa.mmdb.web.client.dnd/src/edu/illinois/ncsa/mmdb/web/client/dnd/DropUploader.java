@@ -41,6 +41,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.methods.multipart.StringPart;
 
 public class DropUploader extends JApplet implements DropTargetListener {
 	public DropTarget dropTarget;
@@ -172,9 +173,15 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			if(files.size()==0) {
 				log("no files dropped! " + dtde);
 			} else {
+				// FIXME use a better way of determining collection name than selecting from first file
+				String collectionName = null;
+				if(files.get(0).isDirectory()) {
+					collectionName = files.get(0).getName();
+					log("collection name = "+collectionName);
+				}
 				files = expandDirectories(files,false); // expand directories 
 				//ta.setText(files.size()+" file(s) dropped: "+files);
-				uploadFiles(files);
+				uploadFiles(files,collectionName);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -251,22 +258,22 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			GetMethod get = new GetMethod();
 			setUrl(get,sessionKey);
 			HttpClient client = new HttpClient();
-			log("requesting progress ...");
+			//log("requesting progress ...");
 			client.executeMethod(get);
 			BufferedReader br = new BufferedReader(new InputStreamReader(get.getResponseBodyAsStream()));
 			String line = "";
 			int percentComplete = 0;
 			while((line = br.readLine()) != null) {
-				log(line);
+				//log(line);
 				if(line.contains("percentComplete")) {
 					String pc = line.replaceFirst(".*\"percentComplete\":([0-9]+).*","$1"); // FIXME hack to parse JSON
 					percentComplete = Integer.parseInt(pc);
 				}
 			}
-			log("got progress "+percentComplete);
+			//log("got progress "+percentComplete);
 			return percentComplete;
 		} catch(Exception x) {
-			log("no progress, or progress not available: "+x.getMessage());
+			//log("no progress, or progress not available: "+x.getMessage());
 			return 0;
 		}
 	}
@@ -361,6 +368,9 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	PostThread postThread;
 	
 	void uploadFiles(List<File> files) throws HttpException, IOException {
+		uploadFiles(files,null);
+	}
+	void uploadFiles(List<File> files, String collectionName) throws HttpException, IOException {
 		if(postThread != null) {
 			if(!postThread.isAlive()) { postThread = null; }
 			else { return; }
@@ -380,16 +390,21 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			// post the data
 			PostMethod post = new PostMethod();
 			setUrl(post,sessionKey);
-			Part parts[] = new Part[files.size()];
-			for(int i = 0; i < files.size(); i++) {
-				File file = files.get(i);
+			List<Part> parts = new LinkedList<Part>();
+			int i = 1;
+			for(File file : files) {
 				FileNameMap fileNameMap = URLConnection.getFileNameMap();
 				String mimeType = fileNameMap.getContentTypeFor(file.getName());
-				FilePart part = new FilePart("f"+(i+1), file, mimeType, null);
-				parts[i] = part;
+				FilePart part = new FilePart("f"+i, file, mimeType, null);
+				parts.add(part);
+				i++;
+			}
+			if(collectionName != null) {
+				log("adding collection name part "+collectionName);
+				parts.add(new StringPart("collection",collectionName));
 			}
 			postThread.post = post;
-			post.setRequestEntity(new MultipartRequestEntity(parts, post.getParams())); 
+			post.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[]{}), post.getParams())); 
 			log("posting data for "+files.size()+" file(s)");
 			postThread.start();
 		} catch(Exception x) {
