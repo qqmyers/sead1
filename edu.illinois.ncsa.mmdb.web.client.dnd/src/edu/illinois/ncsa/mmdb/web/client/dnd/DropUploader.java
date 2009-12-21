@@ -67,7 +67,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 
 		ImageIcon dropIcon = getIcon("Load.png", "Upload");
 		ImageIcon doneIcon = getIcon("Green_check.png", "Done");
-		ImageIcon errorIcon = getIcon("error.png","Error");
+		ImageIcon errorIcon = getIcon("dialog-error.png","Error");
 		
 		// the drop target
 		JLabel dropLabel = new JLabel(dropIcon);
