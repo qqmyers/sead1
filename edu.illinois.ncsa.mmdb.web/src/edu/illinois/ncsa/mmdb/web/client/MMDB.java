@@ -3,6 +3,8 @@ package edu.illinois.ncsa.mmdb.web.client;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mortbay.log.Log;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -12,9 +14,12 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -155,6 +160,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			}
 		});
 		navMenu.add(uploadButton);
+
 		
 		// login menu
 		loginStatusWidget = new LoginStatusWidget();
@@ -318,7 +324,29 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		});
 		uploadPanel.add(uploadWidget);
 		DOM.getElementById("uploadToolbar").removeClassName("hidden");
+		
+		// a hidden "upload complete" button pressed by the applet:
+		Button uploadComplete = new Button("Done") {
+			protected void onAttach() {
+				super.onAttach();
+				getButtonElement().setId("uploadComplete");
+			}
+		};
+		uploadComplete.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent arg0) {
+				listDatasets(); // refresh dataset list
+			}
+		});
+		uploadComplete.addStyleName("invisible");
+		uploadPanel.add(uploadComplete);
+
 		return uploadWidget;
+	}
+	
+	void hideUploadMenu() {
+		toolbar.clear();
+		DOM.getElementById("uploadToolbar").addClassName("hidden");
+		uploadMenuVisible = false;
 	}
 	
 	/**
@@ -338,10 +366,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		}
 	}
 	
-	public native void uploadAppletCallback(String sessionKey) /*-{
-        this.@edu.illinois.ncsa.mmdb.web.client.MMDB::showUploadProgress(Ljava/lang/String;)(sessionKey);
-    }-*/;
-
 	/** 
 	 * This is for when the POST doesn't come from an HTML form but from a client
 	 * that also controls the browser (e.g., an AJAX client or Java applet); in

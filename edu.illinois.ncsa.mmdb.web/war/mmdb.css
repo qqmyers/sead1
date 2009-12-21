@@ -18,6 +18,10 @@ body {
 	display: none;
 }
 
+.invisible {
+    visibility: hidden;
+}
+
 .whiteText {
 	color: white;
 }
