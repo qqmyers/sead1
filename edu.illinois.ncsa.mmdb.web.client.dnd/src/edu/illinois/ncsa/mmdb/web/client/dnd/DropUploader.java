@@ -345,9 +345,11 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				client.executeMethod(post);
 				if(post.getStatusCode() != 200) {
 					log("post failed! "+post.getStatusLine());
+					getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback()"));
 					showCard("error");
 				} else {
 					log("post complete with status "+post.getStatusLine());
+					getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback()"));
 					showCard("done");
 				}
 				progressThread.stopShowingProgress();
