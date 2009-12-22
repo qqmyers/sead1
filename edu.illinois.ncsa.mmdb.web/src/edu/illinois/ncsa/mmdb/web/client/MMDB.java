@@ -196,14 +196,41 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	int pageOffset = 0;
 	int pageSize = 10;
+
+	String uriForSortKey(String key) { // FIXME kludge, make keys full URI's
+		if("title".equals(key)) {
+			return "http://purl.org/dc/elements/1.1/title";
+		} else { // default is date
+			return "http://purl.org/dc/elements/1.1/date"; 
+		}
+	}
+	void goToPage(int page) {
+		History.newItem("listDatasets?page="+page);
+	}
+	void goToPage(int page, String sortKey) {
+		History.newItem("listDatasets?page="+page+"&sort="+sortKey);
+	}
+	void goToPage(int page, String sortKey, boolean desc) {
+		History.newItem("listDatasets?page="+page+"&sort="+sortKey+"&desc="+(desc?"y":"n"));
+	}
+	
+	int page;
+	String sortKey = "date";
+	boolean sortDesc = false;
 	
 	private void listDatasets() {
 		Map<String,String> params = getParams();
-		int page = 1;
+		page = 1;
 		if(params.containsKey("page")) {
 			try {
 				page = Integer.parseInt(params.get("page"));
 			} catch(Exception x) { }
+		}
+		if(params.containsKey("sort")) {
+			sortKey = params.get("sort");
+		}
+		if(params.containsKey("desc")) {
+			sortDesc = params.get("desc").equals("y");
 		}
 		pageOffset = (page - 1) * pageSize;
 		DatasetTableOneColumnView datasetTableWidget = new DatasetTableOneColumnView();
@@ -217,17 +244,42 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		PagingWidget pager = new PagingWidget(page);
 		pager.addValueChangeHandler(new ValueChangeHandler<Integer>() {
 			public void onValueChange(ValueChangeEvent<Integer> event) {
-				History.newItem("listDatasets?page="+event.getValue());
+				goToPage(event.getValue(),sortKey,sortDesc);
 			}
 		});
 		pager.addStyleName("centered"); // special IE-friendly centering style
+		
+		// simple sorting controls
+		Button dateSortButton = new Button("Date");
+		dateSortButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				goToPage(page,"date",sortDesc);
+			}
+		});
+		mainContainer.add(dateSortButton);
+		Button titleSortButton = new Button("Title");
+		titleSortButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				goToPage(page,"title",sortDesc);
+			}
+		});
+		mainContainer.add(titleSortButton);
+		Button ascDescButton = new Button("Asc/Desc");
+		ascDescButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				goToPage(page,sortKey,sortDesc ? false : true);
+			}
+		});
+		mainContainer.add(ascDescButton);
+		
+		//
 		mainContainer.add(pager);
 		mainContainer.add(datasetTableWidget.asWidget());
 
 		// TODO add a way to switch between the two views
 //		DatasetTableView datasetTableWidget = new DatasetTableView();
 		
-		dispatchAsync.execute(new ListDatasets("http://purl.org/dc/elements/1.1/date",true,pageSize,pageOffset),
+		dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),sortDesc,pageSize,pageOffset),
 				new AsyncCallback<ListDatasetsResult>() {
 			public void onFailure(Throwable caught) {
 				GWT.log("Error retrieving datasets", null);
@@ -252,7 +304,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				}
 				
 //				// FIXME temporary testing
-//				GalleryWidget gallery = new GalleryWidget(uris);
+//				Galle
 //				mainContainer.add(gallery);
 			}
 		});
