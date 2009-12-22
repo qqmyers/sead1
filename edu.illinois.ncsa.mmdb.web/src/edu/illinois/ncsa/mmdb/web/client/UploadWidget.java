@@ -14,6 +14,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -194,6 +195,13 @@ public class UploadWidget extends Composite {
 							statusLabel.setText("upload complete.");
 							// uri
 							String uri = dict.get("uris").isArray().get(0).isString().stringValue();
+							// ersatz decanonicalization! FIXME make Uri canon/decanon work on the client!
+							if(uri.startsWith("http://")) {
+								int ix = uri.indexOf("/api/image/");
+								if(ix != -1) {
+									uri = uri.substring(ix+11);
+								}
+							}
 							DatasetUploadedEvent event = new DatasetUploadedEvent();
 							event.setDatasetUri(uri);
 							fireEvent(event);
