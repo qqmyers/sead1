@@ -217,6 +217,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	int page;
 	String sortKey = "date";
 	boolean sortDesc = false;
+	PagingWidget datasetListPager = null;
 	
 	private void listDatasets() {
 		Map<String,String> params = getParams();
@@ -241,13 +242,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		Label titleLabel = new Label("List all");
 		titleLabel.addStyleName("pageTitle");
 		mainContainer.add(titleLabel);
-		PagingWidget pager = new PagingWidget(page);
-		pager.addValueChangeHandler(new ValueChangeHandler<Integer>() {
+		datasetListPager = new PagingWidget(page);
+		datasetListPager.addValueChangeHandler(new ValueChangeHandler<Integer>() {
 			public void onValueChange(ValueChangeEvent<Integer> event) {
 				goToPage(event.getValue(),sortKey,sortDesc);
 			}
 		});
-		pager.addStyleName("centered"); // special IE-friendly centering style
+		datasetListPager.addStyleName("centered"); // special IE-friendly centering style
 		
 		// simple sorting controls
 		Button dateSortButton = new Button("Date");
@@ -273,7 +274,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		mainContainer.add(ascDescButton);
 		
 		//
-		mainContainer.add(pager);
+		mainContainer.add(datasetListPager);
 		mainContainer.add(datasetTableWidget.asWidget());
 
 		// TODO add a way to switch between the two views
@@ -302,6 +303,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 					eventBus.fireEvent(event);
 //					uris.add(dataset.getUri());
 				}
+				datasetListPager.setNumberOfPages(result.getDatasetCount() / pageSize);
 				
 //				// FIXME temporary testing
 //				Galle

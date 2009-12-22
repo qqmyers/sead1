@@ -20,6 +20,7 @@ import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.rdf.terms.Rdf;
 
@@ -292,6 +293,25 @@ public class TupeloStore {
     			e.printStackTrace();
     		}
     	}
+    }
+    
+    int datasetCount = -1;
+    long lastDatasetCount = 0;
+    public int countDatasets() {
+    	return countDatasets(false);
+    }
+    public int countDatasets(boolean force) {
+    	if(force || System.currentTimeMillis() > lastDatasetCount + 15000) {
+    		lastDatasetCount = System.currentTimeMillis();
+    		try {
+    			DatasetBeanUtil dbu = new DatasetBeanUtil(getBeanSession());
+    			log.debug("counting datasets...");
+    			datasetCount = getContext().match(null,Rdf.TYPE,dbu.getType()).size();
+    		} catch(Exception x) {
+    			datasetCount = -1;
+    		}
+    	}
+    	return datasetCount;
     }
 }
 

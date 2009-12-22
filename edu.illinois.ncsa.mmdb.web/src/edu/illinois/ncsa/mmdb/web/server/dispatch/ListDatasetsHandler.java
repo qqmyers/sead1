@@ -71,7 +71,9 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 
 	public ListDatasetsResult execute(ListDatasets arg0, ExecutionContext arg1)
 			throws ActionException {
-		return new ListDatasetsResult(listDatasets(arg0.getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0.getOffset()));
+		ListDatasetsResult r = new ListDatasetsResult(listDatasets(arg0.getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0.getOffset()));
+		r.setDatasetCount(TupeloStore.getInstance().countDatasets());
+		return r;
 	}
 
 	public Class<ListDatasets> getActionType() {

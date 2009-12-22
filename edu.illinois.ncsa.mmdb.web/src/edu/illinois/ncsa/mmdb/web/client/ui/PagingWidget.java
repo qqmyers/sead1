@@ -21,13 +21,22 @@ public class PagingWidget extends Composite implements ClickHandler, HasValueCha
 
 	// paging model
 	int page = 1;
+	int nPages = -1;
+	
 	public void setPage(int p) {
 		page = p >= 1 ? p : 1;
-		setPageLabel(page);
+		setPageLabel(page,nPages);
 		ValueChangeEvent.fire(this, page);
 	}
-	void setPageLabel(int p) {
-		pageLabel.setText("page "+p+" of several");
+	public void setNumberOfPages(int p) {
+		nPages = p;
+		setPageLabel(page,nPages);
+	}
+	public int getNumberOfPages() {
+		return nPages;
+	}
+	void setPageLabel(int p, int np) {
+		pageLabel.setText("page "+p+(np > 0 ? " of " + np : ""));
 	}
 	public int getPage() { return page; }
 	
@@ -43,7 +52,7 @@ public class PagingWidget extends Composite implements ClickHandler, HasValueCha
 		nextButton = new Image("images/go-next.png");
 		pageLabel = new Label();
 		pageLabel.addStyleName("pagingLabel");
-		setPageLabel(page);
+		setPageLabel(page,nPages);
 		for(Widget element : new Widget[] { firstButton, previousButton, pageLabel, nextButton }) {
 			thePanel.add(element);
 			if(element instanceof Image) {

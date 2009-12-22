@@ -9,12 +9,15 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 
 public class ListDatasetsResult implements Result {
+	public static final int COUNT_UNKNOWN = -1;
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -2057929768340773206L;
 	private List<DatasetBean> datasets;
 	private Map<DatasetBean,Collection<PreviewImageBean>> previews;
+	private int datasetCount; // total number of datasets
 	
 	public ListDatasetsResult() { }
 	
@@ -41,5 +44,12 @@ public class ListDatasetsResult implements Result {
 	}
 	public Collection<PreviewImageBean> getPreviews(DatasetBean b) {
 		return getPreviews().get(b);
+	}
+	
+	public void setDatasetCount(int c) {
+		datasetCount = c;
+	}
+	public int getDatasetCount() {
+		return datasetCount;
 	}
 }
