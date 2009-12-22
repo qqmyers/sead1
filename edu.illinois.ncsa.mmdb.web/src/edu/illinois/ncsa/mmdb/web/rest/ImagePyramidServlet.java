@@ -124,6 +124,10 @@ public class ImagePyramidServlet extends HttpServlet {
         			dataset = TupeloStore.fetchThing(uri);
             		pyramidUri = dataset.getResource(ImagePyramidBeanUtil.HAS_PYRAMID);
         		}
+        		if(pyramidUri == null) {
+        			die(resp,"No image pyramid available for dataset "+uri);
+        			return;
+        		}
         		ImagePyramidBean ipb =
         			(ImagePyramidBean) TupeloStore.fetchBean(pyramidUri);
         		log.info("GET PYRAMID "+uri);
