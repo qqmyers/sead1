@@ -315,6 +315,9 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		public void setSessionKey(String sessionKey) {
 			this.sessionKey= sessionKey;
 		}
+		public String getSessionKey() {
+			return sessionKey;
+		}
 	}
 	
 	ProgressThread progressThread;
@@ -350,13 +353,14 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			try {
 				HttpClient client = new HttpClient();
 				client.executeMethod(post);
+				String sessionKey = progressThread.getSessionKey();
 				if(post.getStatusCode() != 200) {
 					log("post failed! "+post.getStatusLine());
-					getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback()"));
+					getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback('"+sessionKey+"')"));
 					showCard("error");
 				} else {
 					log("post complete with status "+post.getStatusLine());
-					getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback()"));
+					getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback('"+sessionKey+"')"));
 					showCard("done");
 				}
 				progressThread.stopShowingProgress();
