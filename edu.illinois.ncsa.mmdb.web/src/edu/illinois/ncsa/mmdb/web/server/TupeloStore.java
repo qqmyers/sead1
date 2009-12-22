@@ -313,5 +313,16 @@ public class TupeloStore {
     	}
     	return datasetCount;
     }
+    
+    Map<String,String> uploadHistory = new HashMap<String,String>();
+    public void setHistoryForUpload(String sessionKey, String history) {
+    	uploadHistory.put(sessionKey, history);
+    }
+    // only call this once.
+    public String getHistoryForUpload(String sessionKey) {
+    	String history = uploadHistory.get(sessionKey);
+    	uploadHistory.put(sessionKey,null);
+    	return history;
+    }
 }
 

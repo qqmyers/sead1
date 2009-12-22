@@ -254,6 +254,7 @@ public class UploadBlob extends HttpServlet {
         // Parse the request
         try {
             List<FileItem> items = upload.parseRequest(request);
+            int nFiles = 0;
             String collectionName = null;
             for (FileItem item : items) {
                 // process a file
@@ -275,6 +276,7 @@ public class UploadBlob extends HttpServlet {
                 }
                 // if it's a field from a form and the size is non-zero...
                 if (!item.isFormField() && (sizeInBytes > 0)) {
+                	nFiles++;
                     BlobWriter bw = new BlobWriter();
                     // generate a URI based on the request using the REST service's minter
                     Map<Resource,Object> md = new HashMap<Resource,Object>();
@@ -368,10 +370,15 @@ public class UploadBlob extends HttpServlet {
             			t.addValue(RestService.HAS_MEMBER, Resource.uriRef(itemUri));
             		}
             		ts.save();
+            		TupeloStore.getInstance().setHistoryForUpload(sessionKey, "collection?uri="+collectionUri);
             	} catch(OperatorException x) {
             		//
             		x.printStackTrace();
             	}
+            } else if(nFiles==1) {
+            	TupeloStore.getInstance().setHistoryForUpload(sessionKey, "dataset?id="+uri);
+            } else {
+            	TupeloStore.getInstance().setHistoryForUpload(sessionKey, "listDatasets?sort=date-desc");
             }
         }
         catch (FileUploadException e1) {

@@ -29,8 +29,9 @@
 
     <!-- upload complete callback -->
     <script>
-    	function uploadCompleteCallback() {
-    		document.getElementById('uploadComplete').click();
+    	function uploadCompleteCallback(sessionKey) {
+    		document.getElementById('sessionKey').innerHTML = sessionKey;
+   			document.getElementById('uploadComplete').click();
     	}
     </script>
   </head>
@@ -62,6 +63,8 @@
     </div>
 
 	<div id="toolbar" class="toolbar"></div>
+	
+	<span class="hidden" id="sessionKey"></span>
 	
 	<div id="uploadToolbar" class="toolbar hidden">
 		<table>

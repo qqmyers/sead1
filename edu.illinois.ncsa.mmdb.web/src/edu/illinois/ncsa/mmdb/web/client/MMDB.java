@@ -31,6 +31,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUploadDestination;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUploadDestinationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -384,7 +386,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		DOM.getElementById("uploadToolbar").removeClassName("hidden");
 		
 		// a hidden "upload complete" button pressed by the applet:
-		Button uploadComplete = new Button("Done") {
+		final Button uploadComplete = new Button("Done") {
 			protected void onAttach() {
 				super.onAttach();
 				getButtonElement().setId("uploadComplete");
@@ -392,7 +394,16 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		};
 		uploadComplete.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent arg0) {
-				listDatasets(); // refresh dataset list
+				// an upload is complete
+				String sessionKey = DOM.getElementById("sessionKey").getInnerHTML();
+				dispatchAsync.execute(new GetUploadDestination(sessionKey), new AsyncCallback<GetUploadDestinationResult>() {
+					public void onFailure(Throwable arg0) {
+						History.newItem("listDatasets?sort=date-desc");
+					}
+					public void onSuccess(GetUploadDestinationResult arg0) {
+						History.newItem(arg0.getHistoryToken());
+					}
+				});
 			}
 		});
 		uploadComplete.addStyleName("invisible");

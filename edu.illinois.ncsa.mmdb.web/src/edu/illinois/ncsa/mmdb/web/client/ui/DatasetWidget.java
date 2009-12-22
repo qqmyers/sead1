@@ -209,8 +209,8 @@ public class DatasetWidget extends Composite {
 
 		typeLabel.addStyleName("metadataEntry");
 
-		dateLabel = new Label("Date: "
-				+ DATE_TIME_FORMAT.format(dataset.getDate()));
+		String dateString = dataset.getDate() != null ? DATE_TIME_FORMAT.format(dataset.getDate()) : "";
+		dateLabel = new Label("Date: "+dateString);
 
 		dateLabel.addStyleName("metadataEntry");
 
