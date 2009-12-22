@@ -7,6 +7,8 @@ import org.mortbay.log.Log;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -26,6 +28,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
@@ -198,11 +201,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	int pageSize = 10;
 
 	String uriForSortKey(String key) { // FIXME kludge, make keys full URI's
-		if("title".equals(key)) {
+		if(key.startsWith("title-")) {
 			return "http://purl.org/dc/elements/1.1/title";
 		} else { // default is date
 			return "http://purl.org/dc/elements/1.1/date"; 
 		}
+	}
+	boolean descForSortKey(String key) {
+		return !key.endsWith("-asc"); // default is descending
 	}
 	void goToPage(int page) {
 		History.newItem("listDatasets?page="+page);
@@ -210,13 +216,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	void goToPage(int page, String sortKey) {
 		History.newItem("listDatasets?page="+page+"&sort="+sortKey);
 	}
-	void goToPage(int page, String sortKey, boolean desc) {
-		History.newItem("listDatasets?page="+page+"&sort="+sortKey+"&desc="+(desc?"y":"n"));
-	}
 	
 	int page;
-	String sortKey = "date";
-	boolean sortDesc = false;
+	String sortKey = "date-desc";
 	PagingWidget datasetListPager = null;
 	
 	private void listDatasets() {
@@ -230,9 +232,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		if(params.containsKey("sort")) {
 			sortKey = params.get("sort");
 		}
-		if(params.containsKey("desc")) {
-			sortDesc = params.get("desc").equals("y");
-		}
 		pageOffset = (page - 1) * pageSize;
 		DatasetTableOneColumnView datasetTableWidget = new DatasetTableOneColumnView();
 		DatasetTablePresenter datasetTablePresenter = new DatasetTablePresenter(
@@ -242,45 +241,50 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		Label titleLabel = new Label("List all");
 		titleLabel.addStyleName("pageTitle");
 		mainContainer.add(titleLabel);
+		
+		HorizontalPanel pagingPanel = new HorizontalPanel();
+		pagingPanel.addStyleName("centered"); // special IE-friendly centering style
+		
 		datasetListPager = new PagingWidget(page);
 		datasetListPager.addValueChangeHandler(new ValueChangeHandler<Integer>() {
 			public void onValueChange(ValueChangeEvent<Integer> event) {
-				goToPage(event.getValue(),sortKey,sortDesc);
+				goToPage(event.getValue(),sortKey);
 			}
 		});
-		datasetListPager.addStyleName("centered"); // special IE-friendly centering style
+		pagingPanel.add(datasetListPager);
 		
-		// simple sorting controls
-		Button dateSortButton = new Button("Date");
-		dateSortButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				goToPage(page,"date",sortDesc);
+		Label sortBy = new Label("sort by: ");
+		sortBy.addStyleName("pagingLabel");
+		pagingPanel.add(sortBy);
+		
+		final ListBox sortOptions = new ListBox();
+		sortOptions.addItem("Date: newest first","date-desc");
+		sortOptions.addItem("Date: oldest first","date-asc");
+		sortOptions.addItem("Title: A-Z","title-asc");
+		sortOptions.addItem("Title: Z-A","title-desc");
+		sortOptions.addStyleName("pagingLabel");
+		
+		for(int i = 0; i < sortOptions.getItemCount(); i++) {
+			if(sortKey.equals(sortOptions.getValue(i))) {
+				sortOptions.setSelectedIndex(i);
+			}
+		}
+		
+		sortOptions.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				goToPage(page,sortOptions.getValue(sortOptions.getSelectedIndex()));
 			}
 		});
-		mainContainer.add(dateSortButton);
-		Button titleSortButton = new Button("Title");
-		titleSortButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				goToPage(page,"title",sortDesc);
-			}
-		});
-		mainContainer.add(titleSortButton);
-		Button ascDescButton = new Button("Asc/Desc");
-		ascDescButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				goToPage(page,sortKey,sortDesc ? false : true);
-			}
-		});
-		mainContainer.add(ascDescButton);
+		pagingPanel.add(sortOptions);
+		mainContainer.add(pagingPanel);
 		
 		//
-		mainContainer.add(datasetListPager);
 		mainContainer.add(datasetTableWidget.asWidget());
 
 		// TODO add a way to switch between the two views
 //		DatasetTableView datasetTableWidget = new DatasetTableView();
 		
-		dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),sortDesc,pageSize,pageOffset),
+		dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),descForSortKey(sortKey),pageSize,pageOffset),
 				new AsyncCallback<ListDatasetsResult>() {
 			public void onFailure(Throwable caught) {
 				GWT.log("Error retrieving datasets", null);
