@@ -309,7 +309,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 					eventBus.fireEvent(event);
 //					uris.add(dataset.getUri());
 				}
-				datasetListPager.setNumberOfPages(result.getDatasetCount() / pageSize);
+				int np = result.getDatasetCount() / pageSize;
+				datasetListPager.setNumberOfPages(np);
 				
 //				// FIXME temporary testing
 //				Galle
