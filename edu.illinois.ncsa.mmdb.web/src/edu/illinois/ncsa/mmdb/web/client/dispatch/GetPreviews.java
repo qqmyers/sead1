@@ -3,6 +3,8 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 import net.customware.gwt.dispatch.shared.Action;
 
 public class GetPreviews implements Action<GetPreviewsResult> {
+	public static final String SMALL = "small";
+	public static final String LARGE = "large";
 
 	/**
 	 * 

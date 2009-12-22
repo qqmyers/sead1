@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter.Display;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
 /**
@@ -50,13 +51,15 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		
 		int row = this.getRowCount();
 		
-		PreviewWidget pre = new PreviewWidget(id,PreviewWidget.SMALL); 
+		PreviewWidget pre = new PreviewWidget(id,GetPreviews.SMALL,"dataset?id="+id); 
 		setWidget(row, 0, pre);
+		/*
 		pre.getTarget().addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
 					History.newItem("dataset?id="+id);
 				}
 			});
+			*/
 		setWidget(row, 0, pre);
 		
 		VerticalPanel verticalPanel = new VerticalPanel();

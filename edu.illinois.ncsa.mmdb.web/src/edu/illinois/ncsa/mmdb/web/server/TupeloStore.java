@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -273,18 +275,23 @@ public class TupeloStore {
         return canon;
     }
     
+    Map<String,Long> lastExtractionRequest = new HashMap<String,Long>();
     public void extractPreviews(String uri) {
-    	String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
-    	log.debug("Submitting to extraction service URI " + extractionServiceURL);
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-        PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
-        try {
-			pbu.callExtractor(extractionServiceURL, dbu.get(uri));
-		} catch (Exception e) {
-			log.error("Extraction service " + extractionServiceURL + " unavailable");
-			e.printStackTrace();
-		}
+    	if(lastExtractionRequest.get(uri) == null ||
+    	   System.currentTimeMillis() > lastExtractionRequest.get(uri)+60000) { // 10min
+    		String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
+    		log.info("EXTRACT PREVIEWS "+uri);
+    		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+    		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+    		PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
+    		try {
+    			lastExtractionRequest.put(uri, System.currentTimeMillis());
+    			pbu.callExtractor(extractionServiceURL, dbu.get(uri));
+    		} catch (Exception e) {
+    			log.error("Extraction service " + extractionServiceURL + " unavailable");
+    			e.printStackTrace();
+    		}
+    	}
     }
 }
 

@@ -1,29 +1,37 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviewsResult;
-import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviewsResult;
+import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 
 public class GetPreviewsHandler implements ActionHandler<GetPreviews, GetPreviewsResult> {
 
 	@Override
 	public GetPreviewsResult execute(GetPreviews getPreviews, ExecutionContext arg1)
 			throws ActionException {
-		List<String> previews = new LinkedList<String>();
+		PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(TupeloStore.getInstance().getBeanSession());
 		String datasetUri = getPreviews.getDatasetUri();
-		if(datasetUri != null) {
-			String smallPreview = RestServlet.getSmallPreviewUri(datasetUri);
-			if(smallPreview != null) { previews.add(smallPreview); }
-			String largePreview = RestServlet.getLargePreviewUri(datasetUri);
-			if(largePreview != null) { previews.add(largePreview); }
+		GetPreviewsResult result = new GetPreviewsResult();
+		try {
+			if(datasetUri != null) {
+				String smallPreview = RestServlet.getSmallPreviewUri(datasetUri);
+				if(smallPreview != null) {
+					result.setPreview(GetPreviews.SMALL, pibu.get(smallPreview));
+				}
+				String largePreview = RestServlet.getLargePreviewUri(datasetUri);
+				if(largePreview != null) {
+					result.setPreview(GetPreviews.LARGE, pibu.get(largePreview));
+				}
+			}
+		} catch(Exception x) {
+			// FIXME report
 		}
-		return new GetPreviewsResult(previews);
+		return result;
 	}
 
 	@Override
