@@ -201,7 +201,7 @@ public class ImagePyramidServlet extends HttpServlet {
         pw.println("<pre>"); // FIXME debug
         pw.println( "<script type=\"text/javascript\">" );
         pw.println( "Seadragon.Config.debug = true;" );
-        pw.println( "Seadragon.Config.imagePath = \"img/\";" );
+        pw.println( "Seadragon.Config.imagePath = \"http://www.seadragon.com/images/seajax/\";" );
         pw.println( String.format( "Seadragon.embed(\"%dpx\", \"%dpx\", \"%s.xml\", %d, %d, %d, %d, \"%s\");", sizex, sizey, ipb.getLabel(), ipb.getWidth(), ipb.getHeight(), ipb.getTilesize(), ipb.getOverlap(), ipb.getFormat() ) );
         pw.println( "</script>" );
         pw.println("</pre>"); // FIXME debug
