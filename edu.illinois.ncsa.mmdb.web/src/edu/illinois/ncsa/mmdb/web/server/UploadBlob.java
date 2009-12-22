@@ -285,7 +285,7 @@ public class UploadBlob extends HttpServlet {
                     String url = TupeloStore.getInstance().getUriCanonicalizer(request).canonicalize(RestServlet.IMAGE_INFIX,uri.toString());
                     UploadInfo u = null;
                     if(listener != null) {
-                    	listener.addUploadInfo(URI.create(url), trimFilename(fileName), sizeInBytes);
+                    	u = listener.addUploadInfo(URI.create(url), trimFilename(fileName), sizeInBytes);
                     }
                     final FileUploadListener _listener = listener;
                     bw.setInputStream(new FilterInputStream(item.getInputStream()) {
