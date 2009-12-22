@@ -12,7 +12,10 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 
 /**
  * @author lmarini
@@ -22,7 +25,7 @@ public class GalleryWidget extends Composite {
 
 	private final FlowPanel mainPanel;
 	private final ArrayList<String> uris;
-	private final FlowPanel imagePanel;
+	private final HorizontalPanel imagePanel;
 	private int pageNum;
 	private final int pageSize = 3;
 	private final String PREVIEW_URL = "./api/image/preview/small/";
@@ -34,7 +37,7 @@ public class GalleryWidget extends Composite {
 		mainPanel.addStyleName("gallery");
 		initWidget(mainPanel);
 		
-		imagePanel = new FlowPanel();
+		imagePanel = new HorizontalPanel();
 		imagePanel.addStyleName("galleryImages");
 		mainPanel.add(imagePanel);
 		
@@ -68,26 +71,14 @@ public class GalleryWidget extends Composite {
 		if (uris.size() > pageSize) {
 			for (int i=0; i<pageSize; i++) {
 				final String uri = uris.get((pageNum - 1) * pageSize + i);
-				Image image = new Image(PREVIEW_URL + uri);
-				image.addStyleName("thumbnail");
-				image.addClickHandler(new ClickHandler() {
-					public void onClick(ClickEvent event) {
-						History.newItem("dataset?id="+uri);
-					}
-				});
-				imagePanel.add(image);
+				PreviewWidget preview = new PreviewWidget(uri, GetPreviews.SMALL, "dataset?id="+uri);
+				imagePanel.add(preview);
 			}
 		} else {
 			for (int i=0; i<uris.size(); i++) {
-				final String uri = uris.get((i));
-				Image image = new Image(PREVIEW_URL + uri);
-				image.addStyleName("thumbnail");
-				image.addClickHandler(new ClickHandler() {
-					public void onClick(ClickEvent event) {
-						History.newItem("dataset?id="+uri);
-					}
-				});
-				imagePanel.add(image);
+				final String uri = uris.get(i);
+				PreviewWidget preview = new PreviewWidget(uri, GetPreviews.SMALL, "dataset?id="+uri);
+				imagePanel.add(preview);
 			}
 		}
 	}

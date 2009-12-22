@@ -111,7 +111,7 @@ public class CollectionPage extends Composite {
 		numDatasetsLabel.setText(datasets.size() + " datasets");
 		ArrayList<String> uris = new ArrayList<String>();
 		for (DatasetBean dataset : datasets) {
-			Image previewImage = new Image(PREVIEW_URL + dataset.getUri());
+			//Image previewImage = new Image(PREVIEW_URL + dataset.getUri());
 //			mainContent.add(previewImage);
 			uris.add(dataset.getUri());
 		}

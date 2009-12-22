@@ -56,11 +56,13 @@ public class PreviewWidget extends Composite {
 				// no preview is available
 				contentPanel.clear();
 				noPreview = new Label("No preview available");
-				noPreview.addClickHandler(new ClickHandler() {
-					public void onClick(ClickEvent event) {
-						History.newItem(link);
-					}
-				});
+				if(link != null) {
+					noPreview.addClickHandler(new ClickHandler() {
+						public void onClick(ClickEvent event) {
+							History.newItem(link);
+						}
+					});
+				}
 				contentPanel.add(noPreview);
 				Timer tryAgain = new Timer() {
 					public void run() {
@@ -80,11 +82,13 @@ public class PreviewWidget extends Composite {
 				}
 			}
 		});
-		image.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				History.newItem(link);
-			}
-		});
+		if(link != null) {
+			image.addClickHandler(new ClickHandler() {
+				public void onClick(ClickEvent event) {
+					History.newItem(link);
+				}
+			});
+		}
 		return image;
 	}
 	

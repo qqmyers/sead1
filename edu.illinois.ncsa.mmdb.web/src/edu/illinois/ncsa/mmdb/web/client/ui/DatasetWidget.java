@@ -36,6 +36,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -455,9 +456,8 @@ public class DatasetWidget extends Composite {
 
 	private void showPreview(DatasetBean dataset) {
 		imageContainer = new SimplePanel();
-		image = new Image(PREVIEW_URL + dataset.getUri());
-		image.addStyleName("imagePreviewNoOverflow");
-		imageContainer.add(image);
+		PreviewWidget pw = new PreviewWidget(dataset.getUri(), GetPreviews.LARGE, null);
+		imageContainer.add(pw);
 	}
 
 	class AddToCollectionHandler implements ClickHandler {
