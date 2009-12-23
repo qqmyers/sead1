@@ -22,9 +22,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviewsResult;
+import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 
 public class PreviewWidget extends Composite {
 	private static final Map<String,String> PREVIEW_URL;
+	private static final String IMAGE_URL = "./api/image/";
 	
 	static {
 		PREVIEW_URL = new HashMap<String,String>();
@@ -48,54 +50,22 @@ public class PreviewWidget extends Composite {
 		MMDB.dispatchAsync.execute(action, callback);
 	}
 	
-	Image createImage(final String datasetUri, final String size, final String link) {
-		image = new Image(PREVIEW_URL.get(size) + datasetUri);
-		image.addStyleName("thumbnail");
-		image.addErrorHandler(new ErrorHandler() {
-			public void onError(ErrorEvent arg0) {
-				// no preview is available
-				contentPanel.clear();
-				noPreview = new Label("No preview available");
-				if(link != null) {
-					noPreview.addClickHandler(new ClickHandler() {
-						public void onClick(ClickEvent event) {
-							History.newItem(link);
-						}
-					});
-				}
-				contentPanel.add(noPreview);
-				Timer tryAgain = new Timer() {
-					public void run() {
-						ajax(new GetPreviews(datasetUri), new AsyncCallback<GetPreviewsResult>() {
-							public void onFailure(Throwable arg0) {
-								// give up.
-							}
-							public void onSuccess(GetPreviewsResult arg0) {
-								contentPanel.clear();
-								contentPanel.add(createImage(datasetUri,size,link));
-							}
-						});
-					}
-				};
-				if(delays[whichDelay] > 0) {
-					tryAgain.schedule(delays[whichDelay++]); // give the extractor a good long time
-				}
-			}
-		});
+	int whichDelay = 0;
+	static final int delays[] = new int[] { 5000, 15000, 30000, -1 };
+
+	Label noPreview(final String link) {
+		Label noPreview = new Label("No preview available");
 		if(link != null) {
-			image.addClickHandler(new ClickHandler() {
+			noPreview.addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
 					History.newItem(link);
 				}
 			});
 		}
-		return image;
+		return noPreview;
 	}
 	
-	int whichDelay = 0;
-	static final int delays[] = new int[] { 5000, 15000, 30000, -1 };
-	
-	public PreviewWidget(final String datasetUri, String desiredSize, String link) {
+	public PreviewWidget(final String datasetUri, String desiredSize, final String link) {
 		final String size;
 		if(!desiredSize.equals(GetPreviews.LARGE)) {
 			size = GetPreviews.SMALL;
@@ -103,8 +73,47 @@ public class PreviewWidget extends Composite {
 			size = desiredSize;
 		}
 		contentPanel = new VerticalPanel();
-		image = createImage(datasetUri, size, link);
-		contentPanel.add(image);
+		Timer fetchPreview = new Timer() {
+			public void run() {
+				ajax(new GetPreviews(datasetUri), new AsyncCallback<GetPreviewsResult>() {
+					public void onFailure(Throwable arg0) {
+					}
+					public void onSuccess(GetPreviewsResult r) {
+						PreviewImageBean preview = r.getPreview(size);
+						if(preview == null) {
+							contentPanel.clear();
+							contentPanel.add(noPreview(link));
+							if(delays[whichDelay] > 0) {
+								schedule(delays[whichDelay++]); // give the extractor a good long time
+							}
+						} else {
+							contentPanel.clear();
+							Image previewImage = new Image(IMAGE_URL + preview.getUri());
+							previewImage.addStyleName("thumbnail");
+							if(link != null) {
+								previewImage.addClickHandler(new ClickHandler() {
+									public void onClick(ClickEvent event) {
+										History.newItem(link);
+									}
+								});
+							}
+							contentPanel.add(previewImage);
+						}
+					}
+				});
+			}
+		};
+		fetchPreview.schedule(1);
+		contentPanel.clear();
+		Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);
+		previewImage.addStyleName("thumbnail");
+		previewImage.addErrorHandler(new ErrorHandler() {
+			public void onError(ErrorEvent event) {
+				contentPanel.clear();
+				contentPanel.add(noPreview(link));
+			}
+		});
+		contentPanel.add(previewImage);
 		initWidget(contentPanel);
 	}
 }
