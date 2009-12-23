@@ -259,7 +259,10 @@ public class UploadBlob extends HttpServlet {
             for (FileItem item : items) {
                 // process a file
                 String fieldName = item.getFieldName();
-                String fileName = normalizeFilename(item.getName());
+                String fileName = item.getName();
+                if(fileName != null) {
+                	fileName = normalizeFilename(fileName);
+                }
                 String contentType = item.getContentType();
                 boolean isInMemory = item.isInMemory();
                 long sizeInBytes = item.getSize();
