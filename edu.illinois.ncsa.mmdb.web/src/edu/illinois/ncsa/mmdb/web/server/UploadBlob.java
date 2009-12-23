@@ -259,7 +259,7 @@ public class UploadBlob extends HttpServlet {
             for (FileItem item : items) {
                 // process a file
                 String fieldName = item.getFieldName();
-                String fileName = item.getName();
+                String fileName = normalizeFilename(item.getName());
                 String contentType = item.getContentType();
                 boolean isInMemory = item.isInMemory();
                 long sizeInBytes = item.getSize();
@@ -387,8 +387,13 @@ public class UploadBlob extends HttpServlet {
         }
     }
 
+    // certain browsers made in Redmond, WA return full pathnames. we just want the last component
+    private String normalizeFilename(String name) {
+    	name = name.replaceFirst(".*\\\\","");
+    	return name;
+	}
 
-    /**
+	/**
      * Convert a vector of values into a Jason array of strings
      * @param name the name of the array
      * @param v the vector
