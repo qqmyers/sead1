@@ -89,6 +89,7 @@ public class PreviewWidget extends Composite {
 		previewImage.addErrorHandler(new ErrorHandler() {
 			public void onError(ErrorEvent event) {
 				statusLabel(NO_PREVIEW_TEXT);
+				getPreview(datasetUri, link);
 			}
 		});
 		addLink(previewImage);
@@ -147,8 +148,9 @@ public class PreviewWidget extends Composite {
 							};
 							if (delays[whichDelay] > 0) {
 								tryAgain.schedule(delays[whichDelay++]);
+							} else {
+								statusLabel(NO_PREVIEW_TEXT);
 							}
-							statusLabel(NO_PREVIEW_TEXT);
 						} else {
 							contentPanel.clear();
 							contentPanel.add(createImage(datasetUri, size,
