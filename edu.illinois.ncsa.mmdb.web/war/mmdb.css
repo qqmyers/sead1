@@ -104,6 +104,11 @@ body {
  	color: white;
 }
 
+.navMenuLink:hover {
+	color: white;
+	text-decoration: underline;
+}
+
 .navMenuLink a:link {
 	font-family: Arial, Helvetica, sans-serif;
 	/**color: #069;**/
@@ -127,7 +132,7 @@ body {
  	color: white;
 }
 
-.navMenuLink:hover {
+.navMenuLink a:hover {
 	color: white;
 	text-decoration: underline;
 }
