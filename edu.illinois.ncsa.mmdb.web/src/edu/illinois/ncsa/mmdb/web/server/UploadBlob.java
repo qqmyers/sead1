@@ -478,7 +478,16 @@ public class UploadBlob extends HttpServlet {
     @Override
 	public void doGet ( HttpServletRequest request,
             HttpServletResponse response ) throws ServletException, IOException {
-        if(!request.getParameterMap().containsKey("session")) { // no session?
+    	if(request.getParameterMap().containsKey("uploadComplete")) { // need to redirect after completion
+        	TupeloStore t = TupeloStore.getInstance();
+        	String sessionKey = request.getParameter("uploadComplete");
+        	String historyToken = t.getHistoryForUpload(sessionKey);
+        	if(historyToken != null) {
+        		String redirectUrl = request.getContextPath() + TupeloStore.MMDB_WEBAPP_PATH + "#" + historyToken;
+        		response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+        		response.setHeader("Location", redirectUrl);
+        	}
+        } else if(!request.getParameterMap().containsKey("session")) { // no session?
         	String sessionKey = SecureHashMinter.getMinter().mint(); // mint a session key
         	// report
         	PrintWriter out = response.getWriter();

@@ -70,7 +70,7 @@ public class RestServlet extends HttpServlet {
 	public static final String PREVIEW_SMALL = "/image/preview/small/";
 	
 	public static final String PREVIEW_LARGE = "/image/preview/large/";
-
+	
     static RestService restService; // TODO manage this lifecycle better
 
     public void init() throws ServletException {
@@ -216,6 +216,7 @@ public class RestServlet extends HttpServlet {
         		} catch(RestServiceException e) {
         			if(e.isNotFound()) {
         				response.setStatus(404);
+        				response.addHeader("Pragma", "no-cache");
         			} else {
         				throw new ServletException("failed to retrieve "+request.getRequestURI()); // FIXME return 404
         			}
@@ -242,9 +243,11 @@ public class RestServlet extends HttpServlet {
                 for(String member : restService.retrieveCollection(uri)) {
                     canonicalMembers.add(canonicalizeUri(member, IMAGE_INFIX, request));
                 }
+                response.addHeader("Pragma", "no-cache");
                 response.getWriter().write(formatList(canonicalMembers));
             } catch(RestServiceException e) {
             	if(e.isNotFound()) {
+            		response.addHeader("Pragma", "no-cache");
             		response.setStatus(404);
             	} else {
             		throw new ServletException("failed to retrieve "+request.getRequestURI());

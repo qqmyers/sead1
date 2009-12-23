@@ -15,6 +15,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -400,34 +401,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		uploadPanel.add(uploadWidget);
 		DOM.getElementById("uploadToolbar").removeClassName("hidden");
 
-		// a hidden "upload complete" button pressed by the applet:
-		final Button uploadComplete = new Button("Done") {
-			@Override
-			protected void onAttach() {
-				super.onAttach();
-				getButtonElement().setId("uploadComplete");
-			}
-		};
-		uploadComplete.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent arg0) {
-				// an upload is complete
-				String sessionKey = DOM.getElementById("sessionKey")
-						.getInnerHTML();
-				dispatchAsync.execute(new GetUploadDestination(sessionKey),
-						new AsyncCallback<GetUploadDestinationResult>() {
-							public void onFailure(Throwable arg0) {
-								History.newItem("listDatasets?sort=date-desc");
-							}
-
-							public void onSuccess(
-									GetUploadDestinationResult arg0) {
-								History.newItem(arg0.getHistoryToken());
-							}
-						});
-			}
-		});
-		uploadComplete.addStyleName("invisible");
-		uploadPanel.add(uploadComplete);
 
 		return uploadWidget;
 	}

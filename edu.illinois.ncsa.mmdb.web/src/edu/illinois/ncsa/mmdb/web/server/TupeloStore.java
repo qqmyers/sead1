@@ -236,7 +236,7 @@ public class TupeloStore {
 	
 	static final String REST_SERVLET_PATH = "/api";
 	static final String MMDB_WEBAPP_PATH = "/mmdb.html";
-
+	
 	static final String INFIXES[] = new String[] {
             RestServlet.ANY_IMAGE_INFIX,
             RestServlet.IMAGE_INFIX,
@@ -253,25 +253,34 @@ public class TupeloStore {
     };
 
 	UriCanonicalizer canon;
+
+	String getWebappPrefix(HttpServletRequest request) throws ServletException {
+		try {
+            URL requestUrl = new URL(request.getRequestURL().toString());
+            String prefix = requestUrl.getProtocol()+"://"+requestUrl.getHost();
+            if(requestUrl.getPort() != -1) {
+                prefix = prefix + ":" + requestUrl.getPort();
+            }
+            return prefix;
+		} catch(MalformedURLException x) {
+			throw new ServletException("failed to determine webapp prefix",x);
+		}
+	}
+
+	public String getHistoryTokenUrl(HttpServletRequest request, String historyToken) throws ServletException {
+		return getWebappPrefix(request) + MMDB_WEBAPP_PATH + "#" + historyToken;
+	}
 	
     public UriCanonicalizer getUriCanonicalizer(HttpServletRequest request) throws ServletException {
         if(canon == null) {
             canon = new UriCanonicalizer();
-            try {
-                URL requestUrl = new URL(request.getRequestURL().toString());
-                String prefix = requestUrl.getProtocol()+"://"+requestUrl.getHost();
-                if(requestUrl.getPort() != -1) {
-                    prefix = prefix + ":" + requestUrl.getPort();
-                }
-                for(String infix : INFIXES) {
-                    String cp = prefix + request.getContextPath() + REST_SERVLET_PATH + infix;
-                    canon.setCanonicalUrlPrefix(infix, cp);
-                }
-                // now handle GWT dataset stuff, hardcoding the HTML path
-                canon.setCanonicalUrlPrefix("dataset",prefix + MMDB_WEBAPP_PATH + "#dataset?id=");
-            } catch(MalformedURLException x) {
-                throw new ServletException("unexpected error: servlet URL is not a URL");
+            String prefix = getWebappPrefix(request);
+            for(String infix : INFIXES) {
+            	String cp = prefix + request.getContextPath() + REST_SERVLET_PATH + infix;
+            	canon.setCanonicalUrlPrefix(infix, cp);
             }
+            // now handle GWT dataset and collection stuff stuff, hardcoding the HTML path
+            canon.setCanonicalUrlPrefix("dataset",prefix + MMDB_WEBAPP_PATH + "#dataset?id=");
         }
         return canon;
     }
