@@ -1,18 +1,13 @@
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.shared.Result;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 
-import net.customware.gwt.dispatch.shared.Result;
-
+@SuppressWarnings("serial")
 public class GetPreviewsResult implements Result {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -8437174571690183109L;
 
 	public GetPreviewsResult() {
 		previews = new HashMap<String,PreviewImageBean>();

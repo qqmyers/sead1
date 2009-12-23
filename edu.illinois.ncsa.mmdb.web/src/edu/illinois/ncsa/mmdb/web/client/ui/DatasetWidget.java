@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 
@@ -71,11 +70,7 @@ public class DatasetWidget extends Composite {
 
 	private DownloadButton downloadButton;
 
-	private Image image;
-
 	private FlowPanel metadataPanel;
-
-	private SimplePanel imageContainer;
 
 	private FlowPanel actionsPanel;
 
@@ -95,7 +90,7 @@ public class DatasetWidget extends Composite {
 
 	private DisclosurePanel informationPanel;
 
-	private String id;
+	private String uri;
 
 	private FlexTable informationTable;
 
@@ -112,6 +107,8 @@ public class DatasetWidget extends Composite {
 	private Label mapHeader;
 
 	private FlowPanel mapPanel;
+
+	private PreviewWidget pw;
 
 	/**
 	 * 
@@ -147,12 +144,13 @@ public class DatasetWidget extends Composite {
 	}
 
 	/**
+	 * Retrieve a specific dataset given the uri.
 	 * 
-	 * @param id
+	 * @param uri dataset uri
 	 */
-	public void showDataset(String id) {
-		this.id = id;
-		service.execute(new GetDataset(id),
+	public void showDataset(String uri) {
+		this.uri = uri;
+		service.execute(new GetDataset(uri),
 				new AsyncCallback<GetDatasetResult>() {
 
 					@Override
@@ -162,21 +160,22 @@ public class DatasetWidget extends Composite {
 
 					@Override
 					public void onSuccess(GetDatasetResult result) {
-						showDataset(result.getDataset());
+						drawPage(result.getDataset());
 
 					}
 				});
 	}
 
 	/**
+	 * Draw the content on the page given a specific dataset.
 	 * 
 	 * @param dataset
 	 * @param collection
 	 */
-	public void showDataset(DatasetBean dataset) {
+	private void drawPage(DatasetBean dataset) {
 
 		// image preview
-		showPreview(dataset);
+		pw = new PreviewWidget(dataset.getUri(), GetPreviews.LARGE, null);
 
 		// title
 		titleLabel = new Label(dataset.getTitle());
@@ -210,6 +209,7 @@ public class DatasetWidget extends Composite {
 		typeLabel.addStyleName("metadataEntry");
 
 		String dateString = dataset.getDate() != null ? DATE_TIME_FORMAT.format(dataset.getDate()) : "";
+		
 		dateLabel = new Label("Date: "+dateString);
 
 		dateLabel.addStyleName("metadataEntry");
@@ -277,7 +277,7 @@ public class DatasetWidget extends Composite {
 		// layout
 		leftColumn.add(titleLabel);
 
-		leftColumn.add(imageContainer);
+		leftColumn.add(pw);
 
 		rightColumn.add(metadataPanel);
 
@@ -294,8 +294,11 @@ public class DatasetWidget extends Composite {
 		loadCollections();
 	}
 
+	/**
+	 * Asynchronously load the collections this dataset is part of.
+	 */
 	private void loadCollections() {
-		service.execute(new GetCollections(id),
+		service.execute(new GetCollections(uri),
 				new AsyncCallback<GetCollectionsResult>() {
 
 					@Override
@@ -332,6 +335,12 @@ public class DatasetWidget extends Composite {
 		addToCollectionDialog.center();
 	}
 	
+	/**
+	 * Format bytes.
+	 * 
+	 * @param x number of bytes
+	 * @return formatted string
+	 */
     private String humanBytes( long x )
     {
         if ( x == Integer.MAX_VALUE ) {
@@ -352,10 +361,15 @@ public class DatasetWidget extends Composite {
         }
     }
 
+    /**
+     * Asynchronously add the current dataset to a collection.
+     * 
+     * @param value
+     */
 	protected void addToCollection(String value) {
-		GWT.log("Adding " + id + " to collection " + value, null);
+		GWT.log("Adding " + uri + " to collection " + value, null);
 		Collection<String> datasets = new HashSet<String>();
-		datasets.add(id);
+		datasets.add(uri);
 		service.execute(new AddToCollection(value, datasets),
 				new AsyncCallback<AddToCollectionResult>() {
 
@@ -374,14 +388,14 @@ public class DatasetWidget extends Composite {
 	}
 
 	private void loadMetadata() {
-		if (id != null) {
-			service.execute(new GetMetadata(id),
+		if (uri != null) {
+			service.execute(new GetMetadata(uri),
 					new AsyncCallback<GetMetadataResult>() {
 
 						@Override
 						public void onFailure(Throwable arg0) {
 							GWT.log("Error retrieving metadata about dataset "
-									+ id, null);
+									+ uri, null);
 						}
 
 				@Override
@@ -406,13 +420,13 @@ public class DatasetWidget extends Composite {
 	}
 
    private void showMap() {
-        if ( id != null ) {
-            service.execute( new GetGeoPoint( id ), new AsyncCallback<GetGeoPointResult>() {
+        if ( uri != null ) {
+            service.execute( new GetGeoPoint( uri ), new AsyncCallback<GetGeoPointResult>() {
 
                 @Override
                 public void onFailure( Throwable arg0 )
                 {
-                    GWT.log( "Error retrieving geolocations for " + id, arg0 );
+                    GWT.log( "Error retrieving geolocations for " + uri, arg0 );
 
                 }
 
@@ -454,21 +468,15 @@ public class DatasetWidget extends Composite {
         }
     }
 
-	private void showPreview(DatasetBean dataset) {
-		imageContainer = new SimplePanel();
-		PreviewWidget pw = new PreviewWidget(dataset.getUri(), GetPreviews.LARGE, null);
-		imageContainer.add(pw);
-	}
-
 	class AddToCollectionHandler implements ClickHandler {
 
 		@Override
 		public void onClick(ClickEvent arg0) {
 			String value = addToCollectionDialog.getSelectedValue();
 			if (value != null) {
-				GWT.log("Adding " + id + " to collection " + value, null);
+				GWT.log("Adding " + uri + " to collection " + value, null);
 				Collection<String> datasets = new HashSet<String>();
-				datasets.add(id);
+				datasets.add(uri);
 				service.execute(new AddToCollection(value, datasets),
 						new AsyncCallback<AddToCollectionResult>() {
 

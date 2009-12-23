@@ -18,7 +18,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-httpclient-contrib-ssl-3.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/concurrent-2.3.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-servlet.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-servlet.jar" sourcepath="lib/gwt-user.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackrabbit-jcr-commons-1.2.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackrabbit-webdav-1.2.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jcl104-over-slf4j-1.0.jar"/>

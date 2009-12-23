@@ -225,13 +225,19 @@ body {
   	margin: 20px;
 }
 
+.datasetsPager {
+	width: 700px;
+	margin: 5px auto 5px auto;
+	}
+
 .datasetTable {
 	width: 700px;
 	border: #CCC solid 1px;
 	vertical-align: top;
-	margin: 20px auto 100px auto;
+	margin: 20px auto 20px auto;
 	padding: 0px;
 	border-spacing:0px;
+	border-collapse: collapse;
 }
 
 .datasetTable .topRow {
@@ -248,6 +254,21 @@ body {
 	padding: 8px;
 	border-top: #CCC solid 1px;
 	text-align: center;
+}
+
+.datasetTable .leftCell {
+	width: 40%;
+	margin: 0px;
+	padding: 8px;
+	border-top: #CCC solid 1px;
+	text-align: center;
+}
+
+.datasetTable .rightCell {
+	margin: 0px;
+	padding: 8px;
+	border-top: #CCC solid 1px;
+	text-align: left;
 }
 
 .datasetTable .evenRow {
@@ -371,7 +392,6 @@ body {
 	float: right;
 	width: 250px;
 	height: 100%;
-	border-left: 1px dotted gray;
 }
 
 .previewPanel {
@@ -385,7 +405,6 @@ body {
 
 .imagePreviewPanel {
 	width: 500px;
-	height: 333px;
 	overflow: auto;
 	margin: 30px;
 	border: 1px solid #888888;
@@ -395,12 +414,21 @@ body {
 }
 
 .imagePreviewNoOverflow {
-	width: 500px;
-	height: 333px;
+
 	display: block;
 	margin: 30px auto 30px auto;
 	vertical-align: middle;
 	border: 1px solid #888888;
+}
+
+.imagePreviewShortWidth {
+	width: 600px;
+	height: auto;
+}
+	
+.imagePreviewShortHeight {
+	width: auto;
+	height: 600px;
 }
 
 .imagePreview {
@@ -449,7 +477,10 @@ body {
 	}
 	
 .thumbnail {
+	display: block;
+	cursor: pointer; 
 	cursor: hand;
+	margin: 5px auto 5px auto;
 }
 
 /*================= Annotations / Comments ============== */
