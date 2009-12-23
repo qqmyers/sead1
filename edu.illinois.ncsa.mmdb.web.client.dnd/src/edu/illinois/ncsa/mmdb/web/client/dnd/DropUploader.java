@@ -347,6 +347,22 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		stopProgressThread();
 	}
 	
+	void showErrorCard() {
+		showCard("error");
+		log("sleeping");
+		(new Thread() {
+			public void run() {
+				try {
+					sleep(2500);
+				} catch(InterruptedException x) {
+				} finally {
+					log("showing drop card");
+					showCard("drop");
+				}
+			}
+		}).start();
+	}
+	
 	class PostThread extends Thread {
 		public PostMethod post;
 		public void run() {
@@ -357,15 +373,16 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				if(post.getStatusCode() != 200) {
 					log("post failed! "+post.getStatusLine());
 					getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback('"+sessionKey+"')"));
-					showCard("error");
+					showErrorCard();
 				} else {
-					log("post complete with status "+post.getStatusLine());
-					getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback('"+sessionKey+"')"));
+					String url = getContextUrl()+"UploadBlob?uploadComplete="+sessionKey; // FIXME parameterize
+					log("post complete with status "+post.getStatusLine()+", redirecting to "+url);
+					getAppletContext().showDocument(new URL(url));
 					showCard("done");
 				}
 				progressThread.stopShowingProgress();
 			} catch(Exception x) {
-				showCard("error");
+				showErrorCard();
 			}
 		}
 	}
@@ -412,7 +429,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			log("posting data for "+files.size()+" file(s)");
 			postThread.start();
 		} catch(Exception x) {
-			showCard("error");
+			showErrorCard();
 		} finally {
 			//showDropTarget();
 		}
