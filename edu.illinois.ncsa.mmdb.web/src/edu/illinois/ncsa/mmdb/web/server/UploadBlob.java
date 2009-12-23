@@ -489,10 +489,14 @@ public class UploadBlob extends HttpServlet {
         	}
         } else if(!request.getParameterMap().containsKey("session")) { // no session?
         	String sessionKey = SecureHashMinter.getMinter().mint(); // mint a session key
+        	// OK, we REALLY don't want IE to cache this. For reals
+        	response.addHeader("cache-control","no-store, no-cache"); // don't cache
+        	response.addHeader("cache-control","post-check=0, pre-check=0, false"); // really don't cache
+        	response.addHeader("Pragma","no-cache"); // no, we mean it, really don't cache
         	// report
         	PrintWriter out = response.getWriter();
         	out.println("{\"session\":\""+sessionKey+"\"}");
-        	log.trace("GET: minted session key = "+sessionKey);
+        	log.info("GET: minted session key = "+sessionKey); // FIXME make log.trace
         } else {
         	String sessionKey = request.getParameter("session");
         	log.trace("GET: session key = "+sessionKey);
