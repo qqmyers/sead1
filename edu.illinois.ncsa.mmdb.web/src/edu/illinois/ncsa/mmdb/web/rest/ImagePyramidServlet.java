@@ -3,6 +3,7 @@ package edu.illinois.ncsa.mmdb.web.rest;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 
 import javax.servlet.ServletException;
@@ -108,7 +109,7 @@ public class ImagePyramidServlet extends HttpServlet {
         	return;
         }
         String suffix = requestUrl.toString().substring(prefix.length());
-        if(suffix.startsWith("/uri/")) {
+        if(suffix.startsWith("/uri=")) {
         	Resource uri = null;
         	try {
         		uri = Resource.uriRef(suffix.substring(5));
@@ -194,24 +195,48 @@ public class ImagePyramidServlet extends HttpServlet {
 		produceHtml(getPyramidForLabel(label),resp,base);
 	}
 	void produceHtml(ImagePyramidBean ipb, HttpServletResponse resp, String base) throws OperatorException, IOException {
-		int sizex = 640;
-		int sizey = 480;
 		PrintWriter pw = new PrintWriter(resp.getOutputStream());
+		String html = generateHtml(ipb,base); 
+		pw.println(html);
+		pw.flush();
+	}
+	public static String generateHtml(String datasetUri, String base) throws OperatorException, IOException {
+		Thing dataset = TupeloStore.fetchThing(datasetUri);
+		Resource pyramidUri = dataset.getResource(ImagePyramidBeanUtil.HAS_PYRAMID);
+		if(pyramidUri == null) {
+			TupeloStore.refetch(datasetUri);
+			dataset = TupeloStore.fetchThing(datasetUri);
+    		pyramidUri = dataset.getResource(ImagePyramidBeanUtil.HAS_PYRAMID);
+		}
+		if(pyramidUri == null) {
+			return "<div class='error'>No image pyramid available for dataset "+datasetUri+"</div>";
+		}
+		ImagePyramidBean ipb =
+			(ImagePyramidBean) TupeloStore.fetchBean(pyramidUri);
+		return generateHtml(ipb,base);
+	}
+	public static String generateHtml(ImagePyramidBean ipb, String base) throws OperatorException, IOException {
+		return generateHtml(ipb,base,640,480);
+	}
+	public static String generateHtml(ImagePyramidBean ipb, String base, int x, int y) throws OperatorException, IOException {
+		int sizex = x;
+		int sizey = y;
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
         pw.println( "<html>" );
-        pw.println("<base href='"+base+"'/>");
+        //pw.println("<base href='"+base+"'/>");
         pw.println( "<title>" + ipb.getLabel() + "</title>" );
         pw.println( "<script type=\"text/javascript\" src=\"http://seadragon.com/ajax/embed.js\"></script>" );
         pw.println( "<body>" );
-        pw.println("<pre>"); // FIXME debug
         pw.println( "<script type=\"text/javascript\">" );
         pw.println( "Seadragon.Config.debug = true;" );
         pw.println( "Seadragon.Config.imagePath = \"http://www.seadragon.com/images/seajax/\";" );
         pw.println( String.format( "Seadragon.embed(\"%dpx\", \"%dpx\", \"%s.xml\", %d, %d, %d, %d, \"%s\");", sizex, sizey, ipb.getLabel(), ipb.getWidth(), ipb.getHeight(), ipb.getTilesize(), ipb.getOverlap(), ipb.getFormat() ) );
         pw.println( "</script>" );
-        pw.println("</pre>"); // FIXME debug
         pw.println( String.format( "Image Size : %d x %d", ipb.getWidth(), ipb.getHeight() ) );
         pw.println( "</body>" );
         pw.println( "</html>" );
         pw.flush();
+        return sw.toString();
 	}
 }

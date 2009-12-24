@@ -23,8 +23,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.DownloadButton;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
@@ -81,6 +83,7 @@ public class DatasetWidget extends Composite {
 	private static final String BLOB_URL = "./api/image/";
 	private static final String PREVIEW_URL = "./api/image/preview/large/";
 	private static final String DOWNLOAD_URL = "./api/image/download/";
+	private static final String PYRAMID_URL = "./pyramid/uri=";
 
 	private PersonBean creator;
 
@@ -108,7 +111,11 @@ public class DatasetWidget extends Composite {
 
 	private FlowPanel mapPanel;
 
-	private PreviewWidget pw;
+	private VerticalPanel previewPanel;
+	
+	private PreviewWidget preview;
+	
+	private Frame zoom;
 
 	/**
 	 * 
@@ -175,8 +182,8 @@ public class DatasetWidget extends Composite {
 	private void drawPage(DatasetBean dataset) {
 
 		// image preview
-		pw = new PreviewWidget(dataset.getUri(), GetPreviews.LARGE, null);
-
+		preview = new PreviewWidget(dataset.getUri(), GetPreviews.LARGE, null);
+		
 		// title
 		titleLabel = new Label(dataset.getTitle());
 
@@ -257,6 +264,20 @@ public class DatasetWidget extends Composite {
 
 		actionsPanel.add(downloadButton);
 
+		Button zoomButton = new Button("Zoom");
+		final String zoomUri = PYRAMID_URL + dataset.getUri(); 
+		zoomButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				// image zoom
+				zoom = new Frame(zoomUri);
+				zoom.addStyleName("datasetZoom downloadButtonContainer");
+				zoom.getElement().setAttribute("frameborder","0"); // IE-friendly
+				previewPanel.clear();
+				previewPanel.add(zoom);
+			}
+		});
+		actionsPanel.add(zoomButton);
+		
 		actionsPanel.add(addToCollectionButton);
 
 		// information panel with extra metadata
@@ -277,7 +298,11 @@ public class DatasetWidget extends Composite {
 		// layout
 		leftColumn.add(titleLabel);
 
-		leftColumn.add(pw);
+		previewPanel = new VerticalPanel();
+		previewPanel.add(preview);
+		previewPanel.addStyleName("downloadButtonContainer");
+		
+		leftColumn.add(previewPanel);
 
 		rightColumn.add(metadataPanel);
 

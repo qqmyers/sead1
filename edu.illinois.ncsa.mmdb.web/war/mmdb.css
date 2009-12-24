@@ -464,6 +464,7 @@ body {
 	width: 100%;
 	margin: 0px;
 	padding: 20px;
+	border: none;
 }
 
 .commentsView {
@@ -533,3 +534,10 @@ body {
 	border-top: 1px solid #959596;
 }
 
+.datasetZoom {
+    border: 0px solid #ffffff;
+    width: 645;
+    height: 485;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
