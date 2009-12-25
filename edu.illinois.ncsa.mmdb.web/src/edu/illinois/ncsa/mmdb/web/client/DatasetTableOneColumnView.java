@@ -59,8 +59,10 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		verticalPanel.add(new Label(DATE_TIME_FORMAT.format(date)));
 		
 		// FIXME debug
+		/*
 		Anchor zoomLink = new Anchor("zoom", GWT.getHostPageBaseURL()+"pyramid/uri="+id);
 		verticalPanel.add(zoomLink);
+		*/
 		// FIXME end debug
 		
 		getCellFormatter().addStyleName(row, 0, "leftCell");

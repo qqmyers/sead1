@@ -233,7 +233,7 @@ public class ImagePyramidServlet extends HttpServlet {
         pw.println( "Seadragon.Config.imagePath = \"http://www.seadragon.com/images/seajax/\";" );
         pw.println( String.format( "Seadragon.embed(\"%dpx\", \"%dpx\", \"%s.xml\", %d, %d, %d, %d, \"%s\");", sizex, sizey, ipb.getLabel(), ipb.getWidth(), ipb.getHeight(), ipb.getTilesize(), ipb.getOverlap(), ipb.getFormat() ) );
         pw.println( "</script>" );
-        pw.println( String.format( "Image Size : %d x %d", ipb.getWidth(), ipb.getHeight() ) );
+        //pw.println( String.format( "Image Size : %d x %d", ipb.getWidth(), ipb.getHeight() ) );
         pw.println( "</body>" );
         pw.println( "</html>" );
         pw.flush();

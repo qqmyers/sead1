@@ -535,9 +535,10 @@ body {
 }
 
 .datasetZoom {
-    border: 0px solid #ffffff;
-    width: 645;
-    height: 485;
-    overflow-x: hidden;
-    overflow-y: hidden;
+    border-top: 0px;
+    border-left: 0px;
+    border-right: 0px;
+    border-bottom: 0px;
+    width: 670;
+    height: 550;
 }

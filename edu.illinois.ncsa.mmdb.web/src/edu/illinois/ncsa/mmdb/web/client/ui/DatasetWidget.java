@@ -17,7 +17,9 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
@@ -111,7 +113,7 @@ public class DatasetWidget extends Composite {
 
 	private FlowPanel mapPanel;
 
-	private VerticalPanel previewPanel;
+	private AbsolutePanel previewPanel;
 	
 	private PreviewWidget preview;
 	
@@ -270,8 +272,9 @@ public class DatasetWidget extends Composite {
 			public void onClick(ClickEvent event) {
 				// image zoom
 				zoom = new Frame(zoomUri);
-				zoom.addStyleName("datasetZoom downloadButtonContainer");
-				zoom.getElement().setAttribute("frameborder","0"); // IE-friendly
+				zoom.addStyleName("datasetZoom");
+				zoom.removeStyleName("gwt-Frame"); // remove frame border!
+				DOM.setElementAttribute(zoom.getElement(), "frameborder", "0"); // IE
 				previewPanel.clear();
 				previewPanel.add(zoom);
 			}
@@ -298,7 +301,7 @@ public class DatasetWidget extends Composite {
 		// layout
 		leftColumn.add(titleLabel);
 
-		previewPanel = new VerticalPanel();
+		previewPanel = new AbsolutePanel();
 		previewPanel.add(preview);
 		previewPanel.addStyleName("downloadButtonContainer");
 		
