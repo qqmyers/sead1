@@ -542,3 +542,22 @@ body {
     width: 670;
     height: 550;
 }
+
+.absoluteRight {
+    margin-right: 20px;
+    float: right;
+}
+
+.debugLayout {
+    border: 1px dashed #999999;
+}
+
+.centerContainer {
+    display: table;
+    vertical-align: middle;
+}
+
+.rssIcon {
+	text-align: right;
+	margin-top: 1.7em;
+}

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,10 +21,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -165,6 +168,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			}
 		});
 		navMenu.add(uploadButton);
+		//
 
 		// login menu
 		loginStatusWidget = new LoginStatusWidget();
@@ -243,9 +247,24 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				datasetTableWidget, eventBus);
 		datasetTablePresenter.bind();
 		mainContainer.clear();
+		
+		DockLayoutPanel titlePanel = new DockLayoutPanel(Unit.EM);
+		titlePanel.addStyleName("pageTitle");
+		titlePanel.setHeight("2.8em");
+		
 		Label titleLabel = new Label("List all");
 		titleLabel.addStyleName("pageTitle");
-		mainContainer.add(titleLabel);
+
+		Anchor rss = new Anchor();
+		rss.setHref("rss.xml");
+		rss.addStyleName("rssIcon");
+		DOM.setElementAttribute(rss.getElement(),"type","application/rss+xml");
+		rss.setHTML("<img src='./images/rss_icon.gif' border='0px' class='navMenuLink'>"); // FIXME hack
+
+		titlePanel.addEast(rss,1.6);
+		titlePanel.add(titleLabel);
+		
+		mainContainer.add(titlePanel);
 
 		mainContainer.add(createPagingPanel());
 

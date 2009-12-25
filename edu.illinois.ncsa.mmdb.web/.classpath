@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.tupelo.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo/src"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/mysql-connector-java-5.0.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/contexts.jar"/>
@@ -38,6 +38,8 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/iri-0.7.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/arq-2.8.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jdom-1.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/rome-1.0.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-jena-2.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-kernel-2.5.jar"/>

@@ -20,7 +20,12 @@
 		<servlet-name>REST Servlet</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.RestServlet</servlet-class>
 	</servlet>
-
+	
+	<servlet>
+		<servlet-name>RSS Servlet</servlet-name>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.RssServlet</servlet-class>
+	</servlet>
+	
 	<servlet>
 		<servlet-name>Image Pyramid Servlet</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.ImagePyramidServlet</servlet-class>
@@ -57,6 +62,11 @@
 	<servlet-mapping>
 		<servlet-name>REST Servlet</servlet-name>
 		<url-pattern>/api/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>RSS Servlet</servlet-name>
+		<url-pattern>/rss.xml</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>
