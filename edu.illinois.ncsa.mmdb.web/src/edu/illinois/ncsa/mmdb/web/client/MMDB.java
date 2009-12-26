@@ -20,10 +20,14 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
@@ -248,9 +252,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		datasetTablePresenter.bind();
 		mainContainer.clear();
 		
-		DockLayoutPanel titlePanel = new DockLayoutPanel(Unit.EM);
-		titlePanel.addStyleName("pageTitle");
-		titlePanel.setHeight("2.8em");
+		HorizontalPanel titlePanel = new HorizontalPanel();
+		titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		titlePanel.addStyleName("titlePanel");
 		
 		Label titleLabel = new Label("List all");
 		titleLabel.addStyleName("pageTitle");
@@ -261,8 +265,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		DOM.setElementAttribute(rss.getElement(),"type","application/rss+xml");
 		rss.setHTML("<img src='./images/rss_icon.gif' border='0px' class='navMenuLink'>"); // FIXME hack
 
-		titlePanel.addEast(rss,1.6);
 		titlePanel.add(titleLabel);
+		titlePanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+		titlePanel.add(rss);
 		
 		mainContainer.add(titlePanel);
 

@@ -199,12 +199,19 @@ body {
 	background: #FFFCCA;
 }
 
+.titlePanel {
+    width: 100%;
+    padding: 20px 20px;
+}
+
 .pageTitle {
-	font-size: 1.5em;
-  	color: black;
-  	margin: 20px;
-  	text-align: left;
-  	text-shadow: 2px 2px 3px #999;
+  	font-size: 1.5em;
+    color: black;
+    text-shadow: 2px 2px 3px #999;
+}
+
+.rssIcon {
+    width: 1em;
 }
 
 .bottomMenu {
@@ -555,9 +562,4 @@ body {
 .centerContainer {
     display: table;
     vertical-align: middle;
-}
-
-.rssIcon {
-	text-align: right;
-	margin-top: 1.7em;
 }
