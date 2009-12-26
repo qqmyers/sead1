@@ -11,6 +11,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -34,7 +35,7 @@ public class CollectionPage extends Composite {
 	private final HandlerManager eventBus;
 	private final FlowPanel mainContent;
 	private final String PREVIEW_URL = "./api/image/preview/small/";
-	private Label pageTitle;
+	private TitlePanel pageTitle;
 	private Label descriptionLabel;
 	private Label dateLabel;
 	private FlowPanel infoPanel;
@@ -76,8 +77,7 @@ public class CollectionPage extends Composite {
 	 * @return
 	 */
 	private Widget createPageTitle() {
-		pageTitle = new Label("Collection");
-		pageTitle.addStyleName("pageTitle");
+		pageTitle = new TitlePanel("Collection");
 		return pageTitle;
 	}
 

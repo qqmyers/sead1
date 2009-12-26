@@ -38,7 +38,7 @@ public class ListCollectionsPage extends Composite {
 	private final Label noCollectionsLabel;
 	private final FlowPanel addCollectionWidget;
 	private FlexTable collectionsTable;
-	private Label pageTitle;
+	private TitlePanel pageTitle;
 
 	public ListCollectionsPage(MyDispatchAsync dispatchasync,
 			HandlerManager eventBus) {
@@ -65,8 +65,7 @@ public class ListCollectionsPage extends Composite {
 	 * @return
 	 */
 	private Widget createPageTitle() {
-		pageTitle = new Label("Collections");
-		pageTitle.addStyleName("pageTitle");
+		pageTitle = new TitlePanel("Collections");
 		return pageTitle;
 	}
 

@@ -55,6 +55,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.TitlePanel;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -252,23 +253,16 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		datasetTablePresenter.bind();
 		mainContainer.clear();
 		
-		HorizontalPanel titlePanel = new HorizontalPanel();
-		titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		titlePanel.addStyleName("titlePanel");
+		TitlePanel titlePanel = new TitlePanel("List all");
 		
-		Label titleLabel = new Label("List all");
-		titleLabel.addStyleName("pageTitle");
-
 		Anchor rss = new Anchor();
 		rss.setHref("rss.xml");
 		rss.addStyleName("rssIcon");
 		DOM.setElementAttribute(rss.getElement(),"type","application/rss+xml");
 		rss.setHTML("<img src='./images/rss_icon.gif' border='0px' class='navMenuLink'>"); // FIXME hack
-
-		titlePanel.add(titleLabel);
-		titlePanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-		titlePanel.add(rss);
 		
+		titlePanel.addEast(rss);
+
 		mainContainer.add(titlePanel);
 
 		mainContainer.add(createPagingPanel());
