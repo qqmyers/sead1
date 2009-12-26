@@ -280,7 +280,7 @@ public class TupeloStore {
             	canon.setCanonicalUrlPrefix(infix, cp);
             }
             // now handle GWT dataset and collection stuff stuff, hardcoding the HTML path
-            canon.setCanonicalUrlPrefix("dataset",prefix + MMDB_WEBAPP_PATH + "#dataset?id=");
+            canon.setCanonicalUrlPrefix("dataset",prefix + request.getContextPath() + MMDB_WEBAPP_PATH + "#dataset?id=");
         }
         return canon;
     }
