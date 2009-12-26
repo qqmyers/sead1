@@ -31,7 +31,7 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 public class TagPage extends Composite {
 
 	private final FlowPanel mainPanel;
-	private Label pageTitle;
+	private TitlePanel pageTitle;
 	private final String uri;
 	private final MyDispatchAsync dispatchAsync;
 	private final HandlerManager eventBus;
@@ -119,8 +119,7 @@ public class TagPage extends Composite {
 	 * @return
 	 */
 	private Widget createPageTitle() {
-		pageTitle = new Label("Tag");
-		pageTitle.addStyleName("pageTitle");
+		pageTitle = new TitlePanel("Tag");
 		return pageTitle;
 	}
 }
