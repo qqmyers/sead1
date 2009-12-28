@@ -18,8 +18,10 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
@@ -28,7 +30,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.DownloadButton;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
@@ -119,6 +120,12 @@ public class DatasetWidget extends Composite {
 	
 	private Frame zoom;
 
+//	private FlowPanel previewPanel;
+
+	private FlowPanel previewControls;
+
+	private PreviewWidget pw;
+
 	/**
 	 * 
 	 * @param dispatchAsync
@@ -184,6 +191,7 @@ public class DatasetWidget extends Composite {
 	private void drawPage(DatasetBean dataset) {
 
 		// image preview
+//		previewPanel(dataset.getUri());
 		preview = new PreviewWidget(dataset.getUri(), GetPreviews.LARGE, null);
 		
 		// title
@@ -308,9 +316,9 @@ public class DatasetWidget extends Composite {
 		leftColumn.add(previewPanel);
 
 		rightColumn.add(metadataPanel);
-
+		
 		leftColumn.add(actionsPanel);
-
+		
 		leftColumn.add(informationPanel);
 
 		leftColumn.add(annotationsWidget);
@@ -320,6 +328,58 @@ public class DatasetWidget extends Composite {
 		loadMetadata();
 
 		loadCollections();
+	}
+
+	private void previewPanel(final String uri) {
+		
+//		previewPanel = new FlowPanel();
+		previewPanel = new AbsolutePanel();
+		
+		previewPanel.addStyleName("previewPanel");
+		
+		previewControls = new FlowPanel();
+		
+		Anchor zoomLink = new Anchor("Zoom", GWT.getHostPageBaseURL()+"pyramid/uri/"+uri);
+		
+		zoomLink.addStyleName("actionLink");
+		
+		previewPanel.add(previewControls);
+		
+//		pw = new PreviewWidget(uri, GetPreviews.LARGE, null);
+//		
+//		previewPanel.add(pw);
+
+		Anchor downloadAnchor = new Anchor("Download full size");
+		downloadAnchor.addStyleName("actionLink");
+		downloadAnchor.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				Window.open(DOWNLOAD_URL + uri, "_blank", "");
+			}
+		});
+		
+		Anchor addToCollectionAnchor = new Anchor("Add to collection");
+		
+		addToCollectionAnchor.addStyleName("actionLink");
+		
+		addToCollectionAnchor.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				showAddToCollectionDialog();
+			}
+		});
+		
+		actionsPanel = new FlowPanel();
+
+		actionsPanel.add(zoomLink);
+		
+		actionsPanel.add(downloadAnchor);
+
+		actionsPanel.add(addToCollectionAnchor);
+		
+		previewPanel.add(actionsPanel);
 	}
 
 	/**

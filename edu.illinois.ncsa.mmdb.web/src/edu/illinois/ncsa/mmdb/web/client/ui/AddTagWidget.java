@@ -5,12 +5,10 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
-
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 
 /**
  * A simple widget to add a tag to a resource
@@ -20,32 +18,31 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
  */
 public class AddTagWidget extends Composite {
 	
-	HorizontalPanel layout;
-	private final String resouce;
-	private final MyDispatchAsync service;
-	private TextBox tagBox;
-	private Button submitButton;
-	private Button cancelButton;
+	FlowPanel layout;
+	private final TextBox tagBox;
+	private final Anchor submitLink;
+	private final Anchor cancelLink;
 	
-	public AddTagWidget(String resouce, MyDispatchAsync service) {
+	public AddTagWidget() {
 		
-		this.resouce = resouce;
-		this.service = service;
-		
-		layout = new HorizontalPanel();
+		layout = new FlowPanel();
 		initWidget(layout);
 		layout.addStyleName("addTags");
-		layout.setSpacing(5);
 		tagBox = new TextBox();
 		tagBox.setWidth("100px");
 		layout.add(tagBox);
 		
-		submitButton = new Button("Submit");
+		submitLink = new Anchor("Submit");
 		
-		layout.add(submitButton);
+		submitLink.addStyleName("actionLink");
 		
-		cancelButton = new Button("Cancel");
-		cancelButton.addClickHandler(new ClickHandler() {
+		layout.add(submitLink);
+		
+		cancelLink = new Anchor("Cancel");
+		
+		cancelLink.addStyleName("actionLink");
+		
+		cancelLink.addClickHandler(new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
@@ -53,15 +50,15 @@ public class AddTagWidget extends Composite {
 			}
 		});
 		
-		layout.add(cancelButton);
+		layout.add(cancelLink);
 	}
 
-	public Button getSubmitButton() {
-		return submitButton;
+	public Anchor getSubmitLink() {
+		return submitLink;
 	}
 	
-	public Button getCancelButton() {
-		return cancelButton;
+	public Anchor getCancelLink() {
+		return cancelLink;
 	}
 
 	public TextBox getTagBox() {

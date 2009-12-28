@@ -18,10 +18,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTags;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
@@ -37,7 +35,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
  */
 public class TagsWidget extends Composite {
 
-	private final VerticalPanel mainPanel;
+	private final FlowPanel mainPanel;
 	private final FlowPanel tagsPanel;
 	private final String id;
 	private final MyDispatchAsync service;
@@ -55,7 +53,7 @@ public class TagsWidget extends Composite {
 		this.id = id;
 		this.service = service;
 		
-		mainPanel = new VerticalPanel();
+		mainPanel = new FlowPanel();
 		mainPanel.addStyleName("datasetRightColSection");
 		initWidget(mainPanel);
 		
@@ -77,9 +75,9 @@ public class TagsWidget extends Composite {
 				
 				mainPanel.remove(addTag);
 				
-				final AddTagWidget tagWidget = new AddTagWidget(id, service);
+				final AddTagWidget tagWidget = new AddTagWidget();
 				
-				tagWidget.getSubmitButton().addClickHandler(new ClickHandler() {
+				tagWidget.getSubmitLink().addClickHandler(new ClickHandler() {
 					
 					@Override
 					public void onClick(ClickEvent event) {
@@ -102,7 +100,7 @@ public class TagsWidget extends Composite {
 					}
 				});
 				
-				tagWidget.getCancelButton().addClickHandler(new ClickHandler() {
+				tagWidget.getCancelLink().addClickHandler(new ClickHandler() {
 					
 					@Override
 					public void onClick(ClickEvent event) {
@@ -112,7 +110,7 @@ public class TagsWidget extends Composite {
 				});
 				
 				mainPanel.add(tagWidget);
-				mainPanel.setCellHorizontalAlignment(tagWidget, HasHorizontalAlignment.ALIGN_RIGHT);
+//				mainPanel.setCellHorizontalAlignment(tagWidget, HasHorizontalAlignment.ALIGN_RIGHT);
 				
 				DeferredCommand.addCommand(new Command() {
 					@Override

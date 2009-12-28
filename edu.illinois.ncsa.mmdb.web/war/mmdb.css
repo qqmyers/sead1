@@ -375,7 +375,6 @@ body {
 	margin-top: 10px;
 	margin-bottom: 10px;
 	padding: 0px;
-	margin: 0px;
 }
 
 .datasetTitle {
@@ -395,26 +394,22 @@ body {
 	width: 700px;
 }
 
-.datasetMainContainerLeftColumn div {
-	display: block;
-	width: 100%;
-}
-
 .datasetMainContainerRightColumn {
 	float: right;
 	width: 250px;
-	height: 100%;
 }
 
 .previewPanel {
-	display: inline;
-	position: relative;
-	float: left;
+	width: 100%;
 	margin: 0px;
 	padding: 0px;
 	height: auto;
 }
 
+.actionLink {
+	margin: 10px;
+}
+	
 .imagePreviewPanel {
 	width: 500px;
 	overflow: auto;
@@ -426,9 +421,8 @@ body {
 }
 
 .imagePreviewNoOverflow {
-
 	display: block;
-	margin: 30px auto 30px auto;
+	margin: 5px auto 5px auto;
 	vertical-align: middle;
 	border: 1px solid #888888;
 }
@@ -464,13 +458,13 @@ body {
 
 .downloadButton {
 	vertical-align: bottom;
-	border: 1px red solid;
 }
 
 .downloadButtonContainer {
 	width: 100%;
 	margin: 0px;
-	padding: 20px;
+	padding-top: 30px;
+	padding-bottom: 30px;
 	border: none;
 }
 
