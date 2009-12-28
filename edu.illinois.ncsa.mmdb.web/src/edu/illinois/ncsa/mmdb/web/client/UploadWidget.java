@@ -102,8 +102,9 @@ public class UploadWidget extends Composite {
 		uploadPanel.add(cancel);
 		uploadStackPanel.add(uploadPanel);
 		uploadStackPanel.add(statusLabel);
+		statusLabel.addStyleName("hidden");
 		uploadStackPanel.add(progressBar);
-		progressBar.setVisible(false);
+		progressBar.addStyleName("hidden");
 		// button behavior:
 		cancel.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
@@ -138,6 +139,7 @@ public class UploadWidget extends Composite {
 		// form behavior:
 		uploadForm.addSubmitHandler(new SubmitHandler() {
 			public void onSubmit(SubmitEvent event) {
+				statusLabel.removeStyleName("hidden");
 				statusLabel.setText("upload submitted");
 			}
 		});
@@ -181,7 +183,7 @@ public class UploadWidget extends Composite {
 					}
 					if(dict.containsKey("percentComplete") &&
 							dict.get("percentComplete").isNumber() != null) {
-						progressBar.setVisible(true);
+						progressBar.removeStyleName("hidden");
 						int percentComplete = (int) dict.get("percentComplete").isNumber().doubleValue();
 						progressBar.setProgress(percentComplete);
 						if(percentComplete == 100) {

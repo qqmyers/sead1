@@ -34,6 +34,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUploadDestination;
@@ -118,10 +119,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		// toolbar
 		toolbar = new FlowPanel();
 		RootPanel.get("toolbar").add(toolbar);
-
-		// upload panel
-		uploadPanel = new FlowPanel();
-		RootPanel.get("uploadPanel").add(uploadPanel);
 
 		// main content
 		mainContainer = new FlowPanel();
@@ -399,6 +396,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private boolean uploadMenuVisible = false;
 	private UploadWidget uploadWidget;
 
+	private boolean dndEnabled = false;
+	
+	native void deployDndApplet() /*-{
+		$wnd.document.getElementById('dndApplet').innerHTML = $wnd.appletHtml;
+	}-*/;
+	
 	UploadWidget showUploadMenu() {
 		uploadWidget = new UploadWidget();
 		uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
@@ -406,26 +409,79 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				History.newItem("dataset?id=" + event.getDatasetUri());
 				DOM.getElementById("uploadToolbar").addClassName("hidden");
 				uploadMenuVisible = false;
-				uploadPanel.clear();
+				toolbar.clear();
 			}
 		});
 		uploadWidget.addCancelHandler(new CancelHandler() {
 			public void onCancel(CancelEvent event) {
 				DOM.getElementById("uploadToolbar").addClassName("hidden");
 				uploadMenuVisible = false;
-				uploadPanel.clear();
+				toolbar.clear();
 			}
 		});
-		uploadPanel.add(uploadWidget);
-		DOM.getElementById("uploadToolbar").removeClassName("hidden");
+		HorizontalPanel uploadToolbar = new HorizontalPanel();
+		uploadToolbar.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		//uploadToolbar.addStyleName("debugLayout"); // FIXME debug
+		VerticalPanel dndPanel = new VerticalPanel();
+		dndPanel.setWidth("120px");
+		//dndPanel.addStyleName("debugLayout"); // FIXME debug
+		final FlowPanel dndApplet = new FlowPanel();
+		//dndApplet.addStyleName("debugLayout"); // FIXME debug
+		dndApplet.setHeight("60px");
+		dndApplet.setWidth("60px");
+		dndApplet.getElement().setId("dndApplet");
+		dndPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		dndPanel.add(dndApplet);
+		if(!dndEnabled) {
+			dndApplet.addStyleName("hidden");
+		}
+		final String disabledMsg = "Click here to drag files and folders from your desktop";
+		final String enabledMsg = "Drop files and folders here";
+		final Label dndTooltip = new Label(dndEnabled ? enabledMsg : disabledMsg);
+		dndTooltip.addStyleName("tooltip");
+		//dndTooltip.addStyleName("debugLayout"); // FIXME debug
+		dndPanel.add(dndTooltip);
+		uploadToolbar.add(dndPanel);
+		
+		//
+		VerticalPanel uploadWidgetPanel = new VerticalPanel();
+		uploadWidgetPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		uploadWidgetPanel.add(uploadWidget);
+		Label uploadWidgetTooltip = new Label("or choose a file to upload");
+		uploadWidgetTooltip.addStyleName("tooltip");
+		uploadWidgetPanel.add(uploadWidgetTooltip);
+		uploadToolbar.add(uploadWidgetPanel);
+		
+		//
+		toolbar.add(uploadToolbar);
 
+		if(dndEnabled) {
+			dndApplet.removeStyleName("hidden");
+			deployDndApplet();
+		} else {
+			dndTooltip.addClickHandler(new ClickHandler() {
+				public void onClick(ClickEvent event) {
+					boolean doit = true;
+					if(!dndEnabled) {
+						doit = Window.confirm("You will be asked to accept a security exception to allow our drag-and-drop upload tool to access your local files. If you don't wish to accept that security exception, press cancel.");
+					}
+					if(doit) {
+						dndApplet.removeStyleName("hidden");
+						deployDndApplet();
+						dndTooltip.setText(enabledMsg);
+						dndEnabled = true;
+					}
+				}
+			});
+		}
 
+		uploadMenuVisible = true;
+		
 		return uploadWidget;
 	}
 
 	void hideUploadMenu() {
 		toolbar.clear();
-		DOM.getElementById("uploadToolbar").addClassName("hidden");
 		uploadMenuVisible = false;
 	}
 
@@ -435,14 +491,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * @return
 	 */
 	void toggleUploadMenu() {
-		toolbar.clear();
-		uploadPanel.clear();
 		if (!uploadMenuVisible) {
 			showUploadMenu();
-			uploadMenuVisible = true;
 		} else {
-			DOM.getElementById("uploadToolbar").addClassName("hidden");
-			uploadMenuVisible = false;
+			hideUploadMenu();
 		}
 	}
 

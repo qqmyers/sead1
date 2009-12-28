@@ -26,6 +26,16 @@
     <!-- be added before this line.                -->
     <!--                                           -->
     <script type="text/javascript" language="javascript" src="mmdb/mmdb.nocache.js"></script>
+
+	<!-- this is a hacked version of deployJava.js that defers deployment -->
+	<script src="js/deployJava.js"></script>
+	<!-- construct the upload applet, but don't deploy it--yet -->
+	<script>
+		var attributes = { code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader', archive:'dnd/DropUploader.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar', width:60, height:60 };
+		var parameters = { jnlp_href: 'dropuploader.jnlp', statusPage: document.URL, background: "0x006699" };
+		deployJava.runApplet(attributes, parameters, '1.5'); // doesn't actually run the applet
+		var appletHtml = deployJava.getDocument();
+	</script>
     
   </head>
 
@@ -56,30 +66,6 @@
     </div>
 
 	<div id="toolbar" class="toolbar"></div>
-	
-	<span class="hidden" id="sessionKey"></span>
-	
-	<div id="uploadToolbar" class="toolbar hidden">
-		<table>
-			<tr>
-				<td width="80px">
-					<span id="uploadAppletContainer">
-					    <!--  this script allows for deploying JNLP-based applets -->
-						<script src="js/deployJava.js"></script>
-						<script>
-							var attributes = { code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader', archive:'dnd/DropUploader.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar', width:60, height:60 };
-							var parameters = { jnlp_href: 'dropuploader.jnlp', statusPage: document.URL, background: "0x006699" };
-							deployJava.runApplet(attributes, parameters, '1.5');
-						</script>
-					</span>
-					<br><span class="tooltip" id="dndTooltip" onclick="alert('You will be prompted to allow our upload tool to access your local folders. If you are not comfortable with doing that, click reject on the prompt and you can use our regular file upload interface');document.getElementById('uploadAppletContainer').innerHTML = deployJava.getDocument();">Click here to drag files from your desktop</span>
-				</td>
-				<td>
-				    <span id="uploadPanel"></span>
-				</td>
-			</tr>
-		</table>
-	</div>
 	
     <div id="mainContainer" class="mainContainer"></div>
     
