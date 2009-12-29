@@ -31,6 +31,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.util.CopyFile;
 import org.tupeloproject.util.Xml;
 import org.w3c.dom.Document;
@@ -277,6 +278,7 @@ public class RestServlet extends HttpServlet {
                 FileItem item = items.get(0);
                 md.put(RestService.FORMAT_PROPERTY, item.getContentType());
                 md.put(RestService.LABEL_PROPERTY, item.getName());
+                md.put(Files.LENGTH, item.getSize());
                 md.put(Dc.DATE, new Date()); // uploaded at current date
                 imageData = item.getInputStream();
             } catch(FileUploadException e) {

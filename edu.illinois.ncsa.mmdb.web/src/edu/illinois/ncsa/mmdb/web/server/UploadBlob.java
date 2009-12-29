@@ -37,6 +37,7 @@ import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
+import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.SecureHashMinter;
 
@@ -328,6 +329,7 @@ public class UploadBlob extends HttpServlet {
                         t.setValue(LABEL, fileName);
                         t.setValue(RestService.LABEL_PROPERTY, fileName);
                         t.setValue(RestService.DATE_PROPERTY, new Date());
+                        t.setValue(Files.LENGTH, bw.getSize());
                         if(contentType != null) {
                         	// httpclient also gives the content type a "charset"; ignore that.
                         	contentType = contentType.replaceFirst("; charset=.*","");
