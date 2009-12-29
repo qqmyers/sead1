@@ -18,6 +18,7 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -279,7 +280,11 @@ public class DatasetWidget extends Composite {
 		zoomButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				// image zoom
-				zoom = new Frame(zoomUri);
+				zoom = new Frame(zoomUri) {
+					public void onBrowserEvent(Event event) {
+						super.onBrowserEvent(event);
+					}
+				};
 				zoom.addStyleName("datasetZoom");
 				zoom.removeStyleName("gwt-Frame"); // remove frame border!
 				DOM.setElementAttribute(zoom.getElement(), "frameborder", "0"); // IE

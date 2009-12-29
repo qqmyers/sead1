@@ -399,7 +399,19 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private boolean dndEnabled = false;
 	
 	native void deployDndApplet() /*-{
-		$wnd.document.getElementById('dndApplet').innerHTML = $wnd.appletHtml;
+		var attributes = {
+			code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
+			archive:'dnd/DropUploader.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+			width:60,
+			height:60
+		};
+		var parameters = {
+			jnlp_href: 'dropuploader.jnlp',
+			statusPage: $wnd.document.URL,
+			background: "0x006699"
+		};
+		$wnd.deployJava.runApplet(attributes, parameters, '1.5');
+		$wnd.document.getElementById('dndApplet').innerHTML = $wnd.deployJava.getDocument();
 	}-*/;
 	
 	UploadWidget showUploadMenu() {

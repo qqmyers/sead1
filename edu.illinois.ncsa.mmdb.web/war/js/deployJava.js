@@ -1,3 +1,5 @@
+// this version of deployJava.js has been hacked to allow the caller to defer when an
+// applet tag is written to the page.
 var deployJava = {
     debug: null,
     firefoxJavaVersion: null,
@@ -17,6 +19,9 @@ var deployJava = {
     browserName: null,
     browserName2: null,
     theDocument: '',
+    documentClear: function() {
+		deployJava.theDocument = '';
+	},
     documentWrite: function(s) {
 		deployJava.theDocument += s;
     },
@@ -156,8 +161,9 @@ var deployJava = {
                 alert('Invalid minimumVersion argument to runApplet():' + minimumVersion);
             }
         }
-    },
+   },
     writeAppletTag: function (attributes, parameters) {
+	    deployJava.documentClear();
         var s = '<' + 'applet ';
         var codeAttribute = false;
         for (var attribute in attributes) {
