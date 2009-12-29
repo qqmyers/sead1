@@ -407,16 +407,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
 			public void onDatasetUploaded(DatasetUploadedEvent event) {
 				History.newItem("dataset?id=" + event.getDatasetUri());
-				DOM.getElementById("uploadToolbar").addClassName("hidden");
-				uploadMenuVisible = false;
-				toolbar.clear();
+				hideUploadMenu();
 			}
 		});
 		uploadWidget.addCancelHandler(new CancelHandler() {
 			public void onCancel(CancelEvent event) {
-				DOM.getElementById("uploadToolbar").addClassName("hidden");
-				uploadMenuVisible = false;
-				toolbar.clear();
+				hideUploadMenu();
 			}
 		});
 		HorizontalPanel uploadToolbar = new HorizontalPanel();
