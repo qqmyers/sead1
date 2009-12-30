@@ -61,8 +61,8 @@ public class RssServlet extends HttpServlet {
 		u.setColumnNames("s","date","label","title","description");
 		u.addPattern("s", Rdf.TYPE, Cet.DATASET);
 		u.addPattern("s", Dc.DATE, "date");
-		u.addPattern("s", Rdfs.LABEL, "label", true);
 		u.addPattern("s", Dc.TITLE, "title", true);
+		u.addPattern("s", Rdfs.LABEL, "label", true);
 		u.addPattern("s", Dc.DESCRIPTION, "description", true);
 		u.addOrderByDesc("date");
 		u.setLimit(20);
@@ -87,11 +87,11 @@ public class RssServlet extends HttpServlet {
         	UriCanonicalizer canon = TupeloStore.getInstance().getUriCanonicalizer(req);
         	String link = canon.canonicalize("dataset",datasetUri);
         	Date date = (Date) row.get(i++).asObject();
-        	String label = row.get(i++).getString();
-        	if(label != null) {
-        		label = row.get(i).getString();
-        	}
-        	i++;
+        	Resource t = row.get(i++);
+        	Resource l = row.get(i++);
+        	String label = "[no title]";
+        	if(t != null) { label = t.getString(); }
+        	else if(l != null) { label = l.getString(); }
         	String description = "<img src='"+canon.canonicalize(RestServlet.PREVIEW_SMALL,datasetUri)+"'>";
         	if(row.get(i) != null) {
         		description += "<p>" + row.get(i++).getString() + "</p>";
