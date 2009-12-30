@@ -24,6 +24,8 @@ import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter.Display;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
 /**
@@ -72,7 +74,7 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 					}
 					public void onSuccess(DeleteDatasetResult result) {
 						getRowFormatter().addStyleName(row, "hidden");
-						// FIXME add the first dataset from the next page to the bottom of the list
+						DatasetTableOneColumnView.this.fireEvent(new DatasetDeletedEvent(id));
 					}
 				});
 			}
@@ -97,4 +99,7 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		return this;
 	}
 
+	public void addDatasetDeletedHandler(DatasetDeletedHandler handler) {
+		this.addHandler(handler, DatasetDeletedEvent.TYPE);
+	}
 }

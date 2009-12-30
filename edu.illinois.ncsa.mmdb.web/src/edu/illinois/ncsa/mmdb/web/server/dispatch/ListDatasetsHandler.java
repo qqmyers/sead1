@@ -55,10 +55,10 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 			List<String> result = new LinkedList<String>();
 			for(Tuple<Resource> row : u.getResult()) {
 				if(row.get(2) == null) {
-					log.info("NOT DELETED: "+row.get(0));
+					log.debug("NOT DELETED: "+row.get(0));
 					result.add(row.get(0).getString());
 				} else {
-					log.info("DELETED: "+row.get(0));
+					log.debug("DELETED: "+row.get(0));
 				}
 			}
 			return result;

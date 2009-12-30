@@ -38,6 +38,8 @@ import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.CancelEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.CancelHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
@@ -289,6 +291,25 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 						datasetListPager.setNumberOfPages(np);
 					}
 				});
+		
+		datasetTableWidget.addDatasetDeletedHandler(new DatasetDeletedHandler() {
+			public void onDeleteDataset(DatasetDeletedEvent event) {
+				dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),descForSortKey(sortKey),1,pageOffset+pageSize-1),
+						new AsyncCallback<ListDatasetsResult>() {
+							public void onFailure(Throwable caught) {
+							}
+							public void onSuccess(ListDatasetsResult result) {
+								for (DatasetBean dataset : result.getDatasets()) {
+									GWT.log("Sending event add dataset "
+											+ dataset.getTitle(), null);
+									AddNewDatasetEvent event = new AddNewDatasetEvent();
+									event.setDataset(dataset);
+									eventBus.fireEvent(event);
+								}
+							}
+						});
+			}
+		});
 	}
 
 	/**
@@ -330,7 +351,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		sortOptions.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
-				goToPage(page, sortOptions.getValue(sortOptions
+				goToPage(1, sortOptions.getValue(sortOptions
 						.getSelectedIndex()));
 			}
 		});
