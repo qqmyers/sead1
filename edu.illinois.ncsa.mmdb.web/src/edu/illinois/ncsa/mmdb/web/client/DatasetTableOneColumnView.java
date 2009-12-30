@@ -7,8 +7,12 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -17,6 +21,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter.Display;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
@@ -43,7 +49,7 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 	@Override
 	public void addRow(final String id, String name, String type, Date date, String preview) {
 		
-		int row = this.getRowCount();
+		final int row = this.getRowCount();
 		
 		GWT.log("Adding dataset " + name + " to row " + row, null);
 		
@@ -57,6 +63,21 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
 		verticalPanel.add(hyperlink);	
 		verticalPanel.add(new Label(DATE_TIME_FORMAT.format(date)));
+		
+		Button deleteButton = new Button("Delete");
+		deleteButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				MMDB.dispatchAsync.execute(new DeleteDataset(id), new AsyncCallback<DeleteDatasetResult>() {
+					public void onFailure(Throwable caught) {
+					}
+					public void onSuccess(DeleteDatasetResult result) {
+						getRowFormatter().addStyleName(row, "hidden");
+						// FIXME add the first dataset from the next page to the bottom of the list
+					}
+				});
+			}
+		});
+		verticalPanel.add(deleteButton);
 		
 		// FIXME debug
 		/*

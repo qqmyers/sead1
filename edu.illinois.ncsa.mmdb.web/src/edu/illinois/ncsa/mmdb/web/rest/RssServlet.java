@@ -58,12 +58,14 @@ public class RssServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
 		Context c = TupeloStore.getInstance().getContext();
 		Unifier u = new Unifier();
-		u.setColumnNames("s","date","label","title","description");
+		u.setColumnNames("r","s","date","label","title","description");
 		u.addPattern("s", Rdf.TYPE, Cet.DATASET);
 		u.addPattern("s", Dc.DATE, "date");
 		u.addPattern("s", Dc.TITLE, "title", true);
 		u.addPattern("s", Rdfs.LABEL, "label", true);
 		u.addPattern("s", Dc.DESCRIPTION, "description", true);
+		u.addPattern("s", Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"),"r",true);
+		u.addOrderBy("r"); // FIXME should be orderByDesc once TUP-479 is resolved
 		u.addOrderByDesc("date");
 		u.setLimit(20);
 		try {
@@ -83,28 +85,30 @@ public class RssServlet extends HttpServlet {
         List<SyndEntry> entries = new LinkedList<SyndEntry>();
         for(Tuple<Resource> row : u.getResult()) {
         	int i = 0;
-        	String datasetUri = row.get(i++).getString();
-        	UriCanonicalizer canon = TupeloStore.getInstance().getUriCanonicalizer(req);
-        	String link = canon.canonicalize("dataset",datasetUri);
-        	Date date = (Date) row.get(i++).asObject();
-        	Resource t = row.get(i++);
-        	Resource l = row.get(i++);
-        	String label = "[no title]";
-        	if(t != null) { label = t.getString(); }
-        	else if(l != null) { label = l.getString(); }
-        	String description = "<img src='"+canon.canonicalize(RestServlet.PREVIEW_SMALL,datasetUri)+"'>";
-        	if(row.get(i) != null) {
-        		description += "<p>" + row.get(i++).getString() + "</p>";
+        	if(row.get(i++) == null) { // i.e., non-deleted current version
+        		String datasetUri = row.get(i++).getString();
+        		UriCanonicalizer canon = TupeloStore.getInstance().getUriCanonicalizer(req);
+        		String link = canon.canonicalize("dataset",datasetUri);
+        		Date date = (Date) row.get(i++).asObject();
+        		Resource t = row.get(i++);
+        		Resource l = row.get(i++);
+        		String label = "[no title]";
+        		if(t != null) { label = t.getString(); }
+        		else if(l != null) { label = l.getString(); }
+        		String description = "<img src='"+canon.canonicalize(RestServlet.PREVIEW_SMALL,datasetUri)+"'>";
+        		if(row.get(i) != null) {
+        			description += "<p>" + row.get(i++).getString() + "</p>";
+        		}
+        		//
+        		SyndEntry entry = new SyndEntryImpl();
+        		entry.setLink(link);
+        		entry.setPublishedDate(date);
+        		entry.setTitle(label);
+        		SyndContentImpl d = new SyndContentImpl();
+        		d.setValue(description);
+        		entry.setDescription(d);
+        		entries.add(entry);
         	}
-        	//
-        	SyndEntry entry = new SyndEntryImpl();
-        	entry.setLink(link);
-        	entry.setPublishedDate(date);
-        	entry.setTitle(label);
-        	SyndContentImpl d = new SyndContentImpl();
-        	d.setValue(description);
-        	entry.setDescription(d);
-        	entries.add(entry);
         }
         feed.setEntries(entries);
         // produce it in XML

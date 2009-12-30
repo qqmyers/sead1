@@ -13,8 +13,10 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tables;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
@@ -37,20 +39,27 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 
 	private List<String> listDatasetUris(String orderBy, boolean desc, int limit, int offset) {
 		Unifier u = new Unifier();
-		u.setColumnNames("s","o");
+		u.setColumnNames("s","o","d");
 		u.addPattern("s",Rdf.TYPE,dbu.getType());
+		u.addPattern("s",Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"),"d",true);
 		u.addPattern("s",Resource.uriRef(orderBy),"o");
 		if(limit > 0) {
 			u.setLimit(limit);
 		}
 		u.setOffset(offset);
+		u.addOrderBy("d"); // FIXME should be desc, this will only work in SQL contexts currently (TUP-479)
 		if(desc) { u.addOrderByDesc("o"); }
 		else { u.addOrderBy("o"); }
 		try {
 			TupeloStore.getInstance().getContext().perform(u);
 			List<String> result = new LinkedList<String>();
-			for(Resource r : Tables.getColumn(u.getResult(),0)) {
-				result.add(r.getString());
+			for(Tuple<Resource> row : u.getResult()) {
+				if(row.get(2) == null) {
+					log.info("NOT DELETED: "+row.get(0));
+					result.add(row.get(0).getString());
+				} else {
+					log.info("DELETED: "+row.get(0));
+				}
 			}
 			return result;
 		} catch(OperatorException x) {

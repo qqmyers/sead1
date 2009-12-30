@@ -17,6 +17,7 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
@@ -315,7 +316,14 @@ public class TupeloStore {
     		try {
     			DatasetBeanUtil dbu = new DatasetBeanUtil(getBeanSession());
     			log.debug("counting datasets...");
-    			datasetCount = getContext().match(null,Rdf.TYPE,dbu.getType()).size();
+    			int allDatasetCount = getContext().match(null,Rdf.TYPE,dbu.getType()).size();
+    			Unifier u = new Unifier();
+    			u.setColumnNames("d");
+    			u.addPattern("d",Rdf.TYPE,dbu.getType());
+    			u.addPattern("d",Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"),Rdf.NIL);
+    			getContext().perform(u);
+    			for(Object o : u.getResult()) { allDatasetCount--; }
+    			datasetCount = allDatasetCount;
     		} catch(Exception x) {
     			datasetCount = -1;
     		}

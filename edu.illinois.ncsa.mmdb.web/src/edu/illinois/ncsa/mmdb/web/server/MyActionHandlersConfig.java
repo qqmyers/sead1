@@ -10,6 +10,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.AddCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAnnotationsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
@@ -49,6 +50,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
 		DispatchUtil.registerHandler(new AddToCollectionHandler());
 		DispatchUtil.registerHandler(new GetPreviewsHandler());
 		DispatchUtil.registerHandler(new GetUploadDestinationHandler());
+		DispatchUtil.registerHandler(new DeleteDatasetHandler());
 	}
 
 	public void contextDestroyed(ServletContextEvent evt) {
