@@ -6,6 +6,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -21,9 +23,14 @@ import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
+import org.tupeloproject.rdf.query.OrderBy;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.ListTable;
+import org.tupeloproject.util.Table;
+import org.tupeloproject.util.Tables;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.CETBean;
@@ -165,7 +172,12 @@ public class TupeloStore {
 	 * @return
 	 */
 	public BeanSession getBeanSession() {
-		return beanSession;
+		try {
+			return CETBeans.createBeanSession(getContext());
+		} catch(Exception x) {
+			x.printStackTrace();
+			return null;
+		}
 	}
 
 	/**
@@ -316,21 +328,48 @@ public class TupeloStore {
     		try {
     			DatasetBeanUtil dbu = new DatasetBeanUtil(getBeanSession());
     			log.debug("counting datasets...");
-    			int allDatasetCount = getContext().match(null,Rdf.TYPE,dbu.getType()).size();
     			Unifier u = new Unifier();
     			u.setColumnNames("d");
     			u.addPattern("d",Rdf.TYPE,dbu.getType());
+    			datasetCount = unifyExcludeDeleted(u,"d").getRows().size();
+    			/*
     			u.addPattern("d",Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"),Rdf.NIL);
     			getContext().perform(u);
     			for(Object o : u.getResult()) { allDatasetCount--; }
-    			datasetCount = allDatasetCount;
+    			datasetCount = allDatasetCount;*/
     		} catch(Exception x) {
+    			x.printStackTrace();
     			datasetCount = -1;
     		}
     	}
+    	log.debug("counted "+datasetCount+" non-deleted datasets");
     	return datasetCount;
     }
     
+    public ListTable<Resource> unifyExcludeDeleted(Unifier u, String subjectVar) throws OperatorException {
+    	List<OrderBy> newOrderBy = new LinkedList<OrderBy>();
+    	List<String> newColumnNames = new LinkedList<String>(u.getColumnNames());
+    	newColumnNames.add("_ued");
+    	u.setColumnNames(newColumnNames);
+    	u.addPattern(subjectVar,Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"),"_ued",true);
+    	OrderBy ued = new OrderBy();
+    	ued.setAscending(true); // FIXME should be false when SQL contexts order correctly
+    	ued.setName("_ued");
+    	newOrderBy.add(ued);
+    	for(OrderBy ob : u.getOrderBy()) {
+    		newOrderBy.add(ob);
+    	}
+    	u.setOrderBy(newOrderBy);
+    	getContext().perform(u);
+    	int cix = u.getColumnNames().size() - 1;
+    	ListTable<Resource> result = new ListTable<Resource>();
+    	for(Tuple<Resource> row : u.getResult()) {
+    		if(row.get(cix) == null) {
+    			result.addRow(row);
+    		}
+    	}
+    	return result;
+    }
     Map<String,String> uploadHistory = new HashMap<String,String>();
     public void setHistoryForUpload(String sessionKey, String history) {
     	uploadHistory.put(sessionKey, history);
