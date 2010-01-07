@@ -39,27 +39,19 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 
 	private List<String> listDatasetUris(String orderBy, boolean desc, int limit, int offset) {
 		Unifier u = new Unifier();
-		u.setColumnNames("s","o","d");
+		u.setColumnNames("s","o");
 		u.addPattern("s",Rdf.TYPE,dbu.getType());
-		u.addPattern("s",Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"),"d",true);
 		u.addPattern("s",Resource.uriRef(orderBy),"o");
 		if(limit > 0) {
 			u.setLimit(limit);
 		}
 		u.setOffset(offset);
-		u.addOrderBy("d"); // FIXME should be desc, this will only work in SQL contexts currently (TUP-479)
 		if(desc) { u.addOrderByDesc("o"); }
 		else { u.addOrderBy("o"); }
 		try {
-			TupeloStore.getInstance().getContext().perform(u);
 			List<String> result = new LinkedList<String>();
-			for(Tuple<Resource> row : u.getResult()) {
-				if(row.get(2) == null) {
-					log.debug("NOT DELETED: "+row.get(0));
-					result.add(row.get(0).getString());
-				} else {
-					log.debug("DELETED: "+row.get(0));
-				}
+			for(Resource r : Tables.getColumn(TupeloStore.getInstance().unifyExcludeDeleted(u,"s"),0)) {
+				result.add(r.getString());
 			}
 			return result;
 		} catch(OperatorException x) {

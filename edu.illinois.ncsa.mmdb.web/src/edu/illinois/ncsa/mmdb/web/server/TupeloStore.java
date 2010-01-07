@@ -16,10 +16,21 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.BlobFetcher;
+import org.tupeloproject.kernel.BlobWriter;
 import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.FilterContext;
+import org.tupeloproject.kernel.NotFoundException;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.ProfilingContextFacade;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.kernel.UnionContext;
+import org.tupeloproject.kernel.events.BlobEvent;
+import org.tupeloproject.kernel.events.EventingContextFacade;
+import org.tupeloproject.kernel.events.TupeloEvent;
+import org.tupeloproject.kernel.events.TupeloObserver;
+import org.tupeloproject.kernel.impl.HashFileContext;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
@@ -27,6 +38,7 @@ import org.tupeloproject.rdf.query.OrderBy;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.CopyFile;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tables;
@@ -95,6 +107,31 @@ public class TupeloStore {
 		return instance;
 	}
 
+	public class CachingContext extends FilterContext {
+		Context cache;
+		public CachingContext(Context backing, Context cache) {
+			setContext(backing);
+			this.cache = cache;
+		}
+		public void doPerform(BlobFetcher bf) throws OperatorException {
+			try {
+				cache.perform(bf);
+			} catch(NotFoundException x) {
+				try {
+					log.info("CACHE MISS on "+bf.getSubject());
+					getContext().perform(bf);
+					BlobWriter bw = new BlobWriter();
+					bw.setSubject(bf.getSubject());
+					bw.setInputStream(bf.getInputStream());
+					cache.perform(bw);
+					doPerform(bf); // recurse
+				} catch(OperatorException e) {
+					e.printStackTrace();
+					throw e;
+				}
+			}
+		}
+	}
 	/**
 	 * Use getInstance() to retrieve singleton instance.
 	 */
@@ -109,6 +146,16 @@ public class TupeloStore {
 			} else {
 				log.info("context deserialized: "+context);
 				initializeContext(context);
+				
+				File hfc = File.createTempFile("mmdb-cache", ".dir");
+				hfc.delete();
+				final HashFileContext cache = new HashFileContext();
+				cache.setDirectory(hfc, true);
+				cache.setDepth(4);
+				final Context backing = context;
+				
+				CachingContext fc = new CachingContext(backing, cache);
+				context = fc;
 			}
 			ContextConvert.updateContext(context);
 			beanSession = CETBeans.createBeanSession(context);
@@ -171,13 +218,18 @@ public class TupeloStore {
 	 * 
 	 * @return
 	 */
+	int nSessionRequests = 0;
 	public BeanSession getBeanSession() {
-		try {
-			return CETBeans.createBeanSession(getContext());
-		} catch(Exception x) {
-			x.printStackTrace();
-			return null;
+		if(nSessionRequests++ > 100) { // arbitrarily throw away bean session every so often
+			try {
+				beanSession = CETBeans.createBeanSession(getContext());
+				//((ProfilingContextFacade)context).dump(System.out);
+			} catch(Exception x) {
+				x.printStackTrace();
+			}
+			nSessionRequests = 0;
 		}
+		return beanSession;
 	}
 
 	/**
@@ -323,7 +375,7 @@ public class TupeloStore {
     	return countDatasets(false);
     }
     public int countDatasets(boolean force) {
-    	if(force || System.currentTimeMillis() > lastDatasetCount + 15000) {
+    	if(force || System.currentTimeMillis() > lastDatasetCount + 120000) {
     		lastDatasetCount = System.currentTimeMillis();
     		try {
     			DatasetBeanUtil dbu = new DatasetBeanUtil(getBeanSession());
