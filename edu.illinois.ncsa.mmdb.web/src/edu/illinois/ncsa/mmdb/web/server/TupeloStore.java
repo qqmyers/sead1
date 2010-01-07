@@ -106,37 +106,7 @@ public class TupeloStore {
 		}
 		return instance;
 	}
-
-	public class CachingContext extends FilterContext {
-		Context cache;
-		public CachingContext(Context backing, Context cache) {
-			setContext(backing);
-			this.cache = cache;
-		}
-		public void doPerform(BlobFetcher bf) throws OperatorException {
-			try {
-				cache.perform(bf);
-			} catch(NotFoundException x) {
-				try {
-					log.info("CACHE MISS on "+bf.getSubject());
-					getContext().perform(bf);
-					BlobWriter bw = new BlobWriter();
-					bw.setSubject(bf.getSubject());
-					bw.setInputStream(bf.getInputStream());
-					cache.perform(bw);
-					doPerform(bf); // recurse
-				} catch(OperatorException e) {
-					e.printStackTrace();
-					throw e;
-				}
-			}
-		}
-	}
 	
-	Context backingContext;
-	Context getBackingContext() {
-		return backingContext;
-	}
 	/**
 	 * Use getInstance() to retrieve singleton instance.
 	 */
@@ -151,16 +121,6 @@ public class TupeloStore {
 			} else {
 				log.info("context deserialized: "+context);
 				initializeContext(context);
-				
-				File hfc = File.createTempFile("mmdb-cache", ".dir");
-				hfc.delete();
-				final HashFileContext cache = new HashFileContext();
-				cache.setDirectory(hfc, true);
-				cache.setDepth(4);
-				backingContext = context;
-				
-				CachingContext fc = new CachingContext(getBackingContext(), cache);
-				context = fc;
 			}
 			ContextConvert.updateContext(context);
 			beanSession = CETBeans.createBeanSession(context);
@@ -223,17 +183,7 @@ public class TupeloStore {
 	 * 
 	 * @return
 	 */
-	int nSessionRequests = 0;
 	public BeanSession getBeanSession() {
-		if(nSessionRequests++ > 100) { // arbitrarily throw away bean session every so often
-			try {
-				beanSession = CETBeans.createBeanSession(getContext());
-				//((ProfilingContextFacade)context).dump(System.out);
-			} catch(Exception x) {
-				x.printStackTrace();
-			}
-			nSessionRequests = 0;
-		}
 		return beanSession;
 	}
 
@@ -361,7 +311,7 @@ public class TupeloStore {
     	   System.currentTimeMillis() > lastExtractionRequest.get(uri)+60000) { // 10min
     		String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
     		log.info("EXTRACT PREVIEWS "+uri);
-    		BeanSession beanSession = new BeanSession(getBackingContext());
+    		BeanSession beanSession = getBeanSession();
     		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
     		PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
     		try {
