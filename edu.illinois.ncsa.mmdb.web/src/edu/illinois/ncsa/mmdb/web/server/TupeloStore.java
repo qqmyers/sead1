@@ -132,6 +132,11 @@ public class TupeloStore {
 			}
 		}
 	}
+	
+	Context backingContext;
+	Context getBackingContext() {
+		return backingContext;
+	}
 	/**
 	 * Use getInstance() to retrieve singleton instance.
 	 */
@@ -152,9 +157,9 @@ public class TupeloStore {
 				final HashFileContext cache = new HashFileContext();
 				cache.setDirectory(hfc, true);
 				cache.setDepth(4);
-				final Context backing = context;
+				backingContext = context;
 				
-				CachingContext fc = new CachingContext(backing, cache);
+				CachingContext fc = new CachingContext(getBackingContext(), cache);
 				context = fc;
 			}
 			ContextConvert.updateContext(context);
@@ -356,7 +361,7 @@ public class TupeloStore {
     	   System.currentTimeMillis() > lastExtractionRequest.get(uri)+60000) { // 10min
     		String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
     		log.info("EXTRACT PREVIEWS "+uri);
-    		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+    		BeanSession beanSession = new BeanSession(getBackingContext());
     		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
     		PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
     		try {
