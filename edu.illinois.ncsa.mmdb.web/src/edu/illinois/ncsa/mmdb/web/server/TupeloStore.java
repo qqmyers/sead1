@@ -5,10 +5,13 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +29,8 @@ import org.tupeloproject.kernel.ProfilingContextFacade;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.kernel.UnionContext;
+import org.tupeloproject.kernel.beans.FetchBeanPostprocessor;
+import org.tupeloproject.kernel.beans.SaveBeanPreprocessor;
 import org.tupeloproject.kernel.events.BlobEvent;
 import org.tupeloproject.kernel.events.EventingContextFacade;
 import org.tupeloproject.kernel.events.TupeloEvent;
@@ -183,7 +188,45 @@ public class TupeloStore {
 	 * 
 	 * @return
 	 */
-	public BeanSession getBeanSession() {
+	Map<Resource,Long> beanExp = new HashMap<Resource,Long>();
+	public synchronized BeanSession getBeanSession() {
+		try {
+			beanSession = CETBeans.createBeanSession(context);
+			beanSession.setFetchBeanPostprocessor(new FetchBeanPostprocessor() {
+				public void postprocess(Object bean) {
+					synchronized(beanExp) {
+						try {
+							beanExp.put(beanSession.getSubject(bean), System.currentTimeMillis() + 30000);
+							Set<Resource> toNuke = new HashSet<Resource>();
+							for(Map.Entry<Resource,Long> entry : beanExp.entrySet()) {
+								if(entry.getValue() < System.currentTimeMillis()) {
+									try {
+										beanSession.deregister(entry.getKey());
+										toNuke.add(entry.getKey());
+									} catch (OperatorException e) {
+										log.error("could not expire bean",e);
+									}
+								}
+							}
+							if(toNuke.size()>0) {
+								log.info("expiring "+toNuke.size()+" bean(s)");
+								for(Object n : toNuke) {
+									beanExp.remove(n);
+								}
+							}
+						} catch(OperatorException x) {
+							log.error("no bean subject",x);
+						}
+					}
+				}
+			});
+		} catch (OperatorException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return beanSession;
 	}
 
@@ -344,12 +387,13 @@ public class TupeloStore {
     			getContext().perform(u);
     			for(Object o : u.getResult()) { allDatasetCount--; }
     			datasetCount = allDatasetCount;*/
+    			long ms = System.currentTimeMillis()-lastDatasetCount;
+    	    	log.debug("counted "+datasetCount+" non-deleted datasets in "+ms+"ms");
     		} catch(Exception x) {
     			x.printStackTrace();
     			datasetCount = -1;
     		}
     	}
-    	log.debug("counted "+datasetCount+" non-deleted datasets");
     	return datasetCount;
     }
     
