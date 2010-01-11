@@ -220,9 +220,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		History.newItem("listDatasets?page=" + page + "&sort=" + sortKey);
 	}
 
-	int page;
+	int page=1, numberOfPages=0;
 	String sortKey = "date-desc";
-	PagingWidget datasetListPager = null;
 
 	private void listDatasets() {
 		Map<String, String> params = getParams();
@@ -255,12 +254,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		mainContainer.add(titlePanel);
 
-		mainContainer.add(createPagingPanel());
+		final PagingWidget topPager = new PagingWidget();
+		mainContainer.add(createPagingPanel(topPager));
 
 		// datasets table
 		mainContainer.add(datasetTableWidget.asWidget());
 		
-		mainContainer.add(createPagingPanel());
+		final PagingWidget bottomPager = new PagingWidget();
+		mainContainer.add(createPagingPanel(bottomPager));
 
 		// TODO add a way to switch between the two views
 		// DatasetTableView datasetTableWidget = new DatasetTableView();
@@ -288,7 +289,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 							eventBus.fireEvent(event);
 						}
 						int np = result.getDatasetCount() / pageSize;
-						datasetListPager.setNumberOfPages(np);
+						topPager.setNumberOfPages(np);
+						bottomPager.setNumberOfPages(np);
+						numberOfPages = np;
 					}
 				});
 		
@@ -316,21 +319,21 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * TODO move to DatasetTableOneColumnView
 	 * @return
 	 */
-	private Widget createPagingPanel() {
+	private Widget createPagingPanel(PagingWidget pagingWidget) {
 		// paging header
 		HorizontalPanel pagingPanel = new HorizontalPanel();
 		pagingPanel.addStyleName("datasetsPager");
-		pagingPanel.addStyleName("centered"); // special IE-friendly centering
-												// style
+		pagingPanel.addStyleName("centered"); // special IE-friendly centering style
 
-		datasetListPager = new PagingWidget(page);
-		datasetListPager
+		pagingWidget.setPage(page);
+		pagingWidget.setNumberOfPages(numberOfPages); // updated on listdatasets callback
+		pagingWidget
 				.addValueChangeHandler(new ValueChangeHandler<Integer>() {
 					public void onValueChange(ValueChangeEvent<Integer> event) {
 						goToPage(event.getValue(), sortKey);
 					}
 				});
-		pagingPanel.add(datasetListPager);
+		pagingPanel.add(pagingWidget);
 
 		Label sortBy = new Label("sort by: ");
 		sortBy.addStyleName("pagingLabel");
