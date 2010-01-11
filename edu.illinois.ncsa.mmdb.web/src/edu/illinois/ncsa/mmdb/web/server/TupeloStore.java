@@ -189,6 +189,7 @@ public class TupeloStore {
 	 * @return
 	 */
 	Map<Resource,Long> beanExp = new HashMap<Resource,Long>();
+	long soonestExp = Long.MAX_VALUE;
 	public synchronized BeanSession getBeanSession() {
 		try {
 			beanSession = CETBeans.createBeanSession(context);
@@ -196,22 +197,33 @@ public class TupeloStore {
 				public void postprocess(Object bean) {
 					synchronized(beanExp) {
 						try {
-							beanExp.put(beanSession.getSubject(bean), System.currentTimeMillis() + 30000);
-							Set<Resource> toNuke = new HashSet<Resource>();
-							for(Map.Entry<Resource,Long> entry : beanExp.entrySet()) {
-								if(entry.getValue() < System.currentTimeMillis()) {
-									try {
-										beanSession.deregister(entry.getKey());
-										toNuke.add(entry.getKey());
-									} catch (OperatorException e) {
-										log.error("could not expire bean",e);
+							long now = System.currentTimeMillis();
+							long exp = now + 30000; // 30s
+							if(exp < soonestExp) {
+								soonestExp = exp;
+							}
+							beanExp.put(beanSession.getSubject(bean), exp);
+							if(now > soonestExp) {
+								soonestExp = Long.MAX_VALUE;
+								Set<Resource> toNuke = new HashSet<Resource>();
+								for(Map.Entry<Resource,Long> entry : beanExp.entrySet()) {
+									exp = entry.getValue();
+									if(exp < now) {
+										try {
+											beanSession.deregister(entry.getKey());
+											toNuke.add(entry.getKey());
+										} catch (OperatorException e) {
+											log.error("could not expire bean",e);
+										}
+									} else if(exp < soonestExp) {
+										soonestExp = exp;
 									}
 								}
-							}
-							if(toNuke.size()>0) {
-								log.info("expiring "+toNuke.size()+" bean(s)");
-								for(Object n : toNuke) {
-									beanExp.remove(n);
+								if(toNuke.size()>0) {
+									for(Object n : toNuke) {
+										beanExp.remove(n);
+									}
+									log.info("expiring "+toNuke.size()+" bean(s)");
 								}
 							}
 						} catch(OperatorException x) {
