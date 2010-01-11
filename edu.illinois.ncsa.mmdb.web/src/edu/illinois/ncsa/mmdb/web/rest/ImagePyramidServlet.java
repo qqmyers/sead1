@@ -126,23 +126,16 @@ public class ImagePyramidServlet extends HttpServlet {
         		return;
         	}
         	try {
-        		Thing dataset = TupeloStore.fetchThing(uri);
-        		Resource pyramidUri = dataset.getResource(ImagePyramidBeanUtil.HAS_PYRAMID);
-        		if(pyramidUri == null) {
-        			TupeloStore.refetch(uri);
-        			dataset = TupeloStore.fetchThing(uri);
-            		pyramidUri = dataset.getResource(ImagePyramidBeanUtil.HAS_PYRAMID);
-        		}
-        		if(pyramidUri == null) {
+        		ImagePyramidBean ipb = partialFetchPyramidFor(uri);
+        		if(ipb == null) {
         			die(resp,"No image pyramid available for dataset "+uri);
         			return;
         		}
-        		ImagePyramidBean ipb =
-        			(ImagePyramidBean) TupeloStore.fetchBean(pyramidUri);
         		log.info("GET PYRAMID "+uri);
         		produceHtml(ipb,resp,prefix+"/");
-        		//resp.setStatus(resp.SC_MOVED_PERMANENTLY);
-        		//resp.setHeader("Location",prefix+"/"+label+".html");
+        	} catch(NotFoundException x) {
+        		die(resp,"pyramid not found "+x);
+        		return;
         	} catch(OperatorException x) {
         		die(resp,"failure "+x);
         		return;
@@ -154,10 +147,10 @@ public class ImagePyramidServlet extends HttpServlet {
 			int row = Integer.parseInt(url.replaceFirst(".*/.*_files/[0-9]+/[0-9]+_([0-9]+).*","$1"));
 			try {
 				try {
-					ImagePyramidTileBean tile = getTile(label,level,row,col);
-					log.info("GET TILE "+label+" level "+level+", ("+row+","+col+")");
+					Resource tileUri = getTileUri(label,level,row,col);
+					log.info("GET TILE "+label+" level "+level+" ("+row+","+col+")");
 					resp.setContentType("image/jpg");
-					CopyFile.copy(TupeloStore.read(tile), resp.getOutputStream());
+					CopyFile.copy(TupeloStore.read(tileUri), resp.getOutputStream());
 				} catch(NotFoundException x) {
 					die(resp,"tile not found");
 				}
@@ -173,7 +166,7 @@ public class ImagePyramidServlet extends HttpServlet {
         }
 	}
 	
-	ImagePyramidTileBean getTile(String label, int level, int row, int col) throws OperatorException {
+	Resource getTileUri(String label, int level, int row, int col) throws OperatorException {
 		Unifier u = new Unifier();
 		u.setColumnNames("tile");
 		u.addPattern("pyramid",Rdfs.LABEL,Resource.literal(label));
@@ -183,7 +176,7 @@ public class ImagePyramidServlet extends HttpServlet {
 		u.addPattern("tile",ImagePyramidTileBeanUtil.PYRAMIDTILE_COL,Resource.literal(col));
 		TupeloStore.getInstance().getContext().perform(u);
 		for(Tuple<Resource> r : u.getResult()) {
-			return (ImagePyramidTileBean) TupeloStore.fetchBean(r.get(0));
+			return r.get(0);
 		}
 		throw new NotFoundException("no tile found");
 	}
@@ -237,6 +230,32 @@ public class ImagePyramidServlet extends HttpServlet {
 	}
 	public static String generateHtml(ImagePyramidBean ipb, String base) throws OperatorException, IOException {
 		return generateHtml(ipb,base,640,480);
+	}
+	ImagePyramidBean partialFetchPyramidFor(Resource uri) throws OperatorException {
+		Unifier u = new Unifier();
+		// fetch only the attributes we care about for generating the seadragon manifest
+		u.addPattern(uri, ImagePyramidBeanUtil.HAS_PYRAMID, "p");
+		u.addPattern("p", Rdfs.LABEL, "label");
+		u.addPattern("p", ImagePyramidBeanUtil.PYRAMID_WIDTH, "width");
+		u.addPattern("p", ImagePyramidBeanUtil.PYRAMID_HEIGHT, "height");
+		u.addPattern("p", ImagePyramidBeanUtil.PYRAMID_FORMAT, "format");
+		u.addPattern("p", ImagePyramidBeanUtil.PYRAMID_OVERLAP, "overlap");
+		u.addPattern("p", ImagePyramidBeanUtil.PYRAMID_SIZE, "tilesize");
+		u.setColumnNames("label","width","height","format","overlap","tilesize");
+		TupeloStore.getInstance().getContext().perform(u);
+		for(Tuple<Resource> row : u.getResult()) {
+			ImagePyramidBean p = new ImagePyramidBean();
+			int pi = 0;
+			p.setUri(uri.getString());
+			p.setLabel(row.get(pi++).getString());
+			p.setWidth((Integer)row.get(pi++).asObject());
+			p.setHeight((Integer)row.get(pi++).asObject());
+			p.setFormat(row.get(pi++).getString());
+			p.setOverlap((Integer)row.get(pi++).asObject());
+			p.setTilesize((Integer)row.get(pi++).asObject());
+			return p;
+		}
+		return null;
 	}
 	public static String generateHtml(ImagePyramidBean ipb, String base, int x, int y) throws OperatorException, IOException {
 		int sizex = x;
