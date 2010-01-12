@@ -101,6 +101,8 @@ public class ImagePyramidServlet extends HttpServlet {
 		return null;
 	}
 	
+	public static final String IMAGE_PYRAMID_INFIX = "/uri=";
+	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {

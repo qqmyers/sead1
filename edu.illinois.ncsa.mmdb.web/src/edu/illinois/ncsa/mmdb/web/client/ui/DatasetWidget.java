@@ -180,7 +180,7 @@ public class DatasetWidget extends Composite {
 
 					@Override
 					public void onSuccess(GetDatasetResult result) {
-						drawPage(result.getDataset());
+						drawPage(result.getDataset(), result.getPyramidUrl());
 
 					}
 				});
@@ -192,7 +192,7 @@ public class DatasetWidget extends Composite {
 	 * @param dataset
 	 * @param collection
 	 */
-	private void drawPage(DatasetBean dataset) {
+	private void drawPage(DatasetBean dataset, String pyramidUrl) {
 
 		// image preview
 //		previewPanel(dataset.getUri());
@@ -279,34 +279,39 @@ public class DatasetWidget extends Composite {
 		actionsPanel.add(downloadButton);
 
 		actionsPanel.add(addToCollectionButton);
-		
-		Button zoomButton = new Button("Zoom");
-		final String zoomUri = PYRAMID_URL + dataset.getUri(); 
-		zoomButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				// image zoom
-				zoom = new Frame(zoomUri) {
-					public void onBrowserEvent(Event event) {
-						if(event.getTypeInt() == Event.ONMOUSEOUT) {
-							int screenX = event.getScreenX();
-							int screenY = event.getScreenY();
-							int clientX = event.getClientX();
-							int clientY = event.getClientY();
-							/*NativeEvent mouseDown = Document.get().createMouseDownEvent(0, screenX, screenY, clientX, clientY, false, false, false, false, Event.BUTTON_LEFT);*/
-							// here we need to catch this event and do something to keep Seadragon from continuing to scroll,
+
+		if(pyramidUrl != null) {
+			Button zoomButton = new Button("Zoom");
+			final String zoomUri = PYRAMID_URL + dataset.getUri(); 
+			zoomButton.addClickHandler(new ClickHandler() {
+				public void onClick(ClickEvent event) {
+					// image zoom
+					zoom = new Frame(zoomUri) {
+						int mouseInScreenX, mouseInScreenY, mouseInClientX, mouseInClientY;
+						public void onBrowserEvent(Event event) {
+							if(event.getTypeInt() == Event.ONMOUSEOVER) {
+								mouseInScreenX = event.getScreenX();
+								mouseInScreenY = event.getScreenY();
+								mouseInClientX = event.getClientX();
+								mouseInClientY = event.getClientY();
+							} else if(event.getTypeInt() == Event.ONMOUSEOUT) {
+								NativeEvent mouseUp = Document.get().createMouseUpEvent(0, mouseInScreenX, mouseInScreenY, mouseInClientX, mouseInClientY, false, false, false, false, Event.BUTTON_LEFT);
+								getElement().dispatchEvent(mouseUp);
+							}
+							super.onBrowserEvent(event);
 						}
-						super.onBrowserEvent(event);
-					}
-				};
-				zoom.sinkEvents(Event.ONMOUSEOUT);
-				zoom.addStyleName("datasetZoom");
-				zoom.removeStyleName("gwt-Frame"); // remove frame border!
-				DOM.setElementAttribute(zoom.getElement(), "frameborder", "0"); // IE
-				previewPanel.clear();
-				previewPanel.add(zoom);
-			}
-		});
-		actionsPanel.add(zoomButton);
+					};
+					zoom.sinkEvents(Event.ONMOUSEOVER);
+					zoom.sinkEvents(Event.ONMOUSEOUT);
+					zoom.addStyleName("datasetZoom");
+					zoom.removeStyleName("gwt-Frame"); // remove frame border!
+					DOM.setElementAttribute(zoom.getElement(), "frameborder", "0"); // IE
+					previewPanel.clear();
+					previewPanel.add(zoom);
+				}
+			});
+			actionsPanel.add(zoomButton);
+		}
 		
 		// information panel with extra metadata
 		informationPanel = new DisclosurePanel("Extracted Information");

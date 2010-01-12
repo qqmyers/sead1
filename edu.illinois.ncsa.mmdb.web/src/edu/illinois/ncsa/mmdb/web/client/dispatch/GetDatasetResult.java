@@ -24,13 +24,16 @@ public class GetDatasetResult implements Result {
 
 	private Collection<PreviewImageBean> previews;
 
+	private String pyramidUrl = null;
+	
 	public GetDatasetResult() {
 	}
 
 	public GetDatasetResult(DatasetBean datasetBean,
-			Collection<PreviewImageBean> previews) {
+			Collection<PreviewImageBean> previews, String pyramidUrl) {
 		setDataset(datasetBean);
 		setPreviews(previews);
+		setPyramidUrl(pyramidUrl);
 	}
 
 	public void setDataset(DatasetBean dataset) {
@@ -50,6 +53,14 @@ public class GetDatasetResult implements Result {
 			return new HashSet<PreviewImageBean>();
 		}
 		return previews;
+	}
+
+	public String getPyramidUrl() {
+		return pyramidUrl;
+	}
+
+	public void setPyramidUrl(String pyramidUrl) {
+		this.pyramidUrl = pyramidUrl;
 	}
 
 }

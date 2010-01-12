@@ -12,14 +12,18 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
+import edu.illinois.ncsa.mmdb.web.rest.ImagePyramidServlet;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.ImagePyramidBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 
 /**
  * Retrieve a specific dataset.
@@ -59,7 +63,18 @@ public class GetDatasetHandler implements
 				log.debug("No image previews available for " + arg0.getId());
 			}
 
-			return new GetDatasetResult(datasetBean, previews);
+			String pyramidUrl = null;
+			// FIXME the next query is probably unnecessary, if we can get to the underlying BeanThing
+			// representing the dataset which will have this triple in it, or not
+			if(TupeloStore.getInstance().getContext().match(Resource.uriRef(datasetBean.getUri()), ImagePyramidBeanUtil.HAS_PYRAMID, null).size() > 0) {
+				try {
+					UriCanonicalizer c = TupeloStore.getInstance().getUriCanonicalizer();
+					pyramidUrl = c.canonicalize(ImagePyramidServlet.IMAGE_PYRAMID_INFIX, datasetBean.getUri());
+				} catch(IllegalStateException x) {
+					log.error("unable to canonicalize dataset for pyramid",x);
+				}
+			}
+			return new GetDatasetResult(datasetBean, previews, pyramidUrl);
 		} catch (Exception e) {
 			throw new ActionException(e);
 		}

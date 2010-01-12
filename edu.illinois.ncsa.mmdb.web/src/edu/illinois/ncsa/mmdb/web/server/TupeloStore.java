@@ -49,6 +49,7 @@ import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tables;
 import org.tupeloproject.util.Tuple;
 
+import edu.illinois.ncsa.mmdb.web.rest.ImagePyramidServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.ContextBean;
@@ -310,9 +311,10 @@ public class TupeloStore {
 	// TODO: figure out how to get these from the server config or incoming requests
 	
 	static final String REST_SERVLET_PATH = "/api";
+	static final String PYRAMID_SERVLET_PATH = "/pyramid";
 	static final String MMDB_WEBAPP_PATH = "/mmdb.html";
 	
-	static final String INFIXES[] = new String[] {
+	static final String REST_INFIXES[] = new String[] {
             RestServlet.ANY_IMAGE_INFIX,
             RestServlet.IMAGE_INFIX,
             RestServlet.PREVIEW_ANY,
@@ -324,8 +326,11 @@ public class TupeloStore {
             RestServlet.COLLECTION_INFIX,
             RestServlet.COLLECTION_CREATE_ANON_INFIX,
             RestServlet.COLLECTION_ADD_INFIX,
-            RestServlet.COLLECTION_REMOVE_INFIX
+            RestServlet.COLLECTION_REMOVE_INFIX,
     };
+	static final String PYRAMID_INFIXES[] = new String[] {
+		ImagePyramidServlet.IMAGE_PYRAMID_INFIX
+	};
 
 	UriCanonicalizer canon;
 
@@ -346,12 +351,23 @@ public class TupeloStore {
 		return getWebappPrefix(request) + MMDB_WEBAPP_PATH + "#" + historyToken;
 	}
 	
+    public UriCanonicalizer getUriCanonicalizer() throws ServletException {
+    	if(canon == null) {
+    		throw new IllegalStateException("cannot call until a request has been made against a servlet");
+    	}
+    	return canon;
+    }
+    
     public UriCanonicalizer getUriCanonicalizer(HttpServletRequest request) throws ServletException {
         if(canon == null) {
             canon = new UriCanonicalizer();
             String prefix = getWebappPrefix(request);
-            for(String infix : INFIXES) {
+            for(String infix : REST_INFIXES) {
             	String cp = prefix + request.getContextPath() + REST_SERVLET_PATH + infix;
+            	canon.setCanonicalUrlPrefix(infix, cp);
+            }
+            for(String infix : PYRAMID_INFIXES) {
+            	String cp = prefix + request.getContextPath() + PYRAMID_SERVLET_PATH + infix;
             	canon.setCanonicalUrlPrefix(infix, cp);
             }
             // now handle GWT dataset and collection stuff stuff, hardcoding the HTML path
