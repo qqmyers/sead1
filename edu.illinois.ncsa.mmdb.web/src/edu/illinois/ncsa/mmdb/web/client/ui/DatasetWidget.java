@@ -512,7 +512,14 @@ public class DatasetWidget extends Composite {
 				public void onSuccess(GetMetadataResult arg0) {
 					List<Metadata> metadata = arg0.getMetadata();
 					Collections.sort( metadata);
+					String category = "";
 					for (Metadata tuple : metadata) {
+					    if (!category.equals( tuple.getCategory() )) {					        
+	                        int row = informationTable.getRowCount()+1;
+	                        informationTable.setHTML(row, 0, "<b>" + tuple.getCategory() + "</b>");
+	                        informationTable.setText(row, 1, ""); //$NON-NLS-1$
+	                        category = tuple.getCategory();
+					    }
 						int row = informationTable.getRowCount()+1;
 						informationTable.setText(row, 0, tuple.getLabel());
 						informationTable.setText(row, 1, tuple.getValue());
