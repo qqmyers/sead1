@@ -3,8 +3,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.ArrayList;
-
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -12,7 +10,8 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
 
@@ -29,7 +28,8 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  */
 public class GetMetadataHandler implements ActionHandler<GetMetadata, GetMetadataResult>{
 
-	private static final String HAS_METADATA = "http://cet.ncsa.uiuc.edu/2007/hasMetaData";
+	private static final Resource METADATA_TYPE     = Cet.cet( "metadata/Metadata" );               //$NON-NLS-1$
+	private static final Resource METADATA_CATEGORY = Cet.cet( "metadata/hasCategory" );            //$NON-NLS-1$
 
 	@Override
 	public GetMetadataResult execute(GetMetadata arg0, ExecutionContext arg1)
@@ -37,23 +37,21 @@ public class GetMetadataHandler implements ActionHandler<GetMetadata, GetMetadat
 		
 		Resource uri = Resource.resource(arg0.getUri());
 		
-		ArrayList<ArrayList<String>> metadata = new ArrayList<ArrayList<String>>();
-		
+		GetMetadataResult result = new GetMetadataResult();
+		 		
 		Unifier uf = new Unifier();
-		uf.addPattern(uri, HAS_METADATA, "metadata");
-		uf.addPattern("metadata",Rdfs.LABEL, "label");
-		uf.addPattern("metadata", Dc.DESCRIPTION, "value");
-		uf.setColumnNames("label", "value");
+		uf.addPattern( uri, "predicate", "value" ); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addPattern( "predicate", Rdf.TYPE, METADATA_TYPE); //$NON-NLS-1$
+        uf.addPattern( "predicate", METADATA_CATEGORY, "category"); //$NON-NLS-1$ //$NON-NLS-2$
+		uf.addPattern( "predicate", Rdfs.LABEL, "label" ); //$NON-NLS-1$ //$NON-NLS-2$
+	    uf.setColumnNames("label", "value", "category"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		try {
 			TupeloStore.getInstance().getContext().perform(uf);
 
 			for (Tuple<Resource> row : uf.getResult()) {
 				if (row.get(0) != null) {
-					ArrayList<String> tuple = new ArrayList<String>();
-					tuple.add(row.get(0).getString());
-					tuple.add(row.get(1).getString());
-					metadata.add(tuple);
+					result.add(row.get(2).getString(), row.get(0).getString(), row.get(1).getString());
 				}
 			}
 		} catch (OperatorException e1) {
@@ -61,7 +59,7 @@ public class GetMetadataHandler implements ActionHandler<GetMetadata, GetMetadat
 			e1.printStackTrace();
 		}
 		
-		return new GetMetadataResult(metadata);
+		return result;
 	}
 
 	@Override
