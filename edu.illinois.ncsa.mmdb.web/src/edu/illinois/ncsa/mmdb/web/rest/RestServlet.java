@@ -30,6 +30,7 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.util.CopyFile;
@@ -157,7 +158,11 @@ public class RestServlet extends HttpServlet {
     	try {
     		Collection<PreviewImageBean> previews = pibu.getAssociationsFor(uri);
     		if(previews.size()==0) {
-    			TupeloStore.getInstance().extractPreviews(uri);
+    			// why are there no previews?
+    			Date startTime = bs.getThingSession().getDate(Resource.uriRef(uri), Cet.cet("metadata/extractor/startTime"));
+    			if(startTime == null) {
+    				TupeloStore.getInstance().extractPreviews(uri);
+    			}
     			return null;
     		} else {
     			long maxArea = 0L;

@@ -376,22 +376,17 @@ public class TupeloStore {
         return canon;
     }
     
-    Map<String,Long> lastExtractionRequest = new HashMap<String,Long>();
     public void extractPreviews(String uri) {
-    	if(lastExtractionRequest.get(uri) == null ||
-    	   System.currentTimeMillis() > lastExtractionRequest.get(uri)+60000) { // 10min
-    		String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
-    		log.info("EXTRACT PREVIEWS "+uri);
-    		BeanSession beanSession = getBeanSession();
-    		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-    		PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
-    		try {
-    			lastExtractionRequest.put(uri, System.currentTimeMillis());
-    			pbu.callExtractor(extractionServiceURL, dbu.get(uri));
-    		} catch (Exception e) {
-    			log.error("Extraction service " + extractionServiceURL + " unavailable");
-    			e.printStackTrace();
-    		}
+    	String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
+    	log.info("EXTRACT PREVIEWS "+uri);
+    	BeanSession beanSession = getBeanSession();
+    	DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+    	PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
+    	try {
+    		pbu.callExtractor(extractionServiceURL, dbu.get(uri));
+    	} catch (Exception e) {
+    		log.error("Extraction service " + extractionServiceURL + " unavailable");
+    		e.printStackTrace();
     	}
     }
     
