@@ -256,6 +256,10 @@ public class TupeloStore {
 		return contextBeans;
 	}
 
+	public boolean authenticate(String username, String password) {
+		return (new Authentication()).authenticate(username, password);
+	}
+	
 	// static utility methods
 	
 	public static Object fetchBean(String uri) throws OperatorException {

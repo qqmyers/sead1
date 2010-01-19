@@ -32,7 +32,7 @@ import edu.uiuc.ncsa.cet.bean.ImagePyramidTileBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.ImagePyramidBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.ImagePyramidTileBeanUtil;
 
-public class ImagePyramidServlet extends HttpServlet {
+public class ImagePyramidServlet extends AuthenticatedServlet {
 	Log log = LogFactory.getLog(ImagePyramidServlet.class);
 
 	/*
@@ -106,6 +106,9 @@ public class ImagePyramidServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		if(!authenticate(req,resp)) {
+			return;
+		}
         String url = req.getRequestURL().toString();
 		URL requestUrl = new URL(url);
         String prefix = requestUrl.getProtocol()+"://"+requestUrl.getHost();

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.xpath.XPathExpressionException;
@@ -46,7 +45,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 /**
  * RestServlet
  */
-public class RestServlet extends HttpServlet {
+public class RestServlet extends AuthenticatedServlet {
     Log log = LogFactory.getLog(RestServlet.class);
 
 	public static final String COLLECTION_REMOVE_INFIX = "/collection/remove/";
@@ -192,6 +191,9 @@ public class RestServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
         //dumpHeaders(request); // FIXME debug
+    	if(!authenticate(request,response)) {
+    		return;
+    	}
         String uri = decanonicalizeUrl(request);
         if(hasPrefix(IMAGE_DOWNLOAD_INFIX,request)) {
             log.trace("DOWNLOAD IMAGE "+uri);
@@ -259,6 +261,8 @@ public class RestServlet extends HttpServlet {
             		throw new ServletException("failed to retrieve "+request.getRequestURI());
             	}
             }
+        } else if(request.getRequestURL().toString().endsWith("authenticate")) {
+        	// we're just authenticating, and that has already been handled. do not report an error
         } else {
             throw new ServletException("unrecognized API call "+request.getRequestURI());
         }

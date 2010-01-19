@@ -11,6 +11,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DeferredCommand;
@@ -151,9 +156,9 @@ public class LoginPage extends Composite {
 	 * 
 	 */
 	protected void authenticate() {
-
-		MMDB.dispatchAsync.execute(new Authenticate(usernameBox.getText(),
-				passwordBox.getText()),
+		final String username = usernameBox.getText();
+		final String password = passwordBox.getText();
+		MMDB.dispatchAsync.execute(new Authenticate(username, password),
 				new AsyncCallback<AuthenticateResult>() {
 
 					@Override
@@ -165,19 +170,41 @@ public class LoginPage extends Composite {
 					public void onSuccess(AuthenticateResult arg0) {
 						if (arg0.getAuthenticated()) {
 							login(arg0.getSessionId());
-							redirect();
+							// now hit the REST authentication endpoint
+							String restUrl = "./api/authenticate";
+							RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+							builder.setUser(username);
+							builder.setPassword(password);
+							try {
+								builder.sendRequest("", new RequestCallback() {
+									public void onError(Request request, Throwable exception) {
+										fail();
+									}
+									public void onResponseReceived(Request request,	Response response) {
+										// success!
+										redirect();
+									}
+								});
+							} catch(RequestException x) {
+								// another error condition
+								fail();
+							}
 						} else {
-							Label message = new Label(
-									"Incorrect username/password combination");
-							message.addStyleName("loginError");
-							feedbackPanel.clear();
-							feedbackPanel.add(message);
+							fail();
 						}
 
 					}
 				});
 	}
 
+	void fail() {
+		Label message = new Label(
+				"Incorrect username/password combination");
+		message.addStyleName("loginError");
+		feedbackPanel.clear();
+		feedbackPanel.add(message);
+	}
+	
 	/**
 	 * Redirect to previous page.
 	 */

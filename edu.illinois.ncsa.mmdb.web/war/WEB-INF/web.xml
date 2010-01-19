@@ -65,6 +65,11 @@
 	</servlet-mapping>
 	
 	<servlet-mapping>
+		<servlet-name>REST Servlet</servlet-name>
+		<url-pattern>/mmdb/api/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
 		<servlet-name>RSS Servlet</servlet-name>
 		<url-pattern>/rss.xml</url-pattern>
 	</servlet-mapping>

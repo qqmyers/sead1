@@ -563,22 +563,24 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 *            history token (everything after the #)
 	 */
 	private void parseHistoryToken(String token) {
-		if (token.startsWith("dataset")) {
-			showDataset();
-		} else if (token.startsWith("listDatasets")) {
-			listDatasets();
-		} else if (token.startsWith("upload")) { // upload applet support
-			showUploadProgress();
-		} else if (token.startsWith("login")) {
+		if(token.startsWith("login")) {
 			showLoginPage();
-		} else if (token.startsWith("tag")) {
-			showTagPage();
-		} else if (token.startsWith("listCollections")) {
-			showListCollectionsPage();
-		} else if (token.startsWith("collection")) {
-			showCollectionPage();
-		} else {
-			listDatasets();
+		} else if(checkLogin()) {
+			if (token.startsWith("dataset")) {
+				showDataset();
+			} else if (token.startsWith("listDatasets")) {
+				listDatasets();
+			} else if (token.startsWith("upload")) { // upload applet support
+				showUploadProgress();
+			} else if (token.startsWith("tag")) {
+				showTagPage();
+			} else if (token.startsWith("listCollections")) {
+				showListCollectionsPage();
+			} else if (token.startsWith("collection")) {
+				showCollectionPage();
+			} else {
+				listDatasets();
+			}
 		}
 	}
 
