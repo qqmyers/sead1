@@ -263,6 +263,9 @@ public class RestServlet extends AuthenticatedServlet {
             }
         } else if(request.getRequestURL().toString().endsWith("authenticate")) {
         	// we're just authenticating, and that has already been handled. do not report an error
+        	// send back the basic credentials provided
+        	response.getWriter().print(request.getHeader("Authorization"));
+        	response.getWriter().flush();
         } else {
             throw new ServletException("unrecognized API call "+request.getRequestURI());
         }
@@ -324,6 +327,9 @@ public class RestServlet extends AuthenticatedServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
         //dumpHeaders(request); // FIXME debug
+    	if(!authenticate(request,response)) {
+    		return;
+    	}
         if(hasPrefix(ANY_IMAGE_INFIX,request)) {
             doPostImage(request,response);
         } else if(hasPrefix(ANY_COLLECTION_INFIX,request)) {

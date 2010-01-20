@@ -4,12 +4,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.util.Base64;
 
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
 
 public class AuthenticatedServlet extends HttpServlet {
-	String AUTHENTICATED_AS_SESSION_ATTRIBUTE = "edu.illinois.ncsa.mmdb.web.server.authenticatedAs";
+	Log log = LogFactory.getLog(AuthenticatedServlet.class);
+	
+	String AUTHENTICATED_AS = "edu.illinois.ncsa.mmdb.web.server.auth.authenticatedAs";
+	String BASIC_CREDENTIALS = "edu.illinois.ncsa.mmdb.web.server.auth.basicCredentials";
 	
 	boolean unauthorized(HttpServletResponse response) {
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -17,17 +22,17 @@ public class AuthenticatedServlet extends HttpServlet {
 		return false;
 	}
 	
-	boolean authenticate(HttpServletRequest request, HttpServletResponse response) {
+	protected boolean authenticate(HttpServletRequest request, HttpServletResponse response) {
+		// is this session already authenticated? if so, no credentials required
+		log.debug("AUTHENTICATE session id = "+request.getSession(true).getId());
+		if(request.getSession(true).getAttribute(AUTHENTICATED_AS) != null) {
+			return true;
+		}
 		String auth = request.getHeader("Authorization");
 		if(auth == null) {
 			return unauthorized(response);
 		} else {
-			// first check to see if this session is already authenticated
-			if(auth.equals(request.getSession(true).getAttribute(AUTHENTICATED_AS_SESSION_ATTRIBUTE))) {
-				// we're already authenticated.
-				return true;
-			}
-			// we need to attempt authentication
+			// attempt to authenticate provided u/p credentials
 			String ap[] = auth.split(" ");
 			if(ap.length != 2 && !ap[0].equalsIgnoreCase("basic")) {
 				return unauthorized(response);
@@ -40,7 +45,8 @@ public class AuthenticatedServlet extends HttpServlet {
 			String password = up[1];
 			if((new Authentication()).authenticate(username, password)) {
 				// set the session attribute indicating that we're authenticated
-				request.getSession().setAttribute(AUTHENTICATED_AS_SESSION_ATTRIBUTE, auth);
+				request.getSession().setAttribute(AUTHENTICATED_AS, username);
+				request.getSession().setAttribute(BASIC_CREDENTIALS, auth);
 				return true;
 			} else {
 				return unauthorized(response);

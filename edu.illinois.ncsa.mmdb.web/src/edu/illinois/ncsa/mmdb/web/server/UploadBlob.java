@@ -41,6 +41,7 @@ import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.SecureHashMinter;
 
+import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
@@ -50,7 +51,7 @@ import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
  * @author plutchak
  *
  */
-public class UploadBlob extends HttpServlet {
+public class UploadBlob extends AuthenticatedServlet {
 
     private static final long  serialVersionUID = 6448203283400080791L;
     public static final String UPLOAD_LISTENER_NAME    = "uploadListener";
@@ -232,6 +233,9 @@ public class UploadBlob extends HttpServlet {
     @Override
 	public void doPost ( HttpServletRequest request,
             HttpServletResponse response ) throws ServletException, IOException {
+    	if(!authenticate(request,response)) {
+    		return;
+    	}
         Context c = TupeloStore.getInstance().getContext();
 
         if (c == null) {
@@ -488,6 +492,9 @@ public class UploadBlob extends HttpServlet {
     @Override
 	public void doGet ( HttpServletRequest request,
             HttpServletResponse response ) throws ServletException, IOException {
+    	if(!authenticate(request,response)) {
+    		return;
+    	}
     	if(request.getParameterMap().containsKey("uploadComplete")) { // need to redirect after completion
         	TupeloStore t = TupeloStore.getInstance();
         	String sessionKey = request.getParameter("uploadComplete");

@@ -68,6 +68,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			+ "connection and try again.";
 
 	public static String sessionID;
+	public static String uploadAppletCredentials;
 
 	/**
 	 * Dispatch service. Should be the only service needed. All commands should
@@ -413,7 +414,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 	private boolean dndEnabled = false;
 	
-	native void deployDndApplet() /*-{
+	native void deployDndApplet(String credentials) /*-{
 		var attributes = {
 			code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
 			archive:'dnd/DropUploader.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
@@ -423,6 +424,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		var parameters = {
 			jnlp_href: 'dropuploader.jnlp',
 			statusPage: $wnd.document.URL,
+			"credentials": credentials,
 			background: "0x006699"
 		};
 		$wnd.deployJava.runApplet(attributes, parameters, '1.5');
@@ -480,7 +482,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		if(dndEnabled) {
 			dndApplet.removeStyleName("hidden");
-			deployDndApplet();
+			deployDndApplet(uploadAppletCredentials);
 		} else {
 			dndTooltip.addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
@@ -490,7 +492,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 					}
 					if(doit) {
 						dndApplet.removeStyleName("hidden");
-						deployDndApplet();
+						deployDndApplet(uploadAppletCredentials);
 						dndTooltip.setText(enabledMsg);
 						dndEnabled = true;
 					}

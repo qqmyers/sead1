@@ -7,6 +7,7 @@ import java.net.URL;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,6 +55,5 @@ public class Authentication {
 			return false;
 		}
 	}
-
 }
 

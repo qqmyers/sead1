@@ -182,6 +182,7 @@ public class LoginPage extends Composite {
 									}
 									public void onResponseReceived(Request request,	Response response) {
 										// success!
+										MMDB.uploadAppletCredentials = response.getText();
 										redirect();
 									}
 								});
