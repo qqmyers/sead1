@@ -232,10 +232,28 @@ public class LoginPage extends Composite {
 	}
 	
 	/**
-	 * Set sessionID to null and remove cookie.
+	 * Set sessionID to null, remove cookie, and log out of REST servlets
 	 */
 	public static void logout() {
 		MMDB.sessionID = null;
 		Cookies.removeCookie("sid");
+		
+		// now hit the REST authentication endpoint
+		String restUrl = "./api/logout";
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+		try {
+			builder.sendRequest("", new RequestCallback() {
+				public void onError(Request request, Throwable exception) {
+					// do something
+				}
+				public void onResponseReceived(Request request,	Response response) {
+					// success!
+					MMDB.uploadAppletCredentials = null;
+					History.newItem("login?p=listDatasets");
+				}
+			});
+		} catch(RequestException x) {
+			// another error condition, do something
+		}
 	}
 }

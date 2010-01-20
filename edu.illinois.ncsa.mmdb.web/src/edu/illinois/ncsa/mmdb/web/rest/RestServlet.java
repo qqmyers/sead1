@@ -194,6 +194,10 @@ public class RestServlet extends AuthenticatedServlet {
     	if(!authenticate(request,response)) {
     		return;
     	}
+    	if(request.getRequestURL().toString().endsWith("logout")) {
+    		logout(request, response);
+    		return;
+    	}
         String uri = decanonicalizeUrl(request);
         if(hasPrefix(IMAGE_DOWNLOAD_INFIX,request)) {
             log.trace("DOWNLOAD IMAGE "+uri);
