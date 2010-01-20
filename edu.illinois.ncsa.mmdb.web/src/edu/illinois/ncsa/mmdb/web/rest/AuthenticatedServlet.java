@@ -13,18 +13,11 @@ import edu.illinois.ncsa.mmdb.web.server.Authentication;
 public class AuthenticatedServlet extends HttpServlet {
 	Log log = LogFactory.getLog(AuthenticatedServlet.class);
 	
-	String AUTHENTICATED_AS = "edu.illinois.ncsa.mmdb.web.server.auth.authenticatedAs";
-	String BASIC_CREDENTIALS = "edu.illinois.ncsa.mmdb.web.server.auth.basicCredentials";
+	public static final String AUTHENTICATED_AS = "edu.illinois.ncsa.mmdb.web.server.auth.authenticatedAs";
+	public static final String BASIC_CREDENTIALS = "edu.illinois.ncsa.mmdb.web.server.auth.basicCredentials";
 	
-	boolean unauthorized(HttpServletResponse response) {
-		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		response.setHeader("WWW-Authenticate", "BASIC realm=\"mmdb\"");
-		return false;
-	}
-	
-	protected boolean authenticate(HttpServletRequest request, HttpServletResponse response) {
+	public static boolean doAuthenticate(HttpServletRequest request, HttpServletResponse response) {
 		// is this session already authenticated? if so, no credentials required
-		log.debug("AUTHENTICATE session id = "+request.getSession(true).getId());
 		if(request.getSession(true).getAttribute(AUTHENTICATED_AS) != null) {
 			return true;
 		}
@@ -52,5 +45,16 @@ public class AuthenticatedServlet extends HttpServlet {
 				return unauthorized(response);
 			}
 		}
+	}
+	
+	static boolean unauthorized(HttpServletResponse response) {
+		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		response.setHeader("WWW-Authenticate", "BASIC realm=\"mmdb\"");
+		return false;
+	}
+	
+	protected boolean authenticate(HttpServletRequest request, HttpServletResponse response) {
+		log.debug("AUTHENTICATE session id = "+request.getSession(true).getId());
+		return doAuthenticate(request,response);
 	}
 }
