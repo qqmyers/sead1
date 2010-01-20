@@ -92,6 +92,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		// set the background colors of the components
 		try {
 			String bgColor = getParameter("background");
+			log("background color = "+bgColor);
 			if(bgColor != null && !bgColor.equals("")) {
 				Color c = Color.decode(bgColor);
 				mainCards.setBackground(c);
@@ -238,6 +239,12 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			method.setURI(new HttpURL(url));
 		} catch (URIException e) {
 			e.printStackTrace();
+		}
+		// now set credentials
+		String creds = getParameter("credentials");
+		log("credentials = "+creds);
+		if(creds != null) {
+			method.addRequestHeader("Authorization", creds);
 		}
 	}
 
