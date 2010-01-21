@@ -39,10 +39,9 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/iri-0.7.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/arq-2.8.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jdom-1.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/rome-1.0.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-jena-2.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-kernel-2.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-kernel-2.5.jar" sourcepath="/org.tupeloproject.core/tupelo-kernel/src/main/java"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-mysql-2.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-rdf-ntriples-2.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-server-2.5.jar"/>
@@ -50,5 +49,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-sql-2.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-util-2.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-webdav-2.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/rome-0.8.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.illinois.ncsa.cet.search.jar" sourcepath="/edu.illinois.ncsa.cet.search"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

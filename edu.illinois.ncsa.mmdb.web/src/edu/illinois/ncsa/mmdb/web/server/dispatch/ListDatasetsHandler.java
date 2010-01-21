@@ -37,7 +37,7 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 	private static Log log = LogFactory.getLog(GetDatasetsHandler.class);
 
 
-	private List<String> listDatasetUris(String orderBy, boolean desc, int limit, int offset) {
+	public static List<String> listDatasetUris(String orderBy, boolean desc, int limit, int offset) {
 		Unifier u = new Unifier();
 		u.setColumnNames("s","o");
 		u.addPattern("s",Rdf.TYPE,dbu.getType());
