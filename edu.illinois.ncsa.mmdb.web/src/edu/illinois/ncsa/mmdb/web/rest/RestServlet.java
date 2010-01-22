@@ -191,11 +191,11 @@ public class RestServlet extends AuthenticatedServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
         //dumpHeaders(request); // FIXME debug
-    	if(!authenticate(request,response)) {
-    		return;
-    	}
     	if(request.getRequestURL().toString().endsWith("logout")) {
     		logout(request, response);
+    		return;
+    	}
+    	if(!authenticate(request,response)) {
     		return;
     	}
         String uri = decanonicalizeUrl(request);

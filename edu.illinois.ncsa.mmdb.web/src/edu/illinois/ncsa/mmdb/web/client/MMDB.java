@@ -516,7 +516,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * @return
 	 */
 	void toggleUploadMenu() {
-		if (!uploadMenuVisible) {
+		if (!uploadMenuVisible && checkLogin()) {
 			showUploadMenu();
 		} else {
 			hideUploadMenu();

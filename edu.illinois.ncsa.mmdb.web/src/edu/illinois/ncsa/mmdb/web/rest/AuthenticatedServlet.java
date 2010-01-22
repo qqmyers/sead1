@@ -18,16 +18,20 @@ public class AuthenticatedServlet extends HttpServlet {
 	
 	public static void doLogout(HttpServletRequest request, HttpServletResponse response) {
 		request.getSession(true).invalidate();
+		request.getSession(true).setAttribute(AUTHENTICATED_AS,null);
+		request.getSession(true).setAttribute(BASIC_CREDENTIALS,null);
 	}
 	
 	protected void logout(HttpServletRequest request, HttpServletResponse response) {
+		String userId = (String) request.getSession(true).getAttribute(AUTHENTICATED_AS);
 		doLogout(request, response);
+		log.info("LOGOUT "+userId);
 	}
 	
 	public static boolean doAuthenticate(HttpServletRequest request, HttpServletResponse response) {
 		// is this session already authenticated? if so, no credentials required
 		if(request.getSession(true).getAttribute(AUTHENTICATED_AS) != null) {
-			return true;
+			return authorized(request);
 		}
 		String auth = request.getHeader("Authorization");
 		if(auth == null) {
@@ -48,7 +52,7 @@ public class AuthenticatedServlet extends HttpServlet {
 				// set the session attribute indicating that we're authenticated
 				request.getSession().setAttribute(AUTHENTICATED_AS, username);
 				request.getSession().setAttribute(BASIC_CREDENTIALS, auth);
-				return true;
+				return authorized(request);
 			} else {
 				return unauthorized(response);
 			}
@@ -61,8 +65,19 @@ public class AuthenticatedServlet extends HttpServlet {
 		return false;
 	}
 	
+	static boolean authorized(HttpServletRequest request) {
+		return true;
+	}
+	
 	protected boolean authenticate(HttpServletRequest request, HttpServletResponse response) {
-		log.debug("AUTHENTICATE session id = "+request.getSession(true).getId());
-		return doAuthenticate(request,response);
+		String sessionId = request.getSession(true).getId();
+		if(doAuthenticate(request,response)) {
+			String username = (String) request.getSession(true).getAttribute(AUTHENTICATED_AS);
+			log.info("AUTHENTICATED session "+sessionId+" for user "+username);
+			return true;
+		} else {
+			log.info("UNAUTHORIZED, session="+sessionId);
+			return false;
+		}
 	}
 }

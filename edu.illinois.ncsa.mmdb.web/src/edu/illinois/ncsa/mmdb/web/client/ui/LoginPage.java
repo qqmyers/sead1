@@ -241,6 +241,8 @@ public class LoginPage extends Composite {
 		// now hit the REST authentication endpoint
 		String restUrl = "./api/logout";
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+		builder.setUser("thisIsAGuaranteedBadUsername");
+		builder.setPassword("thisIsDefinitelyNotThatUsersPassword");
 		try {
 			builder.sendRequest("", new RequestCallback() {
 				public void onError(Request request, Throwable exception) {
