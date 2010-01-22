@@ -10,7 +10,6 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
@@ -18,18 +17,17 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 
 /**
  * Retrieve generic metadata about a resource.
  * 
  * @author Luigi Marini
+ * @author Rob Kooper
  *
  */
 public class GetMetadataHandler implements ActionHandler<GetMetadata, GetMetadataResult>{
-
-	private static final Resource METADATA_TYPE     = Cet.cet( "metadata/Metadata" );               //$NON-NLS-1$
-	private static final Resource METADATA_CATEGORY = Cet.cet( "metadata/hasCategory" );            //$NON-NLS-1$
 
 	@Override
 	public GetMetadataResult execute(GetMetadata arg0, ExecutionContext arg1)
@@ -41,8 +39,8 @@ public class GetMetadataHandler implements ActionHandler<GetMetadata, GetMetadat
 		 		
 		Unifier uf = new Unifier();
 		uf.addPattern( uri, "predicate", "value" ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addPattern( "predicate", Rdf.TYPE, METADATA_TYPE); //$NON-NLS-1$
-        uf.addPattern( "predicate", METADATA_CATEGORY, "category"); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addPattern( "predicate", Rdf.TYPE, MMDB.METADATA_TYPE); //$NON-NLS-1$
+        uf.addPattern( "predicate", MMDB.METADATA_CATEGORY, "category"); //$NON-NLS-1$ //$NON-NLS-2$
 		uf.addPattern( "predicate", Rdfs.LABEL, "label" ); //$NON-NLS-1$ //$NON-NLS-2$
 	    uf.setColumnNames("label", "value", "category"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
