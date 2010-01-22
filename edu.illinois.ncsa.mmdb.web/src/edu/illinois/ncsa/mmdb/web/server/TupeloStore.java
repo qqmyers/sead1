@@ -404,21 +404,27 @@ public class TupeloStore {
     public void extractPreviews(String uri) {
     	Long lastRequest = lastExtractionRequest.get(uri);
     	if(lastRequest == null || lastRequest < System.currentTimeMillis()-120000) { // give it a minute
-    		String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
-    		log.info("EXTRACT PREVIEWS "+uri);
-    		lastExtractionRequest.put(uri, System.currentTimeMillis());
-    		BeanSession beanSession = getBeanSession();
-    		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-    		PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
     		try {
-    			pbu.callExtractor(extractionServiceURL, dbu.get(uri));
-    		} catch (Exception e) {
-    			log.error("Extraction service " + extractionServiceURL + " unavailable");
-    			e.printStackTrace();
+    			Date createTime = getBeanSession().getThingSession().getDate(Resource.uriRef(uri), Cet.cet("metadata/extractor/createTime"));
+    			if(createTime == null) {
+    				String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
+    				log.info("EXTRACT PREVIEWS "+uri);
+    				lastExtractionRequest.put(uri, System.currentTimeMillis());
+    				BeanSession beanSession = getBeanSession();
+    				DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+    				PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
+    				try {
+    					pbu.callExtractor(extractionServiceURL, dbu.get(uri));
+    				} catch (Exception e) {
+    					log.error("Extraction service " + extractionServiceURL + " unavailable");
+    					e.printStackTrace();
+    				}
+    			}
+    		} catch(OperatorException x) {
+    			log.error("error checking context for extraction timestamp",x);
     		}
     	}
     }
-    
     int datasetCount = -1;
     long lastDatasetCount = 0;
     public int countDatasets() {

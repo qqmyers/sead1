@@ -157,11 +157,7 @@ public class RestServlet extends AuthenticatedServlet {
     	try {
     		Collection<PreviewImageBean> previews = pibu.getAssociationsFor(uri);
     		if(previews.size()==0) {
-    			// why are there no previews?
-    			Date startTime = bs.getThingSession().getDate(Resource.uriRef(uri), Cet.cet("metadata/extractor/startTime"));
-    			if(startTime == null) {
-    				TupeloStore.getInstance().extractPreviews(uri);
-    			}
+    			TupeloStore.getInstance().extractPreviews(uri);
     			return null;
     		} else {
     			long maxArea = 0L;
