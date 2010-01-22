@@ -1,6 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,6 +26,7 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.FilterContext;
 import org.tupeloproject.kernel.NotFoundException;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.PeerFacade;
 import org.tupeloproject.kernel.ProfilingContextFacade;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.Unifier;
@@ -36,6 +38,7 @@ import org.tupeloproject.kernel.events.EventingContextFacade;
 import org.tupeloproject.kernel.events.TupeloEvent;
 import org.tupeloproject.kernel.events.TupeloObserver;
 import org.tupeloproject.kernel.impl.HashFileContext;
+import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
@@ -43,6 +46,7 @@ import org.tupeloproject.rdf.query.OrderBy;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.xml.RdfXml;
 import org.tupeloproject.util.CopyFile;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Table;
@@ -170,18 +174,32 @@ public class TupeloStore {
 		URL fileLocation = this.getClass().getResource(path);
 		File file = new File(fileLocation.toURI());
 
-		log.info("Loading serialized context " + fileLocation);
-
-		ContextBeanUtil.setContextBeanStore(file);
-
-		contextBeanUtil = ContextBeanUtil.getContextBeanStore();
-
-		// load default context
-		Context context = contextBeanUtil.getDefaultContext();
+		Context context = null;
 		
-		contextBeans = contextBeanUtil.getAll();
-
-		return context;
+		try {
+			log.info("Loading serialized context " + fileLocation);
+			
+			ContextBeanUtil.setContextBeanStore(file);
+			
+			contextBeanUtil = ContextBeanUtil.getContextBeanStore();
+			
+			// load default context
+			context = contextBeanUtil.getDefaultContext();
+			
+			contextBeans = contextBeanUtil.getAll();
+		} catch(OperatorException x) {
+			// OK, that didn't work, now just use PeerFacade.
+			PeerFacade pf = new PeerFacade();
+			pf.setContext(new MemoryContext(RdfXml.parse(new FileInputStream(file))));
+			context = pf.loadDefaultPeer();
+			// only 3 lines of code, now was that so hard?
+		}
+		if(context != null) {
+			log.info("Loaded context from "+fileLocation);
+			return context;
+		} else {
+			throw new Exception("no context found!");
+		}
 	}
 
 	/**
@@ -252,6 +270,7 @@ public class TupeloStore {
 		return context;
 	}
 
+	// FIXME not used
 	public Collection<ContextBean> getContextBeans() {
 		return contextBeans;
 	}
@@ -380,17 +399,23 @@ public class TupeloStore {
         return canon;
     }
     
+    Map<String,Long> lastExtractionRequest = new HashMap<String,Long>();
+    // extraction takes time. don't make repeated requests at short time intervals
     public void extractPreviews(String uri) {
-    	String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
-    	log.info("EXTRACT PREVIEWS "+uri);
-    	BeanSession beanSession = getBeanSession();
-    	DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-    	PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
-    	try {
-    		pbu.callExtractor(extractionServiceURL, dbu.get(uri));
-    	} catch (Exception e) {
-    		log.error("Extraction service " + extractionServiceURL + " unavailable");
-    		e.printStackTrace();
+    	Long lastRequest = lastExtractionRequest.get(uri);
+    	if(lastRequest == null || lastRequest < System.currentTimeMillis()-120000) { // give it a minute
+    		String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
+    		log.info("EXTRACT PREVIEWS "+uri);
+    		lastExtractionRequest.put(uri, System.currentTimeMillis());
+    		BeanSession beanSession = getBeanSession();
+    		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+    		PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
+    		try {
+    			pbu.callExtractor(extractionServiceURL, dbu.get(uri));
+    		} catch (Exception e) {
+    			log.error("Extraction service " + extractionServiceURL + " unavailable");
+    			e.printStackTrace();
+    		}
     	}
     }
     
