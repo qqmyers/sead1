@@ -71,13 +71,6 @@ public class AuthenticatedServlet extends HttpServlet {
 	
 	protected boolean authenticate(HttpServletRequest request, HttpServletResponse response) {
 		String sessionId = request.getSession(true).getId();
-		if(doAuthenticate(request,response)) {
-			String username = (String) request.getSession(true).getAttribute(AUTHENTICATED_AS);
-			log.info("AUTHENTICATED session "+sessionId+" for user "+username);
-			return true;
-		} else {
-			log.info("UNAUTHORIZED, session="+sessionId);
-			return false;
-		}
+		return doAuthenticate(request,response);
 	}
 }

@@ -249,7 +249,6 @@ public class LoginPage extends Composite {
 				public void onResponseReceived(Request request,	Response response) {
 					// success!
 					MMDB.uploadAppletCredentials = null;
-					History.newItem("login?p=listDatasets"); // FIXME hardcodes destination
 				}
 			});
 		} catch(RequestException x) {
