@@ -241,8 +241,6 @@ public class LoginPage extends Composite {
 		// now hit the REST authentication endpoint
 		String restUrl = "./api/logout";
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-		builder.setUser("thisIsAGuaranteedBadUsername");
-		builder.setPassword("thisIsDefinitelyNotThatUsersPassword");
 		try {
 			builder.sendRequest("", new RequestCallback() {
 				public void onError(Request request, Throwable exception) {
@@ -251,7 +249,7 @@ public class LoginPage extends Composite {
 				public void onResponseReceived(Request request,	Response response) {
 					// success!
 					MMDB.uploadAppletCredentials = null;
-					History.newItem("login?p=listDatasets");
+					History.newItem("login?p=listDatasets"); // FIXME hardcodes destination
 				}
 			});
 		} catch(RequestException x) {
