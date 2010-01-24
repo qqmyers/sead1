@@ -55,6 +55,7 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.rest.ImagePyramidServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
+import edu.illinois.ncsa.mmdb.web.server.search.Search;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.ContextBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -350,6 +351,7 @@ public class TupeloStore {
             RestServlet.COLLECTION_CREATE_ANON_INFIX,
             RestServlet.COLLECTION_ADD_INFIX,
             RestServlet.COLLECTION_REMOVE_INFIX,
+            RestServlet.SEARCH_INFIX,
     };
 	static final String PYRAMID_INFIXES[] = new String[] {
 		ImagePyramidServlet.IMAGE_PYRAMID_INFIX
@@ -488,6 +490,14 @@ public class TupeloStore {
     	String history = uploadHistory.get(sessionKey);
     	uploadHistory.put(sessionKey,null);
     	return history;
+    }
+    
+    Search search = null;
+    public Search getSearch() {
+    	if(search == null) {
+    		search = new Search();
+    	}
+    	return search;
     }
 }
 

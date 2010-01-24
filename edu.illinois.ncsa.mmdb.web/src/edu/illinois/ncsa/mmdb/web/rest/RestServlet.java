@@ -37,6 +37,7 @@ import org.tupeloproject.util.Xml;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import edu.illinois.ncsa.cet.search.Hit;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
@@ -71,6 +72,8 @@ public class RestServlet extends AuthenticatedServlet {
 	public static final String PREVIEW_SMALL = "/image/preview/small/";
 	
 	public static final String PREVIEW_LARGE = "/image/preview/large/";
+	
+	public static final String SEARCH_INFIX = "/search";
 	
     static RestService restService; // TODO manage this lifecycle better
 
@@ -266,6 +269,8 @@ public class RestServlet extends AuthenticatedServlet {
         	// send back the basic credentials provided
         	response.getWriter().print(request.getHeader("Authorization"));
         	response.getWriter().flush();
+        } else if(hasPrefix(SEARCH_INFIX,request)) {
+        	doSearch(request,response);
         } else {
             throw new ServletException("unrecognized API call "+request.getRequestURI());
         }
@@ -368,9 +373,30 @@ public class RestServlet extends AuthenticatedServlet {
             } catch(RestServiceException e) {
                 throw new ServletException("could not modify collection",e);
             }
+        } else if(hasPrefix(SEARCH_INFIX,request)) {
+        	doSearch(request,response);
         }
     }
 
+    void doSearch(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	String searchString = request.getParameter("query");
+    	String offsetString = request.getParameter("offset");
+    	String limitString = request.getParameter("limit");
+    	int offset = 0;
+    	int limit = 1000;
+    	if(offsetString != null) {
+    		offset = Integer.parseInt(offsetString);
+    	}
+    	if(limitString != null) {
+    		limit = Integer.parseInt(limitString);
+    	}
+    	List<String> result = new LinkedList<String>();
+    	for(Hit hit : TupeloStore.getInstance().getSearch().search(searchString, limit, offset)) {
+    		result.add(hit.getId());
+    	}
+    	response.getWriter().write(formatList(result));
+    	response.getWriter().flush();
+    }
     // deal with lists
     String formatList(Iterable<String> members) {
         StringWriter sw = new StringWriter();
