@@ -106,6 +106,10 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			x.printStackTrace();
 		}
 		
+		// check auth
+		String auth = getParameter("credentials");
+		log("credentials = "+auth);
+		
 		getContentPane().add(mainCards, BorderLayout.CENTER);
 
 		setVisible(true);
@@ -242,9 +246,10 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}
 		// now set credentials
 		String creds = getParameter("credentials");
-		log("credentials = "+creds);
-		if(creds != null) {
+		if(creds != null && !creds.equals("")) {
 			method.addRequestHeader("Authorization", creds);
+		} else {
+			showErrorCard();
 		}
 	}
 
@@ -258,6 +263,17 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		String sessionKey = s.replaceFirst(".*\"([0-9a-f]+)\".*","$1"); // FIXME hack to parse JSON
 		log("got session key "+sessionKey);
 		return sessionKey;
+	}
+
+	String getRedirectUrl(String queryUrl) throws HttpException, IOException {
+		GetMethod get = new GetMethod();
+		get.setURI(new HttpURL(queryUrl));
+		HttpClient client = new HttpClient();
+		log("requesting redirect url ...");
+		client.executeMethod(get);
+		String s = get.getResponseBodyAsString();
+		log("got redirect url "+s);
+		return s;
 	}
 
 	int getProgress(String sessionKey) throws HttpException, IOException {
@@ -308,11 +324,13 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		boolean stop = false;
 		public void run() {
 			try {
+				/*
 				while(!stop) {
 					int progress = getProgress(sessionKey);
 					progressPie.setProgress(progress);
 					Thread.sleep(500);
 				}
+				*/
 			} catch(Exception x) {
 			}
 		}
@@ -369,58 +387,14 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			}
 		}).start();
 	}
-	
-	class PostThread extends Thread {
-		public PostMethod post;
-		public void run() {
-			try {
-				HttpClient client = new HttpClient();
-				client.executeMethod(post);
-				String sessionKey = progressThread.getSessionKey();
-				if(post.getStatusCode() != 200) {
-					log("post failed! "+post.getStatusLine());
-					getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback('"+sessionKey+"')"));
-					showErrorCard();
-				} else {
-					String url = getContextUrl()+"UploadBlob?uploadComplete="+sessionKey; // FIXME parameterize
-					log("post complete with status "+post.getStatusLine()+", redirecting to "+url);
-					getAppletContext().showDocument(new URL(url));
-					showCard("done");
-				}
-				progressThread.stopShowingProgress();
-			} catch(Exception x) {
-				showErrorCard();
-			}
-		}
-	}
-	PostThread postThread;
-	
-	void uploadFiles(List<File> files) throws HttpException, IOException {
-		uploadFiles(files,null);
-	}
-	void uploadFiles(List<File> files, String collectionName) throws HttpException, IOException {
-		if(postThread != null) {
-			if(!postThread.isAlive()) { postThread = null; }
-			else { return; }
-		} // can't post while posting
-		postThread = new PostThread();
-		// redirect the browser to start checking progress
-		//getAppletContext().showDocument(new URL(getStatusPage()+"#upload?session="+sessionKey));
-		//getAppletContext().showDocument(new URL("javascript:uploadAppletCallback('"+sessionKey+"')"));
-		try {
-			// acquire the session key
-			String sessionKey = getSessionKey();
-			stopProgressThread();
-			showProgressPie();
-			progressThread = new ProgressThread();
-			progressThread.setSessionKey(sessionKey);
-			progressThread.start();
-			// post the data
+
+	/*
+	 * 			
 			PostMethod post = new PostMethod();
 			setUrl(post,sessionKey);
 			List<Part> parts = new LinkedList<Part>();
 			int i = 1;
-			for(File file : files) {
+			}
 				FileNameMap fileNameMap = URLConnection.getFileNameMap();
 				String mimeType = fileNameMap.getContentTypeFor(file.getName());
 				FilePart part = new FilePart("f"+i, file, mimeType, null);
@@ -433,6 +407,110 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			}
 			postThread.post = post;
 			post.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[]{}), post.getParams())); 
+			postThread.start();
+
+	 */
+	
+	public static final int BATCH_SIZE=3;
+	
+	class BatchPostThread extends Thread {
+		public List<File> files;
+		public String collectionName;
+		String collectionUri;
+		HttpClient client;
+		String postBatch(List<File> batch, int offset, int nFiles) throws Exception {
+			// acquire the session key and start tracking progress
+			String sessionKey = getSessionKey();
+			stopProgressThread();
+			showProgressPie();
+			progressThread = new ProgressThread();
+			progressThread.setSessionKey(sessionKey);
+			progressThread.start();
+			// set up the POST batch
+			PostMethod post = new PostMethod();
+			setUrl(post,sessionKey);
+			List<Part> parts = new LinkedList<Part>();
+			int i = 1;
+			for(File file : batch) {
+				FileNameMap fileNameMap = URLConnection.getFileNameMap();
+				String mimeType = fileNameMap.getContentTypeFor(file.getName());
+				FilePart part = new FilePart("f"+i, file, mimeType, null);
+				parts.add(part);
+				i++;
+			}
+			if(collectionUri != null) {
+				log("adding collection uri part "+collectionUri);
+				parts.add(new StringPart("collectionUri",collectionUri));
+			} else if(collectionName != null) {
+				log("adding collection name part "+collectionName);
+				parts.add(new StringPart("collection",collectionName));
+			}
+			post.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[]{}), post.getParams()));
+			client.executeMethod(post);
+			if(post.getStatusCode() != 200) {
+				log("post failed! "+post.getStatusLine());
+				getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback('"+sessionKey+"')"));
+				stopProgressThread();
+				showErrorCard();
+				throw new Exception("post failed");
+			} else if(collectionName != null && collectionUri == null) {
+				collectionUri = post.getResponseBodyAsString();
+				log("got collection uri from server: "+collectionUri);
+			}
+			progressPie.setProgress((i * 100) / nFiles); 
+			return sessionKey;
+		}
+		public void run() {
+			client = new HttpClient();
+			try {
+				String sessionKey= "";
+				List<File> batch = new LinkedList<File>();
+				int i = 0;
+				for(File file : files) {
+					batch.add(file);
+					if(batch.size()==BATCH_SIZE) {
+						sessionKey = postBatch(batch,i,files.size());
+						batch = new LinkedList<File>();
+					}
+					i++;
+				}
+				// remember to do the last batch
+				if(batch.size() > 0) {
+					sessionKey = postBatch(batch,i,files.size());
+				}
+				// we're done
+				String url = getContextUrl()+"UploadBlob?uploadComplete="+sessionKey;
+				url = getRedirectUrl(url);
+				log("post complete, got redirect url "+url);
+				//if(url.startsWith("/")) { url = url.substring(1); }
+				//getAppletContext().showDocument(new URL(getContextUrl()+url));
+				showCard("done");
+				stopProgressThread();
+			} catch(Exception x) {
+				showErrorCard();
+				stopProgressThread();
+			}
+		}
+	}
+	
+	BatchPostThread postThread;
+	
+	void uploadFiles(List<File> files) throws HttpException, IOException {
+		uploadFiles(files,null);
+	}
+	void uploadFiles(List<File> files, String collectionName) throws HttpException, IOException {
+		if(postThread != null) {
+			if(!postThread.isAlive()) { postThread = null; }
+			else { return; }
+		} // can't post while posting
+		// redirect the browser to start checking progress
+		//getAppletContext().showDocument(new URL(getStatusPage()+"#upload?session="+sessionKey));
+		//getAppletContext().showDocument(new URL("javascript:uploadAppletCallback('"+sessionKey+"')"));
+		try {
+			// post the data
+			postThread = new BatchPostThread();
+			postThread.files = files;
+			postThread.collectionName = collectionName;
 			log("posting data for "+files.size()+" file(s)");
 			postThread.start();
 		} catch(Exception x) {

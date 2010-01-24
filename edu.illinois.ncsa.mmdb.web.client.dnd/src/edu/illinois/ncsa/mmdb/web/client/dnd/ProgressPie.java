@@ -49,7 +49,8 @@ public class ProgressPie extends JComponent {
     
             // Set the color and draw a filled arc
             g.setColor(slices[i].color);
-            g.fillArc(area.x, area.y, area.width, area.height, startAngle, arcAngle);
+            g.drawArc(area.x, area.y, area.width, area.height, startAngle, arcAngle);
+            g.fillArc(area.x, area.y, area.width-1, area.height-1, startAngle, arcAngle);
     
             curValue += slices[i].value;
         }
