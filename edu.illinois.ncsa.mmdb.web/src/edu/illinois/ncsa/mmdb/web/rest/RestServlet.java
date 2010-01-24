@@ -255,6 +255,7 @@ public class RestServlet extends AuthenticatedServlet {
                     canonicalMembers.add(canonicalizeUri(member, IMAGE_INFIX, request));
                 }
                 response.addHeader("Pragma", "no-cache");
+                response.setContentType("text/html");
                 response.getWriter().write(formatList(canonicalMembers));
             } catch(RestServiceException e) {
             	if(e.isNotFound()) {
@@ -394,17 +395,22 @@ public class RestServlet extends AuthenticatedServlet {
     	for(Hit hit : TupeloStore.getInstance().getSearch().search(searchString, limit, offset)) {
     		result.add(hit.getId());
     	}
-    	response.getWriter().write(formatList(result));
+    	response.setContentType("text/html");
+    	response.getWriter().write(formatList(result,true));
     	response.getWriter().flush();
     }
     // deal with lists
     String formatList(Iterable<String> members) {
+    	return formatList(members,false);
+    }
+
+    String formatList(Iterable<String> members, boolean ordered) {
         StringWriter sw = new StringWriter();
-        sw.append("<ul>");
+        sw.append(ordered ? "<ol>" : "<ul>");
         for(String member : members) {
             sw.append("<li>").append(Xml.escape(member)).append("</li>");
         }
-        sw.append("</ul>");
+        sw.append(ordered ? "</ol>" : "</ul>");
         return sw.toString();
     }
 
