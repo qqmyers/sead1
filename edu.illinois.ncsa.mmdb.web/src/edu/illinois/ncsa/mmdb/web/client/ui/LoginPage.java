@@ -182,7 +182,7 @@ public class LoginPage extends Composite {
 									}
 									public void onResponseReceived(Request request,	Response response) {
 										// success!
-										MMDB.uploadAppletCredentials = response.getText();
+										MMDB.setUploadAppletCredentials(response.getText());
 										redirect();
 									}
 								});
@@ -231,16 +231,12 @@ public class LoginPage extends Composite {
 	    Cookies.setCookie("sid", sessionId, expires, null, "/", false);
 	}
 	
-	/**
-	 * Set sessionID to null, remove cookie, and log out of REST servlets
-	 */
-	public static void logout() {
-		MMDB.sessionID = null;
-		Cookies.removeCookie("sid");
-		
-		// now hit the REST authentication endpoint
+	public static void clearBrowserCreds() {
+		// now hit the REST authentication endpoint with bad creds
 		String restUrl = "./api/logout";
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+		builder.setUser("badCreds");
+		builder.setPassword("reallyReallyBadCreds");
 		try {
 			builder.sendRequest("", new RequestCallback() {
 				public void onError(Request request, Throwable exception) {
@@ -248,11 +244,22 @@ public class LoginPage extends Composite {
 				}
 				public void onResponseReceived(Request request,	Response response) {
 					// success!
-					MMDB.uploadAppletCredentials = null;
+					GWT.log("clearing upload applet credentials", null);
+					MMDB.setUploadAppletCredentials(null);
+					History.newItem("login?p=listDatasets"); // FIXME hardcodes destination
 				}
 			});
 		} catch(RequestException x) {
 			// another error condition, do something
 		}
+	}
+	
+	/**
+	 * Set sessionID to null, remove cookie, and log out of REST servlets
+	 */
+	public static void logout() {
+		MMDB.sessionID = null;
+		Cookies.removeCookie("sid");
+		clearBrowserCreds();
 	}
 }

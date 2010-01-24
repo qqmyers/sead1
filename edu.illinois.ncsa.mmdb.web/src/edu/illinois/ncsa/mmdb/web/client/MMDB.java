@@ -132,6 +132,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		parseHistoryToken(History.getToken());
 	}
 
+	Label debugLabel;
 	/**
 	 * Navigation menu at the top of the page.
 	 */
@@ -167,6 +168,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		navMenu.add(uploadButton);
 		//
 
+		// FIXME debug
+		debugLabel = new Label();
+		debugLabel.addStyleName("whiteText");
+		navMenu.add(debugLabel);
+		
 		// login menu
 		loginStatusWidget = new LoginStatusWidget();
 		RootPanel.get("loginMenu").add(loginStatusWidget);
@@ -414,6 +420,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 	private boolean dndEnabled = false;
 	
+	public static void setUploadAppletCredentials(String credentials) {
+		GWT.log("set upload applet credentials to "+credentials, null);
+		uploadAppletCredentials = credentials;
+	}
 	native void deployDndApplet(String credentials) /*-{
 		var attributes = {
 			code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
@@ -632,6 +642,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	public boolean checkLogin() {
 		String cookieSID = Cookies.getCookie("sid");
+		// FIXME debug
+		/*
+		String dl = (cookieSID != null ? "sid="+cookieSID : "")
+		+ (MMDB.sessionID != null ? ",sessionID="+MMDB.sessionID : "");
+		debugLabel.setText(dl);
+		// end debug
+		 */
 		if (cookieSID != null) {
 			LoginPage.login(cookieSID);
 		}

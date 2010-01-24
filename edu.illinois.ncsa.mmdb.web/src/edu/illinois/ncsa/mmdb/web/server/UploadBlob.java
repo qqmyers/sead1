@@ -261,6 +261,7 @@ public class UploadBlob extends AuthenticatedServlet {
             List<FileItem> items = upload.parseRequest(request);
             int nFiles = 0;
             String collectionName = null;
+            String collectionUri = null;
             for (FileItem item : items) {
                 // process a file
                 String fieldName = item.getFieldName();
@@ -281,6 +282,10 @@ public class UploadBlob extends AuthenticatedServlet {
                 if(item.isFormField() && fieldName.equals("collection")) {
                 	collectionName = item.getString();
                 	log.debug("POST: upload collection name = "+collectionName);
+                }
+                if(item.isFormField() && fieldName.equals("collectionUri")) {
+                	collectionUri = item.getString();
+                	log.debug("POST: upload collection uri = "+collectionUri);
                 }
                 // if it's a field from a form and the size is non-zero...
                 if (!item.isFormField() && (sizeInBytes > 0)) {
@@ -360,12 +365,26 @@ public class UploadBlob extends AuthenticatedServlet {
                 }
             }
             // add a collection, if necessary
-            if(collectionName != null) {
+            if(collectionUri != null) {
+            	try {
+            		ThingSession ts = TupeloStore.getInstance().getContext().getThingSession();
+            		Thing t = ts.newThing(Resource.uriRef(collectionUri));
+            		t.setValue(DcTerms.DATE_MODIFIED, new Date());
+            		for(String itemUri : uris) {
+            			log.debug("added "+itemUri+" to collection "+collectionUri);
+            			t.addValue(RestService.HAS_MEMBER, Resource.uriRef(itemUri));
+            		}
+            		ts.save();
+            		TupeloStore.getInstance().setHistoryForUpload(sessionKey, "collection?uri="+collectionUri);
+            	} catch(OperatorException x) {
+            		x.printStackTrace();
+            	}
+            } else if(collectionName != null) {
             	try {
             		Map<Resource,Object> md = new HashMap<Resource,Object>();
             		md.put(RestService.LABEL_PROPERTY, collectionName);
             		md.put(Rdf.TYPE, RestService.COLLECTION_TYPE);
-            		String collectionUri = RestUriMinter.getInstance().mintUri(md);
+            		collectionUri = RestUriMinter.getInstance().mintUri(md);
         			ThingSession ts = TupeloStore.getInstance().getContext().getThingSession();
         			Thing t = ts.newThing(Resource.uriRef(collectionUri));
         			t.addType(RestService.COLLECTION_TYPE);
@@ -380,6 +399,8 @@ public class UploadBlob extends AuthenticatedServlet {
             		}
             		ts.save();
             		TupeloStore.getInstance().setHistoryForUpload(sessionKey, "collection?uri="+collectionUri);
+            		response.getOutputStream().print(collectionUri);
+            		response.getOutputStream().flush();
             	} catch(OperatorException x) {
             		//
             		x.printStackTrace();
@@ -492,19 +513,23 @@ public class UploadBlob extends AuthenticatedServlet {
     @Override
 	public void doGet ( HttpServletRequest request,
             HttpServletResponse response ) throws ServletException, IOException {
-    	if(!authenticate(request,response)) {
-    		return;
-    	}
+    	// allow clients with a session key in hand to continue unauthenticated
     	if(request.getParameterMap().containsKey("uploadComplete")) { // need to redirect after completion
         	TupeloStore t = TupeloStore.getInstance();
         	String sessionKey = request.getParameter("uploadComplete");
         	String historyToken = t.getHistoryForUpload(sessionKey);
         	if(historyToken != null) {
         		String redirectUrl = request.getContextPath() + TupeloStore.MMDB_WEBAPP_PATH + "#" + historyToken;
-        		response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-        		response.setHeader("Location", redirectUrl);
+        		response.getOutputStream().print(redirectUrl);
+        		response.getOutputStream().flush();
         	}
-        } else if(!request.getParameterMap().containsKey("session")) { // no session?
+        	return;
+        }
+    	if(!request.getParameterMap().containsKey("session")) { // no session?
+    		// then you'd better authenticate to get one
+        	if(!authenticate(request,response)) {
+        		return;
+        	}
         	String sessionKey = SecureHashMinter.getMinter().mint(); // mint a session key
         	// OK, we REALLY don't want IE to cache this. For reals
         	response.addHeader("cache-control","no-store, no-cache"); // don't cache

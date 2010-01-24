@@ -56,7 +56,7 @@ public class LoginStatusWidget extends Composite {
 			public void onClick(ClickEvent event) {
 				LoginPage.logout();
 				logout();
-				History.newItem("");
+				//History.newItem("");
 			}
 		});
 		
