@@ -137,6 +137,10 @@ body {
 	text-decoration: underline;
 }
 
+.smallText {
+    font-size: 0.8em;
+}
+
 .tooltip {
 	color: white;
 	font-size: 0.8em;

@@ -34,7 +34,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
  * 
  * @author Luigi Marini
  */
-public class DatasetTableOneColumnView extends FlexTable implements Display {
+public class DatasetTableOneColumnView extends DatasetTableView {
 
 private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDateTimeFormat();
 	
@@ -48,6 +48,10 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		addStyleName("datasetTable");
 	}
 
+	public int getPageSize() {
+		return 10;
+	}
+	
 	@Override
 	public void addRow(final String id, String name, String type, Date date, String preview) {
 		
@@ -74,7 +78,7 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 					}
 					public void onSuccess(DeleteDatasetResult result) {
 						getRowFormatter().addStyleName(row, "hidden");
-						DatasetTableOneColumnView.this.fireEvent(new DatasetDeletedEvent(id));
+						MMDB.eventBus.fireEvent(new DatasetDeletedEvent(id));
 					}
 				});
 			}

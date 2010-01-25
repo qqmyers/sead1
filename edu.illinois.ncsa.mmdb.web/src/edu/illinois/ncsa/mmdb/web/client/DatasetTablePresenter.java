@@ -55,7 +55,10 @@ public class DatasetTablePresenter extends
 	}
 
 	interface Display extends View {
+		/** add a row to this multi-dataset view */
 		void addRow(String id, String text, String string, Date date, String previewUri);
+		/** return the optimal page size for this view */
+		int getPageSize();
 	}
 
 	public Widget getWidget() {
