@@ -8,6 +8,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.HashSet;
+import java.util.Map;
+
+import org.mortbay.log.Log;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -31,6 +34,8 @@ import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 
@@ -46,6 +51,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
@@ -248,7 +254,7 @@ public class DatasetWidget extends Composite {
 		metadataPanel.add(typeLabel);
 
 		metadataPanel.add(dateLabel);
-
+		
 		// tags
 		tagsWidget = new TagsWidget(dataset.getUri(), service);
 
@@ -286,23 +292,7 @@ public class DatasetWidget extends Composite {
 			zoomButton.addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
 					// image zoom
-					zoom = new Frame(zoomUri) {
-						int mouseInScreenX, mouseInScreenY, mouseInClientX, mouseInClientY;
-						public void onBrowserEvent(Event event) {
-							if(event.getTypeInt() == Event.ONMOUSEOVER) {
-								mouseInScreenX = event.getScreenX();
-								mouseInScreenY = event.getScreenY();
-								mouseInClientX = event.getClientX();
-								mouseInClientY = event.getClientY();
-							} else if(event.getTypeInt() == Event.ONMOUSEOUT) {
-								NativeEvent mouseUp = Document.get().createMouseUpEvent(0, mouseInScreenX, mouseInScreenY, mouseInClientX, mouseInClientY, false, false, false, false, Event.BUTTON_LEFT);
-								getElement().dispatchEvent(mouseUp);
-							}
-							super.onBrowserEvent(event);
-						}
-					};
-					zoom.sinkEvents(Event.ONMOUSEOVER);
-					zoom.sinkEvents(Event.ONMOUSEOUT);
+					zoom = new Frame(zoomUri);
 					zoom.addStyleName("datasetZoom");
 					zoom.removeStyleName("gwt-Frame"); // remove frame border!
 					DOM.setElementAttribute(zoom.getElement(), "frameborder", "0"); // IE
@@ -414,7 +404,6 @@ public class DatasetWidget extends Composite {
 					@Override
 					public void onFailure(Throwable arg0) {
 						// TODO Auto-generated method stub
-
 					}
 
 					@Override

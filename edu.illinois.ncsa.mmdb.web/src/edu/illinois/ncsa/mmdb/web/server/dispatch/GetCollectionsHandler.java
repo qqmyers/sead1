@@ -5,6 +5,10 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -17,6 +21,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
 
@@ -49,50 +54,36 @@ public class GetCollectionsHandler implements
 	public GetCollectionsResult execute(GetCollections arg0,
 			ExecutionContext arg1) throws ActionException {
 		String memberUri = arg0.getMemberUri();
-		if (memberUri == null) {
-			try {
-				Collection<CollectionBean> list = cbu.getAll();
-				log.debug("Retrieved " + list.size() + " collections");
-				for (CollectionBean collection : list) {
-					log.debug("Collection " + collection.getTitle() + " | "
-							+ collection.getCreationDate() + " | "
-							+ collection.getLastModifiedDate());
-				}
-				return new GetCollectionsResult(new ArrayList<CollectionBean>(
-						list));
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} else {
-			ArrayList<CollectionBean> collections = new ArrayList<CollectionBean>();
-			ArrayList<String> seenUris = new ArrayList<String>();
-			Unifier uf = new Unifier();
-			uf.addPattern("collection", Rdf.TYPE,
-					CollectionBeanUtil.COLLECTION_TYPE);
+		ArrayList<CollectionBean> collections = new ArrayList<CollectionBean>();
+		List<Resource> seen = new LinkedList<Resource>();
+		Unifier uf = new Unifier();
+		uf.addPattern("collection", Rdf.TYPE,
+				CollectionBeanUtil.COLLECTION_TYPE);
+		if(memberUri != null) {
 			uf.addPattern("collection", CollectionBeanUtil.DCTERMS_HAS_PART,
 					Resource.uriRef(memberUri));
-			uf.addPattern("collection",Dc.DATE,"date");
-			uf.setColumnNames("collection", "resource", "date");
-			uf.addOrderByDesc("date");
-			try {
-				TupeloStore.getInstance().getContext().perform(uf);
-
-				for (Tuple<Resource> row : uf.getResult()) {
-					if (row.get(0) != null) {
-						if (!seenUris.contains(row.get(0).getString())) {
-							collections.add(cbu.get(row.get(0)));
-							seenUris.add(row.get(0).getString());
-						}
+		}
+		uf.addPattern("collection", DcTerms.DATE_CREATED, "date", true);
+		uf.setColumnNames("collection", "date");
+		uf.addOrderByDesc("date");
+		try {
+			TupeloStore.getInstance().getContext().perform(uf);
+			
+			for (Tuple<Resource> row : uf.getResult()) {
+				Resource subject = row.get(0);
+				if (subject != null) {
+					if (!seen.contains(subject)) {
+						CollectionBean colBean = cbu.get(subject);
+						collections.add(colBean);
+						seen.add(subject);
 					}
 				}
-			} catch (OperatorException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
 			}
-			return new GetCollectionsResult(collections);
+		} catch (OperatorException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-		return new GetCollectionsResult(new ArrayList<CollectionBean>());
+		return new GetCollectionsResult(collections);
 	}
 
 	@Override
