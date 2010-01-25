@@ -17,7 +17,6 @@ public class AuthenticatedServlet extends HttpServlet {
 	public static final String BASIC_CREDENTIALS = "edu.illinois.ncsa.mmdb.web.server.auth.basicCredentials";
 	
 	public static void doLogout(HttpServletRequest request, HttpServletResponse response) {
-		request.getSession(true).invalidate();
 		request.getSession(true).setAttribute(AUTHENTICATED_AS,null);
 		request.getSession(true).setAttribute(BASIC_CREDENTIALS,null);
 	}
@@ -26,6 +25,10 @@ public class AuthenticatedServlet extends HttpServlet {
 		String userId = (String) request.getSession(true).getAttribute(AUTHENTICATED_AS);
 		doLogout(request, response);
 		log.info("LOGOUT "+userId);
+	}
+	
+	protected String getAuthenticatedUsername(HttpServletRequest request) {
+		return (String) request.getSession(true).getAttribute(AUTHENTICATED_AS);
 	}
 	
 	public static boolean doAuthenticate(HttpServletRequest request, HttpServletResponse response) {
@@ -70,7 +73,6 @@ public class AuthenticatedServlet extends HttpServlet {
 	}
 	
 	protected boolean authenticate(HttpServletRequest request, HttpServletResponse response) {
-		String sessionId = request.getSession(true).getId();
 		return doAuthenticate(request,response);
 	}
 }

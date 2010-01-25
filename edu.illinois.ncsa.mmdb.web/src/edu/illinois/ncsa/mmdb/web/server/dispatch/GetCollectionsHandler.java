@@ -16,6 +16,7 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
 
@@ -71,8 +72,9 @@ public class GetCollectionsHandler implements
 					CollectionBeanUtil.COLLECTION_TYPE);
 			uf.addPattern("collection", CollectionBeanUtil.DCTERMS_HAS_PART,
 					Resource.uriRef(memberUri));
-			uf.setColumnNames("collection", "resource");
-
+			uf.addPattern("collection",Dc.DATE,"date");
+			uf.setColumnNames("collection", "resource", "date");
+			uf.addOrderByDesc("date");
 			try {
 				TupeloStore.getInstance().getContext().perform(uf);
 

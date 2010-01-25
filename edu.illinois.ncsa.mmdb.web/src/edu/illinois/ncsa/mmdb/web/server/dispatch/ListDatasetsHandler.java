@@ -62,9 +62,13 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 	private List<DatasetBean> listDatasets(String orderBy, boolean desc,
 			int limit, int offset) {
 		try {
+			long then = System.currentTimeMillis(); //
 			List<String> uris = listDatasetUris(orderBy,desc,limit,offset);
-			log.debug("listed "+uris.size()+" dataset(s)");
-			return dbu.get(uris);
+			long between = System.currentTimeMillis();
+			List<DatasetBean> result = dbu.get(uris);
+			long now = System.currentTimeMillis();
+			log.debug("listed "+uris.size()+" dataset(s) in "+(now-then)+"ms ("+(between-then)+"/"+(now-between)+" u/b)");
+			return result;
 		} catch(Exception x) {
 			return new LinkedList<DatasetBean>();
 		}

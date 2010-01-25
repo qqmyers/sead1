@@ -45,6 +45,7 @@ import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 
 /**
@@ -338,6 +339,10 @@ public class UploadBlob extends AuthenticatedServlet {
                         t.setValue(LABEL, fileName);
                         t.setValue(RestService.LABEL_PROPERTY, fileName);
                         t.setValue(RestService.DATE_PROPERTY, new Date());
+                        String username = getAuthenticatedUsername(request);
+                        if(username != null) {
+                        	t.setValue(Dc.CREATOR, Resource.uriRef(PersonBeanUtil.getPersonID(username)));
+                        }
                         t.setValue(Files.LENGTH, bw.getSize());
                         if(contentType != null) {
                         	// httpclient also gives the content type a "charset"; ignore that.
