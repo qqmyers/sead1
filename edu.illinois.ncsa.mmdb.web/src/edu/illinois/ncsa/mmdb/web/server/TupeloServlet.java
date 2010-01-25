@@ -50,8 +50,9 @@ public class TupeloServlet extends HttpTupeloServlet {
     			if(!text.matches("[\\P{Cc}]*")) {
     				log.warn("warning: bad literal \""+text+"\", escaping");
     				return Resource.literal(UnicodeTranscoder.encode(text));
+    			} else {
+    				return literal;
     			}
-    			return literal; // FIXME implement!
     		}
     	}
     	void postProcess(TripleReader tr) {
@@ -76,6 +77,7 @@ public class TupeloServlet extends HttpTupeloServlet {
     			}
     			newResult.addRow(newRow);
     		}
+    		u.setResult(newResult);
     	}
     	public void delegateOperation(Operator operator) throws OperatorException {
     		super.delegateOperation(operator);
