@@ -1,25 +1,19 @@
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
 
-public class GetPreviews implements Action<GetPreviewsResult> {
+@SuppressWarnings("serial")
+public class GetPreviews extends SubjectAction<GetPreviewsResult> {
 	public static final String SMALL = "small";
 	public static final String LARGE = "large";
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -1275298870501863076L;
-
 	public GetPreviews() { }
 	
-	String datasetUri;
-	
 	public GetPreviews(String datasetUri) {
-		this.datasetUri = datasetUri;
+		super(datasetUri);
 	}
 	
+	/** @deprecated use getUri */
 	public String getDatasetUri() {
-		return datasetUri;
+		return getUri();
 	}
 }

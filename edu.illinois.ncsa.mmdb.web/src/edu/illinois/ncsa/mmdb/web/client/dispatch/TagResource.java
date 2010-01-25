@@ -5,16 +5,12 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import java.util.Set;
 
-import net.customware.gwt.dispatch.shared.Action;
-
 /**
  * @author lmarini
  *
  */
-public class TagResource implements Action<TagResourceResult>{
-
-	private static final long serialVersionUID = 2375836350874802386L;
-	private String id;
+@SuppressWarnings("serial")
+public class TagResource extends SubjectAction<TagResourceResult>{
 	private Set<String> tags;
 	
 	public TagResource() {
@@ -22,12 +18,13 @@ public class TagResource implements Action<TagResourceResult>{
 	}
 	
 	public TagResource(String id, Set<String> tags) {
-		this.id = id;
+		setUri(id);
 		this.tags = tags;
 	}
 
+	/** @deprecated use getUri */
 	public String getId() {
-		return id;
+		return getUri();
 	}
 
 	public Set<String> getTags() {

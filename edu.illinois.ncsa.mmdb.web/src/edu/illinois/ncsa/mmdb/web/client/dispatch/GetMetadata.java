@@ -3,7 +3,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
 
 /**
  * Get the metadata attached to a resource.
@@ -12,20 +11,10 @@ import net.customware.gwt.dispatch.shared.Action;
  *
  */
 @SuppressWarnings("serial")
-public class GetMetadata implements Action<GetMetadataResult> {
-
-	private String uri;
-
+public class GetMetadata extends SubjectAction<GetMetadataResult> {
 	public GetMetadata() {}
 	
 	public GetMetadata(String uri) {
-		this.uri = uri;
-	}
-
-	/**
-	 * @return the uri
-	 */
-	public String getUri() {
-		return uri;
+		super(uri);
 	}
 }

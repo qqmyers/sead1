@@ -3,30 +3,29 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
 
 /**
  * @author lmarini
  *
  */
-public class GetGeoPoint implements Action<GetGeoPointResult>{
-
-	private static final long serialVersionUID = -3751159066935167385L;
+@SuppressWarnings("serial")
+public class GetGeoPoint extends SubjectAction<GetGeoPointResult>{
 	
-	private String id;
-	
+	@SuppressWarnings("unused")
 	private GetGeoPoint() {}
 	
 	public GetGeoPoint(String id) {
-		this.setId(id);
+		super(id);
 	}
 
+	/** @deprecated use setUri */
 	public void setId(String id) {
-		this.id = id;
+		setUri(id);
 	}
 
+	/** @deprecated use getUri */
 	public String getId() {
-		return id;
+		return getUri();
 	}
 
 }

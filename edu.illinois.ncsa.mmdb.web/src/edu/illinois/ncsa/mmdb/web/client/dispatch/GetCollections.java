@@ -3,7 +3,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
 
 /**
  * Get all collections.
@@ -12,20 +11,18 @@ import net.customware.gwt.dispatch.shared.Action;
  *
  */
 @SuppressWarnings("serial")
-public class GetCollections implements Action<GetCollectionsResult> {
-
-	private String memberUri;
+public class GetCollections extends SubjectAction<GetCollectionsResult> {
 
 	public GetCollections() {}
 
 	public GetCollections(String uri) {
-		this.memberUri = uri;
+		setUri(uri);
 	}
 	
 	/**
 	 * @return the uri
 	 */
 	public String getMemberUri() {
-		return memberUri;
+		return getUri();
 	}
 }

@@ -3,7 +3,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
 
 /**
  * Retrieve annotations for a particular resource.
@@ -11,21 +10,18 @@ import net.customware.gwt.dispatch.shared.Action;
  * @author Luigi Marini
  *
  */
-public class GetAnnotations implements Action<GetAnnotationsResult>{
-
-	private static final long serialVersionUID = 2465515526733892956L;
-	private String id;
-
+public class GetAnnotations extends SubjectAction<GetAnnotationsResult>{
 	/**
 	 * For serialization only.
 	 */
 	public GetAnnotations() {}
 
 	public GetAnnotations(String id) {
-		this.id = id;
+		super(id);
 	}
 
+	/** @deprecated use getUri() */
 	public String getId() {
-		return id;
+		return getUri();
 	}
 }
