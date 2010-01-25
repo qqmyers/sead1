@@ -51,7 +51,8 @@ public class AuthenticatedServlet extends HttpServlet {
 			}
 			String username = up[0];
 			String password = up[1];
-			if((new Authentication()).authenticate(username, password) || (username.equals("tupelo") && password.equals("tupelo"))) { // FIXME workaround
+			if((username.equals("tupelo") && password.equals("tupelo")) // FIXME workaround
+					|| (new Authentication()).authenticate(username, password)) {
 				// set the session attribute indicating that we're authenticated
 				request.getSession().setAttribute(AUTHENTICATED_AS, username);
 				request.getSession().setAttribute(BASIC_CREDENTIALS, auth);
