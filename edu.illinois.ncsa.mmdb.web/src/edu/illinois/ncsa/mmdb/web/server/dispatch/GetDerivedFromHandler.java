@@ -13,7 +13,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.query.sparql.SparqlQueryFactory;
+import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFrom;
@@ -40,16 +41,10 @@ public class GetDerivedFromHandler implements ActionHandler<GetDerivedFrom, GetD
 			u.addPattern("i1","i1s","i2");
 			u.addPattern("i2",cet("workflow/datalist/hasData"),"i3");
 			u.addPattern("i3","i3s","input");
-			//tag:cet.ncsa.uiuc.edu,2008:/bean/Dataset/f133510f-4d8b-41cc-aa65-d29c168c353a
-			//
-			// FIXME desperation
-			System.out.println("executing "+SparqlQueryFactory.toSparql(u));
-			System.out.println("getting derived datasets for "+subject);
-			// end FIXME
+			u.addPattern("input",Rdf.TYPE,Cet.DATASET);
 			TupeloStore.getInstance().getContext().perform(u);
 			List<DatasetBean> df = new LinkedList<DatasetBean>();
 			for(Tuple<Resource> row : u.getResult()) {
-				System.out.println(subject+" is derived from "+row.get(0)); // FIXME debug
 				df.add(TupeloStore.fetchDataset(row.get(0))); // dbu's only take strings
 			}
 			return new GetDerivedFromResult(df);
