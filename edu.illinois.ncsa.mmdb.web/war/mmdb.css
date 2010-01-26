@@ -174,11 +174,12 @@ body {
 }
 
 .pagingWidget {
-	line-height: 2em;
+	line-height: 24px;
 }
 
-.pagingLabel {
+.pagingButton  {
 	font-size: 0.9em;
+	vertical-align: middle;
 }
 
 .page {
