@@ -17,6 +17,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDerivedFromHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoPointHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
@@ -51,6 +52,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
 		DispatchUtil.registerHandler(new GetPreviewsHandler());
 		DispatchUtil.registerHandler(new GetUploadDestinationHandler());
 		DispatchUtil.registerHandler(new DeleteDatasetHandler());
+		DispatchUtil.registerHandler(new GetDerivedFromHandler());
 	}
 
 	public void contextDestroyed(ServletContextEvent evt) {

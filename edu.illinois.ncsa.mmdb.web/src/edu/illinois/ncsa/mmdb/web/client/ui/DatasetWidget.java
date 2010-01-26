@@ -36,6 +36,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFrom;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFromResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
@@ -106,6 +108,8 @@ public class DatasetWidget extends Composite {
 	private Label metadataHeader;
 
 	protected CollectionMembershipWidget collectionWidget;
+	
+	protected DerivedDatasetsWidget derivedDatasetsWidget;
 
 	private AddToCollectionDialog addToCollectionDialog;
 
@@ -331,6 +335,8 @@ public class DatasetWidget extends Composite {
 		loadMetadata();
 
 		loadCollections();
+		
+		loadDerivedFrom();
 	}
 
 	private void previewPanel(final String uri) {
@@ -410,6 +416,32 @@ public class DatasetWidget extends Composite {
 								collectionWidget.addCollection(collection);
 							}
 							rightColumn.add(collectionWidget);
+						}
+					}
+				});
+	}
+
+
+	private void loadDerivedFrom() {
+		service.execute(new GetDerivedFrom(uri),
+				new AsyncCallback<GetDerivedFromResult>() {
+					@Override
+					public void onFailure(Throwable arg0) {
+						// TODO Auto-generated method stub
+					}
+
+					@Override
+					public void onSuccess(GetDerivedFromResult arg0) {
+						List<DatasetBean> df = arg0.getDerivedFrom();
+						if (df.size() > 0) {
+							if (derivedDatasetsWidget != null) {
+								rightColumn.remove(derivedDatasetsWidget);
+							}
+							derivedDatasetsWidget = new DerivedDatasetsWidget();
+							for(DatasetBean d : df) {
+								derivedDatasetsWidget.addDataset(d);
+							}
+							rightColumn.add(derivedDatasetsWidget);
 						}
 					}
 				});
