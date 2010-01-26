@@ -9,9 +9,11 @@ import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.util.Tables;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFrom;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFromResult;
@@ -19,7 +21,8 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class GetDerivedFromHandler implements ActionHandler<GetDerivedFrom, GetDerivedFromResult> {
-
+	Log log = LogFactory.getLog(GetDerivedFromHandler.class);
+	
 	@Override
 	public GetDerivedFromResult execute(GetDerivedFrom arg0,
 			ExecutionContext arg1) throws ActionException {
@@ -36,11 +39,13 @@ public class GetDerivedFromHandler implements ActionHandler<GetDerivedFrom, GetD
 			u.addPattern("i1","i1s","i2");
 			u.addPattern("i2",cet("workflow/datalist/hasData"),"i3");
 			u.addPattern("i3","i3s","input");
+			//tag:cet.ncsa.uiuc.edu,2008:/bean/Dataset/f133510f-4d8b-41cc-aa65-d29c168c353a
 			//
 			TupeloStore.getInstance().getContext().perform(u);
 			List<DatasetBean> df = new LinkedList<DatasetBean>();
-			for(Resource d : Tables.getColumn(u.getResult(),0)) {
-				df.add(TupeloStore.fetchDataset(d)); // dbu's only take strings
+			for(Tuple<Resource> row : u.getResult()) {
+				log.info(subject+" is derived from "+row.get(0)); // FIXME debug
+				df.add(TupeloStore.fetchDataset(row.get(0))); // dbu's only take strings
 			}
 			return new GetDerivedFromResult(df);
 		} catch(Exception x) {
