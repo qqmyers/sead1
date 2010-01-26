@@ -31,7 +31,6 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter.Display;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -320,7 +319,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 							event.setDataset(dataset);
 							eventBus.fireEvent(event);
 						}
-						int np = result.getDatasetCount() / pageSize;
+						int np = (result.getDatasetCount() / pageSize) + (result.getDatasetCount() % pageSize != 0 ? 1 : 0);
 						topPager.setNumberOfPages(np);
 						bottomPager.setNumberOfPages(np);
 						numberOfPages = np;
