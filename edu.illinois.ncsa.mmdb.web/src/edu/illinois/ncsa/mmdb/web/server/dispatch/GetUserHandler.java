@@ -6,6 +6,12 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
+
+import org.mortbay.log.Log;
+import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.TripleMatcher;
+import org.tupeloproject.rdf.Resource;
+
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
@@ -21,12 +27,23 @@ public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
 	@Override
 	public GetUserResult execute(GetUser action, ExecutionContext arg1)
 			throws ActionException {
+		
+		Context context = TupeloStore.getInstance().getContext();
 		PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance()
 				.getBeanSession());
 		try {
-			PersonBean personBean = pbu.get(PersonBeanUtil.getPersonID(action
-					.getEmailAddress()));
-			return new GetUserResult(personBean);
+			Resource personID = Resource.uriRef(PersonBeanUtil.getPersonID(action.getEmailAddress()));
+			TripleMatcher tm = new TripleMatcher();
+			tm.setSubject(personID);
+			context.perform(tm);
+			if (tm.getResult().size() > 0) {
+				Log.debug("User in the system " + personID.getString());
+				PersonBean personBean = pbu.get(personID);
+				return new GetUserResult(personBean);
+			} else {
+				Log.debug("User not in the system " + personID.getString());
+				return new GetUserResult();
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
