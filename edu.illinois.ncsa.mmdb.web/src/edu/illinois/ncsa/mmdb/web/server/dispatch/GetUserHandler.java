@@ -7,7 +7,8 @@ import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
-import org.mortbay.log.Log;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.rdf.Resource;
@@ -24,6 +25,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
  */
 public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
 
+	/** Commons logging **/
+	private static Log log = LogFactory.getLog(GetUserHandler.class);
+	
 	@Override
 	public GetUserResult execute(GetUser action, ExecutionContext arg1)
 			throws ActionException {
@@ -37,11 +41,11 @@ public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
 			tm.setSubject(personID);
 			context.perform(tm);
 			if (tm.getResult().size() > 0) {
-				Log.debug("User in the system " + personID.getString());
+				log.debug("User in the system " + personID.getString());
 				PersonBean personBean = pbu.get(personID);
 				return new GetUserResult(personBean);
 			} else {
-				Log.debug("User not in the system " + personID.getString());
+				log.debug("User not in the system " + personID.getString());
 				return new GetUserResult();
 			}
 		} catch (Exception e) {
