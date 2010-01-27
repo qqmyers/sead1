@@ -11,6 +11,7 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 @SuppressWarnings("serial")
 public class GetDataset extends SubjectAction<GetDatasetResult>{
 	
+	@SuppressWarnings("unused")
 	private GetDataset() {}
 	
 	public GetDataset(String id) {

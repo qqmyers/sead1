@@ -7,8 +7,6 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import net.customware.gwt.dispatch.shared.Result;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 
 /**

@@ -429,6 +429,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		}
 	}
 
+	String uriForCollectionSortKey(String key) { // FIXME kludge, make keys full URI's
+		if (key.startsWith("title-")) {
+			return "http://purl.org/dc/elements/1.1/title";
+		} else { // default is creation date
+			return "http://purl.org/dc/terms/created";
+		}
+	}
+
 	private void listCollections() {
 		mainContainer.clear();
 
@@ -482,6 +490,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		// now list the collections
 		GetCollections query = new GetCollections();
+		query.setSortKey(uriForCollectionSortKey(sortKey));
+		query.setDesc(descForSortKey(sortKey));
 		query.setOffset(pageOffset);
 		query.setLimit(pageSize);
 

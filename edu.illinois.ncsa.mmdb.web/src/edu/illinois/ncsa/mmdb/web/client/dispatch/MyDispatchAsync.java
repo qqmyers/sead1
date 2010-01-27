@@ -36,6 +36,7 @@ public class MyDispatchAsync implements DispatchAsync {
 				callback.onFailure(caught);
 			}
 
+			@SuppressWarnings("unchecked")
 			public void onSuccess(Result result) {
 				callback.onSuccess((R) result);
 				GWT.log("Command " + action.getClass().getName()

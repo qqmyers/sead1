@@ -73,7 +73,7 @@ public class PagingWidget extends Composite implements ClickHandler, HasValueCha
 				setPage(getPage()-1);
 			}
 		} else if(w == nextButton) {
-			if(getNumberOfPages() == -1 || getPage() < getNumberOfPages()) {
+			if(getNumberOfPages() < 1 || getPage() < getNumberOfPages()) {
 				setPage(getPage()+1);
 			}
 		} else if(w == lastButton) {

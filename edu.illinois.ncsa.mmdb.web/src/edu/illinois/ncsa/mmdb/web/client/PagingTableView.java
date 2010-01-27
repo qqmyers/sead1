@@ -54,7 +54,7 @@ public abstract class PagingTableView<T> extends Composite implements Display<T>
 
 		PagingWidget pagingWidget = new PagingWidget();
 		pagingWidget.setPage(page);
-		pagingControls.add(pagingWidget);
+		addPagingControl(pagingWidget);
 		panel.add(pagingWidget);
 		return panel;
 	}

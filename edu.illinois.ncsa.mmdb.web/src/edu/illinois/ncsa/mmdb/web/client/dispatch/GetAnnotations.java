@@ -10,6 +10,7 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
  * @author Luigi Marini
  *
  */
+@SuppressWarnings("serial")
 public class GetAnnotations extends SubjectAction<GetAnnotationsResult>{
 	/**
 	 * For serialization only.
