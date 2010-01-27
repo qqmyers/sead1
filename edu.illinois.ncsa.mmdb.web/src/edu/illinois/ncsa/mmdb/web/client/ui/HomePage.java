@@ -9,6 +9,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
@@ -27,6 +28,7 @@ public class HomePage extends Page {
 
 	private final FlexTable linksPanel;
 	protected Widget userInfoTable;
+	private SimplePanel flushPanel;
 
 	/**
 	 * 
@@ -37,6 +39,9 @@ public class HomePage extends Page {
 		linksPanel = createLinksPanel();
 		mainLayoutPanel.add(linksPanel);
 		mainLayoutPanel.addStyleName("inline");
+		flushPanel = new SimplePanel();
+		flushPanel.addStyleName("clearBoth");
+		mainLayoutPanel.add(flushPanel);
 		getUserInfo();
 		checkAdminPermissions();
 	}
@@ -76,7 +81,7 @@ public class HomePage extends Page {
 					@Override
 					public void onSuccess(GetUserResult result) {
 						userInfoTable = createUserInfo(result.getPersonBean());
-						mainLayoutPanel.add(userInfoTable);
+						mainLayoutPanel.insert(userInfoTable, 3);
 					}
 				});
 

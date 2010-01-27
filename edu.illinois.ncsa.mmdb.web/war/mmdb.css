@@ -221,6 +221,7 @@ body {
 }
 
 .page {
+	float: none;
 	width: 100%;
 	text-align: center;
 	minHeight: 600px;
@@ -229,7 +230,7 @@ body {
 }
 
 .homePageWidget {
-	display: inline;
+	float: left;
 	border: 1px #002B55 solid;
 	margin: 50px;
 	padding: 50px;
