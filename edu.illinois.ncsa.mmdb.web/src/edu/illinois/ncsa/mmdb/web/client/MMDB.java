@@ -5,8 +5,6 @@ import java.util.Map;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -26,10 +24,8 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
@@ -48,7 +44,6 @@ import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListCollectionsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
-import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TitlePanel;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -229,19 +224,19 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 	int page=1, numberOfPages=0;
 	String sortKey = "date-desc";
-	String listView = "list";
+	String viewType = "list";
 
-	private void listDatasets() {
+	private PagingDatasetTableView createListDatasetsView() {
 		Map<String, String> params = getParams();
 		
 		// first choose the kind of view
 		DatasetTableView datasetTableView = null;
 		if(params.containsKey("view") && params.get("view").equals("grid")) {
-			listView = "grid";
+			viewType = "grid";
 		} else if(params.containsKey("view") && params.get("view").equals("list")) {
-			listView = "list";
+			viewType = "list";
 		}
-		if(listView.equals("grid")) {
+		if(viewType.equals("grid")) {
 			datasetTableView = new DatasetTableFlowGridView();
 		} else {
 			datasetTableView = new DatasetTableOneColumnView();
@@ -262,15 +257,50 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		if (params.containsKey("sort")) {
 			sortKey = params.get("sort");
 		}
-		// compute the page offset
-		pageOffset = (page - 1) * pageSize;
 		
 		// now bind the presenter to the view and associate it with the event bus
-		DatasetTablePresenter datasetTablePresenter = new DatasetTablePresenter(
-				datasetTableView, eventBus);
+		PagingDatasetTableView pagingView = new PagingDatasetTableView(page, sortKey, viewType);
+		pagingView.addStyleName("datasetTable");
+
+		pagingView.setTable(datasetTableView); // here we're wrapping the less generic impl
+		PagingDatasetTablePresenter datasetTablePresenter =
+			new PagingDatasetTablePresenter(pagingView, eventBus);
 		datasetTablePresenter.bind();
-		//
 		
+		pagingView.addPageChangeHandler(new ValueChangeHandler<Integer>() {
+			public void onValueChange(ValueChangeEvent<Integer> event) {
+				goToPage(event.getValue(), sortKey, viewType);
+			}
+		});
+		
+		pagingView.addSortKeyChangeHandler(new ValueChangeHandler<String>() {
+			public void onValueChange(ValueChangeEvent<String> event) {
+				goToPage(1, event.getValue(), viewType);
+			}
+		});
+		
+		pagingView.addViewTypeChangeHandler(new ValueChangeHandler<String>() {
+			public void onValueChange(ValueChangeEvent<String> event) {
+				goToPage(1, sortKey, event.getValue());
+			}
+		});
+
+		// finally
+
+		// if we know the number of pages, have the view reflect it
+		if(numberOfPages > 0) {
+			pagingView.setNumberOfPages(numberOfPages);
+		}
+		
+		// compute the page size using the table's preferred size
+		pageSize = pagingView.getTable().getPageSize();
+		// now compute the current page offset
+		pageOffset = (page - 1) * pageSize;
+		
+		return pagingView;
+	}
+	
+	private void listDatasets() {
 		mainContainer.clear();
 		
 		TitlePanel titlePanel = new TitlePanel("List all");
@@ -284,15 +314,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		titlePanel.addEast(rss);
 
 		mainContainer.add(titlePanel);
-
-		final PagingWidget topPager = new PagingWidget();
-		mainContainer.add(createPagingPanel(topPager));
-
-		// datasets table
-		mainContainer.add(datasetTableView.asWidget());
 		
-		final PagingWidget bottomPager = new PagingWidget();
-		mainContainer.add(createPagingPanel(bottomPager));
+		// datasets table
+		final PagingDatasetTableView listDatasetsView = createListDatasetsView();
+		mainContainer.add(listDatasetsView.asWidget());
 
 		// TODO add a way to switch between the two views
 		// DatasetTableView datasetTableWidget = new DatasetTableView();
@@ -320,8 +345,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 							eventBus.fireEvent(event);
 						}
 						int np = (result.getDatasetCount() / pageSize) + (result.getDatasetCount() % pageSize != 0 ? 1 : 0);
-						topPager.setNumberOfPages(np);
-						bottomPager.setNumberOfPages(np);
+						listDatasetsView.setNumberOfPages(np);
 						numberOfPages = np;
 					}
 				});
@@ -344,77 +368,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 						});
 			}
 		});
-	}
-
-	/**
-	 * TODO move to DatasetTableOneColumnView
-	 * @return
-	 */
-	private Widget createPagingPanel(PagingWidget pagingWidget) {
-		// paging header
-		HorizontalPanel pagingPanel = new HorizontalPanel();
-		pagingPanel.addStyleName("datasetsPager");
-		pagingPanel.addStyleName("centered"); // special IE-friendly centering style
-
-		pagingWidget.setPage(page);
-		pagingWidget.setNumberOfPages(numberOfPages); // updated on listdatasets callback
-		pagingWidget
-				.addValueChangeHandler(new ValueChangeHandler<Integer>() {
-					public void onValueChange(ValueChangeEvent<Integer> event) {
-						goToPage(event.getValue(), sortKey, listView);
-					}
-				});
-		pagingPanel.add(pagingWidget);
-
-		Label sortBy = new Label("sort by: ");
-		sortBy.addStyleName("pagingLabel");
-		pagingPanel.add(sortBy);
-
-		final ListBox sortOptions = new ListBox();
-		sortOptions.addItem("Date: newest first", "date-desc");
-		sortOptions.addItem("Date: oldest first", "date-asc");
-		sortOptions.addItem("Title: A-Z", "title-asc");
-		sortOptions.addItem("Title: Z-A", "title-desc");
-		sortOptions.addStyleName("pagingLabel");
-
-		for (int i = 0; i < sortOptions.getItemCount(); i++) {
-			if (sortKey.equals(sortOptions.getValue(i))) {
-				sortOptions.setSelectedIndex(i);
-			}
-		}
-
-		sortOptions.addChangeHandler(new ChangeHandler() {
-			public void onChange(ChangeEvent event) {
-				goToPage(1, sortOptions.getValue(sortOptions
-						.getSelectedIndex()), listView);
-			}
-		});
-		pagingPanel.add(sortOptions);
-		
-		Label viewOptionsLabel = new Label("view:");
-		viewOptionsLabel.addStyleName("pagingLabel");
-		
-		final ListBox viewOptions = new ListBox();
-		viewOptions.addItem("list", "list");
-		viewOptions.addItem("grid", "grid");
-		viewOptions.addStyleName("pagingLabel");
-		
-		for (int i = 0; i < viewOptions.getItemCount(); i++) {
-			if (listView.equals(viewOptions.getValue(i))) {
-				viewOptions.setSelectedIndex(i);
-			}
-		}
-
-		viewOptions.addChangeHandler(new ChangeHandler() {
-			public void onChange(ChangeEvent event) {
-				goToPage(1, sortKey, viewOptions.getValue(viewOptions.getSelectedIndex()));
-			}
-		});
-
-		pagingPanel.add(viewOptionsLabel);
-		pagingPanel.add(viewOptions);
-		
-		return pagingPanel;
 	}
 
 	/**

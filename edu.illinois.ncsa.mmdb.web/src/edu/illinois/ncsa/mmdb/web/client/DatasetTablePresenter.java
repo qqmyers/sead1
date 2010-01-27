@@ -41,14 +41,7 @@ public class DatasetTablePresenter extends
 						String title = dataset.getTitle();
 						String type = dataset.getMimeType();
 						Date date = dataset.getDate();
-						String previewUri = null;
-						/*
-						for (PreviewImageBean preview : event.getPreviews()) {
-							if (preview.getWidth() == 100) {
-								previewUri = preview.getUri();
-							}
-						}
-						*/
+						String previewUri = "/api/image/preview/small/"+id;
 						display.addRow(id, title, type, date, previewUri);
 					}
 				});
@@ -56,7 +49,7 @@ public class DatasetTablePresenter extends
 
 	interface Display extends View {
 		/** add a row to this multi-dataset view */
-		void addRow(String id, String text, String string, Date date, String previewUri);
+		void addRow(String id, String title, String mimeType, Date date, String previewUri);
 		/** return the optimal page size for this view */
 		int getPageSize();
 	}
