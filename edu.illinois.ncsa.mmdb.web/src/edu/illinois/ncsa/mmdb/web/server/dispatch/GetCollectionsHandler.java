@@ -17,7 +17,7 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.query.sparql.SparqlQueryFactory;
+import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
 
@@ -54,17 +54,20 @@ public class GetCollectionsHandler implements
 			uf.addPattern("collection", CollectionBeanUtil.DCTERMS_HAS_PART,
 					Resource.uriRef(query.getMemberUri()));
 		}
-		Resource sortKey = Resource.uriRef(query.getSortKey());
+		Resource sortKey = DcTerms.DATE_CREATED;
+		if(query.getSortKey() != null) {
+			sortKey = Resource.uriRef(query.getSortKey());
+		}
 		uf.addPattern("collection", sortKey, "o", true);
 		uf.setColumnNames("collection", "o");
 		if(limit > 0) { uf.setLimit(limit); }
 		if(offset > 0) { uf.setOffset(offset); }
-		if(query.isDesc()) {
-			uf.addOrderByDesc("o");
-		} else {
+		if(!query.isDesc()) {
 			uf.addOrderBy("o");
+		} else {
+			uf.addOrderByDesc("o");
 		}
-		System.out.println(SparqlQueryFactory.toSparql(uf)); // FIXME debug
+		//System.out.println(SparqlQueryFactory.toSparql(uf));
 		return uf;
 	}
 	

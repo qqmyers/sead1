@@ -25,6 +25,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		if(item.getCreationDate() != null) {
 			panel.add(new Label(item.getCreationDate()+""));
 		}
+		
 		table.setWidget(row, 1, panel);
 	}
 }

@@ -13,7 +13,7 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 @SuppressWarnings("serial")
 public class GetCollections extends SubjectAction<GetCollectionsResult> {
 	String sortKey;
-	Boolean desc;
+	boolean desc = true;
 	int limit;
 	int offset;
 	
