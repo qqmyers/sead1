@@ -220,9 +220,13 @@ public class LoginPage extends Composite {
 	 * parameter (multiple '=')
 	 */
 	protected void redirect() {
-		String previousHistory = History.getToken().substring(
-				History.getToken().indexOf("?p=") + 3);
-		History.newItem(previousHistory);
+		int indexOf = History.getToken().indexOf("?p=");
+		if (indexOf == -1) {
+			History.newItem("listDatasets"); // FIXME hardcodes destination
+		} else {
+			String previousHistory = History.getToken().substring(indexOf + 3);
+			History.newItem(previousHistory);
+		}
 	}
 
 	/**
