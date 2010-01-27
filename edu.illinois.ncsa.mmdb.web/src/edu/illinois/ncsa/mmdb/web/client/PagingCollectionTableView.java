@@ -21,7 +21,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		int row = table.getRowCount();
 		
 		HorizontalPanel panel = new HorizontalPanel();
-		panel.add(new Hyperlink(item.getTitle(), "#collection?uri="+uri));
+		panel.add(new Hyperlink(item.getTitle(), "collection?uri="+uri));
 		if(item.getCreationDate() != null) {
 			panel.add(new Label(item.getCreationDate()+""));
 		}
