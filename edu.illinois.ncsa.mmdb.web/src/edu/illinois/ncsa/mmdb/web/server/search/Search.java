@@ -30,7 +30,7 @@ public class Search extends TextIndex<Object> implements Searchable {
 		// TODO Auto-generated method stub
 		List<Hit> result = new LinkedList<Hit>();
 		// TODO don't rely on ListDatasetsHandler, move that impl code into a common class
-		for(String uri : ListDatasetsHandler.listDatasetUris(Dc.DATE.getString(), true, limit, offset)) {
+		for(String uri : ListDatasetsHandler.listDatasetUris(Dc.DATE.getString(), true, limit, offset, null)) {
 			result.add(new StringHit(uri));
 		}
 		return result;

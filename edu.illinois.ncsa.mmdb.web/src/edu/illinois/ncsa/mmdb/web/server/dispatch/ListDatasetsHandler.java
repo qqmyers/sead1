@@ -14,6 +14,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Table;
@@ -37,7 +38,7 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(GetDatasetsHandler.class);
 
-	static Table<Resource> list(String orderBy, boolean desc, int limit, int offset) throws OperatorException {
+	static Table<Resource> list(String orderBy, boolean desc, int limit, int offset, String inCollection) throws OperatorException {
 		Unifier u = new Unifier();
 		u.setColumnNames("s","title","date","mimeType","size","creator","o");
 		u.addPattern("s",Rdf.TYPE,dbu.getType());
@@ -45,6 +46,9 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 		u.addPattern("s",Dc.DATE,"date",true);
 		u.addPattern("s",Dc.FORMAT,"mimeType",true);
 		u.addPattern("s",Files.LENGTH,"size",true);
+		if(inCollection != null) {
+			u.addPattern(Resource.uriRef(inCollection), DcTerms.HAS_PART, "s");
+		}
 		//u.addPattern("s",Dc.CREATOR,"creator",true);
 		u.addPattern("s",Resource.uriRef(orderBy),"o");
 		if(limit > 0) {
@@ -56,10 +60,10 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 		return TupeloStore.getInstance().unifyExcludeDeleted(u,"s");
 	}
 	
-	public static List<String> listDatasetUris(String orderBy, boolean desc, int limit, int offset) {
+	public static List<String> listDatasetUris(String orderBy, boolean desc, int limit, int offset, String inCollection) {
 		try {
 			List<String> result = new LinkedList<String>();
-			for(Resource r : Tables.getColumn(list(orderBy,desc,limit,offset),0)) {
+			for(Resource r : Tables.getColumn(list(orderBy,desc,limit,offset,inCollection),0)) {
 				if(!result.contains(r.getString())) {
 					result.add(r.getString());
 				}
@@ -71,10 +75,10 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 	}
 
 	private List<DatasetBean> listDatasets(String orderBy, boolean desc,
-			int limit, int offset) {
+			int limit, int offset, String inCollection) {
 		try {
 			long then = System.currentTimeMillis(); //
-			List<String> uris = listDatasetUris(orderBy,desc,limit,offset);
+			List<String> uris = listDatasetUris(orderBy,desc,limit,offset,inCollection);
 			long between = System.currentTimeMillis();
 			List<DatasetBean> result = dbu.get(uris);
 			long now = System.currentTimeMillis();
@@ -88,7 +92,7 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 
 	public ListDatasetsResult execute(ListDatasets arg0, ExecutionContext arg1)
 			throws ActionException {
-		ListDatasetsResult r = new ListDatasetsResult(listDatasets(arg0.getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0.getOffset()));
+		ListDatasetsResult r = new ListDatasetsResult(listDatasets(arg0.getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0.getOffset(), arg0.getInCollection()));
 		r.setDatasetCount(TupeloStore.getInstance().countDatasets());
 		return r;
 	}

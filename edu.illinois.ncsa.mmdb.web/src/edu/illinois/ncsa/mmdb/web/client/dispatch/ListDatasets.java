@@ -14,12 +14,14 @@ public class ListDatasets implements Action<ListDatasetsResult> {
 	private boolean desc;
 	private int limit;
 	private int offset;
+	private String inCollection;
 	
-	public ListDatasets(String orderBy, boolean desc, int limit, int offset) {
+	public ListDatasets(String orderBy, boolean desc, int limit, int offset, String inCollection) {
 		this.orderBy = orderBy;
 		this.desc = desc;
 		this.limit = limit;
 		this.offset = offset;
+		this.inCollection = inCollection;
 	}
 	
 	public void setOrderBy(String s) { orderBy=s; }
@@ -30,4 +32,6 @@ public class ListDatasets implements Action<ListDatasetsResult> {
 	public int getLimit() { return limit; }
 	public void setOffset(int i) { offset=i; }
 	public int getOffset() { return offset; }
+	public void setInCollection(String s) { inCollection = s; }
+	public String getInCollection() { return inCollection; }
 }

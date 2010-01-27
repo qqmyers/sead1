@@ -50,7 +50,6 @@ import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.HomePage;
-import edu.illinois.ncsa.mmdb.web.client.ui.ListCollectionsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.NewPasswordPage;
@@ -268,6 +267,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				+ "&view=" + listView);
 	}
 
+	void goToPage(String action, int page, String sortKey, String listView, String additionalParams) {
+		History.newItem(action + "?page=" + page + "&sort=" + sortKey
+				+ "&view=" + listView + (additionalParams != null ? ("&" + additionalParams) : ""));
+	}
+
 	int page = 1, numberOfPages = 0;
 	String sortKey = "date-desc";
 	String viewType = "list";
@@ -296,7 +300,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		}
 	}
 
-	private PagingDatasetTableView createListDatasetsView() {
+	private PagingDatasetTableView createListDatasetsView(final String action, final String params) {
 		parsePagingParameters();
 		// first choose the kind of view
 		DatasetTableView datasetTableView = null;
@@ -325,19 +329,19 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		pagingView.addPageChangeHandler(new ValueChangeHandler<Integer>() {
 			public void onValueChange(ValueChangeEvent<Integer> event) {
-				goToPage("listDatasets", event.getValue(), sortKey, viewType);
+				goToPage(action, event.getValue(), sortKey, viewType, params);
 			}
 		});
 
 		pagingView.addSortKeyChangeHandler(new ValueChangeHandler<String>() {
 			public void onValueChange(ValueChangeEvent<String> event) {
-				goToPage("listDatasets", 1, event.getValue(), viewType);
+				goToPage(action, 1, event.getValue(), viewType, params);
 			}
 		});
 
 		pagingView.addViewTypeChangeHandler(new ValueChangeHandler<String>() {
 			public void onValueChange(ValueChangeEvent<String> event) {
-				goToPage("listDatasets", 1, sortKey, event.getValue());
+				goToPage(action, 1, sortKey, event.getValue(), params);
 			}
 		});
 
@@ -357,9 +361,15 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	}
 
 	private void listDatasets() {
+		listDatasets(null);
+	}
+	private void listDatasets(String inCollection) {
 		mainContainer.clear();
 
 		TitlePanel titlePanel = new TitlePanel("List all");
+		if(inCollection != null) {
+			titlePanel = new TitlePanel(inCollection); // FIXME use collection name
+		}
 
 		Anchor rss = new Anchor();
 		rss.setHref("rss.xml");
@@ -375,17 +385,25 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		mainContainer.add(titlePanel);
 
+		String action = "listDatasets";
+		String params = null;
+		if(inCollection != null) {
+			action = "collection";
+			params = "uri="+inCollection;
+		}
 		// datasets table
-		final PagingDatasetTableView listDatasetsView = createListDatasetsView();
+		final PagingDatasetTableView listDatasetsView = createListDatasetsView(action,params);
 		mainContainer.add(listDatasetsView.asWidget());
 
-		int adjustedPageSize = pageSize;
-		if(viewType.equals("flow")) {
-			adjustedPageSize = 3;
-		}
+		final int adjustedPageSize = (viewType.equals("flow") ? 3 : pageSize);
 		
-		dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),
-				descForSortKey(sortKey), adjustedPageSize, pageOffset),
+		ListDatasets query = new ListDatasets();
+		query.setOrderBy(uriForSortKey(sortKey));
+		query.setDesc(descForSortKey(sortKey));
+		query.setLimit(adjustedPageSize);
+		query.setOffset(pageOffset);
+		query.setInCollection(inCollection);
+		dispatchAsync.execute(query,
 				new AsyncCallback<ListDatasetsResult>() {
 
 			public void onFailure(Throwable caught) {
@@ -416,25 +434,35 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			eventBus.addHandler(DatasetDeletedEvent.TYPE,
 					new DatasetDeletedHandler() {
 						public void onDeleteDataset(DatasetDeletedEvent event) {
-					dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),descForSortKey(sortKey),1,pageOffset+pageSize-1),
+							ListDatasets query = new ListDatasets();
+							query.setOrderBy(uriForSortKey(sortKey));
+							query.setDesc(descForSortKey(sortKey));
+							query.setLimit(adjustedPageSize);
+							query.setOffset(pageOffset+adjustedPageSize-1);
+							dispatchAsync.execute(query,
 									new AsyncCallback<ListDatasetsResult>() {
 										public void onFailure(Throwable caught) {
 										}
-						public void onSuccess(ListDatasetsResult result) {
-							for (DatasetBean dataset : result.getDatasets()) {
-								GWT.log("Sending event add dataset "
-										+ dataset.getTitle(), null);
+										public void onSuccess(ListDatasetsResult result) {
+											for (DatasetBean dataset : result.getDatasets()) {
+												GWT.log("Sending event add dataset "
+														+ dataset.getTitle(), null);
 												AddNewDatasetEvent event = new AddNewDatasetEvent();
 												event.setDataset(dataset);
 												eventBus.fireEvent(event);
 											}
 										}
-									});
+							});
 						}
-					});
+			});
 		}
 	}
-
+	
+	private void listCollection() {
+		String inCollection = getParams().get("uri");
+		listDatasets(inCollection);
+	}
+	
 	String uriForCollectionSortKey(String key) { // FIXME kludge, make keys full URI's
 		if (key.startsWith("title-")) {
 			return "http://purl.org/dc/elements/1.1/title";
@@ -786,7 +814,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			} else if (token.startsWith("listCollections")) {
 				listCollections();
 			} else if (token.startsWith("collection")) {
-				showCollectionPage();
+				listCollection();
 			} else if (token.startsWith("modifyPermissions")) {
 				showUsersPage();
 			} else if (token.startsWith("signup")) {
@@ -868,14 +896,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private void showNoAccessPage() {
 		mainContainer.clear();
 		mainContainer.add(new NoAccessPage());
-	}
-
-	/**
-	 * List all collections.
-	 */
-	private void showListCollectionsPage() {
-		mainContainer.clear();
-		mainContainer.add(new ListCollectionsPage(dispatchAsync, eventBus));
 	}
 
 	/**
