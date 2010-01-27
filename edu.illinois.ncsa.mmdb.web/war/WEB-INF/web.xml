@@ -113,6 +113,12 @@
 		</listener-class>
 	</listener>
 
+	<listener>
+		<listener-class>
+			edu.illinois.ncsa.mmdb.web.server.ContextSetupListener
+		</listener-class>
+	</listener>
+
 	<!-- Default page to serve -->
 	<welcome-file-list>
 		<welcome-file>mmdb.html</welcome-file>

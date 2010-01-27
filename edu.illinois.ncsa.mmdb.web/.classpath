@@ -39,6 +39,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/iri-0.7.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/arq-2.8.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jdom-1.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/mail.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-jena-2.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-kernel-2.5.jar" sourcepath="/org.tupeloproject.core/tupelo-kernel/src/main/java"/>

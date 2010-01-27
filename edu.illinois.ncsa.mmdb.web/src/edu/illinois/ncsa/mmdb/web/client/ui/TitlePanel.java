@@ -4,9 +4,15 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Page title widget.
+ * 
+ * @author lmarini
+ *
+ */
 public class TitlePanel extends HorizontalPanel {
 	private String title;
-	private Label titleLabel;
+	private final Label titleLabel;
 	
 	public TitlePanel() {
 		super();

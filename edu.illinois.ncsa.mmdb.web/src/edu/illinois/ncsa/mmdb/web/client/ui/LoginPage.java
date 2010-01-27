@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -35,6 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Authenticate;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthenticateResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 
 /**
  * @author Luigi Marini
@@ -47,11 +49,15 @@ public class LoginPage extends Composite {
 	private TextBox usernameBox;
 	private PasswordTextBox passwordBox;
 	private SimplePanel feedbackPanel;
+	private final MyDispatchAsync dispatchasync;
 
 	/**
+	 * @param dispatchasync
 	 * 
 	 */
-	public LoginPage() {
+	public LoginPage(MyDispatchAsync dispatchasync) {
+
+		this.dispatchasync = dispatchasync;
 
 		mainPanel = new FlowPanel();
 
@@ -71,9 +77,7 @@ public class LoginPage extends Composite {
 	 * @return
 	 */
 	private Widget createPageTitle() {
-		pageTitle = new Label("Login");
-		pageTitle.addStyleName("pageTitle");
-		return pageTitle;
+		return new TitlePanel("Login");
 	}
 
 	/**
@@ -138,6 +142,8 @@ public class LoginPage extends Composite {
 		});
 
 		table.setWidget(2, 1, passwordBox);
+		
+		table.setWidget(2, 3, new Hyperlink("Forgot Password?", "requestNewPassword"));
 
 		Button submitButton = new Button("Login", new ClickHandler() {
 
@@ -208,6 +214,10 @@ public class LoginPage extends Composite {
 	
 	/**
 	 * Redirect to previous page.
+	 * 
+	 * FIXME currently uses a adhoc parsing of the history token. The generic
+	 * parameter parsing gets confused with parsing a parameter inside a
+	 * parameter (multiple '=')
 	 */
 	protected void redirect() {
 		String previousHistory = History.getToken().substring(
@@ -218,19 +228,19 @@ public class LoginPage extends Composite {
 	/**
 	 * Set the session id, add a cookie and add history token.
 	 * 
-	 * @param sessionId 
+	 * @param sessionId
 	 * 
 	 */
 	public static void login(String sessionId) {
 		MMDB.sessionID = sessionId;
 		MMDB.loginStatusWidget.login(MMDB.sessionID);
-		
+
 		// set cookie
-		final long DURATION = 1000 * 60 * 5 ; // 5 minutes
-	    Date expires = new Date(System.currentTimeMillis() + DURATION);
-	    Cookies.setCookie("sid", sessionId, expires, null, "/", false);
+		final long DURATION = 1000 * 60 * 60; // 60 minutes
+		Date expires = new Date(System.currentTimeMillis() + DURATION);
+		Cookies.setCookie("sid", sessionId, expires, null, "/", false);
 	}
-	
+
 	public static void clearBrowserCreds() {
 		// now hit the REST authentication endpoint with bad creds
 		String restUrl = "./api/logout";

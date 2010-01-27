@@ -17,7 +17,9 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 
 /**
- * @author lmarini
+ * Add a user to a group.
+ * 
+ * @author Luigi Marini
  *
  */
 public class AddCollectionHandler implements ActionHandler<AddCollection, AddCollectionResult> {

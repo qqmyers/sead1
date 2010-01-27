@@ -75,7 +75,8 @@ public class LoginStatusWidget extends Composite {
 	 */
 	public void login(String name) {
 		mainPanel.clear();
-		mainPanel.add(new Label(name + " | "));
+		Label emailLabel = new Label("("+name+")");
+		mainPanel.add(emailLabel);
 		mainPanel.add(logoutAnchor);
 	}
 	

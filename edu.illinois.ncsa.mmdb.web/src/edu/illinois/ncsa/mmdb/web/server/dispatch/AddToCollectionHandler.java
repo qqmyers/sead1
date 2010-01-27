@@ -33,7 +33,7 @@ public class AddToCollectionHandler implements ActionHandler<AddToCollection, Ad
 			.getBeanSession();
 
 	/** Commons logging **/
-	private static Log log = LogFactory.getLog(GetCollectionHandler.class);
+	private static Log log = LogFactory.getLog(AddToCollectionHandler.class);
 
 	/** Collection DAO **/
 	private static CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);

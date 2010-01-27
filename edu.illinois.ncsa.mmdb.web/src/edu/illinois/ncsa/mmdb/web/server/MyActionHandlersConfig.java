@@ -8,9 +8,11 @@ import javax.servlet.ServletContextListener;
 
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AddUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.EditPermissionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAnnotationsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
@@ -23,8 +25,14 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUploadDestinationHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUsersHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.NewPasswordHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
 
 /**
  * Setup registry of action handlers when the servlet context is initialized.
@@ -52,6 +60,14 @@ public class MyActionHandlersConfig implements ServletContextListener {
 		DispatchUtil.registerHandler(new GetPreviewsHandler());
 		DispatchUtil.registerHandler(new GetUploadDestinationHandler());
 		DispatchUtil.registerHandler(new DeleteDatasetHandler());
+		DispatchUtil.registerHandler(new GetUsersHandler());
+		DispatchUtil.registerHandler(new UserGroupMembershipHandler());
+		DispatchUtil.registerHandler(new AddUserHandler());
+		DispatchUtil.registerHandler(new HasPermissionHandler());
+		DispatchUtil.registerHandler(new EditPermissionsHandler());
+		DispatchUtil.registerHandler(new GetUserHandler());
+		DispatchUtil.registerHandler(new RequestNewPasswordHandler());
+		DispatchUtil.registerHandler(new NewPasswordHandler());
 		DispatchUtil.registerHandler(new GetDerivedFromHandler());
 	}
 
