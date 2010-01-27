@@ -13,10 +13,11 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.DcTerms;
+import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tables;
-import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
@@ -36,11 +37,15 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(GetDatasetsHandler.class);
 
-
-	public static List<String> listDatasetUris(String orderBy, boolean desc, int limit, int offset) {
+	static Table<Resource> list(String orderBy, boolean desc, int limit, int offset) throws OperatorException {
 		Unifier u = new Unifier();
-		u.setColumnNames("s","o");
+		u.setColumnNames("s","title","date","mimeType","size","creator","o");
 		u.addPattern("s",Rdf.TYPE,dbu.getType());
+		u.addPattern("s",Dc.TITLE,"title",true);
+		u.addPattern("s",Dc.DATE,"date",true);
+		u.addPattern("s",Dc.FORMAT,"mimeType",true);
+		u.addPattern("s",Files.LENGTH,"size",true);
+		//u.addPattern("s",Dc.CREATOR,"creator",true);
 		u.addPattern("s",Resource.uriRef(orderBy),"o");
 		if(limit > 0) {
 			u.setLimit(limit);
@@ -48,10 +53,16 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 		u.setOffset(offset);
 		if(desc) { u.addOrderByDesc("o"); }
 		else { u.addOrderBy("o"); }
+		return TupeloStore.getInstance().unifyExcludeDeleted(u,"s");
+	}
+	
+	public static List<String> listDatasetUris(String orderBy, boolean desc, int limit, int offset) {
 		try {
 			List<String> result = new LinkedList<String>();
-			for(Resource r : Tables.getColumn(TupeloStore.getInstance().unifyExcludeDeleted(u,"s"),0)) {
-				result.add(r.getString());
+			for(Resource r : Tables.getColumn(list(orderBy,desc,limit,offset),0)) {
+				if(!result.contains(r.getString())) {
+					result.add(r.getString());
+				}
 			}
 			return result;
 		} catch(OperatorException x) {
@@ -67,9 +78,10 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 			long between = System.currentTimeMillis();
 			List<DatasetBean> result = dbu.get(uris);
 			long now = System.currentTimeMillis();
-			log.debug("listed "+uris.size()+" dataset(s) in "+(now-then)+"ms ("+(between-then)+"/"+(now-between)+" u/b)");
+			log.debug("listed "+result.size()+" dataset(s) in "+(now-then)+"ms ("+(between-then)+"/"+(now-between)+" u/b)");
 			return result;
 		} catch(Exception x) {
+			x.printStackTrace();
 			return new LinkedList<DatasetBean>();
 		}
 	}

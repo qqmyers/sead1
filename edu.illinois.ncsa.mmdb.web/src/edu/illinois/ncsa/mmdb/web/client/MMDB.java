@@ -319,55 +319,66 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		final PagingDatasetTableView listDatasetsView = createListDatasetsView();
 		mainContainer.add(listDatasetsView.asWidget());
 
-		// TODO add a way to switch between the two views
-		// DatasetTableView datasetTableWidget = new DatasetTableView();
-
 		dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),
 				descForSortKey(sortKey), pageSize, pageOffset),
 				new AsyncCallback<ListDatasetsResult>() {
+			public void onFailure(Throwable caught) {
+				GWT.log("Error retrieving datasets", null);
+				DialogBox dialogBox = new DialogBox();
+				dialogBox.setText("Oops");
+				dialogBox.add(new Label(SERVER_ERROR));
+				dialogBox.setAnimationEnabled(true);
+				dialogBox.center();
+				dialogBox.show();
+			}
+			
+			@Override
+			public void onSuccess(ListDatasetsResult result) {
+				for (DatasetBean dataset : result.getDatasets()) {
+					GWT.log("Sending event add dataset " + dataset.getTitle(), null);
+					AddNewDatasetEvent event = new AddNewDatasetEvent();
+					event.setDataset(dataset);
+					eventBus.fireEvent(event);
+				}
+				int np = (result.getDatasetCount() / pageSize) + (result.getDatasetCount() % pageSize != 0 ? 1 : 0);
+				listDatasetsView.setNumberOfPages(np);
+				numberOfPages = np;
+				//
+				// OK, now asynchronously request the next page but don't display it--so it'll
+				// be cached on the server side. this is way too much network traffic, but hey
+				dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),
+						descForSortKey(sortKey), pageSize, pageOffset + pageSize),
+						new AsyncCallback<ListDatasetsResult>() {
 					public void onFailure(Throwable caught) {
-						GWT.log("Error retrieving datasets", null);
-						DialogBox dialogBox = new DialogBox();
-						dialogBox.setText("Oops");
-						dialogBox.add(new Label(SERVER_ERROR));
-						dialogBox.setAnimationEnabled(true);
-						dialogBox.center();
-						dialogBox.show();
+						// silent
 					}
-
-					@Override
 					public void onSuccess(ListDatasetsResult result) {
-						for (DatasetBean dataset : result.getDatasets()) {
-							GWT.log("Sending event add dataset "
-									+ dataset.getTitle(), null);
-							AddNewDatasetEvent event = new AddNewDatasetEvent();
-							event.setDataset(dataset);
-							eventBus.fireEvent(event);
-						}
-						int np = (result.getDatasetCount() / pageSize) + (result.getDatasetCount() % pageSize != 0 ? 1 : 0);
-						listDatasetsView.setNumberOfPages(np);
-						numberOfPages = np;
+						// silent
 					}
 				});
-		
-		eventBus.addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
-			public void onDeleteDataset(DatasetDeletedEvent event) {
-				dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),descForSortKey(sortKey),1,pageOffset+pageSize-1),
-						new AsyncCallback<ListDatasetsResult>() {
-							public void onFailure(Throwable caught) {
-							}
-							public void onSuccess(ListDatasetsResult result) {
-								for (DatasetBean dataset : result.getDatasets()) {
-									GWT.log("Sending event add dataset "
-											+ dataset.getTitle(), null);
-									AddNewDatasetEvent event = new AddNewDatasetEvent();
-									event.setDataset(dataset);
-									eventBus.fireEvent(event);
-								}
-							}
-						});
 			}
 		});
+
+		if(!eventBus.isEventHandled(DatasetDeletedEvent.TYPE)) {
+			eventBus.addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
+				public void onDeleteDataset(DatasetDeletedEvent event) {
+					dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),descForSortKey(sortKey),1,pageOffset+pageSize-1),
+							new AsyncCallback<ListDatasetsResult>() {
+						public void onFailure(Throwable caught) {
+						}
+						public void onSuccess(ListDatasetsResult result) {
+							for (DatasetBean dataset : result.getDatasets()) {
+								GWT.log("Sending event add dataset "
+										+ dataset.getTitle(), null);
+								AddNewDatasetEvent event = new AddNewDatasetEvent();
+								event.setDataset(dataset);
+								eventBus.fireEvent(event);
+							}
+						}
+					});
+				}
+			});
+		}
 	}
 
 	/**
