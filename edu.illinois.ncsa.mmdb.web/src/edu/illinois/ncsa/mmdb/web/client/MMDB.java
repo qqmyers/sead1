@@ -275,10 +275,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private void parsePagingParameters() {
 		Map<String, String> params = getParams();
 
-		if (params.containsKey("view") && params.get("view").equals("grid")) {
-			viewType = "grid";
-		} else if (params.containsKey("view")
-				&& params.get("view").equals("list")) {
+		if(params.containsKey("view")) {
+			viewType = params.get("view");
+		} else {
 			viewType = "list";
 		}
 
@@ -303,6 +302,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		DatasetTableView datasetTableView = null;
 		if (viewType.equals("grid")) {
 			datasetTableView = new DatasetTableFlowGridView();
+		} else if(viewType.equals("flow")) {
+			datasetTableView = new DatasetTableCoverFlowView();
 		} else {
 			datasetTableView = new DatasetTableOneColumnView();
 		}
@@ -378,8 +379,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		final PagingDatasetTableView listDatasetsView = createListDatasetsView();
 		mainContainer.add(listDatasetsView.asWidget());
 
+		int adjustedPageSize = pageSize;
+		if(viewType.equals("flow")) {
+			adjustedPageSize = 3;
+		}
+		
 		dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),
-				descForSortKey(sortKey), pageSize, pageOffset),
+				descForSortKey(sortKey), adjustedPageSize, pageOffset),
 				new AsyncCallback<ListDatasetsResult>() {
 
 			public void onFailure(Throwable caught) {

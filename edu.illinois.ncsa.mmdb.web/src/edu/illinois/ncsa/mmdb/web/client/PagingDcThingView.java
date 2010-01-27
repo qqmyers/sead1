@@ -50,6 +50,7 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		viewOptions.addStyleName("pagingLabel");
 		viewOptions.addItem("list", "list");
 		viewOptions.addItem("grid", "grid");
+		viewOptions.addItem("flow", "flow");
 		viewOptions.setSelected(viewType);
 		addViewTypeControl(viewOptions);
 		panel.add(viewOptions);
