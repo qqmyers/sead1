@@ -173,9 +173,8 @@ public class LoginPage extends Composite {
 					}
 
 					@Override
-					public void onSuccess(AuthenticateResult arg0) {
+					public void onSuccess(final AuthenticateResult arg0) {
 						if (arg0.getAuthenticated()) {
-							login(arg0.getSessionId());
 							// now hit the REST authentication endpoint
 							String restUrl = "./api/authenticate";
 							RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
@@ -188,7 +187,8 @@ public class LoginPage extends Composite {
 									}
 									public void onResponseReceived(Request request,	Response response) {
 										// success!
-										MMDB.setUploadAppletCredentials(response.getText());
+										String sessionKey = response.getText();
+										login(arg0.getSessionId(), sessionKey);
 										redirect();
 									}
 								});
@@ -235,14 +235,16 @@ public class LoginPage extends Composite {
 	 * @param sessionId
 	 * 
 	 */
-	public static void login(String sessionId) {
+	public static void login(String sessionId, String sessionKey) {
 		MMDB.sessionID = sessionId;
+		MMDB.sessionKey = sessionKey;
 		MMDB.loginStatusWidget.login(MMDB.sessionID);
 
 		// set cookie
 		final long DURATION = 1000 * 60 * 60; // 60 minutes
 		Date expires = new Date(System.currentTimeMillis() + DURATION);
 		Cookies.setCookie("sid", sessionId, expires, null, "/", false);
+		Cookies.setCookie("sessionKey", sessionKey, expires, null, "/", false);
 	}
 
 	public static void clearBrowserCreds() {
@@ -259,7 +261,7 @@ public class LoginPage extends Composite {
 				public void onResponseReceived(Request request,	Response response) {
 					// success!
 					GWT.log("clearing upload applet credentials", null);
-					MMDB.setUploadAppletCredentials(null);
+					MMDB.sessionKey = null;
 					History.newItem("login?p=listDatasets"); // FIXME hardcodes destination
 				}
 			});
@@ -273,7 +275,9 @@ public class LoginPage extends Composite {
 	 */
 	public static void logout() {
 		MMDB.sessionID = null;
+		MMDB.sessionKey = null;
 		Cookies.removeCookie("sid");
+		Cookies.removeCookie("sessionKey");
 		clearBrowserCreds();
 	}
 }

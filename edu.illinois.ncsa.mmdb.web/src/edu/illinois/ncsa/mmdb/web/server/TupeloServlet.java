@@ -8,6 +8,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.FilterContext;
+import org.tupeloproject.kernel.Operator;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.SparqlOperator;
+import org.tupeloproject.kernel.TripleReader;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.server.HttpTupeloServlet;
@@ -15,18 +24,6 @@ import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tuple;
 import org.tupeloproject.util.UnicodeTranscoder;
-import org.tupeloproject.kernel.AbstractContextFacade;
-import org.tupeloproject.kernel.Context;
-import org.tupeloproject.kernel.FilterContext;
-import org.tupeloproject.kernel.Operator;
-import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.kernel.SparqlConstructOperator;
-import org.tupeloproject.kernel.SparqlOperator;
-import org.tupeloproject.kernel.TripleReader;
-import org.tupeloproject.kernel.Unifier;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 
@@ -102,7 +99,7 @@ public class TupeloServlet extends HttpTupeloServlet {
 	public void doDelete(HttpServletRequest arg0, HttpServletResponse arg1)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		if(!AuthenticatedServlet.doAuthenticate(arg0,arg1)) {
+		if(!AuthenticatedServlet.doAuthenticate(arg0,arg1,getServletContext())) {
 			return;
 		}
 		super.doDelete(arg0, arg1);
@@ -112,7 +109,7 @@ public class TupeloServlet extends HttpTupeloServlet {
 	public void doGet(HttpServletRequest arg0, HttpServletResponse arg1)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		if(!AuthenticatedServlet.doAuthenticate(arg0,arg1)) {
+		if(!AuthenticatedServlet.doAuthenticate(arg0,arg1,getServletContext())) {
 			return;
 		}
 		super.doGet(arg0, arg1);
@@ -122,7 +119,7 @@ public class TupeloServlet extends HttpTupeloServlet {
 	public void doPost(HttpServletRequest arg0, HttpServletResponse arg1)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		if(!AuthenticatedServlet.doAuthenticate(arg0,arg1)) {
+		if(!AuthenticatedServlet.doAuthenticate(arg0,arg1,getServletContext())) {
 			return;
 		}
 		super.doPost(arg0, arg1);
@@ -132,7 +129,7 @@ public class TupeloServlet extends HttpTupeloServlet {
 	public void doPut(HttpServletRequest arg0, HttpServletResponse arg1)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		if(!AuthenticatedServlet.doAuthenticate(arg0,arg1)) {
+		if(!AuthenticatedServlet.doAuthenticate(arg0,arg1,getServletContext())) {
 			return;
 		}
 		super.doPut(arg0, arg1);

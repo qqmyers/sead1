@@ -81,7 +81,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * address)
 	 */
 	public static String sessionID;
-	public static String uploadAppletCredentials;
+	public static String sessionKey; // shared secret
 
 	public static ArrayList<String> groups;
 
@@ -599,11 +599,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 	private boolean dndEnabled = false;
 
-	public static void setUploadAppletCredentials(String credentials) {
-		GWT.log("set upload applet credentials to " + credentials, null);
-		uploadAppletCredentials = credentials;
-	}
-
 	native void deployDndApplet(String credentials) /*-{
 		var attributes = {
 		code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
@@ -674,20 +669,24 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		if (dndEnabled) {
 			dndApplet.removeStyleName("hidden");
-			deployDndApplet(uploadAppletCredentials);
+			deployDndApplet(sessionKey);
 		} else {
 			dndTooltip.addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
-					boolean doit = true;
-					if (!dndEnabled) {
-						doit = Window
-								.confirm("You will be asked to accept a security exception to allow our drag-and-drop upload tool to access your local files. If you don't wish to accept that security exception, press cancel.");
-					}
-					if (doit) {
-						dndApplet.removeStyleName("hidden");
-						deployDndApplet(uploadAppletCredentials);
-						dndTooltip.setText(enabledMsg);
-						dndEnabled = true;
+					if(sessionKey == null) {
+						Window.confirm("Upload not permitted. Please log in");
+					} else {
+						boolean doit = true;
+						if (!dndEnabled) {
+							doit = Window
+							.confirm("You will be asked to accept a security exception to allow our drag-and-drop upload tool to access your local files. If you don't wish to accept that security exception, press cancel.");
+						}
+						if (doit) {
+							dndApplet.removeStyleName("hidden");
+							deployDndApplet(sessionKey);
+							dndTooltip.setText(enabledMsg);
+							dndEnabled = true;
+						}
 					}
 				}
 			});
@@ -931,6 +930,16 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	public boolean checkLogin() {
 		String cookieSID = Cookies.getCookie("sid");
+		if(cookieSID != null) {
+			GWT.log("got sid "+cookieSID, null);
+		}
+		String cookieSessionKey = Cookies.getCookie("sessionKey");
+		if(cookieSessionKey != null) {
+			GWT.log("got session key "+cookieSessionKey,null);
+		}
+		if (cookieSID != null && cookieSessionKey != null) {
+			LoginPage.login(cookieSID, cookieSessionKey);
+		}
 		// FIXME debug
 		/*
 		String dl = (cookieSID != null ? "sid="+cookieSID : "")
@@ -938,9 +947,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		debugLabel.setText(dl);
 		// end debug
 		 */
-		if (cookieSID != null) {
-			LoginPage.login(cookieSID);
-		}
 		if (MMDB.sessionID == null) {
 			History.newItem("login?p=" + History.getToken());
 			return false;

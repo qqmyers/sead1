@@ -29,7 +29,6 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.util.CopyFile;
@@ -266,9 +265,9 @@ public class RestServlet extends AuthenticatedServlet {
             	}
             }
         } else if(request.getRequestURL().toString().endsWith("authenticate")) {
-        	// we're just authenticating, and that has already been handled. do not report an error
-        	// send back the basic credentials provided
-        	response.getWriter().print(request.getHeader("Authorization"));
+        	// we're just authenticating, and that has already been handled. do not report an error.
+        	// for convenience, produce the session key as a string
+        	response.getWriter().print(lookupSessionKey(getAuthenticatedUser(request)));
         	response.getWriter().flush();
         } else if(hasPrefix(SEARCH_INFIX,request)) {
         	doSearch(request,response);
