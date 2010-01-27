@@ -351,19 +351,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				int np = (result.getDatasetCount() / pageSize) + (result.getDatasetCount() % pageSize != 0 ? 1 : 0);
 				listDatasetsView.setNumberOfPages(np);
 				numberOfPages = np;
-				//
-				// OK, now asynchronously request the next page but don't display it--so it'll
-				// be cached on the server side. this is way too much network traffic, but hey
-				dispatchAsync.execute(new ListDatasets(uriForSortKey(sortKey),
-						descForSortKey(sortKey), pageSize, pageOffset + pageSize),
-						new AsyncCallback<ListDatasetsResult>() {
-					public void onFailure(Throwable caught) {
-						// silent
-					}
-					public void onSuccess(ListDatasetsResult result) {
-						// silent
-					}
-				});
 			}
 		});
 
