@@ -47,9 +47,9 @@ public class GetCollectionsHandler implements
 	private static CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
 
 	@Override
-	public GetCollectionsResult execute(GetCollections arg0,
+	public GetCollectionsResult execute(GetCollections query,
 			ExecutionContext arg1) throws ActionException {
-		String memberUri = arg0.getMemberUri();
+		String memberUri = query.getMemberUri();
 		ArrayList<CollectionBean> collections = new ArrayList<CollectionBean>();
 		List<Resource> seen = new LinkedList<Resource>();
 		Unifier uf = new Unifier();
@@ -61,6 +61,12 @@ public class GetCollectionsHandler implements
 		}
 		uf.addPattern("collection", DcTerms.DATE_CREATED, "date", true);
 		uf.setColumnNames("collection", "date");
+		if(query.getLimit() != 0) {
+			uf.setLimit(query.getLimit());
+		}
+		if(query.getOffset() != 0) {
+			uf.setOffset(query.getOffset());
+		}
 		uf.addOrderByDesc("date");
 		try {
 			TupeloStore.getInstance().getContext().perform(uf);

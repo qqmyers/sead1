@@ -19,14 +19,14 @@ public abstract class PagingTableView<T> extends Composite implements Display<T>
 	List<PagingWidget> pagingControls;
 	
 	protected HorizontalPanel topPagingPanel;
-	protected HorizontalPanel middlePanel;
+	protected VerticalPanel middlePanel;
 	protected HorizontalPanel bottomPagingPanel;
 	
 	protected PagingTableView() {
 		//
 		mainPanel = new VerticalPanel(); 
 		topPagingPanel = new HorizontalPanel();
-		middlePanel = new HorizontalPanel();
+		middlePanel = new VerticalPanel();
 		bottomPagingPanel = new HorizontalPanel();
 		mainPanel.add(topPagingPanel);
 		mainPanel.add(middlePanel);
