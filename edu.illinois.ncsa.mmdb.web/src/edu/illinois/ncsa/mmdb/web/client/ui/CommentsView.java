@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResourceResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotations;
@@ -79,7 +80,7 @@ public class CommentsView extends Composite {
 			public void onClick(ClickEvent arg0) {
 
 				service.execute(new AnnotateResource(resource,
-						newAnnotationView.getAnnotationBean()),
+						newAnnotationView.getAnnotationBean(), MMDB.sessionID),
 						new AsyncCallback<AnnotateResourceResult>() {
 
 							@Override

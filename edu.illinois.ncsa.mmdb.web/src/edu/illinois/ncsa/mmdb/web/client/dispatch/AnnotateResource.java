@@ -14,12 +14,20 @@ import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 @SuppressWarnings("serial")
 public class AnnotateResource extends SubjectAction<AnnotateResourceResult>{
 	private AnnotationBean annotation;
+	private String sessionId;
 
 	public AnnotateResource() {}
 	
-	public AnnotateResource(String id, AnnotationBean annotation) {
+	/**
+	 * 
+	 * @param id the resource to which to attach the annotation
+	 * @param annotation the new annotation
+	 * @param sessionId 
+	 */
+	public AnnotateResource(String id, AnnotationBean annotation, String sessionId) {
 		setUri(id);
 		this.annotation = annotation;
+		this.sessionId = sessionId;
 	}
 
 	public AnnotationBean getAnnotation() {
@@ -29,5 +37,9 @@ public class AnnotateResource extends SubjectAction<AnnotateResourceResult>{
 	/** @deprecated use getUri */
 	public String getId() {
 		return getUri();
+	}
+
+	public String getSessionId() {
+		return sessionId;
 	}
 }
