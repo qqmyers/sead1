@@ -247,7 +247,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		// now set credentials
 		String creds = getParameter("credentials");
 		if(creds != null && !creds.equals("")) {
-			method.addRequestHeader("Authorization", creds);
+			method.addRequestHeader("Cookie","sessionKey="+creds);
 		} else {
 			showErrorCard();
 		}
@@ -319,18 +319,20 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}
 	}
 	
+	int progress;
+	void setProgress(int p) { progress = p; }
+	int getProgress() { return progress; }
+	
 	class ProgressThread extends Thread {
 		String sessionKey;
 		boolean stop = false;
 		public void run() {
 			try {
-				/*
 				while(!stop) {
-					int progress = getProgress(sessionKey);
+					int progress = getProgress();
 					progressPie.setProgress(progress);
 					Thread.sleep(500);
 				}
-				*/
 			} catch(Exception x) {
 			}
 		}
@@ -457,7 +459,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				collectionUri = post.getResponseBodyAsString();
 				log("got collection uri from server: "+collectionUri);
 			}
-			progressPie.setProgress((i * 100) / nFiles); 
+			setProgress((i * 100) / nFiles); 
 			return sessionKey;
 		}
 		public void run() {
