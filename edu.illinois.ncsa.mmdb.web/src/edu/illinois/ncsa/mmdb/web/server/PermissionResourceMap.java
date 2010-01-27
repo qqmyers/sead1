@@ -1,10 +1,9 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.tupeloproject.rdf.Resource;
-
-import com.google.gwt.dev.util.collect.HashMap;
 
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
