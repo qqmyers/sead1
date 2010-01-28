@@ -202,7 +202,8 @@
 	<target name="resources" description="Copy all resources to output folder.">
 		<copy todir="war/WEB-INF/classes">
 			<fileset dir="src">
-				<include name="logging.properties" />
+				<include name="commons-logging.properties" />
+				<include name="log4j.properties" />
 				<include name="configuration.xml" />
 				<include name="jaas.config" />
 				<include name="mail.properties" />
