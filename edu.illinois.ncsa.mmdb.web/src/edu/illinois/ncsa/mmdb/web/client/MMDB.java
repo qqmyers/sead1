@@ -17,6 +17,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -30,6 +31,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
@@ -47,6 +49,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
+import edu.illinois.ncsa.mmdb.web.client.ui.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.HomePage;
@@ -59,6 +62,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TitlePanel;
 import edu.illinois.ncsa.mmdb.web.client.ui.UserManagementPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.WatermarkTextBox;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
@@ -471,6 +475,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		}
 	}
 
+	/**
+	 * List collections.
+	 * 
+	 * FIXME move code to ListCollectionsPage
+	 */
 	private void listCollections() {
 		mainContainer.clear();
 
@@ -546,6 +555,40 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				}
 			}
 		});
+		
+		// create collection
+		FlowPanel addCollectionPanel = new FlowPanel();
+		final WatermarkTextBox addCollectionBox = new WatermarkTextBox("",
+				"Collection name");
+		addCollectionPanel.add(addCollectionBox);
+		Button addButton = new Button("Add", new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				final CollectionBean collection = new CollectionBean();
+				collection.setTitle(addCollectionBox.getText());
+
+				dispatchAsync.execute(new AddCollection(collection),
+						new AsyncCallback<AddCollectionResult>() {
+
+							@Override
+							public void onFailure(Throwable arg0) {
+								GWT.log("Failed creating new collection", arg0);
+							}
+
+							@Override
+							public void onSuccess(AddCollectionResult arg0) {
+								AddNewCollectionEvent event = new AddNewCollectionEvent(
+										collection);
+								GWT.log("Firing event add collection "
+										+ collection.getTitle(), null);
+								eventBus.fireEvent(event);
+							}
+						});
+			}
+		});
+		addCollectionPanel.add(addButton);
+		mainContainer.add(addCollectionPanel);
 	}
 
 	/**
