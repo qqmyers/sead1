@@ -72,6 +72,10 @@ public class Mail {
 		loadConfig();
 	}
 
+	/**
+	 * Load mail configuration file mail.properties. File should be available in
+	 * the WEB-INF/classes directory.
+	 */
 	private static void loadConfig() {
 		// context location
 		String path = CONFIGURATION_PATH;
@@ -79,7 +83,10 @@ public class Mail {
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
-		InputStream input = Class.class.getResourceAsStream(path);
+
+		log.debug("Trying to load property files " + path);
+
+		InputStream input = Mail.class.getResourceAsStream(path);
 		try {
 			configuration.load(input);
 		} catch (IOException e) {
@@ -94,7 +101,8 @@ public class Mail {
 		}
 	}
 
-	public static void sendNewPassword(String email, String newPassword) throws UnsupportedEncodingException, MessagingException {
+	public static void sendNewPassword(String email, String newPassword)
+			throws UnsupportedEncodingException, MessagingException {
 		Session session = Session.getDefaultInstance(configuration, null);
 		MimeMessage message = new MimeMessage(session);
 
