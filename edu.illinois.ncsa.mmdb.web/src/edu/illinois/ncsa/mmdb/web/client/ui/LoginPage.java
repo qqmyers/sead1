@@ -251,8 +251,8 @@ public class LoginPage extends Composite {
 		// set cookie
 		final long DURATION = 1000 * 60 * 60; // 60 minutes
 		Date expires = new Date(System.currentTimeMillis() + DURATION);
-		Cookies.setCookie("sid", sessionId, expires, null, "/", false);
-		Cookies.setCookie("sessionKey", sessionKey, expires, null, "/", false);
+		Cookies.setCookie("sid", sessionId, expires);
+		Cookies.setCookie("sessionKey", sessionKey, expires);
 	}
 
 	public static void clearBrowserCreds() {
