@@ -343,7 +343,7 @@ public class DatasetWidget extends Composite {
     
     public final native void showSeadragon(String container, String uri) /*-{ 
         $wnd.Seadragon.Config.debug = true;
-        $wnd.Seadragon.Config.imagePath = "/img/";
+        $wnd.Seadragon.Config.imagePath = "img/";
         $wnd.Seadragon.Config.autoHideControls = true;
         var viewer = new $wnd.Seadragon.Viewer(container);
         viewer.openDzi(uri);
