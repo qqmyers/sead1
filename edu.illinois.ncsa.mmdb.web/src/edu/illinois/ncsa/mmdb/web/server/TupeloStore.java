@@ -127,6 +127,7 @@ public class TupeloStore {
 			// setup context creators
 			ContextCreators.register();
 			context = createSerializeContext();
+            System.out.println(CETBeans.contextToNTriples( context ));
 			if(context == null) {
 				log.error("no context deserialized!");
 			} else {
@@ -353,9 +354,6 @@ public class TupeloStore {
             RestServlet.COLLECTION_REMOVE_INFIX,
             RestServlet.SEARCH_INFIX,
     };
-	static final String PYRAMID_INFIXES[] = new String[] {
-		ImagePyramidServlet.IMAGE_PYRAMID_INFIX
-	};
 
 	UriCanonicalizer canon;
 
@@ -389,10 +387,6 @@ public class TupeloStore {
             String prefix = getWebappPrefix(request);
             for(String infix : REST_INFIXES) {
             	String cp = prefix + request.getContextPath() + REST_SERVLET_PATH + infix;
-            	canon.setCanonicalUrlPrefix(infix, cp);
-            }
-            for(String infix : PYRAMID_INFIXES) {
-            	String cp = prefix + request.getContextPath() + PYRAMID_SERVLET_PATH + infix;
             	canon.setCanonicalUrlPrefix(infix, cp);
             }
             // now handle GWT dataset and collection stuff stuff, hardcoding the HTML path

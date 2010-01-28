@@ -63,18 +63,10 @@ public class GetDatasetHandler implements
 				log.debug("No image previews available for " + arg0.getId());
 			}
 
-			String pyramidUrl = null;
 			// FIXME the next query is probably unnecessary, if we can get to the underlying BeanThing
 			// representing the dataset which will have this triple in it, or not
-			if(TupeloStore.getInstance().getContext().match(Resource.uriRef(datasetBean.getUri()), ImagePyramidBeanUtil.HAS_PYRAMID, null).size() > 0) {
-				try {
-					UriCanonicalizer c = TupeloStore.getInstance().getUriCanonicalizer();
-					pyramidUrl = c.canonicalize(ImagePyramidServlet.IMAGE_PYRAMID_INFIX, datasetBean.getUri());
-				} catch(IllegalStateException x) {
-					log.error("unable to canonicalize dataset for pyramid",x);
-				}
-			}
-			return new GetDatasetResult(datasetBean, previews, pyramidUrl);
+			boolean pyramid = TupeloStore.getInstance().getContext().match(Resource.uriRef(datasetBean.getUri()), ImagePyramidBeanUtil.HAS_PYRAMID, null).size() > 0;
+			return new GetDatasetResult(datasetBean, previews, pyramid);
 		} catch (Exception e) {
 			throw new ActionException(e);
 		}

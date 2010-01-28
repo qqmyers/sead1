@@ -24,16 +24,16 @@ public class GetDatasetResult implements Result {
 
 	private Collection<PreviewImageBean> previews;
 
-	private String pyramidUrl = null;
+	private boolean pyramid = false;
 	
 	public GetDatasetResult() {
 	}
 
 	public GetDatasetResult(DatasetBean datasetBean,
-			Collection<PreviewImageBean> previews, String pyramidUrl) {
+			Collection<PreviewImageBean> previews, boolean pyramid) {
 		setDataset(datasetBean);
 		setPreviews(previews);
-		setPyramidUrl(pyramidUrl);
+		setPyramid(pyramid);
 	}
 
 	public void setDataset(DatasetBean dataset) {
@@ -55,12 +55,12 @@ public class GetDatasetResult implements Result {
 		return previews;
 	}
 
-	public String getPyramidUrl() {
-		return pyramidUrl;
+	public boolean isPyramid() {
+		return pyramid;
 	}
 
-	public void setPyramidUrl(String pyramidUrl) {
-		this.pyramidUrl = pyramidUrl;
+	public void setPyramid(boolean pyramid) {
+		this.pyramid = pyramid;
 	}
 
 }

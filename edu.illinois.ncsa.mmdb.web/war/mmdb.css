@@ -557,6 +557,17 @@ body {
 	margin: 5px auto 5px auto;
 }
 
+.seadragon {
+	display: block;
+	margin: 5px auto 5px auto;
+	vertical-align: middle;
+	border: 1px solid #888888;
+	width: 600px;
+	height: 400px;
+	background-color: black;
+	color: white
+}
+
 /*================= Annotations / Comments ============== */
 .commentsHeading {
 	margin-top: 10px;

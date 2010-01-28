@@ -17,7 +17,6 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -27,7 +26,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 
@@ -57,6 +55,7 @@ import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
  * 
  *         TODO replace VerticalPanel and HorizontalPanel with FlowPanel
  */
+@SuppressWarnings("nls")
 public class DatasetWidget extends Composite {
 
 	private final MyDispatchAsync service;
@@ -89,7 +88,7 @@ public class DatasetWidget extends Composite {
 	private static final String BLOB_URL = "./api/image/";
 	private static final String PREVIEW_URL = "./api/image/preview/large/";
 	private static final String DOWNLOAD_URL = "./api/image/download/";
-	private static final String PYRAMID_URL = "./pyramid/uri=";
+	private static final String PYRAMID_URL = "./pyramid/";
 
 	private PersonBean creator;
 
@@ -123,13 +122,10 @@ public class DatasetWidget extends Composite {
 	
 	private PreviewWidget preview;
 	
-	private Frame zoom;
-
 //	private FlowPanel previewPanel;
 
 	private FlowPanel previewControls;
 
-	private PreviewWidget pw;
 
 	/**
 	 * 
@@ -181,7 +177,7 @@ public class DatasetWidget extends Composite {
 
 					@Override
 					public void onSuccess(GetDatasetResult result) {
-						drawPage(result.getDataset(), result.getPyramidUrl());
+						drawPage(result.getDataset(), result.isPyramid());
 
 					}
 				});
@@ -193,7 +189,7 @@ public class DatasetWidget extends Composite {
 	 * @param dataset
 	 * @param collection
 	 */
-	private void drawPage(DatasetBean dataset, String pyramidUrl) {
+    private void drawPage(DatasetBean dataset, boolean pyramid) {
 
 		// image preview
 //		previewPanel(dataset.getUri());
@@ -281,22 +277,28 @@ public class DatasetWidget extends Composite {
 
 		actionsPanel.add(addToCollectionButton);
 
-		if(pyramidUrl != null) {
-			Button zoomButton = new Button("Zoom");
-			final String zoomUri = PYRAMID_URL + dataset.getUri(); 
-			zoomButton.addClickHandler(new ClickHandler() {
-				public void onClick(ClickEvent event) {
-					// image zoom
-					zoom = new Frame(zoomUri);
-					zoom.addStyleName("datasetZoom");
-					zoom.removeStyleName("gwt-Frame"); // remove frame border!
-					DOM.setElementAttribute(zoom.getElement(), "frameborder", "0"); // IE
-					previewPanel.clear();
-					previewPanel.add(zoom);
-				}
-			});
-			actionsPanel.add(zoomButton);
-		}
+        if ( pyramid ) {
+            final Button zoomButton = new Button( "Zoom" );
+            final String zoomUri = PYRAMID_URL + dataset.getUri() + "/xml";
+            zoomButton.addClickHandler( new ClickHandler() {
+                public void onClick( ClickEvent event )
+                {
+                    previewPanel.clear();
+                    if ( zoomButton.getText().equals( "Zoom" ) ) {
+                        Label seadragon = new Label();
+                        seadragon.addStyleName( "seadragon" );
+                        previewPanel.add( seadragon );
+                        seadragon.getElement().setId( "seadragon" );
+                        zoomButton.setText( "Preview" );
+                        showSeadragon( seadragon.getElement().getId(), zoomUri );
+                    } else {
+                        previewPanel.add( preview );
+                        zoomButton.setText( "Zoom" );
+                    }
+                }
+            } );
+            actionsPanel.add( zoomButton );
+        }
 		
 		// information panel with extra metadata
 		informationPanel = new DisclosurePanel("Extracted Information");
@@ -338,6 +340,14 @@ public class DatasetWidget extends Composite {
 		
 		loadDerivedFrom();
 	}
+    
+    public final native void showSeadragon(String container, String uri) /*-{ 
+        $wnd.Seadragon.Config.debug = true;
+        $wnd.Seadragon.Config.imagePath = "/img/";
+        $wnd.Seadragon.Config.autoHideControls = true;
+        var viewer = new $wnd.Seadragon.Viewer(container);
+        viewer.openDzi(uri);
+    }-*/;
 
 	private void previewPanel(final String uri) {
 		
