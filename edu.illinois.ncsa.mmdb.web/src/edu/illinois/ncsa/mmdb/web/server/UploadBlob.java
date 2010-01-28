@@ -339,7 +339,7 @@ public class UploadBlob extends AuthenticatedServlet {
                         t.setValue(LABEL, fileName);
                         t.setValue(RestService.LABEL_PROPERTY, fileName);
                         t.setValue(RestService.DATE_PROPERTY, new Date());
-                        String username = getAuthenticatedUsername(request);
+                        String username = getHttpSessionUser(request);
                         if(username != null) {
                         	t.setValue(Dc.CREATOR, Resource.uriRef(PersonBeanUtil.getPersonID(username)));
                         }

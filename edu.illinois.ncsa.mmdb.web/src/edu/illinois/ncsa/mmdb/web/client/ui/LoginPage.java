@@ -20,6 +20,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -181,6 +182,7 @@ public class LoginPage extends Composite {
 							builder.setUser(username);
 							builder.setPassword(password);
 							try {
+								GWT.log("attempting to authenticate "+username+" against "+restUrl,null);
 								builder.sendRequest("", new RequestCallback() {
 									public void onError(Request request, Throwable exception) {
 										fail();
@@ -188,6 +190,12 @@ public class LoginPage extends Composite {
 									public void onResponseReceived(Request request,	Response response) {
 										// success!
 										String sessionKey = response.getText();
+										GWT.log("REST auth status code = "+response.getStatusCode(), null);
+										if(response.getStatusCode()>300) {
+											GWT.log("authentication failed: "+sessionKey,null);
+											fail();
+										}
+										GWT.log("user "+username+" associated with session key "+sessionKey,null);
 										login(arg0.getSessionId(), sessionKey);
 										redirect();
 									}
@@ -251,22 +259,22 @@ public class LoginPage extends Composite {
 		// now hit the REST authentication endpoint with bad creds
 		String restUrl = "./api/logout";
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-		builder.setUser("badCreds");
-		builder.setPassword("reallyReallyBadCreds");
+		builder.setUser("_badCreds_");
+		builder.setPassword("_reallyReallyBadCreds_");
 		try {
 			builder.sendRequest("", new RequestCallback() {
 				public void onError(Request request, Throwable exception) {
 					// do something
+					Window.alert("error logging out "+exception.getMessage());
 				}
 				public void onResponseReceived(Request request,	Response response) {
 					// success!
-					GWT.log("clearing upload applet credentials", null);
-					MMDB.sessionKey = null;
-					History.newItem("login?p=listDatasets"); // FIXME hardcodes destination
+					History.newItem("login"); // FIXME hardcodes destination
 				}
 			});
 		} catch(RequestException x) {
 			// another error condition, do something
+			Window.alert("error logging out: "+x.getMessage());
 		}
 	}
 	
@@ -274,10 +282,13 @@ public class LoginPage extends Composite {
 	 * Set sessionID to null, remove cookie, and log out of REST servlets
 	 */
 	public static void logout() {
+		if(MMDB.sessionID != null) {
+			GWT.log("user "+MMDB.sessionID+" logging out", null);
+		}
 		MMDB.sessionID = null;
 		MMDB.sessionKey = null;
+		clearBrowserCreds();
 		Cookies.removeCookie("sid");
 		Cookies.removeCookie("sessionKey");
-		clearBrowserCreds();
 	}
 }

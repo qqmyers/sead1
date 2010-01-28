@@ -7,7 +7,6 @@ import java.net.URL;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +20,7 @@ public class Authentication {
 	private static Log log = LogFactory.getLog(Authentication.class);
 	
 	public boolean authenticate(String username, String password) {
-		log.debug("Authenticating '" + username + "'");
+		log.debug("LOGIN: Authenticating '" + username + "' via JAAS");
 
 		if (username.length() == 0) {
 			return false;
@@ -41,10 +40,11 @@ public class Authentication {
 			LoginContext ctx = null;
 
 			try {
+				log.debug("LOGIN: JAAS authentication suceeded for "+username);
 				ctx = new LoginContext("mmdb", subject, handler);
 				ctx.login();
 			} catch (LoginException ex) {
-				log.debug("Failed to authenticate '" + username + "'");
+				log.debug("LOGIN: JAAS authentication FAILED for "+username);
 				return false;
 			}
 

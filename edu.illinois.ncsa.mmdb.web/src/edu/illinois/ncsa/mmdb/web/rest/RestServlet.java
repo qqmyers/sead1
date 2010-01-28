@@ -267,7 +267,7 @@ public class RestServlet extends AuthenticatedServlet {
         } else if(request.getRequestURL().toString().endsWith("authenticate")) {
         	// we're just authenticating, and that has already been handled. do not report an error.
         	// for convenience, produce the session key as a string
-        	response.getWriter().print(lookupSessionKey(getAuthenticatedUser(request)));
+        	response.getWriter().print(lookupSessionKey(getHttpSessionUser(request)));
         	response.getWriter().flush();
         } else if(hasPrefix(SEARCH_INFIX,request)) {
         	doSearch(request,response);

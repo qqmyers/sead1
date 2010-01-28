@@ -983,18 +983,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		}
 		if (cookieSID != null && cookieSessionKey != null) {
 			LoginPage.login(cookieSID, cookieSessionKey);
-		}
-		// FIXME debug
-		/*
-		String dl = (cookieSID != null ? "sid="+cookieSID : "")
-		+ (MMDB.sessionID != null ? ",sessionID="+MMDB.sessionID : "");
-		debugLabel.setText(dl);
-		// end debug
-		 */
-		if (MMDB.sessionID == null) {
-			History.newItem("login?p=" + History.getToken());
+			return true;
+		} else {
 			return false;
 		}
-		return true;
 	}
 }
