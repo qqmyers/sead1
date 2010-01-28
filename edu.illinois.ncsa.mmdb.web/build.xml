@@ -5,8 +5,6 @@
 
 	<property name="webxml" value="web.xml" />
 
-	<property name="gwt.home" value="/usr/local/gwt-2.0.0-ms2" />
-
 	<property name="deploy" value="/usr/local/tomcat/webapps" />
 
 	<property name="war" value="${ant.project.name}.war" />
@@ -191,10 +189,10 @@
 
 	<target name="gwtc" depends="compile" description="compiles Java source files to JavaScript">
 		<!-- Consider adding -Xms256m -Xmx512m to improve performance. -->
-		<java classname="com.google.gwt.dev.Compiler" classpathref="classpath" fork="true">
+		<java classname="com.google.gwt.dev.Compiler" classpathref="classpath" fork="true" failonerror="true">
 			<jvmarg value="-Xms256m" />
 			<jvmarg value="-Xmx512m" />
-			<arg line="-style OBFUSCATE" />
+			<!-- <arg line="-style OBFUSCATE" /> -->
 			<arg value="edu.illinois.ncsa.mmdb.web.MMDB" />
 		</java>
 	</target>
