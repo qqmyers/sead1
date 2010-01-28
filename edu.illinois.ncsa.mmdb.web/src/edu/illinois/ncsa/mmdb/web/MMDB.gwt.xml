@@ -36,7 +36,6 @@
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
   <!-- Other module inherits                                      -->
-  <script src="/seadragon-min.js" />
   
   <!-- Specify the app entry point class.                         -->
   <entry-point class='edu.illinois.ncsa.mmdb.web.client.MMDB'/>
