@@ -856,7 +856,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			} else if (token.startsWith("listCollections")) {
 				listCollections();
 			} else if (token.startsWith("collection")) {
-				listCollection();
+//				listCollection();
+				showCollectionPage();
 			} else if (token.startsWith("modifyPermissions")) {
 				showUsersPage();
 			} else if (token.startsWith("signup")) {

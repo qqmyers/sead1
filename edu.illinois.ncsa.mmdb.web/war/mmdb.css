@@ -237,6 +237,23 @@ body {
 	vertical-align: top;
 }
 
+.twoColumnLayout {
+	float: none;
+}
+
+.twoColumnLayout-leftCol {
+	float: left;
+}
+
+.twoColumnLayout-rightCol {
+	width: 250px;
+	float: right;
+}
+
+.twoColumnLayoutColumn {
+	float: left;
+}
+
 .usersTable {
 	width: 800px;
 	margin: 20px auto 100px auto;

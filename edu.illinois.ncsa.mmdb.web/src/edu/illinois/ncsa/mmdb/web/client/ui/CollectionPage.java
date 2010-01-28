@@ -11,8 +11,6 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -55,9 +53,28 @@ public class CollectionPage extends Composite {
 		
 		mainContent.add(createInfoPanel());
 		
+		mainContent.add(createSocialAnnotationsPanel());
+		
 		retrieveCollection();
 	}
 	
+	/**
+	 * A panel with comments on the left and tags on the right.
+	 * 
+	 * @return the panel
+	 */
+	private Widget createSocialAnnotationsPanel() {
+		CommentsView commentsView = new CommentsView(uri, dispatchasync);
+		TagsWidget tagsWidget = new TagsWidget(uri, dispatchasync);
+		TwoColumnLayout layout = new TwoColumnLayout(commentsView, tagsWidget);
+		return layout;
+	}
+
+	/**
+	 * High level information about the dataset.
+	 * 
+	 * @return the panel
+	 */
 	private Widget createInfoPanel() {
 		infoPanel = new FlowPanel();
 		infoPanel.addStyleName("collectionInfo");
@@ -73,14 +90,18 @@ public class CollectionPage extends Composite {
 	}
 
 	/**
+	 * Create the title of the page.
 	 * 
-	 * @return
+	 * @return title widget
 	 */
 	private Widget createPageTitle() {
 		pageTitle = new TitlePanel("Collection");
 		return pageTitle;
 	}
 
+	/**
+	 * Request collection from the server.
+	 */
 	private void retrieveCollection() {
 		dispatchasync.execute(new GetCollection(uri), new AsyncCallback<GetCollectionResult>() {
 
@@ -96,6 +117,12 @@ public class CollectionPage extends Composite {
 		});
 	}
 
+	/**
+	 * Draw the elements of the collection on the page.
+	 * 
+	 * @param collection
+	 * @param datasets
+	 */
 	protected void showCollection(CollectionBean collection, List<DatasetBean> datasets) {
 		
 		pageTitle.setText(collection.getTitle());
@@ -117,12 +144,7 @@ public class CollectionPage extends Composite {
 		}
 		
 		GalleryWidget gallery = new GalleryWidget(uris);
-		mainContent.add(gallery);
-	}
-
-	private void retrieveMembers() {
-		// TODO Auto-generated method stub
-		
+		mainContent.insert(gallery, 2);
 	}
 
 }
