@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,7 +19,6 @@ import org.tupeloproject.kernel.NotFoundException;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.CopyFile;
 import org.tupeloproject.util.Tuple;
 
@@ -54,7 +55,6 @@ public class ImagePyramidServlet extends AuthenticatedServlet
             return;
         }
         String url = req.getRequestURL().toString();
-        log.info( url );
         URL requestUrl = new URL( url );
         String prefix = requestUrl.getProtocol() + "://" + requestUrl.getHost(); //$NON-NLS-1$
         if ( requestUrl.getPort() != -1 ) {
@@ -72,7 +72,7 @@ public class ImagePyramidServlet extends AuthenticatedServlet
         String request = params.substring( params.indexOf( '/' ) );
         Resource uri = null;
         try {
-            uri = Resource.uriRef( params.substring( 0, params.indexOf( '/' ) ) );
+            uri = Resource.uriRef( URLDecoder.decode( params.substring( 0, params.indexOf( '/' ) ) ) );
         } catch ( IllegalArgumentException x ) {
             die( resp, 404, x );
             return;
@@ -82,7 +82,8 @@ public class ImagePyramidServlet extends AuthenticatedServlet
         if ( request.equals( "/xml" ) ) { //$NON-NLS-1$
             try {
                 log.debug( "GET PYRAMID " + uri );
-                ImagePyramidBean ipb = partialFetchPyramidFor( uri );
+
+                ImagePyramidBean ipb = getFirstPyramid( uri );
                 getXml( ipb, resp );
                 return;
             } catch ( NotFoundException x ) {
@@ -160,7 +161,7 @@ public class ImagePyramidServlet extends AuthenticatedServlet
         Unifier u = new Unifier();
         u.setColumnNames( "tile" ); //$NON-NLS-1$
         u.addPattern( uri, ImagePyramidBeanUtil.HAS_PYRAMID, "pyramid" ); //$NON-NLS-1$
-        u.addPattern( "pyramid", ImagePyramidBeanUtil.PYRAMID_TILES, "tile" ); //$NON-NLS-1$ //$NON-NLS-2$
+        u.addPattern( "pyramid", ImagePyramidTileBeanUtil.PYRAMID_TILES, "tile" ); //$NON-NLS-1$ //$NON-NLS-2$
         u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_LEVEL, Resource.literal( level ) ); //$NON-NLS-1$
         u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_ROW, Resource.literal( row ) ); //$NON-NLS-1$
         u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_COL, Resource.literal( col ) ); //$NON-NLS-1$
@@ -172,39 +173,20 @@ public class ImagePyramidServlet extends AuthenticatedServlet
     }
 
     /**
-     * Given the uri of the pyramid return the pyramid without the tiles.
+     * Given the uri of the pyramid return the first pyramid.
      * 
      * @param uri
      * @return
      * @throws OperatorException
      */
-    private ImagePyramidBean partialFetchPyramidFor( Resource uri ) throws OperatorException
+    private ImagePyramidBean getFirstPyramid( Resource uri ) throws OperatorException
     {
-        // FIXME MMDB-369 tiles should be asssociatable so we can get the bean 
-        Unifier u = new Unifier();
-        // fetch only the attributes we care about for generating the seadragon manifest
-        u.addPattern( uri, ImagePyramidBeanUtil.HAS_PYRAMID, "p" ); //$NON-NLS-1$
-        u.addPattern( "p", Rdfs.LABEL, "label" ); //$NON-NLS-1$ //$NON-NLS-2$
-        u.addPattern( "p", ImagePyramidBeanUtil.PYRAMID_WIDTH, "width" ); //$NON-NLS-1$ //$NON-NLS-2$
-        u.addPattern( "p", ImagePyramidBeanUtil.PYRAMID_HEIGHT, "height" ); //$NON-NLS-1$ //$NON-NLS-2$
-        u.addPattern( "p", ImagePyramidBeanUtil.PYRAMID_FORMAT, "format" ); //$NON-NLS-1$ //$NON-NLS-2$
-        u.addPattern( "p", ImagePyramidBeanUtil.PYRAMID_OVERLAP, "overlap" ); //$NON-NLS-1$ //$NON-NLS-2$
-        u.addPattern( "p", ImagePyramidBeanUtil.PYRAMID_SIZE, "tilesize" ); //$NON-NLS-1$ //$NON-NLS-2$
-        u.setColumnNames( "label", "width", "height", "format", "overlap", "tilesize" ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-        TupeloStore.getInstance().getContext().perform( u );
-        for ( Tuple<Resource> row : u.getResult() ) {
-            ImagePyramidBean p = new ImagePyramidBean();
-            int pi = 0;
-            p.setUri( uri.getString() );
-            p.setLabel( row.get( pi++ ).getString() );
-            p.setWidth( (Integer) row.get( pi++ ).asObject() );
-            p.setHeight( (Integer) row.get( pi++ ).asObject() );
-            p.setFormat( row.get( pi++ ).getString() );
-            p.setOverlap( (Integer) row.get( pi++ ).asObject() );
-            p.setTilesize( (Integer) row.get( pi++ ).asObject() );
-            return p;
+        ImagePyramidBeanUtil ipbu = new ImagePyramidBeanUtil( TupeloStore.getInstance().getBeanSession() );
+        Collection<ImagePyramidBean> pyramids = ipbu.getAssociationsFor( uri );
+        if ( (pyramids == null) || (pyramids.size() == 0) ) {
+            throw new NotFoundException( "no pyramid found" );
         }
-        throw new NotFoundException( "no pyramid found" );
+        return pyramids.iterator().next();
     }
 
     /**
@@ -217,7 +199,7 @@ public class ImagePyramidServlet extends AuthenticatedServlet
      */
     private void die( HttpServletResponse resp, int code, Throwable thr ) throws IOException
     {
-        log.error( String.format( "%d : %s", code, thr.getMessage() ) ); //$NON-NLS-1$
+        log.error( String.format( "%d : %s", code, thr.getMessage() ), thr ); //$NON-NLS-1$
 
         resp.setStatus( code );
         PrintWriter pw = new PrintWriter( resp.getOutputStream() );
