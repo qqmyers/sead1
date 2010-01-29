@@ -20,24 +20,12 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
-import org.tupeloproject.kernel.BlobFetcher;
-import org.tupeloproject.kernel.BlobWriter;
 import org.tupeloproject.kernel.Context;
-import org.tupeloproject.kernel.FilterContext;
-import org.tupeloproject.kernel.NotFoundException;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.PeerFacade;
-import org.tupeloproject.kernel.ProfilingContextFacade;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.Unifier;
-import org.tupeloproject.kernel.UnionContext;
 import org.tupeloproject.kernel.beans.FetchBeanPostprocessor;
-import org.tupeloproject.kernel.beans.SaveBeanPreprocessor;
-import org.tupeloproject.kernel.events.BlobEvent;
-import org.tupeloproject.kernel.events.EventingContextFacade;
-import org.tupeloproject.kernel.events.TupeloEvent;
-import org.tupeloproject.kernel.events.TupeloObserver;
-import org.tupeloproject.kernel.impl.HashFileContext;
 import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
@@ -47,13 +35,9 @@ import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.xml.RdfXml;
-import org.tupeloproject.util.CopyFile;
 import org.tupeloproject.util.ListTable;
-import org.tupeloproject.util.Table;
-import org.tupeloproject.util.Tables;
 import org.tupeloproject.util.Tuple;
 
-import edu.illinois.ncsa.mmdb.web.rest.ImagePyramidServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.server.search.Search;
 import edu.uiuc.ncsa.cet.bean.CETBean;
@@ -127,7 +111,7 @@ public class TupeloStore {
 			// setup context creators
 			ContextCreators.register();
 			context = createSerializeContext();
-            System.out.println(CETBeans.contextToNTriples( context ));
+            //System.out.println(CETBeans.contextToNTriples( context ));
 			if(context == null) {
 				log.error("no context deserialized!");
 			} else {
