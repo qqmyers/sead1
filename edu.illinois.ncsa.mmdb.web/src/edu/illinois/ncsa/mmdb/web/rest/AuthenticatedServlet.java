@@ -131,6 +131,7 @@ public class AuthenticatedServlet extends HttpServlet {
 					sessionKey = setSessionKey(context, validUser);
 					log.info("LOGIN: setting Cookie sessionKey="+sessionKey+" (for user "+validUser+")");
 					Cookie cookie = new Cookie("sessionKey", sessionKey);
+					cookie.setPath(request.getContextPath());
 					response.addCookie(cookie);
 				}
 			}
