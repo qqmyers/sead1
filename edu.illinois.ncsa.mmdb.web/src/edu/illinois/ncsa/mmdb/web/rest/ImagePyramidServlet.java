@@ -5,7 +5,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,11 +82,12 @@ public class ImagePyramidServlet extends AuthenticatedServlet
             try {
                 log.debug( "GET PYRAMID " + uri );
 
-                ImagePyramidBean ipb = getFirstPyramid( uri );
+                ImagePyramidBeanUtil ipbu = new ImagePyramidBeanUtil( TupeloStore.getInstance().getBeanSession() );
+                ImagePyramidBean ipb = ipbu.get( uri );
+                if ( ipb == null ) {
+                    throw (new NotFoundException( "Could not find the pyramid with given URI." ));
+                }
                 getXml( ipb, resp );
-                return;
-            } catch ( NotFoundException x ) {
-                die( resp, 404, x );
                 return;
             } catch ( OperatorException x ) {
                 die( resp, 404, x );
@@ -158,35 +158,23 @@ public class ImagePyramidServlet extends AuthenticatedServlet
      */
     private Resource getTileUri( Resource uri, int level, int row, int col ) throws OperatorException
     {
+        // FIXME MMDB-382
+        Resource rl = Resource.literal( level );
+        Resource rr = Resource.literal( row );
+        Resource rc = Resource.literal( col );
         Unifier u = new Unifier();
-        u.setColumnNames( "tile" ); //$NON-NLS-1$
-        u.addPattern( uri, ImagePyramidBeanUtil.HAS_PYRAMID, "pyramid" ); //$NON-NLS-1$
-        u.addPattern( "pyramid", ImagePyramidTileBeanUtil.PYRAMID_TILES, "tile" ); //$NON-NLS-1$ //$NON-NLS-2$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_LEVEL, Resource.literal( level ) ); //$NON-NLS-1$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_ROW, Resource.literal( row ) ); //$NON-NLS-1$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_COL, Resource.literal( col ) ); //$NON-NLS-1$
+        u.setColumnNames( "tile", "level", "row", "col" ); //$NON-NLS-1$
+        u.addPattern( uri, ImagePyramidTileBeanUtil.PYRAMID_TILES, "tile" ); //$NON-NLS-1$
+        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_LEVEL, "level" ); //$NON-NLS-1$
+        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_ROW, "row" ); //$NON-NLS-1$
+        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_COL, "col" ); //$NON-NLS-1$
         TupeloStore.getInstance().getContext().perform( u );
         for ( Tuple<Resource> r : u.getResult() ) {
+            if (rl.equals( r.get(1)) && rr.equals( r.get(2))  && rc.equals( r.get(3) ) ) {
             return r.get( 0 );
+            }
         }
         throw new NotFoundException( "no tile found" );
-    }
-
-    /**
-     * Given the uri of the pyramid return the first pyramid.
-     * 
-     * @param uri
-     * @return
-     * @throws OperatorException
-     */
-    private ImagePyramidBean getFirstPyramid( Resource uri ) throws OperatorException
-    {
-        ImagePyramidBeanUtil ipbu = new ImagePyramidBeanUtil( TupeloStore.getInstance().getBeanSession() );
-        Collection<ImagePyramidBean> pyramids = ipbu.getAssociationsFor( uri );
-        if ( (pyramids == null) || (pyramids.size() == 0) ) {
-            throw new NotFoundException( "no pyramid found" );
-        }
-        return pyramids.iterator().next();
     }
 
     /**

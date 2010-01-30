@@ -4,6 +4,7 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.Collection;
+import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -13,17 +14,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
-import edu.illinois.ncsa.mmdb.web.rest.ImagePyramidServlet;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.ImagePyramidBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 
 /**
  * Retrieve a specific dataset.
@@ -65,7 +65,11 @@ public class GetDatasetHandler implements
 
 			// FIXME the next query is probably unnecessary, if we can get to the underlying BeanThing
 			// representing the dataset which will have this triple in it, or not
-			boolean pyramid = TupeloStore.getInstance().getContext().match(Resource.uriRef(datasetBean.getUri()), ImagePyramidBeanUtil.HAS_PYRAMID, null).size() > 0;
+			Set<Triple> pyramids =TupeloStore.getInstance().getContext().match(Resource.uriRef(datasetBean.getUri()), ImagePyramidBeanUtil.HAS_PYRAMID, null);
+			String pyramid = null;
+			if (pyramids.size() > 0) {
+			    pyramid = pyramids.iterator().next().getObject().getString();
+			}
 			return new GetDatasetResult(datasetBean, previews, pyramid);
 		} catch (Exception e) {
 			throw new ActionException(e);

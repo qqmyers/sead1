@@ -178,7 +178,7 @@ public class DatasetWidget extends Composite {
 
 					@Override
 					public void onSuccess(GetDatasetResult result) {
-						drawPage(result.getDataset(), result.isPyramid());
+						drawPage(result.getDataset(), result.getPyramid());
 
 					}
 				});
@@ -190,7 +190,7 @@ public class DatasetWidget extends Composite {
 	 * @param dataset
 	 * @param collection
 	 */
-    private void drawPage(DatasetBean dataset, boolean pyramid) {
+    private void drawPage(DatasetBean dataset, String pyramid) {
 
 		// image preview
 //		previewPanel(dataset.getUri());
@@ -278,9 +278,9 @@ public class DatasetWidget extends Composite {
 
 		actionsPanel.add(addToCollectionButton);
 
-        if ( pyramid ) {
+        if ( pyramid != null ) {
             final Button zoomButton = new Button( "Zoom" );
-            final String zoomUri = PYRAMID_URL + URL.encodeComponent( dataset.getUri() ) + "/xml";
+            final String zoomUri = PYRAMID_URL + URL.encodeComponent( pyramid ) + "/xml";
             zoomButton.addClickHandler( new ClickHandler() {
                 public void onClick( ClickEvent event )
                 {
