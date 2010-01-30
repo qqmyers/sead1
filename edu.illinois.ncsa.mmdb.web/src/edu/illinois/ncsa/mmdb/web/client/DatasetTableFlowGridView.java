@@ -2,12 +2,10 @@ package edu.illinois.ncsa.mmdb.web.client;
 
 import java.util.Date;
 
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter.Display;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
@@ -22,6 +20,14 @@ public class DatasetTableFlowGridView extends DatasetTableView {
 		super();
 		addStyleName("datasetTable");
 	}
+
+	
+	@Override
+	public void removeAllRows() {
+		super.removeAllRows();
+		n = 0;
+	}
+
 
 	public int getPageSize() {
 		return 35;

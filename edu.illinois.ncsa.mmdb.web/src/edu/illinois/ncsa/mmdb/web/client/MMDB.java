@@ -18,7 +18,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -32,20 +31,14 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewCollectionEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.CancelEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.CancelHandler;
-import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
-import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
@@ -64,7 +57,6 @@ import edu.illinois.ncsa.mmdb.web.client.ui.TitlePanel;
 import edu.illinois.ncsa.mmdb.web.client.ui.UserManagementPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.WatermarkTextBox;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
  * MMDB entry point.
@@ -76,7 +68,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * The message displayed to the user when the server cannot be reached or
 	 * returns an error.
 	 */
-	private static final String SERVER_ERROR = "An error occurred while "
+	public static final String SERVER_ERROR = "An error occurred while "
 			+ "attempting to contact the server. Please check your network "
 			+ "connection and try again.";
 
@@ -239,131 +231,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				});
 	}
 
-	/**
-	 * A simple testing method to add the list of dataset names to the page.
-	 * This is only to check that the connection with the tupelo repository
-	 * works properly.
-	 * 
-	 * @param eventBus
-	 * @param dispatchAsync
-	 */
-	int pageOffset = 0;
-	int pageSize = 10;
-
-	String uriForSortKey(String key) { // FIXME kludge, make keys full URI's
-		if (key.startsWith("title-")) {
-			return "http://purl.org/dc/elements/1.1/title";
-		} else { // default is date
-			return "http://purl.org/dc/elements/1.1/date";
-		}
-	}
-
-	boolean descForSortKey(String key) {
-		return !key.endsWith("-asc"); // default is descending
-	}
-
-	void goToPage(String action, int page) {
-		History.newItem(action + "?page=" + page);
-	}
-
-	void goToPage(String action, int page, String sortKey, String listView) {
-		History.newItem(action + "?page=" + page + "&sort=" + sortKey
-				+ "&view=" + listView);
-	}
-
-	void goToPage(String action, int page, String sortKey, String listView, String additionalParams) {
-		History.newItem(action + "?page=" + page + "&sort=" + sortKey
-				+ "&view=" + listView + (additionalParams != null ? ("&" + additionalParams) : ""));
-	}
-
-	int page = 1, numberOfPages = 0;
-	String sortKey = "date-desc";
-	String viewType = "list";
-
-	private void parsePagingParameters() {
-		Map<String, String> params = getParams();
-
-		if(params.containsKey("view")) {
-			viewType = params.get("view");
-		} else {
-			viewType = "list";
-		}
-
-		// figure out what page we're on
-		page = 1;
-		if (params.containsKey("page")) {
-			try {
-				page = Integer.parseInt(params.get("page"));
-			} catch (Exception x) {
-			}
-		}
-
-		// and how we need to sort
-		if (params.containsKey("sort")) {
-			sortKey = params.get("sort");
-		}
-	}
-
-	private PagingDatasetTableView createListDatasetsView(final String action, final String params) {
-		parsePagingParameters();
-		// first choose the kind of view
-		DatasetTableView datasetTableView = null;
-		if (viewType.equals("grid")) {
-			datasetTableView = new DatasetTableFlowGridView();
-		} else if(viewType.equals("flow")) {
-			datasetTableView = new DatasetTableCoverFlowView();
-		} else {
-			datasetTableView = new DatasetTableOneColumnView();
-		}
-
-		// ask the view how many datasets per page
-		pageSize = datasetTableView.getPageSize();
-
-		// now bind the presenter to the view and associate it with the event
-		// bus
-		PagingDatasetTableView pagingView = new PagingDatasetTableView(page,
-				sortKey, viewType);
-		pagingView.addStyleName("datasetTable");
-
-		pagingView.setTable(datasetTableView); // here we're wrapping the less
-												// generic impl
-		PagingDatasetTablePresenter datasetTablePresenter = new PagingDatasetTablePresenter(
-				pagingView, eventBus);
-		datasetTablePresenter.bind();
-
-		pagingView.addPageChangeHandler(new ValueChangeHandler<Integer>() {
-			public void onValueChange(ValueChangeEvent<Integer> event) {
-				goToPage(action, event.getValue(), sortKey, viewType, params);
-			}
-		});
-
-		pagingView.addSortKeyChangeHandler(new ValueChangeHandler<String>() {
-			public void onValueChange(ValueChangeEvent<String> event) {
-				goToPage(action, 1, event.getValue(), viewType, params);
-			}
-		});
-
-		pagingView.addViewTypeChangeHandler(new ValueChangeHandler<String>() {
-			public void onValueChange(ValueChangeEvent<String> event) {
-				goToPage(action, 1, sortKey, event.getValue(), params);
-			}
-		});
-
-		// finally
-
-		// if we know the number of pages, have the view reflect it
-		if (numberOfPages > 0) {
-			pagingView.setNumberOfPages(numberOfPages);
-		}
-
-		// compute the page size using the table's preferred size
-		pageSize = pagingView.getTable().getPageSize();
-		// now compute the current page offset
-		pageOffset = (page - 1) * pageSize;
-
-		return pagingView;
-	}
-
 	private void listDatasets() {
 		listDatasets(null);
 	}
@@ -389,51 +256,18 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		mainContainer.add(titlePanel);
 
-		String action = "listDatasets";
-		String params = null;
-		if(inCollection != null) {
-			action = "collection";
-			params = "uri="+inCollection;
-		}
-		// datasets table
-		final PagingDatasetTableView listDatasetsView = createListDatasetsView(action,params);
-		mainContainer.add(listDatasetsView.asWidget());
+		PagingDatasetTableView pagingView = new PagingDatasetTableView();
+		pagingView.addStyleName("datasetTable");
+		PagingDatasetTablePresenter datasetTablePresenter = new PagingDatasetTablePresenter(
+				pagingView, eventBus);
+		datasetTablePresenter.bind();
 
-		final int adjustedPageSize = (viewType.equals("flow") ? 3 : pageSize);
+		mainContainer.add(pagingView.asWidget());
 		
-		ListDatasets query = new ListDatasets();
-		query.setOrderBy(uriForSortKey(sortKey));
-		query.setDesc(descForSortKey(sortKey));
-		query.setLimit(adjustedPageSize);
-		query.setOffset(pageOffset);
-		query.setInCollection(inCollection);
-		dispatchAsync.execute(query,
-				new AsyncCallback<ListDatasetsResult>() {
-
-			public void onFailure(Throwable caught) {
-				GWT.log("Error retrieving datasets", null);
-				DialogBox dialogBox = new DialogBox();
-				dialogBox.setText("Oops");
-				dialogBox.add(new Label(SERVER_ERROR));
-				dialogBox.setAnimationEnabled(true);
-				dialogBox.center();
-				dialogBox.show();
-			}
-			
-			@Override
-			public void onSuccess(ListDatasetsResult result) {
-				for (DatasetBean dataset : result.getDatasets()) {
-					GWT.log("Sending event add dataset " + dataset.getTitle(), null);
-					AddNewDatasetEvent event = new AddNewDatasetEvent();
-					event.setDataset(dataset);
-					eventBus.fireEvent(event);
-				}
-				int np = (result.getDatasetCount() / pageSize) + (result.getDatasetCount() % pageSize != 0 ? 1 : 0);
-				listDatasetsView.setNumberOfPages(np);
-				numberOfPages = np;
-			}
-		});
-
+		pagingView.invalidateView();
+		pagingView.displayAll();
+		
+		/*
 		if (!eventBus.isEventHandled(DatasetDeletedEvent.TYPE)) {
 			eventBus.addHandler(DatasetDeletedEvent.TYPE,
 					new DatasetDeletedHandler() {
@@ -460,21 +294,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 						}
 			});
 		}
+		*/
 	}
 	
-	private void listCollection() {
-		String inCollection = getParams().get("uri");
-		listDatasets(inCollection);
-	}
-	
-	String uriForCollectionSortKey(String key) { // FIXME kludge, make keys full URI's
-		if (key.startsWith("title-")) {
-			return "http://purl.org/dc/elements/1.1/title";
-		} else { // default is creation date
-			return "http://purl.org/dc/terms/created";
-		}
-	}
-
 	/**
 	 * List collections.
 	 * 
@@ -486,75 +308,18 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		TitlePanel titlePanel = new TitlePanel("Collections");
 		mainContainer.add(titlePanel);
 
-		parsePagingParameters();
-
-		PagingCollectionTableView view = new PagingCollectionTableView(page,
-				sortKey, viewType);
+		PagingCollectionTableView view = new PagingCollectionTableView();
 		view.addStyleName("datasetTable");
 		PagingCollectionTablePresenter presenter = new PagingCollectionTablePresenter(
 				view, eventBus);
 		presenter.bind();
+		
+		view.setNumberOfPages(0);
 
-		view.addPageChangeHandler(new ValueChangeHandler<Integer>() {
-			public void onValueChange(ValueChangeEvent<Integer> event) {
-				goToPage("listCollections", event.getValue(), sortKey, viewType);
-			}
-		});
-
-		view.addSortKeyChangeHandler(new ValueChangeHandler<String>() {
-			public void onValueChange(ValueChangeEvent<String> event) {
-				goToPage("listCollections", 1, event.getValue(), viewType);
-			}
-		});
-
-		view.addViewTypeChangeHandler(new ValueChangeHandler<String>() {
-			public void onValueChange(ValueChangeEvent<String> event) {
-				goToPage("listCollections", 1, sortKey, event.getValue());
-			}
-		});
-
-		// we don't know the number of pages
-		numberOfPages = 0;
-
-		// once we fix this, this'll update it
-		if (numberOfPages > 0) {
-			view.setNumberOfPages(numberOfPages);
-		} else {
-			view.setNumberOfPages(0);
-		}
-
-		// for now hardcode the page size
-		pageSize = 15;
-		// now compute the current page offset
-		pageOffset = (page - 1) * pageSize;
-
-		//
 		mainContainer.add(view.asWidget());
-
-		// now list the collections
-		GetCollections query = new GetCollections();
-		query.setSortKey(uriForCollectionSortKey(sortKey));
-		query.setDesc(descForSortKey(sortKey));
-		query.setOffset(pageOffset);
-		query.setLimit(pageSize);
-
-		dispatchAsync.execute(query, new AsyncCallback<GetCollectionsResult>() {
-			@Override
-			public void onFailure(Throwable caught) {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public void onSuccess(GetCollectionsResult result) {
-				for (CollectionBean collection : result.getCollections()) {
-					AddNewCollectionEvent event = new AddNewCollectionEvent(
-							collection);
-					GWT.log("Firing event add collection "
-							+ collection.getTitle(), null);
-					eventBus.fireEvent(event);
-				}
-			}
-		});
+		
+		view.invalidateView();
+		view.displayAll();
 		
 		// create collection
 		FlowPanel addCollectionPanel = new FlowPanel();
@@ -841,20 +606,23 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * @param token
 	 *            history token (everything after the #)
 	 */
+	String previousHistoryToken = new String();
 	private void parseHistoryToken(String token) {
 		if (token.startsWith("login")) {
 			showLoginPage();
 		} else if (checkLogin()) {
 			if (token.startsWith("dataset")) {
 				showDataset();
-			} else if (token.startsWith("listDatasets")) {
+			} else if (token.startsWith("listDatasets") && !previousHistoryToken.startsWith("listDatasets")) {
 				listDatasets();
 			} else if (token.startsWith("upload")) { // upload applet support
 				showUploadProgress();
 			} else if (token.startsWith("tag")) {
 				showTagPage();
-			} else if (token.startsWith("listCollections")) {
+			} else if (token.startsWith("listCollections") && !previousHistoryToken.startsWith("listCollections")) {
 				listCollections();
+			} else if (token.startsWith("listCollections")) {
+				// skip default case!
 			} else if (token.startsWith("collection")) {
 //				listCollection();
 				showCollectionPage();
@@ -866,10 +634,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				showNewPasswordPage();
 			} else if (token.startsWith("home")) {
 				showHomePage();
-			} else {
+			} else if(!previousHistoryToken.startsWith("listDatasets")) {
 				listDatasets();
 			}
 		}
+		previousHistoryToken = token;
 	}
 
 	private void showHomePage() {

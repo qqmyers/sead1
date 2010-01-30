@@ -13,6 +13,12 @@ public class DatasetTableCoverFlowView extends DatasetTableView {
 	int n = 0;
 	
 	@Override
+	public void removeAllRows() {
+		super.removeAllRows();
+		n = 0;
+	}
+
+	@Override
 	public void addRow(String id, String title, String mimeType, Date date,	String previewUri) {
 		VerticalPanel panel = new VerticalPanel();
 		PreviewWidget preview = null;

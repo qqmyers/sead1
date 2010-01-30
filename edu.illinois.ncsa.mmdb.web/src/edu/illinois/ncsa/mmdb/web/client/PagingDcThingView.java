@@ -1,10 +1,15 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
@@ -15,14 +20,134 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 	List<HasValueChangeHandlers<String>> sortControls;
 	List<HasValueChangeHandlers<String>> viewTypeControls;
 	
-	public PagingDcThingView(int page, String sortKey, String viewType) {
+	/**
+	 * Parse the parameters in the history token after the '?'
+	 * 
+	 * @return
+	 */
+	Map<String, String> getParams(String token) {
+		Map<String, String> params = new HashMap<String, String>();
+		String paramString = token.substring(token.indexOf("?") + 1);
+		if (!paramString.isEmpty()) {
+			for (String paramEntry : paramString.split("&")) {
+				String[] terms = paramEntry.split("=");
+				if (terms.length == 2) {
+					params.put(terms[0], terms[1]);
+				}
+			}
+		}
+		return params;
+	}
+	
+	public abstract String getAction();
+	
+	public static String getDefaultSortKey() {
+		return "date-desc";
+	}
+	
+	public static String getDefaultViewType() {
+		return "list";
+	}
+	
+	protected boolean descForSortKey() {
+		return !sortKey.endsWith("-asc"); // default is descending
+	}
+
+	int page = 1;
+	String sortKey = getDefaultSortKey();
+	String viewType = getDefaultViewType();
+	
+	protected boolean isViewValid = false;
+	protected boolean isPageValid = false;
+
+	protected void invalidatePage() {
+		GWT.log("invalidating page",null);
+		isPageValid = false;
+	}
+	public void invalidateView() {
+		GWT.log("invalidating view and page",null);
+		isViewValid = false;
+		isPageValid = false;
+	}
+	
+	protected Map<String,String> parseHistoryToken(String historyToken) {
+		Map<String,String> params = getParams(historyToken);
+		if(!isPageValid) {
+			page = params.containsKey("page") ? Integer.parseInt(params.get("page")) : 1;
+		}
+		if(!isViewValid) {
+			sortKey = params.containsKey("sort") ? params.get("sort") : getDefaultSortKey();
+			viewType = params.containsKey("view") ? params.get("view") : getDefaultViewType();
+		}
+		return params;
+	}
+
+	protected String getHistoryToken() {
+		return getAction()+"?page="+page+"&sort="+sortKey+"&view="+viewType;
+	}
+	
+	protected abstract void displayView();
+	
+	protected abstract void displayPage();
+	
+	public void displayAll() {
+		displayAll(History.getToken());
+	}
+	public void displayAll(String historyToken) {
+		parseHistoryToken(historyToken);
+		GWT.log("view validity = "+isViewValid+" page validity = "+isPageValid, null);
+		if(!isViewValid) {
+			displayView();
+			isViewValid = true;
+		}
+		if(!isPageValid) {
+			displayPage();
+			isPageValid = true;
+		}
+	}
+	
+	public PagingDcThingView() {
 		super();
 		
 		sortControls = new LinkedList<HasValueChangeHandlers<String>>();
 		viewTypeControls = new LinkedList<HasValueChangeHandlers<String>>();
 		
+		parseHistoryToken(History.getToken());
+		
 		topPagingPanel.add(createPagingPanel(page, sortKey, viewType));
 		bottomPagingPanel.add(createPagingPanel(page, sortKey, viewType));
+		
+		History.addValueChangeHandler(new ValueChangeHandler<String>() {
+			public void onValueChange(ValueChangeEvent<String> event) {
+				displayAll(event.getValue());
+			}
+		});
+		
+		addPageChangeHandler(new ValueChangeHandler<Integer>() {
+			public void onValueChange(ValueChangeEvent<Integer> event) {
+				page = event.getValue();
+				invalidatePage();
+				History.newItem(getHistoryToken());
+			}
+		});
+		
+		addViewTypeChangeHandler(new ValueChangeHandler<String>() {
+			public void onValueChange(ValueChangeEvent<String> event) {
+				page = 1;
+				viewType = event.getValue();
+				invalidateView();
+				History.newItem(getHistoryToken());
+			}
+		});
+		
+		addSortKeyChangeHandler(new ValueChangeHandler<String>() {
+			public void onValueChange(ValueChangeEvent<String> event) {
+				page = 1;
+				sortKey = event.getValue();
+				invalidateView();
+				History.newItem(getHistoryToken());
+			}
+		});
 	}
 	
 	protected void addSortControl(HasValueChangeHandlers<String> control) {
@@ -55,6 +180,17 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		addViewTypeControl(viewOptions);
 		panel.add(viewOptions);
 		
+		addViewTypeChangeHandler(new ValueChangeHandler<String>() {
+			public void onValueChange(ValueChangeEvent<String> event) {
+				viewOptions.setSelected(event.getValue());
+			}
+		});
+		
+		addSortKeyChangeHandler(new ValueChangeHandler<String>() {
+			public void onValueChange(ValueChangeEvent<String> event) {
+				sortOptions.setSelected(event.getValue());
+			}
+		});
 		return panel;
 	}
 	

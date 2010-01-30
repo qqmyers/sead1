@@ -11,6 +11,13 @@ public class PagingTablePresenter<T> extends BasePresenter<PagingTablePresenter.
 		super(display, eventBus);
 	}
 
+	
+	@Override
+	public void bind() {
+		super.bind();
+	}
+
+
 	public interface Display<T> extends View {
 		void addItem(String uri, T item);
 	}
