@@ -90,7 +90,7 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		
 		getCellFormatter().addStyleName(row, 0, "leftCell");
 		getCellFormatter().addStyleName(row, 1, "rightCell");
-		getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP);
+		getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP); // FIXME move to CSS
 		getRowFormatter().addStyleName(row, "oddRow");
 	}
 

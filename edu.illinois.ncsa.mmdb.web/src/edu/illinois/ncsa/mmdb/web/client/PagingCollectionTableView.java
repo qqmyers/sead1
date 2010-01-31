@@ -6,11 +6,13 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.PagingCollectionTablePresenter.CollectionDisplay;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
@@ -26,6 +28,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 	
 	public PagingCollectionTableView() {
 		super();
+		addStyleName("datasetTable"); // gotta style ourselves like a dataset table
 		displayView();
 	}
  
@@ -35,19 +38,27 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 	public void addItem(String uri, CollectionBean item) {
 		int row = table.getRowCount();
 		
-		HorizontalPanel panel = new HorizontalPanel();
-		
 		HorizontalPanel previewPanel = new HorizontalPanel();
 		previewPanel.add(new Image("./images/preview-100.gif"));
+		previewPanel.addStyleName("centered");
 		badgeImages.put(uri, previewPanel);
-		panel.add(previewPanel);
+
+		VerticalPanel infoPanel = new VerticalPanel();
+		infoPanel.add(new Hyperlink(item.getTitle(), "collection?uri="+uri));
 		
-		panel.add(new Hyperlink(item.getTitle(), "collection?uri="+uri));
 		if(item.getCreationDate() != null) {
-			panel.add(new Label(item.getCreationDate()+""));
+			infoPanel.add(new Label(item.getCreationDate()+""));
+		} else {
+			infoPanel.add(new Label(""));
 		}
 		
-		table.setWidget(row, 1, panel);
+		// yoinked from DatasetTableOneColumnView
+		table.setWidget(row, 0, previewPanel);
+		table.setWidget(row, 1, infoPanel);
+		table.getCellFormatter().addStyleName(row, 0, "leftCell");
+		table.getCellFormatter().addStyleName(row, 1, "rightCell");
+		table.getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP);
+		table.getRowFormatter().addStyleName(row, "oddRow");
 	}
 
 	@Override
@@ -55,7 +66,8 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		Panel p = badgeImages.get(collectionUri);
 		if(p != null) {
 			p.clear();
-			p.add(new PreviewWidget(badgeUri, GetPreviews.SMALL, "collection?uri="+collectionUri));
+			PreviewWidget pw = new PreviewWidget(badgeUri, GetPreviews.SMALL, "collection?uri="+collectionUri);
+			p.add(pw);
 		}
 	}
 
@@ -115,6 +127,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 	protected void displayView() {
 		middlePanel.clear();
 		table = new FlexTable();
+		table.addStyleName("datasetTable"); // inner table needs style too
 		middlePanel.add(table);
 	}
 

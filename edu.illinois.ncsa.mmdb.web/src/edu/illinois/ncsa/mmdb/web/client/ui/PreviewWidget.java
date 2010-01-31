@@ -97,7 +97,7 @@ public class PreviewWidget extends Composite {
 				getPreview(datasetUri, link);
 			}
 		});
-		addLink(previewImage);
+		addLink(previewImage, link);
 		contentPanel.clear();
 		contentPanel.add(previewImage);
 	}
@@ -105,7 +105,7 @@ public class PreviewWidget extends Composite {
 	/**
 	 * If link is available for image add a click handler to the image.
 	 */
-	private void addLink(Image image) {
+	private void addLink(Image image, final String link) {
 		if (link != null) {
 			image.addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
@@ -156,7 +156,7 @@ public class PreviewWidget extends Composite {
 					public void onSuccess(GetPreviewsResult arg0) {
 						Map<String, PreviewImageBean> previews = arg0
 								.getPreviews();
-						if (previews.get(GetPreviews.LARGE) == null && !arg0.isStopAsking()) {
+						if (previews.get(size) == null && !arg0.isStopAsking()) {
 							retryTimer = new Timer() {
 								@Override
 								public void run() {
@@ -180,10 +180,10 @@ public class PreviewWidget extends Composite {
 
 	protected void grayImage(String size, String link) {
 		contentPanel.clear();
-		Image grayImage = new Image(GRAY_URL.get(size));
-		grayImage.addStyleName("thumbnail");
-		grayImage.setUrl(link);
-		contentPanel.add(grayImage);
+		image = new Image(GRAY_URL.get(size));
+		image.addStyleName("thumbnail");
+		addLink(image, link);
+		contentPanel.add(image);
 	}
 	
 	/**
@@ -253,7 +253,7 @@ public class PreviewWidget extends Composite {
 			}
 		});
 
-		addLink(image);
+		addLink(image, link);
 
 		return image;
 	}
