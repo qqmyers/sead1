@@ -103,7 +103,7 @@ public class AuthenticatedServlet extends HttpServlet {
 			if(validUser == null) {
 				log.info("LOGIN: session key cookie "+sessionKey+" not found, authentication required");
 			} else {
-				log.debug("LOGIN: user "+validUser+" logged in with session key "+sessionKey);
+				//log.debug("LOGIN: user "+validUser+" logged in with session key "+sessionKey);
 			}
 		}
 		if(validUser == null) {
