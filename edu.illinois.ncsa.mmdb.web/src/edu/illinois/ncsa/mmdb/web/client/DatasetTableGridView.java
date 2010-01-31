@@ -32,6 +32,13 @@ public class DatasetTableGridView extends DatasetTableView {
 		return 35;
 	}
 	
+	String shortenTitle(String title) {
+		if(title.length()>15) {
+			return title.substring(0,15)+"...";
+		} else {
+			return title;
+		}
+	}
 	// misnomer here, when we get an "addRow" we're really adding a next
 	// cell in a top-to-bottom, left-to-right traversal of the table.
 	@Override
@@ -39,7 +46,7 @@ public class DatasetTableGridView extends DatasetTableView {
 			String previewUri) {
 		PreviewWidget pw = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id="+id);
 		pw.setWidth("120px");
-		Label t = new Label(title);
+		Label t = new Label(shortenTitle(title));
 		t.addStyleName("smallText");
 		t.setWidth("120px");
 		int row = n / WIDTH;
