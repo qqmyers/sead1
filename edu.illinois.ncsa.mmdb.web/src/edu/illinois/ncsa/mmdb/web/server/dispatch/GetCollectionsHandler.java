@@ -4,8 +4,10 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -17,6 +19,7 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
@@ -71,13 +74,42 @@ public class GetCollectionsHandler implements
 		return uf;
 	}
 	
+	Map<String,String> badges = new HashMap<String,String>(); // badges cache
+	String getBadge(String collectionUri) {
+		String badge = badges.get(collectionUri);
+		if(badge == null) {
+			try {
+				Unifier u = new Unifier();
+				u.setColumnNames("member", "date");
+				u.addPattern(Resource.uriRef(collectionUri), DcTerms.HAS_PART, "member");
+				//u.addPattern("member", Rdf.TYPE, Cet.DATASET);
+				u.addPattern("member", Dc.DATE, "date", true);
+				u.addOrderByDesc("date");
+				u.addOrderBy("member");
+				u.setLimit(1);
+				for(Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member")) {
+					badge = row.get(0).getString();
+					if(badges.size() > 200) {
+						// crude capacity management
+						badges = new HashMap<String,String>();
+					}
+					badges.put(collectionUri, badge);
+					return badge;
+				}
+			} catch(OperatorException x) {
+			}
+		}
+		return badge;
+	}
+	
 	@Override
 	public GetCollectionsResult execute(GetCollections query,
 			ExecutionContext arg1) throws ActionException {
 		int limit = query.getLimit();
 		int offset = query.getOffset();
 		ArrayList<CollectionBean> collections = new ArrayList<CollectionBean>();
-		List<Resource> seen = new LinkedList<Resource>();
+		List<Resource> seen = new LinkedList<Resource>(); 
+		List<String> badges = new LinkedList<String>();
 		try {
 			int dups = 1;
 			while(dups > 0) {
@@ -94,6 +126,7 @@ public class GetCollectionsHandler implements
 						if (!seen.contains(subject)) { // because of this logic, we may return fewer than the limit!
 							CollectionBean colBean = cbu.get(subject);
 							collections.add(colBean);
+							badges.add(getBadge(colBean.getUri()));
 							seen.add(subject);
 							news++;
 						} else {
@@ -110,7 +143,9 @@ public class GetCollectionsHandler implements
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		return new GetCollectionsResult(collections);
+		GetCollectionsResult result = new GetCollectionsResult(collections);
+		result.setBadges(badges);
+		return result; 
 	}
 
 	@Override

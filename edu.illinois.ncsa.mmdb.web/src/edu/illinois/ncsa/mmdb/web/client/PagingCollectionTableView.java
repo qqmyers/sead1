@@ -1,36 +1,62 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 
+import edu.illinois.ncsa.mmdb.web.client.PagingCollectionTablePresenter.CollectionDisplay;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewCollectionEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.AddPreviewEvent;
+import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
-public class PagingCollectionTableView extends PagingDcThingView<CollectionBean> {
+public class PagingCollectionTableView extends PagingDcThingView<CollectionBean> implements CollectionDisplay {
 	FlexTable table;
 	
 	public PagingCollectionTableView() {
 		super();
 		displayView();
 	}
-
+ 
+	Map<String,Panel> badgeImages = new HashMap<String,Panel>();
+	
 	@Override
 	public void addItem(String uri, CollectionBean item) {
 		int row = table.getRowCount();
 		
 		HorizontalPanel panel = new HorizontalPanel();
+		
+		HorizontalPanel previewPanel = new HorizontalPanel();
+		previewPanel.add(new Image("./images/preview-100.gif"));
+		badgeImages.put(uri, previewPanel);
+		panel.add(previewPanel);
+		
 		panel.add(new Hyperlink(item.getTitle(), "collection?uri="+uri));
 		if(item.getCreationDate() != null) {
 			panel.add(new Label(item.getCreationDate()+""));
 		}
 		
 		table.setWidget(row, 1, panel);
+	}
+
+	@Override
+	public void addBadge(String collectionUri, String badgeUri) {
+		Panel p = badgeImages.get(collectionUri);
+		if(p != null) {
+			p.clear();
+			p.add(new PreviewWidget(badgeUri, GetPreviews.SMALL, "collection?uri="+collectionUri));
+		}
 	}
 
 	String uriForSortKey() {
@@ -47,6 +73,8 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		// now compute the current page offset
 		int pageOffset = (page - 1) * pageSize;
 
+		badgeImages.clear();
+		
 		// now list the collections
 		GetCollections query = new GetCollections();
 		query.setSortKey(uriForSortKey());
@@ -68,6 +96,15 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 					GWT.log("Firing event add collection "
 							+ collection.getTitle(), null);
 					MMDB.eventBus.fireEvent(event);
+				}
+				int i = 0;
+				for(String badge : result.getBadges()) {
+					if(badge != null) {
+						String collectionUri = result.getCollections().get(i++).getUri();
+						AddPreviewEvent event = new AddPreviewEvent(collectionUri, badge);
+						GWT.log("firing add badge "+collectionUri+" badge="+badge ,null);
+						MMDB.eventBus.fireEvent(event);
+					}
 				}
 			}
 		});
