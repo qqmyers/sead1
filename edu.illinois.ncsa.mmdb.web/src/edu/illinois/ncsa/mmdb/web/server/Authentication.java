@@ -40,11 +40,11 @@ public class Authentication {
 			LoginContext ctx = null;
 
 			try {
-				log.debug("LOGIN: JAAS authentication suceeded for "+username);
 				ctx = new LoginContext("mmdb", subject, handler);
 				ctx.login();
+				log.debug("LOGIN: JAAS authentication suceeded for "+username);
 			} catch (LoginException ex) {
-				log.debug("LOGIN: JAAS authentication FAILED for "+username);
+				log.debug("LOGIN: JAAS authentication FAILED for "+username,ex);
 				return false;
 			}
 
