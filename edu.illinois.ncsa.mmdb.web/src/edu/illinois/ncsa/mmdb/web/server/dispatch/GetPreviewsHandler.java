@@ -39,7 +39,8 @@ public class GetPreviewsHandler implements ActionHandler<GetPreviews, GetPreview
 				}
 				if(smallPreview == null && largePreview == null) { // no previews.
 					ThingSession ts = TupeloStore.getInstance().getBeanSession().getThingSession();
-					Date endTime =  ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/extractor/endTime"));
+					// FIXME "endTime0" is a kludgy way to represent execution stage information
+					Date endTime =  ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/extractor/endTime0"));
 					if(endTime != null) {
 						log.debug("telling client to stop asking for previews for "+datasetUri);
 						// there won't be previews, so stop asking!

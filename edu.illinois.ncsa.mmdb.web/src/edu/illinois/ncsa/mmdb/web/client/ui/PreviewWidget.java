@@ -77,7 +77,7 @@ public class PreviewWidget extends Composite {
 
 		// default to small size if desired size is unrecognized
 		if (!desiredSize.equals(GetPreviews.SMALL)) {
-			grayImage(GetPreviews.LARGE);
+			grayImage(GetPreviews.LARGE, link);
 			getPreview(datasetUri, link);
 		} else {
 			showThumbnail();
@@ -93,7 +93,7 @@ public class PreviewWidget extends Composite {
 		previewImage.addStyleName("thumbnail");
 		previewImage.addErrorHandler(new ErrorHandler() {
 			public void onError(ErrorEvent event) {
-				grayImage(GetPreviews.SMALL);
+				grayImage(GetPreviews.SMALL, link);
 				getPreview(datasetUri, link);
 			}
 		});
@@ -167,7 +167,7 @@ public class PreviewWidget extends Composite {
 								timeOffset = (timeOffset + 250) % 2000;
 								retryTimer.schedule(delays[whichDelay++] + timeOffset);
 							} else {
-								grayImage(size);
+								grayImage(size, link);
 							}
 						} else if(previews.get(GetPreviews.LARGE) != null) {
 							contentPanel.clear();
@@ -178,10 +178,11 @@ public class PreviewWidget extends Composite {
 				});
 	}
 
-	protected void grayImage(String size) {
+	protected void grayImage(String size, String link) {
 		contentPanel.clear();
 		Image grayImage = new Image(GRAY_URL.get(size));
 		grayImage.addStyleName("thumbnail");
+		grayImage.setUrl(link);
 		contentPanel.add(grayImage);
 	}
 	
