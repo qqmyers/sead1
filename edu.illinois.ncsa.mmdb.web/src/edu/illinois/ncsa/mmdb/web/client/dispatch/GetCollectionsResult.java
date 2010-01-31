@@ -4,6 +4,7 @@
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import net.customware.gwt.dispatch.shared.Result;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
@@ -18,7 +19,16 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
 public class GetCollectionsResult implements Result {
 	
 	private ArrayList<CollectionBean> collections;
+	private List<String> badges;
 	
+	public List<String> getBadges() {
+		return badges;
+	}
+
+	public void setBadges(List<String> badges) {
+		this.badges = badges;
+	}
+
 	public GetCollectionsResult() {}
 	
 	public GetCollectionsResult(ArrayList<CollectionBean> collections) {

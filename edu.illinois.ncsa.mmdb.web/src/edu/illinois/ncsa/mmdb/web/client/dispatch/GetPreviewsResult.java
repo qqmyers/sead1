@@ -8,6 +8,15 @@ import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 
 @SuppressWarnings("serial")
 public class GetPreviewsResult implements Result {
+	boolean stopAsking = false;
+	
+	public boolean isStopAsking() {
+		return stopAsking;
+	}
+
+	public void setStopAsking(boolean stopAsking) {
+		this.stopAsking = stopAsking;
+	}
 
 	public GetPreviewsResult() {
 		previews = new HashMap<String,PreviewImageBean>();

@@ -11,12 +11,12 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
-public class DatasetTableFlowGridView extends DatasetTableView {
+public class DatasetTableGridView extends DatasetTableView {
 
 	int n = 0;
 	final int WIDTH = 5;
 	
-	public DatasetTableFlowGridView() {
+	public DatasetTableGridView() {
 		super();
 		addStyleName("datasetTable");
 	}

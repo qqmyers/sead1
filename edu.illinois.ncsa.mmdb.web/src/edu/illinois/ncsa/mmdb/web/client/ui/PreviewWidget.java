@@ -30,15 +30,20 @@ import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
  */
 public class PreviewWidget extends Composite {
 
+	// FIXME use enums
 	private static final Map<String, String> PREVIEW_URL;
+	private static final Map<String, String> GRAY_URL;
 
 	static {
 		PREVIEW_URL = new HashMap<String, String>();
 		PREVIEW_URL.put(GetPreviews.SMALL, "./api/image/preview/small/");
 		PREVIEW_URL.put(GetPreviews.LARGE, "./api/image/preview/large/");
+		GRAY_URL = new HashMap<String, String>(); // how I yearn for map literals
+		GRAY_URL.put(GetPreviews.SMALL, "./images/preview-100.gif");
+		GRAY_URL.put(GetPreviews.LARGE, "./images/preview-500.gif");
 	}
 
-	static final int delays[] = new int[] { 5000, 15000, 30000, -1 };
+	static final int delays[] = new int[] { 2000, 5000, 10000, 15000, 20000, -1 };
 	static final String LOADING_TEXT = "Loading...";
 	static final String NO_PREVIEW_TEXT = "No preview available";
 	private final SimplePanel contentPanel;
@@ -51,7 +56,7 @@ public class PreviewWidget extends Composite {
 
 	/**
 	 * Create a preview. If the desired size is small (thumbnail) try showing
-	 * the thumbnail, if thumbnail not available show a no preview label. If the
+	 * the thumbnail, if thumbnail notavailable show a no preview label. If the
 	 * desired size is large (preview) ask the server for the size of the
 	 * preview and then properly size the image keeping the correct aspect
 	 * ratio.
@@ -72,7 +77,7 @@ public class PreviewWidget extends Composite {
 
 		// default to small size if desired size is unrecognized
 		if (!desiredSize.equals(GetPreviews.SMALL)) {
-			statusLabel(LOADING_TEXT);
+			grayImage(GetPreviews.LARGE);
 			getPreview(datasetUri, link);
 		} else {
 			showThumbnail();
@@ -88,7 +93,7 @@ public class PreviewWidget extends Composite {
 		previewImage.addStyleName("thumbnail");
 		previewImage.addErrorHandler(new ErrorHandler() {
 			public void onError(ErrorEvent event) {
-				statusLabel(NO_PREVIEW_TEXT);
+				grayImage(GetPreviews.SMALL);
 				getPreview(datasetUri, link);
 			}
 		});
@@ -122,6 +127,18 @@ public class PreviewWidget extends Composite {
 		}
 	}
 
+	static int timeOffset;
+	Timer retryTimer;
+	
+	
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+		if(retryTimer != null) {
+			retryTimer.cancel();
+		}
+	}
+
 	/**
 	 * 
 	 * @param <A>
@@ -139,28 +156,33 @@ public class PreviewWidget extends Composite {
 					public void onSuccess(GetPreviewsResult arg0) {
 						Map<String, PreviewImageBean> previews = arg0
 								.getPreviews();
-						if (previews.size() == 0) {
-							Timer tryAgain = new Timer() {
+						if (previews.get(GetPreviews.LARGE) == null && !arg0.isStopAsking()) {
+							retryTimer = new Timer() {
 								@Override
 								public void run() {
 									getPreview(datasetUri, link);
 								}
 							};
 							if (delays[whichDelay] > 0) {
-								tryAgain.schedule(delays[whichDelay++]);
+								timeOffset = (timeOffset + 250) % 2000;
+								retryTimer.schedule(delays[whichDelay++] + timeOffset);
 							} else {
-								statusLabel(NO_PREVIEW_TEXT);
+								grayImage(size);
 							}
-						} else {
+						} else if(previews.get(GetPreviews.LARGE) != null) {
 							contentPanel.clear();
 							contentPanel.add(createImage(datasetUri, size,
 									link, previews));
-						}
-
+						} 
 					}
 				});
 	}
 
+	protected void grayImage(String size) {
+		contentPanel.clear();
+		contentPanel.add(new Image(GRAY_URL.get(size)));
+	}
+	
 	/**
 	 * 
 	 */

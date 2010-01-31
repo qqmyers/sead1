@@ -53,7 +53,7 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 	protected void displayView() {
 		DatasetTableView datasetTableView = null;
 		if (viewType.equals("grid")) {
-			datasetTableView = new DatasetTableFlowGridView();
+			datasetTableView = new DatasetTableGridView();
 		} else if(viewType.equals("flow")) {
 			datasetTableView = new DatasetTableCoverFlowView();
 		} else {
