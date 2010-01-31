@@ -180,7 +180,9 @@ public class PreviewWidget extends Composite {
 
 	protected void grayImage(String size) {
 		contentPanel.clear();
-		contentPanel.add(new Image(GRAY_URL.get(size)));
+		Image grayImage = new Image(GRAY_URL.get(size));
+		grayImage.addStyleName("thumbnail");
+		contentPanel.add(grayImage);
 	}
 	
 	/**
