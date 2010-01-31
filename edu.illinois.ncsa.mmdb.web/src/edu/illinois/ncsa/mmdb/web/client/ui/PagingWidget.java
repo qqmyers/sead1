@@ -23,11 +23,16 @@ public class PagingWidget extends Composite implements ClickHandler, HasValueCha
 	// paging model
 	int page = 1;
 	int nPages = -1;
-	
+
 	public void setPage(int p) {
+		setPage(p,true);
+	}
+	public void setPage(int p, boolean fire) {
 		page = p >= 1 ? p : 1;
 		setPageLabel(page,nPages);
-		ValueChangeEvent.fire(this, page);
+		if(fire) {
+			ValueChangeEvent.fire(this, page);
+		}
 	}
 	public void setNumberOfPages(int p) {
 		nPages = p;

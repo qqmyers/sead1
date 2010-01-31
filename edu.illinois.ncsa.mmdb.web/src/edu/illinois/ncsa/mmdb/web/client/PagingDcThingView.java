@@ -13,6 +13,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
+import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
 
 public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 	LabeledListBox sortOptions;
@@ -106,6 +107,13 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		}
 	}
 	
+	void setPage(int page) {
+		this.page = page;
+		for(PagingWidget w : pagingControls) {
+			w.setPage(page, false); // avoid infinite loop
+		}
+	}
+	
 	public PagingDcThingView() {
 		super();
 		
@@ -125,7 +133,7 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		
 		addPageChangeHandler(new ValueChangeHandler<Integer>() {
 			public void onValueChange(ValueChangeEvent<Integer> event) {
-				page = event.getValue();
+				setPage(event.getValue());
 				invalidatePage();
 				History.newItem(getHistoryToken());
 			}
@@ -133,7 +141,7 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		
 		addViewTypeChangeHandler(new ValueChangeHandler<String>() {
 			public void onValueChange(ValueChangeEvent<String> event) {
-				page = 1;
+				setPage(1);
 				viewType = event.getValue();
 				invalidateView();
 				History.newItem(getHistoryToken());
@@ -142,7 +150,7 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		
 		addSortKeyChangeHandler(new ValueChangeHandler<String>() {
 			public void onValueChange(ValueChangeEvent<String> event) {
-				page = 1;
+				setPage(1);
 				sortKey = event.getValue();
 				invalidateView();
 				History.newItem(getHistoryToken());

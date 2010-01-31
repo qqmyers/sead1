@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.Label;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
-import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
@@ -88,10 +87,6 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 		// now compute the current page offset
 		pageOffset = (page - 1) * pageSize;
 
-		for(PagingWidget p : pagingControls) {
-			p.setPage(page);
-		}
-		
 		// we need to adjust the page size, just for flow view
 		final int adjustedPageSize = (viewType.equals("flow") ? 3 : pageSize);
 		

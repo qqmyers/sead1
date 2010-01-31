@@ -68,12 +68,14 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 	}
 
 	protected void displayPage() {
+		table.removeAllRows();
+		badgeImages.clear();
+		
 		// for now hardcode the page size
-		int pageSize = 15;
+		int pageSize = 10;
 		// now compute the current page offset
 		int pageOffset = (page - 1) * pageSize;
 
-		badgeImages.clear();
 		
 		// now list the collections
 		GetCollections query = new GetCollections();
