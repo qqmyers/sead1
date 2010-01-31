@@ -41,14 +41,14 @@ public class ListDatasetsHandler implements ActionHandler<ListDatasets, ListData
 	static Table<Resource> list(String orderBy, boolean desc, int limit, int offset, String inCollection) throws OperatorException {
 		Unifier u = new Unifier();
 		u.setColumnNames("s","title","date","mimeType","size","creator","o");
+		if(inCollection != null) {
+			u.addPattern(Resource.uriRef(inCollection), DcTerms.HAS_PART, "s");
+		}
 		u.addPattern("s",Rdf.TYPE,dbu.getType());
 		u.addPattern("s",Dc.TITLE,"title",true);
 		u.addPattern("s",Dc.DATE,"date",true);
 		u.addPattern("s",Dc.FORMAT,"mimeType",true);
 		u.addPattern("s",Files.LENGTH,"size",true);
-		if(inCollection != null) {
-			u.addPattern(Resource.uriRef(inCollection), DcTerms.HAS_PART, "s");
-		}
 		//u.addPattern("s",Dc.CREATOR,"creator",true);
 		u.addPattern("s",Resource.uriRef(orderBy),"o");
 		if(limit > 0) {

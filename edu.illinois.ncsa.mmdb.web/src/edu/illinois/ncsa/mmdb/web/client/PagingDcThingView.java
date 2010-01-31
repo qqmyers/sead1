@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -61,12 +60,17 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 	protected boolean isViewValid = false;
 	protected boolean isPageValid = false;
 
+	@Override
+	protected void onAttach() {
+		super.onAttach();
+		invalidateView();
+		displayAll();
+	}
+
 	protected void invalidatePage() {
-		GWT.log("invalidating page",null);
 		isPageValid = false;
 	}
 	public void invalidateView() {
-		GWT.log("invalidating view and page",null);
 		isViewValid = false;
 		isPageValid = false;
 	}
@@ -96,7 +100,6 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 	}
 	public void displayAll(String historyToken) {
 		parseHistoryToken(historyToken);
-		GWT.log("view validity = "+isViewValid+" page validity = "+isPageValid, null);
 		if(!isViewValid) {
 			displayView();
 			isViewValid = true;

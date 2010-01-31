@@ -31,6 +31,7 @@ import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.query.OrderBy;
+import org.tupeloproject.rdf.query.sparql.SparqlQueryFactory;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.rdf.terms.Rdf;
@@ -449,6 +450,7 @@ public class TupeloStore {
     		newOrderBy.add(ob);
     	}
     	u.setOrderBy(newOrderBy);
+    	System.out.println(SparqlQueryFactory.toSparql(u)); // FIXME debug
     	getContext().perform(u);
     	int cix = u.getColumnNames().size() - 1;
     	ListTable<Resource> result = new ListTable<Resource>();

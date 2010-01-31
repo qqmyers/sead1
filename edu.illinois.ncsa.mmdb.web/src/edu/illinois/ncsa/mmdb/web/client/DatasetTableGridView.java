@@ -3,7 +3,6 @@ package edu.illinois.ncsa.mmdb.web.client;
 import java.util.Date;
 
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -33,17 +32,21 @@ public class DatasetTableGridView extends DatasetTableView {
 		return 35;
 	}
 	
+	// misnomer here, when we get an "addRow" we're really adding a next
+	// cell in a top-to-bottom, left-to-right traversal of the table.
 	@Override
 	public void addRow(String id, String title, String mimeType, Date date,
 			String previewUri) {
-		VerticalPanel vp = new VerticalPanel();
-		vp.setWidth("150px");
-		vp.add(new PreviewWidget(id, GetPreviews.SMALL, "dataset?id="+id));
+		PreviewWidget pw = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id="+id);
+		pw.setWidth("120px");
 		Label t = new Label(title);
-		t.setWidth("150px");
 		t.addStyleName("smallText");
-		vp.add(t);
-		setWidget(n / WIDTH, n++ % WIDTH, vp);
+		t.setWidth("120px");
+		int row = n / WIDTH;
+		int col = n % WIDTH;
+		setWidget(row*2, col, pw);
+		setWidget((row*2)+1, col, t);
+		n++;
 	}
 
 	@Override

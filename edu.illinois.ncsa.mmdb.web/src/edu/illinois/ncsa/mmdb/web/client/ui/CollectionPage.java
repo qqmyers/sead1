@@ -3,7 +3,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -14,6 +13,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTableView;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -39,6 +40,7 @@ public class CollectionPage extends Composite {
 	private FlowPanel infoPanel;
 	private Label numDatasetsLabel;
 	private Label authorLabel;
+	private PagingDatasetTableView datasetTableView;
 
 	public CollectionPage(String uri, MyDispatchAsync dispatchasync,
 			HandlerManager eventBus) {
@@ -54,7 +56,7 @@ public class CollectionPage extends Composite {
 		mainContent.add(createInfoPanel());
 		
 		mainContent.add(createSocialAnnotationsPanel());
-		
+
 		retrieveCollection();
 	}
 	
@@ -86,6 +88,18 @@ public class CollectionPage extends Composite {
 		infoPanel.add(dateLabel);
 		numDatasetsLabel = new Label("Number of datasets");
 		infoPanel.add(numDatasetsLabel);
+		
+		// dataset table ... tada
+		datasetTableView = new PagingDatasetTableView(uri);
+		datasetTableView.addStyleName("datasetTable");
+		
+		PagingDatasetTablePresenter datasetTablePresenter =
+			new PagingDatasetTablePresenter(datasetTableView, eventBus);
+		datasetTablePresenter.bind();
+		//
+		
+		infoPanel.add(datasetTableView);
+		
 		return infoPanel;
 	}
 
@@ -136,15 +150,7 @@ public class CollectionPage extends Composite {
 			dateLabel.setText(collection.getCreationDate().toString());
 		}
 		numDatasetsLabel.setText(datasets.size() + " datasets");
-		ArrayList<String> uris = new ArrayList<String>();
-		for (DatasetBean dataset : datasets) {
-			//Image previewImage = new Image(PREVIEW_URL + dataset.getUri());
-//			mainContent.add(previewImage);
-			uris.add(dataset.getUri());
-		}
 		
-		GalleryWidget gallery = new GalleryWidget(uris);
-		mainContent.insert(gallery, 2);
 	}
 
 }

@@ -24,10 +24,28 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 		super();
 	}
 	
+	public PagingDatasetTableView(String inCollection) {
+		this();
+		setInCollection(inCollection);
+	}
+	
+	public String getInCollection() {
+		return inCollection;
+	}
+
+	public void setInCollection(String inCollection) {
+		this.inCollection = inCollection;
+	}
+
 	public String getAction() {
 		return inCollection == null ? "listDatasets" : "collection";
 	}
 	
+	protected String getHistoryToken() {
+		// TODO Auto-generated method stub
+		return super.getHistoryToken() + (inCollection != null ? "&uri=" + inCollection : "");
+	}
+
 	protected Map<String,String> parseHistoryToken(String token) {
 		Map<String,String> params = super.parseHistoryToken(token);
 		String newInCollection = params.get("uri");
@@ -70,8 +88,6 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 	String uriForSortKey() {
 		if (sortKey.startsWith("title-")) {
 			return "http://purl.org/dc/elements/1.1/title";
-		} else if(inCollection != null) { // default is creation date
-			return "http://purl.org/dc/terms/created";
 		} else {
 			return "http://purl.org/dc/elements/1.1/date";
 		}

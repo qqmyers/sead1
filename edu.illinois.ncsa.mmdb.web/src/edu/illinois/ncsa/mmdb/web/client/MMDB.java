@@ -264,9 +264,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		mainContainer.add(pagingView.asWidget());
 		
-		pagingView.invalidateView();
-		pagingView.displayAll();
-		
 		/*
 		if (!eventBus.isEventHandled(DatasetDeletedEvent.TYPE)) {
 			eventBus.addHandler(DatasetDeletedEvent.TYPE,
@@ -317,9 +314,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		view.setNumberOfPages(0);
 
 		mainContainer.add(view.asWidget());
-		
-		view.invalidateView();
-		view.displayAll();
 		
 		// create collection
 		FlowPanel addCollectionPanel = new FlowPanel();
@@ -624,7 +618,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			} else if (token.startsWith("listCollections")) {
 				// skip default case!
 			} else if (token.startsWith("collection")) {
-//				listCollection();
 				showCollectionPage();
 			} else if (token.startsWith("modifyPermissions")) {
 				showUsersPage();
