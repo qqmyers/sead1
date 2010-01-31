@@ -12,7 +12,6 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
@@ -280,7 +279,7 @@ public class DatasetWidget extends Composite {
 
         if ( pyramid != null ) {
             final Button zoomButton = new Button( "Zoom" );
-            final String zoomUri = PYRAMID_URL + URL.encodeComponent( pyramid ) + "/xml";
+            final String zoomUri = PYRAMID_URL + pyramid + "/xml";
             zoomButton.addClickHandler( new ClickHandler() {
                 public void onClick( ClickEvent event )
                 {

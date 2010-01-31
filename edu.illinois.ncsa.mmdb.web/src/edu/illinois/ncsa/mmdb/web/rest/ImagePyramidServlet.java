@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -68,19 +67,13 @@ public class ImagePyramidServlet extends AuthenticatedServlet
         }
 
         // parse the request
-        String params = requestUrl.toString().substring( prefix.length() + 1 );
-        String request = params.substring( params.indexOf( '/' ) );
-        Resource uri = null;
-        try {
-            uri = Resource.uriRef( URLDecoder.decode( params.substring( 0, params.indexOf( '/' ) ) ) );
-        } catch ( IllegalArgumentException x ) {
-            die( resp, 404, x );
-            return;
-        }
+        String params = requestUrl.toString().substring( prefix.length() );
 
         // return xml if requested
-        if ( request.equals( "/xml" ) ) { //$NON-NLS-1$
+        Matcher matcher = Pattern.compile( "/(.*)/xml" ).matcher( params ); //$NON-NLS-1$
+        if ( matcher.matches() ) {
             try {
+                Resource uri = Resource.uriRef( matcher.group( 1 ) );
                 log.debug( "GET PYRAMID " + uri );
 
                 ImagePyramidBeanUtil ipbu = new ImagePyramidBeanUtil( TupeloStore.getInstance().getBeanSession() );
@@ -90,6 +83,9 @@ public class ImagePyramidServlet extends AuthenticatedServlet
                 }
                 getXml( ipb, resp );
                 return;
+            } catch ( IllegalArgumentException x ) {
+                die( resp, 404, x );
+                return;
             } catch ( OperatorException x ) {
                 die( resp, 404, x );
                 return;
@@ -98,21 +94,16 @@ public class ImagePyramidServlet extends AuthenticatedServlet
         }
 
         // check if it wants a specific tile
-        Matcher matcher = Pattern.compile( "/xml_files/(\\d+)/(\\d+)_(\\d+)\\.(.*)" ).matcher( request ); //$NON-NLS-1$
+        matcher = Pattern.compile( "/(.*)/xml_files/(\\d+)/(\\d+)_(\\d+)\\.(.*)" ).matcher( params ); //$NON-NLS-1$
         if ( matcher.matches() ) {
-            int level = Integer.parseInt( matcher.group( 1 ) );
-            int col = Integer.parseInt( matcher.group( 2 ) );
-            int row = Integer.parseInt( matcher.group( 3 ) );
-            String type = matcher.group( 4 );
             try {
-                try {
-                    log.debug( "GET TILE " + uri + " level " + level + " (" + row + "," + col + ")" );
-                    Resource tileUri = getTileUri( uri, level, row, col );
-                    resp.setContentType( "image/" + type ); //$NON-NLS-1$
-                    CopyFile.copy( TupeloStore.read( tileUri ), resp.getOutputStream() );
-                } catch ( NotFoundException x ) {
-                    die( resp, 404, x );
-                }
+                Resource uri = Resource.uriRef( matcher.group( 1 ) );
+                Resource tileUri = getTileUri( uri, matcher.group( 2 ), matcher.group( 3 ), matcher.group( 4 ) );
+                resp.setContentType( "image/" + matcher.group( 5 ) ); //$NON-NLS-1$
+                CopyFile.copy( TupeloStore.read( tileUri ), resp.getOutputStream() );
+                return;
+            } catch ( NotFoundException x ) {
+                die( resp, 404, x );
                 return;
             } catch ( OperatorException x ) {
                 die( resp, 500, x );
@@ -149,32 +140,34 @@ public class ImagePyramidServlet extends AuthenticatedServlet
      *            the pyramid
      * @param level
      *            level in the pyramid
-     * @param row
-     *            row of the tile in the level
      * @param col
      *            column of the tile in the level
+     * @param row
+     *            row of the tile in the level
      * @return the uri of the tile
      * @throws OperatorException
      *             throws operatorexecption if the tile could not be found.
      */
-    private Resource getTileUri( Resource uri, int level, int row, int col ) throws OperatorException
+    private Resource getTileUri( Resource uri, String level, String col, String row ) throws OperatorException
     {
+        // FIXME should really get ints as input but does not work
+        log.debug( "GET TILE " + uri + " level " + level + " (" + row + "," + col + ")" );
         Unifier u = new Unifier();
         u.setColumnNames( "tile" ); //$NON-NLS-1$
-        u.addPattern(uri, Rdf.TYPE, ImagePyramidBeanUtil.PYRAMID_TYPE);
+        u.addPattern( uri, Rdf.TYPE, ImagePyramidBeanUtil.PYRAMID_TYPE );
         u.addPattern( uri, ImagePyramidTileBeanUtil.PYRAMID_TILES, "tile" ); //$NON-NLS-1$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_LEVEL, Resource.literal(level+"") ); //$NON-NLS-1$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_ROW, Resource.literal(row+"") ); //$NON-NLS-1$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_COL, Resource.literal(col+"") ); //$NON-NLS-1$
+        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_LEVEL, Resource.literal( level ) ); //$NON-NLS-1$
+        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_ROW, Resource.literal( row ) ); //$NON-NLS-1$
+        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_COL, Resource.literal( col ) ); //$NON-NLS-1$
         TupeloStore.getInstance().getContext().perform( u );
         List<Resource> hits = u.getFirstColumn();
-        if(hits.size()==1) {
-        	return hits.get(0);
-        } else if(hits.size()>1) {
-        	log.warn("more than one tile found for "+uri);
-        	return hits.get(0);
+        if ( hits.size() == 1 ) {
+            return hits.get( 0 );
+        } else if ( hits.size() > 1 ) {
+            log.warn( "more than one tile found for " + uri );
+            return hits.get( 0 );
         } else {
-        	throw new NotFoundException( "no tile found" );
+            throw new NotFoundException( "no tile found" );
         }
     }
 
