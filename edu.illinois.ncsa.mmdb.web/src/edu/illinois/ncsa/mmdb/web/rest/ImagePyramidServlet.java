@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,8 +19,8 @@ import org.tupeloproject.kernel.NotFoundException;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.CopyFile;
-import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.ImagePyramidBean;
@@ -158,23 +159,23 @@ public class ImagePyramidServlet extends AuthenticatedServlet
      */
     private Resource getTileUri( Resource uri, int level, int row, int col ) throws OperatorException
     {
-        // FIXME MMDB-382
-        Resource rl = Resource.literal( level );
-        Resource rr = Resource.literal( row );
-        Resource rc = Resource.literal( col );
         Unifier u = new Unifier();
-        u.setColumnNames( "tile", "level", "row", "col" ); //$NON-NLS-1$
+        u.setColumnNames( "tile" ); //$NON-NLS-1$
+        u.addPattern(uri, Rdf.TYPE, ImagePyramidBeanUtil.PYRAMID_TYPE);
         u.addPattern( uri, ImagePyramidTileBeanUtil.PYRAMID_TILES, "tile" ); //$NON-NLS-1$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_LEVEL, "level" ); //$NON-NLS-1$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_ROW, "row" ); //$NON-NLS-1$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_COL, "col" ); //$NON-NLS-1$
+        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_LEVEL, Resource.literal(level+"") ); //$NON-NLS-1$
+        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_ROW, Resource.literal(row+"") ); //$NON-NLS-1$
+        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_COL, Resource.literal(col+"") ); //$NON-NLS-1$
         TupeloStore.getInstance().getContext().perform( u );
-        for ( Tuple<Resource> r : u.getResult() ) {
-            if (rl.equals( r.get(1)) && rr.equals( r.get(2))  && rc.equals( r.get(3) ) ) {
-            return r.get( 0 );
-            }
+        List<Resource> hits = u.getFirstColumn();
+        if(hits.size()==1) {
+        	return hits.get(0);
+        } else if(hits.size()>1) {
+        	log.warn("more than one tile found for "+uri);
+        	return hits.get(0);
+        } else {
+        	throw new NotFoundException( "no tile found" );
         }
-        throw new NotFoundException( "no tile found" );
     }
 
     /**
