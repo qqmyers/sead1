@@ -548,6 +548,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	@Override
 	public void onValueChange(ValueChangeEvent<String> event) {
+		
+		removeSeadragon();
 
 		final String token = event.getValue();
 
@@ -555,6 +557,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		checkPermissions(token);
 	}
+
+	public native void removeSeadragon() /*-{
+		if (typeof $wnd.viewer != "undefined") {
+			$wnd.viewer.close();
+		}
+	}-*/;
 
 	/**
 	 * Check if user has permission ot view member pages.

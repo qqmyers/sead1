@@ -345,8 +345,8 @@ public class DatasetWidget extends Composite {
         $wnd.Seadragon.Config.debug = true;
         $wnd.Seadragon.Config.imagePath = "img/";
         $wnd.Seadragon.Config.autoHideControls = true;
-        var viewer = new $wnd.Seadragon.Viewer(container);
-        viewer.openDzi(uri);
+        $wnd.viewer = new $wnd.Seadragon.Viewer(container);
+        $wnd.viewer.openDzi(uri);
     }-*/;
 
 	private void previewPanel(final String uri) {
