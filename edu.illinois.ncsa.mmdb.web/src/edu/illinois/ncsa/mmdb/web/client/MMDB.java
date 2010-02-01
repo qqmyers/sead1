@@ -559,9 +559,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	}
 
 	public native void removeSeadragon() /*-{
-		if (typeof $wnd.viewer != "undefined") {
-			$wnd.viewer.close();
-		}
+        // hide the current viewer if open
+        if (typeof($wnd.viewer) != "undefined") {
+            $wnd.viewer.close();
+            $wnd.viewer.setVisible(false);
+            $wnd.viewer = null;            
+        }
 	}-*/;
 
 	/**

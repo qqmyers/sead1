@@ -292,6 +292,7 @@ public class DatasetWidget extends Composite {
                         zoomButton.setText( "Preview" );
                         showSeadragon( seadragon.getElement().getId(), zoomUri );
                     } else {
+                        showSeadragon( null, null );
                         previewPanel.add( preview );
                         zoomButton.setText( "Zoom" );
                     }
@@ -341,12 +342,23 @@ public class DatasetWidget extends Composite {
 		loadDerivedFrom();
 	}
     
-    public final native void showSeadragon(String container, String uri) /*-{ 
+    public final native void showSeadragon(String container, String url) /*-{ 
         $wnd.Seadragon.Config.debug = true;
         $wnd.Seadragon.Config.imagePath = "img/";
         $wnd.Seadragon.Config.autoHideControls = true;
-        $wnd.viewer = new $wnd.Seadragon.Viewer(container);
-        $wnd.viewer.openDzi(uri);
+
+        // hide the current viewer if open
+        if (typeof($wnd.viewer) != "undefined") {
+            $wnd.viewer.close();
+            $wnd.viewer.setVisible(false);
+            $wnd.viewer = null;            
+        }
+        
+        // open with new url
+        if (typeof(url) != "undefined") {
+            $wnd.viewer = new $wnd.Seadragon.Viewer(container);
+            $wnd.viewer.openDzi(url);
+        }
     }-*/;
 
 	private void previewPanel(final String uri) {
