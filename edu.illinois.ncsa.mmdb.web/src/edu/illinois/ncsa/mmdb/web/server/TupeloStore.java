@@ -41,15 +41,15 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.server.search.Search;
 import edu.uiuc.ncsa.cet.bean.CETBean;
-import edu.uiuc.ncsa.cet.bean.ContextBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.context.ContextBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
-import edu.uiuc.ncsa.cet.bean.tupelo.ContextBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
+import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
 import edu.uiuc.ncsa.cet.tupelo.contexts.ContextCreators;
 
 /**
