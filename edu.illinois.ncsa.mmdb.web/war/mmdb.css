@@ -220,6 +220,11 @@ body {
 	vertical-align: middle;
 }
 
+.pagingButton:hover {
+    cursor: pointer;
+    cursor: hand;
+}
+
 .page {
 	float: none;
 	width: 100%;
