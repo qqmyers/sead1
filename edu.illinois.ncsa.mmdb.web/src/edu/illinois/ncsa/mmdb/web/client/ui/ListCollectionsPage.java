@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
@@ -94,7 +95,7 @@ public class ListCollectionsPage extends Composite {
 		CollectionBean collection = new CollectionBean();
 		collection.setTitle(text);
 
-		dispatchasync.execute(new AddCollection(collection),
+		dispatchasync.execute(new AddCollection(collection, MMDB.sessionID),
 				new AsyncCallback<AddCollectionResult>() {
 
 					@Override

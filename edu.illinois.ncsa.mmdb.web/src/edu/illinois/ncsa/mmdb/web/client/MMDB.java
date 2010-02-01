@@ -327,7 +327,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				final CollectionBean collection = new CollectionBean();
 				collection.setTitle(addCollectionBox.getText());
 
-				dispatchAsync.execute(new AddCollection(collection),
+				dispatchAsync.execute(new AddCollection(collection, MMDB.sessionID),
 						new AsyncCallback<AddCollectionResult>() {
 
 							@Override

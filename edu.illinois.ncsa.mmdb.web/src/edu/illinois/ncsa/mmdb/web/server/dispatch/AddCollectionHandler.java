@@ -17,7 +17,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.ui.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
-import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Create a new collection.
@@ -31,22 +31,42 @@ public class AddCollectionHandler implements ActionHandler<AddCollection, AddCol
 	private static Log log = LogFactory.getLog(AddCollectionHandler.class);
 	
 	@Override
-	public AddCollectionResult execute(AddCollection arg0, ExecutionContext arg1)
+	public AddCollectionResult execute(AddCollection action, ExecutionContext arg1)
 			throws ActionException {
 		
 		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 		
-		CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+		PersonBeanUtil pbu = new PersonBeanUtil(beanSession);
+		
+		CollectionBean collection = action.getCollection();
 		
 		try {
-			log.debug("Adding collection " + arg0.getCollection().getTitle());
+			log.debug("Adding collection " + action.getCollection().getTitle());
+			
+			// create person bean from session id
+			// FIXME only required until sessionid stores the full uri and not the email address
+			String sessionId = action.getSessionId();
+			String personID = sessionId;
+			if (!sessionId.startsWith(PersonBeanUtil.getPersonID(""))) {
+				personID = PersonBeanUtil.getPersonID(sessionId);
+			}
+			
+			try {
+				collection.setCreator(pbu.get(personID));
+			} catch (Exception e1) {
+				log.error("Error getting creator of annotation", e1);
+			}
+			
+			// set creation date
+			collection.setCreationDate(new Date());
+			
+			// save to repository
+			beanSession.registerAndSave(action.getCollection());
 			
 			// FIXME why doesn't update work and we have to use registerAndSave?
+//			CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
 //			CollectionBean collection = cbu.update(arg0.getCollection());
-			
-			CollectionBean collection = arg0.getCollection();
-			collection.setCreationDate(new Date());
-			beanSession.registerAndSave(arg0.getCollection());
+
 		} catch (Exception e) {
 			log.error("Error creating new collection", e);
 		}
