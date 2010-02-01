@@ -602,7 +602,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 							}
 						}
 					});
-		} else if (token.equals("")) {
+		} else {
 			showLoginPage();
 		}
 	}
