@@ -61,6 +61,9 @@ public class HomePage extends Page {
 						if (result.isPermitted()) {
 							linksPanel.setWidget(linksPanel.getRowCount(), 0,
 									new Hyperlink("Modify Permissions", "modifyPermissions"));
+							// FIXME
+							linksPanel.setWidget(linksPanel.getRowCount(), 0,
+									new Hyperlink("Run SPARQL query", "sparql"));
 						}
 					}
 				});

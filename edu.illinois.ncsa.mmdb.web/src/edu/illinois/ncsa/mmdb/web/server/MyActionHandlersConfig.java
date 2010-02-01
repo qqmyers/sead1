@@ -31,6 +31,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.NewPasswordHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
 
@@ -69,6 +70,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
 		DispatchUtil.registerHandler(new RequestNewPasswordHandler());
 		DispatchUtil.registerHandler(new NewPasswordHandler());
 		DispatchUtil.registerHandler(new GetDerivedFromHandler());
+		DispatchUtil.registerHandler(new RunSparqlQueryHandler());
 	}
 
 	public void contextDestroyed(ServletContextEvent evt) {

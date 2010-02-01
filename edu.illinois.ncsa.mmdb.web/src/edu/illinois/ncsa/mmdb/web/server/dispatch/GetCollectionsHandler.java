@@ -123,14 +123,18 @@ public class GetCollectionsHandler implements
 				for (Tuple<Resource> row : uf.getResult()) {
 					Resource subject = row.get(0);
 					if (subject != null) {
-						if (!seen.contains(subject)) { // because of this logic, we may return fewer than the limit!
-							CollectionBean colBean = cbu.get(subject);
-							collections.add(colBean);
-							badges.add(getBadge(colBean.getUri()));
-							seen.add(subject);
-							news++;
-						} else {
-							dups++;
+						try {
+							if (!seen.contains(subject)) { // because of this logic, we may return fewer than the limit!
+								CollectionBean colBean = cbu.get(subject);
+								collections.add(colBean);
+								badges.add(getBadge(colBean.getUri()));
+								seen.add(subject);
+								news++;
+							} else {
+								dups++;
+							}
+						} catch(OperatorException x) {
+							log.error("unable to fetch collection "+subject,x);
 						}
 					}
 				}
@@ -140,7 +144,6 @@ public class GetCollectionsHandler implements
 				}
 			}
 		} catch (OperatorException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		GetCollectionsResult result = new GetCollectionsResult(collections);

@@ -52,6 +52,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.NewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.NotEnabledPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.SparqlPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TitlePanel;
 import edu.illinois.ncsa.mmdb.web.client.ui.UserManagementPage;
@@ -640,6 +641,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				showNewPasswordPage();
 			} else if (token.startsWith("home")) {
 				showHomePage();
+			} else if (token.startsWith("sparql")) {
+				showSparqlPage();
 			} else if(!previousHistoryToken.startsWith("listDatasets")) {
 				listDatasets();
 			}
@@ -708,7 +711,37 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				});
 	}
 
+
 	/**
+	 * List users in the system.
+	 */
+	private void showSparqlPage() {
+		// Check if the user has view admin pages permission
+		dispatchAsync.execute(new HasPermission(MMDB.sessionID,
+				Permission.VIEW_ADMIN_PAGES),
+				new AsyncCallback<HasPermissionResult>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						GWT
+								.log(
+										"Error checking if the users has permissions to view admin pages",
+										caught);
+					}
+
+					@Override
+					public void onSuccess(HasPermissionResult result) {
+						if (result.isPermitted()) {
+							mainContainer.clear();
+							mainContainer.add(new SparqlPage(dispatchAsync));
+						} else {
+							showNoAccessPage();
+						}
+					}
+				});
+	}
+
+/**
 	 * A page for when a user doesn't have access to a specific page.
 	 */
 	private void showNoAccessPage() {
