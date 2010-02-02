@@ -254,7 +254,6 @@ public class DatasetWidget extends Composite {
 
 		metadataPanel.add(dateLabel);
 		
-		metadataPanel.add(new UserMetadataWidget(dataset.getUri(), service));
 		
 		// tags
 		tagsWidget = new TagsWidget(dataset.getUri(), service);
@@ -325,6 +324,14 @@ public class DatasetWidget extends Composite {
 		informationTable.setWidth("100%");
 
 		informationPanel.add(informationTable);
+		
+		UserMetadataWidget um = new UserMetadataWidget(dataset.getUri(), service);
+		um.setWidth("100%");
+		DisclosurePanel umd = new DisclosurePanel("Metadata");
+		umd.add(um);
+		umd.setWidth("100%");
+		umd.setOpen(true);
+		umd.setAnimationEnabled(true);
 
 		// layout
 		leftColumn.add(titleLabel);
@@ -339,8 +346,10 @@ public class DatasetWidget extends Composite {
 		
 		leftColumn.add(actionsPanel);
 		
+		leftColumn.add(umd);
+		
 		leftColumn.add(informationPanel);
-
+		
 		leftColumn.add(annotationsWidget);
 
 		rightColumn.add(tagsWidget);
