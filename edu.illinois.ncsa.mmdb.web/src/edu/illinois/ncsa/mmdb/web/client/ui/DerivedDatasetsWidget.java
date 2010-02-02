@@ -30,6 +30,10 @@ public class DerivedDatasetsWidget extends Composite {
 		mainContainer.add(previews);
 	}
 
+	public void removeAllDatasets() {
+		previews.removeAllRows();
+	}
+	
 	public void addDataset(DatasetBean ds) {
 		String url = "dataset?id="+ds.getUri();
 		PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url);

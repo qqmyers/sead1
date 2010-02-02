@@ -347,7 +347,7 @@ public class DatasetWidget extends Composite {
 
 		loadCollections();
 		
-		loadDerivedFrom();
+		loadDerivedFrom(uri,4);
 	}
 
     public final native void showSeadragon( String container, String url ) /*-{
@@ -463,7 +463,7 @@ public class DatasetWidget extends Composite {
 	}
 
 
-	private void loadDerivedFrom() {
+	private void loadDerivedFrom(final String uri, final int level) {
 		service.execute(new GetDerivedFrom(uri),
 				new AsyncCallback<GetDerivedFromResult>() {
 					@Override
@@ -475,14 +475,18 @@ public class DatasetWidget extends Composite {
 					public void onSuccess(GetDerivedFromResult arg0) {
 						List<DatasetBean> df = arg0.getDerivedFrom();
 						if (df.size() > 0) {
+							if(derivedDatasetsWidget == null) {
+								derivedDatasetsWidget = new DerivedDatasetsWidget();
+								rightColumn.add(derivedDatasetsWidget);
+							}
 							if (derivedDatasetsWidget != null) {
-								rightColumn.remove(derivedDatasetsWidget);
+								for(DatasetBean d : df) {
+									derivedDatasetsWidget.addDataset(d);
+									if(level > 0) {
+										loadDerivedFrom(d.getUri(),level-1);
+									}
+								}
 							}
-							derivedDatasetsWidget = new DerivedDatasetsWidget();
-							for(DatasetBean d : df) {
-								derivedDatasetsWidget.addDataset(d);
-							}
-							rightColumn.add(derivedDatasetsWidget);
 						}
 					}
 				});

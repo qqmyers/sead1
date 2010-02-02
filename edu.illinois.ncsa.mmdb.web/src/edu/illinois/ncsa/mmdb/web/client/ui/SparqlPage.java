@@ -52,10 +52,15 @@ public class SparqlPage extends Page {
 			"}\r\n" + 
 			"ORDER BY ASC(?r) DESC(?d) \r\n" + 
 			"LIMIT 15";
+	static String singleDataset = "SELECT ?p ?o\r\n" + 
+			"WHERE {\r\n" + 
+			"<tag:medici@uiuc.edu,2009:data_hkSgQzM1BRFoR1O7OKDqGA> ?p ?o .\r\n" + 
+			"}";
 	
 	static Map<String,String> exampleQueries = new HashMap<String,String>();
 	static {
 		exampleQueries.put("tag",tagQuery);
+		exampleQueries.put("single dataset",singleDataset);
 		exampleQueries.put("dataset list",datasetListQuery);
 	}
 
