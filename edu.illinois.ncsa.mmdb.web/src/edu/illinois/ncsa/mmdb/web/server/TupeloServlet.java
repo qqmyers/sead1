@@ -91,7 +91,7 @@ public class TupeloServlet extends HttpTupeloServlet {
     @Override
     public Context getContext() {
         Context context = new LiteralFilter(TupeloStore.getInstance().getContext());
-        log.info("Tupelo Servlet got context "+context);
+        //log.info("Tupelo Servlet got context "+context);
         return context;
     }
 

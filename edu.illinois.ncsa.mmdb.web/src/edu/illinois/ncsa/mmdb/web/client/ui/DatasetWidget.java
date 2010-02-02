@@ -254,6 +254,8 @@ public class DatasetWidget extends Composite {
 
 		metadataPanel.add(dateLabel);
 		
+		metadataPanel.add(new UserMetadataWidget(dataset.getUri(), service));
+		
 		// tags
 		tagsWidget = new TagsWidget(dataset.getUri(), service);
 

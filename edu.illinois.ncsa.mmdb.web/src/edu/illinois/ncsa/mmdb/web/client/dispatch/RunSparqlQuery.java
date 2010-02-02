@@ -10,6 +10,11 @@ public class RunSparqlQuery implements Action<RunSparqlQueryResult> {
 	
 	private String query;
 
+	public RunSparqlQuery() { }
+	
+	public RunSparqlQuery(String q) {
+		setQuery(q);
+	}
 	public void setQuery(String query) {
 		this.query = query;
 	}

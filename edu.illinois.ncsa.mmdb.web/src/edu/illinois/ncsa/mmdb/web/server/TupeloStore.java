@@ -34,6 +34,7 @@ import org.tupeloproject.rdf.query.OrderBy;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.rdf.xml.RdfXml;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
@@ -137,6 +138,10 @@ public class TupeloStore {
 			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Resource.uriRef( "http://cet.ncsa.uiuc.edu/2007/foaf/context/password" ), "guest" );
 			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Rdf.TYPE, Foaf.PERSON );
 			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Foaf.NAME, "guest" );
+			context.addTriple(Resource.uriRef("urn:strangeness"), Rdf.TYPE, Cet.cet("userMetadataField"));
+			context.addTriple(Resource.uriRef("urn:strangeness"), Rdfs.LABEL, "Strangeness");
+			context.addTriple(Resource.uriRef("urn:charm"), Rdf.TYPE, Cet.cet("userMetadataField"));
+			context.addTriple(Resource.uriRef("urn:charm"), Rdfs.LABEL, "Charm");
 		} catch(Exception x) {
 			log.error("failed to initialize context",x);
 		}

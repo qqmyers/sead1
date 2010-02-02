@@ -36,8 +36,6 @@ public class LabeledListBox extends Composite implements HasValueChangeHandlers<
 		mainPanel.add(choice);
 		
 		initWidget(mainPanel);
-		
-		setSelected(selected);
 	}
 
 	public String getSelected() {
@@ -58,6 +56,10 @@ public class LabeledListBox extends Composite implements HasValueChangeHandlers<
 	/** Add a choice */
 	public void addItem(String title, String value) {
 		choice.addItem(title, value);
+		
+		if(getSelected()==null) {
+			selected = value;
+		}
 	}
 
 	@Override

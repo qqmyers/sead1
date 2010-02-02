@@ -56,12 +56,49 @@ public class SparqlPage extends Page {
 			"WHERE {\r\n" + 
 			"<tag:medici@uiuc.edu,2009:data_hkSgQzM1BRFoR1O7OKDqGA> ?p ?o .\r\n" + 
 			"}";
+	static String derivationQuery = "PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/> \r\n" + 
+			"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \r\n" + 
+			"SELECT ?input ?output\r\n" + 
+			"WHERE { \r\n" + 
+			" ?step <cet:workflow/step/hasOutput> ?o1 . \r\n" + 
+			" ?step <cet:workflow/step/hasInput> ?i1 . \r\n" + 
+			" ?o2 <cet:workflow/datalist/hasData> ?o3 . \r\n" + 
+			" ?o3 ?o3s ?output .\r\n" + 
+			" ?output <rdf:type> <cet:Dataset> . \r\n" + 
+			" ?o1 ?o1s ?o2 . \r\n" + 
+			" ?i1 ?i1s ?i2 . \r\n" + 
+			" ?i2 <cet:workflow/datalist/hasData> ?i3 . \r\n" + 
+			" ?i3 ?i3s ?input . \r\n" + 
+			" ?input <rdf:type> <cet:Dataset> . \r\n" + 
+			"}\r\n" + 
+			"LIMIT 20";
+	static String prefixes = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" + 
+			"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\r\n" + 
+			"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\r\n" + 
+			"PREFIX dc: <http://purl.org/dc/elements/1.1/>\r\n" + 
+			"PREFIX dcterms: <ttp://purl.org/dc/terms/>\r\n" + 
+			"PREFIX dctypes: <ttp://purl.org/dc/dcmitype/>\r\n" + 
+			"PREFIX owl: <http://www.w3.org/2002/07/owl#>\r\n" + 
+			"PREFIX foaf: <http://xmlns.com/foaf/0.1/>\r\n" + 
+			"PREFIX tags: <http://www.holygoat.co.uk/owl/redwood/0.1/tags/>\r\n" + 
+			"PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/>";
+	static String collectionsQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" + 
+			"PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/>\r\n" + 
+			"\r\n" + 
+			"SELECT ?c ?t\r\n" + 
+			"WHERE {\r\n" + 
+			"?c <rdf:type> <cet:Collection> .\r\n" + 
+			"?c <dc:title> ?t .\r\n" + 
+			"}";
 	
 	static Map<String,String> exampleQueries = new HashMap<String,String>();
 	static {
+		exampleQueries.put("prefixes",prefixes);
 		exampleQueries.put("tag",tagQuery);
 		exampleQueries.put("single dataset",singleDataset);
 		exampleQueries.put("dataset list",datasetListQuery);
+		exampleQueries.put("derivation", derivationQuery);
+		exampleQueries.put("collections",collectionsQuery);
 	}
 
 	public SparqlPage(final MyDispatchAsync dispatchAsync) {
@@ -80,6 +117,7 @@ public class SparqlPage extends Page {
 		final TextArea queryBox = new TextArea();
 		queryBox.setCharacterWidth(90);
 		queryBox.setVisibleLines(15);
+		queryBox.setText(prefixes);
 		inputPanel.add(queryBox);
 
 		examples.addValueChangeHandler(new ValueChangeHandler<String>() {
