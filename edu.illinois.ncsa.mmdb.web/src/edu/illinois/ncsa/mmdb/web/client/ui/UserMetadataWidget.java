@@ -13,8 +13,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -41,7 +39,6 @@ public class UserMetadataWidget extends Composite {
 	
 	String uri;
 	MyDispatchAsync dispatch;
-	VerticalPanel mainPanel;
 	LabeledListBox fieldChoice;
 	TextArea valueText;
 	FlexTable fieldTable;
@@ -49,12 +46,10 @@ public class UserMetadataWidget extends Composite {
 	public UserMetadataWidget(final String uri, final MyDispatchAsync dispatch) {
 		this.uri = uri;
 		this.dispatch = dispatch;
-		
-		mainPanel = new VerticalPanel();
-		
+
 		fieldTable = new FlexTable();
-		mainPanel.add(fieldTable);
-		initWidget(mainPanel);
+		fieldTable.setWidth("100%");
+		initWidget(fieldTable);
 		
 		dispatch.execute(new RunSparqlQuery(availableFieldsQuery),
 				new AsyncCallback<RunSparqlQueryResult>() {
@@ -87,8 +82,8 @@ public class UserMetadataWidget extends Composite {
 	}
 
 	int getRowForField(String predicate) {
-		for(int row = 0; row < fieldTable.getRowCount(); row++) {
-			Label l = (Label) fieldTable.getWidget(0, 0);
+		for(int row = 0; row < fieldTable.getRowCount()-1; row++) {
+			Label l = (Label) fieldTable.getWidget(row, 0);
 			if(predicate.equals(l.getTitle())) {
 				return row;
 			}
@@ -99,7 +94,8 @@ public class UserMetadataWidget extends Composite {
 	void addNewField(final String predicate, String label, Collection<String> values) {
 		int row = getRowForField(predicate);
 		if(row == -1) {
-			row = fieldTable.getRowCount();
+			row = fieldTable.getRowCount()-1;
+			fieldTable.insertRow(row);
 		}
 
 		Label predicateLabel = new Label(label);
@@ -110,7 +106,7 @@ public class UserMetadataWidget extends Composite {
 			panel.add(new Label(value));
 		}
 		fieldTable.setWidget(row,1,panel);
-		Image removeButton = new Image("./images/list-remove.png");
+		Button removeButton = new Button("Remove");
 		removeButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				removeValue(predicate);
@@ -122,20 +118,24 @@ public class UserMetadataWidget extends Composite {
 	Map<String,String> labels = new HashMap<String,String>();
 	
 	void addFieldAddControls(List<List<String>> result) {
-		fieldChoice = new LabeledListBox("Add field:");
+		fieldChoice = new LabeledListBox("Set field:");
 		for(List<String> entry : result) {
 			String label = entry.get(0);
 			String predicate = entry.get(1);
 			fieldChoice.addItem(label, predicate);
 			labels.put(predicate, label);
 		}
-		mainPanel.add(fieldChoice);
 		
+		int row = fieldTable.getRowCount();
+		
+		fieldTable.setWidget(row,0,fieldChoice);
+
+		VerticalPanel valuePanel = new VerticalPanel();
+		valuePanel.add(new Label("Value to set it to:"));
 		valueText = new TextArea();
-		mainPanel.add(valueText);
-		
-		HorizontalPanel buttons = new HorizontalPanel();
-		mainPanel.add(buttons);
+		valueText.setWidth("100%");
+		valuePanel.add(valueText);
+		fieldTable.setWidget(row,1,valuePanel);
 		
 		Button addButton = new Button("Set value");
 		addButton.addClickHandler(new ClickHandler() {
@@ -143,8 +143,7 @@ public class UserMetadataWidget extends Composite {
 				addValue();
 			}
 		});
-		
-		buttons.add(addButton);
+		fieldTable.setWidget(row,2,addButton);
 	}
 	
 	void addValue() {
