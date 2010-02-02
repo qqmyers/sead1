@@ -550,23 +550,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	@Override
 	public void onValueChange(ValueChangeEvent<String> event) {
 		
-		removeSeadragon();
-
 		final String token = event.getValue();
 
 		GWT.log("History changed: " + event.getValue(), null);
 
 		checkPermissions(token);
 	}
-
-	public native void removeSeadragon() /*-{
-        // hide the current viewer if open
-        if (typeof($wnd.viewer) != "undefined") {
-            $wnd.viewer.close();
-            $wnd.viewer.setVisible(false);
-            $wnd.viewer = null;            
-        }
-	}-*/;
 
 	/**
 	 * Check if user has permission ot view member pages.

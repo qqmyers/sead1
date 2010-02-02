@@ -160,6 +160,14 @@ public class DatasetWidget extends Composite {
 		mainPanel.add(clearFloat);
 	}
 
+	@Override
+	protected void onUnload()
+	{
+	    super.onUnload();
+	    hideSeadragon( );
+	}
+	
+	
 	/**
 	 * Retrieve a specific dataset given the uri.
 	 * 
@@ -292,7 +300,7 @@ public class DatasetWidget extends Composite {
                         zoomButton.setText( "Preview" );
                         showSeadragon( seadragon.getElement().getId(), zoomUri );
                     } else {
-                        showSeadragon( null, null );
+                        hideSeadragon( );
                         previewPanel.add( preview );
                         zoomButton.setText( "Zoom" );
                     }
@@ -341,23 +349,34 @@ public class DatasetWidget extends Composite {
 		
 		loadDerivedFrom();
 	}
-    
-    public final native void showSeadragon(String container, String url) /*-{ 
+
+    public final native void showSeadragon( String container, String url ) /*-{
         $wnd.Seadragon.Config.debug = true;
         $wnd.Seadragon.Config.imagePath = "img/";
         $wnd.Seadragon.Config.autoHideControls = true;
 
-        // hide the current viewer if open
-        if (typeof($wnd.viewer) != "undefined") {
-            $wnd.viewer.close();
+        // close existing viewer
+        if ($wnd.viewer) {
+            $wnd.viewer.setFullPage(false);
             $wnd.viewer.setVisible(false);
+            $wnd.viewer.close();
             $wnd.viewer = null;            
         }
-        
+
         // open with new url
-        if (typeof(url) != "undefined") {
+        if (url != null) {
             $wnd.viewer = new $wnd.Seadragon.Viewer(container);
             $wnd.viewer.openDzi(url);
+        }
+    }-*/;
+
+    public final native void hideSeadragon() /*-{
+        // hide the current viewer if open
+        if ($wnd.viewer) {
+            $wnd.viewer.setFullPage(false);
+            $wnd.viewer.setVisible(false);
+            $wnd.viewer.close();
+            $wnd.viewer = null;            
         }
     }-*/;
 
