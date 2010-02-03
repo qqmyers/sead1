@@ -584,3 +584,4 @@
     </f:propertyImplementationMappingSubject>
     <f:propertyValueImplementationClassName>org.tupeloproject.kernel.ContentStoreContext</f:propertyValueImplementationClassName>
   </a:Context>
+</rdf:RDF>
