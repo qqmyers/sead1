@@ -3,6 +3,7 @@ package edu.illinois.ncsa.mmdb.web.client.dnd;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -178,6 +179,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			if(files.size()==0) {
 				log("no files dropped! " + dtde);
 			} else {
+				startProgressThread();
 				// FIXME use a better way of determining collection name than selecting from first file
 				String collectionName = null;
 				if(files.get(0).isDirectory()) {
@@ -322,36 +324,45 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	int progress;
 	void setProgress(int p) { progress = p; }
 	int getProgress() { return progress; }
-	
+
 	class ProgressThread extends Thread {
-		String sessionKey;
 		boolean stop = false;
 		public void run() {
 			try {
 				while(!stop) {
 					int progress = getProgress();
+					System.out.println("progress thread setting pie progress to "+progress);
 					progressPie.setProgress(progress);
-					Thread.sleep(500);
+					repaint();
+					Thread.sleep(250);
 				}
 			} catch(Exception x) {
+				x.printStackTrace();
 			}
 		}
 		public void stopShowingProgress() {
 			stop = true;
 		}
-		public void setSessionKey(String sessionKey) {
-			this.sessionKey= sessionKey;
-		}
-		public String getSessionKey() {
-			return sessionKey;
-		}
 	}
 	
 	ProgressThread progressThread;
 
+	public void update() {
+		if(progressPie != null) {
+			progressPie.repaint();
+		}
+	}
+	
 	void showCard(String name) {
 		((CardLayout)mainCards.getLayout()).show(mainCards, name);
 		repaint();
+	}
+	
+	void startProgressThread() {
+		if(progressThread == null) {
+			progressThread = new ProgressThread();
+		}
+		progressThread.start();
 	}
 	
 	void stopProgressThread() {
@@ -413,7 +424,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 
 	 */
 	
-	public static final int BATCH_SIZE=3;
+	public static final int BATCH_SIZE=1;
 	
 	class BatchPostThread extends Thread {
 		public List<File> files;
@@ -423,11 +434,8 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		String postBatch(List<File> batch, int offset, int nFiles) throws Exception {
 			// acquire the session key and start tracking progress
 			String sessionKey = getSessionKey();
-			stopProgressThread();
 			showProgressPie();
-			progressThread = new ProgressThread();
-			progressThread.setSessionKey(sessionKey);
-			progressThread.start();
+			// assume progress thread is non-null and started
 			// set up the POST batch
 			PostMethod post = new PostMethod();
 			setUrl(post,sessionKey);
@@ -451,7 +459,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			client.executeMethod(post);
 			if(post.getStatusCode() != 200) {
 				log("post failed! "+post.getStatusLine());
-				getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback('"+sessionKey+"')"));
+				//getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback('"+sessionKey+"')"));
 				stopProgressThread();
 				showErrorCard();
 				throw new Exception("post failed");
@@ -459,7 +467,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				collectionUri = post.getResponseBodyAsString();
 				log("got collection uri from server: "+collectionUri);
 			}
-			setProgress((i * 100) / nFiles); 
+			Thread.sleep(2);
 			return sessionKey;
 		}
 		public void run() {
@@ -472,6 +480,9 @@ public class DropUploader extends JApplet implements DropTargetListener {
 					batch.add(file);
 					if(batch.size()==BATCH_SIZE) {
 						sessionKey = postBatch(batch,i,files.size());
+						int p = ((i+batch.size()) * 100) / files.size();
+						System.out.println("post thread setting progress to "+(i+batch.size())+"/"+files.size()+"="+p+"%");
+						setProgress(p);
 						batch = new LinkedList<File>();
 					}
 					i++;
@@ -479,6 +490,9 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				// remember to do the last batch
 				if(batch.size() > 0) {
 					sessionKey = postBatch(batch,i,files.size());
+					int p = 100;
+					System.out.println("post thread setting progress to 100");
+					setProgress(p);
 				}
 				// we're done
 				String url = getContextUrl()+"UploadBlob?uploadComplete="+sessionKey;

@@ -38,6 +38,7 @@ public class ProgressPie extends JComponent {
         double curValue = 0.0D;
         int startAngleOffset = 90;
         for (int i=0; i<slices.length; i++) {
+        	System.out.println("drawing slice "+i);
             // Compute the start and stop angles
             int startAngle = (int)(curValue * 360 / total) + startAngleOffset;
             int arcAngle = (int)(slices[i].value * 360 / total) + startAngleOffset;
@@ -49,8 +50,10 @@ public class ProgressPie extends JComponent {
     
             // Set the color and draw a filled arc
             g.setColor(slices[i].color);
-            g.drawArc(area.x, area.y, area.width, area.height, startAngle, arcAngle);
-            g.fillArc(area.x, area.y, area.width-1, area.height-1, startAngle, arcAngle);
+            //int arcInset = 2;
+            int pieInset = 6;
+            //g.drawArc(area.x+arcInset, area.y+arcInset, area.width-(arcInset*2), area.height-(arcInset*2), 0, 360);
+            g.fillArc(area.x+pieInset, area.y+pieInset, area.width-(pieInset*2), area.height-(pieInset*2), startAngle, arcAngle);
     
             curValue += slices[i].value;
         }
@@ -62,15 +65,19 @@ public class ProgressPie extends JComponent {
     public void paint(Graphics g) {
         // Draw the pie
     	if(slices != null) {
+    		System.out.println("painting progress pie"); // FIXME debug
     		drawPie((Graphics2D)g, getBounds(), slices);
+    	} else {
+    		System.out.println("slices is null, not painting pie"); // FIXME debug
     	}
     }
     
     public void setProgress(int percent) {
     	slices = new PieValue[] {
     		new PieValue(percent, Color.white),
-    		new PieValue(100-percent, background)
+    		new PieValue(100-percent, Color.darkGray)
     	};
+    	System.out.println("progress set to "+percent); // FIXME debug
     	repaint();
     }
     
