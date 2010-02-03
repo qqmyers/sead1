@@ -114,11 +114,12 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 				int i = 0;
 				for(String badge : result.getBadges()) {
 					if(badge != null) {
-						String collectionUri = result.getCollections().get(i++).getUri();
+						String collectionUri = result.getCollections().get(i).getUri();
 						AddPreviewEvent event = new AddPreviewEvent(collectionUri, badge);
 						GWT.log("firing add badge "+collectionUri+" badge="+badge ,null);
 						MMDB.eventBus.fireEvent(event);
 					}
+					i++;
 				}
 			}
 		});
