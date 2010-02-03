@@ -44,7 +44,7 @@ public class TupeloServlet extends HttpTupeloServlet {
     			return literal;
     		} else {
     			String text = literal.getString();
-    			if(!text.matches("[\\P{Cc}]*")) {
+    			if(!text.matches("[\\P{Cc}\\p{Space}]*")) {
     				log.warn("warning: bad literal \""+text+"\", escaping");
     				return Resource.literal(UnicodeTranscoder.encode(text));
     			} else {
@@ -77,7 +77,7 @@ public class TupeloServlet extends HttpTupeloServlet {
     		u.setResult(newResult);
     	}
     	public void delegateOperation(Operator operator) throws OperatorException {
-    		super.delegateOperation(operator);
+    		getContext().perform(operator);
     		if(operator instanceof TripleReader) {
     			postProcess((TripleReader)operator);
     		} else if(operator instanceof Unifier) {
@@ -91,8 +91,9 @@ public class TupeloServlet extends HttpTupeloServlet {
     @Override
     public Context getContext() {
         Context context = new LiteralFilter(TupeloStore.getInstance().getContext());
+    	return context;
         //log.info("Tupelo Servlet got context "+context);
-        return context;
+        //return context;
     }
 
 	@Override
