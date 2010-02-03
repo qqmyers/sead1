@@ -183,9 +183,9 @@ public class UploadBlob extends AuthenticatedServlet {
         public int percentComplete() {
         	long pct = (int) (contentLength == 0L ? 0 : ((bytesRead * 50) / contentLength)) +
         	                 (itemsLength == 0L ? 0 : ((bytesWritten * 50) / itemsLength));
-        	if(pct < 99) {
-        		log.trace(bytesRead +" read / "+bytesWritten+" written = "+pct+"%");
-        	}
+        	//if(pct < 99) {
+//        		log.trace(bytesRead +" read / "+bytesWritten+" written = "+pct+"%");
+        	//}
         	return (int) pct;
         }
     }
@@ -564,7 +564,7 @@ public class UploadBlob extends AuthenticatedServlet {
             response.setContentType("application/json");
         	PrintWriter out = response.getWriter();
         	out.print(stateToJSON(true, listener, request));
-        	log.trace("GET: reported " + stateToJSON(true, listener, request));
+        	//log.trace("GET: reported " + stateToJSON(true, listener, request));
         }
     }
 
