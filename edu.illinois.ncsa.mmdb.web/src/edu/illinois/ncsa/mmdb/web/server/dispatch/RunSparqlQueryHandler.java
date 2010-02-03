@@ -28,7 +28,7 @@ public class RunSparqlQueryHandler implements ActionHandler<RunSparqlQuery, RunS
 			ExecutionContext arg1) throws ActionException {
 		try {
 			List<List<String>> resultTable = new LinkedList<List<String>>();
-			log.debug("executing "+arg0.getQuery());
+			//log.debug("executing "+arg0.getQuery());
 			Operator o = SparqlOperatorFactory.newOperator(arg0.getQuery());
 			TupeloStore.getInstance().getContext().perform(o);
 			Iterable<? extends Tuple<Resource>> rowSource = null;
@@ -47,9 +47,11 @@ public class RunSparqlQueryHandler implements ActionHandler<RunSparqlQuery, RunS
 				}
 				RunSparqlQueryResult result = new RunSparqlQueryResult();
 				result.setResult(resultTable);
+				/*
 				for(List<String> row : resultTable) {
 					log.debug("result row: "+row);
 				}
+				*/
 				return result;
 			} else {
 				throw new ActionException("query ran, but didn't grok result");

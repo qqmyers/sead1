@@ -49,6 +49,7 @@ public class GetPreviewsHandler implements ActionHandler<GetPreviews, GetPreview
 				}
 			}
 		} catch(Exception x) {
+			log.debug("error getting previews",x);
 			// FIXME report
 		}
 		return result;

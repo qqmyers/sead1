@@ -207,7 +207,7 @@
 				<include name="mail.properties" />
 			</fileset>
 		</copy>
-		<copy tofile="war/WEB-INF/classes/context.xml" file="src/context_mysql.xml" />
+		<copy tofile="war/WEB-INF/classes/context.xml" file="src/context_mmdbdev_hfc.xml" />
 	</target>
 
 	<target name="deploy" depends="war" description="deploys the war file to Tomcat">

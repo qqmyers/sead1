@@ -1,0 +1,586 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:a="tag:tupeloproject.org,2006:/2.0/" xmlns:b="http://java.sun.com/org.tupeloproject.kernel.ContentStoreContext#" xmlns:c="http://java.sun.com/org.tupeloproject.kernel.Context#" xmlns:d="http://java.sun.com/org.tupeloproject.kernel.impl.FileContext#" xmlns:e="http://java.sun.com/org.tupeloproject.kernel.impl.HashFileContext$HashFileMapping#" xmlns:f="tag:tupeloproject.org,2006:/2.0/beans/2.0/" xmlns:g="http://java.sun.com/org.tupeloproject.kernel.impl.HashFileContext#" xmlns:h="http://java.sun.com/org.tupeloproject.mysql.MysqlContext#" xmlns:i="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#">
+  <a:Context rdf:about="tag:tupeloproject.org,2006:9f50325fa6bd267d5514af55beb4032c53b5ba00">
+    <b:dataContext>
+      <a:Context rdf:about="tag:tupeloproject.org,2006:427d2203d42a73b1f4178649e93ceb39f669f763">
+        <c:children>
+          <rdf:Seq rdf:about="tag:tupeloproject.org,2006:c1244fa5588baa8d4ab67bc062622e301cc90ac1"/>
+        </c:children>
+        <d:uriMapping>
+          <a:Context rdf:about="tag:tupeloproject.org,2006:e6119cfd7c8e63b2b88c260a18b850b78d2cd0fa">
+            <e:depth rdf:datatype="http://www.w3.org/2001/XMLSchema#int">3</e:depth>
+            <e:directory>
+              <f:storageTypeFileEntry rdf:about="tag:tupeloproject.org,2006:e3de05004048baa9c2bca53ada8d81d2781f636d">
+                <f:storageTypeFileCanonicalName>/data/mmdb</f:storageTypeFileCanonicalName>
+              </f:storageTypeFileEntry>
+            </e:directory>
+            <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry"/>
+            <f:propertyImplementationMappingSubject>
+              <f:ClassMap rdf:about="http://org.tupeloproject/bean#org.tupeloproject.kernel.impl.HashFileContext$HashFileMapping">
+                <f:classMapClassName>org.tupeloproject.kernel.impl.HashFileContext$HashFileMapping</f:classMapClassName>
+                <f:classMapHasPropertyMap>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:7794158e8da15bfca9f1f839be7898f017642db8">
+                    <f:propertyMapGetter>
+                      <rdf:Description rdf:about="tag:tupeloproject.org,2006:70f0586cc94d1a1824c3ac26af1fdfa843eb4431">
+                        <f:methodMapJavaClassName>java.lang.Integer</f:methodMapJavaClassName>
+                        <f:methodMapName>getDepth</f:methodMapName>
+                        <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                      </rdf:Description>
+                    </f:propertyMapGetter>
+                    <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.kernel.impl.HashFileContext$HashFileMapping#depth"/>
+                    <f:propertyMapPropertyName>depth</f:propertyMapPropertyName>
+                    <f:propertyMapSetter>
+                      <rdf:Description rdf:about="tag:tupeloproject.org,2006:759fb7776db704870d9bdffe2ee31a90620e3b86">
+                        <f:methodMapJavaClassName>java.lang.Integer</f:methodMapJavaClassName>
+                        <f:methodMapName>setDepth</f:methodMapName>
+                        <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                      </rdf:Description>
+                    </f:propertyMapSetter>
+                  </rdf:Description>
+                </f:classMapHasPropertyMap>
+                <f:classMapHasPropertyMap>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:bf8155b5d1398f92926196f320a2a945ccaa9fac">
+                    <f:propertyMapGetter>
+                      <rdf:Description rdf:about="tag:tupeloproject.org,2006:ea31adcdf648ed57ae2183e5e0a18900671af2c6">
+                        <f:methodMapJavaClassName>java.io.File</f:methodMapJavaClassName>
+                        <f:methodMapName>getDirectory</f:methodMapName>
+                        <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                      </rdf:Description>
+                    </f:propertyMapGetter>
+                    <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.kernel.impl.HashFileContext$HashFileMapping#directory"/>
+                    <f:propertyMapPropertyName>directory</f:propertyMapPropertyName>
+                    <f:propertyMapSetter>
+                      <rdf:Description rdf:about="tag:tupeloproject.org,2006:5704e2fb90d12f184b4b6b9ace3b12593fdf91a6">
+                        <f:methodMapJavaClassName>java.io.File</f:methodMapJavaClassName>
+                        <f:methodMapName>setDirectory</f:methodMapName>
+                        <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                      </rdf:Description>
+                    </f:propertyMapSetter>
+                  </rdf:Description>
+                </f:classMapHasPropertyMap>
+                <f:classMapRdfType rdf:resource="tag:tupeloproject.org,2006:/2.0/Context"/>
+                <f:classModifier rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/classModifierRegular"/>
+              </f:ClassMap>
+            </f:propertyImplementationMappingSubject>
+            <f:propertyValueImplementationClassName>org.tupeloproject.kernel.impl.HashFileContext$HashFileMapping</f:propertyValueImplementationClassName>
+          </a:Context>
+        </d:uriMapping>
+        <g:depth rdf:datatype="http://www.w3.org/2001/XMLSchema#int">3</g:depth>
+        <g:directory>
+          <f:storageTypeFileEntry rdf:about="tag:tupeloproject.org,2006:b9fe67fd0d9d4d79c6aba9ddffb99fe2cd7ca7de">
+            <f:storageTypeFileCanonicalName>/data/mmdb</f:storageTypeFileCanonicalName>
+          </f:storageTypeFileEntry>
+        </g:directory>
+        <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry"/>
+        <f:propertyImplementationMappingSubject>
+          <f:ClassMap rdf:about="http://org.tupeloproject/bean#org.tupeloproject.kernel.impl.HashFileContext">
+            <f:classMapClassName>org.tupeloproject.kernel.impl.HashFileContext</f:classMapClassName>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:0ba69eb245cd91dc898fb56d158e4f019eeb527c">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:2af0baa2bf7917d9b6b4fab509d5e4ce538b152c">
+                    <f:methodMapJavaClassName>java.lang.Integer</f:methodMapJavaClassName>
+                    <f:methodMapName>getDepth</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.kernel.impl.HashFileContext#depth"/>
+                <f:propertyMapPropertyName>depth</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:c3adeec9c427c2130911fa188cc3889e722e63e8">
+                    <f:methodMapJavaClassName>java.lang.Integer</f:methodMapJavaClassName>
+                    <f:methodMapName>setDepth</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:5d8a33aa4707f33dc2ff06ef9e4ca13c28340cf6">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:4b8b3803fda4d9c74edf2c398c1d6ca22d9db04c">
+                    <f:methodMapJavaClassName>java.io.File</f:methodMapJavaClassName>
+                    <f:methodMapName>getDirectory</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.kernel.impl.HashFileContext#directory"/>
+                <f:propertyMapPropertyName>directory</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:fb1ccbe6c3bb73e0caa78ded4990f37a75867685">
+                    <f:methodMapJavaClassName>java.io.File</f:methodMapJavaClassName>
+                    <f:methodMapName>setDirectory</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:c461f52c0dcc140e546ba08e4d6d8c8f1bb9173d">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:f2d763ddc8d6939addbae26ed479d213c946e787">
+                    <f:methodMapJavaClassName>java.util.List</f:methodMapJavaClassName>
+                    <f:methodMapName>getChildren</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection"/>
+                    <f:methodMapValueParameter rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.kernel.Context#children"/>
+                <f:propertyMapPropertyName>children</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:c7556d7036c3b29f25871a19f643063576ab948e">
+                    <f:methodMapJavaClassName>java.util.List</f:methodMapJavaClassName>
+                    <f:methodMapName>setChildren</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection"/>
+                    <f:methodMapValueParameter rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:cff30a913ec304c7b7d5ddcf6155f867e4aa76e2">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:84d43ae45f87a4f6a0d293ef8d16e422da1bb941">
+                    <f:methodMapJavaClassName rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.util.UriMapping"/>
+                    <f:methodMapName>getUriMapping</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.kernel.impl.FileContext#uriMapping"/>
+                <f:propertyMapPropertyName>uriMapping</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:b29838ca97bc642318ae6820cbb9c4398e9cfde3">
+                    <f:methodMapJavaClassName>
+                      <f:ClassMap rdf:about="http://org.tupeloproject/bean#org.tupeloproject.util.UriMapping">
+                        <f:classMapClassName>org.tupeloproject.util.UriMapping</f:classMapClassName>
+                        <f:classMapRdfType rdf:resource="tag:tupeloproject.org,2006:/2.0/Context"/>
+                        <f:classModifier rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/classModifierAbstract"/>
+                      </f:ClassMap>
+                    </f:methodMapJavaClassName>
+                    <f:methodMapName>setUriMapping</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapRdfType rdf:resource="tag:tupeloproject.org,2006:/2.0/Context"/>
+            <f:classModifier rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/classModifierRegular"/>
+          </f:ClassMap>
+        </f:propertyImplementationMappingSubject>
+        <f:propertyValueImplementationClassName>org.tupeloproject.kernel.impl.HashFileContext</f:propertyValueImplementationClassName>
+      </a:Context>
+    </b:dataContext>
+    <b:metadataContext>
+      <a:Context rdf:about="tag:tupeloproject.org,2006:9e8167ce8382c8e48191f15dfd07ebdb6eafc9a1">
+        <c:children>
+          <rdf:Seq rdf:about="tag:tupeloproject.org,2006:5f90fd0770cd17f5f31c93907d6833688815f9b3"/>
+        </c:children>
+        <h:tableType>InnoDB</h:tableType>
+        <h:useSsl rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</h:useSsl>
+        <i:adminJdbcUrl>jdbc:mysql://localhost:3306/?user=tupelo&amp;password=tupelo</i:adminJdbcUrl>
+        <i:adminPassword>tupelo</i:adminPassword>
+        <i:adminUser>tupelo</i:adminUser>
+        <i:host>localhost</i:host>
+        <i:jdbcDriverClass>com.mysql.jdbc.Driver</i:jdbcDriverClass>
+        <i:password>tupelo</i:password>
+        <i:port rdf:datatype="http://www.w3.org/2001/XMLSchema#int">3306</i:port>
+        <i:schema>mmdb</i:schema>
+        <i:tableNamePrefix/>
+        <i:user>tupelo</i:user>
+        <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry"/>
+        <f:propertyImplementationMappingSubject>
+          <f:ClassMap rdf:about="http://org.tupeloproject/bean#org.tupeloproject.mysql.MysqlContext">
+            <f:classMapClassName>org.tupeloproject.mysql.MysqlContext</f:classMapClassName>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:105809229721130a6f6220b6365fff84e772ef95">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:46fda2394901f9e7eaad7456b7a9b43e48432113">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>getUser</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#user"/>
+                <f:propertyMapPropertyName>user</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:a65051242298b587d6153966ec28e88dbe22c8a6">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>setUser</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:15954132b91264c3bb1a4cc28f13a9368d014d6e">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:b2254700c7bc80df51e5628485b542740c4f2f4f">
+                    <f:methodMapJavaClassName>java.util.List</f:methodMapJavaClassName>
+                    <f:methodMapName>getChildren</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection"/>
+                    <f:methodMapValueParameter rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.kernel.Context#children"/>
+                <f:propertyMapPropertyName>children</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:f6207992ebf5d48acd5bde51cb3de31212be3245">
+                    <f:methodMapJavaClassName>java.util.List</f:methodMapJavaClassName>
+                    <f:methodMapName>setChildren</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection"/>
+                    <f:methodMapValueParameter>
+                      <f:ClassMap rdf:about="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context">
+                        <f:classMapClassName>org.tupeloproject.kernel.Context</f:classMapClassName>
+                        <f:classMapHasPropertyMap>
+                          <rdf:Description rdf:about="tag:tupeloproject.org,2006:e1fea86d232d24732b27649b3a714b407dd66ab7">
+                            <f:propertyMapGetter>
+                              <rdf:Description rdf:about="tag:tupeloproject.org,2006:363b0a6ba4dad9d098350180806819e27b100328">
+                                <f:methodMapJavaClassName>java.util.List</f:methodMapJavaClassName>
+                                <f:methodMapName>getChildren</f:methodMapName>
+                                <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection"/>
+                                <f:methodMapValueParameter rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context"/>
+                              </rdf:Description>
+                            </f:propertyMapGetter>
+                            <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.kernel.Context#children"/>
+                            <f:propertyMapPropertyName>children</f:propertyMapPropertyName>
+                            <f:propertyMapSetter>
+                              <rdf:Description rdf:about="tag:tupeloproject.org,2006:80dd3151f657dabe3916b52f9de9b597cc0c409f">
+                                <f:methodMapJavaClassName>java.util.List</f:methodMapJavaClassName>
+                                <f:methodMapName>setChildren</f:methodMapName>
+                                <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection"/>
+                                <f:methodMapValueParameter rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context"/>
+                              </rdf:Description>
+                            </f:propertyMapSetter>
+                          </rdf:Description>
+                        </f:classMapHasPropertyMap>
+                        <f:classMapRdfType rdf:resource="http://java.sun.com/org.tupeloproject.kernel.Context"/>
+                        <f:classModifier rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/classModifierRegular"/>
+                      </f:ClassMap>
+                    </f:methodMapValueParameter>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:295295495106121274f20433ad48ac5729c76c53">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:9e78f6a80aa5ebf61d19000ee2fa0fd320e11b0d">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>getAdminUser</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#adminUser"/>
+                <f:propertyMapPropertyName>adminUser</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:bb434ed6da62c1d6272677ca5b1684af5e875431">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>setAdminUser</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:2f36753aadf4c98d4df7be594ca15c793fa5d401">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:b9fdb18121fdf4ddf2a22a5fdf680bfd761cba68">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>getSchema</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#schema"/>
+                <f:propertyMapPropertyName>schema</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:63f8ca06f450dfefa0a110204772afbed1c0ee9b">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>setSchema</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:7577c40a543eccbd267f73f1c2d5d07ff4aa66e8">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:3481fc977b5c9a03cbc90fcdaadd906f2e241999">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>getPassword</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#password"/>
+                <f:propertyMapPropertyName>password</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:1d208cb271d8c4591c0d2ed7a38543a93a636341">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>setPassword</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:87963e69bd9183761bd5366ed5bc2eb8af88ce88">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:fe6fe90baaa60f90e96986af82532652e71e87a8">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>getJdbcUrl</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#jdbcUrl"/>
+                <f:propertyMapPropertyName>jdbcUrl</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:ab3574292c9dbe3f8cecb4d5aecff2384c5624d8">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>setJdbcUrl</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:9c9157138cf15dfba38667716682b57c47ab2404">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:39ecd17242eaf7bb2f4f6b4ea508b72ffecb1b3e">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>getAdminPassword</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#adminPassword"/>
+                <f:propertyMapPropertyName>adminPassword</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:094a4c454ae7035e52b4a01d1f00677636410ac8">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>setAdminPassword</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:a018ad6f8f7ddca8db1bd322146c6c8495d4e28d">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:514fff5e7f120e66f7d40c0459926d7c03e73766">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>getAdminJdbcUrl</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#adminJdbcUrl"/>
+                <f:propertyMapPropertyName>adminJdbcUrl</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:b2ee6313542aec3d9fb1174b577ddd161d3db0c2">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>setAdminJdbcUrl</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:a9b8c6e16ca56620c8bc8f729a530a75922bc53a">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:43f69d79b9c0017951d39b1c12c1fb45ce43ef25">
+                    <f:methodMapJavaClassName>boolean</f:methodMapJavaClassName>
+                    <f:methodMapName>getUseSsl</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.mysql.MysqlContext#useSsl"/>
+                <f:propertyMapPropertyName>useSsl</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:834b4a48dc3a1aeb6ded4639157a90771ed01223">
+                    <f:methodMapJavaClassName>boolean</f:methodMapJavaClassName>
+                    <f:methodMapName>setUseSsl</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:bfedaa0e772366b93f05e33bb66ee20368d6a94d">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:bdb5ba40282d474ed7c24e22843c397e08b499ba">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>getJdbcDriverClass</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#jdbcDriverClass"/>
+                <f:propertyMapPropertyName>jdbcDriverClass</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:f2deebb3834970b036da83f482e45e8bc0a92085">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>setJdbcDriverClass</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:d709725121488215cd42e98fdca85638ace012ea">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:d426b304ef7993e6b20948765fb2bd3ccfe2e43e">
+                    <f:methodMapJavaClassName>int</f:methodMapJavaClassName>
+                    <f:methodMapName>getPort</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#port"/>
+                <f:propertyMapPropertyName>port</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:1d90953baf55e776b079687b19d67dc41c9b2ba6">
+                    <f:methodMapJavaClassName>int</f:methodMapJavaClassName>
+                    <f:methodMapName>setPort</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:dba7910fe449f75b0ac758d861b4cbc950bb44eb">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:f9a2c7f1949b1ede88d0a0182f9fd04ab6848c45">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>getTableNamePrefix</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#tableNamePrefix"/>
+                <f:propertyMapPropertyName>tableNamePrefix</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:99eb5abd87207f23ef24bbe5aa85e808ac77f49c">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>setTableNamePrefix</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:ecb43ed8a2a208907d1ee1846ee805e3a4a92a1d">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:8541bb9a50e8ae79b0f07d97ebcb0b0d5cc8694f">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>getTableType</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.mysql.MysqlContext#tableType"/>
+                <f:propertyMapPropertyName>tableType</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:af2cda8a773a1584f84e59653597b935f820b358">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>setTableType</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapHasPropertyMap>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:f8d86036cf2968bf7c57cb480d2b172d173ef21a">
+                <f:propertyMapGetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:396f4741e1da96a4537a47df604dea6370b802d2">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>getHost</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapGetter>
+                <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.sql.BaseSqlContext#host"/>
+                <f:propertyMapPropertyName>host</f:propertyMapPropertyName>
+                <f:propertyMapSetter>
+                  <rdf:Description rdf:about="tag:tupeloproject.org,2006:83b716731fde286cb657dc3139c86cad43390d96">
+                    <f:methodMapJavaClassName>java.lang.String</f:methodMapJavaClassName>
+                    <f:methodMapName>setHost</f:methodMapName>
+                    <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+                  </rdf:Description>
+                </f:propertyMapSetter>
+              </rdf:Description>
+            </f:classMapHasPropertyMap>
+            <f:classMapRdfType rdf:resource="tag:tupeloproject.org,2006:/2.0/Context"/>
+            <f:classModifier rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/classModifierRegular"/>
+          </f:ClassMap>
+        </f:propertyImplementationMappingSubject>
+        <f:propertyValueImplementationClassName>org.tupeloproject.mysql.MysqlContext</f:propertyValueImplementationClassName>
+      </a:Context>
+    </b:metadataContext>
+    <c:children>
+      <rdf:Seq rdf:about="tag:tupeloproject.org,2006:823d267a8c30cdb202978273452795a0e394a2dc"/>
+    </c:children>
+    <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/DefaultContext"/>
+    <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/RootContext"/>
+    <rdf:type rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry"/>
+    <f:propertyImplementationMappingSubject>
+      <f:ClassMap rdf:about="http://org.tupeloproject/bean#org.tupeloproject.kernel.ContentStoreContext">
+        <f:classMapClassName>org.tupeloproject.kernel.ContentStoreContext</f:classMapClassName>
+        <f:classMapHasPropertyMap>
+          <rdf:Description rdf:about="tag:tupeloproject.org,2006:07eda1157b9e49f008322d20ceb9bdfbe1874c6a">
+            <f:propertyMapGetter>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:2d09949743c6606615006aba5d6e86e11984dc10">
+                <f:methodMapJavaClassName>java.util.List</f:methodMapJavaClassName>
+                <f:methodMapName>getChildren</f:methodMapName>
+                <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection"/>
+                <f:methodMapValueParameter rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context"/>
+              </rdf:Description>
+            </f:propertyMapGetter>
+            <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.kernel.Context#children"/>
+            <f:propertyMapPropertyName>children</f:propertyMapPropertyName>
+            <f:propertyMapSetter>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:343070f9b965c44f7ae2754a60113f5ee2032e70">
+                <f:methodMapJavaClassName>java.util.List</f:methodMapJavaClassName>
+                <f:methodMapName>setChildren</f:methodMapName>
+                <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeCollection"/>
+                <f:methodMapValueParameter rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context"/>
+              </rdf:Description>
+            </f:propertyMapSetter>
+          </rdf:Description>
+        </f:classMapHasPropertyMap>
+        <f:classMapHasPropertyMap>
+          <rdf:Description rdf:about="tag:tupeloproject.org,2006:31a991a1d445f416283e3a4a269ebf9255edabb9">
+            <f:propertyMapGetter>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:e92ec2032235017aa699e46e5c4acb9bcae7d89d">
+                <f:methodMapJavaClassName rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context"/>
+                <f:methodMapName>getMetadataContext</f:methodMapName>
+                <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+              </rdf:Description>
+            </f:propertyMapGetter>
+            <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.kernel.ContentStoreContext#metadataContext"/>
+            <f:propertyMapPropertyName>metadataContext</f:propertyMapPropertyName>
+            <f:propertyMapSetter>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:35f30b5a485f8ba81b2c26db3e17e159f00b7420">
+                <f:methodMapJavaClassName rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context"/>
+                <f:methodMapName>setMetadataContext</f:methodMapName>
+                <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+              </rdf:Description>
+            </f:propertyMapSetter>
+          </rdf:Description>
+        </f:classMapHasPropertyMap>
+        <f:classMapHasPropertyMap>
+          <rdf:Description rdf:about="tag:tupeloproject.org,2006:ace728dd9af70c7a19ff8377f5801b68de3c4d76">
+            <f:propertyMapGetter>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:be4b407685c9705f0c2621a77a3ddb0948ca6591">
+                <f:methodMapJavaClassName rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context"/>
+                <f:methodMapName>getDataContext</f:methodMapName>
+                <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+              </rdf:Description>
+            </f:propertyMapGetter>
+            <f:propertyMapPredicate rdf:resource="http://java.sun.com/org.tupeloproject.kernel.ContentStoreContext#dataContext"/>
+            <f:propertyMapPropertyName>dataContext</f:propertyMapPropertyName>
+            <f:propertyMapSetter>
+              <rdf:Description rdf:about="tag:tupeloproject.org,2006:e34c6d8b8703701964ab69d58c2e79014db60658">
+                <f:methodMapJavaClassName rdf:resource="http://org.tupeloproject/bean#org.tupeloproject.kernel.Context"/>
+                <f:methodMapName>setDataContext</f:methodMapName>
+                <f:methodMapStorageType rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeSingleValue"/>
+              </rdf:Description>
+            </f:propertyMapSetter>
+          </rdf:Description>
+        </f:classMapHasPropertyMap>
+        <f:classMapRdfType rdf:resource="tag:tupeloproject.org,2006:/2.0/Context"/>
+        <f:classModifier rdf:resource="tag:tupeloproject.org,2006:/2.0/beans/2.0/classModifierRegular"/>
+      </f:ClassMap>
+    </f:propertyImplementationMappingSubject>
+    <f:propertyValueImplementationClassName>org.tupeloproject.kernel.ContentStoreContext</f:propertyValueImplementationClassName>
+  </a:Context>
