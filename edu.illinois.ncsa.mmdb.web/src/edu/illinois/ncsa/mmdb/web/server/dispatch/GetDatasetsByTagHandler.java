@@ -35,26 +35,19 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 public class GetDatasetsByTagHandler implements
 		ActionHandler<GetTag, GetDatasetsResult> {
 
-	/** Tupelo bean session **/
-	private static final BeanSession beanSession = TupeloStore.getInstance()
-			.getBeanSession();
-
-	/** Datasets DAO **/
-	private static DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(GetDatasetsByTagHandler.class);
 
 	@Override
-	public Class<GetTag> getActionType() {
-		return GetTag.class;
-	}
-
-	@Override
-	public GetDatasetsResult execute(GetTag arg0, ExecutionContext arg1)
+	public GetDatasetsResult execute(GetTag action, ExecutionContext arg1)
 			throws ActionException {
 
-		String tagTitle = arg0.getUri();
+		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+
+		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+
+		// FIXME Is the uri the tag title?
+		String tagTitle = action.getUri();
 
 		HashSet<DatasetBean> datasets = new HashSet<DatasetBean>();
 
@@ -74,7 +67,7 @@ public class GetDatasetsByTagHandler implements
 				}
 			}
 		} catch (OperatorException e1) {
-			// TODO Auto-generated catch block
+			log.error("Error retrieving datasets with tag " + tagTitle);
 			e1.printStackTrace();
 		}
 
@@ -82,6 +75,11 @@ public class GetDatasetsByTagHandler implements
 				+ tagTitle + "'");
 
 		return new GetDatasetsResult(datasets);
+	}
+
+	@Override
+	public Class<GetTag> getActionType() {
+		return GetTag.class;
 	}
 
 	@Override

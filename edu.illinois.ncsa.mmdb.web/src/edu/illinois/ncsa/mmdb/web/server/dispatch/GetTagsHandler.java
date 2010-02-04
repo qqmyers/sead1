@@ -10,6 +10,8 @@ import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.rdf.Resource;
@@ -20,29 +22,30 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
- * @author lmarini
+ * Get tags associated with a particular resource.
+ *  
+ * @author Luigi Marini
  *
- *	TODO make TagBeanUtil associatable and switch to using that
  */
 public class GetTagsHandler implements ActionHandler<GetTags, GetTagsResult>{
-
-	/** Tupelo bean session **/
-	private static final BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-
-	/** Tags DAO **/
-	private static TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
-
+	
+	/** Commons logging **/
+	private static Log log = LogFactory.getLog(GetTagsHandler.class);
 	
 	@Override
 	public GetTagsResult execute(GetTags arg0, ExecutionContext arg1)
 			throws ActionException {
 
+		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+		
+		TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
+		
 		Set<String> tags = new HashSet<String>();
 
 		try {
-			tags = tebu.getTags(Resource.uriRef(arg0.getId()));
+			tags = tebu.getTags(Resource.uriRef(arg0.getUri()));
 		} catch (OperatorException e) {
-			e.printStackTrace();
+			log.error("Error getting tags for " + arg0.getUri(), e);
 		}
 
 		return new GetTagsResult(tags);

@@ -18,6 +18,8 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
+ * Create new user password.
+ * 
  * @author Luigi Marini
  * 
  */
@@ -38,8 +40,8 @@ public class NewPasswordHandler implements
 
 		try {
 			PersonBean personBean = pbu.get(PersonBeanUtil.getPersonID(user));
-				PasswordManagement
-						.updatePassword(personBean.getUri(), password);
+			// update password
+			PasswordManagement.updatePassword(personBean.getUri(), password);
 		} catch (Exception e1) {
 			log.error("Error retrieving user", e1);
 			throw new ActionException("Error retrieving user", e1);

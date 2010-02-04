@@ -25,12 +25,6 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
  */
 public class TagResourceHandler implements ActionHandler<TagResource, TagResourceResult>{
 	
-	/** Tupelo bean session **/
-	private static final BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-	
-	/** TagEvents DAO **/
-	private static TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
-	
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(TagResourceHandler.class);
 	
@@ -38,7 +32,11 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
 	public TagResourceResult execute(TagResource arg0, ExecutionContext arg1)
 			throws ActionException {
 
-		String uri = arg0.getId();
+		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+		
+		TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
+		
+		String uri = arg0.getUri();
 		
 		Set<String> tags = arg0.getTags();
 
@@ -46,7 +44,7 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
 			tebu.addTags(Resource.uriRef(uri), null, tags);
 			log.debug("Tagging " + uri + " with tags " + tags);
 		} catch (OperatorException e) {
-			e.printStackTrace();
+			log.error("Error tagging " + uri, e);
 		}
 		
 		return new TagResourceResult();

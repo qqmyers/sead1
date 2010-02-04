@@ -18,38 +18,65 @@ import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 
-public class GetPreviewsHandler implements ActionHandler<GetPreviews, GetPreviewsResult> {
-	Log log = LogFactory.getLog(GetPreviewsHandler.class);
-	
+/**
+ * Get image previews.
+ * 
+ * @author Luigi Marini
+ * @author Joe Futrelle
+ * 
+ */
+public class GetPreviewsHandler implements
+		ActionHandler<GetPreviews, GetPreviewsResult> {
+
+	/** Commons logging **/
+	private static Log log = LogFactory.getLog(GetPreviewsHandler.class);
+
 	@Override
-	public GetPreviewsResult execute(GetPreviews getPreviews, ExecutionContext arg1)
-			throws ActionException {
-		PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(TupeloStore.getInstance().getBeanSession());
-		String datasetUri = getPreviews.getUri();
+	public GetPreviewsResult execute(GetPreviews getPreviewsAction,
+			ExecutionContext arg1) throws ActionException {
+		
+		PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(TupeloStore
+				.getInstance().getBeanSession());
+		
+		String datasetUri = getPreviewsAction.getUri();
+		
 		GetPreviewsResult result = new GetPreviewsResult();
+		
 		try {
-			if(datasetUri != null) {
-				String smallPreview = RestServlet.getSmallPreviewUri(datasetUri);
-				String largePreview = RestServlet.getLargePreviewUri(datasetUri);
-				if(smallPreview != null) {
-					result.setPreview(GetPreviews.SMALL, pibu.get(smallPreview));
+			if (datasetUri != null) {
+				String smallPreview = RestServlet
+						.getSmallPreviewUri(datasetUri);
+				String largePreview = RestServlet
+						.getLargePreviewUri(datasetUri);
+				if (smallPreview != null) {
+					result
+							.setPreview(GetPreviews.SMALL, pibu
+									.get(smallPreview));
 				}
-				if(largePreview != null) {
-					result.setPreview(GetPreviews.LARGE, pibu.get(largePreview));
+				if (largePreview != null) {
+					result
+							.setPreview(GetPreviews.LARGE, pibu
+									.get(largePreview));
 				}
-				if(smallPreview == null && largePreview == null) { // no previews.
-					ThingSession ts = TupeloStore.getInstance().getBeanSession().getThingSession();
-					// FIXME "endTime0" is a kludgy way to represent execution stage information
-					Date endTime =  ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/extractor/endTime0"));
-					if(endTime != null) {
-						log.debug("telling client to stop asking for previews for "+datasetUri);
+				if (smallPreview == null && largePreview == null) { // no
+																	// previews.
+					ThingSession ts = TupeloStore.getInstance()
+							.getBeanSession().getThingSession();
+					// FIXME "endTime0" is a kludgy way to represent execution
+					// stage information
+					Date endTime = ts.getDate(Resource.uriRef(datasetUri), Cet
+							.cet("metadata/extractor/endTime0"));
+					if (endTime != null) {
+						log
+								.debug("telling client to stop asking for previews for "
+										+ datasetUri);
 						// there won't be previews, so stop asking!
 						result.setStopAsking(true);
 					}
 				}
 			}
-		} catch(Exception x) {
-			log.debug("error getting previews",x);
+		} catch (Exception x) {
+			log.error("Error getting previews", x);
 			// FIXME report
 		}
 		return result;
@@ -57,7 +84,6 @@ public class GetPreviewsHandler implements ActionHandler<GetPreviews, GetPreview
 
 	@Override
 	public Class<GetPreviews> getActionType() {
-		// TODO Auto-generated method stub
 		return GetPreviews.class;
 	}
 
@@ -65,7 +91,7 @@ public class GetPreviewsHandler implements ActionHandler<GetPreviews, GetPreview
 	public void rollback(GetPreviews arg0, GetPreviewsResult arg1,
 			ExecutionContext arg2) throws ActionException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

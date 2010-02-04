@@ -10,6 +10,8 @@ import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsers;
@@ -26,6 +28,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
  */
 public class GetUsersHandler implements ActionHandler<GetUsers, GetUsersResult>{
 
+	/** Commons logging **/
+	private static Log log = LogFactory.getLog(GetUsersHandler.class);
+	
 	@Override
 	public GetUsersResult execute(GetUsers arg0, ExecutionContext arg1)
 			throws ActionException {
@@ -33,10 +38,9 @@ public class GetUsersHandler implements ActionHandler<GetUsers, GetUsersResult>{
 		PersonBeanUtil personBeanUtil = new PersonBeanUtil(beanSession);
 		try {
 			Collection<PersonBean> all = personBeanUtil.getAll();
-			return new GetUsersResult(new ArrayList(all));
+			return new GetUsersResult(new ArrayList<PersonBean>(all));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error getting user list", e);
 		}
 		return new GetUsersResult();
 	}

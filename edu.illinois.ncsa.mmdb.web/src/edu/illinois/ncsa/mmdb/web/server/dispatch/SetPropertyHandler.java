@@ -6,6 +6,8 @@ import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.rdf.Resource;
 
@@ -13,7 +15,16 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
+/**
+ * TODO Add comments
+ * 
+ * @author Joe Futrelle
+ *
+ */
 public class SetPropertyHandler implements ActionHandler<SetProperty, SetPropertyResult> {
+
+	/** Commons logging **/
+	private static Log log = LogFactory.getLog(SetPropertyHandler.class);
 
 	@Override
 	public SetPropertyResult execute(SetProperty arg0, ExecutionContext arg1)
@@ -28,13 +39,13 @@ public class SetPropertyHandler implements ActionHandler<SetProperty, SetPropert
 			ts.close();
 			return new SetPropertyResult();
 		} catch(Exception x) {
-			throw new ActionException("failed",x);
+			log.error("Error setting metadata on " + arg0.getUri(), x);
+			throw new ActionException("failed", x);
 		}
 	}
 
 	@Override
 	public Class<SetProperty> getActionType() {
-		// TODO Auto-generated method stub
 		return SetProperty.class;
 	}
 

@@ -1,18 +1,26 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUploadDestination;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUploadDestinationResult;
-import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUploadDestination;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUploadDestinationResult;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
-public class GetUploadDestinationHandler implements ActionHandler<GetUploadDestination,GetUploadDestinationResult> {
+/**
+ * TODO Add comments
+ * 
+ * @author Joe Futrelle
+ * 
+ */
+public class GetUploadDestinationHandler implements
+		ActionHandler<GetUploadDestination, GetUploadDestinationResult> {
 
 	@Override
 	public GetUploadDestinationResult execute(GetUploadDestination arg0,
 			ExecutionContext arg1) throws ActionException {
-		String token = TupeloStore.getInstance().getHistoryForUpload(arg0.getSessionKey());
+		String token = TupeloStore.getInstance().getHistoryForUpload(
+				arg0.getSessionKey());
 		GetUploadDestinationResult result = new GetUploadDestinationResult();
 		result.setHistoryToken(token);
 		return result;
@@ -20,7 +28,6 @@ public class GetUploadDestinationHandler implements ActionHandler<GetUploadDesti
 
 	@Override
 	public Class<GetUploadDestination> getActionType() {
-		// TODO Auto-generated method stub
 		return GetUploadDestination.class;
 	}
 
@@ -29,7 +36,7 @@ public class GetUploadDestinationHandler implements ActionHandler<GetUploadDesti
 			GetUploadDestinationResult arg1, ExecutionContext arg2)
 			throws ActionException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

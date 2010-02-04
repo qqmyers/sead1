@@ -3,14 +3,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
-
-import javax.security.auth.Subject;
-import javax.security.auth.login.LoginContext;
-import javax.security.auth.login.LoginException;
-
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -18,20 +10,21 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.illinois.ncsa.bard.jaas.UsernamePasswordContextHandler;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Authenticate;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthenticateResult;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
-import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
- * Handles authentication using jaas.
+ * Authenticate user.
  * 
  * @author Luigi Marini
  * 
  */
 public class AuthenticateHandler implements
 		ActionHandler<Authenticate, AuthenticateResult> {
+
+	/** Commons logging **/
+	private static Log log = LogFactory.getLog(AuthenticateHandler.class);
 	
 	@Override
 	public AuthenticateResult execute(Authenticate arg0, ExecutionContext arg1)
@@ -40,10 +33,12 @@ public class AuthenticateHandler implements
 		String username = arg0.getId();
 
 		String password = arg0.getSecret();
-		
-		if((new Authentication()).authenticate(username, password)) {
+
+		if ((new Authentication()).authenticate(username, password)) {
+			log.trace("User successfully authenticated");
 			return new AuthenticateResult(true, username);
 		} else {
+			log.trace("User failed authentication");
 			return new AuthenticateResult(false, "");
 		}
 	}

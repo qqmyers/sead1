@@ -39,17 +39,74 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 public class GetCollectionsHandler implements
 		ActionHandler<GetCollections, GetCollectionsResult> {
 
-	/** Tupelo bean session **/
-	private static final BeanSession beanSession = TupeloStore.getInstance()
-			.getBeanSession();
-
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(GetCollectionsHandler.class);
 
-	/** Datasets DAO **/
-	private static CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+	/** Badges cache **/
+	private Map<String,String> badges = new HashMap<String,String>();
+	
+	@Override
+	public GetCollectionsResult execute(GetCollections query,
+			ExecutionContext arg1) throws ActionException {
+		
+		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+		
+		CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+		
+		int limit = query.getLimit();
+		int offset = query.getOffset();
+		ArrayList<CollectionBean> collections = new ArrayList<CollectionBean>();
+		List<Resource> seen = new LinkedList<Resource>(); 
+		List<String> badges = new LinkedList<String>();
+		try {
+			int dups = 1;
+			while(dups > 0) {
+				int news = 0;
+				dups = 0;
 
-	Unifier createUnifier(GetCollections query, int limit, int offset) {
+				Unifier uf = createUnifier(query, limit, offset);
+
+				TupeloStore.getInstance().getContext().perform(uf);
+				
+				for (Tuple<Resource> row : uf.getResult()) {
+					Resource subject = row.get(0);
+					if (subject != null) {
+						try {
+							if (!seen.contains(subject)) { // FIXME: because of this logic, we may return fewer than the limit!
+								CollectionBean colBean = cbu.get(subject);
+								collections.add(colBean);
+								badges.add(getBadge(colBean.getUri()));
+								seen.add(subject);
+								news++;
+							} else {
+								dups++;
+							}
+						} catch(OperatorException x) {
+							log.error("Unable to fetch collection " + subject,x);
+						}
+					}
+				}
+				if(limit > 0 && dups > 0) {
+					limit = dups;
+					offset += news;  // FIXME: wow, this is a hack
+				}
+			}
+		} catch (OperatorException e1) {
+			e1.printStackTrace();
+		}
+		GetCollectionsResult result = new GetCollectionsResult(collections);
+		result.setBadges(badges);
+		return result; 
+	}
+	
+	/**
+	 * 
+	 * @param query
+	 * @param limit
+	 * @param offset
+	 * @return
+	 */
+	private Unifier createUnifier(GetCollections query, int limit, int offset) {
 		Unifier uf = new Unifier();
 		uf.addPattern("collection", Rdf.TYPE,
 				CollectionBeanUtil.COLLECTION_TYPE);
@@ -74,15 +131,18 @@ public class GetCollectionsHandler implements
 		return uf;
 	}
 	
-	Map<String,String> badges = new HashMap<String,String>(); // badges cache
-	String getBadge(String collectionUri) {
+	/**
+	 * 
+	 * @param collectionUri
+	 * @return
+	 */
+	private String getBadge(String collectionUri) {
 		String badge = badges.get(collectionUri);
 		if(badge == null) {
 			try {
 				Unifier u = new Unifier();
 				u.setColumnNames("member", "date");
 				u.addPattern(Resource.uriRef(collectionUri), DcTerms.HAS_PART, "member");
-				//u.addPattern("member", Rdf.TYPE, Cet.DATASET);
 				u.addPattern("member", Dc.DATE, "date", true);
 				u.addOrderByDesc("date");
 				u.addOrderBy("member");
@@ -96,60 +156,13 @@ public class GetCollectionsHandler implements
 					badges.put(collectionUri, badge);
 					return badge;
 				}
-			} catch(OperatorException x) {
+			} catch(OperatorException e) {
+				log.error("Error getting badges for collection " + collectionUri, e);
 			}
 		}
 		return badge;
 	}
 	
-	@Override
-	public GetCollectionsResult execute(GetCollections query,
-			ExecutionContext arg1) throws ActionException {
-		int limit = query.getLimit();
-		int offset = query.getOffset();
-		ArrayList<CollectionBean> collections = new ArrayList<CollectionBean>();
-		List<Resource> seen = new LinkedList<Resource>(); 
-		List<String> badges = new LinkedList<String>();
-		try {
-			int dups = 1;
-			while(dups > 0) {
-				int news = 0;
-				dups = 0;
-
-				Unifier uf = createUnifier(query, limit, offset);
-
-				TupeloStore.getInstance().getContext().perform(uf);
-				
-				for (Tuple<Resource> row : uf.getResult()) {
-					Resource subject = row.get(0);
-					if (subject != null) {
-						try {
-							if (!seen.contains(subject)) { // because of this logic, we may return fewer than the limit!
-								CollectionBean colBean = cbu.get(subject);
-								collections.add(colBean);
-								badges.add(getBadge(colBean.getUri()));
-								seen.add(subject);
-								news++;
-							} else {
-								dups++;
-							}
-						} catch(OperatorException x) {
-							log.error("unable to fetch collection "+subject,x);
-						}
-					}
-				}
-				if(limit > 0 && dups > 0) {
-					limit = dups;
-					offset += news;  // wow, this is a hack
-				}
-			}
-		} catch (OperatorException e1) {
-			e1.printStackTrace();
-		}
-		GetCollectionsResult result = new GetCollectionsResult(collections);
-		result.setBadges(badges);
-		return result; 
-	}
 
 	@Override
 	public Class<GetCollections> getActionType() {

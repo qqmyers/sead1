@@ -10,9 +10,18 @@ import edu.illinois.ncsa.cet.search.Hit;
 import edu.illinois.ncsa.cet.search.Searchable;
 import edu.illinois.ncsa.cet.search.StringHit;
 import edu.illinois.ncsa.cet.search.TextIndex;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
+import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
+/**
+ * TODO Add comments
+ * 
+ * @author Joe Futrelle
+ *
+ */
 public class Search extends TextIndex<Object> implements Searchable {
+	
 	@Override
 	public Iterable<Hit> search(String searchString) {
 		// here we just list datasets
@@ -30,7 +39,8 @@ public class Search extends TextIndex<Object> implements Searchable {
 		// TODO Auto-generated method stub
 		List<Hit> result = new LinkedList<Hit>();
 		// TODO don't rely on ListDatasetsHandler, move that impl code into a common class
-		for(String uri : ListDatasetsHandler.listDatasetUris(Dc.DATE.getString(), true, limit, offset, null)) {
+		DatasetBeanUtil dbu = new DatasetBeanUtil(TupeloStore.getInstance().getBeanSession());
+		for(String uri : ListDatasetsHandler.listDatasetUris(Dc.DATE.getString(), true, limit, offset, null, dbu)) {
 			result.add(new StringHit(uri));
 		}
 		return result;

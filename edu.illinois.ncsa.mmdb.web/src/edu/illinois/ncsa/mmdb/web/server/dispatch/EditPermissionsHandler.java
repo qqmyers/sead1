@@ -22,6 +22,8 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 
 /**
+ * Add/remove user permissions.
+ * 
  * @author Luigi Marini
  * 
  */
@@ -36,9 +38,10 @@ public class EditPermissionsHandler implements
 			ExecutionContext arg1) throws ActionException {
 
 		Resource user = Resource.uriRef(action.getUser());
-		
+
 		Resource permission = PermissionResourceMap.getResource(action
 				.getPermission());
+
 		RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
 
 		try {
@@ -51,8 +54,11 @@ public class EditPermissionsHandler implements
 				rbac.removePermission(user, permission);
 				break;
 			default:
-				throw new ActionException("Edit permission action type not found"
+				log.error("Edit permission action type not found"
 						+ action.getType());
+				throw new ActionException(
+						"Edit permission action type not found"
+								+ action.getType());
 			}
 		} catch (OperatorException e) {
 			log.error("Error changing permission on user", e);
@@ -67,15 +73,18 @@ public class EditPermissionsHandler implements
 	 * @param user
 	 */
 	private void emailNotification(Resource user) {
-		PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
-		
+		PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance()
+				.getBeanSession());
+
 		try {
 			PersonBean personBean = pbu.get(user);
-			
-			if (personBean.getEmail() != null && !personBean.getEmail().isEmpty()) {
+
+			if (personBean.getEmail() != null
+					&& !personBean.getEmail().isEmpty()) {
 				Mail.userAuthorized(personBean.getEmail());
 			} else {
-				log.debug("User " + user + " email was null/empty. Email not sent.");
+				log.debug("User " + user
+						+ " email was null/empty. Email not sent.");
 			}
 		} catch (OperatorException e1) {
 			// TODO Auto-generated catch block

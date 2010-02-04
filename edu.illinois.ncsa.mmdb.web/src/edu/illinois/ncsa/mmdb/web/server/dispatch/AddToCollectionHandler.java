@@ -23,25 +23,24 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 
 /**
- * @author lmarini
+ * Add a set of resources to a collection.
+ * 
+ * @author Luigi Marini
  *
  */
 public class AddToCollectionHandler implements ActionHandler<AddToCollection, AddToCollectionResult>{
-	
-	/** Tupelo bean session **/
-	private static final BeanSession beanSession = TupeloStore.getInstance()
-			.getBeanSession();
 
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(AddToCollectionHandler.class);
-
-	/** Collection DAO **/
-	private static CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
 	
 	@Override
 	public AddToCollectionResult execute(AddToCollection arg0,
 			ExecutionContext arg1) throws ActionException {
 
+		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+		
+		CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+		
 		Collection<String> resourcesString = arg0.getResources();
 		
 		Collection<Resource> resources = new HashSet<Resource>();

@@ -20,51 +20,54 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.RunSparqlQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RunSparqlQueryResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
-public class RunSparqlQueryHandler implements ActionHandler<RunSparqlQuery, RunSparqlQueryResult> {
-	Log log = LogFactory.getLog(RunSparqlQueryHandler.class);
-	
+/**
+ * TODO Add comments
+ * 
+ * @author Joe Futrelle
+ * 
+ */
+public class RunSparqlQueryHandler implements
+		ActionHandler<RunSparqlQuery, RunSparqlQueryResult> {
+
+	/** Commons logging **/
+	private static Log log = LogFactory.getLog(RunSparqlQueryHandler.class);
+
 	@Override
 	public RunSparqlQueryResult execute(RunSparqlQuery arg0,
 			ExecutionContext arg1) throws ActionException {
 		try {
 			List<List<String>> resultTable = new LinkedList<List<String>>();
-			//log.debug("executing "+arg0.getQuery());
 			Operator o = SparqlOperatorFactory.newOperator(arg0.getQuery());
 			TupeloStore.getInstance().getContext().perform(o);
 			Iterable<? extends Tuple<Resource>> rowSource = null;
-			if(o instanceof TableProvider) {
-				rowSource = ((TableProvider)o).getResult();
-			} else if(o instanceof TripleSetProvider) {
-				rowSource = ((TripleSetProvider)o).getResult();
+			if (o instanceof TableProvider) {
+				rowSource = ((TableProvider) o).getResult();
+			} else if (o instanceof TripleSetProvider) {
+				rowSource = ((TripleSetProvider) o).getResult();
 			}
-			if(rowSource != null) {
-				for(Tuple<Resource> row : rowSource) { 
+			if (rowSource != null) {
+				for (Tuple<Resource> row : rowSource) {
 					List<String> resultRow = new LinkedList<String>();
-					for(Resource cell : row) {
+					for (Resource cell : row) {
 						resultRow.add(cell != null ? cell.getString() : null);
 					}
 					resultTable.add(resultRow);
 				}
 				RunSparqlQueryResult result = new RunSparqlQueryResult();
 				result.setResult(resultTable);
-				/*
-				for(List<String> row : resultTable) {
-					log.debug("result row: "+row);
-				}
-				*/
 				return result;
 			} else {
+				log.debug("query ran, but didn't grok result");
 				throw new ActionException("query ran, but didn't grok result");
 			}
 		} catch (Exception x) {
-			x.printStackTrace();
-			throw new ActionException("query failed",x);
+			log.error("query failed", x);
+			throw new ActionException("query failed", x);
 		}
 	}
 
 	@Override
 	public Class<RunSparqlQuery> getActionType() {
-		// TODO Auto-generated method stub
 		return RunSparqlQuery.class;
 	}
 
@@ -72,7 +75,7 @@ public class RunSparqlQueryHandler implements ActionHandler<RunSparqlQuery, RunS
 	public void rollback(RunSparqlQuery arg0, RunSparqlQueryResult arg1,
 			ExecutionContext arg2) throws ActionException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

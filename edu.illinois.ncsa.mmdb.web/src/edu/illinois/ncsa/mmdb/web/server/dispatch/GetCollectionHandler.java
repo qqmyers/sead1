@@ -22,30 +22,31 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
 /**
+ * Get datasets in a paricular collection.
+ * 
  * @author lmarini
  * 
  */
 public class GetCollectionHandler implements
 		ActionHandler<GetCollection, GetCollectionResult> {
 
-	/** Tupelo bean session **/
-	private static final BeanSession beanSession = TupeloStore.getInstance()
-			.getBeanSession();
-
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(GetCollectionHandler.class);
-
-	/** Collection DAO **/
-	private static CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
 
 	@Override
 	public GetCollectionResult execute(GetCollection arg0, ExecutionContext arg1)
 			throws ActionException {
+
+		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+
+		CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+
 		try {
 			CollectionBean collectionBean = cbu.get(arg0.getUri());
 
-			List<DatasetBean> collection = (List<DatasetBean>) cbu.getCollection(collectionBean, new DatasetBeanUtil(beanSession)
-					.getType(), "title", false, 100, 0);
+			List<DatasetBean> collection = (List<DatasetBean>) cbu
+					.getCollection(collectionBean, new DatasetBeanUtil(
+							beanSession).getType(), "title", false, 100, 0);
 
 			return new GetCollectionResult(collectionBean, collection);
 		} catch (Exception e) {

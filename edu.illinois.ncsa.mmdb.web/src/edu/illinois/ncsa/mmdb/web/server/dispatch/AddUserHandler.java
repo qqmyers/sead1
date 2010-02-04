@@ -14,7 +14,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUserResult;
 import edu.illinois.ncsa.mmdb.web.server.PasswordManagement;
 
 /**
- * Add user to system.
+ * Create new user account.
  * 
  * @author Luigi Marini
  * 
@@ -27,7 +27,6 @@ public class AddUserHandler implements ActionHandler<AddUser, AddUserResult> {
 
 		String name = arg0.getFirstName() + " " + arg0.getLastName();
 		String email = arg0.getEmail();
-//		String passwordDigest = PasswordDigest.digest(arg0.getPassword());
 
 		try {
 			PasswordManagement.addUser(name, email, arg0.getPassword());
@@ -35,23 +34,6 @@ public class AddUserHandler implements ActionHandler<AddUser, AddUserResult> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-//		Resource personURI = Resource.uriRef(PersonBeanUtil
-//				.getPersonID(email));
-//
-//		Context context = TupeloStore.getInstance().getContext();
-//		try {
-//			context.addTriple(
-//							personURI,
-//							Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/foaf/context/password"),
-//							passwordDigest);
-//			context.addTriple(personURI, Rdf.TYPE, Foaf.PERSON);
-//			context.addTriple(personURI, Foaf.NAME, name);
-//			context.addTriple(personURI, Foaf.MBOX, email);
-//		} catch (OperatorException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 
 		return new AddUserResult();
 	}

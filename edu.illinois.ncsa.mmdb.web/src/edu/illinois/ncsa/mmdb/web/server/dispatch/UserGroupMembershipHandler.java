@@ -27,6 +27,10 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
+ * Add/remove users from groups.
+ * 
+ * TODO Finish and fix. Was originally used to manage permissions
+ * 
  * @author Luigi Marini
  * 
  */
@@ -98,13 +102,14 @@ public class UserGroupMembershipHandler implements
 				throw new ActionException("Unrecognized action " + action);
 			}
 		} catch (OperatorException e) {
-			e.printStackTrace();
+			log.error("Error modifying groups", e);
 			return new UserGroupMembershipResult();
 		}
 		return new UserGroupMembershipResult();
 	}
 
 	/**
+	 * Notify user with email of change of groups.
 	 * 
 	 * @param user
 	 */

@@ -19,7 +19,9 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
- * @author lmarini
+ * Request a new password.
+ * 
+ * @author Luigi Marini
  * 
  */
 public class RequestNewPasswordHandler implements
@@ -58,11 +60,12 @@ public class RequestNewPasswordHandler implements
 							"Error mailing password.");
 				}
 			} else {
+				log.debug("Unable to find account for " + email);
 				return new RequestNewPasswordResult(false,
 						"Unable to find account.");
 			}
 		} catch (Exception e) {
-			log.error("Unable to find account", e);
+			log.error("Unable to find account for " + email, e);
 			return new RequestNewPasswordResult(false,
 					"Unable to find account.");
 		}

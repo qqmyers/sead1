@@ -11,6 +11,8 @@ import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 
@@ -24,39 +26,42 @@ import edu.uiuc.ncsa.cet.bean.tupelo.AnnotationBeanUtil;
  * Get annotations attached to a specific resource sorted by date.
  * 
  * @author Luigi Marini
- *
+ * 
  */
-public class GetAnnotationsHandler implements ActionHandler<GetAnnotations, GetAnnotationsResult>{
+public class GetAnnotationsHandler implements
+		ActionHandler<GetAnnotations, GetAnnotationsResult> {
 
-	/** Tupelo bean session **/
-	private static final BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+	/** Commons logging **/
+	private static Log log = LogFactory.getLog(GetAnnotationsHandler.class);
 
-	/** Annotations DAO **/
-	private static AnnotationBeanUtil abu = new AnnotationBeanUtil(beanSession);
-	
 	@Override
 	public GetAnnotationsResult execute(GetAnnotations arg0,
 			ExecutionContext arg1) throws ActionException {
 
+		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+
+		AnnotationBeanUtil abu = new AnnotationBeanUtil(beanSession);
+
 		ArrayList<AnnotationBean> annotations = new ArrayList<AnnotationBean>();
-		
+
 		try {
-			annotations = new ArrayList<AnnotationBean>(abu.getAssociationsFor(arg0.getId()));
+			annotations = new ArrayList<AnnotationBean>(abu
+					.getAssociationsFor(arg0.getUri()));
 		} catch (OperatorException e) {
-			// TODO Auto-generated catch block
+			log.error("Error getting associations for resource "
+					+ arg0.getUri(), e);
 			e.printStackTrace();
 		}
-		
+
 		// sort annotations by date
 		Collections.sort(annotations, new Comparator<AnnotationBean>() {
 
 			@Override
 			public int compare(AnnotationBean arg0, AnnotationBean arg1) {
-				// TODO Auto-generated method stub
 				return arg0.getDate().compareTo(arg1.getDate());
 			}
 		});
-		
+
 		return new GetAnnotationsResult(annotations);
 	}
 
@@ -69,7 +74,7 @@ public class GetAnnotationsHandler implements ActionHandler<GetAnnotations, GetA
 	public void rollback(GetAnnotations arg0, GetAnnotationsResult arg1,
 			ExecutionContext arg2) throws ActionException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

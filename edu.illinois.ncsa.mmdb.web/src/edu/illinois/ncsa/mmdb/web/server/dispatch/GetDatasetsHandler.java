@@ -28,26 +28,23 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 public class GetDatasetsHandler implements
 		ActionHandler<GetDatasets, GetDatasetsResult> {
 
-	/** Tupelo bean session **/
-	private static final BeanSession beanSession = TupeloStore.getInstance()
-			.getBeanSession();
-
-	/** Datasets DAO **/
-	private static DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(GetDatasetsHandler.class);
 
 	@Override
 	public GetDatasetsResult execute(GetDatasets arg0, ExecutionContext arg1)
 			throws ActionException {
-
+		
+		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+		
+		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+		
 		HashSet<DatasetBean> datasets = new HashSet<DatasetBean>();
 
 		try {
 			datasets = new HashSet<DatasetBean>(dbu.getAll());
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error retrieving datasets from Tupelo repository");
 			throw new ActionException(
 					"Error retrieving datasets from Tupelo repository", e);
 		}

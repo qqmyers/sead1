@@ -20,6 +20,8 @@ import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 
 /**
+ * Check if a user has a specific permission.
+ * 
  * @author Luigi Marini
  * 
  */
@@ -74,12 +76,9 @@ public class HasPermissionHandler implements
 	private Resource createUserURI(String user) {
 		if (user.startsWith("http://cet.ncsa.uiuc.edu/")) {
 			Resource userURI = Resource.uriRef(user);
-			log.debug("User id: " + userURI.getString());
 			return userURI;
 		} else {
-			Resource userURI = Resource
-					.uriRef(PersonBeanUtil.getPersonID(user));
-			log.debug("User id: " + userURI.getString());
+			Resource userURI = Resource.uriRef(PersonBeanUtil.getPersonID(user));
 			return userURI;
 		}
 	}

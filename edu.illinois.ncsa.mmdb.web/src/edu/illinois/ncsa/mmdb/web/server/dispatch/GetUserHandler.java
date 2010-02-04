@@ -20,6 +20,8 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
+ * Get user account.
+ * 
  * @author Luigi Marini
  * 
  */
@@ -27,16 +29,18 @@ public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
 
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(GetUserHandler.class);
-	
+
 	@Override
 	public GetUserResult execute(GetUser action, ExecutionContext arg1)
 			throws ActionException {
-		
+
 		Context context = TupeloStore.getInstance().getContext();
+
 		PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance()
 				.getBeanSession());
 		try {
-			Resource personID = Resource.uriRef(PersonBeanUtil.getPersonID(action.getEmailAddress()));
+			Resource personID = Resource.uriRef(PersonBeanUtil
+					.getPersonID(action.getEmailAddress()));
 			TripleMatcher tm = new TripleMatcher();
 			tm.setSubject(personID);
 			context.perform(tm);
@@ -49,8 +53,8 @@ public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
 				return new GetUserResult();
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error retrieving information about user "
+					+ action.getEmailAddress(), e);
 		}
 		return new GetUserResult();
 	}
