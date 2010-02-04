@@ -512,7 +512,28 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	void toggleUploadMenu() {
 		if (!uploadMenuVisible && checkLogin()) {
-			showUploadMenu();
+			
+			// Check if the user has been activated by an administrator
+			dispatchAsync.execute(new HasPermission(MMDB.sessionID,
+					Permission.VIEW_MEMBER_PAGES),
+					new AsyncCallback<HasPermissionResult>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+							GWT.log("Error checking if the users has " +
+									"permissions to view member pages",
+											caught);
+						}
+
+						@Override
+						public void onSuccess(HasPermissionResult result) {
+							if (result.isPermitted()) {
+								showUploadMenu();
+							} else {
+								hideUploadMenu();
+							}
+						}
+					});
 		} else {
 			hideUploadMenu();
 		}
