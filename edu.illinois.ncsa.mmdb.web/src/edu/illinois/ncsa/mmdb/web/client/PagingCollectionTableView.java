@@ -110,7 +110,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		badgeImages.clear();
 		
 		// for now hardcode the page size
-		int pageSize = 10;
+		final int pageSize = 10;
 		// now compute the current page offset
 		int pageOffset = (page - 1) * pageSize;
 
@@ -130,6 +130,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 
 			@Override
 			public void onSuccess(GetCollectionsResult result) {
+				setNumberOfPages(result.getCount() / pageSize);
 				for (CollectionBean collection : result.getCollections()) {
 					AddNewCollectionEvent event = new AddNewCollectionEvent(
 							collection);

@@ -20,6 +20,7 @@ public class GetCollectionsResult implements Result {
 	
 	private ArrayList<CollectionBean> collections;
 	private List<String> badges;
+	private int count; // total number of collections in the context
 	
 	public List<String> getBadges() {
 		return badges;
@@ -40,5 +41,13 @@ public class GetCollectionsResult implements Result {
 	 */
 	public ArrayList<CollectionBean> getCollections() {
 		return collections;
+	}
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
 	}
 }

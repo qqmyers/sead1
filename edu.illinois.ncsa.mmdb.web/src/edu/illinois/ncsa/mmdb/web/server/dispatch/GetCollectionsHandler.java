@@ -19,13 +19,16 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
+import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
@@ -44,6 +47,35 @@ public class GetCollectionsHandler implements
 
 	/** Badges cache **/
 	private Map<String,String> badges = new HashMap<String,String>();
+
+	static Memoized<Integer> collectionCount;
+	int getCollectionCount() {
+		if(collectionCount == null) {
+			collectionCount = new Memoized<Integer>() {
+				public Integer computeValue() {
+					Unifier u = new Unifier();
+					u.setColumnNames("c");
+					u.addPattern("c",Rdf.TYPE,Cet.cet("Collection"));
+					try {
+						long then = System.currentTimeMillis();
+						TupeloStore.getInstance().unifyExcludeDeleted(u,"c");
+						int count = 0;
+						for(Tuple<Resource> row : u.getResult()) {
+							count++;
+						}
+						long ms = System.currentTimeMillis() - then;
+						log.debug("counted "+count+" collection(s) in "+ms+"ms");
+						return count;
+					} catch (OperatorException e) {
+						e.printStackTrace();
+						return 0;
+					}
+				}
+			};
+			collectionCount.setTtl(30000);
+		}
+		return collectionCount.getValue();
+	}
 	
 	@Override
 	public GetCollectionsResult execute(GetCollections query,
@@ -66,9 +98,9 @@ public class GetCollectionsHandler implements
 
 				Unifier uf = createUnifier(query, limit, offset);
 
-				TupeloStore.getInstance().unifyExcludeDeleted(uf, "collection");
+				Table<Resource> result = TupeloStore.getInstance().unifyExcludeDeleted(uf, "collection");
 				
-				for (Tuple<Resource> row : uf.getResult()) {
+				for (Tuple<Resource> row : result) {
 					Resource subject = row.get(0);
 					if (subject != null) {
 						try {
@@ -96,6 +128,7 @@ public class GetCollectionsHandler implements
 		}
 		GetCollectionsResult result = new GetCollectionsResult(collections);
 		result.setBadges(badges);
+		result.setCount(getCollectionCount());
 		return result; 
 	}
 	
