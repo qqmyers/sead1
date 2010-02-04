@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.DownloadButton;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
@@ -343,12 +344,16 @@ public class DatasetWidget extends Composite {
 
 		informationPanel.add(informationTable);
 		
+		// user defined metadata
 		UserMetadataWidget um = new UserMetadataWidget(dataset.getUri(), service);
 		um.setWidth("100%");
-		DisclosurePanel umd = new DisclosurePanel("Metadata");
-		umd.add(um);
+		DisclosurePanel umd = new DisclosurePanel("Additional Information");
+		VerticalPanel verticalPanel = new VerticalPanel();
+		verticalPanel.add(um);
+		verticalPanel.add(informationTable);
+		umd.add(verticalPanel);
 		umd.setWidth("100%");
-		umd.setOpen(true);
+		umd.setOpen(false);
 		umd.setAnimationEnabled(true);
 
 		// layout
@@ -366,7 +371,7 @@ public class DatasetWidget extends Composite {
 		
 		leftColumn.add(umd);
 		
-		leftColumn.add(informationPanel);
+//		leftColumn.add(informationPanel);
 		
 		leftColumn.add(annotationsWidget);
 
