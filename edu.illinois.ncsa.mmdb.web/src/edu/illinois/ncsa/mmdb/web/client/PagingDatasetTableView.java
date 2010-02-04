@@ -134,6 +134,7 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 					event.setDataset(dataset);
 					MMDB.eventBus.fireEvent(event);
 				}
+				table.doneAddingRows(); // FIXME here we're using MVP to deliver add rows but not to stop adding rows. encapsulation issues ...
 				int np = (result.getDatasetCount() / pageSize) + (result.getDatasetCount() % pageSize != 0 ? 1 : 0);
 				setNumberOfPages(np); // this just sets the displayed number of pages in the paging controls.
 				numberOfPages = np;

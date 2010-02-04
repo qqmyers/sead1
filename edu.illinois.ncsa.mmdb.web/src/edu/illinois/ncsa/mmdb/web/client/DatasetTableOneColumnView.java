@@ -94,6 +94,8 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		getRowFormatter().addStyleName(row, "oddRow");
 	}
 
+	public void doneAddingRows() { }
+	
 	@Override
 	public Widget asWidget() {
 		return this;

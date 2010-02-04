@@ -50,6 +50,8 @@ public class DatasetTablePresenter extends
 	interface Display extends View {
 		/** add a row to this multi-dataset view */
 		void addRow(String id, String title, String mimeType, Date date, String previewUri);
+		/** signal that no more rows will be added on this page */
+		void doneAddingRows();
 		/** return the optimal page size for this view */
 		int getPageSize();
 	}

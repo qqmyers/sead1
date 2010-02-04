@@ -8,13 +8,10 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-
-import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter.Display;
 
 /**
  * List datasets in repository.
@@ -75,6 +72,8 @@ public class DatasetTableFourColumnView extends DatasetTableView {
 		}
 	}
 
+	public void doneAddingRows() { }
+	
 	@Override
 	public Widget asWidget() {
 		return this;

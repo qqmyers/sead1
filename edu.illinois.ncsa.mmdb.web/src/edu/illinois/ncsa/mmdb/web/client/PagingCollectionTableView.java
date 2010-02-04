@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -15,11 +18,14 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.PagingCollectionTablePresenter.CollectionDisplay;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewCollectionEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddPreviewEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
@@ -35,8 +41,8 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 	Map<String,Panel> badgeImages = new HashMap<String,Panel>();
 	
 	@Override
-	public void addItem(String uri, CollectionBean item) {
-		int row = table.getRowCount();
+	public void addItem(final String uri, CollectionBean item) {
+		final int row = table.getRowCount();
 		
 		HorizontalPanel previewPanel = new HorizontalPanel();
 		previewPanel.add(new Image("./images/preview-100.gif"));
@@ -51,6 +57,26 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		} else {
 			infoPanel.add(new Label(""));
 		}
+		
+		int count = item.getMemberCount();
+		if(count > 0) {
+			infoPanel.add(new Label(count+" item"+(count > 1 ? "s" :"")));
+		}
+		
+		Button deleteButton = new Button("Delete");
+		deleteButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				MMDB.dispatchAsync.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
+					public void onFailure(Throwable caught) {
+					}
+					public void onSuccess(DeleteDatasetResult result) {
+						table.getRowFormatter().addStyleName(row, "hidden");
+						MMDB.eventBus.fireEvent(new DatasetDeletedEvent(uri));
+					}
+				});
+			}
+		});
+		infoPanel.add(deleteButton);
 		
 		// yoinked from DatasetTableOneColumnView
 		table.setWidget(row, 0, previewPanel);

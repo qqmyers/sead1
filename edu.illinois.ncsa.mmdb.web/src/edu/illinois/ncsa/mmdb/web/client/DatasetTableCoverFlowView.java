@@ -32,6 +32,8 @@ public class DatasetTableCoverFlowView extends DatasetTableView {
 		this.setWidget(0, n, panel);
 	}
 
+	public void doneAddingRows() { }
+	
 	@Override
 	public int getPageSize() {
 		// TODO Auto-generated method stub

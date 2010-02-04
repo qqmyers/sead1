@@ -56,6 +56,15 @@ public class DatasetTableGridView extends DatasetTableView {
 		n++;
 	}
 
+	public void doneAddingRows() {
+		for(int i = n; i < getPageSize(); i++) {
+			int row = i / WIDTH;
+			int col = i % WIDTH;
+			clearCell(row*2, col);
+			clearCell((row*2)+1, col);
+		}
+	}
+	
 	@Override
 	public Widget asWidget() {
 		// TODO Auto-generated method stub

@@ -66,7 +66,7 @@ public class GetCollectionsHandler implements
 
 				Unifier uf = createUnifier(query, limit, offset);
 
-				TupeloStore.getInstance().getContext().perform(uf);
+				TupeloStore.getInstance().unifyExcludeDeleted(uf, "collection");
 				
 				for (Tuple<Resource> row : uf.getResult()) {
 					Resource subject = row.get(0);
