@@ -49,7 +49,7 @@ public class ListDatasetsHandler implements
 		ListDatasetsResult r = new ListDatasetsResult(listDatasets(arg0
 				.getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0
 				.getOffset(), arg0.getInCollection(), dbu));
-		r.setDatasetCount(TupeloStore.getInstance().countDatasets());
+		r.setDatasetCount(TupeloStore.getInstance().countDatasets(arg0.getInCollection(), false));
 		return r;
 	}
 	

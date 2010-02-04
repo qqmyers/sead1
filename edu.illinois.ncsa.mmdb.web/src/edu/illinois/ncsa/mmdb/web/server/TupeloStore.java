@@ -32,6 +32,7 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.query.OrderBy;
 import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
@@ -413,32 +414,42 @@ public class TupeloStore {
     		}
     	}
     }
-    int datasetCount = -1;
-    long lastDatasetCount = 0;
+    Map<String,Memoized<Integer>> datasetCount = new HashMap<String,Memoized<Integer>>();
     public int countDatasets() {
-    	return countDatasets(false);
+    	return countDatasets(null, false);
     }
-    public int countDatasets(boolean force) {
-    	if(force || System.currentTimeMillis() > lastDatasetCount + 120000) {
-    		lastDatasetCount = System.currentTimeMillis();
-    		try {
-    			DatasetBeanUtil dbu = new DatasetBeanUtil(getBeanSession());
-    			log.debug("counting datasets...");
-    			Unifier u = new Unifier();
-    			u.setColumnNames("d");
-    			u.addPattern("d",Rdf.TYPE,dbu.getType());
-    			datasetCount = unifyExcludeDeleted(u,"d").getRows().size();
-    			/*
-    			u.addPattern("d",Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"),Rdf.NIL);
-    			getContext().perform(u);
-    			for(Object o : u.getResult()) { allDatasetCount--; }
-    			datasetCount = allDatasetCount;*/
-    			long ms = System.currentTimeMillis()-lastDatasetCount;
-    	    	log.debug("counted "+datasetCount+" non-deleted datasets in "+ms+"ms");
-    		} catch(Exception x) {
-    			x.printStackTrace();
-    			datasetCount = -1;
+    public int countDatasets(final String inCollection, boolean force) {
+    	String key = inCollection == null ? "all" : inCollection;
+    	Memoized<Integer> count = datasetCount.get(key);
+    	if(count == null) {
+    		count = new Memoized<Integer>() {
+				public Integer computeValue() {
+					return countDatasetsInCollection(inCollection);
+				}
+    		};
+    		count.setTtl(120000);
+    		datasetCount.put(key,count);
+    	}
+    	return count.getValue(force);
+    }
+    int countDatasetsInCollection(String inCollection) {
+		int datasetCount;
+    	try {
+    		DatasetBeanUtil dbu = new DatasetBeanUtil(getBeanSession());
+    		log.debug("counting datasets "+(inCollection != null ? "in collection "+inCollection : "")+"...");
+    		Unifier u = new Unifier();
+    		u.setColumnNames("d");
+    		u.addPattern("d",Rdf.TYPE,dbu.getType());
+    		if(inCollection != null) {
+    			u.addPattern(Resource.uriRef(inCollection),DcTerms.HAS_PART,"d");
     		}
+    		long now = System.currentTimeMillis();
+    		datasetCount = unifyExcludeDeleted(u,"d").getRows().size();
+    		long ms = System.currentTimeMillis()-now;
+    		log.debug("counted "+datasetCount+" non-deleted datasets in "+ms+"ms");
+    	} catch(Exception x) {
+    		x.printStackTrace();
+    		datasetCount = -1;
     	}
     	return datasetCount;
     }
