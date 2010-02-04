@@ -201,6 +201,9 @@ public class TupeloStore {
 	Map<Resource,Long> beanExp = new HashMap<Resource,Long>();
 	long soonestExp = Long.MAX_VALUE;
 	public synchronized BeanSession getBeanSession() {
+		if(beanSession != null) {
+			return beanSession;
+		}
 		try {
 			beanSession = CETBeans.createBeanSession(context);
 			beanSession.setFetchBeanPostprocessor(new FetchBeanPostprocessor() {

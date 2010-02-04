@@ -12,6 +12,8 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
@@ -43,6 +45,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
@@ -65,7 +69,7 @@ public class DatasetWidget extends Composite {
 
 	private final FlowPanel mainPanel;
 
-	private Label titleLabel;
+	private EditableLabel titleLabel;
 
 	private Label typeLabel;
 
@@ -197,16 +201,30 @@ public class DatasetWidget extends Composite {
 	 * @param dataset
 	 * @param collection
 	 */
-    private void drawPage(DatasetBean dataset, String pyramid) {
+    private void drawPage(final DatasetBean dataset, String pyramid) {
 
 		// image preview
 //		previewPanel(dataset.getUri());
 		preview = new PreviewWidget(dataset.getUri(), GetPreviews.LARGE, null);
 		
 		// title
-		titleLabel = new Label(dataset.getTitle());
+		titleLabel = new EditableLabel(dataset.getTitle());
 
-		titleLabel.addStyleName("datasetTitle");
+		titleLabel.getLabel().addStyleName("datasetTitle");
+		
+		titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
+			public void onValueChange(final ValueChangeEvent<String> event) {
+				SetProperty change = new SetProperty(dataset.getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue());
+				service.execute(change, new AsyncCallback<SetPropertyResult>() {
+					public void onFailure(Throwable caught) {
+						titleLabel.displayValue();
+					}
+					public void onSuccess(SetPropertyResult result) {
+						titleLabel.displayNewValue(event.getValue());
+					}
+				});
+			}
+		});
 
 		// metadata
 		metadataHeader = new Label("Info");

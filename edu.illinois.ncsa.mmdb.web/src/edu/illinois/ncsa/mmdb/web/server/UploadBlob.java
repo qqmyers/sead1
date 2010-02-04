@@ -181,8 +181,7 @@ public class UploadBlob extends AuthenticatedServlet {
         }
         
         public int percentComplete() {
-        	long pct = (int) (contentLength == 0L ? 0 : ((bytesRead * 50) / contentLength)) +
-        	                 (itemsLength == 0L ? 0 : ((bytesWritten * 50) / itemsLength));
+        	long pct = (int) (contentLength == 0L ? 0 : ((bytesRead * 100) / contentLength));
         	//if(pct < 99) {
 //        		log.trace(bytesRead +" read / "+bytesWritten+" written = "+pct+"%");
         	//}

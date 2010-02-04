@@ -33,10 +33,20 @@ public class SetPropertyHandler implements ActionHandler<SetProperty, SetPropert
 			Resource subject = Resource.uriRef(arg0.getUri());
 			Resource predicate = Resource.uriRef(arg0.getPropertyUri());
 			Collection<String> values = arg0.getValues();
+			
+			//
 			ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
 			ts.setValues(subject, predicate, values);
 			ts.save();
 			ts.close();
+			
+			// attempt to refetch the bean
+			try {
+				TupeloStore.refetch(subject);
+			} catch(Exception x) {
+				x.printStackTrace();
+			}
+			
 			return new SetPropertyResult();
 		} catch(Exception x) {
 			log.error("Error setting metadata on " + arg0.getUri(), x);
