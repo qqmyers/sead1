@@ -97,7 +97,7 @@ public class TupeloStore {
 	 * these objects remain null. Should this method throw an exception when 
 	 * there is an error creating an instance of the Tupelo store?
 	 */
-	public static TupeloStore getInstance() {
+	public static synchronized TupeloStore getInstance() {
 		if (instance == null) {
 			instance = new TupeloStore();
 		}
