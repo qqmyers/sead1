@@ -17,6 +17,7 @@ import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
@@ -36,7 +37,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
 public class TagsWidget extends Composite {
 
 	private final FlowPanel mainPanel;
-	private final FlowPanel tagsPanel;
+	private final FlexTable tagsPanel;
 	private final String id;
 	private final MyDispatchAsync service;
 	private final Label tagLabel;
@@ -61,7 +62,7 @@ public class TagsWidget extends Composite {
 		tagLabel.addStyleName("datasetRightColHeading");
 		mainPanel.add(tagLabel);
 		
-		tagsPanel = new FlowPanel();
+		tagsPanel = new FlexTable();
 		tagsPanel.addStyleName("tagsLinks");
 		mainPanel.add(tagsPanel);
 		
@@ -125,6 +126,18 @@ public class TagsWidget extends Composite {
 		
 	}
 	
+	void addTag(final String tag) {
+		final int row = tagsPanel.getRowCount();
+		tagsPanel.setWidget(row,0,tagHyperlink(tag));
+		Anchor delete = new Anchor("delete");
+		delete.addStyleName("deleteLink");
+		delete.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				deleteTag(tag, row);
+			}
+		});
+		//tagsPanel.setWidget(row,1,delete);
+	}
 	/**
 	 * Use service to retrieve tags from server.
 	 */
@@ -139,24 +152,44 @@ public class TagsWidget extends Composite {
 
 			@Override
 			public void onSuccess(GetTagsResult result) {
-				for (String tag : result.getTags()) {
-					tagsPanel.add(tagHyperlink(tag));
+				for (final String tag : result.getTags()) {
+					addTag(tag);
 				}
 			}
 		});
 
 	}
 
+	Set<String> tagSet(String cdl) {
+		Set<String> tagSet = new HashSet<String>();
+		for (String s : cdl.split(",")) {
+			tagSet.add(s);
+		}
+		return tagSet;
+	}
+	
+	private void deleteTag(final String tags, final int toRemove) {
+		final Set<String> tagSet = tagSet(tags);
+		
+		service.execute(new TagResource(id, tagSet, true), new AsyncCallback<TagResourceResult>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				GWT.log("Failed to remove resource", caught);	
+			}
+			@Override
+			public void onSuccess(TagResourceResult result) {
+				tagsPanel.getRowFormatter().addStyleName(toRemove,"hidden");
+			}
+		});
+	}
+	
 	/**
 	 * Submit tags to the server.
 	 * @param tags
 	 */
 	private void submitTag(final String tags) {
 		
-		final Set<String> tagSet = new HashSet<String>();
-		for (String s : tags.split(",")) {
-			tagSet.add(s);
-		}
+		final Set<String> tagSet = tagSet(tags);
 		
 		service.execute(new TagResource(id, tagSet), new AsyncCallback<TagResourceResult>() {
 
@@ -168,7 +201,7 @@ public class TagsWidget extends Composite {
 			@Override
 			public void onSuccess(TagResourceResult result) {
 				for (String tag : tagSet) {
-					tagsPanel.add(tagHyperlink(tag));
+					addTag(tag);
 				}
 			}
 		});

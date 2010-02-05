@@ -717,3 +717,9 @@ body {
 .editHighlight {
     background: #ffff99;
 }
+
+.deleteLink {
+    color: gray;
+    width: 30px;
+    text-align: right;
+}

@@ -41,8 +41,19 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
 		Set<String> tags = arg0.getTags();
 
 		try {
-			tebu.addTags(Resource.uriRef(uri), null, tags);
-			log.debug("Tagging " + uri + " with tags " + tags);
+			if(arg0.isDelete()) {
+				tebu.removeTags(Resource.uriRef(uri), tags);
+				for(String tag : tebu.getTags(arg0.getUri())) {
+					if(tags.contains(tag)) {
+						log.error("failed to delete tag "+tag);
+					}
+				}
+				TupeloStore.refetch(uri);
+				log.debug("removing tags "+tags+" from "+uri);
+			} else {
+				tebu.addTags(Resource.uriRef(uri), null, tags);
+				log.debug("Tagging " + uri + " with tags " + tags);
+			}
 		} catch (OperatorException e) {
 			log.error("Error tagging " + uri, e);
 		}

@@ -134,15 +134,31 @@ public class TupeloStore {
 		}
 	}
 
+	void addUserField(String uri, String label, Context context) throws Exception {
+		context.addTriple(Resource.uriRef(uri), Rdf.TYPE, Cet.cet("userMetadataField"));
+		context.addTriple(Resource.uriRef(uri), Rdfs.LABEL, label);
+	}
+	
 	void initializeContext(Context context) {
 		try {
 			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Resource.uriRef( "http://cet.ncsa.uiuc.edu/2007/foaf/context/password" ), "guest" );
 			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Rdf.TYPE, Foaf.PERSON );
 			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Foaf.NAME, "guest" );
-			context.addTriple(Resource.uriRef("urn:strangeness"), Rdf.TYPE, Cet.cet("userMetadataField"));
-			context.addTriple(Resource.uriRef("urn:strangeness"), Rdfs.LABEL, "Strangeness");
-			context.addTriple(Resource.uriRef("urn:charm"), Rdf.TYPE, Cet.cet("userMetadataField"));
-			context.addTriple(Resource.uriRef("urn:charm"), Rdfs.LABEL, "Charm");
+			context.removeTriple(Resource.uriRef("urn:strangeness"), Rdf.TYPE, Cet.cet("userMetadataField"));
+			context.removeTriple(Resource.uriRef("urn:charm"), Rdf.TYPE, Cet.cet("userMetadataField"));
+			addUserField("http://purl.org/dc/terms/abstract","Abstract",context);
+			addUserField("http://purl.org/dc/terms/alternative","Alternative title",context);
+			addUserField("http://purl.org/dc/terms/audience","Audience",context);
+			addUserField("http://purl.org/dc/terms/bibliographicCitation","Bibliographic citation",context);
+			addUserField("http://purl.org/dc/terms/coverage","Coverage",context);
+			addUserField("http://purl.org/dc/terms/dateCopyrighted","Date copyrighted",context);
+			addUserField("http://purl.org/dc/terms/identifier","Identifier",context);
+			addUserField("http://purl.org/dc/terms/language","Language",context);
+			addUserField("http://purl.org/dc/terms/license","Content license",context);
+			addUserField("http://purl.org/dc/terms/publisher","Publisher",context);
+			addUserField("http://purl.org/dc/terms/rights","Rights",context);
+			addUserField("http://purl.org/dc/terms/rightsHolder","Rights holder",context);
+			addUserField("http://purl.org/dc/terms/subject","Topic",context);
 		} catch(Exception x) {
 			log.error("failed to initialize context",x);
 		}

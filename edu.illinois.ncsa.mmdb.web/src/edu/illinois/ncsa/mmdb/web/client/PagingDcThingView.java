@@ -153,7 +153,6 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		
 		addSortKeyChangeHandler(new ValueChangeHandler<String>() {
 			public void onValueChange(ValueChangeEvent<String> event) {
-				setPage(1);
 				sortKey = event.getValue();
 				invalidateView();
 				History.newItem(getHistoryToken());
