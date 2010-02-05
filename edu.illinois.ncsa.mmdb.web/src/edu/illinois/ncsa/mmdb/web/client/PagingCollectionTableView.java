@@ -130,7 +130,8 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 
 			@Override
 			public void onSuccess(GetCollectionsResult result) {
-				setNumberOfPages(result.getCount() / pageSize);
+				int np = result.getCount() / pageSize + (result.getCount() % pageSize != 0 ? 1 : 0);
+				setNumberOfPages(np);
 				for (CollectionBean collection : result.getCollections()) {
 					AddNewCollectionEvent event = new AddNewCollectionEvent(
 							collection);

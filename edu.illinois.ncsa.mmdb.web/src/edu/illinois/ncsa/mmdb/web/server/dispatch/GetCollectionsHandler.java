@@ -58,9 +58,9 @@ public class GetCollectionsHandler implements
 					u.addPattern("c",Rdf.TYPE,Cet.cet("Collection"));
 					try {
 						long then = System.currentTimeMillis();
-						TupeloStore.getInstance().unifyExcludeDeleted(u,"c");
+						Table<Resource> result = TupeloStore.getInstance().unifyExcludeDeleted(u,"c");
 						int count = 0;
-						for(Tuple<Resource> row : u.getResult()) {
+						for(Tuple<Resource> row : result) {
 							count++;
 						}
 						long ms = System.currentTimeMillis() - then;
