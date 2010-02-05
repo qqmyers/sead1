@@ -669,3 +669,7 @@ body {
     width: 150px;
     height: auto;
 }
+
+.editHighlight {
+    background: #ffff99;
+}

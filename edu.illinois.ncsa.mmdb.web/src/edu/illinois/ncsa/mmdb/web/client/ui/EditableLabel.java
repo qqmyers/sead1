@@ -2,6 +2,10 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -26,8 +30,21 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
 		label.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				if(isEditable) {
+					label.removeStyleName("editHighlight");
 					displayEditControls();
 				}
+			}
+		});
+		label.addMouseOverHandler(new MouseOverHandler() {
+			public void onMouseOver(MouseOverEvent event) {
+				if(isEditable) {
+					label.addStyleName("editHighlight");
+				}
+			}
+		});
+		label.addMouseOutHandler(new MouseOutHandler() {
+			public void onMouseOut(MouseOutEvent event) {
+				label.removeStyleName("editHighlight");
 			}
 		});
 		initWidget(panel);
