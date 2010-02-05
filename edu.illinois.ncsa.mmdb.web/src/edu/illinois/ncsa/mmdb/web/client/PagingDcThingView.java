@@ -15,8 +15,8 @@ import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
 import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
 
 public abstract class PagingDcThingView<T> extends PagingTableView<T> {
-	LabeledListBox sortOptions;
-	LabeledListBox viewOptions;
+	protected LabeledListBox sortOptions;
+	protected LabeledListBox viewOptions;
 	List<HasValueChangeHandlers<String>> sortControls;
 	List<HasValueChangeHandlers<String>> viewTypeControls;
 	

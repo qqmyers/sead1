@@ -62,6 +62,14 @@ public class LabeledListBox extends Composite implements HasValueChangeHandlers<
 		}
 	}
 
+	public void removeItem(String title) {
+		for (int i = 0; i < choice.getItemCount(); i++) {
+			if (title.equals(choice.getValue(i))) {
+				choice.removeItem(i);
+				return;
+			}
+		}
+	}
 	@Override
 	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
 		return addHandler(handler, ValueChangeEvent.getType());

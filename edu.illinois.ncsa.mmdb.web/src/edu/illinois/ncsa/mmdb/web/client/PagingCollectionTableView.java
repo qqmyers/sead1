@@ -37,18 +37,61 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		addStyleName("datasetTable"); // gotta style ourselves like a dataset table
 		displayView();
 	}
- 
+
+	
+	@Override
+	protected HorizontalPanel createPagingPanel(int page, String sortKey,
+			String viewType) {
+		// TODO Auto-generated method stub
+		HorizontalPanel p = super.createPagingPanel(page, sortKey, viewType);
+		viewOptions.removeItem("flow");
+		return p;
+	}
+
+
 	Map<String,Panel> badgeImages = new HashMap<String,Panel>();
 	
 	@Override
 	public void addItem(final String uri, CollectionBean item) {
-		final int row = table.getRowCount();
-		
 		HorizontalPanel previewPanel = new HorizontalPanel();
 		previewPanel.add(new Image("./images/preview-100.gif"));
 		previewPanel.addStyleName("centered");
 		badgeImages.put(uri, previewPanel);
 
+		if(viewType.equals("grid")) {
+			addGridItem(uri, item, previewPanel);
+		} else if(viewType.equals("flow")) {
+			addFlowItem(uri, item, previewPanel);
+		} else {
+			addListItem(uri, item, previewPanel);
+		}
+	}
+
+	void addFlowItem(String uri, CollectionBean item, Panel previewPanel) {
+	}
+
+	String shortenTitle(String title) {
+		if(title.length()>15) {
+			return title.substring(0,15)+"...";
+		} else {
+			return title;
+		}
+	}
+
+	int n = 0;
+	void addGridItem(String uri, CollectionBean item, Panel previewPanel) {
+		previewPanel.setWidth("120px");
+		Label t = new Label(shortenTitle(item.getTitle()));
+		t.addStyleName("smallText");
+		t.setWidth("120px");
+		int row = n / 5; // width of table
+		int col = n % 5;
+		table.setWidget(row*2, col, previewPanel);
+		table.setWidget((row*2)+1, col, t);
+		n++;
+	}
+	
+	void addListItem(final String uri, CollectionBean item, Panel previewPanel) {
 		VerticalPanel infoPanel = new VerticalPanel();
 		infoPanel.add(new Hyperlink(item.getTitle(), "collection?uri="+uri));
 		
@@ -62,6 +105,8 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		if(count > 0) {
 			infoPanel.add(new Label(count+" item"+(count > 1 ? "s" :"")));
 		}
+		
+		final int row = table.getRowCount();
 		
 		Button deleteButton = new Button("Delete");
 		deleteButton.addClickHandler(new ClickHandler() {
@@ -93,6 +138,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		if(p != null) {
 			p.clear();
 			PreviewWidget pw = new PreviewWidget(badgeUri, GetPreviews.SMALL, "collection?uri="+collectionUri);
+			pw.setMaxWidth(100);
 			p.add(pw);
 		}
 	}
@@ -105,16 +151,23 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		}
 	}
 
+	int pageSize() {
+		if(viewType.equals("grid")) {
+			return 35;
+		} else if(viewType.equals("flow")) {
+			return 3;
+		} else {
+			return 10;
+		}
+	}
 	protected void displayPage() {
 		table.removeAllRows();
 		badgeImages.clear();
 		
-		// for now hardcode the page size
-		final int pageSize = 10;
+		final int pageSize = pageSize();
 		// now compute the current page offset
 		int pageOffset = (page - 1) * pageSize;
 
-		
 		// now list the collections
 		GetCollections query = new GetCollections();
 		query.setSortKey(uriForSortKey());
@@ -132,6 +185,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 			public void onSuccess(GetCollectionsResult result) {
 				int np = result.getCount() / pageSize + (result.getCount() % pageSize != 0 ? 1 : 0);
 				setNumberOfPages(np);
+				n = 0;
 				for (CollectionBean collection : result.getCollections()) {
 					AddNewCollectionEvent event = new AddNewCollectionEvent(
 							collection);
