@@ -218,10 +218,10 @@ public class DatasetWidget extends Composite {
 				SetProperty change = new SetProperty(dataset.getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue());
 				service.execute(change, new AsyncCallback<SetPropertyResult>() {
 					public void onFailure(Throwable caught) {
-						titleLabel.displayValue();
+						titleLabel.cancel();
 					}
 					public void onSuccess(SetPropertyResult result) {
-						titleLabel.displayNewValue(event.getValue());
+						titleLabel.setText(event.getValue());
 					}
 				});
 			}

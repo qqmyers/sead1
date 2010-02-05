@@ -56,7 +56,8 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		
 		GWT.log("Adding dataset " + name + " to row " + row, null);
 		
-		PreviewWidget pre = new PreviewWidget(id,GetPreviews.SMALL,"dataset?id="+id); 
+		PreviewWidget pre = new PreviewWidget(id,GetPreviews.SMALL,"dataset?id="+id);
+		pre.setMaxWidth(100);
 		setWidget(row, 0, pre);
 		
 		VerticalPanel verticalPanel = new VerticalPanel();

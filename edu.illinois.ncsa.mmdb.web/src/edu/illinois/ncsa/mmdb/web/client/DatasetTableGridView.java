@@ -46,6 +46,7 @@ public class DatasetTableGridView extends DatasetTableView {
 			String previewUri) {
 		PreviewWidget pw = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id="+id);
 		pw.setWidth("120px");
+		pw.setMaxWidth(100);
 		Label t = new Label(shortenTitle(title));
 		t.addStyleName("smallText");
 		t.setWidth("120px");

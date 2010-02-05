@@ -6,7 +6,7 @@ import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.TextBox;
 public class EditableLabel extends Composite implements HasValueChangeHandlers<String> {
 	HorizontalPanel panel;
 	Label label;
+	boolean isEditable = true;
 	
 	public EditableLabel(String text) {
 		super();
@@ -24,7 +25,9 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
 		panel.add(label);
 		label.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				displayEditControls();
+				if(isEditable) {
+					displayEditControls();
+				}
 			}
 		});
 		initWidget(panel);
@@ -36,16 +39,18 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
 		final TextBox textBox = new TextBox();
 		textBox.setText(label.getText());
 		textBox.setWidth("20em");
-		final Button submit = new Button("Save");
+		final Anchor submit = new Anchor("Save");
+		submit.addStyleName("anchorButton");
 		submit.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				ValueChangeEvent.fire(EditableLabel.this, textBox.getText());
 			}
 		});
-		final Button cancel = new Button("Cancel");
+		final Anchor cancel = new Anchor("Cancel");
+		submit.addStyleName("anchorButton");
 		cancel.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				displayValue();
+				cancel();
 			}
 		});
 		panel.add(textBox);
@@ -57,16 +62,29 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
 		return label;
 	}
 	
-	public void displayValue() {
+	public void cancel() {
 		panel.clear();
 		panel.add(label);
 	}
 	
-	public void displayNewValue(String newValue) {
+	public void setText(String newValue) {
 		label.setText(newValue);
-		displayValue();
+		cancel(); // where "cancel" means "no longer editing"
 	}
 	
+	public String getText() {
+		return label.getText();
+	}
+	
+	
+	public boolean isEditable() {
+		return isEditable;
+	}
+
+	public void setEditable(boolean isEditable) {
+		this.isEditable = isEditable;
+	}
+
 	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
 		return addHandler(handler, ValueChangeEvent.getType());
 	}

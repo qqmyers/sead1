@@ -34,6 +34,8 @@ public class PreviewWidget extends Composite {
 	private static final Map<String, String> PREVIEW_URL;
 	private static final Map<String, String> GRAY_URL;
 
+	int maxWidth = 600;
+	
 	static {
 		PREVIEW_URL = new HashMap<String, String>();
 		PREVIEW_URL.put(GetPreviews.SMALL, "./api/image/preview/small/");
@@ -183,6 +185,8 @@ public class PreviewWidget extends Composite {
 		image = new Image(GRAY_URL.get(size));
 		image.addStyleName("thumbnail");
 		addLink(image, link);
+		image.addStyleName("imagePreviewShortWidth");
+		image.setWidth(maxWidth+"px");
 		contentPanel.add(image);
 	}
 	
@@ -222,12 +226,14 @@ public class PreviewWidget extends Composite {
 			long width = previewImageBean.getWidth();
 			long height = previewImageBean.getHeight();
 			if (width >= height) {
-				if (width >= 600) {
+				if (width >= maxWidth) {
 					image.addStyleName("imagePreviewShortWidth");
+					image.setWidth(maxWidth+"px");
 				}
 			} else {
-				if (height >= 600) {
+				if (height >= maxWidth) {
 					image.addStyleName("imagePreviewShortHeight");
+					image.setHeight(maxWidth+"px");
 				}
 			}
 		} else {
@@ -257,4 +263,14 @@ public class PreviewWidget extends Composite {
 
 		return image;
 	}
+
+	public int getMaxWidth() {
+		return maxWidth;
+	}
+
+	public void setMaxWidth(int maxWidth) {
+		this.maxWidth = maxWidth;
+	}
+	
+	
 }

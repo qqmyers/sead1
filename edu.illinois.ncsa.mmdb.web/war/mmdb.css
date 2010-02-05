@@ -517,13 +517,11 @@ body {
 }
 
 .imagePreviewShortWidth {
-	width: 600px;
 	height: auto;
 }
 	
 .imagePreviewShortHeight {
 	width: auto;
-	height: 600px;
 }
 
 .imagePreview {
@@ -588,6 +586,10 @@ body {
 	height: 400px;
 	background-color: black;
 	color: white
+}
+
+.anchorButton {
+    padding: 3px;
 }
 
 /*================= Annotations / Comments ============== */
@@ -656,4 +658,14 @@ body {
 .centerContainer {
     display: table;
     vertical-align: middle;
+}
+
+.bigFlowCell {
+    width: 400px;
+    height: auto;
+}
+
+.smallFlowCell {
+    width: 150px;
+    height: auto;
 }

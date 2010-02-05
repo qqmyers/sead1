@@ -11,6 +11,11 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
 public class DatasetTableCoverFlowView extends DatasetTableView {
 	int n = 0;
+
+	public DatasetTableCoverFlowView() {
+		super();
+		setWidth("700px");
+	}
 	
 	@Override
 	public void removeAllRows() {
@@ -24,8 +29,14 @@ public class DatasetTableCoverFlowView extends DatasetTableView {
 		PreviewWidget preview = null;
 		if(n++ == 1) {
 			preview = new PreviewWidget(id, GetPreviews.LARGE, "dataset?id="+id);
+			preview.setWidth("400px");
+			preview.setMaxWidth(400);
+			this.getCellFormatter().setWidth(0, n, "400px");
 		} else {
 			preview = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id="+id);
+			preview.setMaxWidth(150);
+			preview.setWidth("150px");
+			this.getCellFormatter().setWidth(0, n, "150px");
 		}
 		panel.add(preview);
 		panel.add(new Label(title));

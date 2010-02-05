@@ -6,6 +6,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -18,6 +20,8 @@ import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTableView;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
@@ -137,9 +141,26 @@ public class CollectionPage extends Composite {
 	 * @param collection
 	 * @param datasets
 	 */
-	protected void showCollection(CollectionBean collection, List<DatasetBean> datasets) {
+	protected void showCollection(final CollectionBean collection, List<DatasetBean> datasets) {
 		
 		pageTitle.setText(collection.getTitle());
+		
+		pageTitle.setEditable(true);
+		// collection title is editable
+		pageTitle.addValueChangeHandler(new ValueChangeHandler<String>() {
+			public void onValueChange(final ValueChangeEvent<String> event) {
+				dispatchasync.execute(new SetProperty(collection.getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue()),
+						new AsyncCallback<SetPropertyResult>() {
+					public void onFailure(Throwable caught) {
+						pageTitle.getEditableLabel().cancel();
+					}
+					public void onSuccess(SetPropertyResult result) {
+						pageTitle.setText(event.getValue());
+					}
+				});
+			}
+		});
+		
 		if (collection.getCreator() == null) {
 			authorLabel.setText("By Anonymous");
 		} else {
