@@ -19,11 +19,11 @@ public class LabeledListBox extends Composite implements HasValueChangeHandlers<
 		HorizontalPanel mainPanel = new HorizontalPanel();
 		
 		Label l = new Label(label);
-		l.addStyleName("pagingLabel");
+		l.addStyleName("labeledListBoxTitle");
 		mainPanel.add(l);
 
 		choice = new ListBox();
-		choice.addStyleName("pagingLabel");
+		choice.addStyleName("labeledListBoxPulldown");
 		
 		choice.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {

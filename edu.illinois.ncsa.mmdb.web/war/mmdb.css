@@ -78,6 +78,50 @@ body {
     font-size: 1.2em;
 }
 
+.additionalInformation {
+	width: 90%;
+	margin-left: 10px;
+}
+
+.addMetadata {
+	width: 100%;
+	padding: 5px;
+	margin: 10px 0px 10px 0px;
+	background-color: #EFF5FB;
+}
+
+.metadataTable {
+	margin: 10px;
+	border-collapse: collapse;
+}
+
+.metadataTableCell {
+	padding: 5px;
+}
+
+.metadataTableEvenRow {
+	background-color: #F2F2F2;
+}
+
+.metadataTableOddRow {
+}
+
+.gwt-DisclosurePanel-closed {
+	background-color: #F2F2F2;
+}
+
+.gwt-DisclosurePanel-open .header {
+	background-color: #F2F2F2;
+}
+
+.labeledListBoxTitle {
+	margin: 5px;
+}
+
+.labeledListBoxPulldown {
+	margin: 5px;
+}
+
 .loginMenu {
 	float: right;
 	width: 200px;

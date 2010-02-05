@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -330,31 +331,37 @@ public class DatasetWidget extends Composite {
         }
 		
 		// information panel with extra metadata
-		informationPanel = new DisclosurePanel("Extracted Information");
-
-		informationPanel.addStyleName("downloadButtonContainer");
-
-		informationPanel.setAnimationEnabled(true);
-
-		informationPanel.setWidth("100%");
+//		informationPanel = new DisclosurePanel("Extracted Information");
+//
+//		informationPanel.addStyleName("downloadButtonContainer");
+//
+//		informationPanel.setAnimationEnabled(true);
+//
+//		informationPanel.setWidth("100%");
 
 		informationTable = new FlexTable();
+		
+		informationTable.addStyleName("metadataTable");
 
 		informationTable.setWidth("100%");
+		
+//		informationTable.setBorderWidth(1);
 
-		informationPanel.add(informationTable);
+//		informationPanel.add(informationTable);
 		
 		// user defined metadata
 		UserMetadataWidget um = new UserMetadataWidget(dataset.getUri(), service);
 		um.setWidth("100%");
-		DisclosurePanel umd = new DisclosurePanel("Additional Information");
+		DisclosurePanel additionalInformationPanel = new DisclosurePanel("Additional Information");
+		additionalInformationPanel.addStyleName("additionalInformation");
+		additionalInformationPanel.setOpen(false);
+		additionalInformationPanel.setAnimationEnabled(true);
 		VerticalPanel verticalPanel = new VerticalPanel();
+		verticalPanel.add(new HTML("<b>From User</b>"));
 		verticalPanel.add(um);
+		verticalPanel.add(new HTML("<b>Extracted</b>"));
 		verticalPanel.add(informationTable);
-		umd.add(verticalPanel);
-		umd.setWidth("100%");
-		umd.setOpen(false);
-		umd.setAnimationEnabled(true);
+		additionalInformationPanel.add(verticalPanel);
 
 		// layout
 		leftColumn.add(titleLabel);
@@ -369,7 +376,7 @@ public class DatasetWidget extends Composite {
 		
 		leftColumn.add(actionsPanel);
 		
-		leftColumn.add(umd);
+		leftColumn.add(additionalInformationPanel);
 		
 //		leftColumn.add(informationPanel);
 		
@@ -609,11 +616,21 @@ public class DatasetWidget extends Composite {
 	                        int row = informationTable.getRowCount()+1;
 	                        informationTable.setHTML(row, 0, "<b>" + tuple.getCategory() + "</b>");
 	                        informationTable.setText(row, 1, ""); //$NON-NLS-1$
+	                        informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
 	                        category = tuple.getCategory();
 					    }
-						int row = informationTable.getRowCount()+1;
+						int row = informationTable.getRowCount();
 						informationTable.setText(row, 0, tuple.getLabel());
 						informationTable.setText(row, 1, tuple.getValue());
+						
+						// formatting
+						informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
+						informationTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
+						if (row % 2 == 0) {
+							informationTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
+						} else {
+							informationTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
+						}
 					}
 				}
 			});
