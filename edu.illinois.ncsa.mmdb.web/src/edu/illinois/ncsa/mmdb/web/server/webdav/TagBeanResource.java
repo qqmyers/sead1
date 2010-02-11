@@ -30,14 +30,18 @@ public class TagBeanResource extends AbstractCollectionResource
 
     private static String TAGS = "tags";
 
+    private String        tag;
+
     public TagBeanResource( BeanSession beanSession, SecurityManager security )
     {
         super( TAGS, Cet.cet( "tags" ).getString(), beanSession, security ); //$NON-NLS-1$
+        this.tag = null;
     }
 
     public TagBeanResource( String tag, BeanSession beanSession, SecurityManager security )
     {
         super( tag, Cet.cet( "tags#" + tag ).getString(), beanSession, security ); //$NON-NLS-1$
+        this.tag = tag;
     }
 
     // ----------------------------------------------------------------------
@@ -49,7 +53,7 @@ public class TagBeanResource extends AbstractCollectionResource
     {
         Map<String, AbstractResource> result = new HashMap<String, AbstractResource>();
 
-        if ( name.equals( TAGS ) ) {
+        if ( tag == null ) {
             Unifier uf = new Unifier();
             uf.addPattern( "tevent", Rdf.TYPE, Tags.TAGGING_EVENT ); //$NON-NLS-1$
             uf.addPattern( "tevent", Tags.HAS_TAG_OBJECT, "tag" ); //$NON-NLS-1$ //$NON-NLS-2$
@@ -72,7 +76,7 @@ public class TagBeanResource extends AbstractCollectionResource
             uf.addPattern( "data", Dc.IS_REPLACED_BY, "replaced", true ); //$NON-NLS-1$ //$NON-NLS-2$
             uf.addPattern( "tevent", Rdf.TYPE, Tags.TAGGING_EVENT ); //$NON-NLS-1$
             uf.addPattern( "tevent", Tags.HAS_TAG_OBJECT, "tag" ); //$NON-NLS-1$ //$NON-NLS-2$
-            uf.addPattern( "tag", Tags.HAS_TAG_TITLE, org.tupeloproject.rdf.Resource.literal( name ) ); //$NON-NLS-1$
+            uf.addPattern( "tag", Tags.HAS_TAG_TITLE, org.tupeloproject.rdf.Resource.literal( tag ) ); //$NON-NLS-1$
             uf.setColumnNames( "data", "replaced" ); //$NON-NLS-1$ //$NON-NLS-2$
             try {
                 beanSession.getContext().perform( uf );
