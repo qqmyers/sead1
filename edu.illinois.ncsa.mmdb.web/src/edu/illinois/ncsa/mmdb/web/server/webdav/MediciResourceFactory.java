@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 
 import com.bradmcevoy.http.CollectionResource;
+import com.bradmcevoy.http.MiltonServlet;
 import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.ResourceFactory;
 
@@ -23,10 +24,6 @@ public class MediciResourceFactory implements ResourceFactory
 {
     private static Log     log  = LogFactory.getLog( MediciResourceFactory.class );
     
-    // this should always end with /? and be the path of the servlet
-    private static String  MMDB = "/mmdb";                                     //$NON-NLS-1$
-    private static String  PATH = "/webdav/?";                                     //$NON-NLS-1$
-
     private FolderResource root;
 
     public MediciResourceFactory()
@@ -48,15 +45,20 @@ public class MediciResourceFactory implements ResourceFactory
         try {
             root.add( new PersonBeanResource( bs, security ) );
         } catch ( IOException e ) {
-            log.warn( "Could not add p.", e );
+            log.warn( "Could not add people.", e );
         }
     }
 
     @Override
     public Resource getResource( String host, String path )
     {
-        path = path.replaceFirst( MMDB, "" ); //$NON-NLS-1$
-        path = path.replaceFirst( PATH, "" ); //$NON-NLS-1$
+        // get path minus servlet
+        path = MiltonServlet.request().getPathInfo();
+        
+        // remove leading slash
+        if (path.startsWith( "/" )) { //$NON-NLS-1$
+            path = path.substring( 1 );
+        }
 
         // special case for root
         if ( path.equals( "" ) || path.equals( "/" ) ) { //$NON-NLS-1$ //$NON-NLS-2$
