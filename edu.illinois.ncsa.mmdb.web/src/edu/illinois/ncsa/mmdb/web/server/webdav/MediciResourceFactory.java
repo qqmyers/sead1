@@ -25,7 +25,7 @@ public class MediciResourceFactory implements ResourceFactory
     
     // this should always end with /? and be the path of the servlet
     private static String  MMDB = "/mmdb";                                     //$NON-NLS-1$
-    private static String  PATH = "/.*/webdav/?";                                     //$NON-NLS-1$
+    private static String  PATH = "/webdav/?";                                     //$NON-NLS-1$
 
     private FolderResource root;
 
