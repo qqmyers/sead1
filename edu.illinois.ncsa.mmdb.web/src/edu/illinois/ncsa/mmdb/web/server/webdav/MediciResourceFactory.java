@@ -24,7 +24,8 @@ public class MediciResourceFactory implements ResourceFactory
     private static Log     log  = LogFactory.getLog( MediciResourceFactory.class );
     
     // this should always end with /? and be the path of the servlet
-    private static String  PATH = "/webdav/?";                                     //$NON-NLS-1$
+    private static String  MMDB = "/mmdb";                                     //$NON-NLS-1$
+    private static String  PATH = "/.*/webdav/?";                                     //$NON-NLS-1$
 
     private FolderResource root;
 
@@ -54,6 +55,7 @@ public class MediciResourceFactory implements ResourceFactory
     @Override
     public Resource getResource( String host, String path )
     {
+        path = path.replaceFirst( MMDB, "" ); //$NON-NLS-1$
         path = path.replaceFirst( PATH, "" ); //$NON-NLS-1$
 
         // special case for root
