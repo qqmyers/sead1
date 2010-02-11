@@ -30,6 +30,7 @@
 		<servlet-name>Image Pyramid Servlet</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.ImagePyramidServlet</servlet-class>
 	</servlet>
+		
 	<servlet>
 		<servlet-name>tupelo</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.server.TupeloServlet</servlet-class>
@@ -98,6 +99,31 @@
 		<servlet-name>UploadBlob</servlet-name>
 		<url-pattern>/mmdb/UploadBlob</url-pattern>
 		<!--  this additional mapping is kludgy, but necessary for GWT -->
+	</servlet-mapping>
+
+	<!--  WebDAV endpoint -->
+	<servlet>
+		<servlet-name>WebDAV Servlet</servlet-name>
+       	<servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
+        <init-param>
+            <param-name>resource.factory.class</param-name>
+            <param-value>edu.illinois.ncsa.mmdb.web.server.webdav.MediciResourceFactory</param-value>            
+        </init-param>
+<!--  
+        <init-param>
+	        <param-name>response.handler.class</param-name>
+            <param-value>com.bradmcevoy.http.webdav.DefaultWebDavResponseHandler</param-value>    
+        </init-param>
+        -->
+        <init-param>
+            <param-name>authentication.handler.classes</param-name>
+            <param-value>com.bradmcevoy.http.http11.auth.BasicAuthHandler</param-value>
+        </init-param>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>WebDAV Servlet</servlet-name>
+		<url-pattern>/webdav/*</url-pattern>
 	</servlet-mapping>
 
 	<!--  Servlet context listener -->
