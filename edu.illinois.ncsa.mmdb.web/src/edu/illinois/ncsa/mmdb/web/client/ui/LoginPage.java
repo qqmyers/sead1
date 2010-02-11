@@ -160,7 +160,8 @@ public class LoginPage extends Composite {
 	}
 
 	/**
-	 * 
+	 * Authenticate against the REST endpoint to make sure user is 
+	 * authenticated on the server side. If successful, login local.
 	 */
 	protected void authenticate() {
 		final String username = usernameBox.getText();
@@ -196,6 +197,7 @@ public class LoginPage extends Composite {
 											fail();
 										}
 										GWT.log("user "+username+" associated with session key "+sessionKey,null);
+										// login local
 										login(arg0.getSessionId(), sessionKey);
 										redirect();
 									}
@@ -221,20 +223,10 @@ public class LoginPage extends Composite {
 	}
 	
 	/**
-	 * Redirect to previous page.
-	 * 
-	 * FIXME currently uses a adhoc parsing of the history token. The generic
-	 * parameter parsing gets confused with parsing a parameter inside a
-	 * parameter (multiple '=')
+	 * Reload page after being logged in.
 	 */
 	protected void redirect() {
-		int indexOf = History.getToken().indexOf("?p=");
-		if (indexOf == -1) {
-			History.newItem("listDatasets"); // FIXME hardcodes destination
-		} else {
-			String previousHistory = History.getToken().substring(indexOf + 3);
-			History.newItem(previousHistory);
-		}
+		History.fireCurrentHistoryState();
 	}
 
 	/**
@@ -249,6 +241,7 @@ public class LoginPage extends Composite {
 		MMDB.loginStatusWidget.login(MMDB.sessionID);
 
 		// set cookie
+		// TODO move to more prominent place... MMDB? A class with static properties?
 		final long DURATION = 1000 * 60 * 60; // 60 minutes
 		Date expires = new Date(System.currentTimeMillis() + DURATION);
 		Cookies.setCookie("sid", sessionId, expires);
