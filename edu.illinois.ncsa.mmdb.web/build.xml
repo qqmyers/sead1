@@ -8,7 +8,11 @@
 	<property name="deploy" value="/usr/local/tomcat/webapps" />
 
 	<property name="war" value="${ant.project.name}.war" />
-
+	
+	<condition property="build" value="${env.VERSION}" else="${env.BUILD_NUMBER}">
+		<isset property="env.VERSION"/>
+	</condition>
+	
 	<path id="classpath">
 		<pathelement path="build" />
 		<pathelement path="src" />
@@ -163,15 +167,9 @@
 	</target>
 
 	<target name="update_version" depends="prepare-hudson, copy_mmdb_html" description="update the build version in MMDB.java">
-		<propertyfile file="war/WEB-INF/info.properties">
-			<entry key="build_number" value="${env.BUILD_NUMBER}" />
-			<entry key="build_tag" value="${env.BUILD_TAG}" />
-		</propertyfile>
-
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
 			<filterset>
-				<filter token="BUILD_TAG" value="${env.BUILD_TAG}" />
-				<filter token="BUILD_NUMBER" value="${env.BUILD_NUMBER}" />
+				<filter token="BUILD_TAG" value="${build}" />
 			</filterset>
 		</copy>
 	</target>
