@@ -11,6 +11,7 @@ import org.tupeloproject.kernel.OperatorException;
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.GetableResource;
 import com.bradmcevoy.http.Range;
+import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 

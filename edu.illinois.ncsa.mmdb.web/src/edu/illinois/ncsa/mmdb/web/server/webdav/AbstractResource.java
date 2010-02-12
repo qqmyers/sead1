@@ -9,6 +9,7 @@ import com.bradmcevoy.http.DigestResource;
 import com.bradmcevoy.http.PropFindableResource;
 import com.bradmcevoy.http.Request;
 import com.bradmcevoy.http.Resource;
+import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.Request.Method;
 import com.bradmcevoy.http.http11.auth.DigestResponse;
 
@@ -59,7 +60,7 @@ public abstract class AbstractResource implements Resource, DigestResource, Prop
     @Override
     public boolean authorise( Request request, Method method, Auth auth )
     {
-        return security.authorise( request, method, auth );
+        return security.authorise( request, method, auth, this );
     }
 
     @Override

@@ -1,5 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.server.webdav;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -12,8 +14,15 @@ import java.util.Map.Entry;
 
 import org.tupeloproject.kernel.BeanSession;
 
+import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.CollectionResource;
+import com.bradmcevoy.http.GetableResource;
+import com.bradmcevoy.http.MiltonServlet;
+import com.bradmcevoy.http.Range;
 import com.bradmcevoy.http.Resource;
+import com.bradmcevoy.http.SecurityManager;
+import com.bradmcevoy.http.XmlWriter;
+import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 
 /**
  * Helper class to easily create a collection (folder). This will take care of
@@ -23,7 +32,7 @@ import com.bradmcevoy.http.Resource;
  * @author Rob Kooper
  * 
  */
-public abstract class AbstractCollectionResource extends AbstractResource implements CollectionResource
+public abstract class AbstractCollectionResource extends AbstractResource implements CollectionResource, GetableResource
 {
     protected Map<String, Resource> resourcemap = new HashMap<String, Resource>();
 
@@ -35,6 +44,54 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
     public AbstractCollectionResource( String name, String id, Date created, BeanSession beanSession, SecurityManager security )
     {
         super( name, id, created, beanSession, security );
+    }
+
+    // ----------------------------------------------------------------------
+    // GetableResource
+    // ----------------------------------------------------------------------
+
+    public void sendContent( OutputStream out, Range range, Map<String, String> params, String contentType ) throws IOException, NotAuthorizedException
+    {
+        String path = MiltonServlet.request().getRequestURL().toString();
+        if (!path.endsWith( "/" )) {
+            path = path + "/";
+        }
+        XmlWriter w = new XmlWriter( out );
+        w.open( "html" );
+        w.open( "body" );
+        w.begin( "h1" ).open().writeText( this.getName() ).close();
+        w.open( "table" );
+        for ( Resource r : getChildren() ) {
+            w.open( "tr" );
+
+            String url = path + r.getName();
+            
+            w.open( "td" );
+            w.begin( "a" ).writeAtt( "href", url ).open().writeText( r.getName() ).close();
+            w.close( "td" );
+
+            w.begin( "td" ).open().writeText( r.getModifiedDate() + "" ).close();
+            w.close( "tr" );
+        }
+        w.close( "table" );
+        w.close( "body" );
+        w.close( "html" );
+        w.flush();
+    }
+
+    public Long getMaxAgeSeconds( Auth auth )
+    {
+        return null;
+    }
+
+    public String getContentType( String accepts )
+    {
+        return "text/html";
+    }
+
+    public Long getContentLength()
+    {
+        return null;
     }
 
     // ----------------------------------------------------------------------

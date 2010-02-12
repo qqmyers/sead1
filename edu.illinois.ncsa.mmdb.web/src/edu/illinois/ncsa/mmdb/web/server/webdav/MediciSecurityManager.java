@@ -12,6 +12,7 @@ import org.tupeloproject.rdf.Resource;
 
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.Request;
+import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.Request.Method;
 import com.bradmcevoy.http.http11.auth.DigestResponse;
 
@@ -56,6 +57,7 @@ public class MediciSecurityManager implements SecurityManager
         return null;
     }
 
+    @Override
     public String authenticate( DigestResponse digestRequest )
     {
         return null;
@@ -67,7 +69,8 @@ public class MediciSecurityManager implements SecurityManager
         //                return token;
     }
 
-    public boolean authorise( Request request, Method method, Auth auth )
+    @Override
+    public boolean authorise( Request request, Method method, Auth auth, com.bradmcevoy.http.Resource resource )
     {
         if ( auth == null ) {
             return false;
@@ -85,5 +88,4 @@ public class MediciSecurityManager implements SecurityManager
             return false;
         }
     }
-
 }

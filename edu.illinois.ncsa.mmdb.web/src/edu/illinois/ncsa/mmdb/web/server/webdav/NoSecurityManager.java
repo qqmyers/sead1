@@ -2,6 +2,8 @@ package edu.illinois.ncsa.mmdb.web.server.webdav;
 
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.Request;
+import com.bradmcevoy.http.Resource;
+import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.Request.Method;
 import com.bradmcevoy.http.http11.auth.DigestResponse;
 
@@ -26,14 +28,15 @@ public class NoSecurityManager implements SecurityManager
         return "OK"; //$NON-NLS-1$
     }
 
+    @Override
     public String authenticate( DigestResponse digestRequest )
     {
         return "OK"; //$NON-NLS-1$
     }
 
-    public boolean authorise( Request request, Method method, Auth auth )
+    @Override
+    public boolean authorise( Request request, Method method, Auth auth, Resource resource )
     {
         return true;
     }
-
 }

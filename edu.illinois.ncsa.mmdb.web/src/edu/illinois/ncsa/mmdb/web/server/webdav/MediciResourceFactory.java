@@ -10,6 +10,7 @@ import com.bradmcevoy.http.CollectionResource;
 import com.bradmcevoy.http.MiltonServlet;
 import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.ResourceFactory;
+import com.bradmcevoy.http.SecurityManager;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
@@ -54,6 +55,9 @@ public class MediciResourceFactory implements ResourceFactory
     {
         // get path minus servlet
         path = MiltonServlet.request().getPathInfo();
+        if (path == null) {
+            path = "";
+        }
         
         // remove leading slash
         if (path.startsWith( "/" )) { //$NON-NLS-1$

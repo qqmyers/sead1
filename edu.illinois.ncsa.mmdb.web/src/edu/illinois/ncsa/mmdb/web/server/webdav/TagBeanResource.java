@@ -14,6 +14,8 @@ import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Tags;
 import org.tupeloproject.util.Tuple;
 
+import com.bradmcevoy.http.SecurityManager;
+
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
 /**

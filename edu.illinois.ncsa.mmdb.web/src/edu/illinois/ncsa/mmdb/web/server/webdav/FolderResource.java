@@ -2,12 +2,13 @@ package edu.illinois.ncsa.mmdb.web.server.webdav;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.tupeloproject.rdf.terms.Cet;
 
-import com.bradmcevoy.http.CollectionResource;
-import com.bradmcevoy.http.Resource;
+import com.bradmcevoy.http.SecurityManager;
 
 /**
  * Helper class to create a folder structure. This can take any resource as
@@ -16,19 +17,19 @@ import com.bradmcevoy.http.Resource;
  * @author Rob Kooper
  * 
  */
-public class FolderResource extends AbstractResource implements CollectionResource
+public class FolderResource extends AbstractCollectionResource
 {
-    private List<Resource> children;
+    private List<AbstractResource> children;
 
     public FolderResource( String folder, SecurityManager security )
     {
         super( folder, Cet.cet( "folders#" + folder ).getString(), null, security ); //$NON-NLS-1$
-        this.children = new ArrayList<Resource>();
+        this.children = new ArrayList<AbstractResource>();
     }
 
-    public void add( Resource child ) throws IOException
+    public void add( AbstractResource child ) throws IOException
     {
-        for ( Resource r : children ) {
+        for ( AbstractResource r : children ) {
             if ( r.getName().equals( child.getName() ) ) {
                 throw (new IOException( "Name has to be unique" ));
             }
@@ -37,26 +38,16 @@ public class FolderResource extends AbstractResource implements CollectionResour
     }
 
     // ----------------------------------------------------------------------
-    // CollectionResource
+    // AbstractCollectionResource
     // ----------------------------------------------------------------------
 
     @Override
-    public Resource child( String childName )
+    public Map<String, AbstractResource> getResourceList()
     {
-        if ( childName == null ) {
-            return null;
+        Map<String, AbstractResource> map = new HashMap<String, AbstractResource>();
+        for(AbstractResource r: children) {
+            map.put( r.getName(), r );
         }
-        for ( Resource r : children ) {
-            if ( childName.equals( r.getName() ) ) {
-                return r;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public List<? extends Resource> getChildren()
-    {
-        return children;
+        return map;
     }
 }
