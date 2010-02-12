@@ -24,10 +24,12 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.RunSparqlQueryResult;
 public class SparqlPage extends Page {
 	VerticalPanel inputPanel;
 	FlexTable resultsTable;
+	TextArea queryBox;
 	
 	static String tagQuery = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\r\n" + 
 			"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" + 
-			"PREFIX tags: <http://www.holygoat.co.uk/owl/redwood/0.1/tags/>\r\n" + 
+			"PREFIX tags: <http://www.holygoat.co.uk/owl/redwood/0.1/tags/>\r\n" +
+			"PREFIX dcterms: <http://purl.org/dc/terms/>\r\n" + 
 			"SELECT ?dataset ?o ?_ldMimeType ?_ldTitle ?_ued\r\n" + 
 			"WHERE { ?dataset <tags:tag> ?event .\r\n" + 
 			" ?event <tags:associatedTag> ?tag .\r\n" + 
@@ -36,7 +38,7 @@ public class SparqlPage extends Page {
 			" ?dataset <dc:date> ?o .\r\n" + 
 			" ?dataset <dc:format> ?_ldMimeType .\r\n" + 
 			" ?dataset <dc:title> ?_ldTitle .\r\n" + 
-			" OPTIONAL { ?dataset <http://purl.org/dc/terms/isReplacedBy> ?_ued . }\r\n" + 
+			" OPTIONAL { ?dataset <dcterms:isReplacedBy> ?_ued . }\r\n" + 
 			"} order by ?_ued ?o limit 100";
 	static String datasetListQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" + 
 			"PREFIX dc: <http://purl.org/dc/elements/1.1/>\r\n" + 
@@ -54,7 +56,7 @@ public class SparqlPage extends Page {
 			"LIMIT 15";
 	static String singleDataset = "SELECT ?p ?o\r\n" + 
 			"WHERE {\r\n" + 
-			"<tag:medici@uiuc.edu,2009:data_hkSgQzM1BRFoR1O7OKDqGA> ?p ?o .\r\n" + 
+			"<{DATASET URI}> ?p ?o .\r\n" + 
 			"}";
 	static String derivationQuery = "PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/> \r\n" + 
 			"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \r\n" + 
@@ -114,7 +116,7 @@ public class SparqlPage extends Page {
 		inputPanel.add(examples);
 		
 		//
-		final TextArea queryBox = new TextArea();
+		queryBox = new TextArea();
 		queryBox.setCharacterWidth(90);
 		queryBox.setVisibleLines(15);
 		queryBox.setText(prefixes);
@@ -129,26 +131,7 @@ public class SparqlPage extends Page {
 		Button submit = new Button("Execute");
 		submit.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				RunSparqlQuery action = new RunSparqlQuery();
-				action.setQuery(queryBox.getText());
-				dispatchAsync.execute(action, new AsyncCallback<RunSparqlQueryResult>() {
-					public void onFailure(Throwable caught) {
-						Window.alert("SPARQL query failed");
-					}
-					public void onSuccess(RunSparqlQueryResult result) {
-						resultsTable.removeAllRows();
-						int row = 0;
-						for(List<String> resultRow : result.getResult()) {
-							int col = 0;
-							for(String rowCell : resultRow) {
-								resultsTable.setWidget(row, col, new Label(rowCell != null ? rowCell : "null")); 
-								resultsTable.getCellFormatter().addStyleName(row, col, "datasetTable");
-								col++;
-							}
-							row++;
-						}
-					}
-				});
+				executeQuery();
 			}
 		});
 		inputPanel.add(submit);
@@ -157,4 +140,35 @@ public class SparqlPage extends Page {
 		resultsTable.addStyleName("datasetTable");
 		inputPanel.add(resultsTable);
 	}
+
+    void executeQuery() {
+    	RunSparqlQuery action = new RunSparqlQuery();
+    	action.setQuery(queryBox.getText());
+    	dispatchAsync.execute(action, new AsyncCallback<RunSparqlQueryResult>() {
+    		public void onFailure(Throwable caught) {
+    			Window.alert("SPARQL query failed");
+    		}
+    		public void onSuccess(RunSparqlQueryResult result) {
+    			resultsTable.removeAllRows();
+    			int row = 0;
+    			for(List<String> resultRow : result.getResult()) {
+    				int col = 0;
+    				for(final String rowCell : resultRow) {
+    					Label label = new Label(rowCell != null ? rowCell : "null");
+    					label.addClickHandler(new ClickHandler() {
+    						public void onClick(ClickEvent event) {
+    							String query = singleDataset.replace("{DATASET URI}", rowCell);
+    							queryBox.setText(query);
+    							executeQuery();
+    						}
+    					});
+    					resultsTable.setWidget(row, col, label);
+    					resultsTable.getCellFormatter().addStyleName(row, col, "datasetTable");
+    					col++;
+    				}
+    				row++;
+    			}
+    		}
+    	});
+    }
 }

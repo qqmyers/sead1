@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
@@ -24,9 +25,6 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 public class DeleteDatasetHandler implements
 		ActionHandler<DeleteDataset, DeleteDatasetResult> {
 
-	private Resource IS_REPLACED_BY = Resource
-			.uriRef("http://purl.org/dc/terms/isReplacedBy");
-
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(DeleteDatasetHandler.class);
 	
@@ -36,7 +34,7 @@ public class DeleteDatasetHandler implements
 		String datasetUri = arg0.getUri();
 		try {
 			TupeloStore.getInstance().getContext().addTriple(
-					Resource.uriRef(datasetUri), IS_REPLACED_BY, Rdf.NIL);
+					Resource.uriRef(datasetUri), DcTerms.IS_REPLACED_BY, Rdf.NIL);
 			log.debug("Dataset deleted" + datasetUri);
 			return new DeleteDatasetResult(true);
 		} catch (OperatorException e) {
@@ -56,7 +54,7 @@ public class DeleteDatasetHandler implements
 		String datasetUri = arg0.getUri();
 		try {
 			TupeloStore.getInstance().getContext().removeTriple(
-					Resource.uriRef(datasetUri), IS_REPLACED_BY, Rdf.NIL);
+					Resource.uriRef(datasetUri), DcTerms.IS_REPLACED_BY, Rdf.NIL);
 		} catch (OperatorException e) {
 			throw new ActionException("unable to undelete dataset "
 					+ datasetUri, e);

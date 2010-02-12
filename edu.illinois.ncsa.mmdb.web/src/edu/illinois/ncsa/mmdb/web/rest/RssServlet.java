@@ -22,18 +22,15 @@ import javax.xml.transform.stream.StreamResult;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
-import org.tupeloproject.kernel.impl.MemoryContext;
-import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
-import org.tupeloproject.util.Xml;
 import org.w3c.dom.Document;
 
-import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndContentImpl;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndEntryImpl;
@@ -64,7 +61,7 @@ public class RssServlet extends HttpServlet {
 		u.addPattern("s", Dc.TITLE, "title", true);
 		u.addPattern("s", Rdfs.LABEL, "label", true);
 		u.addPattern("s", Dc.DESCRIPTION, "description", true);
-		u.addPattern("s", Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"),"r",true);
+		u.addPattern("s", DcTerms.IS_REPLACED_BY, "r",true);
 		u.addOrderBy("r"); // FIXME should be orderByDesc once TUP-479 is resolved
 		u.addOrderByDesc("date");
 		u.setLimit(20);

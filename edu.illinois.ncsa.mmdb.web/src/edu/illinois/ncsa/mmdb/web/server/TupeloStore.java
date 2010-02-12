@@ -477,7 +477,7 @@ public class TupeloStore {
     	u.setColumnNames(newColumnNames);
     	u.addPattern(subjectVar,Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"),"_ued",true);
     	OrderBy ued = new OrderBy();
-    	ued.setAscending(true); // FIXME should be false when SQL contexts order correctly
+    	ued.setAscending(true); // FIXME should be false when SQL contexts order correctly, i.e., when TUP-481 is fixed
     	ued.setName("_ued");
     	newOrderBy.add(ued);
     	for(OrderBy ob : u.getOrderBy()) {

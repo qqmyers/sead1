@@ -136,7 +136,7 @@ public class TagsWidget extends Composite {
 				deleteTag(tag, row);
 			}
 		});
-		//tagsPanel.setWidget(row,1,delete);
+		tagsPanel.setWidget(row,1,delete);
 	}
 	/**
 	 * Use service to retrieve tags from server.
