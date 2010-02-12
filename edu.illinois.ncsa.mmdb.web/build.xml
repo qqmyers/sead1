@@ -8,8 +8,16 @@
 	<property name="deploy" value="/usr/local/tomcat/webapps" />
 
 	<property name="war" value="${ant.project.name}.war" />
+		
+	<condition property="desktop" value="desktop/" else="/desktop/">
+		<isset property="env.VERSION"/>
+	</condition>
+
+	<condition property="build" value="Version: ${env.VERSION}" else="HUDSON Build: ${env.BUILD_NUMBER}">
+		<isset property="env.VERSION"/>
+	</condition>
 	
-	<condition property="build" value="${env.VERSION}" else="${env.BUILD_NUMBER}">
+	<condition property="build" value="Version: ${env.VERSION}" else="HUDSON Build: ${env.BUILD_NUMBER}">
 		<isset property="env.VERSION"/>
 	</condition>
 	
@@ -170,6 +178,7 @@
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
 			<filterset>
 				<filter token="BUILD_TAG" value="${build}" />
+				<filter token="DESKTOP" value="${desktop}" />
 			</filterset>
 		</copy>
 	</target>
