@@ -17,6 +17,7 @@ import org.tupeloproject.kernel.Context;
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.CollectionResource;
 import com.bradmcevoy.http.GetableResource;
+import com.bradmcevoy.http.MiltonServlet;
 import com.bradmcevoy.http.Range;
 import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.SecurityManager;
@@ -103,6 +104,11 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
 
     public void sendContent( OutputStream out, Range range, Map<String, String> params, String contentType ) throws IOException, NotAuthorizedException
     {
+        String path = MiltonServlet.request().getRequestURL().toString();
+        if ( !path.endsWith( "/" ) ) { //$NON-NLS-1$
+            path = path + "/"; //$NON-NLS-1$
+        }
+
         XmlWriter w = new XmlWriter( out );
         w.open( "html" ); //$NON-NLS-1$
         w.open( "body" ); //$NON-NLS-1$
@@ -112,10 +118,24 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
             w.open( "tr" ); //$NON-NLS-1$
 
             w.open( "td" ); //$NON-NLS-1$
-            w.begin( "a" ).writeAtt( "href", r.getName() ).open().writeText( r.getName() ).close(); //$NON-NLS-1$ //$NON-NLS-2$
+            w.begin( "a" ).writeAtt( "href", path + r.getName() ).open().writeText( r.getName() ).close(); //$NON-NLS-1$ //$NON-NLS-2$
             w.close( "td" ); //$NON-NLS-1$
 
-            w.begin( "td" ).open().writeText( r.getModifiedDate() + "" ).close(); //$NON-NLS-1$ //$NON-NLS-2$
+            w.begin( "td" ).open(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            if ( r instanceof GetableResource ) {
+                GetableResource get = (GetableResource) r;
+                if ( get.getContentLength() != null ) {
+                    w.writeText( get.getContentLength() + "" ); //$NON-NLS-1$
+                }
+            }
+            w.close( "td" ); //$NON-NLS-1$
+
+            w.begin( "td" ).open(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            if ( r.getModifiedDate() != null ) {
+                w.writeText( r.getModifiedDate() + "" ); //$NON-NLS-1$                
+            }
+            w.close( "td" ); //$NON-NLS-1$
+
             w.close( "tr" ); //$NON-NLS-1$
         }
         w.close( "table" ); //$NON-NLS-1$

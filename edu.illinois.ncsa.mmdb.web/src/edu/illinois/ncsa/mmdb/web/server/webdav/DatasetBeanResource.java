@@ -47,8 +47,8 @@ public class DatasetBeanResource extends AbstractResource implements GetableReso
     {
         // FIXME add extention if wrong one.
         String name = super.getName();
-        if ((mimetype.equals( "image/jpeg" ) || mimetype.equals( "image/jpg" )) && !name.endsWith( ".jpg" )) {
-            name = name + ".jpg";            
+        if ( (mimetype.equals( "image/jpeg" ) || mimetype.equals( "image/jpg" )) && !name.endsWith( ".jpg" ) ) {
+            name = name + ".jpg";
         }
         return name;
     }

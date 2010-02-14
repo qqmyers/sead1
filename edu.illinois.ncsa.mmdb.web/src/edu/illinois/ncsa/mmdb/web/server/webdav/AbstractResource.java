@@ -145,6 +145,9 @@ public abstract class AbstractResource implements com.bradmcevoy.http.Resource, 
     @Override
     public Date getModifiedDate()
     {
+        if ( modified == null ) {
+            return created;
+        }
         return modified;
     }
 
