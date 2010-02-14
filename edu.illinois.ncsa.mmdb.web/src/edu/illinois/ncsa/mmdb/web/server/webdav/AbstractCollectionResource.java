@@ -17,7 +17,6 @@ import org.tupeloproject.kernel.Context;
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.CollectionResource;
 import com.bradmcevoy.http.GetableResource;
-import com.bradmcevoy.http.MiltonServlet;
 import com.bradmcevoy.http.Range;
 import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.SecurityManager;
@@ -34,8 +33,12 @@ import com.bradmcevoy.http.exceptions.NotAuthorizedException;
  */
 public abstract class AbstractCollectionResource extends AbstractResource implements CollectionResource, GetableResource
 {
+    /** how long to keep children list between consecutive calls in ms */
+    public static int             CACHE_TIME  = 1000;
+
     private Map<String, Resource> resourcemap = new HashMap<String, Resource>();
     private DatasetBeanResource   folder      = null;
+    private long                  last        = 0;
 
     public AbstractCollectionResource( String name, Context context, SecurityManager security )
     {
@@ -78,7 +81,7 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
         if ( folder != null ) {
             return folder;
         }
-        if ( resourcemap.isEmpty() ) {
+        if ( !resourcemap.isEmpty() ) {
             return resourcemap.values().iterator().next();
         }
         return null;
@@ -86,12 +89,12 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
 
     protected Resource getDesktopINI()
     {
-        Resource r = resourcemap.get( "desktop.ini" );
+        Resource r = resourcemap.get( "desktop.ini" ); //$NON-NLS-1$
         if ( r != null ) {
             return r;
         }
         String text = "[ViewState]\nMode=\nVid=\nFolderType=Pictures\nLogo=\n"; //$NON-NLS-1$
-        return new TextResource( "desktop.ini", text, getContext(), getSecurity() );
+        return new TextResource( "desktop.ini", text, getContext(), getSecurity() ); //$NON-NLS-1$
     }
 
     // ----------------------------------------------------------------------
@@ -100,10 +103,6 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
 
     public void sendContent( OutputStream out, Range range, Map<String, String> params, String contentType ) throws IOException, NotAuthorizedException
     {
-        String path = MiltonServlet.request().getRequestURL().toString();
-        if ( !path.endsWith( "/" ) ) { //$NON-NLS-1$
-            path = path + "/"; //$NON-NLS-1$
-        }
         XmlWriter w = new XmlWriter( out );
         w.open( "html" ); //$NON-NLS-1$
         w.open( "body" ); //$NON-NLS-1$
@@ -112,10 +111,8 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
         for ( Resource r : getChildren() ) {
             w.open( "tr" ); //$NON-NLS-1$
 
-            String url = path + r.getName();
-
             w.open( "td" ); //$NON-NLS-1$
-            w.begin( "a" ).writeAtt( "href", url ).open().writeText( r.getName() ).close(); //$NON-NLS-1$ //$NON-NLS-2$
+            w.begin( "a" ).writeAtt( "href", r.getName() ).open().writeText( r.getName() ).close(); //$NON-NLS-1$ //$NON-NLS-2$
             w.close( "td" ); //$NON-NLS-1$
 
             w.begin( "td" ).open().writeText( r.getModifiedDate() + "" ).close(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -162,8 +159,12 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
     }
 
     @Override
-    public List<? extends Resource> getChildren()
+    public synchronized List<? extends Resource> getChildren()
     {
+        if ( System.currentTimeMillis() - last < CACHE_TIME ) {
+            return new ArrayList<Resource>( resourcemap.values() );
+        }
+
         List<String> dups = new ArrayList<String>();
         Set<String> done = new HashSet<String>();
 
@@ -206,6 +207,7 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
             }
         }
 
+        last = System.currentTimeMillis();
         return new ArrayList<Resource>( resourcemap.values() );
     }
 
