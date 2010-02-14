@@ -2,44 +2,102 @@ package edu.illinois.ncsa.mmdb.web.server.webdav;
 
 import java.util.Date;
 
-import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.Context;
+import org.tupeloproject.rdf.Resource;
 
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.DigestResource;
 import com.bradmcevoy.http.PropFindableResource;
 import com.bradmcevoy.http.Request;
-import com.bradmcevoy.http.Resource;
 import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.Request.Method;
 import com.bradmcevoy.http.http11.auth.DigestResponse;
 
 /**
- * Helper class to easily create a resource (file/folder). This will take care of
- * handling the name, id, date and security.
+ * Helper class to easily create a resource (file/folder). This will take care
+ * of handling the name, id, date and security.
  * 
  * @author Rob Kooper
  * 
  */
-public abstract class AbstractResource implements Resource, DigestResource, PropFindableResource
+public abstract class AbstractResource implements com.bradmcevoy.http.Resource, DigestResource, PropFindableResource
 {
-    protected String          name;
-    protected String          id;
-    protected Date            created;
-    protected BeanSession     beanSession;
-    protected SecurityManager security;
+    private String          name;
+    private Resource        uri;
+    private Date            created;
+    private Date            modified;
+    private Context         context;
+    private SecurityManager security;
 
-    public AbstractResource( String name, String id, BeanSession beanSession, SecurityManager security )
+    public AbstractResource( String name, Context context, SecurityManager security )
     {
-        this( name, id, null, beanSession, security );
+        this( name, null, null, null, context, security );
     }
 
-    public AbstractResource( String name, String id, Date created, BeanSession beanSession, SecurityManager security )
+    public AbstractResource( String name, Resource uri, Context context, SecurityManager security )
+    {
+        this( name, uri, null, null, context, security );
+    }
+
+    public AbstractResource( String name, Resource uri, Date created, Context context, SecurityManager security )
+    {
+        this( name, uri, created, created, context, security );
+    }
+
+    public AbstractResource( String name, Resource uri, Date created, Date modified, Context context, SecurityManager security )
     {
         this.name = name;
-        this.id = id;
+        this.uri = uri;
         this.created = created;
-        this.beanSession = beanSession;
+        this.created = modified;
+        this.context = context;
         this.security = security;
+    }
+
+    // ----------------------------------------------------------------------
+    // Setters and Getters
+    // ----------------------------------------------------------------------
+
+    /**
+     * @return the context
+     */
+    public Context getContext()
+    {
+        return context;
+    }
+
+    /**
+     * @return the uri
+     */
+    public Resource getUri()
+    {
+        return uri;
+    }
+
+    /**
+     * @param uri
+     *            the uri to set
+     */
+    public void setUri( Resource uri )
+    {
+        this.uri = uri;
+    }
+
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    /**
+     * @return the security
+     */
+    public SecurityManager getSecurity()
+    {
+        return security;
     }
 
     // ----------------------------------------------------------------------
@@ -69,32 +127,25 @@ public abstract class AbstractResource implements Resource, DigestResource, Prop
         return null;
     }
 
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
     @Override
     public String getName()
     {
         return name;
     }
 
-    public void setUniqueId( String id )
-    {
-        this.id = id;
-    }
-
     @Override
     public String getUniqueId()
     {
-        return id;
+        if ( uri != null ) {
+            return uri.getString();
+        }
+        return null;
     }
 
     @Override
     public Date getModifiedDate()
     {
-        return created;
+        return modified;
     }
 
     // ----------------------------------------------------------------------
@@ -114,5 +165,4 @@ public abstract class AbstractResource implements Resource, DigestResource, Prop
     {
         return created;
     }
-
 }

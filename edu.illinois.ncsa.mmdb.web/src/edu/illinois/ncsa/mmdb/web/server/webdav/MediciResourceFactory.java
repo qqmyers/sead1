@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.Context;
 
 import com.bradmcevoy.http.CollectionResource;
 import com.bradmcevoy.http.MiltonServlet;
@@ -23,28 +23,28 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  */
 public class MediciResourceFactory implements ResourceFactory
 {
-    private static Log     log  = LogFactory.getLog( MediciResourceFactory.class );
-    
+    private static Log     log = LogFactory.getLog( MediciResourceFactory.class );
+
     private FolderResource root;
 
     public MediciResourceFactory()
     {
-        BeanSession bs = TupeloStore.getInstance().getBeanSession();
-        SecurityManager security = new MediciSecurityManager( bs.getContext() );
+        Context context = TupeloStore.getInstance().getContext();
+        SecurityManager security = new MediciSecurityManager( context );
 
         root = new FolderResource( "/", security ); //$NON-NLS-1$
         try {
-            root.add( new CollectionBeanResource( bs, security ) );
+            root.add( new CollectionRootResource( context, security ) );
         } catch ( IOException e ) {
             log.warn( "Could not add collections.", e );
         }
         try {
-            root.add( new TagBeanResource( bs, security ) );
+            root.add( new TagRootResource( context, security ) );
         } catch ( IOException e ) {
             log.warn( "Could not add tags.", e );
         }
         try {
-            root.add( new PersonBeanResource( bs, security ) );
+            root.add( new PersonRootResource( context, security ) );
         } catch ( IOException e ) {
             log.warn( "Could not add people.", e );
         }
@@ -55,12 +55,12 @@ public class MediciResourceFactory implements ResourceFactory
     {
         // get path minus servlet
         path = MiltonServlet.request().getPathInfo();
-        if (path == null) {
+        if ( path == null ) {
             path = "";
         }
-        
+
         // remove leading slash
-        if (path.startsWith( "/" )) { //$NON-NLS-1$
+        if ( path.startsWith( "/" ) ) { //$NON-NLS-1$
             path = path.substring( 1 );
         }
 

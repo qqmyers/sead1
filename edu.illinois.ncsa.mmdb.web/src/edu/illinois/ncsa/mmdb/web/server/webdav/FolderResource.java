@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.tupeloproject.rdf.terms.Cet;
-
 import com.bradmcevoy.http.SecurityManager;
 
 /**
@@ -23,7 +21,7 @@ public class FolderResource extends AbstractCollectionResource
 
     public FolderResource( String folder, SecurityManager security )
     {
-        super( folder, Cet.cet( "folders#" + folder ).getString(), null, security ); //$NON-NLS-1$
+        super( folder, null, security ); //$NON-NLS-1$
         this.children = new ArrayList<AbstractResource>();
     }
 
@@ -45,7 +43,7 @@ public class FolderResource extends AbstractCollectionResource
     public Map<String, AbstractResource> getResourceList()
     {
         Map<String, AbstractResource> map = new HashMap<String, AbstractResource>();
-        for(AbstractResource r: children) {
+        for ( AbstractResource r : children ) {
             map.put( r.getName(), r );
         }
         return map;

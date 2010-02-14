@@ -2,11 +2,13 @@ package edu.illinois.ncsa.mmdb.web.server.webdav;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.Map;
 
-import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.BlobFetcher;
+import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.rdf.Resource;
 
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.GetableResource;
@@ -15,9 +17,6 @@ import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 
-import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
-
 /**
  * Wrapper around the DatasetBean. This will show information about the dataset
  * and allow to download it.
@@ -25,27 +24,42 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  * @author Rob Kooper
  * 
  */
-public class DatasetResource extends AbstractResource implements GetableResource
+public class DatasetBeanResource extends AbstractResource implements GetableResource
 {
-    private DatasetBean bean;
+    private long     size;
+    private Resource uri;
+    private String   mimetype;
 
-    public DatasetResource( DatasetBean bean, BeanSession beanSession, SecurityManager security )
+    public DatasetBeanResource( String name, Resource uri, long size, Date date, String mimetype, Context context, SecurityManager security )
     {
-        super( bean.getLabel(), bean.getUri(), bean.getDate(), beanSession, security );
-        this.bean = bean;
+        super( name, uri, date, context, security );
+        this.uri = uri;
+        this.size = size;
+        this.mimetype = mimetype;
+    }
 
-        if ( bean.getLabel() == null ) {
-            this.name = bean.getTitle();
+    // ----------------------------------------------------------------------
+    // Resource
+    // ----------------------------------------------------------------------
+
+    @Override
+    public String getName()
+    {
+        // FIXME add extention if wrong one.
+        String name = super.getName();
+        if (mimetype.equals( "image/jpeg" ) && !name.endsWith( ".jpg" )) {
+            name = name + ".jpg";            
         }
+        return name;
     }
 
     // ----------------------------------------------------------------------
     // GetableResource
     // ----------------------------------------------------------------------
+
     @Override
     public Long getContentLength()
     {
-        long size = bean.getSize();
         if ( size <= 0 ) {
             return null;
         }
@@ -56,7 +70,7 @@ public class DatasetResource extends AbstractResource implements GetableResource
     public String getContentType( String accepts )
     {
         // FIXME should really use accepts
-        return bean.getMimeType();
+        return mimetype;
     }
 
     @Override
@@ -69,9 +83,9 @@ public class DatasetResource extends AbstractResource implements GetableResource
     public void sendContent( OutputStream out, Range range, Map<String, String> params, String contentType ) throws IOException, NotAuthorizedException, BadRequestException
     {
         BlobFetcher bf = new BlobFetcher();
-        bf.setSubject( org.tupeloproject.rdf.Resource.uriRef( bean.getUri() ) );
+        bf.setSubject( uri );
         try {
-            TupeloStore.getInstance().getContext().perform( bf );
+            getContext().perform( bf );
         } catch ( OperatorException e ) {
             throw (new IOException( e ));
         }

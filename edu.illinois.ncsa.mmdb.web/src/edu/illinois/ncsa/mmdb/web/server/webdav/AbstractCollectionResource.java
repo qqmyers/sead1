@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.Context;
 
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.CollectionResource;
@@ -34,16 +34,64 @@ import com.bradmcevoy.http.exceptions.NotAuthorizedException;
  */
 public abstract class AbstractCollectionResource extends AbstractResource implements CollectionResource, GetableResource
 {
-    protected Map<String, Resource> resourcemap = new HashMap<String, Resource>();
+    private Map<String, Resource> resourcemap = new HashMap<String, Resource>();
+    private DatasetBeanResource   folder      = null;
 
-    public AbstractCollectionResource( String name, String id, BeanSession beanSession, SecurityManager security )
+    public AbstractCollectionResource( String name, Context context, SecurityManager security )
     {
-        this( name, id, null, beanSession, security );
+        super( name, null, null, context, security );
     }
 
-    public AbstractCollectionResource( String name, String id, Date created, BeanSession beanSession, SecurityManager security )
+    public AbstractCollectionResource( String name, org.tupeloproject.rdf.Resource uri, Context context, SecurityManager security )
     {
-        super( name, id, created, beanSession, security );
+        super( name, uri, null, context, security );
+    }
+
+    public AbstractCollectionResource( String name, org.tupeloproject.rdf.Resource uri, Date created, Context context, SecurityManager security )
+    {
+        super( name, uri, created, context, security );
+    }
+
+    public AbstractCollectionResource( String name, org.tupeloproject.rdf.Resource uri, Date created, Date modified, Context context, SecurityManager security )
+    {
+        super( name, uri, created, modified, context, security );
+    }
+
+    /**
+     * DatasetResource that is returned when windows asks for the folder.jpg
+     * 
+     * @param folder
+     *            the resource representing the image to show for this
+     *            collection.
+     */
+    public void setFolder( DatasetBeanResource folder )
+    {
+        this.folder = folder;
+    }
+
+    protected Resource getFolder()
+    {
+        Resource r = resourcemap.get( "folder.jpg" ); //$NON-NLS-1$
+        if ( r != null ) {
+            return r;
+        }
+        if ( folder != null ) {
+            return folder;
+        }
+        if ( resourcemap.isEmpty() ) {
+            return resourcemap.values().iterator().next();
+        }
+        return null;
+    }
+
+    protected Resource getDesktopINI()
+    {
+        Resource r = resourcemap.get( "desktop.ini" );
+        if ( r != null ) {
+            return r;
+        }
+        String text = "[ViewState]\nMode=\nVid=\nFolderType=Pictures\nLogo=\n"; //$NON-NLS-1$
+        return new TextResource( "desktop.ini", text, getContext(), getSecurity() );
     }
 
     // ----------------------------------------------------------------------
@@ -53,29 +101,29 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
     public void sendContent( OutputStream out, Range range, Map<String, String> params, String contentType ) throws IOException, NotAuthorizedException
     {
         String path = MiltonServlet.request().getRequestURL().toString();
-        if (!path.endsWith( "/" )) {
-            path = path + "/";
+        if ( !path.endsWith( "/" ) ) { //$NON-NLS-1$
+            path = path + "/"; //$NON-NLS-1$
         }
         XmlWriter w = new XmlWriter( out );
-        w.open( "html" );
-        w.open( "body" );
-        w.begin( "h1" ).open().writeText( this.getName() ).close();
-        w.open( "table" );
+        w.open( "html" ); //$NON-NLS-1$
+        w.open( "body" ); //$NON-NLS-1$
+        w.begin( "h1" ).open().writeText( this.getName() ).close(); //$NON-NLS-1$
+        w.open( "table" ); //$NON-NLS-1$
         for ( Resource r : getChildren() ) {
-            w.open( "tr" );
+            w.open( "tr" ); //$NON-NLS-1$
 
             String url = path + r.getName();
-            
-            w.open( "td" );
-            w.begin( "a" ).writeAtt( "href", url ).open().writeText( r.getName() ).close();
-            w.close( "td" );
 
-            w.begin( "td" ).open().writeText( r.getModifiedDate() + "" ).close();
-            w.close( "tr" );
+            w.open( "td" ); //$NON-NLS-1$
+            w.begin( "a" ).writeAtt( "href", url ).open().writeText( r.getName() ).close(); //$NON-NLS-1$ //$NON-NLS-2$
+            w.close( "td" ); //$NON-NLS-1$
+
+            w.begin( "td" ).open().writeText( r.getModifiedDate() + "" ).close(); //$NON-NLS-1$ //$NON-NLS-2$
+            w.close( "tr" ); //$NON-NLS-1$
         }
-        w.close( "table" );
-        w.close( "body" );
-        w.close( "html" );
+        w.close( "table" ); //$NON-NLS-1$
+        w.close( "body" ); //$NON-NLS-1$
+        w.close( "html" ); //$NON-NLS-1$
         w.flush();
     }
 
@@ -86,7 +134,7 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
 
     public String getContentType( String accepts )
     {
-        return "text/html";
+        return "text/html"; //$NON-NLS-1$
     }
 
     public Long getContentLength()
@@ -103,6 +151,12 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
     {
         if ( resourcemap.size() == 0 ) {
             getChildren();
+        }
+        if ( childName.equals( "folder.jpg" ) ) { //$NON-NLS-1$
+            return getFolder();
+        }
+        if ( childName.equals( "desktop.ini" ) ) { //$NON-NLS-1$
+            return getDesktopINI();
         }
         return resourcemap.get( childName );
     }
