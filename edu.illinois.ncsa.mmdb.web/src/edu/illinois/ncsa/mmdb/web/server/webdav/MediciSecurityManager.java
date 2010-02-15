@@ -82,10 +82,15 @@ public class MediciSecurityManager implements SecurityManager
         // check permissions
         String userid = PersonBeanUtil.getPersonID( accepted.get( auth.getTag() ) );
         try {
-            return rbac.checkPermission( Resource.uriRef( userid ), MMDB.VIEW_MEMBER_PAGES );
+            if ( !rbac.checkPermission( Resource.uriRef( userid ), MMDB.VIEW_MEMBER_PAGES ) ) {
+                return false;
+            }
         } catch ( OperatorException e ) {
             log.info( "Could not check permissions.", e );
             return false;
         }
+
+        // done
+        return true;
     }
 }
