@@ -5,7 +5,7 @@
 
 	<property name="webxml" value="web.xml" />
 
-	<property name="deploy" value="/usr/local/tomcat/webapps" />
+	<property name="deploy" value="/var/lib/tomcat6/webapps" />
 
 	<property name="war" value="${ant.project.name}.war" />
 		
@@ -226,6 +226,7 @@
 	</target>
 
 	<target name="war" depends="clean, compile, gwtc, resources" description="builds the war file">
+		<exec executable="./versions.sh" />
 		<zip destfile="build/${war}" basedir="war" />
 	</target>
 </project>
