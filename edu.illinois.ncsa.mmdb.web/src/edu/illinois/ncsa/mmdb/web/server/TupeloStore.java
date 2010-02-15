@@ -364,8 +364,6 @@ public class TupeloStore {
             RestServlet.SEARCH_INFIX,
     };
 
-	UriCanonicalizer canon;
-
 	String getWebappPrefix(HttpServletRequest request) throws ServletException {
 		try {
             URL requestUrl = new URL(request.getRequestURL().toString());
@@ -382,15 +380,11 @@ public class TupeloStore {
 	public String getHistoryTokenUrl(HttpServletRequest request, String historyToken) throws ServletException {
 		return getWebappPrefix(request) + MMDB_WEBAPP_PATH + "#" + historyToken;
 	}
+
+	static final String CANONICALIZER_SESSION_ATTRIBUTE = "edu.illinois.ncsa.mmdb.web.UriCanonicalizer";
 	
-    public UriCanonicalizer getUriCanonicalizer() throws ServletException {
-    	if(canon == null) {
-    		throw new IllegalStateException("cannot call until a request has been made against a servlet");
-    	}
-    	return canon;
-    }
-    
     public UriCanonicalizer getUriCanonicalizer(HttpServletRequest request) throws ServletException {
+    	UriCanonicalizer canon = (UriCanonicalizer) request.getSession().getAttribute(CANONICALIZER_SESSION_ATTRIBUTE);
         if(canon == null) {
             canon = new UriCanonicalizer();
             String prefix = getWebappPrefix(request);
@@ -400,6 +394,7 @@ public class TupeloStore {
             }
             // now handle GWT dataset and collection stuff stuff, hardcoding the HTML path
             canon.setCanonicalUrlPrefix("dataset",prefix + request.getContextPath() + MMDB_WEBAPP_PATH + "#dataset?id=");
+            request.getSession().setAttribute(CANONICALIZER_SESSION_ATTRIBUTE, canon);
         }
         return canon;
     }
