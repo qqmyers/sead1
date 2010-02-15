@@ -1,6 +1,19 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+/**
+ * FIXME Add comments
+ *
+ *
+ * @param <T>
+ */
 public abstract class Memoized<T> {
+	
+	/** Commons logging **/
+	private static Log log = LogFactory.getLog(Memoized.class);
+	
 	T cachedValue;
 	long expires;
 	long ttl;
@@ -17,7 +30,7 @@ public abstract class Memoized<T> {
 	public T getValue(boolean force) {
 		long now = System.currentTimeMillis();
 		if(now > expires || force) {
-			System.out.println("RECOMPUTING BECAUSE "+now+">"+expires+" or "+force); // FIXME debug
+			log.debug("RECOMPUTING BECAUSE "+now+" > " + expires + " or " + force);
 			cachedValue = computeValue();
 			expires = now + ttl;
 		}

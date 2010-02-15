@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 
+@Deprecated
 public class DownloadButton extends Button implements ClickHandler {
     private String uri;
 

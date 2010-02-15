@@ -450,7 +450,7 @@ body {
 .datasetRightColSection {
 	width:100%;
 	padding: 0px;
-	margin: 20px 5px 20px 5px;
+	margin: 20px 5px 50px 5px;
 	text-align: left;
 }
 
@@ -591,12 +591,14 @@ body {
 	vertical-align: bottom;
 }
 
-.downloadButtonContainer {
-	width: 100%;
+.datasetActions {
 	margin: 0px;
-	padding-top: 30px;
-	padding-bottom: 30px;
+	padding: 10px 0px 20px 0px;
 	border: none;
+}
+
+.datasetActionLink {
+	margin: 10px;
 }
 
 .commentsView {

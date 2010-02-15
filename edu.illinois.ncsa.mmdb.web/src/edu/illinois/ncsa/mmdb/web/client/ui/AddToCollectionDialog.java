@@ -3,6 +3,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -15,7 +17,6 @@ import com.google.gwt.user.client.ui.ListBox;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**
@@ -27,7 +28,7 @@ public class AddToCollectionDialog extends DialogBox {
 	private final ListBox list;
 	private final Button submitButton;
 	
-	public AddToCollectionDialog(MyDispatchAsync service, ClickHandler clickHandler) {
+	public AddToCollectionDialog(DispatchAsync service, ClickHandler clickHandler) {
 		super();
 		setAnimationEnabled(true);
 		setGlassEnabled(true);

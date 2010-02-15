@@ -3,7 +3,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,7 +22,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -33,9 +31,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-import edu.illinois.ncsa.mmdb.web.client.DownloadButton;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFrom;
@@ -49,7 +44,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
-import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
@@ -81,8 +75,6 @@ public class DatasetWidget extends Composite {
 
 	private AnnotationsWidget annotationsWidget;
 
-	private DownloadButton downloadButton;
-
 	private FlowPanel metadataPanel;
 
 	private FlowPanel actionsPanel;
@@ -102,21 +94,15 @@ public class DatasetWidget extends Composite {
 
 	private Label sizeLabel;
 
-	private DisclosurePanel informationPanel;
-
 	private String uri;
 
 	private FlexTable informationTable;
-
-	private Button addToCollectionButton;
 
 	private Label metadataHeader;
 
 	protected CollectionMembershipWidget collectionWidget;
 	
 	protected DerivedDatasetsWidget derivedDatasetsWidget;
-
-	private AddToCollectionDialog addToCollectionDialog;
 
     private MapWidget mapWidget;
 
@@ -127,10 +113,10 @@ public class DatasetWidget extends Composite {
 	private AbsolutePanel previewPanel;
 	
 	private PreviewWidget preview;
-	
-//	private FlowPanel previewPanel;
 
 	private FlowPanel previewControls;
+
+	private Anchor downloadAnchor;
 
 
 	/**
@@ -167,12 +153,10 @@ public class DatasetWidget extends Composite {
 	}
 
 	@Override
-	protected void onUnload()
-	{
+	protected void onUnload() {
 	    super.onUnload();
 	    hideSeadragon( );
 	}
-	
 	
 	/**
 	 * Retrieve a specific dataset given the uri.
@@ -206,7 +190,6 @@ public class DatasetWidget extends Composite {
     private void drawPage(final DatasetBean dataset, String pyramid) {
 
 		// image preview
-//		previewPanel(dataset.getUri());
 		preview = new PreviewWidget(dataset.getUri(), GetPreviews.LARGE, null);
 		
 		// title
@@ -263,7 +246,7 @@ public class DatasetWidget extends Composite {
 		metadataPanel = new FlowPanel();
 
 		metadataPanel.addStyleName("datasetRightColSection");
-
+		
 		metadataPanel.add(metadataHeader);
 
 		metadataPanel.add(authorLabel);
@@ -273,7 +256,6 @@ public class DatasetWidget extends Composite {
 		metadataPanel.add(typeLabel);
 
 		metadataPanel.add(dateLabel);
-		
 		
 		// tags
 		tagsWidget = new TagsWidget(dataset.getUri(), service);
@@ -285,59 +267,53 @@ public class DatasetWidget extends Composite {
         showMap();
 
 		// TODO change to DOWNLOAD_URL once we have the proper url
-		downloadButton = new DownloadButton(DOWNLOAD_URL + dataset.getUri());
-
-		downloadButton.addStyleName("downloadButton");
-
-		addToCollectionButton = new Button("Add to collection",
-				new ClickHandler() {
-
-					@Override
-					public void onClick(ClickEvent arg0) {
-						showAddToCollectionDialog();
-					}
-				});
+        downloadAnchor = new Anchor("Download full size");
+        
+        downloadAnchor.addStyleName("datasetActionLink");
+        
+        downloadAnchor.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				Window.open(DOWNLOAD_URL + dataset.getUri(), "_blank", "");
+			}
+		});
 
 		actionsPanel = new FlowPanel();
 
-		actionsPanel.addStyleName("downloadButtonContainer");
+		actionsPanel.addStyleName("datasetActions");
 
-		actionsPanel.add(downloadButton);
-
-		actionsPanel.add(addToCollectionButton);
+		actionsPanel.add(downloadAnchor);
 
         if ( pyramid != null ) {
-            final Button zoomButton = new Button( "Zoom" );
+        	
+            final Anchor zoomAnchor = new Anchor( "Zoom" );
+            
+            zoomAnchor.addStyleName("datasetActionLink");
+            
             final String zoomUri = PYRAMID_URL + pyramid + "/xml";
-            zoomButton.addClickHandler( new ClickHandler() {
+            
+            zoomAnchor.addClickHandler( new ClickHandler() {
                 public void onClick( ClickEvent event )
                 {
                     previewPanel.clear();
-                    if ( zoomButton.getText().equals( "Zoom" ) ) {
+                    if ( zoomAnchor.getText().equals( "Zoom" ) ) {
                         Label seadragon = new Label();
                         seadragon.addStyleName( "seadragon" );
                         previewPanel.add( seadragon );
                         seadragon.getElement().setId( "seadragon" );
-                        zoomButton.setText( "Preview" );
+                        zoomAnchor.setText( "Preview" );
                         showSeadragon( seadragon.getElement().getId(), zoomUri );
                     } else {
                         hideSeadragon( );
                         previewPanel.add( preview );
-                        zoomButton.setText( "Zoom" );
+                        zoomAnchor.setText( "Zoom" );
                     }
                 }
             } );
-            actionsPanel.add( zoomButton );
+            
+            actionsPanel.add( zoomAnchor );
         }
-		
-		// information panel with extra metadata
-//		informationPanel = new DisclosurePanel("Extracted Information");
-//
-//		informationPanel.addStyleName("downloadButtonContainer");
-//
-//		informationPanel.setAnimationEnabled(true);
-//
-//		informationPanel.setWidth("100%");
 
 		informationTable = new FlexTable();
 		
@@ -345,11 +321,6 @@ public class DatasetWidget extends Composite {
 
 		informationTable.setWidth("100%");
 		
-//		informationTable.setBorderWidth(1);
-
-//		informationPanel.add(informationTable);
-		
-		// user defined metadata
 		UserMetadataWidget um = new UserMetadataWidget(dataset.getUri(), service);
 		um.setWidth("100%");
 		DisclosurePanel additionalInformationPanel = new DisclosurePanel("Additional Information");
@@ -367,8 +338,10 @@ public class DatasetWidget extends Composite {
 		leftColumn.add(titleLabel);
 
 		previewPanel = new AbsolutePanel();
+		
 		previewPanel.add(preview);
-		previewPanel.addStyleName("downloadButtonContainer");
+		
+		previewPanel.addStyleName("previewPanel");
 		
 		leftColumn.add(previewPanel);
 
@@ -377,8 +350,6 @@ public class DatasetWidget extends Composite {
 		leftColumn.add(actionsPanel);
 		
 		leftColumn.add(additionalInformationPanel);
-		
-//		leftColumn.add(informationPanel);
 		
 		leftColumn.add(annotationsWidget);
 
@@ -421,86 +392,14 @@ public class DatasetWidget extends Composite {
         }
     }-*/;
 
-	private void previewPanel(final String uri) {
-		
-//		previewPanel = new FlowPanel();
-		previewPanel = new AbsolutePanel();
-		
-		previewPanel.addStyleName("previewPanel");
-		
-		previewControls = new FlowPanel();
-		
-		Anchor zoomLink = new Anchor("Zoom", GWT.getHostPageBaseURL()+"pyramid/uri/"+uri);
-		
-		zoomLink.addStyleName("actionLink");
-		
-		previewPanel.add(previewControls);
-		
-//		pw = new PreviewWidget(uri, GetPreviews.LARGE, null);
-//		
-//		previewPanel.add(pw);
-
-		Anchor downloadAnchor = new Anchor("Download full size");
-		downloadAnchor.addStyleName("actionLink");
-		downloadAnchor.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				Window.open(DOWNLOAD_URL + uri, "_blank", "");
-			}
-		});
-		
-		Anchor addToCollectionAnchor = new Anchor("Add to collection");
-		
-		addToCollectionAnchor.addStyleName("actionLink");
-		
-		addToCollectionAnchor.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				showAddToCollectionDialog();
-			}
-		});
-		
-		actionsPanel = new FlowPanel();
-
-		actionsPanel.add(zoomLink);
-		
-		actionsPanel.add(downloadAnchor);
-
-		actionsPanel.add(addToCollectionAnchor);
-		
-		previewPanel.add(actionsPanel);
-	}
-
 	/**
 	 * Asynchronously load the collections this dataset is part of.
 	 */
 	private void loadCollections() {
-		service.execute(new GetCollections(uri),
-				new AsyncCallback<GetCollectionsResult>() {
+		
+		collectionWidget = new CollectionMembershipWidget(service, uri);
 
-					@Override
-					public void onFailure(Throwable arg0) {
-						// TODO Auto-generated method stub
-					}
-
-					@Override
-					public void onSuccess(GetCollectionsResult arg0) {
-						ArrayList<CollectionBean> collections = arg0
-								.getCollections();
-						if (collections.size() > 0) {
-							if (collectionWidget != null) {
-								rightColumn.remove(collectionWidget);
-							}
-							collectionWidget = new CollectionMembershipWidget();
-							for (CollectionBean collection : collections) {
-								collectionWidget.addCollection(collection);
-							}
-							rightColumn.add(collectionWidget);
-						}
-					}
-				});
+		rightColumn.add(collectionWidget);
 	}
 
 
@@ -531,16 +430,6 @@ public class DatasetWidget extends Composite {
 						}
 					}
 				});
-	}
-
-	/**
-	 * Popup dialog to add the dataset to a collection. User selects collection
-	 * from a list box.
-	 */
-	protected void showAddToCollectionDialog() {
-		addToCollectionDialog = new AddToCollectionDialog(service,
-				new AddToCollectionHandler());
-		addToCollectionDialog.center();
 	}
 	
 	/**
@@ -685,36 +574,4 @@ public class DatasetWidget extends Composite {
             } );
         }
     }
-
-	class AddToCollectionHandler implements ClickHandler {
-
-		@Override
-		public void onClick(ClickEvent arg0) {
-			String value = addToCollectionDialog.getSelectedValue();
-			if (value != null) {
-				GWT.log("Adding " + uri + " to collection " + value, null);
-				Collection<String> datasets = new HashSet<String>();
-				datasets.add(uri);
-				service.execute(new AddToCollection(value, datasets),
-						new AsyncCallback<AddToCollectionResult>() {
-
-							@Override
-							public void onFailure(Throwable arg0) {
-								GWT.log("Error adding dataset to collection",
-										arg0);
-							}
-
-							@Override
-							public void onSuccess(AddToCollectionResult arg0) {
-								GWT
-										.log(
-												"Datasets successfully added to collection",
-												null);
-								addToCollectionDialog.hide();
-								loadCollections();
-							}
-						});
-			}
-		}
-	}
 }

@@ -66,7 +66,7 @@ public class TagsWidget extends Composite {
 		tagsPanel.addStyleName("tagsLinks");
 		mainPanel.add(tagsPanel);
 		
-		addTag = new Anchor("Add tag");
+		addTag = new Anchor("Add a tag");
 		mainPanel.add(addTag);
 		
 		addTag.addClickHandler(new ClickHandler() {
