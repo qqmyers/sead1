@@ -26,47 +26,27 @@ import org.apache.commons.logging.LogFactory;
  */
 public class Mail {
 
+	private static final String MEDICI_FROM = "Medici";
+
 	private static final String CONFIGURATION_PATH = "mail.properties";
 
-	private static final String SUBJECT = "[Medici] Account Activated";
+	private static final String USER_ACTIVATION_SUBJECT = "[Medici] Account Activated";
 
-	private static final String BODY = "Your account has been activated. \n\n-The Management";
+	private static final String USER_ACTIVATION_BODY = "Your account has been activated. \n\n-The Management";
 
-	private static final String SUBJECT_NEW_PASSWORD = "[Medici] New Password";
+	private static final String NEW_PASSWORD_SUBJECT = "[Medici] New Password";
 
-	private static final String BODY_BODY_NEW_PASSWORD = "Your new password is: ";
+	private static final String NEW_PASSWORD_BODY = "Your new password is: ";
+	
+	private static final String NEW_USER_SUBJECT = "[Medici] New User";
+
+	private static final String NEW_USER_BODY = "A new user has registered: ";
 
 	private static Properties configuration = new Properties();
 
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(Mail.class);
 
-	/**
-	 * Notify user of authorization change.
-	 * 
-	 * @param userAddress
-	 */
-	public static void userAuthorized(String userAddress) {
-		Session session = Session.getDefaultInstance(configuration, null);
-		MimeMessage message = new MimeMessage(session);
-		try {
-			String from = session.getProperty("mail.from");
-			message.setFrom(new InternetAddress(from, "Medici"));
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(
-					userAddress));
-			message.setSubject(SUBJECT);
-			message.setText(BODY);
-			Transport.send(message);
-			log.debug("Mail sent to " + userAddress
-					+ " to notify of change in permissions.");
-		} catch (MessagingException e) {
-			log.error("Unable to send email message for users authorized to "
-					+ userAddress, e);
-		} catch (UnsupportedEncodingException e) {
-			log.error("Unable to send email message for users authorized to "
-					+ userAddress, e);
-		}
-	}
 
 	static {
 		loadConfig();
@@ -100,6 +80,33 @@ public class Mail {
 			}
 		}
 	}
+	
+	/**
+	 * Notify user of authorization change.
+	 * 
+	 * @param userAddress
+	 */
+	public static void userAuthorized(String userAddress) {
+		Session session = Session.getDefaultInstance(configuration, null);
+		MimeMessage message = new MimeMessage(session);
+		try {
+			String from = session.getProperty("mail.from");
+			message.setFrom(new InternetAddress(from, MEDICI_FROM));
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(
+					userAddress));
+			message.setSubject(USER_ACTIVATION_SUBJECT);
+			message.setText(USER_ACTIVATION_BODY);
+			Transport.send(message);
+			log.debug("Mail sent to " + userAddress
+					+ " to notify of change in permissions.");
+		} catch (MessagingException e) {
+			log.error("Unable to send email message for users authorized to "
+					+ userAddress, e);
+		} catch (UnsupportedEncodingException e) {
+			log.error("Unable to send email message for users authorized to "
+					+ userAddress, e);
+		}
+	}
 
 	public static void sendNewPassword(String email, String newPassword)
 			throws UnsupportedEncodingException, MessagingException {
@@ -107,14 +114,41 @@ public class Mail {
 		MimeMessage message = new MimeMessage(session);
 
 		String from = session.getProperty("mail.from");
-		message.setFrom(new InternetAddress(from, "Medici"));
+		message.setFrom(new InternetAddress(from, MEDICI_FROM));
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress(
 				email));
-		message.setSubject(SUBJECT_NEW_PASSWORD);
-		message.setText(BODY_BODY_NEW_PASSWORD + newPassword);
+		message.setSubject(NEW_PASSWORD_SUBJECT);
+		message.setText(NEW_PASSWORD_BODY + newPassword);
 		Transport.send(message);
 		log.debug("Mail sent to " + email
 				+ " to notify of change in permissions.");
+	}
+
+	/**
+	 * Notify admin of new user registration.
+	 * 
+	 * @param userAddress
+	 */
+	public static void userAdded(String userAddress) {
+		Session session = Session.getDefaultInstance(configuration, null);
+		MimeMessage message = new MimeMessage(session);
+		String from = session.getProperty("mail.from");
+		try {
+			message.setFrom(new InternetAddress(from, MEDICI_FROM));
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(
+					from, MEDICI_FROM));
+			message.setSubject(NEW_USER_SUBJECT);
+			message.setText(NEW_USER_BODY + userAddress);
+			Transport.send(message);
+			log.debug("Mail sent to " + from
+					+ " to notify a new user has registered.");
+		} catch (MessagingException e) {
+			log.error("Unable to send email message for new user registration to "
+					+ from, e);
+		} catch (UnsupportedEncodingException e) {
+			log.error("Unable to send email message for new user registration to "
+					+ from, e);
+		}
 	}
 
 }

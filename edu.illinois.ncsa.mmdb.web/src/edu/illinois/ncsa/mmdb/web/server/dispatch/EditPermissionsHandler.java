@@ -87,8 +87,7 @@ public class EditPermissionsHandler implements
 						+ " email was null/empty. Email not sent.");
 			}
 		} catch (OperatorException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error("Error emailing notification to user " + user, e1);
 		}
 	}
 
