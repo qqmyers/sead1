@@ -54,7 +54,8 @@ public class MediciResourceFactory implements ResourceFactory
     public Resource getResource( String host, String path )
     {
         // get path minus servlet
-        path = path.replaceFirst( MiltonServlet.request().getServletPath() + "/?", "" );
+        String servlet = MiltonServlet.request().getContextPath() + MiltonServlet.request().getServletPath() + "/?";
+        path = path.replaceFirst( servlet, "" );
 
         // remove leading slash
         if ( path.startsWith( "/" ) ) { //$NON-NLS-1$
