@@ -99,7 +99,7 @@ public class LoginPage extends Composite {
 		table.getFlexCellFormatter().setHorizontalAlignment(0, 0,
 				HasHorizontalAlignment.ALIGN_CENTER);
 
-		Label usernameLabel = new Label("Username:");
+		Label usernameLabel = new Label("Email:");
 
 		table.setWidget(1, 0, usernameLabel);
 
