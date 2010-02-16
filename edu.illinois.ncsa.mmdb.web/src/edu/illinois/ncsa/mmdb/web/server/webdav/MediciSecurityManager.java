@@ -34,10 +34,12 @@ public class MediciSecurityManager implements SecurityManager
 
     private Map<String, String> accepted = new HashMap<String, String>();
     private RBAC                rbac;
+    private boolean             allowDelete;
 
-    public MediciSecurityManager( Context context )
+    public MediciSecurityManager( Context context, boolean allowDelete )
     {
-        rbac = new RBAC( context );
+        this.rbac = new RBAC( context );
+        this.allowDelete = allowDelete;
     }
 
     @Override
@@ -87,6 +89,11 @@ public class MediciSecurityManager implements SecurityManager
             }
         } catch ( OperatorException e ) {
             log.info( "Could not check permissions.", e );
+            return false;
+        }
+
+        // no delete
+        if ( !allowDelete && method.equals( Method.DELETE ) ) {
             return false;
         }
 

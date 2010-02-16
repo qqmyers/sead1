@@ -30,7 +30,7 @@ public class MediciResourceFactory implements ResourceFactory
     public MediciResourceFactory()
     {
         Context context = TupeloStore.getInstance().getContext();
-        SecurityManager security = new MediciSecurityManager( context );
+        SecurityManager security = new MediciSecurityManager( context, false );
 
         root = new FolderResource( "/", security ); //$NON-NLS-1$
         try {
