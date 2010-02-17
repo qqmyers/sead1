@@ -2,7 +2,6 @@ package edu.illinois.ncsa.mmdb.web.client;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
@@ -17,8 +16,8 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
 public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 	protected LabeledListBox sortOptions;
 	protected LabeledListBox viewOptions;
-	List<HasValueChangeHandlers<String>> sortControls;
-	List<HasValueChangeHandlers<String>> viewTypeControls;
+	LinkedList<LabeledListBox> sortControls;
+	LinkedList<LabeledListBox> viewTypeControls;
 	
 	/**
 	 * Parse the parameters in the history token after the '?'
@@ -57,6 +56,18 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 	String sortKey = getDefaultSortKey();
 	String viewType = getDefaultViewType();
 	
+	public String getViewType() {
+		return viewType;
+	}
+
+	public void setViewType(String viewType) {
+		this.viewType = viewType;
+		// avoid retriggering a change event and just update the ifc
+		for(LabeledListBox vtc : viewTypeControls) {
+			vtc.setSelected(viewType != null ? viewType : getDefaultViewType());
+		}
+	}
+
 	protected boolean isViewValid = false;
 	protected boolean isPageValid = false;
 
@@ -82,7 +93,11 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		}
 		if(!isViewValid) {
 			sortKey = params.containsKey("sort") ? params.get("sort") : getDefaultSortKey();
-			viewType = params.containsKey("view") ? params.get("view") : getDefaultViewType();
+			if(params.containsKey("view")) {
+				setViewType(params.get("view"));
+			} else if(getViewType() == null) {
+				setViewType(getDefaultViewType());
+			}
 		}
 		return params;
 	}
@@ -120,13 +135,13 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 	public PagingDcThingView() {
 		super();
 		
-		sortControls = new LinkedList<HasValueChangeHandlers<String>>();
-		viewTypeControls = new LinkedList<HasValueChangeHandlers<String>>();
+		sortControls = new LinkedList<LabeledListBox>();
+		viewTypeControls = new LinkedList<LabeledListBox>();
 		
 		parseHistoryToken(History.getToken());
 		
-		topPagingPanel.add(createPagingPanel(page, sortKey, viewType));
-		bottomPagingPanel.add(createPagingPanel(page, sortKey, viewType));
+		topPagingPanel.add(createPagingPanel(page, sortKey, getViewType()));
+		bottomPagingPanel.add(createPagingPanel(page, sortKey, getViewType()));
 		
 		History.addValueChangeHandler(new ValueChangeHandler<String>() {
 			public void onValueChange(ValueChangeEvent<String> event) {
@@ -145,7 +160,7 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		addViewTypeChangeHandler(new ValueChangeHandler<String>() {
 			public void onValueChange(ValueChangeEvent<String> event) {
 				setPage(1);
-				viewType = event.getValue();
+				setViewType(event.getValue());
 				invalidateView();
 				History.newItem(getHistoryToken());
 			}
@@ -160,11 +175,11 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		});
 	}
 	
-	protected void addSortControl(HasValueChangeHandlers<String> control) {
+	protected void addSortControl(LabeledListBox control) {
 		sortControls.add(control);
 	}		
 	
-	protected void addViewTypeControl(HasValueChangeHandlers<String> control) {
+	protected void addViewTypeControl(LabeledListBox control) {
 		viewTypeControls.add(control);
 	}		
 	

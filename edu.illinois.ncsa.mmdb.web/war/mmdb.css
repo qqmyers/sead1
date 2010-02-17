@@ -706,14 +706,42 @@ body {
     vertical-align: middle;
 }
 
-.bigFlowCell {
+.flowPreviewLarge {
     width: 400px;
-    height: auto;
+    height: 400px;
+    text-align: center;
+    overflow: hidden;
 }
 
-.smallFlowCell {
+.flowPreviewSmall {
     width: 150px;
-    height: auto;
+    height: 400px;
+    text-align: center;
+    overflow: hidden;	
+}
+
+.flowLabelLarge {
+	width: 400px;
+	overflow: hidden;
+}
+
+.flowLabelSmall {
+	width: 150px;
+	overflow: hidden;
+}
+
+.gridPreviewSmall {
+    width: 120px;
+    height: 100px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.gridLabelSmall {
+    width: 120px;
+    height: 10px;
+    text-align: center;
+    overflow: hidden;
 }
 
 .editHighlight {

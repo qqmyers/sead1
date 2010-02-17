@@ -58,9 +58,9 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		previewPanel.addStyleName("centered");
 		badgeImages.put(uri, previewPanel);
 
-		if(viewType.equals("grid")) {
+		if(getViewType().equals("grid")) {
 			addGridItem(uri, item, previewPanel);
-		} else if(viewType.equals("flow")) {
+		} else if(getViewType().equals("flow")) {
 			addFlowItem(uri, item, previewPanel);
 		} else {
 			addListItem(uri, item, previewPanel);
@@ -87,7 +87,9 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		int row = n / 5; // width of table
 		int col = n % 5;
 		table.setWidget(row*2, col, previewPanel);
+		table.getCellFormatter().addStyleName(row*2, col, "gridPreviewSmall");
 		table.setWidget((row*2)+1, col, t);
+		table.getCellFormatter().addStyleName((row*2)+1, col, "gridLabelSmall");
 		n++;
 	}
 	
@@ -152,9 +154,9 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 	}
 
 	int pageSize() {
-		if(viewType.equals("grid")) {
+		if(getViewType().equals("grid")) {
 			return 35;
-		} else if(viewType.equals("flow")) {
+		} else if(getViewType().equals("flow")) {
 			return 3;
 		} else {
 			return 10;

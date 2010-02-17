@@ -69,9 +69,9 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 
 	protected void displayView() {
 		DatasetTableView datasetTableView = null;
-		if (viewType.equals("grid")) {
+		if (getViewType().equals("grid")) {
 			datasetTableView = new DatasetTableGridView();
-		} else if(viewType.equals("flow")) {
+		} else if(getViewType().equals("flow")) {
 			datasetTableView = new DatasetTableCoverFlowView();
 		} else {
 			datasetTableView = new DatasetTableOneColumnView();
@@ -104,7 +104,7 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 		pageOffset = (page - 1) * pageSize;
 
 		// we need to adjust the page size, just for flow view
-		final int adjustedPageSize = (viewType.equals("flow") ? 3 : pageSize);
+		final int adjustedPageSize = (getViewType().equals("flow") ? 3 : pageSize);
 		
 		ListDatasets query = new ListDatasets();
 		query.setOrderBy(uriForSortKey());

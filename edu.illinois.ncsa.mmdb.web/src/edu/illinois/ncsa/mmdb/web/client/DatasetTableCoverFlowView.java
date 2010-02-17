@@ -14,7 +14,7 @@ public class DatasetTableCoverFlowView extends DatasetTableView {
 
 	public DatasetTableCoverFlowView() {
 		super();
-		setWidth("700px");
+		setWidth("715px");
 	}
 	
 	@Override
@@ -27,19 +27,22 @@ public class DatasetTableCoverFlowView extends DatasetTableView {
 	public void addRow(String id, String title, String mimeType, Date date,	String previewUri) {
 		VerticalPanel panel = new VerticalPanel();
 		PreviewWidget preview = null;
+		Label titleLabel = new Label(title);
 		if(n++ == 1) {
 			preview = new PreviewWidget(id, GetPreviews.LARGE, "dataset?id="+id);
 			preview.setWidth("400px");
 			preview.setMaxWidth(400);
-			this.getCellFormatter().setWidth(0, n, "400px");
+			getCellFormatter().addStyleName(0, n, "flowPreviewLarge");
+			titleLabel.addStyleName("flowLabelLarge");
 		} else {
 			preview = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id="+id);
 			preview.setMaxWidth(150);
 			preview.setWidth("150px");
-			this.getCellFormatter().setWidth(0, n, "150px");
+			getCellFormatter().addStyleName(0, n, "flowPreviewSmall");
+			titleLabel.addStyleName("flowLabelSmall");
 		}
 		panel.add(preview);
-		panel.add(new Label(title));
+		panel.add(titleLabel);
 		this.setWidget(0, n, panel);
 	}
 

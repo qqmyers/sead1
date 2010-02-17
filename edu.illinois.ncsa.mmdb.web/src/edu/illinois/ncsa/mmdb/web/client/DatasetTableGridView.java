@@ -53,7 +53,9 @@ public class DatasetTableGridView extends DatasetTableView {
 		int row = n / WIDTH;
 		int col = n % WIDTH;
 		setWidget(row*2, col, pw);
+		getCellFormatter().addStyleName(row*2, col, "gridPreviewSmall");
 		setWidget((row*2)+1, col, t);
+		getCellFormatter().addStyleName((row*2)+1, col, "gridLabelSmall");
 		n++;
 	}
 
@@ -61,8 +63,13 @@ public class DatasetTableGridView extends DatasetTableView {
 		for(int i = n; i < getPageSize(); i++) {
 			int row = i / WIDTH;
 			int col = i % WIDTH;
-			clearCell(row*2, col);
-			clearCell((row*2)+1, col);
+			try {
+				clearCell(row*2, col);
+				clearCell((row*2)+1, col);
+			} catch(IndexOutOfBoundsException x) {
+				// this is normal and means there are no more cells to clear.
+				return;
+			}
 		}
 	}
 	
