@@ -65,7 +65,7 @@
 		<!-- compile the CET beans -->
 		<delete dir="beanclass" />
 		<mkdir dir="beanclass" />
-		<javac destdir="beanclass" debug="${debug}" deprecation="${deprecation}" target="1.5" source="1.5">
+		<javac destdir="beanclass" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
 			<src path="../edu.uiuc.ncsa.cet.bean/src" />
 			<exclude name="**/sdl/**/*.java" />
 		</javac>
@@ -79,7 +79,7 @@
 		<!-- compile the CET beans tupelo -->
 		<delete dir="beanclass" />
 		<mkdir dir="beanclass" />
-		<javac destdir="beanclass" debug="${debug}" deprecation="${deprecation}" target="1.5" source="1.5">
+		<javac destdir="beanclass" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
 			<src path="../edu.uiuc.ncsa.cet.bean.tupelo/src" />
 			<classpath>
 				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
@@ -91,7 +91,7 @@
 		<!-- compile the contexts 
 		<delete dir="beanclass"/>
 		<mkdir dir="beanclass"/>		
-	    <javac destdir="beanclass" debug="${debug}" deprecation="${deprecation}" target="1.5" source="1.5">
+	    <javac destdir="beanclass" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
 	    	<src path="../edu.uiuc.ncsa.cet.tupelo.contexts/src"/>
 	    	<classpath>
 	    		<fileset dir="war/WEB-INF/lib" includes="*.jar"/>
@@ -108,7 +108,7 @@
 		<!-- compile the basic jaas jar -->
 		<delete dir="jaasTemp" />
 		<mkdir dir="jaasTemp" />
-		<javac destdir="jaasTemp" debug="${debug}" deprecation="${deprecation}" target="1.5" source="1.5">
+		<javac destdir="jaasTemp" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
 			<src path="../edu.illinois.ncsa.bard.jaas/src" />
 			<classpath>
 				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
@@ -127,7 +127,7 @@
 		<!-- compile the context based jaas module -->
 		<delete dir="jaasTemp" />
 		<mkdir dir="jaasTemp" />
-		<javac destdir="jaasTemp" debug="${debug}" deprecation="${deprecation}" target="1.5" source="1.5">
+		<javac destdir="jaasTemp" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
 			<src path="../edu.illinois.ncsa.bard.jaas.context/src" />
 			<classpath>
 				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
@@ -144,7 +144,7 @@
 		<!-- compile the always authenticate jaas module -->
 		<delete dir="jaasTemp" />
 		<mkdir dir="jaasTemp" />
-		<javac destdir="jaasTemp" debug="${debug}" deprecation="${deprecation}" target="1.5" source="1.5">
+		<javac destdir="jaasTemp" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
 			<src path="../edu.illinois.ncsa.bard.jaas.always/src" />
 			<exclude name="**/osgi/**/*.java" />
 		</javac>
