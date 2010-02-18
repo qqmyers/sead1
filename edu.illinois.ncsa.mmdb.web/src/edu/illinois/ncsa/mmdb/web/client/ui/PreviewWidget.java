@@ -51,7 +51,7 @@ public class PreviewWidget extends Composite {
 	private final SimplePanel contentPanel;
 	private Image image;
 	private Label noPreview;
-	private final String size;
+	private String size;
 	private int whichDelay = 0;
 	private final String datasetUri;
 	private final String link;
@@ -68,34 +68,27 @@ public class PreviewWidget extends Composite {
 	 * @param link
 	 */
 	public PreviewWidget(final String datasetUri, String desiredSize,
-			String link) {
-
+			final String link) {
 		this.datasetUri = datasetUri;
 		this.link = link;
-		this.size = desiredSize;
+		// default to small size if desired size is unrecognized
+		if(desiredSize != GetPreviews.LARGE) {
+			size = GetPreviews.SMALL;
+		} else {
+			size = GetPreviews.LARGE;
+		}
 
 		contentPanel = new SimplePanel();
 		initWidget(contentPanel);
 
-		// default to small size if desired size is unrecognized
-		if (!desiredSize.equals(GetPreviews.SMALL)) {
-			grayImage(GetPreviews.LARGE, link);
-			getPreview(datasetUri, link);
-		} else {
-			showThumbnail();
+		// add the preview image
+		Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri + "?time=" + System.currentTimeMillis());
+		if(size == GetPreviews.SMALL) {
+			previewImage.addStyleName("thumbnail");
 		}
-	}
-
-	/**
-	 * Try showing the thumbnail. If not available show a no preview label and
-	 * schedule a request for later.
-	 */
-	private void showThumbnail() {
-		Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);
-		previewImage.addStyleName("thumbnail");
 		previewImage.addErrorHandler(new ErrorHandler() {
 			public void onError(ErrorEvent event) {
-				grayImage(GetPreviews.SMALL, link);
+				grayImage(size, link);
 				getPreview(datasetUri, link);
 			}
 		});
@@ -186,7 +179,7 @@ public class PreviewWidget extends Composite {
 		image.addStyleName("thumbnail");
 		addLink(image, link);
 		image.addStyleName("imagePreviewShortWidth");
-		image.setWidth(maxWidth+"px");
+		//image.setWidth(getMaxWidth()+"px");
 		contentPanel.add(image);
 	}
 	
