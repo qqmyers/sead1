@@ -18,7 +18,6 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
@@ -266,18 +265,12 @@ public class DatasetWidget extends Composite {
         // map
         showMap();
 
-		// TODO change to DOWNLOAD_URL once we have the proper url
-        downloadAnchor = new Anchor("Download full size");
-        
+        downloadAnchor = new Anchor();
+		downloadAnchor.setHref(DOWNLOAD_URL + dataset.getUri());
+		downloadAnchor.setText("Download full size");
+		downloadAnchor.setTarget("_blank");
+		downloadAnchor.addStyleName("datasetActionLink");
         downloadAnchor.addStyleName("datasetActionLink");
-        
-        downloadAnchor.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				Window.open(DOWNLOAD_URL + dataset.getUri(), "_blank", "");
-			}
-		});
 
 		actionsPanel = new FlowPanel();
 
