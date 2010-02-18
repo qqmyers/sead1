@@ -82,19 +82,22 @@ public class PreviewWidget extends Composite {
 		initWidget(contentPanel);
 
 		// add the preview image
-		Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri + "?time=" + System.currentTimeMillis());
 		if(size == GetPreviews.SMALL) {
+			Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri + "?time=" + System.currentTimeMillis());
 			previewImage.addStyleName("thumbnail");
+			previewImage.addErrorHandler(new ErrorHandler() {
+				public void onError(ErrorEvent event) {
+					grayImage(size, link);
+					getPreview(datasetUri, link);
+				}
+			});
+			addLink(previewImage, link);
+			contentPanel.clear();
+			contentPanel.add(previewImage);
+		} else {
+			grayImage(size, link);
+			getPreview(datasetUri, link);
 		}
-		previewImage.addErrorHandler(new ErrorHandler() {
-			public void onError(ErrorEvent event) {
-				grayImage(size, link);
-				getPreview(datasetUri, link);
-			}
-		});
-		addLink(previewImage, link);
-		contentPanel.clear();
-		contentPanel.add(previewImage);
 	}
 
 	/**
