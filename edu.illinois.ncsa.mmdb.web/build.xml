@@ -8,6 +8,10 @@
 	<property name="deploy" value="/var/lib/tomcat6/webapps" />
 
 	<property name="war" value="${ant.project.name}.war" />
+	
+	<property name="debug" value="true" />
+	
+	<property name="deprecation" value="true" />
 		
 	<condition property="desktop" value="desktop/" else="/desktop/">
 		<isset property="env.VERSION"/>
@@ -65,7 +69,7 @@
 		<!-- compile the CET beans -->
 		<delete dir="beanclass" />
 		<mkdir dir="beanclass" />
-		<javac destdir="beanclass" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
+		<javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
 			<src path="../edu.uiuc.ncsa.cet.bean/src" />
 			<exclude name="**/sdl/**/*.java" />
 		</javac>
@@ -79,7 +83,7 @@
 		<!-- compile the CET beans tupelo -->
 		<delete dir="beanclass" />
 		<mkdir dir="beanclass" />
-		<javac destdir="beanclass" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
+		<javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
 			<src path="../edu.uiuc.ncsa.cet.bean.tupelo/src" />
 			<classpath>
 				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
@@ -91,7 +95,7 @@
 		<!-- compile the contexts 
 		<delete dir="beanclass"/>
 		<mkdir dir="beanclass"/>		
-	    <javac destdir="beanclass" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
+	    <javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
 	    	<src path="../edu.uiuc.ncsa.cet.tupelo.contexts/src"/>
 	    	<classpath>
 	    		<fileset dir="war/WEB-INF/lib" includes="*.jar"/>
@@ -103,12 +107,30 @@
 		<delete dir="beanclass" />
 	</target>
 
+	<!-- make sure we have the latest contexts jars -->
+	<target name="contexts" depends="cetbean" description="Compile contexts jars">
+		<delete dir="contextsTemp" />
+
+		<!-- compile the mysql context jar -->
+		<mkdir dir="contextsTemp" />
+		<javac destdir="contextsTemp" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
+			<src path="../edu.illinois.ncsa.bard.context.mysql/src" />
+			<classpath>
+				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
+			</classpath>
+			<exclude name="**/osgi/**/*.java" />
+		</javac>
+		<jar jarfile="war/WEB-INF/lib/edu.illinois.ncsa.bard.context.mysql.jar" basedir="contextsTemp" />
+		<delete dir="contextsTemp" />
+
+	</target>
+
 	<!-- make sure we have the latest jaas jars -->
 	<target name="jaas" description="Compile jaas jars">
 		<!-- compile the basic jaas jar -->
 		<delete dir="jaasTemp" />
 		<mkdir dir="jaasTemp" />
-		<javac destdir="jaasTemp" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
+		<javac destdir="jaasTemp" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
 			<src path="../edu.illinois.ncsa.bard.jaas/src" />
 			<classpath>
 				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
@@ -127,7 +149,7 @@
 		<!-- compile the context based jaas module -->
 		<delete dir="jaasTemp" />
 		<mkdir dir="jaasTemp" />
-		<javac destdir="jaasTemp" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
+		<javac destdir="jaasTemp" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
 			<src path="../edu.illinois.ncsa.bard.jaas.context/src" />
 			<classpath>
 				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
@@ -144,7 +166,7 @@
 		<!-- compile the always authenticate jaas module -->
 		<delete dir="jaasTemp" />
 		<mkdir dir="jaasTemp" />
-		<javac destdir="jaasTemp" deprecation="${deprecation}" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
+		<javac destdir="jaasTemp" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
 			<src path="../edu.illinois.ncsa.bard.jaas.always/src" />
 			<exclude name="**/osgi/**/*.java" />
 		</javac>
@@ -189,7 +211,7 @@
 
 	<target name="compile" depends="prepare" description="compiles Java source files to bytecode">
 		<mkdir dir="war/WEB-INF/classes" />
-		<javac srcdir="src" includes="**" encoding="utf-8" destdir="war/WEB-INF/classes" source="1.5" target="1.5" nowarn="true" debug="true" debuglevel="lines,vars,source">
+		<javac srcdir="src" includes="**" encoding="utf-8" destdir="war/WEB-INF/classes" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
 			<classpath refid="classpath" />
 		</javac>
 	</target>

@@ -52,7 +52,6 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
-import edu.uiuc.ncsa.cet.tupelo.contexts.ContextCreators;
 
 /**
  * Singleton class to manage a tupelo context and its associated beansession.
@@ -111,7 +110,7 @@ public class TupeloStore {
 
 		try {
 			// setup context creators
-			ContextCreators.register();
+		    registerContextCreators();
 			context = createSerializeContext();
             //System.out.println(CETBeans.contextToNTriples( context ));
 			if(context == null) {
@@ -133,6 +132,18 @@ public class TupeloStore {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Register all context creators.
+	 */
+    private void registerContextCreators()
+    {
+        try {
+            ContextBeanUtil.addContextCreator( new edu.illinois.ncsa.bard.context.mysql.MysqlContextCreator() );
+        } catch ( Throwable thr ) {
+            log.info( "Could not add MySQL context creator.", thr );
+        }
+    }
 
 	void addUserField(String uri, String label, Context context) throws Exception {
 		context.addTriple(Resource.uriRef(uri), Rdf.TYPE, Cet.cet("userMetadataField"));
