@@ -33,6 +33,7 @@ public class PreviewWidget extends Composite {
 	// FIXME use enums
 	private static final Map<String, String> PREVIEW_URL;
 	private static final Map<String, String> GRAY_URL;
+	private static final Map<String, String> PENDING_URL;
 
 	int maxWidth = 600;
 	
@@ -43,6 +44,9 @@ public class PreviewWidget extends Composite {
 		GRAY_URL = new HashMap<String, String>(); // how I yearn for map literals
 		GRAY_URL.put(GetPreviews.SMALL, "./images/preview-100.gif");
 		GRAY_URL.put(GetPreviews.LARGE, "./images/preview-500.gif");
+		PENDING_URL = new HashMap<String, String>(); // how I yearn for map literals
+		PENDING_URL.put(GetPreviews.SMALL, "./images/loading-small.gif");
+		PENDING_URL.put(GetPreviews.LARGE, "./images/loading-large.gif");
 	}
 
 	static final int delays[] = new int[] { 2000, 5000, 10000, 15000, 20000, -1 };
@@ -155,6 +159,7 @@ public class PreviewWidget extends Composite {
 						Map<String, PreviewImageBean> previews = arg0
 								.getPreviews();
 						if (previews.get(size) == null && !arg0.isStopAsking()) {
+							pendingImage(size, link);
 							retryTimer = new Timer() {
 								@Override
 								public void run() {
@@ -185,7 +190,22 @@ public class PreviewWidget extends Composite {
 		//image.setWidth(getMaxWidth()+"px");
 		contentPanel.add(image);
 	}
-	
+
+	protected void pendingImage(String size, String link) {
+		contentPanel.clear();
+		image = new Image(PENDING_URL.get(size));
+		if(size.equals(GetPreviews.LARGE)) {
+			image.addStyleName("thumbnail");
+			image.addStyleName("pendingLarge");
+		} else {
+			image.addStyleName("pendingSmall");
+		}
+		addLink(image, link);
+		image.addStyleName("imagePreviewShortWidth");
+		//image.setWidth(getMaxWidth()+"px");
+		contentPanel.add(image);
+	}
+
 	/**
 	 * 
 	 */
