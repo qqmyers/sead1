@@ -201,7 +201,7 @@ public class RestServlet extends AuthenticatedServlet {
             log.trace("DOWNLOAD IMAGE "+uri);
             try {
                 String filename = getImageThing(uri).getString(RestService.LABEL_PROPERTY);
-                response.setHeader("content-disposition","attachment; filename="+filename);
+                response.setHeader("content-disposition","attachment; filename=\""+filename+"\"");
                 CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
             } catch(RestServiceException e) {
             	throw new ServletException("failed to retrieve "+request.getRequestURI());

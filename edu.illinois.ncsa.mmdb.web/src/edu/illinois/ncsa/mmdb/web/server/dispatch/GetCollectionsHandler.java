@@ -171,7 +171,6 @@ public class GetCollectionsHandler implements
 			badges = new HashMap<String,String>();
 		}
 		badges.put(collectionUri, badge);
-		System.out.println("badge for "+collectionUri+" = "+badge); // FIXME debug
 		return badge;
 	}
 	
