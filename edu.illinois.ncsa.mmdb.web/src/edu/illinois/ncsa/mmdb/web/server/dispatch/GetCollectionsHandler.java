@@ -28,6 +28,7 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
+import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
@@ -164,6 +165,16 @@ public class GetCollectionsHandler implements
 		return uf;
 	}
 	
+	String returnBadge(String collectionUri, String badge) {
+		if(badges.size() > 200) {
+			// crude capacity management
+			badges = new HashMap<String,String>();
+		}
+		badges.put(collectionUri, badge);
+		System.out.println("badge for "+collectionUri+" = "+badge); // FIXME debug
+		return badge;
+	}
+	
 	/**
 	 * 
 	 * @param collectionUri
@@ -179,20 +190,22 @@ public class GetCollectionsHandler implements
 				u.addPattern("member", Dc.DATE, "date", true);
 				u.addOrderByDesc("date");
 				u.addOrderBy("member");
-				u.setLimit(1);
+				u.setLimit(25);
 				for(Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member")) {
 					badge = row.get(0).getString();
-					if(badges.size() > 200) {
-						// crude capacity management
-						badges = new HashMap<String,String>();
+					if(RestServlet.getSmallPreviewUri(badge) != null) {
+						return returnBadge(collectionUri, badge);
 					}
-					badges.put(collectionUri, badge);
-					return badge;
+				}
+				// none of em have previews :(
+				if(badge != null) {
+					return returnBadge(collectionUri, badge);
 				}
 			} catch(OperatorException e) {
 				log.error("Error getting badges for collection " + collectionUri, e);
 			}
 		}
+		// we either found one or didn't, return it
 		return badge;
 	}
 	

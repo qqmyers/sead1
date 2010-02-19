@@ -49,7 +49,7 @@ public class PreviewWidget extends Composite {
 		PENDING_URL.put(GetPreviews.LARGE, "./images/loading-large.gif");
 	}
 
-	static final int delays[] = new int[] { 2000, 5000, 10000, 15000, 20000, -1 };
+	static final int delays[] = new int[] { 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, -1 };
 	static final String LOADING_TEXT = "Loading...";
 	static final String NO_PREVIEW_TEXT = "No preview available";
 	private final SimplePanel contentPanel;
@@ -158,7 +158,9 @@ public class PreviewWidget extends Composite {
 					public void onSuccess(GetPreviewsResult arg0) {
 						Map<String, PreviewImageBean> previews = arg0
 								.getPreviews();
-						if (previews.get(size) == null && !arg0.isStopAsking()) {
+						if(previews.get(size) == null && arg0.isStopAsking()) {
+							grayImage(size, link);
+						} else if (previews.get(size) == null && !arg0.isStopAsking()) {
 							pendingImage(size, link);
 							retryTimer = new Timer() {
 								@Override
@@ -167,10 +169,10 @@ public class PreviewWidget extends Composite {
 								}
 							};
 							if (delays[whichDelay] > 0) {
-								timeOffset = (timeOffset + 250) % 2000;
-								retryTimer.schedule(delays[whichDelay++] + timeOffset);
+								timeOffset = (timeOffset + 37) % 100;
+								retryTimer.schedule((delays[whichDelay++] * 1000) + timeOffset);
 							} else {
-								grayImage(size, link);
+								pendingImage(size, link);
 							}
 						} else if(previews.get(GetPreviews.LARGE) != null) {
 							contentPanel.clear();
@@ -181,29 +183,40 @@ public class PreviewWidget extends Composite {
 				});
 	}
 
+	boolean isGrayImage = false;
+	boolean isPendingImage = false;
+	
 	protected void grayImage(String size, String link) {
-		contentPanel.clear();
-		image = new Image(GRAY_URL.get(size));
-		image.addStyleName("thumbnail");
-		addLink(image, link);
-		image.addStyleName("imagePreviewShortWidth");
-		//image.setWidth(getMaxWidth()+"px");
-		contentPanel.add(image);
+		if(!isGrayImage) {
+			contentPanel.clear();
+			image = new Image(GRAY_URL.get(size));
+			image.addStyleName("thumbnail");
+			addLink(image, link);
+			image.addStyleName("imagePreviewShortWidth");
+			//image.setWidth(getMaxWidth()+"px");
+			contentPanel.add(image);
+			isGrayImage = true;
+			isPendingImage = false;
+		}
 	}
 
 	protected void pendingImage(String size, String link) {
-		contentPanel.clear();
-		image = new Image(PENDING_URL.get(size));
-		if(size.equals(GetPreviews.LARGE)) {
-			image.addStyleName("thumbnail");
-			image.addStyleName("pendingLarge");
-		} else {
-			image.addStyleName("pendingSmall");
+		if(!isPendingImage) {
+			contentPanel.clear();
+			image = new Image(PENDING_URL.get(size));
+			if(size.equals(GetPreviews.LARGE)) {
+				image.addStyleName("thumbnail");
+				image.addStyleName("pendingLarge");
+			} else {
+				image.addStyleName("pendingSmall");
+			}
+			addLink(image, link);
+			image.addStyleName("imagePreviewShortWidth");
+			//image.setWidth(getMaxWidth()+"px");
+			contentPanel.add(image);
+			isPendingImage = true;
+			isGrayImage = false;
 		}
-		addLink(image, link);
-		image.addStyleName("imagePreviewShortWidth");
-		//image.setWidth(getMaxWidth()+"px");
-		contentPanel.add(image);
 	}
 
 	/**
