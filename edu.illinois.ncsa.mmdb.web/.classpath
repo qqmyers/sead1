@@ -6,7 +6,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo/src"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/mysql-connector-java-5.0.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/contexts.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-dispatch-1.0.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-2.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gin-1.0-20090611.jar"/>
