@@ -230,13 +230,13 @@
 		<copy todir="war/WEB-INF/classes">
 			<fileset dir="src">
 				<include name="commons-logging.properties" />
-				<include name="log4j.properties" />
 				<include name="configuration.xml" />
 				<include name="jaas.config" />
 				<include name="mail.properties" />
 			</fileset>
 		</copy>
 		<copy tofile="war/WEB-INF/classes/context.xml" file="src/context_mmdbdev_hfc.xml" />
+		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" />
 	</target>
 
 	<target name="deploy" depends="war" description="deploys the war file to Tomcat">
