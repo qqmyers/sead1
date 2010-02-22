@@ -124,6 +124,9 @@ public class LoginPage extends Composite {
 				usernameBox.setFocus(true);
 			}
 		});
+		
+		// sign up
+		table.setWidget(1, 3, new Hyperlink("Sign up", "signup"));
 
 		Label passwordLabel = new Label("Password:");
 
@@ -144,6 +147,7 @@ public class LoginPage extends Composite {
 
 		table.setWidget(2, 1, passwordBox);
 		
+		// forgot password link
 		table.setWidget(2, 3, new Hyperlink("Forgot Password?", "requestNewPassword"));
 
 		Button submitButton = new Button("Login", new ClickHandler() {
