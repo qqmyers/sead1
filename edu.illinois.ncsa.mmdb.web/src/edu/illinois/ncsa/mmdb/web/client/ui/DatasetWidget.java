@@ -45,6 +45,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.PreviewBean;
+import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 
 /**
@@ -174,7 +176,7 @@ public class DatasetWidget extends Composite {
 
 					@Override
 					public void onSuccess(GetDatasetResult result) {
-						drawPage(result.getDataset(), result.getPyramid());
+						drawPage(result);
 
 					}
 				});
@@ -186,19 +188,20 @@ public class DatasetWidget extends Composite {
 	 * @param dataset
 	 * @param collection
 	 */
-    private void drawPage(final DatasetBean dataset, String pyramid) {
+    private void drawPage(final GetDatasetResult result) {
 
 		// image preview
-		preview = new PreviewWidget(dataset.getUri(), GetPreviews.LARGE, null);
+        // FIXME use the preview widget to avoid call to server
+		preview = new PreviewWidget(result.getDataset().getUri(), GetPreviews.LARGE, null);
 		
 		// title
-		titleLabel = new EditableLabel(dataset.getTitle());
+		titleLabel = new EditableLabel(result.getDataset().getTitle());
 
 		titleLabel.getLabel().addStyleName("datasetTitle");
 		
 		titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
 			public void onValueChange(final ValueChangeEvent<String> event) {
-				SetProperty change = new SetProperty(dataset.getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue());
+				SetProperty change = new SetProperty(result.getDataset().getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue());
 				service.execute(change, new AsyncCallback<SetPropertyResult>() {
 					public void onFailure(Throwable caught) {
 						titleLabel.cancel();
@@ -219,7 +222,7 @@ public class DatasetWidget extends Composite {
 
 		authorLabel.addStyleName("metadataEntry");
 
-		creator = dataset.getCreator();
+		creator = result.getDataset().getCreator();
 
 		if (creator != null) {
 
@@ -228,15 +231,15 @@ public class DatasetWidget extends Composite {
 			authorLabel.setText("Author: " + creator.getName());
 		}
 
-		sizeLabel = new Label("Size: " + humanBytes(dataset.getSize()));
+		sizeLabel = new Label("Size: " + humanBytes(result.getDataset().getSize()));
 
 		sizeLabel.addStyleName("metadataEntry");
 
-		typeLabel = new Label("Type: " + dataset.getMimeType());
+		typeLabel = new Label("Type: " + result.getDataset().getMimeType());
 
 		typeLabel.addStyleName("metadataEntry");
 
-		String dateString = dataset.getDate() != null ? DATE_TIME_FORMAT.format(dataset.getDate()) : "";
+		String dateString = result.getDataset().getDate() != null ? DATE_TIME_FORMAT.format(result.getDataset().getDate()) : "";
 		
 		dateLabel = new Label("Date: "+dateString);
 
@@ -257,16 +260,16 @@ public class DatasetWidget extends Composite {
 		metadataPanel.add(dateLabel);
 		
 		// tags
-		tagsWidget = new TagsWidget(dataset.getUri(), service);
+		tagsWidget = new TagsWidget(result.getDataset().getUri(), service);
 
 		// annotations
-		annotationsWidget = new AnnotationsWidget(dataset.getUri(), service);
+		annotationsWidget = new AnnotationsWidget(result.getDataset().getUri(), service);
 
         // map
         showMap();
 
         downloadAnchor = new Anchor();
-		downloadAnchor.setHref(DOWNLOAD_URL + dataset.getUri());
+		downloadAnchor.setHref(DOWNLOAD_URL + result.getDataset().getUri());
 		downloadAnchor.setText("Download full size");
 		downloadAnchor.setTarget("_blank");
 		downloadAnchor.addStyleName("datasetActionLink");
@@ -278,13 +281,13 @@ public class DatasetWidget extends Composite {
 
 		actionsPanel.add(downloadAnchor);
 
-        if ( pyramid != null ) {
+        if ( result.getPyramid() != null ) {
         	
             final Anchor zoomAnchor = new Anchor( "Zoom" );
             
             zoomAnchor.addStyleName("datasetActionLink");
             
-            final String zoomUri = PYRAMID_URL + pyramid + "/xml";
+            final String zoomUri = PYRAMID_URL + result.getPyramid() + "/xml";
             
             zoomAnchor.addClickHandler( new ClickHandler() {
                 public void onClick( ClickEvent event )
@@ -307,6 +310,35 @@ public class DatasetWidget extends Composite {
             
             actionsPanel.add( zoomAnchor );
         }
+        
+        for ( PreviewBean pb : result.getPreviews() ) {
+            if ( pb instanceof PreviewVideoBean ) {
+                final PreviewVideoBean pvb = (PreviewVideoBean) pb;
+                final String videoURL = DOWNLOAD_URL + pvb.getUri();
+                final Anchor videoAnchor = new Anchor( "Play Video" );
+                videoAnchor.addStyleName( "datasetActionLink" );
+                videoAnchor.addClickHandler( new ClickHandler() {
+                    public void onClick( ClickEvent event )
+                    {
+                        previewPanel.clear();
+                        if ( videoAnchor.getText().equals( "Play Video" ) ) {
+                            Label container = new Label();
+                            container.addStyleName( "seadragon" );
+                            container.getElement().setId( "video" );
+                            previewPanel.add( container );
+                            videoAnchor.setText( "Preview" );
+                            showVideo( container.getElement().getId(), videoURL, Long.toString( pvb.getWidth() ), Long.toString( pvb.getHeight() ) );
+                        } else {
+                            hideVideo();
+                            previewPanel.add( preview );
+                            videoAnchor.setText( "Play Video" );
+                        }
+                    }
+                } );
+
+                actionsPanel.add( videoAnchor );
+            }
+        }
 
 		informationTable = new FlexTable();
 		
@@ -314,7 +346,7 @@ public class DatasetWidget extends Composite {
 
 		informationTable.setWidth("100%");
 		
-		UserMetadataWidget um = new UserMetadataWidget(dataset.getUri(), service);
+		UserMetadataWidget um = new UserMetadataWidget(result.getDataset().getUri(), service);
 		um.setWidth("100%");
 		DisclosurePanel additionalInformationPanel = new DisclosurePanel("Additional Information");
 		additionalInformationPanel.addStyleName("additionalInformation");
@@ -355,6 +387,21 @@ public class DatasetWidget extends Composite {
 		loadDerivedFrom(uri,4);
 	}
 
+    public final native void showVideo( String container, String url, String w, String h ) /*-{
+        // open with new url
+        if (url != null) {
+            $wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');
+            $wdn.player.addParam('allowfullscreen','true'); 
+            $wdn.player.addParam('allowscriptaccess','always'); 
+            $wdn.player.addParam('flashvars','file=' + url); 
+            $wdn.player.write(container); 
+        }
+    }-*/;
+    
+    public final native void hideVideo() /*-{
+        
+    }-*/;
+    
     public final native void showSeadragon( String container, String url ) /*-{
         $wnd.Seadragon.Config.debug = true;
         $wnd.Seadragon.Config.imagePath = "img/";

@@ -4,6 +4,7 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
@@ -20,10 +21,11 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
+import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.ImagePyramidBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewVideoBeanUtil;
 
 /**
  * Retrieve a specific dataset.
@@ -31,62 +33,60 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
  * @author Luigi Marini
  * 
  */
-public class GetDatasetHandler implements
-		ActionHandler<GetDataset, GetDatasetResult> {
+public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetResult>
+{
 
-	/** Commons logging **/
-	private static Log log = LogFactory.getLog(GetDatasetHandler.class);
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog( GetDatasetHandler.class );
 
-	@Override
-	public GetDatasetResult execute(GetDataset action, ExecutionContext arg1)
-			throws ActionException {
-		
-		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-		
-		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-		
-		try {
-			DatasetBean datasetBean = dbu.get(action.getUri());
-			
-			datasetBean = dbu.update(datasetBean);
+    @Override
+    public GetDatasetResult execute( GetDataset action, ExecutionContext arg1 ) throws ActionException
+    {
 
-			// preview
-			PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(beanSession);
-			Collection<PreviewImageBean> previews = pibu
-					.getAssociationsFor(action.getUri());
-			for (PreviewImageBean preview : previews) {
-				log.debug("Preview " + preview.getLabel() + " "
-						+ preview.getWidth() + "x" + preview.getHeight());
-			}
-			if (previews.isEmpty()) {
-				log.debug("No image previews available for " + action.getUri());
-			}
+        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
-			// FIXME the next query is probably unnecessary, if we can get to the underlying BeanThing
-			// representing the dataset which will have this triple in it, or not
-			Set<Triple> pyramids =TupeloStore.getInstance().getContext().match(Resource.uriRef(datasetBean.getUri()), ImagePyramidBeanUtil.HAS_PYRAMID, null);
-			String pyramid = null;
-			if (pyramids.size() > 0) {
-			    pyramid = pyramids.iterator().next().getObject().getString();
-			}
-			return new GetDatasetResult(datasetBean, previews, pyramid);
-		} catch (Exception e) {
-			log.error("Error retrieving dataset " + action.getUri(), e);
-			throw new ActionException(e);
-		}
+        DatasetBeanUtil dbu = new DatasetBeanUtil( beanSession );
 
-	}
+        try {
+            DatasetBean datasetBean = dbu.get( action.getUri() );
 
-	@Override
-	public Class<GetDataset> getActionType() {
-		return GetDataset.class;
-	}
+            datasetBean = dbu.update( datasetBean );
 
-	@Override
-	public void rollback(GetDataset arg0, GetDatasetResult arg1,
-			ExecutionContext arg2) throws ActionException {
-		// TODO Auto-generated method stub
+            Collection<PreviewBean> previews = new HashSet<PreviewBean>();
+            
 
-	}
+            // image previews
+            previews.addAll( new PreviewImageBeanUtil( beanSession ).getAssociationsFor( action.getUri() ) );
+
+            // video previews
+            previews.addAll( new PreviewVideoBeanUtil( beanSession ).getAssociationsFor( action.getUri() ) );
+
+            // FIXME the next query is probably unnecessary, if we can get to the underlying BeanThing
+            // representing the dataset which will have this triple in it, or not
+            Set<Triple> pyramids = TupeloStore.getInstance().getContext().match( Resource.uriRef( datasetBean.getUri() ), ImagePyramidBeanUtil.HAS_PYRAMID, null );
+            String pyramid = null;
+            if ( pyramids.size() > 0 ) {
+                pyramid = pyramids.iterator().next().getObject().getString();
+            }
+            return new GetDatasetResult( datasetBean, previews, pyramid );
+        } catch ( Exception e ) {
+            log.error( "Error retrieving dataset " + action.getUri(), e );
+            throw new ActionException( e );
+        }
+
+    }
+
+    @Override
+    public Class<GetDataset> getActionType()
+    {
+        return GetDataset.class;
+    }
+
+    @Override
+    public void rollback( GetDataset arg0, GetDatasetResult arg1, ExecutionContext arg2 ) throws ActionException
+    {
+        // TODO Auto-generated method stub
+
+    }
 
 }
