@@ -34,9 +34,7 @@ import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.query.OrderBy;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.DcTerms;
-import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.rdf.terms.Rdf;
-import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.rdf.xml.RdfXml;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
@@ -49,7 +47,6 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.context.ContextBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextBeanUtil;
@@ -112,15 +109,12 @@ public class TupeloStore {
 	private TupeloStore() {
 
 		try {
-			// setup context creators
-		    registerContextCreators();
 			context = createSerializeContext();
             //System.out.println(CETBeans.contextToNTriples( context ));
 			if(context == null) {
 				log.error("no context deserialized!");
 			} else {
 				log.info("context deserialized: "+context);
-				initializeContext(context);
 			}
 			ContextConvert.updateContext(context);
 			beanSession = CETBeans.createBeanSession(context);
@@ -136,48 +130,7 @@ public class TupeloStore {
 		}
 	}
 	
-    /**
-     * Register all context creators. This uses the Service providers method, a poor man version
-     * of the eclipse plugin mechanism.
-     */
-    private void registerContextCreators()
-    {
-        Iterator<ContextCreator> iter = Service.providers( ContextCreator.class );
-        while ( iter.hasNext() ) {
-            ContextBeanUtil.addContextCreator( iter.next() );
-        }
-    }
-
-	void addUserField(String uri, String label, Context context) throws Exception {
-		context.addTriple(Resource.uriRef(uri), Rdf.TYPE, Cet.cet("userMetadataField"));
-		context.addTriple(Resource.uriRef(uri), Rdfs.LABEL, label);
-	}
-	
-	void initializeContext(Context context) {
-		try {
-			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Resource.uriRef( "http://cet.ncsa.uiuc.edu/2007/foaf/context/password" ), "guest" );
-			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Rdf.TYPE, Foaf.PERSON );
-			context.addTriple( Resource.uriRef( PersonBeanUtil.getPersonID( "guest" ) ), Foaf.NAME, "guest" );
-			context.removeTriple(Resource.uriRef("urn:strangeness"), Rdf.TYPE, Cet.cet("userMetadataField"));
-			context.removeTriple(Resource.uriRef("urn:charm"), Rdf.TYPE, Cet.cet("userMetadataField"));
-			addUserField("http://purl.org/dc/terms/abstract","Abstract",context);
-			addUserField("http://purl.org/dc/terms/alternative","Alternative title",context);
-			addUserField("http://purl.org/dc/terms/audience","Audience",context);
-			addUserField("http://purl.org/dc/terms/bibliographicCitation","Bibliographic citation",context);
-			addUserField("http://purl.org/dc/terms/coverage","Coverage",context);
-			addUserField("http://purl.org/dc/terms/dateCopyrighted","Date copyrighted",context);
-			addUserField("http://purl.org/dc/terms/identifier","Identifier",context);
-			addUserField("http://purl.org/dc/terms/language","Language",context);
-			addUserField("http://purl.org/dc/terms/license","Content license",context);
-			addUserField("http://purl.org/dc/terms/publisher","Publisher",context);
-			addUserField("http://purl.org/dc/terms/rights","Rights",context);
-			addUserField("http://purl.org/dc/terms/rightsHolder","Rights holder",context);
-			addUserField("http://purl.org/dc/terms/subject","Topic",context);
-		} catch(Exception x) {
-			log.error("failed to initialize context",x);
-		}
-	}
-	
+ 
 	/**
 	 * Load context from disk.
 	 * 
@@ -186,6 +139,13 @@ public class TupeloStore {
 	 */
 	private Context createSerializeContext() throws Exception {
 
+	     // Register all context creators. This uses the Service providers method, a poor man version
+	     // of the eclipse plugin mechanism.
+        Iterator<ContextCreator> iter = Service.providers( ContextCreator.class );
+        while ( iter.hasNext() ) {
+            ContextBeanUtil.addContextCreator( iter.next() );
+        }
+	    
 		// context location
 		String path = CONTEXT_PATH;
 
