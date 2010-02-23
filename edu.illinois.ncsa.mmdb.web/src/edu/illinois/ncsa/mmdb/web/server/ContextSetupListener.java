@@ -57,7 +57,7 @@ public class ContextSetupListener implements ServletContextListener
         // property file location
         Properties props = new Properties();
         String path = "/server.properties";
-        log.debug( "Trying to load server property files " + path );
+        log.debug( "Loading server property file: " + path );
 
         // load properties
         InputStream input = ContextSetupListener.class.getResourceAsStream( path );
@@ -133,7 +133,7 @@ public class ContextSetupListener implements ServletContextListener
                     tripleMatcher.setPredicate( MMDB.HAS_PASSWORD );
                     beanSession.getContext().perform( tripleMatcher );
                     if ( tripleMatcher.getResult().size() == 0 ) {
-                        beanSession.getContext().addTriple( user, MMDB.HAS_PASSWORD, PasswordDigest.digest( props.getProperty( pre + ".password", username ) ) );
+                        beanSession.getContext().addTriple( userid, MMDB.HAS_PASSWORD, PasswordDigest.digest( props.getProperty( pre + ".password", username ) ) );
                     }
 
                     for ( String role : props.getProperty( pre + ".roles", "VIEW_MEMBER_PAGES" ).split( "," ) ) {
