@@ -251,6 +251,7 @@
 				<include name="configuration.xml" />
 				<include name="jaas.config" />
 				<include name="mail.properties" />
+				<include name="server.properties" />
 			</fileset>
 		</copy>
 		<copy tofile="war/WEB-INF/classes/context.xml" file="src/context_mmdbdev_hfc.xml" />
