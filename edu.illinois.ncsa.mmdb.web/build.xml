@@ -120,7 +120,25 @@
 			</classpath>
 			<exclude name="**/osgi/**/*.java" />
 		</javac>
-		<jar jarfile="war/WEB-INF/lib/edu.illinois.ncsa.bard.context.mysql.jar" basedir="contextsTemp" />
+		<jar jarfile="war/WEB-INF/lib/edu.illinois.ncsa.bard.context.mysql.jar">
+			<fileset dir="contextsTemp" />
+			<fileset dir="../edu.illinois.ncsa.bard.context.mysql" includes="META-INF/services/*" />
+		</jar>
+		<delete dir="contextsTemp" />
+
+		<!-- compile the tupeloserver context jar -->
+		<mkdir dir="contextsTemp" />
+		<javac destdir="contextsTemp" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
+			<src path="../edu.illinois.ncsa.bard.context.tupeloserver/src" />
+			<classpath>
+				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
+			</classpath>
+			<exclude name="**/osgi/**/*.java" />
+		</javac>
+		<jar jarfile="war/WEB-INF/lib/edu.illinois.ncsa.bard.context.tupeloserver.jar">
+			<fileset dir="contextsTemp" />
+			<fileset dir="../edu.illinois.ncsa.bard.context.tupeloserver" includes="META-INF/services/*" />
+		</jar>
 		<delete dir="contextsTemp" />
 
 	</target>

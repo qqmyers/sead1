@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import org.tupeloproject.rdf.xml.RdfXml;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
 
+import sun.misc.Service;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.server.search.Search;
 import edu.uiuc.ncsa.cet.bean.CETBean;
@@ -52,6 +54,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
+import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextCreator;
 
 /**
  * Singleton class to manage a tupelo context and its associated beansession.
@@ -133,15 +136,15 @@ public class TupeloStore {
 		}
 	}
 	
-	/**
-	 * Register all context creators.
-	 */
+    /**
+     * Register all context creators. This uses the Service providers method, a poor man version
+     * of the eclipse plugin mechanism.
+     */
     private void registerContextCreators()
     {
-        try {
-            ContextBeanUtil.addContextCreator( new edu.illinois.ncsa.bard.context.mysql.MysqlContextCreator() );
-        } catch ( Throwable thr ) {
-            log.info( "Could not add MySQL context creator.", thr );
+        Iterator<ContextCreator> iter = Service.providers( ContextCreator.class );
+        while ( iter.hasNext() ) {
+            ContextBeanUtil.addContextCreator( iter.next() );
         }
     }
 
