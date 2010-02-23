@@ -171,4 +171,10 @@ public class SparqlPage extends Page {
     		}
     	});
     }
+
+	@Override
+	public void layout() {
+		// TODO Auto-generated method stub
+		
+	}
 }

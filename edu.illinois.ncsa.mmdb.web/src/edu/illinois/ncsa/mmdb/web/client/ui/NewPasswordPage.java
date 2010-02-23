@@ -53,7 +53,6 @@ public class NewPasswordPage extends Page {
 	 */
 	@Override
 	public void layout() {
-		super.layout();
 		form = createForm();
 		mainLayoutPanel.add(form);
 	}

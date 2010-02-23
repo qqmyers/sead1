@@ -14,7 +14,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -76,6 +75,8 @@ public class UploadWidget extends Composite {
 	Label statusLabel = new Label();
 	// progress bar
 	ProgressBar progressBar = new ProgressBar();
+	private Button cancel;
+	private HorizontalPanel uploadPanel;
 	
 	String getModuleBaseUrl() {
 		String baseUrl = GWT.getModuleBaseURL();
@@ -88,7 +89,7 @@ public class UploadWidget extends Composite {
 		// multiple uploads
 		VerticalPanel uploadStackPanel = new VerticalPanel();
 		uploadStackPanel.addStyleName("uploadMainPanel");
-		HorizontalPanel uploadPanel = new HorizontalPanel();
+		uploadPanel = new HorizontalPanel();
 		uploadForm.setAction("UploadBlob");
 		uploadForm.setEncoding(FormPanel.ENCODING_MULTIPART);
 		uploadForm.setMethod(FormPanel.METHOD_POST);
@@ -98,7 +99,7 @@ public class UploadWidget extends Composite {
 		formContents.add(fu);
 		uploadPanel.add(uploadForm);
 		// and a cancel button
-		Button cancel = new Button("Cancel");
+		cancel = new Button("Cancel");
 		uploadPanel.add(cancel);
 		uploadStackPanel.add(uploadPanel);
 		uploadStackPanel.add(statusLabel);
@@ -150,6 +151,18 @@ public class UploadWidget extends Composite {
 		});
 		// make it go
 		initWidget(uploadStackPanel);
+	}
+	
+	/**
+	 * Create the widget and decided whether to show the cancel button or not.
+	 * 
+	 * @param showCancelButton
+	 */
+	public UploadWidget(boolean showCancelButton) {
+		this();
+		if (!showCancelButton) {
+			uploadPanel.remove(cancel);
+		}
 	}
 	
 	void showProgress(String sessionKey, String uploadServletUrl) {

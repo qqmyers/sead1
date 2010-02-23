@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
  * @author Luigi Marini
  *
  */
-public class Page extends Composite {
+public abstract class Page extends Composite {
 
 	protected final FlowPanel mainLayoutPanel;
 	protected final TitlePanel pageTitle;
@@ -51,6 +51,14 @@ public class Page extends Composite {
 	 */
 	public Page(String title, DispatchAsync dispatchAsync) {
 		this(dispatchAsync);
+		setPageTitle(title);
+	}
+	
+	/**
+	 * 
+	 * @param title
+	 */
+	public void setPageTitle(String title) {
 		pageTitle.setText(title);
 	}
 	
@@ -73,11 +81,12 @@ public class Page extends Composite {
 	/**
 	 * 
 	 */
-	public void layout() {
-		// TODO Auto-generated method stub
-		
-	}
+	public abstract void layout();
 	
+	/**
+	 * 
+	 * @param message
+	 */
 	public void showFeedbackMessage(String message) {
 		Label messageLabel = new Label(message);
 		messageLabel.addStyleName("feedbackMessage");

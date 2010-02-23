@@ -32,6 +32,7 @@ body {
 
 .clearBoth {
 	clear: both;
+	position: relative;
 }
 
 .inline {
@@ -43,30 +44,33 @@ body {
 	padding: 0px;
 	margin: 0px;
 	border-bottom: #888888 solid 1px;
+	position: relative;
+	height: auto;
 }
 
 .mainMenu {
 	width: 975px;
-	height: 50px;
+	height: 30px;
 	margin: 0px auto 0px auto;
 	padding: 0px;
-	text-align: left;
+	position: relative;
+	vertical-align: top;
 }
 
 .menuElementLeft {
 	float:left;
+	height: auto;
 	padding: 10px;
 	position: relative;
-	height: 50px;
-	margin-top: 10px;
+	vertical-align: top;
 }
 
 .menuElementRight {
 	float:right;
 	padding: 10px;
+	height: auto;
 	position: relative;
-	height: 50px;
-	margin-top: 10px;
+	vertical-align: top;
 }
 
 .logo {
@@ -75,7 +79,43 @@ body {
     text-align: left;
     width: 100px;
     font-weight: bold;
-    font-size: 1.2em;
+    position: relative;
+	vertical-align: top;
+}
+
+.toolbar {
+	width: 975px;
+	background-color: #069;
+	margin: 0px auto 0px auto;
+	padding: 0px;
+	text-align: left;
+}
+
+.breadcrumb {
+	width: 975px;
+	margin: 5px auto 0px auto;
+	text-align: left;
+	color: gray;
+	padding-left: 40px;
+	position: relative;
+}
+
+.mainContainer {
+	text-align: center;
+	minHeight: 600px;	
+	width: 975px;
+	border: solid 1px #888888;
+	margin: 10px auto 20px auto;
+	padding: 0px;
+	background-color: white;
+}
+
+.bottomMenu {
+	background-color: #E3E3E3;
+	width: 975px;
+	margin: 20px auto 20px auto;
+	padding: 10px;
+	text-align: left;
 }
 
 .additionalInformation {
@@ -228,13 +268,6 @@ body {
 	font-size: 0.8em;
 }
 
-.toolbar {
-	width: 975px;
-	background-color: #069;
-	margin: 0px auto 0px auto;
-	padding: 0px;
-}
-
 .uploadMainPanel {
 	width: 100%;
 	padding: 20px;
@@ -243,16 +276,6 @@ body {
 .centered {
 	text-align: center;
 	margin: 5px auto 5px auto;
-}
-
-.mainContainer {
-	text-align: center;
-	minHeight: 600px;	
-	width: 975px;
-	border: solid 1px #888888;
-	margin: 20px auto 20px auto;
-	padding: 0px;
-	background-color: white;
 }
 
 .pagingWidget {
@@ -286,6 +309,20 @@ body {
 	vertical-align: top;
 }
 
+.uploadPageLayout {
+	width: 95%;
+	margin: 10px auto 10px auto;
+	padding-bottom: 30px;
+}
+
+.dragAndDrop {
+	width: 150px;
+	border: 1px dashed #002B55;
+	padding: 5px;
+	cursor: pointer;
+}
+	
+	
 .twoColumnLayout {
 	float: none;
 }
@@ -345,14 +382,6 @@ body {
 
 .rssIcon {
     width: 1em;
-}
-
-.bottomMenu {
-	background-color: #E3E3E3;
-	width: 975px;
-	margin: 20px auto 20px auto;
-	padding: 10px;
-	text-align: left;
 }
 
 .clearFloat {

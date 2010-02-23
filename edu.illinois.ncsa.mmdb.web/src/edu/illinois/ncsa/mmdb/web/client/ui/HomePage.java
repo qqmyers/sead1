@@ -115,4 +115,10 @@ public class HomePage extends Page {
 				"newPassword"));
 		return table;
 	}
+
+	@Override
+	public void layout() {
+		// TODO Auto-generated method stub
+		
+	}
 }

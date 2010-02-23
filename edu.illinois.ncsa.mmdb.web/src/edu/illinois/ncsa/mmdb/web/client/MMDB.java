@@ -55,6 +55,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SparqlPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TitlePanel;
+import edu.illinois.ncsa.mmdb.web.client.ui.UploadPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.UserManagementPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.WatermarkTextBox;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
@@ -92,9 +93,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	/** Event bus for propagating events in the interface **/
 	public static final HandlerManager eventBus = new HandlerManager(null);
 
-	/** Toolbar above main content panel */
-	private FlowPanel toolbar;
-
 	/** The upload button */
 	private Anchor uploadButton;
 
@@ -108,12 +106,16 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private PlaceService placeService;
 
 	public static LoginStatusWidget loginStatusWidget;
+	
+	private String previousHistoryToken = new String();
 
 	/**
 	 * Session id - user login for when the user is logged in, null if the user
 	 * hasn't been authenticated
 	 */
 	private final String sessionId = null;
+
+	private Label breadcrumb;
 
 	/**
 	 * This is the entry point method.
@@ -122,11 +124,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		// navigation menu
 		initNavMenu();
-
-		// toolbar
-		toolbar = new FlowPanel();
-		RootPanel.get("toolbar").add(toolbar);
-
+		
+		// breadcrumb
+		breadcrumb = new Label("breadcrumb > bread > crumb");
+		breadcrumb.addStyleName("breadcrumb");
+		RootPanel.get("breadcrumb").add(breadcrumb);
+		
 		// main content
 		mainContainer = new FlowPanel();
 		mainContainer.addStyleName("relativePosition");
@@ -135,7 +138,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		// log events
 		logEvent(eventBus);
 
-		// place support for history management
+		// TODO place support for history management
 		// placeService = new PlaceService(eventBus);
 
 		// history support
@@ -179,14 +182,17 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		bullet2.addStyleName("whiteText");
 		navMenu.add(bullet2);
 		// upload link
-		uploadButton = new Anchor("Upload");
-		uploadButton.setStyleName("navMenuLink");
-		uploadButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent click) {
-				toggleUploadMenu();
-			}
-		});
-		navMenu.add(uploadButton);
+		Hyperlink uploadLink = new Hyperlink("Upload", "upload");
+		uploadLink.addStyleName("navMenuLink");
+		navMenu.add(uploadLink);
+//		uploadButton = new Anchor("Upload");
+//		uploadButton.setStyleName("navMenuLink");
+//		uploadButton.addClickHandler(new ClickHandler() {
+//			public void onClick(ClickEvent click) {
+//				toggleUploadMenu();
+//			}
+//		});
+//		navMenu.add(uploadButton);
 
 		// sign up link
 		SimplePanel signupPanel = new SimplePanel();
@@ -376,14 +382,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	private void showDataset() {
 
-		// DatasetView datasetWidget = new DatasetView();
-		// DatasetPresenter datasetPresenter = new
-		// DatasetPresenter(datasetWidget, eventBus, dispatchAsync);
-		// datasetPresenter.bind();
-		//		
-		// mainContainer.clear();
-		// mainContainer.add(datasetWidget.asWidget());
-
 		if (checkLogin()) {
 			DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync);
 			mainContainer.clear();
@@ -401,7 +399,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private UploadWidget uploadWidget;
 
 	private boolean dndEnabled = false;
-
+	
+	/**
+	 * @Deprecated Use UploadPage.java instead
+	 */
 	native void deployDndApplet(String credentials) /*-{
 		var attributes = {
 		code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
@@ -419,6 +420,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		$wnd.document.getElementById('dndApplet').innerHTML = $wnd.deployJava.getDocument();
 	}-*/;
 
+	/**
+	 * @Deprecated Use UploadPage.java instead
+	 */
 	UploadWidget showUploadMenu() {
 		uploadWidget = new UploadWidget();
 		uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
@@ -467,8 +471,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		uploadWidgetPanel.add(uploadWidgetTooltip);
 		uploadToolbar.add(uploadWidgetPanel);
 
-		//
-		toolbar.add(uploadToolbar);
+//		toolbar.add(uploadToolbar);
 
 		if (dndEnabled) {
 			dndApplet.removeStyleName("hidden");
@@ -501,7 +504,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	}
 
 	void hideUploadMenu() {
-		toolbar.clear();
+//		toolbar.clear();
 		uploadMenuVisible = false;
 	}
 
@@ -624,8 +627,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * @param token
 	 *            history token (everything after the #)
 	 */
-	String previousHistoryToken = new String();
 	private void parseHistoryToken(String token) {
+		
 		if (token.startsWith("login")) {
 			showLoginPage();
 		} else if (checkLogin()) {
@@ -634,7 +637,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			} else if (token.startsWith("listDatasets") && !previousHistoryToken.startsWith("listDatasets")) {
 				listDatasets();
 			} else if (token.startsWith("upload")) { // upload applet support
-				showUploadProgress();
+//				showUploadProgress();
+				showUploadPage();
 			} else if (token.startsWith("tag")) {
 				showTagPage();
 			} else if (token.startsWith("listCollections") && !previousHistoryToken.startsWith("listCollections")) {
@@ -658,6 +662,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			}
 		}
 		previousHistoryToken = token;
+	}
+
+	private void showUploadPage() {
+		GWT.log("Loading Upload Page", null);
+		mainContainer.clear();
+		mainContainer.add(new UploadPage(dispatchAsync));
 	}
 
 	private void showHomePage() {
@@ -793,11 +803,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	public boolean checkLogin() {
 		String cookieSID = Cookies.getCookie("sid");
 		if(cookieSID != null) {
-			GWT.log("got sid "+cookieSID, null);
+			GWT.log("Sid: "+cookieSID, null);
 		}
 		String cookieSessionKey = Cookies.getCookie("sessionKey");
 		if(cookieSessionKey != null) {
-			GWT.log("got session key "+cookieSessionKey,null);
+			GWT.log("Session key: "+cookieSessionKey,null);
 		}
 		if (cookieSID != null && cookieSessionKey != null) {
 			LoginPage.login(cookieSID, cookieSessionKey);
