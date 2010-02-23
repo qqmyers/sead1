@@ -13,6 +13,13 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
 import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
 
+/**
+ * TODO Add comments
+ * 
+ * @author Joe Futrelle
+ *
+ * @param <T>
+ */
 public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 	protected LabeledListBox sortOptions;
 	protected LabeledListBox viewOptions;

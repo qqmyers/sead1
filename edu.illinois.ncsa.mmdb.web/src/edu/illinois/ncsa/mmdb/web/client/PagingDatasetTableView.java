@@ -13,6 +13,12 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
+/**
+ * TODO Add comments
+ * 
+ * @author Joe Futrelle
+ *
+ */
 public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 	DatasetTableView table;
 	String inCollection;

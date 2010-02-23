@@ -67,11 +67,11 @@ public class GetPreviewsHandler implements
 					// stage information
 					Date endTime = ts.getDate(Resource.uriRef(datasetUri), Cet
 							.cet("metadata/extractor/endTime0"));
-					System.out.println("end time on "+datasetUri+" = "+endTime); // FIXME debug
+					log.debug("End time on "+datasetUri+" = "+endTime); // FIXME debug
 					if (endTime != null) {
 						System.out.println("telling client to stop asking for previews for "+datasetUri); // FIXME debug
 						log
-								.debug("telling client to stop asking for previews for "
+								.debug("Telling client to stop asking for previews for "
 										+ datasetUri);
 						// there won't be previews, so stop asking!
 						result.setStopAsking(true);

@@ -18,18 +18,26 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFrom;
@@ -43,6 +51,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
@@ -189,7 +198,7 @@ public class DatasetWidget extends Composite {
 	 * @param collection
 	 */
     private void drawPage(final GetDatasetResult result) {
-
+    	
 		// image preview
         // FIXME use the preview widget to avoid call to server
 		preview = new PreviewWidget(result.getDataset().getUri(), GetPreviews.LARGE, null);
@@ -268,19 +277,21 @@ public class DatasetWidget extends Composite {
         // map
         showMap();
 
+        // download
         downloadAnchor = new Anchor();
 		downloadAnchor.setHref(DOWNLOAD_URL + result.getDataset().getUri());
 		downloadAnchor.setText("Download full size");
 		downloadAnchor.setTarget("_blank");
 		downloadAnchor.addStyleName("datasetActionLink");
-        downloadAnchor.addStyleName("datasetActionLink");
 
+        // dataset actions
 		actionsPanel = new FlowPanel();
 
 		actionsPanel.addStyleName("datasetActions");
 
 		actionsPanel.add(downloadAnchor);
 
+		// dataset pyramid zoom
         if ( result.getPyramid() != null ) {
         	
             final Anchor zoomAnchor = new Anchor( "Zoom" );
@@ -310,6 +321,18 @@ public class DatasetWidget extends Composite {
             
             actionsPanel.add( zoomAnchor );
         }
+        
+        // delete dataset
+        // TODO add confirmation dialog
+		Anchor deleteAnchor = new Anchor("Delete");
+		deleteAnchor.addClickHandler(new ClickHandler() {
+			
+			public void onClick(ClickEvent event) {
+				
+				showDeleteDialog();
+			}
+		});
+		actionsPanel.add(deleteAnchor);
         
         for ( PreviewBean pb : result.getPreviews() ) {
             if ( pb instanceof PreviewVideoBean ) {
@@ -387,7 +410,72 @@ public class DatasetWidget extends Composite {
 		loadDerivedFrom(uri,4);
 	}
 
-    public final native void showVideo( String container, String url, String w, String h ) /*-{
+    /**
+     * Confirm the user wants to delete the dataset.
+     */
+    protected void showDeleteDialog() {
+		
+    	final DialogBox dialog = new DialogBox();
+    	
+    	dialog.setText("Delete");
+    	
+    	VerticalPanel panel = new VerticalPanel();
+    	
+    	panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    	
+    	panel.add(new Label("Are you sure you want to delete this dataset?"));
+    	
+    	HorizontalPanel buttonsPanel = new HorizontalPanel();
+    	
+    	Button yesButton = new Button("Yes", new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+
+				dialog.hide();
+				
+				delete();
+			}
+		});
+    	
+    	buttonsPanel.add(yesButton);
+    	
+    	Button noButton = new Button("No", new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				
+				dialog.hide();
+			}
+		});
+    	
+    	buttonsPanel.add(noButton);
+    	
+    	panel.add(buttonsPanel);
+    	
+    	dialog.add(panel);
+    	
+    	dialog.center();
+    	
+    	dialog.show();
+	}
+    
+    /**
+     * Delete dataset.
+     */
+    protected void delete() {
+		MMDB.dispatchAsync.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
+			public void onFailure(Throwable caught) {
+				GWT.log("Error deleting dataset", caught);
+			}
+			public void onSuccess(DeleteDatasetResult result) {
+				MMDB.eventBus.fireEvent(new DatasetDeletedEvent(uri));
+				History.newItem("listDatasets"); // FIXME hardcodes destination
+			}
+		});
+    }
+
+	public final native void showVideo( String container, String url, String w, String h ) /*-{
         // open with new url
         if (url != null) {
             $wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');

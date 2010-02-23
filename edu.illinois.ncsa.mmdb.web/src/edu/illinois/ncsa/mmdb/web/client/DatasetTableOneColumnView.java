@@ -7,19 +7,13 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
@@ -61,26 +55,20 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		setWidget(row, 0, pre);
 		
 		VerticalPanel verticalPanel = new VerticalPanel();
+		
+		verticalPanel.setSpacing(5);
+		
 		setWidget(row, 1, verticalPanel);
 		
+		// title
 		Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
-		verticalPanel.add(hyperlink);	
+		verticalPanel.add(hyperlink);
+		
+		// date
 		verticalPanel.add(new Label(DATE_TIME_FORMAT.format(date)));
 		
-		Button deleteButton = new Button("Delete");
-		deleteButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				MMDB.dispatchAsync.execute(new DeleteDataset(id), new AsyncCallback<DeleteDatasetResult>() {
-					public void onFailure(Throwable caught) {
-					}
-					public void onSuccess(DeleteDatasetResult result) {
-						getRowFormatter().addStyleName(row, "hidden");
-						MMDB.eventBus.fireEvent(new DatasetDeletedEvent(id));
-					}
-				});
-			}
-		});
-		verticalPanel.add(deleteButton);
+		// type
+		verticalPanel.add(new Label(type));
 		
 		// FIXME debug
 		/*
