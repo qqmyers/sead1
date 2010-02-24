@@ -59,7 +59,7 @@ public class NewAnnotationView extends Composite {
 
 		mainTable.setWidget(1, 1, titleTextBox);
 
-		mainTable.setHTML(2, 0, "Description: ");
+		mainTable.setHTML(2, 0, "Comment: ");
 
 		descriptionTextArea = new TextArea();
 		
