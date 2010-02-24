@@ -364,7 +364,7 @@ public class DatasetWidget extends Composite {
 
                                 public void onSuccess( ExtractionServiceResult result )
                                 {
-                                    GWT.log( "Success submitting extraction job " + result.getJobid() );
+                                    GWT.log( "Success submitting extraction job " + result.getJobid(), null);
                                 }
                             } );
                         }
