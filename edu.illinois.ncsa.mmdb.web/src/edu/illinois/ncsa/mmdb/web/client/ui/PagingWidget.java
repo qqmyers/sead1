@@ -13,6 +13,12 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * TODO Add comments
+ * 
+ * @author Luigi Marini
+ *
+ */
 public class PagingWidget extends Composite implements ClickHandler, HasValueChangeHandlers<Integer> {
 	Image firstButton;
 	Image previousButton;

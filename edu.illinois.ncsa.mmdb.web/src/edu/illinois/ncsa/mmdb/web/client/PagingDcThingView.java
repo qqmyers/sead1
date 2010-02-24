@@ -8,6 +8,8 @@ import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
@@ -191,9 +193,13 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 	}		
 	
 	protected HorizontalPanel createPagingPanel(int page, String sortKey, String viewType) {
+		
 		HorizontalPanel panel = createPagingPanel(page);
-	
-		sortOptions = new LabeledListBox("sort by: ");
+		panel.addStyleName("redBorder");
+		panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		
+		sortOptions = new LabeledListBox("Sort by: ");
 		sortOptions.addStyleName("pagingLabel");
 		sortOptions.addItem("Date: newest first", "date-desc");
 		sortOptions.addItem("Date: oldest first", "date-asc");
@@ -203,11 +209,11 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		addSortControl(sortOptions);
 		panel.add(sortOptions);
 		
-		viewOptions = new LabeledListBox("view:");
+		viewOptions = new LabeledListBox("View:");
 		viewOptions.addStyleName("pagingLabel");
-		viewOptions.addItem("list", "list");
-		viewOptions.addItem("grid", "grid");
-		viewOptions.addItem("flow", "flow");
+		viewOptions.addItem("List", "list");
+		viewOptions.addItem("Grid", "grid");
+		viewOptions.addItem("Flow", "flow");
 		viewOptions.setSelected(viewType);
 		addViewTypeControl(viewOptions);
 		panel.add(viewOptions);

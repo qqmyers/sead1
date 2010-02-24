@@ -279,8 +279,16 @@ body {
 	margin: 5px auto 5px auto;
 }
 
+
+.datasetsPager {
+	width: 700px;
+	margin: 0px auto 0px auto;
+	border: 1px solid #CCC;
+}
+
 .pagingWidget {
 	line-height: 24px;
+	margin: 5px;
 }
 
 .pagingButton  {
@@ -399,14 +407,9 @@ body {
   	margin: 20px;
 }
 
-.datasetsPager {
-	width: 700px;
-	margin: 5px auto 5px auto;
-	}
-
 .datasetTable {
 	width: 700px;
-	border: #CCC solid 1px;
+	/**border: #CCC solid 1px;**/
 	vertical-align: top;
 	margin: 20px auto 20px auto;
 	padding: 0px;
