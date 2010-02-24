@@ -44,7 +44,7 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 	}
 	
 	@Override
-	public void addRow(final String id, String name, String type, Date date, String preview) {
+	public void addRow(final String id, String name, String type, Date date, String preview, String size, String authorsId) {
 		
 		final int row = this.getRowCount();
 		
@@ -66,6 +66,12 @@ private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDa
 		
 		// date
 		verticalPanel.add(new Label(DATE_TIME_FORMAT.format(date)));
+		
+		// size
+		verticalPanel.add(new Label(size));
+		
+		// author
+		verticalPanel.add(new Label(authorsId));
 		
 		// type
 		verticalPanel.add(new Label(type));

@@ -42,7 +42,7 @@ public class DatasetTableFourColumnView extends DatasetTableView {
 	}
 	
 	@Override
-	public void addRow(String id, String name, String type, Date date, String preview) {
+	public void addRow(String id, String name, String type, Date date, String preview, String size, String authorsId) {
 		GWT.log("Adding dataset " + name, null);
 		int row = this.getRowCount();
 		Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);

@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Label;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
+import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -66,7 +67,12 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 		String type = dataset.getMimeType();
 		Date date = dataset.getDate();
 		String previewUri = "/api/image/preview/small/"+uri;
-		table.addRow(uri, title, type, date, previewUri);
+		String size = DatasetWidget.humanBytes(dataset.getSize());
+		String authorsId = "Anonymous";
+		if (dataset.getCreator() != null) {
+			authorsId = dataset.getCreator().getEmail();
+		}
+		table.addRow(uri, title, type, date, previewUri, size, authorsId);
 	}
 
 	public DatasetTableView getTable() {

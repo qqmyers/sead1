@@ -24,7 +24,7 @@ public class DatasetTableCoverFlowView extends DatasetTableView {
 	}
 
 	@Override
-	public void addRow(String id, String title, String mimeType, Date date,	String previewUri) {
+	public void addRow(String id, String title, String mimeType, Date date,	String previewUri, String size, String authorsId) {
 		VerticalPanel panel = new VerticalPanel();
 		PreviewWidget preview = null;
 		Label titleLabel = new Label(title);

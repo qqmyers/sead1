@@ -566,7 +566,7 @@ public class DatasetWidget extends Composite {
 	 * @param x number of bytes
 	 * @return formatted string
 	 */
-    private String humanBytes( long x )
+    public static String humanBytes( long x )
     {
         if ( x == Integer.MAX_VALUE ) {
             return "No limit";

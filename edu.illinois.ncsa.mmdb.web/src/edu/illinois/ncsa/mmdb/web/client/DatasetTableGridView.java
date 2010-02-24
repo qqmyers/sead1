@@ -43,7 +43,7 @@ public class DatasetTableGridView extends DatasetTableView {
 	// cell in a top-to-bottom, left-to-right traversal of the table.
 	@Override
 	public void addRow(String id, String title, String mimeType, Date date,
-			String previewUri) {
+			String previewUri, String size, String authorsId) {
 		PreviewWidget pw = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id="+id);
 		pw.setWidth("120px");
 		pw.setMaxWidth(100);
