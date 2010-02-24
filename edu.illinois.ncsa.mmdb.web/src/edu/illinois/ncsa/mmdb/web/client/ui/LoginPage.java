@@ -104,6 +104,8 @@ public class LoginPage extends Composite {
 		table.setWidget(1, 0, usernameLabel);
 
 		usernameBox = new TextBox();
+		
+		usernameBox.setTabIndex(1);
 
 		usernameBox.addKeyUpHandler(new KeyUpHandler() {
 
@@ -133,6 +135,8 @@ public class LoginPage extends Composite {
 		table.setWidget(2, 0, passwordLabel);
 
 		passwordBox = new PasswordTextBox();
+		
+		passwordBox.setTabIndex(2);
 
 		passwordBox.addKeyUpHandler(new KeyUpHandler() {
 
@@ -158,6 +162,8 @@ public class LoginPage extends Composite {
 			}
 		});
 
+		submitButton.setTabIndex(3);
+		
 		table.setWidget(3, 1, submitButton);
 
 		return table;
