@@ -7,6 +7,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -50,21 +51,26 @@ public class CommentsView extends Composite {
 	public CommentsView(final String resource, final MyDispatchAsync service) {
 
 		this.resource = resource;
+
 		this.service = service;
 
-		initWidget(mainPanel);
+		DisclosurePanel disclosurePanel = new DisclosurePanel("Comments");
+		
+		disclosurePanel.addStyleName("datasetDisclosurePanel");
+		
+		disclosurePanel.setOpen(true);
+		
+		disclosurePanel.setAnimationEnabled(true);
+		
+		initWidget(disclosurePanel);
 
 		mainPanel.addStyleName("commentsView");
 
 		layoutPanel = new VerticalPanel();
 
 		mainPanel.add(layoutPanel);
-
-		Label commentsHeader = new Label("Comments");
-
-		commentsHeader.addStyleName("commentsHeading");
-
-		layoutPanel.add(commentsHeader);
+		
+		disclosurePanel.setContent(mainPanel);
 
 		commentsPanel = new VerticalPanel();
 

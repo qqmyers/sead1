@@ -118,9 +118,10 @@ body {
 	text-align: left;
 }
 
-.additionalInformation {
+.datasetDisclosurePanel {
 	width: 90%;
 	margin-left: 10px;
+	margin: 10px 0px 20px 0px;
 }
 
 .addMetadata {

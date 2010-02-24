@@ -372,7 +372,7 @@ public class DatasetWidget extends Composite {
 		UserMetadataWidget um = new UserMetadataWidget(result.getDataset().getUri(), service);
 		um.setWidth("100%");
 		DisclosurePanel additionalInformationPanel = new DisclosurePanel("Additional Information");
-		additionalInformationPanel.addStyleName("additionalInformation");
+		additionalInformationPanel.addStyleName("datasetDisclosurePanel");
 		additionalInformationPanel.setOpen(false);
 		additionalInformationPanel.setAnimationEnabled(true);
 		VerticalPanel verticalPanel = new VerticalPanel();
