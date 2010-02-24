@@ -13,6 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -60,36 +62,38 @@ import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextCreator;
  * 
  */
 public class TupeloStore {
+    /** Commons logging **/
+    private static Log                     log                   = LogFactory.getLog( TupeloStore.class );
 
 	/** Default location of serialized tupelo context **/
-	private static final String CONTEXT_PATH = "/context.xml";
+    private static final String            CONTEXT_PATH          = "/context.xml";
 	
 	/** URL of extraction service */
-	private String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
-
-	/** Commons logging **/
-	private static Log log = LogFactory.getLog(TupeloStore.class);
+    private String                         extractionServiceURL  = "http://localhost:9856/";
 
 	/** Singleton instance **/
-	private static TupeloStore instance;
+    private static TupeloStore             instance;
 
 	/** Tupelo context loaded from disk **/
-	private Context context;
+    private Context                        context;
 
 	/** Tupelo beansession facing tupelo context **/
-	private BeanSession beanSession;
+    private BeanSession                    beanSession;
 
-	/**
-	 * Context beans in case context definition includes multiple context
-	 * definitions
-	 **/
-	private Collection<ContextBean> contextBeans;
+	/**  Context beans in case context definition includes multiple context definitions **/
+    private Collection<ContextBean>        contextBeans;
 	
 	/** last time a certain uri was asked for extraction */
-    private Map<String,Long> lastExtractionRequest = new HashMap<String,Long>();
+    private Map<String, Long>              lastExtractionRequest = new HashMap<String, Long>();
 
 	/** Context DAO used to load context definition from disk **/
-	private ContextBeanUtil contextBeanUtil;
+    private ContextBeanUtil                contextBeanUtil;
+	
+	/** List of counts */
+    private Map<String, Memoized<Integer>> datasetCount          = new HashMap<String, Memoized<Integer>>();
+    
+    /** Timer to schedule re-occurring jobs */
+    private Timer                          timer                 = new Timer();
 
 	/**
 	 * Return singleton instance.
@@ -121,16 +125,22 @@ public class TupeloStore {
 			}
 			ContextConvert.updateContext(context);
 			beanSession = CETBeans.createBeanSession(context);
-		} catch (OperatorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            log.warn("Could not de-serialize context, missing context-creator?.", e);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    log.warn("Could not de-serialize context.", e);
 		}
+		
+		// count datasets every hour
+		// FIXME hack to force read of context every hour to solve MMDB-491
+		timer.schedule( new TimerTask() {
+            @Override
+            public void run()
+            {
+                countDatasets( null, true );
+            }
+		    
+		}, 0, 60 * 60 * 1000 );
 	}
 	
  
@@ -437,45 +447,50 @@ public class TupeloStore {
         }
         return null;
     }
-   
-    Map<String,Memoized<Integer>> datasetCount = new HashMap<String,Memoized<Integer>>();
-    public int countDatasets() {
-    	return countDatasets(null, false);
+    
+    public int countDatasets()
+    {
+        return countDatasets( null, false );
     }
-    public int countDatasets(final String inCollection, boolean force) {
-    	String key = inCollection == null ? "all" : inCollection;
-    	Memoized<Integer> count = datasetCount.get(key);
-    	if(count == null) {
-    		count = new Memoized<Integer>() {
-				public Integer computeValue() {
-					return countDatasetsInCollection(inCollection);
-				}
-    		};
-    		count.setTtl(120000);
-    		datasetCount.put(key,count);
-    	}
-    	return count.getValue(force);
+
+    public int countDatasets( final String inCollection, boolean force )
+    {
+        String key = inCollection == null ? "all" : inCollection;
+        Memoized<Integer> count = datasetCount.get( key );
+        if ( count == null ) {
+            count = new Memoized<Integer>() {
+                public Integer computeValue()
+                {
+                    return countDatasetsInCollection( inCollection );
+                }
+            };
+            count.setTtl( 120000 );
+            datasetCount.put( key, count );
+        }
+        return count.getValue( force );
     }
-    int countDatasetsInCollection(String inCollection) {
-		int datasetCount;
-    	try {
-    		DatasetBeanUtil dbu = new DatasetBeanUtil(getBeanSession());
-    		log.debug("counting datasets "+(inCollection != null ? "in collection "+inCollection : "")+"...");
-    		Unifier u = new Unifier();
-    		u.setColumnNames("d");
-    		u.addPattern("d",Rdf.TYPE,dbu.getType());
-    		if(inCollection != null) {
-    			u.addPattern(Resource.uriRef(inCollection),DcTerms.HAS_PART,"d");
-    		}
-    		long now = System.currentTimeMillis();
-    		datasetCount = unifyExcludeDeleted(u,"d").getRows().size();
-    		long ms = System.currentTimeMillis()-now;
-    		log.debug("counted "+datasetCount+" non-deleted datasets in "+ms+"ms");
-    	} catch(Exception x) {
-    		x.printStackTrace();
-    		datasetCount = -1;
-    	}
-    	return datasetCount;
+
+    private int countDatasetsInCollection( String inCollection )
+    {
+        int datasetCount;
+        try {
+            DatasetBeanUtil dbu = new DatasetBeanUtil( getBeanSession() );
+            log.debug( "counting datasets " + (inCollection != null ? "in collection " + inCollection : "") + "..." );
+            Unifier u = new Unifier();
+            u.setColumnNames( "d" );
+            u.addPattern( "d", Rdf.TYPE, dbu.getType() );
+            if ( inCollection != null ) {
+                u.addPattern( Resource.uriRef( inCollection ), DcTerms.HAS_PART, "d" );
+            }
+            long now = System.currentTimeMillis();
+            datasetCount = unifyExcludeDeleted( u, "d" ).getRows().size();
+            long ms = System.currentTimeMillis() - now;
+            log.debug( "counted " + datasetCount + " non-deleted datasets in " + ms + "ms" );
+        } catch ( Exception x ) {
+            log.warn("Could not ccount datasets.", x);
+            datasetCount = -1;
+        }
+        return datasetCount;
     }
     
     public ListTable<Resource> unifyExcludeDeleted(Unifier u, String subjectVar) throws OperatorException {
