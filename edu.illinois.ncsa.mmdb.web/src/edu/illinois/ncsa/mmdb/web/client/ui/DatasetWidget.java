@@ -59,8 +59,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.PreviewBean;
-import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 
 /**
@@ -374,6 +372,7 @@ public class DatasetWidget extends Composite {
             }
         } );
         
+        /* MMDB-503
         for ( PreviewBean pb : result.getPreviews() ) {
             if ( pb instanceof PreviewVideoBean ) {
                 final PreviewVideoBean pvb = (PreviewVideoBean) pb;
@@ -402,6 +401,7 @@ public class DatasetWidget extends Composite {
                 actionsPanel.add( videoAnchor );
             }
         }
+        */
 
 		informationTable = new FlexTable();
 		
