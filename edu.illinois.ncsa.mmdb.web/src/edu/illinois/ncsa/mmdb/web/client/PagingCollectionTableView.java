@@ -7,7 +7,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -93,8 +93,12 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		n++;
 	}
 	
-	void addListItem(final String uri, CollectionBean item, Panel previewPanel) {
+	private void addListItem(final String uri, CollectionBean item, Panel previewPanel) {
+		
 		VerticalPanel infoPanel = new VerticalPanel();
+		
+		infoPanel.setSpacing(5);
+		
 		infoPanel.add(new Hyperlink(item.getTitle(), "collection?uri="+uri));
 		
 		if(item.getCreationDate() != null) {
@@ -110,8 +114,8 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		
 		final int row = table.getRowCount();
 		
-		Button deleteButton = new Button("Delete");
-		deleteButton.addClickHandler(new ClickHandler() {
+		Anchor deleteAnchor = new Anchor("Delete");
+		deleteAnchor.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				MMDB.dispatchAsync.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
 					public void onFailure(Throwable caught) {
@@ -123,7 +127,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 				});
 			}
 		});
-		infoPanel.add(deleteButton);
+		infoPanel.add(deleteAnchor);
 		
 		// yoinked from DatasetTableOneColumnView
 		table.setWidget(row, 0, previewPanel);
