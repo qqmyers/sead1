@@ -36,8 +36,11 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionServiceResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFrom;
@@ -47,6 +50,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
@@ -325,6 +330,7 @@ public class DatasetWidget extends Composite {
         // delete dataset
         // TODO add confirmation dialog
 		Anchor deleteAnchor = new Anchor("Delete");
+		deleteAnchor.addStyleName("datasetActionLink");
 		deleteAnchor.addClickHandler(new ClickHandler() {
 			
 			public void onClick(ClickEvent event) {
@@ -333,6 +339,40 @@ public class DatasetWidget extends Composite {
 			}
 		});
 		actionsPanel.add(deleteAnchor);
+		
+        service.execute( new HasPermission( MMDB.sessionID, Permission.VIEW_ADMIN_PAGES ), new AsyncCallback<HasPermissionResult>() {
+            @Override
+            public void onFailure( Throwable caught )
+            {
+                GWT.log( "Error checking for admin privileges", caught );
+            }
+
+            @Override
+            public void onSuccess( HasPermissionResult permresult )
+            {
+                if ( permresult.isPermitted() ) {
+                    Anchor extractAnchor = new Anchor( "Rerun Extraction" );
+                    extractAnchor.addStyleName("datasetActionLink");
+                    extractAnchor.addClickHandler( new ClickHandler() {
+                        public void onClick( ClickEvent event )
+                        {
+                            service.execute( new ExtractionService( result.getDataset().getUri() ), new AsyncCallback<ExtractionServiceResult>() {
+                                public void onFailure( Throwable caught )
+                                {
+                                    GWT.log( "Error submitting extraction job", caught );
+                                }
+
+                                public void onSuccess( ExtractionServiceResult result )
+                                {
+                                    GWT.log( "Success submitting extraction job " + result.getJobid() );
+                                }
+                            } );
+                        }
+                    } );
+                    actionsPanel.add( extractAnchor );
+                }
+            }
+        } );
         
         for ( PreviewBean pb : result.getPreviews() ) {
             if ( pb instanceof PreviewVideoBean ) {

@@ -34,7 +34,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
  * FIXME: add roles to admin and guest account and not specific permissions
  * 
  * @author Luigi Marini, Rob Kooper
- *
+ * 
  */
 public class ContextSetupListener implements ServletContextListener
 {
@@ -56,7 +56,7 @@ public class ContextSetupListener implements ServletContextListener
     {
         // property file location
         Properties props = new Properties();
-        String path = "/server.properties";
+        String path = "/server.properties"; //$NON-NLS-1$
         log.debug( "Loading server property file: " + path );
 
         // load properties
@@ -73,6 +73,20 @@ public class ContextSetupListener implements ServletContextListener
             }
         }
 
+        // some global variables
+        if ( props.containsKey( "extractor.url" ) ) { //$NON-NLS-1$
+            TupeloStore.getInstance().setExtractionServiceURL( props.getProperty( "extractor.url" ) ); //$NON-NLS-1$
+        }
+        
+        // mail properties
+        Properties mail = new Properties();
+        for ( String key : props.stringPropertyNames() ) {
+            if (key.startsWith( "mail." )) {
+                mail.put( key, props.getProperty( key ) );
+            }
+        }
+        Mail.setProperties(mail);
+
         // initialize system
         createAccounts( props );
         createUserFields( props );
@@ -84,17 +98,17 @@ public class ContextSetupListener implements ServletContextListener
         TripleWriter tw = new TripleWriter();
 
         // FIXME remove the old code
-        tw.remove( Resource.uriRef( "urn:strangeness" ), Rdf.TYPE, Cet.cet( "userMetadataField" ) );
-        tw.remove( Resource.uriRef( "urn:charm" ), Rdf.TYPE, Cet.cet( "userMetadataField" ) );
+        tw.remove( Resource.uriRef( "urn:strangeness" ), Rdf.TYPE, Cet.cet( "userMetadataField" ) ); //$NON-NLS-1$ //$NON-NLS-2$
+        tw.remove( Resource.uriRef( "urn:charm" ), Rdf.TYPE, Cet.cet( "userMetadataField" ) ); //$NON-NLS-1$ //$NON-NLS-2$
 
         // add all the userfields
         for ( String key : props.stringPropertyNames() ) {
-            if ( key.startsWith( "userfield." ) && key.endsWith( ".predicate" ) ) {
-                String pre = key.substring( 0, key.lastIndexOf( "." ) );
-                if ( props.containsKey( pre + ".label" ) ) {
+            if ( key.startsWith( "userfield." ) && key.endsWith( ".predicate" ) ) { //$NON-NLS-1$ //$NON-NLS-2$
+                String pre = key.substring( 0, key.lastIndexOf( "." ) ); //$NON-NLS-1$
+                if ( props.containsKey( pre + ".label" ) ) { //$NON-NLS-1$
                     Resource r = Resource.uriRef( props.getProperty( key ) );
-                    tw.add( r, Rdf.TYPE, Cet.cet( "userMetadataField" ) );
-                    tw.add( r, Rdfs.LABEL, props.getProperty( pre + ".label" ) );
+                    tw.add( r, Rdf.TYPE, Cet.cet( "userMetadataField" ) ); //$NON-NLS-1$
+                    tw.add( r, Rdfs.LABEL, props.getProperty( pre + ".label" ) ); //$NON-NLS-1$
                 }
             }
         }
@@ -113,17 +127,17 @@ public class ContextSetupListener implements ServletContextListener
         RBAC rbac = new RBAC( TupeloStore.getInstance().getContext() );
 
         for ( String key : props.stringPropertyNames() ) {
-            if ( key.startsWith( "user." ) && key.endsWith( ".username" ) ) {
-                String pre = key.substring( 0, key.lastIndexOf( "." ) );
+            if ( key.startsWith( "user." ) && key.endsWith( ".username" ) ) { //$NON-NLS-1$ //$NON-NLS-2$
+                String pre = key.substring( 0, key.lastIndexOf( "." ) ); //$NON-NLS-1$
                 String username = props.getProperty( key );
 
                 // create account
                 try {
                     PersonBean user = pbu.get( PersonBeanUtil.getPersonID( username ) );
                     Resource userid = Resource.uriRef( user.getUri() );
-                    user.setName( props.getProperty( pre + ".fullname", username ) );
-                    if ( props.containsKey( pre + ".email" ) ) {
-                        user.setEmail( props.getProperty( pre + ".email" ) );
+                    user.setName( props.getProperty( pre + ".fullname", username ) ); //$NON-NLS-1$
+                    if ( props.containsKey( pre + ".email" ) ) { //$NON-NLS-1$
+                        user.setEmail( props.getProperty( pre + ".email" ) ); //$NON-NLS-1$
                     }
                     beanSession.save( user );
 
@@ -133,14 +147,14 @@ public class ContextSetupListener implements ServletContextListener
                     tripleMatcher.setPredicate( MMDB.HAS_PASSWORD );
                     beanSession.getContext().perform( tripleMatcher );
                     if ( tripleMatcher.getResult().size() == 0 ) {
-                        beanSession.getContext().addTriple( userid, MMDB.HAS_PASSWORD, PasswordDigest.digest( props.getProperty( pre + ".password", username ) ) );
+                        beanSession.getContext().addTriple( userid, MMDB.HAS_PASSWORD, PasswordDigest.digest( props.getProperty( pre + ".password", username ) ) ); //$NON-NLS-1$
                     }
 
-                    for ( String role : props.getProperty( pre + ".roles", "VIEW_MEMBER_PAGES" ).split( "," ) ) {
-                        if ( "VIEW_MEMBER_PAGES".equals( role ) ) {
+                    for ( String role : props.getProperty( pre + ".roles", "VIEW_MEMBER_PAGES" ).split( "," ) ) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                        if ( "VIEW_MEMBER_PAGES".equals( role ) ) { //$NON-NLS-1$
                             rbac.addPermission( userid, MMDB.VIEW_MEMBER_PAGES );
                         }
-                        if ( "VIEW_ADMIN_PAGES".equals( role ) ) {
+                        if ( "VIEW_ADMIN_PAGES".equals( role ) ) { //$NON-NLS-1$
                             rbac.addPermission( userid, MMDB.VIEW_ADMIN_PAGES );
                         }
                     }

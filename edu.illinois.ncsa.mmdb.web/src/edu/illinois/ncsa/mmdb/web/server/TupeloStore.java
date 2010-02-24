@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,7 +31,6 @@ import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.query.OrderBy;
-import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.xml.RdfXml;
@@ -65,6 +63,9 @@ public class TupeloStore {
 
 	/** Default location of serialized tupelo context **/
 	private static final String CONTEXT_PATH = "/context.xml";
+	
+	/** URL of extraction service */
+	private String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
 
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(TupeloStore.class);
@@ -83,6 +84,9 @@ public class TupeloStore {
 	 * definitions
 	 **/
 	private Collection<ContextBean> contextBeans;
+	
+	/** last time a certain uri was asked for extraction */
+    private Map<String,Long> lastExtractionRequest = new HashMap<String,Long>();
 
 	/** Context DAO used to load context definition from disk **/
 	private ContextBeanUtil contextBeanUtil;
@@ -110,7 +114,6 @@ public class TupeloStore {
 
 		try {
 			context = createSerializeContext();
-            //System.out.println(CETBeans.contextToNTriples( context ));
 			if(context == null) {
 				log.error("no context deserialized!");
 			} else {
@@ -312,7 +315,7 @@ public class TupeloStore {
 	public static void refetch(Resource uri) throws OperatorException {
 		getInstance().getBeanSession().refetch(uri);
 	}
-	
+		
 	// URL canonicalization
 
 	// these hardcoded strings make sure the right paths are used
@@ -373,32 +376,68 @@ public class TupeloStore {
         return canon;
     }
     
-    Map<String,Long> lastExtractionRequest = new HashMap<String,Long>();
-    // extraction takes time. don't make repeated requests at short time intervals
-    public void extractPreviews(String uri) {
-    	Long lastRequest = lastExtractionRequest.get(uri);
-    	if(lastRequest == null || lastRequest < System.currentTimeMillis()-120000) { // give it a minute
-    		try {
-    			Date createTime = getBeanSession().getThingSession().getDate(Resource.uriRef(uri), Cet.cet("metadata/extractor/createTime"));
-    			if(createTime == null) {
-    				String extractionServiceURL = "http://localhost:9856/"; // FIXME hardcoded
-    				log.info("EXTRACT PREVIEWS "+uri);
-    				lastExtractionRequest.put(uri, System.currentTimeMillis());
-    				BeanSession beanSession = getBeanSession();
-    				DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-    				PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
-    				try {
-    					pbu.callExtractor(extractionServiceURL, dbu.get(uri));
-    				} catch (Exception e) {
-    					log.error("Extraction service " + extractionServiceURL + " unavailable");
-    					e.printStackTrace();
-    				}
-    			}
-    		} catch(OperatorException x) {
-    			log.error("error checking context for extraction timestamp",x);
-    		}
-    	}
+    /**
+     * Sets the URL to use for the extraction service.
+     * 
+     * @param extractionServiceURL
+     *            the URL to use for the extraction service.
+     */
+    public void setExtractionServiceURL( String extractionServiceURL )
+    {
+        this.extractionServiceURL = extractionServiceURL;
     }
+
+    /**
+     * Returns the URL of the extraction service.
+     * 
+     * @return the URL of the extraction service.
+     */
+    public String getExtractionServiceURL()
+    {
+        return extractionServiceURL;
+    }
+    
+    /**
+     * Extract metadata and previews from the given URI.
+     * 
+     * @param uri
+     *            uri of dataset to pass to extraction service.
+     * @return the job id at the extractor or null if the job was rejected.
+     */
+    public String extractPreviews( String uri )
+    {
+        return extractPreviews( uri, false );
+    }
+
+    /**
+     * Extract metadata and previews from the given URI. If rerun is set to true
+     * it will tell the extraction service to rerun the extraction.
+     * 
+     * @param uri
+     *            uri of dataset to pass to extraction service.
+     * @param rerun
+     *            set to true if extraction service should be run again.
+     * @return the job id at the extractor or null if the job was rejected.
+     */
+    public String extractPreviews( String uri, boolean rerun )
+    {
+        Long lastRequest = lastExtractionRequest.get( uri );
+
+        // give it a minute
+        if ( rerun || lastRequest == null || lastRequest < System.currentTimeMillis() - 120000 ) {
+            log.info( "EXTRACT PREVIEWS " + uri );
+            lastExtractionRequest.put( uri, System.currentTimeMillis() );
+            BeanSession beanSession = getBeanSession();
+            PreviewBeanUtil pbu = new PreviewBeanUtil( beanSession );
+            try {
+                return pbu.callExtractor( extractionServiceURL, uri, null, rerun );
+            } catch ( Exception e ) {
+                log.error( String.format( "Extraction service %s unavailable", extractionServiceURL ), e );
+            }
+        }
+        return null;
+    }
+   
     Map<String,Memoized<Integer>> datasetCount = new HashMap<String,Memoized<Integer>>();
     public int countDatasets() {
     	return countDatasets(null, false);

@@ -13,6 +13,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.EditPermissionsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.ExtractionServiceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAnnotationsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
@@ -74,7 +75,8 @@ public class MyActionHandlersConfig implements ServletContextListener {
 		DispatchUtil.registerHandler(new GetDerivedFromHandler());
 		DispatchUtil.registerHandler(new RunSparqlQueryHandler());
 		DispatchUtil.registerHandler(new GetUserMetadataFieldsHandler());
-		DispatchUtil.registerHandler(new SetPropertyHandler());
+        DispatchUtil.registerHandler(new SetPropertyHandler());
+        DispatchUtil.registerHandler(new ExtractionServiceHandler());
 	}
 
 	public void contextDestroyed(ServletContextEvent evt) {
