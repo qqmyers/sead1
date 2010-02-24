@@ -325,20 +325,19 @@ body {
 	
 	
 .twoColumnLayout {
-	float: none;
+	width: 100%;
 }
 
 .twoColumnLayout-leftCol {
+	position: relative;
 	float: left;
+	width: 600px;
 }
 
 .twoColumnLayout-rightCol {
-	width: 250px;
+	position: relative;
 	float: right;
-}
-
-.twoColumnLayoutColumn {
-	float: left;
+	width: 300px;
 }
 
 .usersTable {
@@ -478,7 +477,7 @@ body {
 }
 
 .datasetRightColSection {
-	width:100%;
+	width: 200px;
 	padding: 0px;
 	margin: 20px 5px 50px 5px;
 	text-align: left;
