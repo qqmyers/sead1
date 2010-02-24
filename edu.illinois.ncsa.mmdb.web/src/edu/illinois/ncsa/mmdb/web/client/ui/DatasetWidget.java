@@ -614,13 +614,13 @@ public class DatasetWidget extends Composite {
         if ( x < 1e3 ) {
             return x + " bytes";
         } else if ( x < 1e6 ) {
-            return (int)(x / 1e3 * 100) / 100.0 + " Kb";
+            return (int)(x / 1e3 * 100) / 100.0 + " KB";
         } else if ( x < 1e9 ) {
-            return(int)(x / 1e6 * 100) / 100.0 + " Mb";
+            return(int)(x / 1e6 * 100) / 100.0 + " MB";
         } else if ( x < 1e12 ) {
-            return (int)(x / 1e9 * 100) / 100.0 + " Gb";
+            return (int)(x / 1e9 * 100) / 100.0 + " GB";
         } else if ( x < 1e15 ) {
-            return (int)(x / 1e12 * 100) / 100.0 + " Tb";
+            return (int)(x / 1e12 * 100) / 100.0 + " TB";
         } else {
             return x + " bytes";
         }
