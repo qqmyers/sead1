@@ -59,9 +59,7 @@ public class GetDatasetsByTagHandler implements
 		uf.setColumnNames("dataset");
 
 		try {
-			TupeloStore.getInstance().getContext().perform(uf);
-
-			for (Tuple<Resource> row : uf.getResult()) {
+			for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf, "dataset")) {
 				if (row.get(0) != null) {
 					datasets.add(dbu.get(row.get(0)));
 				}
