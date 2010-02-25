@@ -12,6 +12,7 @@ import javax.servlet.ServletContextListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.client.HttpTupeloClient;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
@@ -76,6 +77,18 @@ public class ContextSetupListener implements ServletContextListener
         // some global variables
         if ( props.containsKey( "extractor.url" ) ) { //$NON-NLS-1$
             TupeloStore.getInstance().setExtractionServiceURL( props.getProperty( "extractor.url" ) ); //$NON-NLS-1$
+        }
+        
+        //
+        if(props.containsKey("extractor.contextUrl")) {
+        	String contextUrl = props.getProperty("extractor.contextUrl");
+        	String contextUser = props.getProperty("extractor.contextUser","admin");
+        	String contextPassword = props.getProperty("extractor.contextPassword","admin");
+        	HttpTupeloClient cc = new HttpTupeloClient();
+        	cc.setTupeloUrl(contextUrl);
+        	cc.setUsername(contextUser);
+        	cc.setPassword(contextPassword);
+        	TupeloStore.getInstance().setExtractorContext(cc);
         }
         
         // mail properties

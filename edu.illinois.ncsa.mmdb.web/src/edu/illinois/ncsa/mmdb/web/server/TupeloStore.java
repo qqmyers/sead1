@@ -77,6 +77,9 @@ public class TupeloStore {
 	/** Tupelo context loaded from disk **/
     private Context                        context;
 
+    /** Tupelo context to be used by the extractor */
+    private Context extractorContext;
+    
 	/** Tupelo beansession facing tupelo context **/
     private BeanSession                    beanSession;
 
@@ -419,7 +422,20 @@ public class TupeloStore {
         return extractPreviews( uri, false );
     }
 
-    /**
+    
+    public Context getExtractorContext() {
+    	if(extractorContext == null) {
+    		return getContext();
+    	} else {
+    		return extractorContext;
+    	}
+	}
+
+	public void setExtractorContext(Context extractorContext) {
+		this.extractorContext = extractorContext;
+	}
+
+	/**
      * Extract metadata and previews from the given URI. If rerun is set to true
      * it will tell the extraction service to rerun the extraction.
      * 
@@ -437,7 +453,7 @@ public class TupeloStore {
         if ( rerun || lastRequest == null || lastRequest < System.currentTimeMillis() - 120000 ) {
             log.info( "EXTRACT PREVIEWS " + uri );
             lastExtractionRequest.put( uri, System.currentTimeMillis() );
-            BeanSession beanSession = getBeanSession();
+            BeanSession beanSession = getExtractorContext().getBeanSession();
             PreviewBeanUtil pbu = new PreviewBeanUtil( beanSession );
             try {
                 return pbu.callExtractor( extractionServiceURL, uri, null, rerun );
@@ -447,8 +463,8 @@ public class TupeloStore {
         }
         return null;
     }
-    
-    public int countDatasets()
+
+	public int countDatasets()
     {
         return countDatasets( null, false );
     }
