@@ -72,7 +72,11 @@ public class AnnotationView extends Composite {
 
 		flexCellFormatter.addStyleName(1, 0, "annotationAttributes");
 
-		mainTable.setHTML(2, 0, annotationBean.getDescription());
+		String description = annotationBean.getDescription();
+		
+		description = description.replaceAll("\n", "<br>");
+		
+		mainTable.setHTML(2, 0, description);
 
 		flexCellFormatter.setColSpan(2, 0, 2);
 
