@@ -174,7 +174,11 @@ public class RestServlet extends AuthenticatedServlet {
     			}
     			if(infix.equals(PREVIEW_LARGE)) {
     				//log.debug("large preview = "+maxArea+"px "+maxUri);
-    				return maxUri;
+    				if(maxArea > 100 * 100) {
+    					return maxUri;
+    				} else {
+    					return null; // not big enough to count as "large"
+    				}
     			} else {
     				//if(minUri != null) { log.debug("small preview = "+minArea+"px "+minUri); }
     				return minUri;
