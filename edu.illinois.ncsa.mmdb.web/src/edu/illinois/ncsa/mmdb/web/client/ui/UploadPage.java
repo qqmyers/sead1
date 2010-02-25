@@ -126,7 +126,7 @@ public class UploadPage extends Page {
 		jnlp_href: 'dropuploader.jnlp',
 		statusPage: $wnd.document.URL,
 		"credentials": credentials,
-		background: "0x006699",
+		background: "0xFFFFFF",
 		};
 		$wnd.deployJava.runApplet(attributes, parameters, '1.5');
 		$wnd.document.getElementById('dndAppletId').innerHTML = $wnd.deployJava.getDocument();
