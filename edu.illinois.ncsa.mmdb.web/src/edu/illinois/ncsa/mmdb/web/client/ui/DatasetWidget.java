@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
@@ -243,7 +244,7 @@ public class DatasetWidget extends Composite {
 			authorLabel.setText("Author: " + creator.getName());
 		}
 
-		sizeLabel = new Label("Size: " + humanBytes(result.getDataset().getSize()));
+		sizeLabel = new Label("Size: " + TextFormatter.humanBytes(result.getDataset().getSize()));
 
 		sizeLabel.addStyleName("metadataEntry");
 
@@ -599,32 +600,6 @@ public class DatasetWidget extends Composite {
 					}
 				});
 	}
-	
-	/**
-	 * Format bytes.
-	 * 
-	 * @param x number of bytes
-	 * @return formatted string
-	 */
-    public static String humanBytes( long x )
-    {
-        if ( x == Integer.MAX_VALUE ) {
-            return "No limit";
-        }
-        if ( x < 1e3 ) {
-            return x + " bytes";
-        } else if ( x < 1e6 ) {
-            return (int)(x / 1e3 * 100) / 100.0 + " KB";
-        } else if ( x < 1e9 ) {
-            return(int)(x / 1e6 * 100) / 100.0 + " MB";
-        } else if ( x < 1e12 ) {
-            return (int)(x / 1e9 * 100) / 100.0 + " GB";
-        } else if ( x < 1e15 ) {
-            return (int)(x / 1e12 * 100) / 100.0 + " TB";
-        } else {
-            return x + " bytes";
-        }
-    }
 
     /**
      * Asynchronously add the current dataset to a collection.
