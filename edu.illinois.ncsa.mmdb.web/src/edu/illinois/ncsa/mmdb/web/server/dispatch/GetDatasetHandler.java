@@ -63,7 +63,7 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
 
             // FIXME the next query is probably unnecessary, if we can get to the underlying BeanThing
             // representing the dataset which will have this triple in it, or not
-            Set<Triple> pyramids = TupeloStore.getInstance().getContext().match( Resource.uriRef( datasetBean.getUri() ), ImagePyramidBeanUtil.HAS_PYRAMID, null );
+            Set<Triple> pyramids = TupeloStore.getInstance().getContext().match( Resource.uriRef( action.getUri() ), ImagePyramidBeanUtil.HAS_PYRAMID, null );
             String pyramid = null;
             if ( pyramids.size() > 0 ) {
                 pyramid = pyramids.iterator().next().getObject().getString();
