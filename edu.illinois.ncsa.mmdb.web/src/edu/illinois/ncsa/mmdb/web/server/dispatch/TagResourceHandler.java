@@ -70,6 +70,7 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
 					}
 				}
 				log.debug("Tagged " + uri + " with tags " + added);
+				return new TagResourceResult(normalizedTags);
 			}
 		} catch (OperatorException e) {
 			log.error("Error tagging " + uri, e);
