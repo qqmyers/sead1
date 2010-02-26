@@ -128,7 +128,7 @@ public class ListDatasetsHandler implements
 	 * @param dbu
 	 * @return
 	 */
-	private List<DatasetBean> listDatasets(String orderBy, boolean desc,
+	public static List<DatasetBean> listDatasets(String orderBy, boolean desc,
 			int limit, int offset, String inCollection, DatasetBeanUtil dbu) {
 		try {
 			List<String> uris;

@@ -12,6 +12,7 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.rdf.terms.Dc;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
@@ -40,13 +41,12 @@ public class GetCollectionHandler implements
 		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
 		CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
-
+		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+		
 		try {
 			CollectionBean collectionBean = cbu.get(arg0.getUri());
 
-			List<DatasetBean> collection = (List<DatasetBean>) cbu
-					.getCollection(collectionBean, new DatasetBeanUtil(
-							beanSession).getType(), "title", false, 100, 0);
+			List<DatasetBean> collection = ListDatasetsHandler.listDatasets(Dc.TITLE.getString(), false, 100, 0, arg0.getUri(), dbu);
 
 			return new GetCollectionResult(collectionBean, collection);
 		} catch (Exception e) {
