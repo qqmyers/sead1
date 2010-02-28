@@ -19,6 +19,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
@@ -26,6 +27,8 @@ import org.tupeloproject.rdf.terms.Rdfs;
 import edu.illinois.ncsa.bard.jaas.PasswordDigest;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewPyramidBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 
@@ -103,6 +106,25 @@ public class ContextSetupListener implements ServletContextListener
         // initialize system
         createAccounts( props );
         createUserFields( props );
+        
+        // FIXME MMDB-514 remove following code for 0.5 release
+        TripleWriter tw = new TripleWriter();
+        TripleMatcher tm = new TripleMatcher();
+        tm.setPredicate( PreviewPyramidBeanUtil.HAS_PYRAMID );
+        try {
+            TupeloStore.getInstance().getContext().perform( tm );
+        } catch ( OperatorException exc ) {
+            log.warn( "Could not get wrong pyramid preview predicates.", exc );
+        }
+        for ( Triple t : tm.getResult() ) {
+            tw.remove( t );
+            tw.add( t.getSubject(), PreviewBeanUtil.HAS_PREVIEW, t.getObject() );
+        }
+        try {
+            TupeloStore.getInstance().getContext().perform( tw );
+        } catch ( OperatorException exc ) {
+            log.warn( "Could not remove wrong pyramid preview predicates.", exc );
+        }
     }
 
     private void createUserFields( Properties props )
