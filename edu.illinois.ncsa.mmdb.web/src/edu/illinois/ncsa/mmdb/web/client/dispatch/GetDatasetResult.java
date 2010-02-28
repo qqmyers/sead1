@@ -25,17 +25,14 @@ public class GetDatasetResult implements Result
 
     private Collection<PreviewBean> previews;
 
-    private String                  pyramid          = null;
-
     public GetDatasetResult()
     {
     }
 
-    public GetDatasetResult( DatasetBean datasetBean, Collection<PreviewBean> previews, String pyramid )
+    public GetDatasetResult( DatasetBean datasetBean, Collection<PreviewBean> previews )
     {
         setDataset( datasetBean );
         setPreviews( previews );
-        setPyramid( pyramid );
     }
 
     public void setDataset( DatasetBean dataset )
@@ -60,15 +57,4 @@ public class GetDatasetResult implements Result
         }
         return previews;
     }
-
-    public String getPyramid()
-    {
-        return pyramid;
-    }
-
-    public void setPyramid( String pyramid )
-    {
-        this.pyramid = pyramid;
-    }
-
 }

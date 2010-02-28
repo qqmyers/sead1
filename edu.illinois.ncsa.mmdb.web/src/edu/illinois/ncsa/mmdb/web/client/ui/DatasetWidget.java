@@ -60,6 +60,9 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.PreviewBean;
+import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
+import edu.uiuc.ncsa.cet.bean.PreviewPyramidBean;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 
 /**
@@ -294,37 +297,6 @@ public class DatasetWidget extends Composite {
 		actionsPanel.addStyleName("datasetActions");
 
 		actionsPanel.add(downloadAnchor);
-
-		// dataset pyramid zoom
-        if ( result.getPyramid() != null ) {
-        	
-            final Anchor zoomAnchor = new Anchor( "Zoom" );
-            
-            zoomAnchor.addStyleName("datasetActionLink");
-            
-            final String zoomUri = PYRAMID_URL + result.getPyramid() + "/xml";
-            
-            zoomAnchor.addClickHandler( new ClickHandler() {
-                public void onClick( ClickEvent event )
-                {
-                    previewPanel.clear();
-                    if ( zoomAnchor.getText().equals( "Zoom" ) ) {
-                        Label seadragon = new Label();
-                        seadragon.addStyleName( "seadragon" );
-                        previewPanel.add( seadragon );
-                        seadragon.getElement().setId( "seadragon" );
-                        zoomAnchor.setText( "Preview" );
-                        showSeadragon( seadragon.getElement().getId(), zoomUri );
-                    } else {
-                        hideSeadragon( );
-                        previewPanel.add( preview );
-                        zoomAnchor.setText( "Zoom" );
-                    }
-                }
-            } );
-            
-            actionsPanel.add( zoomAnchor );
-        }
         
         // delete dataset
         // TODO add confirmation dialog
@@ -373,6 +345,42 @@ public class DatasetWidget extends Composite {
             }
         } );
         
+        // image preview
+        for(PreviewBean pb : result.getPreviews()) {
+            if (pb instanceof PreviewImageBean) {
+                // FIXME add code to show preview
+            }
+        }
+        
+        // pyramid preview
+        for(PreviewBean pb : result.getPreviews()) {
+            if (pb instanceof PreviewPyramidBean) {
+                final String zoomUri = PYRAMID_URL + pb.getUri() + "/xml";               
+                final Anchor zoomAnchor = new Anchor( "Zoom" );                
+                zoomAnchor.addStyleName("datasetActionLink");                
+                zoomAnchor.addClickHandler( new ClickHandler() {
+                    public void onClick( ClickEvent event )
+                    {
+                        previewPanel.clear();
+                        if ( zoomAnchor.getText().equals( "Zoom" ) ) {
+                            Label seadragon = new Label();
+                            seadragon.addStyleName( "seadragon" );
+                            previewPanel.add( seadragon );
+                            seadragon.getElement().setId( "seadragon" );
+                            zoomAnchor.setText( "Preview" );
+                            showSeadragon( seadragon.getElement().getId(), zoomUri );
+                        } else {
+                            hideSeadragon( );
+                            previewPanel.add( preview );
+                            zoomAnchor.setText( "Zoom" );
+                        }
+                    }
+                } );
+                
+                actionsPanel.add( zoomAnchor );                
+            }
+        }
+
         /* MMDB-503
         for ( PreviewBean pb : result.getPreviews() ) {
             if ( pb instanceof PreviewVideoBean ) {

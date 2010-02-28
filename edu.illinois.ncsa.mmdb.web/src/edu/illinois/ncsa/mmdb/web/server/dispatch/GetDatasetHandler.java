@@ -5,7 +5,6 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -14,8 +13,6 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
-import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.Triple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
@@ -23,8 +20,8 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.ImagePyramidBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewPyramidBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewVideoBeanUtil;
 
 /**
@@ -49,26 +46,21 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
 
         try {
             DatasetBean datasetBean = dbu.get( action.getUri() );
-
             datasetBean = dbu.update( datasetBean );
 
             Collection<PreviewBean> previews = new HashSet<PreviewBean>();
             
-
             // image previews
             previews.addAll( new PreviewImageBeanUtil( beanSession ).getAssociationsFor( action.getUri() ) );
 
             // video previews
             previews.addAll( new PreviewVideoBeanUtil( beanSession ).getAssociationsFor( action.getUri() ) );
 
-            // FIXME the next query is probably unnecessary, if we can get to the underlying BeanThing
-            // representing the dataset which will have this triple in it, or not
-            Set<Triple> pyramids = TupeloStore.getInstance().getContext().match( Resource.uriRef( action.getUri() ), ImagePyramidBeanUtil.HAS_PYRAMID, null );
-            String pyramid = null;
-            if ( pyramids.size() > 0 ) {
-                pyramid = pyramids.iterator().next().getObject().getString();
-            }
-            return new GetDatasetResult( datasetBean, previews, pyramid );
+            // pyramid previews
+            previews.addAll( new PreviewPyramidBeanUtil( beanSession ).getAssociationsFor( action.getUri() ) );
+
+            // return dataset and preview
+            return new GetDatasetResult( datasetBean, previews );
         } catch ( Exception e ) {
             log.error( "Error retrieving dataset " + action.getUri(), e );
             throw new ActionException( e );

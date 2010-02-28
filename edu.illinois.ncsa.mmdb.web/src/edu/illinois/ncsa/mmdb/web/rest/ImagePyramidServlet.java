@@ -22,9 +22,8 @@ import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.CopyFile;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.ImagePyramidBean;
-import edu.uiuc.ncsa.cet.bean.tupelo.ImagePyramidBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.ImagePyramidTileBeanUtil;
+import edu.uiuc.ncsa.cet.bean.PreviewPyramidBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewPyramidBeanUtil;
 
 /**
  * Servlet responsible for handling the image pyramid requests. The requests
@@ -76,8 +75,8 @@ public class ImagePyramidServlet extends AuthenticatedServlet
                 Resource uri = Resource.uriRef( matcher.group( 1 ) );
                 log.debug( "GET PYRAMID " + uri );
 
-                ImagePyramidBeanUtil ipbu = new ImagePyramidBeanUtil( TupeloStore.getInstance().getBeanSession() );
-                ImagePyramidBean ipb = ipbu.get( uri );
+                PreviewPyramidBeanUtil ipbu = new PreviewPyramidBeanUtil( TupeloStore.getInstance().getBeanSession() );
+                PreviewPyramidBean ipb = ipbu.get( uri );
                 if ( ipb == null ) {
                     throw (new NotFoundException( "Could not find the pyramid with given URI." ));
                 }
@@ -122,7 +121,7 @@ public class ImagePyramidServlet extends AuthenticatedServlet
      * for the xml file called /pyramid/foo.xml, the images should be in
      * /pyramid/foo_files/0/0_0.<format>
      */
-    private void getXml( ImagePyramidBean pyramid, HttpServletResponse resp ) throws IOException
+    private void getXml( PreviewPyramidBean pyramid, HttpServletResponse resp ) throws IOException
     {
         PrintStream ps = new PrintStream( resp.getOutputStream() );
         ps.println( "<?xml version=\"1.0\" encoding=\"utf-8\"?>" ); //$NON-NLS-1$
@@ -154,11 +153,11 @@ public class ImagePyramidServlet extends AuthenticatedServlet
         log.debug( "GET TILE " + uri + " level " + level + " (" + row + "," + col + ")" );
         Unifier u = new Unifier();
         u.setColumnNames( "tile" ); //$NON-NLS-1$
-        u.addPattern( uri, Rdf.TYPE, ImagePyramidBeanUtil.PYRAMID_TYPE );
-        u.addPattern( uri, ImagePyramidTileBeanUtil.PYRAMID_TILES, "tile" ); //$NON-NLS-1$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_LEVEL, Resource.literal( level ) ); //$NON-NLS-1$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_ROW, Resource.literal( row ) ); //$NON-NLS-1$
-        u.addPattern( "tile", ImagePyramidTileBeanUtil.PYRAMIDTILE_COL, Resource.literal( col ) ); //$NON-NLS-1$
+        u.addPattern( uri, Rdf.TYPE, PreviewPyramidBeanUtil.PREVIEW_TYPE );
+        u.addPattern( uri, PreviewPyramidBeanUtil.PYRAMID_TILES, "tile" ); //$NON-NLS-1$
+        u.addPattern( "tile", PreviewPyramidBeanUtil.PYRAMID_TILE_LEVEL, Resource.literal( level ) ); //$NON-NLS-1$
+        u.addPattern( "tile", PreviewPyramidBeanUtil.PYRAMID_TILE_ROW, Resource.literal( row ) ); //$NON-NLS-1$
+        u.addPattern( "tile", PreviewPyramidBeanUtil.PYRAMID_TILE_COL, Resource.literal( col ) ); //$NON-NLS-1$
         TupeloStore.getInstance().getContext().perform( u );
         List<Resource> hits = u.getFirstColumn();
         if ( hits.size() == 1 ) {
