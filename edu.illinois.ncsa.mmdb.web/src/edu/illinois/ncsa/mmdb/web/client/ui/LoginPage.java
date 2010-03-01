@@ -234,9 +234,15 @@ public class LoginPage extends Composite {
 	
 	/**
 	 * Reload page after being logged in.
+	 * 
+	 * FIXME remove hardcoded paths
 	 */
 	protected void redirect() {
-		History.fireCurrentHistoryState();
+		if (History.getToken().startsWith("login")) {
+			History.newItem("listDatasets");
+		} else {
+			History.fireCurrentHistoryState();
+		}
 	}
 
 	/**
