@@ -9,6 +9,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -59,11 +60,15 @@ public class HomePage extends Page {
 					@Override
 					public void onSuccess(HasPermissionResult result) {
 						if (result.isPermitted()) {
-							linksPanel.setWidget(linksPanel.getRowCount(), 0,
+							int row = linksPanel.getRowCount();
+							linksPanel.setWidget(row, 0,
 									new Hyperlink("Modify Permissions", "modifyPermissions"));
+							linksPanel.getCellFormatter().addStyleName(row, 0, "homePageWidgetRow");
+							row = linksPanel.getRowCount();
 							// FIXME
-							linksPanel.setWidget(linksPanel.getRowCount(), 0,
+							linksPanel.setWidget(row, 0,
 									new Hyperlink("Run SPARQL query", "sparql"));
+							linksPanel.getCellFormatter().addStyleName(row, 0, "homePageWidgetRow");
 						}
 					}
 				});
@@ -97,10 +102,15 @@ public class HomePage extends Page {
 	protected Widget createUserInfo(PersonBean personBean) {
 		FlexTable table = new FlexTable();
 		table.addStyleName("homePageWidget");
-		table.setText(0, 0, "Name:");
-		table.setText(0, 1, personBean.getName());
-		table.setText(1, 0, "Email:");
-		table.setText(1, 1, personBean.getEmail());
+		Label title = new Label("Profile");
+		title.addStyleName("homePageWidgetTitle");
+		table.setWidget(0, 0, title);
+		table.setText(1, 0, "Name:");
+		table.setText(1, 1, personBean.getName());
+		table.getCellFormatter().addStyleName(1, 0, "homePageWidgetRow");
+		table.setText(2, 0, "Email:");
+		table.setText(2, 1, personBean.getEmail());
+		table.getCellFormatter().addStyleName(2, 0, "homePageWidgetRow");
 		return table;
 	}
 
@@ -111,8 +121,12 @@ public class HomePage extends Page {
 	private FlexTable createLinksPanel() {
 		FlexTable table = new FlexTable();
 		table.addStyleName("homePageWidget");
-		table.setWidget(0, 0, new Hyperlink("Create New Password",
+		Label title = new Label("Links");
+		title.addStyleName("homePageWidgetTitle");
+		table.setWidget(0, 0, title);
+		table.setWidget(1, 0, new Hyperlink("Create New Password",
 				"newPassword"));
+		table.getCellFormatter().addStyleName(1, 0, "homePageWidgetRow");
 		return table;
 	}
 

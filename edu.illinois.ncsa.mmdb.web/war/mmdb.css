@@ -304,10 +304,17 @@ body {
 
 .homePageWidget {
 	float: left;
-	border: 1px #002B55 solid;
-	margin: 50px;
-	padding: 50px;
-	vertical-align: top;
+	/**border: 1px #888888 solid;**/
+	margin: 20px 100px 100px 20px;
+	padding: 5px 10px 20px 10px;
+}
+
+.homePageWidgetTitle {
+	font-size: 1.4em;
+}
+
+.homePageWidgetRow {
+	padding-left: 10px;	
 }
 
 .uploadPageLayout {
