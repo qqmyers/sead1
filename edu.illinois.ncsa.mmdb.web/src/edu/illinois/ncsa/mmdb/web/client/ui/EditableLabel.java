@@ -101,6 +101,7 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
 	}
 
 	public void setEditable(boolean isEditable) {
+		label.setTitle("");
 		this.isEditable = isEditable;
 	}
 
