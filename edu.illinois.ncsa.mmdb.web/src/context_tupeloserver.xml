@@ -16,7 +16,7 @@
     <a:hasProperties>
       <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:a8d69700bc0fd2eccc4af545271d9721adca9149">
         <b:storageTypeMapKey>TupeloServer.user</b:storageTypeMapKey>
-        <b:storageTypeMapValue>tupelo</b:storageTypeMapValue>
+        <b:storageTypeMapValue>admin</b:storageTypeMapValue>
       </b:storageTypeMapEntry>
     </a:hasProperties>
     <a:hasProperties>
@@ -28,7 +28,7 @@
     <a:hasProperties>
       <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:f790a9c55b185586b876bfa973430a563024ce18">
         <b:storageTypeMapKey>TupeloServer.password</b:storageTypeMapKey>
-        <b:storageTypeMapValue>tupelo</b:storageTypeMapValue>
+        <b:storageTypeMapValue>admin</b:storageTypeMapValue>
       </b:storageTypeMapEntry>
     </a:hasProperties>
     <dc:creator>
