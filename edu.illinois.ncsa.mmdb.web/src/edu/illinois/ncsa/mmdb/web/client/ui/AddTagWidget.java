@@ -34,13 +34,13 @@ public class AddTagWidget extends Composite {
 		
 		submitLink = new Anchor("Submit");
 		
-		submitLink.addStyleName("actionLink");
+		submitLink.addStyleName("addTagsLink");
 		
 		layout.add(submitLink);
 		
 		cancelLink = new Anchor("Cancel");
 		
-		cancelLink.addStyleName("actionLink");
+		cancelLink.addStyleName("addTagsLink");
 		
 		cancelLink.addClickHandler(new ClickHandler() {
 			
