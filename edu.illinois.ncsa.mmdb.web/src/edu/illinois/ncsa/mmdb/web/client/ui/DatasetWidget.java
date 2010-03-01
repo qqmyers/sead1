@@ -234,7 +234,7 @@ public class DatasetWidget extends Composite {
 
 		metadataHeader.addStyleName("datasetRightColHeading");
 
-		authorLabel = new Label("Author: ");
+		authorLabel = new Label("Contributor: ");
 
 		authorLabel.addStyleName("metadataEntry");
 
@@ -244,7 +244,7 @@ public class DatasetWidget extends Composite {
 
 			authorLabel.setTitle(creator.getEmail());
 
-			authorLabel.setText("Author: " + creator.getName());
+			authorLabel.setText("Contributor: " + creator.getName());
 		}
 
 		sizeLabel = new Label("Size: " + TextFormatter.humanBytes(result.getDataset().getSize()));
