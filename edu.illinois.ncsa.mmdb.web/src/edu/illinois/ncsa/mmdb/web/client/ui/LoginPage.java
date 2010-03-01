@@ -239,7 +239,7 @@ public class LoginPage extends Composite {
 	 */
 	protected void redirect() {
 		if (History.getToken().startsWith("login")) {
-			History.newItem("listDatasets");
+			History.newItem("listDatasets", true);
 		} else {
 			History.fireCurrentHistoryState();
 		}
