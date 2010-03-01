@@ -22,15 +22,11 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -57,6 +53,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
+import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
@@ -463,48 +461,13 @@ public class DatasetWidget extends Composite {
      * Confirm the user wants to delete the dataset.
      */
     protected void showDeleteDialog() {
-		
-    	final DialogBox dialog = new DialogBox();
+    	ConfirmDialog dialog = new ConfirmDialog("Delete", "Are you sure you want to delete this dataset?");
     	
-    	dialog.setText("Delete");
-    	
-    	VerticalPanel panel = new VerticalPanel();
-    	
-    	panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-    	
-    	panel.add(new Label("Are you sure you want to delete this dataset?"));
-    	
-    	HorizontalPanel buttonsPanel = new HorizontalPanel();
-    	
-    	Button yesButton = new Button("Yes", new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-
-				dialog.hide();
-				
+    	dialog.addConfirmHandler(new ConfirmHandler() {
+			public void onConfirm(ConfirmEvent event) {
 				delete();
 			}
-		});
-    	
-    	buttonsPanel.add(yesButton);
-    	
-    	Button noButton = new Button("No", new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				
-				dialog.hide();
-			}
-		});
-    	
-    	buttonsPanel.add(noButton);
-    	
-    	panel.add(buttonsPanel);
-    	
-    	dialog.add(panel);
-    	
-    	dialog.center();
+    	});
     	
     	dialog.show();
 	}

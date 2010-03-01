@@ -146,17 +146,19 @@ public class CommentsView extends Composite {
 	 */
 	public void show(ArrayList<AnnotationBean> annotations) {
 		commentsPanel.clear();
-		if (annotations.size() == 0) {
+		if (annotations.size() == 1) {
 
-			commentsPanel.add(new Label("No comments... yet!"));
+			commentsPanel.add(new Label("1 comment"));
 
 		} else {
 
-			for (AnnotationBean annotation : annotations) {
+			commentsPanel.add(new Label(annotations.size()+" comments"));
+			
+		}
+			
+		for (AnnotationBean annotation : annotations) {
 
-				commentsPanel.add(new AnnotationView(annotation));
-
-			}
+			commentsPanel.add(new AnnotationView(resource, annotation));
 
 		}
 	}

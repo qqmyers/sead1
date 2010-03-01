@@ -46,7 +46,7 @@ public class GetCollectionHandler implements
 		try {
 			CollectionBean collectionBean = cbu.get(arg0.getUri());
 
-			List<DatasetBean> collection = ListDatasetsHandler.listDatasets(Dc.TITLE.getString(), false, 100, 0, arg0.getUri(), dbu);
+			List<DatasetBean> collection = ListDatasetsHandler.listDatasets(Dc.TITLE.getString(), false, 0, 0, arg0.getUri(), dbu);
 
 			return new GetCollectionResult(collectionBean, collection);
 		} catch (Exception e) {
