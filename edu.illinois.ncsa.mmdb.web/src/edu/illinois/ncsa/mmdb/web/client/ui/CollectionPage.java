@@ -59,6 +59,16 @@ public class CollectionPage extends Composite {
 		
 		mainContent.add(createInfoPanel());
 		
+		// dataset table ... tada
+		datasetTableView = new PagingDatasetTableView(uri);
+		datasetTableView.addStyleName("datasetTable");
+		
+		PagingDatasetTablePresenter datasetTablePresenter =
+			new PagingDatasetTablePresenter(datasetTableView, eventBus);
+		datasetTablePresenter.bind();
+		
+		mainContent.add(datasetTableView);
+		
 		mainContent.add(createSocialAnnotationsPanel());
 
 		retrieveCollection();
@@ -92,17 +102,6 @@ public class CollectionPage extends Composite {
 		infoPanel.add(dateLabel);
 		numDatasetsLabel = new Label("Number of datasets");
 		infoPanel.add(numDatasetsLabel);
-		
-		// dataset table ... tada
-		datasetTableView = new PagingDatasetTableView(uri);
-		datasetTableView.addStyleName("datasetTable");
-		
-		PagingDatasetTablePresenter datasetTablePresenter =
-			new PagingDatasetTablePresenter(datasetTableView, eventBus);
-		datasetTablePresenter.bind();
-		//
-		
-		infoPanel.add(datasetTableView);
 		
 		return infoPanel;
 	}
