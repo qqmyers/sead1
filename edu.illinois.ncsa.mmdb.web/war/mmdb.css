@@ -556,6 +556,7 @@ body {
 
 .datasetMainContainerLeftColumn {
 	float: left;
+	text-align: left;
 	width: 700px;
 }
 
@@ -566,6 +567,7 @@ body {
 
 .previewPanel {
 	width: 100%;
+	text-align: center;
 	margin: 0px;
 	padding: 0px;
 	height: auto;
@@ -626,6 +628,7 @@ body {
 .datasetActions {
 	margin: 0px;
 	padding: 10px 0px 20px 0px;
+	text-align: center;
 	border: none;
 }
 
