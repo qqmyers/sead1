@@ -634,14 +634,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		} else if (checkLogin()) {
 			if (token.startsWith("dataset")) {
 				showDataset();
-			} else if (token.startsWith("listDatasets")) {
+			} else if (token.startsWith("listDatasets") && !previousHistoryToken.startsWith("listDatasets")) {
 				listDatasets();
 			} else if (token.startsWith("upload")) { // upload applet support
 //				showUploadProgress();
 				showUploadPage();
 			} else if (token.startsWith("tag")) {
 				showTagPage();
-			} else if (token.startsWith("listCollections")) {
+			} else if (token.startsWith("listCollections") && !previousHistoryToken.startsWith("listCollections")) {
 				listCollections();
 			} else if (token.startsWith("listCollections")) {
 				// skip default case!
