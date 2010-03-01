@@ -52,7 +52,8 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
 	
 	public void displayEditControls() {
 		panel.remove(label);
-		panel.setStyleName(label.getStyleName());
+		HorizontalPanel editPanel = new HorizontalPanel();
+		editPanel.addStyleName("datasetTitle");
 		final TextBox textBox = new TextBox();
 		textBox.setText(label.getText());
 		textBox.setWidth("20em");
@@ -70,9 +71,10 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
 				cancel();
 			}
 		});
-		panel.add(textBox);
-		panel.add(submit);
-		panel.add(cancel);
+		editPanel.add(textBox);
+		editPanel.add(submit);
+		editPanel.add(cancel);
+		panel.add(editPanel);
 	}
 	
 	public Label getLabel() {
