@@ -240,6 +240,8 @@ public class LoginPage extends Composite {
 	protected void redirect() {
 		if (History.getToken().startsWith("login")) {
 			History.newItem("listDatasets", true);
+			// FIXME hack
+			MMDB.listDatasets();
 		} else {
 			History.fireCurrentHistoryState();
 		}

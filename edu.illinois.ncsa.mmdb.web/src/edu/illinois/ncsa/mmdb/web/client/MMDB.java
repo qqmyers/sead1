@@ -100,7 +100,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private FlowPanel uploadPanel;
 
 	/** Main content panel **/
-	private FlowPanel mainContainer;
+	private static final FlowPanel mainContainer = new FlowPanel();
 
 	/** Place support for history management **/
 	private PlaceService placeService;
@@ -131,7 +131,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		RootPanel.get("breadcrumb").add(breadcrumb);
 		
 		// main content
-		mainContainer = new FlowPanel();
 		mainContainer.addStyleName("relativePosition");
 		RootPanel.get("mainContainer").add(mainContainer);
 
@@ -238,10 +237,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				});
 	}
 
-	private void listDatasets() {
+	public static void listDatasets() {
 		listDatasets(null);
 	}
-	private void listDatasets(String inCollection) {
+	
+	public static void listDatasets(String inCollection) {
 		mainContainer.clear();
 
 		TitlePanel titlePanel = new TitlePanel("List all");
