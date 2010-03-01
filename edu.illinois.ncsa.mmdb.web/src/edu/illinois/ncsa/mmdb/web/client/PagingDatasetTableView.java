@@ -69,7 +69,7 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 		String size = TextFormatter.humanBytes(dataset.getSize());
 		String authorsId = "Anonymous";
 		if (dataset.getCreator() != null) {
-			authorsId = dataset.getCreator().getEmail();
+			authorsId = dataset.getCreator().getName();
 		}
 		table.addRow(uri, title, type, date, previewUri, size, authorsId);
 	}

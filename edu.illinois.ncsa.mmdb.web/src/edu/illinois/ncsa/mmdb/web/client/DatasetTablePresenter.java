@@ -43,7 +43,7 @@ public class DatasetTablePresenter extends
 						Date date = dataset.getDate();
 						String previewUri = "/api/image/preview/small/"+id;
 						String size = TextFormatter.humanBytes(dataset.getSize());
-						String authorsId = dataset.getCreator().getEmail();
+						String authorsId = dataset.getCreator().getName();
 						display.addRow(id, title, type, date, previewUri, size, authorsId);
 					}
 				});
