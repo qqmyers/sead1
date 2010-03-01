@@ -19,6 +19,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteAnnotation;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteAnnotationResult;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.DeletedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DeletedHandler;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 
 /**
@@ -114,8 +116,13 @@ public class AnnotationView extends Composite {
 				GWT.log("Error deleting annotation", caught);
 			}
 			public void onSuccess(DeleteAnnotationResult result) {
-				addStyleName("hidden");
+				fireEvent(new DeletedEvent(annotationUri));
+				//addStyleName("hidden");
 			}
 		});
+	}
+	
+	public void addDeletedHandler(DeletedHandler h) {
+		addHandler(h, DeletedEvent.TYPE);
 	}
 }

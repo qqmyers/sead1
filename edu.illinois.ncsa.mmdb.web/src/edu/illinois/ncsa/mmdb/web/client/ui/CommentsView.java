@@ -18,6 +18,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResourceResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotations;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotationsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.event.DeletedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DeletedHandler;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 
 /**
@@ -146,20 +148,17 @@ public class CommentsView extends Composite {
 	 */
 	public void show(ArrayList<AnnotationBean> annotations) {
 		commentsPanel.clear();
-		if (annotations.size() == 1) {
-
-			commentsPanel.add(new Label("1 comment"));
-
-		} else {
-
-			commentsPanel.add(new Label(annotations.size()+" comments"));
-			
-		}
+		
+		commentsPanel.add(new Label(annotations.size()+" comment" + (annotations.size()!=1?"s":"")));
 			
 		for (AnnotationBean annotation : annotations) {
-
-			commentsPanel.add(new AnnotationView(resource, annotation));
-
+			AnnotationView v = new AnnotationView(resource, annotation);
+			v.addDeletedHandler(new DeletedHandler() {
+				public void onDeleted(DeletedEvent event) {
+					refresh();
+				}
+			});
+			commentsPanel.add(v);
 		}
 	}
 
