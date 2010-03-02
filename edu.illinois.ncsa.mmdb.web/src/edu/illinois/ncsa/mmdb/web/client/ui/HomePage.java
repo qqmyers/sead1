@@ -39,7 +39,6 @@ public class HomePage extends Page {
 		super("Home", dispatchAsync);
 		linksPanel = createLinksPanel();
 		mainLayoutPanel.add(linksPanel);
-		mainLayoutPanel.addStyleName("inline");
 		flushPanel = new SimplePanel();
 		flushPanel.addStyleName("clearBoth");
 		mainLayoutPanel.add(flushPanel);
