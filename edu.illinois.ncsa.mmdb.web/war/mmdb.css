@@ -117,7 +117,15 @@ body {
 	width: 975px;
 	margin: 20px auto 20px auto;
 	padding: 10px;
-	text-align: left;
+	text-align: center;
+	font-family: Arial, Helvetica, sans-serif !important;	
+	text-decoration:none;
+	color:#666;
+	font-size: 0.9em !important;		
+}
+
+.bottomMenu a:link, .bottomMenu a:visited {
+	color:#666;
 }
 
 .datasetDisclosurePanel {

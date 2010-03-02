@@ -16,12 +16,8 @@
 	<condition property="desktop" value="desktop/" else="/desktop/">
 		<isset property="env.VERSION"/>
 	</condition>
-
-	<condition property="build" value="Version: ${env.VERSION}" else="HUDSON Build: ${env.BUILD_NUMBER}">
-		<isset property="env.VERSION"/>
-	</condition>
 	
-	<condition property="build" value="Version: ${env.VERSION}" else="HUDSON Build: ${env.BUILD_NUMBER}">
+	<condition property="version" value="v${env.VERSION}#${env.BUILD_NUMBER}" else="build ${env.BUILD_NUMBER}">
 		<isset property="env.VERSION"/>
 	</condition>
 	
@@ -217,7 +213,7 @@
 	<target name="update_version" depends="prepare-hudson, copy_mmdb_html" description="update the build version in MMDB.java">
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
 			<filterset>
-				<filter token="BUILD_TAG" value="${build}" />
+				<filter token="VERSION" value="${version}" />
 				<filter token="DESKTOP" value="${desktop}" />
 			</filterset>
 		</copy>
