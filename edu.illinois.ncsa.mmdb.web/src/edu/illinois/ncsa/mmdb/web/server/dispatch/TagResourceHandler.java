@@ -63,13 +63,13 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
 				log.debug("normalized tags = "+normalizedTags);
 				tebu.addTags(Resource.uriRef(uri), null, normalizedTags);
 				debug(uri); // FIXME debug
-				Set<String> added = tebu.getTags(uri);
-				for(String tag : added) {
-					if(!normalizedTags.contains(tag)) {
+				Set<String> allTags = tebu.getTags(uri);
+				for(String tag : normalizedTags) {
+					if(!allTags.contains(tag)) {
 						log.error("failed to add tag "+tag);
 					}
 				}
-				log.debug("Tagged " + uri + " with tags " + added);
+				log.debug("Tagged " + uri + " with tags " + normalizedTags);
 				return new TagResourceResult(normalizedTags);
 			}
 		} catch (OperatorException e) {

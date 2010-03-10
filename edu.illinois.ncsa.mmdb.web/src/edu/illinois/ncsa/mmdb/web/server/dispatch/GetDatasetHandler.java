@@ -14,9 +14,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 
+import edu.illinois.ncsa.cet.search.Hit;
+import edu.illinois.ncsa.cet.search.TextExtractor;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
@@ -58,6 +61,25 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
 
             // pyramid previews
             previews.addAll( new PreviewPyramidBeanUtil( beanSession ).getAssociationsFor( action.getUri() ) );
+
+    		// FIXME debug
+            // now extract text
+            TupeloStore.getInstance().getSearch().reindex(action.getUri());
+            //
+            TextExtractor<String> ex = new SearchableThingTextExtractor();
+            String query = ex.extractText(action.getUri());
+            query = query.substring(query.indexOf(' ')+1);
+            log.info("searching for "+query);
+            try {
+            	int i = 0;
+            	for(Hit hit : TupeloStore.getInstance().getSearch().search(query)) {
+            		i++;
+            		log.info(i+" "+hit.getId()+" "+ex.extractText(hit.getId()));
+            	}
+            } catch(Exception x) {
+            	log.debug("search failed: "+x.getMessage());
+            }
+            // end debug
 
             // return dataset and preview
             return new GetDatasetResult( datasetBean, previews );

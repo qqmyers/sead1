@@ -3,6 +3,7 @@
  */
 package edu.illinois.ncsa.mmdb.web.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -27,6 +28,12 @@ import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.bard.jaas.PasswordDigest;
+import edu.illinois.ncsa.cet.search.IdGetter;
+import edu.illinois.ncsa.cet.search.TextExtractor;
+import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
+import edu.illinois.ncsa.mmdb.web.server.search.Search;
+import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
+import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
@@ -105,12 +112,40 @@ public class ContextSetupListener implements ServletContextListener
         }
         Mail.setProperties(mail);
 
+        // set up full-text search
+        String indexFile = props.getProperty("search.index",null);
+        setUpSearch(indexFile);
+        
         // initialize system
         createAccounts( props );
         createUserFields( props );
         
         // FIXME MMDB-514 update context
         updateContext();
+    }
+
+    private void setUpSearch(String indexFile) {
+        if(indexFile != null) {
+        	log.info("Lucene search index directory = "+indexFile);
+        	LuceneTextIndex<String> search = new LuceneTextIndex<String>(new File(indexFile));
+        	search.setTextExtractor(new SearchableThingTextExtractor());
+        	search.setIdGetter(new SearchableThingIdGetter());
+        	TupeloStore.getInstance().setSearch(search);
+        } else {
+        	log.info("No Lucene search index directory specified, search will return dummy results");
+        	Search s = new Search();
+        	s.setTextExtractor(new TextExtractor<String>() {
+				public String extractText(String object) {
+					return object;
+				}
+        	});
+        	s.setIdGetter(new IdGetter<String>() {
+				public String getId(String object) {
+					return object;
+				}
+        	});
+        	TupeloStore.getInstance().setSearch(s);
+        }
     }
     
     // FIXME MMDB-514 update context

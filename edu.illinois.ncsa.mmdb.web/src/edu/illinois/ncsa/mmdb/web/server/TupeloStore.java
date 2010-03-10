@@ -40,8 +40,8 @@ import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
 
 import sun.misc.Service;
+import edu.illinois.ncsa.cet.search.SearchableTextIndex;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
-import edu.illinois.ncsa.mmdb.web.server.search.Search;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.context.ContextBean;
@@ -544,12 +544,12 @@ public class TupeloStore {
     	return history;
     }
     
-    Search search = null;
-    public Search getSearch() {
-    	if(search == null) {
-    		search = new Search();
-    	}
+    SearchableTextIndex<String> search = null;
+    public SearchableTextIndex<String> getSearch() {
     	return search;
+    }
+    void setSearch(SearchableTextIndex<String> s) {
+    	search = s;
     }
 }
 

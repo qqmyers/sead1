@@ -4,8 +4,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * FIXME Add comments
- *
+ * This is a generic abstract memoization utility.
+ * To implement, provide an implementation of computeValue.
+ * To use, construct an instance and set the time-to-live (ttl).
+ * Then call getValue. If the expiration time has passed, computeValue
+ * will be called to retrieve the current value. Otherwise the
+ * cached value will be returned.
+ * Changing the ttl will not affect the expiration time until
+ * computeValue is called.
  *
  * @param <T>
  */
@@ -30,7 +36,9 @@ public abstract class Memoized<T> {
 	public T getValue(boolean force) {
 		long now = System.currentTimeMillis();
 		if(now > expires || force) {
-			log.debug("RECOMPUTING BECAUSE "+now+" > " + expires + " or " + force);
+			if(log != null) {
+				log.debug("RECOMPUTING BECAUSE "+now+" > " + expires + " or " + force);
+			}
 			cachedValue = computeValue();
 			expires = now + ttl;
 		}

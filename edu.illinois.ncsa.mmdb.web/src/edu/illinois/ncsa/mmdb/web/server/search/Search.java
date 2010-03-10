@@ -7,9 +7,8 @@ import java.util.List;
 import org.tupeloproject.rdf.terms.Dc;
 
 import edu.illinois.ncsa.cet.search.Hit;
-import edu.illinois.ncsa.cet.search.Searchable;
+import edu.illinois.ncsa.cet.search.SearchableTextIndex;
 import edu.illinois.ncsa.cet.search.StringHit;
-import edu.illinois.ncsa.cet.search.TextIndex;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
@@ -18,14 +17,13 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
  * TODO Add comments
  * 
  * @author Joe Futrelle
- *
  */
-public class Search extends TextIndex<Object> implements Searchable {
+public class Search extends SearchableTextIndex<String> {
 	
 	@Override
 	public Iterable<Hit> search(String searchString) {
 		// here we just list datasets
-		return search(searchString, 0, 30);
+		return search(searchString, 30, 0);
 	}
 
 	@Override
