@@ -33,6 +33,7 @@ import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.query.OrderBy;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
@@ -148,8 +149,15 @@ public class TupeloStore {
             }
 		    
 		}, 0, 60 * 60 * 1000 );
+		
+		// do a full-text index sweep every hour
+		// FIXME do less often
+		timer.schedule(new TimerTask() {
+			public void run() {
+				fullTextIndexAll();
+			}
+		}, 0, 60 * 60 * 1000);
 	}
-	
  
 	/**
 	 * Load context from disk.
@@ -591,6 +599,46 @@ public class TupeloStore {
     }
     void setSearch(SearchableTextIndex<String> s) {
     	search = s;
+    }
+
+    // index all datasets in the full-text index
+    // FIXME should do collections, too
+    private void fullTextIndexAll() {
+    	int i = 0;
+    	int batchSize = 100;
+    	while(true) {
+    		Unifier u = new Unifier();
+    		u.setColumnNames("d","replaced");
+    		u.addPattern("d",Rdf.TYPE,Cet.DATASET);
+    		u.addPattern("d",Dc.DATE,"date");
+    		u.addPattern("d",DcTerms.IS_REPLACED_BY,"replaced",true);
+    		u.setLimit(batchSize);
+    		u.setOffset(i);
+    		u.addOrderByDesc("date");
+    		try {
+    			getContext().perform(u);
+    			int n = 0;
+    			for(Tuple<Resource> row : u.getResult()) {
+    				String d = row.get(0).getString();
+    				Resource r = row.get(1);
+    				if(Rdf.NIL.equals(r)) { // deleted
+    					getSearch().deindex(d);
+    				} else {
+    					getSearch().reindex(d);
+    				}
+    				n++;
+    			}
+    			log.info("full-text indexed "+n+" dataset(s)");
+    			if(n < batchSize) {
+    				return;
+    			}
+    		} catch(OperatorException x) {
+    			x.printStackTrace();
+    			// FIXME deal with busy state
+    		}
+    		//
+    		i += batchSize;
+    	}
     }
 }
 
