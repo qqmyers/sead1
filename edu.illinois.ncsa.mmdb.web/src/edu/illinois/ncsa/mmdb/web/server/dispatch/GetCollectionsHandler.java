@@ -20,7 +20,6 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
-import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Table;
@@ -28,7 +27,6 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
-import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
@@ -108,7 +106,7 @@ public class GetCollectionsHandler implements
 							if (!seen.contains(subject)) { // FIXME: because of this logic, we may return fewer than the limit!
 								CollectionBean colBean = cbu.get(subject);
 								collections.add(colBean);
-								badges.add(getBadge(colBean.getUri()));
+								badges.add(TupeloStore.getInstance().getCollectionBadge(colBean.getUri()));
 								seen.add(subject);
 								news++;
 							} else {
@@ -164,50 +162,6 @@ public class GetCollectionsHandler implements
 		//System.out.println(SparqlQueryFactory.toSparql(uf));
 		return uf;
 	}
-	
-	String returnBadge(String collectionUri, String badge) {
-		if(badges.size() > 200) {
-			// crude capacity management
-			badges = new HashMap<String,String>();
-		}
-		badges.put(collectionUri, badge);
-		return badge;
-	}
-	
-	/**
-	 * 
-	 * @param collectionUri
-	 * @return
-	 */
-	private String getBadge(String collectionUri) {
-		String badge = badges.get(collectionUri);
-		if(badge == null) {
-			try {
-				Unifier u = new Unifier();
-				u.setColumnNames("member", "date");
-				u.addPattern(Resource.uriRef(collectionUri), DcTerms.HAS_PART, "member");
-				u.addPattern("member", Dc.DATE, "date", true);
-				u.addOrderByDesc("date");
-				u.addOrderBy("member");
-				u.setLimit(25);
-				for(Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member")) {
-					badge = row.get(0).getString();
-					if(RestServlet.getSmallPreviewUri(badge) != null) {
-						return returnBadge(collectionUri, badge);
-					}
-				}
-				// none of em have previews :(
-				if(badge != null) {
-					return returnBadge(collectionUri, badge);
-				}
-			} catch(OperatorException e) {
-				log.error("Error getting badges for collection " + collectionUri, e);
-			}
-		}
-		// we either found one or didn't, return it
-		return badge;
-	}
-	
 
 	@Override
 	public Class<GetCollections> getActionType() {

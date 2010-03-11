@@ -33,6 +33,7 @@ import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.query.OrderBy;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.xml.RdfXml;
@@ -92,8 +93,11 @@ public class TupeloStore {
 	/** Context DAO used to load context definition from disk **/
     private ContextBeanUtil                contextBeanUtil;
 	
-	/** List of counts */
+	/** Dataset count by collection (memoized) */
     private Map<String, Memoized<Integer>> datasetCount          = new HashMap<String, Memoized<Integer>>();
+    
+    /** Badge (collection preview) by collection (memoized) */
+    private Map<String, Memoized<String>> collectionBadges = new HashMap<String,Memoized<String>>();
     
     /** Timer to schedule re-occurring jobs */
     private Timer                          timer                 = new Timer();
@@ -509,6 +513,43 @@ public class TupeloStore {
         return datasetCount;
     }
     
+	/**
+	 * 
+	 * @param collectionUri
+	 * @return
+	 */
+	public String getCollectionBadge(final String collectionUri) {
+        Memoized<String> mBadge = collectionBadges.get(collectionUri);
+        if ( mBadge == null ) {
+            mBadge = new Memoized<String>() {
+                public String computeValue() {
+        			try {
+        				Unifier u = new Unifier();
+        				u.setColumnNames("member", "date");
+        				u.addPattern(Resource.uriRef(collectionUri), DcTerms.HAS_PART, "member");
+        				u.addPattern("member", Dc.DATE, "date", true);
+        				u.addOrderByDesc("date");
+        				u.addOrderBy("member");
+        				u.setLimit(25);
+        				for(Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member")) {
+        					String datasetUri = row.get(0).getString();
+        					if(RestServlet.getSmallPreviewUri(datasetUri) != null) {
+        						return datasetUri;
+        					}
+        				}
+        			} catch(OperatorException e) {
+        				log.error("Error getting badges for collection " + collectionUri, e);
+        			}
+    				// none of em have previews, or there was an error :(
+    				return null;
+                }
+            };
+            mBadge.setTtl( 120000 );
+            collectionBadges.put(collectionUri, mBadge);
+        }
+        return mBadge.getValue();
+	}
+	
     public ListTable<Resource> unifyExcludeDeleted(Unifier u, String subjectVar) throws OperatorException {
     	List<OrderBy> newOrderBy = new LinkedList<OrderBy>();
     	List<String> newColumnNames = new LinkedList<String>(u.getColumnNames());
