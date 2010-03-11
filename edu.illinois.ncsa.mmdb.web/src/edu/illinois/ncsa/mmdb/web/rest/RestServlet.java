@@ -74,6 +74,8 @@ public class RestServlet extends AuthenticatedServlet {
 	
 	public static final String SEARCH_INFIX = "/search";
 	
+	public static final String COLLECTION_PREVIEW = "/collection/preview/";
+	
     static RestService restService; // TODO manage this lifecycle better
 
     public void init() throws ServletException {
@@ -153,6 +155,14 @@ public class RestServlet extends AuthenticatedServlet {
     public static String getLargePreviewUri(String datasetUri) {
     	return getPreview(datasetUri, PREVIEW_LARGE);
     }
+    public static String getCollectionPreviewUri(String collectionUri) {
+    	String badge = TupeloStore.getInstance().getCollectionBadge(collectionUri);
+    	if(badge == null) {
+    		return null;
+    	} else {
+    		return getSmallPreviewUri(badge);
+    	}
+    }
     static String getPreview(String uri, String infix) {
     	BeanSession bs = TupeloStore.getInstance().getBeanSession();
     	PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(bs);
@@ -224,29 +234,14 @@ public class RestServlet extends AuthenticatedServlet {
         		log.trace("GET PREVIEW (any) "+uri);
         		previewUri = getPreview(uri, PREVIEW_ANY);
         	}
-        	if(previewUri != null) {
-        		try {
-        			CopyFile.copy(restService.retrieveImage(previewUri), response.getOutputStream());
-        		} catch(RestServiceException e) {
-        			if(e.isNotFound()) {
-        				response.setStatus(404);
-        				response.addHeader("Pragma", "no-cache");
-        			} else {
-        				throw new ServletException("failed to retrieve "+request.getRequestURI()); // FIXME return 404
-        			}
-        		}
-        	}
+        	returnImage(request, response, previewUri);
+        } else if(hasPrefix(COLLECTION_PREVIEW,request)) {
+        	log.trace("GET PREVIEW (collection) "+uri);
+        	String previewUri = getCollectionPreviewUri(uri);
+        	returnImage(request, response, previewUri);
         } else if(hasPrefix(IMAGE_INFIX,request)) {
             log.trace("GET IMAGE "+uri);
-            try {
-                CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
-            } catch(RestServiceException e) {
-            	if(e.isNotFound()) {
-            		response.setStatus(404);
-            	} else {
-            		throw new ServletException("failed to retrieve "+request.getRequestURI()); // FIXME return 404
-            	}
-            }
+            returnImage(request, response, uri);
         } else if(hasPrefix(COLLECTION_INFIX,request)) {
             log.trace("LIST COLLECTION"+uri);
             try {
@@ -278,6 +273,21 @@ public class RestServlet extends AuthenticatedServlet {
         } else {
             throw new ServletException("unrecognized API call "+request.getRequestURI());
         }
+    }
+
+    void returnImage(HttpServletRequest request, HttpServletResponse response, String imageUri) throws IOException, ServletException {
+    	if(imageUri != null) {
+    		try {
+    			CopyFile.copy(restService.retrieveImage(imageUri), response.getOutputStream());
+    			return;
+    		} catch(RestServiceException e) {
+    			if(!e.isNotFound()) {
+    				throw new ServletException("failed to retrieve "+request.getRequestURI()); // FIXME return 404
+    			}
+    		}
+    	}
+    	response.setStatus(404);
+    	response.addHeader("Pragma", "no-cache");
     }
 
     void doPostImage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

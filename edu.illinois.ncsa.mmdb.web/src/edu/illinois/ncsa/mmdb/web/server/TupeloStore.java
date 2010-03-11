@@ -363,6 +363,7 @@ public class TupeloStore {
             RestServlet.COLLECTION_CREATE_ANON_INFIX,
             RestServlet.COLLECTION_ADD_INFIX,
             RestServlet.COLLECTION_REMOVE_INFIX,
+            RestServlet.COLLECTION_PREVIEW,
             RestServlet.SEARCH_INFIX,
     };
 

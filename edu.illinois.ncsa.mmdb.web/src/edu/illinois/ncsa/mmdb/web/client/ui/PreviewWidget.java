@@ -29,7 +29,7 @@ import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
  * 
  */
 public class PreviewWidget extends Composite {
-
+	
 	// FIXME use enums
 	private static final Map<String, String> PREVIEW_URL;
 	private static final Map<String, String> GRAY_URL;
@@ -41,12 +41,15 @@ public class PreviewWidget extends Composite {
 		PREVIEW_URL = new HashMap<String, String>();
 		PREVIEW_URL.put(GetPreviews.SMALL, "./api/image/preview/small/");
 		PREVIEW_URL.put(GetPreviews.LARGE, "./api/image/preview/large/");
+		PREVIEW_URL.put(GetPreviews.BADGE, "./api/collection/preview/");
 		GRAY_URL = new HashMap<String, String>(); // how I yearn for map literals
 		GRAY_URL.put(GetPreviews.SMALL, "./images/preview-100.gif");
 		GRAY_URL.put(GetPreviews.LARGE, "./images/preview-500.gif");
+		GRAY_URL.put(GetPreviews.BADGE, "./images/preview-100.gif");
 		PENDING_URL = new HashMap<String, String>(); // how I yearn for map literals
 		PENDING_URL.put(GetPreviews.SMALL, "./images/loading-small.gif");
 		PENDING_URL.put(GetPreviews.LARGE, "./images/loading-large.gif");
+		PENDING_URL.put(GetPreviews.BADGE, "./images/loading-small.gif");
 	}
 
 	static final int delays[] = new int[] { 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, -1 };
@@ -76,17 +79,19 @@ public class PreviewWidget extends Composite {
 		this.datasetUri = datasetUri;
 		this.link = link;
 		// default to small size if desired size is unrecognized
-		if(desiredSize != GetPreviews.LARGE) {
-			size = GetPreviews.SMALL;
+		if(desiredSize == GetPreviews.BADGE) {
+			size = desiredSize;
+		} else if(desiredSize == GetPreviews.LARGE) {
+			size = desiredSize;
 		} else {
-			size = GetPreviews.LARGE;
+			size = GetPreviews.SMALL;
 		}
 
 		contentPanel = new SimplePanel();
 		initWidget(contentPanel);
 
 		// add the preview image
-		if(size == GetPreviews.SMALL) {
+		if(size != GetPreviews.LARGE) {
 			Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri + "?time=" + System.currentTimeMillis());
 			previewImage.addStyleName("thumbnail");
 			previewImage.addErrorHandler(new ErrorHandler() {
@@ -174,7 +179,8 @@ public class PreviewWidget extends Composite {
 							} else {
 								pendingImage(size, link);
 							}
-						} else if(previews.get(GetPreviews.LARGE) != null) {
+						} else if(previews.get(GetPreviews.LARGE) != null ||
+								  previews.get(GetPreviews.BADGE) != null) {
 							contentPanel.clear();
 							contentPanel.add(createImage(datasetUri, size,
 									link, previews));

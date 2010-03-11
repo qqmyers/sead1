@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**
@@ -94,11 +95,14 @@ public class CollectionMembershipWidget extends Composite {
 	 */
 	public void addCollection(CollectionBean collection) {
 		
-		Hyperlink link = new Hyperlink(collection.getTitle(), "collection?uri="
-				+ collection.getUri());
+		String uri = collection.getUri();
+		String href = "collection?uri="+uri;
+		
+		Hyperlink link = new Hyperlink(collection.getTitle(), href);
 		
 		int row = collectionsPanel.getRowCount();
-		
+		PreviewWidget badge = new PreviewWidget(uri, GetPreviews.BADGE, href);
+		collectionsPanel.setWidget(row++, 0, badge);
 		collectionsPanel.setWidget(row, 0, link);
 	}
 	

@@ -48,6 +48,7 @@ public class GetPreviewsHandler implements
 						.getSmallPreviewUri(datasetUri);
 				String largePreview = RestServlet
 						.getLargePreviewUri(datasetUri);
+				String collectionPreview = RestServlet.getCollectionPreviewUri(datasetUri); // in case this is a collection
 				if (smallPreview != null) {
 					result
 							.setPreview(GetPreviews.SMALL, pibu
@@ -58,7 +59,10 @@ public class GetPreviewsHandler implements
 							.setPreview(GetPreviews.LARGE, pibu
 									.get(largePreview));
 				}
-				if (smallPreview == null && largePreview == null) { // no
+				if(collectionPreview != null) {
+					result.setPreview(GetPreviews.BADGE, pibu.get(collectionPreview));
+				}
+				if (smallPreview == null && largePreview == null && collectionPreview == null) { // no
 																	// previews.
 					TupeloStore.refetch(datasetUri);
 					ThingSession ts = TupeloStore.getInstance()
