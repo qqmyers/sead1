@@ -16,8 +16,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.DatasetTableFourColumnView;
+import edu.illinois.ncsa.mmdb.web.client.DatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTag;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;

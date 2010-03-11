@@ -3,8 +3,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.Set;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -12,7 +10,6 @@ import com.google.gwt.user.client.ui.Composite;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotations;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotationsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 
 /**
  * @author lmarini

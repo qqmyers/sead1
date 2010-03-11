@@ -2,8 +2,6 @@ package edu.illinois.ncsa.mmdb.web.client.event;
 
 import com.google.gwt.event.shared.GwtEvent;
 
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
-
 public class DatasetUploadedEvent extends GwtEvent<DatasetUploadedHandler> {
 
 	public static final GwtEvent.Type<DatasetUploadedHandler> TYPE = new GwtEvent.Type<DatasetUploadedHandler>();
