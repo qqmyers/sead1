@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="MMDB" id="ncsa.mmdb.ui.productmmdb" application="ncsa.mmdb.ui.application" version="0.5.0.qualifier" useFeatures="false" includeLaunchers="true">
+<product name="MMDB" id="ncsa.mmdb.ui.productmmdb" application="ncsa.mmdb.ui.application" version="0.4.100.qualifier" useFeatures="false" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>
