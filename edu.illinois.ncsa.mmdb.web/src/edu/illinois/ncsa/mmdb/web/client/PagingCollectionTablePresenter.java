@@ -17,7 +17,7 @@ public class PagingCollectionTablePresenter extends PagingTablePresenter<Collect
 	}
 	
 	public interface CollectionDisplay extends Display<CollectionBean> {
-		void addBadge(String collectionUri, String badgeUri);
+		void addBadge(String collectionUri);
 	}
 	
 	@Override
@@ -37,7 +37,7 @@ public class PagingCollectionTablePresenter extends PagingTablePresenter<Collect
 		eventBus.addHandler(AddPreviewEvent.TYPE,
 				new AddPreviewHandler() {
 					public void onPreviewAdded(AddPreviewEvent event) {
-						((CollectionDisplay)display).addBadge(event.getUri(), event.getPreviewUri());
+						((CollectionDisplay)display).addBadge(event.getUri());
 					}
 		});
 	}

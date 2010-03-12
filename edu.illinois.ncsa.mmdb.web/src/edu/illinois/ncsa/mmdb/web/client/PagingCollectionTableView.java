@@ -139,11 +139,11 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 	}
 
 	@Override
-	public void addBadge(String collectionUri, String badgeUri) {
+	public void addBadge(String collectionUri) {
 		Panel p = badgeImages.get(collectionUri);
 		if(p != null) {
 			p.clear();
-			PreviewWidget pw = new PreviewWidget(badgeUri, GetPreviews.SMALL, "collection?uri="+collectionUri);
+			PreviewWidget pw = new PreviewWidget(collectionUri, GetPreviews.BADGE, "collection?uri="+collectionUri);
 			pw.setMaxWidth(100);
 			p.add(pw);
 		}

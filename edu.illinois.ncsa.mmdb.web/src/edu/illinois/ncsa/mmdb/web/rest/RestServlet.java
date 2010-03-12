@@ -210,6 +210,7 @@ public class RestServlet extends AuthenticatedServlet {
     		if(elapsed > 30) {
     			log.debug("REST GET serviced in "+elapsed+"ms");
     		}
+    		response.getOutputStream().close();
     	}
     }
     protected void doDoGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -291,7 +292,6 @@ public class RestServlet extends AuthenticatedServlet {
     	if(imageUri != null) {
     		try {
     			CopyFile.copy(restService.retrieveImage(imageUri), response.getOutputStream());
-    			response.getOutputStream().close(); // FIXME should I do this?
     			return;
     		} catch(RestServiceException e) {
     			if(!e.isNotFound()) {
