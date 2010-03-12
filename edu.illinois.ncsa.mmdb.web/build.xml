@@ -13,14 +13,8 @@
 	
 	<property name="deprecation" value="true" />
 		
-	<condition property="desktop" value="desktop/" else="/desktop/">
-		<isset property="env.VERSION"/>
-	</condition>
-	
-	<condition property="version" value="v${env.VERSION}#${env.BUILD_NUMBER}" else="build ${env.BUILD_NUMBER}">
-		<isset property="env.VERSION"/>
-	</condition>
-	
+	<property name="version" value="v0.5.0#${env.BUILD_NUMBER}" />
+
 	<path id="classpath">
 		<pathelement path="build" />
 		<pathelement path="src" />
@@ -214,7 +208,6 @@
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
 			<filterset>
 				<filter token="VERSION" value="${version}" />
-				<filter token="DESKTOP" value="${desktop}" />
 			</filterset>
 		</copy>
 	</target>
