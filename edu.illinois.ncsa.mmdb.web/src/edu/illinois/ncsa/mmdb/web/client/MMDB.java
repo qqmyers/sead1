@@ -51,6 +51,8 @@ import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.NewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.NotEnabledPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.SearchBox;
+import edu.illinois.ncsa.mmdb.web.client.ui.SearchResultsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SparqlPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
@@ -184,14 +186,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		Hyperlink uploadLink = new Hyperlink("Upload", "upload");
 		uploadLink.addStyleName("navMenuLink");
 		navMenu.add(uploadLink);
-//		uploadButton = new Anchor("Upload");
-//		uploadButton.setStyleName("navMenuLink");
-//		uploadButton.addClickHandler(new ClickHandler() {
-//			public void onClick(ClickEvent click) {
-//				toggleUploadMenu();
-//			}
-//		});
-//		navMenu.add(uploadButton);
 
 		// sign up link
 		SimplePanel signupPanel = new SimplePanel();
@@ -216,6 +210,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		// login menu
 		loginStatusWidget = new LoginStatusWidget();
 		RootPanel.get("loginMenu").add(loginStatusWidget);
+		
+		// search box
+		SearchBox searchBox = new SearchBox("Search");
+		RootPanel.get("searchMenu").add(searchBox);
 
 	}
 
@@ -647,6 +645,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				// skip default case!
 			} else if (token.startsWith("collection")) {
 				showCollectionPage();
+			} else if (token.startsWith("search")) {
+				showSearchResultsPage();
 			} else if (token.startsWith("modifyPermissions")) {
 				showUsersPage();
 			} else if (token.startsWith("signup")) {
@@ -662,6 +662,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			}
 		}
 		previousHistoryToken = token;
+	}
+
+	private void showSearchResultsPage() {
+		GWT.log("Loading Search Results Page", null);
+		mainContainer.clear();
+		mainContainer.add(new SearchResultsPage(dispatchAsync, eventBus));
 	}
 
 	private void showUploadPage() {

@@ -58,6 +58,10 @@ body {
 	vertical-align: top;
 }
 
+.searchBox {
+	border: 1px solid white;
+}
+
 .menuElementLeft {
 	float:left;
 	height: auto;
