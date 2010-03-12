@@ -10,6 +10,7 @@ for f in $FOLDERS; do
   FILE=$f/META-INF/MANIFEST.MF
   if [ -e "$FILE" ]; then
     sed -i -e "s/Bundle-Version: ${FROM}.qualifier/Bundle-Version: ${TO}.qualifier/g" "$FILE"
+    sed -i -e "s/;bundle-version=\"${FROM}\"/;bundle-version=\"${TO}\"/g" "$FILE"
     if [ "`grep 'Bundle-Vendor:' \"$FILE\"`" = "" ]; then
       echo "Bundle-Vendor: NCSA" >> "$FILE"
     fi
