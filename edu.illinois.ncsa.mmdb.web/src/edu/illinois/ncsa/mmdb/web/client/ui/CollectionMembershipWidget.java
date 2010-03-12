@@ -20,9 +20,13 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollectionResult;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**
@@ -95,7 +99,7 @@ public class CollectionMembershipWidget extends Composite {
 	 */
 	public void addCollection(CollectionBean collection) {
 		
-		String uri = collection.getUri();
+		final String uri = collection.getUri();
 		String href = "collection?uri="+uri;
 		
 		Hyperlink link = new Hyperlink(collection.getTitle(), href);
@@ -104,6 +108,22 @@ public class CollectionMembershipWidget extends Composite {
 		PreviewWidget badge = new PreviewWidget(uri, GetPreviews.BADGE, href);
 		collectionsPanel.setWidget(row++, 0, badge);
 		collectionsPanel.setWidget(row, 0, link);
+		
+		final int rowToDelete = row-1;
+		Anchor removeButton = new Anchor("Remove");
+		removeButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				service.execute(new RemoveFromCollection(uri, datasetURI), new AsyncCallback<RemoveFromCollectionResult>() {
+					public void onSuccess(RemoveFromCollectionResult result) {
+						collectionsPanel.removeRow(rowToDelete); // remove badge row
+						collectionsPanel.removeRow(rowToDelete); // remove title row
+					}
+					public void onFailure(Throwable caught) {
+					}
+				});
+			}
+		});
+		collectionsPanel.setWidget(row, 1, removeButton);
 	}
 	
 	/**

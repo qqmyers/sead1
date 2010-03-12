@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
-import edu.illinois.ncsa.mmdb.web.client.ui.AddCollectionResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;

@@ -16,8 +16,8 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.rdf.Resource;
 
-import edu.illinois.ncsa.mmdb.web.client.ui.AddToCollection;
-import edu.illinois.ncsa.mmdb.web.client.ui.AddToCollectionResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;

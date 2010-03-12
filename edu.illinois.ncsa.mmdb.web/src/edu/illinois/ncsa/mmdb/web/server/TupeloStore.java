@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -607,6 +608,7 @@ public class TupeloStore {
     private void fullTextIndexAll() {
     	int i = 0;
     	int batchSize = 100;
+    	log.info("starting full-text index sweep @ "+new Date());
     	while(true) {
     		Unifier u = new Unifier();
     		u.setColumnNames("d","replaced");
@@ -631,6 +633,7 @@ public class TupeloStore {
     			}
     			log.info("full-text indexed "+n+" dataset(s)");
     			if(n < batchSize) {
+    				log.info("completed full-text indexing sweep @ "+new Date());
     				return;
     			}
     		} catch(OperatorException x) {

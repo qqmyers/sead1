@@ -4,7 +4,6 @@
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import net.customware.gwt.dispatch.shared.Action;
-import edu.illinois.ncsa.mmdb.web.client.ui.AddCollectionResult;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**

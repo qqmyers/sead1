@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.client.ui;
+package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import java.util.Collection;
 
