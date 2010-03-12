@@ -1,6 +1,6 @@
 FROM="0.4.0"
 TO="0.4.1"
-FOLDERS="*"
+FOLDERS="../*"
 
 for f in $FOLDERS; do
   if [ ! -d "$f" ]; then
@@ -28,4 +28,4 @@ for f in $FOLDERS; do
 
 done
 
-sed -i -e "s/v${FROM}#/v${TO}#/g" edu.illinois.ncsa.mmdb.web/build.xml
+sed -i -e "s/v${FROM}#/v${TO}#/g" ../edu.illinois.ncsa.mmdb.web/build.xml
