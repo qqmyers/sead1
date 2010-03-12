@@ -44,6 +44,7 @@ import org.tupeloproject.util.Tuple;
 
 import sun.misc.Service;
 import edu.illinois.ncsa.cet.search.SearchableTextIndex;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -99,7 +100,7 @@ public class TupeloStore {
     private Map<String, Memoized<Integer>> datasetCount          = new HashMap<String, Memoized<Integer>>();
     
     /** Badge (collection preview) by collection (memoized) */
-    private Map<String, Memoized<String>> collectionBadges = new HashMap<String,Memoized<String>>();
+    private Map<String, Map<String, Memoized<String>>> previewCache = null;
     
     /** Timer to schedule re-occurring jobs */
     private Timer                          timer                 = new Timer();
@@ -522,42 +523,72 @@ public class TupeloStore {
         }
         return datasetCount;
     }
-    
+
+    // caches previews.
+    public String getPreview(final String uri, final String size) {
+    	// lazily initialize cache
+    	if(previewCache == null) {
+    		previewCache = new HashMap<String,Map<String,Memoized<String>>>();
+    	}
+    	Map<String, Memoized<String>> sizeCache = previewCache.get(size);
+    	if(sizeCache == null) {
+    		sizeCache = new HashMap<String,Memoized<String>>();
+    		previewCache.put(size, sizeCache);
+    	}
+    	// now look for the memoized value for this uri
+    	Memoized<String> mPreview = sizeCache.get(uri);
+    	if(mPreview == null) {
+    		if(size == GetPreviews.SMALL) {
+    			mPreview = new Memoized<String>() {
+    				public String computeValue() {
+    					return RestServlet.getSmallPreviewUri(uri);
+    				}
+    			};
+    		} else if(size == GetPreviews.LARGE) {
+    			mPreview = new Memoized<String>() {
+    				public String computeValue() {
+    					return RestServlet.getLargePreviewUri(uri);
+    				}
+    			};
+    		} else { // collection badge {
+    			mPreview = new Memoized<String>() {
+                    public String computeValue() {
+            			try {
+            				Unifier u = new Unifier();
+            				u.setColumnNames("member", "date");
+            				u.addPattern(Resource.uriRef(uri), DcTerms.HAS_PART, "member");
+            				u.addPattern("member", Dc.DATE, "date", true);
+            				u.addOrderByDesc("date");
+            				u.addOrderBy("member");
+            				u.setLimit(25);
+            				for(Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member")) {
+            					String datasetUri = row.get(0).getString();
+            					String preview = getPreview(datasetUri, GetPreviews.SMALL);
+            					if(preview != null) {
+            						return preview;
+            					}
+            				}
+            			} catch(OperatorException e) {
+            				log.error("Error getting badge for collection " + uri, e);
+            			}
+        				// none of em have previews, or there was an error :(
+        				return null;
+                    }
+                };
+    		}
+    		mPreview.setTtl( 60000 * 5 );
+    		mPreview.setForceOnNull(true);
+    		sizeCache.put(uri, mPreview);
+    	}
+    	return mPreview.getValue();
+    }
 	/**
 	 * 
 	 * @param collectionUri
 	 * @return
 	 */
-	public String getCollectionBadge(final String collectionUri) {
-        Memoized<String> mBadge = collectionBadges.get(collectionUri);
-        if ( mBadge == null ) {
-            mBadge = new Memoized<String>() {
-                public String computeValue() {
-        			try {
-        				Unifier u = new Unifier();
-        				u.setColumnNames("member", "date");
-        				u.addPattern(Resource.uriRef(collectionUri), DcTerms.HAS_PART, "member");
-        				u.addPattern("member", Dc.DATE, "date", true);
-        				u.addOrderByDesc("date");
-        				u.addOrderBy("member");
-        				u.setLimit(25);
-        				for(Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member")) {
-        					String datasetUri = row.get(0).getString();
-        					if(RestServlet.getSmallPreviewUri(datasetUri) != null) {
-        						return datasetUri;
-        					}
-        				}
-        			} catch(OperatorException e) {
-        				log.error("Error getting badges for collection " + collectionUri, e);
-        			}
-    				// none of em have previews, or there was an error :(
-    				return null;
-                }
-            };
-            mBadge.setTtl( 120000 );
-            collectionBadges.put(collectionUri, mBadge);
-        }
-        return mBadge.getValue();
+	public String getCollectionBadge(String collectionUri) {
+		return getPreview(collectionUri, GetPreviews.BADGE);
 	}
 	
     public ListTable<Resource> unifyExcludeDeleted(Unifier u, String subjectVar) throws OperatorException {

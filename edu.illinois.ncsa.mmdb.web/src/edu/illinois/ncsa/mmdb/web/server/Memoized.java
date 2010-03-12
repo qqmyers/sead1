@@ -21,6 +21,7 @@ public abstract class Memoized<T> {
 	private static Log log = LogFactory.getLog(Memoized.class);
 	
 	T cachedValue;
+	boolean forceOnNull = false;
 	long expires;
 	long ttl;
 	
@@ -35,10 +36,7 @@ public abstract class Memoized<T> {
 	}
 	public T getValue(boolean force) {
 		long now = System.currentTimeMillis();
-		if(now > expires || force) {
-			if(log != null) {
-				log.debug("RECOMPUTING BECAUSE "+now+" > " + expires + " or " + force);
-			}
+		if(now > expires || force || (cachedValue == null && forceOnNull)) {
 			cachedValue = computeValue();
 			expires = now + ttl;
 		}
@@ -53,5 +51,13 @@ public abstract class Memoized<T> {
 
 	public void setTtl(long ttl) {
 		this.ttl = ttl;
+	}
+
+	public boolean isForceOnNull() {
+		return forceOnNull;
+	}
+
+	public void setForceOnNull(boolean forceOnNull) {
+		this.forceOnNull = forceOnNull;
 	}
 }

@@ -37,6 +37,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import edu.illinois.ncsa.cet.search.Hit;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
@@ -156,13 +157,9 @@ public class RestServlet extends AuthenticatedServlet {
     	return getPreview(datasetUri, PREVIEW_LARGE);
     }
     public static String getCollectionPreviewUri(String collectionUri) {
-    	String badge = TupeloStore.getInstance().getCollectionBadge(collectionUri);
-    	if(badge == null) {
-    		return null;
-    	} else {
-    		return getSmallPreviewUri(badge);
-    	}
+    	return TupeloStore.getInstance().getPreview(collectionUri, GetPreviews.BADGE);
     }
+    
     static String getPreview(String uri, String infix) {
     	BeanSession bs = TupeloStore.getInstance().getBeanSession();
     	PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(bs);
@@ -201,6 +198,21 @@ public class RestServlet extends AuthenticatedServlet {
     
     @Override  
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	long then = System.currentTimeMillis();
+    	try {
+    		doDoGet(request, response);
+    	} catch(ServletException x) {
+    		throw x;
+    	} catch(IOException x) {
+    		throw x;
+    	} finally {
+    		long elapsed = System.currentTimeMillis() - then;
+    		if(elapsed > 30) {
+    			log.debug("REST GET serviced in "+elapsed+"ms");
+    		}
+    	}
+    }
+    protected void doDoGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
         //dumpHeaders(request); // FIXME debug
     	if(request.getRequestURL().toString().endsWith("logout")) {
@@ -226,10 +238,10 @@ public class RestServlet extends AuthenticatedServlet {
         	String previewUri = null;
         	if(hasPrefix(PREVIEW_SMALL,request)) {
         		log.trace("GET PREVIEW (small) "+uri);
-        		previewUri = getPreview(uri, PREVIEW_SMALL);
+        		previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.SMALL);
         	} else if(hasPrefix(PREVIEW_LARGE,request)) {
         		log.trace("GET PREVIEW (large) "+uri);
-        		previewUri = getPreview(uri, PREVIEW_LARGE);
+        		previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.LARGE);
         	} else {
         		log.trace("GET PREVIEW (any) "+uri);
         		previewUri = getPreview(uri, PREVIEW_ANY);
@@ -279,6 +291,7 @@ public class RestServlet extends AuthenticatedServlet {
     	if(imageUri != null) {
     		try {
     			CopyFile.copy(restService.retrieveImage(imageUri), response.getOutputStream());
+    			response.getOutputStream().close(); // FIXME should I do this?
     			return;
     		} catch(RestServiceException e) {
     			if(!e.isNotFound()) {
