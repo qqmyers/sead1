@@ -1,5 +1,5 @@
-FROM="0.2.0.qualifier"
-TO="0.3.0.qualifier"
+FROM="0.3.0.qualifier"
+TO="0.4.0.qualifier"
 FOLDERS="*"
 
 for f in $FOLDERS; do
