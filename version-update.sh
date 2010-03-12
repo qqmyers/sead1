@@ -1,5 +1,5 @@
-FROM="0.3.0.qualifier"
-TO="0.4.0.qualifier"
+FROM="0.4.0"
+TO="0.4.1"
 FOLDERS="*"
 
 for f in $FOLDERS; do
@@ -9,7 +9,7 @@ for f in $FOLDERS; do
 
   FILE=$f/META-INF/MANIFEST.MF
   if [ -e "$FILE" ]; then
-    sed -i -e "s/Bundle-Version: ${FROM}/Bundle-Version: ${TO}/g" "$FILE"
+    sed -i -e "s/Bundle-Version: ${FROM}.qualifier/Bundle-Version: ${TO}.qualifier/g" "$FILE"
     if [ "`grep 'Bundle-Vendor:' \"$FILE\"`" = "" ]; then
       echo "Bundle-Vendor: NCSA" >> "$FILE"
     fi
@@ -17,13 +17,15 @@ for f in $FOLDERS; do
 
   FILE=$f/feature.xml
   if [ -e "$FILE" ]; then
-    sed -i -e "s/version=\"${FROM}\"/version=\"${TO}\"/g" "$FILE"
+    sed -i -e "s/version=\"${FROM}.qualifier\"/version=\"${TO}.qualifier\"/g" "$FILE"
   fi
 
   for g in "$f"/*.product; do
     if [ -e "$g" ]; then
-      sed -i -e "s/version=\"${FROM}\"/version=\"${TO}\"/g" "$g"
+      sed -i -e "s/version=\"${FROM}.qualifier\"/version=\"${TO}.qualifier\"/g" "$g"
     fi
   done
 
 done
+
+sed -i -e "s/v${FROM}#/v${TO}#/g" edu.illinois.ncsa.mmdb.web/build.xml
