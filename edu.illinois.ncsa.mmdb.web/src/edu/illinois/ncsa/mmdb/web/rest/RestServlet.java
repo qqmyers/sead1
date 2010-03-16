@@ -154,16 +154,21 @@ public class RestServlet extends AuthenticatedServlet {
     }
     
     public static String getSmallPreviewUri(String datasetUri) {
-    	return getPreview(datasetUri, PREVIEW_SMALL);
+    	return getPreviewUri(datasetUri, GetPreviews.SMALL);
     }
     public static String getLargePreviewUri(String datasetUri) {
-    	return getPreview(datasetUri, PREVIEW_LARGE);
+    	return getPreviewUri(datasetUri, GetPreviews.LARGE);
     }
     public static String getCollectionPreviewUri(String collectionUri) {
     	return TupeloStore.getInstance().getPreview(collectionUri, GetPreviews.BADGE);
     }
     
-    static String getPreview(String uri, String infix) {
+    public static String getPreviewUri(String uri, String size) {
+    	PreviewImageBean p = getPreview(uri,size);
+    	return p == null ? null : p.getUri();
+    }
+    
+    public static PreviewImageBean getPreview(String uri, String size) {
     	BeanSession bs = TupeloStore.getInstance().getBeanSession();
     	PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(bs);
     	try {
@@ -174,24 +179,23 @@ public class RestServlet extends AuthenticatedServlet {
     		} else {
     			long maxArea = 0L;
     			long minArea = 0L;
-    			String maxUri = null;
-    			String minUri = null;
+    			PreviewImageBean max = null;
+    			PreviewImageBean min = null;
     			for(PreviewImageBean preview : previews) {
     				long area = preview.getHeight() * preview.getWidth();
-    				//log.debug("found "+preview.getWidth()+"x"+preview.getHeight()+" ("+area+"px) preview ="+preview.getUri());
-    				if(area > maxArea) { maxArea = area; maxUri = preview.getUri(); }
-    				if(minArea == 0 || area < minArea) { minArea = area; minUri = preview.getUri(); }
+    				if(area > maxArea) { maxArea = area; max = preview; }
+    				if(minArea == 0 || area < minArea) { minArea = area; min = preview; }
     			}
-    			if(infix.equals(PREVIEW_LARGE)) {
+    			if(GetPreviews.LARGE.equals(size)) {
     				//log.debug("large preview = "+maxArea+"px "+maxUri);
     				if(maxArea > 100 * 100) {
-    					return maxUri;
+    					return max;
     				} else {
     					return null; // not big enough to count as "large"
     				}
     			} else {
     				//if(minUri != null) { log.debug("small preview = "+minArea+"px "+minUri); }
-    				return minUri;
+    				return min;
     			}
     		}
     	} catch(OperatorException x) {
@@ -254,7 +258,7 @@ public class RestServlet extends AuthenticatedServlet {
         		returnImage(request, response, previewUri, LARGE_404);
         	} else {
         		log.trace("GET PREVIEW (any) "+uri);
-        		previewUri = getPreview(uri, PREVIEW_ANY);
+        		previewUri = getPreviewUri(uri, PREVIEW_ANY);
             	returnImage(request, response, previewUri, SMALL_404);
         	}
         } else if(hasPrefix(COLLECTION_PREVIEW,request)) {

@@ -164,8 +164,7 @@ public class PreviewWidget extends Composite {
 					}
 
 					public void onSuccess(GetPreviewsResult arg0) {
-						Map<String, PreviewImageBean> previews = arg0
-								.getPreviews();
+						Map<String, PreviewImageBean> previews = arg0.getPreviews();
 						if(previews.get(size) == null && arg0.isStopAsking()) {
 							grayImage(size, link);
 						} else if (previews.get(size) == null && !arg0.isStopAsking()) {
@@ -186,8 +185,7 @@ public class PreviewWidget extends Composite {
 								  (previews.get(GetPreviews.LARGE) != null ||
 								  previews.get(GetPreviews.BADGE) != null)) {
 							contentPanel.clear();
-							contentPanel.add(createImage(datasetUri, size,
-									link, previews));
+							contentPanel.add(createImage(datasetUri, size, link, previews));
 						} 
 					}
 				});

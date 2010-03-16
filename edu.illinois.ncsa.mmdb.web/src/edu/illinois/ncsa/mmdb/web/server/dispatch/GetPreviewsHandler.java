@@ -44,40 +44,28 @@ public class GetPreviewsHandler implements
 		
 		try {
 			if (datasetUri != null) {
-				String smallPreview = RestServlet
-						.getSmallPreviewUri(datasetUri);
-				String largePreview = RestServlet
-						.getLargePreviewUri(datasetUri);
-				String collectionPreview = RestServlet.getCollectionPreviewUri(datasetUri); // in case this is a collection
+				String smallPreview = RestServlet.getSmallPreviewUri(datasetUri);
+				String largePreview = RestServlet.getLargePreviewUri(datasetUri);
+				// in the following case this is a collection
+				String collectionPreview = RestServlet.getCollectionPreviewUri(datasetUri); 
 				if (smallPreview != null) {
-					result
-							.setPreview(GetPreviews.SMALL, pibu
-									.get(smallPreview));
+					result.setPreview(GetPreviews.SMALL, pibu.get(smallPreview));
 				}
 				if (largePreview != null) {
-					result
-							.setPreview(GetPreviews.LARGE, pibu
-									.get(largePreview));
+					result.setPreview(GetPreviews.LARGE, pibu.get(largePreview));
 				}
 				if(collectionPreview != null) {
 					result.setPreview(GetPreviews.BADGE, pibu.get(collectionPreview));
 				}
-				if (smallPreview == null && largePreview == null && collectionPreview == null) { // no
-																	// previews.
+				if (smallPreview == null && largePreview == null && collectionPreview == null) { // no previews.
 					TupeloStore.refetch(datasetUri);
-					ThingSession ts = TupeloStore.getInstance()
-							.getBeanSession().getThingSession();
-					// FIXME "endTime0" is a kludgy way to represent execution
-					// stage information
-					Date endTime = ts.getDate(Resource.uriRef(datasetUri), Cet
-							.cet("metadata/extractor/endTime0"));
+					ThingSession ts = TupeloStore.getInstance().getBeanSession().getThingSession();
+					// FIXME "endTime1" is a kludgy way to represent execution stage information
+					Date endTime = ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/extractor/endTime1"));
 					log.debug("End time on "+datasetUri+" = "+endTime); // FIXME debug
 					if (endTime != null) {
-						System.out.println("telling client to stop asking for previews for "+datasetUri); // FIXME debug
-						log
-								.debug("Telling client to stop asking for previews for "
-										+ datasetUri);
 						// there won't be previews, so stop asking!
+						log.debug("Telling client to stop asking for previews for "+ datasetUri);
 						result.setStopAsking(true);
 					}
 				}
