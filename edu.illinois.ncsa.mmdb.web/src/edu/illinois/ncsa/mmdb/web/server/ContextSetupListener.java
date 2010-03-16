@@ -121,7 +121,7 @@ public class ContextSetupListener implements ServletContextListener
         createUserFields( props );
         
         // FIXME MMDB-514 update context
-        updateContext();
+//        updateContext();
     }
 
     private void setUpSearch(String indexFile) {
