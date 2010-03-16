@@ -3,11 +3,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import java.util.List;
-
 import net.customware.gwt.dispatch.shared.Result;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
  * @author lmarini
@@ -17,13 +14,13 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 public class GetCollectionResult implements Result {
 	
 	private CollectionBean collection;
-	private List<DatasetBean> datasets;
+	private int collectionSize;
 
 	public GetCollectionResult() {}
 	
-	public GetCollectionResult(CollectionBean collection, List<DatasetBean> datasets) {
+	public GetCollectionResult(CollectionBean collection, int collectionSize) {
 		this.collection = collection;
-		this.datasets = datasets;
+		this.collectionSize = collectionSize;
 	}
 
 	/**
@@ -33,10 +30,11 @@ public class GetCollectionResult implements Result {
 		return collection;
 	}
 
-	/**
-	 * @return the datasets
-	 */
-	public List<DatasetBean> getDatasets() {
-		return datasets;
+	public int getCollectionSize() {
+		return collectionSize;
+	}
+
+	public void setCollectionSize(int collectionSize) {
+		this.collectionSize = collectionSize;
 	}
 }

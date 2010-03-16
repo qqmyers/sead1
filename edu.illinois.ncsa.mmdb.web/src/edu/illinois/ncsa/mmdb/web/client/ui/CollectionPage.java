@@ -3,8 +3,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.List;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -23,7 +21,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
  * A widget showing a collection.
@@ -129,7 +126,7 @@ public class CollectionPage extends Composite {
 
 			@Override
 			public void onSuccess(GetCollectionResult arg0) {
-				showCollection(arg0.getCollection(), arg0.getDatasets());
+				showCollection(arg0.getCollection(), arg0.getCollectionSize());
 			}
 		});
 	}
@@ -140,7 +137,7 @@ public class CollectionPage extends Composite {
 	 * @param collection
 	 * @param datasets
 	 */
-	protected void showCollection(final CollectionBean collection, List<DatasetBean> datasets) {
+	protected void showCollection(final CollectionBean collection, int collectionSize) {
 		
 		pageTitle.setText(collection.getTitle());
 		
@@ -169,7 +166,7 @@ public class CollectionPage extends Composite {
 		if (collection.getCreationDate() != null) {
 			dateLabel.setText(collection.getCreationDate().toString());
 		}
-		numDatasetsLabel.setText(datasets.size() + " datasets");
+		numDatasetsLabel.setText(collectionSize + " dataset(s)");
 		
 	}
 
