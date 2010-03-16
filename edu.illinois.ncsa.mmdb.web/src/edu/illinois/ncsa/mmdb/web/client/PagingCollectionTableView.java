@@ -17,19 +17,18 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-import edu.illinois.ncsa.mmdb.web.client.PagingCollectionTablePresenter.CollectionDisplay;
+import edu.illinois.ncsa.mmdb.web.client.PagingTablePresenter.Display;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewCollectionEvent;
-import edu.illinois.ncsa.mmdb.web.client.event.AddPreviewEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
-public class PagingCollectionTableView extends PagingDcThingView<CollectionBean> implements CollectionDisplay {
+public class PagingCollectionTableView extends PagingDcThingView<CollectionBean> implements Display<CollectionBean> {
 	FlexTable table;
 	
 	public PagingCollectionTableView() {
@@ -54,7 +53,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 	@Override
 	public void addItem(final String uri, CollectionBean item) {
 		HorizontalPanel previewPanel = new HorizontalPanel();
-		previewPanel.add(new Image("./images/preview-100.gif"));
+		previewPanel.add(new Image("./images/preview-100.gif")); // is this necessary?
 		previewPanel.addStyleName("centered");
 		badgeImages.put(uri, previewPanel);
 
@@ -65,6 +64,8 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		} else {
 			addListItem(uri, item, previewPanel);
 		}
+		
+		addBadge(uri);
 	}
 
 	void addFlowItem(String uri, CollectionBean item, Panel previewPanel) {
@@ -138,7 +139,6 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 		table.getRowFormatter().addStyleName(row, "oddRow");
 	}
 
-	@Override
 	public void addBadge(String collectionUri) {
 		Panel p = badgeImages.get(collectionUri);
 		if(p != null) {
@@ -198,16 +198,6 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 					GWT.log("Firing event add collection "
 							+ collection.getTitle(), null);
 					MMDB.eventBus.fireEvent(event);
-				}
-				int i = 0;
-				for(String badge : result.getBadges()) {
-					if(badge != null) {
-						String collectionUri = result.getCollections().get(i).getUri();
-						AddPreviewEvent event = new AddPreviewEvent(collectionUri, badge);
-						GWT.log("firing add badge "+collectionUri+" badge="+badge ,null);
-						MMDB.eventBus.fireEvent(event);
-					}
-					i++;
 				}
 			}
 		});

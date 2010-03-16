@@ -4,10 +4,9 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -18,8 +17,10 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Table;
@@ -31,6 +32,7 @@ import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Retrieve collections.
@@ -43,9 +45,6 @@ public class GetCollectionsHandler implements
 
 	/** Commons logging **/
 	private static Log log = LogFactory.getLog(GetCollectionsHandler.class);
-
-	/** Badges cache **/
-	private Map<String,String> badges = new HashMap<String,String>();
 
 	static Memoized<Integer> collectionCount;
 	int getCollectionCount() {
@@ -83,12 +82,12 @@ public class GetCollectionsHandler implements
 		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 		
 		CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+		PersonBeanUtil pbu = new PersonBeanUtil(beanSession);
 		
 		int limit = query.getLimit();
 		int offset = query.getOffset();
 		ArrayList<CollectionBean> collections = new ArrayList<CollectionBean>();
 		List<Resource> seen = new LinkedList<Resource>(); 
-		List<String> badges = new LinkedList<String>();
 		try {
 			int dups = 1;
 			while(dups > 0) {
@@ -100,13 +99,35 @@ public class GetCollectionsHandler implements
 				Table<Resource> result = TupeloStore.getInstance().unifyExcludeDeleted(uf, "collection");
 				
 				for (Tuple<Resource> row : result) {
-					Resource subject = row.get(0);
+					int r = 0;
+					Resource subject = row.get(r++);
+					Resource creator = row.get(r++);
+					Resource title = row.get(r++);
+					Resource description = row.get(r++);
+					Resource dateCreated = row.get(r++);
+					Resource dateModified = row.get(r++);
 					if (subject != null) {
 						try {
 							if (!seen.contains(subject)) { // FIXME: because of this logic, we may return fewer than the limit!
-								CollectionBean colBean = cbu.get(subject);
+								CollectionBean colBean = new CollectionBean();
+								// FIXME use Rob's BeanFactory instead of this hardcoded way
+								colBean.setUri(subject.getString());
+								if(creator != null) {
+									colBean.setCreator(pbu.get(creator));
+								}
+								if(title != null) {
+									colBean.setTitle(title.getString());
+								}
+								if(description != null) {
+									colBean.setDescription(description.getString());
+								}
+								if(dateCreated != null) {
+									colBean.setCreationDate((Date)ObjectResourceMapping.object(dateCreated));
+								}
+								if(dateModified != null) {
+									colBean.setLastModifiedDate((Date)ObjectResourceMapping.object(dateModified));
+								}
 								collections.add(colBean);
-								badges.add(TupeloStore.getInstance().getCollectionBadge(colBean.getUri()));
 								seen.add(subject);
 								news++;
 							} else {
@@ -126,7 +147,6 @@ public class GetCollectionsHandler implements
 			e1.printStackTrace();
 		}
 		GetCollectionsResult result = new GetCollectionsResult(collections);
-		result.setBadges(badges);
 		result.setCount(getCollectionCount());
 		return result; 
 	}
@@ -151,7 +171,14 @@ public class GetCollectionsHandler implements
 			sortKey = Resource.uriRef(query.getSortKey());
 		}
 		uf.addPattern("collection", sortKey, "o", true);
-		uf.setColumnNames("collection", "o");
+		// now add columns to fetch the info we need to construct minimal CollectionBeans
+		//
+		uf.addPattern("collection", Dc.CREATOR, "creator", true);
+		uf.addPattern("collection", Dc.TITLE, "title", true);
+		uf.addPattern("collection", Dc.DESCRIPTION, "description", true);
+		uf.addPattern("collection", DcTerms.DATE_CREATED, "dateCreated", true);
+		uf.addPattern("collection", DcTerms.DATE_MODIFIED, "dateModified", true);
+		uf.setColumnNames("collection", "creator", "title", "description", "dateCreated", "dateModified", "o");
 		if(limit > 0) { uf.setLimit(limit); }
 		if(offset > 0) { uf.setOffset(offset); }
 		if(!query.isDesc()) {
