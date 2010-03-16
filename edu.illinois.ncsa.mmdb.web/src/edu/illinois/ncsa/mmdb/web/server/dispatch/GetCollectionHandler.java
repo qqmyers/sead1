@@ -61,9 +61,10 @@ public class GetCollectionHandler implements
 	}
 
 	// FIXME use Rob's BeanFactory instead of this hardcoded way
-	private CollectionBean fastGetCollection(CollectionBeanUtil cbu, String uri) throws OperatorException {
+	private CollectionBean fastGetCollection(CollectionBeanUtil cbu, String uriString) throws OperatorException {
 		PersonBeanUtil pbu = new PersonBeanUtil(cbu.getBeanSession());
 		Unifier u = new Unifier();
+		Resource uri = Resource.uriRef(uriString);
 		u.addPattern(uri,Rdf.TYPE,cbu.getType());
 		u.addPattern(uri,Dc.CREATOR,"creator",true);
 		u.addPattern(uri,Dc.TITLE,"title",true);
@@ -81,7 +82,7 @@ public class GetCollectionHandler implements
 			Resource description = row.get(r++);
 			Resource dateCreated = row.get(r++);
 			Resource dateModified = row.get(r++);
-			colBean.setUri(uri);
+			colBean.setUri(uriString);
 			if(creator != null) {
 				colBean.setCreator(pbu.get(creator));
 			}
