@@ -33,25 +33,20 @@ public class SearchResultsPage extends Page {
 	private static final String TITLE = "Search Results";
 	private PagingSearchResultsTableView datasetTableView;
 	private final HandlerManager eventbus;
+	private HTML queryText;
+	private String query;
+	private PagingDatasetTablePresenter datasetTablePresenter;
 
 	public SearchResultsPage(MyDispatchAsync dispatchasync, HandlerManager eventbus) {
 		super(TITLE, dispatchasync);
 		this.eventbus = eventbus;
-		String query = PlaceService.getParams().get("q");
+		query = PlaceService.getParams().get("q");
 		if (query != null) {
-			mainLayoutPanel.add(new HTML("Your search for <b>" + query
-					+ "</b> returned the following results:"));
+			queryText = new HTML("Your search for <b>" + query
+					+ "</b> returned the following results:");
+			mainLayoutPanel.add(queryText);
 			queryServer(query);
 		}
-		// paged table of datasets
-		datasetTableView = new PagingSearchResultsTableView();
-		datasetTableView.addStyleName("datasetTable");
-		
-		PagingDatasetTablePresenter datasetTablePresenter =
-			new PagingDatasetTablePresenter(datasetTableView, eventbus);
-		datasetTablePresenter.bind();
-		
-		mainLayoutPanel.add(datasetTableView);
 	}
 
 	private void queryServer(String query) {
@@ -64,9 +59,28 @@ public class SearchResultsPage extends Page {
 
 			@Override
 			public void onSuccess(SearchResult result) {
-				showResults(result);
+				if (result.getHits().size() == 0) {
+					noResults();
+				} else {
+					showResults(result);
+				}
 			}
 		});
+	}
+
+	/**
+	 * Show message when no results are found for a particular query.
+	 */
+	protected void noResults() {
+		if (queryText != null ) {
+			mainLayoutPanel.remove(queryText);
+		}
+		if (datasetTableView != null) {
+			mainLayoutPanel.remove(datasetTableView);
+		}
+		queryText = new HTML("Your search for <b>" + query
+				+ "</b> returned no results. Please try a different search.");
+		mainLayoutPanel.add(queryText);
 	}
 
 	/*
@@ -80,6 +94,14 @@ public class SearchResultsPage extends Page {
 	}
 
 	protected void showResults(SearchResult result) {
+		// paged table of datasets
+		datasetTableView = new PagingSearchResultsTableView();
+		datasetTableView.addStyleName("datasetTable");
+		datasetTablePresenter =
+			new PagingDatasetTablePresenter(datasetTableView, eventbus);
+		datasetTablePresenter.bind();
+		mainLayoutPanel.add(datasetTableView);
+		
 		List<String> hits = result.getHits();
 		for (String hit : hits) {
 			MMDB.dispatchAsync.execute(new GetDataset(hit),
