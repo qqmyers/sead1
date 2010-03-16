@@ -242,7 +242,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	public static void listDatasets(String inCollection) {
 		mainContainer.clear();
 
-		TitlePanel titlePanel = new TitlePanel("List all");
+		TitlePanel titlePanel = new TitlePanel("Datasets");
 		if(inCollection != null) {
 			titlePanel = new TitlePanel(inCollection); // FIXME use collection name
 		}
