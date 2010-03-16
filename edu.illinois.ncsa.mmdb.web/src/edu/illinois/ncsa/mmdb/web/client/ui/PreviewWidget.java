@@ -92,7 +92,7 @@ public class PreviewWidget extends Composite {
 
 		// add the preview image
 		if(size != GetPreviews.LARGE) {
-			Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri + "?time=" + System.currentTimeMillis());
+			Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);// + "?time=" + System.currentTimeMillis());
 			previewImage.addStyleName("thumbnail");
 			previewImage.addErrorHandler(new ErrorHandler() {
 				public void onError(ErrorEvent event) {
@@ -154,6 +154,9 @@ public class PreviewWidget extends Composite {
 	 * @param callback
 	 */
 	protected void getPreview(final String datasetUri, final String link) {
+		getPreview(datasetUri, link, true);
+	}
+	protected void getPreview(final String datasetUri, final String link, final boolean display) {
 		MMDB.dispatchAsync.execute(new GetPreviews(datasetUri),
 				new AsyncCallback<GetPreviewsResult>() {
 					public void onFailure(Throwable arg0) {
@@ -179,8 +182,9 @@ public class PreviewWidget extends Composite {
 							} else {
 								pendingImage(size, link);
 							}
-						} else if(previews.get(GetPreviews.LARGE) != null ||
-								  previews.get(GetPreviews.BADGE) != null) {
+						} else if(display &&
+								  (previews.get(GetPreviews.LARGE) != null ||
+								  previews.get(GetPreviews.BADGE) != null)) {
 							contentPanel.clear();
 							contentPanel.add(createImage(datasetUri, size,
 									link, previews));

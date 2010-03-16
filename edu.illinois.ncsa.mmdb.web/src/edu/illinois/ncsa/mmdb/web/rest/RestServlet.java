@@ -79,6 +79,9 @@ public class RestServlet extends AuthenticatedServlet {
 	
     static RestService restService; // TODO manage this lifecycle better
 
+    static final String SMALL_404 = "preview-100.gif";
+    static final String LARGE_404 = "preview-500.gif";
+    
     public void init() throws ServletException {
         super.init();
         restService = new RestServiceImpl();
@@ -210,7 +213,11 @@ public class RestServlet extends AuthenticatedServlet {
     		if(elapsed > 30) {
     			log.debug("REST GET serviced in "+elapsed+"ms");
     		}
-    		response.getOutputStream().close();
+    		try {
+    			response.getOutputStream().close();
+    		} catch(IllegalStateException x) {
+    			// may not have been opened; ignore
+    		}
     	}
     }
     protected void doDoGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -240,18 +247,20 @@ public class RestServlet extends AuthenticatedServlet {
         	if(hasPrefix(PREVIEW_SMALL,request)) {
         		log.trace("GET PREVIEW (small) "+uri);
         		previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.SMALL);
+        		returnImage(request, response, previewUri, SMALL_404);
         	} else if(hasPrefix(PREVIEW_LARGE,request)) {
         		log.trace("GET PREVIEW (large) "+uri);
         		previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.LARGE);
+        		returnImage(request, response, previewUri, LARGE_404);
         	} else {
         		log.trace("GET PREVIEW (any) "+uri);
         		previewUri = getPreview(uri, PREVIEW_ANY);
+            	returnImage(request, response, previewUri, SMALL_404);
         	}
-        	returnImage(request, response, previewUri);
         } else if(hasPrefix(COLLECTION_PREVIEW,request)) {
         	log.trace("GET PREVIEW (collection) "+uri);
         	String previewUri = getCollectionPreviewUri(uri);
-        	returnImage(request, response, previewUri);
+        	returnImage(request, response, previewUri, SMALL_404);
         } else if(hasPrefix(IMAGE_INFIX,request)) {
             log.trace("GET IMAGE "+uri);
             returnImage(request, response, uri);
@@ -287,20 +296,28 @@ public class RestServlet extends AuthenticatedServlet {
             throw new ServletException("unrecognized API call "+request.getRequestURI());
         }
     }
-
     void returnImage(HttpServletRequest request, HttpServletResponse response, String imageUri) throws IOException, ServletException {
+    	returnImage(request,response,imageUri,null);
+    }
+    void returnImage(HttpServletRequest request, HttpServletResponse response, String imageUri, String image404) throws IOException, ServletException {
     	if(imageUri != null) {
     		try {
     			CopyFile.copy(restService.retrieveImage(imageUri), response.getOutputStream());
     			return;
     		} catch(RestServiceException e) {
     			if(!e.isNotFound()) {
-    				throw new ServletException("failed to retrieve "+request.getRequestURI()); // FIXME return 404
+    				throw new ServletException("failed to retrieve "+request.getRequestURI());
     			}
     		}
     	}
-    	response.setStatus(404);
-    	response.addHeader("Pragma", "no-cache");
+    	if(image404 != null) {
+    		response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+    		String redirectTo = TupeloStore.getImagePath(request, image404);
+    		response.setHeader("Location", redirectTo);
+    	} else {
+    		response.setStatus(404);
+    	}
+		response.addHeader("Pragma", "no-cache");
     }
 
     void doPostImage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

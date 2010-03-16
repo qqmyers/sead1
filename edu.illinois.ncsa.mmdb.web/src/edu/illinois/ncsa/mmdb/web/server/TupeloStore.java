@@ -369,7 +369,14 @@ public class TupeloStore {
             RestServlet.SEARCH_INFIX,
     };
 
-	String getWebappPrefix(HttpServletRequest request) throws ServletException {
+	
+	/** return a path to the iamge in the "/images" directory of the webapp 
+	 * @throws ServletException */
+	public static String getImagePath(HttpServletRequest request, String imageName) throws ServletException {
+		return getWebappPrefix(request) + request.getContextPath() + "/images/" + imageName;
+	}
+	
+	public static String getWebappPrefix(HttpServletRequest request) throws ServletException {
 		try {
             URL requestUrl = new URL(request.getRequestURL().toString());
             String prefix = requestUrl.getProtocol()+"://"+requestUrl.getHost();
