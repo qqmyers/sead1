@@ -92,7 +92,7 @@ public class PreviewWidget extends Composite {
 
 		// add the preview image
 		if(size != GetPreviews.LARGE) {
-			Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);// + "?time=" + System.currentTimeMillis());
+			Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);
 			previewImage.addStyleName("thumbnail");
 			previewImage.addErrorHandler(new ErrorHandler() {
 				public void onError(ErrorEvent event) {

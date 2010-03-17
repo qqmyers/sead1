@@ -154,6 +154,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * Navigation menu at the top of the page.
 	 */
 	void initNavMenu() {
+		if(RootPanel.get("navMenu") == null) {
+			GWT.log("BARF! failed to get rootpanel");
+		}
 		RootPanel.get("navMenu").clear();
 		HorizontalPanel navMenu = new HorizontalPanel();
 		RootPanel.get("navMenu").add(navMenu);

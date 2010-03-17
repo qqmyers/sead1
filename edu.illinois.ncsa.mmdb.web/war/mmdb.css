@@ -11,6 +11,10 @@ body {
 	border: 1px solid red;
 }
 
+.blueBorder {
+	border: 1px solid blue;
+}
+
 .background {
 	background-color: #E3E3E3;
 }
@@ -303,6 +307,20 @@ body {
 .pagingButton:hover {
     cursor: pointer;
     cursor: hand;
+}
+
+.pageAnchor {
+	/*border: 1px solid blue;*/
+	font-size: 0.9em;
+	margin: 3px;
+}
+
+.thisPageAnchor {
+	margin: 3px;
+	color: black;
+	font-size: 0.9em;
+	font-weight: bold;
+	text-decoration: none;
 }
 
 .page {

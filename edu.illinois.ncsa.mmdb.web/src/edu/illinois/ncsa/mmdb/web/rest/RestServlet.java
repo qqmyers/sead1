@@ -28,7 +28,9 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
+import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.util.CopyFile;
@@ -251,15 +253,15 @@ public class RestServlet extends AuthenticatedServlet {
         	if(hasPrefix(PREVIEW_SMALL,request)) {
         		log.trace("GET PREVIEW (small) "+uri);
         		previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.SMALL);
-        		returnImage(request, response, previewUri, SMALL_404);
+        		returnImage(request, response, previewUri, SMALL_404, shouldCache404(uri));
         	} else if(hasPrefix(PREVIEW_LARGE,request)) {
         		log.trace("GET PREVIEW (large) "+uri);
         		previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.LARGE);
-        		returnImage(request, response, previewUri, LARGE_404);
+        		returnImage(request, response, previewUri, LARGE_404, shouldCache404(uri));
         	} else {
         		log.trace("GET PREVIEW (any) "+uri);
         		previewUri = getPreviewUri(uri, PREVIEW_ANY);
-            	returnImage(request, response, previewUri, SMALL_404);
+            	returnImage(request, response, previewUri, SMALL_404, shouldCache404(uri));
         	}
         } else if(hasPrefix(COLLECTION_PREVIEW,request)) {
         	log.trace("GET PREVIEW (collection) "+uri);
@@ -304,6 +306,9 @@ public class RestServlet extends AuthenticatedServlet {
     	returnImage(request,response,imageUri,null);
     }
     void returnImage(HttpServletRequest request, HttpServletResponse response, String imageUri, String image404) throws IOException, ServletException {
+    	returnImage(request,response,imageUri,image404,true);
+    }
+    void returnImage(HttpServletRequest request, HttpServletResponse response, String imageUri, String image404, boolean shouldCache) throws IOException, ServletException {
     	if(imageUri != null) {
     		try {
     			CopyFile.copy(restService.retrieveImage(imageUri), response.getOutputStream());
@@ -321,7 +326,21 @@ public class RestServlet extends AuthenticatedServlet {
     	} else {
     		response.setStatus(404);
     	}
-		response.addHeader("Pragma", "no-cache");
+    	if(!shouldCache) {
+    		response.addHeader("Pragma", "no-cache");
+    	}
+    }
+    public static boolean shouldCache404(String datasetUri) {
+    	try {
+    		TupeloStore.refetch(datasetUri);
+    		ThingSession ts = TupeloStore.getInstance().getBeanSession().getThingSession();
+    		// FIXME "endTime1" is a kludgy way to represent execution stage information
+    		Date endTime = ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/extractor/endTime1"));
+    		// if there's an end time, then preview extraction has completed, so we should cache this response
+    		return endTime != null;
+    	} catch(OperatorException x) {
+    		return false; // to be safe, don't cache when we don't know
+    	}
     }
 
     void doPostImage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
