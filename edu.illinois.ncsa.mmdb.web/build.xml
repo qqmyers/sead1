@@ -208,9 +208,9 @@
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
 			<filterset>
 				<filter token="VERSION" value="${version}" />
-				<filter token="sensor=false" value="sensor=false&amp;key=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag" />
 			</filterset>
 		</copy>
+		<replace file="war/mmdb.html" token="sensor=false" value="sensor=false&amp;key=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag" />
 	</target>
 
 	<target name="copy_mmdb_html" unless="mmdb_tmp_exists">
