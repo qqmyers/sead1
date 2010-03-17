@@ -11,8 +11,8 @@ DB_PASS=mmdb
 
 FOLDER=/home/mmdb
 
-# key for ncsa.uiuc.edu
-GOOGLEMAPKEY=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag
+# key for googlemap default is for ncsa.uiuc.edu
+#GOOGLEMAPKEY=SOMEKEY
 
 # O.4 release
 #EXTRACTOR_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Extractor%200.4/lastSuccessfulBuild/artifact/build/Extractor/Extractor-linux.gtk.x86_64.tar.gz
@@ -203,7 +203,13 @@ wget $MMDB_URL
 unzip -q -d war mmdb.war
 cp context.xml war/WEB-INF/classes
 cp server.properties war/WEB-INF/classes
-sed -i -e "s#sensor=false#sensor=false&amp;key=$GOOGLEMAPKEY#g" war/mmdb.html
+EOF
+if [ "$GOOGLEMAPKEY" != "" ]; then
+  $DRYRUN cat >> updatewar.sh << EOF
+  sed -i -e "s#sensor=false&amp;key=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag#sensor=false&amp;key=$GOOGLEMAPKEY#g" war/mmdb.html
+EOF
+fi
+$DRYRUN cat >> updatewar.sh << EOF
 chown -R $TOMCAT_USER war
 
 $TOMCAT_SCRIPT stop
@@ -322,7 +328,9 @@ $DRYRUN cp war/WEB-INF/classes/server.properties .
 $DRYRUN sed -i.bak -e "s#mail.from=lmarini@ncsa.illinois.edu#mail.from=$MAINTAINER#g" \
                    -e "s/#user.0.email=/user.0.email=$MAINTAINER/g" \
                    -e "s@#search.index=.*@search.index=$FOLDER/lucene@g" server.properties
-$DRYRUN sed -i -e "s#sensor=false#sensor=false&amp;key=$GOOGLEMAPKEY#g" war/mmdb.html
+if [ "$GOOGLEMAPKEY" != "" ]; then
+  $DRYRUN sed -i -e "s#sensor=false#sensor=false&amp;key=$GOOGLEMAPKEY#g" war/mmdb.html
+fi
 $DRYRUN $TOMCAT_SCRIPT stop
 if [ -e $TOMCAT_DIR/webapps/mmdb ]; then
   $DRYRUN rm -rf $TOMCAT_DIR/webapps/mmdb
