@@ -1,24 +1,26 @@
 #!/bin/bash
 
 DRYRUN="echo"
+TWEAKS="yes"
 
 MAINTAINER=kooper@ncsa.illinois.edu
-DATABASE=mmdb
+
+DB_SCHEMA=mmdb
 DB_USER=mmdb
 DB_PASS=mmdb
-MMDB=/home/mmdb
 
-GOOGLEMAPKEY=
+FOLDER=/home/mmdb
 
-# O.4 release (added fixes to executor)
-EXTRACTOR_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Extractor/91/artifact/build/I.Extractor/Extractor-linux.gtk.x86_64.tar.gz
-MMDB_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Web/421/artifact/mmdb/build/mmdb.war
+# key for ncsa.uiuc.edu
+GOOGLEMAPKEY=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag
+
+# O.4 release
+#EXTRACTOR_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Extractor%200.4/lastSuccessfulBuild/artifact/build/Extractor/Extractor-linux.gtk.x86_64.tar.gz
+#MMDB_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Web%200.4/lastSuccessfulBuild/artifact/mmdb/build/mmdb.war
 
 # latest
-#EXTRACTOR_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Extractor/lastSuccessfulBuild/artifact/build/I.Extractor/Extractor-linux.gtk.x86_64.tar.gz
-#MMDB_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Web/lastSuccessfulBuild/artifact/mmdb/build/mmdb.war
-
-TWEAKS="yes"
+EXTRACTOR_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Extractor/lastSuccessfulBuild/artifact/build/Extractor/Extractor-linux.gtk.x86_64.tar.gz
+MMDB_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Web/lastSuccessfulBuild/artifact/mmdb/build/mmdb.war
 
 # ----------------------------------------------------------------------
 if [ -e /etc/redhat-release ]; then
@@ -26,28 +28,36 @@ if [ -e /etc/redhat-release ]; then
 else
   DIST=ubuntu
 fi
+if [ "`uname -m`" != "x86_64" -a "`uname -p`" != "x86_64" ]; then
+  EXTRACTOR_URL=`echo $EXTRACTOR_URL | sed -e 's#x86_64#x86#'`
+fi
+
 echo "CONFIGURING FOR $DIST"
 
 if [ "$DIST" == "ubuntu" ]; then
   TOMCAT_USER=tomcat6
   TOMCAT_DIR=/var/lib/tomcat6
   TOMCAT_SCRIPT=/etc/init.d/tomcat6
+  HTTPD=/etc/apache2
 fi
 if [ "$DIST" == "redhat" ]; then
   TOMCAT_USER=tomcat
   TOMCAT_DIR=/usr/share/tomcat5/
   TOMCAT_SCRIPT=/etc/init.d/tomcat5
+  HTTPD=/etc/httpd
 fi
 
 # ----------------------------------------------------------------------
 echo "NCSA TWEAKS"
 
-if [ "$TWEAKS" == "yes" -a "$DIST" == "ubuntu" ]; then
-  $DRYRUN sed -i.bak -e 's#http://us.archive.ubuntu.com/ubuntu/#http://cosmos.cites.uiuc.edu/pub/ubuntu#g' /etc/apt/sources.list
+if [ "$TWEAKS" == "yes" -a "$DIST" == "ubuntu" -a ! -e /etc/apt/sources.list.mmdb ]; then
+  $DRYRUN sed -i.mmdb -e 's#http://us.archive.ubuntu.com/ubuntu/#http://cosmos.cites.uiuc.edu/pub/ubuntu#g' /etc/apt/sources.list
   $DRYRUN apt-get -qq update
   $DRYRUN apt-get -qq -y install ntp
+fi
 
-  $DRYRUN sed -i.bak -e 's#server ntp.ubuntu.com#server ntp.ncsa.uiuc.edu#g' /etc/ntp.conf
+if [ "$TWEAKS" == "yes" -a "$DIST" == "ubuntu" -a ! -e /etc/ntp.conf.mmdb ]; then
+  $DRYRUN sed -i.mmdb -e 's#server ntp.ubuntu.com#server ntp.ncsa.uiuc.edu#g' /etc/ntp.conf
   $DRYRUN /etc/init.d/ntp restart
 fi
 
@@ -62,17 +72,18 @@ fi
 # ----------------------------------------------------------------------
 echo "CREATING WORKING FOLDER"
 
-$DRYRUN mkdir -p $MMDB/data
-$DRYRUN chown -R $TOMCAT_USER $MMDB/data
-$DRYRUN cd $MMDB
+$DRYRUN mkdir -p $FOLDER/data
+$DRYRUN mkdir -p $FOLDER/lucene
+$DRYRUN chown -R $TOMCAT_USER $FOLDER/data $FOLDER/lucene
+$DRYRUN cd $FOLDER
 
 # ----------------------------------------------------------------------
 echo "CREATING DATABASE"
 
 $DRYRUN cat > mmdb.sql << EOF
-DROP DATABASE IF EXISTS $DATABASE;
-CREATE DATABASE $DATABASE;
-USE $DATABASE;
+DROP DATABASE IF EXISTS $DB_SCHEMA;
+CREATE DATABASE $DB_SCHEMA;
+USE $DB_SCHEMA;
 
 CREATE TABLE \`blb\` (
   \`bid\` bigint(20) NOT NULL,
@@ -102,7 +113,7 @@ CREATE TABLE \`tup\` (
   KEY \`pre_2\` (\`pre\`,\`obj\`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-GRANT ALL ON $DATABASE.* TO '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
+GRANT ALL ON $DB_SCHEMA.* TO '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
 EOF
 $DRYRUN mysql -u root -p -h localhost < mmdb.sql
 
@@ -111,7 +122,9 @@ echo "EXTRACTION SERVICE"
 
 # download latests build
 $DRYRUN wget -q -O $$.tar.gz $EXTRACTOR_URL
-$DRYRUN rm -rf Extractor
+if [ -e Extractor ]; then
+  $DRYRUN rm -rf Extractor
+fi
 $DRYRUN tar zxf $$.tar.gz
 $DRYRUN chmod -R g+w Extractor
 $DRYRUN chown -R $TOMCAT_USER Extractor
@@ -127,7 +140,9 @@ fi
 
 # fix extractor paths/user
 $DRYRUN cp Extractor/service/extractor.$DIST extractor
-$DRYRUN sed -i -e "s#DIR=/home/kooper/Extractor#DIR=$MMDB/Extractor#" -e "s#USER=kooper#USER=$TOMCAT_USER#" extractor
+$DRYRUN sed -i -e "s#DIR=/home/kooper/Extractor#DIR=$FOLDER/Extractor#" \
+               -e "s#USER=kooper#USER=$TOMCAT_USER#" \
+               -e "s#URL=.*#URL=$EXTRACTOR_URL#" extractor
 
 # autostart extractor
 $DRYRUN cp extractor /etc/init.d
@@ -138,7 +153,7 @@ fi
 if [ "$DIST" == "redhat" ]; then
   $DRYRUN /sbin/chkconfig extractor on
 fi
-$DRYRUN /etc/init.d/extractor start
+$DRYRUN /etc/init.d/extractor restart
 
 # ----------------------------------------------------------------------
 #echo "IPTABLES"
@@ -150,14 +165,15 @@ $DRYRUN /etc/init.d/extractor start
 echo "WEB CLIENT"
 
 # fix tomcat
-if [ "$TWEAKS" == "yes" -a "$DIST" == "ubuntu" ]; then
-  $DRYRUN sed -i -e 's#TOMCAT6_SECURITY=yes#TOMCAT6_SECURITY=no#g' \
+if [ "$TWEAKS" == "yes" -a "$DIST" == "ubuntu" -a ! -e $TOMCAT_SCRIPT.mmdb ]; then
+  $DRYRUN sed -i.mmdb -e 's#TOMCAT6_SECURITY=yes#TOMCAT6_SECURITY=no#g' \
 	-e "s#-outfile SYSLOG -errfile SYSLOG#-outfile $TOMCAT_DIR/logs/stdout -errfile $TOMCAT_DIR/logs/stderr#g" \
 	-e 's#-Xmx128M#-Xmx256M#' $TOMCAT_SCRIPT
 fi
 
 # add proxy for mmdb
-$DRYRUN cat > /etc/apache2/conf.d/mmdb.conf << EOF
+
+$DRYRUN cat > $HTTPD/conf.d/mmdb.conf << EOF
 <Proxy *>
 Order deny,allow
 Allow from all
@@ -183,10 +199,11 @@ $DRYRUN cat > updatewar.sh << EOF
 
 cd /home/mmdb
 rm -rf war mmdb.war
-wget http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Web/lastSuccessfulBuild/artifact/mmdb/build/mmdb.war
+wget $MMDB_URL
 unzip -q -d war mmdb.war
 cp context.xml war/WEB-INF/classes
 cp server.properties war/WEB-INF/classes
+sed -i -e "s#sensor=false#sensor=false&amp;key=$GOOGLEMAPKEY#g" war/mmdb.html
 chown -R $TOMCAT_USER war
 
 $TOMCAT_SCRIPT stop
@@ -232,7 +249,7 @@ $DRYRUN cat > context.xml << EOF
             <a:hasProperties>
               <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:baeb324048fff81406286306cac647d62c885d18">
                 <b:storageTypeMapKey>MySQL.database</b:storageTypeMapKey>
-                <b:storageTypeMapValue>$DATABASE</b:storageTypeMapValue>
+                <b:storageTypeMapValue>$DB_SCHEMA</b:storageTypeMapValue>
               </b:storageTypeMapEntry>
             </a:hasProperties>
             <a:isType>MySQL</a:isType>
@@ -265,7 +282,7 @@ $DRYRUN cat > context.xml << EOF
             <a:hasProperties>
               <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:1f54b2550c47fe349b23567961f120c650556174">
                 <b:storageTypeMapKey>folder</b:storageTypeMapKey>
-                <b:storageTypeMapValue>$MMDB/data</b:storageTypeMapValue>
+                <b:storageTypeMapValue>$FOLDER/data</b:storageTypeMapValue>
               </b:storageTypeMapEntry>
             </a:hasProperties>
             <a:isType>HashFile</a:isType>
@@ -302,11 +319,41 @@ $DRYRUN wget $MMDB_URL
 $DRYRUN unzip -q -d war mmdb.war
 $DRYRUN cp context.xml war/WEB-INF/classes
 $DRYRUN cp war/WEB-INF/classes/server.properties .
-$DRYRUN sed -i.bak -e "s#mail.from=lmarini@ncsa.illinois.edu#mail.from=$MAINTAINER#g" -e "s/#user.0.email=/user.0.email=$MAINTAINER/g" server.properties
+$DRYRUN sed -i.bak -e "s#mail.from=lmarini@ncsa.illinois.edu#mail.from=$MAINTAINER#g" \
+                   -e "s/#user.0.email=/user.0.email=$MAINTAINER/g" \
+                   -e "s@#search.index=.*@search.index=$FOLDER/lucene@g" server.properties
+$DRYRUN sed -i -e "s#sensor=false#sensor=false&amp;key=$GOOGLEMAPKEY#g" war/mmdb.html
+$DRYRUN $TOMCAT_SCRIPT stop
+if [ -e $TOMCAT_DIR/webapps/mmdb ]; then
+  $DRYRUN rm -rf $TOMCAT_DIR/webapps/mmdb
+fi
 $DRYRUN mv war $TOMCAT_DIR/webapps/mmdb
+$DRYRUN $TOMCAT_SCRIPT start
 $DRYRUN rm mmdb.war
-$DRYRUN $TOMCAT_SCRIPT restart
 
 # ----------------------------------------------------------------------
 echo "READY"
+echo ""
+echo "Following database has been created:"
+echo " - $DB_SCHEMA [ user = $DB_USER ]"
+echo ""
+echo "Following files/folders have been created:"
+echo " - $FOLDER"
+echo " - $TOMCAT_DIR/webapps/mmdb"
+echo " - /etc/init.d/extractor"
+echo " - $HTTPD/conf.d/mmdb.conf"
+echo ""
+echo "Following packages have been installed enabled"
+echo " - apache module proxy_http/proxy"
+if [ "$TWEAKS" == "yes" -a "$DIST" == "ubuntu" ]; then
+  echo " - mysql-server-5.1 unzip apache2 tomcat6 ntp [+dependencies]"
+fi
+echo ""
+echo "Following files have been modified:"
+if [ "$TWEAKS" == "yes" -a "$DIST" == "ubuntu" ]; then
+  echo " - /etc/ntp.conf"
+  echo " - /etc/apt/sources.list"
+  echo " - $TOMCAT_SCRIPT"
+fi
+echo ""
 echo "A reboot might be required after the dist-upgrade"
