@@ -103,7 +103,7 @@ public class TupeloStore {
     private Map<String, Map<String, Memoized<String>>> previewCache = null;
     
     /** Timer to schedule re-occurring jobs */
-    private Timer                          timer                 = new Timer();
+    private Timer                          timer                 = new Timer(true);
 
 	/**
 	 * Return singleton instance.
