@@ -13,6 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -55,7 +56,7 @@ public class TagPage extends Composite {
 	}
 	
 	private Widget createTagInformation() {
-		return new Label(uri);
+		return new HTML("Datasets tagged with '<b>" + uri + "</b>'");
 	}
 
 	private void retrieveDatasets() {
