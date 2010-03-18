@@ -1,6 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import java.util.Set;
+import java.util.List;
 
 import net.customware.gwt.dispatch.shared.Result;
 
@@ -13,18 +13,18 @@ import net.customware.gwt.dispatch.shared.Result;
 public class GetTagsResult implements Result {
 
 	private static final long serialVersionUID = -1166225700734328325L;
-	private Set<String> tags;
+	private List<String> tags;
 
 	/**
 	 * For serialization only.
 	 */
 	public GetTagsResult() {}
 
-	public GetTagsResult(Set<String> tags) {
+	public GetTagsResult(List<String> tags) {
 		this.tags = tags;
 	}
 
-	public Set<String> getTags() {
+	public List<String> getTags() {
 		return tags;
 	}
 	

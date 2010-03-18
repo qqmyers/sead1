@@ -15,6 +15,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteAnnotationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.EditPermissionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ExtractionServiceHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAllTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAnnotationsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
@@ -83,6 +84,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new DeleteAnnotationHandler());
         DispatchUtil.registerHandler(new SearchHandler());
         DispatchUtil.registerHandler(new RemoveFromCollectionHandler());
+        DispatchUtil.registerHandler(new GetAllTagsHandler());
 	}
 
 	public void contextDestroyed(ServletContextEvent evt) {
