@@ -51,12 +51,6 @@ public class AnnotationView extends Composite {
 
 		flexCellFormatter = mainTable.getFlexCellFormatter();
 
-		mainTable.setHTML(0, 0, annotationBean.getTitle());
-
-		flexCellFormatter.setColSpan(0, 0, 1);
-
-		flexCellFormatter.addStyleName(0, 0, "annotationTitle");
-
 		Anchor deleteButton = new Anchor("Delete");
 		deleteButton.addStyleName("datasetActionLink");
 		deleteButton.addClickHandler(new ClickHandler() {
@@ -69,7 +63,6 @@ public class AnnotationView extends Composite {
 				});
 			}
 		});
-		mainTable.setWidget(0,1, deleteButton);
 		
 		String mediumDate = "";
 
@@ -91,22 +84,24 @@ public class AnnotationView extends Composite {
 			creator = annotationBean.getCreator().getName();
 		}
 		
-		mainTable.setHTML(1, 0, "By " + creator
+		mainTable.setHTML(0, 0, "By " + creator
 				+ " on " + mediumDate + " " + shortTime);
 
-		flexCellFormatter.setColSpan(1, 0, 2);
+		flexCellFormatter.setColSpan(0, 0, 2);
 
-		flexCellFormatter.addStyleName(1, 0, "annotationAttributes");
+		flexCellFormatter.addStyleName(0, 0, "annotationAttributes");
+		
+		mainTable.setWidget(0, 1, deleteButton);
 
 		String description = annotationBean.getDescription();
 		
 		description = description.replaceAll("\n", "<br>");
 		
-		mainTable.setHTML(2, 0, description);
+		mainTable.setHTML(1, 0, description);
 
-		flexCellFormatter.setColSpan(2, 0, 2);
+		flexCellFormatter.setColSpan(1, 0, 2);
 
-		flexCellFormatter.addStyleName(2, 0, "annotationBody");
+		flexCellFormatter.addStyleName(1, 0, "annotationBody");
 	}
 	
 	// delete this annotation

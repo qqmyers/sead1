@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -120,8 +121,10 @@ public class HomePage extends Page {
 		adminPanel = new FlowPanel();
 		Hyperlink permissionsLink = new Hyperlink("Modify Permissions", "modifyPermissions");
 		adminPanel.add(permissionsLink);
-		Hyperlink sparqlLink = new Hyperlink("Run SPARQL query", "sparql");
+		Hyperlink sparqlLink = new Hyperlink("Run SPARQL Query", "sparql");
 		adminPanel.add(sparqlLink);
+		adminPanel.add(new Label("Update Context"));
+		adminPanel.add(new Label("Reindex Lucene"));
 		tabPanel.add(adminPanel, "Administrator");
 	}
 

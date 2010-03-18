@@ -45,21 +45,11 @@ public class NewAnnotationView extends Composite {
 
 		mainPanel.add(mainTable);
 
-		Label header = new Label("New Comment");
+		Label header = new Label("Write a Comment");
 
 		header.addStyleName("newCommentHeader");
 
 		mainTable.setWidget(0, 0, header);
-
-		mainTable.setHTML(1, 0, "Title: ");
-
-		titleTextBox = new TextBox();
-
-		titleTextBox.setWidth("500px");
-
-		mainTable.setWidget(1, 1, titleTextBox);
-
-		mainTable.setHTML(2, 0, "Comment: ");
 
 		descriptionTextArea = new TextArea();
 		
@@ -69,11 +59,11 @@ public class NewAnnotationView extends Composite {
 
 		descriptionTextArea.setSize("500px", "200px");
 
-		mainTable.setWidget(2, 1, descriptionTextArea);
+		mainTable.setWidget(1, 0, descriptionTextArea);
 
-		submitButton = new Button("Submit");
+		submitButton = new Button("Comment");
 
-		mainTable.setWidget(3, 1, submitButton);
+		mainTable.setWidget(2, 0, submitButton);
 	}
 
 	/**
