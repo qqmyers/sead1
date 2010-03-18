@@ -15,12 +15,12 @@ FOLDER=/home/mmdb
 #GOOGLEMAPKEY=SOMEKEY
 
 # O.4 release
-#EXTRACTOR_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Extractor%200.4/lastSuccessfulBuild/artifact/build/Extractor/Extractor-linux.gtk.x86_64.tar.gz
-#MMDB_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Web%200.4/lastSuccessfulBuild/artifact/mmdb/build/mmdb.war
+#EXTRACTOR_URL=http://isda.ncsa.uiuc.edu/build/mmdb/0.4/extractor/Extractor-linux.gtk.x86_64.tar.gz
+#MMDB_URL=http://isda.ncsa.uiuc.edu/build/mmdb/0.4/web/mmdb.war
 
 # latest
-EXTRACTOR_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Extractor/lastSuccessfulBuild/artifact/build/Extractor/Extractor-linux.gtk.x86_64.tar.gz
-MMDB_URL=http://isda.ncsa.uiuc.edu:8090/job/MMDB%20Web/lastSuccessfulBuild/artifact/mmdb/build/mmdb.war
+EXTRACTOR_URL=http://isda.ncsa.uiuc.edu/build/mmdb/trunk/extractor/Extractor-linux.gtk.x86_64.tar.gz
+MMDB_URL=http://isda.ncsa.uiuc.edu/build/mmdb/trunk/web/mmdb.war
 
 # ----------------------------------------------------------------------
 if [ -e /etc/redhat-release ]; then
