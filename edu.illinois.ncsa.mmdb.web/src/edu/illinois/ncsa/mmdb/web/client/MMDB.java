@@ -56,6 +56,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.SearchResultsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SparqlPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.TagsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TitlePanel;
 import edu.illinois.ncsa.mmdb.web.client.ui.UploadPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.UserManagementPage;
@@ -185,6 +186,15 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		HTML bullet2 = new HTML("&bull;");
 		bullet2.addStyleName("whiteText");
 		navMenu.add(bullet2);
+		// tags
+		Hyperlink tagsLink = new Hyperlink("Tags",
+				"tags");
+		tagsLink.addStyleName("navMenuLink");
+		navMenu.add(tagsLink);
+		// bullet
+		HTML bullet3 = new HTML("&bull;");
+		bullet3.addStyleName("whiteText");
+		navMenu.add(bullet3);
 		// upload link
 		Hyperlink uploadLink = new Hyperlink("Upload", "upload");
 		uploadLink.addStyleName("navMenuLink");
@@ -637,9 +647,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				showDataset();
 			} else if (token.startsWith("listDatasets") && !previousHistoryToken.startsWith("listDatasets")) {
 				listDatasets();
-			} else if (token.startsWith("upload")) { // upload applet support
-//				showUploadProgress();
+			} else if (token.startsWith("upload")) {
 				showUploadPage();
+			} else if (token.startsWith("tags")) {
+				shosTagsPage();
 			} else if (token.startsWith("tag")) {
 				showTagPage();
 			} else if (token.startsWith("listCollections") && !previousHistoryToken.startsWith("listCollections")) {
@@ -665,6 +676,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			}
 		}
 		previousHistoryToken = token;
+	}
+
+	private void shosTagsPage() {
+		GWT.log("Loading Tags Page", null);
+		mainContainer.clear();
+		mainContainer.add(new TagsPage(dispatchAsync));
 	}
 
 	private void showSearchResultsPage() {
