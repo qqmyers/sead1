@@ -9,6 +9,7 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAllTags;
@@ -21,6 +22,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
  *
  */
 public class TagsPage extends Page {
+
+	private FlowPanel tagsPanel;
 
 	public TagsPage(DispatchAsync dispatchAsync) {
 		super("Tags", dispatchAsync);
@@ -41,7 +44,8 @@ public class TagsPage extends Page {
 				while (iterator.hasNext()) {
 					String tag = iterator.next();
 					Hyperlink link = new Hyperlink(tag, "tag?title=" + tag);
-					mainLayoutPanel.add(link);
+					link.addStyleName("tagInPanel");
+					tagsPanel.add(link);
 				}
 			}
 			
@@ -50,5 +54,8 @@ public class TagsPage extends Page {
 
 	@Override
 	public void layout() {
+		tagsPanel = new FlowPanel();
+		tagsPanel.addStyleName("tagsPanel");
+		mainLayoutPanel.add(tagsPanel);
 	}
 }
