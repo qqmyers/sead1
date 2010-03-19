@@ -66,9 +66,11 @@ public class PagingWidget extends Composite implements ClickHandler, HasValueCha
 	final int pad = 3;
 	void setPageLabel(int p, int np) {
 		pagePanel.clear();
-		if(p > pad) {
+		if(p > pad+1) {
 			pagePanel.add(pageNumberAnchor(1,true));
-			pagePanel.add(new Label("..."));
+			if(p > pad+2) {
+				pagePanel.add(new Label("..."));
+			}
 		}
 		for(int i = Math.max(1,p-pad); i < p; i++) {
 			pagePanel.add(pageNumberAnchor(i,true));
@@ -78,7 +80,9 @@ public class PagingWidget extends Composite implements ClickHandler, HasValueCha
 			pagePanel.add(pageNumberAnchor(i,true));
 		}
 		if(p < np-pad) {
-			pagePanel.add(new Label("..."));
+			if(p < np-pad-1) {
+				pagePanel.add(new Label("..."));
+			}
 			pagePanel.add(pageNumberAnchor(np,true));
 		}
 	}
