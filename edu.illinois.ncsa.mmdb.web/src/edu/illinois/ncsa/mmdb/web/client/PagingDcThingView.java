@@ -53,8 +53,9 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		return "date-desc";
 	}
 	
+	// gets it from session preferences
 	public static String getDefaultViewType() {
-		return "list";
+		return MMDB.getSessionPreference("viewType","list");
 	}
 	
 	protected boolean descForSortKey() {
@@ -71,6 +72,8 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 
 	public void setViewType(String viewType) {
 		this.viewType = viewType;
+		// set this as the preferred view type in session preferences
+		MMDB.setSessionPreference("viewType",viewType);
 		// avoid retriggering a change event and just update the ifc
 		for(LabeledListBox vtc : viewTypeControls) {
 			vtc.setSelected(viewType != null ? viewType : getDefaultViewType());

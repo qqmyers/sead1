@@ -120,6 +120,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 	private Label breadcrumb;
 
+	private static Map<String,String> sessionPreferences;
+	
 	/**
 	 * This is the entry point method.
 	 */
@@ -841,5 +843,20 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		} else {
 			return false;
 		}
+	}
+	
+	// session preferences
+	private static Map<String,String> getSessionPreferences() {
+		if(sessionPreferences == null) {
+			sessionPreferences = new HashMap<String,String>();
+		}
+		return sessionPreferences;
+	}
+	public static String getSessionPreference(String key, String defaultValue) {
+		String value = getSessionPreferences().get(key);
+		return value == null ? defaultValue : value;
+	}
+	public static void setSessionPreference(String key, String value) {
+		getSessionPreferences().put(key,value);
 	}
 }

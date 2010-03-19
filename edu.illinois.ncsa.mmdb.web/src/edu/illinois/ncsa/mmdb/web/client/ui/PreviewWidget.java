@@ -104,7 +104,7 @@ public class PreviewWidget extends Composite {
 			contentPanel.clear();
 			contentPanel.add(previewImage);
 		} else {
-			grayImage(size, link);
+			pendingImage(size, link);
 			getPreview(datasetUri, link);
 		}
 	}
