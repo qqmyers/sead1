@@ -156,9 +156,11 @@ public class TupeloStore {
 		// FIXME do less often
 		timer.schedule(new TimerTask() {
 			public void run() {
-				fullTextIndexAll();
+				if(getSearch() != null) {
+					fullTextIndexAll();
+				}
 			}
-		}, 0, 60 * 60 * 1000);
+		}, 10 * 1000, 60 * 60 * 1000);
 	}
  
 	/**
