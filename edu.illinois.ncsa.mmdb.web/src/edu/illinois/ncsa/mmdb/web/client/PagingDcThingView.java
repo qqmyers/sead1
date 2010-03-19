@@ -28,6 +28,10 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 	LinkedList<LabeledListBox> sortControls;
 	LinkedList<LabeledListBox> viewTypeControls;
 	
+	public static final String LIST_VIEW_TYPE = "list";
+	public static final String GRID_VIEW_TYPE = "grid";
+	public static final String FLOW_VIEW_TYPE = "flow";
+	
 	/**
 	 * Parse the parameters in the history token after the '?'
 	 * 
@@ -53,9 +57,16 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		return "date-desc";
 	}
 	
+	/**
+	 * Override to set subclass-specific view type preferences
+	 */
+	protected String getViewTypePreference() {
+		return "viewType";
+	}
+	
 	// gets it from session preferences
-	public static String getDefaultViewType() {
-		return MMDB.getSessionPreference("viewType","list");
+	public String getDefaultViewType() {
+		return MMDB.getSessionPreference(getViewTypePreference(),"list");
 	}
 	
 	protected boolean descForSortKey() {
@@ -73,7 +84,7 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 	public void setViewType(String viewType) {
 		this.viewType = viewType;
 		// set this as the preferred view type in session preferences
-		MMDB.setSessionPreference("viewType",viewType);
+		MMDB.setSessionPreference(getViewTypePreference(),viewType);
 		// avoid retriggering a change event and just update the ifc
 		for(LabeledListBox vtc : viewTypeControls) {
 			vtc.setSelected(viewType != null ? viewType : getDefaultViewType());
@@ -214,9 +225,9 @@ public abstract class PagingDcThingView<T> extends PagingTableView<T> {
 		
 		viewOptions = new LabeledListBox("View:");
 		viewOptions.addStyleName("pagingLabel");
-		viewOptions.addItem("List", "list");
-		viewOptions.addItem("Grid", "grid");
-		viewOptions.addItem("Flow", "flow");
+		viewOptions.addItem("List", LIST_VIEW_TYPE);
+		viewOptions.addItem("Grid", GRID_VIEW_TYPE);
+		viewOptions.addItem("Flow", FLOW_VIEW_TYPE);
 		viewOptions.setSelected(viewType);
 		addViewTypeControl(viewOptions);
 		panel.add(viewOptions);

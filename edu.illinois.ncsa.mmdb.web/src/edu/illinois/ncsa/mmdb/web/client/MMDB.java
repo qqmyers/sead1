@@ -845,13 +845,23 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		}
 	}
 	
+	public static final String DATASET_VIEW_TYPE_PREFERENCE = "datasetViewType";
+	public static final String COLLECTION_VIEW_TYPE_PREFERENCE = "collectionViewType";
+	
+	private static void initializeSessionPreferences() {
+		setSessionPreference(DATASET_VIEW_TYPE_PREFERENCE, PagingDcThingView.GRID_VIEW_TYPE);
+		setSessionPreference(COLLECTION_VIEW_TYPE_PREFERENCE, PagingDcThingView.LIST_VIEW_TYPE);
+	}
+	
 	// session preferences
 	private static Map<String,String> getSessionPreferences() {
 		if(sessionPreferences == null) {
 			sessionPreferences = new HashMap<String,String>();
+			initializeSessionPreferences();
 		}
 		return sessionPreferences;
 	}
+	
 	public static String getSessionPreference(String key, String defaultValue) {
 		String value = getSessionPreferences().get(key);
 		return value == null ? defaultValue : value;

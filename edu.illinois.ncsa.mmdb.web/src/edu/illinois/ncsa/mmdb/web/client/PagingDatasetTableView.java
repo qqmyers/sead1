@@ -152,4 +152,9 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 			}
 		});
 	}
+
+	@Override
+	protected String getViewTypePreference() {
+		return "datasetViewType";
+	}
 }

@@ -213,4 +213,10 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 	public String getAction() {
 		return "listCollections";
 	}
+
+
+	@Override
+	public String getViewTypePreference() {
+		return "collectionViewType";
+	}
 }
