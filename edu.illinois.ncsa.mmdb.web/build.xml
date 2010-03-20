@@ -84,17 +84,6 @@
 		</javac>
 		<jar jarfile="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.tupelo.jar" basedir="beanclass" />
 
-		<!-- compile the contexts 
-		<delete dir="beanclass"/>
-		<mkdir dir="beanclass"/>		
-	    <javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-	    	<src path="../edu.uiuc.ncsa.cet.tupelo.contexts/src"/>
-	    	<classpath>
-	    		<fileset dir="war/WEB-INF/lib" includes="*.jar"/>
-    		</classpath>
-	    </javac>
-		<jar jarfile="war/WEB-INF/lib/edu.uiuc.ncsa.cet.tupelo.contexts.jar" basedir="beanclass"/>
--->
 		<!-- remove the temp folder -->
 		<delete dir="beanclass" />
 	</target>
