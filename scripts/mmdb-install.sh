@@ -12,7 +12,9 @@ DB_PASS=mmdb
 FOLDER=/home/mmdb
 
 # key for googlemap default is for ncsa.uiuc.edu
-#GOOGLEMAPKEY=SOMEKEY
+#GOOGLEMAPKEY=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag
+# uncomment the following line to get a ncsa.illinois.edu key
+#GOOGLEMAPKEY=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRReev6glONoxxqycIC4jgpEP874oRS7hBpD4PdOEFkanKpF-I8YpbHjkw
 
 # O.4 release
 #EXTRACTOR_URL=http://isda.ncsa.uiuc.edu/build/mmdb/0.4/extractor/Extractor-linux.gtk.x86_64.tar.gz
@@ -329,7 +331,7 @@ $DRYRUN sed -i.bak -e "s#mail.from=lmarini@ncsa.illinois.edu#mail.from=$MAINTAIN
                    -e "s/#user.0.email=/user.0.email=$MAINTAINER/g" \
                    -e "s@#search.index=.*@search.index=$FOLDER/lucene@g" server.properties
 if [ "$GOOGLEMAPKEY" != "" ]; then
-  $DRYRUN sed -i -e "s#sensor=false#sensor=false&amp;key=$GOOGLEMAPKEY#g" war/mmdb.html
+  $DRYRUN sed -i -e "s#sensor=false&amp;key=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag#sensor=false&amp;key=$GOOGLEMAPKEY#g" war/mmdb.html
 fi
 $DRYRUN $TOMCAT_SCRIPT stop
 if [ -e $TOMCAT_DIR/webapps/mmdb ]; then
