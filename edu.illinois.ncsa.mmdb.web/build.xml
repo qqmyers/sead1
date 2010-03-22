@@ -37,7 +37,7 @@
 
 	<target name="hudson" depends="tupeloidsa, cetbean, prepare-hudson, mmdb-dev, war, checkstyle" />
 
-	<target name="prepare-hudson" depends="resources" description="setup for hudson build and deployment">
+	<target name="prepare-hudson" depends="resources, copy_mmdb_html" description="setup for hudson build and deployment">
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
 			<filterset>
 				<filter token="VERSION" value="${version}" />
@@ -46,7 +46,7 @@
 		<exec executable="./versions.sh" os="Linux"/>
 	</target>
 
-	<target name="mmdb-dev" depends="resources, copy_mmdb_html" description="setup for hudson build and deployment">
+	<target name="mmdb-dev" depends="resources" description="setup for hudson build and deployment">
 		<copy tofile="war/WEB-INF/classes/context.xml" file="src/context_mmdbdev_hfc.xml" />
 		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" />
 		<replace file="war/WEB-INF/classes/server.properties" token="#search.index=/home/futrelle/dev/scratch/luceneIndex" value="search.index=/data/lucene" />
