@@ -35,19 +35,24 @@
 		<delete dir="build" />
 	</target>
 
-	<target name="hudson" depends="tupeloidsa, cetbean, prepare-hudson, war, checkstyle" />
+	<target name="hudson" depends="tupeloidsa, cetbean, prepare-hudson, mmdb-dev, war, checkstyle" />
 
-	<target name="prepare-hudson" depends="resources, copy_mmdb_html" description="setup for hudson build and deployment">
+	<target name="prepare-hudson" depends="resources" description="setup for hudson build and deployment">
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
 			<filterset>
 				<filter token="VERSION" value="${version}" />
 			</filterset>
 		</copy>
-		<replace file="war/mmdb.html" token="sensor=false" value="sensor=false&amp;key=${googlemap}" />
-		<replace file="war/WEB-INF/classes/server.properties" token="#search.index=/home/futrelle/dev/scratch/luceneIndex" value="search.index=/data/lucene" />
 		<exec executable="./versions.sh" os="Linux"/>
 	</target>
 
+	<target name="mmdb-dev" depends="resources, copy_mmdb_html" description="setup for hudson build and deployment">
+		<copy tofile="war/WEB-INF/classes/context.xml" file="src/context_mmdbdev_hfc.xml" />
+		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" />
+		<replace file="war/WEB-INF/classes/server.properties" token="#search.index=/home/futrelle/dev/scratch/luceneIndex" value="search.index=/data/lucene" />
+		<replace file="war/mmdb.html" token="sensor=false" value="sensor=false&amp;key=${googlemap}" />
+	</target>
+	
 	<!-- copy the tupelo jar files -->
 	<target name="tupeloidsa" description="Copy the latest tupelo jar on hudson">
 		<delete  dir="war/WEB-INF/lib" includes="**/tupelo*.jar"/>
@@ -232,8 +237,6 @@
 				<include name="server.properties" />
 			</fileset>
 		</copy>
-		<copy tofile="war/WEB-INF/classes/context.xml" file="src/context_mmdbdev_hfc.xml" />
-		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" />
 	</target>
 
 	<target name="deploy" depends="war" description="deploys the war file to Tomcat">
