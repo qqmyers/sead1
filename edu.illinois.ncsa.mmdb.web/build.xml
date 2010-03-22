@@ -32,7 +32,7 @@
 	<target name="clean" description="deletes all generated files">
 		<delete dir="war/mmdb" />
 		<delete dir="war/WEB-INF/classes" />
-		<delete dir="build" />
+		<delete dir="${war}" />
 	</target>
 
 	<target name="hudson" depends="clean, tupeloidsa, cetbean, prepare-hudson, mmdb-dev, war, checkstyle" />
@@ -240,10 +240,10 @@
 	</target>
 
 	<target name="deploy" depends="war" description="deploys the war file to Tomcat">
-		<copy file="build/${war}" todir="${deploy}" />
+		<copy file="${war}" todir="${deploy}" />
 	</target>
 
 	<target name="war" depends="clean, compile, gwtc, resources" description="builds the war file">
-		<zip destfile="build/${war}" basedir="war" />
+		<zip destfile="${war}" basedir="war" />
 	</target>
 </project>
