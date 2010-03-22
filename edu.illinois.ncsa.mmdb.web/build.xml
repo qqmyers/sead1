@@ -35,7 +35,7 @@
 		<delete dir="build" />
 	</target>
 
-	<target name="hudson" depends="tupeloidsa, cetbean, prepare-hudson, mmdb-dev, war, checkstyle" />
+	<target name="hudson" depends="clean, tupeloidsa, cetbean, prepare-hudson, mmdb-dev, war, checkstyle" />
 
 	<target name="prepare-hudson" depends="resources, copy_mmdb_html" description="setup for hudson build and deployment">
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
