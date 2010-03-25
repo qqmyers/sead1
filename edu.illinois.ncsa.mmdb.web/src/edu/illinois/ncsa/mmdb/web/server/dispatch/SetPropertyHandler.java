@@ -47,6 +47,8 @@ public class SetPropertyHandler implements ActionHandler<SetProperty, SetPropert
 				x.printStackTrace();
 			}
 			
+			TupeloStore.getInstance().changed(subject.getString());
+			
 			return new SetPropertyResult();
 		} catch(Exception x) {
 			log.error("Error setting metadata on " + arg0.getUri(), x);

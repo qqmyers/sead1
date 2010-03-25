@@ -35,6 +35,9 @@ public class RemoveFromCollectionHandler implements ActionHandler<RemoveFromColl
 		try {
 			CollectionBean collectionBean = cbu.get(action.getCollectionUri());
 			cbu.removeFromCollection(collectionBean, resources);
+			for(Resource r : resources) {
+				TupeloStore.getInstance().changed(r.getString());
+			}
 		} catch (OperatorException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

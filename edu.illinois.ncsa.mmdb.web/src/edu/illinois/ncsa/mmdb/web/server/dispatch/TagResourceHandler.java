@@ -52,7 +52,7 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
 						log.error("failed to delete tag "+tag);
 					}
 				}
-				TupeloStore.refetch(uri);
+				TupeloStore.getInstance().changed(uri);
 				log.debug("removing tags "+tags+" from "+uri);
 			} else {
 				Set<String> normalizedTags = new HashSet<String>();
@@ -70,6 +70,7 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
 					}
 				}
 				log.debug("Tagged " + uri + " with tags " + normalizedTags);
+				TupeloStore.getInstance().changed(uri);
 				return new TagResourceResult(normalizedTags);
 			}
 		} catch (OperatorException e) {

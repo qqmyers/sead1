@@ -33,6 +33,7 @@ public class DeleteAnnotationHandler implements
 			AnnotationBeanUtil abu = new AnnotationBeanUtil(null);
 			Resource ap = abu.getAssociationPredicate();
 			TupeloStore.getInstance().getContext().removeTriple(Resource.uriRef(thingUri), ap, Resource.uriRef(annotationUri));
+			TupeloStore.getInstance().changed(thingUri);
 			return new DeleteAnnotationResult(true);
 		} catch (OperatorException e) {
 			log.error("Error deleting annotation "+annotationUri+" from "+thingUri);

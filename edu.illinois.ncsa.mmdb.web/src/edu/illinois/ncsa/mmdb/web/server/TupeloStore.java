@@ -156,11 +156,15 @@ public class TupeloStore {
 		// FIXME do less often
 		timer.schedule(new TimerTask() {
 			public void run() {
-				if(getSearch() != null) {
-					fullTextIndexAll();
-				}
+				indexFullTextAll();
 			}
 		}, 10 * 1000, 60 * 60 * 1000);
+		
+		timer.schedule(new TimerTask() {
+			public void run() {
+				consumeFullTextIndexQueue();
+			}
+		}, 20 * 1000, 10 * 1000);
 	}
  
 	/**
@@ -635,6 +639,42 @@ public class TupeloStore {
     	return history;
     }
     
+    // full-text 
+
+    /**
+     * Call this when you've added something; e.g., a dataset or a collection.
+     * This notifies the store that cached information (e.g., full-text indexing)
+     * needs to be computed
+     * @param uri the uri of the added thing
+     */
+    public void created(String uri) {
+    }
+    
+    /**
+     * Call this when you've changed something; e.g., a dataset or a collection.
+     * This notifies the store that cached information (e.g., full-text indexing)
+     * needs to be recomputed.
+     * @param uri the uri of the changed thing
+     */
+    public void changed(String uri) {
+    	try {
+			refetch(uri);
+		} catch (OperatorException e) {
+			// ignore, this may not be refetchable
+		}
+    	indexFullText(uri);
+    }
+    
+    /**
+     * Call this when you've deleted something; e.g., a dataset or a collection.
+     * This notifies the store that cached information (e.g., full-text indexing)
+     * needs to be recomputed.
+     * @param uri the uri of the deleted thing
+     */
+    public void deleted(String uri) {
+    	deindexFullText(uri);
+    }
+    
     SearchableTextIndex<String> search = null;
     public SearchableTextIndex<String> getSearch() {
     	return search;
@@ -643,12 +683,46 @@ public class TupeloStore {
     	search = s;
     }
 
-    // index all datasets in the full-text index
-    // FIXME should do collections, too
-    private void fullTextIndexAll() {
+    List<String> indexQueue = new LinkedList<String>();
+    List<String> deindexQueue = new LinkedList<String>();
+    
+    /**
+     * Queue a dataset for full-text (re)indexing
+     * @param datasetUri
+     */
+    public void indexFullText(String datasetUri) {
+    	synchronized(indexQueue) {
+    		synchronized(deindexQueue) {
+    			if(!indexQueue.contains(datasetUri)) {
+    				indexQueue.add(0,datasetUri);
+    			}
+    			if(deindexQueue.contains(datasetUri)) {
+    				deindexQueue.remove(datasetUri);
+    			}
+    		}
+    	}
+    }
+    
+    /**
+     * Queue a dataset for full-text deindexing
+     * @param datasetUri
+     */
+    public void deindexFullText(String datasetUri) {
+    	synchronized(deindexQueue) {
+    		synchronized(indexQueue) {
+    			if(!deindexQueue.contains(datasetUri)) {
+    				deindexQueue.add(0,datasetUri);
+    			}
+    			if(indexQueue.contains(datasetUri)) {
+    				indexQueue.remove(datasetUri);
+    			}
+    		}
+    	}
+    }
+    
+    public int indexFullTextAll() {
     	int i = 0;
     	int batchSize = 100;
-    	log.info("starting full-text index sweep @ "+new Date());
     	while(true) {
     		Unifier u = new Unifier();
     		u.setColumnNames("d","replaced");
@@ -665,16 +739,15 @@ public class TupeloStore {
     				String d = row.get(0).getString();
     				Resource r = row.get(1);
     				if(Rdf.NIL.equals(r)) { // deleted
-    					getSearch().deindex(d);
+    					deindexFullText(d);
     				} else {
-    					getSearch().reindex(d);
+    					indexFullText(d);
     				}
     				n++;
     			}
-    			log.info("full-text indexed "+n+" dataset(s)");
     			if(n < batchSize) {
-    				log.info("completed full-text indexing sweep @ "+new Date());
-    				return;
+    				log.info("queued "+(i+n)+" datasets for full-text reindexing @ "+new Date());
+    				return i+n;
     			}
     		} catch(OperatorException x) {
     			x.printStackTrace();
@@ -682,6 +755,39 @@ public class TupeloStore {
     		}
     		//
     		i += batchSize;
+    	}
+    }
+
+    // consume ft index queue
+    public synchronized void consumeFullTextIndexQueue() {
+    	boolean logged = false;
+    	if(getSearch() != null) {
+    		synchronized(deindexQueue) {
+    			if(deindexQueue.size()>0) {
+    				if(!logged) {
+    		    		log.info("starting full-text reindexing @ "+new Date());
+    		    		logged = true;
+    				}
+    				log.info("deindexing "+deindexQueue.size()+" deleted dataset(s) @ "+new Date());
+    				getSearch().deindex(deindexQueue);
+    				log.info("deindexed "+deindexQueue.size()+" deleted dataset(s) @ "+new Date());
+    				deindexQueue.clear();
+    			}
+    		}
+    		synchronized(indexQueue) {
+    			if(indexQueue.size()>0) {
+    				if(!logged) {
+    		    		log.info("starting full-text reindexing @ "+new Date());
+    		    		logged = true;
+    				}
+    				log.info("indexing "+indexQueue.size()+" dataset(s) @ "+new Date());
+    				for(String datasetUri : indexQueue) {
+    					getSearch().reindex(datasetUri);
+    				}
+    				log.info("indexed "+indexQueue.size()+" dataset(s) @ "+new Date());
+    				indexQueue.clear();
+    			}
+    		}
     	}
     }
 }

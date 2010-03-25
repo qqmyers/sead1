@@ -6,7 +6,10 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -21,6 +24,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLuceneResult;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
@@ -124,7 +129,26 @@ public class HomePage extends Page {
 		Hyperlink sparqlLink = new Hyperlink("Run SPARQL Query", "sparql");
 		adminPanel.add(sparqlLink);
 		adminPanel.add(new Label("Update Context"));
-		adminPanel.add(new Label("Reindex Lucene"));
+		final Anchor luceneAnchor = new Anchor("Reindex Lucene");
+		luceneAnchor.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				luceneAnchor.setEnabled(false);
+				luceneAnchor.setText("Requesting...");
+				dispatchAsync.execute(new ReindexLucene(), new AsyncCallback<ReindexLuceneResult>() {
+					public void onFailure(Throwable caught) {
+						new ConfirmDialog("Error","Error reindexing");
+						luceneAnchor.setText("Reindex Lucene");
+						luceneAnchor.setEnabled(true);
+					}
+					public void onSuccess(ReindexLuceneResult result) {
+						new ConfirmDialog("Started","Queued "+result.getNumberQueued()+" dataset(s) for reindexing");
+						luceneAnchor.setText("Reindex Lucene");
+						luceneAnchor.setEnabled(true);
+					}
+				});
+			}
+		});
+		adminPanel.add(luceneAnchor);
 		tabPanel.add(adminPanel, "Administrator");
 	}
 

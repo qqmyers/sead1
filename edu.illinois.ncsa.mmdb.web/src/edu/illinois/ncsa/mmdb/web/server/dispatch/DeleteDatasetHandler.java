@@ -35,6 +35,7 @@ public class DeleteDatasetHandler implements
 		try {
 			TupeloStore.getInstance().getContext().addTriple(
 					Resource.uriRef(datasetUri), DcTerms.IS_REPLACED_BY, Rdf.NIL);
+			TupeloStore.getInstance().deleted(datasetUri);
 			log.debug("Dataset deleted" + datasetUri);
 			return new DeleteDatasetResult(true);
 		} catch (OperatorException e) {

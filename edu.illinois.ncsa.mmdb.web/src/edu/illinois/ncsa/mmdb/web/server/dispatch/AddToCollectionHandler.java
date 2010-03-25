@@ -47,6 +47,7 @@ public class AddToCollectionHandler implements ActionHandler<AddToCollection, Ad
 		
 		for(String uri : resourcesString) {
 			resources.add(Resource.uriRef(uri));
+			TupeloStore.getInstance().changed(uri);
 		}
 		
 		try {

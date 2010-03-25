@@ -73,6 +73,7 @@ public class AnnotateResourceHandler implements
 			beanSession.register(annotation);
 			beanSession.save(annotation);
 			abu.addAssociationTo(resource, annotation);
+			TupeloStore.getInstance().changed(resource);
 		} catch (OperatorException e2) {
 			log.error("Error saving and associating an annotation bean", e2);
 		} catch (Exception e) {
