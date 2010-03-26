@@ -8,7 +8,6 @@ import java.util.TreeSet;
 
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
-import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdfs;
 
@@ -20,6 +19,8 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.AnnotationBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
@@ -47,21 +48,52 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 			x.printStackTrace();
 			return "";
 		}
-		System.out.println(text); // FIXME debug
 		return text;
 	}
 	
 	String text(String uri) throws OperatorException {
-		return unsplit(title(uri), tags(uri), annotations(uri), collections(uri));
+		return unsplit(title(uri), tags(uri), authors(uri), annotations(uri), collections(uri));
 	}
 
 	String text(CETBean bean) {
-		Resource uri = Resource.uriRef(bean.getUri());
-		return unsplit(title(bean), tags(uri), annotations(uri), collections(uri));
+		return unsplit(title(bean), tags(bean), authors(bean), annotations(bean), collections(bean));
 	}
 	
-	String tags(Resource uri) {
-		return tags(uri.getString());
+	String authors(DatasetBean bean) {
+		List<PersonBean> contributors = new LinkedList<PersonBean>();
+		contributors.add(bean.getCreator());
+		contributors.addAll(bean.getContributors());
+		List<String> names = new LinkedList<String>();
+		for(PersonBean person : contributors) {
+			if(person != null) {
+				String name = person.getName();
+				if(name != null) {
+					names.add(name);
+				}
+				String email = person.getEmail();
+				if(email != null) {
+					names.add(email);
+					names.add(atomize(email));
+				}
+			}
+		}
+		return unsplit(names);
+	}
+
+	String authors(CETBean bean) {
+		if(bean instanceof DatasetBean) {
+			return authors((DatasetBean)bean);
+		} else {
+			return authors(bean.getUri());
+		}
+	}
+	
+	String authors(String uri) {
+		return "";
+	}
+	
+	String tags(CETBean bean) {
+		return tags(bean.getUri());
 	}
 	
 	String tags(String uri) {
@@ -76,8 +108,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		}
 	}
 	
-	String annotations(Resource uri) {
-		return annotations(uri.getString());
+	String annotations(CETBean bean) {
+		return annotations(bean.getUri());
 	}
 	
 	String annotations(String uri) {
@@ -95,8 +127,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		return unsplit(annotations);
 	}
 
-	String collections(Resource uri) {
-		return collections(uri.getString());
+	String collections(CETBean bean) {
+		return collections(bean.getUri());
 	}
 	
 	String collections(String uri) {
@@ -108,8 +140,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		return unsplit(names);
 	}
 	
-	// split a title into words on non-whitespace boundaries
-	static String expandTitle(String title) {
+	// split a string into words on non-whitespace boundaries
+	static String atomize(String title) {
 		String e = title.replaceAll("([a-z])([A-Z])","$1 $2");
 		e = e.replaceAll("([-_\\[\\]\\.])"," $1 ");
 		e = e.replaceAll("([0-9]+)"," $1 ");
@@ -134,14 +166,14 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 	*/
 	
 	String title(CETBean bean) {
-		return expandTitle(bean.getLabel());
+		return atomize(bean.getLabel());
 	}
 	
 	String title(String uri) throws OperatorException {
 		Thing thing = TupeloStore.fetchThing(uri);
 		String dcTitle = thing.getString(Dc.TITLE);
 		String rdfsLabel = thing.getString(Rdfs.LABEL);
-		return expandTitle((dcTitle != null ? dcTitle : "") + (rdfsLabel != null ? " " + rdfsLabel : ""));
+		return atomize((dcTitle != null ? dcTitle : "") + (rdfsLabel != null ? " " + rdfsLabel : ""));
 	}
 
 	// why am I writing this.
