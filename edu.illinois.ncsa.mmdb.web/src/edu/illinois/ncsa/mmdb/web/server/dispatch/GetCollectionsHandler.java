@@ -47,7 +47,7 @@ public class GetCollectionsHandler implements
 	private static Log log = LogFactory.getLog(GetCollectionsHandler.class);
 
 	static Memoized<Integer> collectionCount;
-	int getCollectionCount() {
+	static int getCollectionCount() {
 		if(collectionCount == null) {
 			collectionCount = new Memoized<Integer>() {
 				public Integer computeValue() {
@@ -75,9 +75,7 @@ public class GetCollectionsHandler implements
 		return collectionCount.getValue();
 	}
 	
-	@Override
-	public GetCollectionsResult execute(GetCollections query,
-			ExecutionContext arg1) throws ActionException {
+	public static GetCollectionsResult getCollections(GetCollections query) {
 		
 		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 		
@@ -151,6 +149,12 @@ public class GetCollectionsHandler implements
 		return result; 
 	}
 	
+	@Override
+	public GetCollectionsResult execute(GetCollections query,
+			ExecutionContext arg1) throws ActionException {
+		return getCollections(query);
+	}
+	
 	/**
 	 * 
 	 * @param query
@@ -158,7 +162,7 @@ public class GetCollectionsHandler implements
 	 * @param offset
 	 * @return
 	 */
-	private Unifier createUnifier(GetCollections query, int limit, int offset) {
+	private static Unifier createUnifier(GetCollections query, int limit, int offset) {
 		Unifier uf = new Unifier();
 		uf.addPattern("collection", Rdf.TYPE,
 				CollectionBeanUtil.COLLECTION_TYPE);

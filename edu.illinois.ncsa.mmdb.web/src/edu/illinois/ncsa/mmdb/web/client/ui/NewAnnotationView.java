@@ -28,7 +28,7 @@ public class NewAnnotationView extends Composite {
 
 	private FlexTable mainTable = new FlexTable();
 
-	private TextBox titleTextBox;
+	private TextBox titleTextBox = new TextBox();
 
 	private TextArea descriptionTextArea;
 
