@@ -417,7 +417,7 @@ public class DatasetWidget extends Composite {
                 label = "Zoom";
                 
             } else if (pb instanceof PreviewVideoBean) {
-                label = "Play Video";
+                label = "Video";
 
             } else {
                 GWT.log("Unknown preview bean " + pb);
@@ -547,7 +547,6 @@ public class DatasetWidget extends Composite {
 
             } else if (pb instanceof PreviewVideoBean) {
                 Label container = new Label();
-                container.addStyleName( "seadragon" );
                 container.getElement().setId( "preview" );
                 previewPanel.add( container );
             }
@@ -596,6 +595,7 @@ public class DatasetWidget extends Composite {
             $wnd.player.addParam('allowscriptaccess','always');
             $wnd.player.addParam('wmode','opaque');
             $wnd.player.addVariable('file',url);
+            $wnd.player.addVariable('autostart','true');            
 //            $wnd.player.addVariable('author','Joe');
 //            $wnd.player.addVariable('description','Bob');
 //            $wnd.player.addVariable('image','http://content.longtailvideo.com/videos/image.jpg');
@@ -603,7 +603,6 @@ public class DatasetWidget extends Composite {
 //            $wnd.player.addVariable('debug','console');
             $wnd.player.addVariable('provider',type);
             $wnd.player.write('preview');
-            alert(url);
         }
     }-*/;
         
