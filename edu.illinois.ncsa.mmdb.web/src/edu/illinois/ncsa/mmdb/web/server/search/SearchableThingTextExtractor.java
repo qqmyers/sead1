@@ -88,7 +88,15 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		}
 	}
 	
+	// aaagh, unsafe casts
 	String authors(String uri) {
+		try {
+			Object bean = TupeloStore.fetchBean(uri);
+			if(bean instanceof CETBean) {
+				return authors((CETBean)bean);
+			}
+		} catch(Exception x) {
+		}
 		return "";
 	}
 	
