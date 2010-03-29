@@ -3,10 +3,14 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -31,6 +35,7 @@ public class UploadPage extends Page {
 	private UploadWidget uploadWidget;
 	private boolean dndEnabled;
 	private FlexTable tableLayout;
+	private static VerticalPanel appletStatusPanel;
 
 	public UploadPage() {
 		super();
@@ -109,6 +114,56 @@ public class UploadPage extends Page {
 				}
 			});
 		}
+		
+		// call applet method
+		Anchor callMethodOnApplet = new Anchor("Poke applet");
+		callMethodOnApplet.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				doSomethingWithApplet(DOM.getElementById("dragdropApplet"), "foo");
+			}
+		});
+		tableLayout.setWidget(2, 0, callMethodOnApplet);
+		
+		// applet status
+		appletStatusPanel = new VerticalPanel();
+		tableLayout.setWidget(2, 1, appletStatusPanel);
+		
+		// publish js methods outside of gwt code
+		publishMethods();
+	}
+	
+	/**
+	 * Dummy method to show how to call a method in the applet.
+	 * 
+	 * @param applet
+	 * @param parameter
+	 */
+	public static native void doSomethingWithApplet(Element applet, String param) /*-{
+		if ((applet != null) && (applet.isActive)) {
+			applet.poke();
+		} else {
+			$wnd.alert("Couldn't find applet " + applet);
+		}
+		
+	}-*/;
+	
+	/**
+	 * Publish local methods as page level js methods so that the applet can call them.
+	 */
+	private native void publishMethods() /*-{
+   		$wnd.dndAppletPoke = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::appletPoke();
+	}-*/;
+	
+	/**
+	 * Called by the applet.
+	 * 
+	 * @param param
+	 */
+	public static void appletPoke() {
+		GWT.log("Applet poked the page");
+		appletStatusPanel.add(new Label("Applet poked the page"));
 	}
 	
 	/**
@@ -117,8 +172,10 @@ public class UploadPage extends Page {
 	 */
 	private native void deployDndApplet(String credentials) /*-{
 		var attributes = {
+			id:'dragdropApplet',
+			MAYSCRIPT:'true',
 		code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-		archive:'dnd/DropUploader-490.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+		archive:'dnd/DropUploader.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
 		width:60,
 		height:60
 		};
