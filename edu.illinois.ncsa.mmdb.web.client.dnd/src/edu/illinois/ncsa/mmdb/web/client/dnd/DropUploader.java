@@ -3,7 +3,6 @@ package edu.illinois.ncsa.mmdb.web.client.dnd;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -32,6 +31,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
+import netscape.javascript.JSObject;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
@@ -51,6 +52,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	private ProgressPie progressPie;
 	private static final long serialVersionUID = 9000;
 	
+	@Override
 	public void init() {
 		try {
 			duInit();
@@ -114,6 +116,9 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		getContentPane().add(mainCards, BorderLayout.CENTER);
 
 		setVisible(true);
+		
+		// MMDB-576 applet to javascript communication
+//		callJavascript("Applet started");
 	}
 
 	public void dragEnter(DropTargetDragEvent dtde) {
@@ -306,6 +311,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	class FakeProgressThread extends Thread {
 		int fakeProgress = 0;
 		boolean stop = false;
+		@Override
 		public void run() {
 			try {
 				while(!stop) {
@@ -327,6 +333,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 
 	class ProgressThread extends Thread {
 		boolean stop = false;
+		@Override
 		public void run() {
 			try {
 				while(!stop) {
@@ -351,6 +358,38 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		if(progressPie != null) {
 			progressPie.repaint();
 		}
+	}
+	
+	/**
+	 * Simple function called from javascript for testing. 
+	 */
+	public void poke() {
+		mainCards.add(new JLabel("Poke!"), "poke");
+		((CardLayout)mainCards.getLayout()).show(mainCards, "poke");
+		repaint();
+		(new Thread() {
+			@Override
+			public void run() {
+				try {
+					sleep(2500);
+				} catch(InterruptedException x) {
+				} finally {
+					log("poking applet");
+					showCard("drop");
+				}
+			}
+		}).start();
+	}
+	
+	/**
+	 * Test function calling function in javascript.
+	 * 
+	 * @param msg
+	 */
+	public void callJavascript(String msg) {
+		poke();
+		JSObject window = JSObject.getWindow(this);
+		window.call("dndAppletPoke", null);
 	}
 	
 	void showCard(String name) {
@@ -389,6 +428,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		showCard("error");
 		log("sleeping");
 		(new Thread() {
+			@Override
 			public void run() {
 				try {
 					sleep(2500);
@@ -470,6 +510,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			Thread.sleep(2);
 			return sessionKey;
 		}
+		@Override
 		public void run() {
 			client = new HttpClient();
 			try {
