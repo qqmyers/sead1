@@ -19,13 +19,10 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
-import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
-import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.bard.jaas.PasswordDigest;
 import edu.illinois.ncsa.cet.search.IdGetter;
@@ -36,8 +33,6 @@ import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.PreviewPyramidBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 
@@ -119,9 +114,6 @@ public class ContextSetupListener implements ServletContextListener
         // initialize system
         createAccounts( props );
         createUserFields( props );
-        
-        // FIXME MMDB-514 update context
-//        updateContext();
     }
 
     private void setUpSearch(String indexFile) {
@@ -148,69 +140,6 @@ public class ContextSetupListener implements ServletContextListener
         }
     }
     
-    // FIXME MMDB-514 update context
-    private void updateContext()
-    {
-        Resource image = Resource.literal( "edu.illinois.ncsa.mmdb.extractor.image.ImageExtractor" ); //$NON-NLS-1$
-        Context c = TupeloStore.getInstance().getContext();
-        TripleWriter tw = new TripleWriter();
-
-        // replace HAS_PYRAMID with HAS_PREVIEW
-        TripleMatcher tm = new TripleMatcher();
-        tm.setPredicate( PreviewPyramidBeanUtil.HAS_PYRAMID );
-        try {
-            c.perform( tm );
-        } catch ( OperatorException exc ) {
-            log.warn( "Could not get wrong pyramid preview predicates.", exc );
-        }
-        for ( Triple t : tm.getResult() ) {
-            tw.remove( t );
-            tw.add( t.getSubject(), PreviewBeanUtil.HAS_PREVIEW, t.getObject() );
-        }
-
-        // Make sure every piece of metadata has executor, if none add it to image
-        Unifier uf = new Unifier();
-        uf.addPattern( "predicate", Rdf.TYPE, MMDB.METADATA_TYPE ); //$NON-NLS-1$
-        uf.addPattern( "predicate", MMDB.METADATA_EXTRACTOR, "extractor", true ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.setColumnNames( "predicate", "extractor" ); //$NON-NLS-1$ //$NON-NLS-2$
-        try {
-            c.perform( uf );
-        } catch ( OperatorException exc ) {
-            log.warn( "Could not get predicates.", exc );
-        }
-        for ( Tuple<Resource> row : uf.getResult() ) {
-            if ( row.get( 1 ) == null ) {
-                System.out.println(row.get(0));
-                tw.add( row.get( 0 ), MMDB.METADATA_EXTRACTOR, image );
-            }
-        }
-
-
-        // Make sure every preview has executor, if none add it to image
-        uf = new Unifier();
-        uf.addPattern( "dataset", PreviewBeanUtil.HAS_PREVIEW, "preview" ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addPattern( "preview", MMDB.METADATA_EXTRACTOR, "extractor", true ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.setColumnNames( "preview", "extractor" ); //$NON-NLS-1$ //$NON-NLS-2$
-        try {
-            c.perform( uf );
-        } catch ( OperatorException exc ) {
-            log.warn( "Could not get previews.", exc );
-        }
-        for ( Tuple<Resource> row : uf.getResult() ) {
-            if ( row.get( 1 ) == null ) {
-                System.out.println(row.get(0));
-                tw.add( row.get( 0 ), MMDB.METADATA_EXTRACTOR, image );
-            }
-        }
-
-        // update context
-        try {
-            c.perform( tw );
-        } catch ( OperatorException exc ) {
-            log.warn( "Could not update context.", exc );
-        }
-    }
-
     private void createUserFields( Properties props )
     {
         Context context = TupeloStore.getInstance().getContext();
