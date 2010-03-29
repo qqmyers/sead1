@@ -77,13 +77,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			+ "attempting to contact the server. Please check your network "
 			+ "connection and try again.";
 
-	/**
-	 * TODO switch to using the full uri for session id (instead of email
-	 * address)
-	 */
-	public static String sessionID;
-	public static String sessionKey; // shared secret
-
 	public static ArrayList<String> groups;
 
 	/**
@@ -121,6 +114,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	private Label breadcrumb;
 
 	private static Map<String,String> sessionPreferences;
+	
+	private static UserSessionState sessionState;
 	
 	/**
 	 * This is the entry point method.
@@ -347,7 +342,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				final CollectionBean collection = new CollectionBean();
 				collection.setTitle(addCollectionBox.getText());
 
-				dispatchAsync.execute(new AddCollection(collection, MMDB.sessionID),
+				dispatchAsync.execute(new AddCollection(collection, getSessionState().getUsername()),
 						new AsyncCallback<AddCollectionResult>() {
 
 							@Override
@@ -486,6 +481,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 //		toolbar.add(uploadToolbar);
 
+		final String sessionKey = getSessionState().getSessionKey();
 		if (dndEnabled) {
 			dndApplet.removeStyleName("hidden");
 			deployDndApplet(sessionKey);
@@ -530,7 +526,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		if (!uploadMenuVisible && checkLogin()) {
 			
 			// Check if the user has been activated by an administrator
-			dispatchAsync.execute(new HasPermission(MMDB.sessionID,
+			dispatchAsync.execute(new HasPermission(getSessionState().getUsername(),
 					Permission.VIEW_MEMBER_PAGES),
 					new AsyncCallback<HasPermissionResult>() {
 
@@ -608,7 +604,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			showRequestNewPasswordPage();
 		} else if (checkLogin()) {
 			// Check if the user has been activated by an administrator
-			dispatchAsync.execute(new HasPermission(MMDB.sessionID,
+			dispatchAsync.execute(new HasPermission(getSessionState().getUsername(),
 					Permission.VIEW_MEMBER_PAGES),
 					new AsyncCallback<HasPermissionResult>() {
 
@@ -734,7 +730,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	private void showUsersPage() {
 		// Check if the user has view admin pages permission
-		dispatchAsync.execute(new HasPermission(MMDB.sessionID,
+		dispatchAsync.execute(new HasPermission(getSessionState().getUsername(),
 				Permission.VIEW_ADMIN_PAGES),
 				new AsyncCallback<HasPermissionResult>() {
 
@@ -765,7 +761,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	private void showSparqlPage() {
 		// Check if the user has view admin pages permission
-		dispatchAsync.execute(new HasPermission(MMDB.sessionID,
+		dispatchAsync.execute(new HasPermission(getSessionState().getUsername(),
 				Permission.VIEW_ADMIN_PAGES),
 				new AsyncCallback<HasPermissionResult>() {
 
@@ -848,18 +844,23 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	public static final String DATASET_VIEW_TYPE_PREFERENCE = "datasetViewType";
 	public static final String COLLECTION_VIEW_TYPE_PREFERENCE = "collectionViewType";
 	
-	private static void initializeSessionPreferences() {
-		setSessionPreference(DATASET_VIEW_TYPE_PREFERENCE, PagingDcThingView.GRID_VIEW_TYPE);
-		setSessionPreference(COLLECTION_VIEW_TYPE_PREFERENCE, PagingDcThingView.LIST_VIEW_TYPE);
+	// session state
+	public static UserSessionState getSessionState() {
+		if(sessionState == null) {
+			sessionState = new UserSessionState();
+		}
+		return sessionState;
+	}
+	
+	// a common idiom
+	/** Get the currently-logged-in username, if any */
+	public static String getUsername() {
+		return getSessionState().getUsername();
 	}
 	
 	// session preferences
 	private static Map<String,String> getSessionPreferences() {
-		if(sessionPreferences == null) {
-			sessionPreferences = new HashMap<String,String>();
-			initializeSessionPreferences();
-		}
-		return sessionPreferences;
+		return getSessionState().getPreferences();
 	}
 	
 	public static String getSessionPreference(String key, String defaultValue) {

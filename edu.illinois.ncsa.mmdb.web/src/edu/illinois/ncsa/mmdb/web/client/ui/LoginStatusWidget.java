@@ -60,7 +60,7 @@ public class LoginStatusWidget extends Composite {
 			}
 		});
 		
-		if (MMDB.sessionID == null) {
+		if (MMDB.getUsername() == null) {
 			mainPanel.add(loginAnchor);
 		} else {
 			mainPanel.add(logoutAnchor);

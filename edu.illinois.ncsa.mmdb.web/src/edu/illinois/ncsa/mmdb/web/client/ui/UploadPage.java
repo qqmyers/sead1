@@ -87,11 +87,11 @@ public class UploadPage extends Page {
 
 		if (dndEnabled) {
 			dndApplet.removeStyleName("hidden");
-			deployDndApplet(MMDB.sessionKey);
+			deployDndApplet(MMDB.getSessionState().getSessionKey());
 		} else {
 			dndTooltip.addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
-					if(MMDB.sessionKey == null) {
+					if(MMDB.getSessionState().getUsername() == null) {
 						Window.confirm("Upload not permitted. Please log in");
 					} else {
 						boolean doit = true;
@@ -101,7 +101,7 @@ public class UploadPage extends Page {
 						}
 						if (doit) {
 							dndApplet.removeStyleName("hidden");
-							deployDndApplet(MMDB.sessionKey);
+							deployDndApplet(MMDB.getSessionState().getUsername());
 							dndTooltip.setText(enabledMsg);
 							dndEnabled = true;
 						}

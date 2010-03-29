@@ -96,7 +96,7 @@ public class ListCollectionsPage extends Composite {
 		CollectionBean collection = new CollectionBean();
 		collection.setTitle(text);
 
-		dispatchasync.execute(new AddCollection(collection, MMDB.sessionID),
+		dispatchasync.execute(new AddCollection(collection, MMDB.getUsername()),
 				new AsyncCallback<AddCollectionResult>() {
 
 					@Override

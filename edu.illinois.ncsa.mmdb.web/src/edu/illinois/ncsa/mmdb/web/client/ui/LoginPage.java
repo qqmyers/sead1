@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Authenticate;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthenticateResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -254,9 +255,10 @@ public class LoginPage extends Composite {
 	 * 
 	 */
 	public static void login(String sessionId, String sessionKey) {
-		MMDB.sessionID = sessionId;
-		MMDB.sessionKey = sessionKey;
-		MMDB.loginStatusWidget.login(MMDB.sessionID);
+		UserSessionState state = MMDB.getSessionState();
+		state.setUsername(sessionId);
+		state.setSessionKey(sessionKey);
+		MMDB.loginStatusWidget.login(sessionId);
 
 		// set cookie
 		// TODO move to more prominent place... MMDB? A class with static properties?
@@ -293,11 +295,12 @@ public class LoginPage extends Composite {
 	 * Set sessionID to null, remove cookie, and log out of REST servlets
 	 */
 	public static void logout() {
-		if(MMDB.sessionID != null) {
-			GWT.log("user "+MMDB.sessionID+" logging out", null);
+		UserSessionState state = MMDB.getSessionState();
+		if(state.getUsername() != null) {
+			GWT.log("user "+state.getUsername()+" logging out", null);
 		}
-		MMDB.sessionID = null;
-		MMDB.sessionKey = null;
+		state.setUsername(null);
+		state.setSessionKey(null);
 		clearBrowserCreds();
 		Cookies.removeCookie("sid");
 		Cookies.removeCookie("sessionKey");

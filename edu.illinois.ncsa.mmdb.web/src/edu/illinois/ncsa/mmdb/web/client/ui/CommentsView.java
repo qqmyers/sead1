@@ -88,7 +88,7 @@ public class CommentsView extends Composite {
 			public void onClick(ClickEvent arg0) {
 
 				service.execute(new AnnotateResource(resource,
-						newAnnotationView.getAnnotationBean(), MMDB.sessionID),
+						newAnnotationView.getAnnotationBean(), MMDB.getUsername()),
 						new AsyncCallback<AnnotateResourceResult>() {
 
 							@Override

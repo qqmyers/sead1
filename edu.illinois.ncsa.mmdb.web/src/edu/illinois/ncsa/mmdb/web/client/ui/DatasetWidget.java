@@ -358,7 +358,7 @@ public class DatasetWidget extends Composite {
 		});
 		actionsPanel.add(deleteAnchor);
 		
-        service.execute( new HasPermission( MMDB.sessionID, Permission.VIEW_ADMIN_PAGES ), new AsyncCallback<HasPermissionResult>() {
+        service.execute( new HasPermission( MMDB.getUsername(), Permission.VIEW_ADMIN_PAGES ), new AsyncCallback<HasPermissionResult>() {
             @Override
             public void onFailure( Throwable caught )
             {

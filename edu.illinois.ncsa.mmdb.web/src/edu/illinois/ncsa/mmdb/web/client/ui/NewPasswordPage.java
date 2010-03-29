@@ -148,7 +148,7 @@ public class NewPasswordPage extends Page {
 		
 		if (checkForm()) {
 
-			dispatchAsync.execute(new Authenticate(MMDB.sessionID,
+			dispatchAsync.execute(new Authenticate(MMDB.getUsername(),
 					currentPasswordBox.getText()),
 					new AsyncCallback<AuthenticateResult>() {
 
@@ -174,7 +174,7 @@ public class NewPasswordPage extends Page {
 	 */
 	private void doUpdatePassword() {
 
-		dispatchAsync.execute(new NewPassword(MMDB.sessionID, passwordBox
+		dispatchAsync.execute(new NewPassword(MMDB.getUsername(), passwordBox
 				.getText()), new AsyncCallback<EmptyResult>() {
 
 			@Override

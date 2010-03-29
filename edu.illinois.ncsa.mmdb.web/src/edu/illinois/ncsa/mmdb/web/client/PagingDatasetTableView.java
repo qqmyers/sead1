@@ -155,6 +155,6 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
 
 	@Override
 	protected String getViewTypePreference() {
-		return "datasetViewType";
+		return MMDB.DATASET_VIEW_TYPE_PREFERENCE;
 	}
 }

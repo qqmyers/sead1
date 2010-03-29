@@ -217,6 +217,6 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 
 	@Override
 	public String getViewTypePreference() {
-		return "collectionViewType";
+		return MMDB.COLLECTION_VIEW_TYPE_PREFERENCE;
 	}
 }

@@ -101,7 +101,7 @@ public class HomePage extends Page {
 	 * Check if the user has admin permissions. If so show a tab with admin-level functions.
 	 */
 	private void checkAdminPermissions() {
-		dispatchAsync.execute(new HasPermission(MMDB.sessionID,
+		dispatchAsync.execute(new HasPermission(MMDB.getUsername(),
 				Permission.VIEW_ADMIN_PAGES),
 				new AsyncCallback<HasPermissionResult>() {
 
@@ -156,7 +156,7 @@ public class HomePage extends Page {
 	 * Get basic user info and add it to the profile tab.
 	 */
 	private void getUserInfo() {
-		dispatchAsync.execute(new GetUser(MMDB.sessionID),
+		dispatchAsync.execute(new GetUser(MMDB.getUsername()),
 				new AsyncCallback<GetUserResult>() {
 
 					@Override
