@@ -3,12 +3,10 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
@@ -45,7 +43,7 @@ public class GetAllTagsHandler implements ActionHandler<GetAllTags, GetTagsResul
 		
 		TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
 		
-		List<String> tags = new ArrayList<String>();
+		LinkedHashMap<String, Integer> tags = new LinkedHashMap<String, Integer>();
 
 		Collection<TagEventBean> allTags = new HashSet<TagEventBean>();
 		
@@ -65,14 +63,14 @@ public class GetAllTagsHandler implements ActionHandler<GetAllTags, GetTagsResul
 			while (iterator2.hasNext()) {
 				TagBean next2 = iterator2.next();
 				String tagString = next2.getTagString();
-				if (!tags.contains(tagString)) {
-					tags.add(tagString);
+				if (tags.keySet().contains(tagString)) {
+					Integer newValue = tags.get(tagString) + 1;
+					tags.put(tagString, newValue);
+				} else {
+					tags.put(tagString, 1);
 				}
 			}
 		}
-		
-		// sort
-		Collections.sort(tags);
 
 		return new GetTagsResult(tags);
 	}

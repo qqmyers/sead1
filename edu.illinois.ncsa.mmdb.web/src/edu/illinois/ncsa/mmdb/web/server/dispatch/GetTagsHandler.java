@@ -3,8 +3,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -40,10 +40,13 @@ public class GetTagsHandler implements ActionHandler<GetTags, GetTagsResult>{
 		
 		TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
 		
-		List<String> tags = new ArrayList<String>();
+		LinkedHashMap<String, Integer> tags = new LinkedHashMap<String, Integer>();
 
 		try {
-			tags = new ArrayList<String>(tebu.getTags(Resource.uriRef(arg0.getUri())));
+			Set<String> tagsSet = tebu.getTags(Resource.uriRef(arg0.getUri()));
+			for (String tag : tagsSet) {
+				tags.put(tag, 1);
+			}
 		} catch (OperatorException e) {
 			log.error("Error getting tags for " + arg0.getUri(), e);
 		}

@@ -152,7 +152,7 @@ public class TagsWidget extends Composite {
 
 			@Override
 			public void onSuccess(GetTagsResult result) {
-				for (final String tag : result.getTags()) {
+				for (final String tag : result.getTags().keySet()) {
 					addTag(tag);
 				}
 			}
