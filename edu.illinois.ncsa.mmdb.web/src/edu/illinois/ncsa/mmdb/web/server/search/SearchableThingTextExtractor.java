@@ -8,6 +8,7 @@ import java.util.TreeSet;
 
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
+import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdfs;
 
@@ -25,7 +26,10 @@ import edu.uiuc.ncsa.cet.bean.tupelo.AnnotationBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 public class SearchableThingTextExtractor implements TextExtractor<String> {
-
+	Object fetchBean(String uri) throws OperatorException {
+		return TupeloStore.getInstance().getContext().getBeanSession().fetchBean(Resource.uriRef(uri));
+	}
+	
 	@Override
 	/**
 	 * Extract a text representation of an mmdb thing (e.g., a dataset or collection)
@@ -35,8 +39,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		assert uri != null;
 		String text = "";
 		try {
-			TupeloStore.refetch(uri);
-			Object bean = TupeloStore.fetchBean(uri);
+			Object bean = fetchBean(uri);
 			if(bean instanceof CETBean) {
 				text = text((CETBean)bean);
 			}
@@ -91,7 +94,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 	// aaagh, unsafe casts
 	String authors(String uri) {
 		try {
-			Object bean = TupeloStore.fetchBean(uri);
+			Object bean = fetchBean(uri);
 			if(bean instanceof CETBean) {
 				return authors((CETBean)bean);
 			}
