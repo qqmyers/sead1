@@ -8,6 +8,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.rdf.Resource;
@@ -31,8 +32,11 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 public class SearchableThingTextExtractor implements TextExtractor<String> {
 	Log log = LogFactory.getLog(SearchableThingTextExtractor.class);
 	
+	BeanSession getBeanSession() throws OperatorException, ClassNotFoundException {
+		return CETBeans.createBeanSession(TupeloStore.getInstance().getContext());
+	}
 	Object fetchBean(String uri) throws OperatorException, ClassNotFoundException {
-		return CETBeans.createBeanSession(TupeloStore.getInstance().getContext()).fetchBean(Resource.uriRef(uri));
+		return getBeanSession().fetchBean(Resource.uriRef(uri));
 	}
 	
 	@Override
@@ -62,11 +66,11 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		return text;
 	}
 	
-	String text(String uri) throws OperatorException {
+	String text(String uri) throws OperatorException, ClassNotFoundException {
 		return unsplit(title(uri), tags(uri), authors(uri), annotations(uri), collections(uri));
 	}
 
-	String text(CETBean bean) {
+	String text(CETBean bean) throws OperatorException, ClassNotFoundException {
 		return unsplit(title(bean), tags(bean), authors(bean), annotations(bean), collections(bean));
 	}
 	
@@ -114,12 +118,12 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		return "";
 	}
 	
-	String tags(CETBean bean) {
+	String tags(CETBean bean) throws OperatorException, ClassNotFoundException {
 		return tags(bean.getUri());
 	}
 	
-	String tags(String uri) {
-		TagEventBeanUtil tebu = new TagEventBeanUtil(TupeloStore.getInstance().getBeanSession());
+	String tags(String uri) throws OperatorException, ClassNotFoundException {
+		TagEventBeanUtil tebu = new TagEventBeanUtil(getBeanSession());
 		TreeSet<String> tags = new TreeSet<String>();
 		try {
 			tags.addAll(tebu.getTags(uri));
@@ -130,12 +134,12 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		}
 	}
 	
-	String annotations(CETBean bean) {
+	String annotations(CETBean bean) throws OperatorException, ClassNotFoundException {
 		return annotations(bean.getUri());
 	}
 	
-	String annotations(String uri) {
-		AnnotationBeanUtil abu = new AnnotationBeanUtil(TupeloStore.getInstance().getBeanSession());
+	String annotations(String uri) throws OperatorException, ClassNotFoundException {
+		AnnotationBeanUtil abu = new AnnotationBeanUtil(getBeanSession());
 		List<String> annotations = new LinkedList<String>();
 		try {
 			for(AnnotationBean annotation : abu.getAssociationsFor(uri)) {
