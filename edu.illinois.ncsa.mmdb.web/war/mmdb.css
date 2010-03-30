@@ -870,13 +870,14 @@ body {
 
 .tagsPanel {
 	width: 800px;
-	margin: 10px auto 10px auto;
+	display: block;
+	margin: 10px auto 30px auto;
     min-height: 500px;
 }
 
 .tagInPanel {
     display:inline-block;
-    float:left;
+    position: relative;
 	margin: 10px;
 	padding: 5px;
 }
