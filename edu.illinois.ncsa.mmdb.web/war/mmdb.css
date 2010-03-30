@@ -665,6 +665,11 @@ body {
 	margin: 10px;
 }
 
+.previewActionLink {
+	font-size: 0.8em;
+	color: #999999;
+}
+	
 .commentsView {
 	height: auto;
 	clear: both;

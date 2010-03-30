@@ -210,8 +210,28 @@ public class DatasetWidget extends Composite {
 	 * @param collection
 	 */
     private void drawPage(final GetDatasetResult result) {
-        // sort the previews and get the large preview
-        List<PreviewBean> previews = new ArrayList<PreviewBean>(result.getPreviews());
+        // find best preview bean, add others
+        // best image preview is that that is closest to width of column
+        int maxwidth = leftColumn.getOffsetWidth();
+        List<PreviewBean> previews = new ArrayList<PreviewBean>();
+        PreviewImageBean bestImage = null;
+        for(PreviewBean pb : result.getPreviews()) {
+            if (pb instanceof PreviewImageBean) {
+                PreviewImageBean pib = (PreviewImageBean)pb;
+                if (bestImage == null) {
+                    bestImage = pib;
+                } else if (Math.abs(maxwidth - pib.getWidth()) < Math.abs(maxwidth - bestImage.getWidth())) {
+                    bestImage = pib;                    
+                }
+            } else {
+                previews.add(pb);
+            }
+        }
+        if (bestImage != null) {
+            previews.add(bestImage);
+        }
+        
+        // sort beans, image, zoom, video, rest
         Collections.sort( previews, new Comparator<PreviewBean>() {
             @Override
             public int compare( PreviewBean o1, PreviewBean o2 )
@@ -236,23 +256,8 @@ public class DatasetWidget extends Composite {
                     if (o2 instanceof PreviewVideoBean) {
                         return +1;
                     }
-                    return 0;
                 }
-                
-                // sort images by size
-                if (o1 instanceof PreviewImageBean) {
-                    double s1 = ((PreviewImageBean)o1).getWidth() * ((PreviewImageBean)o1).getHeight();
-                    double s2 = ((PreviewImageBean)o2).getWidth() * ((PreviewImageBean)o2).getHeight();
-                    if (s1 < s2) {
-                        return -1;
-                    } else if (s1 > s2) {
-                        return +1;                        
-                    } else {
-                        return 0;
-                    }
-                }
-                
-                // rest is ok
+                // don't care at this point
                 return 0;
             }
         });
@@ -398,34 +403,26 @@ public class DatasetWidget extends Composite {
 
         FlowPanel previewsPanel = new FlowPanel();
         previewsPanel.addStyleName("datasetActions");
-        PreviewBean bestPreview = null;
         for(PreviewBean pb : previews) {
-            String label = "UNKNOWN";
+            String label;
             if (pb instanceof PreviewImageBean) {
-                PreviewImageBean pib = (PreviewImageBean)pb;
-                label = pib.getWidth() + "x" + pib.getHeight();
-                
-                if (bestPreview == null) {
-                    bestPreview = pb;
-                    
-                } else if ((pib.getWidth() <= 800) && (pib.getHeight() <= 600)) {
-                    // FIXME these number should be user preferences.
-                    bestPreview = pb;
-                }
+                label = "Preview";
 
             } else if (pb instanceof PreviewPyramidBean) {
-                label = "Zoom";
+                label = "Zoomable";
                 
             } else if (pb instanceof PreviewVideoBean) {
                 label = "Video";
 
             } else {
+                label = "Unknown";
                 GWT.log("Unknown preview bean " + pb);
             }
+            
                         
             final PreviewBean finalpb = pb;
             Anchor anchor = new Anchor( label );
-            anchor.addStyleName( "datasetActionLink" );
+            anchor.addStyleName( "previewActionLink" );
             anchor.addClickHandler( new ClickHandler() {
                 public void onClick( ClickEvent event )
                 {
@@ -472,10 +469,10 @@ public class DatasetWidget extends Composite {
 		loadDerivedFrom(uri,4);
 
 		// show preview image
-        if (bestPreview == null) {
+        if (bestImage == null) {
             previewPanel.add(new PreviewWidget(result.getDataset().getUri(), GetPreviews.LARGE, null));                  
         } else {
-            showPreview( bestPreview );
+            showPreview( bestImage );
         }
     }
 
