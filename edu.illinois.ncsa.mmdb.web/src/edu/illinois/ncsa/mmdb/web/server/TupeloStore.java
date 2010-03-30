@@ -134,7 +134,7 @@ public class TupeloStore {
 				log.info("context deserialized: "+context);
 			}
 			ContextConvert.updateContext(context);
-			beanSession = CETBeans.createBeanSession(context);
+			createBeanSession();
         } catch (ClassNotFoundException e) {
             log.warn("Could not de-serialize context, missing context-creator?.", e);
 		} catch (Exception e) {
@@ -225,12 +225,13 @@ public class TupeloStore {
 	 * 
 	 * @return
 	 */
+	public BeanSession getBeanSession() {
+	    return beanSession;
+	}
+	
 	Map<Resource,Long> beanExp = new HashMap<Resource,Long>();
 	long soonestExp = Long.MAX_VALUE;
-	public synchronized BeanSession getBeanSession() {
-		if(beanSession != null) {
-			return beanSession;
-		}
+	private void createBeanSession() {
 		try {
 			beanSession = CETBeans.createBeanSession(context);
 			beanSession.setFetchBeanPostprocessor(new FetchBeanPostprocessor() {
@@ -272,14 +273,9 @@ public class TupeloStore {
 					}
 				}
 			});
-		} catch (OperatorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			log.error( "Could not create bean sessions.", e );
 		}
-		return beanSession;
 	}
 
 	/**
