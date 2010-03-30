@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.rdf.Resource;
@@ -23,11 +25,14 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.AnnotationBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 public class SearchableThingTextExtractor implements TextExtractor<String> {
-	Object fetchBean(String uri) throws OperatorException {
-		return TupeloStore.getInstance().getContext().getBeanSession().fetchBean(Resource.uriRef(uri));
+	Log log = LogFactory.getLog(SearchableThingTextExtractor.class);
+	
+	Object fetchBean(String uri) throws OperatorException, ClassNotFoundException {
+		return CETBeans.createBeanSession(TupeloStore.getInstance().getContext()).fetchBean(Resource.uriRef(uri));
 	}
 	
 	@Override
@@ -43,7 +48,9 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 			if(bean instanceof CETBean) {
 				text = text((CETBean)bean);
 			}
-		} catch(Exception x) { }
+		} catch(Exception x) {
+			log.warn("unexpected bean session behavior: "+x.getMessage());
+		}
 		// it's either not a bean or not a CETBean
 		try {
 			text = text(uri);
@@ -51,6 +58,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 			x.printStackTrace();
 			return "";
 		}
+		//log.debug(uri+"="+text); // FIXME debug
 		return text;
 	}
 	
@@ -87,6 +95,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		if(bean instanceof DatasetBean) {
 			return authors((DatasetBean)bean);
 		} else {
+			log.warn("unexpected bean class "+bean.getClass());
 			return authors(bean.getUri());
 		}
 	}
@@ -97,6 +106,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 			Object bean = fetchBean(uri);
 			if(bean instanceof CETBean) {
 				return authors((CETBean)bean);
+			} else {
+				log.error(uri+" is not a bean, no authors extracted");
 			}
 		} catch(Exception x) {
 		}
