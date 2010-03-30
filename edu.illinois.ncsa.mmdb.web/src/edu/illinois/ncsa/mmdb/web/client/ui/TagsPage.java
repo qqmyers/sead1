@@ -12,6 +12,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAllTags;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
@@ -54,11 +55,16 @@ public class TagsPage extends Page {
 						HashMap<String, Integer> tags = result.getTags();
 						Iterator<String> iterator = tags.keySet().iterator();
 						while (iterator.hasNext()) {
+							FlowPanel tagPanel = new FlowPanel();
 							String tag = iterator.next();
-							Hyperlink link = new Hyperlink(tag + " ("
-									+ tags.get(tag) + ") ", "tag?title=" + tag);
-							link.addStyleName("tagInPanel");
-							tagsPanel.add(link);
+							Hyperlink link = new Hyperlink(tag, "tag?title=" + tag);
+							link.addStyleName("tagLink");
+							tagPanel.add(link);
+							Label tagCount = new Label(" ("	+ tags.get(tag) + ") ");
+							tagCount.addStyleName("tagCount");
+							tagPanel.add(tagCount);
+							tagPanel.addStyleName("tagInPanel");
+							tagsPanel.add(tagPanel);
 						}
 					}
 

@@ -881,3 +881,14 @@ body {
 	margin: 10px;
 	padding: 5px;
 }
+
+.tagLink {
+	display: inline;
+}
+
+.tagCount {
+	display: inline;
+	font-size: 0.9em;
+	vertical-align: sub;
+	color: gray;
+}
