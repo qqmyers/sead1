@@ -308,6 +308,31 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}
 	}
 	
+	List<String> getUrisUploaded(String sessionKey) {
+		List<String> uris = new LinkedList<String>();
+		try {
+			GetMethod get = new GetMethod();
+			setUrl(get,sessionKey);
+			HttpClient client = new HttpClient();
+			log("requesting progress ..."); // FIXME debug
+			client.executeMethod(get);
+			BufferedReader br = new BufferedReader(new InputStreamReader(get.getResponseBodyAsStream()));
+			String line = "";
+			while((line = br.readLine()) != null) {
+				log(line); // FIXME debug
+				if(line.contains("uris")) {
+					line = line.replaceFirst(".*\"uris\":\\[\"([^\\]]*)\\].*","$1");
+					for(String uri : line.split("\",?\"?")) {
+						uris.add(uri);
+					}
+				}
+			}
+		} catch(Exception x) {
+			log("no progress, or progress not available: "+x.getMessage());
+		}
+		return uris;
+	}
+	
 	class FakeProgressThread extends Thread {
 		int fakeProgress = 0;
 		boolean stop = false;
@@ -364,7 +389,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	 * Simple function called from javascript for testing. 
 	 */
 	public void poke() {
-		mainCards.add(new JLabel("Poke!"), "poke");
+		mainCards.add(new JLabel("Poke4!"), "poke");
 		((CardLayout)mainCards.getLayout()).show(mainCards, "poke");
 		repaint();
 		(new Thread() {
@@ -508,6 +533,12 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				log("got collection uri from server: "+collectionUri);
 			}
 			Thread.sleep(2);
+			// now figure out which uri's were uploaded
+			for(String uri : getUrisUploaded(sessionKey)) {
+				log("got uris for uploaded files = "+uri); // FIXME
+				JSObject window = JSObject.getWindow(DropUploader.this);
+				window.call("dndAppletFileUploaded",new Object[] { uri });
+			}
 			return sessionKey;
 		}
 		@Override
@@ -590,6 +621,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			return "[error]";
 		}
 	}
+	
 	public static void main(String args[]) {
 		new DropUploader();
 	}
