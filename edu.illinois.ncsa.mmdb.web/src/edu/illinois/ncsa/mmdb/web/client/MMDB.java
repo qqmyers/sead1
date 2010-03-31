@@ -105,15 +105,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	
 	private String previousHistoryToken = new String();
 
-	/**
-	 * Session id - user login for when the user is logged in, null if the user
-	 * hasn't been authenticated
-	 */
-	private final String sessionId = null;
-
 	private Label breadcrumb;
-
-	private static Map<String,String> sessionPreferences;
 	
 	private static UserSessionState sessionState;
 	
@@ -863,6 +855,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		return getSessionState().getPreferences();
 	}
 	
+	public static String getSessionPreference(String key) {
+		return getSessionPreference(key,null);
+	}
 	public static String getSessionPreference(String key, String defaultValue) {
 		String value = getSessionPreferences().get(key);
 		return value == null ? defaultValue : value;

@@ -163,8 +163,9 @@ public class TupeloStore {
 		timer.schedule(new TimerTask() {
 			public void run() {
 				consumeFullTextIndexQueue();
+				expireBeans(null);
 			}
-		}, 20 * 1000, 10 * 1000);
+		}, 2 * 1000, 10 * 1000);
 	}
  
 	/**
@@ -231,46 +232,53 @@ public class TupeloStore {
 	
 	Map<Resource,Long> beanExp = new HashMap<Resource,Long>();
 	long soonestExp = Long.MAX_VALUE;
+	
+	private void expireBeans(Object bean) {
+		synchronized(beanExp) {
+			try {
+				long now = System.currentTimeMillis();
+				long exp = now + 30000; // 30s
+				if(exp < soonestExp) {
+					soonestExp = exp;
+				}
+				if(bean != null) {
+					beanExp.put(beanSession.getSubject(bean), exp);
+				}
+				if(now > soonestExp) {
+					soonestExp = Long.MAX_VALUE;
+					Set<Resource> toNuke = new HashSet<Resource>();
+					for(Map.Entry<Resource,Long> entry : beanExp.entrySet()) {
+						exp = entry.getValue();
+						if(exp < now) {
+							try {
+								beanSession.deregister(entry.getKey());
+								toNuke.add(entry.getKey());
+							} catch (OperatorException e) {
+								log.error("could not expire bean",e);
+							}
+						} else if(exp < soonestExp) {
+							soonestExp = exp;
+						}
+					}
+					if(toNuke.size()>0) {
+						for(Object n : toNuke) {
+							beanExp.remove(n);
+						}
+						log.info("expiring "+toNuke.size()+" bean(s)");
+					}
+				}
+			} catch(OperatorException x) {
+				log.error("no bean subject",x);
+			}
+		}
+	}
+	
 	private void createBeanSession() {
 		try {
 			beanSession = CETBeans.createBeanSession(context);
 			beanSession.setFetchBeanPostprocessor(new FetchBeanPostprocessor() {
 				public void postprocess(Object bean) {
-					synchronized(beanExp) {
-						try {
-							long now = System.currentTimeMillis();
-							long exp = now + 30000; // 30s
-							if(exp < soonestExp) {
-								soonestExp = exp;
-							}
-							beanExp.put(beanSession.getSubject(bean), exp);
-							if(now > soonestExp) {
-								soonestExp = Long.MAX_VALUE;
-								Set<Resource> toNuke = new HashSet<Resource>();
-								for(Map.Entry<Resource,Long> entry : beanExp.entrySet()) {
-									exp = entry.getValue();
-									if(exp < now) {
-										try {
-											beanSession.deregister(entry.getKey());
-											toNuke.add(entry.getKey());
-										} catch (OperatorException e) {
-											log.error("could not expire bean",e);
-										}
-									} else if(exp < soonestExp) {
-										soonestExp = exp;
-									}
-								}
-								if(toNuke.size()>0) {
-									for(Object n : toNuke) {
-										beanExp.remove(n);
-									}
-									log.info("expiring "+toNuke.size()+" bean(s)");
-								}
-							}
-						} catch(OperatorException x) {
-							log.error("no bean subject",x);
-						}
-					}
+					expireBeans(bean);
 				}
 			});
 		} catch (Exception e) {

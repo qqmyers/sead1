@@ -33,10 +33,11 @@ public class UploadPage extends Page {
 
 	private static final String TITLE = "Upload";
 	private UploadWidget uploadWidget;
-	private boolean dndEnabled;
 	private FlexTable tableLayout;
 	private static VerticalPanel appletStatusPanel;
 
+	public static final String DND_ENABLED_PREFERENCE = "dndAppletEnabled";
+	
 	public UploadPage() {
 		super();
 		setPageTitle(TITLE);
@@ -70,15 +71,15 @@ public class UploadPage extends Page {
 		
 		dndPanel.addStyleName("dragAndDrop");
 		
+		//final boolean dndEnabled = MMDB.getSessionPreference(DND_ENABLED_PREFERENCE) != null;
+		final boolean dndEnabled = false; // FIXME debug
+		
 		final FlowPanel dndApplet = new FlowPanel();
 		dndApplet.setHeight("60px");
 		dndApplet.setWidth("60px");
 		dndApplet.getElement().setId("dndAppletId");
 		dndPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		dndPanel.add(dndApplet);
-		if (!dndEnabled) {
-			dndApplet.addStyleName("hidden");
-		}
 		final String disabledMsg = "Click here to enable drag and drop.";
 		final String enabledMsg = "Drop files and folders here";
 		final Label dndTooltip = new Label(dndEnabled ? enabledMsg
@@ -94,6 +95,7 @@ public class UploadPage extends Page {
 			dndApplet.removeStyleName("hidden");
 			deployDndApplet(MMDB.getSessionState().getSessionKey());
 		} else {
+			dndApplet.addStyleName("hidden");
 			dndTooltip.addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
 					if(MMDB.getSessionState().getUsername() == null) {
@@ -106,9 +108,9 @@ public class UploadPage extends Page {
 						}
 						if (doit) {
 							dndApplet.removeStyleName("hidden");
-							deployDndApplet(MMDB.getSessionState().getUsername());
+							deployDndApplet(MMDB.getSessionState().getSessionKey());
 							dndTooltip.setText(enabledMsg);
-							dndEnabled = true;
+							MMDB.setSessionPreference(DND_ENABLED_PREFERENCE,"true");
 						}
 					}
 				}
@@ -124,7 +126,7 @@ public class UploadPage extends Page {
 				doSomethingWithApplet(DOM.getElementById("dragdropApplet"), "foo");
 			}
 		});
-		tableLayout.setWidget(2, 0, callMethodOnApplet);
+		//tableLayout.setWidget(2, 0, callMethodOnApplet);
 		
 		// applet status
 		appletStatusPanel = new VerticalPanel();
@@ -154,7 +156,15 @@ public class UploadPage extends Page {
 	 */
 	private native void publishMethods() /*-{
    		$wnd.dndAppletPoke = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::appletPoke();
+   		$wnd.dndAppletFileUploaded = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileUploaded(Ljava/lang/String;);
 	}-*/;
+	
+	/** Called by the applet after a file is uploaded. */
+	public static void fileUploaded(String uri) {
+		GWT.log("applet says "+uri+" uploaded");
+		//PreviewWidget preview = new PreviewWidget(uri, GetPreviews.SMALL, "dataset?id="+uri);
+		//appletStatusPanel.add(preview);
+	}
 	
 	/**
 	 * Called by the applet.
@@ -175,7 +185,7 @@ public class UploadPage extends Page {
 			id:'dragdropApplet',
 			MAYSCRIPT:'true',
 		code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-		archive:'dnd/DropUploader.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+		archive:'dnd/DropUploader-883.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
 		width:60,
 		height:60
 		};

@@ -43,7 +43,6 @@ import org.tupeloproject.util.SecureHashMinter;
 
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
-import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
@@ -95,22 +94,12 @@ public class UploadBlob extends AuthenticatedServlet {
         
         public void update ( long aBytesRead, long aContentLength, int anItem ) {
             bytesRead = aBytesRead;
-            /*
-            if(debugPrune++ % 50 == 0) {
-            	log.trace("bytesRead = "+bytesRead+" ("+percentComplete()+"%)");
-            }
-            */
             contentLength = aContentLength;
             item = anItem;
         }
 
         public void wrote(long aBytesWritten) {
         	bytesWritten += aBytesWritten;
-        	/*
-            if(debugPrune++ % 50 == 0) {
-            	log.trace("bytesWritten = "+bytesWritten+" ("+percentComplete()+"%)");
-            }
-            */
         }
         
         public long getBytesRead ( ) {
@@ -297,10 +286,9 @@ public class UploadBlob extends AuthenticatedServlet {
                     uri = RestUriMinter.getInstance().mintUri(md);
                     //
                     bw.setUri(URI.create(uri));
-                    String url = TupeloStore.getInstance().getUriCanonicalizer(request).canonicalize(RestServlet.IMAGE_INFIX,uri.toString());
                     UploadInfo u = null;
                     if(listener != null) {
-                    	u = listener.addUploadInfo(URI.create(url), trimFilename(fileName), sizeInBytes);
+                    	u = listener.addUploadInfo(URI.create(uri), trimFilename(fileName), sizeInBytes);
                     }
                     final FileUploadListener _listener = listener;
                     bw.setInputStream(new FilterInputStream(item.getInputStream()) {
@@ -403,6 +391,7 @@ public class UploadBlob extends AuthenticatedServlet {
             		}
             		ts.save();
             		TupeloStore.getInstance().setHistoryForUpload(sessionKey, "collection?uri="+collectionUri);
+            		// FIXME need whole state, not just collection URI (see lines 410-411 commented out below)
             		response.getOutputStream().print(collectionUri);
             		response.getOutputStream().flush();
             	} catch(OperatorException x) {
@@ -414,6 +403,11 @@ public class UploadBlob extends AuthenticatedServlet {
             } else {
             	TupeloStore.getInstance().setHistoryForUpload(sessionKey, "listDatasets?sort=date-desc");
             }
+            // output state to output stream
+            /*
+            response.getOutputStream().println(stateToJSON(true,listener,request));
+            response.getOutputStream().flush();
+            */
         }
         catch (FileUploadException e1) {
             log.error("file upload error: "+e1.getLocalizedMessage());
