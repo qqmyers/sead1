@@ -36,7 +36,12 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		return CETBeans.createBeanSession(TupeloStore.getInstance().getContext());
 	}
 	Object fetchBean(String uri) throws OperatorException, ClassNotFoundException {
-		return getBeanSession().fetchBean(Resource.uriRef(uri));
+		BeanSession bs = getBeanSession();
+		try {
+			return bs.fetchBean(Resource.uriRef(uri));
+		} finally {
+			bs.close();
+		}
 	}
 	
 	@Override
@@ -51,6 +56,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 			Object bean = fetchBean(uri);
 			if(bean instanceof CETBean) {
 				text = text((CETBean)bean);
+				bean = null;
 			}
 		} catch(Exception x) {
 			log.warn("unexpected bean session behavior: "+x.getMessage());
@@ -109,7 +115,9 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		try {
 			Object bean = fetchBean(uri);
 			if(bean instanceof CETBean) {
-				return authors((CETBean)bean);
+				String authors = authors((CETBean)bean);
+				bean = null;
+				return authors;
 			} else {
 				log.error(uri+" is not a bean, no authors extracted");
 			}
@@ -123,7 +131,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 	}
 	
 	String tags(String uri) throws OperatorException, ClassNotFoundException {
-		TagEventBeanUtil tebu = new TagEventBeanUtil(getBeanSession());
+		BeanSession bs = getBeanSession();
+		TagEventBeanUtil tebu = new TagEventBeanUtil(bs);
 		TreeSet<String> tags = new TreeSet<String>();
 		try {
 			tags.addAll(tebu.getTags(uri));
@@ -131,6 +140,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		} catch (OperatorException e) {
 			e.printStackTrace();
 			return "";
+		} finally {
+			bs.close();
 		}
 	}
 	
@@ -139,7 +150,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 	}
 	
 	String annotations(String uri) throws OperatorException, ClassNotFoundException {
-		AnnotationBeanUtil abu = new AnnotationBeanUtil(getBeanSession());
+		BeanSession bs = getBeanSession();
+		AnnotationBeanUtil abu = new AnnotationBeanUtil(bs);
 		List<String> annotations = new LinkedList<String>();
 		try {
 			for(AnnotationBean annotation : abu.getAssociationsFor(uri)) {
@@ -149,6 +161,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return "";
+		} finally {
+			bs.close();
 		}
 		return unsplit(annotations);
 	}
@@ -196,10 +210,15 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 	}
 	
 	String title(String uri) throws OperatorException, ClassNotFoundException {
-		Thing thing = getBeanSession().getThingSession().fetchThing(Resource.uriRef(uri));
-		String dcTitle = thing.getString(Dc.TITLE);
-		String rdfsLabel = thing.getString(Rdfs.LABEL);
-		return atomize((dcTitle != null ? dcTitle : "") + (rdfsLabel != null ? " " + rdfsLabel : ""));
+		BeanSession bs = getBeanSession();
+		try {
+			Thing thing = bs.getThingSession().fetchThing(Resource.uriRef(uri));
+			String dcTitle = thing.getString(Dc.TITLE);
+			String rdfsLabel = thing.getString(Rdfs.LABEL);
+			return atomize((dcTitle != null ? dcTitle : "") + (rdfsLabel != null ? " " + rdfsLabel : ""));
+		} finally {
+			bs.close();
+		}
 	}
 
 	// why am I writing this.
