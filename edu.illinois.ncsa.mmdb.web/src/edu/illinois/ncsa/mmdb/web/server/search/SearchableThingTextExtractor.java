@@ -195,8 +195,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		return atomize(bean.getLabel());
 	}
 	
-	String title(String uri) throws OperatorException {
-		Thing thing = TupeloStore.fetchThing(uri);
+	String title(String uri) throws OperatorException, ClassNotFoundException {
+		Thing thing = getBeanSession().getThingSession().fetchThing(Resource.uriRef(uri));
 		String dcTitle = thing.getString(Dc.TITLE);
 		String rdfsLabel = thing.getString(Rdfs.LABEL);
 		return atomize((dcTitle != null ? dcTitle : "") + (rdfsLabel != null ? " " + rdfsLabel : ""));
