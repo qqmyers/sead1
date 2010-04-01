@@ -101,19 +101,16 @@ public class PreviewWidget extends Composite {
 					getPreview(datasetUri, link); // handle pending case.
 				}
 			});
-			/*
 			previewImage.addErrorHandler(new ErrorHandler() {
 				public void onError(ErrorEvent event) {
-					grayImage(size, link);
-					getPreview(datasetUri, link);
+					pending(datasetUri, size, link);
 				}
 			});
-			*/
 			addLink(previewImage, link);
 			contentPanel.clear();
 			contentPanel.add(previewImage);
 		} else {
-			pendingImage(size, link);
+			pending(datasetUri, size, link);
 		}
 	}
 
@@ -210,6 +207,11 @@ public class PreviewWidget extends Composite {
 		}
 	}
 
+	protected void pending(String datasetUri, String size, String link) {
+		pendingImage(size, link);
+		getPreview(datasetUri, link);
+	}
+	
 	protected void pendingImage(String size, String link) {
 		if(!isPendingImage) {
 			contentPanel.clear();
