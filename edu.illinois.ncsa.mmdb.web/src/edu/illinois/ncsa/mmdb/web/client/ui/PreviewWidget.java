@@ -9,6 +9,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ErrorEvent;
 import com.google.gwt.event.dom.client.ErrorHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -92,20 +94,26 @@ public class PreviewWidget extends Composite {
 
 		// add the preview image
 		if(size != GetPreviews.LARGE) {
-			Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);
+			final Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);
 			previewImage.addStyleName("thumbnail");
+			previewImage.addLoadHandler(new LoadHandler() {
+				public void onLoad(LoadEvent event) {
+					getPreview(datasetUri, link); // handle pending case.
+				}
+			});
+			/*
 			previewImage.addErrorHandler(new ErrorHandler() {
 				public void onError(ErrorEvent event) {
 					grayImage(size, link);
 					getPreview(datasetUri, link);
 				}
 			});
+			*/
 			addLink(previewImage, link);
 			contentPanel.clear();
 			contentPanel.add(previewImage);
 		} else {
 			pendingImage(size, link);
-			getPreview(datasetUri, link);
 		}
 	}
 
@@ -175,15 +183,9 @@ public class PreviewWidget extends Composite {
 									getPreview(datasetUri, link);
 								}
 							};
-							if (delays[whichDelay] > 0) {
-								timeOffset = (timeOffset + 37) % 100;
-								retryTimer.schedule((delays[whichDelay++] * 1000) + timeOffset);
-							} else {
-								pendingImage(size, link);
-							}
-						} else if(display &&
-								  (previews.get(GetPreviews.LARGE) != null ||
-								  previews.get(GetPreviews.BADGE) != null)) {
+							timeOffset = (timeOffset + 37) % 100;
+							retryTimer.schedule(1000 + timeOffset); // every second or so
+						} else if(display && previews.get(size) != null) {
 							contentPanel.clear();
 							contentPanel.add(createImage(datasetUri, size, link, previews));
 						} 

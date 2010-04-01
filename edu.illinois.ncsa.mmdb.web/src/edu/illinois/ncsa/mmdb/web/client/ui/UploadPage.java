@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UploadWidget;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
@@ -162,8 +163,8 @@ public class UploadPage extends Page {
 	/** Called by the applet after a file is uploaded. */
 	public static void fileUploaded(String uri) {
 		GWT.log("applet says "+uri+" uploaded");
-		//PreviewWidget preview = new PreviewWidget(uri, GetPreviews.SMALL, "dataset?id="+uri);
-		//appletStatusPanel.add(preview);
+		PreviewWidget preview = new PreviewWidget(uri, GetPreviews.SMALL, "dataset?id="+uri);
+		appletStatusPanel.add(preview);
 	}
 	
 	/**
