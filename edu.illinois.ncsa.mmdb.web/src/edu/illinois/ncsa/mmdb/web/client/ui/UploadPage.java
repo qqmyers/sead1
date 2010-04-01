@@ -103,7 +103,7 @@ public class UploadPage extends Page {
 						Window.confirm("Upload not permitted. Please log in");
 					} else {
 						boolean doit = true;
-						if (!dndEnabled) {
+						if (!"true".equals(MMDB.getSessionPreference(DND_ENABLED_PREFERENCE))) {
 							doit = Window
 							.confirm("You will be asked to accept a security exception to allow our drag-and-drop upload tool to access your local files. If you don't wish to accept that security exception, press cancel.");
 						}
