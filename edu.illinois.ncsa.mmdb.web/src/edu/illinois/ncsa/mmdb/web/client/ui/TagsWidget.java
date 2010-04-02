@@ -50,7 +50,9 @@ public class TagsWidget extends Composite {
 	 * @param service
 	 */
 	public TagsWidget(final String id, final MyDispatchAsync service) {
-		
+		this(id,service,true);
+	}
+	public TagsWidget(final String id, final MyDispatchAsync service, boolean withTitle) {
 		this.id = id;
 		this.service = service;
 		
@@ -58,9 +60,13 @@ public class TagsWidget extends Composite {
 		mainPanel.addStyleName("datasetRightColSection");
 		initWidget(mainPanel);
 		
-		tagLabel = new Label("Tags");
-		tagLabel.addStyleName("datasetRightColHeading");
-		mainPanel.add(tagLabel);
+		if(withTitle) {
+			tagLabel = new Label("Tags");
+			tagLabel.addStyleName("datasetRightColHeading");
+			mainPanel.add(tagLabel);
+		} else {
+			tagLabel = null;
+		}
 		
 		tagsPanel = new FlexTable();
 		tagsPanel.addStyleName("tagsLinks");

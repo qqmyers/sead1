@@ -64,6 +64,7 @@ public class PreviewWidget extends Composite {
 	private int whichDelay = 0;
 	private final String datasetUri;
 	private final String link;
+	private boolean checkPending = true;
 
 	/**
 	 * Create a preview. If the desired size is small (thumbnail) try showing
@@ -78,6 +79,11 @@ public class PreviewWidget extends Composite {
 	 */
 	public PreviewWidget(final String datasetUri, String desiredSize,
 			final String link) {
+		this(datasetUri, desiredSize, link, true);
+	}
+	public PreviewWidget(final String datasetUri, String desiredSize,
+			final String link, boolean checkPending) {
+		this.checkPending = checkPending;
 		this.datasetUri = datasetUri;
 		this.link = link;
 		// default to small size if desired size is unrecognized
@@ -93,25 +99,20 @@ public class PreviewWidget extends Composite {
 		initWidget(contentPanel);
 
 		// add the preview image
+		Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);
 		if(size != GetPreviews.LARGE) {
-			final Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);
 			previewImage.addStyleName("thumbnail");
+		}
+		if(checkPending) {
 			previewImage.addLoadHandler(new LoadHandler() {
 				public void onLoad(LoadEvent event) {
-					getPreview(datasetUri, link); // handle pending case.
+					getPreview(); // handle pending case.
 				}
 			});
-			previewImage.addErrorHandler(new ErrorHandler() {
-				public void onError(ErrorEvent event) {
-					pending(datasetUri, size, link);
-				}
-			});
-			addLink(previewImage, link);
-			contentPanel.clear();
-			contentPanel.add(previewImage);
-		} else {
-			pending(datasetUri, size, link);
 		}
+		addLink(previewImage, link);
+		contentPanel.clear();
+		contentPanel.add(previewImage);
 	}
 
 	/**
@@ -158,6 +159,9 @@ public class PreviewWidget extends Composite {
 	 * @param action
 	 * @param callback
 	 */
+	protected void getPreview() {
+		getPreview(datasetUri, link);
+	}
 	protected void getPreview(final String datasetUri, final String link) {
 		getPreview(datasetUri, link, true);
 	}

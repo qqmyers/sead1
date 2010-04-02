@@ -59,9 +59,6 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
             // pyramid previews
             previews.addAll( new PreviewPyramidBeanUtil( beanSession ).getAssociationsFor( action.getUri() ) );
 
-            // FIXME queue for full-text reindexing
-            //TupeloStore.getInstance().getSearch().reindex(action.getUri());
-
             // return dataset and preview
             return new GetDatasetResult( datasetBean, previews );
         } catch ( Exception e ) {

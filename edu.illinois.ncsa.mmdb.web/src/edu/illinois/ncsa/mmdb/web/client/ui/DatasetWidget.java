@@ -266,6 +266,7 @@ public class DatasetWidget extends Composite {
 		titleLabel = new EditableLabel(result.getDataset().getTitle());
 
 		titleLabel.getLabel().addStyleName("datasetTitle");
+		titleLabel.setEditableStyleName("datasetTitle");
 		
 		titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
 			public void onValueChange(final ValueChangeEvent<String> event) {

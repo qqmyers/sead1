@@ -6,23 +6,33 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.UploadWidget;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
  * A standalone page to upload files.
@@ -36,6 +46,7 @@ public class UploadPage extends Page {
 	private UploadWidget uploadWidget;
 	private FlexTable tableLayout;
 	private static VerticalPanel appletStatusPanel;
+	private static FlexTable uploadedDatasetsTable;
 
 	public static final String DND_ENABLED_PREFERENCE = "dndAppletEnabled";
 	
@@ -131,7 +142,29 @@ public class UploadPage extends Page {
 		
 		// applet status
 		appletStatusPanel = new VerticalPanel();
-		tableLayout.setWidget(2, 1, appletStatusPanel);
+		// FIXME debug
+		/*
+		Anchor fakeButton = new Anchor("fake an upload (DEBUG!)");
+		fakeButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				ListDatasets list = new ListDatasets("http://purl.org/dc/elements/1.1/date",true,5,0,null);
+				MMDB.dispatchAsync.execute(list, new AsyncCallback<ListDatasetsResult>() {
+					public void onFailure(Throwable caught) {
+					}
+					public void onSuccess(ListDatasetsResult result) {
+						for(DatasetBean ds : result.getDatasets()) {
+							fileUploaded(ds.getUri());
+						}
+					}
+				});
+			}
+		});
+		appletStatusPanel.add(fakeButton);
+		*/
+		// FIXME end debug
+		uploadedDatasetsTable = new FlexTable();
+		appletStatusPanel.add(uploadedDatasetsTable);
+		mainLayoutPanel.add(appletStatusPanel);
 		
 		// publish js methods outside of gwt code
 		publishMethods();
@@ -159,12 +192,53 @@ public class UploadPage extends Page {
    		$wnd.dndAppletPoke = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::appletPoke();
    		$wnd.dndAppletFileUploaded = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileUploaded(Ljava/lang/String;);
 	}-*/;
+
+	static Widget editableDatasetInfo(final DatasetBean ds) {
+		FlexTable layout = new FlexTable();
+		int row = 0;
+		layout.setWidget(row, 0, new Label("Title:"));
+		final EditableLabel titleLabel = new EditableLabel(ds.getTitle());
+		titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
+			public void onValueChange(final ValueChangeEvent<String> event) {
+				SetProperty change = new SetProperty(ds.getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue());
+				MMDB.dispatchAsync.execute(change, new AsyncCallback<SetPropertyResult>() {
+					public void onFailure(Throwable caught) {
+						titleLabel.cancel();
+					}
+					public void onSuccess(SetPropertyResult result) {
+						titleLabel.setText(event.getValue());
+					}
+				});
+			}
+		});
+		layout.setWidget(row, 1, titleLabel);
+		row++;
+		layout.setWidget(row, 0, new Label("Size:"));
+		layout.setWidget(row, 1, new Label(TextFormatter.humanBytes(ds.getSize())));
+		row++;
+		layout.setWidget(row, 0, new Label("Type:"));
+		layout.setWidget(row, 1, new Label(ds.getMimeType()));
+		row++;
+		layout.setWidget(row, 0, new Label("Date:"));
+		layout.setWidget(row, 1, new Label(ds.getDate()+""));
+		return layout;
+	}
 	
 	/** Called by the applet after a file is uploaded. */
 	public static void fileUploaded(String uri) {
 		GWT.log("applet says "+uri+" uploaded");
+		final int row = uploadedDatasetsTable.getRowCount();
 		PreviewWidget preview = new PreviewWidget(uri, GetPreviews.SMALL, "dataset?id="+uri);
-		appletStatusPanel.add(preview);
+		uploadedDatasetsTable.setWidget(row, 0, preview);
+		MMDB.dispatchAsync.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
+			public void onFailure(Throwable caught) {
+			}
+			public void onSuccess(GetDatasetResult result) {
+				uploadedDatasetsTable.setWidget(row, 1, editableDatasetInfo(result.getDataset()));
+			}
+		});
+		TagsWidget tags = new TagsWidget(uri, MMDB.dispatchAsync, false);
+		uploadedDatasetsTable.setWidget(row, 2, tags);
 	}
 	
 	/**

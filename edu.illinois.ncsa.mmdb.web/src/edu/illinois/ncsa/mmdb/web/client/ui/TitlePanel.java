@@ -23,6 +23,7 @@ public class TitlePanel extends HorizontalPanel implements HasValueChangeHandler
 		titleLabel = new EditableLabel("");
 		titleLabel.setEditable(false);
 		titleLabel.getLabel().addStyleName("pageTitle");
+		titleLabel.setEditableStyleName("datasetTitle");
 		add(titleLabel);
 	}
 	

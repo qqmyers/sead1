@@ -131,14 +131,6 @@ public class RestServlet extends AuthenticatedServlet {
         return decanonicalized;
     }
 
-    void dumpCrap(HttpServletRequest request) {
-        System.out.println("requestURI = "+request.getRequestURI());
-        System.out.println("servletPath = "+request.getServletPath());
-        System.out.println("contextPath = "+request.getContextPath());
-        System.out.println("requestURL = "+request.getRequestURL());
-        System.out.println("localAddr = "+request.getLocalAddr());
-    }
-
     void dumpHeaders(HttpServletRequest request) {
         Enumeration headerNames = request.getHeaderNames();
         while(headerNames.hasMoreElements()) {
