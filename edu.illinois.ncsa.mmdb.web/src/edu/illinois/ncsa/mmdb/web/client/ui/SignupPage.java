@@ -12,7 +12,6 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -231,23 +230,6 @@ public class SignupPage extends Composite {
 									+ "Until your account has been approved you will be unable to log into the system.");
 					thankyouText.addStyleName("loginForm");
 					mainPanel.add(thankyouText);
-
-					final SimplePanel newSignupPanel = new SimplePanel();
-					newSignupPanel.addStyleName("loginForm");
-					final Anchor newSignup = new Anchor("Start over");
-					newSignup.addStyleName("loginForm");
-					newSignupPanel.add(newSignup);
-					mainPanel.add(newSignupPanel);
-					newSignup.addClickHandler(new ClickHandler() {
-
-						@Override
-						public void onClick(ClickEvent event) {
-							mainPanel.remove(thankyouText);
-							mainPanel.remove(newSignupPanel);
-							signupForm = createSignupForm();
-							mainPanel.add(signupForm);
-						}
-					});
 				}
 			});
 		}
