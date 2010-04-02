@@ -1,9 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -22,7 +20,6 @@ import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tables;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
@@ -31,7 +28,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
 /**
  * TODO Add comments
- * 
+ *
  * @author Joe Futrelle
  *
  */
@@ -44,30 +41,22 @@ public class ListDatasetsHandler implements
 	@Override
 	public ListDatasetsResult execute(ListDatasets arg0, ExecutionContext arg1)
 			throws ActionException {
-		
+
 		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-		
+
 		DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-		
+
 		ListDatasetsResult r = new ListDatasetsResult(listDatasets(arg0
 				.getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0
 				.getOffset(), arg0.getInCollection(), dbu));
-		
-		// now add previews
-		Set<String> hasPreviews = new HashSet<String>();
-		for(DatasetBean dataset : r.getDatasets()) {
-			if(TupeloStore.getInstance().getPreview(dataset.getUri(), GetPreviews.SMALL) != null) {
-				hasPreviews.add(dataset.getUri());
-			}
-		}
-		r.setHasPreviews(hasPreviews);
-		
+
+
 		r.setDatasetCount(TupeloStore.getInstance().countDatasets(arg0.getInCollection(), false));
 		return r;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param orderBy
 	 * @param desc
 	 * @param limit
@@ -105,7 +94,7 @@ public class ListDatasetsHandler implements
 	}
 
 	/**
-	 * 
+	 *
 	 * @param orderBy
 	 * @param desc
 	 * @param limit
@@ -132,7 +121,7 @@ public class ListDatasetsHandler implements
 	}
 
 	/**
-	 * 
+	 *
 	 * @param orderBy
 	 * @param desc
 	 * @param limit

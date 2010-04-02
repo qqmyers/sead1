@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server;
 
@@ -32,6 +32,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUsersHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.NewPasswordHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
@@ -45,9 +46,9 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
 
 /**
  * Setup registry of action handlers when the servlet context is initialized.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class MyActionHandlersConfig implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent evt) {
@@ -87,6 +88,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new RemoveFromCollectionHandler());
         DispatchUtil.registerHandler(new GetAllTagsHandler());
         DispatchUtil.registerHandler(new ReindexLuceneHandler());
+        DispatchUtil.registerHandler(new IsPreviewPendingHandler());
 	}
 
 	public void contextDestroyed(ServletContextEvent evt) {

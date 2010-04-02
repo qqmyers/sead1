@@ -40,7 +40,7 @@ public class RestServiceImpl implements RestService {
         return createImage((Map<Resource,Object>)null,imageData);
     }
 
-    
+
     @Override
 	public String mintUri(Map<Resource, Object> metadata) {
     	return RestUriMinter.getInstance().mintUri(metadata);
@@ -81,13 +81,18 @@ public class RestServiceImpl implements RestService {
      * @param md     metadata to give it
      * @param imageData a stream containing image data
      */
-    public void createImage(String imageUri, Map<Resource,Object> md, InputStream imageData) throws RestServiceException {
+    public void createImage(final String imageUri, Map<Resource,Object> md, InputStream imageData) throws RestServiceException {
         updateImage(imageUri, md, imageData);
-        try {
-        	TupeloStore.getInstance().extractPreviews(imageUri);
-        } catch(Exception x) {
-        	x.printStackTrace();
-        }
+        // do not block on this operation.
+        (new Thread() {
+            public void run() {
+                try {
+                    TupeloStore.getInstance().extractPreviews(imageUri);
+                } catch(Exception x) {
+                    x.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     /**

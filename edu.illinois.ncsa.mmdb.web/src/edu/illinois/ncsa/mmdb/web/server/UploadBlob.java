@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server;
 
@@ -91,7 +91,7 @@ public class UploadBlob extends AuthenticatedServlet {
         }
 
         int debugPrune = 0;
-        
+
         public void update ( long aBytesRead, long aContentLength, int anItem ) {
             bytesRead = aBytesRead;
             contentLength = aContentLength;
@@ -101,7 +101,7 @@ public class UploadBlob extends AuthenticatedServlet {
         public void wrote(long aBytesWritten) {
         	bytesWritten += aBytesWritten;
         }
-        
+
         public long getBytesRead ( ) {
             return bytesRead;
         }
@@ -109,7 +109,7 @@ public class UploadBlob extends AuthenticatedServlet {
         public long getBytesWritten() {
         	return bytesWritten;
         }
-        
+
         public long getContentLength ( ) {
             return contentLength;
         }
@@ -168,7 +168,7 @@ public class UploadBlob extends AuthenticatedServlet {
             }
             return false;
         }
-        
+
         public int percentComplete() {
         	long pct = (int) (contentLength == 0L ? 0 : ((bytesRead * 100) / contentLength));
         	//if(pct < 99) {
@@ -179,7 +179,7 @@ public class UploadBlob extends AuthenticatedServlet {
     }
 
     Map<String,FileUploadListener> listeners = new HashMap<String,FileUploadListener>();
-    
+
     void debug(String s) {
     	log.trace(s);
     }
@@ -213,7 +213,7 @@ public class UploadBlob extends AuthenticatedServlet {
         }
         return listener;
     }
-    
+
     /**
      * Handle POST request.<br>
      * A post should only be be the initial upload request, i.e., a form with multipart content
@@ -242,7 +242,7 @@ public class UploadBlob extends AuthenticatedServlet {
         ServletFileUpload upload = new ServletFileUpload(factory);
         String sessionKey = request.getParameter("session");
         FileUploadListener listener = trackProgress(upload, sessionKey);
-        
+
         List<String> uris = new LinkedList<String>();
         String uri = null;
         // Parse the request
@@ -342,11 +342,11 @@ public class UploadBlob extends AuthenticatedServlet {
                         log.info("user uploaded "+fileName+" ("+sizeInBytes+" bytes), uri="+uri);
 
                         uris.add(uri);
-                        
+
                         if(u != null) {
                         	u.setUploaded(true);
                         }
-                        
+
                         // submit to extraction service
                         TupeloStore.getInstance().extractPreviews(uri);
                     }
@@ -529,10 +529,10 @@ public class UploadBlob extends AuthenticatedServlet {
         		return;
         	}
         	String sessionKey = SecureHashMinter.getMinter().mint(); // mint a session key
-        	// OK, we REALLY don't want IE to cache this. For reals
-        	response.addHeader("cache-control","no-store, no-cache"); // don't cache
-        	response.addHeader("cache-control","post-check=0, pre-check=0, false"); // really don't cache
-        	response.addHeader("Pragma","no-cache"); // no, we mean it, really don't cache
+            // OK, we REALLY don't want IE to cache this. For reals
+            response.addHeader("cache-control","no-store, no-cache"); // don't cache
+            response.addHeader("cache-control","post-check=0, pre-check=0, false"); // really don't cache
+            response.addHeader("Pragma","no-cache"); // no, we mean it, really don't cache
         	// report
         	PrintWriter out = response.getWriter();
         	out.println("{\"session\":\""+sessionKey+"\"}");

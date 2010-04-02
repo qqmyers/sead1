@@ -68,22 +68,22 @@ public class RestServlet extends AuthenticatedServlet {
 	public static final String IMAGE_INFIX = "/image/";
 
 	public static final String ANY_IMAGE_INFIX = "/image";
-	
+
 	public static final String PREVIEW_ANY = "/image/preview/";
-	
+
 	public static final String PREVIEW_SMALL = "/image/preview/small/";
-	
+
 	public static final String PREVIEW_LARGE = "/image/preview/large/";
-	
+
 	public static final String SEARCH_INFIX = "/search";
-	
+
 	public static final String COLLECTION_PREVIEW = "/collection/preview/";
-	
+
     static RestService restService; // TODO manage this lifecycle better
 
     static final String SMALL_404 = "preview-100.gif";
     static final String LARGE_404 = "preview-500.gif";
-    
+
     public void init() throws ServletException {
         super.init();
         restService = new RestServiceImpl();
@@ -142,11 +142,11 @@ public class RestServlet extends AuthenticatedServlet {
     Context getContext() {
     	return TupeloStore.getInstance().getContext();
     }
-    
+
     Thing getImageThing(String uri) {
     	return getContext().getThingSession().fetchThing(Resource.uriRef(uri));
     }
-    
+
     public static String getSmallPreviewUri(String datasetUri) {
     	return getPreviewUri(datasetUri, GetPreviews.SMALL);
     }
@@ -156,19 +156,24 @@ public class RestServlet extends AuthenticatedServlet {
     public static String getCollectionPreviewUri(String collectionUri) {
     	return TupeloStore.getInstance().getPreview(collectionUri, GetPreviews.BADGE);
     }
-    
+
     public static String getPreviewUri(String uri, String size) {
     	PreviewImageBean p = getPreview(uri,size);
     	return p == null ? null : p.getUri();
     }
-    
-    public static PreviewImageBean getPreview(String uri, String size) {
+
+    public static PreviewImageBean getPreview(final String uri, String size) {
     	BeanSession bs = TupeloStore.getInstance().getBeanSession();
     	PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(bs);
     	try {
     		Collection<PreviewImageBean> previews = pibu.getAssociationsFor(uri);
     		if(previews.size()==0) {
-    			TupeloStore.getInstance().extractPreviews(uri);
+    		    // do not block on this operation
+    		    (new Thread() {
+    		        public void run() {
+    		            TupeloStore.getInstance().extractPreviews(uri);
+    		        }
+    		    }).start();
     			return null;
     		} else {
     			long maxArea = 0L;
@@ -196,8 +201,8 @@ public class RestServlet extends AuthenticatedServlet {
     		return null;
     	}
     }
-    
-    @Override  
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     	long then = System.currentTimeMillis();
     	try {
@@ -218,6 +223,13 @@ public class RestServlet extends AuthenticatedServlet {
     		}
     	}
     }
+    void dontCache(HttpServletResponse response) {
+        // OK, we REALLY don't want IE to cache this. For reals
+        response.addHeader("cache-control","no-store, no-cache"); // don't cache
+        response.addHeader("cache-control","post-check=0, pre-check=0, false"); // really don't cache
+        response.addHeader("Pragma","no-cache"); // no, we mean it, really don't cache
+    }
+
     protected void doDoGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
         //dumpHeaders(request); // FIXME debug
@@ -272,12 +284,12 @@ public class RestServlet extends AuthenticatedServlet {
                 for(String member : restService.retrieveCollection(uri)) {
                     canonicalMembers.add(canonicalizeUri(member, IMAGE_INFIX, request));
                 }
-                response.addHeader("Pragma", "no-cache");
+                dontCache(response);
                 response.setContentType("text/html");
                 response.getWriter().write(formatList(canonicalMembers));
             } catch(RestServiceException e) {
             	if(e.isNotFound()) {
-            		response.addHeader("Pragma", "no-cache");
+            	    dontCache(response);
             		response.setStatus(404);
             	} else {
             		throw new ServletException("failed to retrieve "+request.getRequestURI());
@@ -319,12 +331,11 @@ public class RestServlet extends AuthenticatedServlet {
     		response.setStatus(404);
     	}
     	if(!shouldCache) {
-    		response.addHeader("Pragma", "no-cache");
+    	    dontCache(response);
     	}
     }
     public static boolean shouldCache404(String datasetUri) {
     	try {
-    		TupeloStore.refetch(datasetUri);
     		ThingSession ts = TupeloStore.getInstance().getBeanSession().getThingSession();
     		// FIXME "endTime1" is a kludgy way to represent execution stage information
     		Date endTime = ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/extractor/endTime1"));

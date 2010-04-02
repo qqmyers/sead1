@@ -3,11 +3,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.ErrorEvent;
-import com.google.gwt.event.dom.client.ErrorHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
@@ -21,24 +18,25 @@ import com.google.gwt.user.client.ui.SimplePanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviewsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPending;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPendingResult;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 
 /**
- * 
+ *
  * @author Joe Futrelle
  * @author Luigi Marini
- * 
+ *
  */
 public class PreviewWidget extends Composite {
-	
+
 	// FIXME use enums
 	private static final Map<String, String> PREVIEW_URL;
 	private static final Map<String, String> GRAY_URL;
 	private static final Map<String, String> PENDING_URL;
 
 	int maxWidth = 600;
-	
+
 	static {
 		PREVIEW_URL = new HashMap<String, String>();
 		PREVIEW_URL.put(GetPreviews.SMALL, "./api/image/preview/small/");
@@ -61,7 +59,7 @@ public class PreviewWidget extends Composite {
 	private Image image;
 	private Label noPreview;
 	private String size;
-	private int whichDelay = 0;
+	private final int whichDelay = 0;
 	private final String datasetUri;
 	private final String link;
 	private boolean checkPending = true;
@@ -72,7 +70,7 @@ public class PreviewWidget extends Composite {
 	 * desired size is large (preview) ask the server for the size of the
 	 * preview and then properly size the image keeping the correct aspect
 	 * ratio.
-	 * 
+	 *
 	 * @param datasetUri
 	 * @param desiredSize
 	 * @param link
@@ -99,15 +97,25 @@ public class PreviewWidget extends Composite {
 		initWidget(contentPanel);
 
 		// add the preview image
-		Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);
+        Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);
 		if(size != GetPreviews.LARGE) {
 			previewImage.addStyleName("thumbnail");
 		}
 		if(checkPending) {
 			previewImage.addLoadHandler(new LoadHandler() {
 				public void onLoad(LoadEvent event) {
-					getPreview(); // handle pending case.
-				}
+                    MMDB.dispatchAsync.execute(new IsPreviewPending(datasetUri, size), new AsyncCallback<IsPreviewPendingResult>() {
+                        public void onFailure(Throwable caught) {
+                        }
+                        public void onSuccess(IsPreviewPendingResult result) {
+                            if(result.isPending()) {
+                                pending();
+                            } else if(!result.isReady()) {
+                                grayImage();
+                            }
+                        }
+                    });
+                }
 			});
 		}
 		addLink(previewImage, link);
@@ -129,7 +137,7 @@ public class PreviewWidget extends Composite {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	public HasClickHandlers getTarget() {
@@ -142,8 +150,8 @@ public class PreviewWidget extends Composite {
 
 	static int timeOffset;
 	Timer retryTimer;
-	
-	
+
+
 	@Override
 	protected void onDetach() {
 		super.onDetach();
@@ -153,7 +161,7 @@ public class PreviewWidget extends Composite {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param <A>
 	 * @param <R>
 	 * @param action
@@ -166,38 +174,32 @@ public class PreviewWidget extends Composite {
 		getPreview(datasetUri, link, true);
 	}
 	protected void getPreview(final String datasetUri, final String link, final boolean display) {
-		MMDB.dispatchAsync.execute(new GetPreviews(datasetUri),
-				new AsyncCallback<GetPreviewsResult>() {
-					public void onFailure(Throwable arg0) {
-						GWT.log("Failed retrieving dataset previews", arg0);
-					}
+        MMDB.dispatchAsync.execute(new IsPreviewPending(datasetUri, size), new AsyncCallback<IsPreviewPendingResult>() {
+            public void onFailure(Throwable caught) {
+            }
+            public void onSuccess(IsPreviewPendingResult result) {
+                if(result.isReady()) {
+                    contentPanel.clear();
+                    contentPanel.add(new Image(PREVIEW_URL.get(size) + datasetUri));
+                } else if(!result.isReady()) {
+                    retryTimer = new Timer() {
+                        @Override
+                        public void run() {
+                            getPreview(datasetUri, link);
+                        }
+                    };
+                    timeOffset = (timeOffset + 37) % 100;
+                    retryTimer.schedule(1000 + timeOffset); // every second or so
+                }
+            }
+        });
 
-					public void onSuccess(GetPreviewsResult arg0) {
-						Map<String, PreviewImageBean> previews = arg0.getPreviews();
-						if(previews.get(size) == null && arg0.isStopAsking()) {
-							grayImage(size, link);
-						} else if (previews.get(size) == null && !arg0.isStopAsking()) {
-							pendingImage(size, link);
-							retryTimer = new Timer() {
-								@Override
-								public void run() {
-									getPreview(datasetUri, link);
-								}
-							};
-							timeOffset = (timeOffset + 37) % 100;
-							retryTimer.schedule(1000 + timeOffset); // every second or so
-						} else if(display && previews.get(size) != null) {
-							contentPanel.clear();
-							contentPanel.add(createImage(datasetUri, size, link, previews));
-						} 
-					}
-				});
 	}
 
 	boolean isGrayImage = false;
 	boolean isPendingImage = false;
-	
-	protected void grayImage(String size, String link) {
+
+	protected void grayImage() {
 		if(!isGrayImage) {
 			contentPanel.clear();
 			image = new Image(GRAY_URL.get(size));
@@ -211,12 +213,12 @@ public class PreviewWidget extends Composite {
 		}
 	}
 
-	protected void pending(String datasetUri, String size, String link) {
-		pendingImage(size, link);
-		getPreview(datasetUri, link);
+	protected void pending() {
+		pendingImage();
+		getPreview();
 	}
-	
-	protected void pendingImage(String size, String link) {
+
+	protected void pendingImage() {
 		if(!isPendingImage) {
 			contentPanel.clear();
 			image = new Image(PENDING_URL.get(size));
@@ -236,7 +238,7 @@ public class PreviewWidget extends Composite {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	protected void statusLabel(String text) {
 		// no preview is available
@@ -251,7 +253,7 @@ public class PreviewWidget extends Composite {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param datasetUri
 	 * @param size
 	 * @param link
@@ -285,6 +287,7 @@ public class PreviewWidget extends Composite {
 			image.addStyleName("thumbnail");
 		}
 
+		/*
 		image.addErrorHandler(new ErrorHandler() {
 			public void onError(ErrorEvent arg0) {
 
@@ -303,6 +306,7 @@ public class PreviewWidget extends Composite {
 				statusLabel(NO_PREVIEW_TEXT);
 			}
 		});
+		*/
 
 		addLink(image, link);
 
@@ -316,6 +320,6 @@ public class PreviewWidget extends Composite {
 	public void setMaxWidth(int maxWidth) {
 		this.maxWidth = maxWidth;
 	}
-	
-	
+
+
 }
