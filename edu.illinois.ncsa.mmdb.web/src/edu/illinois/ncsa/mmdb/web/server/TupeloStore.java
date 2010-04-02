@@ -61,9 +61,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextCreator;
  * Singleton class to manage a tupelo context and its associated beansession.
  * Context is loaded from disk. By default the location of the context
  * definition ends up in WEB-INF/classes/context.xml
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class TupeloStore {
     /** Commons logging **/
@@ -71,7 +71,7 @@ public class TupeloStore {
 
 	/** Default location of serialized tupelo context **/
     private static final String            CONTEXT_PATH          = "/context.xml";
-	
+
 	/** URL of extraction service */
     private String                         extractionServiceURL  = "http://localhost:9856/";
 
@@ -83,35 +83,35 @@ public class TupeloStore {
 
     /** Tupelo context to be used by the extractor */
     private Context extractorContext;
-    
+
 	/** Tupelo beansession facing tupelo context **/
     private BeanSession                    beanSession;
 
 	/**  Context beans in case context definition includes multiple context definitions **/
     private Collection<ContextBean>        contextBeans;
-	
+
 	/** last time a certain uri was asked for extraction */
-    private Map<String, Long>              lastExtractionRequest = new HashMap<String, Long>();
+    private final Map<String, Long>              lastExtractionRequest = new HashMap<String, Long>();
 
 	/** Context DAO used to load context definition from disk **/
     private ContextBeanUtil                contextBeanUtil;
-	
+
 	/** Dataset count by collection (memoized) */
-    private Map<String, Memoized<Integer>> datasetCount          = new HashMap<String, Memoized<Integer>>();
-    
+    private final Map<String, Memoized<Integer>> datasetCount          = new HashMap<String, Memoized<Integer>>();
+
     /** Badge (collection preview) by collection (memoized) */
     private Map<String, Map<String, Memoized<String>>> previewCache = null;
-    
+
     /** Timer to schedule re-occurring jobs */
-    private Timer                          timer                 = new Timer(true);
+    private final Timer                          timer                 = new Timer(true);
 
 	/**
 	 * Return singleton instance.
-	 * 
+	 *
 	 * @return singleton TupeloStore
-	 * 
+	 *
 	 * FIXME if there are any problems creating the context or the beansession,
-	 * these objects remain null. Should this method throw an exception when 
+	 * these objects remain null. Should this method throw an exception when
 	 * there is an error creating an instance of the Tupelo store?
 	 */
 	public static synchronized TupeloStore getInstance() {
@@ -120,7 +120,7 @@ public class TupeloStore {
 		}
 		return instance;
 	}
-	
+
 	/**
 	 * Use getInstance() to retrieve singleton instance.
 	 */
@@ -140,7 +140,7 @@ public class TupeloStore {
 		} catch (Exception e) {
 		    log.warn("Could not de-serialize context.", e);
 		}
-		
+
 		// count datasets every hour
 		// FIXME hack to force read of context every hour to solve MMDB-491
 		timer.schedule( new TimerTask() {
@@ -149,9 +149,9 @@ public class TupeloStore {
             {
                 countDatasets( null, true );
             }
-		    
+
 		}, 0, 60 * 60 * 1000 );
-		
+
 		// do a full-text index sweep every hour
 		// FIXME do less often
 		timer.schedule(new TimerTask() {
@@ -159,18 +159,18 @@ public class TupeloStore {
 				indexFullTextAll();
 			}
 		}, 10 * 1000, 60 * 60 * 1000);
-		
+
 		timer.schedule(new TimerTask() {
 			public void run() {
 				consumeFullTextIndexQueue();
-				expireBeans(null);
+				expireBeans();
 			}
 		}, 2 * 1000, 10 * 1000);
 	}
- 
+
 	/**
 	 * Load context from disk.
-	 * 
+	 *
 	 * @return
 	 * @throws Exception
 	 */
@@ -182,7 +182,7 @@ public class TupeloStore {
         while ( iter.hasNext() ) {
             ContextBeanUtil.addContextCreator( iter.next() );
         }
-	    
+
 		// context location
 		String path = CONTEXT_PATH;
 
@@ -194,17 +194,17 @@ public class TupeloStore {
 		File file = new File(fileLocation.toURI());
 
 		Context context = null;
-		
+
 		try {
 			log.info("Loading serialized context " + fileLocation);
-			
+
 			ContextBeanUtil.setContextBeanStore(file);
-			
+
 			contextBeanUtil = ContextBeanUtil.getContextBeanStore();
-			
+
 			// load default context
 			context = contextBeanUtil.getDefaultContext();
-			
+
 			contextBeans = contextBeanUtil.getAll();
 		} catch(OperatorException x) {
 			// OK, that didn't work, now just use PeerFacade.
@@ -223,62 +223,69 @@ public class TupeloStore {
 
 	/**
 	 * Bean session.
-	 * 
+	 *
 	 * @return
 	 */
 	public BeanSession getBeanSession() {
 	    return beanSession;
 	}
-	
+
 	Map<Resource,Long> beanExp = new HashMap<Resource,Long>();
 	long soonestExp = Long.MAX_VALUE;
-	
-	private void expireBeans(Object bean) {
-		synchronized(beanExp) {
-			try {
-				long now = System.currentTimeMillis();
-				long exp = now + 30000; // 30s
-				if(exp < soonestExp) {
-					soonestExp = exp;
-				}
-				if(bean != null) {
-					beanExp.put(beanSession.getSubject(bean), exp);
-				}
-				if(now > soonestExp) {
-					soonestExp = Long.MAX_VALUE;
-					Set<Resource> toNuke = new HashSet<Resource>();
-					for(Map.Entry<Resource,Long> entry : beanExp.entrySet()) {
-						exp = entry.getValue();
-						if(exp < now) {
-							try {
-								beanSession.deregister(entry.getKey());
-								toNuke.add(entry.getKey());
-							} catch (OperatorException e) {
-								log.error("could not expire bean",e);
-							}
-						} else if(exp < soonestExp) {
-							soonestExp = exp;
-						}
-					}
-					if(toNuke.size()>0) {
-						for(Object n : toNuke) {
-							beanExp.remove(n);
-						}
-						log.info("expiring "+toNuke.size()+" bean(s)");
-					}
-				}
-			} catch(OperatorException x) {
-				log.error("no bean subject",x);
-			}
-		}
+
+	private void setExpirationTime(Object bean) {
+	    synchronized(beanExp) {
+	        long now = System.currentTimeMillis();
+	        long exp = now + 10000; // 10s // FIXME make 2 min
+	        if(exp < soonestExp) {
+	            soonestExp = exp;
+	        }
+	        try {
+	            beanExp.put(beanSession.getSubject(bean), exp);
+	        } catch(Exception x) {
+	            x.printStackTrace();
+	        }
+	    }
 	}
-	
+	private void expireBeans() {
+        long now = System.currentTimeMillis();
+        Set<Resource> toNuke = new HashSet<Resource>();
+        synchronized(beanExp) {
+            if(now > soonestExp) {
+                soonestExp = Long.MAX_VALUE;
+                for(Map.Entry<Resource,Long> entry : beanExp.entrySet()) {
+                    long exp = entry.getValue();
+                    if(exp < now) {
+                        toNuke.add(entry.getKey());
+                    } else if(exp < soonestExp) {
+                        soonestExp = exp;
+                    }
+                }
+                if(toNuke.size()>0) {
+                    for(Object n : toNuke) {
+                        beanExp.remove(n);
+                    }
+                    log.info("expiring "+toNuke.size()+" bean(s)");
+                }
+            }
+	    }
+        // now actually expire the beans (now that we're no longer blocking setting expiration times
+        for(Resource beanUri : toNuke) {
+            try {
+                getBeanSession().deregister(beanUri);
+            } catch(OperatorException x) {
+                log.error("ERROR: could not expire bean "+beanUri+": "+x.getMessage());
+                x.printStackTrace();
+            }
+        }
+	}
+
 	private void createBeanSession() {
 		try {
 			beanSession = CETBeans.createBeanSession(context);
 			beanSession.setFetchBeanPostprocessor(new FetchBeanPostprocessor() {
 				public void postprocess(Object bean) {
-					expireBeans(bean);
+					setExpirationTime(bean);
 				}
 			});
 		} catch (Exception e) {
@@ -288,7 +295,7 @@ public class TupeloStore {
 
 	/**
 	 * Get the tupelo context.
-	 * 
+	 *
 	 * @return tupelo context
 	 */
 	public Context getContext() {
@@ -303,9 +310,9 @@ public class TupeloStore {
 	public boolean authenticate(String username, String password) {
 		return (new Authentication()).authenticate(username, password);
 	}
-	
+
 	// static utility methods
-	
+
 	public static Object fetchBean(String uri) throws OperatorException {
 		return fetchBean(Resource.uriRef(uri));
 	}
@@ -352,16 +359,16 @@ public class TupeloStore {
 	public static void refetch(Resource uri) throws OperatorException {
 		getInstance().getBeanSession().refetch(uri);
 	}
-		
+
 	// URL canonicalization
 
 	// these hardcoded strings make sure the right paths are used
 	// TODO: figure out how to get these from the server config or incoming requests
-	
+
 	static final String REST_SERVLET_PATH = "/api";
 	static final String PYRAMID_SERVLET_PATH = "/pyramid";
 	static final String MMDB_WEBAPP_PATH = "/mmdb.html";
-	
+
 	static final String REST_INFIXES[] = new String[] {
             RestServlet.ANY_IMAGE_INFIX,
             RestServlet.IMAGE_INFIX,
@@ -379,13 +386,13 @@ public class TupeloStore {
             RestServlet.SEARCH_INFIX,
     };
 
-	
-	/** return a path to the iamge in the "/images" directory of the webapp 
+
+	/** return a path to the iamge in the "/images" directory of the webapp
 	 * @throws ServletException */
 	public static String getImagePath(HttpServletRequest request, String imageName) throws ServletException {
 		return getWebappPrefix(request) + request.getContextPath() + "/images/" + imageName;
 	}
-	
+
 	public static String getWebappPrefix(HttpServletRequest request) throws ServletException {
 		try {
             URL requestUrl = new URL(request.getRequestURL().toString());
@@ -404,7 +411,7 @@ public class TupeloStore {
 	}
 
 	static final String CANONICALIZER_SESSION_ATTRIBUTE = "edu.illinois.ncsa.mmdb.web.UriCanonicalizer";
-	
+
     public UriCanonicalizer getUriCanonicalizer(HttpServletRequest request) throws ServletException {
     	UriCanonicalizer canon = (UriCanonicalizer) request.getSession().getAttribute(CANONICALIZER_SESSION_ATTRIBUTE);
         if(canon == null) {
@@ -420,10 +427,10 @@ public class TupeloStore {
         }
         return canon;
     }
-    
+
     /**
      * Sets the URL to use for the extraction service.
-     * 
+     *
      * @param extractionServiceURL
      *            the URL to use for the extraction service.
      */
@@ -434,17 +441,17 @@ public class TupeloStore {
 
     /**
      * Returns the URL of the extraction service.
-     * 
+     *
      * @return the URL of the extraction service.
      */
     public String getExtractionServiceURL()
     {
         return extractionServiceURL;
     }
-    
+
     /**
      * Extract metadata and previews from the given URI.
-     * 
+     *
      * @param uri
      *            uri of dataset to pass to extraction service.
      * @return the job id at the extractor or null if the job was rejected.
@@ -454,7 +461,7 @@ public class TupeloStore {
         return extractPreviews( uri, false );
     }
 
-    
+
     public Context getExtractorContext() {
     	if(extractorContext == null) {
     		return getContext();
@@ -470,7 +477,7 @@ public class TupeloStore {
 	/**
      * Extract metadata and previews from the given URI. If rerun is set to true
      * it will tell the extraction service to rerun the extraction.
-     * 
+     *
      * @param uri
      *            uri of dataset to pass to extraction service.
      * @param rerun
@@ -600,14 +607,14 @@ public class TupeloStore {
     	return mPreview.getValue();
     }
 	/**
-	 * 
+	 *
 	 * @param collectionUri
 	 * @return
 	 */
 	public String getCollectionBadge(String collectionUri) {
 		return getPreview(collectionUri, GetPreviews.BADGE);
 	}
-	
+
     public ListTable<Resource> unifyExcludeDeleted(Unifier u, String subjectVar) throws OperatorException {
     	List<OrderBy> newOrderBy = new LinkedList<OrderBy>();
     	List<String> newColumnNames = new LinkedList<String>(u.getColumnNames());
@@ -642,8 +649,8 @@ public class TupeloStore {
     	uploadHistory.put(sessionKey,null);
     	return history;
     }
-    
-    // full-text 
+
+    // full-text
 
     /**
      * Call this when you've added something; e.g., a dataset or a collection.
@@ -653,7 +660,7 @@ public class TupeloStore {
      */
     public void created(String uri) {
     }
-    
+
     /**
      * Call this when you've changed something; e.g., a dataset or a collection.
      * This notifies the store that cached information (e.g., full-text indexing)
@@ -668,7 +675,7 @@ public class TupeloStore {
 		}
     	indexFullText(uri);
     }
-    
+
     /**
      * Call this when you've deleted something; e.g., a dataset or a collection.
      * This notifies the store that cached information (e.g., full-text indexing)
@@ -678,7 +685,7 @@ public class TupeloStore {
     public void deleted(String uri) {
     	deindexFullText(uri);
     }
-    
+
     SearchableTextIndex<String> search = null;
     public SearchableTextIndex<String> getSearch() {
     	return search;
@@ -689,7 +696,7 @@ public class TupeloStore {
 
     List<String> indexQueue = new LinkedList<String>();
     List<String> deindexQueue = new LinkedList<String>();
-    
+
     /**
      * Queue a dataset for full-text (re)indexing
      * @param datasetUri
@@ -706,7 +713,7 @@ public class TupeloStore {
     		}
     	}
     }
-    
+
     /**
      * Queue a dataset for full-text deindexing
      * @param datasetUri
@@ -723,7 +730,7 @@ public class TupeloStore {
     		}
     	}
     }
-    
+
     public int indexFullTextAll() {
     	int i = 0;
     	int batchSize = 100;
