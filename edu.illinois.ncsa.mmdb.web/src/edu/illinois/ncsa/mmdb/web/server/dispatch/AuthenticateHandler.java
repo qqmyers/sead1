@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Authenticate;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthenticateResult;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Authenticate user.
@@ -36,7 +37,10 @@ public class AuthenticateHandler implements
 
 		if ((new Authentication()).authenticate(username, password)) {
 			log.trace("User successfully authenticated");
-			return new AuthenticateResult(true, username);
+			// retrieve full user URI
+			// FIXME query rdf in case uri space has changed
+			String personID = PersonBeanUtil.getPersonID(username);
+			return new AuthenticateResult(true, personID);
 		} else {
 			log.trace("User failed authentication");
 			return new AuthenticateResult(false, "");

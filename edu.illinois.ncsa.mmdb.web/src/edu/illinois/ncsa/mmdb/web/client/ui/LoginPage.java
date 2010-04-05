@@ -3,8 +3,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.Date;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -52,14 +50,16 @@ public class LoginPage extends Composite {
 	private PasswordTextBox passwordBox;
 	private SimplePanel feedbackPanel;
 	private final MyDispatchAsync dispatchasync;
+	private final MMDB mainWindow;
 
 	/**
 	 * @param dispatchasync
 	 * 
 	 */
-	public LoginPage(MyDispatchAsync dispatchasync) {
+	public LoginPage(MyDispatchAsync dispatchasync, MMDB mainWindow) {
 
 		this.dispatchasync = dispatchasync;
+		this.mainWindow = mainWindow;
 
 		mainPanel = new FlowPanel();
 
@@ -209,7 +209,7 @@ public class LoginPage extends Composite {
 										}
 										GWT.log("user "+username+" associated with session key "+sessionKey,null);
 										// login local
-										login(arg0.getSessionId(), sessionKey);
+										mainWindow.login(arg0.getSessionId(), sessionKey);
 										redirect();
 									}
 								});
@@ -248,25 +248,40 @@ public class LoginPage extends Composite {
 		}
 	}
 
-	/**
-	 * Set the session id, add a cookie and add history token.
-	 * 
-	 * @param sessionId
-	 * 
-	 */
-	public static void login(String sessionId, String sessionKey) {
-		UserSessionState state = MMDB.getSessionState();
-		state.setUsername(sessionId);
-		state.setSessionKey(sessionKey);
-		MMDB.loginStatusWidget.login(sessionId);
-
-		// set cookie
-		// TODO move to more prominent place... MMDB? A class with static properties?
-		final long DURATION = 1000 * 60 * 60; // 60 minutes
-		Date expires = new Date(System.currentTimeMillis() + DURATION);
-		Cookies.setCookie("sid", sessionId, expires);
-		Cookies.setCookie("sessionKey", sessionKey, expires);
-	}
+//	/**
+//	 * Set the session id, add a cookie and add history token.
+//	 * 
+//	 * @param sessionId
+//	 * 
+//	 */
+//	public static void login(final String userId, final String sessionKey) {
+//		final UserSessionState state = MMDB.getSessionState();
+////		state.setUsername(userId);
+//		state.setSessionKey(sessionKey);
+//		// set cookie
+//		// TODO move to more prominent place... MMDB? A class with static properties?
+//		final long DURATION = 1000 * 60 * 60; // 60 minutes
+//		Date expires = new Date(System.currentTimeMillis() + DURATION);
+//		Cookies.setCookie("sid", userId, expires);
+//		Cookies.setCookie("sessionKey", sessionKey, expires);
+//		
+//		MMDB.dispatchAsync.execute(new GetUser(userId), new AsyncCallback<GetUserResult>() {
+//
+//			@Override
+//			public void onFailure(Throwable caught) {
+//				GWT.log("Error retrieving user with id " + userId);
+//			}
+//
+//			@Override
+//			public void onSuccess(GetUserResult result) {
+//				PersonBean personBean = result.getPersonBean();
+//				state.setCurrentUser(personBean);
+//				MMDB.loginStatusWidget.login(personBean.getName());
+//				GWT.log("Current user set to " + personBean.getUri());
+//			}
+//		});
+//
+//	}
 
 	public static void clearBrowserCreds() {
 		// now hit the REST authentication endpoint with bad creds
@@ -296,10 +311,10 @@ public class LoginPage extends Composite {
 	 */
 	public static void logout() {
 		UserSessionState state = MMDB.getSessionState();
-		if(state.getUsername() != null) {
-			GWT.log("user "+state.getUsername()+" logging out", null);
+		if(state.getCurrentUser().getUri() != null) {
+			GWT.log("user "+state.getCurrentUser().getUri()+" logging out", null);
 		}
-		state.setUsername(null);
+		state.setCurrentUser(null);
 		state.setSessionKey(null);
 		clearBrowserCreds();
 		Cookies.removeCookie("sid");

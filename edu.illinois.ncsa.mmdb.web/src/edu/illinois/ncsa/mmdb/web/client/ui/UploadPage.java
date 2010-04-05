@@ -110,7 +110,7 @@ public class UploadPage extends Page {
 			dndApplet.addStyleName("hidden");
 			dndTooltip.addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
-					if(MMDB.getSessionState().getUsername() == null) {
+					if(MMDB.getSessionState().getCurrentUser() == null) {
 						Window.confirm("Upload not permitted. Please log in");
 					} else {
 						boolean doit = true;

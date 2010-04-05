@@ -898,3 +898,9 @@ body {
 	vertical-align: sub;
 	color: gray;
 }
+
+.datasetInfoWidget {
+	border: 1px solid grey;
+	padding: 10px;
+	margin: 10px auto 10px auto;
+}

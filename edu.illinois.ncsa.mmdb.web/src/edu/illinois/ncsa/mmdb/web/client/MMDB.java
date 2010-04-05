@@ -1,6 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,34 +15,28 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewCollectionEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
-import edu.illinois.ncsa.mmdb.web.client.event.CancelEvent;
-import edu.illinois.ncsa.mmdb.web.client.event.CancelHandler;
-import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
-import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
@@ -62,6 +57,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.UploadPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.UserManagementPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.WatermarkTextBox;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
+import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
  * MMDB entry point.
@@ -134,8 +130,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		// history support
 		History.addValueChangeHandler(this);
-
-		checkPermissions(History.getToken());
+		
+		History.fireCurrentHistoryState();
 	}
 
 	Label debugLabel;
@@ -270,35 +266,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 		datasetTablePresenter.bind();
 
 		mainContainer.add(pagingView.asWidget());
-		
-		/*
-		if (!eventBus.isEventHandled(DatasetDeletedEvent.TYPE)) {
-			eventBus.addHandler(DatasetDeletedEvent.TYPE,
-					new DatasetDeletedHandler() {
-						public void onDeleteDataset(DatasetDeletedEvent event) {
-							ListDatasets query = new ListDatasets();
-							query.setOrderBy(uriForSortKey(sortKey));
-							query.setDesc(descForSortKey(sortKey));
-							query.setLimit(adjustedPageSize);
-							query.setOffset(pageOffset+adjustedPageSize-1);
-							dispatchAsync.execute(query,
-									new AsyncCallback<ListDatasetsResult>() {
-										public void onFailure(Throwable caught) {
-										}
-										public void onSuccess(ListDatasetsResult result) {
-											for (DatasetBean dataset : result.getDatasets()) {
-												GWT.log("Sending event add dataset "
-														+ dataset.getTitle(), null);
-												AddNewDatasetEvent event = new AddNewDatasetEvent();
-												event.setDataset(dataset);
-												eventBus.fireEvent(event);
-											}
-										}
-							});
-						}
-			});
-		}
-		*/
 	}
 	
 	/**
@@ -334,7 +301,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 				final CollectionBean collection = new CollectionBean();
 				collection.setTitle(addCollectionBox.getText());
 
-				dispatchAsync.execute(new AddCollection(collection, getSessionState().getUsername()),
+				dispatchAsync.execute(new AddCollection(collection, getSessionState().getCurrentUser().getUri()),
 						new AsyncCallback<AddCollectionResult>() {
 
 							@Override
@@ -382,7 +349,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	private void showDataset() {
 
-		if (checkLogin()) {
 			DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync);
 			mainContainer.clear();
 			mainContainer.add(datasetWidget);
@@ -392,180 +358,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			if (datasetUri != null) {
 				datasetWidget.showDataset(datasetUri);
 			}
-		}
-	}
-
-	private boolean uploadMenuVisible = false;
-	private UploadWidget uploadWidget;
-
-	private boolean dndEnabled = false;
-	
-	/**
-	 * @Deprecated Use UploadPage.java instead
-	 */
-	native void deployDndApplet(String credentials) /*-{
-		var attributes = {
-		code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-		archive:'dnd/DropUploader-490.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
-		width:60,
-		height:60
-		};
-		var parameters = {
-		jnlp_href: 'dropuploader.jnlp',
-		statusPage: $wnd.document.URL,
-		"credentials": credentials,
-		background: "0x006699",
-		};
-		$wnd.deployJava.runApplet(attributes, parameters, '1.5');
-		$wnd.document.getElementById('dndApplet').innerHTML = $wnd.deployJava.getDocument();
-	}-*/;
-
-	/**
-	 * @Deprecated Use UploadPage.java instead
-	 */
-	UploadWidget showUploadMenu() {
-		uploadWidget = new UploadWidget();
-		uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
-			public void onDatasetUploaded(DatasetUploadedEvent event) {
-				History.newItem("dataset?id=" + event.getDatasetUri());
-				hideUploadMenu();
-			}
-		});
-		uploadWidget.addCancelHandler(new CancelHandler() {
-			public void onCancel(CancelEvent event) {
-				hideUploadMenu();
-			}
-		});
-		HorizontalPanel uploadToolbar = new HorizontalPanel();
-		uploadToolbar.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		// uploadToolbar.addStyleName("debugLayout"); // FIXME debug
-		VerticalPanel dndPanel = new VerticalPanel();
-		dndPanel.setWidth("120px");
-		// dndPanel.addStyleName("debugLayout"); // FIXME debug
-		final FlowPanel dndApplet = new FlowPanel();
-		// dndApplet.addStyleName("debugLayout"); // FIXME debug
-		dndApplet.setHeight("60px");
-		dndApplet.setWidth("60px");
-		dndApplet.getElement().setId("dndApplet");
-		dndPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-		dndPanel.add(dndApplet);
-		if (!dndEnabled) {
-			dndApplet.addStyleName("hidden");
-		}
-		final String disabledMsg = "Click here to drag files and folders from your desktop";
-		final String enabledMsg = "Drop files and folders here";
-		final Label dndTooltip = new Label(dndEnabled ? enabledMsg
-				: disabledMsg);
-		dndTooltip.addStyleName("tooltip");
-		// dndTooltip.addStyleName("debugLayout"); // FIXME debug
-		dndPanel.add(dndTooltip);
-		uploadToolbar.add(dndPanel);
-
-		//
-		VerticalPanel uploadWidgetPanel = new VerticalPanel();
-		uploadWidgetPanel
-				.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-		uploadWidgetPanel.add(uploadWidget);
-		Label uploadWidgetTooltip = new Label("or choose a file to upload");
-		uploadWidgetTooltip.addStyleName("tooltip");
-		uploadWidgetPanel.add(uploadWidgetTooltip);
-		uploadToolbar.add(uploadWidgetPanel);
-
-//		toolbar.add(uploadToolbar);
-
-		final String sessionKey = getSessionState().getSessionKey();
-		if (dndEnabled) {
-			dndApplet.removeStyleName("hidden");
-			deployDndApplet(sessionKey);
-		} else {
-			dndTooltip.addClickHandler(new ClickHandler() {
-				public void onClick(ClickEvent event) {
-					if(sessionKey == null) {
-						Window.confirm("Upload not permitted. Please log in");
-					} else {
-						boolean doit = true;
-						if (!dndEnabled) {
-							doit = Window
-							.confirm("You will be asked to accept a security exception to allow our drag-and-drop upload tool to access your local files. If you don't wish to accept that security exception, press cancel.");
-						}
-						if (doit) {
-							dndApplet.removeStyleName("hidden");
-							deployDndApplet(sessionKey);
-							dndTooltip.setText(enabledMsg);
-							dndEnabled = true;
-						}
-					}
-				}
-			});
-		}
-
-		uploadMenuVisible = true;
-
-		return uploadWidget;
-	}
-
-	void hideUploadMenu() {
-//		toolbar.clear();
-		uploadMenuVisible = false;
-	}
-
-	/**
-	 * Show toolbar to upload datasets.
-	 * 
-	 * @return
-	 */
-	void toggleUploadMenu() {
-		if (!uploadMenuVisible && checkLogin()) {
-			
-			// Check if the user has been activated by an administrator
-			dispatchAsync.execute(new HasPermission(getSessionState().getUsername(),
-					Permission.VIEW_MEMBER_PAGES),
-					new AsyncCallback<HasPermissionResult>() {
-
-						@Override
-						public void onFailure(Throwable caught) {
-							GWT.log("Error checking if the users has " +
-									"permissions to view member pages",
-											caught);
-						}
-
-						@Override
-						public void onSuccess(HasPermissionResult result) {
-							if (result.isPermitted()) {
-								showUploadMenu();
-							} else {
-								hideUploadMenu();
-							}
-						}
-					});
-		} else {
-			hideUploadMenu();
-		}
-	}
-
-	/**
-	 * This is for when the POST doesn't come from an HTML form but from a
-	 * client that also controls the browser (e.g., an AJAX client or Java
-	 * applet); in that case said client can direct the browser to
-	 * #upload?session={sessionkey} to trigger the GWT upload progress bar for
-	 * the upload.
-	 */
-	void showUploadProgress() {
-		String sessionKey = getParams().get("session");
-		if (sessionKey != null) {
-			showUploadProgress(sessionKey);
-		}
-	}
-
-	void showUploadProgress(String sessionKey) {
-		if (sessionKey != null) {
-			if (!uploadMenuVisible) {
-				showUploadMenu(); // pop up the upload interface
-			}
-			// show the progress bar for the session key
-			String uploadServletUrl = GWT.getModuleBaseURL() + "UploadBlob";
-			uploadWidget.showProgress(sessionKey, uploadServletUrl);
-		}
 	}
 
 	/**
@@ -579,7 +371,15 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
 		GWT.log("History changed: " + event.getValue(), null);
 
-		checkPermissions(token);
+		if (token.startsWith("login")) {
+			showLoginPage();
+		} else if (token.startsWith("signup")) {
+			showSignupPage();
+		} else if (token.startsWith("requestNewPassword")) {
+			showRequestNewPasswordPage();
+		} else {
+			checkLogin();
+		}
 	}
 
 	/**
@@ -588,15 +388,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * @param token
 	 */
 	private void checkPermissions(final String token) {
-		if (token.startsWith("login")) {
-			showLoginPage();
-		} else if (token.startsWith("signup")) {
-			showSignupPage();
-		} else if (token.startsWith("requestNewPassword")) {
-			showRequestNewPasswordPage();
-		} else if (checkLogin()) {
 			// Check if the user has been activated by an administrator
-			dispatchAsync.execute(new HasPermission(getSessionState().getUsername(),
+			dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
 					Permission.VIEW_MEMBER_PAGES),
 					new AsyncCallback<HasPermissionResult>() {
 
@@ -617,9 +410,41 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 							}
 						}
 					});
-		} else {
-			showLoginPage();
-		}
+	}
+	
+	/**
+	 * Set the session id, add a cookie and add history token.
+	 * 
+	 * @param sessionId
+	 * 
+	 */
+	public void login(final String userId, final String sessionKey) {
+		final UserSessionState state = MMDB.getSessionState();
+		state.setSessionKey(sessionKey);
+		// set cookie
+		// TODO move to more prominent place... MMDB? A class with static properties?
+		final long DURATION = 1000 * 60 * 60; // 60 minutes
+		final Date expires = new Date(System.currentTimeMillis() + DURATION);
+		Cookies.setCookie("sessionKey", sessionKey, expires);
+		
+		MMDB.dispatchAsync.execute(new GetUser(userId), new AsyncCallback<GetUserResult>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				GWT.log("Error retrieving user with id " + userId);
+			}
+
+			@Override
+			public void onSuccess(GetUserResult result) {
+				PersonBean personBean = result.getPersonBean();
+				state.setCurrentUser(personBean);
+				MMDB.loginStatusWidget.login(personBean.getName());
+				GWT.log("Current user set to " + personBean.getUri());
+				Cookies.setCookie("sid", personBean.getUri(), expires);
+				checkPermissions(History.getToken());
+			}
+		});
+
 	}
 
 	/**
@@ -629,10 +454,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 *            history token (everything after the #)
 	 */
 	private void parseHistoryToken(String token) {
-		
-		if (token.startsWith("login")) {
-			showLoginPage();
-		} else if (checkLogin()) {
 			if (token.startsWith("dataset")) {
 				showDataset();
 			} else if (token.startsWith("listDatasets") && !previousHistoryToken.startsWith("listDatasets")) {
@@ -664,7 +485,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			} else if(!previousHistoryToken.startsWith("listDatasets")) {
 				listDatasets();
 			}
-		}
 		previousHistoryToken = token;
 	}
 
@@ -722,7 +542,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	private void showUsersPage() {
 		// Check if the user has view admin pages permission
-		dispatchAsync.execute(new HasPermission(getSessionState().getUsername(),
+		dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
 				Permission.VIEW_ADMIN_PAGES),
 				new AsyncCallback<HasPermissionResult>() {
 
@@ -753,7 +573,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	private void showSparqlPage() {
 		// Check if the user has view admin pages permission
-		dispatchAsync.execute(new HasPermission(getSessionState().getUsername(),
+		dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
 				Permission.VIEW_ADMIN_PAGES),
 				new AsyncCallback<HasPermissionResult>() {
 
@@ -808,7 +628,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	private void showLoginPage() {
 		mainContainer.clear();
-		mainContainer.add(new LoginPage(dispatchAsync));
+		mainContainer.add(new LoginPage(dispatchAsync, this));
 	}
 
 	/**
@@ -816,7 +636,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	 * 
 	 * @return true if logged in already, false if not
 	 */
-	public boolean checkLogin() {
+	public void checkLogin() {
 		String cookieSID = Cookies.getCookie("sid");
 		if(cookieSID != null) {
 			GWT.log("Sid: "+cookieSID, null);
@@ -826,10 +646,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 			GWT.log("Session key: "+cookieSessionKey,null);
 		}
 		if (cookieSID != null && cookieSessionKey != null) {
-			LoginPage.login(cookieSID, cookieSessionKey);
-			return true;
+			login(cookieSID, cookieSessionKey);
 		} else {
-			return false;
+			showLoginPage();
 		}
 	}
 	
@@ -847,7 +666,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 	// a common idiom
 	/** Get the currently-logged-in username, if any */
 	public static String getUsername() {
-		return getSessionState().getUsername();
+		PersonBean currentUser = getSessionState().getCurrentUser();
+		if (currentUser != null) {
+			return currentUser.getUri();
+		} else {
+			return null;
+		}
 	}
 	
 	// session preferences

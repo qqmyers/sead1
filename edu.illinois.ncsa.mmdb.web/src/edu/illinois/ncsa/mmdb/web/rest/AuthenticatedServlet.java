@@ -47,7 +47,7 @@ public class AuthenticatedServlet extends HttpServlet {
 	
 	public static String setSessionKey(ServletContext context, String userId) {
 		String sessionKey = SecureHashMinter.getMinter().mint();
-		log.info("LOGIN: generated new session key "+sessionKey+" for user "+userId);
+		log.info("Generated new session key "+sessionKey+" for user "+userId);
 		getSessionKeys(context).put(sessionKey, userId);
 		return sessionKey;
 	}
@@ -59,7 +59,7 @@ public class AuthenticatedServlet extends HttpServlet {
 	public static void clearSessionKey(ServletContext context, String sessionKey) {
 		Map<String,String> sk = getSessionKeys(context);
 		if(sk.containsKey(sessionKey)) {
-			log.debug("LOGOUT: destroying session key "+sessionKey);
+			log.debug("Destroying session key "+sessionKey);
 			getSessionKeys(context).remove(sessionKey);
 		}
 	}
@@ -83,7 +83,7 @@ public class AuthenticatedServlet extends HttpServlet {
 		}
 		String userId = (String) request.getSession(true).getAttribute(AUTHENTICATED_AS);
 		request.getSession(true).setAttribute(AUTHENTICATED_AS,null);
-		log.info("LOGOUT "+userId);
+		log.info(userId + " logged out");
 	}
 	
 	protected void logout(HttpServletRequest request, HttpServletResponse response) {
@@ -101,7 +101,7 @@ public class AuthenticatedServlet extends HttpServlet {
 		if(sessionKey != null) {
 			validUser = getUserId(context, sessionKey);
 			if(validUser == null) {
-				log.info("LOGIN: session key cookie "+sessionKey+" not found, authentication required");
+				log.info("Session key cookie "+sessionKey+" not found, authentication required");
 			} else {
 				//log.debug("LOGIN: user "+validUser+" logged in with session key "+sessionKey);
 			}
@@ -125,10 +125,10 @@ public class AuthenticatedServlet extends HttpServlet {
 				if(new Authentication().authenticate(username, password)) {
 					// set the session attribute indicating that we're authenticated
 					validUser = username;
-					log.info("LOGIN: "+username+" logged in with correct username/password credentials");
+					log.info(username+" logged in with correct username/password credentials");
 					// we're authenticating, so we need to generate a session key and put it in the context
 					sessionKey = setSessionKey(context, validUser);
-					log.info("LOGIN: setting Cookie sessionKey="+sessionKey+" (for user "+validUser+")");
+					log.info("Setting Cookie sessionKey="+sessionKey+" (for user "+validUser+")");
 					Cookie cookie = new Cookie("sessionKey", sessionKey);
 					cookie.setPath(request.getContextPath());
 					response.addCookie(cookie);
@@ -138,13 +138,13 @@ public class AuthenticatedServlet extends HttpServlet {
 		// now are we authenticated?
 		if(validUser == null) {
 			// no. reject
-			log.info("authentication FAILED: user has no cookie or valid credentials");
+			log.info("Authentication failed: user has no cookie or valid credentials");
 			return unauthorized(response);
 		} else {
 			// yes. record the user id in the http session
 			HttpSession session = request.getSession(true);
 			if(session.getAttribute(AUTHENTICATED_AS) == null) {
-				log.info("LOGIN: user "+validUser+" is now authenticated in HTTP session "+session.getId());
+				log.info("User "+validUser+" is now authenticated in HTTP session "+session.getId());
 				session.setAttribute(AUTHENTICATED_AS, validUser);
 			}
 			return authorized(request);

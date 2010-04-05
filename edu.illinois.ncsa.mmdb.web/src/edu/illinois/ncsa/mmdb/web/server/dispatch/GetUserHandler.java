@@ -39,8 +39,7 @@ public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
 		PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance()
 				.getBeanSession());
 		try {
-			Resource personID = Resource.uriRef(PersonBeanUtil
-					.getPersonID(action.getEmailAddress()));
+			Resource personID = Resource.uriRef(action.getEmailAddress());
 			TripleMatcher tm = new TripleMatcher();
 			tm.setSubject(personID);
 			context.perform(tm);
