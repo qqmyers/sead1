@@ -20,7 +20,6 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPending;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPendingResult;
-import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 
 /**
  *
@@ -118,7 +117,7 @@ public class PreviewWidget extends Composite {
                 }
 			});
 		}
-		addLink(previewImage, link);
+		addLink(previewImage);
 		contentPanel.clear();
 		contentPanel.add(previewImage);
 	}
@@ -126,7 +125,7 @@ public class PreviewWidget extends Composite {
 	/**
 	 * If link is available for image add a click handler to the image.
 	 */
-	private void addLink(Image image, final String link) {
+	private void addLink(Image image) {
 		if (link != null) {
 			image.addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
@@ -180,7 +179,9 @@ public class PreviewWidget extends Composite {
             public void onSuccess(IsPreviewPendingResult result) {
                 if(result.isReady()) {
                     contentPanel.clear();
-                    contentPanel.add(new Image(PREVIEW_URL.get(size) + datasetUri));
+                    image = new Image(PREVIEW_URL.get(size) + datasetUri);
+                    contentPanel.add(image);
+                    addLink(image);
                 } else if(!result.isReady()) {
                     retryTimer = new Timer() {
                         @Override
@@ -204,7 +205,7 @@ public class PreviewWidget extends Composite {
 			contentPanel.clear();
 			image = new Image(GRAY_URL.get(size));
 			image.addStyleName("thumbnail");
-			addLink(image, link);
+			addLink(image);
 			image.addStyleName("imagePreviewShortWidth");
 			//image.setWidth(getMaxWidth()+"px");
 			contentPanel.add(image);
@@ -228,7 +229,7 @@ public class PreviewWidget extends Composite {
 			} else {
 				image.addStyleName("pendingSmall");
 			}
-			addLink(image, link);
+			addLink(image);
 			image.addStyleName("imagePreviewShortWidth");
 			//image.setWidth(getMaxWidth()+"px");
 			contentPanel.add(image);
@@ -250,67 +251,6 @@ public class PreviewWidget extends Composite {
 			noPreview.setHeight("75px");
 		}
 		contentPanel.add(noPreview);
-	}
-
-	/**
-	 *
-	 * @param datasetUri
-	 * @param size
-	 * @param link
-	 * @param previews
-	 * @return
-	 */
-	private Image createImage(final String datasetUri, final String size,
-			final String link, Map<String, PreviewImageBean> previews) {
-
-		image = new Image(PREVIEW_URL.get(size) + datasetUri);
-
-		if (size.equals(GetPreviews.LARGE)) {
-			image.addStyleName("imagePreviewNoOverflow");
-
-			// keep aspect ratio
-			PreviewImageBean previewImageBean = previews.get(GetPreviews.LARGE);
-			long width = previewImageBean.getWidth();
-			long height = previewImageBean.getHeight();
-			if (width >= height) {
-				if (width >= maxWidth) {
-					image.addStyleName("imagePreviewShortWidth");
-					image.setWidth(maxWidth+"px");
-				}
-			} else {
-				if (height >= maxWidth) {
-					image.addStyleName("imagePreviewShortHeight");
-					image.setHeight(maxWidth+"px");
-				}
-			}
-		} else {
-			image.addStyleName("thumbnail");
-		}
-
-		/*
-		image.addErrorHandler(new ErrorHandler() {
-			public void onError(ErrorEvent arg0) {
-
-				statusLabel(LOADING_TEXT);
-
-				// wait before trying again
-				Timer tryAgain = new Timer() {
-					@Override
-					public void run() {
-						getPreview(datasetUri, link);
-					}
-				};
-				if (delays[whichDelay] > 0) {
-					tryAgain.schedule(delays[whichDelay++]);
-				}
-				statusLabel(NO_PREVIEW_TEXT);
-			}
-		});
-		*/
-
-		addLink(image, link);
-
-		return image;
 	}
 
 	public int getMaxWidth() {
