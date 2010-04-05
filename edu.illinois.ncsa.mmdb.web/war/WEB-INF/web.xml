@@ -32,6 +32,11 @@
 	</servlet>
 		
 	<servlet>
+		<servlet-name>Extractor Servlet</servlet-name>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.ExtractorServlet</servlet-class>
+	</servlet>
+		
+	<servlet>
 		<servlet-name>tupelo</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.server.TupeloServlet</servlet-class>
 	</servlet>
@@ -78,6 +83,11 @@
 	<servlet-mapping>
 		<servlet-name>Image Pyramid Servlet</servlet-name>
 		<url-pattern>/pyramid/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>Extractor Servlet</servlet-name>
+		<url-pattern>/extractor/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
