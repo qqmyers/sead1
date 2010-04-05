@@ -236,7 +236,7 @@ public class TupeloStore {
 	private void setExpirationTime(Object bean) {
 	    synchronized(beanExp) {
 	        long now = System.currentTimeMillis();
-	        long exp = now + 10000; // 10s // FIXME make 2 min
+	        long exp = now + 120000; // 10s // FIXME make 2 min
 	        if(exp < soonestExp) {
 	            soonestExp = exp;
 	        }

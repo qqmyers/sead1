@@ -2,9 +2,13 @@ package edu.illinois.ncsa.mmdb.web.server.search;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
+
+import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,8 +22,15 @@ import org.tupeloproject.rdf.terms.Rdfs;
 import edu.illinois.ncsa.cet.search.TextExtractor;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
@@ -31,7 +42,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 public class SearchableThingTextExtractor implements TextExtractor<String> {
 	Log log = LogFactory.getLog(SearchableThingTextExtractor.class);
-	
+
 	BeanSession getBeanSession() throws OperatorException, ClassNotFoundException {
 		return CETBeans.createBeanSession(TupeloStore.getInstance().getContext());
 	}
@@ -43,7 +54,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 			bs.close();
 		}
 	}
-	
+
 	@Override
 	/**
 	 * Extract a text representation of an mmdb thing (e.g., a dataset or collection)
@@ -71,15 +82,15 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		//log.debug(uri+"="+text); // FIXME debug
 		return text;
 	}
-	
+
 	String text(String uri) throws OperatorException, ClassNotFoundException {
-		return unsplit(title(uri), tags(uri), authors(uri), annotations(uri), collections(uri));
+		return unsplit(title(uri), tags(uri), authors(uri), annotations(uri), collections(uri), metadata(uri), userMetadata(uri));
 	}
 
 	String text(CETBean bean) throws OperatorException, ClassNotFoundException {
-		return unsplit(title(bean), tags(bean), authors(bean), annotations(bean), collections(bean));
+		return unsplit(title(bean), tags(bean), authors(bean), annotations(bean), collections(bean), metadata(bean), userMetadata(bean));
 	}
-	
+
 	String authors(DatasetBean bean) {
 		List<PersonBean> contributors = new LinkedList<PersonBean>();
 		contributors.add(bean.getCreator());
@@ -109,7 +120,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 			return authors(bean.getUri());
 		}
 	}
-	
+
 	// aaagh, unsafe casts
 	String authors(String uri) {
 		try {
@@ -125,11 +136,11 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		}
 		return "";
 	}
-	
+
 	String tags(CETBean bean) throws OperatorException, ClassNotFoundException {
 		return tags(bean.getUri());
 	}
-	
+
 	String tags(String uri) throws OperatorException, ClassNotFoundException {
 		BeanSession bs = getBeanSession();
 		TagEventBeanUtil tebu = new TagEventBeanUtil(bs);
@@ -144,11 +155,11 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 			bs.close();
 		}
 	}
-	
+
 	String annotations(CETBean bean) throws OperatorException, ClassNotFoundException {
 		return annotations(bean.getUri());
 	}
-	
+
 	String annotations(String uri) throws OperatorException, ClassNotFoundException {
 		BeanSession bs = getBeanSession();
 		AnnotationBeanUtil abu = new AnnotationBeanUtil(bs);
@@ -158,7 +169,6 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 				annotations.add(annotation.getDescription());
 			}
 		} catch (OperatorException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return "";
 		} finally {
@@ -170,7 +180,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 	String collections(CETBean bean) {
 		return collections(bean.getUri());
 	}
-	
+
 	String collections(String uri) {
 		GetCollectionsResult r = GetCollectionsHandler.getCollections(new GetCollections(uri));
 		List<String> names = new LinkedList<String>();
@@ -179,7 +189,48 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		}
 		return unsplit(names);
 	}
-	
+
+	String metadata(CETBean bean) {
+	    return metadata(bean.getUri());
+	}
+
+	String metadata(String uri) {
+	    GetMetadata gm = new GetMetadata(uri);
+	    GetMetadataResult gmr;
+	    try {
+	        gmr = (new GetMetadataHandler()).execute(gm,null);
+	    } catch(ActionException e) {
+	        e.printStackTrace();
+	        return "";
+	    }
+	    List<String> allValues = new LinkedList<String>();
+	    for(Metadata m : gmr.getMetadata()) {
+	        allValues.add(m.getValue());
+	    }
+	    return unsplit(allValues);
+	}
+
+	String userMetadata(CETBean bean) {
+	    return userMetadata(bean.getUri());
+	}
+
+	String userMetadata(String uri) {
+	    GetUserMetadataFields gumf = new GetUserMetadataFields(uri);
+	    GetUserMetadataFieldsResult gumfr;
+        try {
+            gumfr = (new GetUserMetadataFieldsHandler()).execute(gumf, null);
+        } catch (ActionException e) {
+            e.printStackTrace();
+            return "";
+        }
+        List<String> allValues = new LinkedList<String>();
+	    for(Map.Entry<String,Collection<String>> entry : gumfr.getValues().entrySet()) {
+	        log.debug(entry.getKey()+"="+entry.getValue());
+	        allValues.addAll(entry.getValue());
+	    }
+	    return unsplit(allValues);
+	}
+
 	// split a string into words on non-whitespace boundaries
 	static String atomize(String title) {
 		String e = title.replaceAll("([a-z])([A-Z])","$1 $2");
@@ -188,7 +239,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		e = e.replaceAll("  +"," ");
 		return title+" "+e;
 	}
-	
+
 	/*
 	public static void main(String args[]) {
 		String examples[] = new String[] {
@@ -204,11 +255,11 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		}
 	}
 	*/
-	
+
 	String title(CETBean bean) {
 		return atomize(bean.getLabel());
 	}
-	
+
 	String title(String uri) throws OperatorException, ClassNotFoundException {
 		BeanSession bs = getBeanSession();
 		try {
@@ -232,7 +283,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 		}
 		return sw.toString();
 	}
-	
+
 	String unsplit(String... strings) {
 		List<String> s = new ArrayList<String>(strings.length);
 		for(int i = 0; i < strings.length; i++) {
