@@ -26,6 +26,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDerivedFromHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoPointHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRecentActivityHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUploadDestinationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
@@ -87,6 +88,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new SearchHandler());
         DispatchUtil.registerHandler(new RemoveFromCollectionHandler());
         DispatchUtil.registerHandler(new GetAllTagsHandler());
+        DispatchUtil.registerHandler(new GetRecentActivityHandler());
         DispatchUtil.registerHandler(new ReindexLuceneHandler());
         DispatchUtil.registerHandler(new IsPreviewPendingHandler());
 	}

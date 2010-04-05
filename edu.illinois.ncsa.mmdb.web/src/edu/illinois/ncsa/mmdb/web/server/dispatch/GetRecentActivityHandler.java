@@ -1,0 +1,100 @@
+/**
+ *
+ */
+package edu.illinois.ncsa.mmdb.web.server.dispatch;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import net.customware.gwt.dispatch.server.ActionHandler;
+import net.customware.gwt.dispatch.server.ExecutionContext;
+import net.customware.gwt.dispatch.shared.ActionException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.query.OrderBy;
+import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.Tuple;
+
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRecentActivity;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRecentActivityResult;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+
+/**
+ * Find out recent activity for a particular user.
+ * 
+ * @author Luigi Marini
+ * 
+ */
+public class GetRecentActivityHandler implements ActionHandler<GetRecentActivity, GetRecentActivityResult> {
+
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog(GetRecentActivityHandler.class);
+
+    @Override
+    public GetRecentActivityResult execute(GetRecentActivity getRecentActivity,
+            ExecutionContext arg1) throws ActionException {
+
+        String user = getRecentActivity.getUser();
+
+        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+
+        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+
+        List<DatasetBean> datasets = new ArrayList<DatasetBean>();
+
+        log.debug("Getting recent activity for user " + user);
+
+        // TODO implement query
+        Unifier uf = new Unifier();
+        uf.addPattern("dataset", Rdf.TYPE, Cet.DATASET);
+        uf.addPattern("dataset", Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "_ued", true);
+        uf.addPattern("dataset", Dc.CREATOR, Resource.uriRef(user));
+        uf.addPattern("dataset", Dc.DATE, "date");
+        uf.setColumnNames("dataset", "date");
+
+        List<OrderBy> listOrderBy = new LinkedList<OrderBy>();
+        OrderBy orderBy = new OrderBy();
+        orderBy.setName("date");
+        orderBy.setAscending(false);
+        listOrderBy.add(orderBy);
+        uf.setOrderBy(listOrderBy);
+
+        try {
+            TupeloStore.getInstance().getContext().perform(uf);
+            int showIndex = 0;
+            for (Tuple<Resource> row : uf.getResult() ) {
+                if (showIndex < getRecentActivity.getMaxNum() && row.get(0) != null) {
+                    datasets.add(dbu.get(row.get(0)));
+                    showIndex++;
+                }
+            }
+        } catch (OperatorException e1) {
+            log.error("Error getting recent activity for user" + user, e1);
+        }
+
+        return new GetRecentActivityResult(datasets);
+    }
+
+    @Override
+    public Class<GetRecentActivity> getActionType() {
+        return GetRecentActivity.class;
+    }
+
+    @Override
+    public void rollback(GetRecentActivity arg0, GetRecentActivityResult arg1,
+            ExecutionContext arg2) throws ActionException {
+        // TODO Auto-generated method stub
+
+    }
+
+}

@@ -898,7 +898,20 @@ body {
 }
 
 .datasetInfoWidget {
-	border: 1px solid grey;
 	padding: 10px;
 	margin: 10px auto 10px auto;
+	vertical-align: middle;
+}
+
+.datasetInfoThumbnail {
+	float: left;
+}
+
+.datasetInfoDescription {
+	float: left;
+	margin-left: 20px;
+}
+
+.datasetInfoDescription div {
+	margin-bottom: 5px;
 }
