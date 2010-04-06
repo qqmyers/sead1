@@ -5,9 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
-import org.tupeloproject.rdf.terms.DcTerms;
+import org.tupeloproject.rdf.terms.Files;
 
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.workflow.Cyberintegrator;
@@ -16,68 +15,92 @@ import edu.uiuc.ncsa.cet.bean.tupelo.workflow.Cyberintegrator;
  * RestService
  */
 public interface RestService {
-    public static final Resource IMAGE_TYPE = Cyberintegrator.DATASET;
-    public static final Resource COLLECTION_TYPE = CollectionBeanUtil.COLLECTION_TYPE;
-    public static final Resource HAS_MEMBER = CollectionBeanUtil.DCTERMS_HAS_PART;
-    public static final Resource LABEL_PROPERTY = Dc.TITLE;
-    public static final Resource DATE_PROPERTY = Dc.DATE;
-    public static final Resource FORMAT_PROPERTY = Dc.FORMAT;
-    
-	// image CRUD
+    public static final Resource IMAGE_TYPE        = Cyberintegrator.DATASET;
+    public static final Resource COLLECTION_TYPE   = CollectionBeanUtil.COLLECTION_TYPE;
+    public static final Resource HAS_MEMBER        = CollectionBeanUtil.DCTERMS_HAS_PART;
+    public static final Resource LABEL_PROPERTY    = Dc.TITLE;
+    public static final Resource DATE_PROPERTY     = Dc.DATE;
+    public static final Resource FORMAT_PROPERTY   = Dc.FORMAT;
+    public static final Resource FILENAME_PROPERTY = Files.HAS_NAME;                     // FIXME undeprecate
+
+    // image CRUD
     /**
      * Create an image
-     * @param imageData a stream containing image data
+     * 
+     * @param imageData
+     *            a stream containing image data
      * @return a new URI identifying the image
      */
     String createImage(InputStream imageData) throws RestServiceException;
 
     /**
      * Create an image
-     * @param metadata to give it
-     * @param imageData a stream containing image data
+     * 
+     * @param metadata
+     *            to give it
+     * @param imageData
+     *            a stream containing image data
      */
-    String createImage(Map<Resource,Object> metadata, InputStream imageData) throws RestServiceException;
+    String createImage(Map<Resource, Object> metadata, InputStream imageData) throws RestServiceException;
 
     /**
      * Create an image
-     * @param imageUri the URI to give it
-     * @param imageData a stream containing image data
+     * 
+     * @param imageUri
+     *            the URI to give it
+     * @param imageData
+     *            a stream containing image data
      */
     void createImage(String imageUri, InputStream imageData) throws RestServiceException;
 
     /**
      * Create an image
-     * @param imageUri the URI to give it
-     * @param metadata to give it
-     * @param imageData a stream containing image data
+     * 
+     * @param imageUri
+     *            the URI to give it
+     * @param metadata
+     *            to give it
+     * @param imageData
+     *            a stream containing image data
      */
-    void createImage(String imageUri, Map<Resource,Object> metadata, InputStream imageData) throws RestServiceException;
+    void createImage(String imageUri, Map<Resource, Object> metadata, InputStream imageData) throws RestServiceException;
 
     /**
      * Retrieve an image
-     * @param imageUri the URI of the image to retrieve
+     * 
+     * @param imageUri
+     *            the URI of the image to retrieve
      * @return a stream on the image data
      */
     InputStream retrieveImage(String imageUri) throws RestServiceException;
 
     /**
      * Update an image
-     * @param imageUri the image URI
-     * @param imageData a stream on the data to replace it with
+     * 
+     * @param imageUri
+     *            the image URI
+     * @param imageData
+     *            a stream on the data to replace it with
      */
     void updateImage(String imageUri, InputStream imageData) throws RestServiceException;
 
     /**
      * Update an image
-     * @param imageUri the image URI
-     * @param metadata to give it
-     * @param imageData a stream on the data to replace it with
+     * 
+     * @param imageUri
+     *            the image URI
+     * @param metadata
+     *            to give it
+     * @param imageData
+     *            a stream on the data to replace it with
      */
-    void updateImage(String imageUri, Map<Resource,Object> metadata, InputStream imageData) throws RestServiceException;
+    void updateImage(String imageUri, Map<Resource, Object> metadata, InputStream imageData) throws RestServiceException;
 
     /**
      * Delete an image
-     * @param imageUri the image URI
+     * 
+     * @param imageUri
+     *            the image URI
      */
     void deleteImage(String imageUri) throws RestServiceException;
 
@@ -85,28 +108,37 @@ public interface RestService {
 
     /**
      * Create a collection
-     * @param members the members of the collection (should be URI's)
+     * 
+     * @param members
+     *            the members of the collection (should be URI's)
      * @return a new URI identifying the collection
      */
     String createCollection(Iterable<String> members) throws RestServiceException;
 
     /**
      * Update a collection
-     * @param collectionUri the collection URI
-     * @param members the new set of members (should be URI's)
+     * 
+     * @param collectionUri
+     *            the collection URI
+     * @param members
+     *            the new set of members (should be URI's)
      */
     void updateCollection(String collectionUri, Iterable<String> members) throws RestServiceException;
 
     /**
      * Retrieve a collection
-     * @param collectionUri the collection URI
+     * 
+     * @param collectionUri
+     *            the collection URI
      * @return the members (a list of URI's)
      */
     List<String> retrieveCollection(String collectionUri) throws RestServiceException;
 
     /**
      * Delete a collection
-     * @param collectionUri the collection URI
+     * 
+     * @param collectionUri
+     *            the collection URI
      */
     void deleteCollection(String collectionUri) throws RestServiceException;
 
@@ -114,15 +146,21 @@ public interface RestService {
 
     /**
      * Add to a collection
-     * @param collectionUri the collection URI
-     * @param members the members to add (should be URI's)
+     * 
+     * @param collectionUri
+     *            the collection URI
+     * @param members
+     *            the members to add (should be URI's)
      */
     void addToCollection(String collectionUri, Iterable<String> members) throws RestServiceException;
 
     /**
      * Remove from a collection
-     * @param collectionUri the collection URI
-     * @param members the members to remove (should be URI's)
+     * 
+     * @param collectionUri
+     *            the collection URI
+     * @param members
+     *            the members to remove (should be URI's)
      */
     void removeFromCollection(String collectionUri, Iterable<String> members) throws RestServiceException;
 
@@ -130,15 +168,22 @@ public interface RestService {
 
     /**
      * Add tag(s) to a resource
-     * @param resourceUri the resource URI
-     * @param tags tags to add (should be tag-like strings (e.g., no spaces))
+     * 
+     * @param resourceUri
+     *            the resource URI
+     * @param tags
+     *            tags to add (should be tag-like strings (e.g., no spaces))
      */
     void addTags(String resourceUri, Iterable<String> tags);
 
     /**
      * Remove tag(s) from a resource
-     * @param resourceUri the resource URI
-     * @param tags the tags to remove (should be tag-like strings (e.g., no spaces))
+     * 
+     * @param resourceUri
+     *            the resource URI
+     * @param tags
+     *            the tags to remove (should be tag-like strings (e.g., no
+     *            spaces))
      */
     void removeTags(String resourceUri, Iterable<String> tags);
 
@@ -146,22 +191,28 @@ public interface RestService {
 
     /**
      * Rate the resource
-     * @param resourceUri the resource URI
-     * @param rating 1-5
+     * 
+     * @param resourceUri
+     *            the resource URI
+     * @param rating
+     *            1-5
      */
     void setRating(String resourceUri, int rating);
 
     /**
      * Retrieve the user's rating for the resource
-     * @param resourceUri the resource URI
+     * 
+     * @param resourceUri
+     *            the resource URI
      * @return the rating (1-5)
      */
     int getRating(String resourceUri);
-    
+
     /**
      * Generate a URI for an entity (e.g., image) with the given metadata
+     * 
      * @param metadata
      * @return
      */
-    String mintUri(Map<Resource,Object> metadata);
+    String mintUri(Map<Resource, Object> metadata);
 }
