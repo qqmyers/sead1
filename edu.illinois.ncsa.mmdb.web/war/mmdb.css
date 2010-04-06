@@ -353,11 +353,16 @@ body {
 	padding-bottom: 30px;
 }
 
+.dndContainer {
+	width: 152px;
+}
+
 .dragAndDrop {
-	width: 150px;
+	width: 152px;
 	border: 1px dashed #002B55;
-	padding: 5px;
+	padding: 1px;
 	cursor: pointer;
+	font-size: 0.8em;
 }
 	
 	

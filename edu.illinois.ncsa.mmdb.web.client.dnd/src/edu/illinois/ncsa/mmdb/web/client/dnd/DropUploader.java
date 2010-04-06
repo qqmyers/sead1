@@ -67,7 +67,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	}
 	
 	public void duInit() throws Exception {
-		setSize(64, 64);
+		setSize(150, 100);
 
 		ImageIcon dropIcon = getIcon("Load.png", "Upload");
 		ImageIcon doneIcon = getIcon("Green_check.png", "Done");
@@ -76,8 +76,6 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		// the drop target
 		JLabel dropLabel = new JLabel(dropIcon);
 		dropLabel.setOpaque(true);
-		// This class will handle the drop events
-		dropTarget = new DropTarget(dropLabel, this);
 		
 		// the progress pie
 		progressPie = new ProgressPie();
@@ -113,6 +111,10 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		String auth = getParameter("credentials");
 		log("credentials = "+auth);
 		
+		mainCards.setBounds(0, 0, 150, 100);
+		// This class will handle the drop events
+		dropTarget = new DropTarget(mainCards, this);
+		
 		getContentPane().add(mainCards, BorderLayout.CENTER);
 
 		setVisible(true);
@@ -144,7 +146,11 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	
 	void droppedFile(URI uri, List<File> files) {
 		if(uri != null && uri.isAbsolute() && uri.getScheme().equals("file")) {
-			File f = new File(uri.getPath());
+			droppedFile(new File(uri.getPath()), files);
+		}
+	}
+    void droppedFile(File f, List<File> files) {
+		if(f != null) {
 			log("dropped file "+f);
 			files.add(f);
 		}
@@ -160,8 +166,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				URI uri = null;
 				if (flavor.isFlavorJavaFileListType()) {
 					for(File file : (List<File>) tr.getTransferData(flavor)) {
-						log("dropped file "+file);
-						files.add(file);
+						droppedFile(file,files);
 					}
 					break;
 				} else if(flavor.isFlavorTextType()) {
@@ -192,6 +197,10 @@ public class DropUploader extends JApplet implements DropTargetListener {
 					log("collection name = "+collectionName);
 				}
 				files = expandDirectories(files,false); // expand directories 
+				for(File file : files) {
+					JSObject window = JSObject.getWindow(DropUploader.this);
+					window.call("dndAppletFileDropped",new Object[] { file.getName() });
+				}
 				//ta.setText(files.size()+" file(s) dropped: "+files);
 				uploadFiles(files,collectionName);
 			}
@@ -499,7 +508,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		String postBatch(List<File> batch, int offset, int nFiles) throws Exception {
 			// acquire the session key and start tracking progress
 			String sessionKey = getSessionKey();
-			showProgressPie();
+			//showProgressPie();
 			// assume progress thread is non-null and started
 			// set up the POST batch
 			PostMethod post = new PostMethod();
@@ -572,7 +581,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				log("post complete, got redirect url "+url);
 				//if(url.startsWith("/")) { url = url.substring(1); }
 				//getAppletContext().showDocument(new URL(getContextUrl()+url));
-				showCard("done");
+				//showCard("done");
 				stopProgressThread();
 			} catch(Exception x) {
 				showErrorCard();
