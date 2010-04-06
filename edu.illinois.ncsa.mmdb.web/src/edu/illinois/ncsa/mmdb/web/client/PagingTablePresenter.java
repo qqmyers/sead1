@@ -7,18 +7,18 @@ import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 
 public class PagingTablePresenter<T> extends BasePresenter<PagingTablePresenter.Display<T>> {
 
-	public PagingTablePresenter(Display<T> display, HandlerManager eventBus) {
-		super(display, eventBus);
-	}
+    public PagingTablePresenter(Display<T> display, HandlerManager eventBus) {
+        super(display, eventBus);
+    }
 
-	
-	@Override
-	public void bind() {
-		super.bind();
-	}
+    @Override
+    public void bind() {
+        super.bind();
+    }
 
+    public interface Display<T> extends View {
+        void addItem(String uri, T item);
 
-	public interface Display<T> extends View {
-		void addItem(String uri, T item);
-	}
+        void addItem(String uri, T item, int position);
+    }
 }

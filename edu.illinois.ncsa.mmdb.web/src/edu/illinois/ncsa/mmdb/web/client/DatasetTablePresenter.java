@@ -20,45 +20,49 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  * @author Luigi Marini
  */
 public class DatasetTablePresenter extends
-		BasePresenter<DatasetTablePresenter.Display> {
+        BasePresenter<DatasetTablePresenter.Display> {
 
-	public DatasetTablePresenter(Display widget, HandlerManager eventBus) {
-		super(widget, eventBus);
-	}
+    public DatasetTablePresenter(Display widget, HandlerManager eventBus) {
+        super(widget, eventBus);
+    }
 
-	@Override
-	public void bind() {
+    @Override
+    public void bind() {
 
-		super.bind();
+        super.bind();
 
-		eventBus.addHandler(AddNewDatasetEvent.TYPE,
-				new AddNewDatasetHandler() {
+        eventBus.addHandler(AddNewDatasetEvent.TYPE,
+                new AddNewDatasetHandler() {
 
-					@Override
-					public void onAddNewDataset(AddNewDatasetEvent event) {
-						DatasetBean dataset = event.getDataset();
-						String id = dataset.getUri();
-						String title = dataset.getTitle();
-						String type = dataset.getMimeType();
-						Date date = dataset.getDate();
-						String previewUri = "/api/image/preview/small/"+id;
-						String size = TextFormatter.humanBytes(dataset.getSize());
-						String authorsId = dataset.getCreator().getName();
-						display.addRow(id, title, type, date, previewUri, size, authorsId);
-					}
-				});
-	}
+                    @Override
+                    public void onAddNewDataset(AddNewDatasetEvent event) {
+                        DatasetBean dataset = event.getDataset();
+                        String id = dataset.getUri();
+                        String title = dataset.getTitle();
+                        String type = dataset.getMimeType();
+                        Date date = dataset.getDate();
+                        String previewUri = "/api/image/preview/small/" + id;
+                        String size = TextFormatter.humanBytes(dataset.getSize());
+                        String authorsId = dataset.getCreator().getName();
+                        display.addRow(id, title, type, date, previewUri, size, authorsId);
+                    }
+                });
+    }
 
-	interface Display extends View {
-		/** add a row to this multi-dataset view */
-		void addRow(String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId);
-		/** signal that no more rows will be added on this page */
-		void doneAddingRows();
-		/** return the optimal page size for this view */
-		int getPageSize();
-	}
+    interface Display extends View {
+        /** add a row to this multi-dataset view */
+        void addRow(String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId);
 
-	public Widget getWidget() {
-		return (Widget) this.display;
-	}
+        void insertRow(int position, String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId);
+
+        /** signal that no more rows will be added on this page */
+        void doneAddingRows();
+
+        /** return the optimal page size for this view */
+        int getPageSize();
+    }
+
+    public Widget getWidget() {
+        return (Widget) this.display;
+    }
 }

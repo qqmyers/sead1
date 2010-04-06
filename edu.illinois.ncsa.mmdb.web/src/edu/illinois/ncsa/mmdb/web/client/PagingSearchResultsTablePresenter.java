@@ -8,23 +8,24 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class PagingSearchResultsTablePresenter extends PagingTablePresenter<DatasetBean> {
 
-	public PagingSearchResultsTablePresenter(Display<DatasetBean> display, HandlerManager eventBus) {
-		super(display, eventBus);
-	}
-	
-	@Override
-	public void bind() {
+    public PagingSearchResultsTablePresenter(Display<DatasetBean> display, HandlerManager eventBus) {
+        super(display, eventBus);
+    }
 
-		super.bind();
+    @Override
+    public void bind() {
 
-		eventBus.addHandler(AddNewDatasetEvent.TYPE,
-				new AddNewDatasetHandler() {
-					@Override
-					public void onAddNewDataset(AddNewDatasetEvent event) {
-						DatasetBean dataset = event.getDataset();
-						String id = dataset.getUri();
-						display.addItem(id, dataset);
-					}
-				});
-	}
+        super.bind();
+
+        eventBus.addHandler(AddNewDatasetEvent.TYPE,
+                new AddNewDatasetHandler() {
+                    @Override
+                    public void onAddNewDataset(AddNewDatasetEvent event) {
+                        DatasetBean dataset = event.getDataset();
+                        String id = dataset.getUri();
+                        int position = event.getPosition();
+                        display.addItem(id, dataset, position);
+                    }
+                });
+    }
 }

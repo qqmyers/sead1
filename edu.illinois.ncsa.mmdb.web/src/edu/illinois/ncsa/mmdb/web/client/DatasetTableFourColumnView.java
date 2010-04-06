@@ -20,63 +20,70 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class DatasetTableFourColumnView extends DatasetTableView {
 
-	private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDateTimeFormat();
-	
-	private final ArrayList<Hyperlink> datasetLinks = new ArrayList<Hyperlink>();
+    private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDateTimeFormat();
 
-	private final String BLOB_URL = "./api/image/";
-	private final String PREVIEW_URL = "./api/image/preview/small/";
-	
-	public DatasetTableFourColumnView() {
-		super();
-		this.setWidget(0, 0, new Label("Name"));
-		this.setWidget(0, 1, new Label("Type"));
-		this.setWidget(0, 2, new Label("Date"));
-		this.setWidget(0, 3, new Label(""));
-		addStyleName("datasetTable");
-		getRowFormatter().addStyleName(0, "topRow");
-	}
+    private final ArrayList<Hyperlink>  datasetLinks     = new ArrayList<Hyperlink>();
 
-	public int getPageSize() {
-		return 10;
-	}
-	
-	@Override
-	public void addRow(String id, String name, String type, Date date, String preview, String size, String authorsId) {
-		GWT.log("Adding dataset " + name, null);
-		int row = this.getRowCount();
-		Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
-		datasetLinks.add(hyperlink);
-		this.setWidget(row, 0, hyperlink);
-		
-		this.setWidget(row, 1, new Label(type));
-		this.setWidget(row, 2, new Label(DATE_TIME_FORMAT.format(date)));
-		this.setWidget(row, 3, new Image(PREVIEW_URL + id));
-		
-		/*
-		if (preview != null) {
-			this.setWidget(row, 3, new Image(BLOB_URL + preview));
-		} else {
-			this.setWidget(row, 3, new SimplePanel());
-		}
-		*/
-		
-		for (int col=0; col<4; col++) {
-			getCellFormatter().addStyleName(row, col, "cell");
-		}
-		
-		if (row % 2 == 0) {
-			getRowFormatter().addStyleName(row, "evenRow");
-		} else {
-			getRowFormatter().addStyleName(row, "oddRow");
-		}
-	}
+    private final String                BLOB_URL         = "./api/image/";
+    private final String                PREVIEW_URL      = "./api/image/preview/small/";
 
-	public void doneAddingRows() { }
-	
-	@Override
-	public Widget asWidget() {
-		return this;
-	}
+    public DatasetTableFourColumnView() {
+        super();
+        this.setWidget(0, 0, new Label("Name"));
+        this.setWidget(0, 1, new Label("Type"));
+        this.setWidget(0, 2, new Label("Date"));
+        this.setWidget(0, 3, new Label(""));
+        addStyleName("datasetTable");
+        getRowFormatter().addStyleName(0, "topRow");
+    }
+
+    public int getPageSize() {
+        return 10;
+    }
+
+    @Override
+    public void addRow(String id, String name, String type, Date date, String preview, String size, String authorsId) {
+        GWT.log("Adding dataset " + name, null);
+        int row = this.getRowCount();
+        Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
+        datasetLinks.add(hyperlink);
+        this.setWidget(row, 0, hyperlink);
+
+        this.setWidget(row, 1, new Label(type));
+        this.setWidget(row, 2, new Label(DATE_TIME_FORMAT.format(date)));
+        this.setWidget(row, 3, new Image(PREVIEW_URL + id));
+
+        /*
+        if (preview != null) {
+        	this.setWidget(row, 3, new Image(BLOB_URL + preview));
+        } else {
+        	this.setWidget(row, 3, new SimplePanel());
+        }
+        */
+
+        for (int col = 0; col < 4; col++ ) {
+            getCellFormatter().addStyleName(row, col, "cell");
+        }
+
+        if (row % 2 == 0) {
+            getRowFormatter().addStyleName(row, "evenRow");
+        } else {
+            getRowFormatter().addStyleName(row, "oddRow");
+        }
+    }
+
+    public void doneAddingRows() {
+    }
+
+    @Override
+    public Widget asWidget() {
+        return this;
+    }
+
+    @Override
+    public void insertRow(int position, String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId) {
+        // TODO Auto-generated method stub
+
+    }
 
 }

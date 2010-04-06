@@ -18,36 +18,46 @@ import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
  */
 public class AddNewDatasetEvent extends GwtEvent<AddNewDatasetHandler> {
 
-	public static final GwtEvent.Type<AddNewDatasetHandler> TYPE = new GwtEvent.Type<AddNewDatasetHandler>();
+    public static final GwtEvent.Type<AddNewDatasetHandler> TYPE     = new GwtEvent.Type<AddNewDatasetHandler>();
 
-	private DatasetBean dataset = new DatasetBean();
+    private DatasetBean                                     dataset  = new DatasetBean();
 
-	private Collection<PreviewImageBean> previews;
+    private Collection<PreviewImageBean>                    previews;
 
-	@Override
-	protected void dispatch(AddNewDatasetHandler handler) {
-		handler.onAddNewDataset(this);
-	}
+    private int                                             position = -1;
 
-	@Override
-	public GwtEvent.Type<AddNewDatasetHandler> getAssociatedType() {
-		return TYPE;
-	}
+    @Override
+    protected void dispatch(AddNewDatasetHandler handler) {
+        handler.onAddNewDataset(this);
+    }
 
-	public void setDataset(DatasetBean dataset) {
-		this.dataset = dataset;
-	}
+    @Override
+    public GwtEvent.Type<AddNewDatasetHandler> getAssociatedType() {
+        return TYPE;
+    }
 
-	public DatasetBean getDataset() {
-		return dataset;
-	}
+    public void setDataset(DatasetBean dataset) {
+        this.dataset = dataset;
+    }
 
-	public void setPreviews(Collection<PreviewImageBean> previews) {
-		this.previews = previews;
-	}
+    public DatasetBean getDataset() {
+        return dataset;
+    }
 
-	public Collection<PreviewImageBean> getPreviews() {
-		return previews;
-	}
+    public void setPreviews(Collection<PreviewImageBean> previews) {
+        this.previews = previews;
+    }
+
+    public Collection<PreviewImageBean> getPreviews() {
+        return previews;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    public int getPosition() {
+        return position;
+    }
 
 }
