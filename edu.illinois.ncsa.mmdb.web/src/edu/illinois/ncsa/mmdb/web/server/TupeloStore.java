@@ -187,6 +187,8 @@ public class TupeloStore {
      * @throws Exception
      */
     private Context createSerializeContext() throws Exception {
+        // context location
+        String path = CONTEXT_PATH;
 
         // Register all context creators. This uses the Service providers method, a poor man version
         // of the eclipse plugin mechanism.
@@ -194,9 +196,6 @@ public class TupeloStore {
         while (iter.hasNext()) {
             ContextBeanUtil.addContextCreator(iter.next());
         }
-
-        // context location
-        String path = CONTEXT_PATH;
 
         if (!path.startsWith("/")) {
             path = "/" + path;
@@ -411,7 +410,7 @@ public class TupeloStore {
                                              RestServlet.COLLECTION_REMOVE_INFIX,
                                              RestServlet.COLLECTION_PREVIEW,
                                              RestServlet.SEARCH_INFIX,
-                                             };
+                                                     };
 
     /**
      * return a path to the iamge in the "/images" directory of the webapp
@@ -537,7 +536,7 @@ public class TupeloStore {
         if (count == null) {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
-                {
+                    {
                     return countDatasetsInCollection(inCollection);
                 }
             };
@@ -569,6 +568,44 @@ public class TupeloStore {
         return datasetCount;
     }
 
+    Map<String, Memoized<String>> badgeCache = null;
+
+    public String getBadge(final String collectionUri) {
+        if (badgeCache == null) {
+            badgeCache = new HashMap<String, Memoized<String>>();
+        }
+        Memoized<String> mBadge = badgeCache.get(collectionUri);
+        if (mBadge == null) {
+            mBadge = new Memoized<String>() {
+                public String computeValue() {
+                    try {
+                        Unifier u = new Unifier();
+                        u.setColumnNames("member", "date");
+                        u.addPattern(Resource.uriRef(collectionUri), DcTerms.HAS_PART, "member");
+                        u.addPattern("member", Dc.DATE, "date", true);
+                        u.addOrderByDesc("date");
+                        u.addOrderBy("member");
+                        u.setLimit(25);
+                        for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member") ) {
+                            String datasetUri = row.get(0).getString();
+                            String preview = getPreview(datasetUri, GetPreviews.SMALL);
+                            if (preview != null) {
+                                return datasetUri;
+                            }
+                        }
+                    } catch (Exception x) {
+                        x.printStackTrace();
+                    }
+                    return null;
+                }
+            };
+            mBadge.setTtl(60000 * 5);
+            mBadge.setForceOnNull(true);
+            badgeCache.put(collectionUri, mBadge);
+        }
+        return mBadge.getValue();
+    }
+
     // caches previews.
     public String getPreview(final String uri, final String size) {
         // lazily initialize cache
@@ -598,23 +635,9 @@ public class TupeloStore {
             } else { // collection badge {
                 mPreview = new Memoized<String>() {
                     public String computeValue() {
-                        try {
-                            Unifier u = new Unifier();
-                            u.setColumnNames("member", "date");
-                            u.addPattern(Resource.uriRef(uri), DcTerms.HAS_PART, "member");
-                            u.addPattern("member", Dc.DATE, "date", true);
-                            u.addOrderByDesc("date");
-                            u.addOrderBy("member");
-                            u.setLimit(25);
-                            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member") ) {
-                                String datasetUri = row.get(0).getString();
-                                String preview = getPreview(datasetUri, GetPreviews.SMALL);
-                                if (preview != null) {
-                                    return preview;
-                                }
-                            }
-                        } catch (OperatorException e) {
-                            log.error("Error getting badge for collection " + uri, e);
+                        String badge = getBadge(uri);
+                        if (badge != null) {
+                            return getPreview(badge, GetPreviews.SMALL);
                         }
                         // none of em have previews, or there was an error :(
                         return null;

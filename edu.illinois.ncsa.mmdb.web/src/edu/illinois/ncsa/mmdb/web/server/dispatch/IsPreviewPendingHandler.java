@@ -41,19 +41,32 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPending;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPendingResult;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
-public class IsPreviewPendingHandler implements ActionHandler<IsPreviewPending,IsPreviewPendingResult> {
+public class IsPreviewPendingHandler implements ActionHandler<IsPreviewPending, IsPreviewPendingResult> {
+    Log log = LogFactory.getLog(IsPreviewPendingHandler.class);
 
     @Override
     public IsPreviewPendingResult execute(IsPreviewPending arg0, ExecutionContext arg1) throws ActionException {
         String uri = arg0.getUri();
         IsPreviewPendingResult result = new IsPreviewPendingResult();
         result.setReady(TupeloStore.getInstance().getPreview(uri, arg0.getSize()) != null);
-        result.setPending(!RestServlet.shouldCache404(uri));
+        // is it a collection?
+        String badge = TupeloStore.getInstance().getBadge(uri);
+        if (badge != null) {
+            // check the pending state of the badge
+            result.setPending(!RestServlet.shouldCache404(badge));
+        } else {
+            // otherwise check this dataset's pending state
+            result.setPending(!RestServlet.shouldCache404(uri));
+        }
         return result;
     }
 

@@ -41,6 +41,7 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -142,18 +143,7 @@ public class PreviewWidget extends Composite {
         if (checkPending) {
             previewImage.addLoadHandler(new LoadHandler() {
                 public void onLoad(LoadEvent event) {
-                    MMDB.dispatchAsync.execute(new IsPreviewPending(datasetUri, size), new AsyncCallback<IsPreviewPendingResult>() {
-                        public void onFailure(Throwable caught) {
-                        }
-
-                        public void onSuccess(IsPreviewPendingResult result) {
-                            if (result.isPending()) {
-                                pending();
-                            } else if (!result.isReady()) {
-                                grayImage();
-                            }
-                        }
-                    });
+                    getPreview();
                 }
             });
         }
@@ -213,26 +203,33 @@ public class PreviewWidget extends Composite {
         getPreview(datasetUri, link, true);
     }
 
+    boolean wasEverPending = false;
+
     protected void getPreview(final String datasetUri, final String link, final boolean display) {
         MMDB.dispatchAsync.execute(new IsPreviewPending(datasetUri, size), new AsyncCallback<IsPreviewPendingResult>() {
             public void onFailure(Throwable caught) {
             }
 
             public void onSuccess(IsPreviewPendingResult result) {
-                if (result.isReady()) {
-                    contentPanel.clear();
+                if (result.isReady() && wasEverPending) {
+                    GWT.log("Preview is now READY for " + datasetUri);
                     image = new Image(PREVIEW_URL.get(size) + datasetUri);
+                    contentPanel.clear();
                     contentPanel.add(image);
                     addLink(image);
-                } else if (!result.isReady()) {
+                } else if (result.isPending()) {
+                    GWT.log("Preview is PENDING for " + datasetUri);
+                    wasEverPending = true;
+                    pendingImage();
                     retryTimer = new Timer() {
-                        @Override
                         public void run() {
                             getPreview(datasetUri, link);
                         }
                     };
                     timeOffset = (timeOffset + 37) % 100;
                     retryTimer.schedule(1000 + timeOffset); // every second or so
+                } else {
+                    GWT.log("Preview is NOT READY, NOT PENDING for " + datasetUri);
                 }
             }
         });
@@ -256,14 +253,8 @@ public class PreviewWidget extends Composite {
         }
     }
 
-    protected void pending() {
-        pendingImage();
-        getPreview();
-    }
-
     protected void pendingImage() {
         if (!isPendingImage) {
-            contentPanel.clear();
             image = new Image(PENDING_URL.get(size));
             if (size.equals(GetPreviews.LARGE)) {
                 image.addStyleName("thumbnail");
@@ -274,6 +265,7 @@ public class PreviewWidget extends Composite {
             addLink(image);
             image.addStyleName("imagePreviewShortWidth");
             //image.setWidth(getMaxWidth()+"px");
+            contentPanel.clear();
             contentPanel.add(image);
             isPendingImage = true;
             isGrayImage = false;

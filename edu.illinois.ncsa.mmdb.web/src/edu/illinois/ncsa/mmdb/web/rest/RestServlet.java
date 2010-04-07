@@ -38,10 +38,14 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.rest;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -119,8 +123,8 @@ public class RestServlet extends AuthenticatedServlet {
 
     static RestService         restService;                                                        // TODO manage this lifecycle better
 
-    public static final String SMALL_404                    = "preview-100.gif";
-    public static final String LARGE_404                    = "preview-500.gif";
+    public static final String SMALL_404                    = "/preview-100.gif";
+    public static final String LARGE_404                    = "/preview-500.gif";
 
     public void init() throws ServletException {
         super.init();
@@ -207,6 +211,9 @@ public class RestServlet extends AuthenticatedServlet {
     }
 
     public static PreviewImageBean getPreview(final String uri, String size) {
+        if (uri == null) {
+            return null;
+        }
         BeanSession bs = TupeloStore.getInstance().getBeanSession();
         PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(bs);
         try {
@@ -276,10 +283,11 @@ public class RestServlet extends AuthenticatedServlet {
     }
 
     void dontCache(HttpServletResponse response) {
-        // OK, we REALLY don't want IE to cache this. For reals
-        response.addHeader("cache-control", "no-store, no-cache"); // don't cache
+        // OK, we REALLY don't want the browser to cache this. For reals
+        response.addHeader("cache-control", "no-store, no-cache, must-revalidate, max-age=-1"); // don't cache
         response.addHeader("cache-control", "post-check=0, pre-check=0, false"); // really don't cache
-        response.addHeader("Pragma", "no-cache"); // no, we mean it, really don't cache
+        response.addHeader("pragma", "no store,no-cache"); // no, we mean it, really don't cache
+        response.addHeader("expires", "-1"); // if you cache, we're going to be very, very angry
     }
 
     protected void doDoGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -327,8 +335,9 @@ public class RestServlet extends AuthenticatedServlet {
             }
         } else if (hasPrefix(COLLECTION_PREVIEW, request)) {
             log.trace("GET PREVIEW (collection) " + uri);
-            String previewUri = getCollectionPreviewUri(uri);
-            returnImage(request, response, previewUri, SMALL_404);
+            String badge = TupeloStore.getInstance().getBadge(uri);
+            String previewUri = TupeloStore.getInstance().getPreview(badge, GetPreviews.SMALL); // should accept and propogate null
+            returnImage(request, response, previewUri, SMALL_404, shouldCache404(badge)); // should accept and propagate null
         } else if (hasPrefix(IMAGE_INFIX, request)) {
             log.trace("GET IMAGE " + uri);
             returnImage(request, response, uri);
@@ -384,23 +393,33 @@ public class RestServlet extends AuthenticatedServlet {
                 }
             }
         }
-        if (image404 != null) {
-            response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-            String redirectTo = TupeloStore.getImagePath(request, image404);
-            response.setHeader("Location", redirectTo);
-        } else {
-            response.setStatus(404);
-        }
         if (!shouldCache) {
             dontCache(response);
+        }
+        if (image404 != null) {
+            // return the 404 image
+            URL fileLocation = this.getClass().getResource(image404);
+            try {
+                File file = new File(fileLocation.toURI());
+                String not = shouldCache ? "" : "not ";
+                log.debug("delivering gray preview " + file + " to client and telling it " + not + "to cache");
+                FileInputStream fis = new FileInputStream(file);
+                CopyFile.copy(fis, response.getOutputStream());
+            } catch (URISyntaxException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } else {
+            response.setStatus(404);
         }
     }
 
     public static boolean shouldCache404(String datasetUri) {
         try {
-            ThingSession ts = TupeloStore.getInstance().getBeanSession().getThingSession();
+            ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
             // FIXME "endTime1" is a kludgy way to represent execution stage information
             Date endTime = ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/extractor/endTime1"));
+            ts.close();
             // if there's an end time, then preview extraction has completed, so we should cache this response
             return endTime != null;
         } catch (OperatorException x) {
