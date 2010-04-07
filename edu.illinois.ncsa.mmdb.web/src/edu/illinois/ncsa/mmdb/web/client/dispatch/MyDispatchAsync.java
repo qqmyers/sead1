@@ -57,32 +57,29 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public class MyDispatchAsync implements DispatchAsync {
 
-	private static final DispatchServiceAsync realService = GWT
-			.create(DispatchService.class);
+    private static final DispatchServiceAsync realService = GWT.create(DispatchService.class);
 
-	public MyDispatchAsync() {
-		// TODO Auto-generated constructor stub
-	}
+    public MyDispatchAsync() {
+        // TODO Auto-generated constructor stub
+    }
 
-	@Override
-	public <A extends Action<R>, R extends Result> void execute(final A action,
-			final AsyncCallback<R> callback) {
+    @Override
+    public <A extends Action<R>, R extends Result> void execute(final A action,
+            final AsyncCallback<R> callback) {
 
-		realService.execute(action, new AsyncCallback<Result>() {
+        realService.execute(action, new AsyncCallback<Result>() {
 
-			public void onFailure(Throwable caught) {
-				callback.onFailure(caught);
-			}
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
 
-			@SuppressWarnings("unchecked")
-			public void onSuccess(Result result) {
-				callback.onSuccess((R) result);
-				GWT.log("Command " + action.getClass().getName()
-						+ " successfully executed.", null);
-			}
+            @SuppressWarnings("unchecked")
+            public void onSuccess(Result result) {
+                callback.onSuccess((R) result);
+            }
 
-		});
+        });
 
-	}
+    }
 
 }
