@@ -44,9 +44,9 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ErrorEvent;
+import com.google.gwt.event.dom.client.ErrorHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.event.dom.client.LoadEvent;
-import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -94,7 +94,7 @@ public class PreviewWidget extends Composite {
     static final String                      LOADING_TEXT    = "Loading...";
     static final String                      NO_PREVIEW_TEXT = "No preview available";
     private final SimplePanel                contentPanel;
-    private Image                            image;
+    private final Image                      image;
     private Label                            noPreview;
     private String                           size;
     private final int                        whichDelay      = 0;
@@ -136,20 +136,26 @@ public class PreviewWidget extends Composite {
         initWidget(contentPanel);
 
         // add the preview image
-        Image previewImage = new Image(PREVIEW_URL.get(size) + datasetUri);
+        image = new Image(PREVIEW_URL.get(size) + datasetUri);
         if (size != GetPreviews.LARGE) {
-            previewImage.addStyleName("thumbnail");
+            image.addStyleName("thumbnail");
         }
         if (checkPending) {
-            previewImage.addLoadHandler(new LoadHandler() {
-                public void onLoad(LoadEvent event) {
-                    getPreview();
+            image.addErrorHandler(new ErrorHandler() {
+                public void onError(ErrorEvent event) {
+                    wasEverPending = true;
                 }
             });
+            Timer timer = new Timer() {
+                public void run() {
+                    getPreview();
+                }
+            };
+            timer.schedule(10); // run almost immediately
         }
-        addLink(previewImage);
+        addLink(image);
         contentPanel.clear();
-        contentPanel.add(previewImage);
+        contentPanel.add(image);
     }
 
     /**
@@ -211,16 +217,17 @@ public class PreviewWidget extends Composite {
             }
 
             public void onSuccess(IsPreviewPendingResult result) {
-                if (result.isReady() && wasEverPending) {
+                if (result.isReady()) {
                     GWT.log("Preview is now READY for " + datasetUri);
-                    image = new Image(PREVIEW_URL.get(size) + datasetUri);
-                    contentPanel.clear();
-                    contentPanel.add(image);
-                    addLink(image);
+                    if (wasEverPending) {
+                        image.setUrl(PREVIEW_URL.get(size) + "new/" + datasetUri);
+                    }
                 } else if (result.isPending()) {
                     GWT.log("Preview is PENDING for " + datasetUri);
-                    wasEverPending = true;
-                    pendingImage();
+                    if (!wasEverPending) {
+                        wasEverPending = true;
+                        pendingImage();
+                    }
                     retryTimer = new Timer() {
                         public void run() {
                             getPreview(datasetUri, link);
@@ -240,14 +247,12 @@ public class PreviewWidget extends Composite {
     boolean isPendingImage = false;
 
     protected void grayImage() {
+        if (isPendingImage) {
+            image.removeStyleName("pendingLarge");
+            image.removeStyleName("pendingSmall");
+        }
         if (!isGrayImage) {
-            contentPanel.clear();
-            image = new Image(GRAY_URL.get(size));
-            image.addStyleName("thumbnail");
-            addLink(image);
-            image.addStyleName("imagePreviewShortWidth");
-            //image.setWidth(getMaxWidth()+"px");
-            contentPanel.add(image);
+            image.setUrl(GRAY_URL.get(size));
             isGrayImage = true;
             isPendingImage = false;
         }
@@ -255,18 +260,12 @@ public class PreviewWidget extends Composite {
 
     protected void pendingImage() {
         if (!isPendingImage) {
-            image = new Image(PENDING_URL.get(size));
+            image.setUrl(PENDING_URL.get(size));
             if (size.equals(GetPreviews.LARGE)) {
-                image.addStyleName("thumbnail");
                 image.addStyleName("pendingLarge");
             } else {
                 image.addStyleName("pendingSmall");
             }
-            addLink(image);
-            image.addStyleName("imagePreviewShortWidth");
-            //image.setWidth(getMaxWidth()+"px");
-            contentPanel.clear();
-            contentPanel.add(image);
             isPendingImage = true;
             isGrayImage = false;
         }

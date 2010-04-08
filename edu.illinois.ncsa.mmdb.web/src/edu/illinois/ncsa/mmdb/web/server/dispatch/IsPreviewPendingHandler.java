@@ -45,6 +45,7 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPending;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPendingResult;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
@@ -57,14 +58,15 @@ public class IsPreviewPendingHandler implements ActionHandler<IsPreviewPending, 
     public IsPreviewPendingResult execute(IsPreviewPending arg0, ExecutionContext arg1) throws ActionException {
         String uri = arg0.getUri();
         IsPreviewPendingResult result = new IsPreviewPendingResult();
-        result.setReady(TupeloStore.getInstance().getPreview(uri, arg0.getSize()) != null);
         // is it a collection?
         String badge = TupeloStore.getInstance().getBadge(uri);
         if (badge != null) {
             // check the pending state of the badge
+            result.setReady(TupeloStore.getInstance().getPreview(badge, GetPreviews.SMALL) != null);
             result.setPending(!RestServlet.shouldCache404(badge));
         } else {
             // otherwise check this dataset's pending state
+            result.setReady(TupeloStore.getInstance().getPreview(uri, arg0.getSize()) != null);
             result.setPending(!RestServlet.shouldCache404(uri));
         }
         return result;

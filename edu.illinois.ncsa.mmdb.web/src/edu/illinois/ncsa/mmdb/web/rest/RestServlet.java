@@ -117,9 +117,13 @@ public class RestServlet extends AuthenticatedServlet {
 
     public static final String PREVIEW_LARGE                = "/image/preview/large/";
 
+    public static final String PREVIEW_SMALL_NEW            = "/image/preview/small/new/";
+    public static final String PREVIEW_LARGE_NEW            = "/image/preview/large/new/";
+
     public static final String SEARCH_INFIX                 = "/search";
 
     public static final String COLLECTION_PREVIEW           = "/collection/preview/";
+    public static final String COLLECTION_PREVIEW_NEW       = "/collection/preview/new/";
 
     static RestService         restService;                                                        // TODO manage this lifecycle better
 
@@ -286,7 +290,7 @@ public class RestServlet extends AuthenticatedServlet {
         // OK, we REALLY don't want the browser to cache this. For reals
         response.addHeader("cache-control", "no-store, no-cache, must-revalidate, max-age=-1"); // don't cache
         response.addHeader("cache-control", "post-check=0, pre-check=0, false"); // really don't cache
-        response.addHeader("pragma", "no store,no-cache"); // no, we mean it, really don't cache
+        response.addHeader("pragma", "no-cache, no-store"); // no, we mean it, really don't cache
         response.addHeader("expires", "-1"); // if you cache, we're going to be very, very angry
     }
 
@@ -321,20 +325,20 @@ public class RestServlet extends AuthenticatedServlet {
         } else if (hasPrefix(PREVIEW_ANY, request)) {
             String previewUri = null;
             if (hasPrefix(PREVIEW_SMALL, request)) {
-                log.trace("GET PREVIEW (small) " + uri);
+                log.debug("GET PREVIEW (small) " + uri);
                 previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.SMALL);
                 returnImage(request, response, previewUri, SMALL_404, shouldCache404(uri));
             } else if (hasPrefix(PREVIEW_LARGE, request)) {
-                log.trace("GET PREVIEW (large) " + uri);
+                log.debug("GET PREVIEW (large) " + uri);
                 previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.LARGE);
                 returnImage(request, response, previewUri, LARGE_404, shouldCache404(uri));
             } else {
-                log.trace("GET PREVIEW (any) " + uri);
+                log.debug("GET PREVIEW (any) " + uri);
                 previewUri = getPreviewUri(uri, PREVIEW_ANY);
                 returnImage(request, response, previewUri, SMALL_404, shouldCache404(uri));
             }
         } else if (hasPrefix(COLLECTION_PREVIEW, request)) {
-            log.trace("GET PREVIEW (collection) " + uri);
+            log.debug("GET PREVIEW (collection) " + uri);
             String badge = TupeloStore.getInstance().getBadge(uri);
             String previewUri = TupeloStore.getInstance().getPreview(badge, GetPreviews.SMALL); // should accept and propogate null
             returnImage(request, response, previewUri, SMALL_404, shouldCache404(badge)); // should accept and propagate null
@@ -383,6 +387,9 @@ public class RestServlet extends AuthenticatedServlet {
     }
 
     void returnImage(HttpServletRequest request, HttpServletResponse response, String imageUri, String image404, boolean shouldCache) throws IOException, ServletException {
+        if (!shouldCache) {
+            dontCache(response);
+        }
         if (imageUri != null) {
             try {
                 CopyFile.copy(restService.retrieveImage(imageUri), response.getOutputStream());
@@ -393,18 +400,14 @@ public class RestServlet extends AuthenticatedServlet {
                 }
             }
         }
-        if (!shouldCache) {
-            dontCache(response);
-        }
         if (image404 != null) {
             // return the 404 image
             URL fileLocation = this.getClass().getResource(image404);
             try {
                 File file = new File(fileLocation.toURI());
-                String not = shouldCache ? "" : "not ";
-                log.debug("delivering gray preview " + file + " to client and telling it " + not + "to cache");
                 FileInputStream fis = new FileInputStream(file);
                 CopyFile.copy(fis, response.getOutputStream());
+                return;
             } catch (URISyntaxException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -415,6 +418,9 @@ public class RestServlet extends AuthenticatedServlet {
     }
 
     public static boolean shouldCache404(String datasetUri) {
+        if (datasetUri == null) {
+            return false;
+        }
         try {
             ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
             // FIXME "endTime1" is a kludgy way to represent execution stage information

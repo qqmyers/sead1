@@ -373,6 +373,8 @@ public class TupeloStore {
                                              RestServlet.PREVIEW_ANY,
                                              RestServlet.PREVIEW_SMALL,
                                              RestServlet.PREVIEW_LARGE,
+                                             RestServlet.PREVIEW_SMALL_NEW,
+                                             RestServlet.PREVIEW_LARGE_NEW,
                                              RestServlet.IMAGE_CREATE_ANON_INFIX,
                                              RestServlet.IMAGE_DOWNLOAD_INFIX,
                                              RestServlet.ANY_COLLECTION_INFIX,
@@ -381,6 +383,7 @@ public class TupeloStore {
                                              RestServlet.COLLECTION_ADD_INFIX,
                                              RestServlet.COLLECTION_REMOVE_INFIX,
                                              RestServlet.COLLECTION_PREVIEW,
+                                             RestServlet.COLLECTION_PREVIEW_NEW,
                                              RestServlet.SEARCH_INFIX,
                                                      };
 
