@@ -39,7 +39,6 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -84,7 +83,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.context.ContextBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
@@ -123,17 +121,8 @@ public class TupeloStore {
     /** Tupelo beansession facing tupelo context **/
     private BeanSession                                beanSession;
 
-    /**
-     * Context beans in case context definition includes multiple context
-     * definitions
-     **/
-    private Collection<ContextBean>                    contextBeans;
-
     /** last time a certain uri was asked for extraction */
     private final Map<String, Long>                    lastExtractionRequest = new HashMap<String, Long>();
-
-    /** Context DAO used to load context definition from disk **/
-    private ContextBeanUtil                            contextBeanUtil;
 
     /** Dataset count by collection (memoized) */
     private final Map<String, Memoized<Integer>>       datasetCount          = new HashMap<String, Memoized<Integer>>();
@@ -145,12 +134,6 @@ public class TupeloStore {
      * Return singleton instance.
      * 
      * @return singleton TupeloStore
-     * 
-     *         FIXME if there are any problems creating the context or the
-     *         beansession,
-     *         these objects remain null. Should this method throw an exception
-     *         when
-     *         there is an error creating an instance of the Tupelo store?
      */
     public static synchronized TupeloStore getInstance() {
         if (instance == null) {
@@ -163,7 +146,10 @@ public class TupeloStore {
      * Use getInstance() to retrieve singleton instance.
      */
     private TupeloStore() {
-
+        // FIXME if there are any problems creating the context or the
+        // beansession, these objects remain null. Should this method throw
+        // an exception when there is an error creating an instance of the
+        // Tupelo store?
         try {
             context = createSerializeContext();
             if (context == null) {
@@ -201,28 +187,19 @@ public class TupeloStore {
             path = "/" + path;
         }
 
-        URL fileLocation = this.getClass().getResource(path);
-        File file = new File(fileLocation.toURI());
-
+        URL fileLocation = findFile(path);
         Context context = null;
 
         try {
-            log.info("Loading serialized context " + fileLocation);
-
-            ContextBeanUtil.setContextBeanStore(file);
-
-            contextBeanUtil = ContextBeanUtil.getContextBeanStore();
-
             // load default context
-            context = contextBeanUtil.getDefaultContext();
-
-            contextBeans = contextBeanUtil.getAll();
+            log.info("Loading serialized context " + fileLocation);
+            ContextBeanUtil.setContextBeanStore(fileLocation.openStream());
+            context = ContextBeanUtil.getContextBeanStore().getDefaultContext();
         } catch (OperatorException x) {
             // OK, that didn't work, now just use PeerFacade.
             PeerFacade pf = new PeerFacade();
-            pf.setContext(new MemoryContext(RdfXml.parse(new FileInputStream(file))));
+            pf.setContext(new MemoryContext(RdfXml.parse(fileLocation.openStream())));
             context = pf.loadDefaultPeer();
-            // only 3 lines of code, now was that so hard?
         }
         if (context != null) {
             log.info("Loaded context from " + fileLocation);
@@ -312,11 +289,6 @@ public class TupeloStore {
      */
     public Context getContext() {
         return context;
-    }
-
-    // FIXME not used
-    public Collection<ContextBean> getContextBeans() {
-        return contextBeans;
     }
 
     public boolean authenticate(String username, String password) {
@@ -537,8 +509,8 @@ public class TupeloStore {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
                     {
-                    return countDatasetsInCollection(inCollection);
-                }
+                        return countDatasetsInCollection(inCollection);
+                    }
             };
             count.setTtl(120000);
             datasetCount.put(key, count);
@@ -861,5 +833,45 @@ public class TupeloStore {
                 }
             }
         }
+    }
+
+    // ----------------------------------------------------------------------
+    // Util functions
+    // ----------------------------------------------------------------------
+
+    public static URL findFile(String filename) {
+        // Default folder for MMDB stuff
+        File dataDir = new File(System.getProperty("user.home"), "NCSA/MMDBServer"); //$NON-NLS-1$ //$NON-NLS-2$
+        File file = new File(dataDir, filename);
+        if (file.exists()) {
+            try {
+                URL url = file.toURI().toURL();
+                log.info(String.format("Found %s as %s", filename, url.toExternalForm()));
+                return url;
+            } catch (MalformedURLException e) {
+                log.warn("Could not convert file to a URL.", e);
+            }
+        }
+
+        // install folder (special case the mac installer)
+        dataDir = new File("123456").getAbsoluteFile().getParentFile();
+        if (dataDir.getAbsolutePath().contains("/Contents/MacOS")) {
+            dataDir = dataDir.getParentFile().getParentFile().getParentFile();
+        }
+        file = new File(dataDir, filename);
+        if (file.exists()) {
+            try {
+                URL url = file.toURI().toURL();
+                log.info(String.format("Found %s as %s", filename, url.toExternalForm()));
+                return url;
+            } catch (MalformedURLException e) {
+                log.warn("Could not convert file to a URL.", e);
+            }
+        }
+
+        // ask classloader
+        URL url = TupeloStore.class.getResource(filename);
+        log.info(String.format("Found %s as %s", filename, url.toExternalForm()));
+        return url;
     }
 }

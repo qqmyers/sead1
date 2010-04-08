@@ -106,8 +106,9 @@ public class ContextSetupListener implements ServletContextListener {
         log.debug("Loading server property file: " + path);
 
         // load properties
-        InputStream input = ContextSetupListener.class.getResourceAsStream(path);
+        InputStream input = null;
         try {
+            input = TupeloStore.findFile(path).openStream();
             props.load(input);
         } catch (IOException exc) {
             log.warn("Could not load server.properties.", exc);
