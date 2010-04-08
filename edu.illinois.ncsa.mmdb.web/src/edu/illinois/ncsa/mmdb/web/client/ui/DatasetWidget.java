@@ -36,9 +36,6 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
-/**
- * 
- */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.ArrayList;
@@ -117,149 +114,148 @@ import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 @SuppressWarnings("nls")
 public class DatasetWidget extends Composite {
     /** maximum width of a preview image */
-    private static final long MAX_WIDTH = 600;
+    private static final long            MAX_WIDTH        = 600;
     /** maximum height of a preview image */
-    private static final long MAX_HEIGHT = 600;
+    private static final long            MAX_HEIGHT       = 600;
 
-	private final MyDispatchAsync service;
+    private final MyDispatchAsync        service;
 
-	private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat
-			.getShortDateTimeFormat();
+    private final static DateTimeFormat  DATE_TIME_FORMAT = DateTimeFormat.getShortDateTimeFormat();
 
-	private final FlowPanel mainPanel;
+    private final FlowPanel              mainPanel;
 
-	private EditableLabel titleLabel;
+    private EditableLabel                titleLabel;
 
-	private Label typeLabel;
+    private Label                        typeLabel;
 
-	private Label dateLabel;
+    private Label                        dateLabel;
 
-	private TagsWidget tagsWidget;
+    private TagsWidget                   tagsWidget;
 
-	private AnnotationsWidget annotationsWidget;
+    private AnnotationsWidget            annotationsWidget;
 
-	private FlowPanel metadataPanel;
+    private FlowPanel                    metadataPanel;
 
-	private FlowPanel actionsPanel;
+    private FlowPanel                    actionsPanel;
 
-	private final FlowPanel leftColumn;
+    private final FlowPanel              leftColumn;
 
-	private final FlowPanel rightColumn;
+    private final FlowPanel              rightColumn;
 
-	private static final String BLOB_URL = "./api/image/";
-	private static final String DOWNLOAD_URL = "./api/image/download/";
-	private static final String PYRAMID_URL = "./pyramid/";
+    private static final String          BLOB_URL         = "./api/image/";
+    private static final String          DOWNLOAD_URL     = "./api/image/download/";
+    private static final String          PYRAMID_URL      = "./pyramid/";
 
-	private PersonBean creator;
+    private PersonBean                   creator;
 
-	private Label authorLabel;
+    private Label                        authorLabel;
 
-	private Label sizeLabel;
+    private Label                        sizeLabel;
 
-	private String uri;
+    private String                       uri;
 
-	private FlexTable informationTable;
+    private FlexTable                    informationTable;
 
-	private Label metadataHeader;
+    private Label                        metadataHeader;
 
-	protected CollectionMembershipWidget collectionWidget;
-	
-	protected DerivedDatasetsWidget derivedDatasetsWidget;
+    protected CollectionMembershipWidget collectionWidget;
 
-    private MapWidget mapWidget;
+    protected DerivedDatasetsWidget      derivedDatasetsWidget;
 
-	private Label mapHeader;
+    private MapWidget                    mapWidget;
 
-	private FlowPanel mapPanel;
+    private Label                        mapHeader;
 
-	private AbsolutePanel previewPanel;
-	
-	private Anchor downloadAnchor;
-	
-	private PreviewBean currentPreview;
+    private FlowPanel                    mapPanel;
 
+    private AbsolutePanel                previewPanel;
 
-	/**
-	 * 
-	 * @param dispatchAsync
-	 */
-	public DatasetWidget(MyDispatchAsync dispatchAsync) {
-		this.service = dispatchAsync;
+    private Anchor                       downloadAnchor;
 
-		mainPanel = new FlowPanel();
+    private PreviewBean                  currentPreview;
 
-		mainPanel.addStyleName("datasetMainContainer");
+    /**
+     * 
+     * @param dispatchAsync
+     */
+    public DatasetWidget(MyDispatchAsync dispatchAsync) {
+        this.service = dispatchAsync;
 
-		initWidget(mainPanel);
+        mainPanel = new FlowPanel();
 
-		leftColumn = new FlowPanel();
+        mainPanel.addStyleName("datasetMainContainer");
 
-		leftColumn.addStyleName("datasetMainContainerLeftColumn");
+        initWidget(mainPanel);
 
-		mainPanel.add(leftColumn);
+        leftColumn = new FlowPanel();
 
-		rightColumn = new FlowPanel();
+        leftColumn.addStyleName("datasetMainContainerLeftColumn");
 
-		rightColumn.addStyleName("datasetMainContainerRightColumn");
+        mainPanel.add(leftColumn);
 
-		mainPanel.add(rightColumn);
+        rightColumn = new FlowPanel();
 
-		// necessary so that the main conteinar wraps around the two columns
-		SimplePanel clearFloat = new SimplePanel();
+        rightColumn.addStyleName("datasetMainContainerRightColumn");
 
-		clearFloat.addStyleName("clearFloat");
+        mainPanel.add(rightColumn);
 
-		mainPanel.add(clearFloat);
-	}
+        // necessary so that the main conteinar wraps around the two columns
+        SimplePanel clearFloat = new SimplePanel();
 
-	@Override
-	protected void onUnload() {
-	    super.onUnload();
-	    hideSeadragon( );
-	}
-	
-	/**
-	 * Retrieve a specific dataset given the uri.
-	 * 
-	 * @param uri dataset uri
-	 */
-	public void showDataset(String uri) {
-		this.uri = uri;
-		service.execute(new GetDataset(uri),
-				new AsyncCallback<GetDatasetResult>() {
+        clearFloat.addStyleName("clearFloat");
 
-					@Override
-					public void onFailure(Throwable caught) {
-						GWT.log("Error getting dataset", null);
-					}
+        mainPanel.add(clearFloat);
+    }
 
-					@Override
-					public void onSuccess(GetDatasetResult result) {
-						drawPage(result);
+    @Override
+    protected void onUnload() {
+        super.onUnload();
+        hideSeadragon();
+    }
 
-					}
-				});
-	}
+    /**
+     * Retrieve a specific dataset given the uri.
+     * 
+     * @param uri
+     *            dataset uri
+     */
+    public void showDataset(String uri) {
+        this.uri = uri;
+        service.execute(new GetDataset(uri),
+                new AsyncCallback<GetDatasetResult>() {
 
-	/**
-	 * Draw the content on the page given a specific dataset.
-	 * 
-	 * @param dataset
-	 * @param collection
-	 */
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error getting dataset", null);
+                    }
+
+                    @Override
+                    public void onSuccess(GetDatasetResult result) {
+                        drawPage(result);
+
+                    }
+                });
+    }
+
+    /**
+     * Draw the content on the page given a specific dataset.
+     * 
+     * @param dataset
+     * @param collection
+     */
     private void drawPage(final GetDatasetResult result) {
         // find best preview bean, add others
         // best image preview is that that is closest to width of column
         int maxwidth = leftColumn.getOffsetWidth();
         List<PreviewBean> previews = new ArrayList<PreviewBean>();
         PreviewImageBean bestImage = null;
-        for(PreviewBean pb : result.getPreviews()) {
+        for (PreviewBean pb : result.getPreviews() ) {
             if (pb instanceof PreviewImageBean) {
-                PreviewImageBean pib = (PreviewImageBean)pb;
+                PreviewImageBean pib = (PreviewImageBean) pb;
                 if (bestImage == null) {
                     bestImage = pib;
                 } else if (Math.abs(maxwidth - pib.getWidth()) < Math.abs(maxwidth - bestImage.getWidth())) {
-                    bestImage = pib;                    
+                    bestImage = pib;
                 }
             } else {
                 previews.add(pb);
@@ -268,11 +264,11 @@ public class DatasetWidget extends Composite {
         if (bestImage != null) {
             previews.add(bestImage);
         }
-        
+
         // sort beans, image, zoom, video, rest
-        Collections.sort( previews, new Comparator<PreviewBean>() {
+        Collections.sort(previews, new Comparator<PreviewBean>() {
             @Override
-            public int compare( PreviewBean o1, PreviewBean o2 )
+            public int compare(PreviewBean o1, PreviewBean o2)
             {
                 // sort by type
                 if (o1.getClass() != o2.getClass()) {
@@ -300,156 +296,157 @@ public class DatasetWidget extends Composite {
             }
         });
 
-		// title
-		titleLabel = new EditableLabel(result.getDataset().getTitle());
+        // title
+        titleLabel = new EditableLabel(result.getDataset().getTitle());
 
-		titleLabel.getLabel().addStyleName("datasetTitle");
-		titleLabel.setEditableStyleName("datasetTitle");
-		
-		titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
-			public void onValueChange(final ValueChangeEvent<String> event) {
-				SetProperty change = new SetProperty(result.getDataset().getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue());
-				service.execute(change, new AsyncCallback<SetPropertyResult>() {
-					public void onFailure(Throwable caught) {
-						titleLabel.cancel();
-					}
-					public void onSuccess(SetPropertyResult result) {
-						titleLabel.setText(event.getValue());
-					}
-				});
-			}
-		});
+        titleLabel.getLabel().addStyleName("datasetTitle");
+        titleLabel.setEditableStyleName("datasetTitle");
 
-		// metadata
-		metadataHeader = new Label("Info");
+        titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
+            public void onValueChange(final ValueChangeEvent<String> event) {
+                SetProperty change = new SetProperty(result.getDataset().getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue());
+                service.execute(change, new AsyncCallback<SetPropertyResult>() {
+                    public void onFailure(Throwable caught) {
+                        titleLabel.cancel();
+                    }
 
-		metadataHeader.addStyleName("datasetRightColHeading");
+                    public void onSuccess(SetPropertyResult result) {
+                        titleLabel.setText(event.getValue());
+                    }
+                });
+            }
+        });
 
-		authorLabel = new Label("Contributor: ");
+        // metadata
+        metadataHeader = new Label("Info");
 
-		authorLabel.addStyleName("metadataEntry");
+        metadataHeader.addStyleName("datasetRightColHeading");
 
-		creator = result.getDataset().getCreator();
+        authorLabel = new Label("Contributor: ");
 
-		if (creator != null) {
+        authorLabel.addStyleName("metadataEntry");
 
-			authorLabel.setTitle(creator.getEmail());
+        creator = result.getDataset().getCreator();
 
-			authorLabel.setText("Contributor: " + creator.getName());
-		}
+        if (creator != null) {
 
-		sizeLabel = new Label("Size: " + TextFormatter.humanBytes(result.getDataset().getSize()));
+            authorLabel.setTitle(creator.getEmail());
 
-		sizeLabel.addStyleName("metadataEntry");
+            authorLabel.setText("Contributor: " + creator.getName());
+        }
 
-		typeLabel = new Label("Type: " + result.getDataset().getMimeType());
+        sizeLabel = new Label("Size: " + TextFormatter.humanBytes(result.getDataset().getSize()));
 
-		typeLabel.addStyleName("metadataEntry");
+        sizeLabel.addStyleName("metadataEntry");
 
-		String dateString = result.getDataset().getDate() != null ? DATE_TIME_FORMAT.format(result.getDataset().getDate()) : "";
-		
-		dateLabel = new Label("Date: "+dateString);
+        typeLabel = new Label("Type: " + result.getDataset().getMimeType());
 
-		dateLabel.addStyleName("metadataEntry");
+        typeLabel.addStyleName("metadataEntry");
 
-		metadataPanel = new FlowPanel();
+        String dateString = result.getDataset().getDate() != null ? DATE_TIME_FORMAT.format(result.getDataset().getDate()) : "";
 
-		metadataPanel.addStyleName("datasetRightColSection");
-		
-		metadataPanel.add(metadataHeader);
+        dateLabel = new Label("Date: " + dateString);
 
-		metadataPanel.add(authorLabel);
+        dateLabel.addStyleName("metadataEntry");
 
-		metadataPanel.add(sizeLabel);
+        metadataPanel = new FlowPanel();
 
-		metadataPanel.add(typeLabel);
+        metadataPanel.addStyleName("datasetRightColSection");
 
-		metadataPanel.add(dateLabel);
-		
-		// tags
-		tagsWidget = new TagsWidget(result.getDataset().getUri(), service);
+        metadataPanel.add(metadataHeader);
 
-		// annotations
-		annotationsWidget = new AnnotationsWidget(result.getDataset().getUri(), service);
+        metadataPanel.add(authorLabel);
+
+        metadataPanel.add(sizeLabel);
+
+        metadataPanel.add(typeLabel);
+
+        metadataPanel.add(dateLabel);
+
+        // tags
+        tagsWidget = new TagsWidget(result.getDataset().getUri(), service);
+
+        // annotations
+        annotationsWidget = new AnnotationsWidget(result.getDataset().getUri(), service);
 
         // map
         showMap();
 
         // download
         downloadAnchor = new Anchor();
-		downloadAnchor.setHref(DOWNLOAD_URL + result.getDataset().getUri());
-		downloadAnchor.setText("Download full size");
-		downloadAnchor.setTarget("_blank");
-		downloadAnchor.addStyleName("datasetActionLink");
+        downloadAnchor.setHref(DOWNLOAD_URL + result.getDataset().getUri());
+        downloadAnchor.setText("Download full size");
+        downloadAnchor.setTarget("_blank");
+        downloadAnchor.addStyleName("datasetActionLink");
 
         // dataset actions
-		actionsPanel = new FlowPanel();
+        actionsPanel = new FlowPanel();
 
-		actionsPanel.addStyleName("datasetActions");
+        actionsPanel.addStyleName("datasetActions");
 
-		actionsPanel.add(downloadAnchor);
-        
+        actionsPanel.add(downloadAnchor);
+
         // delete dataset
         // TODO add confirmation dialog
-		Anchor deleteAnchor = new Anchor("Delete");
-		deleteAnchor.addStyleName("datasetActionLink");
-		deleteAnchor.addClickHandler(new ClickHandler() {
-			
-			public void onClick(ClickEvent event) {
-				
-				showDeleteDialog();
-			}
-		});
-		actionsPanel.add(deleteAnchor);
-		
-        service.execute( new HasPermission( MMDB.getUsername(), Permission.VIEW_ADMIN_PAGES ), new AsyncCallback<HasPermissionResult>() {
+        Anchor deleteAnchor = new Anchor("Delete");
+        deleteAnchor.addStyleName("datasetActionLink");
+        deleteAnchor.addClickHandler(new ClickHandler() {
+
+            public void onClick(ClickEvent event) {
+
+                showDeleteDialog();
+            }
+        });
+        actionsPanel.add(deleteAnchor);
+
+        service.execute(new HasPermission(MMDB.getUsername(), Permission.VIEW_ADMIN_PAGES), new AsyncCallback<HasPermissionResult>() {
             @Override
-            public void onFailure( Throwable caught )
+            public void onFailure(Throwable caught)
             {
-                GWT.log( "Error checking for admin privileges", caught );
+                GWT.log("Error checking for admin privileges", caught);
             }
 
             @Override
-            public void onSuccess( HasPermissionResult permresult )
+            public void onSuccess(HasPermissionResult permresult)
             {
-                if ( permresult.isPermitted() ) {
-                    Anchor extractAnchor = new Anchor( "Rerun Extraction" );
+                if (permresult.isPermitted()) {
+                    Anchor extractAnchor = new Anchor("Rerun Extraction");
                     extractAnchor.addStyleName("datasetActionLink");
-                    extractAnchor.addClickHandler( new ClickHandler() {
-                        public void onClick( ClickEvent event )
+                    extractAnchor.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event)
                         {
-                            service.execute( new ExtractionService( result.getDataset().getUri() ), new AsyncCallback<ExtractionServiceResult>() {
-                                public void onFailure( Throwable caught )
+                            service.execute(new ExtractionService(result.getDataset().getUri()), new AsyncCallback<ExtractionServiceResult>() {
+                                public void onFailure(Throwable caught)
                                 {
-                                    GWT.log( "Error submitting extraction job", caught );
+                                    GWT.log("Error submitting extraction job", caught);
                                 }
 
-                                public void onSuccess( ExtractionServiceResult result )
+                                public void onSuccess(ExtractionServiceResult result)
                                 {
-                                    GWT.log( "Success submitting extraction job " + result.getJobid(), null);
+                                    GWT.log("Success submitting extraction job " + result.getJobid(), null);
                                 }
-                            } );
+                            });
                         }
-                    } );
-                    actionsPanel.add( extractAnchor );
+                    });
+                    actionsPanel.add(extractAnchor);
                 }
             }
-        } );
-        
+        });
+
         // show preview selection
-        previewPanel = new AbsolutePanel();     
+        previewPanel = new AbsolutePanel();
         previewPanel.addStyleName("previewPanel");
 
         FlowPanel previewsPanel = new FlowPanel();
         previewsPanel.addStyleName("datasetActions");
-        for(PreviewBean pb : previews) {
+        for (PreviewBean pb : previews ) {
             String label;
             if (pb instanceof PreviewImageBean) {
                 label = "Preview";
 
             } else if (pb instanceof PreviewPyramidBean) {
                 label = "Zoomable";
-                
+
             } else if (pb instanceof PreviewVideoBean) {
                 label = "Video";
 
@@ -457,61 +454,60 @@ public class DatasetWidget extends Composite {
                 label = "Unknown";
                 GWT.log("Unknown preview bean " + pb);
             }
-            
-                        
+
             final PreviewBean finalpb = pb;
-            Anchor anchor = new Anchor( label );
-            anchor.addStyleName( "previewActionLink" );
-            anchor.addClickHandler( new ClickHandler() {
-                public void onClick( ClickEvent event )
+            Anchor anchor = new Anchor(label);
+            anchor.addStyleName("previewActionLink");
+            anchor.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event)
                 {
-                    showPreview( finalpb );
+                    showPreview(finalpb);
                 }
-            } );
-            previewsPanel.add( anchor );
+            });
+            previewsPanel.add(anchor);
         }
-        
-		informationTable = new FlexTable();
-		
-		informationTable.addStyleName("metadataTable");
 
-		informationTable.setWidth("100%");
-		
-		UserMetadataWidget um = new UserMetadataWidget(result.getDataset().getUri(), service);
-		um.setWidth("100%");
-		DisclosurePanel additionalInformationPanel = new DisclosurePanel("Additional Information");
-		additionalInformationPanel.addStyleName("datasetDisclosurePanel");
-		additionalInformationPanel.setOpen(false);
-		additionalInformationPanel.setAnimationEnabled(true);
-		VerticalPanel verticalPanel = new VerticalPanel();
-		verticalPanel.add(new HTML("<b>From User</b>"));
-		verticalPanel.add(um);
-		verticalPanel.add(new HTML("<b>Extracted</b>"));
-		verticalPanel.add(informationTable);
-		additionalInformationPanel.add(verticalPanel);
+        informationTable = new FlexTable();
 
-		// layout
-		leftColumn.add(titleLabel);		
-		leftColumn.add(previewsPanel);
-		leftColumn.add(previewPanel);
-        leftColumn.add(actionsPanel);        
+        informationTable.addStyleName("metadataTable");
+
+        informationTable.setWidth("100%");
+
+        UserMetadataWidget um = new UserMetadataWidget(result.getDataset().getUri(), service);
+        um.setWidth("100%");
+        DisclosurePanel additionalInformationPanel = new DisclosurePanel("Additional Information");
+        additionalInformationPanel.addStyleName("datasetDisclosurePanel");
+        additionalInformationPanel.setOpen(false);
+        additionalInformationPanel.setAnimationEnabled(true);
+        VerticalPanel verticalPanel = new VerticalPanel();
+        verticalPanel.add(new HTML("<b>From User</b>"));
+        verticalPanel.add(um);
+        verticalPanel.add(new HTML("<b>Extracted</b>"));
+        verticalPanel.add(informationTable);
+        additionalInformationPanel.add(verticalPanel);
+
+        // layout
+        leftColumn.add(titleLabel);
+        leftColumn.add(previewsPanel);
+        leftColumn.add(previewPanel);
+        leftColumn.add(actionsPanel);
         leftColumn.add(additionalInformationPanel);
         leftColumn.add(annotationsWidget);
 
-		rightColumn.add(metadataPanel);
-		rightColumn.add(tagsWidget);
+        rightColumn.add(metadataPanel);
+        rightColumn.add(tagsWidget);
 
-		loadMetadata();
+        loadMetadata();
 
-		loadCollections();
-		
-		loadDerivedFrom(uri,4);
+        loadCollections();
 
-		// show preview image
+        loadDerivedFrom(uri, 4);
+
+        // show preview image
         if (bestImage == null) {
-            previewPanel.add(new PreviewWidget(result.getDataset().getUri(), GetPreviews.LARGE, null));                  
+            previewPanel.add(new PreviewWidget(result.getDataset().getUri(), GetPreviews.LARGE, null));
         } else {
-            showPreview( bestImage );
+            showPreview(bestImage);
         }
     }
 
@@ -519,32 +515,33 @@ public class DatasetWidget extends Composite {
      * Confirm the user wants to delete the dataset.
      */
     protected void showDeleteDialog() {
-    	ConfirmDialog dialog = new ConfirmDialog("Delete", "Are you sure you want to delete this dataset?");
-    	
-    	dialog.addConfirmHandler(new ConfirmHandler() {
-			public void onConfirm(ConfirmEvent event) {
-				delete();
-			}
-    	});
-    	
-    	dialog.show();
-	}
-    
+        ConfirmDialog dialog = new ConfirmDialog("Delete", "Are you sure you want to delete this dataset?");
+
+        dialog.addConfirmHandler(new ConfirmHandler() {
+            public void onConfirm(ConfirmEvent event) {
+                delete();
+            }
+        });
+
+        dialog.show();
+    }
+
     /**
      * Delete dataset.
      */
     protected void delete() {
-		MMDB.dispatchAsync.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
-			public void onFailure(Throwable caught) {
-				GWT.log("Error deleting dataset", caught);
-			}
-			public void onSuccess(DeleteDatasetResult result) {
-				MMDB.eventBus.fireEvent(new DatasetDeletedEvent(uri));
-				History.newItem("listDatasets"); // FIXME hardcodes destination
-			}
-		});
+        MMDB.dispatchAsync.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
+            public void onFailure(Throwable caught) {
+                GWT.log("Error deleting dataset", caught);
+            }
+
+            public void onSuccess(DeleteDatasetResult result) {
+                MMDB.eventBus.fireEvent(new DatasetDeletedEvent(uri));
+                History.newItem("listDatasets"); // FIXME hardcodes destination
+            }
+        });
     }
-    
+
     // ----------------------------------------------------------------------
     // preview section
     // ----------------------------------------------------------------------
@@ -554,278 +551,284 @@ public class DatasetWidget extends Composite {
         if (currentPreview == pb) {
             return;
         }
-        
+
         // if not same as current preview hide old preview type
         if (currentPreview == null) {
             previewPanel.clear();
-        } else if ( currentPreview.getClass() != pb.getClass()) {
+        } else if (currentPreview.getClass() != pb.getClass()) {
             if (currentPreview instanceof PreviewPyramidBean) {
                 hideSeadragon();
             }
-            
+
             previewPanel.clear();
             currentPreview = null;
         }
-        
+
         // if now preview type create a new one
         if (currentPreview == null) {
             if (pb instanceof PreviewImageBean) {
                 Image image = new Image();
                 //image.addStyleName( "seadragon" );
-                image.getElement().setId( "preview" );
-                previewPanel.add( image );
-                
+                image.getElement().setId("preview");
+                previewPanel.add(image);
+
             } else if (pb instanceof PreviewPyramidBean) {
                 Label container = new Label();
-                container.addStyleName( "seadragon" );
-                container.getElement().setId( "preview" );
-                previewPanel.add( container );
+                container.addStyleName("seadragon");
+                container.getElement().setId("preview");
+                previewPanel.add(container);
 
             } else if (pb instanceof PreviewVideoBean) {
                 Label container = new Label();
-                container.getElement().setId( "preview" );
-                previewPanel.add( container );
+                container.getElement().setId("preview");
+                previewPanel.add(container);
             }
         }
-        
+
         // replace content (either same type or new created)
         if (pb instanceof PreviewImageBean) {
-            PreviewImageBean pib = (PreviewImageBean)pb;
+            PreviewImageBean pib = (PreviewImageBean) pb;
             long w = pib.getWidth();
             long h = pib.getHeight();
             if (pib.getWidth() > pib.getHeight()) {
                 if (pib.getWidth() > MAX_WIDTH) {
-                    h = (long)(h * (double)MAX_WIDTH / w);
+                    h = (long) (h * (double) MAX_WIDTH / w);
                     w = MAX_WIDTH;
                 }
             } else {
                 if (pib.getHeight() > MAX_HEIGHT) {
-                    w = (long)(w * (double)MAX_HEIGHT / h);
+                    w = (long) (w * (double) MAX_HEIGHT / h);
                     h = MAX_HEIGHT;
                 }
             }
-            showImage( BLOB_URL + pb.getUri(), Long.toString( w ), Long.toString( h ));
-            
-        } else if (pb instanceof PreviewPyramidBean) {            
-            showSeadragon( PYRAMID_URL + pb.getUri() + "/xml" );
+            showImage(BLOB_URL + pb.getUri(), Long.toString(w), Long.toString(h));
+
+        } else if (pb instanceof PreviewPyramidBean) {
+            showSeadragon(PYRAMID_URL + pb.getUri() + "/xml");
 
         } else if (pb instanceof PreviewVideoBean) {
-            PreviewVideoBean pvb = (PreviewVideoBean)pb;
-            showFlash( BLOB_URL + pb.getUri(), "video", Long.toString( pvb.getWidth() ), Long.toString( pvb.getHeight() ) );
+            PreviewVideoBean pvb = (PreviewVideoBean) pb;
+            showFlash(BLOB_URL + pb.getUri(), "video", Long.toString(pvb.getWidth()), Long.toString(pvb.getHeight()));
         }
-        
+
         currentPreview = pb;
     }
-    
-    public final native void showImage( String url, String w, String h  ) /*-{
+
+    public final native void showImage(String url, String w, String h) /*-{
         img = $doc.getElementById("preview");
         img.src=url;
         img.width=w;
         img.height=h;
     }-*/;
-    
-    public final native void showFlash( String url, String type, String w, String h ) /*-{
+
+    public final native void showFlash(String url, String type, String w, String h) /*-{
         if (url != null) {
-            $wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');
-            $wnd.player.addParam('allowfullscreen','true');
-            $wnd.player.addParam('allowscriptaccess','always');
-            $wnd.player.addParam('wmode','opaque');
-            $wnd.player.addVariable('file',url);
-            $wnd.player.addVariable('autostart','true');            
-//            $wnd.player.addVariable('author','Joe');
-//            $wnd.player.addVariable('description','Bob');
-//            $wnd.player.addVariable('image','http://content.longtailvideo.com/videos/image.jpg');
-//            $wnd.player.addVariable('title','title');
-//            $wnd.player.addVariable('debug','console');
-            $wnd.player.addVariable('provider',type);
-            $wnd.player.write('preview');
+        $wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');
+        $wnd.player.addParam('allowfullscreen','true');
+        $wnd.player.addParam('allowscriptaccess','always');
+        $wnd.player.addParam('wmode','opaque');
+        $wnd.player.addVariable('file',url);
+        $wnd.player.addVariable('autostart','true');            
+        //            $wnd.player.addVariable('author','Joe');
+        //            $wnd.player.addVariable('description','Bob');
+        //            $wnd.player.addVariable('image','http://content.longtailvideo.com/videos/image.jpg');
+        //            $wnd.player.addVariable('title','title');
+        //            $wnd.player.addVariable('debug','console');
+        $wnd.player.addVariable('provider',type);
+        $wnd.player.write('preview');
         }
     }-*/;
-        
-    public final native void showSeadragon( String url ) /*-{
+
+    public final native void showSeadragon(String url) /*-{
         $wnd.Seadragon.Config.debug = true;
         $wnd.Seadragon.Config.imagePath = "img/";
         $wnd.Seadragon.Config.autoHideControls = true;
 
         // close existing viewer
         if ($wnd.viewer) {
-            $wnd.viewer.setFullPage(false);
-            $wnd.viewer.setVisible(false);
-            $wnd.viewer.close();
-            $wnd.viewer = null;            
+        $wnd.viewer.setFullPage(false);
+        $wnd.viewer.setVisible(false);
+        $wnd.viewer.close();
+        $wnd.viewer = null;            
         }
 
         // open with new url
         if (url != null) {
-            $wnd.viewer = new $wnd.Seadragon.Viewer("preview");
-            $wnd.viewer.openDzi(url);
+        $wnd.viewer = new $wnd.Seadragon.Viewer("preview");
+        $wnd.viewer.openDzi(url);
         }
     }-*/;
 
     public final native void hideSeadragon() /*-{
         // hide the current viewer if open
         if ($wnd.viewer) {
-            $wnd.viewer.setFullPage(false);
-            $wnd.viewer.setVisible(false);
-            $wnd.viewer.close();
-            $wnd.viewer = null;            
+        $wnd.viewer.setFullPage(false);
+        $wnd.viewer.setVisible(false);
+        $wnd.viewer.close();
+        $wnd.viewer = null;            
         }
     }-*/;
 
-	/**
-	 * Asynchronously load the collections this dataset is part of.
-	 */
-	private void loadCollections() {
-		
-		collectionWidget = new CollectionMembershipWidget(service, uri);
+    /**
+     * Asynchronously load the collections this dataset is part of.
+     */
+    private void loadCollections() {
 
-		rightColumn.add(collectionWidget);
-	}
+        collectionWidget = new CollectionMembershipWidget(service, uri);
 
+        rightColumn.add(collectionWidget);
+    }
 
-	private void loadDerivedFrom(final String uri, final int level) {
-		service.execute(new GetDerivedFrom(uri),
-				new AsyncCallback<GetDerivedFromResult>() {
-					@Override
-					public void onFailure(Throwable arg0) {
-						// TODO Auto-generated method stub
-					}
+    private void loadDerivedFrom(final String uri, final int level) {
+        service.execute(new GetDerivedFrom(uri),
+                new AsyncCallback<GetDerivedFromResult>() {
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        // TODO Auto-generated method stub
+                    }
 
-					@Override
-					public void onSuccess(GetDerivedFromResult arg0) {
-						List<DatasetBean> df = arg0.getDerivedFrom();
-						if (df.size() > 0) {
-							if(derivedDatasetsWidget == null) {
-								derivedDatasetsWidget = new DerivedDatasetsWidget();
-								rightColumn.add(derivedDatasetsWidget);
-							}
-							if (derivedDatasetsWidget != null) {
-								for(DatasetBean d : df) {
-									derivedDatasetsWidget.addDataset(d);
-									if(level > 0) {
-										loadDerivedFrom(d.getUri(),level-1);
-									}
-								}
-							}
-						}
-					}
-				});
-	}
+                    @Override
+                    public void onSuccess(GetDerivedFromResult arg0) {
+                        List<DatasetBean> df = arg0.getDerivedFrom();
+                        if (df.size() > 0) {
+                            if (derivedDatasetsWidget == null) {
+                                derivedDatasetsWidget = new DerivedDatasetsWidget();
+                                rightColumn.add(derivedDatasetsWidget);
+                            }
+                            if (derivedDatasetsWidget != null) {
+                                for (DatasetBean d : df ) {
+                                    derivedDatasetsWidget.addDataset(d);
+                                    if (level > 0) {
+                                        loadDerivedFrom(d.getUri(), level - 1);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+    }
 
     /**
      * Asynchronously add the current dataset to a collection.
      * 
      * @param value
      */
-	protected void addToCollection(String value) {
-		GWT.log("Adding " + uri + " to collection " + value, null);
-		Collection<String> datasets = new HashSet<String>();
-		datasets.add(uri);
-		service.execute(new AddToCollection(value, datasets),
-				new AsyncCallback<AddToCollectionResult>() {
+    protected void addToCollection(String value) {
+        GWT.log("Adding " + uri + " to collection " + value, null);
+        Collection<String> datasets = new HashSet<String>();
+        datasets.add(uri);
+        service.execute(new AddToCollection(value, datasets),
+                new AsyncCallback<AddToCollectionResult>() {
 
-					@Override
-					public void onFailure(Throwable arg0) {
-						GWT.log("Error adding dataset to collection", arg0);
-					}
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        GWT.log("Error adding dataset to collection", arg0);
+                    }
 
-					@Override
-					public void onSuccess(AddToCollectionResult arg0) {
-						GWT.log("Datasets successfully added to collection",
-								null);
-						loadCollections();
-					}
-				});
-	}
+                    @Override
+                    public void onSuccess(AddToCollectionResult arg0) {
+                        GWT.log("Datasets successfully added to collection",
+                                null);
+                        loadCollections();
+                    }
+                });
+    }
 
-	private void loadMetadata() {
-		if (uri != null) {
-			service.execute(new GetMetadata(uri),
-					new AsyncCallback<GetMetadataResult>() {
+    private void loadMetadata() {
+        if (uri != null) {
+            service.execute(new GetMetadata(uri),
+                    new AsyncCallback<GetMetadataResult>() {
 
-						@Override
-						public void onFailure(Throwable arg0) {
-							GWT.log("Error retrieving metadata about dataset "
-									+ uri, null);
-						}
+                        @Override
+                        public void onFailure(Throwable arg0) {
+                            GWT.log("Error retrieving metadata about dataset "
+                                    + uri, null);
+                        }
 
-				@Override
-				public void onSuccess(GetMetadataResult arg0) {
-					List<Metadata> metadata = arg0.getMetadata();
-					Collections.sort( metadata);
-					String category = "";
-					for (Metadata tuple : metadata) {
-					    if (!category.equals( tuple.getCategory() )) {					        
-	                        int row = informationTable.getRowCount()+1;
-	                        informationTable.setHTML(row, 0, "<b>" + tuple.getCategory() + "</b>");
-	                        informationTable.setText(row, 1, ""); //$NON-NLS-1$
-	                        informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
-	                        category = tuple.getCategory();
-					    }
-						int row = informationTable.getRowCount();
-						informationTable.setText(row, 0, tuple.getLabel());
-						informationTable.setText(row, 1, tuple.getValue());
-						
-						// formatting
-						informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
-						informationTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
-						if (row % 2 == 0) {
-							informationTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
-						} else {
-							informationTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
-						}
-					}
-				}
-			});
-		}
-	}
+                        @Override
+                        public void onSuccess(GetMetadataResult arg0) {
+                            List<Metadata> metadata = arg0.getMetadata();
+                            Collections.sort(metadata);
+                            String category = "";
+                            for (Metadata tuple : metadata ) {
+                                if (!category.equals(tuple.getCategory())) {
+                                    int row = informationTable.getRowCount() + 1;
+                                    informationTable.setHTML(row, 0, "<b>" + tuple.getCategory() + "</b>");
+                                    informationTable.setText(row, 1, ""); //$NON-NLS-1$
+                                    informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
+                                    category = tuple.getCategory();
+                                }
+                                int row = informationTable.getRowCount();
+                                informationTable.setText(row, 0, tuple.getLabel());
+                                informationTable.setText(row, 1, tuple.getValue());
 
-   private void showMap() {
-        if ( uri != null ) {
-            service.execute( new GetGeoPoint( uri ), new AsyncCallback<GetGeoPointResult>() {
+                                // formatting
+                                informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
+                                informationTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
+                                if (row % 2 == 0) {
+                                    informationTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
+                                } else {
+                                    informationTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
+                                }
+
+                                // extra metadata to display in info
+                                if ("Extractor".equals(tuple.getCategory()) && "Image Size".equals(tuple.getLabel())) {
+                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                                    lbl.addStyleName("metadataEntry");
+                                    metadataPanel.add(lbl);
+                                }
+                            }
+                        }
+                    });
+        }
+    }
+
+    private void showMap() {
+        if (uri != null) {
+            service.execute(new GetGeoPoint(uri), new AsyncCallback<GetGeoPointResult>() {
 
                 @Override
-                public void onFailure( Throwable arg0 )
+                public void onFailure(Throwable arg0)
                 {
-                    GWT.log( "Error retrieving geolocations for " + uri, arg0 );
+                    GWT.log("Error retrieving geolocations for " + uri, arg0);
 
                 }
 
                 @Override
-                public void onSuccess( GetGeoPointResult arg0 )
+                public void onSuccess(GetGeoPointResult arg0)
                 {
                     if (arg0.getGeoPoints().isEmpty()) {
                         return;
                     }
-                           
-                    mapWidget = new MapWidget();
-                    mapWidget.setSize( "230px", "230px" );
-                    mapWidget.setUIToDefault();
-                    mapWidget.setVisible( false );
 
-            		mapPanel = new FlowPanel();
-            		mapPanel.addStyleName("datasetRightColSection");
-               		mapHeader = new Label("Location");
-            		mapHeader.addStyleName("datasetRightColHeading");
-            		mapPanel.add(mapHeader);
+                    mapWidget = new MapWidget();
+                    mapWidget.setSize("230px", "230px");
+                    mapWidget.setUIToDefault();
+                    mapWidget.setVisible(false);
+
+                    mapPanel = new FlowPanel();
+                    mapPanel.addStyleName("datasetRightColSection");
+                    mapHeader = new Label("Location");
+                    mapHeader.addStyleName("datasetRightColHeading");
+                    mapPanel.add(mapHeader);
                     mapPanel.add(mapWidget);
                     rightColumn.add(mapPanel);
-             
+
                     // drop marker on the map
-                    LatLng center = LatLng.newInstance( 0, 0 );
-                    for(GeoPointBean gpb : arg0.getGeoPoints()) {
+                    LatLng center = LatLng.newInstance(0, 0);
+                    for (GeoPointBean gpb : arg0.getGeoPoints() ) {
                         MarkerOptions options = MarkerOptions.newInstance();
-                        options.setTitle( "lat=" + gpb.getLatitude() +  " lon=" + gpb.getLongitude() + " alt=" + gpb.getAltitude());
-                        LatLng loc = LatLng.newInstance( gpb.getLatitude(), gpb.getLongitude() );
-                        mapWidget.addOverlay( new Marker( loc, options ) );
+                        options.setTitle("lat=" + gpb.getLatitude() + " lon=" + gpb.getLongitude() + " alt=" + gpb.getAltitude());
+                        LatLng loc = LatLng.newInstance(gpb.getLatitude(), gpb.getLongitude());
+                        mapWidget.addOverlay(new Marker(loc, options));
                         center = loc;
                     }
-                    
-                    mapWidget.setCenter( center, 15 );
-                    mapWidget.setVisible( true );
+
+                    mapWidget.setCenter(center, 15);
+                    mapWidget.setVisible(true);
                     mapWidget.checkResizeAndCenter();
                 }
-            } );
+            });
         }
     }
 }
