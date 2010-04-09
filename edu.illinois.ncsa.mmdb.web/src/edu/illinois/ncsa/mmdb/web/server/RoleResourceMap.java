@@ -36,20 +36,44 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
+package edu.illinois.ncsa.mmdb.web.server;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.tupeloproject.rdf.Resource;
+
+import edu.illinois.ncsa.mmdb.web.client.Role;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
+
 /**
+ * Map between elements of an enum and resources representing a specific
+ * role. In the future this can be extended to load the map from an
+ * external resource, be it a file or a Tupelo context.
  * 
- */
-package edu.illinois.ncsa.mmdb.web.client.dispatch;
-
-import net.customware.gwt.dispatch.shared.Result;
-
-/**
  * @author Luigi Marini
  * 
  */
-@SuppressWarnings("serial")
-public class EditPermissionsResult implements Result {
-	
-	public EditPermissionsResult() {
-	}
+public class RoleResourceMap {
+
+    private static Map<Role, Resource> toResource;
+    private static Map<Resource, Role> toRole;
+
+    static {
+        toResource = new HashMap<Role, Resource>();
+        toResource.put(Role.ADMIN, RBAC.ADMIN_ROLE);
+        toResource.put(Role.MEMBER, RBAC.REGULAR_MEMBER_ROLE);
+
+        toRole = new HashMap<Resource, Role>();
+        toRole.put(RBAC.ADMIN_ROLE, Role.ADMIN);
+        toRole.put(RBAC.REGULAR_MEMBER_ROLE, Role.MEMBER);
+    }
+
+    public static final Resource getResource(Role role) {
+        return toResource.get(role);
+    }
+
+    public static final Role getRole(Resource role) {
+        return toRole.get(role);
+    }
 }

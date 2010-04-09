@@ -51,26 +51,23 @@ import javax.servlet.ServletContextListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.client.HttpTupeloClient;
-import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 
-import edu.illinois.ncsa.bard.jaas.PasswordDigest;
 import edu.illinois.ncsa.cet.search.IdGetter;
 import edu.illinois.ncsa.cet.search.TextExtractor;
 import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
 import edu.illinois.ncsa.mmdb.web.server.search.Search;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
-import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 
 /**
@@ -151,10 +148,18 @@ public class ContextSetupListener implements ServletContextListener {
         setUpSearch(indexFile);
 
         // initialize system
-        createAccounts(props);
+        try {
+            createAccounts(props);
+        } catch (Exception e) {
+            log.warn("Could not add accounts.", e);
+        }
         createUserFields(props);
 
         // start the timers
+        startTimers();
+    }
+
+    private void startTimers() {
         // count datasets every hour
         // FIXME hack to force read of context every hour to solve MMDB-491
         timer.schedule(new TimerTask() {
@@ -180,7 +185,6 @@ public class ContextSetupListener implements ServletContextListener {
                 TupeloStore.getInstance().expireBeans();
             }
         }, 2 * 1000, 10 * 1000);
-
     }
 
     private void setUpSearch(String indexFile) {
@@ -234,45 +238,35 @@ public class ContextSetupListener implements ServletContextListener {
         }
     }
 
-    private void createAccounts(Properties props) {
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-        PersonBeanUtil pbu = new PersonBeanUtil(beanSession);
-        RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
+    private void createAccounts(Properties props) throws OperatorException, AuthenticationException {
+        Context context = TupeloStore.getInstance().getContext();
+        ContextAuthentication auth = new ContextAuthentication(context);
+        RBAC rbac = new RBAC(context);
 
+        // add permissions
+        rbac.addPermission(RBAC.ADMIN_ROLE, MMDB.VIEW_ADMIN_PAGES);
+        rbac.addPermission(RBAC.ADMIN_ROLE, MMDB.VIEW_MEMBER_PAGES);
+        rbac.addPermission(RBAC.REGULAR_MEMBER_ROLE, MMDB.VIEW_MEMBER_PAGES);
+
+        // create accounts
         for (String key : props.stringPropertyNames() ) {
             if (key.startsWith("user.") && key.endsWith(".username")) { //$NON-NLS-1$ //$NON-NLS-2$
                 String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
                 String username = props.getProperty(key);
+                String fullname = props.getProperty(pre + ".fullname", username);
+                String email = props.getProperty(pre + ".email");
+                String password = props.getProperty(pre + ".password", username);
 
-                // create account
-                try {
-                    PersonBean user = pbu.get(PersonBeanUtil.getPersonID(username));
-                    Resource userid = Resource.uriRef(user.getUri());
-                    user.setName(props.getProperty(pre + ".fullname", username)); //$NON-NLS-1$
-                    if (props.containsKey(pre + ".email")) { //$NON-NLS-1$
-                        user.setEmail(props.getProperty(pre + ".email")); //$NON-NLS-1$
-                    }
-                    beanSession.save(user);
+                // create the user
+                Resource userid = auth.addUser(username, email, fullname, password);
 
-                    // add password if none exists
-                    TripleMatcher tripleMatcher = new TripleMatcher();
-                    tripleMatcher.setSubject(userid);
-                    tripleMatcher.setPredicate(MMDB.HAS_PASSWORD);
-                    beanSession.getContext().perform(tripleMatcher);
-                    if (tripleMatcher.getResult().size() == 0) {
-                        beanSession.getContext().addTriple(userid, MMDB.HAS_PASSWORD, PasswordDigest.digest(props.getProperty(pre + ".password", username))); //$NON-NLS-1$
-                    }
+                // add roles
+                rbac.addRole(userid, RBAC.REGULAR_MEMBER_ROLE);
 
-                    for (String role : props.getProperty(pre + ".roles", "VIEW_MEMBER_PAGES").split(",") ) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                        if ("VIEW_MEMBER_PAGES".equals(role)) { //$NON-NLS-1$
-                            rbac.addPermission(userid, MMDB.VIEW_MEMBER_PAGES);
-                        }
-                        if ("VIEW_ADMIN_PAGES".equals(role)) { //$NON-NLS-1$
-                            rbac.addPermission(userid, MMDB.VIEW_ADMIN_PAGES);
-                        }
+                for (String role : props.getProperty(pre + ".roles", "").split(",") ) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                    if ("ADMIN".equals(role)) { //$NON-NLS-1$
+                        rbac.addRole(userid, RBAC.ADMIN_ROLE);
                     }
-                } catch (Exception e) {
-                    log.warn("Could not create user : " + username, e);
                 }
             }
         }

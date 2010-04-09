@@ -51,7 +51,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteAnnotationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.EditPermissionsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.EditRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ExtractionServiceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAllTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAnnotationsHandler;
@@ -65,6 +65,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoPointHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRecentActivityHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRolesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUploadDestinationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
@@ -85,41 +86,42 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
 
 /**
  * Setup registry of action handlers when the servlet context is initialized.
- *
+ * 
  * @author Luigi Marini
- *
+ * 
  */
 public class MyActionHandlersConfig implements ServletContextListener {
-	public void contextInitialized(ServletContextEvent evt) {
-		DispatchUtil.registerHandler(new GetDatasetsHandler());
-		DispatchUtil.registerHandler(new GetDatasetHandler());
-		DispatchUtil.registerHandler(new AnnotateResourceHandler());
-		DispatchUtil.registerHandler(new TagResourceHandler());
-		DispatchUtil.registerHandler(new GetTagsHandler());
-		DispatchUtil.registerHandler(new GetAnnotationsHandler());
-		DispatchUtil.registerHandler(new GetDatasetsByTagHandler());
-		DispatchUtil.registerHandler(new ListDatasetsHandler());
-		DispatchUtil.registerHandler(new AuthenticateHandler());
+    public void contextInitialized(ServletContextEvent evt) {
+        DispatchUtil.registerHandler(new GetDatasetsHandler());
+        DispatchUtil.registerHandler(new GetDatasetHandler());
+        DispatchUtil.registerHandler(new AnnotateResourceHandler());
+        DispatchUtil.registerHandler(new TagResourceHandler());
+        DispatchUtil.registerHandler(new GetTagsHandler());
+        DispatchUtil.registerHandler(new GetAnnotationsHandler());
+        DispatchUtil.registerHandler(new GetDatasetsByTagHandler());
+        DispatchUtil.registerHandler(new ListDatasetsHandler());
+        DispatchUtil.registerHandler(new AuthenticateHandler());
         DispatchUtil.registerHandler(new GetMetadataHandler());
         DispatchUtil.registerHandler(new GetGeoPointHandler());
-		DispatchUtil.registerHandler(new GetCollectionsHandler());
-		DispatchUtil.registerHandler(new AddCollectionHandler());
-		DispatchUtil.registerHandler(new GetCollectionHandler());
-		DispatchUtil.registerHandler(new AddToCollectionHandler());
-		DispatchUtil.registerHandler(new GetPreviewsHandler());
-		DispatchUtil.registerHandler(new GetUploadDestinationHandler());
-		DispatchUtil.registerHandler(new DeleteDatasetHandler());
-		DispatchUtil.registerHandler(new GetUsersHandler());
-		DispatchUtil.registerHandler(new UserGroupMembershipHandler());
-		DispatchUtil.registerHandler(new AddUserHandler());
-		DispatchUtil.registerHandler(new HasPermissionHandler());
-		DispatchUtil.registerHandler(new EditPermissionsHandler());
-		DispatchUtil.registerHandler(new GetUserHandler());
-		DispatchUtil.registerHandler(new RequestNewPasswordHandler());
-		DispatchUtil.registerHandler(new NewPasswordHandler());
-		DispatchUtil.registerHandler(new GetDerivedFromHandler());
-		DispatchUtil.registerHandler(new RunSparqlQueryHandler());
-		DispatchUtil.registerHandler(new GetUserMetadataFieldsHandler());
+        DispatchUtil.registerHandler(new GetCollectionsHandler());
+        DispatchUtil.registerHandler(new AddCollectionHandler());
+        DispatchUtil.registerHandler(new GetCollectionHandler());
+        DispatchUtil.registerHandler(new AddToCollectionHandler());
+        DispatchUtil.registerHandler(new GetPreviewsHandler());
+        DispatchUtil.registerHandler(new GetUploadDestinationHandler());
+        DispatchUtil.registerHandler(new DeleteDatasetHandler());
+        DispatchUtil.registerHandler(new GetUsersHandler());
+        DispatchUtil.registerHandler(new UserGroupMembershipHandler());
+        DispatchUtil.registerHandler(new AddUserHandler());
+        DispatchUtil.registerHandler(new HasPermissionHandler());
+        DispatchUtil.registerHandler(new EditRoleHandler());
+        DispatchUtil.registerHandler(new GetRolesHandler());
+        DispatchUtil.registerHandler(new GetUserHandler());
+        DispatchUtil.registerHandler(new RequestNewPasswordHandler());
+        DispatchUtil.registerHandler(new NewPasswordHandler());
+        DispatchUtil.registerHandler(new GetDerivedFromHandler());
+        DispatchUtil.registerHandler(new RunSparqlQueryHandler());
+        DispatchUtil.registerHandler(new GetUserMetadataFieldsHandler());
         DispatchUtil.registerHandler(new SetPropertyHandler());
         DispatchUtil.registerHandler(new ExtractionServiceHandler());
         DispatchUtil.registerHandler(new DeleteAnnotationHandler());
@@ -129,8 +131,8 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetRecentActivityHandler());
         DispatchUtil.registerHandler(new ReindexLuceneHandler());
         DispatchUtil.registerHandler(new IsPreviewPendingHandler());
-	}
+    }
 
-	public void contextDestroyed(ServletContextEvent evt) {
-	}
+    public void contextDestroyed(ServletContextEvent evt) {
+    }
 }

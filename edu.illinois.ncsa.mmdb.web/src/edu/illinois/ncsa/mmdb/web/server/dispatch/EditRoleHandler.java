@@ -47,54 +47,84 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.rdf.Resource;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUser;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUserResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
+import edu.illinois.ncsa.mmdb.web.server.RoleResourceMap;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
+import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 
 /**
- * Create new user account.
+ * Add/remove user permissions.
  * 
  * @author Luigi Marini
  * 
  */
-public class AddUserHandler implements ActionHandler<AddUser, AddUserResult> {
+public class EditRoleHandler implements ActionHandler<EditRole, EmptyResult> {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(AddUserHandler.class);
+    private static Log log = LogFactory.getLog(EditRoleHandler.class);
 
     @Override
-    public AddUserResult execute(AddUser arg0, ExecutionContext arg1) throws ActionException {
-
-        String name = arg0.getFirstName() + " " + arg0.getLastName();
-        String email = arg0.getEmail();
-        String password = arg0.getPassword();
+    public EmptyResult execute(EditRole action, ExecutionContext arg1) throws ActionException {
+        Resource user = Resource.uriRef(action.getUser());
+        Resource role = RoleResourceMap.getResource(action.getRole());
+        RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
 
         try {
-            ContextAuthentication auth = new ContextAuthentication(TupeloStore.getInstance().getContext());
-            auth.addUser(null, email, name, password);
-        } catch (AuthenticationException e) {
-            log.error("Error adding user " + name + " , " + email, e);
+            switch (action.getType()) {
+                case ADD:
+                    rbac.addRole(user, role);
+                    emailNotification(user);
+                    break;
+                case REMOVE:
+                    rbac.removeRole(user, role);
+                    break;
+                default:
+                    log.error("Edit action type not found" + action.getType());
+                    throw new ActionException("Edit action type not found" + action.getType());
+            }
+        } catch (OperatorException e) {
+            log.error("Error changing permission on user", e);
         }
 
-        Mail.userAdded(email);
+        return new EmptyResult();
+    }
 
-        return new AddUserResult();
+    /**
+     * If email availble, send email notification.
+     * 
+     * @param user
+     */
+    private void emailNotification(Resource user) {
+        PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
+
+        try {
+            PersonBean personBean = pbu.get(user);
+
+            if (personBean.getEmail() != null && !personBean.getEmail().isEmpty()) {
+                Mail.userAuthorized(personBean.getEmail());
+            } else {
+                log.debug("User " + user + " email was null/empty. Email not sent.");
+            }
+        } catch (OperatorException e1) {
+            log.error("Error emailing notification to user " + user, e1);
+        }
     }
 
     @Override
-    public Class<AddUser> getActionType() {
-        return AddUser.class;
+    public Class<EditRole> getActionType() {
+        return EditRole.class;
     }
 
     @Override
-    public void rollback(AddUser arg0, AddUserResult arg1, ExecutionContext arg2)
-            throws ActionException {
+    public void rollback(EditRole arg0, EmptyResult arg1, ExecutionContext arg2) throws ActionException {
         // TODO Auto-generated method stub
-
     }
 
 }

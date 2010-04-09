@@ -480,7 +480,7 @@ public class DatasetWidget extends Composite {
         additionalInformationPanel.setOpen(false);
         additionalInformationPanel.setAnimationEnabled(true);
         VerticalPanel verticalPanel = new VerticalPanel();
-        verticalPanel.add(new HTML("<b>From User</b>"));
+        verticalPanel.add(new HTML("<b>User Specified</b>"));
         verticalPanel.add(um);
         verticalPanel.add(new HTML("<b>Extracted</b>"));
         verticalPanel.add(informationTable);

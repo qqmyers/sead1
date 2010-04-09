@@ -45,7 +45,6 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Context;
-import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.rdf.Resource;
 
 import com.bradmcevoy.http.Auth;
@@ -58,6 +57,7 @@ import edu.illinois.ncsa.mmdb.web.server.Authentication;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
  * Simple implementation of SecurityManger for medici. This will use the medici
@@ -66,40 +66,35 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
  * @author Rob Kooper
  * 
  */
-public class MediciSecurityManager implements SecurityManager
-{
-    private static Log          log      = LogFactory.getLog( MediciSecurityManager.class );
+public class MediciSecurityManager implements SecurityManager {
+    private static Log                log      = LogFactory.getLog(MediciSecurityManager.class);
 
-    private Map<String, String> accepted = new HashMap<String, String>();
-    private RBAC                rbac;
-    private boolean             allowDelete;
+    private final Map<String, String> accepted = new HashMap<String, String>();
+    private final RBAC                rbac;
+    private final boolean             allowDelete;
 
-    public MediciSecurityManager( Context context, boolean allowDelete )
-    {
-        this.rbac = new RBAC( context );
+    public MediciSecurityManager(Context context, boolean allowDelete) {
+        this.rbac = new RBAC(context);
         this.allowDelete = allowDelete;
     }
 
     @Override
-    public String getRealm()
-    {
+    public String getRealm() {
         return "medici"; //$NON-NLS-1$
     }
 
     @Override
-    public String authenticate( String user, String password )
-    {
-        if ( new Authentication().authenticate( user, password ) ) {
+    public String authenticate(String user, String password) {
+        if (new Authentication().authenticate(user, password)) {
             String token = UUID.randomUUID().toString();
-            accepted.put( token, user );
+            accepted.put(token, user);
             return token;
         }
         return null;
     }
 
     @Override
-    public String authenticate( DigestResponse digestRequest )
-    {
+    public String authenticate(DigestResponse digestRequest) {
         return null;
         //com.bradmcevoy.http.http11.auth.DigestGenerator
         // Hex(MD5(username + ":" + realm + ":" + password))
@@ -110,28 +105,27 @@ public class MediciSecurityManager implements SecurityManager
     }
 
     @Override
-    public boolean authorise( Request request, Method method, Auth auth, com.bradmcevoy.http.Resource resource )
-    {
-        if ( auth == null ) {
+    public boolean authorise(Request request, Method method, Auth auth, com.bradmcevoy.http.Resource resource) {
+        if (auth == null) {
             return false;
         }
-        if ( !accepted.containsKey( auth.getTag() ) ) {
+        if (!accepted.containsKey(auth.getTag())) {
             return false;
         }
 
         // check permissions
-        String userid = PersonBeanUtil.getPersonID( accepted.get( auth.getTag() ) );
+        String userid = PersonBeanUtil.getPersonID(accepted.get(auth.getTag()));
         try {
-            if ( !rbac.checkPermission( Resource.uriRef( userid ), MMDB.VIEW_MEMBER_PAGES ) ) {
+            if (!rbac.checkPermission(Resource.uriRef(userid), MMDB.VIEW_MEMBER_PAGES)) {
                 return false;
             }
-        } catch ( OperatorException e ) {
-            log.info( "Could not check permissions.", e );
+        } catch (RBACException e) {
+            log.info("Could not check permissions.", e);
             return false;
         }
 
         // no delete
-        if ( !allowDelete && method.equals( Method.DELETE ) ) {
+        if (!allowDelete && method.equals(Method.DELETE)) {
             return false;
         }
 

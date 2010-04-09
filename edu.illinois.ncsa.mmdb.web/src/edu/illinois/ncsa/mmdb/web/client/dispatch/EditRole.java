@@ -39,62 +39,53 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.server.dispatch;
+package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.server.ActionHandler;
-import net.customware.gwt.dispatch.server.ExecutionContext;
-import net.customware.gwt.dispatch.shared.ActionException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUser;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUserResult;
-import edu.illinois.ncsa.mmdb.web.server.Mail;
-import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
+import net.customware.gwt.dispatch.shared.Action;
+import edu.illinois.ncsa.mmdb.web.client.Role;
 
 /**
- * Create new user account.
- * 
- * @author Luigi Marini
+ * @author Rob Kooper
  * 
  */
-public class AddUserHandler implements ActionHandler<AddUser, AddUserResult> {
+@SuppressWarnings("serial")
+public class EditRole implements Action<EmptyResult> {
 
-    /** Commons logging **/
-    private static Log log = LogFactory.getLog(AddUserHandler.class);
+    private String     user;
+    private Role       role;
+    private ActionType type;
 
-    @Override
-    public AddUserResult execute(AddUser arg0, ExecutionContext arg1) throws ActionException {
-
-        String name = arg0.getFirstName() + " " + arg0.getLastName();
-        String email = arg0.getEmail();
-        String password = arg0.getPassword();
-
-        try {
-            ContextAuthentication auth = new ContextAuthentication(TupeloStore.getInstance().getContext());
-            auth.addUser(null, email, name, password);
-        } catch (AuthenticationException e) {
-            log.error("Error adding user " + name + " , " + email, e);
-        }
-
-        Mail.userAdded(email);
-
-        return new AddUserResult();
+    public enum ActionType {
+        ADD, REMOVE
     }
 
-    @Override
-    public Class<AddUser> getActionType() {
-        return AddUser.class;
+    public EditRole() {
     }
 
-    @Override
-    public void rollback(AddUser arg0, AddUserResult arg1, ExecutionContext arg2)
-            throws ActionException {
-        // TODO Auto-generated method stub
-
+    public EditRole(String user, Role role, ActionType type) {
+        this.user = user;
+        this.role = role;
+        this.type = type;
     }
 
+    /**
+     * @return the user
+     */
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * @return the permission
+     */
+    public Role getRole() {
+        return role;
+    }
+
+    /**
+     * @return the type
+     */
+    public ActionType getType() {
+        return type;
+    }
 }

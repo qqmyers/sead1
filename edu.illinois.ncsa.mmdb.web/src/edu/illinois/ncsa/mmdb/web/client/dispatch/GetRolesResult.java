@@ -39,62 +39,40 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.server.dispatch;
+package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.server.ActionHandler;
-import net.customware.gwt.dispatch.server.ExecutionContext;
-import net.customware.gwt.dispatch.shared.ActionException;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUser;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUserResult;
-import edu.illinois.ncsa.mmdb.web.server.Mail;
-import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
+import net.customware.gwt.dispatch.shared.Result;
+import edu.illinois.ncsa.mmdb.web.client.Role;
 
 /**
- * Create new user account.
+ * Return the metadata attached to a resource.
  * 
  * @author Luigi Marini
  * 
  */
-public class AddUserHandler implements ActionHandler<AddUser, AddUserResult> {
+@SuppressWarnings("serial")
+public class GetRolesResult implements Result {
+    private Set<Role> roles;
 
-    /** Commons logging **/
-    private static Log log = LogFactory.getLog(AddUserHandler.class);
-
-    @Override
-    public AddUserResult execute(AddUser arg0, ExecutionContext arg1) throws ActionException {
-
-        String name = arg0.getFirstName() + " " + arg0.getLastName();
-        String email = arg0.getEmail();
-        String password = arg0.getPassword();
-
-        try {
-            ContextAuthentication auth = new ContextAuthentication(TupeloStore.getInstance().getContext());
-            auth.addUser(null, email, name, password);
-        } catch (AuthenticationException e) {
-            log.error("Error adding user " + name + " , " + email, e);
-        }
-
-        Mail.userAdded(email);
-
-        return new AddUserResult();
+    public GetRolesResult() {
+        roles = new HashSet<Role>();
     }
 
-    @Override
-    public Class<AddUser> getActionType() {
-        return AddUser.class;
+    public void add(Role role) {
+        roles.add(role);
     }
 
-    @Override
-    public void rollback(AddUser arg0, AddUserResult arg1, ExecutionContext arg2)
-            throws ActionException {
-        // TODO Auto-generated method stub
-
+    public void setMetadata(Set<Role> roles) {
+        this.roles = roles;
     }
 
+    /**
+     * @return the roles
+     */
+    public Set<Role> getRoles() {
+        return roles;
+    }
 }

@@ -47,52 +47,50 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.rdf.Resource;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUser;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUserResult;
-import edu.illinois.ncsa.mmdb.web.server.Mail;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRoles;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRolesResult;
+import edu.illinois.ncsa.mmdb.web.server.RoleResourceMap;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
- * Create new user account.
+ * Check if a user has a specific permission.
  * 
  * @author Luigi Marini
  * 
  */
-public class AddUserHandler implements ActionHandler<AddUser, AddUserResult> {
+public class GetRolesHandler implements ActionHandler<GetRoles, GetRolesResult> {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(AddUserHandler.class);
+    private static Log log = LogFactory.getLog(GetRolesHandler.class);
 
     @Override
-    public AddUserResult execute(AddUser arg0, ExecutionContext arg1) throws ActionException {
+    public GetRolesResult execute(GetRoles action, ExecutionContext arg1) throws ActionException {
+        RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
+        Resource userUri = Resource.uriRef(action.getUri());
 
-        String name = arg0.getFirstName() + " " + arg0.getLastName();
-        String email = arg0.getEmail();
-        String password = arg0.getPassword();
-
+        GetRolesResult result = new GetRolesResult();
         try {
-            ContextAuthentication auth = new ContextAuthentication(TupeloStore.getInstance().getContext());
-            auth.addUser(null, email, name, password);
-        } catch (AuthenticationException e) {
-            log.error("Error adding user " + name + " , " + email, e);
+            for (Resource role : rbac.getRoles(userUri) ) {
+                result.add(RoleResourceMap.getRole(role));
+            }
+        } catch (RBACException exc) {
+            log.error("Could not get roles for user " + action.getUri());
+            throw (new ActionException("Could not get roles for user " + action.getUri(), exc));
         }
-
-        Mail.userAdded(email);
-
-        return new AddUserResult();
+        return result;
     }
 
     @Override
-    public Class<AddUser> getActionType() {
-        return AddUser.class;
+    public Class<GetRoles> getActionType() {
+        return GetRoles.class;
     }
 
     @Override
-    public void rollback(AddUser arg0, AddUserResult arg1, ExecutionContext arg2)
-            throws ActionException {
+    public void rollback(GetRoles arg0, GetRolesResult arg1, ExecutionContext arg2) throws ActionException {
         // TODO Auto-generated method stub
 
     }
