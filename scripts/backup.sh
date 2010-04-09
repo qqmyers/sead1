@@ -48,4 +48,4 @@ fi
 ssh kooper@$HOSTNAME "/usr/bin/mysqldump -u backup mmdb | gzip > $FOLDER/database/mmdb.sql.gz"
 
 # copy everything to local machine
-rsync -avz --delete kooper@$HOSTNAME:$FOLDER backup.1/
+rsync -avz --delete kooper@$HOSTNAME:$FOLDER/ backup.1/
