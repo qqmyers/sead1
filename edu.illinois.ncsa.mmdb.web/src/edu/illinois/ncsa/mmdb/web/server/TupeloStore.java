@@ -224,7 +224,7 @@ public class TupeloStore {
     private void setExpirationTime(Object bean) {
         synchronized (beanExp) {
             long now = System.currentTimeMillis();
-            long exp = now + 120000; // 10s // FIXME make 2 min
+            long exp = now + 120000;
             if (exp < soonestExp) {
                 soonestExp = exp;
             }
@@ -512,8 +512,8 @@ public class TupeloStore {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
                     {
-                        return countDatasetsInCollection(inCollection);
-                    }
+                    return countDatasetsInCollection(inCollection);
+                }
             };
             count.setTtl(120000);
             datasetCount.put(key, count);
@@ -537,7 +537,7 @@ public class TupeloStore {
             long ms = System.currentTimeMillis() - now;
             log.debug("counted " + datasetCount + " non-deleted datasets in " + ms + "ms");
         } catch (Exception x) {
-            log.warn("Could not ccount datasets.", x);
+            log.warn("Could not count datasets.", x);
             datasetCount = -1;
         }
         return datasetCount;
@@ -595,19 +595,19 @@ public class TupeloStore {
         // now look for the memoized value for this uri
         Memoized<String> mPreview = sizeCache.get(uri);
         if (mPreview == null) {
-            if (size == GetPreviews.SMALL) {
+            if (size.equals(GetPreviews.SMALL)) {
                 mPreview = new Memoized<String>() {
                     public String computeValue() {
                         return RestServlet.getSmallPreviewUri(uri);
                     }
                 };
-            } else if (size == GetPreviews.LARGE) {
+            } else if (size.equals(GetPreviews.LARGE)) {
                 mPreview = new Memoized<String>() {
                     public String computeValue() {
                         return RestServlet.getLargePreviewUri(uri);
                     }
                 };
-            } else { // collection badge {
+            } else if (size.equals(GetPreviews.BADGE)) {
                 mPreview = new Memoized<String>() {
                     public String computeValue() {
                         String badge = getBadge(uri);
@@ -618,12 +618,19 @@ public class TupeloStore {
                         return null;
                     }
                 };
+            } else {
+                log.warn("don't know how to cache preview of size=" + size); // whoops.
+                return RestServlet.getPreviewUri(uri, size);
             }
-            mPreview.setTtl(60000 * 5);
+            mPreview.setTtl(120000); // 2min
             mPreview.setForceOnNull(true);
             sizeCache.put(uri, mPreview);
         }
-        return mPreview.getValue();
+        String preview = mPreview.getValue();
+        if (preview == null) {
+            log.debug("NO PREVIEW for " + uri + "--cache miss, and nothing was found");
+        }
+        return preview;
     }
 
     /**

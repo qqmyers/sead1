@@ -279,6 +279,7 @@ public class RestServlet extends AuthenticatedServlet {
                 log.warn("REST GET serviced in " + elapsed + "ms");
             }
             try {
+                response.getOutputStream().flush();
                 response.getOutputStream().close();
             } catch (IllegalStateException x) {
                 // may not have been opened; ignore
@@ -324,19 +325,24 @@ public class RestServlet extends AuthenticatedServlet {
             }
         } else if (hasPrefix(PREVIEW_ANY, request)) {
             String previewUri = null;
+            String image404 = null;
             if (hasPrefix(PREVIEW_SMALL, request)) {
                 log.debug("GET PREVIEW (small) " + uri);
                 previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.SMALL);
-                returnImage(request, response, previewUri, SMALL_404, shouldCache404(uri));
+                image404 = SMALL_404;
             } else if (hasPrefix(PREVIEW_LARGE, request)) {
                 log.debug("GET PREVIEW (large) " + uri);
                 previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.LARGE);
-                returnImage(request, response, previewUri, LARGE_404, shouldCache404(uri));
+                image404 = LARGE_404;
             } else {
                 log.debug("GET PREVIEW (any) " + uri);
                 previewUri = getPreviewUri(uri, PREVIEW_ANY);
-                returnImage(request, response, previewUri, SMALL_404, shouldCache404(uri));
+                image404 = SMALL_404;
             }
+            if (previewUri == null) {
+                log.info(uri + " has NO PREVIEW");
+            }
+            returnImage(request, response, previewUri, image404, shouldCache404(uri));
         } else if (hasPrefix(COLLECTION_PREVIEW, request)) {
             log.debug("GET PREVIEW (collection) " + uri);
             String badge = TupeloStore.getInstance().getBadge(uri);
@@ -400,7 +406,7 @@ public class RestServlet extends AuthenticatedServlet {
                 }
             }
         }
-        if (image404 != null) {
+        if (image404 != null && shouldCache) {
             // return the 404 image
             URL fileLocation = this.getClass().getResource(image404);
             try {
@@ -412,9 +418,8 @@ public class RestServlet extends AuthenticatedServlet {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        } else {
-            response.setStatus(404);
         }
+        response.setStatus(404);
     }
 
     public static boolean shouldCache404(String datasetUri) {
