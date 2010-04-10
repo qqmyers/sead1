@@ -42,6 +42,8 @@
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import com.google.gwt.core.client.GWT;
@@ -131,9 +133,26 @@ public class UserManagementPage extends Composite {
                         ArrayList<PersonBean> users = result.getUsers();
                         if (users.size() == 0) {
                             usersTable.setText(usersTable.getRowCount() + 1, 0, "No users found.");
-                        }
-                        for (PersonBean user : users ) {
-                            createRow(user);
+                        } else {
+                            // sort users by name
+                            Collections.sort(users, new Comparator<PersonBean>() {
+                                @Override
+                                public int compare(PersonBean o1, PersonBean o2) {
+                                    if (o1.getName() == null) {
+                                        return +1;
+                                    }
+                                    if (o2.getName() == null) {
+                                        return -1;
+                                    }
+                                    if (o1.getName().equals(o2.getName())) {
+                                        return o1.getEmail().compareTo(o2.getEmail());
+                                    }
+                                    return o1.getName().compareTo(o2.getName());
+                                }
+                            });
+                            for (PersonBean user : users ) {
+                                createRow(user);
+                            }
                         }
                     }
                 });

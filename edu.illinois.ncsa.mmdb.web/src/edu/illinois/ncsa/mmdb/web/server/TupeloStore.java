@@ -512,8 +512,8 @@ public class TupeloStore {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
                     {
-                    return countDatasetsInCollection(inCollection);
-                }
+                        return countDatasetsInCollection(inCollection);
+                    }
             };
             count.setTtl(120000);
             datasetCount.put(key, count);
@@ -627,9 +627,9 @@ public class TupeloStore {
             sizeCache.put(uri, mPreview);
         }
         String preview = mPreview.getValue();
-        if (preview == null) {
-            log.debug("NO PREVIEW for " + uri + "--cache miss, and nothing was found");
-        }
+        //        if (preview == null) {
+        //            log.debug("NO PREVIEW for " + uri + "--cache miss, and nothing was found");
+        //        }
         return preview;
     }
 
