@@ -44,7 +44,7 @@ import java.util.Map;
 import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.Role;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
  * Map between elements of an enum and resources representing a specific
@@ -61,12 +61,12 @@ public class RoleResourceMap {
 
     static {
         toResource = new HashMap<Role, Resource>();
-        toResource.put(Role.ADMIN, RBAC.ADMIN_ROLE);
-        toResource.put(Role.MEMBER, RBAC.REGULAR_MEMBER_ROLE);
+        toResource.put(Role.ADMIN, MMDB.ADMIN_ROLE);
+        toResource.put(Role.MEMBER, MMDB.REGULAR_MEMBER_ROLE);
 
         toRole = new HashMap<Resource, Role>();
-        toRole.put(RBAC.ADMIN_ROLE, Role.ADMIN);
-        toRole.put(RBAC.REGULAR_MEMBER_ROLE, Role.MEMBER);
+        toRole.put(MMDB.ADMIN_ROLE, Role.ADMIN);
+        toRole.put(MMDB.REGULAR_MEMBER_ROLE, Role.MEMBER);
     }
 
     public static final Resource getResource(Role role) {

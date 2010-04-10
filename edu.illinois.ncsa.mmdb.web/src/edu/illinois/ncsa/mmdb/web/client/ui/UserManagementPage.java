@@ -152,6 +152,10 @@ public class UserManagementPage extends Composite {
         usersTable.setText(row, 0, user.getName());
         usersTable.setText(row, 1, user.getEmail());
 
+        if ((user.getName() == null) && (user.getEmail() == null)) {
+            usersTable.setText(row, 0, user.getUri());
+        }
+
         // regular member
         final CheckBox memberCheckBox = new CheckBox();
         memberCheckBox.setEnabled(false);

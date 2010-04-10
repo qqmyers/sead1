@@ -244,9 +244,9 @@ public class ContextSetupListener implements ServletContextListener {
         RBAC rbac = new RBAC(context);
 
         // add permissions
-        rbac.addPermission(RBAC.ADMIN_ROLE, MMDB.VIEW_ADMIN_PAGES);
-        rbac.addPermission(RBAC.ADMIN_ROLE, MMDB.VIEW_MEMBER_PAGES);
-        rbac.addPermission(RBAC.REGULAR_MEMBER_ROLE, MMDB.VIEW_MEMBER_PAGES);
+        rbac.addPermission(MMDB.ADMIN_ROLE, MMDB.VIEW_ADMIN_PAGES);
+        rbac.addPermission(MMDB.ADMIN_ROLE, MMDB.VIEW_MEMBER_PAGES);
+        rbac.addPermission(MMDB.REGULAR_MEMBER_ROLE, MMDB.VIEW_MEMBER_PAGES);
 
         // create accounts
         for (String key : props.stringPropertyNames() ) {
@@ -261,11 +261,11 @@ public class ContextSetupListener implements ServletContextListener {
                 Resource userid = auth.addUser(username, email, fullname, password);
 
                 // add roles
-                rbac.addRole(userid, RBAC.REGULAR_MEMBER_ROLE);
+                rbac.addRole(userid, MMDB.REGULAR_MEMBER_ROLE);
 
                 for (String role : props.getProperty(pre + ".roles", "").split(",") ) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                     if ("ADMIN".equals(role)) { //$NON-NLS-1$
-                        rbac.addRole(userid, RBAC.ADMIN_ROLE);
+                        rbac.addRole(userid, MMDB.ADMIN_ROLE);
                     }
                 }
             }

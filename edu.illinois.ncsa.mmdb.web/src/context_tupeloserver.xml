@@ -8,21 +8,9 @@
       </b:storageTypeMapEntry>
     </a:hasProperties>
     <a:hasProperties>
-      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:62de63aa0ca5368c491287abb25c2a7e91f7df37">
-        <b:storageTypeMapKey>http</b:storageTypeMapKey>
-        <b:storageTypeMapValue>false</b:storageTypeMapValue>
-      </b:storageTypeMapEntry>
-    </a:hasProperties>
-    <a:hasProperties>
       <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:a8d69700bc0fd2eccc4af545271d9721adca9149">
         <b:storageTypeMapKey>TupeloServer.user</b:storageTypeMapKey>
         <b:storageTypeMapValue>admin</b:storageTypeMapValue>
-      </b:storageTypeMapEntry>
-    </a:hasProperties>
-    <a:hasProperties>
-      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:ed93c21a600bff48bc4c92b16aa1d581fe874377">
-        <b:storageTypeMapKey>type</b:storageTypeMapKey>
-        <b:storageTypeMapValue>TupeloServer</b:storageTypeMapValue>
       </b:storageTypeMapEntry>
     </a:hasProperties>
     <a:hasProperties>
@@ -31,6 +19,7 @@
         <b:storageTypeMapValue>admin</b:storageTypeMapValue>
       </b:storageTypeMapEntry>
     </a:hasProperties>
+    <a:isType>TupeloServer</a:isType>
     <dc:creator>
       <foaf:Person rdf:about="http://cet.ncsa.uiuc.edu/2007/person/anonymous">
         <dc:identifier>http://cet.ncsa.uiuc.edu/2007/person/anonymous</dc:identifier>
