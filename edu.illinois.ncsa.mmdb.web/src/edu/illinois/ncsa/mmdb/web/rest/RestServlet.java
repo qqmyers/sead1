@@ -429,7 +429,10 @@ public class RestServlet extends AuthenticatedServlet {
         try {
             ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
             // FIXME "endTime1" is a kludgy way to represent execution stage information
-            Date endTime = ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/extractor/endTime1"));
+            Date endTime = ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/Extractor/endTime1"));
+            if (endTime == null) {
+                endTime = ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/extractor/endTime1"));
+            }
             ts.close();
             // if there's an end time, then preview extraction has completed, so we should cache this response
             return endTime != null;
