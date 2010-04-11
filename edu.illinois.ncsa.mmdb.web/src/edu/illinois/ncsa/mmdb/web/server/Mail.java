@@ -36,12 +36,10 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
-/**
- * 
- */
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -60,26 +58,24 @@ import org.apache.commons.logging.LogFactory;
  * @author Luigi Marini
  * 
  */
-public class Mail
-{
+public class Mail {
     /** Commons logging **/
-    private static Log          log                     = LogFactory.getLog( Mail.class );
+    private static Log        log           = LogFactory.getLog(Mail.class);
 
-    private static final String USER_ACTIVATION_SUBJECT = "Account Activated";
-    private static final String USER_ACTIVATION_BODY    = "Your account has been activated. \n\n-The Management";
+    private static Properties configuration = new Properties();
 
-    private static final String NEW_PASSWORD_SUBJECT    = "New Password";
-    private static final String NEW_PASSWORD_BODY       = "Your new password is: ";
-
-    private static final String NEW_USER_SUBJECT        = "New User";
-    private static final String NEW_USER_BODY           = "A new user has registered: ";
-
-    private static Properties   configuration           = new Properties();
-
-    public static void setProperties( Properties mail )
-    {
+    public static void setProperties(Properties mail) {
         configuration.clear();
-        configuration.putAll( mail );
+        configuration.putAll(mail);
+
+        if (configuration.get("mail.servername") == null) {
+            try {
+                configuration.put("mail.servername", InetAddress.getLocalHost().getHostName());
+            } catch (java.net.UnknownHostException uhe) {
+                log.warn("Could not determine hostname.", uhe);
+                configuration.put("mail.servername", "UNKNOWN");
+            }
+        }
     }
 
     /**
@@ -87,14 +83,18 @@ public class Mail
      * 
      * @param userAddress
      */
-    public static void userAuthorized( String userAddress )
-    {
-        sendMessage( userAddress, USER_ACTIVATION_SUBJECT, USER_ACTIVATION_BODY );
+    public static void userAuthorized(String userAddress) {
+        String server = configuration.getProperty("mail.servername");
+        String subject = "Account Activated";
+        String body = String.format("Your account for use on server %s has been activated.", server);
+        sendMessage(userAddress, subject, body);
     }
 
-    public static void sendNewPassword( String email, String newPassword )
-    {
-        sendMessage( email, NEW_PASSWORD_SUBJECT, NEW_PASSWORD_BODY + newPassword );
+    public static void sendNewPassword(String email, String newPassword) {
+        String server = configuration.getProperty("mail.servername");
+        String subject = "New Password";
+        String body = String.format("Your new password for use on server %s is : %s", server, newPassword);
+        sendMessage(email, subject, body);
     }
 
     /**
@@ -102,30 +102,39 @@ public class Mail
      * 
      * @param userAddress
      */
-    public static void userAdded( String userAddress )
-    {
-        sendMessage( configuration.getProperty( "mail.from" ), NEW_USER_SUBJECT, NEW_USER_BODY + userAddress ); //$NON-NLS-1$
+    public static void userAdded(String userAddress) {
+        String server = configuration.getProperty("mail.servername");
+        String subject = "New User";
+        String body = String.format("A new user has registered on server %s with email address %s", server, userAddress);
+        sendMessage(configuration.getProperty("mail.from"), subject, body); //$NON-NLS-1$
     }
 
-    private static void sendMessage( String rcpt, String subject, String body )
-    {
-        String from = configuration.getProperty( "mail.from" ); //$NON-NLS-1$
-        String presubj = configuration.getProperty( "mail.subject", "[MEDICI]" ); //$NON-NLS-1$
-        String fullname = configuration.getProperty( "mail.fullname", "Medici" ); //$NON-NLS-1$
+    /**
+     * Send the message
+     * 
+     * @param url
+     * @param rcpt
+     * @param subject
+     * @param body
+     */
+    private static void sendMessage(String rcpt, String subject, String body) {
+        String from = configuration.getProperty("mail.from"); //$NON-NLS-1$
+        String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
+        String fullname = configuration.getProperty("mail.fullname", "Medici"); //$NON-NLS-1$
 
-        Session session = Session.getDefaultInstance( configuration, null );
-        MimeMessage message = new MimeMessage( session );
+        Session session = Session.getDefaultInstance(configuration, null);
+        MimeMessage message = new MimeMessage(session);
         try {
-            message.setFrom( new InternetAddress( from, fullname ) );
-            message.addRecipient( Message.RecipientType.TO, new InternetAddress( rcpt ) );
-            message.setSubject( String.format( "%s %s", presubj, subject ) ); //$NON-NLS-1$
-            message.setText( body );
-            Transport.send( message );
-            log.debug( String.format( "Mail sent to %s with subject '%s'", rcpt, subject ) );
-        } catch ( MessagingException e ) {
-            log.error( String.format( "Unable to send mail sent to %s with subject '%s'", rcpt, subject ), e );
-        } catch ( UnsupportedEncodingException e ) {
-            log.error( String.format( "Unable to send mail sent to %s with subject '%s'", rcpt, subject ), e );
+            message.setFrom(new InternetAddress(from, fullname));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(rcpt));
+            message.setSubject(String.format("%s %s", presubj, subject)); //$NON-NLS-1$
+            message.setText(body);
+            Transport.send(message);
+            log.debug(String.format("Mail sent to %s with subject '%s'", rcpt, subject));
+        } catch (MessagingException e) {
+            log.error(String.format("Unable to send mail sent to %s with subject '%s'", rcpt, subject), e);
+        } catch (UnsupportedEncodingException e) {
+            log.error(String.format("Unable to send mail sent to %s with subject '%s'", rcpt, subject), e);
         }
     }
 }
