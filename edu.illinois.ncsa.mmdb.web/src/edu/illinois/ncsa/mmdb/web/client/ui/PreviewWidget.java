@@ -90,17 +90,17 @@ public class PreviewWidget extends Composite {
         PENDING_URL.put(GetPreviews.BADGE, "./images/loading-small.gif");
     }
 
-    static final int                         delays[]        = new int[] { 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, -1 };
     static final String                      LOADING_TEXT    = "Loading...";
     static final String                      NO_PREVIEW_TEXT = "No preview available";
     private final SimplePanel                contentPanel;
     private final Image                      image;
     private Label                            noPreview;
     private String                           size;
-    private final int                        whichDelay      = 0;
     private final String                     datasetUri;
     private final String                     link;
     private boolean                          checkPending    = true;
+    boolean                                  wasEverPending  = false;
+    Timer                                    retryTimer;
 
     /**
      * Create a preview. If the desired size is small (thumbnail) try showing
@@ -146,12 +146,7 @@ public class PreviewWidget extends Composite {
                     wasEverPending = true;
                 }
             });
-            Timer timer = new Timer() {
-                public void run() {
-                    getPreview();
-                }
-            };
-            timer.schedule(10); // run almost immediately
+            getPreview(datasetUri, link);
         }
         addLink(image);
         contentPanel.clear();
@@ -183,9 +178,6 @@ public class PreviewWidget extends Composite {
         }
     }
 
-    static int timeOffset;
-    Timer      retryTimer;
-
     @Override
     protected void onDetach() {
         super.onDetach();
@@ -209,38 +201,46 @@ public class PreviewWidget extends Composite {
         getPreview(datasetUri, link, true);
     }
 
-    boolean wasEverPending = false;
-
     protected void getPreview(final String datasetUri, final String link, final boolean display) {
         MMDB.dispatchAsync.execute(new IsPreviewPending(datasetUri, size), new AsyncCallback<IsPreviewPendingResult>() {
             public void onFailure(Throwable caught) {
             }
 
             public void onSuccess(IsPreviewPendingResult result) {
-                if (result.isReady()) {
-                    GWT.log("Preview is now READY for " + datasetUri);
-                    if (wasEverPending) {
-                        image.setUrl(PREVIEW_URL.get(size) + "new/" + datasetUri);
-                    }
-                } else if (result.isPending()) {
-                    GWT.log("Preview is PENDING for " + datasetUri);
-                    if (!wasEverPending) {
-                        wasEverPending = true;
-                        pendingImage();
-                    }
-                    retryTimer = new Timer() {
-                        public void run() {
-                            getPreview(datasetUri, link);
+                if (checkPending) { // do we need to know the pending state?
+                    if (result.isReady()) {
+                        GWT.log("Preview is now READY for " + datasetUri);
+                        if (wasEverPending) {
+                            image.setUrl(PREVIEW_URL.get(size) + "new/" + datasetUri); // workaround firefox bug
                         }
-                    };
-                    timeOffset = (timeOffset + 37) % 100;
-                    retryTimer.schedule(1000 + timeOffset); // every second or so
-                } else {
-                    GWT.log("Preview is NOT READY, NOT PENDING for " + datasetUri);
+                        if (retryTimer != null) {
+                            retryTimer.cancel();
+                        }
+                        checkPending = false;
+                    } else if (result.isPending()) {
+                        GWT.log("Preview is PENDING for " + datasetUri);
+                        if (!wasEverPending) {
+                            wasEverPending = true;
+                            pendingImage();
+                        }
+                        if (retryTimer == null) {
+                            retryTimer = new Timer() {
+                                public void run() {
+                                    getPreview(datasetUri, link);
+                                }
+                            };
+                            retryTimer.scheduleRepeating(1000); // every 1s
+                        }
+                    } else {
+                        GWT.log("Preview is NOT READY, NOT PENDING for " + datasetUri);
+                        if (retryTimer != null) {
+                            retryTimer.cancel();
+                        }
+                        checkPending = false;
+                    }
                 }
             }
         });
-
     }
 
     boolean isGrayImage    = false;
