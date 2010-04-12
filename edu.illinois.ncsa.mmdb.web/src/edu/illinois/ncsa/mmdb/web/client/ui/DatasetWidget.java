@@ -114,65 +114,28 @@ import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 @SuppressWarnings("nls")
 public class DatasetWidget extends Composite {
     /** maximum width of a preview image */
-    private static final long            MAX_WIDTH        = 600;
+    private static final long           MAX_WIDTH        = 600;
     /** maximum height of a preview image */
-    private static final long            MAX_HEIGHT       = 600;
+    private static final long           MAX_HEIGHT       = 600;
 
-    private final MyDispatchAsync        service;
+    private static final String         BLOB_URL         = "./api/image/";
+    private static final String         DOWNLOAD_URL     = "./api/image/download/";
+    private static final String         PYRAMID_URL      = "./pyramid/";
 
-    private final static DateTimeFormat  DATE_TIME_FORMAT = DateTimeFormat.getShortDateTimeFormat();
+    private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getShortDateTimeFormat();
 
-    private final FlowPanel              mainPanel;
+    private final MyDispatchAsync       service;
 
-    private EditableLabel                titleLabel;
+    private final FlowPanel             leftColumn;
+    private final FlowPanel             rightColumn;
 
-    private Label                        typeLabel;
+    private String                      uri;
 
-    private Label                        dateLabel;
-
-    private TagsWidget                   tagsWidget;
-
-    private AnnotationsWidget            annotationsWidget;
-
-    private FlowPanel                    metadataPanel;
-
-    private FlowPanel                    actionsPanel;
-
-    private final FlowPanel              leftColumn;
-
-    private final FlowPanel              rightColumn;
-
-    private static final String          BLOB_URL         = "./api/image/";
-    private static final String          DOWNLOAD_URL     = "./api/image/download/";
-    private static final String          PYRAMID_URL      = "./pyramid/";
-
-    private PersonBean                   creator;
-
-    private Label                        authorLabel;
-
-    private Label                        sizeLabel;
-
-    private String                       uri;
-
-    private FlexTable                    informationTable;
-
-    private Label                        metadataHeader;
-
-    protected CollectionMembershipWidget collectionWidget;
-
-    protected DerivedDatasetsWidget      derivedDatasetsWidget;
-
-    private MapWidget                    mapWidget;
-
-    private Label                        mapHeader;
-
-    private FlowPanel                    mapPanel;
-
-    private AbsolutePanel                previewPanel;
-
-    private Anchor                       downloadAnchor;
-
-    private PreviewBean                  currentPreview;
+    private FlowPanel                   metadataPanel;
+    private FlexTable                   informationTable;
+    protected DerivedDatasetsWidget     derivedDatasetsWidget;
+    private AbsolutePanel               previewPanel;
+    private PreviewBean                 currentPreview;
 
     /**
      * 
@@ -181,29 +144,21 @@ public class DatasetWidget extends Composite {
     public DatasetWidget(MyDispatchAsync dispatchAsync) {
         this.service = dispatchAsync;
 
-        mainPanel = new FlowPanel();
-
+        FlowPanel mainPanel = new FlowPanel();
         mainPanel.addStyleName("datasetMainContainer");
-
         initWidget(mainPanel);
 
         leftColumn = new FlowPanel();
-
         leftColumn.addStyleName("datasetMainContainerLeftColumn");
-
         mainPanel.add(leftColumn);
 
         rightColumn = new FlowPanel();
-
         rightColumn.addStyleName("datasetMainContainerRightColumn");
-
         mainPanel.add(rightColumn);
 
         // necessary so that the main conteinar wraps around the two columns
         SimplePanel clearFloat = new SimplePanel();
-
         clearFloat.addStyleName("clearFloat");
-
         mainPanel.add(clearFloat);
     }
 
@@ -221,20 +176,21 @@ public class DatasetWidget extends Composite {
      */
     public void showDataset(String uri) {
         this.uri = uri;
-        service.execute(new GetDataset(uri),
-                new AsyncCallback<GetDatasetResult>() {
+        leftColumn.clear();
+        rightColumn.clear();
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Error getting dataset", null);
-                    }
+        service.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
 
-                    @Override
-                    public void onSuccess(GetDatasetResult result) {
-                        drawPage(result);
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error getting dataset", null);
+            }
 
-                    }
-                });
+            @Override
+            public void onSuccess(GetDatasetResult result) {
+                drawPage(result);
+            }
+        });
     }
 
     /**
@@ -297,14 +253,14 @@ public class DatasetWidget extends Composite {
         });
 
         // title
-        titleLabel = new EditableLabel(result.getDataset().getTitle());
+        final EditableLabel titleLabel = new EditableLabel(result.getDataset().getTitle());
 
         titleLabel.getLabel().addStyleName("datasetTitle");
         titleLabel.setEditableStyleName("datasetTitle");
 
         titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
             public void onValueChange(final ValueChangeEvent<String> event) {
-                SetProperty change = new SetProperty(result.getDataset().getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue());
+                SetProperty change = new SetProperty(uri, "http://purl.org/dc/elements/1.1/title", event.getValue());
                 service.execute(change, new AsyncCallback<SetPropertyResult>() {
                     public void onFailure(Throwable caught) {
                         titleLabel.cancel();
@@ -318,72 +274,55 @@ public class DatasetWidget extends Composite {
         });
 
         // metadata
-        metadataHeader = new Label("Info");
-
+        Label metadataHeader = new Label("Info");
         metadataHeader.addStyleName("datasetRightColHeading");
 
-        authorLabel = new Label("Contributor: ");
-
+        Label authorLabel = new Label("Contributor: ");
         authorLabel.addStyleName("metadataEntry");
 
-        creator = result.getDataset().getCreator();
-
+        PersonBean creator = result.getDataset().getCreator();
         if (creator != null) {
-
             authorLabel.setTitle(creator.getEmail());
-
             authorLabel.setText("Contributor: " + creator.getName());
         }
 
-        sizeLabel = new Label("Size: " + TextFormatter.humanBytes(result.getDataset().getSize()));
-
+        Label sizeLabel = new Label("Size: " + TextFormatter.humanBytes(result.getDataset().getSize()));
         sizeLabel.addStyleName("metadataEntry");
 
-        typeLabel = new Label("Type: " + result.getDataset().getMimeType());
-
+        Label typeLabel = new Label("Type: " + result.getDataset().getMimeType());
         typeLabel.addStyleName("metadataEntry");
 
         String dateString = result.getDataset().getDate() != null ? DATE_TIME_FORMAT.format(result.getDataset().getDate()) : "";
-
-        dateLabel = new Label("Date: " + dateString);
-
+        Label dateLabel = new Label("Date: " + dateString);
         dateLabel.addStyleName("metadataEntry");
 
         metadataPanel = new FlowPanel();
-
         metadataPanel.addStyleName("datasetRightColSection");
-
         metadataPanel.add(metadataHeader);
-
         metadataPanel.add(authorLabel);
-
         metadataPanel.add(sizeLabel);
-
         metadataPanel.add(typeLabel);
-
         metadataPanel.add(dateLabel);
 
         // tags
-        tagsWidget = new TagsWidget(result.getDataset().getUri(), service);
+        TagsWidget tagsWidget = new TagsWidget(uri, service);
 
         // annotations
-        annotationsWidget = new AnnotationsWidget(result.getDataset().getUri(), service);
+        AnnotationsWidget annotationsWidget = new AnnotationsWidget(uri, service);
 
         // map
         showMap();
 
+        // dataset actions
+        final FlowPanel actionsPanel = new FlowPanel();
+        actionsPanel.addStyleName("datasetActions");
+
         // download
-        downloadAnchor = new Anchor();
-        downloadAnchor.setHref(DOWNLOAD_URL + result.getDataset().getUri());
+        Anchor downloadAnchor = new Anchor();
+        downloadAnchor.setHref(DOWNLOAD_URL + uri);
         downloadAnchor.setText("Download original");
         downloadAnchor.setTarget("_blank");
         downloadAnchor.addStyleName("datasetActionLink");
-
-        // dataset actions
-        actionsPanel = new FlowPanel();
-
-        actionsPanel.addStyleName("datasetActions");
-
         actionsPanel.add(downloadAnchor);
 
         // delete dataset
@@ -391,7 +330,6 @@ public class DatasetWidget extends Composite {
         Anchor deleteAnchor = new Anchor("Delete");
         deleteAnchor.addStyleName("datasetActionLink");
         deleteAnchor.addClickHandler(new ClickHandler() {
-
             public void onClick(ClickEvent event) {
 
                 showDeleteDialog();
@@ -415,17 +353,7 @@ public class DatasetWidget extends Composite {
                     extractAnchor.addClickHandler(new ClickHandler() {
                         public void onClick(ClickEvent event)
                         {
-                            service.execute(new ExtractionService(result.getDataset().getUri()), new AsyncCallback<ExtractionServiceResult>() {
-                                public void onFailure(Throwable caught)
-                                {
-                                    GWT.log("Error submitting extraction job", caught);
-                                }
-
-                                public void onSuccess(ExtractionServiceResult result)
-                                {
-                                    GWT.log("Success submitting extraction job " + result.getJobid(), null);
-                                }
-                            });
+                            showRerunExtraction();
                         }
                     });
                     actionsPanel.add(extractAnchor);
@@ -434,6 +362,7 @@ public class DatasetWidget extends Composite {
         });
 
         // show preview selection
+        currentPreview = null;
         previewPanel = new AbsolutePanel();
         previewPanel.addStyleName("previewPanel");
 
@@ -468,12 +397,10 @@ public class DatasetWidget extends Composite {
         }
 
         informationTable = new FlexTable();
-
         informationTable.addStyleName("metadataTable");
-
         informationTable.setWidth("100%");
 
-        UserMetadataWidget um = new UserMetadataWidget(result.getDataset().getUri(), service);
+        UserMetadataWidget um = new UserMetadataWidget(uri, service);
         um.setWidth("100%");
         DisclosurePanel additionalInformationPanel = new DisclosurePanel("Additional Information");
         additionalInformationPanel.addStyleName("datasetDisclosurePanel");
@@ -505,10 +432,39 @@ public class DatasetWidget extends Composite {
 
         // show preview image
         if (bestImage == null) {
-            previewPanel.add(new PreviewWidget(result.getDataset().getUri(), GetPreviews.LARGE, null));
+            previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null));
         } else {
             showPreview(bestImage);
         }
+    }
+
+    protected void showRerunExtraction() {
+        ConfirmDialog dialog = new ConfirmDialog("Rerun Extraction", "Are you sure you want to rerun the extraction on this dataset? Results can take a few seconds to minutes to show up.");
+
+        dialog.addConfirmHandler(new ConfirmHandler() {
+            public void onConfirm(ConfirmEvent event) {
+                service.execute(new ExtractionService(uri), new AsyncCallback<ExtractionServiceResult>() {
+                    public void onFailure(Throwable caught)
+                    {
+                        GWT.log("Error submitting extraction job", caught);
+                    }
+
+                    public void onSuccess(ExtractionServiceResult result)
+                    {
+                        GWT.log("Success submitting extraction job " + result.getJobid(), null);
+                        ConfirmDialog dialog = new ConfirmDialog("Refresh Page", "Extraction resubmitted, should page be refreshed now, or later? (it can take a few minutes before results show up)");
+                        dialog.addConfirmHandler(new ConfirmHandler() {
+                            public void onConfirm(ConfirmEvent event) {
+                                showDataset(uri);
+                            }
+                        });
+                        dialog.show();
+                    }
+                });
+            }
+        });
+
+        dialog.show();
     }
 
     /**
@@ -673,9 +629,7 @@ public class DatasetWidget extends Composite {
      * Asynchronously load the collections this dataset is part of.
      */
     private void loadCollections() {
-
-        collectionWidget = new CollectionMembershipWidget(service, uri);
-
+        CollectionMembershipWidget collectionWidget = new CollectionMembershipWidget(service, uri);
         rightColumn.add(collectionWidget);
     }
 
@@ -801,14 +755,14 @@ public class DatasetWidget extends Composite {
                         return;
                     }
 
-                    mapWidget = new MapWidget();
+                    MapWidget mapWidget = new MapWidget();
                     mapWidget.setSize("230px", "230px");
                     mapWidget.setUIToDefault();
                     mapWidget.setVisible(false);
 
-                    mapPanel = new FlowPanel();
+                    FlowPanel mapPanel = new FlowPanel();
                     mapPanel.addStyleName("datasetRightColSection");
-                    mapHeader = new Label("Location");
+                    Label mapHeader = new Label("Location");
                     mapHeader.addStyleName("datasetRightColHeading");
                     mapPanel.add(mapHeader);
                     mapPanel.add(mapWidget);
