@@ -14,12 +14,6 @@
       </b:storageTypeMapEntry>
     </a:hasProperties>
     <a:hasProperties>
-      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:cfc36bba89f22fce1c5f8f536a1ccbe3f37982ef">
-        <b:storageTypeMapKey>type</b:storageTypeMapKey>
-        <b:storageTypeMapValue>MySQL</b:storageTypeMapValue>
-      </b:storageTypeMapEntry>
-    </a:hasProperties>
-    <a:hasProperties>
       <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:d375c0d755070b224225584c48d0cb434f4f415e">
         <b:storageTypeMapKey>MySQL.ssl</b:storageTypeMapKey>
         <b:storageTypeMapValue>false</b:storageTypeMapValue>
@@ -37,12 +31,7 @@
         <b:storageTypeMapValue>tupelo</b:storageTypeMapValue>
       </b:storageTypeMapEntry>
     </a:hasProperties>
-    <a:hasProperties>
-      <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:f6f1ec1557cf885ce105ecfe18296a053df74b11">
-        <b:storageTypeMapKey>http</b:storageTypeMapKey>
-        <b:storageTypeMapValue>true</b:storageTypeMapValue>
-      </b:storageTypeMapEntry>
-    </a:hasProperties>
+    <a:isType>MySQL</a:isType>
     <dc:creator>
       <foaf:Person rdf:about="http://cet.ncsa.uiuc.edu/2007/person/anonymous">
         <dc:identifier>http://cet.ncsa.uiuc.edu/2007/person/anonymous</dc:identifier>

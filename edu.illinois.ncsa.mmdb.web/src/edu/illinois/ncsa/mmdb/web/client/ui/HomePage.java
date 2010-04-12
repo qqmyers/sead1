@@ -60,6 +60,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ContextConvert;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRecentActivity;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRecentActivityResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
@@ -196,11 +198,34 @@ public class HomePage extends Page {
      */
     protected void createAdminTab() {
         adminPanel = new FlowPanel();
+
         Hyperlink permissionsLink = new Hyperlink("Modify Permissions", "modifyPermissions");
         adminPanel.add(permissionsLink);
+
         Hyperlink sparqlLink = new Hyperlink("Run SPARQL Query", "sparql");
         adminPanel.add(sparqlLink);
-        adminPanel.add(new Label("Update Context"));
+
+        final Anchor updateAnchor = new Anchor("Update Context");
+        updateAnchor.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                updateAnchor.setEnabled(false);
+                updateAnchor.setText("Update Context Running...");
+                dispatchAsync.execute(new ContextConvert(), new AsyncCallback<EmptyResult>() {
+                    public void onFailure(Throwable caught) {
+                        updateAnchor.setText("Update Context Failed");
+                        updateAnchor.setEnabled(true);
+                    }
+
+                    public void onSuccess(EmptyResult result) {
+                        updateAnchor.setText("Update Context Finished");
+                        updateAnchor.setEnabled(true);
+                    }
+                });
+            }
+        });
+        adminPanel.add(updateAnchor);
+        adminPanel.add(new HTML());
+
         final Anchor luceneAnchor = new Anchor("Reindex Lucene");
         luceneAnchor.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -222,6 +247,7 @@ public class HomePage extends Page {
             }
         });
         adminPanel.add(luceneAnchor);
+
         tabPanel.add(adminPanel, "Administrator");
     }
 
