@@ -375,7 +375,7 @@ public class DatasetWidget extends Composite {
         // download
         downloadAnchor = new Anchor();
         downloadAnchor.setHref(DOWNLOAD_URL + result.getDataset().getUri());
-        downloadAnchor.setText("Download full size");
+        downloadAnchor.setText("Download original");
         downloadAnchor.setTarget("_blank");
         downloadAnchor.addStyleName("datasetActionLink");
 
