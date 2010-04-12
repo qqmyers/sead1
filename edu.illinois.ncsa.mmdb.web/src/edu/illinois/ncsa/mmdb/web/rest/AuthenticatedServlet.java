@@ -53,6 +53,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.util.Base64;
 import org.tupeloproject.util.SecureHashMinter;
 
+import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
 
 public class AuthenticatedServlet extends HttpServlet {
@@ -150,27 +151,27 @@ public class AuthenticatedServlet extends HttpServlet {
         }
         if (validUser == null) {
             String auth = request.getHeader("Authorization");
-            if (auth == null) {
-                return unauthorized(response);
-            } else {
+            if (auth != null) {
                 // attempt to authenticate provided u/p credentials
+                //log.info("raw basic creds = " + auth); // FIXME debug
                 String ap[] = auth.split(" ");
                 if (ap.length != 2 && !ap[0].equalsIgnoreCase("basic")) {
+                    log.warn("can't parse basic creds " + auth); // FIXME debug
                     return unauthorized(response);
                 }
+                //log.info("authorization credentials = " + Base64.decodeToString(ap[1])); // FIXME debug
                 String up[] = Base64.decodeToString(ap[1]).split(":");
                 if (up.length != 2) {
                     return unauthorized(response);
                 }
-                String username = up[0];
+                String username = TextFormatter.unescapeEmailAddress(up[0]);
                 String password = up[1];
                 if (new Authentication().authenticate(username, password)) {
                     // set the session attribute indicating that we're authenticated
                     validUser = username;
-                    log.info(username + " logged in with correct username/password credentials");
                     // we're authenticating, so we need to generate a session key and put it in the context
                     sessionKey = setSessionKey(context, validUser);
-                    log.info("Setting Cookie sessionKey=" + sessionKey + " (for user " + validUser + ")");
+                    log.info("User " + username + " logged in with valid u/p, sessionKey=" + sessionKey);
                     Cookie cookie = new Cookie("sessionKey", sessionKey);
                     cookie.setPath(request.getContextPath());
                     response.addCookie(cookie);
@@ -180,7 +181,7 @@ public class AuthenticatedServlet extends HttpServlet {
         // now are we authenticated?
         if (validUser == null) {
             // no. reject
-            log.info("Authentication failed: user has no cookie or valid credentials");
+            log.info("Client provided no credentials, returning 403 Unauthorized");
             return unauthorized(response);
         } else {
             // yes. record the user id in the http session

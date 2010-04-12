@@ -75,4 +75,12 @@ public class TextFormatter {
 		}
 	}
 
+    public static String escapeEmailAddress(String emailAddress) {
+        return emailAddress.replaceAll("@", "_at_").replaceAll("\\.", "_dot_");
+    }
+
+    public static String unescapeEmailAddress(String emailAddress) {
+        return emailAddress.replaceAll("_at_", "@").replaceAll("_dot_", ".");
+    }
+
 }

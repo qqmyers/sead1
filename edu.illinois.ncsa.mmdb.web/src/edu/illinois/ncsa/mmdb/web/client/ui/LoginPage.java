@@ -71,6 +71,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Authenticate;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthenticateResult;
@@ -218,50 +219,49 @@ public class LoginPage extends Composite {
         MMDB.dispatchAsync.execute(new Authenticate(username, password),
                 new AsyncCallback<AuthenticateResult>() {
 
-                    @Override
-                    public void onFailure(Throwable arg0) {
-                        GWT.log("Failed authenticating", arg0);
-                    }
+            @Override
+            public void onFailure(Throwable arg0) {
+                GWT.log("Failed authenticating", arg0);
+            }
 
-                    @Override
-                    public void onSuccess(final AuthenticateResult arg0) {
-                        if (arg0.getAuthenticated()) {
-                            // now hit the REST authentication endpoint
-                            String restUrl = "./api/authenticate";
-                            RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-                            builder.setUser(username);
-                            builder.setPassword(password);
-                            try {
-                                GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
-                                builder.sendRequest("", new RequestCallback() {
-                                    public void onError(Request request, Throwable exception) {
-                                        fail();
-                                    }
-
-                                    public void onResponseReceived(Request request, Response response) {
-                                        // success!
-                                        String sessionKey = response.getText();
-                                        GWT.log("REST auth status code = " + response.getStatusCode(), null);
-                                        if (response.getStatusCode() > 300) {
-                                            GWT.log("authentication failed: " + sessionKey, null);
-                                            fail();
-                                        }
-                                        GWT.log("user " + username + " associated with session key " + sessionKey, null);
-                                        // login local
-                                        mainWindow.login(arg0.getSessionId(), sessionKey);
-                                        redirect();
-                                    }
-                                });
-                            } catch (RequestException x) {
-                                // another error condition
+            @Override
+            public void onSuccess(final AuthenticateResult arg0) {
+                if (arg0.getAuthenticated()) {
+                    // now hit the REST authentication endpoint
+                    String restUrl = "./api/authenticate";
+                    RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+                    builder.setUser(TextFormatter.escapeEmailAddress(username));
+                    builder.setPassword(password);
+                    try {
+                        GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
+                        builder.sendRequest("", new RequestCallback() {
+                            public void onError(Request request, Throwable exception) {
                                 fail();
                             }
-                        } else {
-                            fail();
-                        }
 
+                            public void onResponseReceived(Request request, Response response) {
+                                // success!
+                                String sessionKey = response.getText();
+                                GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                                if (response.getStatusCode() > 300) {
+                                    GWT.log("authentication failed: " + sessionKey, null);
+                                    fail();
+                                }
+                                GWT.log("user " + username + " associated with session key " + sessionKey, null);
+                                // login local
+                                mainWindow.login(arg0.getSessionId(), sessionKey);
+                                redirect();
+                            }
+                        });
+                    } catch (RequestException x) {
+                        // another error condition
+                        fail();
                     }
-                });
+                } else {
+                    fail();
+                }
+            }
+        });
     }
 
     void fail() {
