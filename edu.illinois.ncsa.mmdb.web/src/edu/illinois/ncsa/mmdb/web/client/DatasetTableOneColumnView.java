@@ -43,9 +43,16 @@ package edu.illinois.ncsa.mmdb.web.client;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
@@ -55,6 +62,9 @@ import com.google.gwt.user.client.ui.Widget;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
 /**
@@ -72,9 +82,12 @@ public class DatasetTableOneColumnView extends DatasetTableView {
     private final String                BLOB_URL         = "./api/image/";
     private final String                PREVIEW_URL      = "./api/image/preview/small/";
 
+    private final Map<CheckBox, String> checkBoxes;
+
     public DatasetTableOneColumnView() {
         super();
         addStyleName("datasetTable");
+        checkBoxes = new HashMap<CheckBox, String>();
     }
 
     public int getPageSize() {
@@ -97,6 +110,48 @@ public class DatasetTableOneColumnView extends DatasetTableView {
         verticalPanel.setSpacing(5);
 
         setWidget(row, 1, verticalPanel);
+
+        // selection checkbox
+        final CheckBox checkBox = new CheckBox();
+        checkBoxes.put(checkBox, id);
+        verticalPanel.add(checkBox);
+
+        // HACK since this view doesn't have it's own presenter
+        checkBox.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (checkBox.getValue()) {
+                    DatasetSelectedEvent datasetSelected = new DatasetSelectedEvent();
+                    datasetSelected.setUri(id);
+                    MMDB.eventBus.fireEvent(datasetSelected);
+                } else {
+                    DatasetUnselectedEvent datasetUnselected = new DatasetUnselectedEvent();
+                    datasetUnselected.setUri(id);
+                    MMDB.eventBus.fireEvent(datasetUnselected);
+                }
+
+            }
+        });
+
+        UserSessionState sessionState = MMDB.getSessionState();
+        if (sessionState.getSelectedDatasets().contains(id)) {
+            checkBox.setValue(true);
+        } else {
+            checkBox.setValue(false);
+        }
+
+        MMDB.eventBus.addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
+
+            @Override
+            public void onDatasetUnselected(DatasetUnselectedEvent datasetUnselectedEvent) {
+                if (id.equals(datasetUnselectedEvent.getUri())) {
+                    checkBox.setValue(false);
+                }
+
+            }
+
+        });
 
         // title
         Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
@@ -181,5 +236,22 @@ public class DatasetTableOneColumnView extends DatasetTableView {
         getCellFormatter().addStyleName(row, 1, "rightCell");
         getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP); // FIXME move to CSS
         getRowFormatter().addStyleName(row, "oddRow");
+    }
+
+    @Override
+    public List<String> getSelectedDatasets() {
+        List<String> selectedDataset = new ArrayList<String>();
+        for (CheckBox checkBox : checkBoxes.keySet() ) {
+            if (checkBox.getValue()) {
+                selectedDataset.add(checkBoxes.get(checkBox));
+            }
+        }
+        return selectedDataset;
+    }
+
+    @Override
+    public HasClickHandlers getShowSelectedAnchor() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

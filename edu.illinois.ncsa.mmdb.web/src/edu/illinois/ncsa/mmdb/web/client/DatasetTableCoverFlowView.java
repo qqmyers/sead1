@@ -38,8 +38,11 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -103,6 +106,18 @@ public class DatasetTableCoverFlowView extends DatasetTableView {
     public void insertRow(int position, String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public List<String> getSelectedDatasets() {
+        List<String> selectedDataset = new ArrayList<String>();
+        return selectedDataset;
+    }
+
+    @Override
+    public HasClickHandlers getShowSelectedAnchor() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

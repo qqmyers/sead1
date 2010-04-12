@@ -82,280 +82,281 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
  */
 public class LoginPage extends Composite {
 
-	private final FlowPanel mainPanel;
-	private Label pageTitle;
-	private TextBox usernameBox;
-	private PasswordTextBox passwordBox;
-	private SimplePanel feedbackPanel;
-	private final MyDispatchAsync dispatchasync;
-	private final MMDB mainWindow;
+    private final FlowPanel       mainPanel;
+    private Label                 pageTitle;
+    private TextBox               usernameBox;
+    private PasswordTextBox       passwordBox;
+    private SimplePanel           feedbackPanel;
+    private final MyDispatchAsync dispatchasync;
+    private final MMDB            mainWindow;
 
-	/**
-	 * @param dispatchasync
-	 * 
-	 */
-	public LoginPage(MyDispatchAsync dispatchasync, MMDB mainWindow) {
+    /**
+     * @param dispatchasync
+     * 
+     */
+    public LoginPage(MyDispatchAsync dispatchasync, MMDB mainWindow) {
 
-		this.dispatchasync = dispatchasync;
-		this.mainWindow = mainWindow;
+        this.dispatchasync = dispatchasync;
+        this.mainWindow = mainWindow;
 
-		mainPanel = new FlowPanel();
+        mainPanel = new FlowPanel();
 
-		mainPanel.addStyleName("page");
+        mainPanel.addStyleName("page");
 
-		initWidget(mainPanel);
+        initWidget(mainPanel);
 
-		// page title
-		mainPanel.add(createPageTitle());
+        // page title
+        mainPanel.add(createPageTitle());
 
-		// login form
-		mainPanel.add(createLoginForm());
-	}
+        // login form
+        mainPanel.add(createLoginForm());
+    }
 
-	/**
-	 * 
-	 * @return
-	 */
-	private Widget createPageTitle() {
-		return new TitlePanel("Login");
-	}
+    /**
+     * 
+     * @return
+     */
+    private Widget createPageTitle() {
+        return new TitlePanel("Login");
+    }
 
-	/**
-	 * 
-	 * @return
-	 */
-	private Widget createLoginForm() {
-		FlexTable table = new FlexTable();
+    /**
+     * 
+     * @return
+     */
+    private Widget createLoginForm() {
+        FlexTable table = new FlexTable();
 
-		table.addStyleName("loginForm");
+        table.addStyleName("loginForm");
 
-		feedbackPanel = new SimplePanel();
+        feedbackPanel = new SimplePanel();
 
-		table.setWidget(0, 0, feedbackPanel);
+        table.setWidget(0, 0, feedbackPanel);
 
-		table.getFlexCellFormatter().setColSpan(0, 0, 2);
+        table.getFlexCellFormatter().setColSpan(0, 0, 2);
 
-		table.getFlexCellFormatter().setHorizontalAlignment(0, 0,
-				HasHorizontalAlignment.ALIGN_CENTER);
+        table.getFlexCellFormatter().setHorizontalAlignment(0, 0,
+                HasHorizontalAlignment.ALIGN_CENTER);
 
-		Label usernameLabel = new Label("Email:");
+        Label usernameLabel = new Label("Email:");
 
-		table.setWidget(1, 0, usernameLabel);
+        table.setWidget(1, 0, usernameLabel);
 
-		usernameBox = new TextBox();
-		
-		usernameBox.setTabIndex(1);
+        usernameBox = new TextBox();
 
-		usernameBox.addKeyUpHandler(new KeyUpHandler() {
+        usernameBox.setTabIndex(1);
 
-			@Override
-			public void onKeyUp(KeyUpEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-					authenticate();
-				}
+        usernameBox.addKeyUpHandler(new KeyUpHandler() {
 
-			}
-		});
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    authenticate();
+                }
 
-		table.setWidget(1, 1, usernameBox);
+            }
+        });
 
-		DeferredCommand.addCommand(new Command() {
-			@Override
-			public void execute() {
-				usernameBox.setFocus(true);
-			}
-		});
-		
-		// sign up
-		table.setWidget(1, 3, new Hyperlink("Sign up", "signup"));
+        table.setWidget(1, 1, usernameBox);
 
-		Label passwordLabel = new Label("Password:");
+        DeferredCommand.addCommand(new Command() {
+            @Override
+            public void execute() {
+                usernameBox.setFocus(true);
+            }
+        });
 
-		table.setWidget(2, 0, passwordLabel);
+        // sign up
+        table.setWidget(1, 3, new Hyperlink("Sign up", "signup"));
 
-		passwordBox = new PasswordTextBox();
-		
-		passwordBox.setTabIndex(2);
+        Label passwordLabel = new Label("Password:");
 
-		passwordBox.addKeyUpHandler(new KeyUpHandler() {
+        table.setWidget(2, 0, passwordLabel);
 
-			@Override
-			public void onKeyUp(KeyUpEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-					authenticate();
-				}
+        passwordBox = new PasswordTextBox();
 
-			}
-		});
+        passwordBox.setTabIndex(2);
 
-		table.setWidget(2, 1, passwordBox);
-		
-		// forgot password link
-		table.setWidget(2, 3, new Hyperlink("Forgot Password?", "requestNewPassword"));
+        passwordBox.addKeyUpHandler(new KeyUpHandler() {
 
-		Button submitButton = new Button("Login", new ClickHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    authenticate();
+                }
 
-			@Override
-			public void onClick(ClickEvent event) {
-				authenticate();
-			}
-		});
+            }
+        });
 
-		submitButton.setTabIndex(3);
-		
-		table.setWidget(3, 1, submitButton);
+        table.setWidget(2, 1, passwordBox);
 
-		return table;
-	}
+        // forgot password link
+        table.setWidget(2, 3, new Hyperlink("Forgot Password?", "requestNewPassword"));
 
-	/**
-	 * Authenticate against the REST endpoint to make sure user is 
-	 * authenticated on the server side. If successful, login local.
-	 */
-	protected void authenticate() {
-		final String username = usernameBox.getText();
-		final String password = passwordBox.getText();
-		MMDB.dispatchAsync.execute(new Authenticate(username, password),
-				new AsyncCallback<AuthenticateResult>() {
+        Button submitButton = new Button("Login", new ClickHandler() {
 
-					@Override
-					public void onFailure(Throwable arg0) {
-						GWT.log("Failed authenticating", arg0);
-					}
+            @Override
+            public void onClick(ClickEvent event) {
+                authenticate();
+            }
+        });
 
-					@Override
-					public void onSuccess(final AuthenticateResult arg0) {
-						if (arg0.getAuthenticated()) {
-							// now hit the REST authentication endpoint
-							String restUrl = "./api/authenticate";
-							RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-							builder.setUser(username);
-							builder.setPassword(password);
-							try {
-								GWT.log("attempting to authenticate "+username+" against "+restUrl,null);
-								builder.sendRequest("", new RequestCallback() {
-									public void onError(Request request, Throwable exception) {
-										fail();
-									}
-									public void onResponseReceived(Request request,	Response response) {
-										// success!
-										String sessionKey = response.getText();
-										GWT.log("REST auth status code = "+response.getStatusCode(), null);
-										if(response.getStatusCode()>300) {
-											GWT.log("authentication failed: "+sessionKey,null);
-											fail();
-										}
-										GWT.log("user "+username+" associated with session key "+sessionKey,null);
-										// login local
-										mainWindow.login(arg0.getSessionId(), sessionKey);
-										redirect();
-									}
-								});
-							} catch(RequestException x) {
-								// another error condition
-								fail();
-							}
-						} else {
-							fail();
-						}
+        submitButton.setTabIndex(3);
 
-					}
-				});
-	}
+        table.setWidget(3, 1, submitButton);
 
-	void fail() {
-		Label message = new Label(
-				"Incorrect username/password combination");
-		message.addStyleName("loginError");
-		feedbackPanel.clear();
-		feedbackPanel.add(message);
-	}
-	
-	/**
-	 * Reload page after being logged in.
-	 * 
-	 * FIXME remove hardcoded paths
-	 */
-	protected void redirect() {
-		if (History.getToken().startsWith("login")) {
-			History.newItem("listDatasets", true);
-			// FIXME hack
-			MMDB.listDatasets();
-		} else {
-			History.fireCurrentHistoryState();
-		}
-	}
+        return table;
+    }
 
-//	/**
-//	 * Set the session id, add a cookie and add history token.
-//	 * 
-//	 * @param sessionId
-//	 * 
-//	 */
-//	public static void login(final String userId, final String sessionKey) {
-//		final UserSessionState state = MMDB.getSessionState();
-////		state.setUsername(userId);
-//		state.setSessionKey(sessionKey);
-//		// set cookie
-//		// TODO move to more prominent place... MMDB? A class with static properties?
-//		final long DURATION = 1000 * 60 * 60; // 60 minutes
-//		Date expires = new Date(System.currentTimeMillis() + DURATION);
-//		Cookies.setCookie("sid", userId, expires);
-//		Cookies.setCookie("sessionKey", sessionKey, expires);
-//		
-//		MMDB.dispatchAsync.execute(new GetUser(userId), new AsyncCallback<GetUserResult>() {
-//
-//			@Override
-//			public void onFailure(Throwable caught) {
-//				GWT.log("Error retrieving user with id " + userId);
-//			}
-//
-//			@Override
-//			public void onSuccess(GetUserResult result) {
-//				PersonBean personBean = result.getPersonBean();
-//				state.setCurrentUser(personBean);
-//				MMDB.loginStatusWidget.login(personBean.getName());
-//				GWT.log("Current user set to " + personBean.getUri());
-//			}
-//		});
-//
-//	}
+    /**
+     * Authenticate against the REST endpoint to make sure user is
+     * authenticated on the server side. If successful, login local.
+     */
+    protected void authenticate() {
+        final String username = usernameBox.getText();
+        final String password = passwordBox.getText();
+        MMDB.dispatchAsync.execute(new Authenticate(username, password),
+                new AsyncCallback<AuthenticateResult>() {
 
-	public static void clearBrowserCreds() {
-		// now hit the REST authentication endpoint with bad creds
-		String restUrl = "./api/logout";
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-		builder.setUser("_badCreds_");
-		builder.setPassword("_reallyReallyBadCreds_");
-		try {
-			builder.sendRequest("", new RequestCallback() {
-				public void onError(Request request, Throwable exception) {
-					// do something
-					Window.alert("error logging out "+exception.getMessage());
-				}
-				public void onResponseReceived(Request request,	Response response) {
-					// success!
-					History.newItem("login"); // FIXME hardcodes destination
-				}
-			});
-		} catch(RequestException x) {
-			// another error condition, do something
-			Window.alert("error logging out: "+x.getMessage());
-		}
-	}
-	
-	/**
-	 * Set sessionID to null, remove cookie, and log out of REST servlets
-	 */
-	public static void logout() {
-		UserSessionState state = MMDB.getSessionState();
-		if(state.getCurrentUser().getUri() != null) {
-			GWT.log("user "+state.getCurrentUser().getUri()+" logging out", null);
-		}
-		state.setCurrentUser(null);
-		state.setSessionKey(null);
-		clearBrowserCreds();
-		Cookies.removeCookie("sid");
-		Cookies.removeCookie("sessionKey");
-	}
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        GWT.log("Failed authenticating", arg0);
+                    }
+
+                    @Override
+                    public void onSuccess(final AuthenticateResult arg0) {
+                        if (arg0.getAuthenticated()) {
+                            // now hit the REST authentication endpoint
+                            String restUrl = "./api/authenticate";
+                            RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+                            builder.setUser(username);
+                            builder.setPassword(password);
+                            try {
+                                GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
+                                builder.sendRequest("", new RequestCallback() {
+                                    public void onError(Request request, Throwable exception) {
+                                        fail();
+                                    }
+
+                                    public void onResponseReceived(Request request, Response response) {
+                                        // success!
+                                        String sessionKey = response.getText();
+                                        GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                                        if (response.getStatusCode() > 300) {
+                                            GWT.log("authentication failed: " + sessionKey, null);
+                                            fail();
+                                        }
+                                        GWT.log("user " + username + " associated with session key " + sessionKey, null);
+                                        // login local
+                                        mainWindow.login(arg0.getSessionId(), sessionKey);
+                                        redirect();
+                                    }
+                                });
+                            } catch (RequestException x) {
+                                // another error condition
+                                fail();
+                            }
+                        } else {
+                            fail();
+                        }
+
+                    }
+                });
+    }
+
+    void fail() {
+        Label message = new Label(
+                "Incorrect username/password combination");
+        message.addStyleName("loginError");
+        feedbackPanel.clear();
+        feedbackPanel.add(message);
+    }
+
+    /**
+     * Reload page after being logged in.
+     * 
+     * FIXME remove hardcoded paths
+     */
+    protected void redirect() {
+        if (History.getToken().startsWith("login")) {
+            History.newItem("listDatasets", true);
+            mainWindow.showListDatasetsPage();
+        } else {
+            History.fireCurrentHistoryState();
+        }
+    }
+
+    //	/**
+    //	 * Set the session id, add a cookie and add history token.
+    //	 * 
+    //	 * @param sessionId
+    //	 * 
+    //	 */
+    //	public static void login(final String userId, final String sessionKey) {
+    //		final UserSessionState state = MMDB.getSessionState();
+    ////		state.setUsername(userId);
+    //		state.setSessionKey(sessionKey);
+    //		// set cookie
+    //		// TODO move to more prominent place... MMDB? A class with static properties?
+    //		final long DURATION = 1000 * 60 * 60; // 60 minutes
+    //		Date expires = new Date(System.currentTimeMillis() + DURATION);
+    //		Cookies.setCookie("sid", userId, expires);
+    //		Cookies.setCookie("sessionKey", sessionKey, expires);
+    //		
+    //		MMDB.dispatchAsync.execute(new GetUser(userId), new AsyncCallback<GetUserResult>() {
+    //
+    //			@Override
+    //			public void onFailure(Throwable caught) {
+    //				GWT.log("Error retrieving user with id " + userId);
+    //			}
+    //
+    //			@Override
+    //			public void onSuccess(GetUserResult result) {
+    //				PersonBean personBean = result.getPersonBean();
+    //				state.setCurrentUser(personBean);
+    //				MMDB.loginStatusWidget.login(personBean.getName());
+    //				GWT.log("Current user set to " + personBean.getUri());
+    //			}
+    //		});
+    //
+    //	}
+
+    public static void clearBrowserCreds() {
+        // now hit the REST authentication endpoint with bad creds
+        String restUrl = "./api/logout";
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+        builder.setUser("_badCreds_");
+        builder.setPassword("_reallyReallyBadCreds_");
+        try {
+            builder.sendRequest("", new RequestCallback() {
+                public void onError(Request request, Throwable exception) {
+                    // do something
+                    Window.alert("error logging out " + exception.getMessage());
+                }
+
+                public void onResponseReceived(Request request, Response response) {
+                    // success!
+                    History.newItem("login"); // FIXME hardcodes destination
+                }
+            });
+        } catch (RequestException x) {
+            // another error condition, do something
+            Window.alert("error logging out: " + x.getMessage());
+        }
+    }
+
+    /**
+     * Set sessionID to null, remove cookie, and log out of REST servlets
+     */
+    public static void logout() {
+        UserSessionState state = MMDB.getSessionState();
+        if (state.getCurrentUser().getUri() != null) {
+            GWT.log("user " + state.getCurrentUser().getUri() + " logging out", null);
+        }
+        state.setCurrentUser(null);
+        state.setSessionKey(null);
+        clearBrowserCreds();
+        Cookies.removeCookie("sid");
+        Cookies.removeCookie("sessionKey");
+    }
 }

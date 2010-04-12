@@ -48,25 +48,23 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 /**
  * Holds information about the current state of the user's session.
  * Non-persistent upon login/logout.
- *
+ * 
  * @author futrelle
  */
 public class UserSessionState {
-    private Map<String, String> preferences;
-    private String              sessionKey;
-    private Set<String>         selectedDatasets;
-    private PersonBean          currentUser;
+    private final Map<String, String> preferences;
+    private String                    sessionKey;
+    private final Set<String>         selectedDatasets;
+    private PersonBean                currentUser;
 
-    public Map<String, String> getPreferences() {
-        if (preferences == null) {
-            preferences = new HashMap<String, String>();
-            initializePreferences();
-        }
-        return preferences;
+    public UserSessionState() {
+        preferences = new HashMap<String, String>();
+        selectedDatasets = new HashSet<String>();
+        initializePreferences();
     }
 
-    public void setPreferences(Map<String, String> preferences) {
-        this.preferences = preferences;
+    public Map<String, String> getPreferences() {
+        return preferences;
     }
 
     public String getSessionKey() {
@@ -74,18 +72,7 @@ public class UserSessionState {
     }
 
     public void setSessionKey(String sessionKey) {
-        this.sessionKey = sessionKey;
-    }
-
-    public Set<String> getSelectedDatasets() {
-        if (selectedDatasets == null) {
-            selectedDatasets = new HashSet<String>();
-        }
-        return selectedDatasets;
-    }
-
-    public void setSelectedDatasets(Set<String> selectedDatasets) {
-        this.selectedDatasets = selectedDatasets;
+        sessionKey = sessionKey;
     }
 
     private void initializePreferences() {
@@ -99,5 +86,17 @@ public class UserSessionState {
 
     public PersonBean getCurrentUser() {
         return currentUser;
+    }
+
+    public void datasetSelected(String uri) {
+        selectedDatasets.add(uri);
+    }
+
+    public void datasetUnselected(String uri) {
+        selectedDatasets.remove(uri);
+    }
+
+    public Set<String> getSelectedDatasets() {
+        return selectedDatasets;
     }
 }

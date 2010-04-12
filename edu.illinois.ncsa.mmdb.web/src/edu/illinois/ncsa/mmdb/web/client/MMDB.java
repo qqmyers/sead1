@@ -51,7 +51,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -75,10 +74,13 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewCollectionEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.HomePage;
+import edu.illinois.ncsa.mmdb.web.client.ui.ListDatasetsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.NewPasswordPage;
@@ -103,628 +105,607 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  * @author Luigi Marini
  */
 public class MMDB implements EntryPoint, ValueChangeHandler<String> {
-	/**
-	 * The message displayed to the user when the server cannot be reached or
-	 * returns an error.
-	 */
-	public static final String SERVER_ERROR = "An error occurred while "
-			+ "attempting to contact the server. Please check your network "
-			+ "connection and try again.";
-
-	public static ArrayList<String> groups;
-
-	/**
-	 * Dispatch service. Should be the only service needed. All commands should
-	 * go through this endpoint. To learn more look up gwt-dispatch and the
-	 * command pattern.
-	 */
-	public static final MyDispatchAsync dispatchAsync = new MyDispatchAsync();
-
-	/** Event bus for propagating events in the interface **/
-	public static final HandlerManager eventBus = new HandlerManager(null);
-
-	/** The upload button */
-	private Anchor uploadButton;
-
-	/** The upload widget in the upload toolbar */
-	private FlowPanel uploadPanel;
-
-	/** Main content panel **/
-	private static final FlowPanel mainContainer = new FlowPanel();
-
-	/** Place support for history management **/
-	private PlaceService placeService;
-
-	public static LoginStatusWidget loginStatusWidget;
-	
-	private String previousHistoryToken = new String();
-
-	private Label breadcrumb;
-	
-	private static UserSessionState sessionState;
-	
-	/**
-	 * This is the entry point method.
-	 */
-	public void onModuleLoad() {
-
-		// navigation menu
-		initNavMenu();
-		
-		// breadcrumb
-		breadcrumb = new Label("breadcrumb > bread > crumb");
-		breadcrumb.addStyleName("breadcrumb");
-		RootPanel.get("breadcrumb").add(breadcrumb);
-		
-		// main content
-		mainContainer.addStyleName("relativePosition");
-		RootPanel.get("mainContainer").add(mainContainer);
-
-		// log events
-		logEvent(eventBus);
-
-		// TODO place support for history management
-		// placeService = new PlaceService(eventBus);
-
-		// history support
-		History.addValueChangeHandler(this);
-		
-		History.fireCurrentHistoryState();
-	}
-
-	Label debugLabel;
-
-	/**
-	 * Navigation menu at the top of the page.
-	 */
-	void initNavMenu() {
-		if(RootPanel.get("navMenu") == null) {
-			GWT.log("BARF! failed to get rootpanel", null);
-		}
-		RootPanel.get("navMenu").clear();
-		HorizontalPanel navMenu = new HorizontalPanel();
-		RootPanel.get("navMenu").add(navMenu);
-		// datasets
-		Hyperlink homeLink = new Hyperlink("Home", "home");
-		homeLink.addStyleName("navMenuLink");
-		navMenu.add(homeLink);
-		// bullet
-		HTML bullet = new HTML("&bull;");
-		bullet.addStyleName("whiteText");
-		navMenu.add(bullet);
-		// datasets
-		Hyperlink listLink = new Hyperlink("Datasets", "listDatasets");
-		listLink.addStyleName("navMenuLink");
-		navMenu.add(listLink);
-		// bullet
-		bullet = new HTML("&bull;");
-		bullet.addStyleName("whiteText");
-		navMenu.add(bullet);
-		// collections
-		Hyperlink collectionsLink = new Hyperlink("Collections",
-				"listCollections");
-		collectionsLink.addStyleName("navMenuLink");
-		navMenu.add(collectionsLink);
-		// bullet
-		HTML bullet2 = new HTML("&bull;");
-		bullet2.addStyleName("whiteText");
-		navMenu.add(bullet2);
-		// tags
-		Hyperlink tagsLink = new Hyperlink("Tags",
-				"tags");
-		tagsLink.addStyleName("navMenuLink");
-		navMenu.add(tagsLink);
-		// bullet
-		HTML bullet3 = new HTML("&bull;");
-		bullet3.addStyleName("whiteText");
-		navMenu.add(bullet3);
-		// upload link
-		Hyperlink uploadLink = new Hyperlink("Upload", "upload");
-		uploadLink.addStyleName("navMenuLink");
-		navMenu.add(uploadLink);
-
-		// sign up link
-		SimplePanel signupPanel = new SimplePanel();
-		signupPanel.addStyleName("signupPanel");
-		Anchor signupLink = new Anchor("Sign up");
-		signupLink.addStyleName("signupLink");
-		signupLink.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				History.newItem("signup");
-			}
-		});
-		signupPanel.add(signupLink);
-		RootPanel.get("signup").add(signupPanel);
-
-		// FIXME debug
-		debugLabel = new Label();
-		debugLabel.addStyleName("whiteText");
-		navMenu.add(debugLabel);
-
-		// login menu
-		loginStatusWidget = new LoginStatusWidget();
-		RootPanel.get("loginMenu").add(loginStatusWidget);
-		
-		// search box
-		SearchBox searchBox = new SearchBox("Search");
-		RootPanel.get("searchMenu").add(searchBox);
-
-	}
-
-	/**
-	 * For debugging purposes. Monitor events of interest.
-	 * 
-	 * @param eventBus
-	 */
-	private void logEvent(HandlerManager eventBus) {
-		eventBus.addHandler(AddNewDatasetEvent.TYPE,
-				new AddNewDatasetHandler() {
-
-					@Override
-					public void onAddNewDataset(AddNewDatasetEvent event) {
-						GWT.log("Event Logging: Add new dataset event "
-								+ event.getDataset().getTitle(), null);
-
-					}
-				});
-	}
-
-	public static void listDatasets() {
-		listDatasets(null);
-	}
-	
-	public static void listDatasets(String inCollection) {
-		mainContainer.clear();
-
-		TitlePanel titlePanel = new TitlePanel("Datasets");
-		if(inCollection != null) {
-			titlePanel = new TitlePanel(inCollection); // FIXME use collection name
-		}
-
-		Anchor rss = new Anchor();
-		rss.setHref("rss.xml");
-		rss.addStyleName("rssIcon");
-		DOM
-				.setElementAttribute(rss.getElement(), "type",
-						"application/rss+xml");
-		rss
-				.setHTML("<img src='./images/rss_icon.gif' border='0px' class='navMenuLink'>"); // FIXME
-																								// hack
-
-		titlePanel.addEast(rss);
-
-		mainContainer.add(titlePanel);
-
-		PagingDatasetTableView pagingView = new PagingDatasetTableView();
-		pagingView.addStyleName("datasetTable");
-		PagingDatasetTablePresenter datasetTablePresenter = new PagingDatasetTablePresenter(
-				pagingView, eventBus);
-		datasetTablePresenter.bind();
-
-		mainContainer.add(pagingView.asWidget());
-	}
-	
-	/**
-	 * List collections.
-	 * 
-	 * FIXME move code to ListCollectionsPage
-	 */
-	private void listCollections() {
-		mainContainer.clear();
-
-		TitlePanel titlePanel = new TitlePanel("Collections");
-		mainContainer.add(titlePanel);
-
-		PagingCollectionTableView view = new PagingCollectionTableView();
-		view.addStyleName("datasetTable");
-		PagingCollectionTablePresenter presenter = new PagingCollectionTablePresenter(
-				view, eventBus);
-		presenter.bind();
-		
-		view.setNumberOfPages(0);
-
-		mainContainer.add(view.asWidget());
-		
-		// create collection
-		FlowPanel addCollectionPanel = new FlowPanel();
-		final WatermarkTextBox addCollectionBox = new WatermarkTextBox("",
-				"Collection name");
-		addCollectionPanel.add(addCollectionBox);
-		Button addButton = new Button("Add", new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent arg0) {
-				final CollectionBean collection = new CollectionBean();
-				collection.setTitle(addCollectionBox.getText());
-
-				dispatchAsync.execute(new AddCollection(collection, getSessionState().getCurrentUser().getUri()),
-						new AsyncCallback<AddCollectionResult>() {
-
-							@Override
-							public void onFailure(Throwable arg0) {
-								GWT.log("Failed creating new collection", arg0);
-							}
-
-							@Override
-							public void onSuccess(AddCollectionResult arg0) {
-								AddNewCollectionEvent event = new AddNewCollectionEvent(
-										collection);
-								GWT.log("Firing event add collection "
-										+ collection.getTitle(), null);
-								eventBus.fireEvent(event);
-							}
-						});
-			}
-		});
-		addCollectionPanel.add(addButton);
-		mainContainer.add(addCollectionPanel);
-	}
-
-	/**
-	 * Parse the parameters in the history token after the '?'
-	 * 
-	 * @return
-	 */
-	Map<String, String> getParams() {
-		Map<String, String> params = new HashMap<String, String>();
-		String paramString = History.getToken().substring(
-				History.getToken().indexOf("?") + 1);
-		if (!paramString.isEmpty()) {
-			for (String paramEntry : paramString.split("&")) {
-				String[] terms = paramEntry.split("=");
-				if (terms.length == 2) {
-					params.put(terms[0], terms[1]);
-				}
-			}
-		}
-		return params;
-	}
-
-	/**
-	 * Show information about a particular dataset.
-	 */
-	private void showDataset() {
-
-			DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync);
-			mainContainer.clear();
-			mainContainer.add(datasetWidget);
-
-			String datasetUri = getParams().get("id"); // FIXME should use
-			// "uri?"
-			if (datasetUri != null) {
-				datasetWidget.showDataset(datasetUri);
-			}
-	}
-
-	/**
-	 * History handler. Check if the user has been enabled first, otherwise show
-	 * the not enabled page.
-	 */
-	@Override
-	public void onValueChange(ValueChangeEvent<String> event) {
-		
-		final String token = event.getValue();
-
-		GWT.log("History changed: " + event.getValue(), null);
-
-		if (token.startsWith("login")) {
-			showLoginPage();
-		} else if (token.startsWith("signup")) {
-			showSignupPage();
-		} else if (token.startsWith("requestNewPassword")) {
-			showRequestNewPasswordPage();
-		} else {
-			checkLogin();
-		}
-	}
-
-	/**
-	 * Check if user has permission ot view member pages.
-	 * 
-	 * @param token
-	 */
-	private void checkPermissions(final String token) {
-			// Check if the user has been activated by an administrator
-			dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
-					Permission.VIEW_MEMBER_PAGES),
-					new AsyncCallback<HasPermissionResult>() {
-
-						@Override
-						public void onFailure(Throwable caught) {
-							GWT
-									.log(
-											"Error checking if the users has permissions to view member pages",
-											caught);
-						}
-
-						@Override
-						public void onSuccess(HasPermissionResult result) {
-							if (result.isPermitted()) {
-								parseHistoryToken(token);
-							} else {
-								showNotEnabledPage();
-							}
-						}
-					});
-	}
-	
-	/**
-	 * Set the session id, add a cookie and add history token.
-	 * 
-	 * @param sessionId
-	 * 
-	 */
-	public void login(final String userId, final String sessionKey) {
-		final UserSessionState state = MMDB.getSessionState();
-		state.setSessionKey(sessionKey);
-		// set cookie
-		// TODO move to more prominent place... MMDB? A class with static properties?
-		final long DURATION = 1000 * 60 * 60; // 60 minutes
-		final Date expires = new Date(System.currentTimeMillis() + DURATION);
-		Cookies.setCookie("sessionKey", sessionKey, expires);
-		
-		MMDB.dispatchAsync.execute(new GetUser(userId), new AsyncCallback<GetUserResult>() {
-
-			@Override
-			public void onFailure(Throwable caught) {
-				GWT.log("Error retrieving user with id " + userId);
-			}
-
-			@Override
-			public void onSuccess(GetUserResult result) {
-				PersonBean personBean = result.getPersonBean();
-				state.setCurrentUser(personBean);
-				MMDB.loginStatusWidget.login(personBean.getName());
-				GWT.log("Current user set to " + personBean.getUri());
-				Cookies.setCookie("sid", personBean.getUri(), expires);
-				checkPermissions(History.getToken());
-			}
-		});
-
-	}
-
-	/**
-	 * Parse history token and show the proper widgets.
-	 * 
-	 * @param token
-	 *            history token (everything after the #)
-	 */
-	private void parseHistoryToken(String token) {
-			if (token.startsWith("dataset")) {
-				showDataset();
-			} else if (token.startsWith("listDatasets") && !previousHistoryToken.startsWith("listDatasets")) {
-				listDatasets();
-			} else if (token.startsWith("upload")) {
-				showUploadPage();
-			} else if (token.startsWith("tags")) {
-				shosTagsPage();
-			} else if (token.startsWith("tag")) {
-				showTagPage();
-			} else if (token.startsWith("listCollections") && !previousHistoryToken.startsWith("listCollections")) {
-				listCollections();
-			} else if (token.startsWith("listCollections")) {
-				// skip default case!
-			} else if (token.startsWith("collection")) {
-				showCollectionPage();
-			} else if (token.startsWith("search")) {
-				showSearchResultsPage();
-			} else if (token.startsWith("modifyPermissions")) {
-				showUsersPage();
-			} else if (token.startsWith("signup")) {
-				showSignupPage();
-			} else if (token.startsWith("newPassword")) {
-				showNewPasswordPage();
-			} else if (token.startsWith("home")) {
-				showHomePage();
-			} else if (token.startsWith("sparql")) {
-				showSparqlPage();
-			} else if(!previousHistoryToken.startsWith("listDatasets")) {
-				listDatasets();
-			}
-		previousHistoryToken = token;
-	}
-
-	private void shosTagsPage() {
-		GWT.log("Loading Tags Page", null);
-		mainContainer.clear();
-		mainContainer.add(new TagsPage(dispatchAsync));
-	}
-
-	private void showSearchResultsPage() {
-		GWT.log("Loading Search Results Page", null);
-		mainContainer.clear();
-		mainContainer.add(new SearchResultsPage(dispatchAsync, eventBus));
-	}
-
-	private void showUploadPage() {
-		GWT.log("Loading Upload Page", null);
-		mainContainer.clear();
-		mainContainer.add(new UploadPage(dispatchAsync));
-	}
-
-	private void showHomePage() {
-		mainContainer.clear();
-		mainContainer.add(new HomePage(dispatchAsync));
-	}
-
-	private void showNewPasswordPage() {
-		mainContainer.clear();
-		mainContainer.add(new NewPasswordPage(dispatchAsync));
-	}
-
-	private void showRequestNewPasswordPage() {
-		mainContainer.clear();
-		mainContainer.add(new RequestNewPasswordPage(dispatchAsync));
-	}
-
-	/**
-	 * For users that haven't been enabled by an admin yet.
-	 */
-	private void showNotEnabledPage() {
-		mainContainer.clear();
-		mainContainer.add(new NotEnabledPage());
-	}
-
-	/**
-	 * Signup on to the system.
-	 */
-	private void showSignupPage() {
-		mainContainer.clear();
-		mainContainer.add(new SignupPage(dispatchAsync));
-	}
-
-	/**
-	 * List users in the system.
-	 */
-	private void showUsersPage() {
-		// Check if the user has view admin pages permission
-		dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
-				Permission.VIEW_ADMIN_PAGES),
-				new AsyncCallback<HasPermissionResult>() {
-
-					@Override
-					public void onFailure(Throwable caught) {
-						GWT
-								.log(
-										"Error checking if the users has permissions to view admin pages",
-										caught);
-					}
-
-					@Override
-					public void onSuccess(HasPermissionResult result) {
-						if (result.isPermitted()) {
-							mainContainer.clear();
-							mainContainer.add(new UserManagementPage(
-									dispatchAsync));
-						} else {
-							showNoAccessPage();
-						}
-					}
-				});
-	}
-
-
-	/**
-	 * List users in the system.
-	 */
-	private void showSparqlPage() {
-		// Check if the user has view admin pages permission
-		dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
-				Permission.VIEW_ADMIN_PAGES),
-				new AsyncCallback<HasPermissionResult>() {
-
-					@Override
-					public void onFailure(Throwable caught) {
-						GWT
-								.log(
-										"Error checking if the users has permissions to view admin pages",
-										caught);
-					}
-
-					@Override
-					public void onSuccess(HasPermissionResult result) {
-						if (result.isPermitted()) {
-							mainContainer.clear();
-							mainContainer.add(new SparqlPage(dispatchAsync));
-						} else {
-							showNoAccessPage();
-						}
-					}
-				});
-	}
-
-/**
-	 * A page for when a user doesn't have access to a specific page.
-	 */
-	private void showNoAccessPage() {
-		mainContainer.clear();
-		mainContainer.add(new NoAccessPage());
-	}
-
-	/**
-	 * Show a specific collection.
-	 */
-	private void showCollectionPage() {
-		mainContainer.clear();
-		mainContainer.add(new CollectionPage(getParams().get("uri"),
-				dispatchAsync, eventBus));
-	}
-
-	/**
-	 * Show a specific tag page.
-	 */
-	private void showTagPage() {
-		mainContainer.clear();
-		mainContainer.add(new TagPage(getParams().get("title"), dispatchAsync,
-				eventBus));
-	}
-
-	/**
-	 * Show a set of widgets to authenticate with the server.
-	 */
-	private void showLoginPage() {
-		mainContainer.clear();
-		mainContainer.add(new LoginPage(dispatchAsync, this));
-	}
-
-	/**
-	 * If user not logged in redirect to the required login page.
-	 * 
-	 * @return true if logged in already, false if not
-	 */
-	public void checkLogin() {
-		String cookieSID = Cookies.getCookie("sid");
-		if(cookieSID != null) {
-			GWT.log("Sid: "+cookieSID, null);
-		}
-		String cookieSessionKey = Cookies.getCookie("sessionKey");
-		if(cookieSessionKey != null) {
-			GWT.log("Session key: "+cookieSessionKey,null);
-		}
-		if (cookieSID != null && cookieSessionKey != null) {
-			login(cookieSID, cookieSessionKey);
-		} else {
-			showLoginPage();
-		}
-	}
-	
-	public static final String DATASET_VIEW_TYPE_PREFERENCE = "datasetViewType";
-	public static final String COLLECTION_VIEW_TYPE_PREFERENCE = "collectionViewType";
-	
-	// session state
-	public static UserSessionState getSessionState() {
-		if(sessionState == null) {
-			sessionState = new UserSessionState();
-		}
-		return sessionState;
-	}
-	
-	// a common idiom
-	/** Get the currently-logged-in username, if any */
-	public static String getUsername() {
-		PersonBean currentUser = getSessionState().getCurrentUser();
-		if (currentUser != null) {
-			return currentUser.getUri();
-		} else {
-			return null;
-		}
-	}
-	
-	// session preferences
-	private static Map<String,String> getSessionPreferences() {
-		return getSessionState().getPreferences();
-	}
-	
-	public static String getSessionPreference(String key) {
-		return getSessionPreference(key,null);
-	}
-	public static String getSessionPreference(String key, String defaultValue) {
-		String value = getSessionPreferences().get(key);
-		return value == null ? defaultValue : value;
-	}
-	public static void setSessionPreference(String key, String value) {
-		getSessionPreferences().put(key,value);
-	}
+    /**
+     * The message displayed to the user when the server cannot be reached or
+     * returns an error.
+     */
+    public static final String          SERVER_ERROR         = "An error occurred while "
+                                                                     + "attempting to contact the server. Please check your network "
+                                                                     + "connection and try again.";
+
+    public static ArrayList<String>     groups;
+
+    /**
+     * Dispatch service. Should be the only service needed. All commands should
+     * go through this endpoint. To learn more look up gwt-dispatch and the
+     * command pattern.
+     */
+    public static final MyDispatchAsync dispatchAsync        = new MyDispatchAsync();
+
+    /** Event bus for propagating events in the interface **/
+    public static final HandlerManager  eventBus             = new HandlerManager(null);
+
+    /** The upload button */
+    private Anchor                      uploadButton;
+
+    /** The upload widget in the upload toolbar */
+    private FlowPanel                   uploadPanel;
+
+    /** Main content panel **/
+    private static final FlowPanel      mainContainer        = new FlowPanel();
+
+    /** Place support for history management **/
+    private PlaceService                placeService;
+
+    public static LoginStatusWidget     loginStatusWidget;
+
+    private String                      previousHistoryToken = new String();
+
+    private Label                       breadcrumb;
+
+    private static UserSessionState     sessionState;
+
+    /**
+     * This is the entry point method.
+     */
+    public void onModuleLoad() {
+
+        // navigation menu
+        initNavMenu();
+
+        // breadcrumb
+        breadcrumb = new Label("breadcrumb > bread > crumb");
+        breadcrumb.addStyleName("breadcrumb");
+        RootPanel.get("breadcrumb").add(breadcrumb);
+
+        // main content
+        mainContainer.addStyleName("relativePosition");
+        RootPanel.get("mainContainer").add(mainContainer);
+
+        // log events
+        logEvent(eventBus);
+
+        eventBus.addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
+
+            @Override
+            public void onDatasetSelected(DatasetSelectedEvent event) {
+                GWT.log("Dataset selected " + event.getUri());
+            }
+        });
+
+        // TODO place support for history management
+        // placeService = new PlaceService(eventBus);
+
+        // history support
+        History.addValueChangeHandler(this);
+
+        History.fireCurrentHistoryState();
+    }
+
+    Label debugLabel;
+
+    /**
+     * Navigation menu at the top of the page.
+     */
+    void initNavMenu() {
+        if (RootPanel.get("navMenu") == null) {
+            GWT.log("BARF! failed to get rootpanel", null);
+        }
+        RootPanel.get("navMenu").clear();
+        HorizontalPanel navMenu = new HorizontalPanel();
+        RootPanel.get("navMenu").add(navMenu);
+        // datasets
+        Hyperlink homeLink = new Hyperlink("Home", "home");
+        homeLink.addStyleName("navMenuLink");
+        navMenu.add(homeLink);
+        // bullet
+        HTML bullet = new HTML("&bull;");
+        bullet.addStyleName("whiteText");
+        navMenu.add(bullet);
+        // datasets
+        Hyperlink listLink = new Hyperlink("Datasets", "listDatasets");
+        listLink.addStyleName("navMenuLink");
+        navMenu.add(listLink);
+        // bullet
+        bullet = new HTML("&bull;");
+        bullet.addStyleName("whiteText");
+        navMenu.add(bullet);
+        // collections
+        Hyperlink collectionsLink = new Hyperlink("Collections",
+                "listCollections");
+        collectionsLink.addStyleName("navMenuLink");
+        navMenu.add(collectionsLink);
+        // bullet
+        HTML bullet2 = new HTML("&bull;");
+        bullet2.addStyleName("whiteText");
+        navMenu.add(bullet2);
+        // tags
+        Hyperlink tagsLink = new Hyperlink("Tags",
+                "tags");
+        tagsLink.addStyleName("navMenuLink");
+        navMenu.add(tagsLink);
+        // bullet
+        HTML bullet3 = new HTML("&bull;");
+        bullet3.addStyleName("whiteText");
+        navMenu.add(bullet3);
+        // upload link
+        Hyperlink uploadLink = new Hyperlink("Upload", "upload");
+        uploadLink.addStyleName("navMenuLink");
+        navMenu.add(uploadLink);
+
+        // sign up link
+        SimplePanel signupPanel = new SimplePanel();
+        signupPanel.addStyleName("signupPanel");
+        Anchor signupLink = new Anchor("Sign up");
+        signupLink.addStyleName("signupLink");
+        signupLink.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                History.newItem("signup");
+            }
+        });
+        signupPanel.add(signupLink);
+        RootPanel.get("signup").add(signupPanel);
+
+        // FIXME debug
+        debugLabel = new Label();
+        debugLabel.addStyleName("whiteText");
+        navMenu.add(debugLabel);
+
+        // login menu
+        loginStatusWidget = new LoginStatusWidget();
+        RootPanel.get("loginMenu").add(loginStatusWidget);
+
+        // search box
+        SearchBox searchBox = new SearchBox("Search");
+        RootPanel.get("searchMenu").add(searchBox);
+
+    }
+
+    /**
+     * For debugging purposes. Monitor events of interest.
+     * 
+     * @param eventBus
+     */
+    private void logEvent(HandlerManager eventBus) {
+        eventBus.addHandler(AddNewDatasetEvent.TYPE,
+                new AddNewDatasetHandler() {
+
+                    @Override
+                    public void onAddNewDataset(AddNewDatasetEvent event) {
+                        GWT.log("Event Logging: Add new dataset event "
+                                + event.getDataset().getTitle(), null);
+
+                    }
+                });
+    }
+
+    public void showListDatasetsPage() {
+        mainContainer.clear();
+        mainContainer.add(new ListDatasetsPage(dispatchAsync, eventBus));
+    }
+
+    /**
+     * List collections.
+     * 
+     * FIXME move code to ListCollectionsPage
+     */
+    private void listCollections() {
+        mainContainer.clear();
+
+        TitlePanel titlePanel = new TitlePanel("Collections");
+        mainContainer.add(titlePanel);
+
+        PagingCollectionTableView view = new PagingCollectionTableView();
+        view.addStyleName("datasetTable");
+        PagingCollectionTablePresenter presenter = new PagingCollectionTablePresenter(
+                view, eventBus);
+        presenter.bind();
+
+        view.setNumberOfPages(0);
+
+        mainContainer.add(view.asWidget());
+
+        // create collection
+        FlowPanel addCollectionPanel = new FlowPanel();
+        final WatermarkTextBox addCollectionBox = new WatermarkTextBox("",
+                "Collection name");
+        addCollectionPanel.add(addCollectionBox);
+        Button addButton = new Button("Add", new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent arg0) {
+                final CollectionBean collection = new CollectionBean();
+                collection.setTitle(addCollectionBox.getText());
+
+                dispatchAsync.execute(new AddCollection(collection, getSessionState().getCurrentUser().getUri()),
+                        new AsyncCallback<AddCollectionResult>() {
+
+                            @Override
+                            public void onFailure(Throwable arg0) {
+                                GWT.log("Failed creating new collection", arg0);
+                            }
+
+                            @Override
+                            public void onSuccess(AddCollectionResult arg0) {
+                                AddNewCollectionEvent event = new AddNewCollectionEvent(
+                                        collection);
+                                GWT.log("Firing event add collection "
+                                        + collection.getTitle(), null);
+                                eventBus.fireEvent(event);
+                            }
+                        });
+            }
+        });
+        addCollectionPanel.add(addButton);
+        mainContainer.add(addCollectionPanel);
+    }
+
+    /**
+     * Parse the parameters in the history token after the '?'
+     * 
+     * @return
+     */
+    Map<String, String> getParams() {
+        Map<String, String> params = new HashMap<String, String>();
+        String paramString = History.getToken().substring(
+                History.getToken().indexOf("?") + 1);
+        if (!paramString.isEmpty()) {
+            for (String paramEntry : paramString.split("&") ) {
+                String[] terms = paramEntry.split("=");
+                if (terms.length == 2) {
+                    params.put(terms[0], terms[1]);
+                }
+            }
+        }
+        return params;
+    }
+
+    /**
+     * Show information about a particular dataset.
+     */
+    private void showDataset() {
+
+        DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync);
+        mainContainer.clear();
+        mainContainer.add(datasetWidget);
+
+        String datasetUri = getParams().get("id"); // FIXME should use
+        // "uri?"
+        if (datasetUri != null) {
+            datasetWidget.showDataset(datasetUri);
+        }
+    }
+
+    /**
+     * History handler. Check if the user has been enabled first, otherwise show
+     * the not enabled page.
+     */
+    @Override
+    public void onValueChange(ValueChangeEvent<String> event) {
+
+        final String token = event.getValue();
+
+        GWT.log("History changed: " + event.getValue(), null);
+
+        if (token.startsWith("login")) {
+            showLoginPage();
+        } else if (token.startsWith("signup")) {
+            showSignupPage();
+        } else if (token.startsWith("requestNewPassword")) {
+            showRequestNewPasswordPage();
+        } else {
+            checkLogin();
+        }
+    }
+
+    /**
+     * Check if user has permission ot view member pages.
+     * 
+     * @param token
+     */
+    private void checkPermissions(final String token) {
+        // Check if the user has been activated by an administrator
+        dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
+                    Permission.VIEW_MEMBER_PAGES),
+                    new AsyncCallback<HasPermissionResult>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT
+                                    .log(
+                                            "Error checking if the users has permissions to view member pages",
+                                            caught);
+                        }
+
+                        @Override
+                        public void onSuccess(HasPermissionResult result) {
+                            if (result.isPermitted()) {
+                                parseHistoryToken(token);
+                            } else {
+                                showNotEnabledPage();
+                            }
+                        }
+                    });
+    }
+
+    /**
+     * Set the session id, add a cookie and add history token.
+     * 
+     * @param sessionId
+     * 
+     */
+    public void login(final String userId, final String sessionKey) {
+        final UserSessionState state = MMDB.getSessionState();
+        state.setSessionKey(sessionKey);
+        // set cookie
+        // TODO move to more prominent place... MMDB? A class with static properties?
+        final long DURATION = 1000 * 60 * 60; // 60 minutes
+        final Date expires = new Date(System.currentTimeMillis() + DURATION);
+        Cookies.setCookie("sessionKey", sessionKey, expires);
+
+        MMDB.dispatchAsync.execute(new GetUser(userId), new AsyncCallback<GetUserResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error retrieving user with id " + userId);
+            }
+
+            @Override
+            public void onSuccess(GetUserResult result) {
+                PersonBean personBean = result.getPersonBean();
+                state.setCurrentUser(personBean);
+                MMDB.loginStatusWidget.login(personBean.getName());
+                GWT.log("Current user set to " + personBean.getUri());
+                Cookies.setCookie("sid", personBean.getUri(), expires);
+                checkPermissions(History.getToken());
+            }
+        });
+
+    }
+
+    /**
+     * Parse history token and show the proper widgets.
+     * 
+     * @param token
+     *            history token (everything after the #)
+     */
+    private void parseHistoryToken(String token) {
+        if (token.startsWith("dataset")) {
+            showDataset();
+        } else if (token.startsWith("listDatasets") && !previousHistoryToken.startsWith("listDatasets")) {
+            showListDatasetsPage();
+        } else if (token.startsWith("upload")) {
+            showUploadPage();
+        } else if (token.startsWith("tags")) {
+            shosTagsPage();
+        } else if (token.startsWith("tag")) {
+            showTagPage();
+        } else if (token.startsWith("listCollections") && !previousHistoryToken.startsWith("listCollections")) {
+            listCollections();
+        } else if (token.startsWith("listCollections")) {
+            // skip default case!
+        } else if (token.startsWith("collection")) {
+            showCollectionPage();
+        } else if (token.startsWith("search")) {
+            showSearchResultsPage();
+        } else if (token.startsWith("modifyPermissions")) {
+            showUsersPage();
+        } else if (token.startsWith("signup")) {
+            showSignupPage();
+        } else if (token.startsWith("newPassword")) {
+            showNewPasswordPage();
+        } else if (token.startsWith("home")) {
+            showHomePage();
+        } else if (token.startsWith("sparql")) {
+            showSparqlPage();
+        } else if (!previousHistoryToken.startsWith("listDatasets")) {
+            showListDatasetsPage();
+        }
+        previousHistoryToken = token;
+    }
+
+    private void shosTagsPage() {
+        GWT.log("Loading Tags Page", null);
+        mainContainer.clear();
+        mainContainer.add(new TagsPage(dispatchAsync));
+    }
+
+    private void showSearchResultsPage() {
+        GWT.log("Loading Search Results Page", null);
+        mainContainer.clear();
+        mainContainer.add(new SearchResultsPage(dispatchAsync, eventBus));
+    }
+
+    private void showUploadPage() {
+        GWT.log("Loading Upload Page", null);
+        mainContainer.clear();
+        mainContainer.add(new UploadPage(dispatchAsync));
+    }
+
+    private void showHomePage() {
+        mainContainer.clear();
+        mainContainer.add(new HomePage(dispatchAsync));
+    }
+
+    private void showNewPasswordPage() {
+        mainContainer.clear();
+        mainContainer.add(new NewPasswordPage(dispatchAsync));
+    }
+
+    private void showRequestNewPasswordPage() {
+        mainContainer.clear();
+        mainContainer.add(new RequestNewPasswordPage(dispatchAsync));
+    }
+
+    /**
+     * For users that haven't been enabled by an admin yet.
+     */
+    private void showNotEnabledPage() {
+        mainContainer.clear();
+        mainContainer.add(new NotEnabledPage());
+    }
+
+    /**
+     * Signup on to the system.
+     */
+    private void showSignupPage() {
+        mainContainer.clear();
+        mainContainer.add(new SignupPage(dispatchAsync));
+    }
+
+    /**
+     * List users in the system.
+     */
+    private void showUsersPage() {
+        // Check if the user has view admin pages permission
+        dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
+                Permission.VIEW_ADMIN_PAGES),
+                new AsyncCallback<HasPermissionResult>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT
+                                .log(
+                                        "Error checking if the users has permissions to view admin pages",
+                                        caught);
+                    }
+
+                    @Override
+                    public void onSuccess(HasPermissionResult result) {
+                        if (result.isPermitted()) {
+                            mainContainer.clear();
+                            mainContainer.add(new UserManagementPage(
+                                    dispatchAsync));
+                        } else {
+                            showNoAccessPage();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * List users in the system.
+     */
+    private void showSparqlPage() {
+        // Check if the user has view admin pages permission
+        dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
+                Permission.VIEW_ADMIN_PAGES),
+                new AsyncCallback<HasPermissionResult>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT
+                                .log(
+                                        "Error checking if the users has permissions to view admin pages",
+                                        caught);
+                    }
+
+                    @Override
+                    public void onSuccess(HasPermissionResult result) {
+                        if (result.isPermitted()) {
+                            mainContainer.clear();
+                            mainContainer.add(new SparqlPage(dispatchAsync));
+                        } else {
+                            showNoAccessPage();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * A page for when a user doesn't have access to a specific page.
+     */
+    private void showNoAccessPage() {
+        mainContainer.clear();
+        mainContainer.add(new NoAccessPage());
+    }
+
+    /**
+     * Show a specific collection.
+     */
+    private void showCollectionPage() {
+        mainContainer.clear();
+        mainContainer.add(new CollectionPage(getParams().get("uri"),
+                dispatchAsync, eventBus));
+    }
+
+    /**
+     * Show a specific tag page.
+     */
+    private void showTagPage() {
+        mainContainer.clear();
+        mainContainer.add(new TagPage(getParams().get("title"), dispatchAsync,
+                eventBus));
+    }
+
+    /**
+     * Show a set of widgets to authenticate with the server.
+     */
+    private void showLoginPage() {
+        mainContainer.clear();
+        mainContainer.add(new LoginPage(dispatchAsync, this));
+    }
+
+    /**
+     * If user not logged in redirect to the required login page.
+     * 
+     * @return true if logged in already, false if not
+     */
+    public void checkLogin() {
+        String cookieSID = Cookies.getCookie("sid");
+        if (cookieSID != null) {
+            GWT.log("Sid: " + cookieSID, null);
+        }
+        String cookieSessionKey = Cookies.getCookie("sessionKey");
+        if (cookieSessionKey != null) {
+            GWT.log("Session key: " + cookieSessionKey, null);
+        }
+        if (cookieSID != null && cookieSessionKey != null) {
+            login(cookieSID, cookieSessionKey);
+        } else {
+            showLoginPage();
+        }
+    }
+
+    public static final String DATASET_VIEW_TYPE_PREFERENCE    = "datasetViewType";
+    public static final String COLLECTION_VIEW_TYPE_PREFERENCE = "collectionViewType";
+
+    // session state
+    public static UserSessionState getSessionState() {
+        if (sessionState == null) {
+            sessionState = new UserSessionState();
+        }
+        return sessionState;
+    }
+
+    // a common idiom
+    /** Get the currently-logged-in username, if any */
+    public static String getUsername() {
+        PersonBean currentUser = getSessionState().getCurrentUser();
+        if (currentUser != null) {
+            return currentUser.getUri();
+        } else {
+            return null;
+        }
+    }
+
+    // session preferences
+    private static Map<String, String> getSessionPreferences() {
+        return getSessionState().getPreferences();
+    }
+
+    public static String getSessionPreference(String key) {
+        return getSessionPreference(key, null);
+    }
+
+    public static String getSessionPreference(String key, String defaultValue) {
+        String value = getSessionPreferences().get(key);
+        return value == null ? defaultValue : value;
+    }
+
+    public static void setSessionPreference(String key, String value) {
+        getSessionPreferences().put(key, value);
+    }
 }

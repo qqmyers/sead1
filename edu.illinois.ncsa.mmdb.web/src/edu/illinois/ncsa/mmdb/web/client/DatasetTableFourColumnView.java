@@ -43,8 +43,10 @@ package edu.illinois.ncsa.mmdb.web.client;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
@@ -122,6 +124,18 @@ public class DatasetTableFourColumnView extends DatasetTableView {
     public void insertRow(int position, String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public List<String> getSelectedDatasets() {
+        List<String> selectedDataset = new ArrayList<String>();
+        return selectedDataset;
+    }
+
+    @Override
+    public HasClickHandlers getShowSelectedAnchor() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

@@ -41,12 +41,13 @@ package edu.illinois.ncsa.mmdb.web.client.event;
 import com.google.gwt.event.shared.EventHandler;
 
 /**
- * Fired when a dataset is selected.
+ * Fired when a dataset is unselected.
  * 
  * @author Luigi Marini
  * 
  */
-public interface DatasetSelectedHandler extends EventHandler {
+public interface DatasetUnselectedHandler extends EventHandler {
 
-    void onDatasetSelected(DatasetSelectedEvent event);
+    void onDatasetUnselected(DatasetUnselectedEvent datasetUnselectedEvent);
+
 }

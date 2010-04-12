@@ -39,91 +39,50 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.client.ui;
+package edu.illinois.ncsa.mmdb.web.client.event;
 
+import com.google.gwt.event.shared.GwtEvent;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.TextBox;
-
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
- * Popup to tag a resource. Submit button doesn't have a default
- * click handler attached to it.
+ * Fired when a dataset is unselected.
  * 
  * @author Luigi Marini
- *
+ * 
  */
-public class TagDialogBox extends DialogBox {
+public class DatasetUnselectedEvent extends GwtEvent<DatasetUnselectedHandler> {
 
-	private FlowPanel layout;
-	private TextBox tagBox;
-	private Button submitButton;
-	private Button cancelButton;
-	private final MyDispatchAsync service;
-	private final String id;
-	
-	/**
-	 * A simple dialog box to annotate a resource
-	 * 
-	 * TODO automatically put cursor in text field
-	 * 
-	 * @param id
-	 * @param service
-	 */
-	public TagDialogBox(String id, MyDispatchAsync service) {
-		this.id = id;
-		this.service = service;
-		
-		setText("Tag");
-		
-		layout = new FlowPanel();
-		tagBox = new TextBox();
-		tagBox.setWidth("300px");
-		layout.add(tagBox);
-		
-		submitButton = new Button("Submit");
-		
-		layout.add(submitButton);
-		
-		cancelButton = new Button("Cancel");
-		cancelButton.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				hide();
-			}
-		});
-		
-		layout.add(cancelButton);
-		
-		setWidget(layout);
-		center();
-		show();
-	}
+    public static final GwtEvent.Type<DatasetUnselectedHandler> TYPE    = new GwtEvent.Type<DatasetUnselectedHandler>();
 
-	public Button getSubmitButton() {
-		return submitButton;
-	}
+    private DatasetBean                                         dataset = new DatasetBean();
 
-	public String getTags() {
-		return tagBox.getText();
-	}
+    private String                                              uri;
 
-	public FocusWidget getTagBox() {
-		return tagBox;
-	}
+    @Override
+    protected void dispatch(DatasetUnselectedHandler handler) {
+        handler.onDatasetUnselected(this);
+    }
 
-	public MyDispatchAsync getService() {
-		return service;
-	}
+    @Override
+    public GwtEvent.Type<DatasetUnselectedHandler> getAssociatedType() {
+        return TYPE;
+    }
 
-	public String getId() {
-		return id;
-	}
+    public void setDataset(DatasetBean dataset) {
+        this.dataset = dataset;
+    }
+
+    public DatasetBean getDataset() {
+        return dataset;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
 }

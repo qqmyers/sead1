@@ -42,7 +42,9 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
 import java.util.Date;
+import java.util.List;
 
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -98,6 +100,10 @@ public class DatasetTablePresenter extends
 
         /** return the optimal page size for this view */
         int getPageSize();
+
+        List<String> getSelectedDatasets();
+
+        HasClickHandlers getShowSelectedAnchor();
     }
 
     public Widget getWidget() {

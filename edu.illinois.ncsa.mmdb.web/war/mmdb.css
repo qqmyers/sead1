@@ -536,8 +536,8 @@ body {
 
 .collectionInfo {
 	text-align: left;
-	margin: 20px;
-	}
+	margin-left: 20px;
+}
 
 .tagsView {
 	width:100%;
@@ -919,4 +919,35 @@ body {
 
 .datasetInfoDescription div {
 	margin-bottom: 5px;
+}
+
+.batchOperationPanel {
+}
+
+.batchOperationCount {
+	float: right;
+	color: gray;
+	font-size: 80%;
+	margin: 5px;
+}
+
+.batchOperationMenu {
+	display: inline;
+	float: right;
+}
+
+.titlePanelRightElement {
+	margin-right: 60px
+}
+
+.gwt-MenuBar .gwt-MenuItem-selected {
+	background: red;
+}
+
+.gwt-MenuBar-vertical .subMenuIcon-selected {
+  background: red;
+}
+
+.gwt-MenuBar-horizontal .subMenuIcon-selected {
+  background: red;
 }
