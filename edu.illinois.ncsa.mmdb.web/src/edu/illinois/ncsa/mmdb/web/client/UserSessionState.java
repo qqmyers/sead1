@@ -72,7 +72,7 @@ public class UserSessionState {
     }
 
     public void setSessionKey(String sessionKey) {
-        sessionKey = sessionKey;
+        this.sessionKey = sessionKey;
     }
 
     private void initializePreferences() {
