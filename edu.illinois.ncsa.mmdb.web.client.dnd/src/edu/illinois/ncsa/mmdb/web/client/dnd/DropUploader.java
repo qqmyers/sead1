@@ -47,9 +47,7 @@ import org.apache.commons.httpclient.methods.multipart.StringPart;
 
 public class DropUploader extends JApplet implements DropTargetListener {
 	public DropTarget dropTarget;
-	private JTextArea ta;
 	private JPanel mainCards;
-	private ProgressPie progressPie;
 	private static final long serialVersionUID = 9000;
 	
 	@Override
@@ -77,16 +75,12 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		JLabel dropLabel = new JLabel(dropIcon);
 		dropLabel.setOpaque(true);
 		
-		// the progress pie
-		progressPie = new ProgressPie();
-		
 		JLabel doneLabel = new JLabel(doneIcon);
 		JLabel errorLabel = new JLabel(errorIcon);
 		
 		// now layout the components in a two-card card layout
 		mainCards = new JPanel(new CardLayout());
 		mainCards.add(dropLabel, "drop");
-		mainCards.add(progressPie, "progress");
 		mainCards.add(doneLabel, "done");
 		mainCards.add(errorLabel, "error");
 		
@@ -100,7 +94,6 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				dropLabel.setBackground(c);
 				doneLabel.setBackground(c);
 				errorLabel.setBackground(c);
-				progressPie.setBackground(c);
 			}
 		} catch(Exception x) {
 			// fall through
@@ -189,7 +182,6 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			if(files.size()==0) {
 				log("no files dropped! " + dtde);
 			} else {
-				startProgressThread();
 				// FIXME use a better way of determining collection name than selecting from first file
 				String collectionName = null;
 				if(files.get(0).isDirectory()) {
@@ -247,6 +239,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			return statusPage;
 		}
 	}
+	
 	void setUrl(HttpMethod method) {
 		setUrl(method, "");
 	}
@@ -292,106 +285,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		return s;
 	}
 
-	int getProgress(String sessionKey) throws HttpException, IOException {
-		try {
-			GetMethod get = new GetMethod();
-			setUrl(get,sessionKey);
-			HttpClient client = new HttpClient();
-			//log("requesting progress ...");
-			client.executeMethod(get);
-			BufferedReader br = new BufferedReader(new InputStreamReader(get.getResponseBodyAsStream()));
-			String line = "";
-			int percentComplete = 0;
-			while((line = br.readLine()) != null) {
-				//log(line);
-				if(line.contains("percentComplete")) {
-					String pc = line.replaceFirst(".*\"percentComplete\":([0-9]+).*","$1"); // FIXME hack to parse JSON
-					percentComplete = Integer.parseInt(pc);
-				}
-			}
-			//log("got progress "+percentComplete);
-			return percentComplete;
-		} catch(Exception x) {
-			//log("no progress, or progress not available: "+x.getMessage());
-			return 0;
-		}
-	}
-	
-	List<String> getUrisUploaded(String sessionKey) {
-		List<String> uris = new LinkedList<String>();
-		try {
-			GetMethod get = new GetMethod();
-			setUrl(get,sessionKey);
-			HttpClient client = new HttpClient();
-			log("requesting progress ..."); // FIXME debug
-			client.executeMethod(get);
-			BufferedReader br = new BufferedReader(new InputStreamReader(get.getResponseBodyAsStream()));
-			String line = "";
-			while((line = br.readLine()) != null) {
-				log(line); // FIXME debug
-				if(line.contains("uris")) {
-					line = line.replaceFirst(".*\"uris\":\\[\"([^\\]]*)\\].*","$1");
-					for(String uri : line.split("\",?\"?")) {
-						uris.add(uri);
-					}
-				}
-			}
-		} catch(Exception x) {
-			log("no progress, or progress not available: "+x.getMessage());
-		}
-		return uris;
-	}
-	
-	class FakeProgressThread extends Thread {
-		int fakeProgress = 0;
-		boolean stop = false;
-		@Override
-		public void run() {
-			try {
-				while(!stop) {
-					progressPie.setProgress(fakeProgress);
-					Thread.sleep(500);
-					fakeProgress = (fakeProgress + 17) % 100;
-				}
-			} catch(Exception x) {
-			}
-		}
-		public void stopShowingProgress() {
-			stop = true;
-		}
-	}
-	
-	int progress;
-	void setProgress(int p) { progress = p; }
-	int getProgress() { return progress; }
-
-	class ProgressThread extends Thread {
-		boolean stop = false;
-		@Override
-		public void run() {
-			try {
-				while(!stop) {
-					int progress = getProgress();
-					System.out.println("progress thread setting pie progress to "+progress);
-					progressPie.setProgress(progress);
-					repaint();
-					Thread.sleep(250);
-				}
-			} catch(Exception x) {
-				x.printStackTrace();
-			}
-		}
-		public void stopShowingProgress() {
-			stop = true;
-		}
-	}
-	
-	ProgressThread progressThread;
-
 	public void update() {
-		if(progressPie != null) {
-			progressPie.repaint();
-		}
 	}
 	
 	/**
@@ -431,31 +325,18 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		repaint();
 	}
 	
-	void startProgressThread() {
-		if(progressThread == null) {
-			progressThread = new ProgressThread();
-		}
+	ProgressThread startProgressThread(String sessionKey) {
+		ProgressThread progressThread = new ProgressThread(this, sessionKey);
 		progressThread.start();
-	}
-	
-	void stopProgressThread() {
-		if(progressThread != null) {
-			progressThread.stopShowingProgress();
-		}
-	}
-	
-	void showProgressPie() {
-		showCard("progress");
+		return progressThread;
 	}
 	
 	void showDropTarget() {
 		showCard("drop");
-		stopProgressThread();
 	}
 	
 	void showDoneCard() {
 		showCard("done");
-		stopProgressThread();
 	}
 	
 	void showErrorCard() {
@@ -475,30 +356,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}).start();
 	}
 
-	/*
-	 * 			
-			PostMethod post = new PostMethod();
-			setUrl(post,sessionKey);
-			List<Part> parts = new LinkedList<Part>();
-			int i = 1;
-			}
-				FileNameMap fileNameMap = URLConnection.getFileNameMap();
-				String mimeType = fileNameMap.getContentTypeFor(file.getName());
-				FilePart part = new FilePart("f"+i, file, mimeType, null);
-				parts.add(part);
-				i++;
-			}
-			if(collectionName != null) {
-				log("adding collection name part "+collectionName);
-				parts.add(new StringPart("collection",collectionName));
-			}
-			postThread.post = post;
-			post.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[]{}), post.getParams())); 
-			postThread.start();
-
-	 */
-	
-	public static final int BATCH_SIZE=1;
+	public static final int BATCH_SIZE=1; // FIXME changing to >1 would break stuff
 	
 	class BatchPostThread extends Thread {
 		public List<File> files;
@@ -508,8 +366,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		String postBatch(List<File> batch, int offset, int nFiles) throws Exception {
 			// acquire the session key and start tracking progress
 			String sessionKey = getSessionKey();
-			//showProgressPie();
-			// assume progress thread is non-null and started
+			ProgressThread progressThread = startProgressThread(sessionKey);
 			// set up the POST batch
 			PostMethod post = new PostMethod();
 			setUrl(post,sessionKey);
@@ -533,8 +390,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			client.executeMethod(post);
 			if(post.getStatusCode() != 200) {
 				log("post failed! "+post.getStatusLine());
-				//getAppletContext().showDocument(new URL("javascript:uploadCompleteCallback('"+sessionKey+"')"));
-				stopProgressThread();
+				progressThread.stopShowingProgress();
 				showErrorCard();
 				throw new Exception("post failed");
 			} else if(collectionName != null && collectionUri == null) {
@@ -543,49 +399,35 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			}
 			Thread.sleep(2);
 			// now figure out which uri's were uploaded
-			for(String uri : getUrisUploaded(sessionKey)) {
+			for(String uri : progressThread.getUrisUploaded()) {
 				log("got uris for uploaded files = "+uri); // FIXME
 				JSObject window = JSObject.getWindow(DropUploader.this);
 				window.call("dndAppletFileUploaded",new Object[] { uri });
 			}
+			progressThread.stopShowingProgress();
 			return sessionKey;
 		}
 		@Override
 		public void run() {
 			client = new HttpClient();
 			try {
-				String sessionKey= "";
 				List<File> batch = new LinkedList<File>();
 				int i = 0;
 				for(File file : files) {
 					batch.add(file);
 					if(batch.size()==BATCH_SIZE) {
-						sessionKey = postBatch(batch,i,files.size());
-						int p = ((i+batch.size()) * 100) / files.size();
-						System.out.println("post thread setting progress to "+(i+batch.size())+"/"+files.size()+"="+p+"%");
-						setProgress(p);
+						postBatch(batch,i,files.size());
 						batch = new LinkedList<File>();
 					}
 					i++;
 				}
 				// remember to do the last batch
 				if(batch.size() > 0) {
-					sessionKey = postBatch(batch,i,files.size());
-					int p = 100;
-					System.out.println("post thread setting progress to 100");
-					setProgress(p);
+					postBatch(batch,i,files.size());
 				}
 				// we're done
-				String url = getContextUrl()+"UploadBlob?uploadComplete="+sessionKey;
-				url = getRedirectUrl(url);
-				log("post complete, got redirect url "+url);
-				//if(url.startsWith("/")) { url = url.substring(1); }
-				//getAppletContext().showDocument(new URL(getContextUrl()+url));
-				//showCard("done");
-				stopProgressThread();
 			} catch(Exception x) {
 				showErrorCard();
-				stopProgressThread();
 			}
 		}
 	}

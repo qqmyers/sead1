@@ -598,8 +598,8 @@ public class UploadBlob extends AuthenticatedServlet {
             FileUploadListener listener = listeners.get(sessionKey);
             // are we done?
             if (listener.allDone()) {
-                // clean up
-                listeners.put(sessionKey, null);
+                // FIXME need to clean up, but only when client has the info it needs
+                //listeners.put(sessionKey, null);
             }
             // report progress
             response.setContentType("application/json");

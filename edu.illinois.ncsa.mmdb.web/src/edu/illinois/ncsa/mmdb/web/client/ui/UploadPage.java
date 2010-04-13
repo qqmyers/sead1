@@ -229,6 +229,7 @@ public class UploadPage extends Page {
         $wnd.dndAppletPoke = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::appletPoke();
         $wnd.dndAppletFileDropped = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileDropped(Ljava/lang/String;);
         $wnd.dndAppletFileUploaded = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileUploaded(Ljava/lang/String;);
+        $wnd.dndAppletProgress = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileProgress(I);
     }-*/;
 
     static Widget editableDatasetInfo(final DatasetBean ds) {
@@ -302,6 +303,15 @@ public class UploadPage extends Page {
     }
 
     /**
+     * Called by the applet to report progress on current batch
+     * 
+     * @param percent
+     */
+    public static void fileProgress(int percent) {
+        uploadedDatasetsTable.setWidget(nUploaded, 2, new Label(percent + "%"));
+    }
+
+    /**
      * Called by the applet.
      * 
      * @param param
@@ -320,7 +330,7 @@ public class UploadPage extends Page {
         id:'dragdropApplet',
         MAYSCRIPT:'true',
         code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-        archive:'dnd/DropUploader-901.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+        archive:'dnd/DropUploader-932.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
         width:150,
         height:100
         };
