@@ -731,6 +731,21 @@ public class DatasetWidget extends Composite {
                                     lbl.addStyleName("metadataEntry");
                                     metadataPanel.add(lbl);
                                 }
+                                if ("FFMPEG".equals(tuple.getCategory()) && "Video Duration".equals(tuple.getLabel())) {
+                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                                    lbl.addStyleName("metadataEntry");
+                                    metadataPanel.add(lbl);
+                                }
+                                if ("FFMPEG".equals(tuple.getCategory()) && "Video FPS".equals(tuple.getLabel())) {
+                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                                    lbl.addStyleName("metadataEntry");
+                                    metadataPanel.add(lbl);
+                                }
+                                if ("FFMPEG".equals(tuple.getCategory()) && "Video Size".equals(tuple.getLabel())) {
+                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                                    lbl.addStyleName("metadataEntry");
+                                    metadataPanel.add(lbl);
+                                }
                             }
                         }
                     });
