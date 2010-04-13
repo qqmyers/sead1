@@ -62,20 +62,21 @@ public class ProgressThread extends Thread {
 					String pc = line.replaceFirst(".*\"percentComplete\":([0-9]+).*","$1"); // FIXME hack to parse JSON
 					percentComplete = Integer.parseInt(pc);
 				}
-				if(urisUploaded == null && line.contains("uris")) {
-					urisUploaded = new LinkedList<String>();
-					line = line.replaceFirst(".*\"uris\":\\[\"?([^\\]]*)\\].*","$1");
+				if(urisUploaded.size()==0 && line.contains("uris\":[\"")) {
+					line = line.replaceFirst(".*\"uris\":\\[\"([^\\]]*)\\].*","$1");
+					log("looking for uris in "+line); // FIXME debug
 					for(String uri : line.split("\",?\"?")) {
 						urisUploaded.add(uri);
 					}
 				}
 			}
 			log("got progress "+percentComplete+" "+urisUploaded);
+			progress = percentComplete;
 		} catch(Exception x) {
 			log("no progress, or progress not available: "+x.getMessage());
 		}
 	}
-
+	
 	public void stopShowingProgress() {
 		stop = true;
 	}

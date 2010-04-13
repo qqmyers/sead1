@@ -936,6 +936,16 @@ body {
 	float: right;
 }
 
+.progressBar {
+	border: 1px solid;
+	padding: 1px;
+}
+
+.progressBarBar {
+	background-color: #002b55;
+	font-size: 0.5em;
+}
+
 .titlePanelRightElement {
 	margin-right: 60px
 }

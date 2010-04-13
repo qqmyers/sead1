@@ -308,7 +308,18 @@ public class UploadPage extends Page {
      * @param percent
      */
     public static void fileProgress(int percent) {
-        uploadedDatasetsTable.setWidget(nUploaded, 2, new Label(percent + "%"));
+        if (nUploaded < uploadedDatasetsTable.getRowCount()) {
+            if (uploadedDatasetsTable.getCellCount(nUploaded) < 3) {
+                uploadedDatasetsTable.setWidget(nUploaded, 2, new ProgressBar(1));
+            }
+            Widget widget = uploadedDatasetsTable.getWidget(nUploaded, 2);
+            if (widget instanceof ProgressBar) {
+                GWT.log("setting progress bar value to " + percent);
+                ((ProgressBar) widget).setProgress(percent);
+            } else {
+                GWT.log("couldn't find progress bar!!!!"); // FIXME debug
+            }
+        }
     }
 
     /**
@@ -330,7 +341,7 @@ public class UploadPage extends Page {
         id:'dragdropApplet',
         MAYSCRIPT:'true',
         code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-        archive:'dnd/DropUploader-932.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+        archive:'dnd/DropUploader-965.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
         width:150,
         height:100
         };
