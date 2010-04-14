@@ -91,15 +91,15 @@ CREATE TABLE \`blb\` (
   \`bid\` bigint(20) NOT NULL,
   \`bda\` longblob,
   PRIMARY KEY  (\`bid\`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE \`sym\` (
   \`uid\` bigint(20) NOT NULL auto_increment,
   \`hsh\` varchar(32) default NULL,
-  \`sym\` text character set latin1 collate latin1_bin,
+  \`sym\` text character set utf8,
   PRIMARY KEY  (\`uid\`),
   UNIQUE KEY \`hsh\` (\`hsh\`)
-) ENGINE=InnoDB AUTO_INCREMENT=1221 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1221 DEFAULT CHARSET=utf8;
 
 CREATE TABLE \`tup\` (
   \`sub\` bigint(20) NOT NULL,
@@ -113,7 +113,7 @@ CREATE TABLE \`tup\` (
   KEY \`sub_3\` (\`sub\`,\`pre\`),
   KEY \`sub_4\` (\`sub\`,\`obj\`),
   KEY \`pre_2\` (\`pre\`,\`obj\`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 GRANT ALL ON $DB_SCHEMA.* TO '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
 EOF
