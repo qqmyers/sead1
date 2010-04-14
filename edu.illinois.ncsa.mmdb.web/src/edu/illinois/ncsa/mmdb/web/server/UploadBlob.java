@@ -299,10 +299,12 @@ public class UploadBlob extends AuthenticatedServlet {
                     fileName = normalizeFilename(fileName);
                 }
                 String contentType = item.getContentType();
+                if (MimeMap.UNKNOWN_TYPE.equals(contentType)) {
+                    contentType = TupeloStore.getInstance().getFileNameMap().getContentTypeFor(fileName);
+                }
                 boolean isInMemory = item.isInMemory();
                 long sizeInBytes = item.getSize();
-                log.info("Post: " + item.isFormField() + "|" + fieldName + "|" + fileName + "|" + isInMemory + "|"
-                        + contentType + "|" + sizeInBytes);
+                log.info("Post: " + item.isFormField() + "|" + fieldName + "|" + fileName + "|" + isInMemory + "|" + contentType + "|" + sizeInBytes);
                 if (item.isFormField() && fieldName.equals("session") && listener == null) {
                     sessionKey = item.getString();
                     log.trace("POST: upload session key (part) = " + sessionKey);
@@ -472,7 +474,7 @@ public class UploadBlob extends AuthenticatedServlet {
      *            the vector
      * @return
      */
-    public String toJsonArray(String name, Vector v) {
+    public String toJsonArray(String name, Vector<? extends Object> v) {
         StringBuffer sb = new StringBuffer();
         if (name != null) {
             sb.append("\"" + name + "\":");

@@ -40,6 +40,7 @@ package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.FileNameMap;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -130,6 +131,12 @@ public class TupeloStore {
     /** Badge (collection preview) by collection (memoized) */
     private Map<String, Map<String, Memoized<String>>> previewCache          = null;
 
+    private final Map<Resource, Long>                  beanExp               = new HashMap<Resource, Long>();
+    private long                                       soonestExp            = Long.MAX_VALUE;
+
+    /** FileNameMap to map from extension to MIME type. */
+    private MimeMap                                    mimemap;
+
     /**
      * Return singleton instance.
      * 
@@ -218,9 +225,6 @@ public class TupeloStore {
         return beanSession;
     }
 
-    Map<Resource, Long> beanExp    = new HashMap<Resource, Long>();
-    long                soonestExp = Long.MAX_VALUE;
-
     private void setExpirationTime(Object bean) {
         synchronized (beanExp) {
             long now = System.currentTimeMillis();
@@ -289,6 +293,19 @@ public class TupeloStore {
      */
     public Context getContext() {
         return context;
+    }
+
+    /**
+     * Returns a FileNameMap that is initialized with default mappings as well
+     * as those stored inside the context.
+     * 
+     * @return the FileNameMap
+     */
+    public FileNameMap getFileNameMap() {
+        if (mimemap == null) {
+            mimemap = new MimeMap(context);
+        }
+        return mimemap;
     }
 
     public boolean authenticate(String username, String password) {
