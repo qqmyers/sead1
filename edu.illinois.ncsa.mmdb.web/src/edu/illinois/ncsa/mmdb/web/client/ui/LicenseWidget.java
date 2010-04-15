@@ -108,12 +108,12 @@ public class LicenseWidget extends Composite {
             mainPanel.add(title);
         }
 
-        attribution = new Label();
-        mainPanel.add(attribution);
-
         licenseText = new Anchor("");
         licenseText.setTarget("_blank");
         mainPanel.add(licenseText);
+
+        attribution = new Label();
+        mainPanel.add(attribution);
 
         // allow user to edit the license
         licenseEdit = new Anchor("Edit");
@@ -147,6 +147,7 @@ public class LicenseWidget extends Composite {
         rightsHolder.setWidth("200px");
         licenseEditor.add(rightsHolder);
 
+        // Edit Creative Commons License
         cc = new RadioButton("license", "Creative Commons");
         cc.setStyleName("licenseButton");
         licenseEditor.add(cc);
@@ -181,6 +182,7 @@ public class LicenseWidget extends Composite {
         shareAlike.setStyleName("licenseIndent");
         licenseEditor.add(shareAlike);
 
+        // Edit limited copyright
         limited = new RadioButton("license", "Limited Copyright");
         limited.setStyleName("licenseButton");
         licenseEditor.add(limited);
@@ -230,8 +232,8 @@ public class LicenseWidget extends Composite {
                 setLicense();
                 showLicense();
                 mainPanel.remove(licenseEditor);
-                mainPanel.add(attribution);
                 mainPanel.add(licenseText);
+                mainPanel.add(attribution);
                 mainPanel.add(licenseEdit);
             }
         });
@@ -244,8 +246,8 @@ public class LicenseWidget extends Composite {
             public void onClick(ClickEvent event) {
                 showLicense();
                 mainPanel.remove(licenseEditor);
-                mainPanel.add(attribution);
                 mainPanel.add(licenseText);
+                mainPanel.add(attribution);
                 mainPanel.add(licenseEdit);
             }
         });
@@ -265,6 +267,9 @@ public class LicenseWidget extends Composite {
         });
     }
 
+    /**
+     * Save the values in the edit box to the backend.
+     */
     private void setLicense() {
         final LicenseResult oldLicense = license;
 
@@ -287,8 +292,12 @@ public class LicenseWidget extends Composite {
             license.setLicense("http://creativecommons.org/licenses/" + rights.substring(3) + "/3.0");
 
         } else {
-            license.setRights(rights.getText());
-            license.setLicense(licenseURL.getText());
+            if (!rights.getText().equals("")) {
+                license.setRights(rights.getText());
+            }
+            if (!licenseURL.getText().equals("")) {
+                license.setLicense(licenseURL.getText());
+            }
             license.setAllowDownload(allowDownload.getValue());
         }
 
@@ -306,20 +315,27 @@ public class LicenseWidget extends Composite {
         });
     }
 
+    /**
+     * Parse the license, fill in the display box as well as the edit box based
+     * on the values.
+     */
     private void showLicense() {
-        // rights
+        // attribution
+        if (license.getRightsHolder() == null) {
+            attribution.setVisible(false);
+            rightsHolder.setText("");
+        } else {
+            attribution.setVisible(true);
+            attribution.setText("By : " + license.getRightsHolder());
+            rightsHolder.setText(license.getRightsHolder());
+        }
+
+        // check to see if it is a creative commons license or regular license.
         String rights = license.getRights().toLowerCase();
         if ("cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights)) {
-            // attribution
-            if (license.getRightsHolder() == null) {
-                attribution.setVisible(false);
-            } else {
-                attribution.setVisible(true);
-                attribution.setText("By : " + license.getRightsHolder());
-            }
 
             // Creative Commons License
-            Image icon = new Image("/images/" + rights + ".png");
+            Image icon = new Image("images/" + rights + ".png");
             licenseText.setText("");
             licenseText.getElement().appendChild(icon.getElement());
             licenseText.setHref("http://creativecommons.org/licenses/" + rights.substring(3) + "/3.0");
@@ -349,13 +365,6 @@ public class LicenseWidget extends Composite {
             shareAlike.setEnabled(allowRemixing.getValue());
 
         } else {
-            // attribution
-            if (license.getRightsHolder() == null) {
-                attribution.setVisible(false);
-            } else {
-                attribution.setVisible(true);
-                attribution.setText("By : " + license.getRightsHolder());
-            }
 
             // Other License
             licenseText.setText(license.getRights());
@@ -390,11 +399,5 @@ public class LicenseWidget extends Composite {
             shareAlike.setEnabled(allowRemixing.getValue());
 
         }
-
-        // license holder
-        rightsHolder.setText(license.getRightsHolder());
-
-        // allow downloading original only applicable for non Creative Commons License
-        //allowDownload.setChecked(result.isAllowDownload());
     }
 }
