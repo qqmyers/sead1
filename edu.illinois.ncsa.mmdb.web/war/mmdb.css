@@ -577,6 +577,10 @@ body {
 	margin-left: 5px;
 }
 
+.licenseIndent {
+	margin-left: 20px;
+}
+
 .datasetTitle {
 	font-size: 1.5em;
   	color: black;
