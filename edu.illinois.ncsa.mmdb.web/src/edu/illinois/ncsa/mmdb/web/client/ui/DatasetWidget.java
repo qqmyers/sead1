@@ -131,7 +131,7 @@ public class DatasetWidget extends Composite {
 
     private String                      uri;
 
-    private FlowPanel                   metadataPanel;
+    private FlowPanel                   infoPanel;
     private FlexTable                   informationTable;
     protected DerivedDatasetsWidget     derivedDatasetsWidget;
     private AbsolutePanel               previewPanel;
@@ -204,7 +204,9 @@ public class DatasetWidget extends Composite {
         // best image preview is that that is closest to width of column
         int maxwidth = leftColumn.getOffsetWidth();
         List<PreviewBean> previews = new ArrayList<PreviewBean>();
+        // FIXME use a map to handle all previews
         PreviewImageBean bestImage = null;
+        PreviewVideoBean bestVideo = null;
         for (PreviewBean pb : result.getPreviews() ) {
             if (pb instanceof PreviewImageBean) {
                 PreviewImageBean pib = (PreviewImageBean) pb;
@@ -213,12 +215,22 @@ public class DatasetWidget extends Composite {
                 } else if (Math.abs(maxwidth - pib.getWidth()) < Math.abs(maxwidth - bestImage.getWidth())) {
                     bestImage = pib;
                 }
+            } else if (pb instanceof PreviewVideoBean) {
+                PreviewVideoBean pvb = (PreviewVideoBean) pb;
+                if (bestVideo == null) {
+                    bestVideo = pvb;
+                } else if (Math.abs(maxwidth - pvb.getWidth()) < Math.abs(maxwidth - bestVideo.getWidth())) {
+                    bestVideo = pvb;
+                }
             } else {
                 previews.add(pb);
             }
         }
         if (bestImage != null) {
             previews.add(bestImage);
+        }
+        if (bestVideo != null) {
+            previews.add(bestVideo);
         }
 
         // sort beans, image, zoom, video, rest
@@ -296,22 +308,13 @@ public class DatasetWidget extends Composite {
         Label dateLabel = new Label("Date: " + dateString);
         dateLabel.addStyleName("metadataEntry");
 
-        metadataPanel = new FlowPanel();
-        metadataPanel.addStyleName("datasetRightColSection");
-        metadataPanel.add(metadataHeader);
-        metadataPanel.add(authorLabel);
-        metadataPanel.add(sizeLabel);
-        metadataPanel.add(typeLabel);
-        metadataPanel.add(dateLabel);
-
-        // tags
-        TagsWidget tagsWidget = new TagsWidget(uri, service);
-
-        // annotations
-        AnnotationsWidget annotationsWidget = new AnnotationsWidget(uri, service);
-
-        // map
-        showMap();
+        infoPanel = new FlowPanel();
+        infoPanel.addStyleName("datasetRightColSection");
+        infoPanel.add(metadataHeader);
+        infoPanel.add(authorLabel);
+        infoPanel.add(sizeLabel);
+        infoPanel.add(typeLabel);
+        infoPanel.add(dateLabel);
 
         // dataset actions
         final FlowPanel actionsPanel = new FlowPanel();
@@ -419,10 +422,14 @@ public class DatasetWidget extends Composite {
         leftColumn.add(previewPanel);
         leftColumn.add(actionsPanel);
         leftColumn.add(additionalInformationPanel);
-        leftColumn.add(annotationsWidget);
+        leftColumn.add(new AnnotationsWidget(uri, service));
 
-        rightColumn.add(metadataPanel);
-        rightColumn.add(tagsWidget);
+        rightColumn.add(infoPanel);
+        rightColumn.add(new LicenseWidget(uri, service));
+        rightColumn.add(new TagsWidget(uri, service));
+
+        // map
+        showMap();
 
         loadMetadata();
 
@@ -431,10 +438,12 @@ public class DatasetWidget extends Composite {
         loadDerivedFrom(uri, 4);
 
         // show preview image
-        if (bestImage == null) {
-            previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null));
-        } else {
+        if (bestVideo != null) {
+            showPreview(bestVideo);
+        } else if (bestImage != null) {
             showPreview(bestImage);
+        } else {
+            previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null));
         }
     }
 
@@ -564,7 +573,7 @@ public class DatasetWidget extends Composite {
 
         } else if (pb instanceof PreviewVideoBean) {
             PreviewVideoBean pvb = (PreviewVideoBean) pb;
-            showFlash(BLOB_URL + pb.getUri(), "video", Long.toString(pvb.getWidth()), Long.toString(pvb.getHeight()));
+            showFlash(BLOB_URL + pb.getUri(), null, "video", Long.toString(pvb.getWidth()), Long.toString(pvb.getHeight()));
         }
 
         currentPreview = pb;
@@ -577,17 +586,19 @@ public class DatasetWidget extends Composite {
         img.height=h;
     }-*/;
 
-    public final native void showFlash(String url, String type, String w, String h) /*-{
+    public final native void showFlash(String url, String preview, String type, String w, String h) /*-{
         if (url != null) {
         $wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');
         $wnd.player.addParam('allowfullscreen','true');
         $wnd.player.addParam('allowscriptaccess','always');
         $wnd.player.addParam('wmode','opaque');
         $wnd.player.addVariable('file',url);
-        $wnd.player.addVariable('autostart','true');            
+        $wnd.player.addVariable('autostart','true');
+        if (preview != null) {
+        $wnd.player.addVariable('image',preview);
+        }            
         //            $wnd.player.addVariable('author','Joe');
         //            $wnd.player.addVariable('description','Bob');
-        //            $wnd.player.addVariable('image','http://content.longtailvideo.com/videos/image.jpg');
         //            $wnd.player.addVariable('title','title');
         //            $wnd.player.addVariable('debug','console');
         $wnd.player.addVariable('provider',type);
@@ -729,22 +740,22 @@ public class DatasetWidget extends Composite {
                                 if ("Extractor".equals(tuple.getCategory()) && "Image Size".equals(tuple.getLabel())) {
                                     Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
                                     lbl.addStyleName("metadataEntry");
-                                    metadataPanel.add(lbl);
+                                    infoPanel.add(lbl);
                                 }
                                 if ("FFMPEG".equals(tuple.getCategory()) && "Video Duration".equals(tuple.getLabel())) {
                                     Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
                                     lbl.addStyleName("metadataEntry");
-                                    metadataPanel.add(lbl);
+                                    infoPanel.add(lbl);
                                 }
                                 if ("FFMPEG".equals(tuple.getCategory()) && "Video FPS".equals(tuple.getLabel())) {
                                     Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
                                     lbl.addStyleName("metadataEntry");
-                                    metadataPanel.add(lbl);
+                                    infoPanel.add(lbl);
                                 }
                                 if ("FFMPEG".equals(tuple.getCategory()) && "Video Size".equals(tuple.getLabel())) {
                                     Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
                                     lbl.addStyleName("metadataEntry");
-                                    metadataPanel.add(lbl);
+                                    infoPanel.add(lbl);
                                 }
                             }
                         }

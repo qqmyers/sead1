@@ -63,6 +63,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDerivedFromHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoPointHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRecentActivityHandler;
@@ -81,6 +82,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetPropertyHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
@@ -133,6 +135,8 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new ReindexLuceneHandler());
         DispatchUtil.registerHandler(new IsPreviewPendingHandler());
         DispatchUtil.registerHandler(new ContextConvertHandler());
+        DispatchUtil.registerHandler(new GetLicenseHandler());
+        DispatchUtil.registerHandler(new SetLicenseHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {
