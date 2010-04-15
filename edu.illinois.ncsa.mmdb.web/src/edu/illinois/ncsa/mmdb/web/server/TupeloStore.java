@@ -91,6 +91,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextCreator;
+import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
  * Singleton class to manage a tupelo context and its associated beansession.
@@ -136,6 +137,9 @@ public class TupeloStore {
 
     /** FileNameMap to map from extension to MIME type. */
     private MimeMap                                    mimemap;
+
+    /** Use a single previewbeanutil for optimizations */
+    private PreviewBeanUtil                            extractorpbu;
 
     /**
      * Return singleton instance.
@@ -503,14 +507,16 @@ public class TupeloStore {
     public String extractPreviews(String uri, boolean rerun) {
         Long lastRequest = lastExtractionRequest.get(uri);
 
+        if (extractorpbu == null) {
+            extractorpbu = new PreviewBeanUtil(getExtractorContext().getBeanSession());
+        }
+
         // give it a minute
         if (rerun || lastRequest == null || lastRequest < System.currentTimeMillis() - 120000) {
             log.info("EXTRACT PREVIEWS " + uri);
             lastExtractionRequest.put(uri, System.currentTimeMillis());
-            BeanSession beanSession = getExtractorContext().getBeanSession();
-            PreviewBeanUtil pbu = new PreviewBeanUtil(beanSession);
             try {
-                return pbu.callExtractor(extractionServiceURL, uri, null, rerun);
+                return extractorpbu.callExtractor(extractionServiceURL, uri, null, rerun);
             } catch (Exception e) {
                 log.error(String.format("Extraction service %s unavailable", extractionServiceURL), e);
             }

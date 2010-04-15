@@ -83,6 +83,7 @@ import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
  * @author plutchak
