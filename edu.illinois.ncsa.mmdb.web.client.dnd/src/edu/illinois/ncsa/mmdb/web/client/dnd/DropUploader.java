@@ -143,7 +143,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}
 	}
     void droppedFile(File f, List<File> files) {
-		if(f != null) {
+		if(f != null && !files.contains(f)) {
 			log("dropped file "+f);
 			files.add(f);
 		}
@@ -157,24 +157,21 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			List<File> files = new LinkedList<File>();
 			for(DataFlavor flavor : tr.getTransferDataFlavors()) {
 				URI uri = null;
+				log("DataFlavor = "+flavor);
 				if (flavor.isFlavorJavaFileListType()) {
 					for(File file : (List<File>) tr.getTransferData(flavor)) {
 						droppedFile(file,files);
 					}
-					break;
 				} else if(flavor.isFlavorTextType()) {
 					BufferedReader br = new BufferedReader(flavor.getReaderForText(tr));
 					String s = null;
 					while((s = br.readLine()) != null) {
 						uri = new URI(s);
 						droppedFile(uri, files);
-						break;
 					}
-					break;
 				} else if(flavor.isMimeTypeEqual("application/x-java-url")) {
 					URI url = URI.create(tr.getTransferData(flavor)+"");
 					droppedFile(url, files);
-					break;
 				} else {
 					log("unknown "+flavor);
 				}
@@ -191,7 +188,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				files = expandDirectories(files,false); // expand directories 
 				for(File file : files) {
 					JSObject window = JSObject.getWindow(DropUploader.this);
-					window.call("dndAppletFileDropped",new Object[] { file.getName() });
+					window.call("dndAppletFileDropped",new Object[] { file.getName(), file.length()+"" });
 				}
 				//ta.setText(files.size()+" file(s) dropped: "+files);
 				uploadFiles(files,collectionName);

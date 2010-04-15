@@ -227,7 +227,7 @@ public class UploadPage extends Page {
      */
     private native void publishMethods() /*-{
         $wnd.dndAppletPoke = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::appletPoke();
-        $wnd.dndAppletFileDropped = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileDropped(Ljava/lang/String;);
+        $wnd.dndAppletFileDropped = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileDropped(Ljava/lang/String;Ljava/lang/String;);
         $wnd.dndAppletFileUploaded = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileUploaded(Ljava/lang/String;);
         $wnd.dndAppletProgress = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileProgress(I);
     }-*/;
@@ -264,7 +264,9 @@ public class UploadPage extends Page {
         return layout;
     }
 
-    static int nUploaded = 0;
+    // FIXME encapsulate these two state variables into a delegate
+    static int         nUploaded          = 0;
+    static ProgressBar currentProgressBar = null;
 
     /** Called by the applet after a file is uploaded. */
     public static void fileUploaded(String uri) {
@@ -293,13 +295,14 @@ public class UploadPage extends Page {
     }
 
     /** Called by the applet for each file dropped */
-    public static void fileDropped(String filename) {
+    public static void fileDropped(String filename, String sizeString) {
         nUploaded = 0;
         GWT.log("applet says " + filename + " dropped");
         final int row = uploadedDatasetsTable.getRowCount();
         Image image = new Image(PreviewWidget.GRAY_URL.get(GetPreviews.SMALL));
         uploadedDatasetsTable.setWidget(row, 0, image);
-        uploadedDatasetsTable.setWidget(row, 1, new Label("Uploading \"" + filename + "\" ..."));
+        long size = Long.parseLong(sizeString);
+        uploadedDatasetsTable.setWidget(row, 1, new Label("Uploading \"" + filename + "\" (" + TextFormatter.humanBytes(size) + ") ..."));
     }
 
     /**
@@ -309,16 +312,11 @@ public class UploadPage extends Page {
      */
     public static void fileProgress(int percent) {
         if (nUploaded < uploadedDatasetsTable.getRowCount()) {
-            if (uploadedDatasetsTable.getCellCount(nUploaded) < 3) {
-                uploadedDatasetsTable.setWidget(nUploaded, 2, new ProgressBar(1));
+            if (currentProgressBar == null) {
+                currentProgressBar = new ProgressBar(1);
+                uploadedDatasetsTable.setWidget(nUploaded, 2, currentProgressBar);
             }
-            Widget widget = uploadedDatasetsTable.getWidget(nUploaded, 2);
-            if (widget instanceof ProgressBar) {
-                GWT.log("setting progress bar value to " + percent);
-                ((ProgressBar) widget).setProgress(percent);
-            } else {
-                GWT.log("couldn't find progress bar!!!!"); // FIXME debug
-            }
+            currentProgressBar.setProgress(percent);
         }
     }
 
@@ -341,7 +339,7 @@ public class UploadPage extends Page {
         id:'dragdropApplet',
         MAYSCRIPT:'true',
         code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-        archive:'dnd/DropUploader-965.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+        archive:'dnd/DropUploader-966.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
         width:150,
         height:100
         };
