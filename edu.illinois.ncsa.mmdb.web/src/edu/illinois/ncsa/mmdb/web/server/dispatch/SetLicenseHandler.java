@@ -116,7 +116,9 @@ public class SetLicenseHandler implements ActionHandler<SetLicense, EmptyResult>
         if (arg0.getLicense().getRights() != null) {
             tw.add(uri, DCTERMS_RIGHTS, arg0.getLicense().getRights());
         }
-        if (arg0.getLicense().getRightsHolder() != null) {
+        if (arg0.getLicense().getRightsHolderUri() != null) {
+            tw.add(uri, DCTERMS_RIGHTS_HOLDER, Resource.uriRef(arg0.getLicense().getRightsHolderUri()));
+        } else if (arg0.getLicense().getRightsHolder() != null) {
             tw.add(uri, DCTERMS_RIGHTS_HOLDER, arg0.getLicense().getRightsHolder());
         }
         if (arg0.getLicense().getLicense() != null) {

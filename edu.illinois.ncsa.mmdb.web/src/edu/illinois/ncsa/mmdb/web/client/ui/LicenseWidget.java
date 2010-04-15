@@ -52,6 +52,7 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
@@ -70,7 +71,6 @@ public class LicenseWidget extends Composite {
     private final String          resource;
     private LicenseResult         license;
 
-    //private final Image           licenseIcon;
     private final Anchor          licenseText;
     private final Anchor          licenseEdit;
     private final RadioButton     limited;
@@ -85,6 +85,8 @@ public class LicenseWidget extends Composite {
     private final Label           attribution;
     private final Label           lblRights;
     private final Label           lblLicense;
+    private final CheckBox        myData;
+    private final Label           lblRightsHolder;
 
     public LicenseWidget(String resource, MyDispatchAsync service) {
         this(resource, service, true);
@@ -141,10 +143,19 @@ public class LicenseWidget extends Composite {
 
         // in case of cc the rights wil be cc-by-etc same as icon
 
-        Label lbl = new Label("Rights Holder");
-        licenseEditor.add(lbl);
+        myData = new CheckBox("I own the rights.");
+        myData.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                lblRightsHolder.setVisible(!myData.getValue());
+                rightsHolder.setVisible(!myData.getValue());
+            }
+        });
+        licenseEditor.add(myData);
+        lblRightsHolder = new Label("Rights Holder");
+        licenseEditor.add(lblRightsHolder);
         rightsHolder = new TextBox();
-        rightsHolder.setWidth("200px");
+        rightsHolder.setWidth("180px");
         licenseEditor.add(rightsHolder);
 
         // Edit Creative Commons License
@@ -274,8 +285,14 @@ public class LicenseWidget extends Composite {
         final LicenseResult oldLicense = license;
 
         license = new LicenseResult();
-        if (!rightsHolder.getText().equals("")) {
+        if (myData.getValue()) {
+            license.setRightsHolderUri(MMDB.getUsername());
+            license.setRightsHolder(MMDB.getSessionState().getCurrentUser().getName());
+        } else if (!rightsHolder.getText().equals("")) {
             license.setRightsHolder(rightsHolder.getText());
+            if ((oldLicense.getRightsHolderUri() != null) && oldLicense.getRightsHolder().equals(rightsHolder.getText())) {
+                license.setRightsHolderUri(oldLicense.getRightsHolderUri());
+            }
         }
 
         if (cc.getValue()) {
@@ -330,6 +347,17 @@ public class LicenseWidget extends Composite {
             rightsHolder.setText(license.getRightsHolder());
         }
 
+        // if me then hide
+        if (MMDB.getUsername().equals(license.getRightsHolderUri())) {
+            myData.setValue(true);
+            lblRightsHolder.setVisible(false);
+            rightsHolder.setVisible(false);
+        } else {
+            myData.setValue(false);
+            lblRightsHolder.setVisible(true);
+            rightsHolder.setVisible(true);
+        }
+
         // check to see if it is a creative commons license or regular license.
         String rights = license.getRights().toLowerCase();
         if ("cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights)) {
@@ -345,7 +373,7 @@ public class LicenseWidget extends Composite {
 
             lblRights.setVisible(false);
             this.rights.setVisible(false);
-            this.rights.setText("Copyright");
+            this.rights.setText("All Rights Reserved");
 
             lblLicense.setVisible(false);
             licenseURL.setVisible(false);

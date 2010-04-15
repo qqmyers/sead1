@@ -425,7 +425,6 @@ public class DatasetWidget extends Composite {
         leftColumn.add(new AnnotationsWidget(uri, service));
 
         rightColumn.add(infoPanel);
-        rightColumn.add(new LicenseWidget(uri, service));
         rightColumn.add(new TagsWidget(uri, service));
 
         // map
@@ -436,6 +435,8 @@ public class DatasetWidget extends Composite {
         loadCollections();
 
         loadDerivedFrom(uri, 4);
+
+        rightColumn.add(new LicenseWidget(uri, service));
 
         // show preview image
         if (bestVideo != null) {

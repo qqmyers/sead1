@@ -52,6 +52,7 @@ import net.customware.gwt.dispatch.shared.Result;
 @SuppressWarnings("serial")
 public class LicenseResult implements Result {
     private String  rights;
+    private String  rightsHolderUri;
     private String  rightsHolder;
     private String  license;
     private boolean allowDownload;
@@ -73,6 +74,14 @@ public class LicenseResult implements Result {
 
     public void setRightsHolder(String rightsHolder) {
         this.rightsHolder = rightsHolder;
+    }
+
+    public String getRightsHolderUri() {
+        return rightsHolderUri;
+    }
+
+    public void setRightsHolderUri(String rightsHolderUri) {
+        this.rightsHolderUri = rightsHolderUri;
     }
 
     public String getLicense() {

@@ -58,6 +58,8 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Get license attached to a specific resource.
@@ -81,8 +83,9 @@ public class GetLicenseHandler implements ActionHandler<GetLicense, LicenseResul
     public LicenseResult execute(GetLicense arg0, ExecutionContext arg1) throws ActionException {
         LicenseResult result = new LicenseResult();
 
-        // FIXME are these good defaults?
-        result.setRights("Copyrighted");
+        PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
+
+        result.setRights("All Rights Reserved");
         result.setAllowDownload(true);
 
         // get license information
@@ -106,7 +109,18 @@ public class GetLicenseHandler implements ActionHandler<GetLicense, LicenseResul
                 result.setRights(row.get(0).getString());
             }
             if (row.get(1) != null) {
-                result.setRightsHolder(row.get(1).getString());
+                if (row.get(1).isUri()) {
+                    result.setRightsHolderUri(row.get(1).getString());
+                    try {
+                        PersonBean pb = pbu.get(row.get(1));
+                        result.setRightsHolder(pb.getName());
+                    } catch (OperatorException e) {
+                        log.warn("Could not get personbean.", e);
+                        result.setRightsHolder(row.get(1).getString());
+                    }
+                } else {
+                    result.setRightsHolder(row.get(1).getString());
+                }
             }
             if (row.get(2) != null) {
                 result.setLicense(row.get(2).getString());
