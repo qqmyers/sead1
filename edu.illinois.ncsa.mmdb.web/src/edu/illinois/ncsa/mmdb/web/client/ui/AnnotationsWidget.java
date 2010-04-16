@@ -51,33 +51,32 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 
 /**
  * @author lmarini
- *
+ * 
  */
 public class AnnotationsWidget extends Composite {
 
-	private CommentsView commentsView;
+    private final CommentsView commentsView;
 
-	public AnnotationsWidget(String id, MyDispatchAsync service) {
-		commentsView = new CommentsView(id, service);
-		initWidget(commentsView);
-		
-		service.execute(new GetAnnotations(id), new AsyncCallback<GetAnnotationsResult>() {
+    public AnnotationsWidget(String id, MyDispatchAsync service) {
+        commentsView = new CommentsView(id, service);
+        initWidget(commentsView);
 
-			@Override
-			public void onFailure(Throwable caught) {
-				GWT.log("Error retrieving annotations", null);
-				
-			}
+        service.execute(new GetAnnotations(id), new AsyncCallback<GetAnnotationsResult>() {
 
-			@Override
-			public void onSuccess(GetAnnotationsResult result) {
-				commentsView.show(result.getAnnotations());
-				
-			}
-			
-		});
-		
-		
-	}
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error retrieving annotations", null);
+
+            }
+
+            @Override
+            public void onSuccess(GetAnnotationsResult result) {
+                commentsView.show(result.getAnnotations());
+
+            }
+
+        });
+
+    }
 
 }

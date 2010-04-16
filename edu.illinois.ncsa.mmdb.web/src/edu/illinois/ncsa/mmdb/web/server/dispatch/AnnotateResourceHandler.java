@@ -66,71 +66,72 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
  * 
  */
 public class AnnotateResourceHandler implements
-		ActionHandler<AnnotateResource, AnnotateResourceResult> {
+        ActionHandler<AnnotateResource, AnnotateResourceResult> {
 
-	/** Commons logging **/
-	private static Log log = LogFactory.getLog(AnnotateResourceHandler.class);
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog(AnnotateResourceHandler.class);
 
-	@Override
-	public AnnotateResourceResult execute(AnnotateResource arg0,
-			ExecutionContext arg1) throws ActionException {
+    @Override
+    public AnnotateResourceResult execute(AnnotateResource arg0,
+            ExecutionContext arg1) throws ActionException {
 
-		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
-		AnnotationBeanUtil abu = new AnnotationBeanUtil(beanSession);
+        AnnotationBeanUtil abu = new AnnotationBeanUtil(beanSession);
 
-		AnnotationBean annotation = arg0.getAnnotation();
+        AnnotationBean annotation = arg0.getAnnotation();
 
-		String resource = arg0.getId();
+        String resource = arg0.getId();
 
-		String sessionId = arg0.getSessionId();
+        String sessionId = arg0.getSessionId();
 
-		String personID = sessionId;
+        String personID = sessionId;
 
-		PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance()
-				.getBeanSession());
+        PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance()
+                .getBeanSession());
 
-		// FIXME only required until sessionid stores the full uri and not the
-		// email address
-		if (!sessionId.startsWith(PersonBeanUtil.getPersonID(""))) {
-			personID = PersonBeanUtil.getPersonID(sessionId);
-		}
+        // FIXME only required until sessionid stores the full uri and not the
+        // email address
+        if (!sessionId.startsWith(PersonBeanUtil.getPersonID(""))) {
+            personID = PersonBeanUtil.getPersonID(sessionId);
+        }
 
-		try {
-			annotation.setCreator(pbu.get(personID));
-		} catch (Exception e1) {
-			log.error("Error getting creator of annotation", e1);
-		}
+        try {
+            annotation.setCreator(pbu.get(personID));
+        } catch (Exception e1) {
+            log.error("Error getting creator of annotation", e1);
+        }
 
-		if (annotation.getCreator() == null) {
-			annotation.setCreator(PersonBeanUtil.getAnonymous());
-		}
+        if (annotation.getCreator() == null) {
+            annotation.setCreator(PersonBeanUtil.getAnonymous());
+        }
 
-		// store annotation
-		try {
-			beanSession.register(annotation);
-			beanSession.save(annotation);
-			abu.addAssociationTo(resource, annotation);
-			TupeloStore.getInstance().changed(resource);
-		} catch (OperatorException e2) {
-			log.error("Error saving and associating an annotation bean", e2);
-		} catch (Exception e) {
-			log.error("Error saving and associating an annotation bean", e);
-		}
+        // store annotation
+        try {
+            beanSession.register(annotation);
+            beanSession.save(annotation);
+            abu.addAssociationTo(resource, annotation);
+            log.debug("Annotated " + resource);
+            TupeloStore.getInstance().changed(resource);
+        } catch (OperatorException e2) {
+            log.error("Error saving and associating an annotation bean", e2);
+        } catch (Exception e) {
+            log.error("Error saving and associating an annotation bean", e);
+        }
 
-		return new AnnotateResourceResult();
-	}
+        return new AnnotateResourceResult();
+    }
 
-	@Override
-	public Class<AnnotateResource> getActionType() {
-		return AnnotateResource.class;
-	}
+    @Override
+    public Class<AnnotateResource> getActionType() {
+        return AnnotateResource.class;
+    }
 
-	@Override
-	public void rollback(AnnotateResource arg0, AnnotateResourceResult arg1,
-			ExecutionContext arg2) throws ActionException {
-		// TODO Auto-generated method stub
+    @Override
+    public void rollback(AnnotateResource arg0, AnnotateResourceResult arg1,
+            ExecutionContext arg2) throws ActionException {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
 }

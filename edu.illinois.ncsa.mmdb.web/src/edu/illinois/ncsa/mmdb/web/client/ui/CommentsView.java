@@ -69,135 +69,135 @@ import edu.uiuc.ncsa.cet.bean.AnnotationBean;
  */
 public class CommentsView extends Composite {
 
-	private SimplePanel mainPanel = new SimplePanel();
+    private final SimplePanel       mainPanel = new SimplePanel();
 
-	private VerticalPanel layoutPanel;
+    private final VerticalPanel     layoutPanel;
 
-	private NewAnnotationView newAnnotationView;
+    private final NewAnnotationView newAnnotationView;
 
-	private String resource;
+    private final String            resource;
 
-	private VerticalPanel commentsPanel;
+    private final VerticalPanel     commentsPanel;
 
-	private final MyDispatchAsync service;
+    private final MyDispatchAsync   service;
 
-	/**
-	 * Draws the main panel and the widget to input a new annotation. Calls the
-	 * refresh method to refresh the list and retrieve all the current
-	 * annotations.
-	 * 
-	 * @param resource
-	 */
-	public CommentsView(final String resource, final MyDispatchAsync service) {
+    /**
+     * Draws the main panel and the widget to input a new annotation. Calls the
+     * refresh method to refresh the list and retrieve all the current
+     * annotations.
+     * 
+     * @param resource
+     */
+    public CommentsView(final String resource, final MyDispatchAsync service) {
 
-		this.resource = resource;
+        this.resource = resource;
 
-		this.service = service;
+        this.service = service;
 
-		DisclosurePanel disclosurePanel = new DisclosurePanel("Comments");
-		
-		disclosurePanel.addStyleName("datasetDisclosurePanel");
-		
-		disclosurePanel.setOpen(true);
-		
-		disclosurePanel.setAnimationEnabled(true);
-		
-		initWidget(disclosurePanel);
+        DisclosurePanel disclosurePanel = new DisclosurePanel("Comments");
 
-		mainPanel.addStyleName("commentsView");
+        disclosurePanel.addStyleName("datasetDisclosurePanel");
 
-		layoutPanel = new VerticalPanel();
+        disclosurePanel.setOpen(true);
 
-		mainPanel.add(layoutPanel);
-		
-		disclosurePanel.setContent(mainPanel);
+        disclosurePanel.setAnimationEnabled(true);
 
-		commentsPanel = new VerticalPanel();
+        initWidget(disclosurePanel);
 
-		commentsPanel.setWidth("100%");
+        mainPanel.addStyleName("commentsView");
 
-		layoutPanel.add(commentsPanel);
+        layoutPanel = new VerticalPanel();
 
-		newAnnotationView = new NewAnnotationView();
+        mainPanel.add(layoutPanel);
 
-		// add new annotation
-		newAnnotationView.addClickHandler(new ClickHandler() {
+        disclosurePanel.setContent(mainPanel);
 
-			public void onClick(ClickEvent arg0) {
+        commentsPanel = new VerticalPanel();
 
-				service.execute(new AnnotateResource(resource,
-						newAnnotationView.getAnnotationBean(), MMDB.getUsername()),
-						new AsyncCallback<AnnotateResourceResult>() {
+        commentsPanel.setWidth("100%");
 
-							@Override
-							public void onFailure(Throwable caught) {
-								GWT.log("Failed to annotate resource "
-										+ resource, caught);
-							}
+        layoutPanel.add(commentsPanel);
 
-							@Override
-							public void onSuccess(AnnotateResourceResult result) {
-								newAnnotationView.clear();
+        newAnnotationView = new NewAnnotationView();
 
-								refresh();
+        // add new annotation
+        newAnnotationView.addClickHandler(new ClickHandler() {
 
-							}
-						});
+            public void onClick(ClickEvent arg0) {
 
-			}
+                service.execute(new AnnotateResource(resource,
+                        newAnnotationView.getAnnotationBean(), MMDB.getUsername()),
+                        new AsyncCallback<AnnotateResourceResult>() {
 
-		});
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Failed to annotate resource "
+                                + resource, caught);
+                    }
 
-		layoutPanel.add(newAnnotationView);
+                    @Override
+                    public void onSuccess(AnnotateResourceResult result) {
+                        newAnnotationView.clear();
 
-		refresh();
-	}
+                        refresh();
 
-	/**
-	 * Retrieves annotations and adds them to the panel.
-	 * 
-	 */
-	private void refresh() {
+                    }
+                });
 
-		commentsPanel.clear();
+            }
 
-		service.execute(new GetAnnotations(resource),
-				new AsyncCallback<GetAnnotationsResult>() {
+        });
 
-					@Override
-					public void onFailure(Throwable caught) {
-						GWT.log("Error retrieving annotations", caught);
-					}
+        layoutPanel.add(newAnnotationView);
 
-					@Override
-					public void onSuccess(GetAnnotationsResult result) {
-						
-						ArrayList<AnnotationBean> annotations = result
-								.getAnnotations();
-						
-						show(annotations);
-					}
-				});
-	}
+        refresh();
+    }
 
-	/**
-	 * 
-	 * @param annotations
-	 */
-	public void show(ArrayList<AnnotationBean> annotations) {
-		commentsPanel.clear();
-		
-		commentsPanel.add(new Label(annotations.size()+" comment" + (annotations.size()!=1?"s":"")));
-			
-		for (AnnotationBean annotation : annotations) {
-			AnnotationView v = new AnnotationView(resource, annotation);
-			v.addDeletedHandler(new DeletedHandler() {
-				public void onDeleted(DeletedEvent event) {
-					refresh();
-				}
-			});
-			commentsPanel.add(v);
-		}
-	}
+    /**
+     * Retrieves annotations and adds them to the panel.
+     * 
+     */
+    private void refresh() {
+
+        commentsPanel.clear();
+
+        service.execute(new GetAnnotations(resource),
+                new AsyncCallback<GetAnnotationsResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error retrieving annotations", caught);
+            }
+
+            @Override
+            public void onSuccess(GetAnnotationsResult result) {
+
+                ArrayList<AnnotationBean> annotations = result
+                        .getAnnotations();
+
+                show(annotations);
+            }
+        });
+    }
+
+    /**
+     * 
+     * @param annotations
+     */
+    public void show(ArrayList<AnnotationBean> annotations) {
+        commentsPanel.clear();
+
+        commentsPanel.add(new Label(annotations.size() + " comment" + (annotations.size() != 1 ? "s" : "")));
+
+        for (AnnotationBean annotation : annotations ) {
+            AnnotationView v = new AnnotationView(resource, annotation);
+            v.addDeletedHandler(new DeletedHandler() {
+                public void onDeleted(DeletedEvent event) {
+                    refresh();
+                }
+            });
+            commentsPanel.add(v);
+        }
+    }
 
 }

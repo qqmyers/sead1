@@ -535,8 +535,8 @@ public class TupeloStore {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
                     {
-                        return countDatasetsInCollection(inCollection);
-                    }
+                    return countDatasetsInCollection(inCollection);
+                }
             };
             count.setTtl(120000);
             datasetCount.put(key, count);
@@ -839,31 +839,36 @@ public class TupeloStore {
     public synchronized void consumeFullTextIndexQueue() {
         boolean logged = false;
         if (getSearch() != null) {
+            // copy the queues, so we don't block
+            List<String> toDeindex = new LinkedList<String>();
+            List<String> toIndex = new LinkedList<String>();
             synchronized (deindexQueue) {
-                if (deindexQueue.size() > 0) {
-                    if (!logged) {
-                        log.info("starting full-text reindexing @ " + new Date());
-                        logged = true;
-                    }
-                    log.info("deindexing " + deindexQueue.size() + " deleted dataset(s) @ " + new Date());
-                    getSearch().deindex(deindexQueue);
-                    log.info("deindexed " + deindexQueue.size() + " deleted dataset(s) @ " + new Date());
+                synchronized (indexQueue) {
+                    toIndex.addAll(indexQueue);
+                    toDeindex.addAll(deindexQueue);
+                    indexQueue.clear();
                     deindexQueue.clear();
                 }
             }
-            synchronized (indexQueue) {
-                if (indexQueue.size() > 0) {
-                    if (!logged) {
-                        log.info("starting full-text reindexing @ " + new Date());
-                        logged = true;
-                    }
-                    log.info("indexing " + indexQueue.size() + " dataset(s) @ " + new Date());
-                    for (String datasetUri : indexQueue ) {
-                        getSearch().reindex(datasetUri);
-                    }
-                    log.info("indexed " + indexQueue.size() + " dataset(s) @ " + new Date());
-                    indexQueue.clear();
+            if (toDeindex.size() > 0) {
+                if (!logged) {
+                    log.info("starting full-text reindexing @ " + new Date());
+                    logged = true;
                 }
+                log.info("deindexing " + toDeindex.size() + " deleted dataset(s) @ " + new Date());
+                getSearch().deindex(toDeindex);
+                log.info("deindexed " + toDeindex.size() + " deleted dataset(s) @ " + new Date());
+            }
+            if (toIndex.size() > 0) {
+                if (!logged) {
+                    log.info("starting full-text reindexing @ " + new Date());
+                    logged = true;
+                }
+                log.info("indexing " + toIndex.size() + " dataset(s) @ " + new Date());
+                for (String datasetUri : toIndex ) {
+                    getSearch().reindex(datasetUri);
+                }
+                log.info("indexed " + toIndex.size() + " dataset(s) @ " + new Date());
             }
         }
     }
