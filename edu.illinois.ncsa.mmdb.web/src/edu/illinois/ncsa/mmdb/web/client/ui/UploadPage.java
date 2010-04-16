@@ -53,6 +53,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -122,7 +123,7 @@ public class UploadPage extends Page {
         //final boolean dndEnabled = MMDB.getSessionPreference(DND_ENABLED_PREFERENCE) != null;
         final boolean dndEnabled = false; // FIXME debug
 
-        final VerticalPanel dndApplet = new VerticalPanel();
+        final FlowPanel dndApplet = new FlowPanel();
         dndApplet.setWidth("150px");
         dndApplet.setHeight("100px");
         dndApplet.getElement().setId("dndAppletId");
