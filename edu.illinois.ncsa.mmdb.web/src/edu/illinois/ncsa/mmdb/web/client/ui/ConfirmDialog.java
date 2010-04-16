@@ -53,41 +53,57 @@ import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 
 public class ConfirmDialog extends DialogBox {
+    String                  message;
+    protected VerticalPanel content;
 
-	public ConfirmDialog(String title, String message) {
-    	setText(title);
-    	VerticalPanel panel = new VerticalPanel();
-    	panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-    	panel.add(new Label(message));
-    	
-    	HorizontalPanel buttonsPanel = new HorizontalPanel();
-    	Button yesButton = new Button("Yes", new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				fireEvent(new ConfirmEvent());
-				hide();
-			}
-		});
-    	
-    	buttonsPanel.add(yesButton);
-    	Button noButton = new Button("No", new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				fireEvent(new CancelEvent());
-				hide();
-			}
-		});
-    	
-    	buttonsPanel.add(noButton);
-    	panel.add(buttonsPanel);
-    	add(panel);
-    	center();
-	}
-	
-	public void addCancelHandler(CancelHandler h) {
-		addHandler(h, CancelEvent.TYPE);
-	}
-	
-	public void addConfirmHandler(ConfirmHandler h) {
-		addHandler(h, ConfirmEvent.TYPE);
-	}
+    public ConfirmDialog(String title) {
+        this(title, null);
+    }
+
+    public ConfirmDialog(String title, String message) {
+        setText(title);
+        init();
+
+        if (message != null) {
+            content.add(new Label(message));
+        }
+    }
+
+    void init() {
+        VerticalPanel panel = new VerticalPanel();
+        panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
+        content = new VerticalPanel();
+        panel.add(content);
+
+        HorizontalPanel buttonsPanel = new HorizontalPanel();
+        Button yesButton = new Button("Yes", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                fireEvent(new ConfirmEvent());
+                hide();
+            }
+        });
+
+        buttonsPanel.add(yesButton);
+        Button noButton = new Button("No", new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                fireEvent(new CancelEvent());
+                hide();
+            }
+        });
+
+        buttonsPanel.add(noButton);
+        panel.add(buttonsPanel);
+        add(panel);
+        center();
+    }
+
+    public void addCancelHandler(CancelHandler h) {
+        addHandler(h, CancelEvent.TYPE);
+    }
+
+    public void addConfirmHandler(ConfirmHandler h) {
+        addHandler(h, ConfirmEvent.TYPE);
+    }
 }

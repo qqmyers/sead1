@@ -41,6 +41,12 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
+import net.customware.gwt.dispatch.shared.Action;
+
 /**
  * Retrieve license for a particular resource.
  * 
@@ -48,7 +54,8 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
  * 
  */
 @SuppressWarnings("serial")
-public class SetLicense extends SubjectAction<EmptyResult> {
+public class SetLicense implements Action<EmptyResult> {
+    Collection<String>    resources;
     private LicenseResult license;
 
     /**
@@ -58,8 +65,17 @@ public class SetLicense extends SubjectAction<EmptyResult> {
     }
 
     public SetLicense(String resource, LicenseResult license) {
-        super(resource);
-        this.license = license;
+        List<String> batch = new LinkedList<String>();
+        batch.add(resource);
+        setResources(batch);
+        setLicense(license);
+    }
+
+    public SetLicense(Collection<String> resources, LicenseResult license) {
+        List<String> batch = new LinkedList<String>();
+        batch.addAll(resources);
+        setResources(batch);
+        setLicense(license);
     }
 
     public LicenseResult getLicense() {
@@ -70,4 +86,11 @@ public class SetLicense extends SubjectAction<EmptyResult> {
         this.license = license;
     }
 
+    public Collection<String> getResources() {
+        return resources;
+    }
+
+    public void setResources(List<String> resources) {
+        this.resources = resources;
+    }
 }

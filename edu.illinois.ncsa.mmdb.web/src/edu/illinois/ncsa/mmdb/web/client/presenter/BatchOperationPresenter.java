@@ -3,6 +3,7 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,6 +33,7 @@ import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
 import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 import edu.illinois.ncsa.mmdb.web.client.ui.AddToCollectionDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
+import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
 
 /**
@@ -112,6 +114,13 @@ public class BatchOperationPresenter implements Presenter {
                         });
                     }
                 });
+            }
+        });
+        display.addMenuAction("Change license", new Command() {
+            public void execute() {
+                Collection<String> batch = sessionState.getSelectedDatasets();
+                SetLicenseDialog dialog = new SetLicenseDialog("Set license for " + batch.size() + " dataset(s)", sessionState.getSelectedDatasets());
+                // since dispatches are embedded in LicenseWidget, we have no way to close the dialog ...
             }
         });
         // unselect items

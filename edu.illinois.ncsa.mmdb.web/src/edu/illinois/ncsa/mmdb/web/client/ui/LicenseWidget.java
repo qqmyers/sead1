@@ -38,6 +38,9 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.Collection;
+import java.util.LinkedList;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -65,37 +68,49 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetLicense;
  * @author Rob Kooper
  * 
  */
+// FIXME refactor and provide license-display-only widget that can be separated from the editing code
+// and an editor that fires handleable events
 public class LicenseWidget extends Composite {
 
     private final MyDispatchAsync service;
-    private final String          resource;
+    private String                resource;
+    Collection<String>            batch;
     private LicenseResult         license;
 
-    private final Anchor          licenseText;
-    private final Anchor          licenseEdit;
-    private final RadioButton     limited;
-    private final RadioButton     cc;
-    private final TextBox         rightsHolder;
-    private final CheckBox        allowRemixing;
-    private final CheckBox        allowCommercial;
-    private final CheckBox        shareAlike;
-    private final TextBox         rights;
-    private final TextBox         licenseURL;
-    private final CheckBox        allowDownload;
-    private final Label           attribution;
-    private final Label           lblRights;
-    private final Label           lblLicense;
-    private final CheckBox        myData;
-    private final Label           lblRightsHolder;
+    private Anchor                licenseText;
+    private Anchor                licenseEdit;
+    private RadioButton           limited;
+    private RadioButton           cc;
+    private TextBox               rightsHolder;
+    private CheckBox              allowRemixing;
+    private CheckBox              allowCommercial;
+    private CheckBox              shareAlike;
+    private TextBox               rights;
+    private TextBox               licenseURL;
+    private CheckBox              allowDownload;
+    private Label                 attribution;
+    private Label                 lblRights;
+    private Label                 lblLicense;
+    private CheckBox              myData;
+    private Label                 lblRightsHolder;
 
     public LicenseWidget(String resource, MyDispatchAsync service) {
         this(resource, service, true);
     }
 
+    public LicenseWidget(Collection<String> batch, MyDispatchAsync service) {
+        this.batch = batch;
+        this.service = service;
+        init(false);
+    }
+
     public LicenseWidget(String resource, MyDispatchAsync service, boolean withTitle) {
         this.resource = resource;
         this.service = service;
+        init(withTitle);
+    }
 
+    void init(boolean withTitle) {
         // edit panel
         final VerticalPanel licenseEditor = new VerticalPanel();
 
@@ -264,18 +279,20 @@ public class LicenseWidget extends Composite {
         });
 
         // get the license
-        service.execute(new GetLicense(resource), new AsyncCallback<LicenseResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Error retrieving license", caught);
-            }
+        if (resource != null && batch == null) { // it's a batch, so can't show
+            service.execute(new GetLicense(resource), new AsyncCallback<LicenseResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Error retrieving license", caught);
+                }
 
-            @Override
-            public void onSuccess(LicenseResult result) {
-                license = result;
-                showLicense();
-            }
-        });
+                @Override
+                public void onSuccess(LicenseResult result) {
+                    license = result;
+                    showLicense();
+                }
+            });
+        }
     }
 
     /**
@@ -290,7 +307,7 @@ public class LicenseWidget extends Composite {
             license.setRightsHolder(MMDB.getSessionState().getCurrentUser().getName());
         } else if (!rightsHolder.getText().equals("")) {
             license.setRightsHolder(rightsHolder.getText());
-            if ((oldLicense.getRightsHolderUri() != null) && oldLicense.getRightsHolder().equals(rightsHolder.getText())) {
+            if (oldLicense != null && (oldLicense.getRightsHolderUri() != null) && oldLicense.getRightsHolder().equals(rightsHolder.getText())) {
                 license.setRightsHolderUri(oldLicense.getRightsHolderUri());
             }
         }
@@ -318,7 +335,16 @@ public class LicenseWidget extends Composite {
             license.setAllowDownload(allowDownload.getValue());
         }
 
-        service.execute(new SetLicense(resource, license), new AsyncCallback<EmptyResult>() {
+        Collection<String> toChange = null;
+        if (resource != null) {
+            toChange = new LinkedList<String>();
+            toChange.add(resource);
+        }
+        if (batch != null) {
+            toChange = batch;
+        }
+        // fix me modify the bat
+        service.execute(new SetLicense(toChange, license), new AsyncCallback<EmptyResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Error setting license", caught);
@@ -337,6 +363,9 @@ public class LicenseWidget extends Composite {
      * on the values.
      */
     private void showLicense() {
+        if (license == null) { // nothing to show
+            return;
+        }
         // attribution
         if (license.getRightsHolder() == null) {
             attribution.setVisible(false);
