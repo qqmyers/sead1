@@ -6,19 +6,27 @@ package edu.illinois.ncsa.mmdb.web.client.presenter;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
 import edu.illinois.ncsa.mmdb.web.client.mvp.View;
+import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
 
 /**
@@ -50,20 +58,52 @@ public class BatchOperationPresenter implements Presenter {
                 tagView.show();
             }
         });
-        // unselect items
-        display.addMenuAction("Unselect All", new Command() {
-
-            @Override
+        // delete items
+        display.addMenuAction("Delete", new Command() {
             public void execute() {
-                Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
-                for (String dataset : selectedDatasets ) {
-                    DatasetUnselectedEvent datasetUnselected = new DatasetUnselectedEvent();
-                    datasetUnselected.setUri(dataset);
-                    MMDB.eventBus.fireEvent(datasetUnselected);
-                }
+                final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
+                ConfirmDialog cd = new ConfirmDialog("Delete selected datasets", "Do you really want to delete " + selectedDatasets.size() + " dataset(s)?");
+                cd.addConfirmHandler(new ConfirmHandler() {
+                    public void onConfirm(ConfirmEvent event) {
+                        for (final String dataset : selectedDatasets ) {
+                            MMDB.dispatchAsync.execute(new DeleteDataset(dataset), new AsyncCallback<DeleteDatasetResult>() {
+                                public void onFailure(Throwable caught) {
+                                    GWT.log("Error deleting dataset", caught);
+                                }
+
+                                public void onSuccess(DeleteDatasetResult result) {
+                                    // FIXME what to do?
+                                    DatasetDeletedEvent dde = new DatasetDeletedEvent(dataset);
+                                    MMDB.eventBus.fireEvent(dde);
+                                    unselect(dataset);
+                                }
+                            });
+                        }
+                    }
+                });
             }
         });
+        // unselect items
+        display.addMenuAction("Unselect All", new Command() {
+            @Override
+            public void execute() {
+                unselectAll();
+            }
+        });
+    }
 
+    void unselectAll() {
+        UserSessionState sessionState = MMDB.getSessionState();
+        Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
+        for (String dataset : selectedDatasets ) {
+            unselect(dataset);
+        }
+    }
+
+    void unselect(String dataset) {
+        DatasetUnselectedEvent datasetUnselected = new DatasetUnselectedEvent();
+        datasetUnselected.setUri(dataset);
+        MMDB.eventBus.fireEvent(datasetUnselected);
     }
 
     @Override
