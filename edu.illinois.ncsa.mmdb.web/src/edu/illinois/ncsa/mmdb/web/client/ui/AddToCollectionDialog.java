@@ -59,70 +59,80 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**
  * @author lmarini
- *
+ * 
  */
 public class AddToCollectionDialog extends DialogBox {
 
-	private final ListBox list;
-	private final Button submitButton;
-	
-	public AddToCollectionDialog(DispatchAsync service, ClickHandler clickHandler) {
-		super();
-		setAnimationEnabled(true);
-		setGlassEnabled(true);
-		setText("Add to collection");
+    private final ListBox list;
+    private final Button  submitButton;
 
-		FlowPanel mainContainer = new FlowPanel();
-		mainContainer.addStyleName("addToCollectionDialog");
-		mainContainer.setSize("400px", "200px");
-		setWidget(mainContainer);
+    public AddToCollectionDialog(DispatchAsync service) {
 
-		mainContainer.add(new Label("Select collection"));
+        super();
+        setAnimationEnabled(true);
+        setGlassEnabled(true);
+        setText("Add to collection");
 
-		list = new ListBox();
-		list.setVisibleItemCount(5);
-		list.setWidth("300px");
-		mainContainer.add(list);
+        FlowPanel mainContainer = new FlowPanel();
+        mainContainer.addStyleName("addToCollectionDialog");
+        mainContainer.setSize("400px", "200px");
+        setWidget(mainContainer);
 
-		// retrieve collections
-		service.execute(new GetCollections(),
-				new AsyncCallback<GetCollectionsResult>() {
+        mainContainer.add(new Label("Select collection"));
 
-					@Override
-					public void onFailure(Throwable arg0) {
-						GWT.log("Error retrieving collections", arg0);
-					}
+        list = new ListBox();
+        list.setVisibleItemCount(5);
+        list.setWidth("300px");
+        mainContainer.add(list);
 
-					@Override
-					public void onSuccess(GetCollectionsResult arg0) {
-						for (CollectionBean collection : arg0.getCollections()) {
-							list.addItem(collection.getTitle(), collection
-									.getUri());
-						}
-					}
-				});
+        // retrieve collections
+        service.execute(new GetCollections(),
+                new AsyncCallback<GetCollectionsResult>() {
 
-		// buttons
-		FlowPanel buttonsPanels = new FlowPanel();
-		mainContainer.add(buttonsPanels);
-		
-		// submit button
-		submitButton = new Button("Submit", clickHandler);
-		buttonsPanels.add(submitButton);
+            @Override
+            public void onFailure(Throwable arg0) {
+                GWT.log("Error retrieving collections", arg0);
+            }
 
-		// close button
-		Button closeButton = new Button("Cancel", new ClickHandler() {
+            @Override
+            public void onSuccess(GetCollectionsResult arg0) {
+                for (CollectionBean collection : arg0.getCollections() ) {
+                    list.addItem(collection.getTitle(), collection
+                            .getUri());
+                }
+            }
+        });
 
-			@Override
-			public void onClick(ClickEvent arg0) {
-				hide();
-			}
-		});
-		buttonsPanels.add(closeButton);
-		center();
-	}
+        // buttons
+        FlowPanel buttonsPanels = new FlowPanel();
+        mainContainer.add(buttonsPanels);
 
-	public String getSelectedValue() {
-		return list.getValue(list.getSelectedIndex());
-	}
+        // submit button
+        submitButton = new Button("Submit");
+        buttonsPanels.add(submitButton);
+
+        // close button
+        Button closeButton = new Button("Cancel", new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent arg0) {
+                hide();
+            }
+        });
+        buttonsPanels.add(closeButton);
+        center();
+    }
+
+    public AddToCollectionDialog(DispatchAsync service, ClickHandler clickHandler) {
+        this(service);
+        addClickHandler(clickHandler);
+    }
+
+    public String getSelectedValue() {
+        return list.getValue(list.getSelectedIndex());
+    }
+
+    public void addClickHandler(ClickHandler ch) {
+        submitButton.addClickHandler(ch);
+    }
 }

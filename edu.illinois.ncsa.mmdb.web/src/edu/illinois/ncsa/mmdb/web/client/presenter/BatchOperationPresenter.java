@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -14,6 +16,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -26,6 +30,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
 import edu.illinois.ncsa.mmdb.web.client.mvp.View;
+import edu.illinois.ncsa.mmdb.web.client.ui.AddToCollectionDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
 
@@ -79,6 +84,32 @@ public class BatchOperationPresenter implements Presenter {
                                 }
                             });
                         }
+                    }
+                });
+            }
+        });
+        display.addMenuAction("Add to collection", new Command() {
+            @Override
+            public void execute() {
+                final AddToCollectionDialog atc = new AddToCollectionDialog(MMDB.dispatchAsync);
+                atc.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        final String collectionUri = atc.getSelectedValue();
+                        final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
+                        MMDB.dispatchAsync.execute(new AddToCollection(collectionUri, selectedDatasets),
+                                new AsyncCallback<AddToCollectionResult>() {
+
+                            @Override
+                            public void onFailure(Throwable arg0) {
+                                GWT.log("Error adding dataset(s) to collection", arg0);
+                            }
+
+                            @Override
+                            public void onSuccess(AddToCollectionResult arg0) {
+                                GWT.log("Dataset(s) successfully added to collection", null);
+                                atc.hide();
+                            }
+                        });
                     }
                 });
             }
