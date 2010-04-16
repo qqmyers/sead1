@@ -76,7 +76,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUsersHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.NewPasswordHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
@@ -121,7 +121,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetRolesHandler());
         DispatchUtil.registerHandler(new GetUserHandler());
         DispatchUtil.registerHandler(new RequestNewPasswordHandler());
-        DispatchUtil.registerHandler(new NewPasswordHandler());
+        DispatchUtil.registerHandler(new ChangeUserHandler());
         DispatchUtil.registerHandler(new GetDerivedFromHandler());
         DispatchUtil.registerHandler(new RunSparqlQueryHandler());
         DispatchUtil.registerHandler(new GetUserMetadataFieldsHandler());

@@ -50,7 +50,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -64,14 +63,11 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ContextConvert;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRecentActivity;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRecentActivityResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLuceneResult;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
  * The home page is user specific. It contains a set of tabs to modify and view
@@ -85,7 +81,6 @@ public class HomePage extends Page {
     private static final int MAX_DATASETS = 10;
     protected Widget         userInfoTable;
     private TabPanel         tabPanel;
-    private FlowPanel        profilePanel;
     private FlowPanel        preferencesPanel;
     private FlowPanel        recentActivityPanel;
     private FlowPanel        adminPanel;
@@ -101,7 +96,6 @@ public class HomePage extends Page {
         createRecentActivityTab();
         createProfileTab();
         //        createPreferencesTab();
-        getUserInfo();
         checkAdminPermissions();
         tabPanel.selectTab(0);
     }
@@ -148,8 +142,7 @@ public class HomePage extends Page {
      */
     private void createPreferencesTab() {
         preferencesPanel = new FlowPanel();
-        preferencesPanel
-                .add(new HTML("Set preferences. (not implemented yet)"));
+        preferencesPanel.add(new HTML("Set preferences. (not implemented yet)"));
         tabPanel.add(preferencesPanel, "Preferences");
     }
 
@@ -157,8 +150,7 @@ public class HomePage extends Page {
      * Create the tab that includes profile information for the user.
      */
     private void createProfileTab() {
-        profilePanel = new FlowPanel();
-        tabPanel.add(profilePanel, "Profile");
+        tabPanel.add(new ProfileWidget(dispatchAsync), "Profile");
     }
 
     /**
@@ -249,47 +241,6 @@ public class HomePage extends Page {
         adminPanel.add(luceneAnchor);
 
         tabPanel.add(adminPanel, "Administrator");
-    }
-
-    /**
-     * Get basic user info and add it to the profile tab.
-     */
-    private void getUserInfo() {
-        dispatchAsync.execute(new GetUser(MMDB.getUsername()),
-                new AsyncCallback<GetUserResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Error get user", caught);
-                    }
-
-                    @Override
-                    public void onSuccess(GetUserResult result) {
-                        userInfoTable = createUserInfo(result.getPersonBean());
-                        profilePanel.add(userInfoTable);
-                    }
-                });
-
-    }
-
-    /**
-     * Layout information about the user.
-     * 
-     * @param personBean
-     */
-    protected Widget createUserInfo(PersonBean personBean) {
-        FlexTable table = new FlexTable();
-        table.setText(0, 0, "Name:");
-        table.setText(0, 1, personBean.getName());
-        table.getCellFormatter().addStyleName(0, 0, "homePageWidgetRow");
-        table.setText(1, 0, "Email:");
-        table.setText(1, 1, personBean.getEmail());
-        table.getCellFormatter().addStyleName(1, 0, "homePageWidgetRow");
-        table.setWidget(2, 0, new Hyperlink("Request New Password",
-                "newPassword"));
-        table.getFlexCellFormatter().setColSpan(2, 0, 2);
-        table.getCellFormatter().addStyleName(2, 0, "homePageWidgetRow");
-        return table;
     }
 
     @Override

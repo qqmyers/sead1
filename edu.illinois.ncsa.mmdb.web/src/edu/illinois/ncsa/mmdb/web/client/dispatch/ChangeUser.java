@@ -39,56 +39,70 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.server.dispatch;
+package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.server.ActionHandler;
-import net.customware.gwt.dispatch.server.ExecutionContext;
-import net.customware.gwt.dispatch.shared.ActionException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.rdf.Resource;
-
-import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.NewPassword;
-import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
+import net.customware.gwt.dispatch.shared.Action;
 
 /**
- * Create new user password.
- * 
  * @author Luigi Marini
  * 
  */
-public class NewPasswordHandler implements ActionHandler<NewPassword, EmptyResult> {
+@SuppressWarnings("serial")
+public class ChangeUser implements Action<EmptyResult> {
 
-    /** Commons logging **/
-    private static Log log = LogFactory.getLog(NewPasswordHandler.class);
+    private String user;
+    private String name;
+    private String oldPassword;
+    private String newPassword;
 
-    @Override
-    public EmptyResult execute(NewPassword action, ExecutionContext arg1) throws ActionException {
-        Resource user = Resource.uriRef(action.getUser());
-        String password = action.getPassword();
-
-        try {
-            ContextAuthentication auth = new ContextAuthentication(TupeloStore.getInstance().getContext());
-            auth.changePassword(user, password);
-        } catch (Exception e1) {
-            log.error("Error changing password", e1);
-            throw new ActionException("Error changing password", e1);
-        }
-
-        return new EmptyResult();
+    public ChangeUser() {
     }
 
-    @Override
-    public Class<NewPassword> getActionType() {
-        return NewPassword.class;
+    public ChangeUser(String user, String name) {
+        this.user = user;
+        this.name = name;
     }
 
-    @Override
-    public void rollback(NewPassword arg0, EmptyResult arg1, ExecutionContext arg2) throws ActionException {
-        // TODO Auto-generated method stub
+    public ChangeUser(String user, String oldPassword, String newPassword) {
+        this.user = user;
+        this.oldPassword = oldPassword;
+        this.newPassword = newPassword;
     }
 
+    /**
+     * @return the user
+     */
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * @return the name of the user
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the name of the user
+     * 
+     * @param name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return the old password
+     */
+    public String getOldPassword() {
+        return oldPassword;
+    }
+
+    /**
+     * @return the new password
+     */
+    public String getNewPassword() {
+        return newPassword;
+    }
 }

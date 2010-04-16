@@ -83,7 +83,6 @@ import edu.illinois.ncsa.mmdb.web.client.ui.HomePage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListDatasetsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
-import edu.illinois.ncsa.mmdb.web.client.ui.NewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.NotEnabledPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchBox;
@@ -494,8 +493,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showUsersPage();
         } else if (token.startsWith("signup")) {
             showSignupPage();
-        } else if (token.startsWith("newPassword")) {
-            showNewPasswordPage();
         } else if (token.startsWith("home")) {
             showHomePage();
         } else if (token.startsWith("sparql")) {
@@ -527,11 +524,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private void showHomePage() {
         mainContainer.clear();
         mainContainer.add(new HomePage(dispatchAsync));
-    }
-
-    private void showNewPasswordPage() {
-        mainContainer.clear();
-        mainContainer.add(new NewPasswordPage(dispatchAsync));
     }
 
     private void showRequestNewPasswordPage() {
