@@ -39,7 +39,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.HashSet;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -72,40 +72,41 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetLicense;
 // and an editor that fires handleable events
 public class LicenseWidget extends Composite {
 
-    private final MyDispatchAsync service;
-    private String                resource;
-    Collection<String>            batch;
-    private LicenseResult         license;
+    private final MyDispatchAsync    service;
+    private final Collection<String> resources;
+    private LicenseResult            license;
 
-    private Anchor                licenseText;
-    private Anchor                licenseEdit;
-    private RadioButton           limited;
-    private RadioButton           cc;
-    private TextBox               rightsHolder;
-    private CheckBox              allowRemixing;
-    private CheckBox              allowCommercial;
-    private CheckBox              shareAlike;
-    private TextBox               rights;
-    private TextBox               licenseURL;
-    private CheckBox              allowDownload;
-    private Label                 attribution;
-    private Label                 lblRights;
-    private Label                 lblLicense;
-    private CheckBox              myData;
-    private Label                 lblRightsHolder;
+    private Anchor                   licenseText;
+    private Anchor                   licenseEdit;
+    private RadioButton              pd;
+    private RadioButton              cc;
+    private RadioButton              limited;
+    private TextBox                  rightsHolder;
+    private CheckBox                 allowRemixing;
+    private CheckBox                 allowCommercial;
+    private CheckBox                 shareAlike;
+    private TextBox                  rights;
+    private TextBox                  licenseURL;
+    private CheckBox                 allowDownload;
+    private Label                    attribution;
+    private Label                    lblRights;
+    private Label                    lblLicense;
+    private CheckBox                 myData;
+    private Label                    lblRightsHolder;
 
     public LicenseWidget(String resource, MyDispatchAsync service) {
         this(resource, service, true);
     }
 
     public LicenseWidget(Collection<String> batch, MyDispatchAsync service) {
-        this.batch = batch;
+        this.resources = batch;
         this.service = service;
         init(false);
     }
 
     public LicenseWidget(String resource, MyDispatchAsync service, boolean withTitle) {
-        this.resource = resource;
+        this.resources = new HashSet<String>();
+        this.resources.add(resource);
         this.service = service;
         init(withTitle);
     }
@@ -170,8 +171,26 @@ public class LicenseWidget extends Composite {
         lblRightsHolder = new Label("Rights Holder");
         licenseEditor.add(lblRightsHolder);
         rightsHolder = new TextBox();
-        rightsHolder.setWidth("180px");
+        rightsHolder.setWidth("200px");
         licenseEditor.add(rightsHolder);
+
+        // Public domain
+        pd = new RadioButton("license", "Public Domain");
+        pd.setStyleName("licenseButton");
+        licenseEditor.add(pd);
+        pd.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                allowRemixing.setVisible(false);
+                allowCommercial.setVisible(false);
+                shareAlike.setVisible(false);
+                lblRights.setVisible(false);
+                rights.setVisible(false);
+                lblLicense.setVisible(false);
+                licenseURL.setVisible(false);
+                allowDownload.setVisible(false);
+            }
+        });
 
         // Edit Creative Commons License
         cc = new RadioButton("license", "Creative Commons");
@@ -279,7 +298,8 @@ public class LicenseWidget extends Composite {
         });
 
         // get the license
-        if (resource != null && batch == null) { // it's a batch, so can't show
+        if (resources.size() == 1) {
+            String resource = resources.iterator().next();
             service.execute(new GetLicense(resource), new AsyncCallback<LicenseResult>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -312,7 +332,11 @@ public class LicenseWidget extends Composite {
             }
         }
 
-        if (cc.getValue()) {
+        if (pd.getValue()) {
+            license.setRights("pddl");
+            license.setLicense("http://www.opendatacommons.org/licenses/pddl/summary/");
+
+        } else if (cc.getValue()) {
             String rights = "cc-by";
             if (!allowCommercial.getValue()) {
                 rights += "-nc";
@@ -335,16 +359,8 @@ public class LicenseWidget extends Composite {
             license.setAllowDownload(allowDownload.getValue());
         }
 
-        Collection<String> toChange = null;
-        if (resource != null) {
-            toChange = new LinkedList<String>();
-            toChange.add(resource);
-        }
-        if (batch != null) {
-            toChange = batch;
-        }
         // fix me modify the bat
-        service.execute(new SetLicense(toChange, license), new AsyncCallback<EmptyResult>() {
+        service.execute(new SetLicense(resources, license), new AsyncCallback<EmptyResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Error setting license", caught);
@@ -387,18 +403,27 @@ public class LicenseWidget extends Composite {
             rightsHolder.setVisible(true);
         }
 
-        // check to see if it is a creative commons license or regular license.
+        // check to see the license type
         String rights = license.getRights().toLowerCase();
-        if ("cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights)) {
-
-            // Creative Commons License
-            Image icon = new Image("images/" + rights + ".png");
+        if (rights.equals("pddl")) {
+            // Public Domain License
+            Image icon = new Image("images/cc-pd.png");
             licenseText.setText("");
             licenseText.getElement().appendChild(icon.getElement());
-            licenseText.setHref("http://creativecommons.org/licenses/" + rights.substring(3) + "/3.0");
+            licenseText.setHref(license.getLicense());
 
             // editor panel
-            cc.setValue(true);
+            pd.setValue(true);
+
+            allowCommercial.setVisible(false);
+            allowCommercial.setValue(true);
+
+            allowRemixing.setVisible(false);
+            allowRemixing.setValue(true);
+
+            shareAlike.setVisible(false);
+            shareAlike.setValue(false);
+            shareAlike.setEnabled(allowRemixing.getValue());
 
             lblRights.setVisible(false);
             this.rights.setVisible(false);
@@ -411,6 +436,16 @@ public class LicenseWidget extends Composite {
             allowDownload.setVisible(false);
             allowDownload.setValue(true);
 
+        } else if ("cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights)) {
+            // Creative Commons License
+            Image icon = new Image("images/" + rights + ".png");
+            licenseText.setText("");
+            licenseText.getElement().appendChild(icon.getElement());
+            licenseText.setHref(license.getLicense());
+
+            // editor panel
+            cc.setValue(true);
+
             allowCommercial.setVisible(true);
             allowCommercial.setValue(!rights.contains("nc"));
 
@@ -421,8 +456,18 @@ public class LicenseWidget extends Composite {
             shareAlike.setValue(rights.contains("sa"));
             shareAlike.setEnabled(allowRemixing.getValue());
 
-        } else {
+            lblRights.setVisible(false);
+            this.rights.setVisible(false);
+            this.rights.setText("All Rights Reserved");
 
+            lblLicense.setVisible(false);
+            licenseURL.setVisible(false);
+            licenseURL.setText("");
+
+            allowDownload.setVisible(false);
+            allowDownload.setValue(true);
+
+        } else {
             // Other License
             licenseText.setText(license.getRights());
             if ((license.getLicense() != null) && license.getLicense().startsWith("http://")) {
@@ -434,17 +479,6 @@ public class LicenseWidget extends Composite {
             // editor panel
             limited.setValue(true);
 
-            lblRights.setVisible(true);
-            this.rights.setVisible(true);
-            this.rights.setText(license.getRights());
-
-            lblLicense.setVisible(true);
-            licenseURL.setVisible(true);
-            licenseURL.setText(license.getLicense());
-
-            allowDownload.setVisible(true);
-            allowDownload.setValue(license.isAllowDownload());
-
             allowCommercial.setVisible(false);
             allowCommercial.setValue(true);
 
@@ -455,6 +489,16 @@ public class LicenseWidget extends Composite {
             shareAlike.setValue(false);
             shareAlike.setEnabled(allowRemixing.getValue());
 
+            lblRights.setVisible(true);
+            this.rights.setVisible(true);
+            this.rights.setText(license.getRights());
+
+            lblLicense.setVisible(true);
+            licenseURL.setVisible(true);
+            licenseURL.setText(license.getLicense());
+
+            allowDownload.setVisible(true);
+            allowDownload.setValue(license.isAllowDownload());
         }
     }
 }
