@@ -85,9 +85,6 @@ public class GetLicenseHandler implements ActionHandler<GetLicense, LicenseResul
 
         PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
 
-        result.setRights("All Rights Reserved");
-        result.setAllowDownload(true);
-
         // get license information
         Resource uri = Resource.uriRef(arg0.getUri());
         Unifier uf = new Unifier();

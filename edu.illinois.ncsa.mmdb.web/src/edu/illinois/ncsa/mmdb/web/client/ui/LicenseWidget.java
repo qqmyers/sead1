@@ -76,6 +76,9 @@ public class LicenseWidget extends Composite {
     private final Collection<String> resources;
     private LicenseResult            license;
 
+    private VerticalPanel            mainPanel;
+    private VerticalPanel            licenseEditor;
+
     private Anchor                   licenseText;
     private Anchor                   licenseEdit;
     private RadioButton              pd;
@@ -101,22 +104,22 @@ public class LicenseWidget extends Composite {
     public LicenseWidget(Collection<String> batch, MyDispatchAsync service) {
         this.resources = batch;
         this.service = service;
-        init(false);
+        init(false, true);
     }
 
     public LicenseWidget(String resource, MyDispatchAsync service, boolean withTitle) {
         this.resources = new HashSet<String>();
         this.resources.add(resource);
         this.service = service;
-        init(withTitle);
+        init(withTitle, false);
     }
 
-    void init(boolean withTitle) {
+    void init(boolean withTitle, boolean showEdit) {
         // edit panel
-        final VerticalPanel licenseEditor = new VerticalPanel();
+        licenseEditor = new VerticalPanel();
 
         // main panel with title
-        final VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel = new VerticalPanel();
         mainPanel.addStyleName("datasetRightColSection");
         initWidget(mainPanel);
 
@@ -274,12 +277,7 @@ public class LicenseWidget extends Composite {
         okLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                setLicense();
-                showLicense();
-                mainPanel.remove(licenseEditor);
-                mainPanel.add(licenseText);
-                mainPanel.add(attribution);
-                mainPanel.add(licenseEdit);
+                onOK();
             }
         });
 
@@ -289,11 +287,7 @@ public class LicenseWidget extends Composite {
         cancelLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                showLicense();
-                mainPanel.remove(licenseEditor);
-                mainPanel.add(licenseText);
-                mainPanel.add(attribution);
-                mainPanel.add(licenseEdit);
+                onCancel();
             }
         });
 
@@ -312,7 +306,40 @@ public class LicenseWidget extends Composite {
                     showLicense();
                 }
             });
+        } else {
+            license = new LicenseResult();
+            showLicense();
         }
+
+        if (showEdit) {
+            mainPanel.remove(attribution);
+            mainPanel.remove(licenseText);
+            mainPanel.remove(licenseEdit);
+            mainPanel.add(licenseEditor);
+        }
+    }
+
+    /**
+     * Called when the user presses the ok button
+     */
+    protected void onOK() {
+        setLicense();
+        showLicense();
+        mainPanel.remove(licenseEditor);
+        mainPanel.add(licenseText);
+        mainPanel.add(attribution);
+        mainPanel.add(licenseEdit);
+    }
+
+    /**
+     * Called when the user presses the cancel button
+     */
+    protected void onCancel() {
+        showLicense();
+        mainPanel.remove(licenseEditor);
+        mainPanel.add(licenseText);
+        mainPanel.add(attribution);
+        mainPanel.add(licenseEdit);
     }
 
     /**

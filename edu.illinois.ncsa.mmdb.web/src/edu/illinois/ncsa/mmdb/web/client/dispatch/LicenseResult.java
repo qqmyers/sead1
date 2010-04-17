@@ -51,11 +51,11 @@ import net.customware.gwt.dispatch.shared.Result;
  */
 @SuppressWarnings("serial")
 public class LicenseResult implements Result {
-    private String  rights;
+    private String  rights        = "All Rights Reserved";
     private String  rightsHolderUri;
     private String  rightsHolder;
     private String  license;
-    private boolean allowDownload;
+    private boolean allowDownload = true;
 
     public LicenseResult() {
     }
