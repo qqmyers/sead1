@@ -139,6 +139,8 @@ public class PreviewWidget extends Composite {
         image = new Image(PREVIEW_URL.get(size) + datasetUri);
         if (size != GetPreviews.LARGE) {
             image.addStyleName("thumbnail");
+        } else {
+            image.setWidth(getMaxWidth() + "px");
         }
         if (checkPending) {
             image.addErrorHandler(new ErrorHandler() {
@@ -212,6 +214,9 @@ public class PreviewWidget extends Composite {
                         GWT.log("Preview is now READY for " + datasetUri);
                         if (wasEverPending) {
                             image.setUrl(PREVIEW_URL.get(size) + "new/" + datasetUri); // workaround firefox bug
+                        }
+                        if (size.equals(GetPreviews.LARGE)) {
+                            image.setWidth(getMaxWidth() + "px");
                         }
                         if (retryTimer != null) {
                             retryTimer.cancel();
