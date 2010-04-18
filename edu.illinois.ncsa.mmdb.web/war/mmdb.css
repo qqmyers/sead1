@@ -970,3 +970,28 @@ body {
 .gwt-MenuBar-horizontal .subMenuIcon-selected {
   background: red;
 }
+
+.dynamicTable {
+  width: 100%;
+}
+
+.dynamicTable .content {
+  margin: 0px auto;
+}
+
+.dynamicTableList {
+	width: 700px;
+	border: #CCC solid 1px;
+	vertical-align: top;
+	margin: 20px auto 20px auto;
+	padding: 0px;
+	border-spacing:0px;
+	border-collapse: collapse;
+}
+
+.dynamicTableList .cell {
+	margin: 0px;
+	padding: 8px;
+	border-top: #CCC solid 1px;
+	text-align: center;
+}

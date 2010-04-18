@@ -37,7 +37,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
 
 /**
- * @author lmarini
+ * @author LUigi Marini
  * 
  */
 public class BatchOperationPresenter implements Presenter {

@@ -12,7 +12,9 @@ import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTableView;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
+import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
+import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
 /**
  * @author lmarini
@@ -20,13 +22,13 @@ import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
  */
 public class ListDatasetsPage extends Page {
 
-    private final MyDispatchAsync dispatchAsync2;
+    private final MyDispatchAsync dispatch;
     private final HandlerManager  eventbus;
 
-    public ListDatasetsPage(MyDispatchAsync dispatchAsync, HandlerManager eventbus) {
-        super("Datasets", dispatchAsync);
-        dispatchAsync2 = dispatchAsync;
-        this.eventbus = eventbus;
+    public ListDatasetsPage(MyDispatchAsync dispatch, HandlerManager eventBus) {
+        super("Datasets", dispatch);
+        this.dispatch = dispatch;
+        this.eventbus = eventBus;
 
         HorizontalPanel rightHeader = new HorizontalPanel();
         pageTitle.addEast(rightHeader);
@@ -34,7 +36,7 @@ public class ListDatasetsPage extends Page {
         // batch operations
         BatchOperationView batchOperationView = new BatchOperationView();
         batchOperationView.addStyleName("titlePanelRightElement");
-        BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatchAsync, eventbus, batchOperationView);
+        BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatch, eventBus, batchOperationView);
         batchOperationPresenter.bind();
         rightHeader.add(batchOperationView);
 
@@ -49,12 +51,17 @@ public class ListDatasetsPage extends Page {
         rightHeader.add(rss);
 
         // paging table
-        PagingDatasetTableView pagingView = new PagingDatasetTableView();
-        pagingView.addStyleName("datasetTable");
-        PagingDatasetTablePresenter datasetTablePresenter = new PagingDatasetTablePresenter(
-                pagingView, eventbus);
-        datasetTablePresenter.bind();
-        mainLayoutPanel.add(pagingView.asWidget());
+                PagingDatasetTableView pagingView = new PagingDatasetTableView();
+                pagingView.addStyleName("datasetTable");
+                PagingDatasetTablePresenter datasetTablePresenter = new PagingDatasetTablePresenter(
+                        pagingView, eventBus);
+                datasetTablePresenter.bind();
+                mainLayoutPanel.add(pagingView.asWidget());
+
+//        DynamicTableView dynamicTableView = new DynamicTableView();
+//        DynamicTablePresenter dynamicTablePresenter = new DynamicTablePresenter(dispatch, eventBus, dynamicTableView);
+//        dynamicTablePresenter.bind();
+//        mainLayoutPanel.add(dynamicTableView.asWidget());
     }
 
     @Override
