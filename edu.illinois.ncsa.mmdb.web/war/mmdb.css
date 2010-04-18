@@ -940,6 +940,11 @@ body {
 	float: right;
 }
 
+.gwt-MenuBar-horizontal .gwt-MenuItem {
+	font-weight: normal !important;
+	color: #000 !important;
+}
+
 .progressBar {
 	border: 1px solid;
 	padding: 1px;

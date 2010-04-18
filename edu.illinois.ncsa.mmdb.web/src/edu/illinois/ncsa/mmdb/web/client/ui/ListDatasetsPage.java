@@ -12,7 +12,7 @@ import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTableView;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
-import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
+import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationListBoxView;
 
 /**
  * @author lmarini
@@ -32,7 +32,7 @@ public class ListDatasetsPage extends Page {
         pageTitle.addEast(rightHeader);
 
         // batch operations
-        BatchOperationView batchOperationView = new BatchOperationView();
+        BatchOperationListBoxView batchOperationView = new BatchOperationListBoxView();
         batchOperationView.addStyleName("titlePanelRightElement");
         BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatchAsync, eventbus, batchOperationView);
         batchOperationPresenter.bind();
@@ -44,7 +44,7 @@ public class ListDatasetsPage extends Page {
         rss.addStyleName("rssIcon");
         rss.addStyleName("titlePanelRightElement");
         DOM.setElementAttribute(rss.getElement(), "type",
-                        "application/rss+xml");
+                "application/rss+xml");
         rss.setHTML("<img src='./images/rss_icon.gif' border='0px' class='navMenuLink'>"); // FIXME hack
         rightHeader.add(rss);
 
