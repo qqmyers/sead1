@@ -373,10 +373,7 @@ public class UploadBlob extends AuthenticatedServlet {
                         t.setValue(RestService.LABEL_PROPERTY, fileName);
                         t.setValue(RestService.FILENAME_PROPERTY, fileName);
                         t.setValue(RestService.DATE_PROPERTY, new Date());
-                        String username = getHttpSessionUser(request);
-                        if (username != null) {
-                            t.setValue(Dc.CREATOR, Resource.uriRef(PersonBeanUtil.getPersonID(username)));
-                        }
+                        createdByUser(t, request);
                         t.setValue(Files.LENGTH, bw.getSize());
                         if (contentType != null) {
                             // httpclient also gives the content type a "charset"; ignore that.
@@ -408,6 +405,7 @@ public class UploadBlob extends AuthenticatedServlet {
                     ThingSession ts = TupeloStore.getInstance().getContext().getThingSession();
                     Thing t = ts.newThing(Resource.uriRef(collectionUri));
                     t.setValue(DcTerms.DATE_MODIFIED, new Date());
+                    createdByUser(t, request);
                     for (String itemUri : uris ) {
                         log.debug("added " + itemUri + " to collection " + collectionUri);
                         t.addValue(RestService.HAS_MEMBER, Resource.uriRef(itemUri));
@@ -430,6 +428,7 @@ public class UploadBlob extends AuthenticatedServlet {
                     t.setValue(Dc.TITLE, collectionName);
                     t.setValue(DcTerms.DATE_CREATED, new Date());
                     t.setValue(DcTerms.DATE_MODIFIED, new Date());
+                    createdByUser(t, request);
                     log.debug("created collection '" + collectionName + "' @ " + collectionUri);
                     for (String itemUri : uris ) {
                         log.debug("added " + itemUri + " to collection " + collectionUri);
@@ -644,6 +643,13 @@ public class UploadBlob extends AuthenticatedServlet {
             return "";
         } else {
             return (":" + req.getServerPort());
+        }
+    }
+
+    void createdByUser(Thing t, HttpServletRequest request) throws OperatorException {
+        String username = getHttpSessionUser(request);
+        if (username != null) {
+            t.setValue(Dc.CREATOR, Resource.uriRef(PersonBeanUtil.getPersonID(username)));
         }
     }
 }
