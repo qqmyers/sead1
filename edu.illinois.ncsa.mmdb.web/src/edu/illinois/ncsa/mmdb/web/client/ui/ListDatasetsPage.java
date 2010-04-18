@@ -12,7 +12,7 @@ import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTableView;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
-import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationListBoxView;
+import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 
 /**
  * @author lmarini
@@ -32,7 +32,7 @@ public class ListDatasetsPage extends Page {
         pageTitle.addEast(rightHeader);
 
         // batch operations
-        BatchOperationListBoxView batchOperationView = new BatchOperationListBoxView();
+        BatchOperationView batchOperationView = new BatchOperationView();
         batchOperationView.addStyleName("titlePanelRightElement");
         BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatchAsync, eventbus, batchOperationView);
         batchOperationPresenter.bind();

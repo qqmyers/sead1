@@ -28,7 +28,7 @@ public class BatchOperationView extends Composite implements BatchOperationPrese
         mainLayout.addStyleName("batchOperationPanel");
         initWidget(mainLayout);
         MenuBar actionsBar = new MenuBar();
-        actionsBar.setWidth("120px");
+        actionsBar.setWidth("80px");
         actionsBar.addStyleName("batchOperationMenu");
         actionsMenu = new MenuBar(true);
         actionsBar.addItem("Actions", actionsMenu);

@@ -118,6 +118,10 @@ public class LabeledListBox extends Composite implements HasValueChangeHandlers<
         return label.getText();
     }
 
+    public Label getLabel() {
+        return label;
+    }
+
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
         return addHandler(handler, ValueChangeEvent.getType());

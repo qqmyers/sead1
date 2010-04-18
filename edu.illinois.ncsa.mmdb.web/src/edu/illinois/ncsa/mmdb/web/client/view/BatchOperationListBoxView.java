@@ -18,6 +18,7 @@ public class BatchOperationListBoxView extends Composite implements Display {
 
     public BatchOperationListBoxView() {
         menu = new LabeledListBox("0 datasets selected");
+        menu.getLabel().addStyleName("batchOperationCount");
         menu.addItem("Actions", "Actions");
         menu.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
