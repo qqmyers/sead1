@@ -216,50 +216,54 @@ public class LoginPage extends Composite {
     protected void authenticate() {
         final String username = usernameBox.getText();
         final String password = passwordBox.getText();
-        MMDB.dispatchAsync.execute(new Authenticate(username, password),
-                new AsyncCallback<AuthenticateResult>() {
+        clearBrowserCreds(new Command() { // ensure we're logged out of REST endpoints, before authenticating
+            public void execute() {
+                MMDB.dispatchAsync.execute(new Authenticate(username, password),
+                        new AsyncCallback<AuthenticateResult>() {
 
-            @Override
-            public void onFailure(Throwable arg0) {
-                GWT.log("Failed authenticating", arg0);
-            }
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        GWT.log("Failed authenticating", arg0);
+                    }
 
-            @Override
-            public void onSuccess(final AuthenticateResult arg0) {
-                if (arg0.getAuthenticated()) {
-                    // now hit the REST authentication endpoint
-                    String restUrl = "./api/authenticate";
-                    RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-                    builder.setUser(TextFormatter.escapeEmailAddress(username));
-                    builder.setPassword(password);
-                    try {
-                        GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
-                        builder.sendRequest("", new RequestCallback() {
-                            public void onError(Request request, Throwable exception) {
+                    @Override
+                    public void onSuccess(final AuthenticateResult arg0) {
+                        if (arg0.getAuthenticated()) {
+                            // now hit the REST authentication endpoint
+                            String restUrl = "./api/authenticate";
+                            RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+                            builder.setUser(TextFormatter.escapeEmailAddress(username));
+                            builder.setPassword(password);
+                            try {
+                                GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
+                                builder.sendRequest("", new RequestCallback() {
+                                    public void onError(Request request, Throwable exception) {
+                                        fail();
+                                    }
+
+                                    public void onResponseReceived(Request request, Response response) {
+                                        // success!
+                                        String sessionKey = response.getText();
+                                        GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                                        if (response.getStatusCode() > 300) {
+                                            GWT.log("authentication failed: " + sessionKey, null);
+                                            fail();
+                                        }
+                                        GWT.log("user " + username + " associated with session key " + sessionKey, null);
+                                        // login local
+                                        mainWindow.login(arg0.getSessionId(), sessionKey);
+                                        redirect();
+                                    }
+                                });
+                            } catch (RequestException x) {
+                                // another error condition
                                 fail();
                             }
-
-                            public void onResponseReceived(Request request, Response response) {
-                                // success!
-                                String sessionKey = response.getText();
-                                GWT.log("REST auth status code = " + response.getStatusCode(), null);
-                                if (response.getStatusCode() > 300) {
-                                    GWT.log("authentication failed: " + sessionKey, null);
-                                    fail();
-                                }
-                                GWT.log("user " + username + " associated with session key " + sessionKey, null);
-                                // login local
-                                mainWindow.login(arg0.getSessionId(), sessionKey);
-                                redirect();
-                            }
-                        });
-                    } catch (RequestException x) {
-                        // another error condition
-                        fail();
+                        } else {
+                            fail();
+                        }
                     }
-                } else {
-                    fail();
-                }
+                });
             }
         });
     }
@@ -322,6 +326,15 @@ public class LoginPage extends Composite {
     //	}
 
     public static void clearBrowserCreds() {
+        clearBrowserCreds(new Command() {
+            public void execute() {
+                // success!
+                History.newItem("login"); // FIXME hardcodes destination
+            }
+        });
+    }
+
+    public static void clearBrowserCreds(final Command onSuccess) {
         // now hit the REST authentication endpoint with bad creds
         String restUrl = "./api/logout";
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
@@ -335,8 +348,9 @@ public class LoginPage extends Composite {
                 }
 
                 public void onResponseReceived(Request request, Response response) {
-                    // success!
-                    History.newItem("login"); // FIXME hardcodes destination
+                    if (onSuccess != null) {
+                        onSuccess.execute();
+                    }
                 }
             });
         } catch (RequestException x) {
