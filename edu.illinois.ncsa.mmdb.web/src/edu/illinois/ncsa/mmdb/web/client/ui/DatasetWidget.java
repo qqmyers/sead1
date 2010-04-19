@@ -700,7 +700,11 @@ public class DatasetWidget extends Composite {
 
         } else if (pb instanceof PreviewVideoBean) {
             PreviewVideoBean pvb = (PreviewVideoBean) pb;
-            showFlash(BLOB_URL + pb.getUri(), null, "video", Long.toString(pvb.getWidth()), Long.toString(pvb.getHeight()));
+            String preview = null;
+            if (pvb.getPreviewImage() != null) {
+                preview = BLOB_URL + pvb.getPreviewImage().getUri();
+            }
+            showFlash(BLOB_URL + pb.getUri(), preview, "video", Long.toString(pvb.getWidth()), Long.toString(pvb.getHeight()));
         }
 
         currentPreview = pb;
@@ -720,7 +724,7 @@ public class DatasetWidget extends Composite {
         $wnd.player.addParam('allowscriptaccess','always');
         $wnd.player.addParam('wmode','opaque');
         $wnd.player.addVariable('file',url);
-        $wnd.player.addVariable('autostart','true');
+        $wnd.player.addVariable('autostart','false');
         if (preview != null) {
         $wnd.player.addVariable('image',preview);
         }            
