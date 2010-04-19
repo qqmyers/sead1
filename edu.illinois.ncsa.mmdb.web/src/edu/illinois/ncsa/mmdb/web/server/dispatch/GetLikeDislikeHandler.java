@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.Date;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -52,10 +54,12 @@ import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislike;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislikeResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislike.LikeDislike;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
@@ -66,22 +70,23 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  */
 public class GetLikeDislikeHandler implements ActionHandler<GetLikeDislike, GetLikeDislikeResult> {
     // FIXME move to MMDB
-    public static Resource MMDB_LIKE    = Cet.cet("mmdb/isLikedBy");
-    public static Resource MMDB_DISLIKE = Cet.cet("mmdb/isDislikedBy");
+    public static Resource MMDB_LIKE_DISLIKE       = Cet.cet("mmdb/isLikedDislikedBy");
+    public static Resource MMDB_LIKE_DISLIKE_STATE = Cet.cet("mmdb/likedDislikedState");
 
     /** Commons logging **/
-    private static Log     log          = LogFactory.getLog(GetLikeDislikeHandler.class);
+    private static Log     log                     = LogFactory.getLog(GetLikeDislikeHandler.class);
 
     @Override
     public GetLikeDislikeResult execute(GetLikeDislike arg0, ExecutionContext arg1) throws ActionException {
         Resource dataset = Resource.uriRef(arg0.getResource());
         Resource person = Resource.uriRef(arg0.getPerson());
 
-        // FIXME do we want to store the date the user viewed?
         Unifier uf = new Unifier();
-        uf.addPattern(dataset, MMDB_LIKE, "like", true);
-        uf.addPattern(dataset, MMDB_DISLIKE, "dislike", true);
-        uf.setColumnNames("like", "dislike");
+        uf.addPattern(dataset, MMDB_LIKE_DISLIKE, "like");
+        uf.addPattern("like", Dc.CREATOR, "likee");
+        uf.addPattern("like", MMDB_LIKE_DISLIKE_STATE, "state");
+        uf.addPattern("like", Dc.DATE, "date");
+        uf.setColumnNames("like", "likee", "state", "date");
         try {
             TupeloStore.getInstance().getContext().perform(uf);
         } catch (OperatorException e) {
@@ -89,88 +94,63 @@ public class GetLikeDislikeHandler implements ActionHandler<GetLikeDislike, GetL
             throw (new ActionException("Could not get like/dislike count for dataset.", e));
         }
 
-        boolean like = false;
+        LikeDislike user = LikeDislike.UNKNOWN;
         int likeCount = 0;
-        boolean dislike = false;
         int dislikeCount = 0;
         TripleWriter tw = new TripleWriter();
         for (Tuple<Resource> row : uf.getResult() ) {
-            if (row.get(0) != null) {
-                likeCount++;
+            if (row.get(1).equals(person) && (arg0.getState() != LikeDislike.UNKNOWN)) {
+                // remove everything
+                tw.remove(dataset, MMDB_LIKE_DISLIKE, row.get(0));
+                tw.remove(row.get(0), Dc.CREATOR, row.get(1));
+                tw.remove(row.get(0), MMDB_LIKE_DISLIKE_STATE, row.get(2));
+                tw.remove(row.get(0), Dc.DATE, row.get(3));
+            } else {
+                LikeDislike cur = LikeDislike.valueOf(row.get(2).getString());
                 if (row.get(1).equals(person)) {
-                    like = true;
+                    user = cur;
                 }
-            }
-            if (row.get(1) != null) {
-                dislikeCount++;
-                if (row.get(1).equals(person)) {
-                    dislike = true;
+                if (cur == LikeDislike.LIKE) {
+                    likeCount++;
+                }
+                if (cur == LikeDislike.DISLIKE) {
+                    dislikeCount++;
                 }
             }
         }
 
-        // update the count
-        switch (arg0.getState()) {
-            case UNKNOWN:
-                break;
-            case NONE:
-                if (like) {
-                    tw.remove(dataset, MMDB_LIKE, person);
-                    likeCount--;
-                }
-                if (dislike) {
-                    tw.remove(dataset, MMDB_DISLIKE, person);
-                    dislikeCount--;
-                }
-                like = false;
-                dislike = false;
-                break;
-            case LIKE:
-                if (dislike) {
-                    tw.remove(dataset, MMDB_DISLIKE, person);
-                    dislikeCount--;
-                    tw.add(dataset, MMDB_LIKE, person);
-                    likeCount++;
-                }
-                if (!like && !dislike) {
-                    tw.add(dataset, MMDB_LIKE, person);
-                    likeCount++;
-                }
-                like = true;
-                dislike = false;
-                break;
-            case DISLIKE:
-                if (like) {
-                    tw.remove(dataset, MMDB_LIKE, person);
-                    likeCount--;
-                    tw.add(dataset, MMDB_DISLIKE, person);
-                    dislikeCount++;
-                }
-                if (!like && !dislike) {
-                    tw.add(dataset, MMDB_DISLIKE, person);
-                    dislikeCount++;
-                }
-                like = false;
-                dislike = true;
-                break;
+        if (arg0.getState() == LikeDislike.LIKE) {
+            Resource uri = Resource.uriRef();
+            tw.add(dataset, MMDB_LIKE_DISLIKE, uri);
+            tw.add(uri, Dc.CREATOR, person);
+            tw.add(uri, MMDB_LIKE_DISLIKE_STATE, arg0.getState().toString());
+            tw.add(uri, Dc.DATE, new Date());
+            user = arg0.getState();
+            likeCount++;
         }
-        if ((tw.getToAdd().size() != 0) && (tw.getToRemove().size() != 0)) {
+        if (arg0.getState() == LikeDislike.DISLIKE) {
+            Resource uri = Resource.uriRef();
+            tw.add(dataset, MMDB_LIKE_DISLIKE, uri);
+            tw.add(uri, Dc.CREATOR, person);
+            tw.add(uri, MMDB_LIKE_DISLIKE_STATE, arg0.getState().toString());
+            tw.add(uri, Dc.DATE, new Date());
+            user = arg0.getState();
+            dislikeCount++;
+        }
+        if ((tw.getToAdd().size() != 0) || (tw.getToRemove().size() != 0)) {
             try {
                 TupeloStore.getInstance().getContext().perform(tw);
             } catch (OperatorException e) {
-                log.warn("Could not update like/dislkie count for dataset.", e);
-                throw (new ActionException("Could not update like/dislkie count for dataset.", e));
+                log.warn("Could not update like/dislike count for dataset.", e);
+                throw (new ActionException("Could not update like/dislike count for dataset.", e));
             }
         }
 
         // done
         GetLikeDislikeResult result = new GetLikeDislikeResult();
-        result.setLike(like);
+        result.setState(user);
         result.setLikeCount(likeCount);
-        result.setDislike(dislike);
         result.setDislikeCount(dislikeCount);
-
-        // done
         return result;
     }
 

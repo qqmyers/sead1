@@ -42,6 +42,7 @@
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import net.customware.gwt.dispatch.shared.Result;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislike.LikeDislike;
 
 /**
  * Return the number of people that have viewed this resource
@@ -51,10 +52,9 @@ import net.customware.gwt.dispatch.shared.Result;
  */
 @SuppressWarnings("serial")
 public class GetLikeDislikeResult implements Result {
-    private int     likeCount    = 0;
-    private int     dislikeCount = 0;
-    private boolean like         = false;
-    private boolean dislike      = false;
+    private int         likeCount    = 0;
+    private int         dislikeCount = 0;
+    private LikeDislike state        = LikeDislike.UNKNOWN;
 
     public GetLikeDislikeResult() {
     }
@@ -75,19 +75,11 @@ public class GetLikeDislikeResult implements Result {
         this.dislikeCount = dislikeCount;
     }
 
-    public boolean isLike() {
-        return like;
+    public LikeDislike getState() {
+        return state;
     }
 
-    public void setLike(boolean like) {
-        this.like = like;
-    }
-
-    public boolean isDislike() {
-        return dislike;
-    }
-
-    public void setDislike(boolean dislike) {
-        this.dislike = dislike;
+    public void setState(LikeDislike state) {
+        this.state = state;
     }
 }

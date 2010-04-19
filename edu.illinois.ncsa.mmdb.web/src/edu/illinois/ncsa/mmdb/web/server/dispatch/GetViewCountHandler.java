@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.Date;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -48,7 +50,9 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
@@ -65,6 +69,8 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  * 
  */
 public class GetViewCountHandler implements ActionHandler<GetViewCount, GetViewCountResult> {
+    private static int     IGNORE      = 5 * 60 * 1000;                               // 5 minutes
+
     // FIXME move to MMDB
     public static Resource MMDB_VIEWED = Cet.cet("mmdb/isViewedBy");
 
@@ -76,40 +82,75 @@ public class GetViewCountHandler implements ActionHandler<GetViewCount, GetViewC
         Resource dataset = Resource.uriRef(arg0.getResource());
         Resource person = Resource.uriRef(arg0.getPerson());
 
-        // FIXME do we want to store the date the user viewed?
         Unifier uf = new Unifier();
         uf.addPattern(dataset, Dc.CREATOR, "creator");
-        uf.addPattern(dataset, MMDB_VIEWED, "viewed", true);
-        uf.setColumnNames("creator", "viewed");
+        uf.addPattern(dataset, MMDB_VIEWED, "viewed");
+        uf.addPattern("viewed", Dc.CREATOR, "viewer");
+        uf.setColumnNames("creator", "viewed", "viewer");
         try {
             TupeloStore.getInstance().getContext().perform(uf);
         } catch (OperatorException e) {
             log.warn("Could not get view count for dataset.", e);
             throw (new ActionException("Could not get view count for dataset.", e));
         }
-        boolean seenit = false;
+
+        Resource viewed = null;
         int count = 0;
+        Resource creator = null;
         for (Tuple<Resource> row : uf.getResult() ) {
             // Don't count creator.
-            if ((row.get(0) != null) && row.get(0).equals(person)) {
-                seenit = true;
-            }
-            if (row.get(1) != null) {
+            creator = row.get(0);
+            if (!creator.equals(row.get(2))) {
                 count++;
-                if (row.get(1).equals(person)) {
-                    seenit = true;
-                }
+            }
+            if (row.get(2).equals(person)) {
+                viewed = row.get(1);
             }
         }
 
         // update the count
-        if (!seenit) {
-            try {
-                TupeloStore.getInstance().getContext().addTriple(dataset, MMDB_VIEWED, person);
+        TripleWriter tw = new TripleWriter();
+        if (viewed == null) {
+            if (!creator.equals(person)) {
                 count++;
+            }
+            viewed = Resource.uriRef();
+            tw.add(dataset, MMDB_VIEWED, viewed);
+            tw.add(viewed, Dc.CREATOR, person);
+            tw.add(viewed, Dc.DATE, new Date());
+        } else {
+            uf = new Unifier();
+            uf.addPattern(viewed, Dc.DATE, "date");
+            uf.setColumnNames("date");
+            try {
+                TupeloStore.getInstance().getContext().perform(uf);
             } catch (OperatorException e) {
-                log.warn("Could not add to view count for dataset.", e);
-                throw (new ActionException("Could not add to view count for dataset.", e));
+                log.warn("Could not get view count for dataset.", e);
+                throw (new ActionException("Could not get view count for dataset.", e));
+            }
+            Date last = new Date(new Date().getTime() - IGNORE);
+            boolean skip = false;
+            for (Tuple<Resource> row : uf.getResult() ) {
+                Object o = ObjectResourceMapping.object(row.get(0));
+                if (o instanceof Date) {
+                    Date date = (Date) o;
+                    if ((last == null) || (last.compareTo(date) < 0)) {
+                        skip = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!skip) {
+                tw.add(viewed, Dc.DATE, new Date());
+            }
+        }
+        if (tw.getToAdd().size() > 0) {
+            try {
+                TupeloStore.getInstance().getContext().perform(tw);
+            } catch (OperatorException e) {
+                log.warn("Could not add a view to dataset.", e);
+                throw (new ActionException("Could not add a view to dataset.", e));
             }
         }
 

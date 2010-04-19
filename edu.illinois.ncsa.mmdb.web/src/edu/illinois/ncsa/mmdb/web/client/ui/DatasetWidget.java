@@ -316,17 +316,20 @@ public class DatasetWidget extends Composite {
         Label dateLabel = new Label("Date: " + dateString);
         dateLabel.addStyleName("metadataEntry");
 
-        final Anchor iLikeLabel = new Anchor("Like:");
-        iLikeLabel.addStyleName("metadataEntry");
+        final Label likeCount = new Label();
+        likeCount.addStyleName("metadataEntry");
 
-        final Anchor iDislikeLabel = new Anchor("Dislike:");
-        iDislikeLabel.addStyleName("metadataEntry");
+        final Anchor likeAnchor = new Anchor("Like");
+        likeAnchor.addStyleName("metadataEntry");
 
-        iLikeLabel.addClickHandler(new ClickHandler() {
+        final Anchor dislikeAnchor = new Anchor("Dislike");
+        dislikeAnchor.addStyleName("metadataEntry");
+
+        likeAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 GetLikeDislike ld = new GetLikeDislike(uri, MMDB.getUsername());
-                if (iLikeLabel.getText().startsWith("Like:")) {
+                if (likeAnchor.getText().equals("Like")) {
                     ld.setState(LikeDislike.LIKE);
                 } else {
                     ld.setState(LikeDislike.NONE);
@@ -339,25 +342,29 @@ public class DatasetWidget extends Composite {
                     }
 
                     public void onSuccess(GetLikeDislikeResult result) {
-                        if (result.isLike()) {
-                            iLikeLabel.setText("Unlike: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                        String likes = NumberFormat.getDecimalFormat().format(result.getLikeCount());
+                        String dislikes = NumberFormat.getDecimalFormat().format(result.getDislikeCount());
+                        likeCount.setText(likes + " likes and " + dislikes + " dislikes");
+
+                        if (result.getState() == LikeDislike.LIKE) {
+                            likeAnchor.setText("Unlike");
                         } else {
-                            iLikeLabel.setText("Like: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                            likeAnchor.setText("Like");
                         }
-                        if (result.isDislike()) {
-                            iDislikeLabel.setText("Undislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                        if (result.getState() == LikeDislike.DISLIKE) {
+                            dislikeAnchor.setText("Undislike");
                         } else {
-                            iDislikeLabel.setText("Dislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                            dislikeAnchor.setText("Dislike");
                         }
                     }
                 });
             }
         });
-        iDislikeLabel.addClickHandler(new ClickHandler() {
+        dislikeAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 GetLikeDislike ld = new GetLikeDislike(uri, MMDB.getUsername());
-                if (iDislikeLabel.getText().startsWith("Dislike:")) {
+                if (dislikeAnchor.getText().equals("Dislike")) {
                     ld.setState(LikeDislike.DISLIKE);
                 } else {
                     ld.setState(LikeDislike.NONE);
@@ -370,15 +377,19 @@ public class DatasetWidget extends Composite {
                     }
 
                     public void onSuccess(GetLikeDislikeResult result) {
-                        if (result.isLike()) {
-                            iLikeLabel.setText("Unlike: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                        String likes = NumberFormat.getDecimalFormat().format(result.getLikeCount());
+                        String dislikes = NumberFormat.getDecimalFormat().format(result.getDislikeCount());
+                        likeCount.setText(likes + " likes and " + dislikes + " dislikes");
+
+                        if (result.getState() == LikeDislike.LIKE) {
+                            likeAnchor.setText("Unlike");
                         } else {
-                            iLikeLabel.setText("Like: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                            likeAnchor.setText("Like");
                         }
-                        if (result.isDislike()) {
-                            iDislikeLabel.setText("Undislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                        if (result.getState() == LikeDislike.DISLIKE) {
+                            dislikeAnchor.setText("Undislike");
                         } else {
-                            iDislikeLabel.setText("Dislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                            dislikeAnchor.setText("Dislike");
                         }
                     }
                 });
@@ -396,8 +407,9 @@ public class DatasetWidget extends Composite {
         infoPanel.add(typeLabel);
         infoPanel.add(dateLabel);
         infoPanel.add(viewLabel);
-        infoPanel.add(iLikeLabel);
-        infoPanel.add(iDislikeLabel);
+        infoPanel.add(likeCount);
+        infoPanel.add(likeAnchor);
+        infoPanel.add(dislikeAnchor);
 
         // get view count (including updating count)
         service.execute(new GetViewCount(uri, MMDB.getUsername()), new AsyncCallback<GetViewCountResult>() {
@@ -407,7 +419,8 @@ public class DatasetWidget extends Composite {
             }
 
             public void onSuccess(GetViewCountResult result) {
-                viewLabel.setText("Viewed: " + NumberFormat.getDecimalFormat().format(result.getCount()));
+                String count = NumberFormat.getDecimalFormat().format(result.getCount());
+                viewLabel.setText("Viewed by " + count + " people");
             }
         });
 
@@ -419,15 +432,19 @@ public class DatasetWidget extends Composite {
             }
 
             public void onSuccess(GetLikeDislikeResult result) {
-                if (result.isLike()) {
-                    iLikeLabel.setText("Unlike: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                String likes = NumberFormat.getDecimalFormat().format(result.getLikeCount());
+                String dislikes = NumberFormat.getDecimalFormat().format(result.getDislikeCount());
+                likeCount.setText(likes + " likes and " + dislikes + " dislikes");
+
+                if (result.getState() == LikeDislike.LIKE) {
+                    likeAnchor.setText("Unlike");
                 } else {
-                    iLikeLabel.setText("Like: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                    likeAnchor.setText("Like");
                 }
-                if (result.isDislike()) {
-                    iDislikeLabel.setText("Undislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                if (result.getState() == LikeDislike.DISLIKE) {
+                    dislikeAnchor.setText("Undislike");
                 } else {
-                    iDislikeLabel.setText("Dislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                    dislikeAnchor.setText("Dislike");
                 }
             }
         });
