@@ -86,6 +86,7 @@ public class UploadPage extends Page {
     private FlexTable            tableLayout;
     private static VerticalPanel appletStatusPanel;
     private static FlexTable     uploadedDatasetsTable;
+    private static Label         appletStatusLabel;
 
     public static final String   DND_ENABLED_PREFERENCE = "dndAppletEnabled";
 
@@ -196,6 +197,8 @@ public class UploadPage extends Page {
         appletStatusPanel.add(fakeButton);
         */
         // FIXME end debug
+        appletStatusLabel = new Label("");
+        //appletStatusPanel.add(appletStatusLabel);
         uploadedDatasetsTable = new FlexTable();
         appletStatusPanel.add(uploadedDatasetsTable);
         mainLayoutPanel.add(appletStatusPanel);
@@ -266,41 +269,52 @@ public class UploadPage extends Page {
     static ProgressBar currentProgressBar = null;
 
     /** Called by the applet after a file is uploaded. */
-    public static void fileUploaded(String uri) {
+    public static void fileUploaded(final String uri) {
         final int row = nUploaded;
         nUploaded++;
+        while (uploadedDatasetsTable.getRowCount() < nUploaded) {
+            uploadedDatasetsTable.insertRow(uploadedDatasetsTable.getRowCount());
+        }
         GWT.log("applet says " + uri + " uploaded");
-        //appletStatusPanel.add(new Label("applet says " + uri + " uploaded")); // FIXME debug
-        PreviewWidget preview = new PreviewWidget(uri, GetPreviews.SMALL, "dataset?id=" + uri);
-        uploadedDatasetsTable.setWidget(row, 0, preview);
         MMDB.dispatchAsync.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
             public void onFailure(Throwable caught) {
             }
 
             public void onSuccess(GetDatasetResult result) {
+                PreviewWidget preview = new PreviewWidget(uri, GetPreviews.SMALL, "dataset?id=" + uri);
+                uploadedDatasetsTable.setWidget(row, 0, preview);
                 uploadedDatasetsTable.setWidget(row, 1, editableDatasetInfo(result.getDataset()));
+                TagsWidget tags = new TagsWidget(uri, MMDB.dispatchAsync, false);
+                uploadedDatasetsTable.setWidget(row, 2, tags);
+                Anchor hideAnchor = new Anchor("Hide");
+                hideAnchor.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        uploadedDatasetsTable.getRowFormatter().addStyleName(row, "hidden");
+                    }
+                });
+                uploadedDatasetsTable.setWidget(row, 3, hideAnchor);
             }
         });
-        TagsWidget tags = new TagsWidget(uri, MMDB.dispatchAsync, false);
-        uploadedDatasetsTable.setWidget(row, 2, tags);
-        Anchor hideAnchor = new Anchor("Hide");
-        hideAnchor.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                uploadedDatasetsTable.getRowFormatter().addStyleName(row, "hidden");
-            }
-        });
-        uploadedDatasetsTable.setWidget(row, 3, hideAnchor);
     }
 
     /** Called by the applet for each file dropped */
     public static void fileDropped(String filename, String sizeString) {
         nUploaded = 0;
         GWT.log("applet says " + filename + " dropped");
+        appletStatusLabel.setText(filename + " will be uploaded"); // FIXME better message
         //appletStatusPanel.add(new Label("applet says " + filename + " (" + sizeString + ") dropped")); // FIXME debug
         final int row = uploadedDatasetsTable.getRowCount();
+        if (row == 0) {
+            uploadedDatasetsTable.insertRow(0);
+        }
         Image image = new Image(PreviewWidget.GRAY_URL.get(GetPreviews.SMALL));
         uploadedDatasetsTable.setWidget(row, 0, image);
-        long size = Long.parseLong(sizeString);
+        int size = -1;
+        try {
+            size = Integer.parseInt(sizeString);
+        } catch (NumberFormatException x) {
+            // fall through
+        }
         uploadedDatasetsTable.setWidget(row, 1, new Label("Uploading \"" + filename + "\" (" + TextFormatter.humanBytes(size) + ") ..."));
     }
 
@@ -311,6 +325,7 @@ public class UploadPage extends Page {
      */
     public static void fileProgress(int percent) {
         //appletStatusPanel.add(new Label("applet says progress is " + percent)); // FIXME debug
+        appletStatusLabel.setText("File upload progress: " + percent + "%"); // FIXME better text
         if (nUploaded < uploadedDatasetsTable.getRowCount()) {
             if (currentProgressBar == null) {
                 currentProgressBar = new ProgressBar(1);
