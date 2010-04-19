@@ -49,6 +49,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ContextConvertHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteAnnotationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetHandler;
@@ -64,6 +65,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDerivedFromHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoPointHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLicenseHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLikeDislikeHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRecentActivityHandler;
@@ -73,10 +75,10 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUploadDestinationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUsersHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetViewCountHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
@@ -137,6 +139,8 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new ContextConvertHandler());
         DispatchUtil.registerHandler(new GetLicenseHandler());
         DispatchUtil.registerHandler(new SetLicenseHandler());
+        DispatchUtil.registerHandler(new GetViewCountHandler());
+        DispatchUtil.registerHandler(new GetLikeDislikeHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

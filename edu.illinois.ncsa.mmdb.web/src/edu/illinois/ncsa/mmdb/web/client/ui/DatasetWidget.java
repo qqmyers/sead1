@@ -51,6 +51,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
@@ -85,9 +86,13 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFromResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislike;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislikeResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetViewCount;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetViewCountResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
@@ -95,6 +100,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislike.LikeDislike;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
@@ -310,6 +316,78 @@ public class DatasetWidget extends Composite {
         Label dateLabel = new Label("Date: " + dateString);
         dateLabel.addStyleName("metadataEntry");
 
+        final Anchor iLikeLabel = new Anchor("Like:");
+        iLikeLabel.addStyleName("metadataEntry");
+
+        final Anchor iDislikeLabel = new Anchor("Dislike:");
+        iDislikeLabel.addStyleName("metadataEntry");
+
+        iLikeLabel.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                GetLikeDislike ld = new GetLikeDislike(uri, MMDB.getUsername());
+                if (iLikeLabel.getText().startsWith("Like:")) {
+                    ld.setState(LikeDislike.LIKE);
+                } else {
+                    ld.setState(LikeDislike.NONE);
+                }
+                // get like/dislike count
+                service.execute(ld, new AsyncCallback<GetLikeDislikeResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error getting like/dislike count", caught);
+                    }
+
+                    public void onSuccess(GetLikeDislikeResult result) {
+                        if (result.isLike()) {
+                            iLikeLabel.setText("Unlike: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                        } else {
+                            iLikeLabel.setText("Like: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                        }
+                        if (result.isDislike()) {
+                            iDislikeLabel.setText("Undislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                        } else {
+                            iDislikeLabel.setText("Dislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                        }
+                    }
+                });
+            }
+        });
+        iDislikeLabel.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                GetLikeDislike ld = new GetLikeDislike(uri, MMDB.getUsername());
+                if (iDislikeLabel.getText().startsWith("Dislike:")) {
+                    ld.setState(LikeDislike.DISLIKE);
+                } else {
+                    ld.setState(LikeDislike.NONE);
+                }
+                // get like/dislike count
+                service.execute(ld, new AsyncCallback<GetLikeDislikeResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error getting like/dislike count", caught);
+                    }
+
+                    public void onSuccess(GetLikeDislikeResult result) {
+                        if (result.isLike()) {
+                            iLikeLabel.setText("Unlike: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                        } else {
+                            iLikeLabel.setText("Like: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                        }
+                        if (result.isDislike()) {
+                            iDislikeLabel.setText("Undislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                        } else {
+                            iDislikeLabel.setText("Dislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                        }
+                    }
+                });
+            }
+        });
+
+        final Label viewLabel = new Label("Viewed: N/A");
+        viewLabel.addStyleName("metadataEntry");
+
         infoPanel = new FlowPanel();
         infoPanel.addStyleName("datasetRightColSection");
         infoPanel.add(metadataHeader);
@@ -317,6 +395,42 @@ public class DatasetWidget extends Composite {
         infoPanel.add(sizeLabel);
         infoPanel.add(typeLabel);
         infoPanel.add(dateLabel);
+        infoPanel.add(viewLabel);
+        infoPanel.add(iLikeLabel);
+        infoPanel.add(iDislikeLabel);
+
+        // get view count (including updating count)
+        service.execute(new GetViewCount(uri, MMDB.getUsername()), new AsyncCallback<GetViewCountResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error getting view count", caught);
+            }
+
+            public void onSuccess(GetViewCountResult result) {
+                viewLabel.setText("Viewed: " + NumberFormat.getDecimalFormat().format(result.getCount()));
+            }
+        });
+
+        // get like/dislike count
+        service.execute(new GetLikeDislike(uri, MMDB.getUsername()), new AsyncCallback<GetLikeDislikeResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error getting view count", caught);
+            }
+
+            public void onSuccess(GetLikeDislikeResult result) {
+                if (result.isLike()) {
+                    iLikeLabel.setText("Unlike: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                } else {
+                    iLikeLabel.setText("Like: " + NumberFormat.getDecimalFormat().format(result.getLikeCount()));
+                }
+                if (result.isDislike()) {
+                    iDislikeLabel.setText("Undislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                } else {
+                    iDislikeLabel.setText("Dislike: " + NumberFormat.getDecimalFormat().format(result.getDislikeCount()));
+                }
+            }
+        });
 
         // dataset actions
         final FlowPanel actionsPanel = new FlowPanel();
