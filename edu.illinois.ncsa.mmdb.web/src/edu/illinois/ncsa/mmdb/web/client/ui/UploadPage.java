@@ -120,10 +120,36 @@ public class UploadPage extends Page {
 
         VerticalPanel dndPanel = new VerticalPanel();
 
-        //final boolean dndEnabled = MMDB.getSessionPreference(DND_ENABLED_PREFERENCE) != null;
-        final boolean dndEnabled = false; // FIXME debug
+        final boolean dndEnabled = MMDB.getSessionPreference(DND_ENABLED_PREFERENCE) != null;
+        final String disabledMsg = "Click here to upload multiple files. You may be asked by your web browser to accept a security exception.";
+        final String enabledMsg = "Drop files and folders here";
+        final Label dndTooltip = new Label(dndEnabled ? enabledMsg
+                : disabledMsg);
 
-        final FlowPanel dndApplet = new FlowPanel();
+        final FlowPanel dndApplet = new FlowPanel() {
+            protected void onAttach() {
+                // TODO Auto-generated method stub
+                super.onAttach();
+                if (dndEnabled) {
+                    removeStyleName("hidden");
+                    deployDndApplet(MMDB.getSessionState().getSessionKey());
+                } else {
+                    addStyleName("hidden");
+                    dndTooltip.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            if (MMDB.getSessionState().getCurrentUser() == null) {
+                                Window.confirm("Upload not permitted. Please log in");
+                            } else {
+                                removeStyleName("hidden");
+                                deployDndApplet(MMDB.getSessionState().getSessionKey());
+                                dndTooltip.setText(enabledMsg);
+                                MMDB.setSessionPreference(DND_ENABLED_PREFERENCE, "true");
+                            }
+                        }
+                    });
+                }
+            }
+        };
         dndApplet.setWidth("150px");
         dndApplet.setHeight("100px");
         dndApplet.getElement().setId("dndAppletId");
@@ -131,41 +157,11 @@ public class UploadPage extends Page {
         dndApplet.addStyleName("dragAndDrop");
         dndPanel.addStyleName("dndContainer");
         dndPanel.add(dndApplet);
-        final String disabledMsg = "Click here to enable drag and drop.";
-        final String enabledMsg = "Drop files and folders here";
-        final Label dndTooltip = new Label(dndEnabled ? enabledMsg
-                : disabledMsg);
         dndPanel.add(dndTooltip);
 
         tableLayout.setWidget(1, 1, dndPanel);
 
         tableLayout.setWidget(1, 0, uploadWidget);
-
-        if (dndEnabled) {
-            dndApplet.removeStyleName("hidden");
-            deployDndApplet(MMDB.getSessionState().getSessionKey());
-        } else {
-            dndApplet.addStyleName("hidden");
-            dndTooltip.addClickHandler(new ClickHandler() {
-                public void onClick(ClickEvent event) {
-                    if (MMDB.getSessionState().getCurrentUser() == null) {
-                        Window.confirm("Upload not permitted. Please log in");
-                    } else {
-                        boolean doit = true;
-                        if (!"true".equals(MMDB.getSessionPreference(DND_ENABLED_PREFERENCE))) {
-                            doit = Window
-                                    .confirm("You will be asked to accept a security exception to allow our drag-and-drop upload tool to access your local files. If you don't wish to accept that security exception, press cancel.");
-                        }
-                        if (doit) {
-                            dndApplet.removeStyleName("hidden");
-                            deployDndApplet(MMDB.getSessionState().getSessionKey());
-                            dndTooltip.setText(enabledMsg);
-                            MMDB.setSessionPreference(DND_ENABLED_PREFERENCE, "true");
-                        }
-                    }
-                }
-            });
-        }
 
         // call applet method
         Anchor callMethodOnApplet = new Anchor("Poke applet");
