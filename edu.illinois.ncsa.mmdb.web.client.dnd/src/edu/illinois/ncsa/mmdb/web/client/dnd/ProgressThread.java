@@ -10,8 +10,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 
-import netscape.javascript.JSObject;
-
 public class ProgressThread extends Thread {
 	DropUploader applet;
 	String sessionKey = null;
@@ -33,8 +31,7 @@ public class ProgressThread extends Thread {
 				updateProgress();
 				if(progress >= 0) {
 					System.out.println("progress thread reporting "+progress);
-					JSObject window = JSObject.getWindow(applet);
-					window.call("dndAppletProgress",new Object[] { progress });
+					applet.call("dndAppletProgress",new Object[] { progress });
 				}
 				sleep(250);
 			}

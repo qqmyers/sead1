@@ -270,6 +270,7 @@ public class UploadPage extends Page {
         final int row = nUploaded;
         nUploaded++;
         GWT.log("applet says " + uri + " uploaded");
+        //appletStatusPanel.add(new Label("applet says " + uri + " uploaded")); // FIXME debug
         PreviewWidget preview = new PreviewWidget(uri, GetPreviews.SMALL, "dataset?id=" + uri);
         uploadedDatasetsTable.setWidget(row, 0, preview);
         MMDB.dispatchAsync.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
@@ -295,6 +296,7 @@ public class UploadPage extends Page {
     public static void fileDropped(String filename, String sizeString) {
         nUploaded = 0;
         GWT.log("applet says " + filename + " dropped");
+        //appletStatusPanel.add(new Label("applet says " + filename + " (" + sizeString + ") dropped")); // FIXME debug
         final int row = uploadedDatasetsTable.getRowCount();
         Image image = new Image(PreviewWidget.GRAY_URL.get(GetPreviews.SMALL));
         uploadedDatasetsTable.setWidget(row, 0, image);
@@ -308,6 +310,7 @@ public class UploadPage extends Page {
      * @param percent
      */
     public static void fileProgress(int percent) {
+        //appletStatusPanel.add(new Label("applet says progress is " + percent)); // FIXME debug
         if (nUploaded < uploadedDatasetsTable.getRowCount()) {
             if (currentProgressBar == null) {
                 currentProgressBar = new ProgressBar(1);
@@ -336,7 +339,7 @@ public class UploadPage extends Page {
         id:'dragdropApplet',
         MAYSCRIPT:'true',
         code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-        archive:'dnd/DropUploader-966.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+        archive:'dnd/DropUploader-974.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
         width:150,
         height:100
         };

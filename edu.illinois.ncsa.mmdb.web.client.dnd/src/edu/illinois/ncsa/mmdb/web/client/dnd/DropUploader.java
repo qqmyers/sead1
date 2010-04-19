@@ -31,6 +31,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
+import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -49,6 +50,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	public DropTarget dropTarget;
 	private JPanel mainCards;
 	private static final long serialVersionUID = 9000;
+	JSObject window = null;
 	
 	@Override
 	public void init() {
@@ -187,8 +189,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				}
 				files = expandDirectories(files,false); // expand directories 
 				for(File file : files) {
-					JSObject window = JSObject.getWindow(DropUploader.this);
-					window.call("dndAppletFileDropped",new Object[] { file.getName(), file.length()+"" });
+					call("dndAppletFileDropped",new Object[] { file.getName(), file.length()+"" });
 				}
 				//ta.setText(files.size()+" file(s) dropped: "+files);
 				uploadFiles(files,collectionName);
@@ -317,6 +318,23 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		window.call("dndAppletPoke", null);
 	}
 	
+	public void call(String functionName, Object[] args) {
+		if(window == null) {
+			window = JSObject.getWindow(this);
+		}
+		if(window == null) {
+			log("error: unable to call javascript (JSObject.getWindow(this) returned null)");
+			return;
+		}
+		synchronized(window) {
+			try {
+				window.call(functionName,args);
+			} catch(JSException x) {
+				x.printStackTrace();
+			}
+		}
+	}
+	
 	void showCard(String name) {
 		((CardLayout)mainCards.getLayout()).show(mainCards, name);
 		repaint();
@@ -398,8 +416,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			// now figure out which uri's were uploaded
 			for(String uri : progressThread.getUrisUploaded()) {
 				log("got uris for uploaded files = "+uri); // FIXME
-				JSObject window = JSObject.getWindow(DropUploader.this);
-				window.call("dndAppletFileUploaded",new Object[] { uri });
+				DropUploader.this.call("dndAppletFileUploaded",new Object[] { uri });
 			}
 			progressThread.stopShowingProgress();
 			return sessionKey;
