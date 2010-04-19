@@ -445,7 +445,7 @@ public class DatasetWidget extends Composite {
 
             public void onSuccess(LicenseResult result) {
                 String rights = result.getRights().toLowerCase();
-                if (rights.equals("pddl") || "cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights) || result.isAllowDownload()) {
+                if (MMDB.getUsername().equals(result.getRightsHolderUri()) || rights.equals("pddl") || "cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights) || result.isAllowDownload()) {
                     Anchor downloadAnchor = new Anchor();
                     downloadAnchor.setHref(DOWNLOAD_URL + uri);
                     downloadAnchor.setText("Download original");
