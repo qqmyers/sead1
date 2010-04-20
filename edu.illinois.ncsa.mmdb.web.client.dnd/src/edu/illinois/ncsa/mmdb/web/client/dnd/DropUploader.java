@@ -378,6 +378,12 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		public String collectionName;
 		String collectionUri;
 		HttpClient client;
+		DropUploader applet;
+		
+		public BatchPostThread(DropUploader a) {
+			applet = a;
+		}
+		
 		String postBatch(List<File> batch, int offset, int nFiles) throws Exception {
 			// acquire the session key and start tracking progress
 			String sessionKey = getSessionKey();
@@ -416,7 +422,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			// now figure out which uri's were uploaded
 			for(String uri : progressThread.getUrisUploaded()) {
 				log("got uris for uploaded files = "+uri); // FIXME
-				DropUploader.this.call("dndAppletFileUploaded",new Object[] { uri });
+				applet.call("dndAppletFileUploaded",new Object[] { uri });
 			}
 			progressThread.stopShowingProgress();
 			return sessionKey;
@@ -461,7 +467,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		//getAppletContext().showDocument(new URL("javascript:uploadAppletCallback('"+sessionKey+"')"));
 		try {
 			// post the data
-			postThread = new BatchPostThread();
+			postThread = new BatchPostThread(this);
 			postThread.files = files;
 			postThread.collectionName = collectionName;
 			log("posting data for "+files.size()+" file(s)");

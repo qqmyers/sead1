@@ -61,7 +61,7 @@ public class ProgressBar extends Composite {
         StringBuffer html = new StringBuffer();
         html.append("<table width='200px' class='progressBar'><tr>");
         html.append("<td width='" + i + "%' class='progressBarBar'>&nbsp;</td>");
-        html.append("<td width='" + (100 - i) + "%'>&nbsp;</td>");
+        html.append("<td width='" + (100 - i) + "%'></td>");
         html.append("</tr></table>");
         theBar.setHTML(html.toString());
     }

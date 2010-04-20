@@ -86,7 +86,6 @@ public class UploadPage extends Page {
     private FlexTable            tableLayout;
     private static VerticalPanel appletStatusPanel;
     private static FlexTable     uploadedDatasetsTable;
-    private static Label         appletStatusLabel;
 
     public static final String   DND_ENABLED_PREFERENCE = "dndAppletEnabled";
 
@@ -197,8 +196,6 @@ public class UploadPage extends Page {
         appletStatusPanel.add(fakeButton);
         */
         // FIXME end debug
-        appletStatusLabel = new Label("");
-        //appletStatusPanel.add(appletStatusLabel);
         uploadedDatasetsTable = new FlexTable();
         appletStatusPanel.add(uploadedDatasetsTable);
         mainLayoutPanel.add(appletStatusPanel);
@@ -270,14 +267,28 @@ public class UploadPage extends Page {
 
     /** Called by the applet after a file is uploaded. */
     public static void fileUploaded(final String uri) {
+        GWT.log("applet says " + uri + " uploaded");
+        showFileUploaded(uri);
+    }
+
+    public static void showFileUploaded(final String uri) {
         final int row = nUploaded;
         nUploaded++;
         while (uploadedDatasetsTable.getRowCount() < nUploaded) {
             uploadedDatasetsTable.insertRow(uploadedDatasetsTable.getRowCount());
         }
-        GWT.log("applet says " + uri + " uploaded");
+        Anchor anchor = new Anchor("View", "#dataset?id=" + uri);
+        anchor.setTarget("_blank");
+        uploadedDatasetsTable.setWidget(row, 0, anchor);
+        uploadedDatasetsTable.setWidget(row, 2, new Label("Complete"));
+        currentProgressBar = null;
+        showUploadedDatasetInfo(uri, row);
+    }
+
+    public static void showUploadedDatasetInfo(final String uri, final int row) {
         MMDB.dispatchAsync.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
             public void onFailure(Throwable caught) {
+                Window.alert("fileUploaded dispatch failed: " + caught.getMessage()); // FIXME
             }
 
             public void onSuccess(GetDatasetResult result) {
@@ -301,7 +312,6 @@ public class UploadPage extends Page {
     public static void fileDropped(String filename, String sizeString) {
         nUploaded = 0;
         GWT.log("applet says " + filename + " dropped");
-        appletStatusLabel.setText(filename + " will be uploaded"); // FIXME better message
         //appletStatusPanel.add(new Label("applet says " + filename + " (" + sizeString + ") dropped")); // FIXME debug
         final int row = uploadedDatasetsTable.getRowCount();
         if (row == 0) {
@@ -325,14 +335,11 @@ public class UploadPage extends Page {
      */
     public static void fileProgress(int percent) {
         //appletStatusPanel.add(new Label("applet says progress is " + percent)); // FIXME debug
-        appletStatusLabel.setText("File upload progress: " + percent + "%"); // FIXME better text
-        if (nUploaded < uploadedDatasetsTable.getRowCount()) {
-            if (currentProgressBar == null) {
-                currentProgressBar = new ProgressBar(1);
-                uploadedDatasetsTable.setWidget(nUploaded, 2, currentProgressBar);
-            }
-            currentProgressBar.setProgress(percent);
+        if (currentProgressBar == null) {
+            currentProgressBar = new ProgressBar(1);
+            uploadedDatasetsTable.setWidget(nUploaded, 2, currentProgressBar);
         }
+        currentProgressBar.setProgress(percent);
     }
 
     /**
@@ -354,7 +361,7 @@ public class UploadPage extends Page {
         id:'dragdropApplet',
         MAYSCRIPT:'true',
         code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-        archive:'dnd/DropUploader-974.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+        archive:'dnd/DropUploader-1001.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
         width:150,
         height:100
         };
