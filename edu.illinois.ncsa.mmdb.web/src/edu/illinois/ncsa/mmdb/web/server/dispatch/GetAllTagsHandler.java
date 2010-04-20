@@ -44,8 +44,8 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Set;
+import java.util.TreeMap;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -67,62 +67,62 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
  * Return all tags in the system.
  * 
  * @author Luigi Marini
- *
+ * 
  */
 public class GetAllTagsHandler implements ActionHandler<GetAllTags, GetTagsResult> {
 
-	/** Commons logging **/
-	private static Log log = LogFactory.getLog(GetAllTags.class);
-	
-	@Override
-	public GetTagsResult execute(GetAllTags arg0, ExecutionContext arg1)
-			throws ActionException {
-		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-		
-		TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
-		
-		LinkedHashMap<String, Integer> tags = new LinkedHashMap<String, Integer>();
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog(GetAllTags.class);
 
-		Collection<TagEventBean> allTags = new HashSet<TagEventBean>();
-		
-		try {
-			allTags = tebu.getAll();
-		} catch (OperatorException e) {
-			log.error("Error getting tags", e);
-		} catch (Exception e) {
-			log.error("Error getting tags", e);
-		}
-		
-		Iterator<TagEventBean> iterator = allTags.iterator();
-		while (iterator.hasNext()) {
-			TagEventBean next = iterator.next();
-			Set<TagBean> tags2 = next.getTags();
-			Iterator<TagBean> iterator2 = tags2.iterator();
-			while (iterator2.hasNext()) {
-				TagBean next2 = iterator2.next();
-				String tagString = next2.getTagString();
-				if (tags.keySet().contains(tagString)) {
-					Integer newValue = tags.get(tagString) + 1;
-					tags.put(tagString, newValue);
-				} else {
-					tags.put(tagString, 1);
-				}
-			}
-		}
+    @Override
+    public GetTagsResult execute(GetAllTags arg0, ExecutionContext arg1)
+            throws ActionException {
+        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
-		return new GetTagsResult(tags);
-	}
+        TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
 
-	@Override
-	public Class<GetAllTags> getActionType() {
-		return GetAllTags.class;
-	}
+        TreeMap<String, Integer> tags = new TreeMap<String, Integer>();
 
-	@Override
-	public void rollback(GetAllTags arg0, GetTagsResult arg1,
-			ExecutionContext arg2) throws ActionException {
-		// TODO Auto-generated method stub
-		
-	}
+        Collection<TagEventBean> allTags = new HashSet<TagEventBean>();
+
+        try {
+            allTags = tebu.getAll();
+        } catch (OperatorException e) {
+            log.error("Error getting tags", e);
+        } catch (Exception e) {
+            log.error("Error getting tags", e);
+        }
+
+        Iterator<TagEventBean> iterator = allTags.iterator();
+        while (iterator.hasNext()) {
+            TagEventBean next = iterator.next();
+            Set<TagBean> tags2 = next.getTags();
+            Iterator<TagBean> iterator2 = tags2.iterator();
+            while (iterator2.hasNext()) {
+                TagBean next2 = iterator2.next();
+                String tagString = next2.getTagString();
+                if (tags.keySet().contains(tagString)) {
+                    Integer newValue = tags.get(tagString) + 1;
+                    tags.put(tagString, newValue);
+                } else {
+                    tags.put(tagString, 1);
+                }
+            }
+        }
+
+        return new GetTagsResult(tags);
+    }
+
+    @Override
+    public Class<GetAllTags> getActionType() {
+        return GetAllTags.class;
+    }
+
+    @Override
+    public void rollback(GetAllTags arg0, GetTagsResult arg1,
+            ExecutionContext arg2) throws ActionException {
+        // TODO Auto-generated method stub
+
+    }
 
 }

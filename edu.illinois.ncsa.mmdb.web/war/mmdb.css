@@ -902,7 +902,7 @@ body {
 .tagCount {
 	display: inline;
 	font-size: 0.9em;
-	vertical-align: sub;
+	vertical-align: super;
 	color: gray;
 }
 

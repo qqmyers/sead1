@@ -41,8 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.TreeMap;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -63,56 +63,64 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
  */
 public class TagsPage extends Page {
 
-	private FlowPanel tagsPanel;
+    private FlowPanel tagsPanel;
 
-	/**
-	 * Build the page and retrieve all the tags in the system.
-	 * 
-	 * @param dispatchAsync dispatch service
-	 */
-	public TagsPage(DispatchAsync dispatchAsync) {
-		super("Tags", dispatchAsync);
-		getTags();
-	}
+    /**
+     * Build the page and retrieve all the tags in the system.
+     * 
+     * @param dispatchAsync
+     *            dispatch service
+     */
+    public TagsPage(DispatchAsync dispatchAsync) {
+        super("Tags", dispatchAsync);
+        getTags();
+    }
 
-	/**
-	 * Get tags from server and add them to the tag panel. Shows both the tag
-	 * name and tag count.
-	 */
-	private void getTags() {
-		dispatchAsync.execute(new GetAllTags(),
-				new AsyncCallback<GetTagsResult>() {
+    /**
+     * Get tags from server and add them to the tag panel. Shows both the tag
+     * name and tag count.
+     */
+    private void getTags() {
+        dispatchAsync.execute(new GetAllTags(),
+                new AsyncCallback<GetTagsResult>() {
 
-					@Override
-					public void onFailure(Throwable caught) {
-						GWT.log("Error getting tags", caught);
-					}
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error getting tags", caught);
+                    }
 
-					@Override
-					public void onSuccess(GetTagsResult result) {
-						HashMap<String, Integer> tags = result.getTags();
-						Iterator<String> iterator = tags.keySet().iterator();
-						while (iterator.hasNext()) {
-							FlowPanel tagPanel = new FlowPanel();
-							String tag = iterator.next();
-							Hyperlink link = new Hyperlink(tag, "tag?title=" + tag);
-							link.addStyleName("tagLink");
-							tagPanel.add(link);
-							Label tagCount = new Label(" ("	+ tags.get(tag) + ") ");
-							tagCount.addStyleName("tagCount");
-							tagPanel.add(tagCount);
-							tagPanel.addStyleName("tagInPanel");
-							tagsPanel.add(tagPanel);
-						}
-					}
+                    @Override
+                    public void onSuccess(GetTagsResult result) {
+                        TreeMap<String, Integer> tags = result.getTags();
+                        Iterator<String> iterator = tags.keySet().iterator();
+                        while (iterator.hasNext()) {
+                            FlowPanel tagPanel = new FlowPanel();
+                            String tag = iterator.next();
+                            if (!tag.equals("")) {
+                                String linkText = tag;
+                                if (linkText.length() > 10) {
+                                    linkText = linkText.substring(0, 10) + "...";
+                                }
+                                Hyperlink link = new Hyperlink(linkText, "tag?title=" + tag);
+                                link.addStyleName("tagLink");
+                                link.setTitle(tag);
+                                tagPanel.add(link);
+                                Label tagCount = new Label(" (" + tags.get(tag) + ") ");
+                                tagCount.addStyleName("tagCount");
+                                tagPanel.add(tagCount);
+                                tagPanel.addStyleName("tagInPanel");
+                                tagsPanel.add(tagPanel);
+                            }
+                        }
+                    }
 
-				});
-	}
+                });
+    }
 
-	@Override
-	public void layout() {
-		tagsPanel = new FlowPanel();
-		tagsPanel.addStyleName("tagsPanel");
-		mainLayoutPanel.add(tagsPanel);
-	}
+    @Override
+    public void layout() {
+        tagsPanel = new FlowPanel();
+        tagsPanel.addStyleName("tagsPanel");
+        mainLayoutPanel.add(tagsPanel);
+    }
 }
