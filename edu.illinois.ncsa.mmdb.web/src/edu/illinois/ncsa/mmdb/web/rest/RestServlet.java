@@ -310,11 +310,15 @@ public class RestServlet extends AuthenticatedServlet {
             log.trace("DOWNLOAD IMAGE " + uri);
             try {
                 Thing imageThing = getImageThing(uri);
+                String contentType = imageThing.getString(Dc.FORMAT);
                 String label = imageThing.getString(RestService.LABEL_PROPERTY);
                 String filename = getImageThing(uri).getString(RestService.FILENAME_PROPERTY);
                 String name = filename;
                 if (name == null) {
                     name = label;
+                }
+                if (contentType != null) {
+                    response.setContentType(contentType);
                 }
                 response.setHeader("content-disposition", "attachment; filename=\"" + name + "\"");
                 CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
@@ -341,6 +345,16 @@ public class RestServlet extends AuthenticatedServlet {
             }
             if (previewUri == null) {
                 log.info(uri + " has NO PREVIEW");
+            } else {
+                try {
+                    Thing imageThing = getImageThing(previewUri);
+                    String contentType = imageThing.getString(Dc.FORMAT);
+                    if (contentType != null) {
+                        response.setContentType(contentType);
+                    }
+                } catch (OperatorException e) {
+                    throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
+                }
             }
             returnImage(request, response, previewUri, image404, shouldCache404(uri));
         } else if (hasPrefix(COLLECTION_PREVIEW, request)) {
@@ -350,7 +364,18 @@ public class RestServlet extends AuthenticatedServlet {
             returnImage(request, response, previewUri, SMALL_404, shouldCache404(badge)); // should accept and propagate null
         } else if (hasPrefix(IMAGE_INFIX, request)) {
             log.trace("GET IMAGE " + uri);
-            returnImage(request, response, uri);
+            try {
+                Thing imageThing = getImageThing(uri);
+                String contentType = imageThing.getString(Dc.FORMAT);
+                if (contentType != null) {
+                    response.setContentType(contentType);
+                }
+                CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
+            } catch (RestServiceException e) {
+                throw new ServletException("failed to retrieve " + request.getRequestURI());
+            } catch (OperatorException e) {
+                throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
+            }
         } else if (hasPrefix(COLLECTION_INFIX, request)) {
             log.trace("LIST COLLECTION" + uri);
             try {
@@ -407,6 +432,7 @@ public class RestServlet extends AuthenticatedServlet {
             }
         }
         if (image404 != null && shouldCache) {
+            response.setContentType("image/gif");
             // return the 404 image
             URL fileLocation = this.getClass().getResource(image404);
             try {
