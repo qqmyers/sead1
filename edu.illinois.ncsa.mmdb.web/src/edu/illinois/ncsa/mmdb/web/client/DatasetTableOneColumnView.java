@@ -101,20 +101,10 @@ public class DatasetTableOneColumnView extends DatasetTableView {
 
         GWT.log("Adding dataset " + name + " to row " + row, null);
 
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
-        pre.setMaxWidth(100);
-        setWidget(row, 0, pre);
-
-        VerticalPanel verticalPanel = new VerticalPanel();
-
-        verticalPanel.setSpacing(5);
-
-        setWidget(row, 1, verticalPanel);
-
         // selection checkbox
         final CheckBox checkBox = new CheckBox();
         checkBoxes.put(checkBox, id);
-        verticalPanel.add(checkBox);
+        setWidget(row, 0, checkBox);
 
         // HACK since this view doesn't have it's own presenter
         checkBox.addClickHandler(new ClickHandler() {
@@ -153,6 +143,18 @@ public class DatasetTableOneColumnView extends DatasetTableView {
 
         });
 
+        // preview
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
+        pre.setMaxWidth(100);
+        setWidget(row, 1, pre);
+
+        // generic information
+        VerticalPanel verticalPanel = new VerticalPanel();
+
+        verticalPanel.setSpacing(5);
+
+        setWidget(row, 2, verticalPanel);
+
         // title
         Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
         verticalPanel.add(hyperlink);
@@ -176,9 +178,10 @@ public class DatasetTableOneColumnView extends DatasetTableView {
         */
         // FIXME end debug
 
-        getCellFormatter().addStyleName(row, 0, "leftCell");
+        getCellFormatter().addStyleName(row, 0, "rightCell");
         getCellFormatter().addStyleName(row, 1, "rightCell");
-        getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP); // FIXME move to CSS
+        getCellFormatter().addStyleName(row, 2, "rightCell");
+        //        getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP); // FIXME move to CSS
         getRowFormatter().addStyleName(row, "oddRow");
     }
 

@@ -42,13 +42,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
 public class DatasetTableGridView extends DatasetTableView {
@@ -82,19 +89,64 @@ public class DatasetTableGridView extends DatasetTableView {
     // misnomer here, when we get an "addRow" we're really adding a next
     // cell in a top-to-bottom, left-to-right traversal of the table.
     @Override
-    public void addRow(String id, String title, String mimeType, Date date,
+    public void addRow(final String id, String title, String mimeType, Date date,
             String previewUri, String size, String authorsId) {
         PreviewWidget pw = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
         pw.setWidth("120px");
         pw.setMaxWidth(100);
-        Label t = new Label(shortenTitle(title));
-        t.addStyleName("smallText");
-        t.setWidth("120px");
+        // selection checkbox
+        final CheckBox checkBox = new CheckBox();
+        checkBox.addStyleName("inline");
+        // HACK since this view doesn't have it's own presenter
+        checkBox.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (checkBox.getValue()) {
+                    DatasetSelectedEvent datasetSelected = new DatasetSelectedEvent();
+                    datasetSelected.setUri(id);
+                    MMDB.eventBus.fireEvent(datasetSelected);
+                } else {
+                    DatasetUnselectedEvent datasetUnselected = new DatasetUnselectedEvent();
+                    datasetUnselected.setUri(id);
+                    MMDB.eventBus.fireEvent(datasetUnselected);
+                }
+
+            }
+        });
+
+        UserSessionState sessionState = MMDB.getSessionState();
+        if (sessionState.getSelectedDatasets().contains(id)) {
+            checkBox.setValue(true);
+        } else {
+            checkBox.setValue(false);
+        }
+
+        MMDB.eventBus.addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
+
+            @Override
+            public void onDatasetUnselected(DatasetUnselectedEvent datasetUnselectedEvent) {
+                if (id.equals(datasetUnselectedEvent.getUri())) {
+                    checkBox.setValue(false);
+                }
+
+            }
+
+        });
+        // title label
+        Label titleLabel = new Label(shortenTitle(title));
+        titleLabel.addStyleName("smallText");
+        titleLabel.addStyleName("inline");
+        titleLabel.setWidth("120px");
         int row = n / WIDTH;
         int col = n % WIDTH;
         setWidget(row * 2, col, pw);
         getCellFormatter().addStyleName(row * 2, col, "gridPreviewSmall");
-        setWidget((row * 2) + 1, col, t);
+        // title panel
+        FlowPanel titlePanel = new FlowPanel();
+        titlePanel.add(checkBox);
+        titlePanel.add(titleLabel);
+        setWidget((row * 2) + 1, col, titlePanel);
         getCellFormatter().addStyleName((row * 2) + 1, col, "gridLabelSmall");
         n++;
     }
