@@ -38,8 +38,6 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server;
 
-import java.net.URL;
-
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
@@ -62,8 +60,14 @@ public class Authentication {
             return false;
         }
 
-        URL fileLocation = TupeloStore.findFile(JAAS_CONFIG);
-        System.setProperty("java.security.auth.login.config", fileLocation.toExternalForm());
+        String loc = TupeloStore.findFile(JAAS_CONFIG).toExternalForm();
+
+        // Workaround SUN's workaround, hopefully this is only a problem with a space.
+        if (loc.startsWith("file:")) {
+            loc = loc.replace("%20", " ");
+        }
+
+        System.setProperty("java.security.auth.login.config", loc);
         UsernamePasswordContextHandler handler = new UsernamePasswordContextHandler(username, password, TupeloStore.getInstance().getContext());
 
         Subject subject = new Subject();
