@@ -672,6 +672,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         return sessionState;
     }
 
+    /** Get rid of the session state; (e.g., when logging out) */
+    public static void clearSessionState() {
+        getSessionState().initialize();
+    }
+
     // a common idiom
     /** Get the currently-logged-in username, if any */
     public static String getUsername() {

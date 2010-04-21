@@ -52,12 +52,16 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  * @author futrelle
  */
 public class UserSessionState {
-    private final Map<String, String> preferences;
-    private String                    sessionKey;
-    private final Set<String>         selectedDatasets;
-    private PersonBean                currentUser;
+    private Map<String, String> preferences;
+    private String              sessionKey;
+    private Set<String>         selectedDatasets;
+    private PersonBean          currentUser;
 
     public UserSessionState() {
+        initialize();
+    }
+
+    public void initialize() {
         preferences = new HashMap<String, String>();
         selectedDatasets = new HashSet<String>();
         initializePreferences();
@@ -75,7 +79,11 @@ public class UserSessionState {
         this.sessionKey = sessionKey;
     }
 
-    private void initializePreferences() {
+    /**
+     * Put the user session state in its initial state, with default values only
+     * and no personal information.
+     */
+    public void initializePreferences() {
         preferences.put(MMDB.DATASET_VIEW_TYPE_PREFERENCE, PagingDcThingView.GRID_VIEW_TYPE);
         preferences.put(MMDB.COLLECTION_VIEW_TYPE_PREFERENCE, PagingDcThingView.LIST_VIEW_TYPE);
     }

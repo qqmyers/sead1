@@ -366,7 +366,9 @@ public class LoginPage extends Composite {
         UserSessionState state = MMDB.getSessionState();
         if (state.getCurrentUser().getUri() != null) {
             GWT.log("user " + state.getCurrentUser().getUri() + " logging out", null);
+            MMDB.clearSessionState();
         }
+        // in case anyone is holding refs to the state, zero out the auth information in it
         state.setCurrentUser(null);
         state.setSessionKey(null);
         clearBrowserCreds();
