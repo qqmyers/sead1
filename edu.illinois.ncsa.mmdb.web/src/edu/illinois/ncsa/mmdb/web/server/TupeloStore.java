@@ -285,6 +285,9 @@ public class TupeloStore {
                     setExpirationTime(bean);
                 }
             });
+            if (extractorpbu == null) {
+                extractorpbu = new PreviewBeanUtil(beanSession);
+            }
         } catch (Exception e) {
             log.error("Could not create bean sessions.", e);
         }
@@ -482,16 +485,8 @@ public class TupeloStore {
         return extractPreviews(uri, false);
     }
 
-    public Context getExtractorContext() {
-        if (extractorContext == null) {
-            return getContext();
-        } else {
-            return extractorContext;
-        }
-    }
-
-    public void setExtractorContext(Context extractorContext) {
-        this.extractorContext = extractorContext;
+    public void setExtractorContext(Context extractorContext) throws OperatorException, ClassNotFoundException {
+        extractorpbu = new PreviewBeanUtil(CETBeans.createBeanSession(extractorContext));
     }
 
     /**
@@ -506,14 +501,6 @@ public class TupeloStore {
      */
     public String extractPreviews(String uri, boolean rerun) {
         Long lastRequest = lastExtractionRequest.get(uri);
-
-        if (extractorpbu == null) {
-            try {
-                extractorpbu = new PreviewBeanUtil(CETBeans.createBeanSession(getExtractorContext()));
-            } catch (Exception e) {
-                log.error("Could not create extractor beansession", e);
-            }
-        }
 
         // give it a minute
         if (rerun || lastRequest == null || lastRequest < System.currentTimeMillis() - 120000) {
@@ -539,8 +526,8 @@ public class TupeloStore {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
                     {
-                    return countDatasetsInCollection(inCollection);
-                }
+                        return countDatasetsInCollection(inCollection);
+                    }
             };
             count.setTtl(120000);
             datasetCount.put(key, count);

@@ -115,10 +115,10 @@ public class GetViewCountHandler implements ActionHandler<GetViewCount, GetViewC
         int count = 0;
         for (Tuple<Resource> row : uf.getResult() ) {
             // Don't count creator.
-            if (!creator.equals(row.get(2))) {
+            if (!creator.equals(row.get(1))) {
                 count++;
             }
-            if (row.get(2).equals(person)) {
+            if (row.get(1).equals(person)) {
                 viewed = row.get(1);
             }
         }
