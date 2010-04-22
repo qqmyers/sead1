@@ -216,7 +216,7 @@ public class LoginPage extends Composite {
     protected void authenticate() {
         final String username = usernameBox.getText();
         final String password = passwordBox.getText();
-        clearBrowserCreds(new Command() { // ensure we're logged out of REST endpoints, before authenticating
+        logout(new Command() { // ensure we're logged out before authenticating
             public void execute() {
                 MMDB.dispatchAsync.execute(new Authenticate(username, password),
                         new AsyncCallback<AuthenticateResult>() {
@@ -325,15 +325,6 @@ public class LoginPage extends Composite {
     //
     //	}
 
-    public static void clearBrowserCreds() {
-        clearBrowserCreds(new Command() {
-            public void execute() {
-                // success!
-                History.newItem("login"); // FIXME hardcodes destination
-            }
-        });
-    }
-
     public static void clearBrowserCreds(final Command onSuccess) {
         // now hit the REST authentication endpoint with bad creds
         String restUrl = "./api/logout";
@@ -359,20 +350,28 @@ public class LoginPage extends Composite {
         }
     }
 
+    public static void logout() {
+        logout(new Command() {
+            public void execute() {
+                History.newItem("login");
+            }
+        });
+    }
+
     /**
      * Set sessionID to null, remove cookie, and log out of REST servlets
      */
-    public static void logout() {
+    public static void logout(Command onSuccess) {
         UserSessionState state = MMDB.getSessionState();
-        if (state.getCurrentUser().getUri() != null) {
+        if (state.getCurrentUser() != null && state.getCurrentUser().getUri() != null) {
             GWT.log("user " + state.getCurrentUser().getUri() + " logging out", null);
             MMDB.clearSessionState();
         }
         // in case anyone is holding refs to the state, zero out the auth information in it
         state.setCurrentUser(null);
         state.setSessionKey(null);
-        clearBrowserCreds();
         Cookies.removeCookie("sid");
         Cookies.removeCookie("sessionKey");
+        clearBrowserCreds(onSuccess);
     }
 }

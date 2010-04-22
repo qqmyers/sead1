@@ -133,20 +133,23 @@ public class AuthenticatedServlet extends HttpServlet {
         doLogout(request, response);
     }
 
-    protected String getHttpSessionUser(HttpServletRequest request) {
+    protected static String getHttpSessionUser(HttpServletRequest request) {
         return (String) request.getSession(true).getAttribute(AUTHENTICATED_AS);
     }
 
     public static boolean doAuthenticate(HttpServletRequest request, HttpServletResponse response, ServletContext context) {
+        // first, see if this HTTP session is already authenticated // FIXME need expiration mechanism!
+        String validUser = getHttpSessionUser(request);
         // to authenticate we need either 1) a "sessionKey" cookie, or 2) credentials
-        String sessionKey = getSessionKey(request);
-        String validUser = null;
-        if (sessionKey != null) {
-            validUser = getUserId(context, sessionKey);
-            if (validUser == null) {
-                log.info("Session key cookie " + sessionKey + " not found, authentication required");
-            } else {
-                //log.debug("LOGIN: user "+validUser+" logged in with session key "+sessionKey);
+        if (validUser == null) {
+            String sessionKey = getSessionKey(request);
+            if (sessionKey != null) {
+                validUser = getUserId(context, sessionKey);
+                if (validUser == null) {
+                    log.info("Session key cookie " + sessionKey + " not found, authentication required");
+                } else {
+                    //log.debug("LOGIN: user "+validUser+" logged in with session key "+sessionKey);
+                }
             }
         }
         if (validUser == null) {
@@ -170,7 +173,7 @@ public class AuthenticatedServlet extends HttpServlet {
                     // set the session attribute indicating that we're authenticated
                     validUser = username;
                     // we're authenticating, so we need to generate a session key and put it in the context
-                    sessionKey = setSessionKey(context, validUser);
+                    String sessionKey = setSessionKey(context, validUser);
                     log.info("User " + username + " logged in with valid u/p, sessionKey=" + sessionKey);
                     Cookie cookie = new Cookie("sessionKey", sessionKey);
                     cookie.setPath(request.getContextPath());
@@ -196,7 +199,7 @@ public class AuthenticatedServlet extends HttpServlet {
 
     static boolean unauthorized(HttpServletResponse response) {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setHeader("WWW-Authenticate", "BASIC realm=\"mmdb\"");
+        response.setHeader("WWW-Authenticate", "BASIC realm=\"mmdb\""); // FIXME need webapp-specific realm
         return false;
     }
 
