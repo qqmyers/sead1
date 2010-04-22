@@ -117,9 +117,6 @@ public class TupeloStore {
     /** Tupelo context loaded from disk **/
     private Context                                    context;
 
-    /** Tupelo context to be used by the extractor */
-    private Context                                    extractorContext;
-
     /** Tupelo beansession facing tupelo context **/
     private BeanSession                                beanSession;
 
@@ -285,6 +282,9 @@ public class TupeloStore {
                     setExpirationTime(bean);
                 }
             });
+            if (extractorpbu == null) {
+                extractorpbu = new PreviewBeanUtil(beanSession);
+            }
         } catch (Exception e) {
             log.error("Could not create bean sessions.", e);
         }
@@ -482,16 +482,8 @@ public class TupeloStore {
         return extractPreviews(uri, false);
     }
 
-    public Context getExtractorContext() {
-        if (extractorContext == null) {
-            return getContext();
-        } else {
-            return extractorContext;
-        }
-    }
-
-    public void setExtractorContext(Context extractorContext) {
-        this.extractorContext = extractorContext;
+    public void setExtractorContext(Context extractorContext) throws OperatorException, ClassNotFoundException {
+        extractorpbu = new PreviewBeanUtil(CETBeans.createBeanSession(extractorContext));
     }
 
     /**
@@ -506,14 +498,6 @@ public class TupeloStore {
      */
     public String extractPreviews(String uri, boolean rerun) {
         Long lastRequest = lastExtractionRequest.get(uri);
-
-        if (extractorpbu == null) {
-            try {
-                extractorpbu = new PreviewBeanUtil(CETBeans.createBeanSession(getExtractorContext()));
-            } catch (Exception e) {
-                log.error("Could not create extractor beansession", e);
-            }
-        }
 
         // give it a minute
         if (rerun || lastRequest == null || lastRequest < System.currentTimeMillis() - 120000) {

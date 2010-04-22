@@ -131,7 +131,11 @@ public class ContextSetupListener implements ServletContextListener {
             cc.setTupeloUrl(contextUrl);
             cc.setUsername(contextUser);
             cc.setPassword(contextPassword);
-            TupeloStore.getInstance().setExtractorContext(cc);
+            try {
+                TupeloStore.getInstance().setExtractorContext(cc);
+            } catch (Exception e) {
+                log.error("Could not set context for extraction service.", e);
+            }
         }
 
         // mail properties
