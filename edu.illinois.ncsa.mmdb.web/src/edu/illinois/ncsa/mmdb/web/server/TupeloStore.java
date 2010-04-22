@@ -508,7 +508,11 @@ public class TupeloStore {
         Long lastRequest = lastExtractionRequest.get(uri);
 
         if (extractorpbu == null) {
-            extractorpbu = new PreviewBeanUtil(getExtractorContext().getBeanSession());
+            try {
+                extractorpbu = new PreviewBeanUtil(CETBeans.createBeanSession(getExtractorContext()));
+            } catch (Exception e) {
+                log.error("Could not create extractor beansession", e);
+            }
         }
 
         // give it a minute
@@ -535,8 +539,8 @@ public class TupeloStore {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
                     {
-                    return countDatasetsInCollection(inCollection);
-                }
+                        return countDatasetsInCollection(inCollection);
+                    }
             };
             count.setTtl(120000);
             datasetCount.put(key, count);
