@@ -2,12 +2,14 @@
 
 DRYRUN="echo"
 TWEAKS="yes"
+FONTS="yes"
+FFMPEG="yes"
 
 MAINTAINER=kooper@ncsa.illinois.edu
 
 DB_SCHEMA=mmdb
 DB_USER=mmdb
-DB_PASS=mmdb
+DB_PASS=SecretPassword
 
 FOLDER=/home/mmdb
 
@@ -55,10 +57,10 @@ echo "NCSA TWEAKS"
 if [ "$TWEAKS" == "yes" -a "$DIST" == "ubuntu" -a ! -e /etc/apt/sources.list.mmdb ]; then
   $DRYRUN sed -i.mmdb -e 's#http://us.archive.ubuntu.com/ubuntu/#http://cosmos.cites.uiuc.edu/pub/ubuntu#g' /etc/apt/sources.list
   $DRYRUN apt-get -qq update
-  $DRYRUN apt-get -qq -y install ntp
 fi
 
 if [ "$TWEAKS" == "yes" -a "$DIST" == "ubuntu" -a ! -e /etc/ntp.conf.mmdb ]; then
+  $DRYRUN apt-get -qq -y install ntp
   $DRYRUN sed -i.mmdb -e 's#server ntp.ubuntu.com#server ntp.ncsa.uiuc.edu#g' /etc/ntp.conf
   $DRYRUN /etc/init.d/ntp restart
 fi
@@ -68,7 +70,32 @@ echo "UPDATING SYSTEM/INSTALLING SOFTWARE"
 
 if [ "$DIST" == "ubuntu" ]; then
   $DRYRUN apt-get -qq -y dist-upgrade
-  $DRYRUN apt-get -qq -y install mysql-server-5.1 unzip apache2 tomcat6
+  $DRYRUN apt-get -qq -y install mysql-server-5.1 unzip apache2 tomcat6 ffmpeg libavcodec-extra-52
+fi
+
+# ----------------------------------------------------------------------
+echo "FFMPEG"
+
+if [ "$FFMPEG" == "yes" -a "$DIST" == "ubuntu" ]; then
+  $DRYRUN wget http://www.medibuntu.org/sources.list.d/`lsb_release -cs`.list --output-document=/etc/apt/sources.list.d/medibuntu.list
+  $DRYRUN apt-get -qq update
+  $DRYRUN apt-get --yes -qq --allow-unauthenticated install medibuntu-keyring 
+  $DRYRUN apt-get -qq update
+
+  $DRYRUN apt-get -qq -y ffmpeg libavcodec-extra-52
+fi
+
+# ----------------------------------------------------------------------
+echo "FONTS"
+
+if [ "$FONTS" == "yes" -a "$DIST" == "ubuntu" ]; then
+  $DRYRUN wget http://www.medibuntu.org/sources.list.d/`lsb_release -cs`.list --output-document=/etc/apt/sources.list.d/medibuntu.list
+  $DRYRUN apt-get -qq update
+  $DRYRUN apt-get --yes -qq --allow-unauthenticated install medibuntu-keyring 
+  $DRYRUN apt-get -qq update
+
+  # maybe install sun-java6-fonts
+  $DRYRUN apt-get -qq -y install ttf-dejavu-core ttf-baekmuk ttf-kochi-gothic ttf-kochi-mincho ttf-wqy-zenhei ttf-indic-fonts-core ttf-telugu-fonts ttf-oriya-fonts ttf-kannada-fonts ttf-bengali-fonts
 fi
 
 # ----------------------------------------------------------------------
@@ -329,7 +356,7 @@ $DRYRUN cp context.xml war/WEB-INF/classes
 $DRYRUN cp war/WEB-INF/classes/server.properties .
 $DRYRUN sed -i.bak -e "s#mail.from=lmarini@ncsa.illinois.edu#mail.from=$MAINTAINER#g" \
                    -e "s/#user.0.email=/user.0.email=$MAINTAINER/g" \
-                   -e "s@#search.index=.*@search.index=$FOLDER/lucene@g" server.properties
+                   -e "s@#?search.index=.*@search.index=$FOLDER/lucene@g" server.properties
 if [ "$GOOGLEMAPKEY" != "" ]; then
   $DRYRUN sed -i -e "s#sensor=false&amp;key=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag#sensor=false&amp;key=$GOOGLEMAPKEY#g" war/mmdb.html
 fi
