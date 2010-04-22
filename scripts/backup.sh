@@ -41,11 +41,10 @@ fi
 
 # next two command assume ssh keys are setup and no password
 
-# backup database.
-# Add following grant to database
-#  GRANT SELECT, LOCK TABLES ON dbname.* TO backup@'%';
-# make sure user can write to remote folder
-ssh kooper@$HOSTNAME "/usr/bin/mysqldump -u backup mmdb | gzip > $FOLDER/database/mmdb.sql.gz"
-
 # copy everything to local machine
 rsync -avz --delete kooper@$HOSTNAME:$FOLDER/ backup.1/
+
+# backup database.
+# Add following grant to database
+#  GRANT SELECT, LOCK TABLES ON dbname.* TO backup@'localhost';
+ssh kooper@$HOSTNAME "/usr/bin/mysqldump -u backup mmdb | gzip -c" > backup.1/dump.sql.gz
