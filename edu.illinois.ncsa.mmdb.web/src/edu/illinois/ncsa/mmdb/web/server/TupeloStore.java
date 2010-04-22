@@ -585,7 +585,7 @@ public class TupeloStore {
                     return null;
                 }
             };
-            mBadge.setTtl(60000 * 5);
+            mBadge.setTtl(60000 * 5); // 5 min
             mBadge.setForceOnNull(true);
             badgeCache.put(collectionUri, mBadge);
         }
@@ -633,7 +633,7 @@ public class TupeloStore {
                 log.warn("don't know how to cache preview of size=" + size); // whoops.
                 return RestServlet.getPreviewUri(uri, size);
             }
-            mPreview.setTtl(120000); // 2min
+            mPreview.setTtl(1000 * 60 * 60); // 2hr
             mPreview.setForceOnNull(true);
             sizeCache.put(uri, mPreview);
         }
