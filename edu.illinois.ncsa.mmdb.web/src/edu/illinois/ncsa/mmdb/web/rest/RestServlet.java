@@ -66,16 +66,19 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Files;
+import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.terms.Xsd;
 import org.tupeloproject.util.CopyFile;
+import org.tupeloproject.util.Tuple;
 import org.tupeloproject.util.Xml;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -206,22 +209,44 @@ public class RestServlet extends AuthenticatedServlet {
     }
 
     public static String getCollectionPreviewUri(String collectionUri) {
-        return TupeloStore.getInstance().getPreview(collectionUri, GetPreviews.BADGE);
+        return TupeloStore.getInstance().getPreviewUri(collectionUri, GetPreviews.BADGE);
     }
 
     public static String getPreviewUri(String uri, String size) {
-        PreviewImageBean p = getPreview(uri, size);
-        return p == null ? null : p.getUri();
+        return getPreviewUri(getPreview(uri, size));
+    }
+
+    public static String getPreviewUri(PreviewImageBean pib) {
+        return pib == null ? null : pib.getUri();
     }
 
     public static PreviewImageBean getPreview(final String uri, String size) {
         if (uri == null) {
             return null;
         }
-        BeanSession bs = TupeloStore.getInstance().getBeanSession();
-        PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(bs);
         try {
-            Collection<PreviewImageBean> previews = pibu.getAssociationsFor(uri);
+            Collection<PreviewImageBean> previews = new LinkedList<PreviewImageBean>();
+            Unifier u = new Unifier();
+            u.setColumnNames("preview", "height", "width", "mimeType");
+            u.addPattern(Resource.uriRef(uri), PreviewImageBeanUtil.HAS_PREVIEW, "preview");
+            u.addPattern("preview", Rdf.TYPE, PreviewImageBeanUtil.PREVIEW_TYPE);
+            u.addPattern("preview", PreviewImageBeanUtil.IMAGE_HEIGHT, "height");
+            u.addPattern("preview", PreviewImageBeanUtil.IMAGE_WIDTH, "width");
+            u.addPattern("preview", Dc.FORMAT, "mimeType");
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "preview") ) {
+                Resource previewSubject = row.get(0);
+                if (Xsd.LONG.equals(row.get(1).getDatatype()) && Xsd.LONG.equals(row.get(2).getDatatype())) {
+                    long height = (Long) row.get(1).asObject();
+                    long width = (Long) row.get(2).asObject();
+                    PreviewImageBean preview = new PreviewImageBean();
+                    preview.setUri(previewSubject.getString());
+                    preview.setHeight(height);
+                    preview.setWidth(width);
+                    String mimeType = row.get(3).getString();
+                    preview.setMimeType(mimeType);
+                    previews.add(preview);
+                }
+            }
             if (previews.size() == 0) {
                 // do not block on this operation
                 (new Thread() {
@@ -274,13 +299,8 @@ public class RestServlet extends AuthenticatedServlet {
         } catch (IOException x) {
             throw x;
         } finally {
-            long elapsed = System.currentTimeMillis() - then;
-            if (elapsed > 100) {
-                log.warn("REST GET serviced in " + elapsed + "ms");
-            }
             try {
-                response.getOutputStream().flush();
-                response.getOutputStream().close();
+                response.flushBuffer();
             } catch (IllegalStateException x) {
                 // may not have been opened; ignore
             }
@@ -328,39 +348,40 @@ public class RestServlet extends AuthenticatedServlet {
                 throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
             }
         } else if (hasPrefix(PREVIEW_ANY, request)) {
-            String previewUri = null;
+            long then = System.currentTimeMillis(); // FIXME debug
+            PreviewImageBean preview = null;
             String image404 = null;
             if (hasPrefix(PREVIEW_SMALL, request)) {
                 log.debug("GET PREVIEW (small) " + uri);
-                previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.SMALL);
+                preview = TupeloStore.getInstance().getPreview(uri, GetPreviews.SMALL);
                 image404 = SMALL_404;
             } else if (hasPrefix(PREVIEW_LARGE, request)) {
                 log.debug("GET PREVIEW (large) " + uri);
-                previewUri = TupeloStore.getInstance().getPreview(uri, GetPreviews.LARGE);
+                preview = TupeloStore.getInstance().getPreview(uri, GetPreviews.LARGE);
                 image404 = LARGE_404;
             } else {
                 log.debug("GET PREVIEW (any) " + uri);
-                previewUri = getPreviewUri(uri, PREVIEW_ANY);
+                preview = getPreview(uri, PREVIEW_ANY);
                 image404 = SMALL_404;
             }
-            if (previewUri == null) {
+            if (preview == null) {
                 log.info(uri + " has NO PREVIEW");
             } else {
-                try {
-                    Thing imageThing = getImageThing(previewUri);
-                    String contentType = imageThing.getString(Dc.FORMAT);
-                    if (contentType != null) {
-                        response.setContentType(contentType);
-                    }
-                } catch (OperatorException e) {
-                    throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
+                long now = System.currentTimeMillis();
+                if (now - then > 100) {
+                    log.warn("preview lookup took " + (now - then) + "ms");
+                }
+                String contentType = preview.getMimeType();
+                if (contentType != null) {
+                    response.setContentType(contentType);
                 }
             }
+            String previewUri = preview != null ? preview.getUri() : null;
             returnImage(request, response, previewUri, image404, shouldCache404(uri));
         } else if (hasPrefix(COLLECTION_PREVIEW, request)) {
             log.debug("GET PREVIEW (collection) " + uri);
             String badge = TupeloStore.getInstance().getBadge(uri);
-            String previewUri = TupeloStore.getInstance().getPreview(badge, GetPreviews.SMALL); // should accept and propogate null
+            String previewUri = TupeloStore.getInstance().getPreviewUri(badge, GetPreviews.SMALL); // should accept and propogate null
             returnImage(request, response, previewUri, SMALL_404, shouldCache404(badge)); // should accept and propagate null
         } else if (hasPrefix(IMAGE_INFIX, request)) {
             log.trace("GET IMAGE " + uri);
@@ -423,7 +444,18 @@ public class RestServlet extends AuthenticatedServlet {
         }
         if (imageUri != null) {
             try {
-                CopyFile.copy(restService.retrieveImage(imageUri), response.getOutputStream());
+                long then = System.currentTimeMillis(); // FIXME debug
+                InputStream imageData = restService.retrieveImage(imageUri);
+                long now = System.currentTimeMillis(); // FIXME debug
+                if (now - then > 100) {
+                    log.warn("BlobFetcher took " + (now - then) + "ms");
+                }
+                then = System.currentTimeMillis();
+                CopyFile.copy(imageData, response.getOutputStream());
+                now = System.currentTimeMillis(); // FIXME debug
+                if (now - then > 100) {
+                    log.warn("image write to client took " + (now - then) + "ms");
+                }
                 return;
             } catch (RestServiceException e) {
                 if (!e.isNotFound()) {

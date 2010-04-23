@@ -84,6 +84,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
@@ -103,40 +104,40 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  */
 public class TupeloStore {
     /** Commons logging **/
-    private static Log                                 log                   = LogFactory.getLog(TupeloStore.class);
+    private static Log                                           log                   = LogFactory.getLog(TupeloStore.class);
 
     /** Default location of serialized tupelo context **/
-    private static final String                        CONTEXT_PATH          = "/context.xml";
+    private static final String                                  CONTEXT_PATH          = "/context.xml";
 
     /** URL of extraction service */
-    private String                                     extractionServiceURL  = "http://localhost:9856/";
+    private String                                               extractionServiceURL  = "http://localhost:9856/";
 
     /** Singleton instance **/
-    private static TupeloStore                         instance;
+    private static TupeloStore                                   instance;
 
     /** Tupelo context loaded from disk **/
-    private Context                                    context;
+    private Context                                              context;
 
     /** Tupelo beansession facing tupelo context **/
-    private BeanSession                                beanSession;
+    private BeanSession                                          beanSession;
 
     /** last time a certain uri was asked for extraction */
-    private final Map<String, Long>                    lastExtractionRequest = new HashMap<String, Long>();
+    private final Map<String, Long>                              lastExtractionRequest = new HashMap<String, Long>();
 
     /** Dataset count by collection (memoized) */
-    private final Map<String, Memoized<Integer>>       datasetCount          = new HashMap<String, Memoized<Integer>>();
+    private final Map<String, Memoized<Integer>>                 datasetCount          = new HashMap<String, Memoized<Integer>>();
 
-    /** Badge (collection preview) by collection (memoized) */
-    private Map<String, Map<String, Memoized<String>>> previewCache          = null;
+    /** Dataset/collection previews (memoized) */
+    private Map<String, Map<String, Memoized<PreviewImageBean>>> previewCache          = null;
 
-    private final Map<Resource, Long>                  beanExp               = new HashMap<Resource, Long>();
-    private long                                       soonestExp            = Long.MAX_VALUE;
+    private final Map<Resource, Long>                            beanExp               = new HashMap<Resource, Long>();
+    private long                                                 soonestExp            = Long.MAX_VALUE;
 
     /** FileNameMap to map from extension to MIME type. */
-    private MimeMap                                    mimemap;
+    private MimeMap                                              mimemap;
 
     /** Use a single previewbeanutil for optimizations */
-    private PreviewBeanUtil                            extractorpbu;
+    private PreviewBeanUtil                                      extractorpbu;
 
     /**
      * Return singleton instance.
@@ -523,8 +524,8 @@ public class TupeloStore {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
                     {
-                        return countDatasetsInCollection(inCollection);
-                    }
+                    return countDatasetsInCollection(inCollection);
+                }
             };
             count.setTtl(120000);
             datasetCount.put(key, count);
@@ -574,7 +575,7 @@ public class TupeloStore {
                         u.setLimit(25);
                         for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member") ) {
                             String datasetUri = row.get(0).getString();
-                            String preview = getPreview(datasetUri, GetPreviews.SMALL);
+                            String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
                             if (preview != null) {
                                 return datasetUri;
                             }
@@ -593,34 +594,32 @@ public class TupeloStore {
     }
 
     // caches previews.
-    public String getPreview(final String uri, final String size) {
+    public String getPreviewUri(String uri, String size) {
+        return RestServlet.getPreviewUri(getPreview(uri, size));
+    }
+
+    public PreviewImageBean getPreview(final String uri, final String size) {
         // lazily initialize cache
         if (previewCache == null) {
-            previewCache = new HashMap<String, Map<String, Memoized<String>>>();
+            previewCache = new HashMap<String, Map<String, Memoized<PreviewImageBean>>>();
         }
-        Map<String, Memoized<String>> sizeCache = previewCache.get(size);
+        Map<String, Memoized<PreviewImageBean>> sizeCache = previewCache.get(size);
         if (sizeCache == null) {
-            sizeCache = new HashMap<String, Memoized<String>>();
+            sizeCache = new HashMap<String, Memoized<PreviewImageBean>>();
             previewCache.put(size, sizeCache);
         }
         // now look for the memoized value for this uri
-        Memoized<String> mPreview = sizeCache.get(uri);
+        Memoized<PreviewImageBean> mPreview = sizeCache.get(uri);
         if (mPreview == null) {
-            if (size.equals(GetPreviews.SMALL)) {
-                mPreview = new Memoized<String>() {
-                    public String computeValue() {
-                        return RestServlet.getSmallPreviewUri(uri);
-                    }
-                };
-            } else if (size.equals(GetPreviews.LARGE)) {
-                mPreview = new Memoized<String>() {
-                    public String computeValue() {
-                        return RestServlet.getLargePreviewUri(uri);
+            if (size.equals(GetPreviews.SMALL) || size.equals(GetPreviews.LARGE)) {
+                mPreview = new Memoized<PreviewImageBean>() {
+                    public PreviewImageBean computeValue() {
+                        return RestServlet.getPreview(uri, size);
                     }
                 };
             } else if (size.equals(GetPreviews.BADGE)) {
-                mPreview = new Memoized<String>() {
-                    public String computeValue() {
+                mPreview = new Memoized<PreviewImageBean>() {
+                    public PreviewImageBean computeValue() {
                         String badge = getBadge(uri);
                         if (badge != null) {
                             return getPreview(badge, GetPreviews.SMALL);
@@ -631,13 +630,13 @@ public class TupeloStore {
                 };
             } else {
                 log.warn("don't know how to cache preview of size=" + size); // whoops.
-                return RestServlet.getPreviewUri(uri, size);
+                return RestServlet.getPreview(uri, size);
             }
             mPreview.setTtl(1000 * 60 * 60); // 2hr
             mPreview.setForceOnNull(true);
             sizeCache.put(uri, mPreview);
         }
-        String preview = mPreview.getValue();
+        PreviewImageBean preview = mPreview.getValue();
         //        if (preview == null) {
         //            log.debug("NO PREVIEW for " + uri + "--cache miss, and nothing was found");
         //        }
@@ -650,23 +649,25 @@ public class TupeloStore {
      * @return
      */
     public String getCollectionBadge(String collectionUri) {
-        return getPreview(collectionUri, GetPreviews.BADGE);
+        return getPreviewUri(collectionUri, GetPreviews.BADGE);
     }
 
     public ListTable<Resource> unifyExcludeDeleted(Unifier u, String subjectVar) throws OperatorException {
-        List<OrderBy> newOrderBy = new LinkedList<OrderBy>();
         List<String> newColumnNames = new LinkedList<String>(u.getColumnNames());
         newColumnNames.add("_ued");
         u.setColumnNames(newColumnNames);
         u.addPattern(subjectVar, Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "_ued", true);
-        OrderBy ued = new OrderBy();
-        ued.setAscending(true); // FIXME should be false when SQL contexts order correctly, i.e., when TUP-481 is fixed
-        ued.setName("_ued");
-        newOrderBy.add(ued);
-        for (OrderBy ob : u.getOrderBy() ) {
-            newOrderBy.add(ob);
+        if (u.getOffset() != 0 || u.getLimit() != Unifier.UNLIMITED) {
+            List<OrderBy> newOrderBy = new LinkedList<OrderBy>();
+            OrderBy ued = new OrderBy();
+            ued.setAscending(true); // FIXME should be false when SQL contexts order correctly, i.e., when TUP-481 is fixed
+            ued.setName("_ued");
+            newOrderBy.add(ued);
+            for (OrderBy ob : u.getOrderBy() ) {
+                newOrderBy.add(ob);
+            }
+            u.setOrderBy(newOrderBy);
         }
-        u.setOrderBy(newOrderBy);
         getContext().perform(u);
         int cix = u.getColumnNames().size() - 1;
         ListTable<Resource> result = new ListTable<Resource>();

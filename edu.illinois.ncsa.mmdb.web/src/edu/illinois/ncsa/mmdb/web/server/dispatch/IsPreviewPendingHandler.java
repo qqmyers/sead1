@@ -62,11 +62,11 @@ public class IsPreviewPendingHandler implements ActionHandler<IsPreviewPending, 
         String badge = TupeloStore.getInstance().getBadge(uri);
         if (badge != null) {
             // check the pending state of the badge
-            result.setReady(TupeloStore.getInstance().getPreview(badge, GetPreviews.SMALL) != null);
+            result.setReady(TupeloStore.getInstance().getPreviewUri(badge, GetPreviews.SMALL) != null);
             result.setPending(!RestServlet.shouldCache404(badge));
         } else {
             // otherwise check this dataset's pending state
-            result.setReady(TupeloStore.getInstance().getPreview(uri, arg0.getSize()) != null);
+            result.setReady(TupeloStore.getInstance().getPreviewUri(uri, arg0.getSize()) != null);
             result.setPending(!RestServlet.shouldCache404(uri));
         }
         return result;

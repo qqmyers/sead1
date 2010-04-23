@@ -77,10 +77,10 @@ public class GetPreviewsHandler implements
 		
 		try {
 			if (datasetUri != null) {
-				String smallPreview = TupeloStore.getInstance().getPreview(datasetUri, GetPreviews.SMALL);
-				String largePreview = TupeloStore.getInstance().getPreview(datasetUri, GetPreviews.LARGE);
+				String smallPreview = TupeloStore.getInstance().getPreviewUri(datasetUri, GetPreviews.SMALL);
+				String largePreview = TupeloStore.getInstance().getPreviewUri(datasetUri, GetPreviews.LARGE);
 				// in the following case this is a collection
-				String collectionPreview = TupeloStore.getInstance().getPreview(datasetUri, GetPreviews.BADGE);
+				String collectionPreview = TupeloStore.getInstance().getPreviewUri(datasetUri, GetPreviews.BADGE);
 				if (smallPreview != null) {
 					result.setPreview(GetPreviews.SMALL, pibu.get(smallPreview));
 				}
