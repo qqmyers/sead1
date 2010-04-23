@@ -214,6 +214,7 @@ public class ListDatasetsHandler implements
                             }
                         }
                     }, 10);
+                    // FIXME make sure the timer doesn't leak.
                 }
                 return result;
             } catch (OperatorException x) {
