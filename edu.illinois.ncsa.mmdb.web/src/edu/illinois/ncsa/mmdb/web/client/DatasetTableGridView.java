@@ -75,7 +75,7 @@ public class DatasetTableGridView extends DatasetTableView {
     }
 
     public int getPageSize() {
-        return 35;
+        return 25;
     }
 
     String shortenTitle(String title) {
