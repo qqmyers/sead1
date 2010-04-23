@@ -40,6 +40,8 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -56,6 +58,7 @@ import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tables;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
@@ -161,6 +164,11 @@ public class ListDatasetsHandler implements
      */
     public static List<DatasetBean> listDatasets(String orderBy, boolean desc,
             int limit, int offset, String inCollection, DatasetBeanUtil dbu) {
+        return listDatasets(orderBy, desc, limit, offset, inCollection, dbu, true);
+    }
+
+    public static List<DatasetBean> listDatasets(final String orderBy, final boolean desc,
+            final int limit, final int offset, final String inCollection, final DatasetBeanUtil dbu, boolean prefetch) {
         try {
             List<String> uris;
             long then = System.currentTimeMillis(); //
@@ -175,11 +183,38 @@ public class ListDatasetsHandler implements
             try {
                 BeanSession beanSession = TupeloStore.getInstance()
                         .getBeanSession();
-                List<DatasetBean> result = dbu.get(uris);
+                final List<DatasetBean> result = dbu.get(uris);
                 long now = System.currentTimeMillis();
                 log.debug("listed " + result.size() + " dataset(s) in "
                         + (now - then) + "ms (" + (between - then) + "/"
                         + (now - between) + " u/b)");
+                if (prefetch) {
+                    Timer t = new Timer(true);
+                    t.schedule(new TimerTask() {
+                        public void run() {
+                            // prefetch the previews on this page
+                            for (DatasetBean ds : result ) {
+                                TupeloStore.getInstance().getPreview(ds.getUri(), GetPreviews.SMALL);
+                            }
+                            List<String> previewsToFetch = new LinkedList<String>();
+                            // prefetch 3 more pages in each direction
+                            for (int i = 1; i <= 3; i++ ) {
+                                for (String ds : listDatasetUris(orderBy, desc, limit, offset + (limit * i), inCollection, dbu) ) {
+                                    previewsToFetch.add(ds);
+                                }
+                                if (offset - (limit * i) > 0) {
+                                    for (String ds : listDatasetUris(orderBy, desc, limit, offset - (limit * i), inCollection, dbu) ) {
+                                        previewsToFetch.add(ds);
+                                    }
+                                }
+                            }
+                            // now fetch their previews
+                            for (String ds : previewsToFetch ) {
+                                TupeloStore.getInstance().getPreview(ds, GetPreviews.SMALL);
+                            }
+                        }
+                    }, 10);
+                }
                 return result;
             } catch (OperatorException x) {
                 log.error("unable to list datasets " + uris);
