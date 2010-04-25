@@ -52,58 +52,58 @@ import com.google.gwt.user.client.ui.TextBox;
  * A simple widget to add a tag to a resource
  * 
  * @author Luigi Marini
- *
+ * 
  */
 public class AddTagWidget extends Composite {
-	
-	FlowPanel layout;
-	private final TextBox tagBox;
-	private final Anchor submitLink;
-	private final Anchor cancelLink;
-	
-	public AddTagWidget() {
-		
-		layout = new FlowPanel();
-		initWidget(layout);
-		layout.addStyleName("addTags");
-		tagBox = new TextBox();
-		tagBox.setWidth("100px");
-		layout.add(tagBox);
-		
-		submitLink = new Anchor("Submit");
-		
-		submitLink.addStyleName("addTagsLink");
-		
-		layout.add(submitLink);
-		
-		cancelLink = new Anchor("Cancel");
-		
-		cancelLink.addStyleName("addTagsLink");
-		
-		cancelLink.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				
-			}
-		});
-		
-		layout.add(cancelLink);
-	}
 
-	public Anchor getSubmitLink() {
-		return submitLink;
-	}
-	
-	public Anchor getCancelLink() {
-		return cancelLink;
-	}
+    FlowPanel             layout;
+    private final TextBox tagBox;
+    private final Anchor  submitLink;
+    private final Anchor  cancelLink;
 
-	public TextBox getTagBox() {
-		return tagBox;
-	}
+    public AddTagWidget() {
 
-	public String getTags() {
-		return tagBox.getText();
-	}
+        layout = new FlowPanel();
+        initWidget(layout);
+        layout.addStyleName("addTags");
+        tagBox = new TextBox();
+        tagBox.setWidth("100px");
+        layout.add(tagBox);
+
+        submitLink = new Anchor("Add");
+
+        submitLink.addStyleName("addTagsLink");
+
+        layout.add(submitLink);
+
+        cancelLink = new Anchor("Cancel");
+
+        cancelLink.addStyleName("addTagsLink");
+
+        cancelLink.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+
+            }
+        });
+
+        //layout.add(cancelLink);
+    }
+
+    public Anchor getSubmitLink() {
+        return submitLink;
+    }
+
+    public Anchor getCancelLink() {
+        return cancelLink;
+    }
+
+    public TextBox getTagBox() {
+        return tagBox;
+    }
+
+    public String getTags() {
+        return tagBox.getText();
+    }
 }

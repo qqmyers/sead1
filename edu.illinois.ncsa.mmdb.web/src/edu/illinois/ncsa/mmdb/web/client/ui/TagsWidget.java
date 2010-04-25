@@ -79,7 +79,7 @@ public class TagsWidget extends Composite {
     private final String          id;
     private final MyDispatchAsync service;
     private final Label           tagLabel;
-    private final Anchor          addTag;
+    private final AddTagWidget    tagWidget;
 
     /**
      * A widget listing tags and providing a way to add a new one.
@@ -111,64 +111,49 @@ public class TagsWidget extends Composite {
         tagsPanel.addStyleName("tagsLinks");
         mainPanel.add(tagsPanel);
 
-        addTag = new Anchor("Add a tag");
-        mainPanel.add(addTag);
+        tagWidget = new AddTagWidget();
 
-        addTag.addClickHandler(new ClickHandler() {
-
+        tagWidget.getSubmitLink().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                submitTag(tagWidget.getTags());
+                tagWidget.getTagBox().setText("");
+                tagWidget.getTagBox().setFocus(true);
+            }
+        });
 
-                mainPanel.remove(addTag);
-
-                final AddTagWidget tagWidget = new AddTagWidget();
-
-                tagWidget.getSubmitLink().addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        submitTag(tagWidget.getTags());
-                        mainPanel.remove(tagWidget);
-                        mainPanel.add(addTag);
-                    }
-                });
-
-                tagWidget.getTagBox().addKeyUpHandler(new KeyUpHandler() {
-
-                    @Override
-                    public void onKeyUp(KeyUpEvent event) {
-                        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                            submitTag(tagWidget.getTags());
-                            mainPanel.remove(tagWidget);
-                            mainPanel.add(addTag);
-                        }
-
-                    }
-                });
-
-                tagWidget.getCancelLink().addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        mainPanel.remove(tagWidget);
-                        mainPanel.add(addTag);
-                    }
-                });
-
-                mainPanel.add(tagWidget);
-                //				mainPanel.setCellHorizontalAlignment(tagWidget, HasHorizontalAlignment.ALIGN_RIGHT);
-
-                DeferredCommand.addCommand(new Command() {
-                    @Override
-                    public void execute() {
-                        tagWidget.getTagBox().setFocus(true);
-                    }
-                });
+        tagWidget.getTagBox().addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    submitTag(tagWidget.getTags());
+                    tagWidget.getTagBox().setText("");
+                    tagWidget.getTagBox().setFocus(true);
+                }
 
             }
         });
-        getTags();
 
+        tagWidget.getCancelLink().addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                tagWidget.getTagBox().setText("");
+                tagWidget.getTagBox().setFocus(true);
+            }
+        });
+
+        mainPanel.add(tagWidget);
+        //				mainPanel.setCellHorizontalAlignment(tagWidget, HasHorizontalAlignment.ALIGN_RIGHT);
+
+        DeferredCommand.addCommand(new Command() {
+            @Override
+            public void execute() {
+                tagWidget.getTagBox().setFocus(true);
+            }
+        });
+
+        getTags();
     }
 
     void addTag(final String tag) {
@@ -179,6 +164,7 @@ public class TagsWidget extends Composite {
         delete.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 deleteTag(tag, row);
+                tagWidget.getTagBox().setFocus(true);
             }
         });
         tagsPanel.setWidget(row, 1, delete);

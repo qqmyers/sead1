@@ -189,7 +189,7 @@ public class ListDatasetsHandler implements
                         + (now - then) + "ms (" + (between - then) + "/"
                         + (now - between) + " u/b)");
                 if (prefetch) {
-                    Timer t = new Timer(true);
+                    final Timer t = new Timer(true);
                     t.schedule(new TimerTask() {
                         public void run() {
                             // prefetch the previews on this page
@@ -197,8 +197,8 @@ public class ListDatasetsHandler implements
                                 TupeloStore.getInstance().getPreview(ds.getUri(), GetPreviews.SMALL);
                             }
                             List<String> previewsToFetch = new LinkedList<String>();
-                            // prefetch 3 more pages in each direction
-                            for (int i = 1; i <= 3; i++ ) {
+                            // prefetch 1 more pages in each direction
+                            for (int i = 1; i <= 1; i++ ) {
                                 for (String ds : listDatasetUris(orderBy, desc, limit, offset + (limit * i), inCollection, dbu) ) {
                                     previewsToFetch.add(ds);
                                 }
@@ -212,8 +212,9 @@ public class ListDatasetsHandler implements
                             for (String ds : previewsToFetch ) {
                                 TupeloStore.getInstance().getPreview(ds, GetPreviews.SMALL);
                             }
+                            t.cancel();
                         }
-                    }, 10);
+                    }, 1000);
                     // FIXME make sure the timer doesn't leak.
                 }
                 return result;
