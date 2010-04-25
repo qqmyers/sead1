@@ -295,7 +295,7 @@ public class UploadPage extends Page {
                 PreviewWidget preview = new PreviewWidget(uri, GetPreviews.SMALL, "dataset?id=" + uri);
                 uploadedDatasetsTable.setWidget(row, 0, preview);
                 uploadedDatasetsTable.setWidget(row, 1, editableDatasetInfo(result.getDataset()));
-                TagsWidget tags = new TagsWidget(uri, MMDB.dispatchAsync, true); // FIXME title is too big
+                TagsWidget tags = new TagsWidget(uri, MMDB.dispatchAsync, false);
                 uploadedDatasetsTable.setWidget(row, 2, tags);
                 Anchor hideAnchor = new Anchor("Hide");
                 hideAnchor.addClickHandler(new ClickHandler() {

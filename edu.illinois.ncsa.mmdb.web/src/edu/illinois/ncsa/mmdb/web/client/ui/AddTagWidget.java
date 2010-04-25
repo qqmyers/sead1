@@ -70,7 +70,7 @@ public class AddTagWidget extends Composite {
         tagBox.setWidth("100px");
         layout.add(tagBox);
 
-        submitLink = new Anchor("Add");
+        submitLink = new Anchor("Add tag(s)");
 
         submitLink.addStyleName("addTagsLink");
 

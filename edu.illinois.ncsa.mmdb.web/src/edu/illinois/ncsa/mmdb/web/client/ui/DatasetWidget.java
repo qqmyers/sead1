@@ -246,30 +246,30 @@ public class DatasetWidget extends Composite {
             @Override
             public int compare(PreviewBean o1, PreviewBean o2)
                 {
-                    // sort by type
-                    if (o1.getClass() != o2.getClass()) {
-                        if (o1 instanceof PreviewImageBean) {
-                            return -1;
-                        }
-                        if (o2 instanceof PreviewImageBean) {
-                            return +1;
-                        }
-                        if (o1 instanceof PreviewPyramidBean) {
-                            return -1;
-                        }
-                        if (o2 instanceof PreviewPyramidBean) {
-                            return +1;
-                        }
-                        if (o1 instanceof PreviewVideoBean) {
-                            return -1;
-                        }
-                        if (o2 instanceof PreviewVideoBean) {
-                            return +1;
-                        }
+                // sort by type
+                if (o1.getClass() != o2.getClass()) {
+                    if (o1 instanceof PreviewImageBean) {
+                        return -1;
                     }
-                    // don't care at this point
-                    return 0;
+                    if (o2 instanceof PreviewImageBean) {
+                        return +1;
+                    }
+                    if (o1 instanceof PreviewPyramidBean) {
+                        return -1;
+                    }
+                    if (o2 instanceof PreviewPyramidBean) {
+                        return +1;
+                    }
+                    if (o1 instanceof PreviewVideoBean) {
+                        return -1;
+                    }
+                    if (o2 instanceof PreviewVideoBean) {
+                        return +1;
+                    }
                 }
+                // don't care at this point
+                return 0;
+            }
         });
 
         // title
@@ -487,24 +487,24 @@ public class DatasetWidget extends Composite {
             @Override
             public void onFailure(Throwable caught)
                 {
-                    GWT.log("Error checking for admin privileges", caught);
-                }
+                GWT.log("Error checking for admin privileges", caught);
+            }
 
             @Override
             public void onSuccess(HasPermissionResult permresult)
                 {
-                    if (permresult.isPermitted()) {
-                        Anchor extractAnchor = new Anchor("Rerun Extraction");
-                        extractAnchor.addStyleName("datasetActionLink");
-                        extractAnchor.addClickHandler(new ClickHandler() {
-                            public void onClick(ClickEvent event)
+                if (permresult.isPermitted()) {
+                    Anchor extractAnchor = new Anchor("Rerun Extraction");
+                    extractAnchor.addStyleName("datasetActionLink");
+                    extractAnchor.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event)
                             {
-                                showRerunExtraction();
-                            }
-                        });
-                        actionsPanel.add(extractAnchor);
-                    }
+                            showRerunExtraction();
+                        }
+                    });
+                    actionsPanel.add(extractAnchor);
                 }
+            }
         });
 
         // show preview selection
@@ -520,13 +520,13 @@ public class DatasetWidget extends Composite {
                 label = "Preview";
 
             } else if (pb instanceof PreviewPyramidBean) {
-                label = "Zoomable";
+                label = "Zoom in";
 
             } else if (pb instanceof PreviewVideoBean) {
-                label = "Video";
+                label = "Play video";
 
             } else {
-                label = "Unknown";
+                label = "Unknown"; // FIXME maybe "other" would be more user-friendly?
                 GWT.log("Unknown preview bean " + pb);
             }
 
@@ -536,8 +536,8 @@ public class DatasetWidget extends Composite {
             anchor.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event)
                     {
-                        showPreview(finalpb);
-                    }
+                    showPreview(finalpb);
+                }
             });
             previewsPanel.add(anchor);
         }
@@ -599,20 +599,20 @@ public class DatasetWidget extends Composite {
                 service.execute(new ExtractionService(uri), new AsyncCallback<ExtractionServiceResult>() {
                     public void onFailure(Throwable caught)
                         {
-                            GWT.log("Error submitting extraction job", caught);
-                        }
+                        GWT.log("Error submitting extraction job", caught);
+                    }
 
                     public void onSuccess(ExtractionServiceResult result)
                         {
-                            GWT.log("Success submitting extraction job " + result.getJobid(), null);
-                            ConfirmDialog dialog = new ConfirmDialog("Refresh Page", "Extraction resubmitted, should page be refreshed now, or later? (it can take a few minutes before results show up)");
-                            dialog.addConfirmHandler(new ConfirmHandler() {
-                                public void onConfirm(ConfirmEvent event) {
-                                    showDataset(uri);
-                                }
-                            });
-                            dialog.show();
-                        }
+                        GWT.log("Success submitting extraction job " + result.getJobid(), null);
+                        ConfirmDialog dialog = new ConfirmDialog("Refresh Page", "Extraction resubmitted, should page be refreshed now, or later? (it can take a few minutes before results show up)");
+                        dialog.addConfirmHandler(new ConfirmHandler() {
+                            public void onConfirm(ConfirmEvent event) {
+                                showDataset(uri);
+                            }
+                        });
+                        dialog.show();
+                    }
                 });
             }
         });
@@ -795,30 +795,30 @@ public class DatasetWidget extends Composite {
     private void loadDerivedFrom(final String uri, final int level) {
         service.execute(new GetDerivedFrom(uri),
                 new AsyncCallback<GetDerivedFromResult>() {
-                    @Override
-                    public void onFailure(Throwable arg0) {
-                        // TODO Auto-generated method stub
-                    }
+            @Override
+            public void onFailure(Throwable arg0) {
+                // TODO Auto-generated method stub
+            }
 
-                    @Override
-                    public void onSuccess(GetDerivedFromResult arg0) {
-                        List<DatasetBean> df = arg0.getDerivedFrom();
-                        if (df.size() > 0) {
-                            if (derivedDatasetsWidget == null) {
-                                derivedDatasetsWidget = new DerivedDatasetsWidget();
-                                rightColumn.add(derivedDatasetsWidget);
-                            }
-                            if (derivedDatasetsWidget != null) {
-                                for (DatasetBean d : df ) {
-                                    derivedDatasetsWidget.addDataset(d);
-                                    if (level > 0) {
-                                        loadDerivedFrom(d.getUri(), level - 1);
-                                    }
-                                }
+            @Override
+            public void onSuccess(GetDerivedFromResult arg0) {
+                List<DatasetBean> df = arg0.getDerivedFrom();
+                if (df.size() > 0) {
+                    if (derivedDatasetsWidget == null) {
+                        derivedDatasetsWidget = new DerivedDatasetsWidget();
+                        rightColumn.add(derivedDatasetsWidget);
+                    }
+                    if (derivedDatasetsWidget != null) {
+                        for (DatasetBean d : df ) {
+                            derivedDatasetsWidget.addDataset(d);
+                            if (level > 0) {
+                                loadDerivedFrom(d.getUri(), level - 1);
                             }
                         }
                     }
-                });
+                }
+            }
+        });
     }
 
     /**
@@ -833,18 +833,18 @@ public class DatasetWidget extends Composite {
         service.execute(new AddToCollection(value, datasets),
                 new AsyncCallback<AddToCollectionResult>() {
 
-                    @Override
-                    public void onFailure(Throwable arg0) {
-                        GWT.log("Error adding dataset to collection", arg0);
-                    }
+            @Override
+            public void onFailure(Throwable arg0) {
+                GWT.log("Error adding dataset to collection", arg0);
+            }
 
-                    @Override
-                    public void onSuccess(AddToCollectionResult arg0) {
-                        GWT.log("Datasets successfully added to collection",
-                                null);
-                        loadCollections();
-                    }
-                });
+            @Override
+            public void onSuccess(AddToCollectionResult arg0) {
+                GWT.log("Datasets successfully added to collection",
+                        null);
+                loadCollections();
+            }
+        });
     }
 
     private void loadMetadata() {
@@ -852,62 +852,62 @@ public class DatasetWidget extends Composite {
             service.execute(new GetMetadata(uri),
                     new AsyncCallback<GetMetadataResult>() {
 
-                        @Override
-                        public void onFailure(Throwable arg0) {
-                            GWT.log("Error retrieving metadata about dataset "
-                                    + uri, null);
+                @Override
+                public void onFailure(Throwable arg0) {
+                    GWT.log("Error retrieving metadata about dataset "
+                            + uri, null);
+                }
+
+                @Override
+                public void onSuccess(GetMetadataResult arg0) {
+                    List<Metadata> metadata = arg0.getMetadata();
+                    Collections.sort(metadata);
+                    String category = "";
+                    for (Metadata tuple : metadata ) {
+                        if (!category.equals(tuple.getCategory())) {
+                            int row = informationTable.getRowCount() + 1;
+                            informationTable.setHTML(row, 0, "<b>" + tuple.getCategory() + "</b>");
+                            informationTable.setText(row, 1, ""); //$NON-NLS-1$
+                            informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
+                            category = tuple.getCategory();
+                        }
+                        int row = informationTable.getRowCount();
+                        informationTable.setText(row, 0, tuple.getLabel());
+                        informationTable.setText(row, 1, tuple.getValue());
+
+                        // formatting
+                        informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
+                        informationTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
+                        if (row % 2 == 0) {
+                            informationTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
+                        } else {
+                            informationTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
                         }
 
-                        @Override
-                        public void onSuccess(GetMetadataResult arg0) {
-                            List<Metadata> metadata = arg0.getMetadata();
-                            Collections.sort(metadata);
-                            String category = "";
-                            for (Metadata tuple : metadata ) {
-                                if (!category.equals(tuple.getCategory())) {
-                                    int row = informationTable.getRowCount() + 1;
-                                    informationTable.setHTML(row, 0, "<b>" + tuple.getCategory() + "</b>");
-                                    informationTable.setText(row, 1, ""); //$NON-NLS-1$
-                                    informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
-                                    category = tuple.getCategory();
-                                }
-                                int row = informationTable.getRowCount();
-                                informationTable.setText(row, 0, tuple.getLabel());
-                                informationTable.setText(row, 1, tuple.getValue());
-
-                                // formatting
-                                informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
-                                informationTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
-                                if (row % 2 == 0) {
-                                    informationTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
-                                } else {
-                                    informationTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
-                                }
-
-                                // extra metadata to display in info
-                                if ("Extractor".equals(tuple.getCategory()) && "Image Size".equals(tuple.getLabel())) {
-                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                                    lbl.addStyleName("metadataEntry");
-                                    infoPanel.add(lbl);
-                                }
-                                if ("FFMPEG".equals(tuple.getCategory()) && "Video Duration".equals(tuple.getLabel())) {
-                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                                    lbl.addStyleName("metadataEntry");
-                                    infoPanel.add(lbl);
-                                }
-                                if ("FFMPEG".equals(tuple.getCategory()) && "Video FPS".equals(tuple.getLabel())) {
-                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                                    lbl.addStyleName("metadataEntry");
-                                    infoPanel.add(lbl);
-                                }
-                                if ("FFMPEG".equals(tuple.getCategory()) && "Video Size".equals(tuple.getLabel())) {
-                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                                    lbl.addStyleName("metadataEntry");
-                                    infoPanel.add(lbl);
-                                }
-                            }
+                        // extra metadata to display in info
+                        if ("Extractor".equals(tuple.getCategory()) && "Image Size".equals(tuple.getLabel())) {
+                            Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                            lbl.addStyleName("metadataEntry");
+                            infoPanel.add(lbl);
                         }
-                    });
+                        if ("FFMPEG".equals(tuple.getCategory()) && "Video Duration".equals(tuple.getLabel())) {
+                            Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                            lbl.addStyleName("metadataEntry");
+                            infoPanel.add(lbl);
+                        }
+                        if ("FFMPEG".equals(tuple.getCategory()) && "Video FPS".equals(tuple.getLabel())) {
+                            Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                            lbl.addStyleName("metadataEntry");
+                            infoPanel.add(lbl);
+                        }
+                        if ("FFMPEG".equals(tuple.getCategory()) && "Video Size".equals(tuple.getLabel())) {
+                            Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                            lbl.addStyleName("metadataEntry");
+                            infoPanel.add(lbl);
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -918,44 +918,44 @@ public class DatasetWidget extends Composite {
                 @Override
                 public void onFailure(Throwable arg0)
                     {
-                        GWT.log("Error retrieving geolocations for " + uri, arg0);
+                    GWT.log("Error retrieving geolocations for " + uri, arg0);
 
-                    }
+                }
 
                 @Override
                 public void onSuccess(GetGeoPointResult arg0)
                     {
-                        if (arg0.getGeoPoints().isEmpty()) {
-                            return;
-                        }
-
-                        MapWidget mapWidget = new MapWidget();
-                        mapWidget.setSize("230px", "230px");
-                        mapWidget.setUIToDefault();
-                        mapWidget.setVisible(false);
-
-                        FlowPanel mapPanel = new FlowPanel();
-                        mapPanel.addStyleName("datasetRightColSection");
-                        Label mapHeader = new Label("Location");
-                        mapHeader.addStyleName("datasetRightColHeading");
-                        mapPanel.add(mapHeader);
-                        mapPanel.add(mapWidget);
-                        rightColumn.add(mapPanel);
-
-                        // drop marker on the map
-                        LatLng center = LatLng.newInstance(0, 0);
-                        for (GeoPointBean gpb : arg0.getGeoPoints() ) {
-                            MarkerOptions options = MarkerOptions.newInstance();
-                            options.setTitle("lat=" + gpb.getLatitude() + " lon=" + gpb.getLongitude() + " alt=" + gpb.getAltitude());
-                            LatLng loc = LatLng.newInstance(gpb.getLatitude(), gpb.getLongitude());
-                            mapWidget.addOverlay(new Marker(loc, options));
-                            center = loc;
-                        }
-
-                        mapWidget.setCenter(center, 15);
-                        mapWidget.setVisible(true);
-                        mapWidget.checkResizeAndCenter();
+                    if (arg0.getGeoPoints().isEmpty()) {
+                        return;
                     }
+
+                    MapWidget mapWidget = new MapWidget();
+                    mapWidget.setSize("230px", "230px");
+                    mapWidget.setUIToDefault();
+                    mapWidget.setVisible(false);
+
+                    FlowPanel mapPanel = new FlowPanel();
+                    mapPanel.addStyleName("datasetRightColSection");
+                    Label mapHeader = new Label("Location");
+                    mapHeader.addStyleName("datasetRightColHeading");
+                    mapPanel.add(mapHeader);
+                    mapPanel.add(mapWidget);
+                    rightColumn.add(mapPanel);
+
+                    // drop marker on the map
+                    LatLng center = LatLng.newInstance(0, 0);
+                    for (GeoPointBean gpb : arg0.getGeoPoints() ) {
+                        MarkerOptions options = MarkerOptions.newInstance();
+                        options.setTitle("lat=" + gpb.getLatitude() + " lon=" + gpb.getLongitude() + " alt=" + gpb.getAltitude());
+                        LatLng loc = LatLng.newInstance(gpb.getLatitude(), gpb.getLongitude());
+                        mapWidget.addOverlay(new Marker(loc, options));
+                        center = loc;
+                    }
+
+                    mapWidget.setCenter(center, 15);
+                    mapWidget.setVisible(true);
+                    mapWidget.checkResizeAndCenter();
+                }
             });
         }
     }
