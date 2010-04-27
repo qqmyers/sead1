@@ -13,18 +13,26 @@ DB_PASS=SecretPassword
 
 FOLDER=/home/mmdb
 
+# architecture
+# win32.win32.x86, linux.gtk.x86, linux.gtk.x86_64, macosx.cocoa.x86 
+ARCH=linux.gtk.x86_64
+# how files are distributed
+# windows == zip
+# others = tar.gz
+PACK=tar.gz
+
 # key for googlemap default is for ncsa.uiuc.edu
-#GOOGLEMAPKEY=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag
+NCSA_KEY=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag
 # uncomment the following line to get a ncsa.illinois.edu key
 #GOOGLEMAPKEY=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRReev6glONoxxqycIC4jgpEP874oRS7hBpD4PdOEFkanKpF-I8YpbHjkw
 
-# O.4 release
-#EXTRACTOR_URL=http://isda.ncsa.uiuc.edu/build/mmdb/0.4/extractor/Extractor-linux.gtk.x86_64.tar.gz
-#MMDB_URL=http://isda.ncsa.uiuc.edu/build/mmdb/0.4/web/mmdb.war
+# O.5 release
+#EXTRACTOR_URL=http://medici.ncsa.illinois.edu/downloads.php?project=MMDB&category=extractor&version=v0.5&file=Extractor-$ARCH.$PACK
+#MMDB_URL=http://medici.ncsa.illinois.edu/downloads.php?project=MMDB&category=web&version=v0.5&file=mmdb.war
 
 # latest
-EXTRACTOR_URL=http://isda.ncsa.uiuc.edu/build/mmdb/trunk/extractor/Extractor-linux.gtk.x86_64.tar.gz
-MMDB_URL=http://isda.ncsa.uiuc.edu/build/mmdb/trunk/web/mmdb.war
+EXTRACTOR_URL=http://medici.ncsa.illinois.edu/downloads.php?project=MMDB&category=extractor&version=unstable&file=Extractor-$ARCH.$PACK
+MMDB_URL=http://medici.ncsa.illinois.edu/downloads.php?project=MMDB&category=web&version=unstable&file=mmdb.war
 
 # ----------------------------------------------------------------------
 if [ -e /etc/redhat-release ]; then
@@ -235,7 +243,7 @@ cp server.properties war/WEB-INF/classes
 EOF
 if [ "$GOOGLEMAPKEY" != "" ]; then
   $DRYRUN cat >> updatewar.sh << EOF
-  sed -i -e "s#sensor=false&amp;key=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag#sensor=false&amp;key=$GOOGLEMAPKEY#g" war/mmdb.html
+sed -i -e "s#key=$NCSA_KEY#key=$GOOGLEMAPKEY#g" war/mmdb.html
 EOF
 fi
 $DRYRUN cat >> updatewar.sh << EOF
@@ -358,7 +366,7 @@ $DRYRUN sed -i.bak -e "s#mail.from=lmarini@ncsa.illinois.edu#mail.from=$MAINTAIN
                    -e "s/#user.0.email=/user.0.email=$MAINTAINER/g" \
                    -e "s@#?search.index=.*@search.index=$FOLDER/lucene@g" server.properties
 if [ "$GOOGLEMAPKEY" != "" ]; then
-  $DRYRUN sed -i -e "s#sensor=false&amp;key=ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag#sensor=false&amp;key=$GOOGLEMAPKEY#g" war/mmdb.html
+  $DRYRUN sed -i -e "s#key=$NCSA_KEY#key=$GOOGLEMAPKEY#g" war/mmdb.html
 fi
 $DRYRUN $TOMCAT_SCRIPT stop
 if [ -e $TOMCAT_DIR/webapps/mmdb ]; then
