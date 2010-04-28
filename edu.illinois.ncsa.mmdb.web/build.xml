@@ -40,7 +40,7 @@
 		<delete dir="${war}" />
 	</target>
 
-	<target name="hudson" depends="clean, tupeloidsa, cetbean, prepare-hudson, mmdb-dev, war, checkstyle" />
+	<target name="hudson" depends="clean, tupeloisda, cetbean, prepare-hudson, mmdb-dev, war, checkstyle" />
 
 	<target name="prepare-hudson" depends="resources, copy_mmdb_html" description="setup for hudson build and deployment">
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
@@ -61,19 +61,19 @@
 	</target>
 	
 	<!-- copy the tupelo jar files -->
-	<target name="tupeloidsa" description="Copy the latest tupelo jar on hudson">
+	<target name="tupeloisda" description="Copy the latest tupelo jar on hudson">
 		<delete  dir="war/WEB-INF/lib" includes="**/tupelo*.jar"/>
 		<copy todir="war/WEB-INF/lib" preservelastmodified="true" overwrite="true" verbose="true" flatten="true">
 			<fileset dir="/home/hudson/work/jobs/Tupelo 2.5/lastSuccessful">
-				<include name="tupelo-client-2.5.jar" />
-				<include name="tupelo-jena-2.5.jar" />
-				<include name="tupelo-kernel-2.5.jar" />
-				<include name="tupelo-mysql-2.5.jar" />
-				<include name="tupelo-rdf-ntriples-2.5.jar" />
-				<include name="tupelo-server-2.5.jar" />
-				<include name="tupelo-sparql-2.5.jar" />
-				<include name="tupelo-sql-2.5.jar" />
-				<include name="tupelo-util-2.5.jar" />
+				<include name="**/tupelo-client-2.5.jar" />
+				<include name="**/tupelo-jena-2.5.jar" />
+				<include name="**/tupelo-kernel-2.5.jar" />
+				<include name="**/tupelo-mysql-2.5.jar" />
+				<include name="**/tupelo-rdf-ntriples-2.5.jar" />
+				<include name="**/tupelo-server-2.5.jar" />
+				<include name="**/tupelo-sparql-2.5.jar" />
+				<include name="**/tupelo-sql-2.5.jar" />
+				<include name="**/tupelo-util-2.5.jar" />
 			</fileset>
 		</copy>
 	</target>
@@ -82,15 +82,15 @@
 		<delete  dir="war/WEB-INF/lib" includes="**/tupelo*.jar"/>
 		<copy todir="war/WEB-INF/lib" preservelastmodified="true" overwrite="true" verbose="true" flatten="true">
 			<fileset dir="\\isda\shared\build\tupelo\2.5">
-				<include name="tupelo-client-2.5.jar" />
-				<include name="tupelo-jena-2.5.jar" />
-				<include name="tupelo-kernel-2.5.jar" />
-				<include name="tupelo-mysql-2.5.jar" />
-				<include name="tupelo-rdf-ntriples-2.5.jar" />
-				<include name="tupelo-server-2.5.jar" />
-				<include name="tupelo-sparql-2.5.jar" />
-				<include name="tupelo-sql-2.5.jar" />
-				<include name="tupelo-util-2.5.jar" />
+				<include name="**/tupelo-client-2.5.jar" />
+				<include name="**/tupelo-jena-2.5.jar" />
+				<include name="**/tupelo-kernel-2.5.jar" />
+				<include name="**/tupelo-mysql-2.5.jar" />
+				<include name="**/tupelo-rdf-ntriples-2.5.jar" />
+				<include name="**/tupelo-server-2.5.jar" />
+				<include name="**/tupelo-sparql-2.5.jar" />
+				<include name="**/tupelo-sql-2.5.jar" />
+				<include name="**/tupelo-util-2.5.jar" />
 			</fileset>
 		</copy>
 	</target>
