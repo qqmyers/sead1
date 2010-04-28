@@ -38,50 +38,35 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server;
 
-import javax.security.auth.Subject;
-import javax.security.auth.login.LoginContext;
-import javax.security.auth.login.LoginException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.illinois.ncsa.bard.jaas.UsernamePasswordContextHandler;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 
 public class Authentication {
-    private static final String JAAS_CONFIG = "/jaas.config";
-
     /** Commons logging **/
-    private static Log          log         = LogFactory.getLog(Authentication.class);
+    private static Log log = LogFactory.getLog(Authentication.class);
 
     public boolean authenticate(String username, String password) {
-        log.debug("LOGIN: Authenticating '" + username + "' via JAAS");
+        log.debug("LOGIN: Authenticating attempt for " + username);
 
         if (username.length() == 0) {
             return false;
         }
 
-        String loc = TupeloStore.findFile(JAAS_CONFIG).toExternalForm();
-
-        // Workaround SUN's workaround, hopefully this is only a problem with a space.
-        if (loc.startsWith("file:")) {
-            loc = loc.replace("%20", " ");
-        }
-
-        System.setProperty("java.security.auth.login.config", loc);
-        UsernamePasswordContextHandler handler = new UsernamePasswordContextHandler(username, password, TupeloStore.getInstance().getContext());
-
-        Subject subject = new Subject();
-        LoginContext ctx = null;
-
         try {
-            ctx = new LoginContext("mmdb", subject, handler);
-            ctx.login();
-            log.debug("LOGIN: JAAS authentication suceeded for " + username);
-        } catch (LoginException ex) {
-            log.debug("LOGIN: JAAS authentication FAILED for " + username, ex);
+            ContextAuthentication ca = new ContextAuthentication(TupeloStore.getInstance().getContext());
+            if (ca.checkPassword(username, password)) {
+                log.debug("LOGIN: authentication suceeded for " + username);
+                return true;
+            } else {
+                log.debug("LOGIN: authentication failed for " + username);
+                return false;
+            }
+        } catch (AuthenticationException ex) {
+            log.debug("LOGIN: authentication FAILED for " + username, ex);
             return false;
         }
-
-        return true;
     }
 }
