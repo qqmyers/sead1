@@ -17,6 +17,11 @@
 	
 	<property name="googlemap" value="ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag" />
 	
+	<condition property="deps" value=".." else="../plugins">
+		<available file="../edu.uiuc.ncsa.cet.bean/build.properties" />
+	</condition>
+		
+	
 	<available file="war/mmdb.tmp" property="mmdb_tmp_exists" />
 
 	<path id="classpath">
@@ -60,8 +65,15 @@
 		<delete  dir="war/WEB-INF/lib" includes="**/tupelo*.jar"/>
 		<copy todir="war/WEB-INF/lib" preservelastmodified="true" overwrite="true" verbose="true" flatten="true">
 			<fileset dir="/home/hudson/work/jobs/Tupelo 2.5/lastSuccessful">
-				<include name="**/tupelo*.jar"/>
-				<exclude name="**/tupelo*-2.5-tests.jar"/>
+				<include name="tupelo-client-2.5.jar" />
+				<include name="tupelo-jena-2.5.jar" />
+				<include name="tupelo-kernel-2.5.jar" />
+				<include name="tupelo-mysql-2.5.jar" />
+				<include name="tupelo-rdf-ntriples-2.5.jar" />
+				<include name="tupelo-server-2.5.jar" />
+				<include name="tupelo-sparql-2.5.jar" />
+				<include name="tupelo-sql-2.5.jar" />
+				<include name="tupelo-util-2.5.jar" />
 			</fileset>
 		</copy>
 	</target>
@@ -70,8 +82,15 @@
 		<delete  dir="war/WEB-INF/lib" includes="**/tupelo*.jar"/>
 		<copy todir="war/WEB-INF/lib" preservelastmodified="true" overwrite="true" verbose="true" flatten="true">
 			<fileset dir="\\isda\shared\build\tupelo\2.5">
-				<include name="**/tupelo*.jar"/>
-				<exclude name="**/*-2.5-tests.jar"/>
+				<include name="tupelo-client-2.5.jar" />
+				<include name="tupelo-jena-2.5.jar" />
+				<include name="tupelo-kernel-2.5.jar" />
+				<include name="tupelo-mysql-2.5.jar" />
+				<include name="tupelo-rdf-ntriples-2.5.jar" />
+				<include name="tupelo-server-2.5.jar" />
+				<include name="tupelo-sparql-2.5.jar" />
+				<include name="tupelo-sql-2.5.jar" />
+				<include name="tupelo-util-2.5.jar" />
 			</fileset>
 		</copy>
 	</target>
@@ -82,12 +101,12 @@
 		<delete dir="beanclass" />
 		<mkdir dir="beanclass" />
 		<javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-			<src path="../edu.uiuc.ncsa.cet.bean/src" />
+			<src path="${deps}/edu.uiuc.ncsa.cet.bean/src" />
 			<exclude name="**/sdl/**/*.java" />
 		</javac>
 		<jar jarfile="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.jar">
 			<fileset dir="beanclass" />
-			<fileset dir="../edu.uiuc.ncsa.cet.bean/src">
+			<fileset dir="${deps}/edu.uiuc.ncsa.cet.bean/src">
 				<exclude name="**/sdl/**/*.java" />
 			</fileset>
 		</jar>
@@ -96,7 +115,7 @@
 		<delete dir="beanclass" />
 		<mkdir dir="beanclass" />
 		<javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-			<src path="../edu.uiuc.ncsa.cet.bean.tupelo/src" />
+			<src path="${deps}/edu.uiuc.ncsa.cet.bean.tupelo/src" />
 			<classpath>
 				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
 			</classpath>
@@ -248,6 +267,9 @@
 	</target>
 
 	<target name="war" depends="clean, compile, gwtc, resources" description="builds the war file">
-		<zip destfile="${war}" basedir="war" />
+		<zip destfile="${war}" basedir="war" >
+			<exclude name="WEB-INF/lib/commons-logging.jar" />
+			<exclude name="WEB-INF/lib/mysql-connector-java-5.0.4.jar" />
+		</zip>
 	</target>
 </project>
