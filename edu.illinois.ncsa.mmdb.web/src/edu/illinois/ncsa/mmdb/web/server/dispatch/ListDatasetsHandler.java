@@ -183,7 +183,7 @@ public class ListDatasetsHandler implements
             try {
                 BeanSession beanSession = TupeloStore.getInstance()
                         .getBeanSession();
-                final List<DatasetBean> result = dbu.get(uris);
+                final List<DatasetBean> result = dbu.get(uris, true); // we know they're not deleted already, hence getDeleted=true
                 long now = System.currentTimeMillis();
                 log.debug("listed " + result.size() + " dataset(s) in "
                         + (now - then) + "ms (" + (between - then) + "/"
