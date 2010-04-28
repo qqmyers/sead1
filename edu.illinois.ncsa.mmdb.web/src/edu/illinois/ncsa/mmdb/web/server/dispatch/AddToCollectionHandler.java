@@ -64,54 +64,54 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
  * Add a set of resources to a collection.
  * 
  * @author Luigi Marini
- *
+ * 
  */
-public class AddToCollectionHandler implements ActionHandler<AddToCollection, AddToCollectionResult>{
+public class AddToCollectionHandler implements ActionHandler<AddToCollection, AddToCollectionResult> {
 
-	/** Commons logging **/
-	private static Log log = LogFactory.getLog(AddToCollectionHandler.class);
-	
-	@Override
-	public AddToCollectionResult execute(AddToCollection arg0,
-			ExecutionContext arg1) throws ActionException {
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog(AddToCollectionHandler.class);
 
-		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-		
-		CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
-		
-		Collection<String> resourcesString = arg0.getResources();
-		
-		Collection<Resource> resources = new HashSet<Resource>();
-		
-		for(String uri : resourcesString) {
-			resources.add(Resource.uriRef(uri));
-			TupeloStore.getInstance().changed(uri);
-		}
-		
-		try {
-			CollectionBean collectionBean = cbu.get(arg0.getCollectionUri());
-			cbu.addToCollection(collectionBean, resources);
-		} catch (OperatorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return new AddToCollectionResult();
-	}
+    @Override
+    public AddToCollectionResult execute(AddToCollection arg0,
+            ExecutionContext arg1) throws ActionException {
 
-	@Override
-	public Class<AddToCollection> getActionType() {
-		return AddToCollection.class;
-	}
+        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
-	@Override
-	public void rollback(AddToCollection arg0, AddToCollectionResult arg1,
-			ExecutionContext arg2) throws ActionException {
-		// TODO Auto-generated method stub
-		
-	}
+        CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+
+        Collection<String> resourcesString = arg0.getResources();
+
+        Collection<Resource> resources = new HashSet<Resource>();
+
+        for (String uri : resourcesString ) {
+            resources.add(Resource.uriRef(uri));
+            TupeloStore.getInstance().changed(uri);
+        }
+
+        try {
+            CollectionBean collectionBean = cbu.get(arg0.getCollectionUri(), true);
+            cbu.addToCollection(collectionBean, resources);
+        } catch (OperatorException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return new AddToCollectionResult();
+    }
+
+    @Override
+    public Class<AddToCollection> getActionType() {
+        return AddToCollection.class;
+    }
+
+    @Override
+    public void rollback(AddToCollection arg0, AddToCollectionResult arg1,
+            ExecutionContext arg2) throws ActionException {
+        // TODO Auto-generated method stub
+
+    }
 
 }

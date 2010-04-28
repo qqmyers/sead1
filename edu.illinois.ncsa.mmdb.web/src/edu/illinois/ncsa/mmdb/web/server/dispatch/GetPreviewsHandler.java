@@ -59,58 +59,58 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
  * 
  */
 public class GetPreviewsHandler implements
-		ActionHandler<GetPreviews, GetPreviewsResult> {
+        ActionHandler<GetPreviews, GetPreviewsResult> {
 
-	/** Commons logging **/
-	private static Log log = LogFactory.getLog(GetPreviewsHandler.class);
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog(GetPreviewsHandler.class);
 
-	@Override
-	public GetPreviewsResult execute(GetPreviews getPreviewsAction,
-			ExecutionContext arg1) throws ActionException {
-		
-		PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(TupeloStore
-				.getInstance().getBeanSession());
-		
-		String datasetUri = getPreviewsAction.getUri();
-		
-		GetPreviewsResult result = new GetPreviewsResult();
-		
-		try {
-			if (datasetUri != null) {
-				String smallPreview = TupeloStore.getInstance().getPreviewUri(datasetUri, GetPreviews.SMALL);
-				String largePreview = TupeloStore.getInstance().getPreviewUri(datasetUri, GetPreviews.LARGE);
-				// in the following case this is a collection
-				String collectionPreview = TupeloStore.getInstance().getPreviewUri(datasetUri, GetPreviews.BADGE);
-				if (smallPreview != null) {
-					result.setPreview(GetPreviews.SMALL, pibu.get(smallPreview));
-				}
-				if (largePreview != null) {
-					result.setPreview(GetPreviews.LARGE, pibu.get(largePreview));
-				}
-				if(collectionPreview != null) {
-					result.setPreview(GetPreviews.BADGE, pibu.get(collectionPreview));
-				}
-				if (smallPreview == null && largePreview == null && collectionPreview == null) { // no previews.
-					result.setStopAsking(RestServlet.shouldCache404(datasetUri));
-				}
-			}
-		} catch (Exception x) {
-			log.error("Error getting previews", x);
-			// FIXME report
-		}
-		return result;
-	}
+    @Override
+    public GetPreviewsResult execute(GetPreviews getPreviewsAction,
+            ExecutionContext arg1) throws ActionException {
 
-	@Override
-	public Class<GetPreviews> getActionType() {
-		return GetPreviews.class;
-	}
+        PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(TupeloStore
+                .getInstance().getBeanSession());
 
-	@Override
-	public void rollback(GetPreviews arg0, GetPreviewsResult arg1,
-			ExecutionContext arg2) throws ActionException {
-		// TODO Auto-generated method stub
+        String datasetUri = getPreviewsAction.getUri();
 
-	}
+        GetPreviewsResult result = new GetPreviewsResult();
+
+        try {
+            if (datasetUri != null) {
+                String smallPreview = TupeloStore.getInstance().getPreviewUri(datasetUri, GetPreviews.SMALL);
+                String largePreview = TupeloStore.getInstance().getPreviewUri(datasetUri, GetPreviews.LARGE);
+                // in the following case this is a collection
+                String collectionPreview = TupeloStore.getInstance().getPreviewUri(datasetUri, GetPreviews.BADGE);
+                if (smallPreview != null) {
+                    result.setPreview(GetPreviews.SMALL, pibu.get(smallPreview, true));
+                }
+                if (largePreview != null) {
+                    result.setPreview(GetPreviews.LARGE, pibu.get(largePreview, true));
+                }
+                if (collectionPreview != null) {
+                    result.setPreview(GetPreviews.BADGE, pibu.get(collectionPreview, true));
+                }
+                if (smallPreview == null && largePreview == null && collectionPreview == null) { // no previews.
+                    result.setStopAsking(RestServlet.shouldCache404(datasetUri));
+                }
+            }
+        } catch (Exception x) {
+            log.error("Error getting previews", x);
+            // FIXME report
+        }
+        return result;
+    }
+
+    @Override
+    public Class<GetPreviews> getActionType() {
+        return GetPreviews.class;
+    }
+
+    @Override
+    public void rollback(GetPreviews arg0, GetPreviewsResult arg1,
+            ExecutionContext arg2) throws ActionException {
+        // TODO Auto-generated method stub
+
+    }
 
 }

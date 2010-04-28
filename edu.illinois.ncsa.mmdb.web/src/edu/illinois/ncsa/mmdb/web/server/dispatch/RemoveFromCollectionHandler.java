@@ -57,47 +57,47 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 
 public class RemoveFromCollectionHandler implements ActionHandler<RemoveFromCollection, RemoveFromCollectionResult> {
 
-	@Override
-	public RemoveFromCollectionResult execute(RemoveFromCollection action,
-			ExecutionContext exc) throws ActionException {
-		
-		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-		CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
-		Collection<String> resourcesString = action.getResources();
-		Collection<Resource> resources = new HashSet<Resource>();
-		
-		for(String uri : resourcesString) {
-			resources.add(Resource.uriRef(uri));
-		}
-		
-		try {
-			CollectionBean collectionBean = cbu.get(action.getCollectionUri());
-			cbu.removeFromCollection(collectionBean, resources);
-			for(Resource r : resources) {
-				TupeloStore.getInstance().changed(r.getString());
-			}
-		} catch (OperatorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return new RemoveFromCollectionResult();
+    @Override
+    public RemoveFromCollectionResult execute(RemoveFromCollection action,
+            ExecutionContext exc) throws ActionException {
 
-	}
+        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+        CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+        Collection<String> resourcesString = action.getResources();
+        Collection<Resource> resources = new HashSet<Resource>();
 
-	@Override
-	public Class<RemoveFromCollection> getActionType() {
-		return RemoveFromCollection.class;
-	}
+        for (String uri : resourcesString ) {
+            resources.add(Resource.uriRef(uri));
+        }
 
-	@Override
-	public void rollback(RemoveFromCollection arg0,
-			RemoveFromCollectionResult arg1, ExecutionContext arg2)
-			throws ActionException {
-		// TODO Auto-generated method stub
-		
-	}
+        try {
+            CollectionBean collectionBean = cbu.get(action.getCollectionUri(), true);
+            cbu.removeFromCollection(collectionBean, resources);
+            for (Resource r : resources ) {
+                TupeloStore.getInstance().changed(r.getString());
+            }
+        } catch (OperatorException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return new RemoveFromCollectionResult();
+
+    }
+
+    @Override
+    public Class<RemoveFromCollection> getActionType() {
+        return RemoveFromCollection.class;
+    }
+
+    @Override
+    public void rollback(RemoveFromCollection arg0,
+            RemoveFromCollectionResult arg1, ExecutionContext arg2)
+            throws ActionException {
+        // TODO Auto-generated method stub
+
+    }
 }
