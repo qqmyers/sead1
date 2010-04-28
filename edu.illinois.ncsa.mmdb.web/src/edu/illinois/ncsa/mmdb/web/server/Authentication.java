@@ -40,7 +40,9 @@ package edu.illinois.ncsa.mmdb.web.server;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.rdf.Resource;
 
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 
@@ -56,8 +58,9 @@ public class Authentication {
         }
 
         try {
+            Resource person = Resource.uriRef(PersonBeanUtil.getPersonID(username));
             ContextAuthentication ca = new ContextAuthentication(TupeloStore.getInstance().getContext());
-            if (ca.checkPassword(username, password)) {
+            if (ca.checkPassword(person, password)) {
                 log.debug("LOGIN: authentication suceeded for " + username);
                 return true;
             } else {
