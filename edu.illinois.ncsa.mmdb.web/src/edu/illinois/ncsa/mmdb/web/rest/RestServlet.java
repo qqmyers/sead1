@@ -318,6 +318,13 @@ public class RestServlet extends AuthenticatedServlet {
     protected void doDoGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
         //dumpHeaders(request); // FIXME debug
+        if (request.getRequestURL().toString().endsWith("checkLogin")) {
+            if (getHttpSessionUser(request) != null) {
+                return;
+            } else {
+                response.setStatus(404); // not "unauthorized"--that will cause the browser to pop up an auth dialog
+            }
+        }
         if (request.getRequestURL().toString().endsWith("logout")) {
             logout(request, response);
             return;

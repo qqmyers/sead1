@@ -374,4 +374,32 @@ public class LoginPage extends Composite {
         Cookies.removeCookie("sessionKey");
         clearBrowserCreds(onSuccess);
     }
+
+    public static void checkRestAuth(final Command onSuccess, final Command onFailure) {
+        String restUrl = "./api/checkLogin";
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+        try {
+            GWT.log("checking login status @ " + restUrl, null);
+            // we need to block.
+            builder.sendRequest("", new RequestCallback() {
+                public void onError(Request request, Throwable exception) {
+                    onFailure.execute();
+                }
+
+                public void onResponseReceived(Request request, Response response) {
+                    // success!
+                    String sessionKey = response.getText();
+                    GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                    if (response.getStatusCode() > 300) {
+                        GWT.log("not authenticated to REST services", null);
+                        onFailure.execute();
+                    } else {
+                        onSuccess.execute();
+                    }
+                }
+            });
+        } catch (RequestException x) {
+            onFailure.execute();
+        }
+    }
 }

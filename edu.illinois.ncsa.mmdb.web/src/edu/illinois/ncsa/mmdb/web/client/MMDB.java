@@ -50,6 +50,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -643,21 +644,36 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     /**
      * If user not logged in redirect to the required login page.
      * 
-     * @return true if logged in already, false if not
      */
     public void checkLogin() {
-        String cookieSID = Cookies.getCookie("sid");
+        boolean loggedIn = true;
+        final String cookieSID = Cookies.getCookie("sid");
         if (cookieSID != null) {
             GWT.log("Sid: " + cookieSID, null);
+        } else {
+            loggedIn = false;
         }
-        String cookieSessionKey = Cookies.getCookie("sessionKey");
+        final String cookieSessionKey = Cookies.getCookie("sessionKey");
         if (cookieSessionKey != null) {
             GWT.log("Session key: " + cookieSessionKey, null);
-        }
-        if (cookieSID != null && cookieSessionKey != null) {
-            login(cookieSID, cookieSessionKey);
         } else {
-            showLoginPage();
+            loggedIn = false;
+        }
+        Command onNotLoggedIn = new Command() {
+            public void execute() {
+                showLoginPage();
+            }
+        };
+        if (!loggedIn) {
+            onNotLoggedIn.execute();
+        } else {
+            // now check REST auth
+            Command onLoggedIn = new Command() {
+                public void execute() {
+                    login(cookieSID, cookieSessionKey); // ?
+                }
+            };
+            LoginPage.checkRestAuth(onLoggedIn, onNotLoggedIn);
         }
     }
 
