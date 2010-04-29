@@ -319,9 +319,12 @@ public class RestServlet extends AuthenticatedServlet {
         //dumpCrap(request); // FIXME debug
         //dumpHeaders(request); // FIXME debug
         if (request.getRequestURL().toString().endsWith("checkLogin")) {
-            if (getHttpSessionUser(request) != null) {
+            String httpSessionUser = getHttpSessionUser(request);
+            if (httpSessionUser != null) {
+                log.debug("REST /checkLogin: HTTP session " + request.getSession().getId() + " is authenticated as " + httpSessionUser);
                 return;
             } else {
+                log.debug("REST /checkLogin: HTTP session " + request.getSession().getId() + " is unauthenticated");
                 response.setStatus(404); // not "unauthorized"--that will cause the browser to pop up an auth dialog
             }
         }

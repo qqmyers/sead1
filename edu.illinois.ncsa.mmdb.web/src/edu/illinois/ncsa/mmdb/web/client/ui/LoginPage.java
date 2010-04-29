@@ -383,15 +383,16 @@ public class LoginPage extends Composite {
             // we need to block.
             builder.sendRequest("", new RequestCallback() {
                 public void onError(Request request, Throwable exception) {
+                    logout(null);
                     onFailure.execute();
                 }
 
                 public void onResponseReceived(Request request, Response response) {
                     // success!
-                    String sessionKey = response.getText();
                     GWT.log("REST auth status code = " + response.getStatusCode(), null);
                     if (response.getStatusCode() > 300) {
                         GWT.log("not authenticated to REST services", null);
+                        logout(null);
                         onFailure.execute();
                     } else {
                         onSuccess.execute();
@@ -399,6 +400,7 @@ public class LoginPage extends Composite {
                 }
             });
         } catch (RequestException x) {
+            logout(null);
             onFailure.execute();
         }
     }
