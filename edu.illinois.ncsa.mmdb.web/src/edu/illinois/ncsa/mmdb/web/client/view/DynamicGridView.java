@@ -40,7 +40,7 @@ public class DynamicGridView extends FlexTable implements Display {
     @Override
     public int insertItem(final String id, String name, String type, Date date, String preview, String size, String authorId) {
 
-        VerticalPanel layoutPanel = new VerticalPanel();
+        final VerticalPanel layoutPanel = new VerticalPanel();
         layoutPanel.addStyleName("dynamicGridElement");
         layoutPanel.setHeight("130px");
         layoutPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -70,7 +70,8 @@ public class DynamicGridView extends FlexTable implements Display {
 
         final int row = this.getRowCount();
 
-        setWidget(numItems / ROW_WIDTH, numItems % ROW_WIDTH, layoutPanel);
+        final int n = numItems;
+        setWidget(n / ROW_WIDTH, n % ROW_WIDTH, layoutPanel);
 
         numItems++;
 

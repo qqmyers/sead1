@@ -28,12 +28,18 @@ public class TagDialogPresenter implements Presenter {
     private final HandlerManager  eventBus;
     private final Display         display;
     private Set<String>           selectedResources;
+    private final boolean         delete;           // should we delete the tags instead?
 
     public TagDialogPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+        this(dispatch, eventBus, display, false);
+    }
+
+    public TagDialogPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display, boolean delete) {
         this.dispatch = dispatch;
         this.eventBus = eventBus;
         this.display = display;
         this.selectedResources = new HashSet<String>();
+        this.delete = delete;
     }
 
     @Override
@@ -70,7 +76,7 @@ public class TagDialogPresenter implements Presenter {
         if (!tagSet.isEmpty()) {
             for (String id : selectedResources ) {
 
-                dispatch.execute(new TagResource(id, tagSet), new AsyncCallback<TagResourceResult>() {
+                dispatch.execute(new TagResource(id, tagSet, delete), new AsyncCallback<TagResourceResult>() {
 
                     @Override
                     public void onFailure(Throwable caught) {

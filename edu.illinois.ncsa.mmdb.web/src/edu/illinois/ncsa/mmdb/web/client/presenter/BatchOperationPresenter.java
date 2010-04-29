@@ -22,6 +22,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
@@ -53,18 +55,6 @@ public class BatchOperationPresenter implements Presenter {
         // selected dataset
         final UserSessionState sessionState = MMDB.getSessionState();
         display.setNumSelected(sessionState.getSelectedDatasets().size());
-        // add tag action
-        display.addMenuAction("Tag", new Command() {
-
-            @Override
-            public void execute() {
-                TagDialogView tagView = new TagDialogView();
-                TagDialogPresenter tagPresenter = new TagDialogPresenter(dispatch, eventBus, tagView);
-                tagPresenter.bind();
-                tagPresenter.setSelectedResources(sessionState.getSelectedDatasets());
-                tagView.show();
-            }
-        });
         // delete items
         display.addMenuAction("Delete", new Command() {
             public void execute() {
@@ -88,6 +78,34 @@ public class BatchOperationPresenter implements Presenter {
                         }
                     }
                 });
+            }
+        });
+        display.addMenuAction("Change license", new Command() {
+            public void execute() {
+                Collection<String> batch = sessionState.getSelectedDatasets();
+                new SetLicenseDialog("Set license for " + batch.size() + " dataset(s)", sessionState.getSelectedDatasets());
+            }
+        });
+        // add tag action
+        display.addMenuAction("Add tag(s)", new Command() {
+
+            @Override
+            public void execute() {
+                TagDialogView tagView = new TagDialogView();
+                TagDialogPresenter tagPresenter = new TagDialogPresenter(dispatch, eventBus, tagView);
+                tagPresenter.bind();
+                tagPresenter.setSelectedResources(sessionState.getSelectedDatasets());
+                tagView.show();
+            }
+        });
+        display.addMenuAction("Remove tag(s)", new Command() {
+            @Override
+            public void execute() {
+                TagDialogView tagView = new TagDialogView();
+                TagDialogPresenter tagPresenter = new TagDialogPresenter(dispatch, eventBus, tagView, true);
+                tagPresenter.bind();
+                tagPresenter.setSelectedResources(sessionState.getSelectedDatasets());
+                tagView.show();
             }
         });
         display.addMenuAction("Add to collection", new Command() {
@@ -116,11 +134,30 @@ public class BatchOperationPresenter implements Presenter {
                 });
             }
         });
-        display.addMenuAction("Change license", new Command() {
+        display.addMenuAction("Remove from collection", new Command() {
+            @Override
             public void execute() {
-                Collection<String> batch = sessionState.getSelectedDatasets();
-                SetLicenseDialog dialog = new SetLicenseDialog("Set license for " + batch.size() + " dataset(s)", sessionState.getSelectedDatasets());
-                // since dispatches are embedded in LicenseWidget, we have no way to close the dialog ...
+                final AddToCollectionDialog atc = new AddToCollectionDialog(MMDB.dispatchAsync);
+                atc.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        final String collectionUri = atc.getSelectedValue();
+                        final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
+                        MMDB.dispatchAsync.execute(new RemoveFromCollection(collectionUri, selectedDatasets),
+                                new AsyncCallback<RemoveFromCollectionResult>() {
+
+                            @Override
+                            public void onFailure(Throwable arg0) {
+                                GWT.log("Error adding dataset(s) to collection", arg0);
+                            }
+
+                            @Override
+                            public void onSuccess(RemoveFromCollectionResult result) {
+                                GWT.log("Dataset(s) successfully removed from collection", null);
+                                atc.hide();
+                            }
+                        });
+                    }
+                });
             }
         });
         // unselect items

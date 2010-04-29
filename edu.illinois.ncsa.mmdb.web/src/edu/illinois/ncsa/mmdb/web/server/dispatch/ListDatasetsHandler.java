@@ -173,16 +173,13 @@ public class ListDatasetsHandler implements
             List<String> uris;
             long then = System.currentTimeMillis(); //
             try {
-                uris = listDatasetUris(orderBy, desc, limit, offset,
-                        inCollection, dbu);
+                uris = listDatasetUris(orderBy, desc, limit, offset, inCollection, dbu);
             } catch (Exception x) {
                 log.error("unable to list datasets", x);
                 throw x;
             }
             long between = System.currentTimeMillis();
             try {
-                BeanSession beanSession = TupeloStore.getInstance()
-                        .getBeanSession();
                 final List<DatasetBean> result = dbu.get(uris, true); // we know they're not deleted already, hence getDeleted=true
                 long now = System.currentTimeMillis();
                 log.debug("listed " + result.size() + " dataset(s) in "
@@ -208,14 +205,13 @@ public class ListDatasetsHandler implements
                                     }
                                 }
                             }
-                            // now fetch their previews
+                            // now fetch their previews, so they'll be cached
                             for (String ds : previewsToFetch ) {
                                 TupeloStore.getInstance().getPreview(ds, GetPreviews.SMALL);
                             }
                             t.cancel();
                         }
                     }, 1000);
-                    // FIXME make sure the timer doesn't leak.
                 }
                 return result;
             } catch (OperatorException x) {
