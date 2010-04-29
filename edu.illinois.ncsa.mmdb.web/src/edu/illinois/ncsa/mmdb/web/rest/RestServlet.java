@@ -326,6 +326,7 @@ public class RestServlet extends AuthenticatedServlet {
             } else {
                 log.debug("REST /checkLogin: HTTP session " + request.getSession().getId() + " is unauthenticated");
                 response.setStatus(404); // not "unauthorized"--that will cause the browser to pop up an auth dialog
+                return; // do not proceed with authentication!
             }
         }
         if (request.getRequestURL().toString().endsWith("logout")) {
