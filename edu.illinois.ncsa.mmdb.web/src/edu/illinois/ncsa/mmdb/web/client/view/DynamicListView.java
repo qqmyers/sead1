@@ -1,7 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.client.view;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Set;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -14,23 +13,26 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicListPresenter.Display;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
 /**
+ * Show contents of a {@link DynamicTablePresenter} as a list. One item per row.
  * 
  * @author Luigi Marini
  * 
  */
 public class DynamicListView extends FlexTable implements Display {
 
-    private final HashMap<CheckBox, String> checkBoxes;
-    private final static DateTimeFormat     DATE_TIME_FORMAT = DateTimeFormat.getShortDateTimeFormat();
+    //    private final HashMap<CheckBox, String> checkBoxes;
+    private final static DateTimeFormat DATE_TIME_FORMAT  = DateTimeFormat.getShortDateTimeFormat();
+    public static final int             DEFAULT_PAGE_SIZE = 10;
 
     public DynamicListView() {
         super();
         addStyleName("dynamicTableList");
-        checkBoxes = new HashMap<CheckBox, String>();
+        //        checkBoxes = new HashMap<CheckBox, String>();
     }
 
     @Override
@@ -91,4 +93,36 @@ public class DynamicListView extends FlexTable implements Display {
         return (CheckBox) getWidget(location, 0);
     }
 
+    @Override
+    public int insertItem(String id) {
+
+        final int row = this.getRowCount();
+
+        // selection checkbox
+        CheckBox checkBox = new CheckBox();
+        setWidget(row, 0, checkBox);
+
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
+        pre.setMaxWidth(100);
+        setWidget(row, 1, pre);
+
+        VerticalPanel verticalPanel = new VerticalPanel();
+
+        verticalPanel.setSpacing(5);
+
+        setWidget(row, 2, verticalPanel);
+
+        getCellFormatter().addStyleName(row, 0, "cell");
+        getCellFormatter().addStyleName(row, 1, "cell");
+        getCellFormatter().addStyleName(row, 2, "cell");
+        getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP); // FIXME move to CSS
+
+        return row;
+    }
+
+    @Override
+    public void setTitle(int id, String title) {
+        VerticalPanel panel = (VerticalPanel) getWidget(id, 2);
+        panel.add(new Label(title));
+    }
 }

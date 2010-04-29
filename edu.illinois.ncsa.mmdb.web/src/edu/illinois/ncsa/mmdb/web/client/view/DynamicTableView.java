@@ -15,11 +15,17 @@ import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter.Display
 import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
 import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
 
+/**
+ * A table widget to enable paging, sorting and ordering of business beans.
+ * 
+ * @author Luigi Marini
+ * 
+ */
 public class DynamicTableView extends Composite implements Display {
 
-    private static final String   LIST_VIEW_TYPE = "list";
-    private static final String   GRID_VIEW_TYPE = "grid";
-    private static final String   FLOW_VIEW_TYPE = "flow";
+    public static final String    LIST_VIEW_TYPE = "list";
+    public static final String    GRID_VIEW_TYPE = "grid";
+    public static final String    FLOW_VIEW_TYPE = "flow";
     private final FlowPanel       mainPanel;
     private final HorizontalPanel topPagingPanel;
     private final VerticalPanel   middlePanel;
@@ -38,12 +44,12 @@ public class DynamicTableView extends Composite implements Display {
         mainPanel.addStyleName("dynamicTable");
         initWidget(mainPanel);
         topPagingPanel = new HorizontalPanel();
-        topPagingPanel.setWidth("100%");
+        topPagingPanel.addStyleName("dynamicTableHeader");
         topPagingPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         middlePanel = new VerticalPanel();
         middlePanel.addStyleName("content");
         bottomPagingPanel = new HorizontalPanel();
-        bottomPagingPanel.setWidth("100%");
+        bottomPagingPanel.addStyleName("dynamicTableHeader");
         bottomPagingPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         mainPanel.add(topPagingPanel);
         mainPanel.add(middlePanel);
@@ -149,8 +155,15 @@ public class DynamicTableView extends Composite implements Display {
     }
 
     @Override
-    public void setContentView(DynamicListView listView) {
-        middlePanel.add(listView);
+    public void setContentView(Widget contentView) {
+        middlePanel.clear();
+        middlePanel.add(contentView);
 
+    }
+
+    @Override
+    public void setViewType(String viewType) {
+        viewOptionsTop.setSelected(viewType);
+        viewOptionsBottom.setSelected(viewType);
     }
 }

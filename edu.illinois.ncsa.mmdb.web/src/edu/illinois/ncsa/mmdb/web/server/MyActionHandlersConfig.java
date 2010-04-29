@@ -79,6 +79,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetViewCountHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
@@ -141,6 +142,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new SetLicenseHandler());
         DispatchUtil.registerHandler(new GetViewCountHandler());
         DispatchUtil.registerHandler(new GetLikeDislikeHandler());
+        DispatchUtil.registerHandler(new ListQueryDatasetsHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

@@ -13,24 +13,35 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
 import edu.illinois.ncsa.mmdb.web.client.mvp.View;
+import edu.illinois.ncsa.mmdb.web.client.view.DynamicGridView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicListView;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
-public class DynamicTablePresenter implements Presenter {
+/**
+ * A table widget to allow paging, sorting and ordering of business beans.
+ * 
+ * @author Luigi Marini
+ * 
+ * @param <B>
+ *            Server side bean to be shown in the table
+ */
+public abstract class DynamicTablePresenter<B> implements Presenter {
 
-    private final MyDispatchAsync dispatch;
-    private final HandlerManager  eventBus;
-    private final Display         display;
-    private final int             pageSize    = 5;
-    private String                sortKey     = "date-desc";
-    private int                   numberOfPages;
-    private int                   currentPage = 1;
+    protected final MyDispatchAsync dispatch;
+    protected final HandlerManager  eventBus;
+    protected final Display         display;
+    private int                     pageSize    = 5;
+    protected String                sortKey     = "date-desc";
+    protected String                viewType    = DynamicTableView.LIST_VIEW_TYPE;
+    protected int                   numberOfPages;
+    protected int                   currentPage = 1;
 
     public interface Display {
         void setCurrentPage(int num);
@@ -53,9 +64,18 @@ public class DynamicTablePresenter implements Presenter {
 
         void setOrder(String order);
 
-        void setContentView(DynamicListView listView);
+        void setContentView(Widget contentView);
+
+        void setViewType(String viewType);
     }
 
+    /**
+     * Setup a presenter and view for the inner table visualization.
+     * 
+     * @param dispatch
+     * @param eventBus
+     * @param display
+     */
     public DynamicTablePresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
         this.dispatch = dispatch;
         this.eventBus = eventBus;
@@ -70,25 +90,18 @@ public class DynamicTablePresenter implements Presenter {
     }
 
     /**
-     * TODO This should potentially be an abstract method used to get the proper
-     * content for the table.
+     * Retrieve server side items using {@link getQuery} and adding them to
+     * display using {@link addItem}.
      */
     private void getContent() {
-        int offset = (currentPage - 1) * pageSize;
-        GWT.log("Getting datasets " + offset + " to " + (offset + pageSize));
-        ListDatasets query = new ListDatasets();
-        query.setOrderBy(uriForSortKey());
-        query.setDesc(descForSortKey());
-        query.setLimit(pageSize);
-        query.setOffset(offset);
-        //        query.setInCollection(""); // FIXME specify collection
+        ListQuery<B> query = getQuery();
         dispatch.execute(query,
-                new AsyncCallback<ListDatasetsResult>() {
+                new AsyncCallback<ListQueryResult<B>>() {
 
                     public void onFailure(Throwable caught) {
-                        GWT.log("Error retrieving datasets", caught);
+                        GWT.log("Error retrieving items to show in table", caught);
                         DialogBox dialogBox = new DialogBox();
-                        dialogBox.setText("Error retrieving datasets");
+                        dialogBox.setText("Error retrieving items");
                         dialogBox.add(new Label(MMDB.SERVER_ERROR));
                         dialogBox.setAnimationEnabled(true);
                         dialogBox.center();
@@ -96,34 +109,65 @@ public class DynamicTablePresenter implements Presenter {
                     }
 
                     @Override
-                    public void onSuccess(ListDatasetsResult result) {
-                        display.removeAllRows();
+                    public void onSuccess(ListQueryResult<B> result) {
+                        eventBus.fireEvent(new ClearDatasetsEvent());
                         int index = 0;
-                        for (DatasetBean dataset : result.getDatasets() ) {
-                            AddNewDatasetEvent addNewDatasetEvent = new AddNewDatasetEvent();
-                            addNewDatasetEvent.setDataset(dataset);
-                            addNewDatasetEvent.setPosition(index);
-                            eventBus.fireEvent(addNewDatasetEvent);
-                            //                            display.addItem(dataset.getTitle(), index);
+                        for (B item : result.getResults() ) {
+                            ShowItemEvent event = new ShowItemEvent();
+                            event.setPosition(index);
+                            addItem(event, item);
                             index++;
+                            eventBus.fireEvent(event);
                         }
-                        int np = (result.getDatasetCount() / pageSize) + (result.getDatasetCount() % pageSize != 0 ? 1 : 0);
+                        int np = (int) Math.ceil((double) result.getTotalCount() / getPageSize());
                         setNumberOfPages(np);
                     }
                 });
 
     }
 
+    /**
+     * Query to retrieve items server side.
+     * 
+     * @return query sent to server to retrieve items
+     */
+    protected abstract ListQuery<B> getQuery();
+
+    /**
+     * Add item to interface. Implement based on the specific type of item.
+     * 
+     * @param event
+     *            event to fire to add item to interface
+     * @param index
+     *            item retrieved from server side
+     */
+    protected abstract void addItem(ShowItemEvent event, B item);
+
+    /**
+     * Set the total number of pages.
+     * 
+     * @param numberOfPages
+     */
     protected void setNumberOfPages(int numberOfPages) {
         this.numberOfPages = numberOfPages;
         display.setTotalNumPages(numberOfPages);
     }
 
-    private boolean descForSortKey() {
+    /**
+     * Set sorting descending.
+     * 
+     * @return true is sorting is descending
+     */
+    protected boolean descForSortKey() {
         return !sortKey.endsWith("-asc"); // default is descending
     }
 
-    private String uriForSortKey() {
+    /**
+     * URI used for the sort key.
+     * 
+     * @return uri for the sort key
+     */
+    protected String uriForSortKey() {
         if (sortKey.startsWith("title-")) {
             return "http://purl.org/dc/elements/1.1/title";
         } else {
@@ -165,15 +209,49 @@ public class DynamicTablePresenter implements Presenter {
                 @Override
                 public void onValueChange(ValueChangeEvent<String> event) {
                     GWT.log("View list box clicked " + event.getValue());
+                    changeViewType(event.getValue());
                 }
             });
         }
+    }
+
+    /**
+     * 
+     * @param viewType
+     */
+    protected void changeViewType(String viewType) {
+        this.viewType = viewType;
+        display.setViewType(viewType);
+        if (viewType.equals(DynamicTableView.LIST_VIEW_TYPE)) {
+            DynamicListView listView = new DynamicListView();
+            setPageSize(DynamicListView.DEFAULT_PAGE_SIZE);
+            DynamicListPresenter listPresenter = new DynamicListPresenter(dispatch, eventBus, listView);
+            listPresenter.bind();
+            display.setContentView(listView);
+        } else if (viewType.equals(DynamicTableView.GRID_VIEW_TYPE)) {
+            DynamicGridView gridView = new DynamicGridView();
+            setPageSize(DynamicGridView.DEFAULT_PAGE_SIZE);
+            DynamicGridPresenter gridPresenter = new DynamicGridPresenter(dispatch, eventBus, gridView);
+            gridPresenter.bind();
+            display.setContentView(gridView);
+        } else if (viewType.equals(DynamicTableView.FLOW_VIEW_TYPE)) {
+            display.setContentView(new Label("The flow view has a cold. It will be back soon."));
+        }
+        getContent();
     }
 
     @Override
     public View getView() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
     }
 
 }

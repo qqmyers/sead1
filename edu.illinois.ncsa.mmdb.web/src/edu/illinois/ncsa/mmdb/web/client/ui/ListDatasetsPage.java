@@ -8,11 +8,9 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
-import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
-import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTableView;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
-import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.presenter.DatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
@@ -51,17 +49,17 @@ public class ListDatasetsPage extends Page {
         rightHeader.add(rss);
 
         // paging table
-                PagingDatasetTableView pagingView = new PagingDatasetTableView();
-                pagingView.addStyleName("datasetTable");
-                PagingDatasetTablePresenter datasetTablePresenter = new PagingDatasetTablePresenter(
-                        pagingView, eventBus);
-                datasetTablePresenter.bind();
-                mainLayoutPanel.add(pagingView.asWidget());
+        //                PagingDatasetTableView pagingView = new PagingDatasetTableView();
+        //                pagingView.addStyleName("datasetTable");
+        //                PagingDatasetTablePresenter datasetTablePresenter = new PagingDatasetTablePresenter(
+        //                        pagingView, eventBus);
+        //                datasetTablePresenter.bind();
+        //                mainLayoutPanel.add(pagingView.asWidget());
 
-//        DynamicTableView dynamicTableView = new DynamicTableView();
-//        DynamicTablePresenter dynamicTablePresenter = new DynamicTablePresenter(dispatch, eventBus, dynamicTableView);
-//        dynamicTablePresenter.bind();
-//        mainLayoutPanel.add(dynamicTableView.asWidget());
+        DynamicTableView dynamicTableView = new DynamicTableView();
+        DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatch, eventBus, dynamicTableView);
+        dynamicTablePresenter.bind();
+        mainLayoutPanel.add(dynamicTableView.asWidget());
     }
 
     @Override

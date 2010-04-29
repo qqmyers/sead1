@@ -24,12 +24,12 @@ import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
 import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 
 /**
- * Show contents of a {@link DynamicTablePresenter} as a list. One item per row.
+ * Show contents of a {@link DynamicTablePresenter} as a grid.
  * 
  * @author Luigi Marini
  * 
  */
-public class DynamicListPresenter implements Presenter {
+public class DynamicGridPresenter implements Presenter {
 
     private final MyDispatchAsync      dispatch;
     private final HandlerManager       eventBus;
@@ -44,14 +44,10 @@ public class DynamicListPresenter implements Presenter {
 
         int insertItem(String id, String name, String type, Date date, String preview, String size, String authorId);
 
-        int insertItem(String id);
-
-        void setTitle(int row, String title);
-
         void removeAllRows();
     }
 
-    public DynamicListPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+    public DynamicGridPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
         this.dispatch = dispatch;
         this.eventBus = eventBus;
         this.display = display;
@@ -73,8 +69,7 @@ public class DynamicListPresenter implements Presenter {
 
             @Override
             public void onShowItem(ShowItemEvent showItemEvent) {
-                int row = addItem(showItemEvent.getId());
-                display.setTitle(row, showItemEvent.getTitle());
+                display.insertItem(showItemEvent.getId(), showItemEvent.getTitle(), "", null, null, "", "");
             }
 
         });
@@ -88,8 +83,8 @@ public class DynamicListPresenter implements Presenter {
         });
     }
 
-    public int addItem(final String id) {
-        int location = display.insertItem(id);
+    public void addItem(final String id) {
+        int location = display.insertItem(id, "", "", new Date(), "", "", "");
         items.put(id, location);
         final HasValue<Boolean> selected = display.getSelected(location);
         selected.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -114,7 +109,6 @@ public class DynamicListPresenter implements Presenter {
         } else {
             selected.setValue(false);
         }
-        return location;
     }
 
     @Override

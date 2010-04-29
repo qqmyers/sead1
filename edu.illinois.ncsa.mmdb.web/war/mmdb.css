@@ -3,7 +3,7 @@ body {
 	font-size: 90% !important;
 	margin: 0px;
 	padding: 0px;
-	background-color: #E3E3E3;
+	/**background-color: #E3E3E3;**/
 	text-align: center;
 }
 
@@ -16,7 +16,7 @@ body {
 }
 
 .background {
-	background-color: #E3E3E3;
+	/**background-color: #E3E3E3;**/
 }
 
 .hidden {
@@ -114,14 +114,15 @@ body {
 	text-align: center;
 	minHeight: 600px;	
 	width: 975px;
-	border: solid 1px #888888;
+	/**border: solid 1px #888888;**/
 	margin: 10px auto 20px auto;
 	padding: 0px;
 	background-color: white;
 }
 
 .bottomMenu {
-	background-color: #E3E3E3;
+	/**background-color: #E3E3E3;**/
+	border-top: 1px solid gray;
 	width: 975px;
 	margin: 20px auto 20px auto;
 	padding: 10px;
@@ -973,15 +974,21 @@ body {
 }
 
 .dynamicTable {
-  width: 100%;
+    width: 900px;
+    margin: 10px auto;
 }
 
 .dynamicTable .content {
-  margin: 0px auto;
+    margin: 0px auto;
+}
+
+.dynamicTableHeader {
+	width: 100%;
+    border: #CCC solid 1px;
 }
 
 .dynamicTableList {
-	width: 700px;
+	width: 900px;
 	border: #CCC solid 1px;
 	vertical-align: top;
 	margin: 20px auto 20px auto;
@@ -995,4 +1002,18 @@ body {
 	padding: 8px;
 	border-top: #CCC solid 1px;
 	text-align: center;
+}
+
+.dynamicGrid {
+	width: 900px;
+	vertical-align: top;
+	margin: 20px auto 20px auto;
+	padding: 0px;
+	border-spacing:0px;
+	border-collapse: collapse;	
+}
+
+.dynamicGridElement {
+	border: 1px solid #CCC;
+	margin: 10px;
 }
