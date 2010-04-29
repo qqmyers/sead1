@@ -41,6 +41,8 @@ package edu.illinois.ncsa.mmdb.web.client.view;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -97,6 +99,12 @@ public class TagDialogView extends DialogBox implements Display {
         setWidget(layout);
         center();
         show();
+
+        DeferredCommand.addCommand(new Command() {
+            public void execute() {
+                tagBox.setFocus(true);
+            }
+        });
     }
 
     @Override
