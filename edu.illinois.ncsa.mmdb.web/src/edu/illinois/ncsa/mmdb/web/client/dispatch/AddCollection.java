@@ -41,6 +41,9 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.customware.gwt.dispatch.shared.Action;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
@@ -48,36 +51,49 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
  * Create new collection.
  * 
  * @author Luigi Marini
- *
+ * 
  */
 @SuppressWarnings("serial")
 public class AddCollection implements Action<AddCollectionResult> {
 
-	private CollectionBean collection;
-	private String sessionId;
+    private CollectionBean collection;
+    private String         sessionId;
+    private List<String>   members;
 
-	public AddCollection() {}
-	
-	public AddCollection(CollectionBean collection, String sessionId) {
-		this.collection = collection;
-		this.sessionId = sessionId;
-	}
+    public AddCollection() {
+    }
 
-	/**
-	 * Get the new collection bean.
-	 * 
-	 * @return the collection
-	 */
-	public CollectionBean getCollection() {
-		return collection;
-	}
+    public AddCollection(CollectionBean collection, String sessionId) {
+        this.collection = collection;
+        this.sessionId = sessionId;
+        this.members = new LinkedList<String>(); // empty
+    }
 
-	/**
-	 * Get the sessionId used.
-	 * 
-	 * @return sessionId
-	 */
-	public String getSessionId() {
-		return sessionId;
-	}
+    public AddCollection(CollectionBean collection, String sessionId, List<String> members) {
+        this.collection = collection;
+        this.sessionId = sessionId;
+        this.members = members;
+    }
+
+    /**
+     * Get the new collection bean.
+     * 
+     * @return the collection
+     */
+    public CollectionBean getCollection() {
+        return collection;
+    }
+
+    /**
+     * Get the sessionId used.
+     * 
+     * @return sessionId
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public List<String> getMembers() {
+        return members;
+    }
 }

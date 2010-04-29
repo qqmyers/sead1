@@ -36,6 +36,7 @@ import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 import edu.illinois.ncsa.mmdb.web.client.ui.AddToCollectionDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
+import edu.illinois.ncsa.mmdb.web.client.view.CreateCollectionDialogView;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
 
 /**
@@ -106,6 +107,16 @@ public class BatchOperationPresenter implements Presenter {
                 tagPresenter.bind();
                 tagPresenter.setSelectedResources(sessionState.getSelectedDatasets());
                 tagView.show();
+            }
+        });
+        display.addMenuAction("Create collection", new Command() {
+            @Override
+            public void execute() {
+                CreateCollectionDialogView view = new CreateCollectionDialogView();
+                CreateCollectionDialogPresenter presenter = new CreateCollectionDialogPresenter(dispatch, eventBus, view);
+                presenter.bind();
+                presenter.setSelectedResources(sessionState.getSelectedDatasets());
+                view.show();
             }
         });
         display.addMenuAction("Add to collection", new Command() {

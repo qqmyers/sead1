@@ -38,20 +38,6 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.view;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.event.dom.client.HasKeyUpHandlers;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
-
-import edu.illinois.ncsa.mmdb.web.client.presenter.TagDialogPresenter.Display;
 
 /**
  * Popup dialog box to tag a set if resources.
@@ -59,76 +45,9 @@ import edu.illinois.ncsa.mmdb.web.client.presenter.TagDialogPresenter.Display;
  * @author Luigi Marini
  * 
  */
-public class TagDialogView extends DialogBox implements Display {
-
-    private final FlowPanel layout;
-    private final TextBox   tagBox;
-    private final Button    submitButton;
-    private final Button    cancelButton;
-
-    /**
-     * A simple dialog box to annotate a resource
-     * 
-     * @param id
-     * @param service
-     */
+public class TagDialogView extends TextDialogView {
     public TagDialogView() {
+        super();
         setText("Tag");
-
-        layout = new FlowPanel();
-        tagBox = new TextBox();
-        tagBox.setWidth("300px");
-        layout.add(tagBox);
-
-        submitButton = new Button("Submit");
-
-        layout.add(submitButton);
-
-        cancelButton = new Button("Cancel");
-        cancelButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                hide();
-            }
-        });
-
-        layout.add(cancelButton);
-
-        setWidget(layout);
-        center();
-        show();
-
-        DeferredCommand.addCommand(new Command() {
-            public void execute() {
-                tagBox.setFocus(true);
-            }
-        });
-    }
-
-    @Override
-    public HasClickHandlers getSubmitButton() {
-        return submitButton;
-    }
-
-    @Override
-    public Widget asWidget() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public HasText getTagString() {
-        return tagBox;
-    }
-
-    @Override
-    public HasClickHandlers getCancelButton() {
-        return cancelButton;
-    }
-
-    @Override
-    public HasKeyUpHandlers getTagBox() {
-        return tagBox;
     }
 }

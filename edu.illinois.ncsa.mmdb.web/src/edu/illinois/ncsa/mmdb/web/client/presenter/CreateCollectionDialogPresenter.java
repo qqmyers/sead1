@@ -1,6 +1,8 @@
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -12,28 +14,25 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
 import edu.illinois.ncsa.mmdb.web.client.mvp.View;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
-/**
- * @author Luigi Marini
- * 
- */
-public class TagDialogPresenter extends TextDialogPresenter {
-
-    private final MyDispatchAsync dispatch;
+public class CreateCollectionDialogPresenter extends TextDialogPresenter {
+    private final MyDispatchAsync dispatch;         // FIXME duplicated in multiple presenters, can we generalize?
     private final HandlerManager  eventBus;
     private final Display         display;
     private Set<String>           selectedResources;
     private final boolean         delete;           // should we delete the tags instead?
 
-    public TagDialogPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+    public CreateCollectionDialogPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
         this(dispatch, eventBus, display, false);
     }
 
-    public TagDialogPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display, boolean delete) {
+    public CreateCollectionDialogPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display, boolean delete) {
         this.dispatch = dispatch;
         this.eventBus = eventBus;
         this.display = display;
@@ -47,7 +46,7 @@ public class TagDialogPresenter extends TextDialogPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                tag();
+                create();
                 display.hide();
             }
         });
@@ -63,7 +62,7 @@ public class TagDialogPresenter extends TextDialogPresenter {
         display.getTextBox().addKeyUpHandler(new KeyUpHandler() {
             public void onKeyUp(KeyUpEvent event) {
                 if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    tag();
+                    create();
                     display.hide();
                 }
             }
@@ -73,30 +72,23 @@ public class TagDialogPresenter extends TextDialogPresenter {
     /**
      * Tag resources if tag is not empty.
      */
-    protected void tag() {
-        Set<String> tagSet = new HashSet<String>();
-        for (String s : display.getTextString().getText().split(",") ) {
-            if (!s.equals("")) {
-                tagSet.add(s);
+    protected void create() {
+        List<String> members = new LinkedList<String>();
+        members.addAll(selectedResources);
+        CollectionBean collection = new CollectionBean();
+        collection.setTitle(display.getTextString().getText());
+        dispatch.execute(new AddCollection(collection, MMDB.getUsername(), members), new AsyncCallback<AddCollectionResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Failed creating collection from selected resources", caught);
             }
-        }
-        if (!tagSet.isEmpty()) {
-            for (String id : selectedResources ) {
 
-                dispatch.execute(new TagResource(id, tagSet, delete), new AsyncCallback<TagResourceResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Failed tagging resource", caught);
-                    }
-
-                    @Override
-                    public void onSuccess(TagResourceResult result) {
-                        GWT.log("Resource successfully tagged", null);
-                    }
-                });
+            @Override
+            public void onSuccess(AddCollectionResult result) {
+                // FIXME AddCollectionResult should include URI, so we can change the history token 
+                GWT.log("Succeeded creating collection from selected resources", null);
             }
-        }
+        });
     }
 
     @Override

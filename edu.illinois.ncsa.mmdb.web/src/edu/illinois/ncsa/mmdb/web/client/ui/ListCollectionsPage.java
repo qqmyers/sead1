@@ -72,128 +72,128 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
  */
 public class ListCollectionsPage extends Composite {
 
-	private final MyDispatchAsync dispatchasync;
-	private final HandlerManager eventBus;
-	private final FlowPanel mainContainer;
-	private final Label noCollectionsLabel;
-	private final FlowPanel addCollectionWidget;
-	private FlexTable collectionsTable;
-	private TitlePanel pageTitle;
+    private final MyDispatchAsync dispatchasync;
+    private final HandlerManager  eventBus;
+    private final FlowPanel       mainContainer;
+    private final Label           noCollectionsLabel;
+    private final FlowPanel       addCollectionWidget;
+    private FlexTable             collectionsTable;
+    private TitlePanel            pageTitle;
 
-	public ListCollectionsPage(MyDispatchAsync dispatchasync,
-			HandlerManager eventBus) {
-		this.dispatchasync = dispatchasync;
-		this.eventBus = eventBus;
-		mainContainer = new FlowPanel();
-		mainContainer.addStyleName("page");
-		initWidget(mainContainer);
-		
-		mainContainer.add(createPageTitle());
+    public ListCollectionsPage(MyDispatchAsync dispatchasync,
+            HandlerManager eventBus) {
+        this.dispatchasync = dispatchasync;
+        this.eventBus = eventBus;
+        mainContainer = new FlowPanel();
+        mainContainer.addStyleName("page");
+        initWidget(mainContainer);
 
-		noCollectionsLabel = new Label("No collections available.");
-		mainContainer.add(noCollectionsLabel);
+        mainContainer.add(createPageTitle());
 
-		// add collection widget
-		addCollectionWidget = createAddCollectionWidget();
-		mainContainer.add(addCollectionWidget);
+        noCollectionsLabel = new Label("No collections available.");
+        mainContainer.add(noCollectionsLabel);
 
-		retrieveCollections();
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	private Widget createPageTitle() {
-		pageTitle = new TitlePanel("Collections");
-		return pageTitle;
-	}
+        // add collection widget
+        addCollectionWidget = createAddCollectionWidget();
+        mainContainer.add(addCollectionWidget);
 
-	private FlowPanel createAddCollectionWidget() {
-		FlowPanel addCollectionPanel = new FlowPanel();
-		final WatermarkTextBox addCollectionBox = new WatermarkTextBox("",
-				"Collection name");
-		addCollectionPanel.add(addCollectionBox);
-		Button addButton = new Button("Add", new ClickHandler() {
+        retrieveCollections();
+    }
 
-			@Override
-			public void onClick(ClickEvent arg0) {
-				createNewCollection(addCollectionBox.getText());
-			}
-		});
-		addCollectionPanel.add(addButton);
-		return addCollectionPanel;
-	}
+    /**
+     * 
+     * @return
+     */
+    private Widget createPageTitle() {
+        pageTitle = new TitlePanel("Collections");
+        return pageTitle;
+    }
 
-	/**
-	 * 
-	 * @param text
-	 */
-	protected void createNewCollection(String text) {
+    private FlowPanel createAddCollectionWidget() {
+        FlowPanel addCollectionPanel = new FlowPanel();
+        final WatermarkTextBox addCollectionBox = new WatermarkTextBox("",
+                "Collection name");
+        addCollectionPanel.add(addCollectionBox);
+        Button addButton = new Button("Add", new ClickHandler() {
 
-		CollectionBean collection = new CollectionBean();
-		collection.setTitle(text);
+            @Override
+            public void onClick(ClickEvent arg0) {
+                createNewCollection(addCollectionBox.getText());
+            }
+        });
+        addCollectionPanel.add(addButton);
+        return addCollectionPanel;
+    }
 
-		dispatchasync.execute(new AddCollection(collection, MMDB.getUsername()),
-				new AsyncCallback<AddCollectionResult>() {
+    /**
+     * 
+     * @param text
+     */
+    protected void createNewCollection(String text) {
 
-					@Override
-					public void onFailure(Throwable arg0) {
-						GWT.log("Failed creating new collection", arg0);
-					}
+        CollectionBean collection = new CollectionBean();
+        collection.setTitle(text);
 
-					@Override
-					public void onSuccess(AddCollectionResult arg0) {
-						retrieveCollections();
-					}
-				});
-	}
+        dispatchasync.execute(new AddCollection(collection, MMDB.getUsername()),
+                new AsyncCallback<AddCollectionResult>() {
 
-	/**
-	 * Retrieve collections from server.
-	 */
-	private void retrieveCollections() {
-		dispatchasync.execute(new GetCollections(),
-				new AsyncCallback<GetCollectionsResult>() {
+            @Override
+            public void onFailure(Throwable arg0) {
+                GWT.log("Failed creating new collection", arg0);
+            }
 
-					@Override
-					public void onFailure(Throwable arg0) {
-						// TODO Auto-generated method stub
+            @Override
+            public void onSuccess(AddCollectionResult arg0) {
+                retrieveCollections();
+            }
+        });
+    }
 
-					}
+    /**
+     * Retrieve collections from server.
+     */
+    private void retrieveCollections() {
+        dispatchasync.execute(new GetCollections(),
+                new AsyncCallback<GetCollectionsResult>() {
 
-					@Override
-					public void onSuccess(GetCollectionsResult arg0) {
-						showCollections(arg0.getCollections());
-					}
-				});
-	}
+            @Override
+            public void onFailure(Throwable arg0) {
+                // TODO Auto-generated method stub
 
-	/**
-	 * 
-	 * @param collections
-	 */
-	protected void showCollections(ArrayList<CollectionBean> collections) {
-		if (collections.size() > 0) {
-			if (collectionsTable == null) {
-				mainContainer.remove(noCollectionsLabel);
-				collectionsTable = new FlexTable();
-				collectionsTable.addStyleName("datasetTable");
-				mainContainer.insert(collectionsTable, 1);
-			}
-			int row = 0;
-			for (CollectionBean collection : collections) {
-				Hyperlink link = new Hyperlink(collection.getTitle(),
-						"collection?uri=" + collection.getUri());
-				collectionsTable.setWidget(row, 0, link);
-				collectionsTable.setText(row, 1, collection.getDescription());
-				if (collection.getCreationDate() != null) {
-					collectionsTable.setText(row, 2, collection.getCreationDate()
-							.toString());
-				}
-				row++;
-			}
-		}
-	}
+            }
+
+            @Override
+            public void onSuccess(GetCollectionsResult arg0) {
+                showCollections(arg0.getCollections());
+            }
+        });
+    }
+
+    /**
+     * 
+     * @param collections
+     */
+    protected void showCollections(ArrayList<CollectionBean> collections) {
+        if (collections.size() > 0) {
+            if (collectionsTable == null) {
+                mainContainer.remove(noCollectionsLabel);
+                collectionsTable = new FlexTable();
+                collectionsTable.addStyleName("datasetTable");
+                mainContainer.insert(collectionsTable, 1);
+            }
+            int row = 0;
+            for (CollectionBean collection : collections ) {
+                Hyperlink link = new Hyperlink(collection.getTitle(),
+                        "collection?uri=" + collection.getUri());
+                collectionsTable.setWidget(row, 0, link);
+                collectionsTable.setText(row, 1, collection.getDescription());
+                if (collection.getCreationDate() != null) {
+                    collectionsTable.setText(row, 2, collection.getCreationDate()
+                            .toString());
+                }
+                row++;
+            }
+        }
+    }
 
 }
