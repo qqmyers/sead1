@@ -48,6 +48,7 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -146,6 +147,10 @@ public class DatasetTableGridView extends DatasetTableView {
         FlowPanel titlePanel = new FlowPanel();
         titlePanel.add(checkBox);
         titlePanel.add(titleLabel);
+        // clear both for IE
+        SimplePanel clear = new SimplePanel();
+        clear.addStyleName("clearFloat");
+        titlePanel.add(clear);
         setWidget((row * 2) + 1, col, titlePanel);
         getCellFormatter().addStyleName((row * 2) + 1, col, "gridLabelSmall");
         n++;
