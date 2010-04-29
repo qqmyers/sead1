@@ -521,7 +521,11 @@ public class DatasetWidget extends Composite {
 
             } else if (pb instanceof PreviewPyramidBean) {
                 label = "Zoom in";
-
+                // FIXME easter egg--remove for 1.0
+                if (MMDB.getUsername().contains("joefutrelle@gmail.com") ||
+                        MMDB.getUsername().contains("acraig@ncsa.uiuc.edu")) {
+                    label = "Mega-Zoom™";
+                }
             } else if (pb instanceof PreviewVideoBean) {
                 label = "Play video";
 
