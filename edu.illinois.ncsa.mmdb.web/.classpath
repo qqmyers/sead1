@@ -4,7 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo/src"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/mysql-connector-java-5.0.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-dispatch-1.0.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-2.0.jar"/>
@@ -22,10 +21,8 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackrabbit-webdav-1.2.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jcl104-over-slf4j-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jcr-1.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/junit-3.8.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/org.apache.commons.httpclient.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/oro-2.0.8.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.illinois.ncsa.bard.jaas.always.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.illinois.ncsa.bard.jaas.context.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.illinois.ncsa.bard.jaas.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-maps.jar"/>
@@ -40,19 +37,16 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/mail.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-jena-2.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-kernel-2.5.jar" sourcepath="/org.tupeloproject.core/tupelo-kernel/src/main/java"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-mysql-2.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-rdf-ntriples-2.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-server-2.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-sparql-2.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-sql-2.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-util-2.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-webdav-2.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/rome-0.8.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.illinois.ncsa.cet.search.jar" sourcepath="/edu.illinois.ncsa.cet.search"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/milton-api-1.5.1.jar" sourcepath="war/WEB-INF/lib/milton-api-1.5.1-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/milton-servlet-1.5.1.jar" sourcepath="war/WEB-INF/lib/milton-servlet-1.5.1-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-dnd-3.0.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/rome-1.0.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
