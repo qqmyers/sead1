@@ -160,12 +160,12 @@ public class AuthenticatedServlet extends HttpServlet {
                 String ap[] = auth.split(" ");
                 if (ap.length != 2 && !ap[0].equalsIgnoreCase("basic")) {
                     log.warn("can't parse basic creds " + auth); // FIXME debug
-                    return unauthorized(response);
+                    return unauthorized(request, response);
                 }
                 //log.info("authorization credentials = " + Base64.decodeToString(ap[1])); // FIXME debug
                 String up[] = Base64.decodeToString(ap[1]).split(":");
                 if (up.length != 2) {
-                    return unauthorized(response);
+                    return unauthorized(request, response);
                 }
                 String username = TextFormatter.unescapeEmailAddress(up[0]);
                 String password = up[1];
@@ -185,7 +185,7 @@ public class AuthenticatedServlet extends HttpServlet {
         if (validUser == null) {
             // no. reject
             log.info("Client provided no credentials, returning 403 Unauthorized");
-            return unauthorized(response);
+            return unauthorized(request, response);
         } else {
             // yes. record the user id in the http session
             HttpSession session = request.getSession(true);
@@ -197,9 +197,9 @@ public class AuthenticatedServlet extends HttpServlet {
         }
     }
 
-    static boolean unauthorized(HttpServletResponse response) {
+    static boolean unauthorized(HttpServletRequest request, HttpServletResponse response) {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setHeader("WWW-Authenticate", "BASIC realm=\"mmdb\""); // FIXME need webapp-specific realm
+        response.setHeader("WWW-Authenticate", "BASIC realm=\"Medici REST service @ " + request.getContextPath() + "\""); // FIXME need webapp-specific realm
         return false;
     }
 
