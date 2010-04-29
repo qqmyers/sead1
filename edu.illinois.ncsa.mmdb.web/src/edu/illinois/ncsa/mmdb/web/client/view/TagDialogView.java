@@ -41,6 +41,7 @@ package edu.illinois.ncsa.mmdb.web.client.view;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.HasKeyUpHandlers;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
@@ -67,8 +68,6 @@ public class TagDialogView extends DialogBox implements Display {
 
     /**
      * A simple dialog box to annotate a resource
-     * 
-     * TODO automatically put cursor in text field
      * 
      * @param id
      * @param service
@@ -126,5 +125,10 @@ public class TagDialogView extends DialogBox implements Display {
     @Override
     public HasClickHandlers getCancelButton() {
         return cancelButton;
+    }
+
+    @Override
+    public HasKeyUpHandlers getTagBox() {
+        return tagBox;
     }
 }
