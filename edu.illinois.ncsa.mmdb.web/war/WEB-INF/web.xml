@@ -12,11 +12,6 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>greetServlet</servlet-name>
-		<servlet-class>edu.illinois.ncsa.mmdb.web.server.GreetingServiceImpl</servlet-class>
-	</servlet>
-
-	<servlet>
 		<servlet-name>REST Servlet</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.RestServlet</servlet-class>
 	</servlet>
@@ -58,11 +53,6 @@
 	<servlet-mapping>
 		<servlet-name>dispatch</servlet-name>
 		<url-pattern>/mmdb/dispatch</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>greetServlet</servlet-name>
-		<url-pattern>/mmdb/greet</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
