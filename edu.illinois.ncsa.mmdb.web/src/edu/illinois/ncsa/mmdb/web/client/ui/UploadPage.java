@@ -55,6 +55,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -71,6 +72,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
+import edu.illinois.ncsa.mmdb.web.client.presenter.HelpPresenter;
+import edu.illinois.ncsa.mmdb.web.client.view.HelpDialogView;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -107,7 +110,19 @@ public class UploadPage extends Page {
 
         mainLayoutPanel.add(tableLayout);
 
-        tableLayout.setText(0, 0, "Select the file you want to upload or click and drag a file or folder.");
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.add(new Label("Select the file you want to upload or click and drag a file or folder. "));
+        Image helpButton = new Image("./images/help-browser.png");
+        helpButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                HelpDialogView view = new HelpDialogView("Upload help");
+                HelpPresenter presenter = new HelpPresenter(view);
+                presenter.bind();
+                presenter.addContent(new Label("[put help content here]"));
+            }
+        });
+        hp.add(helpButton);
+        tableLayout.setWidget(0, 0, hp);
 
         tableLayout.getFlexCellFormatter().setColSpan(0, 0, 2);
 

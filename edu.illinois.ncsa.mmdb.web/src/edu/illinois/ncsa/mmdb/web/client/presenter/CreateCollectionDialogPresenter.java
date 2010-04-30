@@ -26,18 +26,12 @@ public class CreateCollectionDialogPresenter extends TextDialogPresenter {
     private final HandlerManager  eventBus;
     private final Display         display;
     private Set<String>           selectedResources;
-    private final boolean         delete;           // should we delete the tags instead?
 
     public CreateCollectionDialogPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
-        this(dispatch, eventBus, display, false);
-    }
-
-    public CreateCollectionDialogPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display, boolean delete) {
         this.dispatch = dispatch;
         this.eventBus = eventBus;
         this.display = display;
         this.selectedResources = new HashSet<String>();
-        this.delete = delete;
     }
 
     @Override
