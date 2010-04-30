@@ -246,35 +246,35 @@ public class DatasetWidget extends Composite {
             @Override
             public int compare(PreviewBean o1, PreviewBean o2)
                 {
-                // sort by type
-                if (o1.getClass() != o2.getClass()) {
-                    if (o1 instanceof PreviewImageBean) {
-                        return -1;
+                    // sort by type
+                    if (o1.getClass() != o2.getClass()) {
+                        if (o1 instanceof PreviewImageBean) {
+                            return -1;
+                        }
+                        if (o2 instanceof PreviewImageBean) {
+                            return +1;
+                        }
+                        if (o1 instanceof PreviewPyramidBean) {
+                            return -1;
+                        }
+                        if (o2 instanceof PreviewPyramidBean) {
+                            return +1;
+                        }
+                        if (o1 instanceof PreviewVideoBean) {
+                            return -1;
+                        }
+                        if (o2 instanceof PreviewVideoBean) {
+                            return +1;
+                        }
                     }
-                    if (o2 instanceof PreviewImageBean) {
-                        return +1;
-                    }
-                    if (o1 instanceof PreviewPyramidBean) {
-                        return -1;
-                    }
-                    if (o2 instanceof PreviewPyramidBean) {
-                        return +1;
-                    }
-                    if (o1 instanceof PreviewVideoBean) {
-                        return -1;
-                    }
-                    if (o2 instanceof PreviewVideoBean) {
-                        return +1;
-                    }
+                    // don't care at this point
+                    return 0;
                 }
-                // don't care at this point
-                return 0;
-            }
         });
 
         // title
         final EditableLabel titleLabel = new EditableLabel(result.getDataset().getTitle());
-
+        titleLabel.setEditable(false);
         titleLabel.getLabel().addStyleName("datasetTitle");
         titleLabel.setEditableStyleName("datasetTitle");
 
@@ -473,40 +473,6 @@ public class DatasetWidget extends Composite {
             }
         });
 
-        // delete dataset
-        Anchor deleteAnchor = new Anchor("Delete");
-        deleteAnchor.addStyleName("datasetActionLink");
-        deleteAnchor.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                showDeleteDialog();
-            }
-        });
-        actionsPanel.add(deleteAnchor);
-
-        service.execute(new HasPermission(MMDB.getUsername(), Permission.VIEW_ADMIN_PAGES), new AsyncCallback<HasPermissionResult>() {
-            @Override
-            public void onFailure(Throwable caught)
-                {
-                GWT.log("Error checking for admin privileges", caught);
-            }
-
-            @Override
-            public void onSuccess(HasPermissionResult permresult)
-                {
-                if (permresult.isPermitted()) {
-                    Anchor extractAnchor = new Anchor("Rerun Extraction");
-                    extractAnchor.addStyleName("datasetActionLink");
-                    extractAnchor.addClickHandler(new ClickHandler() {
-                        public void onClick(ClickEvent event)
-                            {
-                            showRerunExtraction();
-                        }
-                    });
-                    actionsPanel.add(extractAnchor);
-                }
-            }
-        });
-
         // show preview selection
         currentPreview = null;
         previewPanel = new AbsolutePanel();
@@ -540,8 +506,8 @@ public class DatasetWidget extends Composite {
             anchor.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event)
                     {
-                    showPreview(finalpb);
-                }
+                        showPreview(finalpb);
+                    }
             });
             previewsPanel.add(anchor);
         }
@@ -550,7 +516,7 @@ public class DatasetWidget extends Composite {
         informationTable.addStyleName("metadataTable");
         informationTable.setWidth("100%");
 
-        UserMetadataWidget um = new UserMetadataWidget(uri, service);
+        final UserMetadataWidget um = new UserMetadataWidget(uri, service);
         um.setWidth("100%");
         DisclosurePanel additionalInformationPanel = new DisclosurePanel("Additional Information");
         additionalInformationPanel.addStyleName("datasetDisclosurePanel");
@@ -583,8 +549,6 @@ public class DatasetWidget extends Composite {
 
         loadDerivedFrom(uri, 4);
 
-        rightColumn.add(new LicenseWidget(uri, service));
-
         // show preview image
         if (bestVideo != null) {
             showPreview(bestVideo);
@@ -593,6 +557,65 @@ public class DatasetWidget extends Composite {
         } else {
             previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null));
         }
+
+        // get permissions
+        service.execute(new HasPermission(MMDB.getUsername(), Permission.VIEW_ADMIN_PAGES), new AsyncCallback<HasPermissionResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error checking for admin privileges", caught);
+                addWidgets(false, result.getDataset().getCreator().getUri().equals(MMDB.getUsername()));
+            }
+
+            @Override
+            public void onSuccess(HasPermissionResult permresult) {
+                addWidgets(permresult.isPermitted(), result.getDataset().getCreator().getUri().equals(MMDB.getUsername()));
+            }
+
+            private void addWidgets(boolean isAdmin, boolean isCreator) {
+                // admins and owners can update some fields
+                if (isAdmin || isCreator) {
+                    // delete
+                    Anchor deleteAnchor = new Anchor("Delete");
+                    deleteAnchor.addStyleName("datasetActionLink");
+                    deleteAnchor.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            showDeleteDialog();
+                        }
+                    });
+                    actionsPanel.add(deleteAnchor);
+
+                    // license
+                    LicenseWidget license = new LicenseWidget(uri, service, true, true, false);
+                    rightColumn.add(license);
+
+                    // title
+                    titleLabel.setEditable(true);
+
+                    // user specified metadata
+                    um.showFields(true);
+                } else {
+                    // license
+                    LicenseWidget license = new LicenseWidget(uri, service, true, false, false);
+                    rightColumn.add(license);
+
+                    // user specified metadata
+                    um.showFields(false);
+                }
+
+                // only admins can rerun extraction
+                if (isAdmin) {
+                    Anchor extractAnchor = new Anchor("Rerun Extraction");
+                    extractAnchor.addStyleName("datasetActionLink");
+                    extractAnchor.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            showRerunExtraction();
+                        }
+                    });
+                    actionsPanel.add(extractAnchor);
+                }
+            }
+        });
+
     }
 
     protected void showRerunExtraction() {
@@ -603,20 +626,20 @@ public class DatasetWidget extends Composite {
                 service.execute(new ExtractionService(uri), new AsyncCallback<ExtractionServiceResult>() {
                     public void onFailure(Throwable caught)
                         {
-                        GWT.log("Error submitting extraction job", caught);
-                    }
+                            GWT.log("Error submitting extraction job", caught);
+                        }
 
                     public void onSuccess(ExtractionServiceResult result)
                         {
-                        GWT.log("Success submitting extraction job " + result.getJobid(), null);
-                        ConfirmDialog dialog = new ConfirmDialog("Refresh Page", "Extraction resubmitted, should page be refreshed now, or later? (it can take a few minutes before results show up)");
-                        dialog.addConfirmHandler(new ConfirmHandler() {
-                            public void onConfirm(ConfirmEvent event) {
-                                showDataset(uri);
-                            }
-                        });
-                        dialog.show();
-                    }
+                            GWT.log("Success submitting extraction job " + result.getJobid(), null);
+                            ConfirmDialog dialog = new ConfirmDialog("Refresh Page", "Extraction resubmitted, should page be refreshed now, or later? (it can take a few minutes before results show up)");
+                            dialog.addConfirmHandler(new ConfirmHandler() {
+                                public void onConfirm(ConfirmEvent event) {
+                                    showDataset(uri);
+                                }
+                            });
+                            dialog.show();
+                        }
                 });
             }
         });
@@ -799,30 +822,30 @@ public class DatasetWidget extends Composite {
     private void loadDerivedFrom(final String uri, final int level) {
         service.execute(new GetDerivedFrom(uri),
                 new AsyncCallback<GetDerivedFromResult>() {
-            @Override
-            public void onFailure(Throwable arg0) {
-                // TODO Auto-generated method stub
-            }
-
-            @Override
-            public void onSuccess(GetDerivedFromResult arg0) {
-                List<DatasetBean> df = arg0.getDerivedFrom();
-                if (df.size() > 0) {
-                    if (derivedDatasetsWidget == null) {
-                        derivedDatasetsWidget = new DerivedDatasetsWidget();
-                        rightColumn.add(derivedDatasetsWidget);
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        // TODO Auto-generated method stub
                     }
-                    if (derivedDatasetsWidget != null) {
-                        for (DatasetBean d : df ) {
-                            derivedDatasetsWidget.addDataset(d);
-                            if (level > 0) {
-                                loadDerivedFrom(d.getUri(), level - 1);
+
+                    @Override
+                    public void onSuccess(GetDerivedFromResult arg0) {
+                        List<DatasetBean> df = arg0.getDerivedFrom();
+                        if (df.size() > 0) {
+                            if (derivedDatasetsWidget == null) {
+                                derivedDatasetsWidget = new DerivedDatasetsWidget();
+                                rightColumn.add(derivedDatasetsWidget);
+                            }
+                            if (derivedDatasetsWidget != null) {
+                                for (DatasetBean d : df ) {
+                                    derivedDatasetsWidget.addDataset(d);
+                                    if (level > 0) {
+                                        loadDerivedFrom(d.getUri(), level - 1);
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            }
-        });
+                });
     }
 
     /**
@@ -837,18 +860,18 @@ public class DatasetWidget extends Composite {
         service.execute(new AddToCollection(value, datasets),
                 new AsyncCallback<AddToCollectionResult>() {
 
-            @Override
-            public void onFailure(Throwable arg0) {
-                GWT.log("Error adding dataset to collection", arg0);
-            }
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        GWT.log("Error adding dataset to collection", arg0);
+                    }
 
-            @Override
-            public void onSuccess(AddToCollectionResult arg0) {
-                GWT.log("Datasets successfully added to collection",
-                        null);
-                loadCollections();
-            }
-        });
+                    @Override
+                    public void onSuccess(AddToCollectionResult arg0) {
+                        GWT.log("Datasets successfully added to collection",
+                                null);
+                        loadCollections();
+                    }
+                });
     }
 
     private void loadMetadata() {
@@ -856,62 +879,62 @@ public class DatasetWidget extends Composite {
             service.execute(new GetMetadata(uri),
                     new AsyncCallback<GetMetadataResult>() {
 
-                @Override
-                public void onFailure(Throwable arg0) {
-                    GWT.log("Error retrieving metadata about dataset "
-                            + uri, null);
-                }
-
-                @Override
-                public void onSuccess(GetMetadataResult arg0) {
-                    List<Metadata> metadata = arg0.getMetadata();
-                    Collections.sort(metadata);
-                    String category = "";
-                    for (Metadata tuple : metadata ) {
-                        if (!category.equals(tuple.getCategory())) {
-                            int row = informationTable.getRowCount() + 1;
-                            informationTable.setHTML(row, 0, "<b>" + tuple.getCategory() + "</b>");
-                            informationTable.setText(row, 1, ""); //$NON-NLS-1$
-                            informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
-                            category = tuple.getCategory();
-                        }
-                        int row = informationTable.getRowCount();
-                        informationTable.setText(row, 0, tuple.getLabel());
-                        informationTable.setText(row, 1, tuple.getValue());
-
-                        // formatting
-                        informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
-                        informationTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
-                        if (row % 2 == 0) {
-                            informationTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
-                        } else {
-                            informationTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
+                        @Override
+                        public void onFailure(Throwable arg0) {
+                            GWT.log("Error retrieving metadata about dataset "
+                                    + uri, null);
                         }
 
-                        // extra metadata to display in info
-                        if ("Extractor".equals(tuple.getCategory()) && "Image Size".equals(tuple.getLabel())) {
-                            Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                            lbl.addStyleName("metadataEntry");
-                            infoPanel.add(lbl);
+                        @Override
+                        public void onSuccess(GetMetadataResult arg0) {
+                            List<Metadata> metadata = arg0.getMetadata();
+                            Collections.sort(metadata);
+                            String category = "";
+                            for (Metadata tuple : metadata ) {
+                                if (!category.equals(tuple.getCategory())) {
+                                    int row = informationTable.getRowCount() + 1;
+                                    informationTable.setHTML(row, 0, "<b>" + tuple.getCategory() + "</b>");
+                                    informationTable.setText(row, 1, ""); //$NON-NLS-1$
+                                    informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
+                                    category = tuple.getCategory();
+                                }
+                                int row = informationTable.getRowCount();
+                                informationTable.setText(row, 0, tuple.getLabel());
+                                informationTable.setText(row, 1, tuple.getValue());
+
+                                // formatting
+                                informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
+                                informationTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
+                                if (row % 2 == 0) {
+                                    informationTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
+                                } else {
+                                    informationTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
+                                }
+
+                                // extra metadata to display in info
+                                if ("Extractor".equals(tuple.getCategory()) && "Image Size".equals(tuple.getLabel())) {
+                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                                    lbl.addStyleName("metadataEntry");
+                                    infoPanel.add(lbl);
+                                }
+                                if ("FFMPEG".equals(tuple.getCategory()) && "Video Duration".equals(tuple.getLabel())) {
+                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                                    lbl.addStyleName("metadataEntry");
+                                    infoPanel.add(lbl);
+                                }
+                                if ("FFMPEG".equals(tuple.getCategory()) && "Video FPS".equals(tuple.getLabel())) {
+                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                                    lbl.addStyleName("metadataEntry");
+                                    infoPanel.add(lbl);
+                                }
+                                if ("FFMPEG".equals(tuple.getCategory()) && "Video Size".equals(tuple.getLabel())) {
+                                    Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                                    lbl.addStyleName("metadataEntry");
+                                    infoPanel.add(lbl);
+                                }
+                            }
                         }
-                        if ("FFMPEG".equals(tuple.getCategory()) && "Video Duration".equals(tuple.getLabel())) {
-                            Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                            lbl.addStyleName("metadataEntry");
-                            infoPanel.add(lbl);
-                        }
-                        if ("FFMPEG".equals(tuple.getCategory()) && "Video FPS".equals(tuple.getLabel())) {
-                            Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                            lbl.addStyleName("metadataEntry");
-                            infoPanel.add(lbl);
-                        }
-                        if ("FFMPEG".equals(tuple.getCategory()) && "Video Size".equals(tuple.getLabel())) {
-                            Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                            lbl.addStyleName("metadataEntry");
-                            infoPanel.add(lbl);
-                        }
-                    }
-                }
-            });
+                    });
         }
     }
 
@@ -922,44 +945,44 @@ public class DatasetWidget extends Composite {
                 @Override
                 public void onFailure(Throwable arg0)
                     {
-                    GWT.log("Error retrieving geolocations for " + uri, arg0);
+                        GWT.log("Error retrieving geolocations for " + uri, arg0);
 
-                }
+                    }
 
                 @Override
                 public void onSuccess(GetGeoPointResult arg0)
                     {
-                    if (arg0.getGeoPoints().isEmpty()) {
-                        return;
+                        if (arg0.getGeoPoints().isEmpty()) {
+                            return;
+                        }
+
+                        MapWidget mapWidget = new MapWidget();
+                        mapWidget.setSize("230px", "230px");
+                        mapWidget.setUIToDefault();
+                        mapWidget.setVisible(false);
+
+                        FlowPanel mapPanel = new FlowPanel();
+                        mapPanel.addStyleName("datasetRightColSection");
+                        Label mapHeader = new Label("Location");
+                        mapHeader.addStyleName("datasetRightColHeading");
+                        mapPanel.add(mapHeader);
+                        mapPanel.add(mapWidget);
+                        rightColumn.add(mapPanel);
+
+                        // drop marker on the map
+                        LatLng center = LatLng.newInstance(0, 0);
+                        for (GeoPointBean gpb : arg0.getGeoPoints() ) {
+                            MarkerOptions options = MarkerOptions.newInstance();
+                            options.setTitle("lat=" + gpb.getLatitude() + " lon=" + gpb.getLongitude() + " alt=" + gpb.getAltitude());
+                            LatLng loc = LatLng.newInstance(gpb.getLatitude(), gpb.getLongitude());
+                            mapWidget.addOverlay(new Marker(loc, options));
+                            center = loc;
+                        }
+
+                        mapWidget.setCenter(center, 15);
+                        mapWidget.setVisible(true);
+                        mapWidget.checkResizeAndCenter();
                     }
-
-                    MapWidget mapWidget = new MapWidget();
-                    mapWidget.setSize("230px", "230px");
-                    mapWidget.setUIToDefault();
-                    mapWidget.setVisible(false);
-
-                    FlowPanel mapPanel = new FlowPanel();
-                    mapPanel.addStyleName("datasetRightColSection");
-                    Label mapHeader = new Label("Location");
-                    mapHeader.addStyleName("datasetRightColHeading");
-                    mapPanel.add(mapHeader);
-                    mapPanel.add(mapWidget);
-                    rightColumn.add(mapPanel);
-
-                    // drop marker on the map
-                    LatLng center = LatLng.newInstance(0, 0);
-                    for (GeoPointBean gpb : arg0.getGeoPoints() ) {
-                        MarkerOptions options = MarkerOptions.newInstance();
-                        options.setTitle("lat=" + gpb.getLatitude() + " lon=" + gpb.getLongitude() + " alt=" + gpb.getAltitude());
-                        LatLng loc = LatLng.newInstance(gpb.getLatitude(), gpb.getLongitude());
-                        mapWidget.addOverlay(new Marker(loc, options));
-                        center = loc;
-                    }
-
-                    mapWidget.setCenter(center, 15);
-                    mapWidget.setVisible(true);
-                    mapWidget.checkResizeAndCenter();
-                }
             });
         }
     }

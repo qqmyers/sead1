@@ -77,9 +77,10 @@ public class LicenseWidget extends Composite {
     private LicenseResult            license;
 
     private VerticalPanel            mainPanel;
-    private VerticalPanel            licenseEditor;
-
     private Anchor                   licenseText;
+    private Label                    attribution;
+
+    private VerticalPanel            licenseEditor;
     private Anchor                   licenseEdit;
     private RadioButton              pd;
     private RadioButton              cc;
@@ -91,30 +92,42 @@ public class LicenseWidget extends Composite {
     private TextBox                  rights;
     private TextBox                  licenseURL;
     private CheckBox                 allowDownload;
-    private Label                    attribution;
     private Label                    lblRights;
     private Label                    lblLicense;
     private CheckBox                 myData;
     private Label                    lblRightsHolder;
 
-    public LicenseWidget(String resource, MyDispatchAsync service) {
-        this(resource, service, true);
-    }
-
-    public LicenseWidget(Collection<String> batch, MyDispatchAsync service) {
+    public LicenseWidget(Collection<String> batch, MyDispatchAsync service, boolean showTitle, boolean canEdit, boolean showEdit) {
         this.resources = batch;
         this.service = service;
-        init(false, true);
+        init(showTitle, canEdit, showEdit);
     }
 
-    public LicenseWidget(String resource, MyDispatchAsync service, boolean withTitle) {
+    public LicenseWidget(String resource, MyDispatchAsync service, boolean showTitle, boolean canEdit, boolean showEdit) {
         this.resources = new HashSet<String>();
         this.resources.add(resource);
         this.service = service;
-        init(withTitle, false);
+        init(showTitle, canEdit, showEdit);
     }
 
-    void init(boolean withTitle, boolean showEdit) {
+    public void showEditor(boolean showEdit) {
+        if (licenseEdit == null) {
+            return;
+        }
+        if (showEdit) {
+            mainPanel.remove(attribution);
+            mainPanel.remove(licenseText);
+            mainPanel.remove(licenseEdit);
+            mainPanel.add(licenseEditor);
+        } else {
+            mainPanel.remove(licenseEditor);
+            mainPanel.add(attribution);
+            mainPanel.add(licenseText);
+            mainPanel.add(licenseEdit);
+        }
+    }
+
+    private void init(boolean showTitle, boolean canEdit, boolean showEdit) {
         // edit panel
         licenseEditor = new VerticalPanel();
 
@@ -123,7 +136,7 @@ public class LicenseWidget extends Composite {
         mainPanel.addStyleName("datasetRightColSection");
         initWidget(mainPanel);
 
-        if (withTitle) {
+        if (showTitle) {
             Label title = new Label("License");
             title.addStyleName("datasetRightColHeading");
             mainPanel.add(title);
@@ -137,16 +150,40 @@ public class LicenseWidget extends Composite {
         mainPanel.add(attribution);
 
         // allow user to edit the license
+        if (canEdit) {
+            editPanel();
+            showEditor(showEdit);
+        }
+
+        // get the license
+        if (resources.size() == 1) {
+            String resource = resources.iterator().next();
+            service.execute(new GetLicense(resource), new AsyncCallback<LicenseResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Error retrieving license", caught);
+                }
+
+                @Override
+                public void onSuccess(LicenseResult result) {
+                    license = result;
+                    showLicense();
+                }
+            });
+        } else {
+            license = new LicenseResult();
+            showLicense();
+        }
+    }
+
+    private void editPanel() {
         licenseEdit = new Anchor("Edit");
         mainPanel.add(licenseEdit);
 
         licenseEdit.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                mainPanel.remove(attribution);
-                mainPanel.remove(licenseText);
-                mainPanel.remove(licenseEdit);
-                mainPanel.add(licenseEditor);
+                showEditor(true);
             }
         });
 
@@ -290,62 +327,38 @@ public class LicenseWidget extends Composite {
                 onCancel();
             }
         });
-
-        // get the license
-        if (resources.size() == 1) {
-            String resource = resources.iterator().next();
-            service.execute(new GetLicense(resource), new AsyncCallback<LicenseResult>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    GWT.log("Error retrieving license", caught);
-                }
-
-                @Override
-                public void onSuccess(LicenseResult result) {
-                    license = result;
-                    showLicense();
-                }
-            });
-        } else {
-            license = new LicenseResult();
-            showLicense();
-        }
-
-        if (showEdit) {
-            mainPanel.remove(attribution);
-            mainPanel.remove(licenseText);
-            mainPanel.remove(licenseEdit);
-            mainPanel.add(licenseEditor);
-        }
     }
 
     /**
      * Called when the user presses the ok button
      */
     protected void onOK() {
+        if (licenseEdit == null) {
+            return;
+        }
         setLicense();
         showLicense();
-        mainPanel.remove(licenseEditor);
-        mainPanel.add(licenseText);
-        mainPanel.add(attribution);
-        mainPanel.add(licenseEdit);
+        showEditor(false);
     }
 
     /**
      * Called when the user presses the cancel button
      */
     protected void onCancel() {
+        if (licenseEdit == null) {
+            return;
+        }
         showLicense();
-        mainPanel.remove(licenseEditor);
-        mainPanel.add(licenseText);
-        mainPanel.add(attribution);
-        mainPanel.add(licenseEdit);
+        showEditor(false);
     }
 
     /**
      * Save the values in the edit box to the backend.
      */
     private void setLicense() {
+        if (licenseEdit == null) {
+            return;
+        }
         final LicenseResult oldLicense = license;
 
         license = new LicenseResult();
@@ -409,25 +422,14 @@ public class LicenseWidget extends Composite {
         if (license == null) { // nothing to show
             return;
         }
+
         // attribution
         if (license.getRightsHolder() == null) {
+            attribution.setText("");
             attribution.setVisible(false);
-            rightsHolder.setText("");
         } else {
-            attribution.setVisible(true);
             attribution.setText("By : " + license.getRightsHolder());
-            rightsHolder.setText(license.getRightsHolder());
-        }
-
-        // if me then hide
-        if (MMDB.getUsername().equals(license.getRightsHolderUri())) {
-            myData.setValue(true);
-            lblRightsHolder.setVisible(false);
-            rightsHolder.setVisible(false);
-        } else {
-            myData.setValue(false);
-            lblRightsHolder.setVisible(true);
-            rightsHolder.setVisible(true);
+            attribution.setVisible(true);
         }
 
         // check to see the license type
@@ -439,7 +441,46 @@ public class LicenseWidget extends Composite {
             licenseText.getElement().appendChild(icon.getElement());
             licenseText.setHref(license.getLicense());
 
-            // editor panel
+        } else if ("cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights)) {
+            // Creative Commons License
+            Image icon = new Image("images/" + rights + ".png");
+            licenseText.setText("");
+            licenseText.getElement().appendChild(icon.getElement());
+            licenseText.setHref(license.getLicense());
+
+        } else {
+            // Other License
+            licenseText.setText(license.getRights());
+            if ((license.getLicense() != null) && license.getLicense().startsWith("http://")) {
+                licenseText.setHref(license.getLicense());
+            } else {
+                licenseText.setHref("javascript:;");
+            }
+        }
+
+        // rest is edit part
+        if (licenseEdit == null) {
+            return;
+        }
+
+        // rightsholder
+        if (MMDB.getUsername().equals(license.getRightsHolderUri())) {
+            myData.setValue(true);
+            lblRightsHolder.setVisible(false);
+            rightsHolder.setVisible(false);
+        } else {
+            myData.setValue(false);
+            lblRightsHolder.setVisible(true);
+            rightsHolder.setVisible(true);
+            if (license.getRightsHolder() == null) {
+                rightsHolder.setText("");
+            } else {
+                rightsHolder.setText(license.getRightsHolder());
+            }
+        }
+
+        if (rights.equals("pddl")) {
+            // Public Domain License
             pd.setValue(true);
 
             allowCommercial.setVisible(false);
@@ -465,12 +506,6 @@ public class LicenseWidget extends Composite {
 
         } else if ("cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights)) {
             // Creative Commons License
-            Image icon = new Image("images/" + rights + ".png");
-            licenseText.setText("");
-            licenseText.getElement().appendChild(icon.getElement());
-            licenseText.setHref(license.getLicense());
-
-            // editor panel
             cc.setValue(true);
 
             allowCommercial.setVisible(true);

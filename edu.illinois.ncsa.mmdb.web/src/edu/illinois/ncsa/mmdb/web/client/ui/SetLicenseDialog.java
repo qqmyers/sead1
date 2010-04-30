@@ -51,7 +51,7 @@ public class SetLicenseDialog extends DialogBox {
 
         setText(title);
 
-        LicenseWidget lw = new LicenseWidget(batch, MMDB.dispatchAsync) {
+        LicenseWidget lw = new LicenseWidget(batch, MMDB.dispatchAsync, false, true, true) {
             protected void onOK() {
                 super.onOK();
                 SetLicenseDialog.this.hide();

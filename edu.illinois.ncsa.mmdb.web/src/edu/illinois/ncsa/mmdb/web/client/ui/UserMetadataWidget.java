@@ -68,214 +68,227 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
 
 public class UserMetadataWidget extends Composite {
-	static String availableFieldsQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" + 
-			"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\r\n" + 
-			"PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/>\r\n" + 
-			"\r\n" + 
-			"SELECT ?label ?f\r\n" + 
-			"WHERE {\r\n" + 
-			"  ?f <rdf:type> <cet:userMetadataField> .\r\n" + 
-			"  ?f <rdfs:label> ?label .\r\n" + 
-			"}\r\n" +
-			"ORDER BY ASC(?label)";
-	
-	String uri;
-	MyDispatchAsync dispatch;
-	LabeledListBox fieldChoice;
-	TextBox valueText;
-	FlexTable fieldTable;
-	Map<String,String> labels = new HashMap<String,String>();
+    static String       availableFieldsQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" +
+                                                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\r\n" +
+                                                     "PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/>\r\n" +
+                                                     "\r\n" +
+                                                     "SELECT ?label ?f\r\n" +
+                                                     "WHERE {\r\n" +
+                                                     "  ?f <rdf:type> <cet:userMetadataField> .\r\n" +
+                                                     "  ?f <rdfs:label> ?label .\r\n" +
+                                                     "}\r\n" +
+                                                     "ORDER BY ASC(?label)";
 
-	public UserMetadataWidget(final String uri, final MyDispatchAsync dispatch) {
-		this.uri = uri;
-		this.dispatch = dispatch;
+    String              uri;
+    MyDispatchAsync     dispatch;
+    LabeledListBox      fieldChoice;
+    TextBox             valueText;
+    FlexTable           fieldTable;
+    Map<String, String> labels               = new HashMap<String, String>();
 
-		fieldTable = new FlexTable();
-		fieldTable.setWidth("100%");
-		fieldTable.addStyleName("metadataTable");
-		fieldTable.getColumnFormatter().setWidth(0, "30%");
-		fieldTable.getColumnFormatter().setWidth(1, "50%");
-		fieldTable.getColumnFormatter().setWidth(2, "20%");
-		initWidget(fieldTable);
-		
-		dispatch.execute(new RunSparqlQuery(availableFieldsQuery),
-				new AsyncCallback<RunSparqlQueryResult>() {
-					public void onFailure(Throwable caught) {
-					}
-					public void onSuccess(RunSparqlQueryResult result) {
-						if(result.getResult().size() > 0) {
-							addFieldAddControls(result.getResult());
-							dispatch.execute(new GetUserMetadataFields(uri),
-									new AsyncCallback<GetUserMetadataFieldsResult>() {
-										public void onFailure(Throwable caught) {
-										}
-										public void onSuccess(GetUserMetadataFieldsResult result) {
-											for(String predicate : result.getFieldLabels().keySet()) {
-												addNewField(predicate, result.getFieldLabels().get(predicate),
-														result.getValues().get(predicate));
-											}
-										}
-							});
-						}
-					}
-		});
-		
-	}
+    public UserMetadataWidget(String uri, MyDispatchAsync dispatch) {
+        this.uri = uri;
+        this.dispatch = dispatch;
 
-	/**
-	 * 
-	 * @param predicate
-	 * @param label
-	 * @param value
-	 */
-	private void setProperty(String predicate, String label, String value) {
-		Set<String> v = new HashSet<String>();
-		v.add(value);
-		addNewField(predicate, label, v);
-	}
+        fieldTable = new FlexTable();
+        fieldTable.setWidth("100%");
+        fieldTable.addStyleName("metadataTable");
+        fieldTable.getColumnFormatter().setWidth(0, "30%");
+        fieldTable.getColumnFormatter().setWidth(1, "50%");
+        fieldTable.getColumnFormatter().setWidth(2, "20%");
+        initWidget(fieldTable);
+    }
 
-	/**
-	 * 
-	 * @param predicate
-	 * @return
-	 */
-	private int getRowForField(String predicate) {
-		for(int row = 0; row < fieldTable.getRowCount()-1; row++) {
-			Label l = (Label) fieldTable.getWidget(row, 0);
-			if(predicate.equals(l.getTitle())) {
-				return row;
-			}
-		}
-		return -1;
-	}
-	
-	/**
-	 * 
-	 * @param predicate
-	 * @param label
-	 * @param values
-	 */
-	private void addNewField(final String predicate, String label, Collection<String> values) {
-		int row = getRowForField(predicate);
-		if(row == -1) {
-			row = fieldTable.getRowCount()-1;
-			fieldTable.insertRow(row);
-		}
+    public void showFields(final boolean canEdit) {
+        // FIXME single get to get fields and values
+        dispatch.execute(new RunSparqlQuery(availableFieldsQuery), new AsyncCallback<RunSparqlQueryResult>() {
+            public void onFailure(Throwable caught) {
+            }
 
-		Label predicateLabel = new Label(label);
-		predicateLabel.setTitle(predicate);
-		fieldTable.setWidget(row, 0, predicateLabel);
-		VerticalPanel panel = new VerticalPanel();
-		for(String value : values) {
-			panel.add(new Label(value));
-		}
-		fieldTable.setWidget(row,1,panel);
-		Anchor removeAnchor = new Anchor("Remove");
-		removeAnchor.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				removeValue(predicate);
-			}
-		});
-		fieldTable.setWidget(row,2,removeAnchor);
-		styleRows();
-	}
-	
-	/**
-	 * 
-	 * @param result
-	 */
-	private void addFieldAddControls(List<List<String>> result) {
-		
-		HorizontalPanel horizontalPanel = new HorizontalPanel();
-		
-		horizontalPanel.addStyleName("addMetadata");
-		
-		horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-		
-		horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		
-		int row = fieldTable.getRowCount();
-		
-		fieldTable.getFlexCellFormatter().setColSpan(row, 0, 3);
-		
-		fieldTable.setWidget(row, 0, horizontalPanel);
-		
-		fieldChoice = new LabeledListBox("Set Field:");
-		for(List<String> entry : result) {
-			String label = entry.get(0);
-			String predicate = entry.get(1);
-			fieldChoice.addItem(label, predicate);
-			labels.put(predicate, label);
-		}
-		horizontalPanel.add(fieldChoice);
-		
-//		fieldTable.setWidget(row,0,fieldChoice);
+            public void onSuccess(RunSparqlQueryResult result) {
+                if (result.getResult().size() > 0) {
+                    if (canEdit) {
+                        addFieldAddControls(result.getResult());
+                    }
+                    dispatch.execute(new GetUserMetadataFields(uri), new AsyncCallback<GetUserMetadataFieldsResult>() {
+                        public void onFailure(Throwable caught) {
+                        }
 
-		VerticalPanel valuePanel = new VerticalPanel();
-		valuePanel.add(new Label("Value to set it to:"));
-		valueText = new TextBox();
-		valuePanel.add(valueText);
-//		fieldTable.setWidget(row,1,valuePanel);
-		horizontalPanel.add(valueText);
-		
-		Button addButton = new Button("Set value");
-		addButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				addValue();
-			}
-		});
-//		fieldTable.setWidget(row,2,addButton);
-		horizontalPanel.add(addButton);
-	}
-	
-	/**
+                        public void onSuccess(GetUserMetadataFieldsResult result) {
+                            for (String predicate : result.getFieldLabels().keySet() ) {
+                                addNewField(predicate, result.getFieldLabels().get(predicate), result.getValues().get(predicate), canEdit);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /**
+     * 
+     * @param predicate
+     * @param label
+     * @param value
+     */
+    private void setProperty(String predicate, String label, String value) {
+        Set<String> v = new HashSet<String>();
+        v.add(value);
+        addNewField(predicate, label, v, true);
+    }
+
+    /**
+     * 
+     * @param predicate
+     * @return
+     */
+    private int getRowForField(String predicate) {
+        for (int row = 0; row < fieldTable.getRowCount() - 1; row++ ) {
+            Label l = (Label) fieldTable.getWidget(row, 0);
+            if (predicate.equals(l.getTitle())) {
+                return row;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * 
+     * @param predicate
+     * @param label
+     * @param values
+     */
+    private void addNewField(final String predicate, String label, Collection<String> values, boolean canEdit) {
+        int row = getRowForField(predicate);
+        if (row == -1) {
+            row = fieldTable.getRowCount();
+            if (fieldChoice != null) {
+                row--;
+            }
+            fieldTable.insertRow(row);
+        }
+
+        Label predicateLabel = new Label(label);
+        predicateLabel.setTitle(predicate);
+        fieldTable.setWidget(row, 0, predicateLabel);
+        VerticalPanel panel = new VerticalPanel();
+        for (String value : values ) {
+            panel.add(new Label(value));
+        }
+        fieldTable.setWidget(row, 1, panel);
+        if (canEdit) {
+            Anchor removeAnchor = new Anchor("Remove");
+            removeAnchor.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    removeValue(predicate);
+                }
+            });
+            fieldTable.setWidget(row, 2, removeAnchor);
+        }
+        styleRows();
+    }
+
+    /**
+     * 
+     * @param result
+     */
+    private void addFieldAddControls(List<List<String>> result) {
+
+        HorizontalPanel horizontalPanel = new HorizontalPanel();
+
+        horizontalPanel.addStyleName("addMetadata");
+
+        horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
+        horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+
+        int row = fieldTable.getRowCount();
+
+        fieldTable.getFlexCellFormatter().setColSpan(row, 0, 3);
+
+        fieldTable.setWidget(row, 0, horizontalPanel);
+
+        fieldChoice = new LabeledListBox("Set Field:");
+        for (List<String> entry : result ) {
+            String label = entry.get(0);
+            String predicate = entry.get(1);
+            fieldChoice.addItem(label, predicate);
+            labels.put(predicate, label);
+        }
+        horizontalPanel.add(fieldChoice);
+
+        //		fieldTable.setWidget(row,0,fieldChoice);
+
+        VerticalPanel valuePanel = new VerticalPanel();
+        valuePanel.add(new Label("Value to set it to:"));
+        valueText = new TextBox();
+        valuePanel.add(valueText);
+        //		fieldTable.setWidget(row,1,valuePanel);
+        horizontalPanel.add(valueText);
+
+        Button addButton = new Button("Set value");
+        addButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                addValue();
+            }
+        });
+        //		fieldTable.setWidget(row,2,addButton);
+        horizontalPanel.add(addButton);
+    }
+
+    /**
 	 * 
 	 */
-	private void addValue() {
-		final String property = fieldChoice.getSelected();
-		dispatch.execute(new SetProperty(uri, property, valueText.getText()),
-				new AsyncCallback<SetPropertyResult>() {
-					public void onFailure(Throwable caught) {
-					}
-					public void onSuccess(SetPropertyResult result) {
-						setProperty(property, labels.get(property), valueText.getText());
-					}
-		});
-	}
-	
-	/**
-	 * 
-	 * @param property
-	 */
-	private void removeValue(final String property) {
-		dispatch.execute(new SetProperty(uri, property, new HashSet<String>()),
-				new AsyncCallback<SetPropertyResult>() {
-					public void onFailure(Throwable caught) {
-					}
-					public void onSuccess(SetPropertyResult result) {
-						int row = getRowForField(property);
-						if(row != -1) {
-							fieldTable.removeRow(row);
-							styleRows();
-						}
-					}
-		});
-	}
-	
-	/**
-	 * Style rows with css.
-	 */
-	private void styleRows() {
-		int rows = fieldTable.getRowCount()-1;
-		for (int row=0; row<rows; row++) {
-			fieldTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
-			fieldTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
-			fieldTable.getFlexCellFormatter().addStyleName(row, 2, "metadataTableCell");
-			if (row % 2 == 0) {
-				fieldTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
-			} else {
-				fieldTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
-			}
-		}
-	}
+    private void addValue() {
+        final String property = fieldChoice.getSelected();
+        dispatch.execute(new SetProperty(uri, property, valueText.getText()),
+                new AsyncCallback<SetPropertyResult>() {
+                    public void onFailure(Throwable caught) {
+                    }
+
+                    public void onSuccess(SetPropertyResult result) {
+                        setProperty(property, labels.get(property), valueText.getText());
+                    }
+                });
+    }
+
+    /**
+     * 
+     * @param property
+     */
+    private void removeValue(final String property) {
+        dispatch.execute(new SetProperty(uri, property, new HashSet<String>()),
+                new AsyncCallback<SetPropertyResult>() {
+                    public void onFailure(Throwable caught) {
+                    }
+
+                    public void onSuccess(SetPropertyResult result) {
+                        int row = getRowForField(property);
+                        if (row != -1) {
+                            fieldTable.removeRow(row);
+                            styleRows();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Style rows with css.
+     */
+    private void styleRows() {
+        int rows = fieldTable.getRowCount();
+        if (fieldChoice != null) {
+            rows--;
+        }
+        for (int row = 0; row < rows; row++ ) {
+            fieldTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
+            fieldTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
+            fieldTable.getFlexCellFormatter().addStyleName(row, 2, "metadataTableCell");
+            if (row % 2 == 0) {
+                fieldTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
+            } else {
+                fieldTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
+            }
+        }
+    }
 }
