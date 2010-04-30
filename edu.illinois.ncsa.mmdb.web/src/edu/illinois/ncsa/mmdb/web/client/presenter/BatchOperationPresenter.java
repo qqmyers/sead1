@@ -36,6 +36,7 @@ import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 import edu.illinois.ncsa.mmdb.web.client.ui.AddToCollectionDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
+import edu.illinois.ncsa.mmdb.web.client.view.BatchAddMetadataView;
 import edu.illinois.ncsa.mmdb.web.client.view.CreateCollectionDialogView;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
 
@@ -107,6 +108,16 @@ public class BatchOperationPresenter implements Presenter {
                 tagPresenter.bind();
                 tagPresenter.setSelectedResources(sessionState.getSelectedDatasets());
                 tagView.show();
+            }
+        });
+        display.addMenuAction("Add metadata", new Command() {
+            @Override
+            public void execute() {
+                Set<String> selection = sessionState.getSelectedDatasets();
+                BatchAddMetadataView view = new BatchAddMetadataView("Add metadata to " + selection.size() + " selected dataset(s)");
+                BatchAddMetadataPresenter presenter = new BatchAddMetadataPresenter(dispatch, view, sessionState.getSelectedDatasets());
+                presenter.bind();
+                view.show();
             }
         });
         display.addMenuAction("Create collection", new Command() {

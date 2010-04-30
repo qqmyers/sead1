@@ -40,7 +40,6 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -49,7 +48,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 
-public class LabeledListBox extends Composite implements HasValueChangeHandlers<String> {
+public class LabeledListBox extends Composite implements ValueSelectionControl<String> {
     String  selected;
     Label   label;
     ListBox choice;
