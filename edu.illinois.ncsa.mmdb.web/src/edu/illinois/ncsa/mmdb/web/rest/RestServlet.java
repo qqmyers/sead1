@@ -352,6 +352,7 @@ public class RestServlet extends AuthenticatedServlet {
                     response.setContentType(contentType);
                 }
                 response.setHeader("content-disposition", "attachment; filename=\"" + name + "\"");
+                response.flushBuffer();
                 CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
             } catch (RestServiceException e) {
                 throw new ServletException("failed to retrieve " + request.getRequestURI());
@@ -402,6 +403,7 @@ public class RestServlet extends AuthenticatedServlet {
                 if (contentType != null) {
                     response.setContentType(contentType);
                 }
+                response.flushBuffer();
                 CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
             } catch (RestServiceException e) {
                 throw new ServletException("failed to retrieve " + request.getRequestURI());
@@ -433,7 +435,7 @@ public class RestServlet extends AuthenticatedServlet {
             // we're just authenticating, and that has already been handled. do not report an error.
             // for convenience, produce the session key as a string
             response.getWriter().print(lookupSessionKey(getHttpSessionUser(request)));
-            response.getWriter().flush();
+            response.flushBuffer();
         } else if (hasPrefix(SEARCH_INFIX, request)) {
             doSearch(request, response);
         } else {
@@ -462,6 +464,7 @@ public class RestServlet extends AuthenticatedServlet {
                     log.warn("BlobFetcher took " + (now - then) + "ms");
                 }
                 then = System.currentTimeMillis();
+                response.flushBuffer();
                 CopyFile.copy(imageData, response.getOutputStream());
                 now = System.currentTimeMillis(); // FIXME debug
                 if (now - then > 100) {
