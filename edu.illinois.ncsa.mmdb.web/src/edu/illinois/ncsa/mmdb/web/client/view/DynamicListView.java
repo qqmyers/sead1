@@ -25,17 +25,16 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
  */
 public class DynamicListView extends FlexTable implements Display {
 
-    //    private final HashMap<CheckBox, String> checkBoxes;
     private final static DateTimeFormat DATE_TIME_FORMAT  = DateTimeFormat.getShortDateTimeFormat();
     public static final int             DEFAULT_PAGE_SIZE = 5;
 
     public DynamicListView() {
         super();
         addStyleName("dynamicTableList");
-        //        checkBoxes = new HashMap<CheckBox, String>();
     }
 
     @Override
+    @Deprecated
     public int insertItem(final String id, String name, String type, Date date, String preview, String size, String authorId) {
 
         final int row = this.getRowCount();

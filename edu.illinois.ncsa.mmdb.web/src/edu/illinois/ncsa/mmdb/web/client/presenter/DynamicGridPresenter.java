@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -45,6 +46,8 @@ public class DynamicGridPresenter implements Presenter {
         int insertItem(String id, String name, String type, Date date, String preview, String size, String authorId);
 
         void removeAllRows();
+
+        int insertItem(String id, String title);
     }
 
     public DynamicGridPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
@@ -69,7 +72,8 @@ public class DynamicGridPresenter implements Presenter {
 
             @Override
             public void onShowItem(ShowItemEvent showItemEvent) {
-                display.insertItem(showItemEvent.getId(), showItemEvent.getTitle(), "", null, null, "", "");
+                GWT.log("Adding item to grid " + showItemEvent.getId());
+                addItem(showItemEvent);
             }
 
         });
@@ -83,9 +87,9 @@ public class DynamicGridPresenter implements Presenter {
         });
     }
 
-    public void addItem(final String id) {
-        int location = display.insertItem(id, "", "", new Date(), "", "", "");
-        items.put(id, location);
+    public void addItem(final ShowItemEvent showItemEvent) {
+        int location = display.insertItem(showItemEvent.getId(), showItemEvent.getTitle());
+        items.put(showItemEvent.getId(), location);
         final HasValue<Boolean> selected = display.getSelected(location);
         selected.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
@@ -93,18 +97,18 @@ public class DynamicGridPresenter implements Presenter {
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 if (selected.getValue()) {
                     DatasetSelectedEvent datasetSelected = new DatasetSelectedEvent();
-                    datasetSelected.setUri(id);
+                    datasetSelected.setUri(showItemEvent.getId());
                     MMDB.eventBus.fireEvent(datasetSelected);
                 } else {
                     DatasetUnselectedEvent datasetUnselected = new DatasetUnselectedEvent();
-                    datasetUnselected.setUri(id);
+                    datasetUnselected.setUri(showItemEvent.getId());
                     MMDB.eventBus.fireEvent(datasetUnselected);
                 }
 
             }
         });
         UserSessionState sessionState = MMDB.getSessionState();
-        if (sessionState.getSelectedDatasets().contains(id)) {
+        if (sessionState.getSelectedDatasets().contains(showItemEvent.getId())) {
             selected.setValue(true);
         } else {
             selected.setValue(false);
