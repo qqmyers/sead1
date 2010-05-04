@@ -37,7 +37,7 @@ public abstract class DynamicTablePresenter<B> implements Presenter {
     protected final MyDispatchAsync dispatch;
     protected final HandlerManager  eventBus;
     protected final Display         display;
-    private int                     pageSize    = 5;
+    private int                     pageSize    = DynamicListView.DEFAULT_PAGE_SIZE;
     protected String                sortKey     = "date-desc";
     protected String                viewType    = DynamicTableView.LIST_VIEW_TYPE;
     protected int                   numberOfPages;

@@ -27,7 +27,7 @@ public class DynamicListView extends FlexTable implements Display {
 
     //    private final HashMap<CheckBox, String> checkBoxes;
     private final static DateTimeFormat DATE_TIME_FORMAT  = DateTimeFormat.getShortDateTimeFormat();
-    public static final int             DEFAULT_PAGE_SIZE = 10;
+    public static final int             DEFAULT_PAGE_SIZE = 5;
 
     public DynamicListView() {
         super();
