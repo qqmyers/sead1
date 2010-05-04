@@ -41,8 +41,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -70,7 +68,7 @@ public class AddTagWidget extends Composite {
         tagBox.setWidth("100px");
         layout.add(tagBox);
 
-        submitLink = new Anchor("Add tag(s)");
+        submitLink = new Anchor("Add");
 
         submitLink.addStyleName("addTagsLink");
 
@@ -80,15 +78,7 @@ public class AddTagWidget extends Composite {
 
         cancelLink.addStyleName("addTagsLink");
 
-        cancelLink.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-
-            }
-        });
-
-        //layout.add(cancelLink);
+        layout.add(cancelLink);
     }
 
     public Anchor getSubmitLink() {

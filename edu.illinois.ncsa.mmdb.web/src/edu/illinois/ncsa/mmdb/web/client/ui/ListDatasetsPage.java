@@ -43,9 +43,8 @@ public class ListDatasetsPage extends Page {
         rss.setHref("rss.xml");
         rss.addStyleName("rssIcon");
         rss.addStyleName("titlePanelRightElement");
-        DOM.setElementAttribute(rss.getElement(), "type",
-                "application/rss+xml");
-        rss.setHTML("<img src='./images/rss_icon.gif' border='0px' class='navMenuLink'>"); // FIXME hack
+        DOM.setElementAttribute(rss.getElement(), "type", "application/rss+xml");
+        rss.setHTML("<img src='./images/rss_icon.gif' border='0px' id='rssIcon' class='navMenuLink'>"); // FIXME hack
         rightHeader.add(rss);
 
         // paging table
@@ -57,9 +56,11 @@ public class ListDatasetsPage extends Page {
         //                mainLayoutPanel.add(pagingView.asWidget());
 
         DynamicTableView dynamicTableView = new DynamicTableView();
-        DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatch, eventBus, dynamicTableView);
+        final DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatch, eventBus, dynamicTableView);
         dynamicTablePresenter.bind();
         mainLayoutPanel.add(dynamicTableView.asWidget());
+
+        dynamicTablePresenter.refresh();
     }
 
     @Override

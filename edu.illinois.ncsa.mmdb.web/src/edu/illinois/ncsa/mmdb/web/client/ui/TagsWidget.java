@@ -79,7 +79,7 @@ public class TagsWidget extends Composite {
     private final String          id;
     private final MyDispatchAsync service;
     private final Label           tagLabel;
-    private final AddTagWidget    tagWidget;
+    private AddTagWidget          tagWidget;
 
     /**
      * A widget listing tags and providing a way to add a new one.
@@ -111,47 +111,54 @@ public class TagsWidget extends Composite {
         tagsPanel.addStyleName("tagsLinks");
         mainPanel.add(tagsPanel);
 
-        tagWidget = new AddTagWidget();
-
-        tagWidget.getSubmitLink().addClickHandler(new ClickHandler() {
-            @Override
+        final Anchor addTagAnchor = new Anchor("Add tag(s)");
+        addTagAnchor.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                submitTag(tagWidget.getTags());
-                tagWidget.getTagBox().setText("");
-                tagWidget.getTagBox().setFocus(true);
+                mainPanel.remove(addTagAnchor);
+
+                tagWidget = new AddTagWidget();
+
+                tagWidget.getSubmitLink().addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        submitTag(tagWidget.getTags());
+                        tagWidget.getTagBox().setText("");
+                        tagWidget.getTagBox().setFocus(true);
+                    }
+                });
+
+                tagWidget.getTagBox().addKeyUpHandler(new KeyUpHandler() {
+                    @Override
+                    public void onKeyUp(KeyUpEvent event) {
+                        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                            submitTag(tagWidget.getTags());
+                            tagWidget.getTagBox().setText("");
+                            tagWidget.getTagBox().setFocus(true);
+                        }
+
+                    }
+                });
+
+                tagWidget.getCancelLink().addClickHandler(new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        mainPanel.remove(tagWidget);
+                        mainPanel.add(addTagAnchor);
+                    }
+                });
+
+                mainPanel.add(tagWidget);
+
+                DeferredCommand.addCommand(new Command() {
+                    public void execute() {
+                        tagWidget.getTagBox().setFocus(true);
+                    }
+                });
             }
         });
-
-        tagWidget.getTagBox().addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    submitTag(tagWidget.getTags());
-                    tagWidget.getTagBox().setText("");
-                    tagWidget.getTagBox().setFocus(true);
-                }
-
-            }
-        });
-
-        tagWidget.getCancelLink().addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                tagWidget.getTagBox().setText("");
-                tagWidget.getTagBox().setFocus(true);
-            }
-        });
-
-        mainPanel.add(tagWidget);
+        mainPanel.add(addTagAnchor);
         //				mainPanel.setCellHorizontalAlignment(tagWidget, HasHorizontalAlignment.ALIGN_RIGHT);
-
-        DeferredCommand.addCommand(new Command() {
-            @Override
-            public void execute() {
-                tagWidget.getTagBox().setFocus(true);
-            }
-        });
 
         getTags();
     }

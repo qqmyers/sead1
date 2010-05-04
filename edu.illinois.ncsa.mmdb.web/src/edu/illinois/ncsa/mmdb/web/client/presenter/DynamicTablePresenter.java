@@ -17,6 +17,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.NoMoreItemsEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
 import edu.illinois.ncsa.mmdb.web.client.mvp.View;
@@ -85,7 +86,9 @@ public abstract class DynamicTablePresenter<B> implements Presenter {
         DynamicListPresenter listPresenter = new DynamicListPresenter(dispatch, eventBus, listView);
         listPresenter.bind();
         display.setContentView(listView);
+    }
 
+    public void refresh() {
         getContent();
     }
 
@@ -98,32 +101,32 @@ public abstract class DynamicTablePresenter<B> implements Presenter {
         dispatch.execute(query,
                 new AsyncCallback<ListQueryResult<B>>() {
 
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Error retrieving items to show in table", caught);
-                        DialogBox dialogBox = new DialogBox();
-                        dialogBox.setText("Error retrieving items");
-                        dialogBox.add(new Label(MMDB.SERVER_ERROR));
-                        dialogBox.setAnimationEnabled(true);
-                        dialogBox.center();
-                        dialogBox.show();
-                    }
+            public void onFailure(Throwable caught) {
+                GWT.log("Error retrieving items to show in table", caught);
+                DialogBox dialogBox = new DialogBox();
+                dialogBox.setText("Error retrieving items");
+                dialogBox.add(new Label(MMDB.SERVER_ERROR));
+                dialogBox.setAnimationEnabled(true);
+                dialogBox.center();
+                dialogBox.show();
+            }
 
-                    @Override
-                    public void onSuccess(ListQueryResult<B> result) {
-                        eventBus.fireEvent(new ClearDatasetsEvent());
-                        int index = 0;
-                        for (B item : result.getResults() ) {
-                            ShowItemEvent event = new ShowItemEvent();
-                            event.setPosition(index);
-                            addItem(event, item);
-                            index++;
-                            eventBus.fireEvent(event);
-                        }
-                        int np = (int) Math.ceil((double) result.getTotalCount() / getPageSize());
-                        setNumberOfPages(np);
-                    }
-                });
-
+            @Override
+            public void onSuccess(final ListQueryResult<B> result) {
+                eventBus.fireEvent(new ClearDatasetsEvent());
+                int index = 0;
+                for (B item : result.getResults() ) {
+                    ShowItemEvent event = new ShowItemEvent();
+                    event.setPosition(index);
+                    addItem(event, item);
+                    index++;
+                    eventBus.fireEvent(event);
+                }
+                eventBus.fireEvent(new NoMoreItemsEvent());
+                final int np = (int) Math.ceil((double) result.getTotalCount() / getPageSize());
+                setNumberOfPages(np);
+            }
+        });
     }
 
     /**

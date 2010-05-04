@@ -360,6 +360,7 @@ public class RestServlet extends AuthenticatedServlet {
                 throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
             }
         } else if (hasPrefix(PREVIEW_ANY, request)) {
+            response.flushBuffer(); // MMDB-620
             long then = System.currentTimeMillis(); // FIXME debug
             PreviewImageBean preview = null;
             String image404 = null;
@@ -386,6 +387,7 @@ public class RestServlet extends AuthenticatedServlet {
                 String contentType = preview.getMimeType();
                 if (contentType != null) {
                     response.setContentType(contentType);
+                    response.flushBuffer(); // MMDB-620
                 }
             }
             String previewUri = preview != null ? preview.getUri() : null;
@@ -452,6 +454,7 @@ public class RestServlet extends AuthenticatedServlet {
     }
 
     void returnImage(HttpServletRequest request, HttpServletResponse response, String imageUri, String image404, boolean shouldCache) throws IOException, ServletException {
+        response.flushBuffer();
         if (!shouldCache) {
             dontCache(response);
         }

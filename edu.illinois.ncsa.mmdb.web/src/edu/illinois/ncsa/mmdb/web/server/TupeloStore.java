@@ -853,11 +853,14 @@ public class TupeloStore {
                     log.info("starting full-text reindexing @ " + new Date());
                     logged = true;
                 }
+                long then = System.currentTimeMillis();
                 log.info("indexing " + toIndex.size() + " dataset(s) @ " + new Date());
                 for (String datasetUri : toIndex ) {
                     getSearch().reindex(datasetUri);
                 }
-                log.info("indexed " + toIndex.size() + " dataset(s) @ " + new Date());
+                long elapsed = System.currentTimeMillis() - then;
+                double minutes = elapsed / 60000.0;
+                log.info("indexed " + toIndex.size() + " dataset(s) in " + minutes + " minutes");
             }
         }
     }

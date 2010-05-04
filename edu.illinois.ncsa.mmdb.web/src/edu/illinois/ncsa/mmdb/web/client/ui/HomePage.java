@@ -171,18 +171,18 @@ public class HomePage extends Page {
                 Permission.VIEW_ADMIN_PAGES),
                 new AsyncCallback<HasPermissionResult>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Error checking for admin privileges", caught);
-                    }
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error checking for admin privileges", caught);
+            }
 
-                    @Override
-                    public void onSuccess(HasPermissionResult result) {
-                        if (result.isPermitted()) {
-                            createAdminTab();
-                        }
-                    }
-                });
+            @Override
+            public void onSuccess(HasPermissionResult result) {
+                if (result.isPermitted()) {
+                    createAdminTab();
+                }
+            }
+        });
     }
 
     /**

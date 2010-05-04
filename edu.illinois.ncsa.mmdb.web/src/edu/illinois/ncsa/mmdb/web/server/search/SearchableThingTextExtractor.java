@@ -79,182 +79,183 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 public class SearchableThingTextExtractor implements TextExtractor<String> {
-	Log log = LogFactory.getLog(SearchableThingTextExtractor.class);
+    Log log = LogFactory.getLog(SearchableThingTextExtractor.class);
 
-	BeanSession getBeanSession() throws OperatorException, ClassNotFoundException {
-		return CETBeans.createBeanSession(TupeloStore.getInstance().getContext());
-	}
-	Object fetchBean(String uri) throws OperatorException, ClassNotFoundException {
-		BeanSession bs = getBeanSession();
-		try {
-			return bs.fetchBean(Resource.uriRef(uri));
-		} finally {
-			bs.close();
-		}
-	}
+    BeanSession getBeanSession() throws OperatorException, ClassNotFoundException {
+        return CETBeans.createBeanSession(TupeloStore.getInstance().getContext());
+    }
 
-	@Override
-	/**
-	 * Extract a text representation of an mmdb thing (e.g., a dataset or collection)
-	 * for full-text indexing purposes.
-	 */
-	public String extractText(String uri) {
-		assert uri != null;
-		String text = "";
-		try {
-			Object bean = fetchBean(uri);
-			if(bean instanceof CETBean) {
-				text = text((CETBean)bean);
-				bean = null;
-			}
-		} catch(Exception x) {
-			log.warn("unexpected bean session behavior: "+x.getMessage());
-		}
-		// it's either not a bean or not a CETBean
-		try {
-			text = text(uri);
-		} catch(Exception x) { // something's wrong
-			x.printStackTrace();
-			return "";
-		}
-		//log.debug(uri+"="+text); // FIXME debug
-		return text;
-	}
+    Object fetchBean(String uri) throws OperatorException, ClassNotFoundException {
+        BeanSession bs = getBeanSession();
+        try {
+            return bs.fetchBean(Resource.uriRef(uri));
+        } finally {
+            bs.close();
+        }
+    }
 
-	String text(String uri) throws OperatorException, ClassNotFoundException {
-		return unsplit(title(uri), tags(uri), authors(uri), annotations(uri), collections(uri), metadata(uri), userMetadata(uri));
-	}
+    @Override
+    /**
+     * Extract a text representation of an mmdb thing (e.g., a dataset or collection)
+     * for full-text indexing purposes.
+     */
+    public String extractText(String uri) {
+        assert uri != null;
+        String text = "";
+        try {
+            Object bean = fetchBean(uri);
+            if (bean instanceof CETBean) {
+                text = text((CETBean) bean);
+                bean = null;
+            }
+        } catch (Exception x) {
+            log.warn("unexpected bean session behavior: " + x.getMessage());
+        }
+        // it's either not a bean or not a CETBean
+        try {
+            text = text(uri);
+        } catch (Exception x) { // something's wrong
+            x.printStackTrace();
+            return "";
+        }
+        //log.debug(uri+"="+text); // FIXME debug
+        return text;
+    }
 
-	String text(CETBean bean) throws OperatorException, ClassNotFoundException {
-		return unsplit(title(bean), tags(bean), authors(bean), annotations(bean), collections(bean), metadata(bean), userMetadata(bean));
-	}
+    String text(String uri) throws OperatorException, ClassNotFoundException {
+        return unsplit(title(uri), tags(uri), authors(uri), annotations(uri), collections(uri), metadata(uri), userMetadata(uri));
+    }
 
-	String authors(DatasetBean bean) {
-		List<PersonBean> contributors = new LinkedList<PersonBean>();
-		contributors.add(bean.getCreator());
-		contributors.addAll(bean.getContributors());
-		List<String> names = new LinkedList<String>();
-		for(PersonBean person : contributors) {
-			if(person != null) {
-				String name = person.getName();
-				if(name != null) {
-					names.add(name);
-				}
-				String email = person.getEmail();
-				if(email != null) {
-					names.add(email);
-					names.add(atomize(email));
-				}
-			}
-		}
-		return unsplit(names);
-	}
+    String text(CETBean bean) throws OperatorException, ClassNotFoundException {
+        return unsplit(title(bean), tags(bean), authors(bean), annotations(bean), collections(bean), metadata(bean), userMetadata(bean));
+    }
 
-	String authors(CETBean bean) {
-		if(bean instanceof DatasetBean) {
-			return authors((DatasetBean)bean);
-		} else {
-			log.warn("unexpected bean class "+bean.getClass());
-			return authors(bean.getUri());
-		}
-	}
+    String authors(DatasetBean bean) {
+        List<PersonBean> contributors = new LinkedList<PersonBean>();
+        contributors.add(bean.getCreator());
+        contributors.addAll(bean.getContributors());
+        List<String> names = new LinkedList<String>();
+        for (PersonBean person : contributors ) {
+            if (person != null) {
+                String name = person.getName();
+                if (name != null) {
+                    names.add(name);
+                }
+                String email = person.getEmail();
+                if (email != null) {
+                    names.add(email);
+                    names.add(atomize(email));
+                }
+            }
+        }
+        return unsplit(names);
+    }
 
-	// aaagh, unsafe casts
-	String authors(String uri) {
-		try {
-			Object bean = fetchBean(uri);
-			if(bean instanceof CETBean) {
-				String authors = authors((CETBean)bean);
-				bean = null;
-				return authors;
-			} else {
-				log.error(uri+" is not a bean, no authors extracted");
-			}
-		} catch(Exception x) {
-		}
-		return "";
-	}
+    String authors(CETBean bean) {
+        if (bean instanceof DatasetBean) {
+            return authors((DatasetBean) bean);
+        } else {
+            log.warn("unexpected bean class " + bean.getClass());
+            return authors(bean.getUri());
+        }
+    }
 
-	String tags(CETBean bean) throws OperatorException, ClassNotFoundException {
-		return tags(bean.getUri());
-	}
+    // aaagh, unsafe casts
+    String authors(String uri) {
+        try {
+            Object bean = fetchBean(uri);
+            if (bean instanceof CETBean) {
+                String authors = authors((CETBean) bean);
+                bean = null;
+                return authors;
+            } else {
+                log.error(uri + " is not a bean, no authors extracted");
+            }
+        } catch (Exception x) {
+        }
+        return "";
+    }
 
-	String tags(String uri) throws OperatorException, ClassNotFoundException {
-		BeanSession bs = getBeanSession();
-		TagEventBeanUtil tebu = new TagEventBeanUtil(bs);
-		TreeSet<String> tags = new TreeSet<String>();
-		try {
-			tags.addAll(tebu.getTags(uri));
-			return unsplit(tags);
-		} catch (OperatorException e) {
-			e.printStackTrace();
-			return "";
-		} finally {
-			bs.close();
-		}
-	}
+    String tags(CETBean bean) throws OperatorException, ClassNotFoundException {
+        return tags(bean.getUri());
+    }
 
-	String annotations(CETBean bean) throws OperatorException, ClassNotFoundException {
-		return annotations(bean.getUri());
-	}
+    String tags(String uri) throws OperatorException, ClassNotFoundException {
+        BeanSession bs = getBeanSession();
+        TagEventBeanUtil tebu = new TagEventBeanUtil(bs);
+        TreeSet<String> tags = new TreeSet<String>();
+        try {
+            tags.addAll(tebu.getTags(uri));
+            return unsplit(tags);
+        } catch (OperatorException e) {
+            e.printStackTrace();
+            return "";
+        } finally {
+            bs.close();
+        }
+    }
 
-	String annotations(String uri) throws OperatorException, ClassNotFoundException {
-		BeanSession bs = getBeanSession();
-		AnnotationBeanUtil abu = new AnnotationBeanUtil(bs);
-		List<String> annotations = new LinkedList<String>();
-		try {
-			for(AnnotationBean annotation : abu.getAssociationsFor(uri)) {
-				annotations.add(annotation.getDescription());
-			}
-		} catch (OperatorException e) {
-			e.printStackTrace();
-			return "";
-		} finally {
-			bs.close();
-		}
-		return unsplit(annotations);
-	}
+    String annotations(CETBean bean) throws OperatorException, ClassNotFoundException {
+        return annotations(bean.getUri());
+    }
 
-	String collections(CETBean bean) {
-		return collections(bean.getUri());
-	}
+    String annotations(String uri) throws OperatorException, ClassNotFoundException {
+        BeanSession bs = getBeanSession();
+        AnnotationBeanUtil abu = new AnnotationBeanUtil(bs);
+        List<String> annotations = new LinkedList<String>();
+        try {
+            for (AnnotationBean annotation : abu.getAssociationsFor(uri) ) {
+                annotations.add(annotation.getDescription());
+            }
+        } catch (OperatorException e) {
+            e.printStackTrace();
+            return "";
+        } finally {
+            bs.close();
+        }
+        return unsplit(annotations);
+    }
 
-	String collections(String uri) {
-		GetCollectionsResult r = GetCollectionsHandler.getCollections(new GetCollections(uri));
-		List<String> names = new LinkedList<String>();
-		for(CollectionBean c : r.getCollections()) {
-			names.add(c.getTitle());
-		}
-		return unsplit(names);
-	}
+    String collections(CETBean bean) {
+        return collections(bean.getUri());
+    }
 
-	String metadata(CETBean bean) {
-	    return metadata(bean.getUri());
-	}
+    String collections(String uri) {
+        GetCollectionsResult r = GetCollectionsHandler.getCollections(new GetCollections(uri));
+        List<String> names = new LinkedList<String>();
+        for (CollectionBean c : r.getCollections() ) {
+            names.add(c.getTitle());
+        }
+        return unsplit(names);
+    }
 
-	String metadata(String uri) {
-	    GetMetadata gm = new GetMetadata(uri);
-	    GetMetadataResult gmr;
-	    try {
-	        gmr = (new GetMetadataHandler()).execute(gm,null);
-	    } catch(ActionException e) {
-	        e.printStackTrace();
-	        return "";
-	    }
-	    List<String> allValues = new LinkedList<String>();
-	    for(Metadata m : gmr.getMetadata()) {
-	        allValues.add(m.getValue());
-	    }
-	    return unsplit(allValues);
-	}
+    String metadata(CETBean bean) {
+        return metadata(bean.getUri());
+    }
 
-	String userMetadata(CETBean bean) {
-	    return userMetadata(bean.getUri());
-	}
+    String metadata(String uri) {
+        GetMetadata gm = new GetMetadata(uri);
+        GetMetadataResult gmr;
+        try {
+            gmr = (new GetMetadataHandler()).execute(gm, null);
+        } catch (ActionException e) {
+            e.printStackTrace();
+            return "";
+        }
+        List<String> allValues = new LinkedList<String>();
+        for (Metadata m : gmr.getMetadata() ) {
+            allValues.add(m.getValue());
+        }
+        return unsplit(allValues);
+    }
 
-	String userMetadata(String uri) {
-	    GetUserMetadataFields gumf = new GetUserMetadataFields(uri);
-	    GetUserMetadataFieldsResult gumfr;
+    String userMetadata(CETBean bean) {
+        return userMetadata(bean.getUri());
+    }
+
+    String userMetadata(String uri) {
+        GetUserMetadataFields gumf = new GetUserMetadataFields(uri);
+        GetUserMetadataFieldsResult gumfr;
         try {
             gumfr = (new GetUserMetadataFieldsHandler()).execute(gumf, null);
         } catch (ActionException e) {
@@ -262,71 +263,73 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
             return "";
         }
         List<String> allValues = new LinkedList<String>();
-	    for(Map.Entry<String,Collection<String>> entry : gumfr.getValues().entrySet()) {
-	        log.debug(entry.getKey()+"="+entry.getValue());
-	        allValues.addAll(entry.getValue());
-	    }
-	    return unsplit(allValues);
-	}
+        for (Map.Entry<String, Collection<String>> entry : gumfr.getValues().entrySet() ) {
+            //log.debug(entry.getKey()+"="+entry.getValue());
+            allValues.addAll(entry.getValue());
+        }
+        return unsplit(allValues);
+    }
 
-	// split a string into words on non-whitespace boundaries
-	static String atomize(String title) {
-		String e = title.replaceAll("([a-z])([A-Z])","$1 $2");
-		e = e.replaceAll("([-_\\[\\]\\.])"," $1 ");
-		e = e.replaceAll("([0-9]+)"," $1 ");
-		e = e.replaceAll("  +"," ");
-		return title+" "+e;
-	}
+    // split a string into words on non-whitespace boundaries
+    static String atomize(String title) {
+        String e = title.replaceAll("([a-z])([A-Z])", "$1 $2");
+        e = e.replaceAll("([-_\\[\\]\\.])", " $1 ");
+        e = e.replaceAll("([0-9]+)", " $1 ");
+        e = e.replaceAll("  +", " ");
+        return title + " " + e;
+    }
 
-	/*
-	public static void main(String args[]) {
-		String examples[] = new String[] {
-				"zephyrObservationCar.jpg",
-				"3934741243_ab09b6a208_o.jpg [Crop Tool.OutputImage]",
-				"114_0145.MOV",
-				"source-mosaic-14400x6150.jpg",
-				"london_map1807_large.jpg",
-				"france_louis_xi.jpg"
-		};
-		for(String title : examples) {
-			System.out.println(expandTitle(title));
-		}
-	}
-	*/
+    /*
+    public static void main(String args[]) {
+    	String examples[] = new String[] {
+    			"zephyrObservationCar.jpg",
+    			"3934741243_ab09b6a208_o.jpg [Crop Tool.OutputImage]",
+    			"114_0145.MOV",
+    			"source-mosaic-14400x6150.jpg",
+    			"london_map1807_large.jpg",
+    			"france_louis_xi.jpg"
+    	};
+    	for(String title : examples) {
+    		System.out.println(expandTitle(title));
+    	}
+    }
+    */
 
-	String title(CETBean bean) {
-		return atomize(bean.getLabel());
-	}
+    String title(CETBean bean) {
+        return atomize(bean.getLabel());
+    }
 
-	String title(String uri) throws OperatorException, ClassNotFoundException {
-		BeanSession bs = getBeanSession();
-		try {
-			Thing thing = bs.getThingSession().fetchThing(Resource.uriRef(uri));
-			String dcTitle = thing.getString(Dc.TITLE);
-			String rdfsLabel = thing.getString(Rdfs.LABEL);
-			return atomize((dcTitle != null ? dcTitle : "") + (rdfsLabel != null ? " " + rdfsLabel : ""));
-		} finally {
-			bs.close();
-		}
-	}
+    String title(String uri) throws OperatorException, ClassNotFoundException {
+        BeanSession bs = getBeanSession();
+        try {
+            Thing thing = bs.getThingSession().fetchThing(Resource.uriRef(uri));
+            String dcTitle = thing.getString(Dc.TITLE);
+            String rdfsLabel = thing.getString(Rdfs.LABEL);
+            return atomize((dcTitle != null ? dcTitle : "") + (rdfsLabel != null ? " " + rdfsLabel : ""));
+        } finally {
+            bs.close();
+        }
+    }
 
-	// why am I writing this.
-	String unsplit(Iterable<String> strings) {
-		boolean first = true;
-		StringWriter sw = new StringWriter();
-		for(String s : strings) {
-			if(!first) { sw.append(' '); }
-			sw.append(s);
-			first = false;
-		}
-		return sw.toString();
-	}
+    // why am I writing this.
+    String unsplit(Iterable<String> strings) {
+        boolean first = true;
+        StringWriter sw = new StringWriter();
+        for (String s : strings ) {
+            if (!first) {
+                sw.append(' ');
+            }
+            sw.append(s);
+            first = false;
+        }
+        return sw.toString();
+    }
 
-	String unsplit(String... strings) {
-		List<String> s = new ArrayList<String>(strings.length);
-		for(int i = 0; i < strings.length; i++) {
-			s.add(strings[i]);
-		}
-		return unsplit(s);
-	}
+    String unsplit(String... strings) {
+        List<String> s = new ArrayList<String>(strings.length);
+        for (int i = 0; i < strings.length; i++ ) {
+            s.add(strings[i]);
+        }
+        return unsplit(s);
+    }
 }

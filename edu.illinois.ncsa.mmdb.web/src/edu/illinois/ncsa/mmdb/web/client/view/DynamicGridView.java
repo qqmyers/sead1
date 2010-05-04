@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -12,6 +13,7 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -73,6 +75,12 @@ public class DynamicGridView extends FlexTable implements Display {
         final int n = numItems;
         setWidget(n / ROW_WIDTH, n % ROW_WIDTH, layoutPanel);
 
+        Timer t = new Timer() {
+            public void run() {
+                setWidget(n / ROW_WIDTH, n % ROW_WIDTH, layoutPanel);
+            }
+        };
+        t.schedule(1500);
         numItems++;
 
         return row;

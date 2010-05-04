@@ -69,11 +69,11 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPendingResult;
 public class PreviewWidget extends Composite {
 
     // FIXME use enums
-    private static final Map<String, String> PREVIEW_URL;
-    public static final Map<String, String>  GRAY_URL;
-    private static final Map<String, String> PENDING_URL;
+    public static final Map<String, String> PREVIEW_URL;
+    public static final Map<String, String> GRAY_URL;
+    public static final Map<String, String> PENDING_URL;
 
-    int                                      maxWidth        = 600;
+    int                                     maxWidth        = 600;
 
     static {
         PREVIEW_URL = new HashMap<String, String>();
@@ -90,17 +90,19 @@ public class PreviewWidget extends Composite {
         PENDING_URL.put(GetPreviews.BADGE, "./images/loading-small.gif");
     }
 
-    static final String                      LOADING_TEXT    = "Loading...";
-    static final String                      NO_PREVIEW_TEXT = "No preview available";
-    private final SimplePanel                contentPanel;
-    private final Image                      image;
-    private Label                            noPreview;
-    private String                           size;
-    private final String                     datasetUri;
-    private final String                     link;
-    private boolean                          checkPending    = true;
-    boolean                                  wasEverPending  = false;
-    Timer                                    retryTimer;
+    static final String                     LOADING_TEXT    = "Loading...";
+    static final String                     NO_PREVIEW_TEXT = "No preview available";
+    private final SimplePanel               contentPanel;
+    private final Image                     image;
+    private Label                           noPreview;
+    private String                          size;
+    private final String                    datasetUri;
+    private final String                    link;
+    private boolean                         checkPending    = true;
+    boolean                                 wasEverPending  = false;
+    boolean                                 checkingPending = false;
+    Timer                                   retryTimer;
+    Timer                                   safariForceTimer;
 
     /**
      * Create a preview. If the desired size is small (thumbnail) try showing
@@ -119,7 +121,7 @@ public class PreviewWidget extends Composite {
     }
 
     public PreviewWidget(final String datasetUri, String desiredSize,
-            final String link, boolean checkPending) {
+            final String link, final boolean checkPending) {
         this.checkPending = checkPending;
         this.datasetUri = datasetUri;
         this.link = link;
@@ -133,10 +135,21 @@ public class PreviewWidget extends Composite {
         }
 
         contentPanel = new SimplePanel();
-        initWidget(contentPanel);
 
         // add the preview image
         image = new Image(PREVIEW_URL.get(size) + datasetUri);
+        contentPanel.clear();
+        contentPanel.add(image);
+        addLink(image);
+        safariForceTimer = new Timer() { // MMDB-620
+            public void run() {
+                contentPanel.clear();
+                contentPanel.add(image);
+            }
+        };
+        safariForceTimer.schedule(50); // right away
+        safariForceTimer.schedule(1000); // somewhat later
+        safariForceTimer.schedule(2000); // last attempt
         if (size != GetPreviews.LARGE) {
             image.addStyleName("thumbnail");
         } else {
@@ -150,9 +163,8 @@ public class PreviewWidget extends Composite {
             });
             getPreview(datasetUri, link);
         }
-        addLink(image);
-        contentPanel.clear();
-        contentPanel.add(image);
+
+        initWidget(contentPanel);
     }
 
     /**
@@ -186,6 +198,9 @@ public class PreviewWidget extends Composite {
         if (retryTimer != null) {
             retryTimer.cancel();
         }
+        if (safariForceTimer != null) {
+            safariForceTimer.cancel();
+        }
     }
 
     /**
@@ -204,6 +219,7 @@ public class PreviewWidget extends Composite {
     }
 
     protected void getPreview(final String datasetUri, final String link, final boolean display) {
+        checkingPending = true;
         MMDB.dispatchAsync.execute(new IsPreviewPending(datasetUri, size), new AsyncCallback<IsPreviewPendingResult>() {
             public void onFailure(Throwable caught) {
             }
@@ -221,6 +237,7 @@ public class PreviewWidget extends Composite {
                         if (retryTimer != null) {
                             retryTimer.cancel();
                         }
+                        checkingPending = false;
                         checkPending = false;
                     } else if (result.isPending()) {
                         GWT.log("Preview is PENDING for " + datasetUri);
@@ -241,6 +258,7 @@ public class PreviewWidget extends Composite {
                         if (retryTimer != null) {
                             retryTimer.cancel();
                         }
+                        checkingPending = false;
                         checkPending = false;
                     }
                 }

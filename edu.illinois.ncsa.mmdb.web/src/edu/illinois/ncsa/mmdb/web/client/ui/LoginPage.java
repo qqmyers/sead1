@@ -62,6 +62,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
@@ -88,6 +89,7 @@ public class LoginPage extends Composite {
     private TextBox               usernameBox;
     private PasswordTextBox       passwordBox;
     private SimplePanel           feedbackPanel;
+    private Label                 progressLabel;
     private final MyDispatchAsync dispatchasync;
     private final MMDB            mainWindow;
 
@@ -198,6 +200,7 @@ public class LoginPage extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
+                progressLabel.setText("Logging in...");
                 authenticate();
             }
         });
@@ -205,6 +208,11 @@ public class LoginPage extends Composite {
         submitButton.setTabIndex(3);
 
         table.setWidget(3, 1, submitButton);
+
+        progressLabel = new Label("");
+        table.setWidget(4, 0, progressLabel);
+        table.getFlexCellFormatter().setColSpan(4, 0, 2);
+        table.getFlexCellFormatter().setHorizontalAlignment(4, 0, HasAlignment.ALIGN_CENTER);
 
         return table;
     }
@@ -223,7 +231,7 @@ public class LoginPage extends Composite {
 
                     @Override
                     public void onFailure(Throwable arg0) {
-                        GWT.log("Failed authenticating", arg0);
+                        fail();
                     }
 
                     @Override
@@ -269,11 +277,13 @@ public class LoginPage extends Composite {
     }
 
     void fail() {
+        GWT.log("Failed authenticating", null);
         Label message = new Label(
                 "Incorrect username/password combination");
         message.addStyleName("loginError");
         feedbackPanel.clear();
         feedbackPanel.add(message);
+        progressLabel.setText("");
     }
 
     /**
