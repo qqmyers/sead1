@@ -15,6 +15,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
+import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 
 /**
@@ -81,18 +82,27 @@ public class TagDialogPresenter extends TextDialogPresenter {
             }
         }
         if (!tagSet.isEmpty()) {
-            for (String id : selectedResources ) {
+            String actionVerb = delete ? "untagged" : "tagged";
+            final BatchCompletedEvent done = new BatchCompletedEvent(selectedResources.size(), actionVerb);
+            for (final String id : selectedResources ) {
 
                 dispatch.execute(new TagResource(id, tagSet, delete), new AsyncCallback<TagResourceResult>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Failed tagging resource", caught);
+                        done.setFailure(id, "failed: " + caught.getMessage());
+                        if (done.readyToFire()) {
+                            eventBus.fireEvent(done);
+                        }
                     }
 
                     @Override
                     public void onSuccess(TagResourceResult result) {
                         GWT.log("Resource successfully tagged", null);
+                        done.addSuccess(id);
+                        if (done.readyToFire()) {
+                            eventBus.fireEvent(done);
+                        }
                     }
                 });
             }

@@ -40,18 +40,19 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.Collection;
 
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.DialogBox;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 
 public class SetLicenseDialog extends DialogBox {
 
-    public SetLicenseDialog(String title, Collection<String> batch) {
+    public SetLicenseDialog(String title, Collection<String> batch, HandlerManager eventBus) {
         super();
 
         setText(title);
 
-        LicenseWidget lw = new LicenseWidget(batch, MMDB.dispatchAsync, false, true, true) {
+        LicenseWidget lw = new LicenseWidget(batch, MMDB.dispatchAsync, eventBus, false, true, true) {
             protected void onOK() {
                 super.onOK();
                 SetLicenseDialog.this.hide();

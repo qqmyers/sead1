@@ -43,6 +43,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -55,21 +56,27 @@ import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 public class ConfirmDialog extends DialogBox {
     String                  message;
     protected VerticalPanel content;
+    HasText                 okText;
+    HasText                 cancelText;
 
     public ConfirmDialog(String title) {
         this(title, null);
     }
 
     public ConfirmDialog(String title, String message) {
+        this(title, message, true);
+    }
+
+    public ConfirmDialog(String title, String message, boolean includeCancelButton) {
         setText(title);
-        init();
+        init(includeCancelButton);
 
         if (message != null) {
             content.add(new Label(message));
         }
     }
 
-    void init() {
+    void init(boolean includeCancelButton) {
         VerticalPanel panel = new VerticalPanel();
         panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
@@ -84,19 +91,33 @@ public class ConfirmDialog extends DialogBox {
                 hide();
             }
         });
+        okText = yesButton;
 
         buttonsPanel.add(yesButton);
-        Button noButton = new Button("No", new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                fireEvent(new CancelEvent());
-                hide();
-            }
-        });
 
-        buttonsPanel.add(noButton);
+        if (includeCancelButton) {
+            Button noButton = new Button("No", new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    fireEvent(new CancelEvent());
+                    hide();
+                }
+            });
+            cancelText = noButton;
+
+            buttonsPanel.add(noButton);
+        }
+
         panel.add(buttonsPanel);
         add(panel);
         center();
+    }
+
+    public HasText getOkText() {
+        return okText;
+    }
+
+    public HasText getCancelText() {
+        return cancelText;
     }
 
     public void addCancelHandler(CancelHandler h) {

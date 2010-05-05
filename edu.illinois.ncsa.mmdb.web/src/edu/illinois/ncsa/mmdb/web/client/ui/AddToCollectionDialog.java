@@ -67,11 +67,15 @@ public class AddToCollectionDialog extends DialogBox {
     private final Button  submitButton;
 
     public AddToCollectionDialog(DispatchAsync service) {
+        this(service, "Add to collection");
+    }
+
+    public AddToCollectionDialog(DispatchAsync service, String text) {
 
         super();
         setAnimationEnabled(true);
         setGlassEnabled(true);
-        setText("Add to collection");
+        setText(text);
 
         FlowPanel mainContainer = new FlowPanel();
         mainContainer.addStyleName("addToCollectionDialog");

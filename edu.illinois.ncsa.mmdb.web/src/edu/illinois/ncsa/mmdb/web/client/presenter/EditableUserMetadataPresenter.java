@@ -3,15 +3,18 @@ package edu.illinois.ncsa.mmdb.web.client.presenter;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.shared.HandlerManager;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 
 public abstract class EditableUserMetadataPresenter extends UserMetadataPresenter {
-    Display editDisplay;
+    Display                  editDisplay;
+    protected HandlerManager eventBus;
 
-    public EditableUserMetadataPresenter(MyDispatchAsync dispatch, Display display) {
+    public EditableUserMetadataPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
         super(dispatch, display);
         editDisplay = display;
+        this.eventBus = eventBus;
     }
 
     public void bind() {

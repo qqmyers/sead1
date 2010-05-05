@@ -38,7 +38,6 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.view;
 
-
 /**
  * Popup dialog box to tag a set if resources.
  * 
@@ -47,7 +46,11 @@ package edu.illinois.ncsa.mmdb.web.client.view;
  */
 public class TagDialogView extends TextDialogView {
     public TagDialogView() {
+        this("Tag");
+    }
+
+    public TagDialogView(String title) {
         super();
-        setText("Tag");
+        setText(title);
     }
 }

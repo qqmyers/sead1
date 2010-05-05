@@ -18,6 +18,7 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
@@ -67,20 +68,25 @@ public class CreateCollectionDialogPresenter extends TextDialogPresenter {
      * Tag resources if tag is not empty.
      */
     protected void create() {
-        List<String> members = new LinkedList<String>();
+        final List<String> members = new LinkedList<String>();
         members.addAll(selectedResources);
         CollectionBean collection = new CollectionBean();
         collection.setTitle(display.getTextString().getText());
+        final BatchCompletedEvent done = new BatchCompletedEvent(members.size(), "added to new collection");
         dispatch.execute(new AddCollection(collection, MMDB.getUsername(), members), new AsyncCallback<AddCollectionResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Failed creating collection from selected resources", caught);
+                done.setFailure(members, caught);
+                eventBus.fireEvent(done);
             }
 
             @Override
             public void onSuccess(AddCollectionResult result) {
                 // FIXME AddCollectionResult should include URI, so we can change the history token 
                 GWT.log("Succeeded creating collection from selected resources", null);
+                done.addSuccesses(members);
+                eventBus.fireEvent(done);
             }
         });
     }

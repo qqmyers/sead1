@@ -44,6 +44,7 @@ import java.util.HashSet;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -61,6 +62,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetLicense;
+import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 
 /**
  * Shows the current license and allows the user to edit the license.
@@ -75,6 +77,7 @@ public class LicenseWidget extends Composite {
     private final MyDispatchAsync    service;
     private final Collection<String> resources;
     private LicenseResult            license;
+    private HandlerManager           eventBus;
 
     private VerticalPanel            mainPanel;
     private Anchor                   licenseText;
@@ -97,9 +100,10 @@ public class LicenseWidget extends Composite {
     private CheckBox                 myData;
     private Label                    lblRightsHolder;
 
-    public LicenseWidget(Collection<String> batch, MyDispatchAsync service, boolean showTitle, boolean canEdit, boolean showEdit) {
+    public LicenseWidget(Collection<String> batch, MyDispatchAsync service, HandlerManager eventBus, boolean showTitle, boolean canEdit, boolean showEdit) {
         this.resources = batch;
         this.service = service;
+        this.eventBus = eventBus;
         init(showTitle, canEdit, showEdit);
     }
 
@@ -399,6 +403,7 @@ public class LicenseWidget extends Composite {
             license.setAllowDownload(allowDownload.getValue());
         }
 
+        final BatchCompletedEvent done = new BatchCompletedEvent();
         // fix me modify the bat
         service.execute(new SetLicense(resources, license), new AsyncCallback<EmptyResult>() {
             @Override
@@ -406,10 +411,22 @@ public class LicenseWidget extends Composite {
                 GWT.log("Error setting license", caught);
                 license = oldLicense;
                 showLicense();
+                for (String r : resources ) {
+                    done.setFailure(r, "failed: unknown reason");
+                }
+                if (eventBus != null) {
+                    eventBus.fireEvent(done);
+                }
             }
 
             @Override
             public void onSuccess(EmptyResult result) {
+                for (String r : resources ) {
+                    done.addSuccess(r);
+                }
+                if (eventBus != null) {
+                    eventBus.fireEvent(done);
+                }
             }
         });
     }
