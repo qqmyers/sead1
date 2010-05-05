@@ -18,6 +18,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.NoMoreItemsEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.RefreshEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.RefreshHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
 import edu.illinois.ncsa.mmdb.web.client.mvp.View;
@@ -86,6 +88,13 @@ public abstract class DynamicTablePresenter<B> implements Presenter {
         DynamicListPresenter listPresenter = new DynamicListPresenter(dispatch, eventBus, listView);
         listPresenter.bind();
         display.setContentView(listView);
+
+        eventBus.addHandler(RefreshEvent.TYPE, new RefreshHandler() {
+            @Override
+            public void onRefresh(RefreshEvent event) {
+                refresh();
+            }
+        });
     }
 
     public void refresh() {

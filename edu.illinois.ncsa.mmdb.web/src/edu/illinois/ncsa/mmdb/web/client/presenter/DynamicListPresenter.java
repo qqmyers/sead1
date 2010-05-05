@@ -15,9 +15,12 @@ import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.RefreshEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEventHandler;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
@@ -72,8 +75,11 @@ public class DynamicListPresenter implements Presenter {
 
             @Override
             public void onDatasetUnselected(DatasetUnselectedEvent datasetUnselectedEvent) {
-                HasValue<Boolean> selected = display.getSelected(items.get(datasetUnselectedEvent.getUri()));
-                selected.setValue(false);
+                String uri = datasetUnselectedEvent.getUri();
+                if (items.containsKey(uri)) {
+                    HasValue<Boolean> selected = display.getSelected(items.get(uri));
+                    selected.setValue(false);
+                }
             }
         });
 
@@ -92,6 +98,16 @@ public class DynamicListPresenter implements Presenter {
             @Override
             public void onClearDatasets(ClearDatasetsEvent event) {
                 display.removeAllRows();
+                items.clear();
+            }
+        });
+
+        eventBus.addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
+            @Override
+            public void onDeleteDataset(DatasetDeletedEvent event) {
+                if (items.containsKey(event.getDatasetUri())) {
+                    eventBus.fireEvent(new RefreshEvent());
+                }
             }
         });
     }
