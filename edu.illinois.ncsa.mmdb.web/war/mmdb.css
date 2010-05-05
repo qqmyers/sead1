@@ -702,7 +702,7 @@ body {
 	display: block;
 	cursor: pointer; 
 	cursor: hand;
-	margin: 5px auto 5px auto;
+	margin: 5px;
 }
 
 .pendingSmall {
@@ -997,11 +997,34 @@ body {
 	border-collapse: collapse;
 }
 
-.dynamicTableList .cell {
+.dynamicTableListCell {
 	margin: 0px;
-	padding: 8px;
+	padding: 10px;
 	border-top: #CCC solid 1px;
 	text-align: center;
+	vertical-align: top;
+}
+
+.dynamicTableListCheckbox {
+	width: 100px;
+	margin: 0px;
+	padding: 10px;
+	border-top: #CCC solid 1px;
+	text-align: right;
+	vertical-align: top;
+}
+
+.dynamicTableListPreview {
+	width: 150px;
+	margin: 0px;
+	padding: 5px;
+	border-top: #CCC solid 1px;
+	text-align: left;
+	vertical-align: top;
+}
+
+.dynamicTableListInformation {
+	width: 350px;
 }
 
 .dynamicGrid {

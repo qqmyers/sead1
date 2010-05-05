@@ -7,7 +7,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -69,10 +68,9 @@ public class DynamicListView extends FlexTable implements Display {
         // type
         verticalPanel.add(new Label(type));
 
-        getCellFormatter().addStyleName(row, 0, "cell");
-        getCellFormatter().addStyleName(row, 1, "cell");
-        getCellFormatter().addStyleName(row, 2, "cell");
-        getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP); // FIXME move to CSS
+        getFlexCellFormatter().addStyleName(row, 0, "dynamicTableListCheckbox");
+        getFlexCellFormatter().addStyleName(row, 1, "dynamicTableListPreview");
+        getFlexCellFormatter().addStyleName(row, 2, "dynamicTableListCell");
 
         return row;
     }
@@ -105,48 +103,46 @@ public class DynamicListView extends FlexTable implements Display {
         pre.setMaxWidth(100);
         setWidget(row, 1, pre);
 
-        VerticalPanel verticalPanel = new VerticalPanel();
+        FlexTable informationPanel = new FlexTable();
+        informationPanel.addStyleName("dynamicTableListInformation");
+        informationPanel.getFlexCellFormatter().setColSpan(0, 0, 2);
+        setWidget(row, 2, informationPanel);
 
-        verticalPanel.setSpacing(5);
-
-        setWidget(row, 2, verticalPanel);
-
-        getCellFormatter().addStyleName(row, 0, "cell");
-        getCellFormatter().addStyleName(row, 1, "cell");
-        getCellFormatter().addStyleName(row, 2, "cell");
-        getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP); // FIXME move to CSS
+        getFlexCellFormatter().addStyleName(row, 0, "dynamicTableListCheckbox");
+        getFlexCellFormatter().addStyleName(row, 1, "dynamicTableListPreview");
+        getFlexCellFormatter().addStyleName(row, 2, "dynamicTableListCell");
 
         return row;
     }
 
     @Override
     public void setTitle(int id, String title, String uri) {
-        VerticalPanel panel = (VerticalPanel) getWidget(id, 2);
+        FlexTable panel = (FlexTable) getWidget(id, 2);
         Hyperlink hyperlink = new Hyperlink(title, "dataset?id=" + uri);
-        panel.add(hyperlink);
+        panel.setWidget(0, 0, hyperlink);
     }
 
     @Override
     public void setAuthor(int row, String author) {
-        VerticalPanel panel = (VerticalPanel) getWidget(row, 2);
-        panel.add(new Label(author));
+        FlexTable panel = (FlexTable) getWidget(row, 2);
+        panel.setWidget(1, 0, new Label(author));
     }
 
     @Override
     public void setDate(int row, Date date) {
-        VerticalPanel panel = (VerticalPanel) getWidget(row, 2);
-        panel.add(new Label(DateTimeFormat.getMediumDateTimeFormat().format(date)));
+        FlexTable panel = (FlexTable) getWidget(row, 2);
+        panel.setWidget(2, 0, new Label(DateTimeFormat.getMediumDateTimeFormat().format(date)));
     }
 
     @Override
     public void setSize(int row, String size) {
-        VerticalPanel panel = (VerticalPanel) getWidget(row, 2);
-        panel.add(new Label(size));
+        FlexTable panel = (FlexTable) getWidget(row, 2);
+        panel.setWidget(1, 1, new Label(size));
     }
 
     @Override
     public void setType(int row, String type) {
-        VerticalPanel panel = (VerticalPanel) getWidget(row, 2);
-        panel.add(new Label(type));
+        FlexTable panel = (FlexTable) getWidget(row, 2);
+        panel.setWidget(2, 1, new Label(type));
     }
 }
