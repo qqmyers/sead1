@@ -290,21 +290,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	 * Simple function called from javascript for testing. 
 	 */
 	public void poke() {
-		mainCards.add(new JLabel("Poke4!"), "poke");
-		((CardLayout)mainCards.getLayout()).show(mainCards, "poke");
 		repaint();
-		(new Thread() {
-			@Override
-			public void run() {
-				try {
-					sleep(2500);
-				} catch(InterruptedException x) {
-				} finally {
-					log("poking applet");
-					showCard("drop");
-				}
-			}
-		}).start();
 	}
 	
 	/**

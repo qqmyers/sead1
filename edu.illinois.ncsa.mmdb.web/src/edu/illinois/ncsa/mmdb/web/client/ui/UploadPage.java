@@ -49,6 +49,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -89,6 +90,7 @@ public class UploadPage extends Page {
     private FlexTable            tableLayout;
     private static VerticalPanel appletStatusPanel;
     private static FlexTable     uploadedDatasetsTable;
+    Timer                        safariWakeupTimer;
 
     public static final String   DND_ENABLED_PREFERENCE = "dndAppletEnabled";
 
@@ -110,7 +112,7 @@ public class UploadPage extends Page {
 
         mainLayoutPanel.add(tableLayout);
 
-        HorizontalPanel hp = new HorizontalPanel();
+        final HorizontalPanel hp = new HorizontalPanel();
         hp.add(new Label("Select the file you want to upload or click and drag a file or folder. "));
         Image helpButton = new Image("./images/help-browser.png");
         helpButton.addClickHandler(new ClickHandler() {
@@ -178,16 +180,13 @@ public class UploadPage extends Page {
 
         tableLayout.setWidget(1, 0, uploadWidget);
 
-        // call applet method
-        Anchor callMethodOnApplet = new Anchor("Poke applet");
-        callMethodOnApplet.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                doSomethingWithApplet(DOM.getElementById("dragdropApplet"), "foo");
+        // wake the applet up periodically, so it doesn't block on javascript calls
+        safariWakeupTimer = new Timer() {
+            public void run() {
+                pokeApplet(DOM.getElementById("dragdropApplet"));
             }
-        });
-        //tableLayout.setWidget(2, 0, callMethodOnApplet);
+        };
+        safariWakeupTimer.scheduleRepeating(500);
 
         // applet status
         appletStatusPanel = new VerticalPanel();
@@ -220,16 +219,15 @@ public class UploadPage extends Page {
     }
 
     /**
-     * Dummy method to show how to call a method in the applet.
+     * "poke" the applet. this keeps it awake in WebKit browsers where
+     * javascript callbacks can block it
      * 
      * @param applet
      * @param parameter
      */
-    public static native void doSomethingWithApplet(Element applet, String param) /*-{
+    public static native void pokeApplet(Element applet) /*-{
         if ((applet != null) && (applet.isActive)) {
         applet.poke();
-        } else {
-        $wnd.alert("Couldn't find applet " + applet);
         }
     }-*/;
 
@@ -376,7 +374,7 @@ public class UploadPage extends Page {
         id:'dragdropApplet',
         MAYSCRIPT:'true',
         code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-        archive:'dnd/DropUploader-1001.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+        archive:'dnd/DropUploader-1006.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
         width:150,
         height:100
         };
@@ -389,4 +387,13 @@ public class UploadPage extends Page {
         $wnd.deployJava.runApplet(attributes, parameters, '1.5');
         $wnd.document.getElementById('dndAppletId').innerHTML = $wnd.deployJava.getDocument();
     }-*/;
+
+    @Override
+    protected void onDetach() {
+        super.onDetach();
+        if (safariWakeupTimer != null) {
+            safariWakeupTimer.cancel();
+        }
+    }
+
 }
