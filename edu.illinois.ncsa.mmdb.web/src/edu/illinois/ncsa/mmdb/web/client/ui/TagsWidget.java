@@ -80,6 +80,7 @@ public class TagsWidget extends Composite {
     private final MyDispatchAsync service;
     private final Label           tagLabel;
     private AddTagWidget          tagWidget;
+    final Set<String>             tagsShown;
 
     /**
      * A widget listing tags and providing a way to add a new one.
@@ -94,6 +95,7 @@ public class TagsWidget extends Composite {
     public TagsWidget(final String id, final MyDispatchAsync service, boolean withTitle) {
         this.id = id;
         this.service = service;
+        tagsShown = new HashSet<String>();
 
         mainPanel = new FlowPanel();
         mainPanel.addStyleName("datasetRightColSection");
@@ -164,17 +166,20 @@ public class TagsWidget extends Composite {
     }
 
     void addTag(final String tag) {
-        final int row = tagsPanel.getRowCount();
-        tagsPanel.setWidget(row, 0, tagHyperlink(tag));
-        Anchor delete = new Anchor("delete");
-        delete.addStyleName("deleteLink");
-        delete.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                deleteTag(tag, row);
-                tagWidget.getTagBox().setFocus(true);
-            }
-        });
-        tagsPanel.setWidget(row, 1, delete);
+        if (!tagsShown.contains(tag)) {
+            final int row = tagsPanel.getRowCount();
+            tagsPanel.setWidget(row, 0, tagHyperlink(tag));
+            Anchor delete = new Anchor("delete");
+            delete.addStyleName("deleteLink");
+            delete.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    deleteTag(tag, row);
+                    tagWidget.getTagBox().setFocus(true);
+                }
+            });
+            tagsPanel.setWidget(row, 1, delete);
+            tagsShown.add(tag);
+        }
     }
 
     /**
@@ -219,6 +224,9 @@ public class TagsWidget extends Composite {
             @Override
             public void onSuccess(TagResourceResult result) {
                 tagsPanel.getRowFormatter().addStyleName(toRemove, "hidden");
+                for (String tag : tagSet ) {
+                    tagsShown.remove(tag);
+                }
             }
         });
     }
