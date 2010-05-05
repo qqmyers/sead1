@@ -6,6 +6,7 @@ package edu.illinois.ncsa.mmdb.web.client.presenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 
+import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -44,5 +45,9 @@ public class DatasetTablePresenter extends DynamicTablePresenter<DatasetBean> {
     protected void addItem(ShowItemEvent event, DatasetBean item) {
         event.setId(item.getUri());
         event.setTitle(item.getTitle());
+        event.setAuthor(item.getCreator().getName());
+        event.setDate(item.getDate());
+        event.setSize(TextFormatter.humanBytes(item.getSize()));
+        event.setType(item.getMimeType());
     }
 }

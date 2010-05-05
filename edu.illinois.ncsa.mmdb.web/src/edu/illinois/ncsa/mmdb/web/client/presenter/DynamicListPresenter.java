@@ -89,6 +89,18 @@ public class DynamicListPresenter implements Presenter {
             public void onShowItem(ShowItemEvent showItemEvent) {
                 int row = addItem(showItemEvent.getId());
                 display.setTitle(row, showItemEvent.getTitle(), showItemEvent.getId());
+                if (showItemEvent.getAuthor() != null) {
+                    display.setAuthor(row, showItemEvent.getAuthor());
+                }
+                if (showItemEvent.getDate() != null) {
+                    display.setDate(row, showItemEvent.getDate());
+                }
+                if (showItemEvent.getType() != null) {
+                    display.setType(row, showItemEvent.getType());
+                }
+                if (showItemEvent.getSize() != null) {
+                    display.setSize(row, showItemEvent.getSize());
+                }
             }
 
         });
@@ -102,6 +114,15 @@ public class DynamicListPresenter implements Presenter {
             }
         });
 
+        eventBus.addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
+            @Override
+            public void onDeleteDataset(DatasetDeletedEvent event) {
+                if (items.containsKey(event.getDatasetUri())) {
+                    eventBus.fireEvent(new RefreshEvent());
+                }
+            }
+        });
+        
         eventBus.addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
             @Override
             public void onDeleteDataset(DatasetDeletedEvent event) {

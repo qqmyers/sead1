@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.event;
 
+import java.util.Date;
+
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
@@ -52,11 +54,13 @@ import com.google.gwt.event.shared.GwtEvent;
 public class ShowItemEvent extends GwtEvent<ShowItemEventHandler> {
 
     public static final GwtEvent.Type<ShowItemEventHandler> TYPE     = new GwtEvent.Type<ShowItemEventHandler>();
-
     private int                                             position = -1;
     private String                                          title;
-
     private String                                          id;
+    private Date                                            date;
+    private String                                          author;
+    private String                                          size;
+    private String                                          type;
 
     @Override
     protected void dispatch(ShowItemEventHandler handler) {
@@ -92,4 +96,35 @@ public class ShowItemEvent extends GwtEvent<ShowItemEventHandler> {
         return id;
     }
 
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getType() {
+        return type;
+    }
 }
