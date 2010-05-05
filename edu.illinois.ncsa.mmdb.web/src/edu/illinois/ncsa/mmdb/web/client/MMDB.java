@@ -272,13 +272,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         eventBus.addHandler(AddNewDatasetEvent.TYPE,
                 new AddNewDatasetHandler() {
 
-            @Override
-            public void onAddNewDataset(AddNewDatasetEvent event) {
-                GWT.log("Event Logging: Add new dataset event "
-                        + event.getDataset().getTitle(), null);
+                    @Override
+                    public void onAddNewDataset(AddNewDatasetEvent event) {
+                        GWT.log("Event Logging: Add new dataset event "
+                                + event.getDataset().getTitle(), null);
 
-            }
-        });
+                    }
+                });
     }
 
     public void showListDatasetsPage() {
@@ -322,20 +322,20 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 dispatchAsync.execute(new AddCollection(collection, getSessionState().getCurrentUser().getUri()),
                         new AsyncCallback<AddCollectionResult>() {
 
-                    @Override
-                    public void onFailure(Throwable arg0) {
-                        GWT.log("Failed creating new collection", arg0);
-                    }
+                            @Override
+                            public void onFailure(Throwable arg0) {
+                                GWT.log("Failed creating new collection", arg0);
+                            }
 
-                    @Override
-                    public void onSuccess(AddCollectionResult arg0) {
-                        AddNewCollectionEvent event = new AddNewCollectionEvent(
-                                collection);
-                        GWT.log("Firing event add collection "
-                                + collection.getTitle(), null);
-                        eventBus.fireEvent(event);
-                    }
-                });
+                            @Override
+                            public void onSuccess(AddCollectionResult arg0) {
+                                AddNewCollectionEvent event = new AddNewCollectionEvent(
+                                        collection);
+                                GWT.log("Firing event add collection "
+                                        + collection.getTitle(), null);
+                                eventBus.fireEvent(event);
+                            }
+                        });
             }
         });
         addCollectionPanel.add(addButton);
@@ -411,23 +411,23 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 Permission.VIEW_MEMBER_PAGES),
                 new AsyncCallback<HasPermissionResult>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT
-                        .log(
-                        "Error checking if the users has permissions to view member pages",
-                        caught);
-            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT
+                                .log(
+                                        "Error checking if the users has permissions to view member pages",
+                                        caught);
+                    }
 
-            @Override
-            public void onSuccess(HasPermissionResult result) {
-                if (result.isPermitted()) {
-                    parseHistoryToken(token);
-                } else {
-                    showNotEnabledPage();
-                }
-            }
-        });
+                    @Override
+                    public void onSuccess(HasPermissionResult result) {
+                        if (result.isPermitted()) {
+                            parseHistoryToken(token);
+                        } else {
+                            showNotEnabledPage();
+                        }
+                    }
+                });
     }
 
     /**
@@ -445,7 +445,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         final Date expires = new Date(System.currentTimeMillis() + DURATION);
         Cookies.setCookie("sessionKey", sessionKey, expires);
 
-        MMDB.dispatchAsync.execute(new GetUser(userId), new AsyncCallback<GetUserResult>() {
+        GetUser getUser = new GetUser();
+        getUser.setUserId(userId);
+        MMDB.dispatchAsync.execute(getUser, new AsyncCallback<GetUserResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -557,25 +559,25 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 Permission.VIEW_ADMIN_PAGES),
                 new AsyncCallback<HasPermissionResult>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT
-                        .log(
-                        "Error checking if the users has permissions to view admin pages",
-                        caught);
-            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT
+                                .log(
+                                        "Error checking if the users has permissions to view admin pages",
+                                        caught);
+                    }
 
-            @Override
-            public void onSuccess(HasPermissionResult result) {
-                if (result.isPermitted()) {
-                    mainContainer.clear();
-                    mainContainer.add(new UserManagementPage(
-                            dispatchAsync));
-                } else {
-                    showNoAccessPage();
-                }
-            }
-        });
+                    @Override
+                    public void onSuccess(HasPermissionResult result) {
+                        if (result.isPermitted()) {
+                            mainContainer.clear();
+                            mainContainer.add(new UserManagementPage(
+                                    dispatchAsync));
+                        } else {
+                            showNoAccessPage();
+                        }
+                    }
+                });
     }
 
     /**
@@ -587,24 +589,24 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 Permission.VIEW_ADMIN_PAGES),
                 new AsyncCallback<HasPermissionResult>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT
-                        .log(
-                        "Error checking if the users has permissions to view admin pages",
-                        caught);
-            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT
+                                .log(
+                                        "Error checking if the users has permissions to view admin pages",
+                                        caught);
+                    }
 
-            @Override
-            public void onSuccess(HasPermissionResult result) {
-                if (result.isPermitted()) {
-                    mainContainer.clear();
-                    mainContainer.add(new SparqlPage(dispatchAsync));
-                } else {
-                    showNoAccessPage();
-                }
-            }
-        });
+                    @Override
+                    public void onSuccess(HasPermissionResult result) {
+                        if (result.isPermitted()) {
+                            mainContainer.clear();
+                            mainContainer.add(new SparqlPage(dispatchAsync));
+                        } else {
+                            showNoAccessPage();
+                        }
+                    }
+                });
     }
 
     /**

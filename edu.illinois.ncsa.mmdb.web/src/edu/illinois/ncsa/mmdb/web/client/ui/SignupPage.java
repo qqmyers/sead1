@@ -213,7 +213,9 @@ public class SignupPage extends Composite {
     }
 
     protected void checkEmailAndSubmit() {
-        dispatchAsync.execute(new GetUser(emailBox.getValue()),
+        GetUser getUser = new GetUser();
+        getUser.setEmailAddress(emailBox.getValue());
+        dispatchAsync.execute(getUser,
                 new AsyncCallback<GetUserResult>() {
 
                     @Override

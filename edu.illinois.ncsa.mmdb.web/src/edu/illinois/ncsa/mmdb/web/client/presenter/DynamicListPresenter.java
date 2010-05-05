@@ -46,7 +46,15 @@ public class DynamicListPresenter implements Presenter {
 
         int insertItem(String id);
 
-        void setTitle(int row, String title);
+        void setTitle(int row, String title, String uri);
+
+        void setDate(int row, Date date);
+
+        void setAuthor(int row, String author);
+
+        void setSize(int row, String size);
+
+        void setType(int row, String type);
 
         void removeAllRows();
     }
@@ -74,7 +82,7 @@ public class DynamicListPresenter implements Presenter {
             @Override
             public void onShowItem(ShowItemEvent showItemEvent) {
                 int row = addItem(showItemEvent.getId());
-                display.setTitle(row, showItemEvent.getTitle());
+                display.setTitle(row, showItemEvent.getTitle(), showItemEvent.getId());
             }
 
         });

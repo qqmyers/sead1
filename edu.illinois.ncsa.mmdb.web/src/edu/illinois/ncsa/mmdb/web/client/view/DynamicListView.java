@@ -120,8 +120,33 @@ public class DynamicListView extends FlexTable implements Display {
     }
 
     @Override
-    public void setTitle(int id, String title) {
+    public void setTitle(int id, String title, String uri) {
         VerticalPanel panel = (VerticalPanel) getWidget(id, 2);
-        panel.add(new Label(title));
+        Hyperlink hyperlink = new Hyperlink(title, "dataset?id=" + uri);
+        panel.add(hyperlink);
+    }
+
+    @Override
+    public void setAuthor(int row, String author) {
+        VerticalPanel panel = (VerticalPanel) getWidget(row, 2);
+        panel.add(new Label(author));
+    }
+
+    @Override
+    public void setDate(int row, Date date) {
+        VerticalPanel panel = (VerticalPanel) getWidget(row, 2);
+        panel.add(new Label(DateTimeFormat.getMediumDateTimeFormat().format(date)));
+    }
+
+    @Override
+    public void setSize(int row, String size) {
+        VerticalPanel panel = (VerticalPanel) getWidget(row, 2);
+        panel.add(new Label(size));
+    }
+
+    @Override
+    public void setType(int row, String type) {
+        VerticalPanel panel = (VerticalPanel) getWidget(row, 2);
+        panel.add(new Label(type));
     }
 }

@@ -82,21 +82,29 @@ public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
 
         try {
             String email = action.getEmailAddress();
-            Unifier u = new Unifier();
-            u.setColumnNames("uri");
-            u.addPattern("uri", Foaf.MBOX, Resource.literal(email));
-            context.perform(u);
-            List<Resource> uris = u.getFirstColumn();
-            if (uris.size() == 1) {
-                log.debug("User in the system " + uris.get(0));
-                PersonBean personBean = pbu.get(uris.get(0));
+            if (email != null) {
+                Unifier u = new Unifier();
+                u.setColumnNames("uri");
+                u.addPattern("uri", Foaf.MBOX, Resource.literal(email));
+                context.perform(u);
+                List<Resource> uris = u.getFirstColumn();
+                if (uris.size() == 1) {
+                    log.debug("User in the system " + uris.get(0));
+                    PersonBean personBean = pbu.get(uris.get(0));
+                    return new GetUserResult(personBean);
+                } else if (uris.size() == 0) {
+                    log.debug("User not in the system " + email);
+                    return new GetUserResult();
+                } else {
+                    log.error("Query returned too many users with email " + action.getEmailAddress());
+                    return new GetUserResult();
+                }
+            }
+            String userId = action.getUserId();
+            if (userId != null) {
+                log.debug("User in the system " + userId);
+                PersonBean personBean = pbu.get(userId);
                 return new GetUserResult(personBean);
-            } else if (uris.size() == 0) {
-                log.debug("User not in the system " + email);
-                return new GetUserResult();
-            } else {
-                log.error("Query returned too many users with email " + action.getEmailAddress());
-                return new GetUserResult();
             }
         } catch (Exception e) {
             log.error("Error retrieving information about user "

@@ -45,24 +45,37 @@ import net.customware.gwt.dispatch.shared.Action;
 
 /**
  * @author Luigi Marini
- *
+ * 
  */
 @SuppressWarnings("serial")
-public class GetUser implements Action<GetUserResult>{
+public class GetUser implements Action<GetUserResult> {
 
-	private String emailAddress;
+    private String emailAddress;
 
-	public GetUser() {
-	}
-	
-	public GetUser(String emailAddress) {
-		this.emailAddress = emailAddress;
-	}
+    private String userId;
 
-	/**
-	 * @return the emailAddress
-	 */
-	public String getEmailAddress() {
-		return emailAddress;
-	}
+    public GetUser() {
+    }
+
+    /**
+     * @return the emailAddress
+     */
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
+    /**
+     * @return user id - usually they uri of the person bean
+     */
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 }
