@@ -95,7 +95,6 @@ public class GetRecentActivityHandler implements ActionHandler<GetRecentActivity
         // TODO implement query
         Unifier uf = new Unifier();
         uf.addPattern("dataset", Rdf.TYPE, Cet.DATASET);
-        uf.addPattern("dataset", Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "_ued", true);
         uf.addPattern("dataset", Dc.CREATOR, Resource.uriRef(user));
         uf.addPattern("dataset", Dc.DATE, "date");
         uf.setColumnNames("dataset", "date");
@@ -108,9 +107,8 @@ public class GetRecentActivityHandler implements ActionHandler<GetRecentActivity
         uf.setOrderBy(listOrderBy);
 
         try {
-            TupeloStore.getInstance().getContext().perform(uf);
             int showIndex = 0;
-            for (Tuple<Resource> row : uf.getResult() ) {
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf, "dataset") ) {
                 if (showIndex < getRecentActivity.getMaxNum() && row.get(0) != null) {
                     datasets.add(dbu.get(row.get(0)));
                     showIndex++;
