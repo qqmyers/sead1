@@ -51,7 +51,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -103,8 +103,9 @@ public class UploadPage extends Page {
 
         mainLayoutPanel.add(tableLayout);
 
+        VerticalPanel singleUpload = new VerticalPanel();
         final HorizontalPanel hp = new HorizontalPanel();
-        hp.add(new Label("Select the file you want to upload or click and drag a file or folder. "));
+        hp.add(new Label("Select the file you want to upload:"));
         Image helpButton = new Image("./images/help-browser.png");
         helpButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -115,9 +116,7 @@ public class UploadPage extends Page {
             }
         });
         hp.add(helpButton);
-        tableLayout.setWidget(0, 0, hp);
-
-        tableLayout.getFlexCellFormatter().setColSpan(0, 0, 2);
+        singleUpload.add(hp);
 
         uploadWidget = new UploadWidget(false);
         uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
@@ -125,6 +124,8 @@ public class UploadPage extends Page {
                 History.newItem("dataset?id=" + event.getDatasetUri());
             }
         });
+        singleUpload.add(uploadWidget);
+        tableLayout.setWidget(0, 0, singleUpload);
 
         VerticalPanel dndPanel = new VerticalPanel();
 
@@ -161,15 +162,20 @@ public class UploadPage extends Page {
         dndApplet.setWidth("150px");
         dndApplet.setHeight("100px");
         dndApplet.getElement().setId("dndAppletId");
-        dndPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        dndPanel.setHorizontalAlignment(HasAlignment.ALIGN_CENTER);
         dndApplet.addStyleName("dragAndDrop");
         dndPanel.addStyleName("dndContainer");
         dndPanel.add(dndApplet);
         dndPanel.add(dndTooltip);
 
-        tableLayout.setWidget(1, 1, dndPanel);
-
-        tableLayout.setWidget(1, 0, uploadWidget);
+        Label or = new Label("OR");
+        or.addStyleName("uploadOrLabel");
+        tableLayout.setWidget(0, 1, or);
+        tableLayout.setWidget(0, 2, dndPanel);
+        tableLayout.getCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
+        tableLayout.getCellFormatter().addStyleName(0, 0, "uploadPageLargeCell");
+        tableLayout.getCellFormatter().addStyleName(0, 2, "uploadPageLargeCell");
+        tableLayout.getCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_CENTER);
 
         // wake the applet up periodically, so it doesn't block on javascript calls
         safariWakeupTimer = new Timer() {

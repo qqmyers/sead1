@@ -68,7 +68,9 @@ public class UploadStatusPresenter implements Presenter {
     }
 
     public void onProgress(int percent) {
-        display.onProgress(nUploaded, percent);
+        if (nUploaded < nDropped) { // ignore spurious updates to last completed upload
+            display.onProgress(nUploaded, percent);
+        }
     }
 
     public void onComplete(String uri) {

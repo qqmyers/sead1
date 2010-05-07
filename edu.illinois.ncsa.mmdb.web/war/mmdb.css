@@ -354,6 +354,14 @@ body {
 	padding-bottom: 30px;
 }
 
+.uploadPageLargeCell {
+	width: 50%;
+}
+
+.uploadOrLabel {
+	font-size: 1.4em;
+}
+
 .dndContainer {
 	width: 152px;
 }

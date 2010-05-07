@@ -291,6 +291,7 @@ public class BatchOperationPresenter implements Presenter {
             }
         });
 
+        // FIXME MMDB-777; this handler should only be added once to the global event bus
         eventBus.addHandler(BatchCompletedEvent.TYPE, new BatchCompletedHandler() {
             @Override
             public void onBatchCompleted(BatchCompletedEvent event) {
