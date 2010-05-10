@@ -47,9 +47,10 @@ import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
  */
 public class BatchOperationPresenter implements Presenter {
 
-    private final HandlerManager  eventBus;
-    private final MyDispatchAsync dispatch;
-    private final Display         display;
+    private final HandlerManager         eventBus;
+    private final MyDispatchAsync        dispatch;
+    private final Display                display;
+    private static BatchCompletedHandler batchCompletedHandler;
 
     String title(String fmt) {
         return title(fmt, MMDB.getSessionState().getSelectedDatasets().size());
@@ -271,6 +272,7 @@ public class BatchOperationPresenter implements Presenter {
     @Override
     public void bind() {
 
+        // FIXME MMDB-784, this handler should already be on the global event bus
         eventBus.addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
 
             @Override
@@ -281,6 +283,7 @@ public class BatchOperationPresenter implements Presenter {
             }
         });
 
+        // FIXME MMDB-784, this handler should already be on the global event bus
         eventBus.addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
 
             @Override
@@ -291,16 +294,18 @@ public class BatchOperationPresenter implements Presenter {
             }
         });
 
-        // FIXME MMDB-777; this handler should only be added once to the global event bus
-        eventBus.addHandler(BatchCompletedEvent.TYPE, new BatchCompletedHandler() {
-            @Override
-            public void onBatchCompleted(BatchCompletedEvent event) {
-                String failureClause = event.getFailures().size() > 0 ? " (" + event.getFailures().size() + " failure(s))" : "";
-                String content = title("%s " + event.getActionVerb() + failureClause, event.getSuccesses().size());
-                ConfirmDialog d = new ConfirmDialog("Action complete", content, false);
-                d.getOkText().setText("OK");
-            }
-        });
+        if (batchCompletedHandler == null) {
+            batchCompletedHandler = new BatchCompletedHandler() {
+                @Override
+                public void onBatchCompleted(BatchCompletedEvent event) {
+                    String failureClause = event.getFailures().size() > 0 ? " (" + event.getFailures().size() + " failure(s))" : "";
+                    String content = title("%s " + event.getActionVerb() + failureClause, event.getSuccesses().size());
+                    ConfirmDialog d = new ConfirmDialog("Action complete", content, false);
+                    d.getOkText().setText("OK");
+                }
+            };
+            eventBus.addHandler(BatchCompletedEvent.TYPE, batchCompletedHandler);
+        }
     }
 
     @Override
