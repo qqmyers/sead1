@@ -54,6 +54,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.MessagingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -85,7 +86,9 @@ import org.xml.sax.SAXException;
 
 import edu.illinois.ncsa.cet.search.Hit;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.IssueType;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
@@ -127,6 +130,8 @@ public class RestServlet extends AuthenticatedServlet {
 
     public static final String COLLECTION_PREVIEW           = "/collection/preview/";
     public static final String COLLECTION_PREVIEW_NEW       = "/collection/preview/new/";
+
+    public static final String JIRA_ISSUE                   = "/jira";
 
     static RestService         restService;                                                        // TODO manage this lifecycle better
 
@@ -333,6 +338,13 @@ public class RestServlet extends AuthenticatedServlet {
             logout(request, response);
             return;
         }
+
+        // JIRA Issue creator
+        if (hasPrefix(JIRA_ISSUE, request)) {
+            createJiraIssue(request, response);
+            return;
+        }
+
         if (!authenticate(request, response)) {
             return;
         }
@@ -444,6 +456,33 @@ public class RestServlet extends AuthenticatedServlet {
             throw new ServletException("unrecognized API call " + request.getRequestURI());
         }
     }
+
+    // ----------------------------------------------------------------------
+    // JIRA ISSUE CREAION
+    // ----------------------------------------------------------------------
+
+    /**
+     * Submit the issue to the Jira Issue Handler
+     * 
+     * @param request
+     *            the form with all information about the issue to be created.
+     * @param response
+     *            any information to be returned to the user.
+     */
+    private void createJiraIssue(HttpServletRequest request, HttpServletResponse response) {
+        IssueType issueType = IssueType.valueOf(request.getParameter("issueType"));
+        String summary = request.getParameter("subject");
+        String description = request.getParameter("body");
+
+        try {
+            JiraIssueHandler.createJiraIssue(issueType, summary, description);
+            response.setStatus(HttpServletResponse.SC_OK);
+        } catch (MessagingException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        }
+    }
+
+    // ----------------------------------------------------------------------
 
     void returnImage(HttpServletRequest request, HttpServletResponse response, String imageUri) throws IOException, ServletException {
         returnImage(request, response, imageUri, null);

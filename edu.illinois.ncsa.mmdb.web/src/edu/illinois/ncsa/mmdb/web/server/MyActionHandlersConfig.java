@@ -78,6 +78,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUsersHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetViewCountHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
@@ -143,6 +144,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetViewCountHandler());
         DispatchUtil.registerHandler(new GetLikeDislikeHandler());
         DispatchUtil.registerHandler(new ListQueryDatasetsHandler());
+        DispatchUtil.registerHandler(new JiraIssueHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

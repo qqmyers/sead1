@@ -87,14 +87,22 @@ public class Mail {
         String server = configuration.getProperty("mail.servername");
         String subject = "Account Activated";
         String body = String.format("Your account for use on server %s has been activated.", server);
-        sendMessage(userAddress, subject, body);
+        try {
+            sendMessage(userAddress, subject, body);
+        } catch (MessagingException e) {
+            log.error(String.format("Could not send email to '%s' about '%s'.", userAddress, subject), e);
+        }
     }
 
     public static void sendNewPassword(String email, String newPassword) {
         String server = configuration.getProperty("mail.servername");
         String subject = "New Password";
         String body = String.format("Your new password for use on server %s is : %s", server, newPassword);
-        sendMessage(email, subject, body);
+        try {
+            sendMessage(email, subject, body);
+        } catch (MessagingException e) {
+            log.error(String.format("Could not send email to '%s' about '%s'.", email, subject), e);
+        }
     }
 
     /**
@@ -104,9 +112,14 @@ public class Mail {
      */
     public static void userAdded(String userAddress) {
         String server = configuration.getProperty("mail.servername");
+        String rcpt = configuration.getProperty("mail.from");
         String subject = "New User";
         String body = String.format("A new user has registered on server %s with email address %s", server, userAddress);
-        sendMessage(configuration.getProperty("mail.from"), subject, body); //$NON-NLS-1$
+        try {
+            sendMessage(rcpt, subject, body); //$NON-NLS-1$
+        } catch (MessagingException e) {
+            log.error(String.format("Could not send email to '%s' about '%s'.", rcpt, subject), e);
+        }
     }
 
     /**
@@ -116,8 +129,9 @@ public class Mail {
      * @param rcpt
      * @param subject
      * @param body
+     * @throws MessagingException
      */
-    private static void sendMessage(String rcpt, String subject, String body) {
+    public static void sendMessage(String rcpt, String subject, String body) throws MessagingException {
         String from = configuration.getProperty("mail.from"); //$NON-NLS-1$
         String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
         String fullname = configuration.getProperty("mail.fullname", "Medici"); //$NON-NLS-1$
@@ -126,15 +140,13 @@ public class Mail {
         MimeMessage message = new MimeMessage(session);
         try {
             message.setFrom(new InternetAddress(from, fullname));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(rcpt));
-            message.setSubject(String.format("%s %s", presubj, subject)); //$NON-NLS-1$
-            message.setText(body);
-            Transport.send(message);
-            log.debug(String.format("Mail sent to %s with subject '%s'", rcpt, subject));
-        } catch (MessagingException e) {
-            log.error(String.format("Unable to send mail sent to %s with subject '%s'", rcpt, subject), e);
         } catch (UnsupportedEncodingException e) {
-            log.error(String.format("Unable to send mail sent to %s with subject '%s'", rcpt, subject), e);
+            throw (new MessagingException("Could not encode from address.", e));
         }
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(rcpt));
+        message.setSubject(String.format("%s %s", presubj, subject)); //$NON-NLS-1$
+        message.setText(body);
+        Transport.send(message);
+        log.debug(String.format("Mail sent to %s with subject '%s'", rcpt, subject));
     }
 }
