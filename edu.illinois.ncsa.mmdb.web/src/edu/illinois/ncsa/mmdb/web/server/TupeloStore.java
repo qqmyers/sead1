@@ -407,6 +407,7 @@ public class TupeloStore {
                                              RestServlet.COLLECTION_PREVIEW,
                                              RestServlet.COLLECTION_PREVIEW_NEW,
                                              RestServlet.SEARCH_INFIX,
+                                             RestServlet.JIRA_ISSUE,
                                                      };
 
     /**
@@ -524,8 +525,8 @@ public class TupeloStore {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
                     {
-                    return countDatasetsInCollection(inCollection);
-                }
+                        return countDatasetsInCollection(inCollection);
+                    }
             };
             count.setTtl(120000);
             datasetCount.put(key, count);
