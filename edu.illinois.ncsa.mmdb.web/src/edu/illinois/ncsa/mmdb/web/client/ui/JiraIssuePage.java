@@ -95,10 +95,11 @@ public class JiraIssuePage extends Page {
         txtDescription.setWidth("400px");
         table.setWidget(1, 1, txtDescription);
 
-        Anchor submit = new Anchor("Submit");
+        final Anchor submit = new Anchor("Submit");
         submit.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                submit.setEnabled(false);
                 if (txtSummary.getText().trim().length() == 0) {
                     showFeedbackMessage("Please enter a summary of this issue.");
                     txtSummary.setFocus(true);
@@ -119,11 +120,15 @@ public class JiraIssuePage extends Page {
                     public void onFailure(Throwable caught) {
                         GWT.log("Error submitting Jira Issue.", caught);
                         showFeedbackMessage("Error submitting Issue, please mail to medici@ncsa.illinois.edu");
+                        submit.setEnabled(true);
                     }
 
                     @Override
                     public void onSuccess(EmptyResult result) {
                         showFeedbackMessage("Thank you for submitting this issue");
+                        txtSummary.setText("");
+                        txtDescription.setText("");
+                        submit.setEnabled(true);
                     }
                 });
             }

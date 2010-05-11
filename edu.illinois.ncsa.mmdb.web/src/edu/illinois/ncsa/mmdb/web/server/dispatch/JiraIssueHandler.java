@@ -46,13 +46,11 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.kernel.OperatorException;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
-import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
  * Send email to jira to enter a new jira issue.
@@ -72,8 +70,8 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
     @Override
     public EmptyResult execute(JiraIssue arg0, ExecutionContext arg1) throws ActionException {
         try {
-            edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert.updateContext(TupeloStore.getInstance().getContext(), true);
-        } catch (OperatorException e) {
+            createJiraIssue(arg0.getIssueType(), arg0.getSummary(), arg0.getDescription());
+        } catch (MessagingException e) {
             log.warn("Failed to update context.", e);
             throw (new ActionException("Could not update context.", e));
         }
