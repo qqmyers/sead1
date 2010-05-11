@@ -56,57 +56,58 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  * @author Luigi Marini
  * 
  */
+// FIXME dead code
 public class MainPresenter extends BasePresenter<MainView> {
 
-	private final DatasetTablePresenter tablePresenter;
-	private final DatasetPresenter datasetPresenter;
-	private Presenter currentPresenter;
-	
-	public MainPresenter(MainView display, HandlerManager eventBus, 
-			DatasetTablePresenter tablePresenter,
-			DatasetPresenter datasetPresenter) {
-		super(display, eventBus);
-		this.tablePresenter = tablePresenter;
-		this.datasetPresenter = datasetPresenter;
-		
-		switchPresenter(tablePresenter);
-	}
+    private final DatasetTablePresenter tablePresenter;
+    private final DatasetPresenter      datasetPresenter;
+    private Presenter                   currentPresenter;
 
-	interface MainViewInterface extends View {
-		
-	}
-	
-	@Override
-	public void bind() {
-		super.bind();
-		eventBus.addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
-			
-			@Override
-			public void onDatasetSelected(DatasetSelectedEvent event) {
-				doShowDataset(event.getDataset());
-			}
-		});
-	}
-	
-	protected void doShowDataset(DatasetBean dataset) {
-		datasetPresenter.showDataset(dataset);
-		switchPresenter(datasetPresenter);
-	}
+    public MainPresenter(MainView display, HandlerManager eventBus,
+            DatasetTablePresenter tablePresenter,
+            DatasetPresenter datasetPresenter) {
+        super(display, eventBus);
+        this.tablePresenter = tablePresenter;
+        this.datasetPresenter = datasetPresenter;
 
-	private void switchPresenter(Presenter presenter) {
+        switchPresenter(tablePresenter);
+    }
 
-		if (this.currentPresenter != null) {
-//			this.currentPresenter.unbind();
-			display.removeContent();
-		}
+    interface MainViewInterface extends View {
 
-		this.currentPresenter = presenter;
+    }
 
-		if (presenter != null) {
-			display.addContent(presenter.getView().asWidget());
-			this.currentPresenter.bind();
-		}
+    @Override
+    public void bind() {
+        super.bind();
+        eventBus.addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
 
-	}
+            @Override
+            public void onDatasetSelected(DatasetSelectedEvent event) {
+                doShowDataset(event.getDataset());
+            }
+        });
+    }
+
+    protected void doShowDataset(DatasetBean dataset) {
+        datasetPresenter.showDataset(dataset);
+        switchPresenter(datasetPresenter);
+    }
+
+    private void switchPresenter(Presenter presenter) {
+
+        if (this.currentPresenter != null) {
+            //			this.currentPresenter.unbind();
+            display.removeContent();
+        }
+
+        this.currentPresenter = presenter;
+
+        if (presenter != null) {
+            //display.addContent(presenter.getView().asWidget());
+            this.currentPresenter.bind();
+        }
+
+    }
 
 }

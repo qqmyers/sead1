@@ -41,36 +41,48 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.mvp;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Base presenter. Should be extended specific presenters.
  * 
  * @author Luigi Marini
- *
+ * 
  */
-public class BasePresenter<D extends View> implements Presenter {
+public class BasePresenter<D> implements Presenter {
 
-	protected D display;
-	protected final HandlerManager eventBus;
+    protected D                             display;
+    protected final HandlerManager          eventBus;
+    private final List<HandlerRegistration> handlerRegistrations = new LinkedList<HandlerRegistration>();
 
-	public BasePresenter(D display, HandlerManager eventBus) {
-		this.display = display;
-		this.eventBus = eventBus;
-	}
-	
-	/* (non-Javadoc)
-	 * @see edu.illinois.ncsa.mmdb.web.client.mvp.Presenter#bindDisplay(edu.illinois.ncsa.mmdb.web.client.mvp.Display)
-	 */
-	@Override
-	public void bind() {
-		// TODO Auto-generated method stub
+    public BasePresenter(D display, HandlerManager eventBus) {
+        this.display = display;
+        this.eventBus = eventBus;
+    }
 
-	}
+    protected <T extends EventHandler> void addHandler(GwtEvent.Type<T> type, T handler) {
+        handlerRegistrations.add(eventBus.addHandler(type, handler));
+    }
 
-	@Override
-	public View getView() {
-		return display;
-	}
+    /* (non-Javadoc)
+     * @see edu.illinois.ncsa.mmdb.web.client.mvp.Presenter#bindDisplay(edu.illinois.ncsa.mmdb.web.client.mvp.Display)
+     */
+    @Override
+    public void bind() {
+        // TODO Auto-generated method stub
+    }
 
+    public void unbind() {
+        for (HandlerRegistration registration : handlerRegistrations ) {
+            GWT.log("removing " + registration);
+            registration.removeHandler();
+        }
+    }
 }

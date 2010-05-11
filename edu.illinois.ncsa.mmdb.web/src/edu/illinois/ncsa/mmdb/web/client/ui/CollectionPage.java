@@ -130,8 +130,18 @@ public class CollectionPage extends Composite {
      * @return the panel
      */
     private Widget createInfoPanel() {
+        // batch operations and logic to unbind
+        BatchOperationView batchOperationView = new BatchOperationView();
+        final BatchOperationPresenter batchOperationPresenter =
+                new BatchOperationPresenter(dispatchasync, eventBus, batchOperationView);
 
-        HorizontalPanel horizontalPanel = new HorizontalPanel();
+        HorizontalPanel horizontalPanel = new HorizontalPanel() {
+            @Override
+            protected void onDetach() {
+                super.onDetach();
+                batchOperationPresenter.unbind();
+            }
+        };
         horizontalPanel.setWidth("100%");
 
         infoPanel = new FlowPanel();
@@ -147,10 +157,7 @@ public class CollectionPage extends Composite {
         horizontalPanel.add(infoPanel);
 
         // batch operations
-        BatchOperationView batchOperationView = new BatchOperationView();
         batchOperationView.addStyleName("titlePanelRightElement");
-        BatchOperationPresenter batchOperationPresenter =
-                new BatchOperationPresenter(dispatchasync, eventBus, batchOperationView);
         batchOperationPresenter.bind();
         horizontalPanel.add(batchOperationView);
 
@@ -201,14 +208,14 @@ public class CollectionPage extends Composite {
             public void onValueChange(final ValueChangeEvent<String> event) {
                 dispatchasync.execute(new SetProperty(collection.getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue()),
                         new AsyncCallback<SetPropertyResult>() {
-                            public void onFailure(Throwable caught) {
-                                pageTitle.getEditableLabel().cancel();
-                            }
+                    public void onFailure(Throwable caught) {
+                        pageTitle.getEditableLabel().cancel();
+                    }
 
-                            public void onSuccess(SetPropertyResult result) {
-                                pageTitle.setText(event.getValue());
-                            }
-                        });
+                    public void onSuccess(SetPropertyResult result) {
+                        pageTitle.setText(event.getValue());
+                    }
+                });
             }
         });
 

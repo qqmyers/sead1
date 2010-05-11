@@ -19,7 +19,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
-import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 public class CreateCollectionDialogPresenter extends TextDialogPresenter {
@@ -89,12 +88,6 @@ public class CreateCollectionDialogPresenter extends TextDialogPresenter {
                 eventBus.fireEvent(done);
             }
         });
-    }
-
-    @Override
-    public View getView() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     public void setSelectedResources(Set<String> selectedResources) {

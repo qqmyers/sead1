@@ -62,8 +62,10 @@ import edu.illinois.ncsa.mmdb.web.client.UploadWidget;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
+import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.HelpPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.UploadStatusPresenter;
+import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.illinois.ncsa.mmdb.web.client.view.HelpDialogView;
 import edu.illinois.ncsa.mmdb.web.client.view.UploadStatusView;
 
@@ -75,15 +77,16 @@ import edu.illinois.ncsa.mmdb.web.client.view.UploadStatusView;
  */
 public class UploadPage extends Page {
 
-    private static final String          TITLE                  = "Upload";
-    private UploadWidget                 uploadWidget;
-    private FlexTable                    tableLayout;
-    private static VerticalPanel         appletStatusPanel;
-    private static UploadStatusPresenter uploadStatusPresenter;
-    private static UploadStatusView      uploadStatusView;
-    Timer                                safariWakeupTimer;
+    private static final String            TITLE                  = "Upload";
+    private UploadWidget                   uploadWidget;
+    private FlexTable                      tableLayout;
+    private static VerticalPanel           appletStatusPanel;
+    private static UploadStatusPresenter   uploadStatusPresenter;
+    private static BatchOperationPresenter batchOperationPresenter;
+    private static UploadStatusView        uploadStatusView;
+    Timer                                  safariWakeupTimer;
 
-    public static final String           DND_ENABLED_PREFERENCE = "dndAppletEnabled";
+    public static final String             DND_ENABLED_PREFERENCE = "dndAppletEnabled";
 
     public UploadPage() {
         super();
@@ -97,7 +100,18 @@ public class UploadPage extends Page {
     @Override
     public void layout() {
 
-        tableLayout = new FlexTable();
+        tableLayout = new FlexTable() {
+            @Override
+            protected void onDetach() {
+                super.onDetach();
+                if (uploadStatusPresenter != null) {
+                    uploadStatusPresenter.unbind();
+                }
+                if (batchOperationPresenter != null) {
+                    batchOperationPresenter.unbind();
+                }
+            }
+        };
 
         tableLayout.addStyleName("uploadPageLayout");
 
@@ -184,6 +198,13 @@ public class UploadPage extends Page {
             }
         };
         safariWakeupTimer.scheduleRepeating(500);
+
+        // batch actions
+        BatchOperationView batchOperationView = new BatchOperationView();
+        batchOperationView.addStyleName("titlePanelRightElement");
+        batchOperationPresenter = new BatchOperationPresenter(MMDB.dispatchAsync, MMDB.eventBus, batchOperationView);
+        batchOperationPresenter.bind();
+        mainLayoutPanel.add(batchOperationView);
 
         // applet status
         appletStatusPanel = new VerticalPanel();

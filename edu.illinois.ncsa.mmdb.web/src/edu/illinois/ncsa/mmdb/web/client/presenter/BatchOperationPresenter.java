@@ -23,6 +23,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollectionResult;
+import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
@@ -32,8 +33,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
-import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
-import edu.illinois.ncsa.mmdb.web.client.mvp.View;
+import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.AddToCollectionDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
@@ -45,11 +45,9 @@ import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
  * @author LUigi Marini
  * 
  */
-public class BatchOperationPresenter implements Presenter {
+public class BatchOperationPresenter extends BasePresenter<BatchOperationPresenter.Display> {
 
-    private final HandlerManager         eventBus;
     private final MyDispatchAsync        dispatch;
-    private final Display                display;
     private static BatchCompletedHandler batchCompletedHandler;
 
     String title(String fmt) {
@@ -70,9 +68,8 @@ public class BatchOperationPresenter implements Presenter {
     }
 
     public BatchOperationPresenter(final MyDispatchAsync dispatch, final HandlerManager eventBus, final Display display) {
+        super(display, eventBus);
         this.dispatch = dispatch;
-        this.eventBus = eventBus;
-        this.display = display;
         // selected dataset
         final UserSessionState sessionState = MMDB.getSessionState();
         final int nSelected = sessionState.getSelectedDatasets().size();
@@ -256,11 +253,8 @@ public class BatchOperationPresenter implements Presenter {
     }
 
     void unselectAll() {
-        UserSessionState sessionState = MMDB.getSessionState();
-        Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
-        for (String dataset : selectedDatasets ) {
-            unselect(dataset);
-        }
+        AllDatasetsUnselectedEvent unselect = new AllDatasetsUnselectedEvent();
+        MMDB.eventBus.fireEvent(unselect);
     }
 
     void unselect(String dataset) {
@@ -272,28 +266,24 @@ public class BatchOperationPresenter implements Presenter {
     @Override
     public void bind() {
 
-        // FIXME MMDB-784, this handler should already be on the global event bus
-        eventBus.addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
+        addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
 
             @Override
             public void onDatasetSelected(DatasetSelectedEvent event) {
-                UserSessionState sessionState = MMDB.getSessionState();
-                sessionState.datasetSelected(event.getUri());
-                display.setNumSelected(sessionState.getSelectedDatasets().size());
+                display.setNumSelected(MMDB.getSessionState().getSelectedDatasets().size());
             }
         });
 
-        // FIXME MMDB-784, this handler should already be on the global event bus
-        eventBus.addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
+        addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
 
             @Override
             public void onDatasetUnselected(DatasetUnselectedEvent event) {
-                UserSessionState sessionState = MMDB.getSessionState();
-                sessionState.datasetUnselected(event.getUri());
-                display.setNumSelected(sessionState.getSelectedDatasets().size());
+                display.setNumSelected(MMDB.getSessionState().getSelectedDatasets().size());
             }
         });
 
+        // only add one of these handlers globally, because we want to see batch results even if
+        // we have already unattached the batch operations menu
         if (batchCompletedHandler == null) {
             batchCompletedHandler = new BatchCompletedHandler() {
                 @Override
@@ -306,12 +296,6 @@ public class BatchOperationPresenter implements Presenter {
             };
             eventBus.addHandler(BatchCompletedEvent.TYPE, batchCompletedHandler);
         }
-    }
-
-    @Override
-    public View getView() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     public interface Display {

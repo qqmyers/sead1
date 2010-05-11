@@ -6,7 +6,6 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
-import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 
 /**
  * Display some dismissable, context-sensitive help.
@@ -30,12 +29,6 @@ public class HelpPresenter implements Presenter {
             }
         });
         display.reveal();
-    }
-
-    @Override
-    public View getView() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     public void addContent(Widget contentItem) {

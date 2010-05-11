@@ -10,8 +10,8 @@ import com.google.gwt.user.client.ui.HasValue;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
-import edu.illinois.ncsa.mmdb.web.client.mvp.View;
+import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetSelectionCheckboxHandler;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
@@ -22,18 +22,15 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  * @author futrelle
  * 
  */
-public class UploadStatusPresenter implements Presenter {
+public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.Display> {
     MyDispatchAsync dispatch;
-    HandlerManager  eventBus;
-    Display         display;
 
     int             nDropped  = 0;
     int             nUploaded = 0;
 
     public UploadStatusPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+        super(display, eventBus);
         this.dispatch = dispatch;
-        this.eventBus = eventBus;
-        this.display = display;
     }
 
     public interface Display {
@@ -60,9 +57,12 @@ public class UploadStatusPresenter implements Presenter {
      * @param file
      */
     public void onDropped(String filename, String sizeString) {
-        nUploaded = 0;
-        if (nUploaded > 0) {
+        if (nDropped == 0 || nUploaded > 0) {
+            nUploaded = 0;
+            nDropped = 0;
             display.clear();
+            // clear the selection
+            eventBus.fireEvent(new AllDatasetsUnselectedEvent());
         }
         display.onDropped(nDropped++, filename, sizeString);
     }
@@ -76,6 +76,7 @@ public class UploadStatusPresenter implements Presenter {
     public void onComplete(String uri) {
         display.onComplete(nUploaded, uri);
         display.getSelectionControl(nUploaded).addValueChangeHandler(new DatasetSelectionCheckboxHandler(uri, eventBus));
+        display.getSelectionControl(nUploaded).setValue(true, true); // select, and fire the selection event
         fetchDataset(nUploaded, uri);
         nUploaded++;
     }
@@ -101,11 +102,4 @@ public class UploadStatusPresenter implements Presenter {
         // TODO Auto-generated method stub
 
     }
-
-    @Override
-    public View getView() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

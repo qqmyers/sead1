@@ -25,7 +25,6 @@ import edu.illinois.ncsa.mmdb.web.client.event.RefreshEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEventHandler;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
-import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 
 /**
  * Show contents of a {@link DynamicTablePresenter} as a grid.
@@ -130,11 +129,4 @@ public class DynamicGridPresenter implements Presenter {
             selected.setValue(false);
         }
     }
-
-    @Override
-    public View getView() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

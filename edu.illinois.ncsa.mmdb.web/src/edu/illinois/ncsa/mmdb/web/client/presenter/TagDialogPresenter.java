@@ -16,7 +16,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
-import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 
 /**
  * @author Luigi Marini
@@ -107,12 +106,6 @@ public class TagDialogPresenter extends TextDialogPresenter {
                 });
             }
         }
-    }
-
-    @Override
-    public View getView() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     public void setSelectedResources(Set<String> selectedResources) {

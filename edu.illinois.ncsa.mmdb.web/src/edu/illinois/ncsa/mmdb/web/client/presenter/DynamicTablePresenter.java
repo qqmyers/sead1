@@ -22,7 +22,6 @@ import edu.illinois.ncsa.mmdb.web.client.event.RefreshEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.RefreshHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
-import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicGridView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicListView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
@@ -250,12 +249,6 @@ public abstract class DynamicTablePresenter<B> implements Presenter {
             display.setContentView(new Label("The flow view has a cold. It will be back soon."));
         }
         getContent();
-    }
-
-    @Override
-    public View getView() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     public int getPageSize() {

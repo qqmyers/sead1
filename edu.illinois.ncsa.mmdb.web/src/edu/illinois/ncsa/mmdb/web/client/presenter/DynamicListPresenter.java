@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HasValue;
 
@@ -17,14 +15,13 @@ import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
-import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.RefreshEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEventHandler;
-import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
-import edu.illinois.ncsa.mmdb.web.client.mvp.View;
+import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
+import edu.illinois.ncsa.mmdb.web.client.ui.DatasetSelectionCheckboxHandler;
 
 /**
  * Show contents of a {@link DynamicTablePresenter} as a list. One item per row.
@@ -32,11 +29,9 @@ import edu.illinois.ncsa.mmdb.web.client.mvp.View;
  * @author Luigi Marini
  * 
  */
-public class DynamicListPresenter implements Presenter {
+public class DynamicListPresenter extends BasePresenter<DynamicListPresenter.Display> {
 
     private final MyDispatchAsync      dispatch;
-    private final HandlerManager       eventBus;
-    private final Display              display;
     /** Map from uri to location in view **/
     private final Map<String, Integer> items;
 
@@ -63,15 +58,14 @@ public class DynamicListPresenter implements Presenter {
     }
 
     public DynamicListPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+        super(display, eventBus);
         this.dispatch = dispatch;
-        this.eventBus = eventBus;
-        this.display = display;
         this.items = new HashMap<String, Integer>();
     }
 
     @Override
     public void bind() {
-        eventBus.addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
+        addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
 
             @Override
             public void onDatasetUnselected(DatasetUnselectedEvent datasetUnselectedEvent) {
@@ -83,7 +77,7 @@ public class DynamicListPresenter implements Presenter {
             }
         });
 
-        eventBus.addHandler(ShowItemEvent.TYPE, new ShowItemEventHandler() {
+        addHandler(ShowItemEvent.TYPE, new ShowItemEventHandler() {
 
             @Override
             public void onShowItem(ShowItemEvent showItemEvent) {
@@ -105,7 +99,7 @@ public class DynamicListPresenter implements Presenter {
 
         });
 
-        eventBus.addHandler(ClearDatasetsEvent.TYPE, new ClearDatasetsHandler() {
+        addHandler(ClearDatasetsEvent.TYPE, new ClearDatasetsHandler() {
 
             @Override
             public void onClearDatasets(ClearDatasetsEvent event) {
@@ -114,7 +108,7 @@ public class DynamicListPresenter implements Presenter {
             }
         });
 
-        eventBus.addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
+        addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
             @Override
             public void onDeleteDataset(DatasetDeletedEvent event) {
                 if (items.containsKey(event.getDatasetUri())) {
@@ -122,8 +116,8 @@ public class DynamicListPresenter implements Presenter {
                 }
             }
         });
-        
-        eventBus.addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
+
+        addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
             @Override
             public void onDeleteDataset(DatasetDeletedEvent event) {
                 if (items.containsKey(event.getDatasetUri())) {
@@ -137,22 +131,7 @@ public class DynamicListPresenter implements Presenter {
         int location = display.insertItem(id);
         items.put(id, location);
         final HasValue<Boolean> selected = display.getSelected(location);
-        selected.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                if (selected.getValue()) {
-                    DatasetSelectedEvent datasetSelected = new DatasetSelectedEvent();
-                    datasetSelected.setUri(id);
-                    MMDB.eventBus.fireEvent(datasetSelected);
-                } else {
-                    DatasetUnselectedEvent datasetUnselected = new DatasetUnselectedEvent();
-                    datasetUnselected.setUri(id);
-                    MMDB.eventBus.fireEvent(datasetUnselected);
-                }
-
-            }
-        });
+        selected.addValueChangeHandler(new DatasetSelectionCheckboxHandler(id, MMDB.eventBus));
         UserSessionState sessionState = MMDB.getSessionState();
         if (sessionState.getSelectedDatasets().contains(id)) {
             selected.setValue(true);
@@ -161,11 +140,4 @@ public class DynamicListPresenter implements Presenter {
         }
         return location;
     }
-
-    @Override
-    public View getView() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

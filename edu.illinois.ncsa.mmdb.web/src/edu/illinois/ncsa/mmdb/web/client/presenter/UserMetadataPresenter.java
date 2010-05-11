@@ -8,7 +8,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RunSparqlQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RunSparqlQueryResult;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
-import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 
 public class UserMetadataPresenter implements Presenter {
     static String                   availableFieldsQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" +
@@ -47,12 +46,6 @@ public class UserMetadataPresenter implements Presenter {
                         }
                     }
                 });
-    }
-
-    @Override
-    public View getView() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     public interface Display {

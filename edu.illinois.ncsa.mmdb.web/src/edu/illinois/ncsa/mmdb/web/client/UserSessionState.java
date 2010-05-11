@@ -107,4 +107,8 @@ public class UserSessionState {
     public Set<String> getSelectedDatasets() {
         return selectedDatasets;
     }
+
+    public void allDatasetsUnselected() {
+        selectedDatasets.clear();
+    }
 }
