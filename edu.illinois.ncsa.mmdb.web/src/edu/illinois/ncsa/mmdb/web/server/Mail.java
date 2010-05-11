@@ -85,7 +85,8 @@ public class Mail {
      */
     public static void userAuthorized(String userAddress) {
         String server = configuration.getProperty("mail.servername");
-        String subject = "Account Activated";
+        String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
+        String subject = presubj + " Account Activated";
         String body = String.format("Your account for use on server %s has been activated.", server);
         try {
             sendMessage(userAddress, subject, body);
@@ -96,7 +97,8 @@ public class Mail {
 
     public static void sendNewPassword(String email, String newPassword) {
         String server = configuration.getProperty("mail.servername");
-        String subject = "New Password";
+        String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
+        String subject = presubj + " New Password";
         String body = String.format("Your new password for use on server %s is : %s", server, newPassword);
         try {
             sendMessage(email, subject, body);
@@ -113,7 +115,8 @@ public class Mail {
     public static void userAdded(String userAddress) {
         String server = configuration.getProperty("mail.servername");
         String rcpt = configuration.getProperty("mail.from");
-        String subject = "New User";
+        String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
+        String subject = presubj + " New User";
         String body = String.format("A new user has registered on server %s with email address %s", server, userAddress);
         try {
             sendMessage(rcpt, subject, body); //$NON-NLS-1$
@@ -133,7 +136,6 @@ public class Mail {
      */
     public static void sendMessage(String rcpt, String subject, String body) throws MessagingException {
         String from = configuration.getProperty("mail.from"); //$NON-NLS-1$
-        String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
         String fullname = configuration.getProperty("mail.fullname", "Medici"); //$NON-NLS-1$
 
         Session session = Session.getDefaultInstance(configuration, null);
@@ -144,7 +146,7 @@ public class Mail {
             throw (new MessagingException("Could not encode from address.", e));
         }
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(rcpt));
-        message.setSubject(String.format("%s %s", presubj, subject)); //$NON-NLS-1$
+        message.setSubject(subject); //$NON-NLS-1$
         message.setText(body);
         Transport.send(message);
         log.debug(String.format("Mail sent to %s with subject '%s'", rcpt, subject));

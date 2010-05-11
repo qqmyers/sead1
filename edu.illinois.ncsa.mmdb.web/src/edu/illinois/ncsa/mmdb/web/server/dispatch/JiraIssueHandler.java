@@ -59,10 +59,8 @@ import edu.illinois.ncsa.mmdb.web.server.Mail;
  * 
  */
 public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
-    //    public static final String JIRA_EMAIL_BUG     = "jira+mmdb.bug@ncsa.illinois.edu";
-    //    public static final String JIRA_EMAIL_FEATURE = "jira+mmdb.feature@ncsa.illinois.edu";
-    public static final String JIRA_EMAIL_BUG     = "jira@ncsa.illinois.edu";
-    public static final String JIRA_EMAIL_FEATURE = "jira@ncsa.illinois.edu";
+    public static final String JIRA_EMAIL_BUG     = "jira+mmdb.bug@ncsa.illinois.edu";
+    public static final String JIRA_EMAIL_FEATURE = "jira+mmdb.feature@ncsa.illinois.edu";
 
     /** Commons logging **/
     private static Log         log                = LogFactory.getLog(JiraIssueHandler.class);
