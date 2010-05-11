@@ -44,20 +44,20 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 import net.customware.gwt.dispatch.shared.Action;
 
 /**
- * Convert context to newer version
+ * A new jira issue.
  * 
  * @author Rob Kooper
  * 
  */
 @SuppressWarnings("serial")
 public class JiraIssue implements Action<EmptyResult> {
-    public enum IssueType {
+    public enum JiraIssueType {
         BUG, FEATURE
     }
 
-    private IssueType issueType;
-    private String    summary;
-    private String    description;
+    private JiraIssueType issueType;
+    private String        summary;
+    private String        description;
 
     public JiraIssue() {
     }
@@ -65,7 +65,7 @@ public class JiraIssue implements Action<EmptyResult> {
     /**
      * @return the issueType
      */
-    public IssueType getIssueType() {
+    public JiraIssueType getIssueType() {
         return issueType;
     }
 
@@ -73,7 +73,7 @@ public class JiraIssue implements Action<EmptyResult> {
      * @param issueType
      *            the issueType to set
      */
-    public void setIssueType(IssueType issueType) {
+    public void setIssueType(JiraIssueType issueType) {
         this.issueType = issueType;
     }
 

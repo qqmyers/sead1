@@ -86,7 +86,7 @@ import org.xml.sax.SAXException;
 
 import edu.illinois.ncsa.cet.search.Hit;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.IssueType;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
@@ -470,7 +470,7 @@ public class RestServlet extends AuthenticatedServlet {
      *            any information to be returned to the user.
      */
     private void createJiraIssue(HttpServletRequest request, HttpServletResponse response) {
-        IssueType issueType = IssueType.valueOf(request.getParameter("issueType"));
+        JiraIssueType issueType = JiraIssueType.valueOf(request.getParameter("issueType"));
         String summary = request.getParameter("subject");
         String description = request.getParameter("body");
 

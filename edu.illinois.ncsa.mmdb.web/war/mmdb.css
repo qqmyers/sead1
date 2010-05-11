@@ -181,50 +181,11 @@ body {
 	margin: 5px;
 }
 
-.loginMenu {
-	float: right;
-	width: 200px;
-	text-align: right;
-	color: white;
-	white-space: nowrap;
-}
-
-.signupPanel div {
-	float: right;
-}
-
-.signupLink:link {
-	color: white;
-	text-decoration: none;
-}
-
-.signupLink:visited {
-	color: white;
-	text-decoration: none;
-}
-
-.signupLink:hover {
-	color: white;
-	text-decoration: underline;
-}
-	
-.loginMenu div {
-	float: left;
-}
-
-.loginMenuLink:link {
-	color: white;
-	text-decoration: none;
-}
-
-.loginMenuLink:hover {
-	color: white;
-	text-decoration: underline;
-}
-
 .navMenu {
+	color: white;
 	position: relative;
 	padding-left: 100px;
+	white-space: nowrap;
 }
 
 .navMenuLink:link {

@@ -43,10 +43,10 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
@@ -57,72 +57,75 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
  * menu.
  * 
  * @author Luigi Marini
- *
+ * @author Rob Kooper
+ * 
  */
 public class LoginStatusWidget extends Composite {
 
-	private final FlowPanel mainPanel;
-	private final Anchor loginAnchor;
-	private final Anchor logoutAnchor;
-	
-	/**
-	 * Create a main panel and show the appropriate
-	 * link depending on what the sessionID is.
-	 */
-	public LoginStatusWidget() {
-		mainPanel = new  FlowPanel();
-		mainPanel.addStyleName("loginMenu");
-		initWidget(mainPanel);
-		
-		// login anchor
-		loginAnchor = new Anchor("Login");
-		loginAnchor.addStyleName("loginMenuLink");
-		loginAnchor.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				History.newItem("login");
-			}
-		});
-		
-		// logout anchor
-		logoutAnchor = new Anchor("Logout");
-		logoutAnchor.addStyleName("loginMenuLink");
-		logoutAnchor.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				LoginPage.logout();
-				logout();
-				//History.newItem("");
-			}
-		});
-		
-		if (MMDB.getUsername() == null) {
-			mainPanel.add(loginAnchor);
-		} else {
-			mainPanel.add(logoutAnchor);
-		}
-	}
-	
-	/**
-	 * Add the name of the user logged in and
-	 * a link to log out.
-	 * 
-	 * @param name user logged in
-	 */
-	public void login(String name) {
-		mainPanel.clear();
-		Label emailLabel = new Label("("+name+")");
-		mainPanel.add(emailLabel);
-		mainPanel.add(logoutAnchor);
-	}
-	
-	/**
-	 * Display a login link.
-	 */
-	public void logout() {
-		mainPanel.clear();
-		mainPanel.add(loginAnchor);
-	}
+    private final HorizontalPanel mainPanel;
+    private final Hyperlink       loginAnchor;
+    private final Hyperlink       signupAnchor;
+    private final Anchor          logoutAnchor;
+
+    /**
+     * Create a main panel and show the appropriate
+     * link depending on what the sessionID is.
+     */
+    public LoginStatusWidget() {
+        mainPanel = new HorizontalPanel();
+        mainPanel.addStyleName("navMenu");
+        initWidget(mainPanel);
+
+        // login anchor
+        loginAnchor = new Hyperlink("Login", "login");
+        loginAnchor.addStyleName("navMenuLink");
+
+        // signup anchor
+        signupAnchor = new Hyperlink("Sign up", "signup");
+        signupAnchor.addStyleName("navMenuLink");
+
+        // logout anchor
+        logoutAnchor = new Anchor("Logout");
+        logoutAnchor.addStyleName("navMenuLink");
+        logoutAnchor.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                LoginPage.logout();
+                logout();
+                //History.newItem("");
+            }
+        });
+
+        if (MMDB.getUsername() == null) {
+            mainPanel.add(loginAnchor);
+            mainPanel.add(signupAnchor);
+        } else {
+            mainPanel.add(logoutAnchor);
+        }
+    }
+
+    /**
+     * Add the name of the user logged in and
+     * a link to log out.
+     * 
+     * @param name
+     *            user logged in
+     */
+    public void login(String name) {
+        mainPanel.clear();
+        Label label = new Label("(" + name + ")");
+        label.setStyleName("whiteText");
+        mainPanel.add(logoutAnchor);
+        mainPanel.add(label);
+    }
+
+    /**
+     * Display a login link.
+     */
+    public void logout() {
+        mainPanel.clear();
+        mainPanel.add(loginAnchor);
+        mainPanel.add(signupAnchor);
+    }
 }

@@ -62,7 +62,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
@@ -72,6 +71,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewCollectionEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
@@ -81,6 +81,7 @@ import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.HomePage;
+import edu.illinois.ncsa.mmdb.web.client.ui.JiraIssuePage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListDatasetsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
@@ -103,6 +104,7 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  * MMDB entry point.
  * 
  * @author Luigi Marini
+ * @author Rob Kooper
  */
 public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     /**
@@ -145,6 +147,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     private static UserSessionState     sessionState;
 
+    private Label                       debugLabel;
+
     /**
      * This is the entry point method.
      */
@@ -181,8 +185,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         History.fireCurrentHistoryState();
     }
-
-    Label debugLabel;
 
     /**
      * Navigation menu at the top of the page.
@@ -232,21 +234,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         Hyperlink uploadLink = new Hyperlink("Upload", "upload");
         uploadLink.addStyleName("navMenuLink");
         navMenu.add(uploadLink);
-
-        // sign up link
-        SimplePanel signupPanel = new SimplePanel();
-        signupPanel.addStyleName("signupPanel");
-        Anchor signupLink = new Anchor("Sign up");
-        signupLink.addStyleName("signupLink");
-        signupLink.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                History.newItem("signup");
-            }
-        });
-        signupPanel.add(signupLink);
-        RootPanel.get("signup").add(signupPanel);
 
         // FIXME debug
         debugLabel = new Label();
@@ -395,6 +382,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showSignupPage();
         } else if (token.startsWith("requestNewPassword")) {
             showRequestNewPasswordPage();
+        } else if (token.startsWith("jiraBug")) {
+            showJiraBugPage();
+        } else if (token.startsWith("jiraFeature")) {
+            showJiraFeaturePage();
         } else {
             checkLogin();
         }
@@ -532,6 +523,22 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private void showRequestNewPasswordPage() {
         mainContainer.clear();
         mainContainer.add(new RequestNewPasswordPage(dispatchAsync));
+    }
+
+    /**
+     * Show a form to allow the user to submit a jira bug.
+     */
+    private void showJiraBugPage() {
+        mainContainer.clear();
+        mainContainer.add(new JiraIssuePage(dispatchAsync, JiraIssueType.BUG));
+    }
+
+    /**
+     * Show a form to allow the user to submit a jira feature.
+     */
+    private void showJiraFeaturePage() {
+        mainContainer.clear();
+        mainContainer.add(new JiraIssuePage(dispatchAsync, JiraIssueType.FEATURE));
     }
 
     /**

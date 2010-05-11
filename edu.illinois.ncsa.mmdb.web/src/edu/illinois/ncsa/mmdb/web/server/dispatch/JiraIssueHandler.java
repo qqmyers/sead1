@@ -50,20 +50,21 @@ import org.tupeloproject.kernel.OperatorException;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.IssueType;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
- * Delete dataset. Marks dataset as deleted but content still remains in the
- * repository.
+ * Send email to jira to enter a new jira issue.
  * 
- * @author Luigi Marini
+ * @author Rob Kooper
  * 
  */
 public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
-    public static final String JIRA_EMAIL_BUG     = "jira+mmdb.bug@ncsa.illinois.edu";
-    public static final String JIRA_EMAIL_FEATURE = "jira+mmdb.feature@ncsa.illinois.edu";
+    //    public static final String JIRA_EMAIL_BUG     = "jira+mmdb.bug@ncsa.illinois.edu";
+    //    public static final String JIRA_EMAIL_FEATURE = "jira+mmdb.feature@ncsa.illinois.edu";
+    public static final String JIRA_EMAIL_BUG     = "jira@ncsa.illinois.edu";
+    public static final String JIRA_EMAIL_FEATURE = "jira@ncsa.illinois.edu";
 
     /** Commons logging **/
     private static Log         log                = LogFactory.getLog(JiraIssueHandler.class);
@@ -90,7 +91,10 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
         throw new ActionException("Can not undo a jira issue creation.");
     }
 
-    public static void createJiraIssue(IssueType type, String summary, String description) throws MessagingException {
+    /**
+     * Create a jira issue by sending email.
+     */
+    public static void createJiraIssue(JiraIssueType type, String summary, String description) throws MessagingException {
         switch (type) {
             case BUG:
                 Mail.sendMessage(JIRA_EMAIL_BUG, summary, description);
