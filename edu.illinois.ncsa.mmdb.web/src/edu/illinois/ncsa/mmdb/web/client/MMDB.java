@@ -202,7 +202,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         navMenu.add(homeLink);
         // bullet
         HTML bullet = new HTML("&bull;");
-        bullet.addStyleName("whiteText");
+        bullet.addStyleName("navMenuText");
         navMenu.add(bullet);
         // datasets
         Hyperlink listLink = new Hyperlink("Datasets", "listDatasets");
@@ -210,7 +210,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         navMenu.add(listLink);
         // bullet
         bullet = new HTML("&bull;");
-        bullet.addStyleName("whiteText");
+        bullet.addStyleName("navMenuText");
         navMenu.add(bullet);
         // collections
         Hyperlink collectionsLink = new Hyperlink("Collections",
@@ -219,7 +219,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         navMenu.add(collectionsLink);
         // bullet
         HTML bullet2 = new HTML("&bull;");
-        bullet2.addStyleName("whiteText");
+        bullet2.addStyleName("navMenuText");
         navMenu.add(bullet2);
         // tags
         Hyperlink tagsLink = new Hyperlink("Tags",
@@ -228,7 +228,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         navMenu.add(tagsLink);
         // bullet
         HTML bullet3 = new HTML("&bull;");
-        bullet3.addStyleName("whiteText");
+        bullet3.addStyleName("navMenuText");
         navMenu.add(bullet3);
         // upload link
         Hyperlink uploadLink = new Hyperlink("Upload", "upload");
@@ -237,7 +237,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         // FIXME debug
         debugLabel = new Label();
-        debugLabel.addStyleName("whiteText");
+        debugLabel.addStyleName("navMenuText");
         navMenu.add(debugLabel);
 
         // login menu

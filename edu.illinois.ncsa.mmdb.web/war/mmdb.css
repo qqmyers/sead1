@@ -7,6 +7,60 @@ body {
 	text-align: center;
 }
 
+/* ----------------------------------------------------------------------
+ * Menu Bar
+ * ---------------------------------------------------------------------- */
+.menuElementLeft, .menuElementRight, .logo {
+	height: 40px;
+	padding: 10px;
+	position: relative;
+	vertical-align: center;
+}
+
+.menuElementLeft {
+	float:left;
+}
+
+.menuElementRight {
+	float:right;
+}
+
+.logo {
+    width: 100px;
+    height: 40px;
+    padding: 0px;
+}
+
+.navMenu {
+	color: black;
+	position: relative;
+	padding-left: 100px;
+	white-space: nowrap;
+}
+
+.navMenuLink:link, .navMenuLink:visited, .navMenuLink a:link, .navMenuLink a:visited {
+	color: black;
+	text-decoration: none;
+	margin: 5px;
+}
+
+.navMenuLink:active, .navMenuLink a:active, .navMenuText {
+ 	color: black;
+}
+
+.navMenuLink:hover, .navMenuLink a:hover {
+	color: black;
+	text-decoration: underline;
+}
+
+.searchBox {
+	border: 1px solid lightgray;
+}
+
+/* ----------------------------------------------------------------------
+ * Rest of styles
+ * ---------------------------------------------------------------------- */
+
 .redBorder {
 	border: 1px solid red;
 }
@@ -25,10 +79,6 @@ body {
 
 .invisible {
     visibility: hidden;
-}
-
-.whiteText {
-	color: black;
 }
 
 .relativePosition {
@@ -64,35 +114,6 @@ body {
 	border-bottom: #888888 solid 1px;
 }
 
-.searchBox {
-	border: 1px solid lightgray;
-}
-
-.menuElementLeft {
-	float:left;
-	height: auto;
-	padding: 10px;
-	position: relative;
-	vertical-align: top;
-}
-
-.menuElementRight {
-	float:right;
-	padding: 10px;
-	height: auto;
-	position: relative;
-	vertical-align: top;
-}
-
-.logo {
-	float: left;
-    color: black;
-    text-align: left;
-    width: 100px;
-    font-weight: bold;
-    position: relative;
-	vertical-align: top;
-}
 
 .toolbar {
 	width: 975px;
@@ -183,54 +204,6 @@ body {
 	margin: 5px;
 }
 
-.navMenu {
-	color: black;
-	position: relative;
-	padding-left: 100px;
-	white-space: nowrap;
-}
-
-.navMenuLink:link {
-	color: black;
-	text-decoration: none;
-	margin: 5px;
-}
-
-.navMenuLink:visited {
-	color: black;
-	text-decoration: none;
-	margin: 5px;
-}
-
-.navMenuLink:active {
- 	color: black;
-}
-
-.navMenuLink:hover {
-	color: black;
-	text-decoration: underline;
-}
-
-.navMenuLink a:link {
-	color: black;
-	text-decoration: none;
-	margin: 5px;
-}
-
-.navMenuLink a:visited {
-	color: black;
-	text-decoration: none;
-	margin: 5px;
-}
-
-.navMenuLink a:active {
- 	color: black;
-}
-
-.navMenuLink a:hover {
-	color: black;
-	text-decoration: underline;
-}
 
 .smallText {
     font-size: 0.8em;

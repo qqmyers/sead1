@@ -115,7 +115,7 @@ public class LoginStatusWidget extends Composite {
     public void login(String name) {
         mainPanel.clear();
         Label label = new Label("(" + name + ")");
-        label.setStyleName("whiteText");
+        label.setStyleName("navMenuText");
         mainPanel.add(logoutAnchor);
         mainPanel.add(label);
     }
