@@ -16,6 +16,7 @@ body {
  * ---------------------------------------------------------------------- */
 a, a:link, a:visited, a:hover, a:active {
 	color: deeppink;
+	font-family: "Comic Sans MS", sans-serif;
 	text-decoration: none;
 }
 
