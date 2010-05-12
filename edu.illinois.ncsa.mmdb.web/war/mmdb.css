@@ -3,8 +3,29 @@ body {
 	font-size: 90% !important;
 	margin: 0px;
 	padding: 0px;
-	/**background-color: #E3E3E3;**/
 	text-align: center;
+}
+
+.mainContainer {
+	text-align: center;
+	minHeight: 600px;	
+	width: 975px;
+	/**border: solid 1px #888888;**/
+	margin: 10px auto 20px auto;
+	padding: 0px;
+	background-color: white;
+}
+
+/* ----------------------------------------------------------------------
+ * Links
+ * ---------------------------------------------------------------------- */
+a, a:link, a:visited, a:hover, a:active {
+	color:#3366FF;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
 }
 
 /* ----------------------------------------------------------------------
@@ -44,12 +65,7 @@ body {
 	margin: 5px;
 }
 
-.navMenuLink:active, .navMenuLink a:active, .navMenuText {
- 	color: black;
-}
-
 .navMenuLink:hover, .navMenuLink a:hover {
-	color: black;
 	text-decoration: underline;
 }
 
@@ -131,16 +147,6 @@ body {
 	color: gray;
 	padding-left: 40px;
 	position: relative;
-}
-
-.mainContainer {
-	text-align: center;
-	minHeight: 600px;	
-	width: 975px;
-	/**border: solid 1px #888888;**/
-	margin: 10px auto 20px auto;
-	padding: 0px;
-	background-color: white;
 }
 
 .bottomMenu {
