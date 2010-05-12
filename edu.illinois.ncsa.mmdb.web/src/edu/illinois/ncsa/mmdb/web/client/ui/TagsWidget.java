@@ -110,6 +110,7 @@ public class TagsWidget extends Composite {
         }
 
         tagsPanel = new FlexTable();
+        tagsPanel.setVisible(false);
         tagsPanel.addStyleName("tagsLinks");
         mainPanel.add(tagsPanel);
 
@@ -196,8 +197,11 @@ public class TagsWidget extends Composite {
 
             @Override
             public void onSuccess(GetTagsResult result) {
-                for (final String tag : result.getTags().keySet() ) {
-                    addTag(tag);
+                if (result.getTags().size() != 0) {
+                    tagsPanel.setVisible(true);
+                    for (final String tag : result.getTags().keySet() ) {
+                        addTag(tag);
+                    }
                 }
             }
         });

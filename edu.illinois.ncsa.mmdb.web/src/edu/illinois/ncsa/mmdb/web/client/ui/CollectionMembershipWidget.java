@@ -75,158 +75,162 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
  */
 public class CollectionMembershipWidget extends Composite {
 
-	private final FlowPanel mainContainer;
-	
-	private final Label titleLabel;
+    private final FlowPanel       mainContainer;
 
-	private Anchor addAnchor;
+    private final Label           titleLabel;
 
-	private AddToCollectionDialog addToCollectionDialog;
+    private final Anchor          addAnchor;
 
-	private final DispatchAsync service;
+    private AddToCollectionDialog addToCollectionDialog;
 
-	private final String datasetURI;
+    private final DispatchAsync   service;
 
-	private FlexTable collectionsPanel;
+    private final String          datasetURI;
 
-	/**
-	 * Create empty widget showing a title and a add to collection link.
-	 */
-	public CollectionMembershipWidget(DispatchAsync dispatch, String datasetURI) {
-		this.service = dispatch;
-		this.datasetURI = datasetURI;
-		mainContainer = new FlowPanel();
-		mainContainer.addStyleName("datasetRightColSection");
-		initWidget(mainContainer);
+    private final FlexTable       collectionsPanel;
 
-		titleLabel = new Label("Collections");
-		titleLabel.addStyleName("datasetRightColHeading");
-		mainContainer.add(titleLabel);
-		
-		collectionsPanel = new FlexTable();
-		collectionsPanel.addStyleName("tagsLinks");
-		mainContainer.add(collectionsPanel);
-		
-		// add to collection anchor
-		addAnchor = new Anchor("Add to a collection");
-		
-		addAnchor.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				showAddToCollectionDialog();
-			}
-		});
-		mainContainer.add(addAnchor);
-		loadCollections();
-	}
+    /**
+     * Create empty widget showing a title and a add to collection link.
+     */
+    public CollectionMembershipWidget(DispatchAsync dispatch, String datasetURI) {
+        this.service = dispatch;
+        this.datasetURI = datasetURI;
+        mainContainer = new FlowPanel();
+        mainContainer.addStyleName("datasetRightColSection");
+        initWidget(mainContainer);
 
-	/**
-	 * Popup a dialog to select collection.
-	 */
-	protected void showAddToCollectionDialog() {
-		addToCollectionDialog = new AddToCollectionDialog(service,
-				new AddToCollectionHandler());
-		addToCollectionDialog.center();
-	}
+        titleLabel = new Label("Collections");
+        titleLabel.addStyleName("datasetRightColHeading");
+        mainContainer.add(titleLabel);
 
-	/**
-	 * Add a collection to the list of collections shown.
-	 * 
-	 * @param collection
-	 */
-	public void addCollection(CollectionBean collection) {
-		
-		final String uri = collection.getUri();
-		String href = "collection?uri="+uri;
-		
-		Hyperlink link = new Hyperlink(collection.getTitle(), href);
-		
-		int row = collectionsPanel.getRowCount();
-		PreviewWidget badge = new PreviewWidget(uri, GetPreviews.BADGE, href);
-		collectionsPanel.setWidget(row++, 0, badge);
-		collectionsPanel.setWidget(row, 0, link);
-		
-		final int rowToDelete = row-1;
-		Anchor removeButton = new Anchor("Remove");
-		removeButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				service.execute(new RemoveFromCollection(uri, datasetURI), new AsyncCallback<RemoveFromCollectionResult>() {
-					public void onSuccess(RemoveFromCollectionResult result) {
-						collectionsPanel.removeRow(rowToDelete); // remove badge row
-						collectionsPanel.removeRow(rowToDelete); // remove title row
-					}
-					public void onFailure(Throwable caught) {
-					}
-				});
-			}
-		});
-		collectionsPanel.setWidget(row, 1, removeButton);
-	}
-	
-	/**
-	 * Clear the list of collections.
-	 */
-	public void clear() {
-		collectionsPanel.clear();
-	}
-	
-	/**
-	 * Asynchronously load the collections this dataset is part of.
-	 */
-	private void loadCollections() {
-		service.execute(new GetCollections(datasetURI),
-				new AsyncCallback<GetCollectionsResult>() {
+        collectionsPanel = new FlexTable();
+        collectionsPanel.setVisible(false);
+        collectionsPanel.addStyleName("tagsLinks");
+        mainContainer.add(collectionsPanel);
 
-					@Override
-					public void onFailure(Throwable arg0) {
-						GWT.log("Error loading collections the dataset is part of", arg0);
-					}
+        // add to collection anchor
+        addAnchor = new Anchor("Add to a collection");
 
-					@Override
-					public void onSuccess(GetCollectionsResult arg0) {
-						ArrayList<CollectionBean> collections = arg0
-								.getCollections();
-						
-						clear();
-						if (collections.size() > 0) {
-							for (CollectionBean collection : collections) {
-								addCollection(collection);
-							}
-						}
-					}
-				});
-	}
-	
-	class AddToCollectionHandler implements ClickHandler {
+        addAnchor.addClickHandler(new ClickHandler() {
 
-		@Override
-		public void onClick(ClickEvent arg0) {
-			String value = addToCollectionDialog.getSelectedValue();
-			if (value != null) {
-				GWT.log("Adding " + datasetURI + " to collection " + value, null);
-				Collection<String> datasets = new HashSet<String>();
-				datasets.add(datasetURI);
-				service.execute(new AddToCollection(value, datasets),
-						new AsyncCallback<AddToCollectionResult>() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showAddToCollectionDialog();
+            }
+        });
+        mainContainer.add(addAnchor);
+        loadCollections();
+    }
 
-							@Override
-							public void onFailure(Throwable arg0) {
-								GWT.log("Error adding dataset to collection",
-										arg0);
-							}
+    /**
+     * Popup a dialog to select collection.
+     */
+    protected void showAddToCollectionDialog() {
+        addToCollectionDialog = new AddToCollectionDialog(service,
+                new AddToCollectionHandler());
+        addToCollectionDialog.center();
+    }
 
-							@Override
-							public void onSuccess(AddToCollectionResult arg0) {
-								GWT
-										.log(
-												"Datasets successfully added to collection",
-												null);
-								addToCollectionDialog.hide();
-								loadCollections();
-							}
-						});
-			}
-		}
-	}
+    /**
+     * Add a collection to the list of collections shown.
+     * 
+     * @param collection
+     */
+    public void addCollection(CollectionBean collection) {
+        if (!collectionsPanel.isVisible()) {
+            collectionsPanel.setVisible(true);
+        }
+        final String uri = collection.getUri();
+        String href = "collection?uri=" + uri;
+
+        Hyperlink link = new Hyperlink(collection.getTitle(), href);
+
+        int row = collectionsPanel.getRowCount();
+        PreviewWidget badge = new PreviewWidget(uri, GetPreviews.BADGE, href);
+        collectionsPanel.setWidget(row++, 0, badge);
+        collectionsPanel.setWidget(row, 0, link);
+
+        final int rowToDelete = row - 1;
+        Anchor removeButton = new Anchor("Remove");
+        removeButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                service.execute(new RemoveFromCollection(uri, datasetURI), new AsyncCallback<RemoveFromCollectionResult>() {
+                    public void onSuccess(RemoveFromCollectionResult result) {
+                        collectionsPanel.removeRow(rowToDelete); // remove badge row
+                        collectionsPanel.removeRow(rowToDelete); // remove title row
+                    }
+
+                    public void onFailure(Throwable caught) {
+                    }
+                });
+            }
+        });
+        collectionsPanel.setWidget(row, 1, removeButton);
+    }
+
+    /**
+     * Clear the list of collections.
+     */
+    public void clear() {
+        collectionsPanel.clear();
+    }
+
+    /**
+     * Asynchronously load the collections this dataset is part of.
+     */
+    private void loadCollections() {
+        service.execute(new GetCollections(datasetURI),
+                new AsyncCallback<GetCollectionsResult>() {
+
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        GWT.log("Error loading collections the dataset is part of", arg0);
+                    }
+
+                    @Override
+                    public void onSuccess(GetCollectionsResult arg0) {
+                        ArrayList<CollectionBean> collections = arg0
+                                .getCollections();
+
+                        clear();
+                        if (collections.size() > 0) {
+                            for (CollectionBean collection : collections ) {
+                                addCollection(collection);
+                            }
+                        }
+                    }
+                });
+    }
+
+    class AddToCollectionHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent arg0) {
+            String value = addToCollectionDialog.getSelectedValue();
+            if (value != null) {
+                GWT.log("Adding " + datasetURI + " to collection " + value, null);
+                Collection<String> datasets = new HashSet<String>();
+                datasets.add(datasetURI);
+                service.execute(new AddToCollection(value, datasets),
+                        new AsyncCallback<AddToCollectionResult>() {
+
+                            @Override
+                            public void onFailure(Throwable arg0) {
+                                GWT.log("Error adding dataset to collection",
+                                        arg0);
+                            }
+
+                            @Override
+                            public void onSuccess(AddToCollectionResult arg0) {
+                                GWT
+                                        .log(
+                                                "Datasets successfully added to collection",
+                                                null);
+                                addToCollectionDialog.hide();
+                                loadCollections();
+                            }
+                        });
+            }
+        }
+    }
 }
