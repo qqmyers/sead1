@@ -159,6 +159,7 @@ public class PreviewWidget extends Composite {
             image.addErrorHandler(new ErrorHandler() {
                 public void onError(ErrorEvent event) {
                     wasEverPending = true;
+                    pendingImage(); // attempt to resolve MMDB-672
                 }
             });
             getPreview(datasetUri, link);
