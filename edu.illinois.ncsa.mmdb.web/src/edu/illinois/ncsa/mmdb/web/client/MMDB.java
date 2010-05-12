@@ -160,57 +160,63 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      */
     public void onModuleLoad() {
 
-        // navigation menu
-        initNavMenu();
+        RootPanel rootPanel = RootPanel.get("mmdb-mainContainer");
 
-        // breadcrumb
-        breadcrumb = new Label("breadcrumb > bread > crumb");
-        breadcrumb.addStyleName("breadcrumb");
-        RootPanel.get("breadcrumb").add(breadcrumb);
+        if (rootPanel != null) {
 
-        // main content
-        mainContainer.addStyleName("relativePosition");
-        RootPanel.get("mainContainer").add(mainContainer);
+            // navigation menu
+            initNavMenu();
 
-        // log events
-        logEvent(eventBus);
+            // breadcrumb
+            breadcrumb = new Label("breadcrumb > bread > crumb");
+            breadcrumb.addStyleName("breadcrumb");
+            RootPanel.get("breadcrumb").add(breadcrumb);
 
-        eventBus.addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
-            @Override
-            public void onDatasetSelected(DatasetSelectedEvent event) {
-                GWT.log("Dataset selected " + event.getUri());
-                MMDB.getSessionState().datasetSelected(event.getUri());
-            }
-        });
+            // main content
+            mainContainer.addStyleName("relativePosition");
+            RootPanel.get("mmdb-mainContainer").add(mainContainer);
 
-        eventBus.addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
-            @Override
-            public void onDatasetUnselected(DatasetUnselectedEvent event) {
-                GWT.log("Dataset unselected " + event.getUri());
-                MMDB.getSessionState().datasetUnselected(event.getUri());
-            }
-        });
+            // log events
+            logEvent(eventBus);
 
-        eventBus.addHandler(AllDatasetsUnselectedEvent.TYPE, new AllDatasetsUnselectedHandler() {
-            @Override
-            public void onAllDatasetsUnselected(AllDatasetsUnselectedEvent event) {
-                GWT.log("All datasets unselected");
-                Set<String> toDeselect = new HashSet<String>(MMDB.getSessionState().getSelectedDatasets());
-                for (String datasetUri : toDeselect ) {
-                    DatasetUnselectedEvent ue = new DatasetUnselectedEvent();
-                    ue.setUri(datasetUri);
-                    eventBus.fireEvent(ue);
+            eventBus.addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
+
+                @Override
+                public void onDatasetSelected(DatasetSelectedEvent event) {
+                    GWT.log("Dataset selected " + event.getUri());
+                    MMDB.getSessionState().datasetSelected(event.getUri());
                 }
-            }
-        });
+            });
 
-        // TODO place support for history management
-        // placeService = new PlaceService(eventBus);
+            eventBus.addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
+                @Override
+                public void onDatasetUnselected(DatasetUnselectedEvent event) {
+                    GWT.log("Dataset unselected " + event.getUri());
+                    MMDB.getSessionState().datasetUnselected(event.getUri());
+                }
+            });
 
-        // history support
-        History.addValueChangeHandler(this);
+            eventBus.addHandler(AllDatasetsUnselectedEvent.TYPE, new AllDatasetsUnselectedHandler() {
+                @Override
+                public void onAllDatasetsUnselected(AllDatasetsUnselectedEvent event) {
+                    GWT.log("All datasets unselected");
+                    Set<String> toDeselect = new HashSet<String>(MMDB.getSessionState().getSelectedDatasets());
+                    for (String datasetUri : toDeselect ) {
+                        DatasetUnselectedEvent ue = new DatasetUnselectedEvent();
+                        ue.setUri(datasetUri);
+                        eventBus.fireEvent(ue);
+                    }
+                }
+            });
 
-        History.fireCurrentHistoryState();
+            // TODO place support for history management
+            // placeService = new PlaceService(eventBus);
+
+            // history support
+            History.addValueChangeHandler(this);
+
+            History.fireCurrentHistoryState();
+        }
     }
 
     /**
@@ -286,13 +292,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         eventBus.addHandler(AddNewDatasetEvent.TYPE,
                 new AddNewDatasetHandler() {
 
-            @Override
-            public void onAddNewDataset(AddNewDatasetEvent event) {
-                GWT.log("Event Logging: Add new dataset event "
-                        + event.getDataset().getTitle(), null);
+                    @Override
+                    public void onAddNewDataset(AddNewDatasetEvent event) {
+                        GWT.log("Event Logging: Add new dataset event "
+                                + event.getDataset().getTitle(), null);
 
-            }
-        });
+                    }
+                });
     }
 
     public void showListDatasetsPage() {
@@ -336,20 +342,20 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 dispatchAsync.execute(new AddCollection(collection, getSessionState().getCurrentUser().getUri()),
                         new AsyncCallback<AddCollectionResult>() {
 
-                    @Override
-                    public void onFailure(Throwable arg0) {
-                        GWT.log("Failed creating new collection", arg0);
-                    }
+                            @Override
+                            public void onFailure(Throwable arg0) {
+                                GWT.log("Failed creating new collection", arg0);
+                            }
 
-                    @Override
-                    public void onSuccess(AddCollectionResult arg0) {
-                        AddNewCollectionEvent event = new AddNewCollectionEvent(
-                                collection);
-                        GWT.log("Firing event add collection "
-                                + collection.getTitle(), null);
-                        eventBus.fireEvent(event);
-                    }
-                });
+                            @Override
+                            public void onSuccess(AddCollectionResult arg0) {
+                                AddNewCollectionEvent event = new AddNewCollectionEvent(
+                                        collection);
+                                GWT.log("Firing event add collection "
+                                        + collection.getTitle(), null);
+                                eventBus.fireEvent(event);
+                            }
+                        });
             }
         });
         addCollectionPanel.add(addButton);
@@ -429,23 +435,23 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 Permission.VIEW_MEMBER_PAGES),
                 new AsyncCallback<HasPermissionResult>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT
-                        .log(
-                        "Error checking if the users has permissions to view member pages",
-                        caught);
-            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT
+                                .log(
+                                        "Error checking if the users has permissions to view member pages",
+                                        caught);
+                    }
 
-            @Override
-            public void onSuccess(HasPermissionResult result) {
-                if (result.isPermitted()) {
-                    parseHistoryToken(token);
-                } else {
-                    showNotEnabledPage();
-                }
-            }
-        });
+                    @Override
+                    public void onSuccess(HasPermissionResult result) {
+                        if (result.isPermitted()) {
+                            parseHistoryToken(token);
+                        } else {
+                            showNotEnabledPage();
+                        }
+                    }
+                });
     }
 
     /**
@@ -593,25 +599,25 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 Permission.VIEW_ADMIN_PAGES),
                 new AsyncCallback<HasPermissionResult>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT
-                        .log(
-                        "Error checking if the users has permissions to view admin pages",
-                        caught);
-            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT
+                                .log(
+                                        "Error checking if the users has permissions to view admin pages",
+                                        caught);
+                    }
 
-            @Override
-            public void onSuccess(HasPermissionResult result) {
-                if (result.isPermitted()) {
-                    mainContainer.clear();
-                    mainContainer.add(new UserManagementPage(
-                            dispatchAsync));
-                } else {
-                    showNoAccessPage();
-                }
-            }
-        });
+                    @Override
+                    public void onSuccess(HasPermissionResult result) {
+                        if (result.isPermitted()) {
+                            mainContainer.clear();
+                            mainContainer.add(new UserManagementPage(
+                                    dispatchAsync));
+                        } else {
+                            showNoAccessPage();
+                        }
+                    }
+                });
     }
 
     /**
@@ -623,24 +629,24 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 Permission.VIEW_ADMIN_PAGES),
                 new AsyncCallback<HasPermissionResult>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT
-                        .log(
-                        "Error checking if the users has permissions to view admin pages",
-                        caught);
-            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT
+                                .log(
+                                        "Error checking if the users has permissions to view admin pages",
+                                        caught);
+                    }
 
-            @Override
-            public void onSuccess(HasPermissionResult result) {
-                if (result.isPermitted()) {
-                    mainContainer.clear();
-                    mainContainer.add(new SparqlPage(dispatchAsync));
-                } else {
-                    showNoAccessPage();
-                }
-            }
-        });
+                    @Override
+                    public void onSuccess(HasPermissionResult result) {
+                        if (result.isPermitted()) {
+                            mainContainer.clear();
+                            mainContainer.add(new SparqlPage(dispatchAsync));
+                        } else {
+                            showNoAccessPage();
+                        }
+                    }
+                });
     }
 
     /**
