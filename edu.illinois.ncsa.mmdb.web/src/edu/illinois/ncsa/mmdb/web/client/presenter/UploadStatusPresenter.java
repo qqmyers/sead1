@@ -11,6 +11,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetSelectionCheckboxHandler;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -73,10 +75,18 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
         }
     }
 
-    public void onComplete(String uri) {
-        display.onComplete(nUploaded, uri);
-        display.getSelectionControl(nUploaded).addValueChangeHandler(new DatasetSelectionCheckboxHandler(uri, eventBus));
-        display.getSelectionControl(nUploaded).setValue(true, true); // select, and fire the selection event
+    public void onComplete(final String uri) {
+        final int ix = nUploaded;
+        display.onComplete(ix, uri);
+        display.getSelectionControl(ix).addValueChangeHandler(new DatasetSelectionCheckboxHandler(uri, eventBus));
+        display.getSelectionControl(ix).setValue(true, true); // select, and fire the selection event
+        addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
+            public void onDatasetUnselected(DatasetUnselectedEvent datasetUnselectedEvent) {
+                if (datasetUnselectedEvent.getUri().equals(uri)) {
+                    display.getSelectionControl(ix).setValue(false, false); // deselect, but don't fire another deselection event
+                }
+            }
+        });
         fetchDataset(nUploaded, uri);
         nUploaded++;
     }
