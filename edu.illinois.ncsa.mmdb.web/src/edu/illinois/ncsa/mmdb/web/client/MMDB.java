@@ -410,7 +410,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         GWT.log("History changed: " + event.getValue(), null);
 
-        if (token.startsWith("login")) {
+        if (token.startsWith("logout")) {
+            LoginPage.logout();
+            loginStatusWidget.logout();
+            showLoginPage();
+        } else if (token.startsWith("login")) {
             showLoginPage();
         } else if (token.startsWith("signup")) {
             showSignupPage();

@@ -41,9 +41,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -65,7 +62,7 @@ public class LoginStatusWidget extends Composite {
     private final HorizontalPanel mainPanel;
     private final Hyperlink       loginAnchor;
     private final Hyperlink       signupAnchor;
-    private final Anchor          logoutAnchor;
+    private final Hyperlink       logoutAnchor;
 
     /**
      * Create a main panel and show the appropriate
@@ -85,17 +82,8 @@ public class LoginStatusWidget extends Composite {
         signupAnchor.addStyleName("navMenuLink");
 
         // logout anchor
-        logoutAnchor = new Anchor("Logout");
+        logoutAnchor = new Hyperlink("Logout", "logout");
         logoutAnchor.addStyleName("navMenuLink");
-        logoutAnchor.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                LoginPage.logout();
-                logout();
-                //History.newItem("");
-            }
-        });
 
         if (MMDB.getUsername() == null) {
             mainPanel.add(loginAnchor);
