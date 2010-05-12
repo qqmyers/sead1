@@ -46,6 +46,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -58,16 +59,18 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 public class PagingWidget extends Composite implements ClickHandler, HasValueChangeHandlers<Integer> {
-    Image           firstButton;
-    Image           previousButton;
-    Image           nextButton;
-    Image           lastButton;
-    HorizontalPanel pagePanel;
-    Label           pageLabel;
-
+    Image                firstButton;
+    Image                previousButton;
+    Image                nextButton;
+    Image                lastButton;
+    HorizontalPanel      pagePanel;
+    Label                pageLabel;
+    final int            pad    = 3;
+    private final Anchor previousAnchor;
+    private final Anchor nextAnchor;
     // paging model
-    int             page   = 1;
-    int             nPages = -1;
+    int                  page   = 1;
+    int                  nPages = -1;
 
     public void setPage(int p) {
         setPage(p, true);
@@ -109,8 +112,6 @@ public class PagingWidget extends Composite implements ClickHandler, HasValueCha
         return anchor;
     }
 
-    final int pad = 3;
-
     void setPageLabel(int p, int np) {
         pagePanel.clear();
         if (np < pad * 2 + 5) {
@@ -151,21 +152,51 @@ public class PagingWidget extends Composite implements ClickHandler, HasValueCha
     public PagingWidget(int p) {
         page = p;
         HorizontalPanel thePanel = new HorizontalPanel();
+        thePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        thePanel.setSpacing(1);
         thePanel.addStyleName("pagingWidget");
         firstButton = new Image("images/go-first.png");
         previousButton = new Image("images/go-previous.png");
         nextButton = new Image("images/go-next.png");
         lastButton = new Image("images/go-last.png");
         pagePanel = new HorizontalPanel();
+        pagePanel.addStyleName("pagingList");
         //pageLabel = new Label();
         setPageLabel(page, nPages);
-        for (Widget element : new Widget[] { /*firstButton,*/previousButton, pagePanel, nextButton /*, lastButton*/} ) {
+
+        // previous anchor
+        previousAnchor = new Anchor("Previous");
+        previousAnchor.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (getPage() > 1) {
+                    setPage(getPage() - 1);
+                }
+            }
+        });
+        // next anchor
+        nextAnchor = new Anchor("Next");
+        nextAnchor.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (getNumberOfPages() < 1 || getPage() < getNumberOfPages()) {
+                    setPage(getPage() + 1);
+                }
+            }
+        });
+
+        // add and configure widgets
+        thePanel.add(previousAnchor);
+        for (Widget element : new Widget[] { /*firstButton, previousButton,*/pagePanel /*, nextButton, lastButton*/} ) {
             thePanel.add(element);
             element.addStyleName("pagingButton");
             if (element instanceof Image) {
                 ((Image) element).addClickHandler(this);
             }
         }
+        thePanel.add(nextAnchor);
         initWidget(thePanel);
     }
 

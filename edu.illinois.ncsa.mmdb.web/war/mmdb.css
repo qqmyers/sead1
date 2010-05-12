@@ -243,8 +243,12 @@ a:hover {
 }
 
 .pagingWidget {
-	line-height: 24px;
 	margin: 5px;
+}
+
+.pagingList {
+	padding: 0px;
+	margin: 0px 10px 0px 10px;
 }
 
 .pagingButton  {
@@ -259,14 +263,14 @@ a:hover {
 
 .pageAnchor {
 	/*border: 1px solid blue;*/
-	font-size: 0.9em;
+	/*font-size: 0.9em;*/
 	margin: 3px;
 }
 
 .thisPageAnchor {
 	margin: 3px;
 	color: black;
-	font-size: 0.9em;
+	/*font-size: 0.9em;*/
 	font-weight: bold;
 	text-decoration: none;
 }
