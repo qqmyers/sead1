@@ -119,17 +119,23 @@ public class UploadPage extends Page {
 
         VerticalPanel singleUpload = new VerticalPanel();
         final HorizontalPanel hp = new HorizontalPanel();
-        hp.add(new Label("Select the file you want to upload:"));
+        hp.add(new Label("Select a file you want to upload:"));
         Image helpButton = new Image("./images/help-browser.png");
         helpButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 HelpDialogView view = new HelpDialogView("Upload help");
                 HelpPresenter presenter = new HelpPresenter(view);
                 presenter.bind();
-                presenter.addContent(new Label("[put help content here]"));
+                view.setWidth("300px");
+                view.setPopupPosition(360, 70);
+                String helpText = "To upload a single file, use the file chooser on the left. " +
+                        "To upload multiple files or a folder, click in the box to the right to load the upload applet. " +
+                        "Once the applet is loaded, you can drag a folder or multiple files from your desktop and drop them on " +
+                        "the disk icon to upload. As files upload you will see information about the upload progress below.";
+                presenter.addContent(new Label(helpText));
             }
         });
-        hp.add(helpButton);
+        pageTitle.addEast(helpButton);
         singleUpload.add(hp);
 
         uploadWidget = new UploadWidget(false);
@@ -155,6 +161,7 @@ public class UploadPage extends Page {
                 super.onAttach();
                 if (dndEnabled) {
                     removeStyleName("hidden");
+                    dndTooltip.removeStyleName("dndTooltip");
                     deployDndApplet(MMDB.getSessionState().getSessionKey());
                 } else {
                     addStyleName("hidden");
@@ -164,6 +171,7 @@ public class UploadPage extends Page {
                                 Window.confirm("Upload not permitted. Please log in");
                             } else {
                                 removeStyleName("hidden");
+                                dndTooltip.removeStyleName("dndTooltip");
                                 deployDndApplet(MMDB.getSessionState().getSessionKey());
                                 dndTooltip.setText(enabledMsg);
                                 MMDB.setSessionPreference(DND_ENABLED_PREFERENCE, "true");
@@ -180,6 +188,7 @@ public class UploadPage extends Page {
         dndApplet.addStyleName("dragAndDrop");
         dndPanel.addStyleName("dndContainer");
         dndPanel.add(dndApplet);
+        dndTooltip.addStyleName("dndTooltip");
         dndPanel.add(dndTooltip);
 
         Label or = new Label("OR");

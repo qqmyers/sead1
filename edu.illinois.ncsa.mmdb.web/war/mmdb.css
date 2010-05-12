@@ -362,6 +362,13 @@ a:hover {
 	width: 152px;
 }
 
+.dndTooltip {
+	width: 152px;
+	border: 1px dashed #002B55;
+	padding: 7px;
+	cursor: pointer;
+}
+
 .dragAndDrop {
 	width: 152px;
 	border: 1px dashed #002B55;
@@ -940,15 +947,15 @@ a:hover {
 }
 
 .gwt-MenuBar .gwt-MenuItem-selected {
-	background: red;
+	background: #dddddd;
 }
 
 .gwt-MenuBar-vertical .subMenuIcon-selected {
-  background: red;
+  background: #dddddd;
 }
 
 .gwt-MenuBar-horizontal .subMenuIcon-selected {
-  background: red;
+  background: #dddddd;
 }
 
 .dynamicTable {
