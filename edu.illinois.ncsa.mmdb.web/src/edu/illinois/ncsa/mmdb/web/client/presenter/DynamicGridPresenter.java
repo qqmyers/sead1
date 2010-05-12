@@ -113,11 +113,11 @@ public class DynamicGridPresenter implements Presenter {
                 if (selected.getValue()) {
                     DatasetSelectedEvent datasetSelected = new DatasetSelectedEvent();
                     datasetSelected.setUri(showItemEvent.getId());
-                    MMDB.eventBus.fireEvent(datasetSelected);
+                    eventBus.fireEvent(datasetSelected);
                 } else {
                     DatasetUnselectedEvent datasetUnselected = new DatasetUnselectedEvent();
                     datasetUnselected.setUri(showItemEvent.getId());
-                    MMDB.eventBus.fireEvent(datasetUnselected);
+                    eventBus.fireEvent(datasetUnselected);
                 }
 
             }
