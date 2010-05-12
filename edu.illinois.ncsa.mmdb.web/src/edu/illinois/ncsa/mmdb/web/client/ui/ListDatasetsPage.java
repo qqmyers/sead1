@@ -7,6 +7,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
@@ -58,7 +59,15 @@ public class ListDatasetsPage extends Page {
         DynamicTableView dynamicTableView = new DynamicTableView();
         final DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatch, eventBus, dynamicTableView);
         dynamicTablePresenter.bind();
-        mainLayoutPanel.add(dynamicTableView.asWidget());
+
+        VerticalPanel vp = new VerticalPanel() {
+            @Override
+            protected void onDetach() {
+                dynamicTablePresenter.unbind();
+            }
+        };
+        vp.add(dynamicTableView.asWidget());
+        mainLayoutPanel.add(vp);
 
         dynamicTablePresenter.refresh();
     }

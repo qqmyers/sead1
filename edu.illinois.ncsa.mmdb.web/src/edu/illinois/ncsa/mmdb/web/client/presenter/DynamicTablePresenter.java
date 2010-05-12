@@ -21,7 +21,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.NoMoreItemsEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.RefreshEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.RefreshHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
-import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
+import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicGridView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicListView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
@@ -34,16 +34,15 @@ import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
  * @param <B>
  *            Server side bean to be shown in the table
  */
-public abstract class DynamicTablePresenter<B> implements Presenter {
+public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTablePresenter.Display> {
 
     protected final MyDispatchAsync dispatch;
-    protected final HandlerManager  eventBus;
-    protected final Display         display;
     private int                     pageSize    = DynamicListView.DEFAULT_PAGE_SIZE;
     protected String                sortKey     = "date-desc";
     protected String                viewType    = DynamicTableView.LIST_VIEW_TYPE;
     protected int                   numberOfPages;
     protected int                   currentPage = 1;
+    protected BasePresenter<?>      viewTypePresenter;
 
     public interface Display {
         void setCurrentPage(int num);
@@ -79,16 +78,12 @@ public abstract class DynamicTablePresenter<B> implements Presenter {
      * @param display
      */
     public DynamicTablePresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+        super(display, eventBus);
         this.dispatch = dispatch;
-        this.eventBus = eventBus;
-        this.display = display;
 
-        DynamicListView listView = new DynamicListView();
-        DynamicListPresenter listPresenter = new DynamicListPresenter(dispatch, eventBus, listView);
-        listPresenter.bind();
-        display.setContentView(listView);
+        changeViewType(DynamicTableView.LIST_VIEW_TYPE); // FIXME use a different default depending on what's being listed
 
-        eventBus.addHandler(RefreshEvent.TYPE, new RefreshHandler() {
+        addHandler(RefreshEvent.TYPE, new RefreshHandler() {
             @Override
             public void onRefresh(RefreshEvent event) {
                 refresh();
@@ -233,20 +228,27 @@ public abstract class DynamicTablePresenter<B> implements Presenter {
     protected void changeViewType(String viewType) {
         this.viewType = viewType;
         display.setViewType(viewType);
+        // unbind the existing presenter if any
+        if (viewTypePresenter != null) {
+            viewTypePresenter.unbind();
+        }
         if (viewType.equals(DynamicTableView.LIST_VIEW_TYPE)) {
             DynamicListView listView = new DynamicListView();
             setPageSize(DynamicListView.DEFAULT_PAGE_SIZE);
             DynamicListPresenter listPresenter = new DynamicListPresenter(dispatch, eventBus, listView);
             listPresenter.bind();
+            viewTypePresenter = listPresenter;
             display.setContentView(listView);
         } else if (viewType.equals(DynamicTableView.GRID_VIEW_TYPE)) {
             DynamicGridView gridView = new DynamicGridView();
             setPageSize(DynamicGridView.DEFAULT_PAGE_SIZE);
             DynamicGridPresenter gridPresenter = new DynamicGridPresenter(dispatch, eventBus, gridView);
             gridPresenter.bind();
+            viewTypePresenter = gridPresenter;
             display.setContentView(gridView);
         } else if (viewType.equals(DynamicTableView.FLOW_VIEW_TYPE)) {
             display.setContentView(new Label("The flow view has a cold. It will be back soon."));
+            viewTypePresenter = null;
         }
         getContent();
     }
@@ -257,6 +259,14 @@ public abstract class DynamicTablePresenter<B> implements Presenter {
 
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
+    }
+
+    @Override
+    public void unbind() {
+        super.unbind();
+        if (viewTypePresenter != null) {
+            viewTypePresenter.unbind();
+        }
     }
 
 }

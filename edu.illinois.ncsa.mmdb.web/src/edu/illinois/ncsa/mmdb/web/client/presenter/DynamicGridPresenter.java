@@ -24,7 +24,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.RefreshEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEventHandler;
-import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
+import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
 
 /**
  * Show contents of a {@link DynamicTablePresenter} as a grid.
@@ -32,11 +32,9 @@ import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
  * @author Luigi Marini
  * 
  */
-public class DynamicGridPresenter implements Presenter {
+public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Display> {
 
     private final MyDispatchAsync      dispatch;
-    private final HandlerManager       eventBus;
-    private final Display              display;
     /** Map from uri to location in view **/
     private final Map<String, Integer> items;
 
@@ -53,15 +51,14 @@ public class DynamicGridPresenter implements Presenter {
     }
 
     public DynamicGridPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+        super(display, eventBus);
         this.dispatch = dispatch;
-        this.eventBus = eventBus;
-        this.display = display;
         this.items = new HashMap<String, Integer>();
     }
 
     @Override
     public void bind() {
-        eventBus.addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
+        addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
 
             @Override
             public void onDatasetUnselected(DatasetUnselectedEvent datasetUnselectedEvent) {
@@ -73,7 +70,7 @@ public class DynamicGridPresenter implements Presenter {
             }
         });
 
-        eventBus.addHandler(ShowItemEvent.TYPE, new ShowItemEventHandler() {
+        addHandler(ShowItemEvent.TYPE, new ShowItemEventHandler() {
 
             @Override
             public void onShowItem(ShowItemEvent showItemEvent) {
@@ -83,7 +80,7 @@ public class DynamicGridPresenter implements Presenter {
 
         });
 
-        eventBus.addHandler(ClearDatasetsEvent.TYPE, new ClearDatasetsHandler() {
+        addHandler(ClearDatasetsEvent.TYPE, new ClearDatasetsHandler() {
 
             @Override
             public void onClearDatasets(ClearDatasetsEvent event) {
@@ -92,7 +89,7 @@ public class DynamicGridPresenter implements Presenter {
             }
         });
 
-        eventBus.addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
+        addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
             @Override
             public void onDeleteDataset(DatasetDeletedEvent event) {
                 if (items.containsKey(event.getDatasetUri())) {
