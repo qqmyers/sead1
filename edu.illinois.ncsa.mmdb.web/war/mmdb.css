@@ -33,7 +33,7 @@ a:hover {
  * ---------------------------------------------------------------------- */
 .menuElementLeft, .menuElementRight, .logo {
 	height: 40px;
-	padding: 10px;
+	padding: 15px 5px 0px 15px;
 	position: relative;
 	vertical-align: center;
 }
@@ -52,10 +52,15 @@ a:hover {
     padding: 0px;
 }
 
+.searchMenu {
+	position: relative;
+	float: right;
+	padding: 10px;
+}
+
 .navMenu {
 	color: black;
 	position: relative;
-	padding-left: 100px;
 	white-space: nowrap;
 }
 
@@ -66,6 +71,7 @@ a:hover {
 }
 
 .navMenuLink:hover, .navMenuLink a:hover {
+	color: #3366FF;
 	text-decoration: underline;
 }
 
@@ -150,15 +156,14 @@ a:hover {
 }
 
 .bottomMenu {
-	/**background-color: #E3E3E3;**/
-	border-top: 1px solid gray;
+	border-top: #888888 solid 1px;
 	width: 975px;
-	margin: 20px auto 20px auto;
-	padding: 10px;
+	margin: 0px auto 0px auto;
+	padding-top: 10px;
 	text-align: center;
 	font-family: Arial, Helvetica, sans-serif !important;	
 	text-decoration:none;
-	color:#666;
+	color:#888888;
 	font-size: 0.9em !important;		
 }
 
