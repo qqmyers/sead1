@@ -298,7 +298,7 @@ public class DatasetWidget extends Composite {
         metadataHeader.addStyleName("datasetRightColHeading");
 
         Label authorLabel = new Label("Contributor: ");
-        authorLabel.addStyleName("metadataEntry");
+        authorLabel.addStyleName("datasetRightColText");
 
         PersonBean creator = result.getDataset().getCreator();
         if (creator != null) {
@@ -307,23 +307,23 @@ public class DatasetWidget extends Composite {
         }
 
         Label sizeLabel = new Label("Size: " + TextFormatter.humanBytes(result.getDataset().getSize()));
-        sizeLabel.addStyleName("metadataEntry");
+        sizeLabel.addStyleName("datasetRightColText");
 
         Label typeLabel = new Label("Type: " + result.getDataset().getMimeType());
-        typeLabel.addStyleName("metadataEntry");
+        typeLabel.addStyleName("datasetRightColText");
 
         String dateString = result.getDataset().getDate() != null ? DATE_TIME_FORMAT.format(result.getDataset().getDate()) : "";
         Label dateLabel = new Label("Date: " + dateString);
-        dateLabel.addStyleName("metadataEntry");
+        dateLabel.addStyleName("datasetRightColText");
 
         final Label likeCount = new Label();
-        likeCount.addStyleName("metadataEntry");
+        likeCount.addStyleName("datasetRightColText");
 
         final Anchor likeAnchor = new Anchor("Like");
-        likeAnchor.addStyleName("metadataEntry");
+        likeAnchor.addStyleName("datasetRightColText");
 
         final Anchor dislikeAnchor = new Anchor("Dislike");
-        dislikeAnchor.addStyleName("metadataEntry");
+        dislikeAnchor.addStyleName("datasetRightColText");
 
         likeAnchor.addClickHandler(new ClickHandler() {
             @Override
@@ -397,7 +397,7 @@ public class DatasetWidget extends Composite {
         });
 
         final Label viewLabel = new Label("Viewed: N/A");
-        viewLabel.addStyleName("metadataEntry");
+        viewLabel.addStyleName("datasetRightColText");
 
         infoPanel = new FlowPanel();
         infoPanel.addStyleName("datasetRightColSection");
@@ -916,22 +916,22 @@ public class DatasetWidget extends Composite {
                         // extra metadata to display in info
                         if ("Extractor".equals(tuple.getCategory()) && "Image Size".equals(tuple.getLabel())) {
                             Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                            lbl.addStyleName("metadataEntry");
+                            lbl.addStyleName("datasetRightColText");
                             infoPanel.add(lbl);
                         }
                         if ("FFMPEG".equals(tuple.getCategory()) && "Video Duration".equals(tuple.getLabel())) {
                             Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                            lbl.addStyleName("metadataEntry");
+                            lbl.addStyleName("datasetRightColText");
                             infoPanel.add(lbl);
                         }
                         if ("FFMPEG".equals(tuple.getCategory()) && "Video FPS".equals(tuple.getLabel())) {
                             Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                            lbl.addStyleName("metadataEntry");
+                            lbl.addStyleName("datasetRightColText");
                             infoPanel.add(lbl);
                         }
                         if ("FFMPEG".equals(tuple.getCategory()) && "Video Size".equals(tuple.getLabel())) {
                             Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
-                            lbl.addStyleName("metadataEntry");
+                            lbl.addStyleName("datasetRightColText");
                             infoPanel.add(lbl);
                         }
                     }

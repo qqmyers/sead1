@@ -4,23 +4,18 @@ body {
 	margin: 0px;
 	padding: 0px;
 	text-align: center;
+	background-color: white;
 }
 
-.mainContainer {
-	text-align: center;
-	minHeight: 600px;	
+.mainMenu, .mainContainer, .bottomMenu {
 	width: 975px;
-	/**border: solid 1px #888888;**/
-	margin: 10px auto 20px auto;
-	padding: 0px;
-	background-color: white;
 }
 
 /* ----------------------------------------------------------------------
  * Links
  * ---------------------------------------------------------------------- */
 a, a:link, a:visited, a:hover, a:active {
-	color:#3366FF;
+	color: deeppink;
 	text-decoration: none;
 }
 
@@ -31,6 +26,15 @@ a:hover {
 /* ----------------------------------------------------------------------
  * Menu Bar
  * ---------------------------------------------------------------------- */
+.mainMenu {
+	height: 40px;
+	margin: 0px auto 0px auto;
+	padding: 0px;
+	position: relative;
+	vertical-align: top;
+	border-bottom: #888888 solid 1px;
+}
+
 .menuElementLeft, .menuElementRight, .logo {
 	height: 40px;
 	padding: 15px 5px 0px 15px;
@@ -52,27 +56,21 @@ a:hover {
     padding: 0px;
 }
 
-.searchMenu {
-	position: relative;
-	float: right;
-	padding: 10px;
-}
-
 .navMenu {
 	color: black;
 	position: relative;
 	white-space: nowrap;
 }
 
-.navMenuLink:link, .navMenuLink:visited, .navMenuLink a:link, .navMenuLink a:visited {
+.navMenuLink, .navMenuLink a:link, .navMenuLink a:visited {
 	color: black;
-	text-decoration: none;
-	margin: 5px;
+	margin: 0px 5px;
 }
 
-.navMenuLink:hover, .navMenuLink a:hover {
-	color: #3366FF;
-	text-decoration: underline;
+.searchMenu {
+	position: relative;
+	float: right;
+	padding: 10px;
 }
 
 .searchBox {
@@ -80,8 +78,82 @@ a:hover {
 }
 
 /* ----------------------------------------------------------------------
+ * Footer
+ * ---------------------------------------------------------------------- */
+.bottomMenu {
+	border-top: #888888 solid 1px;
+	margin: 0px auto 0px auto;
+	padding-top: 10px;
+	text-align: center;
+	text-decoration:none;
+	color:#888888;
+	font-size: 0.9em !important;		
+}
+
+.bottomMenu a:link, .bottomMenu a:visited {
+	color:#888888;
+}
+
+/* ----------------------------------------------------------------------
+ * Main Page
+ * ---------------------------------------------------------------------- */
+.mainContainer {
+	text-align: center;
+	minHeight: 600px;	
+	margin: 10px auto 20px auto;
+	padding: 0px;
+}
+
+/* ----------------------------------------------------------------------
+ * Dataset Page Left Side
+ * ---------------------------------------------------------------------- */
+
+.datasetMainContainerLeftColumn {
+	float: left;
+	text-align: left;
+	width: 750px;
+}
+
+/* ----------------------------------------------------------------------
+ * Dataset Page Right Side
+ * ---------------------------------------------------------------------- */
+ 
+.datasetMainContainerRightColumn, .datasetRightColHeading, .datasetRightColSection {
+	width: 200px;
+	text-align: left;
+	padding: 0px;
+}
+
+.datasetMainContainerRightColumn {
+	float: right;
+}
+
+.datasetRightColSection {
+	margin: 20px 5px 10px 5px;
+}
+
+.datasetRightColHeading {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	font-size: 1.5em;
+}
+
+.datasetRightColText {
+	vertical-align: middle;
+	padding-bottom: 5px;
+	padding-right: 5px;
+}
+
+/* ----------------------------------------------------------------------
  * Rest of styles
  * ---------------------------------------------------------------------- */
+.anchorBlock {
+	display: block;
+}
+
+.imageNoBorder {
+	border: 0px;
+}
 
 .redBorder {
 	border: 1px solid red;
@@ -126,17 +198,6 @@ a:hover {
 	height: auto;
 }
 
-.mainMenu {
-	width: 975px;
-	height: 40px;
-	margin: 0px auto 0px auto;
-	padding: 0px;
-	position: relative;
-	vertical-align: top;
-	border-bottom: #888888 solid 1px;
-}
-
-
 .toolbar {
 	width: 975px;
 	background-color: #069;
@@ -153,22 +214,6 @@ a:hover {
 	color: gray;
 	padding-left: 40px;
 	position: relative;
-}
-
-.bottomMenu {
-	border-top: #888888 solid 1px;
-	width: 975px;
-	margin: 0px auto 0px auto;
-	padding-top: 10px;
-	text-align: center;
-	font-family: Arial, Helvetica, sans-serif !important;	
-	text-decoration:none;
-	color:#888888;
-	font-size: 0.9em !important;		
-}
-
-.bottomMenu a:link, .bottomMenu a:visited {
-	color:#666;
 }
 
 .datasetDisclosurePanel {
@@ -462,23 +507,6 @@ a:hover {
 	width: 100px;
 }
 
-.datasetRightColHeading {
-	width: 200px;
-	margin-top: 10px;
-	margin-bottom: 10px;
-	padding: 0px;
-	font-size: 1.5em;
-	text-align: left;
-	/**background: #EC8E00;**/
-}
-
-.datasetRightColSection {
-	width: 200px;
-	padding: 0px;
-	margin: 20px 5px 50px 5px;
-	text-align: left;
-}
-
 .gallery {
 	width: 350px;
 	padding: 10px;
@@ -553,16 +581,7 @@ a:hover {
 	width: 100%;
 }
 
-.datasetMainContainerLeftColumn {
-	float: left;
-	text-align: left;
-	width: 700px;
-}
 
-.datasetMainContainerRightColumn {
-	float: right;
-	width: 250px;
-}
 
 .previewPanel {
 	width: 100%;

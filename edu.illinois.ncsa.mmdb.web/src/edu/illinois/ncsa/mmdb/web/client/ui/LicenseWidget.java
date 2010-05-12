@@ -80,7 +80,7 @@ public class LicenseWidget extends Composite {
     private LicenseResult            license;
     private HandlerManager           eventBus;
 
-    private VerticalPanel            mainPanel;
+    private FlowPanel                mainPanel;
     private Anchor                   licenseText;
     private Label                    attribution;
 
@@ -137,7 +137,7 @@ public class LicenseWidget extends Composite {
         licenseEditor = new VerticalPanel();
 
         // main panel with title
-        mainPanel = new VerticalPanel();
+        mainPanel = new FlowPanel();
         mainPanel.addStyleName("datasetRightColSection");
         initWidget(mainPanel);
 
@@ -149,6 +149,8 @@ public class LicenseWidget extends Composite {
 
         licenseText = new Anchor("");
         licenseText.setTarget("_blank");
+        licenseText.setStyleName("datasetRightColText");
+        licenseText.addStyleName("anchorBlock");
         mainPanel.add(licenseText);
 
         attribution = new Label();
@@ -183,6 +185,7 @@ public class LicenseWidget extends Composite {
 
     private void editPanel() {
         licenseEdit = new Anchor("Edit");
+        licenseEdit.addStyleName("anchorBlock");
         mainPanel.add(licenseEdit);
 
         licenseEdit.addClickHandler(new ClickHandler() {
@@ -465,6 +468,7 @@ public class LicenseWidget extends Composite {
         } else if ("cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights)) {
             // Creative Commons License
             Image icon = new Image("images/" + rights + ".png");
+            icon.addStyleName("imageNoBorder");
             licenseText.setText("");
             licenseText.getElement().appendChild(icon.getElement());
             licenseText.setHref(license.getLicense());
