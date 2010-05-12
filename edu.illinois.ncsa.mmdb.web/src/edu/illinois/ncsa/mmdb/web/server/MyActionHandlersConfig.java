@@ -81,6 +81,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryDatasetsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
@@ -145,6 +146,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetLikeDislikeHandler());
         DispatchUtil.registerHandler(new ListQueryDatasetsHandler());
         DispatchUtil.registerHandler(new JiraIssueHandler());
+        DispatchUtil.registerHandler(new ListUserMetadataFieldsHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

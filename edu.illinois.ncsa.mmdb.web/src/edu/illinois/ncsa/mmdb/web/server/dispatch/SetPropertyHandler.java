@@ -51,59 +51,65 @@ import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
+import edu.illinois.ncsa.mmdb.web.server.AccessControl;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
  * TODO Add comments
  * 
  * @author Joe Futrelle
- *
+ * 
  */
 public class SetPropertyHandler implements ActionHandler<SetProperty, SetPropertyResult> {
 
-	/** Commons logging **/
-	private static Log log = LogFactory.getLog(SetPropertyHandler.class);
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog(SetPropertyHandler.class);
 
-	@Override
-	public SetPropertyResult execute(SetProperty arg0, ExecutionContext arg1)
-			throws ActionException {
-		try {
-			Resource subject = Resource.uriRef(arg0.getUri());
-			Resource predicate = Resource.uriRef(arg0.getPropertyUri());
-			Collection<String> values = arg0.getValues();
-			
-			//
-			ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
-			ts.setValues(subject, predicate, values);
-			ts.save();
-			ts.close();
-			
-			// attempt to refetch the bean
-			try {
-				TupeloStore.refetch(subject);
-			} catch(Exception x) {
-				x.printStackTrace();
-			}
-			
-			TupeloStore.getInstance().changed(subject.getString());
-			
-			return new SetPropertyResult();
-		} catch(Exception x) {
-			log.error("Error setting metadata on " + arg0.getUri(), x);
-			throw new ActionException("failed", x);
-		}
-	}
+    @Override
+    public SetPropertyResult execute(SetProperty arg0, ExecutionContext arg1)
+            throws ActionException {
+        // only allow resource creator to edit user metadata fields
+        if (ListUserMetadataFieldsHandler.listUserMetadataFields().containsKey(arg0.getPropertyUri()) &&
+                !AccessControl.isAdmin(arg0.getUser()) && !AccessControl.isCreator(arg0.getUser(), arg0.getUri())) {
+            throw new ActionException("Unauthorized");
+        }
+        try {
+            Resource subject = Resource.uriRef(arg0.getUri());
+            Resource predicate = Resource.uriRef(arg0.getPropertyUri());
+            Collection<String> values = arg0.getValues();
 
-	@Override
-	public Class<SetProperty> getActionType() {
-		return SetProperty.class;
-	}
+            //
+            ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
+            ts.setValues(subject, predicate, values);
+            ts.save();
+            ts.close();
 
-	@Override
-	public void rollback(SetProperty arg0, SetPropertyResult arg1,
-			ExecutionContext arg2) throws ActionException {
-		// TODO Auto-generated method stub
-		
-	}
+            // attempt to refetch the bean
+            try {
+                TupeloStore.refetch(subject);
+            } catch (Exception x) {
+                x.printStackTrace();
+            }
+
+            TupeloStore.getInstance().changed(subject.getString());
+
+            return new SetPropertyResult();
+        } catch (Exception x) {
+            log.error("Error setting metadata on " + arg0.getUri(), x);
+            throw new ActionException("failed", x);
+        }
+    }
+
+    @Override
+    public Class<SetProperty> getActionType() {
+        return SetProperty.class;
+    }
+
+    @Override
+    public void rollback(SetProperty arg0, SetPropertyResult arg1,
+            ExecutionContext arg2) throws ActionException {
+        // TODO Auto-generated method stub
+
+    }
 
 }

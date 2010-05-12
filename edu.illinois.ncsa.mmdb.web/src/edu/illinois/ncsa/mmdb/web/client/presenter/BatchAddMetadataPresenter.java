@@ -28,7 +28,7 @@ public class BatchAddMetadataPresenter extends EditableUserMetadataPresenter {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    GWT.log("Failed tagging resource", caught);
+                    GWT.log("Failed modifying resource", caught);
                     editDisplay.onFailure();
                     done.setFailure(dataset, caught);
                     if (done.readyToFire()) {
@@ -38,7 +38,7 @@ public class BatchAddMetadataPresenter extends EditableUserMetadataPresenter {
 
                 @Override
                 public void onSuccess(SetPropertyResult result) {
-                    GWT.log("Resource successfully tagged", null);
+                    GWT.log("Resource successfully modified", null);
                     editDisplay.onSuccess();
                     done.addSuccess(dataset);
                     if (done.readyToFire()) {

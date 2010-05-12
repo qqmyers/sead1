@@ -40,6 +40,7 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -57,7 +58,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -405,7 +406,7 @@ public class LicenseWidget extends Composite {
 
         final BatchCompletedEvent done = new BatchCompletedEvent();
         // fix me modify the bat
-        service.execute(new SetLicense(resources, license), new AsyncCallback<EmptyResult>() {
+        service.execute(new SetLicense(resources, license), new AsyncCallback<BatchResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Error setting license", caught);
@@ -420,9 +421,12 @@ public class LicenseWidget extends Composite {
             }
 
             @Override
-            public void onSuccess(EmptyResult result) {
-                for (String r : resources ) {
+            public void onSuccess(BatchResult result) {
+                for (String r : result.getSuccesses() ) {
                     done.addSuccess(r);
+                }
+                for (Map.Entry<String, String> failure : result.getFailures().entrySet() ) {
+                    done.setFailure(failure.getKey(), failure.getValue());
                 }
                 if (eventBus != null) {
                     eventBus.fireEvent(done);

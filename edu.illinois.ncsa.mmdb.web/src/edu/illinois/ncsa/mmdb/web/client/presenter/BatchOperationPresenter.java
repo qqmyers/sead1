@@ -67,9 +67,9 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
         return false;
     }
 
-    public BatchOperationPresenter(final MyDispatchAsync dispatch, final HandlerManager eventBus, final Display display) {
+    public BatchOperationPresenter(final MyDispatchAsync theDispatch, final HandlerManager eventBus, final Display display) {
         super(display, eventBus);
-        this.dispatch = dispatch;
+        this.dispatch = theDispatch;
         // selected dataset
         final UserSessionState sessionState = MMDB.getSessionState();
         final int nSelected = sessionState.getSelectedDatasets().size();
@@ -86,7 +86,7 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                     public void onConfirm(ConfirmEvent event) {
                         final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "deleted");
                         for (final String dataset : selectedDatasets ) {
-                            MMDB.dispatchAsync.execute(new DeleteDataset(dataset), new AsyncCallback<DeleteDatasetResult>() {
+                            dispatch.execute(new DeleteDataset(dataset), new AsyncCallback<DeleteDatasetResult>() {
                                 public void onFailure(Throwable caught) {
                                     GWT.log("Error deleting dataset", caught);
                                     done.setFailure(dataset, "not deleted: " + caught.getMessage());
@@ -98,7 +98,7 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                                 public void onSuccess(DeleteDatasetResult result) {
                                     // FIXME what to do?
                                     DatasetDeletedEvent dde = new DatasetDeletedEvent(dataset);
-                                    MMDB.eventBus.fireEvent(dde);
+                                    eventBus.fireEvent(dde);
                                     done.addSuccess(dataset);
                                     if (done.readyToFire()) {
                                         eventBus.fireEvent(done);
@@ -178,13 +178,13 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 if (selectionEmpty()) {
                     return;
                 }
-                final AddToCollectionDialog atc = new AddToCollectionDialog(MMDB.dispatchAsync, title("Add %s to collection"));
+                final AddToCollectionDialog atc = new AddToCollectionDialog(dispatch, title("Add %s to collection"));
                 atc.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
                         final String collectionUri = atc.getSelectedValue();
                         final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
                         final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "added");
-                        MMDB.dispatchAsync.execute(new AddToCollection(collectionUri, selectedDatasets),
+                        dispatch.execute(new AddToCollection(collectionUri, selectedDatasets),
                                 new AsyncCallback<AddToCollectionResult>() {
 
                             @Override
@@ -288,7 +288,7 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
             batchCompletedHandler = new BatchCompletedHandler() {
                 @Override
                 public void onBatchCompleted(BatchCompletedEvent event) {
-                    String failureClause = event.getFailures().size() > 0 ? " (" + event.getFailures().size() + " failure(s))" : "";
+                    String failureClause = event.getFailures().size() > 0 ? " (" + event.getFailures().size() + " errors(s))" : "";
                     String content = title("%s " + event.getActionVerb() + failureClause, event.getSuccesses().size());
                     ConfirmDialog d = new ConfirmDialog("Action complete", content, false);
                     d.getOkText().setText("OK");

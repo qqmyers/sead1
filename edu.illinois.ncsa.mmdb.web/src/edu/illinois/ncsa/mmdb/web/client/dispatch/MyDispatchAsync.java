@@ -50,6 +50,8 @@ import net.customware.gwt.dispatch.shared.Result;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
+
 /**
  * Default dispatcher.
  * 
@@ -66,6 +68,12 @@ public class MyDispatchAsync implements DispatchAsync {
     @Override
     public <A extends Action<R>, R extends Result> void execute(final A action,
             final AsyncCallback<R> callback) {
+
+        // if the action requires authorization, set the user to the currently-logged-in user
+        if (action instanceof AuthorizedAction<?>) {
+            AuthorizedAction<?> authzAction = (AuthorizedAction<?>) action;
+            authzAction.setUser(MMDB.getUsername());
+        }
 
         realService.execute(action, new AsyncCallback<Result>() {
 

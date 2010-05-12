@@ -51,6 +51,7 @@ import org.tupeloproject.rdf.terms.Rdf;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
+import edu.illinois.ncsa.mmdb.web.server.AccessControl;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
@@ -61,42 +62,46 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  * 
  */
 public class DeleteDatasetHandler implements
-		ActionHandler<DeleteDataset, DeleteDatasetResult> {
+        ActionHandler<DeleteDataset, DeleteDatasetResult> {
 
-	/** Commons logging **/
-	private static Log log = LogFactory.getLog(DeleteDatasetHandler.class);
-	
-	@Override
-	public DeleteDatasetResult execute(DeleteDataset arg0, ExecutionContext arg1)
-			throws ActionException {
-		String datasetUri = arg0.getUri();
-		try {
-			TupeloStore.getInstance().getContext().addTriple(
-					Resource.uriRef(datasetUri), DcTerms.IS_REPLACED_BY, Rdf.NIL);
-			TupeloStore.getInstance().deleted(datasetUri);
-			log.debug("Dataset deleted" + datasetUri);
-			return new DeleteDatasetResult(true);
-		} catch (OperatorException e) {
-			log.error("Error deleting dataset " + datasetUri, e);
-			return new DeleteDatasetResult(false);
-		}
-	}
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog(DeleteDatasetHandler.class);
 
-	@Override
-	public Class<DeleteDataset> getActionType() {
-		return DeleteDataset.class;
-	}
+    @Override
+    public DeleteDatasetResult execute(DeleteDataset arg0, ExecutionContext arg1)
+            throws ActionException {
+        String datasetUri = arg0.getUri();
+        // check for authorization
+        if (!AccessControl.isAdmin(arg0.getUser()) && !AccessControl.isCreator(arg0.getUser(), datasetUri)) {
+            throw new ActionException("Unauthorized");
+        }
+        try {
+            TupeloStore.getInstance().getContext().addTriple(
+                    Resource.uriRef(datasetUri), DcTerms.IS_REPLACED_BY, Rdf.NIL);
+            TupeloStore.getInstance().deleted(datasetUri);
+            log.debug("Dataset deleted" + datasetUri);
+            return new DeleteDatasetResult(true);
+        } catch (OperatorException e) {
+            log.error("Error deleting dataset " + datasetUri, e);
+            return new DeleteDatasetResult(false);
+        }
+    }
 
-	@Override
-	public void rollback(DeleteDataset arg0, DeleteDatasetResult arg1,
-			ExecutionContext arg2) throws ActionException {
-		String datasetUri = arg0.getUri();
-		try {
-			TupeloStore.getInstance().getContext().removeTriple(
-					Resource.uriRef(datasetUri), DcTerms.IS_REPLACED_BY, Rdf.NIL);
-		} catch (OperatorException e) {
-			throw new ActionException("unable to undelete dataset "
-					+ datasetUri, e);
-		}
-	}
+    @Override
+    public Class<DeleteDataset> getActionType() {
+        return DeleteDataset.class;
+    }
+
+    @Override
+    public void rollback(DeleteDataset arg0, DeleteDatasetResult arg1,
+            ExecutionContext arg2) throws ActionException {
+        String datasetUri = arg0.getUri();
+        try {
+            TupeloStore.getInstance().getContext().removeTriple(
+                    Resource.uriRef(datasetUri), DcTerms.IS_REPLACED_BY, Rdf.NIL);
+        } catch (OperatorException e) {
+            throw new ActionException("unable to undelete dataset "
+                    + datasetUri, e);
+        }
+    }
 }

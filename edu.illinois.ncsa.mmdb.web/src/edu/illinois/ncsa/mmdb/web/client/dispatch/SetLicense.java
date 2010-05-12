@@ -45,8 +45,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.customware.gwt.dispatch.shared.Action;
-
 /**
  * Retrieve license for a particular resource.
  * 
@@ -54,7 +52,7 @@ import net.customware.gwt.dispatch.shared.Action;
  * 
  */
 @SuppressWarnings("serial")
-public class SetLicense implements Action<EmptyResult> {
+public class SetLicense extends AuthorizedAction<BatchResult> {
     Collection<String>    resources;
     private LicenseResult license;
 
