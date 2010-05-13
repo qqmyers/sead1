@@ -48,37 +48,40 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class DerivedDatasetsWidget extends Composite {
-	FlowPanel mainContainer;
-	FlexTable previews;
-	private final Label titleLabel;
+    FlowPanel           mainContainer;
+    FlexTable           previews;
+    private final Label titleLabel;
 
-	int n = 1;
-	
-	public DerivedDatasetsWidget() {
-		mainContainer = new FlowPanel();
-		mainContainer.addStyleName("datasetRightColSection");
-		
-		titleLabel = new Label("Derived from");
-		titleLabel.addStyleName("datasetRightColHeading");
-		mainContainer.add(titleLabel);
-		initWidget(mainContainer);
+    int                 n = 0;
 
-		previews = new FlexTable();
-		previews.setWidth("150px");
-		mainContainer.add(previews);
-	}
+    public DerivedDatasetsWidget() {
+        mainContainer = new FlowPanel();
+        mainContainer.addStyleName("datasetRightColSection");
 
-	public void removeAllDatasets() {
-		previews.removeAllRows();
-	}
-	
-	public void addDataset(DatasetBean ds) {
-		String url = "dataset?id="+ds.getUri();
-		PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url);
-		String title = ds.getTitle();
-		title = title.length() > 15 ? title.substring(0,15)+"..." : title;
-		Hyperlink link = new Hyperlink(title, url);
-		previews.setWidget(n++, 0, pw);
-		previews.setWidget(n++, 0, link);
-	}
+        titleLabel = new Label("Derived from");
+        titleLabel.addStyleName("datasetRightColHeading");
+        mainContainer.add(titleLabel);
+        initWidget(mainContainer);
+
+        previews = new FlexTable();
+        previews.setWidth("150px");
+        mainContainer.add(previews);
+    }
+
+    public void removeAllDatasets() {
+        previews.removeAllRows();
+    }
+
+    public void addDataset(DatasetBean ds) {
+        String url = "dataset?id=" + ds.getUri();
+        PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url);
+        String title = ds.getTitle();
+        title = title.length() > 15 ? title.substring(0, 15) + "..." : title;
+        Hyperlink link = new Hyperlink(title, url);
+        if (n > 0) {
+            previews.setWidget(n++, 0, new Label("which was derived from:"));
+        }
+        previews.setWidget(n++, 0, pw);
+        previews.setWidget(n++, 0, link);
+    }
 }
