@@ -39,6 +39,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
     protected final MyDispatchAsync dispatch;
     private int                     pageSize    = DynamicListView.DEFAULT_PAGE_SIZE;
     protected String                sortKey     = "date-desc";
+    protected String                viewTypePreference;
     protected String                viewType    = DynamicTableView.LIST_VIEW_TYPE;
     protected int                   numberOfPages;
     protected int                   currentPage = 1;
@@ -81,7 +82,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         super(display, eventBus);
         this.dispatch = dispatch;
 
-        changeViewType(DynamicTableView.LIST_VIEW_TYPE); // FIXME use a different default depending on what's being listed
+        changeViewType(MMDB.getSessionPreference(getViewTypePreference(), DynamicTableView.LIST_VIEW_TYPE));
 
         addHandler(RefreshEvent.TYPE, new RefreshHandler() {
             @Override
@@ -228,6 +229,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
     protected void changeViewType(String viewType) {
         this.viewType = viewType;
         display.setViewType(viewType);
+        MMDB.setSessionPreference(getViewTypePreference(), viewType);
         // unbind the existing presenter if any
         if (viewTypePresenter != null) {
             viewTypePresenter.unbind();
@@ -269,4 +271,6 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         }
     }
 
+    /** Override to return the view type preference key for this kind of table */
+    protected abstract String getViewTypePreference();
 }
