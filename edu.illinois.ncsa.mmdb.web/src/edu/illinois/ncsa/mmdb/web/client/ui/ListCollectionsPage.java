@@ -50,13 +50,14 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.PagingCollectionTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.PagingCollectionTableView;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
@@ -77,7 +78,6 @@ public class ListCollectionsPage extends Composite {
     private final FlowPanel       mainContainer;
     private final Label           noCollectionsLabel;
     private final FlowPanel       addCollectionWidget;
-    private FlexTable             collectionsTable;
     private TitlePanel            pageTitle;
 
     public ListCollectionsPage(MyDispatchAsync dispatchasync,
@@ -90,12 +90,12 @@ public class ListCollectionsPage extends Composite {
 
         mainContainer.add(createPageTitle());
 
-        noCollectionsLabel = new Label("No collections available.");
-        mainContainer.add(noCollectionsLabel);
-
         // add collection widget
         addCollectionWidget = createAddCollectionWidget();
         mainContainer.add(addCollectionWidget);
+
+        noCollectionsLabel = new Label("No collections available.");
+        mainContainer.add(noCollectionsLabel);
 
         retrieveCollections();
     }
@@ -109,10 +109,19 @@ public class ListCollectionsPage extends Composite {
         return pageTitle;
     }
 
+    /**
+     * Widget to create a new collection.
+     * 
+     * @return
+     */
     private FlowPanel createAddCollectionWidget() {
         FlowPanel addCollectionPanel = new FlowPanel();
+        Label createLabel = new Label("Create new collection: ");
+        createLabel.addStyleName("inline");
+        addCollectionPanel.add(createLabel);
         final WatermarkTextBox addCollectionBox = new WatermarkTextBox("",
                 "Collection name");
+        addCollectionBox.addStyleName("inline");
         addCollectionPanel.add(addCollectionBox);
         Button addButton = new Button("Add", new ClickHandler() {
 
@@ -121,13 +130,19 @@ public class ListCollectionsPage extends Composite {
                 createNewCollection(addCollectionBox.getText());
             }
         });
+        addButton.addStyleName("inline");
         addCollectionPanel.add(addButton);
+        SimplePanel clearBoth = new SimplePanel();
+        clearBoth.addStyleName("clearBoth");
+        addCollectionPanel.add(clearBoth);
         return addCollectionPanel;
     }
 
     /**
+     * Create new collection on the server.
      * 
      * @param text
+     *            name of collection
      */
     protected void createNewCollection(String text) {
 
@@ -137,16 +152,16 @@ public class ListCollectionsPage extends Composite {
         dispatchasync.execute(new AddCollection(collection, MMDB.getUsername()),
                 new AsyncCallback<AddCollectionResult>() {
 
-            @Override
-            public void onFailure(Throwable arg0) {
-                GWT.log("Failed creating new collection", arg0);
-            }
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        GWT.log("Failed creating new collection", arg0);
+                    }
 
-            @Override
-            public void onSuccess(AddCollectionResult arg0) {
-                retrieveCollections();
-            }
-        });
+                    @Override
+                    public void onSuccess(AddCollectionResult arg0) {
+                        retrieveCollections();
+                    }
+                });
     }
 
     /**
@@ -156,44 +171,34 @@ public class ListCollectionsPage extends Composite {
         dispatchasync.execute(new GetCollections(),
                 new AsyncCallback<GetCollectionsResult>() {
 
-            @Override
-            public void onFailure(Throwable arg0) {
-                // TODO Auto-generated method stub
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        GWT.log("Error getting collections", arg0);
+                    }
 
-            }
-
-            @Override
-            public void onSuccess(GetCollectionsResult arg0) {
-                showCollections(arg0.getCollections());
-            }
-        });
+                    @Override
+                    public void onSuccess(GetCollectionsResult arg0) {
+                        showCollections(arg0.getCollections());
+                    }
+                });
     }
 
     /**
+     * Draw table with list of collections.
      * 
      * @param collections
      */
     protected void showCollections(ArrayList<CollectionBean> collections) {
-        if (collections.size() > 0) {
-            if (collectionsTable == null) {
-                mainContainer.remove(noCollectionsLabel);
-                collectionsTable = new FlexTable();
-                collectionsTable.addStyleName("datasetTable");
-                mainContainer.insert(collectionsTable, 1);
-            }
-            int row = 0;
-            for (CollectionBean collection : collections ) {
-                Hyperlink link = new Hyperlink(collection.getTitle(),
-                        "collection?uri=" + collection.getUri());
-                collectionsTable.setWidget(row, 0, link);
-                collectionsTable.setText(row, 1, collection.getDescription());
-                if (collection.getCreationDate() != null) {
-                    collectionsTable.setText(row, 2, collection.getCreationDate()
-                            .toString());
-                }
-                row++;
-            }
-        }
+        mainContainer.remove(noCollectionsLabel);
+        PagingCollectionTableView view = new PagingCollectionTableView();
+        view.addStyleName("datasetTable");
+        PagingCollectionTablePresenter presenter = new PagingCollectionTablePresenter(
+                        view, eventBus);
+        presenter.bind();
+
+        view.setNumberOfPages(0);
+
+        mainContainer.add(view.asWidget());
     }
 
 }
