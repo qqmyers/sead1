@@ -41,9 +41,7 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -53,15 +51,18 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Tags;
+import org.tupeloproject.util.Bag;
+import org.tupeloproject.util.HashBag;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAllTags;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
+import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.TagBean;
-import edu.uiuc.ncsa.cet.bean.TagEventBean;
-import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
  * Return all tags in the system.
@@ -72,45 +73,57 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 public class GetAllTagsHandler implements ActionHandler<GetAllTags, GetTagsResult> {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(GetAllTags.class);
+    private static Log                     log = LogFactory.getLog(GetAllTags.class);
+    private static Memoized<GetTagsResult> cachedQuery;
+
+    public GetAllTagsHandler() {
+        super();
+        if (cachedQuery == null) {
+            cachedQuery = new Memoized<GetTagsResult>() {
+                @Override
+                public GetTagsResult computeValue() {
+                    Unifier u = new Unifier();
+                    u.setColumnNames("label", "resource");
+                    u.addPattern("resource", Tags.HAS_TAGGING_EVENT, "tagEvent");
+                    u.addPattern("tagEvent", Tags.HAS_TAG_OBJECT, "tag");
+                    u.addPattern("tag", Tags.HAS_TAG_TITLE, "label");
+
+                    // only count one tag per label per non-deleted resource
+                    Bag<String> tags = new HashBag<String>();
+                    Set<String> uniq = new HashSet<String>();
+                    try {
+                        for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "resource") ) {
+                            String label = row.get(0).getString();
+                            String resource = row.get(1).getString();
+                            String key = resource + " " + label;
+                            if (!uniq.contains(key)) {
+                                tags.add(label);
+                            }
+                            uniq.add(key);
+                        }
+                    } catch (OperatorException e) {
+                        log.error("Error getting tags", e);
+                    } catch (Exception e) {
+                        log.error("Error getting tags", e);
+                    }
+
+                    TreeMap<String, Integer> sortedTags = new TreeMap<String, Integer>();
+                    for (String tag : tags ) {
+                        sortedTags.put(tag, tags.getCardinality(tag));
+                    }
+
+                    return new GetTagsResult(sortedTags);
+                }
+            };
+            cachedQuery.setTtl(30 * 1000); // 30s
+        }
+    }
 
     @Override
     public GetTagsResult execute(GetAllTags arg0, ExecutionContext arg1)
             throws ActionException {
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
-        TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
-
-        TreeMap<String, Integer> tags = new TreeMap<String, Integer>();
-
-        Collection<TagEventBean> allTags = new HashSet<TagEventBean>();
-
-        try {
-            allTags = tebu.getAll();
-        } catch (OperatorException e) {
-            log.error("Error getting tags", e);
-        } catch (Exception e) {
-            log.error("Error getting tags", e);
-        }
-
-        Iterator<TagEventBean> iterator = allTags.iterator();
-        while (iterator.hasNext()) {
-            TagEventBean next = iterator.next();
-            Set<TagBean> tags2 = next.getTags();
-            Iterator<TagBean> iterator2 = tags2.iterator();
-            while (iterator2.hasNext()) {
-                TagBean next2 = iterator2.next();
-                String tagString = next2.getTagString();
-                if (tags.keySet().contains(tagString)) {
-                    Integer newValue = tags.get(tagString) + 1;
-                    tags.put(tagString, newValue);
-                } else {
-                    tags.put(tagString, 1);
-                }
-            }
-        }
-
-        return new GetTagsResult(tags);
+        return cachedQuery.getValue();
     }
 
     @Override
