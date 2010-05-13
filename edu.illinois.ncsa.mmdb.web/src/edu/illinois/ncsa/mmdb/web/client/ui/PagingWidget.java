@@ -122,11 +122,15 @@ public class PagingWidget extends Composite implements ClickHandler, HasValueCha
             for (int i = 1; i <= pad * 2 + 3; i++ ) {
                 pagePanel.add(pageNumberAnchor(i, i != p));
             }
-            pagePanel.add(new Label("..."));
+            Label lbl = new Label("...");
+            lbl.addStyleName("arrowCursor");
+            pagePanel.add(lbl);
             pagePanel.add(pageNumberAnchor(np, np != p));
         } else if (p + pad > np - 3) {
             pagePanel.add(pageNumberAnchor(1, 1 != p));
-            pagePanel.add(new Label("..."));
+            Label lbl = new Label("...");
+            lbl.addStyleName("arrowCursor");
+            pagePanel.add(lbl);
             for (int i = np - (pad * 2 + 2); i <= np; i++ ) {
                 pagePanel.add(pageNumberAnchor(i, i != p));
             }
