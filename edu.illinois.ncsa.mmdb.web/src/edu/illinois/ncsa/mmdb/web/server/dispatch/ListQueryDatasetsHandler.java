@@ -92,7 +92,7 @@ public class ListQueryDatasetsHandler implements
                 .getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0
                 .getOffset(), arg0.getInCollection(), arg0.getWithTag(), dbu));
 
-        queryResult.setTotalCount(TupeloStore.getInstance().countDatasets(arg0.getInCollection(), false));
+        queryResult.setTotalCount(TupeloStore.getInstance().countDatasets(arg0.getInCollection(), arg0.getWithTag(), false));
 
         return queryResult;
     }
