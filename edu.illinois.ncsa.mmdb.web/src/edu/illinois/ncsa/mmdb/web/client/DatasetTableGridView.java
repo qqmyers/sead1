@@ -145,6 +145,7 @@ public class DatasetTableGridView extends DatasetTableView {
         getCellFormatter().addStyleName(row * 2, col, "gridPreviewSmall");
         // title panel
         FlowPanel titlePanel = new FlowPanel();
+        titlePanel.addStyleName("dynamicGridElementTitle");
         titlePanel.add(checkBox);
         titlePanel.add(titleLabel);
         // clear both for IE

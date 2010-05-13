@@ -62,6 +62,8 @@ import edu.illinois.ncsa.mmdb.web.client.event.DeletedHandler;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 
 /**
+ * One single comment/annotation.
+ * 
  * @author Luigi Marini <lmarini@ncsa.uiuc.edu>
  * 
  */
@@ -90,7 +92,7 @@ public class AnnotationView extends Composite {
         flexCellFormatter = mainTable.getFlexCellFormatter();
 
         Anchor deleteButton = new Anchor("Delete");
-        deleteButton.addStyleName("datasetActionLink");
+        deleteButton.addStyleName("absoluteRight");
         deleteButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 ConfirmDialog confirm = new ConfirmDialog("Delete", "Are you sure you want to delete this comment?");

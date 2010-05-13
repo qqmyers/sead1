@@ -507,6 +507,10 @@ a:hover {
 	clear: both;
 }
 
+.borderDebug {
+	border: 1px solid red;
+}
+
 .borderDebug div {
 	border: 1px solid red;
 }
@@ -832,7 +836,6 @@ a:hover {
 }
 
 .absoluteRight {
-    margin-right: 20px;
     float: right;
 }
 
@@ -1051,4 +1054,10 @@ a:hover {
 .dynamicGridElement {
 	border: 1px solid #CCC;
 	margin: 10px;
+}
+
+.dynamicGridElementTitle {
+	width: 130px;
+	text-align: left;
+	vertical-align: middle;
 }
