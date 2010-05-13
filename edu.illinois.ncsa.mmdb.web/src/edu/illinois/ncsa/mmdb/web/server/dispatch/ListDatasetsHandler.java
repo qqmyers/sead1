@@ -55,6 +55,7 @@ import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.terms.Tags;
 import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tables;
 
@@ -87,7 +88,7 @@ public class ListDatasetsHandler implements
 
         ListDatasetsResult r = new ListDatasetsResult(listDatasets(arg0
                 .getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0
-                .getOffset(), arg0.getInCollection(), dbu));
+                .getOffset(), arg0.getInCollection(), arg0.getWithTag(), dbu));
 
         r.setDatasetCount(TupeloStore.getInstance().countDatasets(arg0.getInCollection(), false));
         return r;
@@ -104,12 +105,17 @@ public class ListDatasetsHandler implements
      * @throws OperatorException
      */
     private static Table<Resource> list(String orderBy, boolean desc,
-            int limit, int offset, String inCollection, DatasetBeanUtil dbu)
+            int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu)
             throws OperatorException {
         Unifier u = new Unifier();
         u.setColumnNames("s", "o");
         if (inCollection != null) {
             u.addPattern(Resource.uriRef(inCollection), DcTerms.HAS_PART, "s");
+        }
+        if (withTag != null) {
+            u.addPattern("s", Tags.HAS_TAGGING_EVENT, "_te");
+            u.addPattern("_te", Tags.HAS_TAG_OBJECT, "_to");
+            u.addPattern("_to", Tags.HAS_TAG_TITLE, Resource.literal(withTag)); // FIXME normalize?
         }
         u.addPattern("s", Rdf.TYPE, dbu.getType());
         u.addPattern("s", Resource.uriRef(orderBy), "o");
@@ -136,11 +142,11 @@ public class ListDatasetsHandler implements
      * @return
      */
     public static List<String> listDatasetUris(String orderBy, boolean desc,
-            int limit, int offset, String inCollection, DatasetBeanUtil dbu) {
+            int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu) {
         try {
             List<String> result = new LinkedList<String>();
             for (Resource r : Tables.getColumn(list(orderBy, desc, limit,
-                    offset, inCollection, dbu), 0) ) {
+                    offset, inCollection, withTag, dbu), 0) ) {
                 if (!result.contains(r.getString())) {
                     result.add(r.getString());
                 }
@@ -163,17 +169,17 @@ public class ListDatasetsHandler implements
      * @return
      */
     public static List<DatasetBean> listDatasets(String orderBy, boolean desc,
-            int limit, int offset, String inCollection, DatasetBeanUtil dbu) {
-        return listDatasets(orderBy, desc, limit, offset, inCollection, dbu, true);
+            int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu) {
+        return listDatasets(orderBy, desc, limit, offset, inCollection, withTag, dbu, true);
     }
 
     public static List<DatasetBean> listDatasets(final String orderBy, final boolean desc,
-            final int limit, final int offset, final String inCollection, final DatasetBeanUtil dbu, boolean prefetch) {
+            final int limit, final int offset, final String inCollection, final String withTag, final DatasetBeanUtil dbu, boolean prefetch) {
         try {
             List<String> uris;
             long then = System.currentTimeMillis(); //
             try {
-                uris = listDatasetUris(orderBy, desc, limit, offset, inCollection, dbu);
+                uris = listDatasetUris(orderBy, desc, limit, offset, inCollection, withTag, dbu);
             } catch (Exception x) {
                 log.error("unable to list datasets", x);
                 throw x;
@@ -196,11 +202,11 @@ public class ListDatasetsHandler implements
                             List<String> previewsToFetch = new LinkedList<String>();
                             // prefetch 1 more pages in each direction
                             for (int i = 1; i <= 1; i++ ) {
-                                for (String ds : listDatasetUris(orderBy, desc, limit, offset + (limit * i), inCollection, dbu) ) {
+                                for (String ds : listDatasetUris(orderBy, desc, limit, offset + (limit * i), inCollection, withTag, dbu) ) {
                                     previewsToFetch.add(ds);
                                 }
                                 if (offset - (limit * i) > 0) {
-                                    for (String ds : listDatasetUris(orderBy, desc, limit, offset - (limit * i), inCollection, dbu) ) {
+                                    for (String ds : listDatasetUris(orderBy, desc, limit, offset - (limit * i), inCollection, withTag, dbu) ) {
                                         previewsToFetch.add(ds);
                                     }
                                 }

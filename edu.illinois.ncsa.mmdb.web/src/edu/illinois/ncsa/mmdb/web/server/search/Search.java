@@ -57,46 +57,46 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
  * @author Joe Futrelle
  */
 public class Search extends SearchableTextIndex<String> {
-	
-	@Override
-	public Iterable<Hit> search(String searchString) {
-		// here we just list datasets
-		return search(searchString, 30, 0);
-	}
 
-	@Override
-	public Iterable<Hit> search(String searchString, int limit) {
-		// TODO Auto-generated method stub
-		return search(searchString, limit, 0);
-	}
+    @Override
+    public Iterable<Hit> search(String searchString) {
+        // here we just list datasets
+        return search(searchString, 30, 0);
+    }
 
-	@Override
-	public Iterable<Hit> search(String searchString, int limit, int offset) {
-		// TODO Auto-generated method stub
-		List<Hit> result = new LinkedList<Hit>();
-		// TODO don't rely on ListDatasetsHandler, move that impl code into a common class
-		DatasetBeanUtil dbu = new DatasetBeanUtil(TupeloStore.getInstance().getBeanSession());
-		for(String uri : ListDatasetsHandler.listDatasetUris(Dc.DATE.getString(), true, limit, offset, null, dbu)) {
-			result.add(new StringHit(uri));
-		}
-		return result;
-	}
+    @Override
+    public Iterable<Hit> search(String searchString, int limit) {
+        // TODO Auto-generated method stub
+        return search(searchString, limit, 0);
+    }
 
-	@Override
-	public void deindex(String id) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public Iterable<Hit> search(String searchString, int limit, int offset) {
+        // TODO Auto-generated method stub
+        List<Hit> result = new LinkedList<Hit>();
+        // TODO don't rely on ListDatasetsHandler, move that impl code into a common class
+        DatasetBeanUtil dbu = new DatasetBeanUtil(TupeloStore.getInstance().getBeanSession());
+        for (String uri : ListDatasetsHandler.listDatasetUris(Dc.DATE.getString(), true, limit, offset, null, null, dbu) ) {
+            result.add(new StringHit(uri));
+        }
+        return result;
+    }
 
-	@Override
-	public void index(String id, String text) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void deindex(String id) {
+        // TODO Auto-generated method stub
 
-	@Override
-	public Iterator<String> iterator() throws UnsupportedOperationException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    }
+
+    @Override
+    public void index(String id, String text) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Iterator<String> iterator() throws UnsupportedOperationException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
