@@ -170,7 +170,7 @@ public class TagsWidget extends Composite {
         if (!tagsShown.contains(tag)) {
             final int row = tagsPanel.getRowCount();
             tagsPanel.setWidget(row, 0, tagHyperlink(tag));
-            Anchor delete = new Anchor("delete");
+            Anchor delete = new Anchor("Delete");
             delete.addStyleName("deleteLink");
             delete.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
