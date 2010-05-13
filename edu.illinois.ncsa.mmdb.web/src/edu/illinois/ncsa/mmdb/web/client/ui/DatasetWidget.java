@@ -313,7 +313,7 @@ public class DatasetWidget extends Composite {
         typeLabel.addStyleName("datasetRightColText");
 
         String dateString = result.getDataset().getDate() != null ? DATE_TIME_FORMAT.format(result.getDataset().getDate()) : "";
-        Label dateLabel = new Label("Date: " + dateString);
+        Label dateLabel = new Label("Uploaded: " + dateString);
         dateLabel.addStyleName("datasetRightColText");
 
         final Label likeCount = new Label();
