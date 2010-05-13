@@ -3,7 +3,6 @@ package edu.illinois.ncsa.mmdb.web.client.presenter;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasValue;
 
@@ -87,7 +86,7 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
                 }
             }
         });
-        fetchDataset(nUploaded, uri);
+        fetchDataset(ix, uri);
         nUploaded++;
     }
 
@@ -96,7 +95,6 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
             public void execute() {
                 dispatch.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
                     public void onFailure(Throwable caught) {
-                        Window.alert("fileUploaded dispatch failed: " + caught.getMessage()); // FIXME
                     }
 
                     public void onSuccess(GetDatasetResult result) {
@@ -108,8 +106,6 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
     }
 
     @Override
-    public void bind() {
-        // TODO Auto-generated method stub
-
+    public void unbind() {
     }
 }

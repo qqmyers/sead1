@@ -90,7 +90,7 @@ public class ListDatasetsHandler implements
                 .getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0
                 .getOffset(), arg0.getInCollection(), arg0.getWithTag(), dbu));
 
-        r.setDatasetCount(TupeloStore.getInstance().countDatasets(arg0.getInCollection(), false));
+        r.setDatasetCount(TupeloStore.getInstance().countDatasets(arg0.getInCollection(), arg0.getWithTag(), false));
         return r;
     }
 

@@ -74,6 +74,7 @@ import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.terms.Tags;
 import org.tupeloproject.rdf.xml.RdfXml;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
@@ -519,31 +520,44 @@ public class TupeloStore {
     }
 
     public int countDatasets(final String inCollection, boolean force) {
-        String key = inCollection == null ? "all" : inCollection;
+        return countDatasets(inCollection, null, force);
+    }
+
+    public int countDatasets(final String inCollection, final String withTag, boolean force) {
+        String key = (inCollection == null ? "noCollection" : inCollection) + " " + (withTag == null ? "noTag" : withTag);
         Memoized<Integer> count = datasetCount.get(key);
         if (count == null) {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
                     {
-                        return countDatasetsInCollection(inCollection);
-                    }
+                    return countDatasetsInCollectionWithTag(inCollection, withTag);
+                }
             };
-            count.setTtl(120000);
+            if (inCollection != null || withTag != null) {
+                count.setTtl(10000);
+            } else {
+                count.setTtl(120000);
+            }
             datasetCount.put(key, count);
         }
         return count.getValue(force);
     }
 
-    private int countDatasetsInCollection(String inCollection) {
+    private int countDatasetsInCollectionWithTag(String inCollection, String withTag) {
         int datasetCount;
         try {
             DatasetBeanUtil dbu = new DatasetBeanUtil(getBeanSession());
-            log.debug("counting datasets " + (inCollection != null ? "in collection " + inCollection : "") + "...");
+            log.debug("counting datasets " + (inCollection != null ? "in collection " + inCollection : "") + (withTag != null ? "with tag " + withTag : "") + "...");
             Unifier u = new Unifier();
             u.setColumnNames("d");
             u.addPattern("d", Rdf.TYPE, dbu.getType());
             if (inCollection != null) {
                 u.addPattern(Resource.uriRef(inCollection), DcTerms.HAS_PART, "d");
+            }
+            if (withTag != null) {
+                u.addPattern("d", Tags.HAS_TAGGING_EVENT, "tagEvent");
+                u.addPattern("tagEvent", Tags.HAS_TAG_OBJECT, "tag");
+                u.addPattern("tag", Tags.HAS_TAG_TITLE, Resource.literal(withTag));
             }
             long now = System.currentTimeMillis();
             datasetCount = unifyExcludeDeleted(u, "d").getRows().size();

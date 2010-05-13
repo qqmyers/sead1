@@ -169,7 +169,7 @@ public class ContextSetupListener implements ServletContextListener {
         timer.schedule(new TimerTask() {
             @Override
             public void run()
-            {
+                {
                 TupeloStore.getInstance().countDatasets(null, true);
             }
 
@@ -181,7 +181,7 @@ public class ContextSetupListener implements ServletContextListener {
             public void run() {
                 TupeloStore.getInstance().indexFullTextAll();
             }
-        }, 10 * 1000, 60 * 60 * 1000);
+        }, 30 * 60 * 1000, 60 * 60 * 1000);
 
         timer.schedule(new TimerTask() {
             public void run() {
