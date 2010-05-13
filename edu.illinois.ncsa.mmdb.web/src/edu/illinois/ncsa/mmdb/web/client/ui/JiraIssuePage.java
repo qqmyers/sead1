@@ -47,8 +47,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -93,9 +94,10 @@ public class JiraIssuePage extends Page {
 
         final TextArea txtDescription = new TextArea();
         txtDescription.setWidth("400px");
+        txtDescription.setHeight("100px");
         table.setWidget(1, 1, txtDescription);
 
-        final Anchor submit = new Anchor("Submit");
+        final Button submit = new Button("Submit");
         submit.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -133,7 +135,8 @@ public class JiraIssuePage extends Page {
                 });
             }
         });
-        table.setWidget(2, 0, submit);
+        table.getCellFormatter().setHorizontalAlignment(2, 1, HasHorizontalAlignment.ALIGN_CENTER);
+        table.setWidget(2, 1, submit);
     }
 
     @Override
