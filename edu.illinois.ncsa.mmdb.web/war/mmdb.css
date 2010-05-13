@@ -93,8 +93,7 @@ table td, select {
  * Links
  * ---------------------------------------------------------------------- */
 a, a:link, a:visited, a:hover, a:active {
-	color: deeppink;
-	font-family: "Comic Sans MS", sans-serif;
+	color: #4444DD;
 	text-decoration: none;
 }
 
