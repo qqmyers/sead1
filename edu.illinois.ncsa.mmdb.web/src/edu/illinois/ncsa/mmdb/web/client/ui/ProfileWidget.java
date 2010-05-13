@@ -91,6 +91,7 @@ public class ProfileWidget extends Composite {
                         showFeedbackMessage("Name successfully changed");
                         user.setName(newname);
                         table.setText(row, 1, newname);
+                        MMDB.loginStatusWidget.login(newname);
                     }
                 });
 
