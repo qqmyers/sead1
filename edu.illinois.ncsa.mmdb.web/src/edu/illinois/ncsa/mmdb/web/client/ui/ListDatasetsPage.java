@@ -43,18 +43,9 @@ public class ListDatasetsPage extends Page {
         Anchor rss = new Anchor();
         rss.setHref("rss.xml");
         rss.addStyleName("rssIcon");
-        rss.addStyleName("titlePanelRightElement");
         DOM.setElementAttribute(rss.getElement(), "type", "application/rss+xml");
         rss.setHTML("<img src='./images/rss_icon.gif' border='0px' id='rssIcon' class='navMenuLink'>"); // FIXME hack
         rightHeader.add(rss);
-
-        // paging table
-        //                PagingDatasetTableView pagingView = new PagingDatasetTableView();
-        //                pagingView.addStyleName("datasetTable");
-        //                PagingDatasetTablePresenter datasetTablePresenter = new PagingDatasetTablePresenter(
-        //                        pagingView, eventBus);
-        //                datasetTablePresenter.bind();
-        //                mainLayoutPanel.add(pagingView.asWidget());
 
         DynamicTableView dynamicTableView = new DynamicTableView();
         final DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatch, eventBus, dynamicTableView);
@@ -67,6 +58,7 @@ public class ListDatasetsPage extends Page {
             }
         };
         vp.add(dynamicTableView.asWidget());
+        vp.addStyleName("tableCenter");
         mainLayoutPanel.add(vp);
 
         dynamicTablePresenter.refresh();

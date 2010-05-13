@@ -25,6 +25,26 @@ table td, select {
 }
 
 /* ----------------------------------------------------------------------
+ * Helper styles
+ * ---------------------------------------------------------------------- */
+.anchorBlock {
+	display: block;
+}
+
+.imageNoBorder {
+	border: 0px;
+}
+
+.multiAnchor {
+	padding-left: 5px;
+}
+
+.tableCenter {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* ----------------------------------------------------------------------
  * Overriding GWT styles
  * ---------------------------------------------------------------------- */
 .gwt-DisclosurePanel-closed {
@@ -200,21 +220,6 @@ a:hover {
 .datasetRightColText {
 	vertical-align: middle;
 	padding-bottom: 5px;
-}
-
-/* ----------------------------------------------------------------------
- * Helper sytels
- * ---------------------------------------------------------------------- */
-.anchorBlock {
-	display: block;
-}
-
-.imageNoBorder {
-	border: 0px;
-}
-
-.multiAnchor {
-	padding-left: 5px;
 }
 
 /* ----------------------------------------------------------------------
