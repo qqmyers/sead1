@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="mmdb" default="war" basedir=".">
+<project name="medici" default="war" basedir=".">
 
 	<property environment="env" />
 
