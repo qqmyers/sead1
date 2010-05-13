@@ -1,5 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.client.dnd;
 
+import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -114,6 +115,10 @@ public class DropUploader extends JApplet implements DropTargetListener {
 
 		setVisible(true);
 		
+		window = JSObject.getWindow(this); // will this work?
+		if(window == null) {
+			log("warn: window is null in init()");
+		}
 		// MMDB-576 applet to javascript communication
 //		callJavascript("Applet started");
 	}
@@ -309,11 +314,12 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			window = JSObject.getWindow(this);
 		}
 		if(window == null) {
-			log("error: unable to call javascript (JSObject.getWindow(this) returned null)");
+			log("error: unable to call javascript "+functionName+" (JSObject.getWindow(this) returned null)");
 			return;
 		}
 		synchronized(window) {
 			try {
+				log("calling javascript "+functionName+" with args "+args);
 				window.call(functionName,args);
 			} catch(JSException x) {
 				x.printStackTrace();
