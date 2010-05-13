@@ -102,6 +102,7 @@ public class ProfileWidget extends Composite {
         buttons.add(ok);
 
         Anchor cancel = new Anchor("Cancel");
+        cancel.addStyleName("multiAnchor");
         cancel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
