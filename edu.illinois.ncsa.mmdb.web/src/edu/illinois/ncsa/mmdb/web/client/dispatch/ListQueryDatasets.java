@@ -13,6 +13,7 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 public class ListQueryDatasets extends ListQuery<DatasetBean> {
 
     private String inCollection;
+    private String withTag;
 
     public void setInCollection(String inCollection) {
         this.inCollection = inCollection;
@@ -20,6 +21,14 @@ public class ListQueryDatasets extends ListQuery<DatasetBean> {
 
     public String getInCollection() {
         return inCollection;
+    }
+
+    public void setWithTag(String withTag) {
+        this.withTag = withTag;
+    }
+
+    public String getWithTag() {
+        return withTag;
     }
 
 }

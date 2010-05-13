@@ -36,12 +36,10 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
-/**
- * 
- */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -58,35 +56,33 @@ import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Tags;
 import org.tupeloproject.util.Tuple;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTag;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryDatasetsForTag;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
 /**
- * Handler to retrieve datasets from repository tagged with a particular tag.
+ * Given a tag get all datasets tagged with it.
  * 
  * @author Luigi Marini
  * 
  */
-public class GetDatasetsByTagHandler implements
-        ActionHandler<GetTag, GetDatasetsResult> {
+public class ListQueryDatasetsForTagHandler implements
+        ActionHandler<ListQueryDatasetsForTag, ListQueryResult<DatasetBean>> {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(GetDatasetsByTagHandler.class);
+    private static Log log = LogFactory.getLog(ListQueryDatasetsForTagHandler.class);
 
     @Override
-    public GetDatasetsResult execute(GetTag action, ExecutionContext arg1)
+    public ListQueryResult<DatasetBean> execute(ListQueryDatasetsForTag action, ExecutionContext arg1)
             throws ActionException {
 
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-
         DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-
-        String tagName = action.getUri();
-
-        HashSet<DatasetBean> datasets = new HashSet<DatasetBean>();
+        String tagName = action.getTagName();
+        log.trace("Getting datasets tagged with " + tagName);
+        List<DatasetBean> datasets = new ArrayList<DatasetBean>();
 
         Unifier uf = new Unifier();
         uf.addPattern("dataset", Tags.HAS_TAGGING_EVENT, "event");
@@ -96,6 +92,7 @@ public class GetDatasetsByTagHandler implements
         uf.setColumnNames("dataset");
 
         try {
+            // TODO modifiy to support sorting and paging
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf, "dataset") ) {
                 if (row.get(0) != null) {
                     datasets.add(dbu.get(row.get(0)));
@@ -109,19 +106,23 @@ public class GetDatasetsByTagHandler implements
         log.debug("Found " + datasets.size() + " datasets with tag '"
                 + tagName + "'");
 
-        return new GetDatasetsResult(datasets);
+        ListQueryResult<DatasetBean> queryResult = new ListQueryResult<DatasetBean>();
+        queryResult.setResults(datasets);
+
+        queryResult.setTotalCount(datasets.size());
+
+        return queryResult;
     }
 
     @Override
-    public Class<GetTag> getActionType() {
-        return GetTag.class;
+    public Class<ListQueryDatasetsForTag> getActionType() {
+        return ListQueryDatasetsForTag.class;
     }
 
     @Override
-    public void rollback(GetTag arg0, GetDatasetsResult arg1,
+    public void rollback(ListQueryDatasetsForTag arg0, ListQueryResult<DatasetBean> arg1,
             ExecutionContext arg2) throws ActionException {
         // TODO Auto-generated method stub
 
     }
-
 }

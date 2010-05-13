@@ -55,6 +55,7 @@ import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.terms.Tags;
 import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tables;
 
@@ -69,6 +70,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
  * TODO Add comments
  * 
  * @author Joe Futrelle
+ * @author Luigi Marini
  * 
  */
 public class ListQueryDatasetsHandler implements
@@ -88,9 +90,10 @@ public class ListQueryDatasetsHandler implements
         ListQueryResult<DatasetBean> queryResult = new ListQueryResult<DatasetBean>();
         queryResult.setResults(listDatasets(arg0
                 .getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0
-                .getOffset(), arg0.getInCollection(), dbu));
+                .getOffset(), arg0.getInCollection(), arg0.getWithTag(), dbu));
 
         queryResult.setTotalCount(TupeloStore.getInstance().countDatasets(arg0.getInCollection(), false));
+
         return queryResult;
     }
 
@@ -105,12 +108,17 @@ public class ListQueryDatasetsHandler implements
      * @throws OperatorException
      */
     private static Table<Resource> list(String orderBy, boolean desc,
-            int limit, int offset, String inCollection, DatasetBeanUtil dbu)
+            int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu)
             throws OperatorException {
         Unifier u = new Unifier();
         u.setColumnNames("s", "o");
         if (inCollection != null) {
             u.addPattern(Resource.uriRef(inCollection), DcTerms.HAS_PART, "s");
+        }
+        if (withTag != null) {
+            u.addPattern("s", Tags.HAS_TAGGING_EVENT, "_te");
+            u.addPattern("_te", Tags.HAS_TAG_OBJECT, "_to");
+            u.addPattern("_to", Tags.HAS_TAG_TITLE, Resource.literal(withTag)); // FIXME normalize?
         }
         u.addPattern("s", Rdf.TYPE, dbu.getType());
         u.addPattern("s", Resource.uriRef(orderBy), "o");
@@ -137,11 +145,11 @@ public class ListQueryDatasetsHandler implements
      * @return
      */
     public static List<String> listDatasetUris(String orderBy, boolean desc,
-            int limit, int offset, String inCollection, DatasetBeanUtil dbu) {
+            int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu) {
         try {
             List<String> result = new LinkedList<String>();
             for (Resource r : Tables.getColumn(list(orderBy, desc, limit,
-                    offset, inCollection, dbu), 0) ) {
+                    offset, inCollection, withTag, dbu), 0) ) {
                 if (!result.contains(r.getString())) {
                     result.add(r.getString());
                 }
@@ -164,27 +172,24 @@ public class ListQueryDatasetsHandler implements
      * @return
      */
     public static List<DatasetBean> listDatasets(String orderBy, boolean desc,
-            int limit, int offset, String inCollection, DatasetBeanUtil dbu) {
-        return listDatasets(orderBy, desc, limit, offset, inCollection, dbu, true);
+            int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu) {
+        return listDatasets(orderBy, desc, limit, offset, inCollection, withTag, dbu, true);
     }
 
     public static List<DatasetBean> listDatasets(final String orderBy, final boolean desc,
-            final int limit, final int offset, final String inCollection, final DatasetBeanUtil dbu, boolean prefetch) {
+            final int limit, final int offset, final String inCollection, final String withTag, final DatasetBeanUtil dbu, boolean prefetch) {
         try {
             List<String> uris;
             long then = System.currentTimeMillis(); //
             try {
-                uris = listDatasetUris(orderBy, desc, limit, offset,
-                        inCollection, dbu);
+                uris = listDatasetUris(orderBy, desc, limit, offset, inCollection, withTag, dbu);
             } catch (Exception x) {
                 log.error("unable to list datasets", x);
                 throw x;
             }
             long between = System.currentTimeMillis();
             try {
-                BeanSession beanSession = TupeloStore.getInstance()
-                        .getBeanSession();
-                final List<DatasetBean> result = dbu.get(uris);
+                final List<DatasetBean> result = dbu.get(uris, true); // we know they're not deleted already, hence getDeleted=true
                 long now = System.currentTimeMillis();
                 log.debug("listed " + result.size() + " dataset(s) in "
                         + (now - then) + "ms (" + (between - then) + "/"
@@ -200,23 +205,22 @@ public class ListQueryDatasetsHandler implements
                             List<String> previewsToFetch = new LinkedList<String>();
                             // prefetch 1 more pages in each direction
                             for (int i = 1; i <= 1; i++ ) {
-                                for (String ds : listDatasetUris(orderBy, desc, limit, offset + (limit * i), inCollection, dbu) ) {
+                                for (String ds : listDatasetUris(orderBy, desc, limit, offset + (limit * i), inCollection, withTag, dbu) ) {
                                     previewsToFetch.add(ds);
                                 }
                                 if (offset - (limit * i) > 0) {
-                                    for (String ds : listDatasetUris(orderBy, desc, limit, offset - (limit * i), inCollection, dbu) ) {
+                                    for (String ds : listDatasetUris(orderBy, desc, limit, offset - (limit * i), inCollection, withTag, dbu) ) {
                                         previewsToFetch.add(ds);
                                     }
                                 }
                             }
-                            // now fetch their previews
+                            // now fetch their previews, so they'll be cached
                             for (String ds : previewsToFetch ) {
                                 TupeloStore.getInstance().getPreview(ds, GetPreviews.SMALL);
                             }
                             t.cancel();
                         }
                     }, 1000);
-                    // FIXME make sure the timer doesn't leak.
                 }
                 return result;
             } catch (OperatorException x) {
@@ -235,9 +239,9 @@ public class ListQueryDatasetsHandler implements
     }
 
     @Override
-    public void rollback(ListQueryDatasets arg0, ListQueryResult<DatasetBean> arg1,
-            ExecutionContext arg2) throws ActionException {
+    public void rollback(ListQueryDatasets arg0, ListQueryResult<DatasetBean> arg1, ExecutionContext arg2) throws ActionException {
         // TODO Auto-generated method stub
 
     }
+
 }

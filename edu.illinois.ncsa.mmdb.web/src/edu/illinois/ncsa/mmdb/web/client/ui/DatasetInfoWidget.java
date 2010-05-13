@@ -46,6 +46,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -53,9 +54,9 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
  * Small info widget for a dataset.
- *
+ * 
  * @author Luigi Marini
- *
+ * 
  */
 public class DatasetInfoWidget extends Composite {
 
@@ -68,13 +69,19 @@ public class DatasetInfoWidget extends Composite {
 
         PreviewWidget thumbnail = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri());
         thumbnail.setMaxWidth(100);
-        thumbnail.addStyleName("datasetInfoThumbnail");
-        mainPanel.add(thumbnail);
+        SimplePanel previewPanel = new SimplePanel();
+        previewPanel.addStyleName("datasetInfoThumbnail");
+        previewPanel.add(thumbnail);
+        mainPanel.add(previewPanel);
 
         FlowPanel descriptionPanel = new FlowPanel();
         descriptionPanel.addStyleName("datasetInfoDescription");
         descriptionPanel.add(new Hyperlink(dataset.getTitle(), "dataset?id=" + dataset.getUri()));
-        descriptionPanel.add(new Label(dataset.getCreator().getName() + " (" + dataset.getCreator().getEmail() + ")"));
+        if (dataset.getCreator().getName() != null) {
+            descriptionPanel.add(new Label(dataset.getCreator().getName()));
+        } else {
+            descriptionPanel.add(new Label("Contributor unknown"));
+        }
         descriptionPanel.add(new Label(DateTimeFormat.getLongDateFormat().format(dataset.getDate())));
         descriptionPanel.add(new Label(TextFormatter.humanBytes(dataset.getSize())));
         descriptionPanel.add(new Label(dataset.getMimeType()));

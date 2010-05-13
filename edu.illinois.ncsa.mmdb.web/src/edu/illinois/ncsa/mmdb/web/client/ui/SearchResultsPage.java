@@ -142,7 +142,7 @@ public class SearchResultsPage extends Page {
 
         final List<String> hits = result.getHits();
         for (final String hit : hits ) {
-            MMDB.dispatchAsync.execute(new GetDataset(hit),
+            dispatchAsync.execute(new GetDataset(hit),
                     new AsyncCallback<GetDatasetResult>() {
 
                         @Override

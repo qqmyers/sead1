@@ -926,6 +926,7 @@ a:hover {
 }
 
 .datasetInfoThumbnail {
+	width: 150px;
 	float: left;
 }
 

@@ -41,13 +41,8 @@ package edu.illinois.ncsa.mmdb.web.client;
 import java.util.Date;
 import java.util.Map;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
-import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -81,26 +76,27 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
     @Override
     protected HorizontalPanel createPagingPanel(int page, String sortKey,
             String viewType) {
-        HorizontalPanel panel = createPagingPanel(page);
-        panel.addStyleName("redBorder");
-        panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-
-        viewOptions = new LabeledListBox("View:");
-        viewOptions.addStyleName("pagingLabel");
-        viewOptions.addItem("List", "list");
-        viewOptions.addItem("Grid", "grid");
-        viewOptions.addItem("Flow", "flow");
-        viewOptions.setSelected(viewType);
-        addViewTypeControl(viewOptions);
-        panel.add(viewOptions);
-
-        addViewTypeChangeHandler(new ValueChangeHandler<String>() {
-            public void onValueChange(ValueChangeEvent<String> event) {
-                viewOptions.setSelected(event.getValue());
-            }
-        });
-        return panel;
+        //        HorizontalPanel panel = createPagingPanel(page);
+        //        panel.addStyleName("redBorder");
+        //        panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        //        panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        //
+        //        viewOptions = new LabeledListBox("View:");
+        //        viewOptions.addStyleName("pagingLabel");
+        //        viewOptions.addItem("List", "list");
+        //        viewOptions.addItem("Grid", "grid");
+        //        viewOptions.addItem("Flow", "flow");
+        //        viewOptions.setSelected(viewType);
+        //        addViewTypeControl(viewOptions);
+        //        panel.add(viewOptions);
+        //
+        //        addViewTypeChangeHandler(new ValueChangeHandler<String>() {
+        //            public void onValueChange(ValueChangeEvent<String> event) {
+        //                viewOptions.setSelected(event.getValue());
+        //            }
+        //        });
+        //        return panel;
+        return new HorizontalPanel();
     }
 
     @Override
