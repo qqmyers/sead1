@@ -609,6 +609,7 @@ a:hover {
 	margin-top: 10px;
 	margin-bottom: 20px;
 	padding: 0px;
+	width: 100%;
 }
 
 .tag {
@@ -880,7 +881,7 @@ a:hover {
 }
 
 .deleteLink {
-    color: gray;
+    color: gray !important;
     width: 30px;
     text-align: right;
 }
