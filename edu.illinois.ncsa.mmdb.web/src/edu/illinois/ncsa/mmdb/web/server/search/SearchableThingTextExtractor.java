@@ -279,22 +279,6 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
         return title + " " + e;
     }
 
-    /*
-    public static void main(String args[]) {
-    	String examples[] = new String[] {
-    			"zephyrObservationCar.jpg",
-    			"3934741243_ab09b6a208_o.jpg [Crop Tool.OutputImage]",
-    			"114_0145.MOV",
-    			"source-mosaic-14400x6150.jpg",
-    			"london_map1807_large.jpg",
-    			"france_louis_xi.jpg"
-    	};
-    	for(String title : examples) {
-    		System.out.println(expandTitle(title));
-    	}
-    }
-    */
-
     String title(CETBean bean) {
         return atomize(bean.getLabel());
     }

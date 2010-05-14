@@ -193,7 +193,7 @@ public class RestServlet extends AuthenticatedServlet {
         Enumeration headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String headerName = (String) headerNames.nextElement();
-            System.out.println(headerName + ": " + request.getHeader(headerName));
+            log.trace(headerName + ": " + request.getHeader(headerName));
         }
     }
 

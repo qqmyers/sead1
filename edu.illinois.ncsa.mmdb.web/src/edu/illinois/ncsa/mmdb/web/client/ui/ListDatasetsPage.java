@@ -60,8 +60,6 @@ public class ListDatasetsPage extends Page {
         vp.add(dynamicTableView.asWidget());
         vp.addStyleName("tableCenter");
         mainLayoutPanel.add(vp);
-
-        dynamicTablePresenter.refresh();
     }
 
     @Override

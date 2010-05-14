@@ -169,7 +169,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             RootPanel.get("mmdb-mainContainer").add(mainContainer);
 
             // log events
-            logEvent(eventBus);
+            //            logEvent(eventBus);
 
             eventBus.addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
 
