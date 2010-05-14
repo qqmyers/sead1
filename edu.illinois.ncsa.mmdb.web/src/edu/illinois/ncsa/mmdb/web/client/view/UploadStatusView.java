@@ -14,8 +14,10 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
@@ -31,13 +33,19 @@ import edu.illinois.ncsa.mmdb.web.client.ui.TagsWidget;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class UploadStatusView extends Composite implements Display {
+    VerticalPanel          thePanel;
+    HorizontalPanel        progressPanel;
     FlexTable              statusTable;
     Map<Integer, CheckBox> selectionCheckboxes;
 
     public UploadStatusView() {
+        thePanel = new VerticalPanel();
+        progressPanel = new HorizontalPanel();
+        thePanel.add(progressPanel);
         statusTable = new FlexTable();
         selectionCheckboxes = new HashMap<Integer, CheckBox>();
-        initWidget(statusTable);
+        thePanel.add(statusTable);
+        initWidget(thePanel);
     }
 
     @Override
@@ -55,7 +63,7 @@ public class UploadStatusView extends Composite implements Display {
     }
 
     @Override
-    public void onComplete(int ix, String uri) {
+    public void onComplete(int ix, String uri, int total) {
         Anchor anchor = new Anchor("View", "#dataset?id=" + uri);
         anchor.setTarget("_blank");
         CheckBox selectionCheckbox = new CheckBox();
@@ -63,6 +71,14 @@ public class UploadStatusView extends Composite implements Display {
         statusTable.setWidget(ix, 0, selectionCheckbox);
         statusTable.setWidget(ix, 1, anchor);
         statusTable.setWidget(ix, 3, new Label("Complete"));
+        //
+        if (total > 0) {
+            int n = ix + 1;
+            progressPanel.clear();
+            progressPanel.add(new ProgressBar((int) ((float) (n * 100) / (float) total)));
+            progressPanel.add(new Label((ix + 1) + " of " + total + " file(s) uploaded"));
+            progressPanel.setSpacing(20);
+        }
     }
 
     @Override

@@ -41,7 +41,7 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
 
         void onProgress(int ix, int percent);
 
-        void onComplete(int ix, String uri);
+        void onComplete(int ix, String uri, int total);
 
         void onPostComplete(int ix, DatasetBean dataset);
 
@@ -76,7 +76,7 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
 
     public void onComplete(final String uri) {
         final int ix = nUploaded;
-        display.onComplete(ix, uri);
+        display.onComplete(ix, uri, nDropped);
         display.getSelectionControl(ix).addValueChangeHandler(new DatasetSelectionCheckboxHandler(uri, eventBus));
         display.getSelectionControl(ix).setValue(true, true); // select, and fire the selection event
         addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
