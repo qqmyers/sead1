@@ -33,6 +33,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetsDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.AddToCollectionDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
@@ -97,12 +98,13 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                             public void onSuccess(BatchResult result) {
                                 for (String success : result.getSuccesses() ) {
                                     done.addSuccess(success);
+                                    eventBus.fireEvent(new DatasetUnselectedEvent(success));
                                 }
                                 for (Map.Entry<String, String> failureEntry : result.getFailures().entrySet() ) {
                                     done.setFailure(failureEntry.getKey(), failureEntry.getValue());
                                 }
                                 eventBus.fireEvent(done);
-                                // FIXME now make sure affected views refresh by firing a batch delete event
+                                eventBus.fireEvent(new DatasetsDeletedEvent(result.getSuccesses()));
                             }
                         });
                     }

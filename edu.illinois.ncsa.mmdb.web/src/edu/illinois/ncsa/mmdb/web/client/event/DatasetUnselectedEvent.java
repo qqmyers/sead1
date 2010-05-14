@@ -59,6 +59,17 @@ public class DatasetUnselectedEvent extends GwtEvent<DatasetUnselectedHandler> {
 
     private String                                              uri;
 
+    public DatasetUnselectedEvent() {
+    }
+
+    public DatasetUnselectedEvent(String uri) {
+        setUri(uri);
+    }
+
+    public DatasetUnselectedEvent(DatasetBean dataset) {
+        setDataset(dataset);
+    }
+
     @Override
     protected void dispatch(DatasetUnselectedHandler handler) {
         handler.onDatasetUnselected(this);

@@ -17,6 +17,8 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetsDeletedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetsDeletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.RefreshEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEventHandler;
@@ -117,11 +119,14 @@ public class DynamicListPresenter extends BasePresenter<DynamicListPresenter.Dis
             }
         });
 
-        addHandler(DatasetDeletedEvent.TYPE, new DatasetDeletedHandler() {
+        addHandler(DatasetsDeletedEvent.TYPE, new DatasetsDeletedHandler() {
             @Override
-            public void onDeleteDataset(DatasetDeletedEvent event) {
-                if (items.containsKey(event.getDatasetUri())) {
-                    eventBus.fireEvent(new RefreshEvent());
+            public void onDatasetsDeleted(DatasetsDeletedEvent event) {
+                for (String datasetUri : event.getUris() ) {
+                    if (items.containsKey(datasetUri)) {
+                        eventBus.fireEvent(new RefreshEvent());
+                        return;
+                    }
                 }
             }
         });
