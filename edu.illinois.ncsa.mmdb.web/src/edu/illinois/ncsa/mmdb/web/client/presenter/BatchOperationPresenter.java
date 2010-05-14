@@ -4,6 +4,7 @@
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -18,8 +19,8 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollectionResult;
@@ -28,7 +29,6 @@ import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
-import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
@@ -85,28 +85,26 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 cd.addConfirmHandler(new ConfirmHandler() {
                     public void onConfirm(ConfirmEvent event) {
                         final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "deleted");
-                        for (final String dataset : selectedDatasets ) {
-                            dispatch.execute(new DeleteDataset(dataset), new AsyncCallback<DeleteDatasetResult>() {
-                                public void onFailure(Throwable caught) {
-                                    GWT.log("Error deleting dataset", caught);
-                                    done.setFailure(dataset, "not deleted: " + caught.getMessage());
-                                    if (done.readyToFire()) {
-                                        eventBus.fireEvent(done);
-                                    }
+                        dispatch.execute(new DeleteDatasets(selectedDatasets), new AsyncCallback<BatchResult>() {
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Error deleting datasets", caught);
+                                for (String datasetUri : selectedDatasets ) {
+                                    done.setFailure(datasetUri, "not deleted: " + caught.getMessage());
                                 }
+                                eventBus.fireEvent(done);
+                            }
 
-                                public void onSuccess(DeleteDatasetResult result) {
-                                    // FIXME what to do?
-                                    DatasetDeletedEvent dde = new DatasetDeletedEvent(dataset);
-                                    eventBus.fireEvent(dde);
-                                    done.addSuccess(dataset);
-                                    if (done.readyToFire()) {
-                                        eventBus.fireEvent(done);
-                                    }
-                                    unselect(dataset);
+                            public void onSuccess(BatchResult result) {
+                                for (String success : result.getSuccesses() ) {
+                                    done.addSuccess(success);
                                 }
-                            });
-                        }
+                                for (Map.Entry<String, String> failureEntry : result.getFailures().entrySet() ) {
+                                    done.setFailure(failureEntry.getKey(), failureEntry.getValue());
+                                }
+                                eventBus.fireEvent(done);
+                                // FIXME now make sure affected views refresh by firing a batch delete event
+                            }
+                        });
                     }
                 });
             }

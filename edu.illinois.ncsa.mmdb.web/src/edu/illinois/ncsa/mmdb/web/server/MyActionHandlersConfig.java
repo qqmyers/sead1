@@ -53,6 +53,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ContextConvertHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteAnnotationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.EditRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ExtractionServiceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAllTagsHandler;
@@ -149,6 +150,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new JiraIssueHandler());
         DispatchUtil.registerHandler(new ListUserMetadataFieldsHandler());
         DispatchUtil.registerHandler(new ListQueryDatasetsForTagHandler());
+        DispatchUtil.registerHandler(new DeleteDatasetsHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {
