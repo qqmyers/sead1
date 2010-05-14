@@ -105,32 +105,32 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         dispatch.execute(query,
                 new AsyncCallback<ListQueryResult<B>>() {
 
-            public void onFailure(Throwable caught) {
-                GWT.log("Error retrieving items to show in table", caught);
-                DialogBox dialogBox = new DialogBox();
-                dialogBox.setText("Error retrieving items");
-                dialogBox.add(new Label(MMDB.SERVER_ERROR));
-                dialogBox.setAnimationEnabled(true);
-                dialogBox.center();
-                dialogBox.show();
-            }
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error retrieving items to show in table", caught);
+                        DialogBox dialogBox = new DialogBox();
+                        dialogBox.setText("Error retrieving items");
+                        dialogBox.add(new Label(MMDB.SERVER_ERROR));
+                        dialogBox.setAnimationEnabled(true);
+                        dialogBox.center();
+                        dialogBox.show();
+                    }
 
-            @Override
-            public void onSuccess(final ListQueryResult<B> result) {
-                eventBus.fireEvent(new ClearDatasetsEvent());
-                int index = 0;
-                for (B item : result.getResults() ) {
-                    ShowItemEvent event = new ShowItemEvent();
-                    event.setPosition(index);
-                    addItem(event, item);
-                    index++;
-                    eventBus.fireEvent(event);
-                }
-                eventBus.fireEvent(new NoMoreItemsEvent());
-                final int np = (int) Math.ceil((double) result.getTotalCount() / getPageSize());
-                setNumberOfPages(np);
-            }
-        });
+                    @Override
+                    public void onSuccess(final ListQueryResult<B> result) {
+                        eventBus.fireEvent(new ClearDatasetsEvent());
+                        int index = 0;
+                        for (B item : result.getResults() ) {
+                            ShowItemEvent event = new ShowItemEvent();
+                            event.setPosition(index);
+                            addItem(event, item);
+                            index++;
+                            eventBus.fireEvent(event);
+                        }
+                        eventBus.fireEvent(new NoMoreItemsEvent());
+                        final int np = (int) Math.ceil((double) result.getTotalCount() / getPageSize());
+                        setNumberOfPages(np);
+                    }
+                });
     }
 
     /**
@@ -220,6 +220,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
                 }
             });
         }
+        getContent();
     }
 
     /**
@@ -252,7 +253,6 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
             display.setContentView(new Label("The flow view has a cold. It will be back soon."));
             viewTypePresenter = null;
         }
-        getContent();
     }
 
     public int getPageSize() {

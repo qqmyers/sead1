@@ -22,9 +22,9 @@ public class TagTablePresenter extends DynamicTablePresenter<DatasetBean> {
 
     private String tagName;
 
-    public TagTablePresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+    public TagTablePresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display, String tagName) {
         super(dispatch, eventBus, display);
-        // TODO Auto-generated constructor stub
+        setTagName(tagName);
     }
 
     @Override

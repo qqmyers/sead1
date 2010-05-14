@@ -87,9 +87,8 @@ public class TagPage extends Composite {
 
     private void retrieveDatasets() {
         DynamicTableView dynamicTableView = new DynamicTableView();
-        TagTablePresenter tablePresenter = new TagTablePresenter(dispatchAsync, eventBus, dynamicTableView);
+        TagTablePresenter tablePresenter = new TagTablePresenter(dispatchAsync, eventBus, dynamicTableView, tagName);
         tablePresenter.bind();
-        tablePresenter.setTagName(tagName);
         mainPanel.add(dynamicTableView.asWidget());
     }
 
