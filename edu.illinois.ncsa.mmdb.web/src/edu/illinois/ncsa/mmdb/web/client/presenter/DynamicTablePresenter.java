@@ -249,9 +249,6 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
             gridPresenter.bind();
             viewTypePresenter = gridPresenter;
             display.setContentView(gridView);
-        } else if (viewType.equals(DynamicTableView.FLOW_VIEW_TYPE)) {
-            display.setContentView(new Label("The flow view has a cold. It will be back soon."));
-            viewTypePresenter = null;
         }
     }
 

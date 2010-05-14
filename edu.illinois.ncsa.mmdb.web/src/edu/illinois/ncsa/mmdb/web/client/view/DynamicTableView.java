@@ -86,7 +86,6 @@ public class DynamicTableView extends Composite implements Display {
         viewOptions.addStyleName("pagingLabel");
         viewOptions.addItem("List", LIST_VIEW_TYPE);
         viewOptions.addItem("Grid", GRID_VIEW_TYPE);
-        viewOptions.addItem("Flow", FLOW_VIEW_TYPE);
         viewOptions.setSelected(viewType);
         return viewOptions;
     }
