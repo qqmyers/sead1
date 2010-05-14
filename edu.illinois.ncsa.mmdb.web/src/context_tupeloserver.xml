@@ -4,7 +4,7 @@
     <a:hasProperties>
       <b:storageTypeMapEntry rdf:about="tag:tupeloproject.org,2006:11153b7c7a85b8a899925f018127bcec06680dc2">
         <b:storageTypeMapKey>TupeloServer.URL</b:storageTypeMapKey>
-        <b:storageTypeMapValue>http://mmdb-dev.ncsa.uiuc.edu:8080/mmdb/tupelo</b:storageTypeMapValue>
+        <b:storageTypeMapValue>http://mmdb-dev.ncsa.uiuc.edu:8080/medici/tupelo</b:storageTypeMapValue>
       </b:storageTypeMapEntry>
     </a:hasProperties>
     <a:hasProperties>
