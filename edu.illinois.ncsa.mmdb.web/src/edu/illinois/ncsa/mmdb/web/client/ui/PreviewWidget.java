@@ -149,21 +149,23 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         }
 
         contentPanel = new SimplePanel();
-
         // add the preview image
         image = new Image(PREVIEW_URL.get(size) + datasetUri);
         contentPanel.clear();
         contentPanel.add(image);
         addLink(image);
+        //
         safariForceTimer = new Timer() { // MMDB-620
             public void run() {
                 contentPanel.clear();
                 contentPanel.add(image);
+                addLink(image);
             }
         };
         safariForceTimer.schedule(50); // right away
         safariForceTimer.schedule(1000); // somewhat later
         safariForceTimer.schedule(2000); // last attempt
+        //
         if (size != GetPreviews.LARGE) {
             image.addStyleName("thumbnail");
         } else {
@@ -172,8 +174,9 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         if (checkPending) {
             image.addErrorHandler(new ErrorHandler() {
                 public void onError(ErrorEvent event) {
-                    wasEverPending = true;
-                    pendingImage(); // attempt to resolve MMDB-672
+                    wasEverPending = false;
+                    grayImage();
+                    getPreview(datasetUri, link);
                 }
             });
             getPreview(datasetUri, link);

@@ -8,6 +8,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -82,9 +84,13 @@ public class UploadStatusView extends Composite implements Display {
     }
 
     @Override
-    public void onPostComplete(final int ix, DatasetBean dataset) {
-        PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri());
-        statusTable.setWidget(ix, 1, preview);
+    public void onPostComplete(final int ix, final DatasetBean dataset) {
+        DeferredCommand.addCommand(new Command() {
+            public void execute() {
+                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri());
+                statusTable.setWidget(ix, 1, preview);
+            }
+        });
         statusTable.setWidget(ix, 2, editableDatasetInfo(dataset));
         TagsWidget tags = new TagsWidget(dataset.getUri(), MMDB.dispatchAsync, false);
         statusTable.setWidget(ix, 3, tags);

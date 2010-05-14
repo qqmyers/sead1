@@ -204,8 +204,6 @@ public class UploadPage extends Page {
         safariWakeupTimer = new Timer() {
             public void run() {
                 pokeApplet(DOM.getElementById("dragdropApplet"));
-                mainLayoutPanel.remove(uploadStatusView); // kludge to force redraw in Safari
-                mainLayoutPanel.add(uploadStatusView); // kludge to force redraw in Safari
             }
         };
         safariWakeupTimer.scheduleRepeating(500);
