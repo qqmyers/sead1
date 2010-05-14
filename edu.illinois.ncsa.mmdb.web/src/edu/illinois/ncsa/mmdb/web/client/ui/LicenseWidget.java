@@ -457,6 +457,7 @@ public class LicenseWidget extends Composite {
         }
 
         // check to see the license type
+        licenseText.removeStyleName("deadLink");
         String rights = license.getRights().toLowerCase();
         if (rights.equals("pddl")) {
             // Public Domain License
@@ -479,6 +480,7 @@ public class LicenseWidget extends Composite {
             if ((license.getLicense() != null) && license.getLicense().startsWith("http://")) {
                 licenseText.setHref(license.getLicense());
             } else {
+                licenseText.addStyleName("deadLink");
                 licenseText.setHref("javascript:;");
             }
         }

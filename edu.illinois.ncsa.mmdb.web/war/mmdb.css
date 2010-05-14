@@ -48,6 +48,12 @@ table td, select {
 	cursor: default;
 }
 
+.deadLink {
+	cursor: default;
+	color: black;
+	text-decoration: none;
+}
+
 /* ----------------------------------------------------------------------
  * Overriding GWT styles
  * ---------------------------------------------------------------------- */
@@ -103,6 +109,11 @@ a, a:link, a:visited, a:hover, a:active {
 
 a:hover {
 	text-decoration: underline;
+}
+
+.deadlink {
+	color: black !important;
+	text-decoration: none !important;
 }
 
 /* ----------------------------------------------------------------------

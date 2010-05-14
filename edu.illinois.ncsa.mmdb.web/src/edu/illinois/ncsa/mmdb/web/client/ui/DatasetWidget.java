@@ -479,7 +479,7 @@ public class DatasetWidget extends Composite {
         previewPanel = new AbsolutePanel();
         previewPanel.addStyleName("previewPanel");
 
-        FlowPanel previewsPanel = new FlowPanel();
+        final FlowPanel previewsPanel = new FlowPanel();
         previewsPanel.addStyleName("datasetActions");
         for (PreviewBean pb : previews ) {
             String label;
@@ -502,14 +502,22 @@ public class DatasetWidget extends Composite {
             }
 
             final PreviewBean finalpb = pb;
-            Anchor anchor = new Anchor(label);
+            final Anchor anchor = new Anchor(label);
             anchor.addStyleName("previewActionLink");
             anchor.addClickHandler(new ClickHandler() {
-                public void onClick(ClickEvent event)
-                    {
-                        showPreview(finalpb);
+                public void onClick(ClickEvent event) {
+                    for (int i = 0; i < previewsPanel.getWidgetCount(); i++ ) {
+                        previewsPanel.getWidget(i).removeStyleName("deadlink");
                     }
+                    anchor.addStyleName("deadlink");
+                    showPreview(finalpb);
+                }
             });
+            if (bestVideo == finalpb) {
+                anchor.addStyleName("deadlink");
+            } else if (bestImage == finalpb) {
+                anchor.addStyleName("deadlink");
+            }
             previewsPanel.add(anchor);
         }
 
