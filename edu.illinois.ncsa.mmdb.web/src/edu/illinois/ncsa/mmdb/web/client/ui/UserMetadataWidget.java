@@ -195,17 +195,12 @@ public class UserMetadataWidget extends Composite {
     private void addFieldAddControls(List<List<String>> result) {
 
         HorizontalPanel horizontalPanel = new HorizontalPanel();
-
         horizontalPanel.addStyleName("addMetadata");
-
         horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-
         horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
         int row = fieldTable.getRowCount();
-
         fieldTable.getFlexCellFormatter().setColSpan(row, 0, 3);
-
         fieldTable.setWidget(row, 0, horizontalPanel);
 
         fieldChoice = new LabeledListBox("Set Field:");
@@ -240,16 +235,18 @@ public class UserMetadataWidget extends Composite {
 	 * 
 	 */
     private void addValue() {
+        final String text = valueText.getText();
         final String property = fieldChoice.getSelected();
-        dispatch.execute(new SetProperty(uri, property, valueText.getText()),
-                new AsyncCallback<SetPropertyResult>() {
-                    public void onFailure(Throwable caught) {
-                    }
+        SetProperty prop = new SetProperty(uri, property, text);
+        valueText.setText("");
+        dispatch.execute(prop, new AsyncCallback<SetPropertyResult>() {
+            public void onFailure(Throwable caught) {
+            }
 
-                    public void onSuccess(SetPropertyResult result) {
-                        setProperty(property, labels.get(property), valueText.getText());
-                    }
-                });
+            public void onSuccess(SetPropertyResult result) {
+                setProperty(property, labels.get(property), text);
+            }
+        });
     }
 
     /**
@@ -257,19 +254,18 @@ public class UserMetadataWidget extends Composite {
      * @param property
      */
     private void removeValue(final String property) {
-        dispatch.execute(new SetProperty(uri, property, new HashSet<String>()),
-                new AsyncCallback<SetPropertyResult>() {
-                    public void onFailure(Throwable caught) {
-                    }
+        dispatch.execute(new SetProperty(uri, property, new HashSet<String>()), new AsyncCallback<SetPropertyResult>() {
+            public void onFailure(Throwable caught) {
+            }
 
-                    public void onSuccess(SetPropertyResult result) {
-                        int row = getRowForField(property);
-                        if (row != -1) {
-                            fieldTable.removeRow(row);
-                            styleRows();
-                        }
-                    }
-                });
+            public void onSuccess(SetPropertyResult result) {
+                int row = getRowForField(property);
+                if (row != -1) {
+                    fieldTable.removeRow(row);
+                    styleRows();
+                }
+            }
+        });
     }
 
     /**
@@ -285,8 +281,10 @@ public class UserMetadataWidget extends Composite {
             fieldTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
             fieldTable.getFlexCellFormatter().addStyleName(row, 2, "metadataTableCell");
             if (row % 2 == 0) {
+                fieldTable.getRowFormatter().removeStyleName(row, "metadataTableOddRow");
                 fieldTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
             } else {
+                fieldTable.getRowFormatter().removeStyleName(row, "metadataTableEvenRow");
                 fieldTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
             }
         }
