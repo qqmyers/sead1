@@ -136,6 +136,11 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
     public PreviewWidget(final String datasetUri, String desiredSize,
             final String link, final boolean checkPending) {
+        this(datasetUri, desiredSize, link, checkPending, true);
+    }
+
+    public PreviewWidget(final String datasetUri, String desiredSize,
+                final String link, final boolean checkPending, boolean initialDisplay) {
         this.checkPending = checkPending;
         this.datasetUri = datasetUri;
         this.link = link;
@@ -150,7 +155,11 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
         contentPanel = new SimplePanel();
         // add the preview image
-        image = new Image(PREVIEW_URL.get(size) + datasetUri);
+        if (initialDisplay) {
+            image = new Image(PREVIEW_URL.get(size) + datasetUri);
+        } else {
+            image = new Image(GRAY_URL.get(size));
+        }
         contentPanel.clear();
         contentPanel.add(image);
         addLink(image);

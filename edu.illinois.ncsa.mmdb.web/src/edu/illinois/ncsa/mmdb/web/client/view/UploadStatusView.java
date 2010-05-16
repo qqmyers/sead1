@@ -87,7 +87,8 @@ public class UploadStatusView extends Composite implements Display {
     public void onPostComplete(final int ix, final DatasetBean dataset) {
         DeferredCommand.addCommand(new Command() {
             public void execute() {
-                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri());
+                // check pending, but don't initially display
+                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri(), true, false);
                 statusTable.setWidget(ix, 1, preview);
             }
         });
