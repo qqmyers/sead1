@@ -28,7 +28,11 @@ export WORKSPACE=$PWD/workspace
 # What should be installed
 #  Due to a bug if only web installed install edu.ncsa.cet.bean first
 # ----------------------------------------------------------------------
+# for mmdb
 export INSTALL="edu.illinois.ncsa.mmdb.desktop.site edu.illinois.ncsa.mmdb.extractor.feature edu.illinois.ncsa.mmdb.web"
+
+# for cyberintegrator
+#export INSTALL="edu.illinois.ncsa.cyberintegrator.client.site edu.uiuc.ncsa.cyberintegrator.server.feature edu.uiuc.ncsa.cet.cron.feature"
 
 # ----------------------------------------------------------------------
 # Where to download buckminster from
@@ -193,6 +197,8 @@ cat > ncsa.rmap << EOF
     <locator searchPathRef="edu.illinois.ncsa.mmdb" pattern="^edu\.illinois\.ncsa\.mmdb(\..+)?"/>
     <locator searchPathRef="edu.illinois.ncsa.cyberintegrator" pattern="^edu\.uiuc\.ncsa\.cyberintegrator(\..+)?"/>
     <locator searchPathRef="edu.illinois.ncsa.cyberintegrator" pattern="^edu\.illinois\.ncsa\.cyberintegrator(\..+)?"/>
+    <locator searchPathRef="edu.illinois.ncsa.cyberintegrator" pattern="^edu.uiuc.ncsa.cet.cron.feature"/>
+    <locator searchPathRef="edu.illinois.ncsa.cyberintegrator" pattern="^edu.uiuc.ncsa.cron"/>
     <locator searchPathRef="edu.illinois.ncsa.cet" pattern="^edu\.illinois\.ncsa(\..+)?"/>
     <locator searchPathRef="edu.illinois.ncsa.cet" pattern="^edu\.uiuc\.ncsa(\..+)?"/>
     <locator searchPathRef="edu.illinois.ncsa.cet" pattern="^org\.eclipse\.rcp\.headless(\..+)?"/>
