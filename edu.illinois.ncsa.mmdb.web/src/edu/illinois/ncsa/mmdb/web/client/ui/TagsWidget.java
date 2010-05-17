@@ -110,8 +110,8 @@ public class TagsWidget extends Composite {
         }
 
         tagsPanel = new FlexTable();
-        tagsPanel.setVisible(false);
         tagsPanel.addStyleName("tagsLinks");
+        tagsPanel.setVisible(false);
         mainPanel.add(tagsPanel);
 
         final Anchor addTagAnchor = new Anchor("Add tag(s)");
@@ -125,8 +125,6 @@ public class TagsWidget extends Composite {
                     @Override
                     public void onClick(ClickEvent event) {
                         submitTag(tagWidget.getTags());
-                        tagWidget.getTagBox().setText("");
-                        tagWidget.getTagBox().setFocus(true);
                     }
                 });
 
@@ -135,8 +133,6 @@ public class TagsWidget extends Composite {
                     public void onKeyUp(KeyUpEvent event) {
                         if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
                             submitTag(tagWidget.getTags());
-                            tagWidget.getTagBox().setText("");
-                            tagWidget.getTagBox().setFocus(true);
                         }
 
                     }
@@ -168,6 +164,7 @@ public class TagsWidget extends Composite {
 
     void addTag(final String tag) {
         if (!tagsShown.contains(tag)) {
+            tagsPanel.setVisible(true);
             final int row = tagsPanel.getRowCount();
             tagsPanel.setWidget(row, 0, tagHyperlink(tag));
             Anchor delete = new Anchor("Delete");
@@ -198,7 +195,6 @@ public class TagsWidget extends Composite {
             @Override
             public void onSuccess(GetTagsResult result) {
                 if (result.getTags().size() != 0) {
-                    tagsPanel.setVisible(true);
                     for (final String tag : result.getTags().keySet() ) {
                         addTag(tag);
                     }
@@ -242,7 +238,9 @@ public class TagsWidget extends Composite {
      */
     private void submitTag(final String tags) {
 
+        String tagText = tagWidget.getTags();
         if (!"".equals(tags)) {
+            GWT.log("submitting tag " + tagText);
             final Set<String> tagSet = tagSet(tags);
 
             service.execute(new TagResource(id, tagSet), new AsyncCallback<TagResourceResult>() {
@@ -254,11 +252,14 @@ public class TagsWidget extends Composite {
 
                 @Override
                 public void onSuccess(TagResourceResult result) {
+                    GWT.log("succeeded tagging resource");
                     for (String tag : result.getTags() ) {
                         addTag(tag);
                     }
                 }
             });
+            tagWidget.getTagBox().setText("");
+            tagWidget.getTagBox().setFocus(true);
         }
     }
 
