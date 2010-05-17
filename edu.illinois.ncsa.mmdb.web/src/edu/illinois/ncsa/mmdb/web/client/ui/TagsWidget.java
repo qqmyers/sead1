@@ -110,8 +110,6 @@ public class TagsWidget extends Composite {
         }
 
         tagsPanel = new FlexTable();
-        tagsPanel.addStyleName("tagsLinks");
-        tagsPanel.setVisible(false);
         mainPanel.add(tagsPanel);
 
         final Anchor addTagAnchor = new Anchor("Add tag(s)");
@@ -164,7 +162,7 @@ public class TagsWidget extends Composite {
 
     void addTag(final String tag) {
         if (!tagsShown.contains(tag)) {
-            tagsPanel.setVisible(true);
+            tagsPanel.addStyleName("tagsLinks");
             final int row = tagsPanel.getRowCount();
             tagsPanel.setWidget(row, 0, tagHyperlink(tag));
             Anchor delete = new Anchor("Delete");
