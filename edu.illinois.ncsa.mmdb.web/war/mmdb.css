@@ -916,8 +916,7 @@ a:hover {
 }
 
 .tagInPanel {
-	display: inline-table;
-	float: left;
+	display: inline-block;
     position: relative;
 	margin: 10px;
 	padding: 5px;
