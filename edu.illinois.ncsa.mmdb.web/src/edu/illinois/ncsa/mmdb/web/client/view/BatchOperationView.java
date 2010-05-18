@@ -33,10 +33,10 @@ public class BatchOperationView extends Composite implements BatchOperationPrese
         actionsMenu = new MenuBar(true);
         actionsBar.addItem("Actions", actionsMenu);
 
-        mainLayout.add(actionsBar);
         numSelectedLabel = new Label("0 selected datasets");
         numSelectedLabel.addStyleName("batchOperationCount");
         mainLayout.add(numSelectedLabel);
+        mainLayout.add(actionsBar);
     }
 
     @Override

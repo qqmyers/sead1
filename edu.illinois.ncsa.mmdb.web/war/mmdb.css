@@ -54,6 +54,13 @@ table td, select {
 	text-decoration: none;
 }
 
+/* an IE-friendly inline-block style */
+.inlineBlock {
+	display: inline-block;
+	*display: inline;
+	zoom: 1;
+}
+
 /* ----------------------------------------------------------------------
  * Overriding GWT styles
  * ---------------------------------------------------------------------- */
@@ -959,18 +966,22 @@ a:hover {
 }
 
 .batchOperationPanel {
+	float: right;
 }
 
 .batchOperationCount {
-	float: right;
 	color: gray;
 	font-size: 80%;
 	margin: 5px;
+	display: inline-block;
+	*display: inline;
+	zoom: 1;
 }
 
 .batchOperationMenu {
-	display: inline;
-	float: right;
+	display: inline-block;
+	*display: inline;
+	zoom: 1;
 }
 
 .gwt-MenuBar-horizontal .gwt-MenuItem {
