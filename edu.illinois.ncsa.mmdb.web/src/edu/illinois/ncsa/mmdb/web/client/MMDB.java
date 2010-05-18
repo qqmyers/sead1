@@ -356,8 +356,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         if (token.startsWith("logout")) {
             LoginPage.logout();
-            loginStatusWidget.logout();
-            showLoginPage();
         } else if (token.startsWith("login")) {
             showLoginPage();
         } else if (token.startsWith("signup")) {
@@ -414,7 +412,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         state.setSessionKey(sessionKey);
         // set cookie
         // TODO move to more prominent place... MMDB? A class with static properties?
-        final long DURATION = 1000 * 60 * 60; // 60 minutes
+        final long DURATION = 1000;// * 60 * 60; // 60 minutes
         final Date expires = new Date(System.currentTimeMillis() + DURATION);
         Cookies.setCookie("sessionKey", sessionKey, expires);
 
@@ -628,6 +626,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * Show a set of widgets to authenticate with the server.
      */
     private void showLoginPage() {
+        loginStatusWidget.logout();
         mainContainer.clear();
         mainContainer.add(new LoginPage(dispatchAsync, this));
     }
