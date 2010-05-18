@@ -217,6 +217,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
                 public void onValueChange(ValueChangeEvent<String> event) {
                     GWT.log("View list box clicked " + event.getValue());
                     changeViewType(event.getValue());
+                    getContent();
                 }
             });
         }
