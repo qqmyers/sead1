@@ -412,7 +412,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         state.setSessionKey(sessionKey);
         // set cookie
         // TODO move to more prominent place... MMDB? A class with static properties?
-        final long DURATION = 1000;// * 60 * 60; // 60 minutes
+        final long DURATION = 1000 * 60 * 60; // 60 minutes
         final Date expires = new Date(System.currentTimeMillis() + DURATION);
         Cookies.setCookie("sessionKey", sessionKey, expires);
 
