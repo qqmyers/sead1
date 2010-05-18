@@ -910,7 +910,6 @@ a:hover {
 
 .tagsPanel {
 	width: 800px;
-	display: block;
 	margin: 10px auto 30px auto;
     min-height: 500px;
 }
@@ -920,17 +919,23 @@ a:hover {
     position: relative;
 	margin: 10px;
 	padding: 5px;
+	zoom: 1;
+	*display: inline;
 }
 
 .tagLink {
+	zoom: 1;
 	display: inline;
+	*display: inline;
 }
 
 .tagCount {
-	display: inline;
 	font-size: 0.9em;
 	vertical-align: super;
 	color: gray;
+	zoom: 1;
+    display: inline;
+	*display: inline;
 }
 
 .datasetInfoWidget {
