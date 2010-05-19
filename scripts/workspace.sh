@@ -1,6 +1,15 @@
 #!/bin/bash
 
 # ----------------------------------------------------------------------
+# What should be installed
+# ----------------------------------------------------------------------
+# for mmdb
+export INSTALL="edu.illinois.ncsa.mmdb.desktop.site edu.illinois.ncsa.mmdb.extractor.feature edu.illinois.ncsa.mmdb.web"
+
+# for cyberintegrator
+#export INSTALL="edu.illinois.ncsa.cyberintegrator.client.site edu.uiuc.ncsa.cyberintegrator.server.feature edu.uiuc.ncsa.cet.cron.feature"
+
+# ----------------------------------------------------------------------
 # Where is eclipse installed
 #  A version of eclipse need to exist at this location to bootstrap
 # ----------------------------------------------------------------------
@@ -10,29 +19,35 @@ export ECLIPSE=/home/kooper/eclipse
 # Where is the target platform installed
 #  If no target is found it will be downloaded
 # ----------------------------------------------------------------------
-export TARGET=$PWD/target
+#export TARGET=`readlink -m $PWD/target`
+export TARGET=/home/kooper/projects/target
 
 # ----------------------------------------------------------------------
 # Where should buckminster be installed
 #  If buckminster is not found it will be downloaded
 # ----------------------------------------------------------------------
-export BUCKY_DIR=$PWD/bucky
+#export BUCKMINSTER=`readlink -m $PWD/bucky`
+export BUCKMINSTER=/home/kooper/projects/buckminster
 
 # ----------------------------------------------------------------------
 # Where should the workspace be created
 #  This is where all files will appear
 # ----------------------------------------------------------------------
-export WORKSPACE=$PWD/workspace
+export WORKSPACE=`readlink -m $PWD/workspace`
 
 # ----------------------------------------------------------------------
-# What should be installed
-#  Due to a bug if only web installed install edu.ncsa.cet.bean first
+# What version should be installed
+#  use main for the trunk/head 
+#  branches start with a /, tags just the name
+#  for example /mmdb-0.5
 # ----------------------------------------------------------------------
-# for mmdb
-export INSTALL="edu.illinois.ncsa.mmdb.desktop.site edu.illinois.ncsa.mmdb.extractor.feature edu.illinois.ncsa.mmdb.web"
+VERSIONALL=main
+VERSIONTUPELO=2.5
 
-# for cyberintegrator
-#export INSTALL="edu.illinois.ncsa.cyberintegrator.client.site edu.uiuc.ncsa.cyberintegrator.server.feature edu.uiuc.ncsa.cet.cron.feature"
+# ----------------------------------------------------------------------
+# Any certificates needed to be used?
+# ----------------------------------------------------------------------
+export CERTS="-Djavax.net.ssl.trustStore=/home/kooper/jssecacerts"
 
 # ----------------------------------------------------------------------
 # Where to download buckminster from
@@ -44,20 +59,19 @@ export LOGGING=INFO
 # ----------------------------------------------------------------------
 # Install buckminster
 # ----------------------------------------------------------------------
-if [ ! -e $BUCKY_DIR ]; then
+if [ ! -e $BUCKMINSTER ]; then
   export EQUINOX="`ls -1rt $ECLIPSE/plugins/org.eclipse.equinox.launcher_*.jar | head -1`"
-  java -jar $EQUINOX -application org.eclipse.equinox.p2.director -destination $BUCKY_DIR -profile buckminster -installIU org.eclipse.buckminster.cmdline.product -repository $URL
-  $BUCKY_DIR/buckminster install $URL org.eclipse.buckminster.core.headless.feature
-  $BUCKY_DIR/buckminster install $URL  org.eclipse.buckminster.pde.headless.feature
-  $BUCKY_DIR/buckminster install $SVN_URL org.eclipse.buckminster.subversive.headless.feature
+  java -jar $EQUINOX -application org.eclipse.equinox.p2.director -destination $BUCKMINSTER -profile buckminster -installIU org.eclipse.buckminster.cmdline.product -repository $URL
+  $BUCKMINSTER/buckminster install $URL org.eclipse.buckminster.core.headless.feature
+  $BUCKMINSTER/buckminster install $URL  org.eclipse.buckminster.pde.headless.feature
+  $BUCKMINSTER/buckminster install $SVN_URL org.eclipse.buckminster.subversive.headless.feature
 fi
 
 # ----------------------------------------------------------------------
 # Some variables to get buckminster to work
 # ----------------------------------------------------------------------
-export EQUINOX="`ls -1rt $BUCKY_DIR/plugins/org.eclipse.equinox.launcher_*.jar | head -1`"
-export CERTS="-Djavax.net.ssl.trustStore=/home/kooper/jssecacerts"
-export BUCKMINSTER="java -Xmx512m $CERTS -Dtargetplatform=file://$TARGET -jar $EQUINOX -application org.eclipse.buckminster.cmdline.headless -data $WORKSPACE --loglevel $LOGGING -consolelog"
+export EQUINOX="`ls -1rt $BUCKMINSTER/plugins/org.eclipse.equinox.launcher_*.jar | head -1`"
+export BUCKMINSTERCMD="java -Xmx512m $CERTS -jar $EQUINOX -application org.eclipse.buckminster.cmdline.headless -data $WORKSPACE --loglevel $LOGGING -consolelog"
 
 # ----------------------------------------------------------------------
 # Eclipse target platform
@@ -71,21 +85,16 @@ if [ ! -e $TARGET ]; then
     xmlns:pmp="http://www.eclipse.org/buckminster/PDEMapProvider-1.0"
     xmlns:bc="http://www.eclipse.org/buckminster/Common-1.0">
 
-    <searchPath name="org.eclipse.platform.RBUILD">
+    <searchPath name="org.eclipse.galileo">
         <provider readerType="p2" componentTypes="osgi.bundle,eclipse.feature" mutable="false" source="false">
             <uri format="http://download.eclipse.org/eclipse/updates/3.5?importType=binary"/>
         </provider>
-    </searchPath>
-
-    <searchPath name="org.eclipse.galileo">
         <provider readerType="p2" componentTypes="osgi.bundle,eclipse.feature" mutable="false" source="false">
             <uri format="http://download.eclipse.org/releases/galileo?importType=binary"/>
         </provider>
     </searchPath>
 
-
-    <locator searchPathRef="org.eclipse.platform.${useBuild}" failOnError="false" />
-    <locator searchPathRef="org.eclipse.galileo" failOnError="false" />
+    <locator searchPathRef="org.eclipse.galileo" />
 </rmap>
 EOF
 
@@ -109,7 +118,7 @@ EOF
     <cq:property key="target.ws" value="*"/> 
 </cq:componentQuery>
 EOF
-    $BUCKMINSTER import $PLUGIN.mspec
+    $BUCKMINSTERCMD import $PLUGIN.mspec
     rm $PLUGIN.mspec $PLUGIN.cquery
   done
   rm eclipse.rmap
@@ -135,7 +144,7 @@ cat > eclipse.target << EOF
    </launcherArgs>
 </target>
 EOF
-$BUCKMINSTER importtargetdefinition -A $PWD/eclipse.target
+$BUCKMINSTERCMD importtargetdefinition -A $PWD/eclipse.target
 rm eclipse.target
 
 # ----------------------------------------------------------------------
@@ -216,14 +225,12 @@ for PLUGIN in $INSTALL; do
     <cq:property key="target.arch" value="*"/>
     <cq:property key="target.os" value="*"/>
     <cq:property key="target.ws" value="*"/>
-<!--
-    <cq:advisorNode namePattern="edu.uiuc.ncsa.*" branchTagPath="mmdb-0.5"/>
-    <cq:advisorNode namePattern="edu.illinois.ncsa.*" branchTagPath="mmdb-0.5"/>
-    <cq:advisorNode namePattern="org.tupeloproject.*" branchTagPath="/mmdb-0.5"/>
--->
+    <cq:advisorNode namePattern="edu.uiuc.ncsa.*" branchTagPath="$VERSIONALL"/>
+    <cq:advisorNode namePattern="edu.illinois.ncsa.*" branchTagPath="$VERSIONALL"/>
+    <cq:advisorNode namePattern="org.tupeloproject.*" branchTagPath="$VERSIONTUPELO"/>
 </cq:componentQuery>
 EOF
-  $BUCKMINSTER import $PLUGIN.cquery
+  $BUCKMINSTERCMD import $PLUGIN.cquery
   rm $PLUGIN.cquery
 done
 
