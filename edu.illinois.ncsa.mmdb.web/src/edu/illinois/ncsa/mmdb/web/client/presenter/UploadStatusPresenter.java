@@ -3,6 +3,7 @@ package edu.illinois.ncsa.mmdb.web.client.presenter;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasValue;
 
@@ -10,6 +11,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
@@ -79,6 +82,14 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
         display.onComplete(ix, uri, nDropped);
         display.getSelectionControl(ix).addValueChangeHandler(new DatasetSelectionCheckboxHandler(uri, eventBus));
         display.getSelectionControl(ix).setValue(true, true); // select, and fire the selection event
+        // checkbox should also respond to selection and deselection events coming from elsewhere
+        addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
+            public void onDatasetSelected(DatasetSelectedEvent event) {
+                if (event.getUri().equals(uri)) {
+                    display.getSelectionControl(ix).setValue(true, false); // select, but don't fire another selection event
+                }
+            }
+        });
         addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
             public void onDatasetUnselected(DatasetUnselectedEvent datasetUnselectedEvent) {
                 if (datasetUnselectedEvent.getUri().equals(uri)) {
@@ -95,6 +106,7 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
             public void execute() {
                 dispatch.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
                     public void onFailure(Throwable caught) {
+                        Window.alert("GetDataset failed for " + uri); // FIXME debug
                     }
 
                     public void onSuccess(GetDatasetResult result) {

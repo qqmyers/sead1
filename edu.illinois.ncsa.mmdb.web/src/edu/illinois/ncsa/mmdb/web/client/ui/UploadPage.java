@@ -253,15 +253,18 @@ public class UploadPage extends Page {
         $wnd.dndAppletProgress = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileProgress(I);
     }-*/;
 
+    // on applet callbacks we need to post-process values with an identity transformations to work around applet-to-Javascript issues
+
     /** Called by the applet after a file is uploaded. */
-    public static void fileUploaded(final String uri) {
+    public static void fileUploaded(String uriUploaded) {
+        String uri = uriUploaded + ""; // identity transform required, do not remove
         GWT.log("applet says " + uri + " uploaded");
         uploadStatusPresenter.onComplete(uri);
     }
 
     /** Called by the applet for each file dropped */
     public static void fileDropped(String filename, String sizeString) {
-        uploadStatusPresenter.onDropped(filename, sizeString);
+        uploadStatusPresenter.onDropped(filename + "", sizeString + ""); // identity transforms required, do not remove
     }
 
     /**
@@ -270,7 +273,7 @@ public class UploadPage extends Page {
      * @param percent
      */
     public static void fileProgress(int percent) {
-        uploadStatusPresenter.onProgress(percent);
+        uploadStatusPresenter.onProgress(percent + 0); // identity transform required, do not remove
     }
 
     /**

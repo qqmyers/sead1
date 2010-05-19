@@ -151,12 +151,13 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
         return unsplit(names);
     }
 
+    // 
     String authors(CETBean bean) {
         if (bean instanceof DatasetBean) {
             return authors((DatasetBean) bean);
         } else {
             log.warn("unexpected bean class " + bean.getClass());
-            return authors(bean.getUri());
+            return "";
         }
     }
 
@@ -164,8 +165,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
     String authors(String uri) {
         try {
             Object bean = fetchBean(uri);
-            if (bean instanceof CETBean) {
-                String authors = authors((CETBean) bean);
+            if (bean instanceof DatasetBean) {
+                String authors = authors((DatasetBean) bean);
                 bean = null;
                 return authors;
             } else {
