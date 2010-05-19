@@ -9,6 +9,9 @@ export INSTALL="edu.illinois.ncsa.mmdb.desktop.site edu.illinois.ncsa.mmdb.extra
 # for cyberintegrator
 #export INSTALL="edu.illinois.ncsa.cyberintegrator.client.site edu.uiuc.ncsa.cyberintegrator.server.feature edu.uiuc.ncsa.cet.cron.feature"
 
+# for dse
+#export INSTALL="edu.uiuc.ncsa.cyberintegrator.server.feature dse-webapp"
+
 # ----------------------------------------------------------------------
 # Where is eclipse installed
 #  A version of eclipse need to exist at this location to bootstrap
@@ -159,31 +162,33 @@ cat > ncsa.rmap << EOF
     xmlns:pmp="http://www.eclipse.org/buckminster/PDEMapProvider-1.0"
     xmlns:bc="http://www.eclipse.org/buckminster/Common-1.0">
 
-    <searchPath name="edu.illinois.ncsa.cet">
+    <searchPath name="ncsa">
         <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
             <uri format="https://svn.ncsa.uiuc.edu/svn/cet/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>
-    </searchPath>
 
-    <searchPath name="edu.illinois.ncsa.mmdb">
         <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
             <uri format="https://svn.ncsa.uiuc.edu/svn/mmdb/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>
-    </searchPath>
 
-    <searchPath name="edu.illinois.ncsa.cyberintegrator">
         <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
             <uri format="https://svn.ncsa.uiuc.edu/svn/cyberintegrator/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>
+
+        <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
+            <uri format="https://svn.ncsa.uiuc.edu/svn/dse/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+                <bc:propertyRef key="buckminster.component" />
+            </uri>
+        </provider>
     </searchPath>
 
-    <searchPath name="org.tupeloproject">
+    <searchPath name="tupelo">
         <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
             <uri format="https://svn.ncsa.uiuc.edu/svn/tupelo/trunk/tupelo-all/{0}?moduleAfterTag&amp;moduleAfterBranch">
                 <bc:replace>
@@ -203,15 +208,10 @@ cat > ncsa.rmap << EOF
     </searchPath>
 
 
-    <locator searchPathRef="edu.illinois.ncsa.mmdb" pattern="^edu\.illinois\.ncsa\.mmdb(\..+)?"/>
-    <locator searchPathRef="edu.illinois.ncsa.cyberintegrator" pattern="^edu\.uiuc\.ncsa\.cyberintegrator(\..+)?"/>
-    <locator searchPathRef="edu.illinois.ncsa.cyberintegrator" pattern="^edu\.illinois\.ncsa\.cyberintegrator(\..+)?"/>
-    <locator searchPathRef="edu.illinois.ncsa.cyberintegrator" pattern="^edu.uiuc.ncsa.cet.cron.feature"/>
-    <locator searchPathRef="edu.illinois.ncsa.cyberintegrator" pattern="^edu.uiuc.ncsa.cron"/>
-    <locator searchPathRef="edu.illinois.ncsa.cet" pattern="^edu\.illinois\.ncsa(\..+)?"/>
-    <locator searchPathRef="edu.illinois.ncsa.cet" pattern="^edu\.uiuc\.ncsa(\..+)?"/>
-    <locator searchPathRef="edu.illinois.ncsa.cet" pattern="^org\.eclipse\.rcp\.headless(\..+)?"/>
-    <locator searchPathRef="org.tupeloproject" pattern="^org\.tupeloproject(\..+)?"/>
+    <locator searchPathRef="ncsa" pattern="^edu\.illinois\.ncsa(\..+)?"/>
+    <locator searchPathRef="ncsa" pattern="^edu\.uiuc\.ncsa(\..+)?"/>
+    <locator searchPathRef="ncsa" pattern="^org\.eclipse\.rcp\.headless(\..+)?"/>
+    <locator searchPathRef="tupelo" pattern="^org\.tupeloproject(\..+)?"/>
     <locator searchPathRef="ncsa-orbit" />
 </rmap>
 EOF
