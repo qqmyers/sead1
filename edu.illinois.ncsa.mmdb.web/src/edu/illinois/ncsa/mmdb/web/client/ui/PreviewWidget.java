@@ -41,7 +41,6 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ErrorEvent;
@@ -254,7 +253,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             public void onSuccess(IsPreviewPendingResult result) {
                 if (checkPending) { // do we need to know the pending state?
                     if (result.isReady()) {
-                        GWT.log("Preview is now READY for " + datasetUri);
+                        //GWT.log("Preview is now READY for " + datasetUri);
                         if (wasEverPending) {
                             image.setUrl(PREVIEW_URL.get(size) + "new/" + datasetUri); // workaround firefox bug
                         }
@@ -267,7 +266,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
                         checkingPending = false;
                         checkPending = false;
                     } else if (result.isPending()) {
-                        GWT.log("Preview is PENDING for " + datasetUri);
+                        //GWT.log("Preview is PENDING for " + datasetUri);
                         if (!wasEverPending) {
                             wasEverPending = true;
                             pendingImage();
@@ -281,7 +280,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
                             retryTimer.scheduleRepeating(1000); // every 1s
                         }
                     } else {
-                        GWT.log("Preview is NOT READY, NOT PENDING for " + datasetUri);
+                        //GWT.log("Preview is NOT READY, NOT PENDING for " + datasetUri);
                         if (retryTimer != null) {
                             retryTimer.cancel();
                         }
