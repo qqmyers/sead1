@@ -205,7 +205,7 @@ public class TagsWidget extends Composite {
     Set<String> tagSet(String cdl) {
         Set<String> tagSet = new HashSet<String>();
         for (String s : cdl.split(",") ) {
-            tagSet.add(s);
+            tagSet.add(s.trim());
         }
         return tagSet;
     }
