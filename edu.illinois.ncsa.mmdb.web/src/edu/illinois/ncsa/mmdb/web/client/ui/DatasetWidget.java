@@ -333,14 +333,17 @@ public class DatasetWidget extends Composite {
 
         // download original only if allowed
         final FlowPanel downloadWidget = new FlowPanel();
+        downloadWidget.addStyleName("inlineBlock");
         actionsPanel.add(downloadWidget);
 
         // delete dataset
         final FlowPanel deleteWidget = new FlowPanel();
+        deleteWidget.addStyleName("inlineBlock");
         actionsPanel.add(deleteWidget);
 
         // rerun extraction
         final FlowPanel extractWidget = new FlowPanel();
+        extractWidget.addStyleName("inlineBlock");
         actionsPanel.add(extractWidget);
 
         // metadata        
