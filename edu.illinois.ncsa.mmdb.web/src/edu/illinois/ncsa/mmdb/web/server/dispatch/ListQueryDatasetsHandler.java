@@ -107,9 +107,7 @@ public class ListQueryDatasetsHandler implements
      * @return
      * @throws OperatorException
      */
-    private static Table<Resource> list(String orderBy, boolean desc,
-            int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu)
-            throws OperatorException {
+    private static Table<Resource> list(String orderBy, boolean desc, int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu) throws OperatorException {
         Unifier u = new Unifier();
         u.setColumnNames("s", "o");
         if (inCollection != null) {
@@ -119,13 +117,14 @@ public class ListQueryDatasetsHandler implements
             u.addPattern("s", Tags.HAS_TAGGING_EVENT, "_te");
             u.addPattern("_te", Tags.HAS_TAG_OBJECT, "_to");
             u.addPattern("_to", Tags.HAS_TAG_TITLE, Resource.literal(withTag)); // FIXME normalize?
+        } else {
+            if (limit > 0) {
+                u.setLimit(limit);
+            }
+            u.setOffset(offset);
         }
         u.addPattern("s", Rdf.TYPE, dbu.getType());
         u.addPattern("s", Resource.uriRef(orderBy), "o");
-        if (limit > 0) {
-            u.setLimit(limit);
-        }
-        u.setOffset(offset);
         if (desc) {
             u.addOrderByDesc("o");
         } else {
@@ -144,16 +143,22 @@ public class ListQueryDatasetsHandler implements
      * @param dbu
      * @return
      */
-    public static List<String> listDatasetUris(String orderBy, boolean desc,
-            int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu) {
+    public static List<String> listDatasetUris(String orderBy, boolean desc, int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu) {
         try {
             List<String> result = new LinkedList<String>();
-            for (Resource r : Tables.getColumn(list(orderBy, desc, limit,
-                    offset, inCollection, withTag, dbu), 0) ) {
+            for (Resource r : Tables.getColumn(list(orderBy, desc, limit, offset, inCollection, withTag, dbu), 0) ) {
                 if (!result.contains(r.getString())) {
                     result.add(r.getString());
                 }
             }
+            if (withTag != null) {
+                if (offset > result.size()) {
+                    result.clear();
+                } else {
+                    result = result.subList(offset, Math.min(offset + limit, result.size()));
+                }
+            }
+            log.info(result.size() + " elements retured");
             return result;
         } catch (OperatorException x) {
             log.error("Error listing dataset URIs", x);

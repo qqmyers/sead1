@@ -77,6 +77,7 @@ import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Tags;
 import org.tupeloproject.rdf.xml.RdfXml;
 import org.tupeloproject.util.ListTable;
+import org.tupeloproject.util.Tables;
 import org.tupeloproject.util.Tuple;
 
 import sun.misc.Service;
@@ -530,8 +531,8 @@ public class TupeloStore {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
                     {
-                    return countDatasetsInCollectionWithTag(inCollection, withTag);
-                }
+                        return countDatasetsInCollectionWithTag(inCollection, withTag);
+                    }
             };
             if (inCollection != null || withTag != null) {
                 count.setTtl(10000);
@@ -560,7 +561,8 @@ public class TupeloStore {
                 u.addPattern("tag", Tags.HAS_TAG_TITLE, Resource.literal(withTag));
             }
             long now = System.currentTimeMillis();
-            datasetCount = unifyExcludeDeleted(u, "d").getRows().size();
+            HashSet<Resource> set = new HashSet<Resource>(Tables.getColumn(unifyExcludeDeleted(u, "d"), 0));
+            datasetCount = set.size();
             long ms = System.currentTimeMillis() - now;
             log.debug("counted " + datasetCount + " non-deleted datasets in " + ms + "ms");
         } catch (Exception x) {
