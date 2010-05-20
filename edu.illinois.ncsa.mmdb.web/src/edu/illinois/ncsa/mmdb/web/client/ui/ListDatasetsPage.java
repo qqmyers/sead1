@@ -25,7 +25,7 @@ public class ListDatasetsPage extends Page {
     private final HandlerManager  eventbus;
 
     public ListDatasetsPage(MyDispatchAsync dispatch, HandlerManager eventBus) {
-        super("Datasets", dispatch);
+        super("Data", dispatch);
         this.dispatch = dispatch;
         this.eventbus = eventBus;
 
