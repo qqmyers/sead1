@@ -81,6 +81,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPendingResult;
  */
 public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
+    private static final int                MAXREQUEST      = 30;                    // 5 minutes approx
+
     // FIXME use enums
     public static final Map<String, String> PREVIEW_URL;
     public static final Map<String, String> GRAY_URL;
@@ -94,9 +96,9 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         PREVIEW_URL.put(GetPreviews.LARGE, "./api/image/preview/large/");
         PREVIEW_URL.put(GetPreviews.BADGE, "./api/collection/preview/");
         GRAY_URL = new HashMap<String, String>(); // how I yearn for map literals
-        GRAY_URL.put(GetPreviews.SMALL, "./images/preview-100.gif");
-        GRAY_URL.put(GetPreviews.LARGE, "./images/preview-500.gif");
-        GRAY_URL.put(GetPreviews.BADGE, "./images/preview-100.gif");
+        GRAY_URL.put(GetPreviews.SMALL, "./images/nopreview-100.gif");
+        GRAY_URL.put(GetPreviews.LARGE, "./images/nopreview-100.gif");
+        GRAY_URL.put(GetPreviews.BADGE, "./images/nopreview-100.gif");
         PENDING_URL = new HashMap<String, String>(); // how I yearn for map literals
         PENDING_URL.put(GetPreviews.SMALL, "./images/loading-small.gif");
         PENDING_URL.put(GetPreviews.LARGE, "./images/loading-large.gif");
@@ -116,6 +118,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     boolean                                 checkingPending = false;
     Timer                                   retryTimer;
     Timer                                   safariForceTimer;
+    private int                             previewTries;
 
     /**
      * Create a preview. If the desired size is small (thumbnail) try showing
@@ -177,7 +180,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         if (size != GetPreviews.LARGE) {
             image.addStyleName("thumbnail");
         } else {
-            image.setWidth(getMaxWidth() + "px");
+            //image.setWidth(getMaxWidth() + "px");
         }
         if (checkPending) {
             image.addErrorHandler(new ErrorHandler() {
@@ -251,6 +254,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             }
 
             public void onSuccess(IsPreviewPendingResult result) {
+                previewTries++;
                 if (checkPending) { // do we need to know the pending state?
                     if (result.isReady()) {
                         //GWT.log("Preview is now READY for " + datasetUri);
@@ -265,13 +269,14 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
                         }
                         checkingPending = false;
                         checkPending = false;
-                    } else if (result.isPending()) {
+                    } else if (result.isPending() && (previewTries < MAXREQUEST)) {
                         //GWT.log("Preview is PENDING for " + datasetUri);
                         if (!wasEverPending) {
                             wasEverPending = true;
                             pendingImage();
                         }
                         if (retryTimer == null) {
+                            previewTries = 0;
                             retryTimer = new Timer() {
                                 public void run() {
                                     getPreview(datasetUri, link);
@@ -283,6 +288,9 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
                         //GWT.log("Preview is NOT READY, NOT PENDING for " + datasetUri);
                         if (retryTimer != null) {
                             retryTimer.cancel();
+                        }
+                        if (wasEverPending) {
+                            grayImage();
                         }
                         checkingPending = false;
                         checkPending = false;
