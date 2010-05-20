@@ -135,8 +135,8 @@ public class RestServlet extends AuthenticatedServlet {
 
     static RestService         restService;                                                        // TODO manage this lifecycle better
 
-    public static final String SMALL_404                    = "/preview-100.gif";
-    public static final String LARGE_404                    = "/preview-500.gif";
+    public static final String SMALL_404                    = "/nopreview-100.gif";
+    public static final String LARGE_404                    = "/nopreview-100.gif";
 
     public void init() throws ServletException {
         super.init();
