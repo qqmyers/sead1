@@ -116,7 +116,7 @@ public class LicenseWidget extends Composite {
     }
 
     public void showEditor(boolean showEdit) {
-        if (licenseEdit == null) {
+        if (!licenseEdit.isAttached()) {
             return;
         }
         if (showEdit) {
@@ -157,10 +157,9 @@ public class LicenseWidget extends Composite {
         mainPanel.add(attribution);
 
         // allow user to edit the license
-        if (canEdit) {
-            editPanel();
-            showEditor(showEdit);
-        }
+        editPanel();
+        setEditable(canEdit);
+        showEditor(showEdit);
 
         // get the license
         if (resources.size() == 1) {
@@ -183,10 +182,17 @@ public class LicenseWidget extends Composite {
         }
     }
 
+    public void setEditable(boolean canEdit) {
+        if (canEdit && !licenseEdit.isAttached()) {
+            mainPanel.add(licenseEdit);
+        } else if (!canEdit && licenseEdit.isAttached()) {
+            mainPanel.remove(licenseEdit);
+        }
+    }
+
     private void editPanel() {
         licenseEdit = new Anchor("Edit");
         licenseEdit.addStyleName("anchorBlock");
-        mainPanel.add(licenseEdit);
 
         licenseEdit.addClickHandler(new ClickHandler() {
             @Override

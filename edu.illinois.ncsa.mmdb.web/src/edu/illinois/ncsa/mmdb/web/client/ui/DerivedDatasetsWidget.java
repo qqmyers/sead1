@@ -38,46 +38,85 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.List;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFrom;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFromResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class DerivedDatasetsWidget extends Composite {
-    FlowPanel           mainContainer;
-    FlexTable           previews;
-    private final Label titleLabel;
+    private final FlowPanel       mainContainer;
+    private final FlexTable       previews;
 
-    int                 n = 0;
+    private final String          uri;
+    private final MyDispatchAsync service;
 
-    public DerivedDatasetsWidget() {
+    public DerivedDatasetsWidget(String uri, MyDispatchAsync service) {
+        this(uri, service, true);
+    }
+
+    public DerivedDatasetsWidget(final String uri, final MyDispatchAsync service, boolean withTitle) {
+        this.uri = uri;
+        this.service = service;
+
         mainContainer = new FlowPanel();
         mainContainer.addStyleName("datasetRightColSection");
-
-        titleLabel = new Label("Derived from");
-        titleLabel.addStyleName("datasetRightColHeading");
-        mainContainer.add(titleLabel);
+        mainContainer.setVisible(false);
         initWidget(mainContainer);
+
+        if (withTitle) {
+            Label titleLabel = new Label("Derived from");
+            titleLabel.addStyleName("datasetRightColHeading");
+            mainContainer.add(titleLabel);
+        }
 
         previews = new FlexTable();
         previews.setWidth("150px");
         mainContainer.add(previews);
     }
 
-    public void removeAllDatasets() {
+    public void showDepth(int depth) {
         previews.removeAllRows();
+        showLevel(uri, depth);
     }
 
-    public void addDataset(DatasetBean ds) {
+    private void showLevel(final String uri, final int level) {
+        service.execute(new GetDerivedFrom(uri), new AsyncCallback<GetDerivedFromResult>() {
+            @Override
+            public void onFailure(Throwable arg0) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onSuccess(GetDerivedFromResult arg0) {
+                List<DatasetBean> df = arg0.getDerivedFrom();
+                for (DatasetBean d : df ) {
+                    addDataset(d);
+                    if (level > 0) {
+                        showLevel(d.getUri(), level - 1);
+                    }
+                }
+                mainContainer.setVisible(previews.getRowCount() > 0);
+            }
+        });
+    }
+
+    private void addDataset(DatasetBean ds) {
         String url = "dataset?id=" + ds.getUri();
         PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url);
         String title = ds.getTitle();
         title = title.length() > 15 ? title.substring(0, 15) + "..." : title;
         Hyperlink link = new Hyperlink(title, url);
+        int n = previews.getRowCount();
         if (n > 0) {
             previews.setWidget(n++, 0, new Label("which was derived from:"));
         }
