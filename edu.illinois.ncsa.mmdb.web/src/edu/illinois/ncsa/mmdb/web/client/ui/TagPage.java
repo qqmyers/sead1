@@ -82,7 +82,7 @@ public class TagPage extends Composite {
     }
 
     private Widget createTagInformation() {
-        return new HTML("Datasets tagged with '<b>" + tagName + "</b>'");
+        return new HTML("Data tagged with '<b>" + tagName + "</b>'");
     }
 
     private void retrieveDatasets() {

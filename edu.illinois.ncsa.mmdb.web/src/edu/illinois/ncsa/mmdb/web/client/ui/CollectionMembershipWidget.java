@@ -216,16 +216,12 @@ public class CollectionMembershipWidget extends Composite {
 
                             @Override
                             public void onFailure(Throwable arg0) {
-                                GWT.log("Error adding dataset to collection",
-                                        arg0);
+                                GWT.log("Error adding dataset to collection", arg0);
                             }
 
                             @Override
                             public void onSuccess(AddToCollectionResult arg0) {
-                                GWT
-                                        .log(
-                                                "Datasets successfully added to collection",
-                                                null);
+                                GWT.log("Data successfully added to collection", null);
                                 addToCollectionDialog.hide();
                                 loadCollections();
                             }
