@@ -466,7 +466,7 @@ public class DatasetWidget extends Composite {
                 if (MMDB.getUsername().equals(result.getRightsHolderUri()) || rights.equals("pddl") || "cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights) || result.isAllowDownload()) {
                     Anchor downloadAnchor = new Anchor();
                     downloadAnchor.setHref(DOWNLOAD_URL + uri);
-                    downloadAnchor.setText("Download original");
+                    downloadAnchor.setText("Download");
                     downloadAnchor.setTarget("_blank");
                     downloadAnchor.addStyleName("datasetActionLink");
                     actionsPanel.insert(downloadAnchor, 0);
