@@ -73,12 +73,13 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
  */
 public class ListCollectionsPage extends Composite {
 
-    private final MyDispatchAsync dispatchasync;
-    private final HandlerManager  eventBus;
-    private final FlowPanel       mainContainer;
-    private final Label           noCollectionsLabel;
-    private final FlowPanel       addCollectionWidget;
-    private TitlePanel            pageTitle;
+    private final MyDispatchAsync     dispatchasync;
+    private final HandlerManager      eventBus;
+    private final FlowPanel           mainContainer;
+    private final Label               noCollectionsLabel;
+    private final FlowPanel           addCollectionWidget;
+    private TitlePanel                pageTitle;
+    private PagingCollectionTableView view;
 
     public ListCollectionsPage(MyDispatchAsync dispatchasync,
             HandlerManager eventBus) {
@@ -190,7 +191,11 @@ public class ListCollectionsPage extends Composite {
      */
     protected void showCollections(ArrayList<CollectionBean> collections) {
         mainContainer.remove(noCollectionsLabel);
-        PagingCollectionTableView view = new PagingCollectionTableView();
+        if (view != null) {
+            mainContainer.remove(view);
+        }
+
+        view = new PagingCollectionTableView();
         view.addStyleName("datasetTable");
         PagingCollectionTablePresenter presenter = new PagingCollectionTablePresenter(
                         view, eventBus);
