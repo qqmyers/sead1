@@ -139,7 +139,7 @@ public class LocationWidget extends Composite {
             setVisible(true);
 
             map = new MapWidget();
-            map.setSize("230px", "230px");
+            map.setSize("200px", "200px");
             map.setUIToDefault();
             mainPanel.add(map);
         }
