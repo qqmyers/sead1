@@ -207,7 +207,6 @@ cat > ncsa.rmap << EOF
         </provider>        
     </searchPath>
 
-
     <locator searchPathRef="ncsa" pattern="^edu\.illinois\.ncsa(\..+)?"/>
     <locator searchPathRef="ncsa" pattern="^edu\.uiuc\.ncsa(\..+)?"/>
     <locator searchPathRef="ncsa" pattern="^org\.eclipse\.rcp\.headless(\..+)?"/>
