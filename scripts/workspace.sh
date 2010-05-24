@@ -137,8 +137,8 @@ cat > eclipse.target << EOF
        <location path="$TARGET" type="Profile"/>
    </locations>
    <environment>
-        <os>win32</os>
-        <ws>win32</ws>
+        <os>linux</os>
+        <ws>gtk</ws>
         <arch>x86</arch>
         <nl>en_US</nl>
    </environment>
