@@ -29,18 +29,18 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jena-2.6.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.5.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-log4j12-1.5.3.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-client-2.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-client-2.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/iri-0.7.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/arq-2.8.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jdom-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/mail.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-jena-2.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-kernel-2.5.jar" sourcepath="/org.tupeloproject.core/tupelo-kernel/src/main/java"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-rdf-ntriples-2.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-server-2.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-sparql-2.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-util-2.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-jena-2.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-kernel-2.6.jar" sourcepath="/org.tupeloproject.core/tupelo-kernel/src/main/java"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-rdf-ntriples-2.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-server-2.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-sparql-2.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-util-2.6.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.illinois.ncsa.cet.search.jar" sourcepath="/edu.illinois.ncsa.cet.search"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/milton-api-1.5.1.jar" sourcepath="war/WEB-INF/lib/milton-api-1.5.1-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/milton-servlet-1.5.1.jar" sourcepath="war/WEB-INF/lib/milton-servlet-1.5.1-sources.jar"/>
