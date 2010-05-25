@@ -116,7 +116,7 @@ public class LicenseWidget extends Composite {
     }
 
     public void showEditor(boolean showEdit) {
-        if (!licenseEdit.isAttached()) {
+        if (!licenseEditor.isAttached() && !licenseEdit.isAttached()) {
             return;
         }
         if (showEdit) {
