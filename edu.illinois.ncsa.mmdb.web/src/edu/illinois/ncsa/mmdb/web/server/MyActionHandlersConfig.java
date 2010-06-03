@@ -90,6 +90,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetPropertyHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
 
@@ -149,6 +150,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new JiraIssueHandler());
         DispatchUtil.registerHandler(new ListUserMetadataFieldsHandler());
         DispatchUtil.registerHandler(new DeleteDatasetsHandler());
+        DispatchUtil.registerHandler(new SystemInfoHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

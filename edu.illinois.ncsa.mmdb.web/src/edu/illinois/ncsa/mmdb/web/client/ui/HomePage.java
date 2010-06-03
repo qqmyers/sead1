@@ -94,6 +94,7 @@ public class HomePage extends Page {
         super("Home", dispatchAsync);
         createTabs();
         createRecentActivityTab();
+        createSystemInfoTab();
         createProfileTab();
         //        createPreferencesTab();
         checkAdminPermissions();
@@ -107,6 +108,13 @@ public class HomePage extends Page {
         recentActivityPanel = new FlowPanel();
         tabPanel.add(recentActivityPanel, "Recent Activity");
         getRecentActivity();
+    }
+
+    /**
+     * A tab to show system info
+     */
+    private void createSystemInfoTab() {
+        tabPanel.add(new SystemInfoWidget(dispatchAsync, false), "System Info");
     }
 
     /**
@@ -171,18 +179,18 @@ public class HomePage extends Page {
                 Permission.VIEW_ADMIN_PAGES),
                 new AsyncCallback<HasPermissionResult>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Error checking for admin privileges", caught);
-            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error checking for admin privileges", caught);
+                    }
 
-            @Override
-            public void onSuccess(HasPermissionResult result) {
-                if (result.isPermitted()) {
-                    createAdminTab();
-                }
-            }
-        });
+                    @Override
+                    public void onSuccess(HasPermissionResult result) {
+                        if (result.isPermitted()) {
+                            createAdminTab();
+                        }
+                    }
+                });
     }
 
     /**
