@@ -53,7 +53,6 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
-import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
@@ -85,17 +84,18 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
 
         Unifier uf = new Unifier();
         uf.addPattern("ds", Rdf.TYPE, Cet.DATASET);
-        uf.addPattern("ds", Files.LENGTH, "size");
+        uf.addPattern("ds", Files.LENGTH, "size", true);
         uf.setColumnNames("ds", "size");
         long size = 0;
         int count = 0;
         try {
-            ListTable<Resource> result = TupeloStore.getInstance().unifyExcludeDeleted(uf, "ds");
-            for (Tuple<Resource> row : result ) {
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf, "ds") ) {
                 count++;
-                long l = Long.parseLong(row.get(1).getString());
-                if (l > 0) {
-                    size += l;
+                if (row.get(1) != null) {
+                    long l = Long.parseLong(row.get(1).getString());
+                    if (l > 0) {
+                        size += l;
+                    }
                 }
             }
         } catch (OperatorException e) {
