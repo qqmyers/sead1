@@ -7,7 +7,7 @@
 export INSTALL="edu.illinois.ncsa.mmdb.desktop.site edu.illinois.ncsa.mmdb.extractor.feature edu.illinois.ncsa.mmdb.web"
 
 # for cyberintegrator
-#export INSTALL="edu.illinois.ncsa.cyberintegrator.client.site edu.uiuc.ncsa.cyberintegrator.server.feature edu.uiuc.ncsa.cet.cron.feature"
+#export INSTALL="edu.illinois.ncsa.cyberintegrator.client.site edu.uiuc.ncsa.cyberintegrator.server.feature edu.uiuc.ncsa.cet.cron.feature edu.illinois.ncsa.cet.contextserver.ui.feature"
 
 # for dse
 #export INSTALL="edu.uiuc.ncsa.cyberintegrator.server.feature dse-webapp"
