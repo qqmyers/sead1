@@ -171,7 +171,7 @@ public class DynamicGridView extends FlexTable implements Display {
     }
 
     private String shortenTitle(String title) {
-        if (title.length() > 15) {
+        if (title != null && title.length() > 15) {
             return title.substring(0, 10) + "...";
         } else {
             return title;
