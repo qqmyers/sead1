@@ -22,15 +22,15 @@ export ECLIPSE=/home/kooper/eclipse
 # Where is the target platform installed
 #  If no target is found it will be downloaded
 # ----------------------------------------------------------------------
-#export TARGET=`readlink -m $PWD/target`
-export TARGET=/home/kooper/projects/target
+export TARGET=`readlink -m $PWD/target`
+#export TARGET=$HOME/projects/target
 
 # ----------------------------------------------------------------------
 # Where should buckminster be installed
 #  If buckminster is not found it will be downloaded
 # ----------------------------------------------------------------------
-#export BUCKMINSTER=`readlink -m $PWD/bucky`
-export BUCKMINSTER=/home/kooper/projects/buckminster
+export BUCKMINSTER=`readlink -m $PWD/buckminster`
+#export BUCKMINSTER=$HOME/projects/buckminster
 
 # ----------------------------------------------------------------------
 # Where should the workspace be created
@@ -39,23 +39,31 @@ export BUCKMINSTER=/home/kooper/projects/buckminster
 export WORKSPACE=`readlink -m $PWD/workspace`
 
 # ----------------------------------------------------------------------
+# Info about what type of eclipse is running
+# ----------------------------------------------------------------------
+export P2OS=linux
+export P2ARCH=`arch`
+export P2WS=gtk
+export P2NL=en_US
+
+# ----------------------------------------------------------------------
 # What version should be installed
 #  use main for the trunk/head 
 #  branches start with a /, tags just the name
 #  for example /mmdb-0.5
 # ----------------------------------------------------------------------
 VERSIONALL=main
-VERSIONTUPELO=2.5
+VERSIONTUPELO=main
 
 # ----------------------------------------------------------------------
 # Any certificates needed to be used?
 # ----------------------------------------------------------------------
-export CERTS="-Djavax.net.ssl.trustStore=/home/kooper/jssecacerts"
+#export CERTS="-Djavax.net.ssl.trustStore=/home/kooper/jssecacerts"
 
 # ----------------------------------------------------------------------
 # Where to download buckminster from
 # ----------------------------------------------------------------------
-export URL=http://download.eclipse.org/tools/buckminster/headless-3.6/
+export URL=http://download.eclipse.org/tools/buckminster/headless-3.6
 export SVN_URL=http://download.cloudsmith.com/buckminster/external-3.6
 export LOGGING=INFO
 
@@ -64,7 +72,7 @@ export LOGGING=INFO
 # ----------------------------------------------------------------------
 if [ ! -e $BUCKMINSTER ]; then
   export EQUINOX="`ls -1rt $ECLIPSE/plugins/org.eclipse.equinox.launcher_*.jar | head -1`"
-  java -jar $EQUINOX -application org.eclipse.equinox.p2.director -destination $BUCKMINSTER -profile buckminster -installIU org.eclipse.buckminster.cmdline.product -repository $URL
+  java -jar $EQUINOX -application org.eclipse.equinox.p2.director -destination $BUCKMINSTER -profile buckminster -installIU org.eclipse.buckminster.cmdline.product -repository $URL -p2.os $P2OS -p2.ws $P2WS -p2.arch $P2ARCH -p2.nl $P2NL
   $BUCKMINSTER/buckminster install $URL org.eclipse.buckminster.core.headless.feature
   $BUCKMINSTER/buckminster install $URL  org.eclipse.buckminster.pde.headless.feature
   $BUCKMINSTER/buckminster install $SVN_URL org.eclipse.buckminster.subversive.headless.feature
@@ -88,16 +96,16 @@ if [ ! -e $TARGET ]; then
     xmlns:pmp="http://www.eclipse.org/buckminster/PDEMapProvider-1.0"
     xmlns:bc="http://www.eclipse.org/buckminster/Common-1.0">
 
-    <searchPath name="org.eclipse.galileo">
+    <searchPath name="eclipse">
         <provider readerType="p2" componentTypes="osgi.bundle,eclipse.feature" mutable="false" source="false">
-            <uri format="http://download.eclipse.org/eclipse/updates/3.5?importType=binary"/>
+            <uri format="http://download.eclipse.org/eclipse/updates/3.6?importType=binary"/>
         </provider>
         <provider readerType="p2" componentTypes="osgi.bundle,eclipse.feature" mutable="false" source="false">
-            <uri format="http://download.eclipse.org/releases/galileo?importType=binary"/>
+            <uri format="http://download.eclipse.org/releases/helios?importType=binary"/>
         </provider>
     </searchPath>
 
-    <locator searchPathRef="org.eclipse.galileo" />
+    <locator searchPathRef="eclipse" />
 </rmap>
 EOF
 
@@ -137,10 +145,10 @@ cat > eclipse.target << EOF
        <location path="$TARGET" type="Profile"/>
    </locations>
    <environment>
-        <os>linux</os>
-        <ws>gtk</ws>
-        <arch>x86</arch>
-        <nl>en_US</nl>
+        <os>$P2OS</os>
+        <ws>$P2WS</ws>
+        <arch>$P2ARCH</arch>
+        <nl>$P2NL</nl>
    </environment>
    <launcherArgs>
         <vmArgs>-Dosgi.requiredJavaVersion=1.5 -Xms40m -Xmx512m</vmArgs>
@@ -164,25 +172,25 @@ cat > ncsa.rmap << EOF
 
     <searchPath name="ncsa">
         <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
-            <uri format="https://svn.ncsa.uiuc.edu/svn/cet/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+            <uri format="https://opensource.ncsa.illinois.edu/svn/cet/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>
 
         <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
-            <uri format="https://svn.ncsa.uiuc.edu/svn/mmdb/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+            <uri format="https://opensource.ncsa.illinois.edu/svn/mmdb/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>
 
         <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
-            <uri format="https://svn.ncsa.uiuc.edu/svn/cyberintegrator/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+            <uri format="https://opensource.ncsa.illinois.edu/svn/cyberintegrator/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>
 
         <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
-            <uri format="https://svn.ncsa.uiuc.edu/svn/dse/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+            <uri format="https://opensource.ncsa.illinois.edu/svn/dse/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>
@@ -190,7 +198,7 @@ cat > ncsa.rmap << EOF
 
     <searchPath name="tupelo">
         <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
-            <uri format="https://svn.ncsa.uiuc.edu/svn/tupelo/trunk/tupelo-all/{0}?moduleAfterTag&amp;moduleAfterBranch">
+            <uri format="https://opensource.ncsa.illinois.edu/svn/tupelo/trunk/tupelo-all/{0}?moduleAfterTag&amp;moduleAfterBranch">
                 <bc:replace>
                     <bc:propertyRef key="buckminster.component" />
                     <bc:match pattern="^org\.tupeloproject\.((?:.\w+)*)$" replacement="tupelo-\$1" />
@@ -201,17 +209,25 @@ cat > ncsa.rmap << EOF
 
     <searchPath name="ncsa-orbit">
         <provider readerType="svn" componentTypes="eclipse.feature,osgi.bundle,buckminster" source="true" mutable="true">
-            <uri format="https://svn.ncsa.uiuc.edu/svn/ncsa-orbit/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+            <uri format="https://opensource.ncsa.illinois.edu/svn/ncsa-orbit/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>        
     </searchPath>
 
-    <locator searchPathRef="ncsa" pattern="^edu\.illinois\.ncsa(\..+)?"/>
-    <locator searchPathRef="ncsa" pattern="^edu\.uiuc\.ncsa(\..+)?"/>
-    <locator searchPathRef="ncsa" pattern="^org\.eclipse\.rcp\.headless(\..+)?"/>
-    <locator searchPathRef="tupelo" pattern="^org\.tupeloproject(\..+)?"/>
-    <locator searchPathRef="ncsa-orbit" />
+    <searchPath name="eclipse">
+        <provider readerType="p2" componentTypes="osgi.bundle,eclipse.feature" mutable="false" source="false">
+            <uri format="http://download.eclipse.org/eclipse/updates/3.6?importType=binary"/>
+        </provider>
+        <provider readerType="p2" componentTypes="osgi.bundle,eclipse.feature" mutable="false" source="false">
+            <uri format="http://download.eclipse.org/releases/helios?importType=binary"/>
+        </provider>
+    </searchPath>
+
+    <locator searchPathRef="ncsa" failOnError="false" />
+    <locator searchPathRef="tupelo" pattern="^org\.tupeloproject(\..+)?" />
+    <locator searchPathRef="ncsa-orbit" failOnError="false" />
+    <locator searchPathRef="eclipse" />
 </rmap>
 EOF
 
