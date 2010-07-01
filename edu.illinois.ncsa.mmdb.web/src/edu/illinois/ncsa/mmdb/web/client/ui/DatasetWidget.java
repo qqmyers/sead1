@@ -38,9 +38,7 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -51,14 +49,12 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -76,7 +72,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
@@ -89,10 +84,6 @@ import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.PreviewBean;
-import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
-import edu.uiuc.ncsa.cet.bean.PreviewPyramidBean;
-import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
 
 /**
  * Show one datasets and related information about it.
@@ -103,14 +94,8 @@ import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
  */
 @SuppressWarnings("nls")
 public class DatasetWidget extends Composite {
-    /** maximum width of a preview image */
-    private static final long       MAX_WIDTH    = 600;
-    /** maximum height of a preview image */
-    private static final long       MAX_HEIGHT   = 600;
 
-    private static final String     BLOB_URL     = "./api/image/";
     private static final String     DOWNLOAD_URL = "./api/image/download/";
-    private static final String     PYRAMID_URL  = "./pyramid/";
 
     private final MyDispatchAsync   service;
 
@@ -122,8 +107,6 @@ public class DatasetWidget extends Composite {
     private Panel                   infoPanel;
     private FlexTable               informationTable;
     protected DerivedDatasetsWidget derivedDatasetsWidget;
-    private AbsolutePanel           previewPanel;
-    private PreviewBean             currentPreview;
 
     /**
      * 
@@ -144,7 +127,7 @@ public class DatasetWidget extends Composite {
         rightColumn.addStyleName("datasetMainContainerRightColumn");
         mainPanel.add(rightColumn);
 
-        // necessary so that the main conteinar wraps around the two columns
+        // necessary so that the main container wraps around the two columns
         SimplePanel clearFloat = new SimplePanel();
         clearFloat.addStyleName("clearFloat");
         mainPanel.add(clearFloat);
@@ -153,7 +136,7 @@ public class DatasetWidget extends Composite {
     @Override
     protected void onUnload() {
         super.onUnload();
-        hideSeadragon();
+        //hideSeadragon();
     }
 
     /**
@@ -188,69 +171,6 @@ public class DatasetWidget extends Composite {
      * @param collection
      */
     private void drawPage(final GetDatasetResult result) {
-        // find best preview bean, add others
-        // best image preview is that that is closest to width of column
-        int maxwidth = leftColumn.getOffsetWidth();
-        List<PreviewBean> previews = new ArrayList<PreviewBean>();
-        // FIXME use a map to handle all previews
-        PreviewImageBean bestImage = null;
-        PreviewVideoBean bestVideo = null;
-        for (PreviewBean pb : result.getPreviews() ) {
-            if (pb instanceof PreviewImageBean) {
-                PreviewImageBean pib = (PreviewImageBean) pb;
-                if (bestImage == null) {
-                    bestImage = pib;
-                } else if (Math.abs(maxwidth - pib.getWidth()) < Math.abs(maxwidth - bestImage.getWidth())) {
-                    bestImage = pib;
-                }
-            } else if (pb instanceof PreviewVideoBean) {
-                PreviewVideoBean pvb = (PreviewVideoBean) pb;
-                if (bestVideo == null) {
-                    bestVideo = pvb;
-                } else if (Math.abs(maxwidth - pvb.getWidth()) < Math.abs(maxwidth - bestVideo.getWidth())) {
-                    bestVideo = pvb;
-                }
-            } else {
-                previews.add(pb);
-            }
-        }
-        if (bestImage != null) {
-            previews.add(bestImage);
-        }
-        if (bestVideo != null) {
-            previews.add(bestVideo);
-        }
-
-        // sort beans, image, zoom, video, rest
-        Collections.sort(previews, new Comparator<PreviewBean>() {
-            @Override
-            public int compare(PreviewBean o1, PreviewBean o2)
-                {
-                    // sort by type
-                    if (o1.getClass() != o2.getClass()) {
-                        if (o1 instanceof PreviewImageBean) {
-                            return -1;
-                        }
-                        if (o2 instanceof PreviewImageBean) {
-                            return +1;
-                        }
-                        if (o1 instanceof PreviewPyramidBean) {
-                            return -1;
-                        }
-                        if (o2 instanceof PreviewPyramidBean) {
-                            return +1;
-                        }
-                        if (o1 instanceof PreviewVideoBean) {
-                            return -1;
-                        }
-                        if (o2 instanceof PreviewVideoBean) {
-                            return +1;
-                        }
-                    }
-                    // don't care at this point
-                    return 0;
-                }
-        });
 
         // ----------------------------------------------------------------------
         // Create the left side of the page
@@ -277,54 +197,9 @@ public class DatasetWidget extends Composite {
         });
         leftColumn.add(titleLabel);
 
-        // preview options
-        final FlowPanel previewsPanel = new FlowPanel();
-        previewsPanel.addStyleName("datasetActions");
-        for (PreviewBean pb : previews ) {
-            String label;
-            if (pb instanceof PreviewImageBean) {
-                label = "Preview";
-
-            } else if (pb instanceof PreviewPyramidBean) {
-                label = "Zoom in";
-                if (MMDB.getUsername().contains("joefutrelle@gmail.com") || MMDB.getUsername().contains("acraig@ncsa.uiuc.edu")) {
-                    label = "Mega-Zoom™";
-                }
-
-            } else if (pb instanceof PreviewVideoBean) {
-                label = "Play video";
-
-            } else {
-                label = "Unknown"; // FIXME maybe "other" would be more user-friendly?
-                GWT.log("Unknown preview bean " + pb);
-            }
-
-            final PreviewBean finalpb = pb;
-            final Anchor anchor = new Anchor(label);
-            anchor.addStyleName("previewActionLink");
-            anchor.addClickHandler(new ClickHandler() {
-                public void onClick(ClickEvent event) {
-                    for (int i = 0; i < previewsPanel.getWidgetCount(); i++ ) {
-                        previewsPanel.getWidget(i).removeStyleName("deadlink");
-                    }
-                    anchor.addStyleName("deadlink");
-                    showPreview(finalpb);
-                }
-            });
-            if (bestVideo == finalpb) {
-                anchor.addStyleName("deadlink");
-            } else if (bestImage == finalpb) {
-                anchor.addStyleName("deadlink");
-            }
-            previewsPanel.add(anchor);
-        }
-        leftColumn.add(previewsPanel);
-
-        // space for the preview/video/zoom
-        currentPreview = null;
-        previewPanel = new AbsolutePanel();
-        previewPanel.addStyleName("previewPanel");
-        leftColumn.add(previewPanel);
+        // preview - selection text and preview
+        PreviewPanel Preview = new PreviewPanel();
+        Preview.drawPreview(result, leftColumn, uri);
 
         // dataset actions
         final FlowPanel actionsPanel = new FlowPanel();
@@ -382,19 +257,6 @@ public class DatasetWidget extends Composite {
 
         // social items
         rightColumn.add(new SocialWidget(uri, service));
-
-        // ----------------------------------------------------------------------
-        // Initialize some more pieces of the UI
-        // ----------------------------------------------------------------------
-
-        // show right preview
-        if (bestVideo != null) {
-            showPreview(bestVideo);
-        } else if (bestImage != null) {
-            showPreview(bestImage);
-        } else {
-            previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null));
-        }
 
         // add download link
         service.execute(new GetLicense(uri), new AsyncCallback<LicenseResult>() {
@@ -567,143 +429,6 @@ public class DatasetWidget extends Composite {
 
         dialog.show();
     }
-
-    // ----------------------------------------------------------------------
-    // preview section
-    // ----------------------------------------------------------------------
-
-    private void showPreview(PreviewBean pb) {
-        // check to make sure this is not already showing
-        if (currentPreview == pb) {
-            return;
-        }
-
-        // if not same as current preview hide old preview type
-        if (currentPreview == null) {
-            previewPanel.clear();
-        } else if (currentPreview.getClass() != pb.getClass()) {
-            if (currentPreview instanceof PreviewPyramidBean) {
-                hideSeadragon();
-            }
-
-            previewPanel.clear();
-            currentPreview = null;
-        }
-
-        // if now preview type create a new one
-        if (currentPreview == null) {
-            if (pb instanceof PreviewImageBean) {
-                Image image = new Image();
-                //image.addStyleName( "seadragon" );
-                image.getElement().setId("preview");
-                previewPanel.add(image);
-
-            } else if (pb instanceof PreviewPyramidBean) {
-                Label container = new Label();
-                container.addStyleName("seadragon");
-                container.getElement().setId("preview");
-                previewPanel.add(container);
-
-            } else if (pb instanceof PreviewVideoBean) {
-                Label container = new Label();
-                container.getElement().setId("preview");
-                previewPanel.add(container);
-            }
-        }
-
-        // replace content (either same type or new created)
-        if (pb instanceof PreviewImageBean) {
-            PreviewImageBean pib = (PreviewImageBean) pb;
-            long w = pib.getWidth();
-            long h = pib.getHeight();
-            if (pib.getWidth() > pib.getHeight()) {
-                if (pib.getWidth() > MAX_WIDTH) {
-                    h = (long) (h * (double) MAX_WIDTH / w);
-                    w = MAX_WIDTH;
-                }
-            } else {
-                if (pib.getHeight() > MAX_HEIGHT) {
-                    w = (long) (w * (double) MAX_HEIGHT / h);
-                    h = MAX_HEIGHT;
-                }
-            }
-            showImage(BLOB_URL + pb.getUri(), Long.toString(w), Long.toString(h));
-
-        } else if (pb instanceof PreviewPyramidBean) {
-            showSeadragon(PYRAMID_URL + pb.getUri() + "/xml");
-
-        } else if (pb instanceof PreviewVideoBean) {
-            PreviewVideoBean pvb = (PreviewVideoBean) pb;
-            String preview = null;
-            if (pvb.getPreviewImage() != null) {
-                preview = BLOB_URL + pvb.getPreviewImage().getUri();
-            }
-            showFlash(BLOB_URL + pb.getUri(), preview, "video", Long.toString(pvb.getWidth()), Long.toString(pvb.getHeight()));
-        }
-
-        currentPreview = pb;
-    }
-
-    // ----------------------------------------------------------------------
-    // javascript
-    // ----------------------------------------------------------------------
-
-    public final native void showImage(String url, String w, String h) /*-{
-        img = $doc.getElementById("preview");
-        img.src=url;
-        img.width=w;
-        img.height=h;
-    }-*/;
-
-    public final native void showFlash(String url, String preview, String type, String w, String h) /*-{
-        if (url != null) {
-        $wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');
-        $wnd.player.addParam('allowfullscreen','true');
-        $wnd.player.addParam('allowscriptaccess','always');
-        $wnd.player.addParam('wmode','opaque');
-        $wnd.player.addVariable('file',url);
-        $wnd.player.addVariable('autostart','false');
-        if (preview != null) {
-        $wnd.player.addVariable('image',preview);
-        }            
-        //            $wnd.player.addVariable('author','Joe');
-        //            $wnd.player.addVariable('description','Bob');
-        //            $wnd.player.addVariable('title','title');
-        //            $wnd.player.addVariable('debug','console');
-        $wnd.player.addVariable('provider',type);
-        $wnd.player.write('preview');
-        }
-    }-*/;
-
-    public final native void showSeadragon(String url) /*-{
-        $wnd.Seadragon.Config.debug = true;
-        $wnd.Seadragon.Config.imagePath = "img/";
-        $wnd.Seadragon.Config.autoHideControls = true;
-
-        // close existing viewer
-        if ($wnd.viewer) {
-        $wnd.viewer.setFullPage(false);
-        $wnd.viewer.setVisible(false);
-        $wnd.viewer.close();
-        $wnd.viewer = null;            
-        }
-
-        // open with new url
-        if (url != null) {
-        $wnd.viewer = new $wnd.Seadragon.Viewer("preview");
-        $wnd.viewer.openDzi(url);
-        }
-    }-*/;
-
-    public final native void hideSeadragon() /*-{
-        // hide the current viewer if open
-        if ($wnd.viewer) {
-        $wnd.viewer.setFullPage(false);
-        $wnd.viewer.setVisible(false);
-        $wnd.viewer.close();
-        $wnd.viewer = null;            
-        }
-    }-*/;
 
     private Composite createMetaDataPanel(UserMetadataWidget um) {
         informationTable = new FlexTable();
