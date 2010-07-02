@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:titleCondensed="Prefs" android:icon="@drawable/ic_menu_preferences"
+		android:title="Preferences" android:id="@+id/mm_prefs"></item>
+	<item android:titleCondensed="Choose" android:icon="@drawable/ic_menu_gallery"
+		android:title="Choose Image ..." android:id="@+id/mm_choose"></item>
+	<item android:titleCondensed="Quit" android:icon="@drawable/ic_menu_revert"
+		android:title="Quit" android:id="@+id/mm_quit"></item>
+</menu>
