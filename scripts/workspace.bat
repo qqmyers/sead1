@@ -1,4 +1,8 @@
 @echo off
+
+REM enable delayed expansian of variables
+SETLOCAL ENABLEDELAYEDEXPANSION
+
 REM ----------------------------------------------------------------------
 REM What should be installed
 REM ----------------------------------------------------------------------
@@ -71,7 +75,7 @@ if not exist %BUCKMINSTER% (
   for /f "delims=" %%E in ('dir /b "%ECLIPSE%\plugins\org.eclipse.equinox.launcher_*"') do (
     set EQUINOX="%ECLIPSE%\plugins\%%E"
   )
-  java -jar %EQUINOX% -application org.eclipse.equinox.p2.director -destination %BUCKMINSTER% -profile buckminster -installIU org.eclipse.buckminster.cmdline.product -repository %URL% -p2.os %P2OS% -p2.ws %P2WS% -p2.arch %P2ARCH% -p2.nl %P2NL%
+  java -jar !EQUINOX! -application org.eclipse.equinox.p2.director -destination %BUCKMINSTER% -profile buckminster -installIU org.eclipse.buckminster.cmdline.product -repository %URL% -p2.os %P2OS% -p2.ws %P2WS% -p2.arch %P2ARCH% -p2.nl %P2NL%
   %BUCKMINSTER%/buckminster install %URL% org.eclipse.buckminster.core.headless.feature
   %BUCKMINSTER%/buckminster install %URL%  org.eclipse.buckminster.pde.headless.feature
   %BUCKMINSTER%/buckminster install %SVN_URL% org.eclipse.buckminster.subversive.headless.feature
@@ -244,3 +248,5 @@ for %%P in (%INSTALL%) do (
 
 REM remove map file
 del ncsa.rmap
+pause
+
