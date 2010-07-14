@@ -67,6 +67,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.PreviewPyramidBean;
+import edu.uiuc.ncsa.cet.bean.PreviewThreeDimensionalBean;
 import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
 
 /**
@@ -102,6 +103,7 @@ public class PreviewPanel {
     protected void onUnload() {
         //super.onUnload();
         hideSeadragon();
+        hideWebGL();
     }
 
     public void drawPreview(final GetDatasetResult result, FlowPanel leftColumn, String uri) {
@@ -113,7 +115,7 @@ public class PreviewPanel {
         // FIXME use a map to handle all previews
         PreviewImageBean bestImage = null;
         PreviewVideoBean bestVideo = null;
-        //Preview3DBean best3D = null;
+        PreviewThreeDimensionalBean best3D = null;
         for (PreviewBean pb : result.getPreviews() ) {
             if (pb instanceof PreviewImageBean) {
                 PreviewImageBean pib = (PreviewImageBean) pb;
@@ -129,15 +131,15 @@ public class PreviewPanel {
                 } else if (Math.abs(maxwidth - pvb.getWidth()) < Math.abs(maxwidth - bestVideo.getWidth())) {
                     bestVideo = pvb;
                 }
-            }
-            /*else if (pb instanceof Preview3DBean) {
-                Preview3DBean p3Db = (Preview3DBean) pb;
+            } else if (pb instanceof PreviewThreeDimensionalBean) {
+                PreviewThreeDimensionalBean p3Db = (PreviewThreeDimensionalBean) pb;
+
                 if (best3D == null) {
                     best3D = p3Db;
                 } else if (Math.abs(maxwidth - p3Db.getWidth()) < Math.abs(maxwidth - best3D.getWidth())) {
                     best3D = p3Db;
                 }
-            }*/
+            }
 
             else {
                 previews.add(pb);
@@ -149,11 +151,9 @@ public class PreviewPanel {
         if (bestVideo != null) {
             previews.add(bestVideo);
         }
-        /*
         if (best3D != null) {
             previews.add(best3D);
         }
-        */
 
         // sort beans, image, zoom, video, rest
         Collections.sort(previews, new Comparator<PreviewBean>() {
@@ -179,13 +179,13 @@ public class PreviewPanel {
                              }
                              if (o2 instanceof PreviewVideoBean) {
                                  return +1;
-                             }/*
-                              if (o1 instanceof Preview3DBean) {
+                             }
+                             if (o1 instanceof PreviewThreeDimensionalBean) {
                                  return -1;
-                              }
-                              if (o2 instanceof Preview3DBean) {
+                             }
+                             if (o2 instanceof PreviewThreeDimensionalBean) {
                                  return +1;
-                              }*/
+                             }
                          }
                          // don't care at this point
                          return 0;
@@ -197,8 +197,7 @@ public class PreviewPanel {
         previewsPanel.addStyleName("datasetActions");
         for (PreviewBean pb : previews ) {
             String label;
-            //|| pb instanceof Preview3DBean
-            if ((pb instanceof PreviewImageBean)) {
+            if ((pb instanceof PreviewImageBean) || pb instanceof PreviewThreeDimensionalBean) {
                 label = "Preview";
 
             } else if (pb instanceof PreviewPyramidBean) {
@@ -230,11 +229,9 @@ public class PreviewPanel {
                 anchor.addStyleName("deadlink");
             } else if (bestImage == finalpb) {
                 anchor.addStyleName("deadlink");
-            }
-
-            /* else if (best3D == finalpb) {
+            } else if (best3D == finalpb) {
                 anchor.addStyleName("deadlink");
-            }*/
+            }
 
             previewsPanel.add(anchor);
         }
@@ -250,11 +247,11 @@ public class PreviewPanel {
             showPreview(bestVideo);
         } else if (bestImage != null) {
             showPreview(bestImage);
-            //FIXME hack to allow preview based on MIME type instead of a bean
-            //best3D != null || 
-        } else if (result.getDataset().getMimeType().equals("application/x-tgif")) {
+        } else if (best3D != null) {
+            //show3D(uri);
+            //TODO fix uri in showPreview function, default until all tabs set up
+            showWebGL(uri);
             //showPreview(best3D);
-            show3D(uri);
         } else {
             previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null));
         }
@@ -302,12 +299,11 @@ public class PreviewPanel {
                 container.getElement().setId("preview");
                 previewPanel.add(container);
 
-            } /*else if (pb instanceof Preview3DBean) {
+            } else if (pb instanceof PreviewThreeDimensionalBean) {
                 Label container = new Label();
                 container.getElement().setId("preview");
                 previewPanel.add(container);
-              }
-              */
+            }
 
         }
 
@@ -340,10 +336,10 @@ public class PreviewPanel {
             }
             showFlash(BLOB_URL + pb.getUri(), preview, "video", Long.toString(pvb.getWidth()), Long.toString(pvb.getHeight()));
 
-        } /*else if (pb instanceof Preview3DBean) {
-            //show 3D preview when hack is gone
-          }
-          */
+        } else if (pb instanceof PreviewThreeDimensionalBean) {
+            PreviewThreeDimensionalBean p3db = (PreviewThreeDimensionalBean) pb;
+            show3D(p3db.getUri());
+        }
 
         currentPreview = pb;
     }
@@ -410,8 +406,18 @@ public class PreviewPanel {
     }-*/;
 
     public final native void readOBJ(String fileData) /*-{
-        // hide the current viewer if open
+        // initialize HTML5 application
         $wnd.initialize(fileData);
+    }-*/;
+
+    public final native void readOBJ2(String fileData) /*-{
+        // initialize WebGL application
+        $wnd.init_webGL(fileData);
+    }-*/;
+
+    public final native void hideWebGL() /*-{
+        // hide the current WebGL viewer if open
+        $wnd.clear_webGL();
     }-*/;
 
     public final native int getPoly() /*-{
@@ -437,6 +443,7 @@ public class PreviewPanel {
 
     public final void show3D(String uri) {
 
+        //TODO change to correct/dynamic localhost instead of static link
         String url = "http://127.0.0.1:8888/" + DOWNLOAD_URL + uri;
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
         try {
@@ -525,6 +532,47 @@ public class PreviewPanel {
     ///////////////////////////////////////////////////////////////////
     // The following previews below are not in use and are being tested
     ///////////////////////////////////////////////////////////////////
+
+    public final void showWebGL(String uri) {
+
+        //TODO change to correct/dynamic localhost instead of static link
+        String url = "http://127.0.0.1:8888/" + DOWNLOAD_URL + uri;
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
+        try {
+            @SuppressWarnings("unused")
+            Request request = builder.sendRequest(null, new RequestCallback() {
+                public void onError(Request request, Throwable exception) {
+                    // Couldn't connect to server (could be timeout, SOP violation, etc.)     
+                }
+
+                public void onResponseReceived(Request request, Response response) {
+
+                    if (200 == response.getStatusCode()) {
+
+                        //Read file successfully; call Javascript to initialize html5 canvas
+                        readOBJ2(response.getText());
+
+                    } else {
+                        // Handle the error.  Can get the status text from response.getStatusText()
+                        HTML html3 = new HTML();
+                        html3.setHTML("Error: Could not read file from server.");
+                        previewPanel.add(html3);
+                    }
+
+                }
+            });
+        } catch (RequestException e) {
+            // Couldn't connect to server        
+        }
+
+        HTML webGL = new HTML();
+        webGL.setHTML("<STYLE type='text/css'> canvas {border:solid 1px #000;} body{overflow:hidden;}</STYLE>" +
+                "<CANVAS id='c' width='480' height='360'><P>If you are seeing this, " +
+                "your browser does not support <a href='http://www.google.com/chrome/'>" +
+                "HTML5</a></P></CANVAS>" + "<p id='info'></p>");
+        previewPanel.add(webGL);
+
+    }
 
     //Javaview : More advanced preview for 3D files
     public final void showjvLite(String url) {

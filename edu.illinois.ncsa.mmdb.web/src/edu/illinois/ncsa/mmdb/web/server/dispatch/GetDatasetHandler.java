@@ -60,6 +60,7 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewPyramidBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewThreeDimensionalBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewVideoBeanUtil;
 
 /**
@@ -68,53 +69,52 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PreviewVideoBeanUtil;
  * @author Luigi Marini
  * 
  */
-public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetResult>
-{
+public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetResult> {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog( GetDatasetHandler.class );
+    private static Log log = LogFactory.getLog(GetDatasetHandler.class);
 
     @Override
-    public GetDatasetResult execute( GetDataset action, ExecutionContext arg1 ) throws ActionException
-    {
+    public GetDatasetResult execute(GetDataset action, ExecutionContext arg1) throws ActionException {
 
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
-        DatasetBeanUtil dbu = new DatasetBeanUtil( beanSession );
+        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
 
         try {
-            DatasetBean datasetBean = dbu.get( action.getUri() );
-            datasetBean = dbu.update( datasetBean );
+            DatasetBean datasetBean = dbu.get(action.getUri());
+            datasetBean = dbu.update(datasetBean);
 
             Collection<PreviewBean> previews = new HashSet<PreviewBean>();
-            
+
             // image previews
-            previews.addAll( new PreviewImageBeanUtil( beanSession ).getAssociationsFor( action.getUri() ) );
+            previews.addAll(new PreviewImageBeanUtil(beanSession).getAssociationsFor(action.getUri()));
 
             // video previews
-            previews.addAll( new PreviewVideoBeanUtil( beanSession ).getAssociationsFor( action.getUri() ) );
+            previews.addAll(new PreviewVideoBeanUtil(beanSession).getAssociationsFor(action.getUri()));
 
             // pyramid previews
-            previews.addAll( new PreviewPyramidBeanUtil( beanSession ).getAssociationsFor( action.getUri() ) );
+            previews.addAll(new PreviewPyramidBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+
+            // 3D previews
+            previews.addAll(new PreviewThreeDimensionalBeanUtil(beanSession).getAssociationsFor(action.getUri()));
 
             // return dataset and preview
-            return new GetDatasetResult( datasetBean, previews );
-        } catch ( Exception e ) {
-            log.error( "Error retrieving dataset " + action.getUri(), e );
-            throw new ActionException( e );
+            return new GetDatasetResult(datasetBean, previews);
+        } catch (Exception e) {
+            log.error("Error retrieving dataset " + action.getUri(), e);
+            throw new ActionException(e);
         }
 
     }
 
     @Override
-    public Class<GetDataset> getActionType()
-    {
+    public Class<GetDataset> getActionType() {
         return GetDataset.class;
     }
 
     @Override
-    public void rollback( GetDataset arg0, GetDatasetResult arg1, ExecutionContext arg2 ) throws ActionException
-    {
+    public void rollback(GetDataset arg0, GetDatasetResult arg1, ExecutionContext arg2) throws ActionException {
         // TODO Auto-generated method stub
 
     }

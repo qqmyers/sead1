@@ -28,7 +28,7 @@ var g_scale = 1;
 var g_objloading = 0;
 var stopRotating;
 
-function Matrix(){
+function Matrix_html5(){
 
     var rowCount, columnCount;
     var tempArray = new Array(4);
@@ -111,7 +111,7 @@ function Object(){
   	this.verticesArray = [];
   	this.polygonsArray = [];
   	this.centroidVerticesArray = [];
-  	this.transformMatrix = new Matrix();
+  	this.transformMatrix = new Matrix_html5();
   	this.normalsArray = [];
 	
 	this.num_polygons = 0;
@@ -241,13 +241,13 @@ function Object(){
   
 function Camera(){
 	
-	this.transformMatrix = new Matrix(); 
+	this.transformMatrix = new Matrix_html5(); 
   
 }
 
 function RenderINT() {
 
-   this.clipSpace = new Matrix();
+   this.clipSpace = new Matrix_html5();
    this.clipSpace = [ [1.305, 0, 0, 0],
    	                  [0, 1.740, 0, 0],
    	                  [0, 0, 1.002, 1],
@@ -371,7 +371,7 @@ function RenderINT() {
 	
 function RenderEngine(){
 
-   this.clipSpace = new Matrix();   
+   this.clipSpace = new Matrix_html5();   
    this.clipSpace = [ [1.305, 0, 0, 0],
    	                  [0, 1.740, 0, 0],
    	                  [0, 0, 1.002, 1],
@@ -463,7 +463,7 @@ function RenderEngine(){
     
 function TranslationMatrix(x,y,z) {
 	
-    var outputMatrix = new Matrix();
+    var outputMatrix = new Matrix_html5();
 
     outputMatrix[3][0] = x;
     outputMatrix[3][1] = y;
@@ -489,7 +489,7 @@ function vertexMultiplication(vertex,matrix){
 function MatrixMultiplication(MatrixA,MatrixB) {
 	
     var rowCount, columnCount;
-    var outputMatrix = new Matrix();
+    var outputMatrix = new Matrix_html5();
 
     for (rowCount = 0; rowCount < 4; rowCount++){
         for (columnCount = 0; columnCount < 4; columnCount++) {
@@ -507,7 +507,7 @@ function MatrixMultiplication(MatrixA,MatrixB) {
 
 function RotationXMatrix(angle) {
 
-    var outputMatrix = new Matrix();
+    var outputMatrix = new Matrix_html5();
 
     outputMatrix[0][0] = 1;
     outputMatrix[0][1] = 0;
@@ -533,7 +533,7 @@ function RotationXMatrix(angle) {
 
 function RotationYMatrix(angle) {
 
-    var outputMatrix = new Matrix();
+    var outputMatrix = new Matrix_html5();
 
     outputMatrix[0][0] = Math.cos(angle);
     outputMatrix[0][1] = 0;
@@ -559,7 +559,7 @@ function RotationYMatrix(angle) {
 
 function RotationZMatrix(angle) {
 	
-    var outputMatrix = new Matrix();
+    var outputMatrix = new Matrix_html5();
 
     outputMatrix[0][0] = Math.cos(angle);
     outputMatrix[0][1] = Math.sin(angle);
@@ -609,7 +609,7 @@ function initialize(cubeOBJ) {
     /////g_testObject.transformMatrix = RotationXMatrix(1);
     /////g_testObject.transformMatrix = RotationXMatrix(g_testZ);
     /////g_testObject.transformMatrix = MatrixMultiplication(g_testObject.transformMatrix,TranslationMatrix(0,0,-3));
-    g_camera.transformMatrix = new Matrix();
+    g_camera.transformMatrix = new Matrix_html5();
 	g_camera.transformMatrix = [ [1, 0, 0, 0],
 									 [0, 1, 0, 0],
 									 [0, 0, g_scale, 0],
@@ -630,7 +630,7 @@ function nextFrame() {
     stopRotating = 0;
        
     g_ctx.clearRect(0,0,g_canvasWidth,g_canvasHeight);
-    g_testObject.transformMatrix = new Matrix();
+    g_testObject.transformMatrix = new Matrix_html5();
     g_testObject.transformMatrix = RotationXMatrix(1.57);
     g_testObject.transformMatrix = MatrixMultiplication(g_testObject.transformMatrix,RotationYMatrix(g_frameCount/200));
     g_testObject.transformMatrix = MatrixMultiplication(g_testObject.transformMatrix,TranslationMatrix(0,0,-5));
