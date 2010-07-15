@@ -1632,6 +1632,8 @@ Mouse = {
   RIGHT : 2
 }
 
+var drawInterval = null;
+
 Scene = function(canvas, scene, cam) {
   if (!scene) scene = new Node();
   if (!cam) cam = Scene.getDefaultCamera();
@@ -1675,12 +1677,12 @@ Scene.prototype = {
   bg : [1,1,1,1],
   clear : true,
   useDepth : true,
-  
+
   startFrameLoop : function() {
     this.previousTime = new Date;
-    clearInterval(this.drawInterval);
+    clearInterval(drawInterval);
     var t = this;
-    this.drawInterval = setInterval(function(){ t.draw(); }, this.frameDuration);
+    drawInterval = setInterval(function(){ t.draw(); }, this.frameDuration);
   },
 
   updateMouse : function(ev) {
@@ -2010,18 +2012,24 @@ Obj.prototype = {
 
 //INITIALIZATION CODE/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-clear_webGL = function() {
+    alert_webGL = function(string) {
 
-alert('webGL frame cleared');
+        alert(string);
 
-}
-	  
+    }
 
-      init_webGL = function(fileData) {
+    hide_webGL = function(){
 
-      var c = $('c');
+        clearInterval(drawInterval);
+
+    }
+
+    init_webGL = function(fileData) {
+
+        var c = $('c');
       
         var s = new Scene($('c'));
+        
         $('info').innerHTML = 'Loading model...';
         var w = Obj.load(fileData);
         //w.onload = function() {

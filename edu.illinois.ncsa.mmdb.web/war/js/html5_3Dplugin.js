@@ -28,6 +28,8 @@ var g_scale = 1;
 var g_objloading = 0;
 var stopRotating;
 
+var rotate = null;
+
 function Matrix_html5(){
 
     var rowCount, columnCount;
@@ -581,6 +583,10 @@ function RotationZMatrix(angle) {
     return outputMatrix;
      
 }
+
+ 
+
+
   
 function initialize(cubeOBJ) {
 
@@ -591,7 +597,10 @@ function initialize(cubeOBJ) {
     //g_FPSManager = new FPSManager();
     g_renderEngine = new RenderEngine();
 
-    window.document.onkeypress = onKeyPress;
+    //window.document.onkeypress = onKeyPress;
+    
+    document.onkeydown = handleKeyDown;
+    document.onkeyup = handleKeyUp;
 
     g_testObject.loadOBJ(cubeOBJ);
 	g_ctx.clearRect(0,0,g_canvasWidth,g_canvasHeight);
@@ -642,33 +651,37 @@ function nextFrame() {
  
 }
 
-/**
- * A key has been released, so handle it
- */
-function onKeyPress(event) {
-  event = event || window.event;
-  g_keyPressed[event.keyCode] = false;
-  
-  if(event.keyCode == 37){
+function hideFrame(){
+
+    clearInterval(rotate);
+    
+}
+
+function handleKeyDown(event) {
+
+    if (event.keyCode == 37) {
       g_ctx.clearRect(0,0,g_canvasWidth,g_canvasHeight);
       g_scale = g_scale * 1.5;
       RenderINT();
-  }
-  else if(event.keyCode == 39){
+    }
+	if (event.keyCode == 39) {
       g_ctx.clearRect(0,0,g_canvasWidth,g_canvasHeight);
       g_scale = g_scale * .75;
       RenderINT();
-  }
-  else if(event.keyCode == 38){
-  
-  if(stopRotating == 0){
-     clearInterval(rotate);
-     stopRotating = 1;
-     }
-     else {
-     clearInterval(rotate);
-     rotate = setInterval(nextFrame, 16.67);
-     stopRotating = 0;
-     }
-  }
+    }
+	if(event.keyCode == 38){
+		if(stopRotating == 0){
+            clearInterval(rotate);
+            stopRotating = 1;
+        }
+        else {
+           clearInterval(rotate);
+           rotate = setInterval(nextFrame, 16.67);
+           stopRotating = 0;
+        }
+	}
+}
+
+function handleKeyUp(event) {
+    //currentlyPressedKeys[event.keyCode] = false;
 }

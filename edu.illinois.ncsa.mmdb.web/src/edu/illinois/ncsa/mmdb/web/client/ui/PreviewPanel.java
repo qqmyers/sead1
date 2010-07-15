@@ -103,7 +103,7 @@ public class PreviewPanel {
     protected void onUnload() {
         //super.onUnload();
         hideSeadragon();
-        hideWebGL();
+        //hideWebGL();
     }
 
     public void drawPreview(final GetDatasetResult result, FlowPanel leftColumn, String uri) {
@@ -139,9 +139,7 @@ public class PreviewPanel {
                 } else if (Math.abs(maxwidth - p3Db.getWidth()) < Math.abs(maxwidth - best3D.getWidth())) {
                     best3D = p3Db;
                 }
-            }
-
-            else {
+            } else {
                 previews.add(pb);
             }
         }
@@ -196,8 +194,12 @@ public class PreviewPanel {
         final FlowPanel previewsPanel = new FlowPanel();
         previewsPanel.addStyleName("datasetActions");
         for (PreviewBean pb : previews ) {
+
+            final PreviewBean finalpb = pb;
+            final String finaluri = uri;
             String label;
-            if ((pb instanceof PreviewImageBean) || pb instanceof PreviewThreeDimensionalBean) {
+
+            if (pb instanceof PreviewImageBean) {
                 label = "Preview";
 
             } else if (pb instanceof PreviewPyramidBean) {
@@ -205,15 +207,18 @@ public class PreviewPanel {
                 if (MMDB.getUsername().contains("joefutrelle@gmail.com") || MMDB.getUsername().contains("acraig@ncsa.uiuc.edu")) {
                     label = "Mega-Zoom™";
                 }
+
             } else if (pb instanceof PreviewVideoBean) {
                 label = "Play video";
+
+            } else if (pb instanceof PreviewThreeDimensionalBean) {
+                label = "Preview";
 
             } else {
                 label = "Unknown"; // FIXME maybe "other" would be more user-friendly?
                 GWT.log("Unknown preview bean " + pb);
             }
 
-            final PreviewBean finalpb = pb;
             final Anchor anchor = new Anchor(label);
             anchor.addStyleName("previewActionLink");
             anchor.addClickHandler(new ClickHandler() {
@@ -222,7 +227,7 @@ public class PreviewPanel {
                         previewsPanel.getWidget(i).removeStyleName("deadlink");
                     }
                     anchor.addStyleName("deadlink");
-                    showPreview(finalpb);
+                    showPreview(finalpb, 0, finaluri);
                 }
             });
             if (bestVideo == finalpb) {
@@ -234,6 +239,42 @@ public class PreviewPanel {
             }
 
             previewsPanel.add(anchor);
+
+            //TODO Clean up code to allow two different instances:
+            //     1) Multiple beans : one preview per bean
+            //     2) One bean : multiple previews per bean
+
+            if (pb instanceof PreviewThreeDimensionalBean) {
+
+                String[] extraLabel = { "HTML5", "WebGL" };
+
+                final Anchor anchor2 = new Anchor(extraLabel[0]);
+                final Anchor anchor3 = new Anchor(extraLabel[1]);
+                anchor2.addStyleName("previewActionLink");
+                anchor3.addStyleName("previewActionLink");
+
+                anchor2.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        anchor3.removeStyleName("deadlink");
+                        anchor.removeStyleName("deadlink");
+                        anchor2.addStyleName("deadlink");
+                        currentPreview = null;
+                        showPreview(finalpb, 1, finaluri);
+                    }
+                });
+                anchor3.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        anchor3.addStyleName("deadlink");
+                        anchor2.removeStyleName("deadlink");
+                        anchor.removeStyleName("deadlink");
+                        currentPreview = null;
+                        showPreview(finalpb, 2, finaluri);
+                    }
+                });
+                previewsPanel.add(anchor2);
+                previewsPanel.add(anchor3);
+            }
+
         }
         leftColumn.add(previewsPanel);
 
@@ -244,14 +285,12 @@ public class PreviewPanel {
         leftColumn.add(previewPanel);
 
         if (bestVideo != null) {
-            showPreview(bestVideo);
+            showPreview(bestVideo, 0, null);
         } else if (bestImage != null) {
-            showPreview(bestImage);
+            showPreview(bestImage, 0, null);
         } else if (best3D != null) {
-            //show3D(uri);
-            //TODO fix uri in showPreview function, default until all tabs set up
-            showWebGL(uri);
-            //showPreview(best3D);
+            currentPreview = null;
+            showPreview(best3D, 0, uri);
         } else {
             previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null));
         }
@@ -262,10 +301,11 @@ public class PreviewPanel {
     // preview section
     // ----------------------------------------------------------------------
 
-    private void showPreview(PreviewBean pb) {
+    private void showPreview(PreviewBean pb, int Preview, String uri) {
         // check to make sure this is not already showing
         if (currentPreview == pb) {
             return;
+
         }
 
         // if not same as current preview hide old preview type
@@ -275,7 +315,6 @@ public class PreviewPanel {
             if (currentPreview instanceof PreviewPyramidBean) {
                 hideSeadragon();
             }
-
             previewPanel.clear();
             currentPreview = null;
         }
@@ -304,7 +343,6 @@ public class PreviewPanel {
                 container.getElement().setId("preview");
                 previewPanel.add(container);
             }
-
         }
 
         // replace content (either same type or new created)
@@ -337,8 +375,27 @@ public class PreviewPanel {
             showFlash(BLOB_URL + pb.getUri(), preview, "video", Long.toString(pvb.getWidth()), Long.toString(pvb.getHeight()));
 
         } else if (pb instanceof PreviewThreeDimensionalBean) {
-            PreviewThreeDimensionalBean p3db = (PreviewThreeDimensionalBean) pb;
-            show3D(p3db.getUri());
+            ////PreviewThreeDimensionalBean p3db = (PreviewThreeDimensionalBean) pb;
+            switch (Preview) {
+                //TODO hack, should use bean uri but has not been set up yet
+                case 0:
+                    //showjvLite(p3db.getUri());
+                    hideWebGL();
+                    hideHTML5();
+                    showjvLite(uri);
+                    break;
+                case 1:
+                    //show3D(p3db.getUri());
+                    hideWebGL();
+                    show3D(uri);
+                    break;
+                case 2:
+                    //showWebGL(p3db.getUri());
+                    hideHTML5();
+                    showWebGL(uri);
+                    break;
+
+            }
         }
 
         currentPreview = pb;
@@ -415,9 +472,19 @@ public class PreviewPanel {
         $wnd.init_webGL(fileData);
     }-*/;
 
+    public final native void alertWebGL(String alert) /*-{
+        // hide the current WebGL viewer if open
+        $wnd.clear_webGL(alert);
+    }-*/;
+
     public final native void hideWebGL() /*-{
         // hide the current WebGL viewer if open
-        $wnd.clear_webGL();
+        $wnd.hide_webGL();
+    }-*/;
+
+    public final native void hideHTML5() /*-{
+        // hide the current WebGL viewer if open
+        $wnd.hideFrame();
     }-*/;
 
     public final native int getPoly() /*-{
