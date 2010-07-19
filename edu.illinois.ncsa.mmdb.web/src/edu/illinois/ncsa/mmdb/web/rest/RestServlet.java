@@ -133,6 +133,8 @@ public class RestServlet extends AuthenticatedServlet {
 
     public static final String JIRA_ISSUE                   = "/jira";
 
+    public static final String DATASET                      = "/dataset/";
+
     static RestService         restService;                                                        // TODO manage this lifecycle better
 
     public static final String SMALL_404                    = "/nopreview-100.gif";
@@ -351,6 +353,30 @@ public class RestServlet extends AuthenticatedServlet {
         String uri = decanonicalizeUrl(request);
         if (hasPrefix(IMAGE_DOWNLOAD_INFIX, request)) {
             log.trace("DOWNLOAD IMAGE " + uri);
+            try {
+                Thing imageThing = getImageThing(uri);
+                String contentType = imageThing.getString(Dc.FORMAT);
+                String label = imageThing.getString(RestService.LABEL_PROPERTY);
+                String filename = getImageThing(uri).getString(RestService.FILENAME_PROPERTY);
+                String name = filename;
+                if (name == null) {
+                    name = label;
+                }
+                if (contentType != null) {
+                    response.setContentType(contentType);
+                }
+                response.setHeader("content-disposition", "attachment; filename=\"" + name + "\"");
+                response.flushBuffer();
+                CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
+            } catch (RestServiceException e) {
+                throw new ServletException("failed to retrieve " + request.getRequestURI());
+            } catch (OperatorException e) {
+                throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
+            }
+        } else if (hasPrefix(DATASET, request)) {
+            log.debug("Downloading Dataset " + uri);
+            // TODO check that file ends in extension instead of assuming it does
+            uri = uri.substring(0, uri.length() - 4);
             try {
                 Thing imageThing = getImageThing(uri);
                 String contentType = imageThing.getString(Dc.FORMAT);

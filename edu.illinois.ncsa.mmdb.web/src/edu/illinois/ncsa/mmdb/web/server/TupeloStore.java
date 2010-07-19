@@ -410,6 +410,7 @@ public class TupeloStore {
                                              RestServlet.COLLECTION_PREVIEW_NEW,
                                              RestServlet.SEARCH_INFIX,
                                              RestServlet.JIRA_ISSUE,
+                                             RestServlet.DATASET,
                                                      };
 
     /**
