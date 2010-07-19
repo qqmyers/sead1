@@ -92,7 +92,7 @@ public class PreviewPanel {
     public double               getVerts;
 
     private static final String BLOB_URL     = "./api/image/";
-    private static final String DOWNLOAD_URL = "./api/image/download/";
+    private static final String DOWNLOAD_URL = "/api/image/";
     private static final String PYRAMID_URL  = "./pyramid/";
 
     public PreviewPanel() {
@@ -196,7 +196,6 @@ public class PreviewPanel {
         for (PreviewBean pb : previews ) {
 
             final PreviewBean finalpb = pb;
-            final String finaluri = uri;
             String label;
 
             if (pb instanceof PreviewImageBean) {
@@ -224,10 +223,11 @@ public class PreviewPanel {
             anchor.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
                     for (int i = 0; i < previewsPanel.getWidgetCount(); i++ ) {
+                        currentPreview = null;
                         previewsPanel.getWidget(i).removeStyleName("deadlink");
                     }
                     anchor.addStyleName("deadlink");
-                    showPreview(finalpb, 0, finaluri);
+                    showPreview(finalpb, 0);
                 }
             });
             if (bestVideo == finalpb) {
@@ -259,7 +259,7 @@ public class PreviewPanel {
                         anchor.removeStyleName("deadlink");
                         anchor2.addStyleName("deadlink");
                         currentPreview = null;
-                        showPreview(finalpb, 1, finaluri);
+                        showPreview(finalpb, 1);
                     }
                 });
                 anchor3.addClickHandler(new ClickHandler() {
@@ -268,7 +268,7 @@ public class PreviewPanel {
                         anchor2.removeStyleName("deadlink");
                         anchor.removeStyleName("deadlink");
                         currentPreview = null;
-                        showPreview(finalpb, 2, finaluri);
+                        showPreview(finalpb, 2);
                     }
                 });
                 previewsPanel.add(anchor2);
@@ -285,12 +285,12 @@ public class PreviewPanel {
         leftColumn.add(previewPanel);
 
         if (bestVideo != null) {
-            showPreview(bestVideo, 0, null);
+            showPreview(bestVideo, 0);
         } else if (bestImage != null) {
-            showPreview(bestImage, 0, null);
+            showPreview(bestImage, 0);
         } else if (best3D != null) {
             currentPreview = null;
-            showPreview(best3D, 0, uri);
+            showPreview(best3D, 0);
         } else {
             previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null));
         }
@@ -301,8 +301,10 @@ public class PreviewPanel {
     // preview section
     // ----------------------------------------------------------------------
 
-    private void showPreview(PreviewBean pb, int Preview, String uri) {
+    private void showPreview(PreviewBean pb, int Preview) {
+
         // check to make sure this is not already showing
+
         if (currentPreview == pb) {
             return;
 
@@ -375,24 +377,21 @@ public class PreviewPanel {
             showFlash(BLOB_URL + pb.getUri(), preview, "video", Long.toString(pvb.getWidth()), Long.toString(pvb.getHeight()));
 
         } else if (pb instanceof PreviewThreeDimensionalBean) {
-            ////PreviewThreeDimensionalBean p3db = (PreviewThreeDimensionalBean) pb;
+            PreviewThreeDimensionalBean p3db = (PreviewThreeDimensionalBean) pb;
             switch (Preview) {
                 //TODO hack, should use bean uri but has not been set up yet
                 case 0:
-                    //showjvLite(p3db.getUri());
                     hideWebGL();
                     hideHTML5();
-                    showjvLite(uri);
+                    showjvLite(DOWNLOAD_URL + p3db.getUri());
                     break;
                 case 1:
-                    //show3D(p3db.getUri());
                     hideWebGL();
-                    show3D(uri);
+                    show3D(DOWNLOAD_URL + p3db.getUri());
                     break;
                 case 2:
-                    //showWebGL(p3db.getUri());
                     hideHTML5();
-                    showWebGL(uri);
+                    showWebGL(DOWNLOAD_URL + p3db.getUri());
                     break;
 
             }
@@ -462,24 +461,11 @@ public class PreviewPanel {
         }
     }-*/;
 
+    //The following Javascript functions are used in the HTML5 3D Script
+
     public final native void readOBJ(String fileData) /*-{
         // initialize HTML5 application
         $wnd.initialize(fileData);
-    }-*/;
-
-    public final native void readOBJ2(String fileData) /*-{
-        // initialize WebGL application
-        $wnd.init_webGL(fileData);
-    }-*/;
-
-    public final native void alertWebGL(String alert) /*-{
-        // hide the current WebGL viewer if open
-        $wnd.clear_webGL(alert);
-    }-*/;
-
-    public final native void hideWebGL() /*-{
-        // hide the current WebGL viewer if open
-        $wnd.hide_webGL();
     }-*/;
 
     public final native void hideHTML5() /*-{
@@ -504,6 +490,23 @@ public class PreviewPanel {
         $wnd.RenderINT();
     }-*/;
 
+    //The following Javascript functions are in WebGL 3D script
+
+    public final native void readWebGL(String fileData) /*-{
+        // initialize WebGL application
+        $wnd.init_webGL(fileData);
+    }-*/;
+
+    public final native void alertWebGL(String alert) /*-{
+        // hide the current WebGL viewer if open
+        $wnd.alert_webGL(alert);
+    }-*/;
+
+    public final native void hideWebGL() /*-{
+        // hide the current WebGL viewer if open
+        $wnd.hide_webGL();
+    }-*/;
+
     // ----------------------------------------------------------------------
     // html previews
     // ----------------------------------------------------------------------
@@ -511,8 +514,7 @@ public class PreviewPanel {
     public final void show3D(String uri) {
 
         //TODO change to correct/dynamic localhost instead of static link
-        String url = "http://127.0.0.1:8888/" + DOWNLOAD_URL + uri;
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(uri));
         try {
             @SuppressWarnings("unused")
             Request request = builder.sendRequest(null, new RequestCallback() {
@@ -596,15 +598,9 @@ public class PreviewPanel {
         previewPanel.add(white);
     }
 
-    ///////////////////////////////////////////////////////////////////
-    // The following previews below are not in use and are being tested
-    ///////////////////////////////////////////////////////////////////
-
     public final void showWebGL(String uri) {
 
-        //TODO change to correct/dynamic localhost instead of static link
-        String url = "http://127.0.0.1:8888/" + DOWNLOAD_URL + uri;
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(uri));
         try {
             @SuppressWarnings("unused")
             Request request = builder.sendRequest(null, new RequestCallback() {
@@ -617,7 +613,7 @@ public class PreviewPanel {
                     if (200 == response.getStatusCode()) {
 
                         //Read file successfully; call Javascript to initialize html5 canvas
-                        readOBJ2(response.getText());
+                        readWebGL(response.getText());
 
                     } else {
                         // Handle the error.  Can get the status text from response.getStatusText()
@@ -644,13 +640,17 @@ public class PreviewPanel {
     //Javaview : More advanced preview for 3D files
     public final void showjvLite(String url) {
         HTML Javaview = new HTML();
-        Javaview.setHTML("<APPLET name=jvLite code='jvLite.class' codebase='/' width=480 " +
-                "height=480 archive='plugins/jvLite.jar'>" +
-                //"<PARAM NAME='model' VALUE='" + url + "'>" +
-                "<PARAM NAME='model' VALUE='plugins/ladybird.obj'>" +
+        Javaview.setHTML("<APPLET name=jvLite code='jvLite.class' width=480 " +
+                "height=360 archive='plugins/jvLite.jar'>" +
+                "<PARAM NAME='model' VALUE='" + url + "'>" +
+                //"<PARAM NAME='model' VALUE='images/metal.jpg'>" +
                 "<PARAM NAME='border' VALUE='hide'></APPLET>");
         previewPanel.add(Javaview);
     }
+
+    ///////////////////////////////////////////////////////////////////
+    // The following previews below are not in use and are being tested
+    ///////////////////////////////////////////////////////////////////
 
     //Google Docs Viewer CONS - no RDF support, less file formats supported
     //                   PROS - Supports large file sizes
