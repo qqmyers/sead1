@@ -80,9 +80,9 @@ import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
 public class PreviewPanel {
 
     /** maximum width of a preview image */
-    private static final long   MAX_WIDTH    = 600;
+    private static final long   MAX_WIDTH     = 600;
     /** maximum height of a preview image */
-    private static final long   MAX_HEIGHT   = 600;
+    private static final long   MAX_HEIGHT    = 600;
 
     private AbsolutePanel       previewPanel;
     private PreviewBean         currentPreview;
@@ -91,9 +91,10 @@ public class PreviewPanel {
     public int                  getPolys;
     public double               getVerts;
 
-    private static final String BLOB_URL     = "./api/image/";
-    private static final String DOWNLOAD_URL = "/api/image/";
-    private static final String PYRAMID_URL  = "./pyramid/";
+    private static final String BLOB_URL      = "./api/image/";
+    private static final String DOWNLOAD_URL  = "/api/image/";
+    private static final String EXTENSION_URL = "api/dataset/";
+    private static final String PYRAMID_URL   = "./pyramid/";
 
     public PreviewPanel() {
 
@@ -312,6 +313,7 @@ public class PreviewPanel {
 
         // if not same as current preview hide old preview type
         if (currentPreview == null) {
+            //hideWebGL();
             previewPanel.clear();
         } else if (currentPreview.getClass() != pb.getClass()) {
             if (currentPreview instanceof PreviewPyramidBean) {
@@ -379,11 +381,10 @@ public class PreviewPanel {
         } else if (pb instanceof PreviewThreeDimensionalBean) {
             PreviewThreeDimensionalBean p3db = (PreviewThreeDimensionalBean) pb;
             switch (Preview) {
-                //TODO hack, should use bean uri but has not been set up yet
                 case 0:
                     hideWebGL();
                     hideHTML5();
-                    showjvLite(DOWNLOAD_URL + p3db.getUri());
+                    showjvLite(EXTENSION_URL + p3db.getUri());
                     break;
                 case 1:
                     hideWebGL();
@@ -393,7 +394,6 @@ public class PreviewPanel {
                     hideHTML5();
                     showWebGL(DOWNLOAD_URL + p3db.getUri());
                     break;
-
             }
         }
 
@@ -505,6 +505,11 @@ public class PreviewPanel {
     public final native void hideWebGL() /*-{
         // hide the current WebGL viewer if open
         $wnd.hide_webGL();
+    }-*/;
+
+    public final native void textureWebGL(int texture) /*-{
+        // hide the current WebGL viewer if open
+        $wnd.texture_webGL(texture);
     }-*/;
 
     // ----------------------------------------------------------------------
@@ -635,6 +640,27 @@ public class PreviewPanel {
                 "HTML5</a></P></CANVAS>" + "<p id='info'></p>");
         previewPanel.add(webGL);
 
+        Button metal = new Button("Metal", new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                textureWebGL(1);
+            }
+        });
+        previewPanel.add(metal);
+
+        Button wood = new Button("Wood", new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                textureWebGL(2);
+            }
+        });
+        previewPanel.add(wood);
+
+        Button grass = new Button("Grass", new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                textureWebGL(3);
+            }
+        });
+        previewPanel.add(grass);
+
     }
 
     //Javaview : More advanced preview for 3D files
@@ -642,7 +668,7 @@ public class PreviewPanel {
         HTML Javaview = new HTML();
         Javaview.setHTML("<APPLET name=jvLite code='jvLite.class' width=480 " +
                 "height=360 archive='plugins/jvLite.jar'>" +
-                "<PARAM NAME='model' VALUE='" + url + "'>" +
+                "<PARAM NAME='model' VALUE='" + url + ".obj" + "'>" +
                 //"<PARAM NAME='model' VALUE='images/metal.jpg'>" +
                 "<PARAM NAME='border' VALUE='hide'></APPLET>");
         previewPanel.add(Javaview);
@@ -657,8 +683,8 @@ public class PreviewPanel {
     public final void showDocs(String url) {
         HTML Docs = new HTML();
         Docs.setHTML("<iframe src='http://docs.google.com/viewer?" +
-                // "url=" + BLOB_URL + url + "&embedded=true' " +
-                "url=www.arl.noaa.gov/documents/reports/niagara_overview.ppt&embedded=true' " +
+                 //"url=" + url + ".ppt" + "&embedded=true' " +
+                "url=http://127.0.0.1:8888/api/dataset/tag:medici@uiuc.edu,2009:data_Qhk_u-zF71vlTog8Kc3h9Q.ppt&embedded=true' " +
                 "style='width:650px; height:500px;' frameborder='0'></iframe> ");
 
         previewPanel.add(Docs);
@@ -669,8 +695,8 @@ public class PreviewPanel {
     public final void showZOHO(String url) {
         HTML Docs = new HTML();
         Docs.setHTML("<iframe src='http://viewer.zoho.com/api/urlview.do?" +
-                   "url=http://www.arl.noaa.gov/documents/reports/niagara_overview.ppt&embed=true' " +
-                //"url=http://medici-demo.ncsa.illinois.edu/medici/api/image/download/tag:medici@uiuc.edu,2009:data_tWyTtfhMVY7vxZeEV4QjqQ&embed=true' " +
+                   //"url=http://www.iasted.org/conferences/formatting/presentations-tips.ppt&embed=true'" +
+                "url=http://127.0.0.1:8888/api/dataset/tag:medici@uiuc.edu,2009:data_Qhk_u-zF71vlTog8Kc3h9Q.ppt&embed=true'" +
                 "frameborder='0' width='600' height='500'> </iframe>");
 
         previewPanel.add(Docs);

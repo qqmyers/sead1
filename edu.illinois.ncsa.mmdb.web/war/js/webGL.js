@@ -1,3 +1,31 @@
+/*
+Copyright (C) 2009  Ilmari Heikkinen <ilmari.heikkinen@gmail.com>
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+Edited by: Luis J Mendez / NCSA
+
+*/
+
 document.writeln('<script id="ppix-vert" type="x-shader\/x-vertex">\r\n      #version 120\r\n      attribute vec3 Vertex;\r\n      attribute vec3 Normal;\r\n      attribute vec2 TexCoord;\r\n\r\n      uniform mat4 PMatrix;\r\n      uniform mat4 MVMatrix;\r\n      uniform mat3 NMatrix;\r\n\r\n      uniform float LightConstantAtt;\r\n      uniform float LightLinearAtt;\r\n      uniform float LightQuadraticAtt;\r\n\r\n      uniform vec4 LightPos;\r\n      \r\n      varying vec3 normal, lightDir, eyeVec;\r\n      varying vec2 texCoord0;\r\n      varying float attenuation;\r\n\r\n      void main()\r\n      {\r\n        vec3 lightVector;\r\n        vec4 v = vec4(Vertex, 1.0);\r\n\r\n        texCoord0 = TexCoord;\r\n\r\n        normal = normalize(NMatrix * Normal);\r\n\r\n        vec4 worldPos = MVMatrix * v;\r\n        lightVector = vec3(LightPos - worldPos);\r\n        lightDir = normalize(lightVector);\r\n        float dist = length(lightVector);\r\n\r\n        eyeVec = -vec3(worldPos);\r\n\r\n        attenuation = 1.0 \/ (LightConstantAtt + LightLinearAtt*dist + LightQuadraticAtt * dist*dist);\r\n        \r\n        gl_Position = PMatrix * worldPos;\r\n      }\r\n\r\n    <\/script>\r\n	');
 
 document.writeln('<script id="ppix-frag" type="x-shader\/x-fragment">\r\n      #version 120\r\n      uniform vec4 LightDiffuse;\r\n      uniform vec4 LightSpecular;\r\n      uniform vec4 MaterialSpecular;\r\n      uniform vec4 MaterialDiffuse;\r\n      uniform vec4 MaterialAmbient;\r\n      uniform vec4 GlobalAmbient;\r\n      uniform float MaterialShininess;\r\n      \r\n      uniform sampler2D DiffTex, SpecTex;\r\n      \r\n      varying vec3 normal, lightDir, eyeVec;\r\n      varying vec2 texCoord0;\r\n      varying float attenuation;\r\n\r\n      void main()\r\n      {\r\n        vec4 color = GlobalAmbient * MaterialAmbient;\r\n        vec4 tex = texture2D(DiffTex, vec2(texCoord0.s, 1.0-texCoord0.t));\r\n        vec4 diffuse = tex;\r\n        \r\n        float lambertTerm = dot(normal, lightDir);\r\n\r\n        if (lambertTerm > 0.0) {\r\n          color += diffuse * lambertTerm * attenuation;\r\n\r\n          vec3 E = normalize(eyeVec);\r\n          vec3 R = reflect(-lightDir, normal);\r\n          \r\n          float specular = pow( max(dot(R, E), 0.0), MaterialShininess );\r\n\r\n          color += MaterialSpecular * LightSpecular * specular * attenuation * tex.r;\r\n        }\r\n        color.a = MaterialDiffuse.a;\r\n\r\n        gl_FragColor = color;\r\n      }\r\n    <\/script>');
@@ -1722,6 +1750,10 @@ Scene.prototype = {
       t.updateMouse(ev);
     }, false);
   },
+  
+  clear : function() {
+  	this.gl.clearColor(.55, .55, .122, 1);
+  },
 
   draw : function() {
     var newTime = new Date;
@@ -1898,7 +1930,8 @@ Obj.prototype = {
     var hashChar = '#'.charCodeAt(0);
     for (var i=0; i<lines.length; i++) {
       var l = lines[i];
-      var vals = l.replace(/^\s+|\s+$/g, '').split(" ");
+      var vals = l.replace(/^\s+|\s+$/g, '').split(/[\s]+/);
+	  //var vals = l.replace(/^\s+|\s+$/g, '').split(/[\s\/]+/);
       if (vals.length == 0) continue;
       if (vals[0].charCodeAt(0) == hashChar) continue;
       switch (vals[0]) {
@@ -1931,7 +1964,8 @@ Obj.prototype = {
           }
           for (var j=0; j<faces.length; j++) {
             var f = faces[j];
-            var a = f.split("/");
+            //var a = f.split("/");
+            var a = f.split(/[\s\/]+/);
             geo_faces.push(parseInt(a[0]) - 1);
             if (a.length > 1)
               tex_faces.push(parseInt(a[1]) - 1);
@@ -2012,57 +2046,85 @@ Obj.prototype = {
 
 //INITIALIZATION CODE/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    alert_webGL = function(string) {
+    
+  
 
+    alert_webGL = function(string) {
+		
         alert(string);
 
     }
 
     hide_webGL = function(){
-
+    	//g_s.clear();
+       //g_ctx.clearRect(0,0,480,360);
         clearInterval(drawInterval);
 
     }
+    
+        //Global Node & Scene
+    	var g_n = new Node();   
 
+     
+    
+    texture_webGL = function(t_num){
+    
+        var tex = new Texture();
+        tex.image = new Image();
+        if (t_num == 1)
+        	tex.image.src = 'images/texture_metal.jpg';
+        else if(t_num == 2)
+        	tex.image.src = 'images/texture_wood.jpg';
+        else if(t_num == 3)
+        	tex.image.src = 'images/texture_grass.jpg';
+        $('info').innerHTML = 'Loading texture (56kB)...';
+        tex.image.onload = function(){
+        	   $('info').innerHTML = '';
+    		   g_n.material = DefaultMaterial.get();
+               g_n.material.textures.DiffTex = tex;
+               s.scene.appendChild(g_n);
+        }
+    }
+
+         
     init_webGL = function(fileData) {
 
-        var c = $('c');
-      
-        var s = new Scene($('c'));
-        
+		var c = $('c');
+		var g_s = new Scene($('c'));  
+       
         $('info').innerHTML = 'Loading model...';
         var w = Obj.load(fileData);
         //w.onload = function() {
-          s.camera.position = [0, 2, 7];
+          g_s.camera.position = [0, 2, 7];
           var tex = new Texture();
           tex.image = new Image();
-          tex.image.src = 'images/metal.jpg';
-          $('info').innerHTML = 'Loading texture (56kB)...';
+          tex.image.src = 'images/texture_wood.jpg';
+          $('info').innerHTML = 'Loading image texture...';
           tex.image.onload = function(){
             $('info').innerHTML = '';
-            var n = new Node();
-            var sc = 4.0 / (w.boundingBox.diameter);
-            n.scaling = [sc, sc, sc];
-            n.model = w.makeVBO();
-            n.position[1] = 0.5;
-//             n.rotation.axis = [1,0,0];
-//             n.rotation.angle = -Math.PI/2;
-            n.material = DefaultMaterial.get();
-            n.material.textures.DiffTex = tex;
             
-            n.material.floats.LightDiffuse = [1,1,1,1];
-          n.material.floats.MaterialShininess = 6.0;
-          n.material.floats.MaterialDiffuse = [1,1,1,1];
+            var sc = 4.0 / (w.boundingBox.diameter);
+            g_n.scaling = [sc, sc, sc];
+            g_n.model = w.makeVBO();
+            g_n.position[1] = 0.5;
+//             g_n.rotation.axis = [1,0,0];
+//             g_n.rotation.angle = -Math.PI/2;
+            g_n.material = DefaultMaterial.get();
+            g_n.material.textures.DiffTex = tex;
+            
+            g_n.material.floats.LightDiffuse = [1,1,1,1];
+          g_n.material.floats.MaterialShininess = 6.0;
+          g_n.material.floats.MaterialDiffuse = [1,1,1,1];
 
            
-            s.scene.appendChild(n);
+            g_s.scene.appendChild(g_n);
             
             var xRot = new Node();
           xRot.rotation.axis = [0, 1, 0];
           var yRot = new Node();
           yRot.rotation.axis = [1, 0, 0];
           yRot.appendChild(xRot);
-          xRot.appendChild(n);
+          xRot.appendChild(g_n);
           var wheelHandler = function(ev) {
             var ds = ((ev.detail || ev.wheelDelta) < 0) ? 1.1 : (1 / 1.1);
             if (ev.shiftKey) {
@@ -2070,20 +2132,20 @@ Obj.prototype = {
               yRot.scaling[1] *= ds;
               yRot.scaling[2] *= ds;
             } else {
-              s.camera.targetFov *= ds;
+              g_s.camera.targetFov *= ds;
             }
-            s.changed = true;
+            g_s.changed = true;
             ev.preventDefault();
           };
-          s.camera.addFrameListener(function() {
+          g_s.camera.addFrameListener(function() {
             if (Math.abs(this.targetFov - this.fov) > 0.01) {
-              s.changed = true;
+              g_s.changed = true;
             }
           });
           c.addEventListener('DOMMouseScroll', wheelHandler, false);
           c.addEventListener('mousewheel', wheelHandler, false);
           
-                      c.addEventListener('mousedown', function(ev){ 
+           c.addEventListener('mousedown', function(ev){ 
             this.dragging = true;
             this.sx = ev.clientX;
             this.sy = ev.clientY;
@@ -2093,15 +2155,15 @@ Obj.prototype = {
             if (c.dragging) {
               var dx = ev.clientX - c.sx, dy = ev.clientY - c.sy;
               c.sx = ev.clientX, c.sy = ev.clientY;
-              if (s.mouse.left) {
+              if (g_s.mouse.left) {
                 xRot.rotation.angle += dx / 200;
                 yRot.rotation.angle += dy / 200;
-              } else if (s.mouse.middle) {
-                yRot.position[0] += dx * 0.01 * (s.camera.fov / 45);
-                yRot.position[1] -= dy * 0.01 * (s.camera.fov / 45);
+              } else if (g_s.mouse.middle) {
+                yRot.position[0] += dx * 0.01 * (g_s.camera.fov / 45);
+                yRot.position[1] -= dy * 0.01 * (g_s.camera.fov / 45);
               }
               ev.preventDefault();
-              s.changed = true;
+              g_s.changed = true;
             }
           }, false);
           window.addEventListener('mouseup', function(ev) {
@@ -2110,8 +2172,8 @@ Obj.prototype = {
               ev.preventDefault();
             }
           }, false);
-          s.changed = true;
-			s.scene.appendChild(yRot);
+          g_s.changed = true;
+			g_s.scene.appendChild(yRot);
           }
         //}
       }
