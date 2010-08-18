@@ -103,7 +103,7 @@
 	</target>
 	
 	<!-- copy the tupelo jar files -->
-	<target name="tupelo" description="Copy the latest tupelo jars" if="tupelo.present">>
+	<target name="tupelo" description="Copy the latest tupelo jars" if="tupelo.present">
 		<delete>
 			<fileset dir="war/WEB-INF/lib" includes="**/tupelo*.jar"/>
 		</delete>
