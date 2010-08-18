@@ -43,7 +43,10 @@
 
 	<property name="webxml" value="web.xml" />
 	
-	<property name="tupelo" value="/home/hudson/work/jobs/tupelo/lastSuccessful" />
+	
+	<property name="tupelo" value="/var/lib/hudson/jobs/tupelo/lastSuccessful" />
+
+	<available file="${tupelo}" type="dir" property="tupelo.present"/>
 
 	<property name="deploy" value="/var/lib/tomcat6/webapps" />
 
@@ -60,7 +63,6 @@
 	<condition property="deps" value=".." else="../plugins">
 		<available file="../edu.uiuc.ncsa.cet.bean/build.properties" />
 	</condition>
-		
 	
 	<available file="war/mmdb.tmp" property="mmdb_tmp_exists" />
 
@@ -80,7 +82,7 @@
 		<delete dir="${war}" />
 	</target>
 
-	<target name="hudson" depends="clean, tupelo, cetbean, prepare-hudson, mmdb-dev, war, checkstyle" />
+	<target name="hudson" depends="clean, cetbean, prepare-hudson, mmdb-dev, war" />
 
 	<target name="prepare-hudson" depends="resources, copy_mmdb_html" description="setup for hudson build and deployment">
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
@@ -101,7 +103,7 @@
 	</target>
 	
 	<!-- copy the tupelo jar files -->
-	<target name="tupelo" description="Copy the latest tupelo jars">
+	<target name="tupelo" description="Copy the latest tupelo jars" if="tupelo.present">>
 		<delete>
 			<fileset dir="war/WEB-INF/lib" includes="**/tupelo*.jar"/>
 		</delete>
@@ -246,16 +248,6 @@
 
 	<target name="copy_mmdb_html" unless="mmdb_tmp_exists">
 		<copy file="war/mmdb.html" tofile="war/mmdb.tmp" />
-	</target>
-
-	<target name="checkstyle">
-		<taskdef resource="checkstyletask.properties" classpath="/home/hudson/checkstyle/checkstyle-all-5.0-beta01.jar" />
-		<checkstyle config="checks.xml" maxErrors="2147483647">
-			<fileset dir=".">
-				<include name="**/*.java" />
-			</fileset>
-			<formatter type="xml" toFile="checkstyle-result.xml" />
-		</checkstyle>
 	</target>
 
 	<target name="compile" depends="resources" description="compiles Java source files to bytecode">
