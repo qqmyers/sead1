@@ -77,7 +77,7 @@
 		<delete dir="${war}" />
 	</target>
 
-	<target name="hudson" depends="clean, tupelo, cetbean, prepare-hudson, mmdb-dev, war" />
+	<target name="hudson" depends="clean, cetbean, prepare-hudson, mmdb-dev, war" />
 
 	<target name="prepare-hudson" depends="resources, copy_mmdb_html" description="setup for hudson build and deployment">
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
