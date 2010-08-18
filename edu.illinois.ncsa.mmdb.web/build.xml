@@ -42,9 +42,7 @@
 	<property environment="env" />
 
 	<property name="webxml" value="web.xml" />
-	
-	<property name="tupelo" value="/home/hudson/work/jobs/tupelo/lastSuccessful" />
-
+		<property name="tupelo" value="/var/lib/hudson/jobs/tupelo/lastSuccessful" />	<available file="${tupelo}" type="dir" property="tupelo.present"/>
 	<property name="deploy" value="/var/lib/tomcat6/webapps" />
 
 	<property name="war" value="${ant.project.name}.war" />
@@ -59,8 +57,7 @@
 	
 	<condition property="deps" value=".." else="../plugins">
 		<available file="../edu.uiuc.ncsa.cet.bean/build.properties" />
-	</condition>
-		
+	</condition>		
 	
 	<available file="war/mmdb.tmp" property="mmdb_tmp_exists" />
 
@@ -101,7 +98,7 @@
 	</target>
 	
 	<!-- copy the tupelo jar files -->
-	<target name="tupelo" description="Copy the latest tupelo jars">
+	<target name="tupelo" description="Copy the latest tupelo jars" if="tupelo.present">
 		<delete>
 			<fileset dir="war/WEB-INF/lib" includes="**/tupelo*.jar"/>
 		</delete>
