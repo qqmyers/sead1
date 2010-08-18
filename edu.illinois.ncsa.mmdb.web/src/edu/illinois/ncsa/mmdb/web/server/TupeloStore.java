@@ -588,7 +588,7 @@ public class TupeloStore {
                         u.setColumnNames("member", "date");
                         u.addPattern(Resource.uriRef(collectionUri), DcTerms.HAS_PART, "member");
                         u.addPattern("member", Dc.DATE, "date", true);
-                        u.addOrderByDesc("date");
+                        u.addOrderBy("date");
                         u.addOrderBy("member");
                         u.setLimit(25);
                         for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member") ) {
