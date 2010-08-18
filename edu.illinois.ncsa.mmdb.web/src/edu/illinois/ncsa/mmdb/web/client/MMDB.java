@@ -50,6 +50,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
@@ -320,7 +321,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             for (String paramEntry : paramString.split("&") ) {
                 String[] terms = paramEntry.split("=");
                 if (terms.length == 2) {
-                    params.put(terms[0], terms[1]);
+                    params.put(URL.decodeComponent(terms[0]), URL.decodeComponent(terms[1]));
                 }
             }
         }

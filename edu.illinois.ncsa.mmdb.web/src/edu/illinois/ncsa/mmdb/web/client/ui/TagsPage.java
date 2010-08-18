@@ -47,6 +47,7 @@ import java.util.TreeMap;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -101,7 +102,7 @@ public class TagsPage extends Page {
                                 if (linkText.length() > 10) {
                                     linkText = linkText.substring(0, 10) + "...";
                                 }
-                                Hyperlink link = new Hyperlink(linkText, "tag?title=" + tag);
+                                Hyperlink link = new Hyperlink(linkText, "tag?title=" + URL.encodeComponent(tag));
                                 link.addStyleName("tagLink");
                                 link.setTitle(tag);
                                 tagPanel.add(link);
