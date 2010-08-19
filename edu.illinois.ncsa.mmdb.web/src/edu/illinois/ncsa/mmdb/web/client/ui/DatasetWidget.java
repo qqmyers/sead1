@@ -335,6 +335,14 @@ public class DatasetWidget extends Composite {
         });
     }
 
+    void addInfo(String name, String value, Panel panel) {
+        if (value != null && !value.equals("")) {
+            Label lbl = new Label(name + ": " + value);
+            lbl.addStyleName("datasetRightColText");
+            panel.add(lbl);
+        }
+    }
+
     /**
      * Create the panel containing the information about the dataset.
      * 
@@ -356,21 +364,20 @@ public class DatasetWidget extends Composite {
         }
         panel.add(lbl);
 
-        lbl = new Label("Size: " + TextFormatter.humanBytes(data.getSize()));
-        lbl.addStyleName("datasetRightColText");
-        panel.add(lbl);
+        String filename = data.getFilename();
+        addInfo("Filename", filename, panel);
 
-        lbl = new Label("Type: " + data.getMimeType());
-        lbl.addStyleName("datasetRightColText");
-        panel.add(lbl);
+        String size = TextFormatter.humanBytes(data.getSize());
+        addInfo("Size", size, panel);
+
+        String type = data.getMimeType();
+        addInfo("Type", type, panel);
 
         String date = "";
         if (data.getDate() != null) {
             date += DateTimeFormat.getShortDateTimeFormat().format(data.getDate());
         }
-        lbl = new Label("Uploaded: " + date);
-        lbl.addStyleName("datasetRightColText");
-        panel.add(lbl);
+        addInfo("Uploaded", date, panel);
 
         return panel;
     }
