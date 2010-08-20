@@ -49,10 +49,14 @@ import com.google.gwt.user.client.ui.HasValue;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetsDeletedEvent;
@@ -117,6 +121,29 @@ public class DynamicListPresenter extends BasePresenter<DynamicListPresenter.Dis
             }
         });
 
+        addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
+
+            @Override
+            public void onDatasetSelected(DatasetSelectedEvent datasetSelectedEvent) {
+                String uri = datasetSelectedEvent.getUri();
+                if (items.containsKey(uri)) {
+                    HasValue<Boolean> selected = display.getSelected(items.get(uri));
+                    selected.setValue(true);
+                }
+            }
+        });
+
+        addHandler(AllOnPageSelectedEvent.TYPE, new AllOnPageSelectedHandler() {
+            @Override
+            public void onAllOnPageSelected(AllOnPageSelectedEvent event) {
+                for (String uri : items.keySet() ) {
+                    DatasetSelectedEvent se = new DatasetSelectedEvent();
+                    se.setUri(uri);
+                    eventBus.fireEvent(se);
+                }
+            }
+        });
+
         addHandler(ShowItemEvent.TYPE, new ShowItemEventHandler() {
 
             @Override
@@ -175,6 +202,14 @@ public class DynamicListPresenter extends BasePresenter<DynamicListPresenter.Dis
         items.put(id, location);
         final HasValue<Boolean> selected = display.getSelected(location);
         selected.addValueChangeHandler(new DatasetSelectionCheckboxHandler(id, eventBus));
+        addHandler(AllOnPageSelectedEvent.TYPE, new AllOnPageSelectedHandler() {
+            @Override
+            public void onAllOnPageSelected(AllOnPageSelectedEvent event) {
+                DatasetSelectedEvent datasetSelected = new DatasetSelectedEvent();
+                datasetSelected.setUri(id);
+                eventBus.fireEvent(datasetSelected);
+            }
+        });
         UserSessionState sessionState = MMDB.getSessionState();
         if (sessionState.getSelectedDatasets().contains(id)) {
             selected.setValue(true);

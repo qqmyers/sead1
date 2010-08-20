@@ -52,11 +52,14 @@ import com.google.gwt.user.client.ui.HasValue;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetsDeletedEvent;
@@ -98,6 +101,8 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
 
     @Override
     public void bind() {
+        // FIXME this binding logic is duplicated as a tile in DynamicListPresenter ... needs refactoring
+
         addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
 
             @Override
@@ -106,6 +111,29 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
                 if (items.containsKey(uri)) {
                     HasValue<Boolean> selected = display.getSelected(items.get(uri));
                     selected.setValue(false);
+                }
+            }
+        });
+
+        addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
+
+            @Override
+            public void onDatasetSelected(DatasetSelectedEvent datasetSelectedEvent) {
+                String uri = datasetSelectedEvent.getUri();
+                if (items.containsKey(uri)) {
+                    HasValue<Boolean> selected = display.getSelected(items.get(uri));
+                    selected.setValue(true);
+                }
+            }
+        });
+
+        addHandler(AllOnPageSelectedEvent.TYPE, new AllOnPageSelectedHandler() {
+            @Override
+            public void onAllOnPageSelected(AllOnPageSelectedEvent event) {
+                for (String uri : items.keySet() ) {
+                    DatasetSelectedEvent se = new DatasetSelectedEvent();
+                    se.setUri(uri);
+                    eventBus.fireEvent(se);
                 }
             }
         });

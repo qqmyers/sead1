@@ -63,6 +63,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
@@ -225,22 +226,22 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                         dispatch.execute(new AddToCollection(collectionUri, selectedDatasets),
                                 new AsyncCallback<AddToCollectionResult>() {
 
-                            @Override
-                            public void onFailure(Throwable arg0) {
-                                GWT.log("Error adding dataset(s) to collection", arg0);
-                                done.setFailure(selectedDatasets, arg0);
-                                eventBus.fireEvent(done);
-                            }
+                                    @Override
+                                    public void onFailure(Throwable arg0) {
+                                        GWT.log("Error adding dataset(s) to collection", arg0);
+                                        done.setFailure(selectedDatasets, arg0);
+                                        eventBus.fireEvent(done);
+                                    }
 
-                            @Override
-                            public void onSuccess(AddToCollectionResult arg0) {
-                                // FIXME AddToCollectionResult doesn't tell us how many were actually added
-                                GWT.log("Dataset(s) successfully added to collection", null);
-                                done.addSuccesses(selectedDatasets);
-                                eventBus.fireEvent(done);
-                                atc.hide();
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(AddToCollectionResult arg0) {
+                                        // FIXME AddToCollectionResult doesn't tell us how many were actually added
+                                        GWT.log("Dataset(s) successfully added to collection", null);
+                                        done.addSuccesses(selectedDatasets);
+                                        eventBus.fireEvent(done);
+                                        atc.hide();
+                                    }
+                                });
                     }
                 });
             }
@@ -261,33 +262,44 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                         MMDB.dispatchAsync.execute(new RemoveFromCollection(collectionUri, selectedDatasets),
                                 new AsyncCallback<RemoveFromCollectionResult>() {
 
-                            @Override
-                            public void onFailure(Throwable arg0) {
-                                GWT.log("Error adding dataset(s) to collection", arg0);
-                                done.setFailure(selectedDatasets, arg0);
-                                eventBus.fireEvent(done);
-                            }
+                                    @Override
+                                    public void onFailure(Throwable arg0) {
+                                        GWT.log("Error adding dataset(s) to collection", arg0);
+                                        done.setFailure(selectedDatasets, arg0);
+                                        eventBus.fireEvent(done);
+                                    }
 
-                            @Override
-                            public void onSuccess(RemoveFromCollectionResult result) {
-                                // FIXME AddToCollectionResult doesn't tell us how many were actually removed
-                                GWT.log("Dataset(s) successfully removed from collection", null);
-                                done.addSuccesses(selectedDatasets);
-                                atc.hide();
-                                eventBus.fireEvent(done);
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(RemoveFromCollectionResult result) {
+                                        // FIXME AddToCollectionResult doesn't tell us how many were actually removed
+                                        GWT.log("Dataset(s) successfully removed from collection", null);
+                                        done.addSuccesses(selectedDatasets);
+                                        atc.hide();
+                                        eventBus.fireEvent(done);
+                                    }
+                                });
                     }
                 });
             }
         });
+        display.addMenuAction("Select all on page", new Command() {
+            @Override
+            public void execute() {
+                selectAllOnPage();
+            }
+        });
         // unselect items
-        display.addMenuAction("Unselect All", new Command() {
+        display.addMenuAction("Unselect all", new Command() {
             @Override
             public void execute() {
                 unselectAll();
             }
         });
+    }
+
+    void selectAllOnPage() {
+        AllOnPageSelectedEvent select = new AllOnPageSelectedEvent();
+        MMDB.eventBus.fireEvent(select);
     }
 
     void unselectAll() {
