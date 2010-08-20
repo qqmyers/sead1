@@ -174,6 +174,10 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             }
         };
         safariForceTimer.schedule(50); // right away
+        safariForceTimer.schedule(60); // and again
+        safariForceTimer.schedule(70); // rapid fire
+        safariForceTimer.schedule(100); // take that!
+        safariForceTimer.schedule(250); // will this work?
         safariForceTimer.schedule(1000); // somewhat later
         safariForceTimer.schedule(2000); // last attempt
         //
