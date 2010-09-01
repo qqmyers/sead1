@@ -97,6 +97,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.UploadPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.UserManagementPage;
+import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
@@ -668,6 +669,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         }
     }
 
+    // FIXME move these into UserSessionState?
     public static final String DATASET_VIEW_TYPE_PREFERENCE    = "datasetViewType";
     public static final String COLLECTION_VIEW_TYPE_PREFERENCE = "collectionViewType";
 
@@ -682,6 +684,16 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     /** Get rid of the session state; (e.g., when logging out) */
     public static void clearSessionState() {
         getSessionState().initialize();
+        initializePreferences();
+    }
+
+    /**
+     * Put the user session state in its initial state, with default values only
+     * and no personal information.
+     */
+    static void initializePreferences() {
+        getSessionState().getPreferences().put(MMDB.DATASET_VIEW_TYPE_PREFERENCE, DynamicTableView.GRID_VIEW_TYPE);
+        getSessionState().getPreferences().put(MMDB.COLLECTION_VIEW_TYPE_PREFERENCE, DynamicTableView.LIST_VIEW_TYPE);
     }
 
     // a common idiom

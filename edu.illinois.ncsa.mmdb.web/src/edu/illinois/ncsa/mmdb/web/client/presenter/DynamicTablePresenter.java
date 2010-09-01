@@ -213,11 +213,17 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
      * @return uri for the sort key
      */
     protected String uriForSortKey() {
-        if (sortKey.startsWith("title-")) {
+        if (sortKey.startsWith("title-")) { // FIXME fragile
             return "http://purl.org/dc/elements/1.1/title";
         } else {
             return "http://purl.org/dc/elements/1.1/date";
         }
+    }
+
+    void setPage(int page) {
+        currentPage = page;
+        display.setPage(page);
+        MMDB.getSessionState().setPage(page); // remember page number in session
     }
 
     @Override
@@ -227,9 +233,9 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
 
                 @Override
                 public void onValueChange(ValueChangeEvent<Integer> event) {
-                    GWT.log("Paging changed " + event.getValue());
-                    display.setPage(event.getValue());
-                    currentPage = event.getValue();
+                    int page = event.getValue();
+                    GWT.log("Page changed to " + page);
+                    setPage(page);
                     getContent();
                 }
             });
@@ -243,6 +249,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
                     GWT.log("Sort list box clicked " + event.getValue());
                     sortKey = event.getValue();
                     display.setOrder(sortKey);
+                    setPage(1); // FIXME stay on same page?
                     getContent();
                 }
             });
@@ -255,10 +262,14 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
                 public void onValueChange(ValueChangeEvent<String> event) {
                     GWT.log("View list box clicked " + event.getValue());
                     changeViewType(event.getValue());
+                    setPage(1); // FIXME compute correct page for new view type?
                     getContent();
                 }
             });
         }
+
+        setPage(MMDB.getSessionState().getPage()); // restore last-viewed page #
+
         getContent();
     }
 

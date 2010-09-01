@@ -43,7 +43,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
@@ -57,6 +56,7 @@ public class UserSessionState {
     private String              sessionKey;
     private Set<String>         selectedDatasets;
     private PersonBean          currentUser;
+    private int                 page;
 
     public UserSessionState() {
         initialize();
@@ -65,7 +65,7 @@ public class UserSessionState {
     public void initialize() {
         preferences = new HashMap<String, String>();
         selectedDatasets = new HashSet<String>();
-        initializePreferences();
+        page = 1;
     }
 
     public Map<String, String> getPreferences() {
@@ -78,15 +78,6 @@ public class UserSessionState {
 
     public void setSessionKey(String sessionKey) {
         this.sessionKey = sessionKey;
-    }
-
-    /**
-     * Put the user session state in its initial state, with default values only
-     * and no personal information.
-     */
-    public void initializePreferences() {
-        preferences.put(MMDB.DATASET_VIEW_TYPE_PREFERENCE, DynamicTableView.GRID_VIEW_TYPE);
-        preferences.put(MMDB.COLLECTION_VIEW_TYPE_PREFERENCE, DynamicTableView.LIST_VIEW_TYPE);
     }
 
     public void setCurrentUser(PersonBean currentUser) {
@@ -111,5 +102,13 @@ public class UserSessionState {
 
     public void allDatasetsUnselected() {
         selectedDatasets.clear();
+    }
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
     }
 }
