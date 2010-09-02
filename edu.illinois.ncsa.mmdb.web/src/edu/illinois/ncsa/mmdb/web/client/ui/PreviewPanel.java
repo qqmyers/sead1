@@ -56,6 +56,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
@@ -65,6 +66,7 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
+import edu.uiuc.ncsa.cet.bean.PreviewDocumentBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.PreviewPyramidBean;
 import edu.uiuc.ncsa.cet.bean.PreviewThreeDimensionalBean;
@@ -77,7 +79,7 @@ import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
  * 
  */
 
-public class PreviewPanel {
+public class PreviewPanel extends Composite {
 
     /** maximum width of a preview image */
     private static final long   MAX_WIDTH     = 600;
@@ -94,6 +96,7 @@ public class PreviewPanel {
     private static final String BLOB_URL      = "./api/image/";
     private static final String DOWNLOAD_URL  = "/api/image/";
     private static final String EXTENSION_URL = "api/dataset/";
+
     private static final String PYRAMID_URL   = "./pyramid/";
 
     public PreviewPanel() {
@@ -102,9 +105,9 @@ public class PreviewPanel {
 
     //@Override
     protected void onUnload() {
-        //super.onUnload();
+        super.onUnload();
+        alertWebGL("onUnload");
         hideSeadragon();
-        //hideWebGL();
     }
 
     public void drawPreview(final GetDatasetResult result, FlowPanel leftColumn, String uri) {
@@ -117,6 +120,7 @@ public class PreviewPanel {
         PreviewImageBean bestImage = null;
         PreviewVideoBean bestVideo = null;
         PreviewThreeDimensionalBean best3D = null;
+        PreviewDocumentBean bestDoc = null;
         for (PreviewBean pb : result.getPreviews() ) {
             if (pb instanceof PreviewImageBean) {
                 PreviewImageBean pib = (PreviewImageBean) pb;
@@ -140,6 +144,14 @@ public class PreviewPanel {
                 } else if (Math.abs(maxwidth - p3Db.getWidth()) < Math.abs(maxwidth - best3D.getWidth())) {
                     best3D = p3Db;
                 }
+            } else if (pb instanceof PreviewDocumentBean) {
+                PreviewDocumentBean pdb = (PreviewDocumentBean) pb;
+
+                if (bestDoc == null) {
+                    bestDoc = pdb;
+                } else if (Math.abs(maxwidth - pdb.getWidth()) < Math.abs(maxwidth - bestDoc.getWidth())) {
+                    bestDoc = pdb;
+                }
             } else {
                 previews.add(pb);
             }
@@ -152,6 +164,9 @@ public class PreviewPanel {
         }
         if (best3D != null) {
             previews.add(best3D);
+        }
+        if (bestDoc != null) {
+            previews.add(bestDoc);
         }
 
         // sort beans, image, zoom, video, rest
@@ -185,6 +200,12 @@ public class PreviewPanel {
                              if (o2 instanceof PreviewThreeDimensionalBean) {
                                  return +1;
                              }
+                             if (o1 instanceof PreviewDocumentBean) {
+                                 return -1;
+                             }
+                             if (o2 instanceof PreviewDocumentBean) {
+                                 return +1;
+                             }
                          }
                          // don't care at this point
                          return 0;
@@ -199,7 +220,7 @@ public class PreviewPanel {
             final PreviewBean finalpb = pb;
             String label;
 
-            if (pb instanceof PreviewImageBean) {
+            if (pb instanceof PreviewImageBean || pb instanceof PreviewDocumentBean || pb instanceof PreviewThreeDimensionalBean) {
                 label = "Preview";
 
             } else if (pb instanceof PreviewPyramidBean) {
@@ -210,9 +231,6 @@ public class PreviewPanel {
 
             } else if (pb instanceof PreviewVideoBean) {
                 label = "Play video";
-
-            } else if (pb instanceof PreviewThreeDimensionalBean) {
-                label = "Preview";
 
             } else {
                 label = "Unknown"; // FIXME maybe "other" would be more user-friendly?
@@ -236,6 +254,8 @@ public class PreviewPanel {
             } else if (bestImage == finalpb) {
                 anchor.addStyleName("deadlink");
             } else if (best3D == finalpb) {
+                anchor.addStyleName("deadlink");
+            } else if (bestDoc == finalpb) {
                 anchor.addStyleName("deadlink");
             }
 
@@ -289,6 +309,8 @@ public class PreviewPanel {
             showPreview(bestVideo, 0);
         } else if (bestImage != null) {
             showPreview(bestImage, 0);
+        } else if (bestDoc != null) {
+            showPreview(bestDoc, 0);
         } else if (best3D != null) {
             currentPreview = null;
             showPreview(best3D, 0);
@@ -346,6 +368,11 @@ public class PreviewPanel {
                 Label container = new Label();
                 container.getElement().setId("preview");
                 previewPanel.add(container);
+
+            } else if (pb instanceof PreviewDocumentBean) {
+                Label container = new Label();
+                container.getElement().setId("preview");
+                previewPanel.add(container);
             }
         }
 
@@ -369,6 +396,9 @@ public class PreviewPanel {
 
         } else if (pb instanceof PreviewPyramidBean) {
             showSeadragon(PYRAMID_URL + pb.getUri() + "/xml");
+
+        } else if (pb instanceof PreviewDocumentBean) {
+            showText(DOWNLOAD_URL + pb.getUri());
 
         } else if (pb instanceof PreviewVideoBean) {
             PreviewVideoBean pvb = (PreviewVideoBean) pb;
@@ -663,6 +693,50 @@ public class PreviewPanel {
 
     }
 
+    public final void showText(String uri) {
+
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(uri));
+        try {
+            @SuppressWarnings("unused")
+            Request request = builder.sendRequest(null, new RequestCallback() {
+                public void onError(Request request, Throwable exception) {
+                    // Couldn't connect to server (could be timeout, SOP violation, etc.)     
+                }
+
+                public void onResponseReceived(Request request, Response response) {
+
+                    if (200 == response.getStatusCode()) {
+
+                        //Read file successfully; call Javascript to initialize html5 canvas
+                        textHTML(response.getText());
+
+                    } else {
+                        // Handle the error.  Can get the status text from response.getStatusText()
+                        HTML html3 = new HTML();
+                        html3.setHTML("Error: Could not read file from server.");
+                        previewPanel.add(html3);
+                    }
+
+                }
+            });
+        } catch (RequestException e) {
+            // Couldn't connect to server        
+        }
+
+    }
+
+    public final void textHTML(String text) {
+
+        text = text.replaceAll("<", "&lt;");
+        text = text.replaceAll(" ", "&nbsp;");
+        text = text.replaceAll("\n", "<br />");
+
+        HTML box = new HTML();
+        box.setHTML("<div class='textboxPreview'>" + text + "</div>");
+        previewPanel.add(box);
+
+    }
+
     //Javaview : More advanced preview for 3D files
     public final void showjvLite(String url) {
         HTML Javaview = new HTML();
@@ -670,35 +744,8 @@ public class PreviewPanel {
                 "height=360 archive='plugins/jvLite.jar'>" +
                 "<PARAM NAME='model' VALUE='" + url + ".obj" + "'>" +
                 //"<PARAM NAME='model' VALUE='images/metal.jpg'>" +
-                "<PARAM NAME='border' VALUE='hide'></APPLET>");
+                "</APPLET>");
         previewPanel.add(Javaview);
     }
 
-    ///////////////////////////////////////////////////////////////////
-    // The following previews below are not in use and are being tested
-    ///////////////////////////////////////////////////////////////////
-
-    //Google Docs Viewer CONS - no RDF support, less file formats supported
-    //                   PROS - Supports large file sizes
-    public final void showDocs(String url) {
-        HTML Docs = new HTML();
-        Docs.setHTML("<iframe src='http://docs.google.com/viewer?" +
-                 //"url=" + url + ".ppt" + "&embedded=true' " +
-                "url=http://127.0.0.1:8888/api/dataset/tag:medici@uiuc.edu,2009:data_Qhk_u-zF71vlTog8Kc3h9Q.ppt&embedded=true' " +
-                "style='width:650px; height:500px;' frameborder='0'></iframe> ");
-
-        previewPanel.add(Docs);
-    }
-
-    //ZOHO Viewer CONS - 10MB file size limit, has to include HTTP, no RDF support
-    //            PROS - Large number of file formats supported  
-    public final void showZOHO(String url) {
-        HTML Docs = new HTML();
-        Docs.setHTML("<iframe src='http://viewer.zoho.com/api/urlview.do?" +
-                   //"url=http://www.iasted.org/conferences/formatting/presentations-tips.ppt&embed=true'" +
-                "url=http://127.0.0.1:8888/api/dataset/tag:medici@uiuc.edu,2009:data_Qhk_u-zF71vlTog8Kc3h9Q.ppt&embed=true'" +
-                "frameborder='0' width='600' height='500'> </iframe>");
-
-        previewPanel.add(Docs);
-    }
 }

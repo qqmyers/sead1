@@ -58,6 +58,7 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewDocumentBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewPyramidBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewThreeDimensionalBeanUtil;
@@ -98,6 +99,9 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
 
             // 3D previews
             previews.addAll(new PreviewThreeDimensionalBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+
+            // document previews
+            previews.addAll(new PreviewDocumentBeanUtil(beanSession).getAssociationsFor(action.getUri()));
 
             // return dataset and preview
             return new GetDatasetResult(datasetBean, previews);

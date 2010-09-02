@@ -214,6 +214,19 @@ a:hover {
 	width: 750px;
 }
 
+.textboxPreview {
+	text-align: left; 
+	overflow:auto; 
+	margin:0 auto; 
+	width:600px; 
+	height:500px; 
+	padding: 5 5 5 5; 
+	border:solid 1px #000;
+	border-color:#A8A8A8;
+    font: 0.8em Courier, sans-serif; 
+	color: #505050; 
+}
+
 /* ----------------------------------------------------------------------
  * Dataset Page Right Side
  * ---------------------------------------------------------------------- */
