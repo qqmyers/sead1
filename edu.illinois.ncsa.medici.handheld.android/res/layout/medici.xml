@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:scrollbars="vertical">
+
+	<TextView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/lblTitle"
+		android:textSize="30sp"
+		android:gravity="center"
+		android:textStyle="bold" />
+	<ImageView
+		android:id="@+id/imgPreview"
+		android:src="@drawable/medici"
+		android:layout_width="fill_parent"
+		android:layout_height="120px" 	
+		android:gravity="center"
+		android:clickable="true"/>    		    	
+	<EditText
+		android:hint="Title"
+		android:text=""
+		android:id="@+id/title"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content" />
+	<Button
+		android:text="Upload"
+		android:id="@+id/btnUpload"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content" />
+	<EditText
+		android:text=""
+		android:id="@+id/debug"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:inputType="none" />
+
+</LinearLayout>
