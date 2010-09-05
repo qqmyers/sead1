@@ -39,6 +39,14 @@ public class DeadCode extends Activity {
         }
     }
 
+    public String getPath(Uri uri) {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
+
     private void findLocation() {
         // Acquire a reference to the system Location Manager
         final LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
