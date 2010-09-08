@@ -106,7 +106,8 @@ table td, select {
   border-bottom: 1px solid white;
 }
 
-/* ----------------------------------------------------------------------
+
+/* ----------------------------f------------------------------------------
  * Links
  * ---------------------------------------------------------------------- */
 a, a:link, a:visited, a:hover, a:active {
@@ -680,8 +681,13 @@ a:hover {
 .datasetTitle {
 	font-size: 1.5em;
   	color: black;
-  	margin: 20px;
+  	margin: 20px 20px 20px 10px;
   	text-align: left;
+}
+
+.datasetTitleIcon {
+	margin-left: 20px;	
+	
 }
 
 .datasetMainContainer {

@@ -55,14 +55,17 @@ import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
+import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
@@ -101,6 +104,8 @@ public class DatasetWidget extends Composite {
 
     private final FlowPanel         leftColumn;
     private final FlowPanel         rightColumn;
+
+    private ContentCategory         category;
 
     private String                  uri;
 
@@ -176,6 +181,17 @@ public class DatasetWidget extends Composite {
         // Create the left side of the page
         // ----------------------------------------------------------------------
 
+        // icon - content category
+        HorizontalPanel titlePanel = new HorizontalPanel();
+        titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        titlePanel.addStyleName("datasetTitleIcon");
+        final Image image = new Image();
+
+        category = new ContentCategory(result.getDataset().getMimeType());
+        image.setUrl("images/icons/" + category.name + ".png");
+        image.setTitle(category.name + " File");
+        titlePanel.add(image);
+
         // title
         final EditableLabel titleLabel = new EditableLabel(result.getDataset().getTitle());
         titleLabel.setEditable(false);
@@ -195,7 +211,8 @@ public class DatasetWidget extends Composite {
                 });
             }
         });
-        leftColumn.add(titleLabel);
+        titlePanel.add(titleLabel);
+        leftColumn.add(titlePanel);
 
         // preview - selection text and preview
         PreviewPanel Preview = new PreviewPanel();
@@ -370,8 +387,11 @@ public class DatasetWidget extends Composite {
         String size = TextFormatter.humanBytes(data.getSize());
         addInfo("Size", size, panel);
 
+        String cat = category.name;
+        addInfo("Category", cat, panel);
+
         String type = data.getMimeType();
-        addInfo("Type", type, panel);
+        addInfo("MIME Type", type, panel);
 
         String date = "";
         if (data.getDate() != null) {

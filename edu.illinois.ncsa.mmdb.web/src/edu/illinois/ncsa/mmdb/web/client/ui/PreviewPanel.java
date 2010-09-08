@@ -239,16 +239,18 @@ public class PreviewPanel extends Composite {
 
             final Anchor anchor = new Anchor(label);
             anchor.addStyleName("previewActionLink");
-            anchor.addClickHandler(new ClickHandler() {
-                public void onClick(ClickEvent event) {
-                    for (int i = 0; i < previewsPanel.getWidgetCount(); i++ ) {
-                        currentPreview = null;
-                        previewsPanel.getWidget(i).removeStyleName("deadlink");
+            if (finalpb != bestDoc) {
+                anchor.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        for (int i = 0; i < previewsPanel.getWidgetCount(); i++ ) {
+                            currentPreview = null;
+                            previewsPanel.getWidget(i).removeStyleName("deadlink");
+                        }
+                        anchor.addStyleName("deadlink");
+                        showPreview(finalpb, 0);
                     }
-                    anchor.addStyleName("deadlink");
-                    showPreview(finalpb, 0);
-                }
-            });
+                });
+            }
             if (bestVideo == finalpb) {
                 anchor.addStyleName("deadlink");
             } else if (bestImage == finalpb) {
