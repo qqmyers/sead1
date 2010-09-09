@@ -106,7 +106,7 @@ function setInstructions(){
 		
 }
 
-function Object(){
+function Object3D(){
 	
 	//this.verticesBuffer = [];
   	//this.indicesBuffer = [];
@@ -592,7 +592,7 @@ function initialize(cubeOBJ) {
 
     g_ctx = document.getElementById("canvas").getContext("2d");
 
-    g_testObject = new Object();
+    g_testObject = new Object3D();
     g_camera = new Camera();
     //g_FPSManager = new FPSManager();
     g_renderEngine = new RenderEngine();
