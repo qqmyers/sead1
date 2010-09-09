@@ -101,4 +101,8 @@ public class TagTablePresenter extends DynamicTablePresenter<DatasetBean> {
         return MMDB.DATASET_VIEW_TYPE_PREFERENCE;
     }
 
+    @Override
+    public String getPageKey() {
+        return null; // do not remember what page we're on
+    }
 }

@@ -102,4 +102,9 @@ public class DatasetTablePresenter extends DynamicTablePresenter<DatasetBean> {
     protected String getViewTypePreference() {
         return MMDB.DATASET_VIEW_TYPE_PREFERENCE;
     }
+
+    @Override
+    protected boolean rememberPageNumber() {
+        return true;
+    }
 }

@@ -220,10 +220,20 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         }
     }
 
+    protected boolean rememberPageNumber() {
+        return false;
+    }
+
+    protected String getPageKey() {
+        return this.getClass().getName();
+    }
+
     void setPage(int page) {
         currentPage = page;
         display.setPage(page);
-        MMDB.getSessionState().setPage(page); // remember page number in session
+        if (rememberPageNumber()) {
+            MMDB.getSessionState().setPage(getPageKey(), page); // remember page number in session
+        }
     }
 
     @Override
@@ -268,7 +278,9 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
             });
         }
 
-        setPage(MMDB.getSessionState().getPage()); // restore last-viewed page #
+        if (rememberPageNumber()) {
+            setPage(MMDB.getSessionState().getPage(getPageKey())); // restore last-viewed page #
+        }
 
         getContent();
     }

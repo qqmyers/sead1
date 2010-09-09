@@ -52,11 +52,11 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  * @author futrelle
  */
 public class UserSessionState {
-    private Map<String, String> preferences;
-    private String              sessionKey;
-    private Set<String>         selectedDatasets;
-    private PersonBean          currentUser;
-    private int                 page;
+    private Map<String, String>  preferences;
+    private String               sessionKey;
+    private Set<String>          selectedDatasets;
+    private PersonBean           currentUser;
+    private Map<String, Integer> currentPage;
 
     public UserSessionState() {
         initialize();
@@ -65,7 +65,7 @@ public class UserSessionState {
     public void initialize() {
         preferences = new HashMap<String, String>();
         selectedDatasets = new HashSet<String>();
-        page = 1;
+        currentPage = new HashMap<String, Integer>();
     }
 
     public Map<String, String> getPreferences() {
@@ -104,11 +104,19 @@ public class UserSessionState {
         selectedDatasets.clear();
     }
 
-    public int getPage() {
-        return page;
+    public int getPage(String key) {
+        if (!currentPage.containsKey(key)) {
+            return 1;
+        } else {
+            return currentPage.get(key);
+        }
     }
 
-    public void setPage(int page) {
-        this.page = page;
+    public void setPage(String key, int p) {
+        currentPage.put(key, p);
+    }
+
+    public void clearPage(String key) {
+        currentPage.remove(key);
     }
 }
