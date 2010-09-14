@@ -82,9 +82,9 @@ import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
 public class PreviewPanel extends Composite {
 
     /** maximum width of a preview image */
-    private static final long   MAX_WIDTH     = 600;
+    private static final long   MAX_WIDTH       = 600;
     /** maximum height of a preview image */
-    private static final long   MAX_HEIGHT    = 600;
+    private static final long   MAX_HEIGHT      = 600;
 
     private AbsolutePanel       previewPanel;
     private PreviewBean         currentPreview;
@@ -93,11 +93,11 @@ public class PreviewPanel extends Composite {
     public int                  getPolys;
     public double               getVerts;
 
-    private static final String BLOB_URL      = "./api/image/";
-    private static final String DOWNLOAD_URL  = "/api/image/";
-    private static final String EXTENSION_URL = "api/dataset/";
+    private static final String BLOB_URL        = "./api/image/";
+    private static final String NOREFERENCE_URL = "api/image/";
+    private static final String EXTENSION_URL   = "api/dataset/";
 
-    private static final String PYRAMID_URL   = "./pyramid/";
+    private static final String PYRAMID_URL     = "./pyramid/";
 
     public PreviewPanel() {
 
@@ -400,7 +400,7 @@ public class PreviewPanel extends Composite {
             showSeadragon(PYRAMID_URL + pb.getUri() + "/xml");
 
         } else if (pb instanceof PreviewDocumentBean) {
-            showText(DOWNLOAD_URL + pb.getUri());
+            showText(NOREFERENCE_URL + pb.getUri());
 
         } else if (pb instanceof PreviewVideoBean) {
             PreviewVideoBean pvb = (PreviewVideoBean) pb;
@@ -420,11 +420,11 @@ public class PreviewPanel extends Composite {
                     break;
                 case 1:
                     hideWebGL();
-                    show3D(DOWNLOAD_URL + p3db.getUri());
+                    show3D(NOREFERENCE_URL + p3db.getUri());
                     break;
                 case 2:
                     hideHTML5();
-                    showWebGL(DOWNLOAD_URL + p3db.getUri());
+                    showWebGL(NOREFERENCE_URL + p3db.getUri());
                     break;
             }
         }
@@ -551,7 +551,7 @@ public class PreviewPanel extends Composite {
     public final void show3D(String uri) {
 
         //TODO change to correct/dynamic localhost instead of static link
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(uri));
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(GWT.getHostPageBaseURL() + uri));
         try {
             @SuppressWarnings("unused")
             Request request = builder.sendRequest(null, new RequestCallback() {
@@ -637,7 +637,8 @@ public class PreviewPanel extends Composite {
 
     public final void showWebGL(String uri) {
 
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(uri));
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(GWT.getHostPageBaseURL() + uri));
+
         try {
             @SuppressWarnings("unused")
             Request request = builder.sendRequest(null, new RequestCallback() {
@@ -697,7 +698,7 @@ public class PreviewPanel extends Composite {
 
     public final void showText(String uri) {
 
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(uri));
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(GWT.getHostPageBaseURL() + uri));
         try {
             @SuppressWarnings("unused")
             Request request = builder.sendRequest(null, new RequestCallback() {
