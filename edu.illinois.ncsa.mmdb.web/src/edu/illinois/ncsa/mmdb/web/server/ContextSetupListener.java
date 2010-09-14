@@ -59,10 +59,7 @@ import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 
-import edu.illinois.ncsa.cet.search.IdGetter;
-import edu.illinois.ncsa.cet.search.TextExtractor;
 import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
-import edu.illinois.ncsa.mmdb.web.server.search.Search;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
@@ -170,8 +167,8 @@ public class ContextSetupListener implements ServletContextListener {
             @Override
             public void run()
                 {
-                TupeloStore.getInstance().countDatasets(null, true);
-            }
+                    TupeloStore.getInstance().countDatasets(null, true);
+                }
 
         }, 0, 60 * 60 * 1000);
 
@@ -192,27 +189,28 @@ public class ContextSetupListener implements ServletContextListener {
     }
 
     private void setUpSearch(String indexFile) {
+        File folder = null;
         if (indexFile != null) {
-            log.info("Lucene search index directory = " + indexFile);
-            LuceneTextIndex<String> search = new LuceneTextIndex<String>(new File(indexFile));
-            search.setTextExtractor(new SearchableThingTextExtractor());
-            search.setIdGetter(new SearchableThingIdGetter());
-            TupeloStore.getInstance().setSearch(search);
-        } else {
-            log.info("No Lucene search index directory specified, search will return dummy results");
-            Search s = new Search();
-            s.setTextExtractor(new TextExtractor<String>() {
-                public String extractText(String object) {
-                    return object;
+            folder = new File(indexFile);
+            if (!folder.exists()) {
+                if (!folder.mkdirs()) {
+                    folder = null;
                 }
-            });
-            s.setIdGetter(new IdGetter<String>() {
-                public String getId(String object) {
-                    return object;
-                }
-            });
-            TupeloStore.getInstance().setSearch(s);
+            } else if (!folder.isDirectory()) {
+                folder = null;
+            }
         }
+
+        if (folder == null) {
+            folder = new File(System.getProperty("java.io.tmpdir"), "mmdb.lucene");
+            folder.mkdirs();
+        }
+
+        log.info("Lucene search index directory = " + folder.getAbsolutePath());
+        LuceneTextIndex<String> search = new LuceneTextIndex<String>(folder);
+        search.setTextExtractor(new SearchableThingTextExtractor());
+        search.setIdGetter(new SearchableThingIdGetter());
+        TupeloStore.getInstance().setSearch(search);
     }
 
     private void createUserFields(Properties props) {
