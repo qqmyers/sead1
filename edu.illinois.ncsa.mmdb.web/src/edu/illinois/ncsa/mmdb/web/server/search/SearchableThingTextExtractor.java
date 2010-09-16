@@ -52,8 +52,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.SubjectFacade;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdfs;
 
@@ -107,6 +109,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
             if (bean instanceof CETBean) {
                 text = text((CETBean) bean);
                 bean = null;
+                /*log.debug("indexed text = " + text); // FIXME debug*/
+                return text;
             }
         } catch (Exception x) {
             log.warn("unexpected bean session behavior: " + x.getMessage());
@@ -114,20 +118,20 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
         // it's either not a bean or not a CETBean
         try {
             text = text(uri);
+            /*log.debug("indexed text = " + text); // FIXME debug*/
+            return text;
         } catch (Exception x) { // something's wrong
             x.printStackTrace();
             return "";
         }
-        //log.debug(uri+"="+text); // FIXME debug
-        return text;
     }
 
     String text(String uri) throws OperatorException, ClassNotFoundException {
-        return unsplit(title(uri), tags(uri), authors(uri), annotations(uri), collections(uri), metadata(uri), userMetadata(uri));
+        return unsplit(title(uri), tags(uri), authors(uri), annotations(uri), collections(uri), metadata(uri), userMetadata(uri), allLiterals(uri));
     }
 
     String text(CETBean bean) throws OperatorException, ClassNotFoundException {
-        return unsplit(title(bean), tags(bean), authors(bean), annotations(bean), collections(bean), metadata(bean), userMetadata(bean));
+        return unsplit(title(bean), tags(bean), authors(bean), annotations(bean), collections(bean), metadata(bean), userMetadata(bean), allLiterals(bean));
     }
 
     String authors(DatasetBean bean) {
@@ -271,6 +275,29 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
         return unsplit(allValues);
     }
 
+    String allLiterals(CETBean bean) {
+        return allLiterals(bean.getUri());
+    }
+
+    String allLiterals(String uri) {
+        if (uri == null) {
+            return "";
+        }
+        SubjectFacade s = TupeloStore.getInstance().getContext().getSubject(Resource.uriRef(uri));
+        List<String> results = new LinkedList<String>();
+        try {
+            for (Triple t : s.getTriples() ) {
+                if (t.getObject().isLiteral()) {
+                    results.add(t.getObject().getString());
+                }
+            }
+        } catch (OperatorException e) {
+            return "";
+        }
+        /*System.out.println("all literals = " + results); // FIXME debug*/
+        return unsplit(results);
+    }
+
     // split a string into words on non-whitespace boundaries
     static String atomize(String title) {
         String e = title.replaceAll("([a-z])([A-Z])", "$1 $2");
@@ -280,8 +307,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
         return title + " " + e;
     }
 
-    String title(CETBean bean) {
-        return atomize(bean.getLabel());
+    String title(CETBean bean) throws OperatorException, ClassNotFoundException {
+        return title(bean.getUri());
     }
 
     String title(String uri) throws OperatorException, ClassNotFoundException {
