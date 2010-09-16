@@ -39,11 +39,6 @@
 
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -62,7 +57,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 
-import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
@@ -93,11 +87,10 @@ public class PreviewPanel extends Composite {
     public int                  getPolys;
     public double               getVerts;
 
-    private static final String BLOB_URL        = "./api/image/";
+    private static final String BLOB_URL        = "api/image/";
     private static final String NOREFERENCE_URL = "api/image/";
     private static final String EXTENSION_URL   = "api/dataset/";
-
-    private static final String PYRAMID_URL     = "./pyramid/";
+    private static final String PYRAMID_URL     = "pyramid/";
 
     public PreviewPanel() {
 
@@ -110,17 +103,22 @@ public class PreviewPanel extends Composite {
         hideSeadragon();
     }
 
+    //TODO Clean up code to allow two different instances:
+    //     1) Multiple beans : one preview per bean
+    //     2) One bean : multiple previews per bean
     public void drawPreview(final GetDatasetResult result, FlowPanel leftColumn, String uri) {
-
-        // find best preview bean, add others
-        // best image preview is that that is closest to width of column
+        // find best preview bean
+        // best preview is that that is closest to width of column
         int maxwidth = leftColumn.getOffsetWidth();
-        List<PreviewBean> previews = new ArrayList<PreviewBean>();
-        // FIXME use a map to handle all previews
+
+        // list of known best previews
         PreviewImageBean bestImage = null;
         PreviewVideoBean bestVideo = null;
         PreviewThreeDimensionalBean best3D = null;
         PreviewDocumentBean bestDoc = null;
+        PreviewPyramidBean bestPyramid = null;
+
+        // loop through all previews finding the best options
         for (PreviewBean pb : result.getPreviews() ) {
             if (pb instanceof PreviewImageBean) {
                 PreviewImageBean pib = (PreviewImageBean) pb;
@@ -152,153 +150,16 @@ public class PreviewPanel extends Composite {
                 } else if (Math.abs(maxwidth - pdb.getWidth()) < Math.abs(maxwidth - bestDoc.getWidth())) {
                     bestDoc = pdb;
                 }
+            } else if (pb instanceof PreviewPyramidBean) {
+                bestPyramid = (PreviewPyramidBean) pb;
             } else {
-                previews.add(pb);
+                GWT.log("Unknown preview type : " + pb);
             }
         }
-        if (bestImage != null) {
-            previews.add(bestImage);
-        }
-        if (bestVideo != null) {
-            previews.add(bestVideo);
-        }
-        if (best3D != null) {
-            previews.add(best3D);
-        }
-        if (bestDoc != null) {
-            previews.add(bestDoc);
-        }
-
-        // sort beans, image, zoom, video, rest
-        Collections.sort(previews, new Comparator<PreviewBean>() {
-            @Override
-            public int compare(PreviewBean o1, PreviewBean o2)
-                     {
-                         // sort by type
-                         if (o1.getClass() != o2.getClass()) {
-                             if (o1 instanceof PreviewImageBean) {
-                                 return -1;
-                             }
-                             if (o2 instanceof PreviewImageBean) {
-                                 return +1;
-                             }
-                             if (o1 instanceof PreviewPyramidBean) {
-                                 return -1;
-                             }
-                             if (o2 instanceof PreviewPyramidBean) {
-                                 return +1;
-                             }
-                             if (o1 instanceof PreviewVideoBean) {
-                                 return -1;
-                             }
-                             if (o2 instanceof PreviewVideoBean) {
-                                 return +1;
-                             }
-                             if (o1 instanceof PreviewThreeDimensionalBean) {
-                                 return -1;
-                             }
-                             if (o2 instanceof PreviewThreeDimensionalBean) {
-                                 return +1;
-                             }
-                             if (o1 instanceof PreviewDocumentBean) {
-                                 return -1;
-                             }
-                             if (o2 instanceof PreviewDocumentBean) {
-                                 return +1;
-                             }
-                         }
-                         // don't care at this point
-                         return 0;
-                     }
-        });
 
         // preview options
         final FlowPanel previewsPanel = new FlowPanel();
         previewsPanel.addStyleName("datasetActions");
-        for (PreviewBean pb : previews ) {
-
-            final PreviewBean finalpb = pb;
-            String label;
-
-            if (pb instanceof PreviewImageBean || pb instanceof PreviewDocumentBean || pb instanceof PreviewThreeDimensionalBean) {
-                label = "Preview";
-
-            } else if (pb instanceof PreviewPyramidBean) {
-                label = "Zoom in";
-                if (MMDB.getUsername().contains("joefutrelle@gmail.com") || MMDB.getUsername().contains("acraig@ncsa.uiuc.edu")) {
-                    label = "Mega-Zoom™";
-                }
-
-            } else if (pb instanceof PreviewVideoBean) {
-                label = "Play video";
-
-            } else {
-                label = "Unknown"; // FIXME maybe "other" would be more user-friendly?
-                GWT.log("Unknown preview bean " + pb);
-            }
-
-            final Anchor anchor = new Anchor(label);
-            anchor.addStyleName("previewActionLink");
-            if (finalpb != bestDoc) {
-                anchor.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        for (int i = 0; i < previewsPanel.getWidgetCount(); i++ ) {
-                            currentPreview = null;
-                            previewsPanel.getWidget(i).removeStyleName("deadlink");
-                        }
-                        anchor.addStyleName("deadlink");
-                        showPreview(finalpb, 0);
-                    }
-                });
-            }
-            if (bestVideo == finalpb) {
-                anchor.addStyleName("deadlink");
-            } else if (bestImage == finalpb) {
-                anchor.addStyleName("deadlink");
-            } else if (best3D == finalpb) {
-                anchor.addStyleName("deadlink");
-            } else if (bestDoc == finalpb) {
-                anchor.addStyleName("deadlink");
-            }
-
-            previewsPanel.add(anchor);
-
-            //TODO Clean up code to allow two different instances:
-            //     1) Multiple beans : one preview per bean
-            //     2) One bean : multiple previews per bean
-
-            if (pb instanceof PreviewThreeDimensionalBean) {
-
-                String[] extraLabel = { "HTML5", "WebGL" };
-
-                final Anchor anchor2 = new Anchor(extraLabel[0]);
-                final Anchor anchor3 = new Anchor(extraLabel[1]);
-                anchor2.addStyleName("previewActionLink");
-                anchor3.addStyleName("previewActionLink");
-
-                anchor2.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        anchor3.removeStyleName("deadlink");
-                        anchor.removeStyleName("deadlink");
-                        anchor2.addStyleName("deadlink");
-                        currentPreview = null;
-                        showPreview(finalpb, 1);
-                    }
-                });
-                anchor3.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        anchor3.addStyleName("deadlink");
-                        anchor2.removeStyleName("deadlink");
-                        anchor.removeStyleName("deadlink");
-                        currentPreview = null;
-                        showPreview(finalpb, 2);
-                    }
-                });
-                previewsPanel.add(anchor2);
-                previewsPanel.add(anchor3);
-            }
-
-        }
         leftColumn.add(previewsPanel);
 
         // space for the preview/video/zoom
@@ -307,19 +168,56 @@ public class PreviewPanel extends Composite {
         previewPanel.addStyleName("previewPanel");
         leftColumn.add(previewPanel);
 
+        // add previews, this order is important, add beans in order
+        PreviewBean shown = null;
+
+        if (bestDoc != null) {
+            shown = addAnchor(bestDoc, "Text", previewsPanel, shown);
+        }
+        if (best3D != null) {
+            shown = addAnchor(best3D, "3D (java)", previewsPanel, 0, shown);
+            shown = addAnchor(best3D, "3D (WebGL)", previewsPanel, 1, shown);
+            shown = addAnchor(best3D, "3D (HTML5)", previewsPanel, 2, shown);
+        }
         if (bestVideo != null) {
-            showPreview(bestVideo, 0);
-        } else if (bestImage != null) {
-            showPreview(bestImage, 0);
-        } else if (bestDoc != null) {
-            showPreview(bestDoc, 0);
-        } else if (best3D != null) {
-            currentPreview = null;
-            showPreview(best3D, 0);
-        } else {
+            shown = addAnchor(bestVideo, "Video", previewsPanel, shown);
+        }
+        if (bestImage != null) {
+            shown = addAnchor(bestImage, "Image", previewsPanel, shown);
+        }
+        if (bestPyramid != null) {
+            shown = addAnchor(bestPyramid, "Zoom", previewsPanel, shown);
+        }
+        if (shown == null) {
             previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null));
         }
+    }
 
+    private PreviewBean addAnchor(final PreviewBean bean, String label, final FlowPanel previewsPanel, PreviewBean shown) {
+        return addAnchor(bean, label, previewsPanel, 0, shown);
+    }
+
+    private PreviewBean addAnchor(final PreviewBean bean, String label, final FlowPanel previewsPanel, final int method, PreviewBean shown) {
+        final Anchor anchor = new Anchor(label);
+        anchor.addStyleName("previewActionLink");
+        anchor.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                for (int i = 0; i < previewsPanel.getWidgetCount(); i++ ) {
+                    currentPreview = null;
+                    previewsPanel.getWidget(i).removeStyleName("deadlink");
+                }
+                anchor.addStyleName("deadlink");
+                showPreview(bean, 0);
+            }
+        });
+        previewsPanel.add(anchor);
+
+        if (shown == null) {
+            shown = bean;
+            showPreview(bean, 0);
+            anchor.addStyleName("deadlink");
+        }
+        return shown;
     }
 
     // ----------------------------------------------------------------------
@@ -351,7 +249,6 @@ public class PreviewPanel extends Composite {
         if (currentPreview == null) {
             if (pb instanceof PreviewImageBean) {
                 Image image = new Image();
-                //image.addStyleName( "sea dragon" );
                 image.getElement().setId("preview");
                 previewPanel.add(image);
 
@@ -547,7 +444,53 @@ public class PreviewPanel extends Composite {
     // ----------------------------------------------------------------------
     // html previews
     // ----------------------------------------------------------------------
+    public final void showText(String uri) {
 
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(GWT.getHostPageBaseURL() + uri));
+        try {
+            @SuppressWarnings("unused")
+            Request request = builder.sendRequest(null, new RequestCallback() {
+                public void onError(Request request, Throwable exception) {
+                    // Couldn't connect to server (could be timeout, SOP violation, etc.)     
+                }
+
+                public void onResponseReceived(Request request, Response response) {
+
+                    if (200 == response.getStatusCode()) {
+
+                        //Read file successfully; call Javascript to initialize html5 canvas
+                        textHTML(response.getText());
+
+                    } else {
+                        // Handle the error.  Can get the status text from response.getStatusText()
+                        HTML html3 = new HTML();
+                        html3.setHTML("Error: Could not read file from server.");
+                        previewPanel.add(html3);
+                    }
+
+                }
+            });
+        } catch (RequestException e) {
+            // Couldn't connect to server        
+        }
+
+    }
+
+    public final void textHTML(String text) {
+
+        text = text.replaceAll("<", "&lt;");
+        text = text.replaceAll(" ", "&nbsp;");
+        text = text.replaceAll("\n", "<br />");
+
+        HTML box = new HTML();
+        box.setHTML("<div class='textboxPreview'>" + text + "</div>");
+        previewPanel.add(box);
+
+    }
+
+    // ----------------------------------------------------------------------
+    // 3D previews
+    // ----------------------------------------------------------------------
     public final void show3D(String uri) {
 
         //TODO change to correct/dynamic localhost instead of static link
@@ -693,50 +636,6 @@ public class PreviewPanel extends Composite {
             }
         });
         previewPanel.add(grass);
-
-    }
-
-    public final void showText(String uri) {
-
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(GWT.getHostPageBaseURL() + uri));
-        try {
-            @SuppressWarnings("unused")
-            Request request = builder.sendRequest(null, new RequestCallback() {
-                public void onError(Request request, Throwable exception) {
-                    // Couldn't connect to server (could be timeout, SOP violation, etc.)     
-                }
-
-                public void onResponseReceived(Request request, Response response) {
-
-                    if (200 == response.getStatusCode()) {
-
-                        //Read file successfully; call Javascript to initialize html5 canvas
-                        textHTML(response.getText());
-
-                    } else {
-                        // Handle the error.  Can get the status text from response.getStatusText()
-                        HTML html3 = new HTML();
-                        html3.setHTML("Error: Could not read file from server.");
-                        previewPanel.add(html3);
-                    }
-
-                }
-            });
-        } catch (RequestException e) {
-            // Couldn't connect to server        
-        }
-
-    }
-
-    public final void textHTML(String text) {
-
-        text = text.replaceAll("<", "&lt;");
-        text = text.replaceAll(" ", "&nbsp;");
-        text = text.replaceAll("\n", "<br />");
-
-        HTML box = new HTML();
-        box.setHTML("<div class='textboxPreview'>" + text + "</div>");
-        previewPanel.add(box);
 
     }
 
