@@ -86,7 +86,7 @@ public class DynamicListPresenter extends BasePresenter<DynamicListPresenter.Dis
 
         int insertItem(String id, String name, String type, Date date, String preview, String size, String authorId);
 
-        int insertItem(String id);
+        int insertItem(String id, String type);
 
         void setTitle(int row, String title, String uri);
 
@@ -148,7 +148,7 @@ public class DynamicListPresenter extends BasePresenter<DynamicListPresenter.Dis
 
             @Override
             public void onShowItem(ShowItemEvent showItemEvent) {
-                int row = addItem(showItemEvent.getId());
+                int row = addItem(showItemEvent.getId(), showItemEvent.getType());
                 display.setTitle(row, showItemEvent.getTitle(), showItemEvent.getId());
                 if (showItemEvent.getAuthor() != null) {
                     display.setAuthor(row, showItemEvent.getAuthor());
@@ -197,8 +197,8 @@ public class DynamicListPresenter extends BasePresenter<DynamicListPresenter.Dis
         });
     }
 
-    public int addItem(final String id) {
-        int location = display.insertItem(id);
+    public int addItem(final String id, String type) {
+        int location = display.insertItem(id, type);
         items.put(id, location);
         final HasValue<Boolean> selected = display.getSelected(location);
         selected.addValueChangeHandler(new DatasetSelectionCheckboxHandler(id, eventBus));

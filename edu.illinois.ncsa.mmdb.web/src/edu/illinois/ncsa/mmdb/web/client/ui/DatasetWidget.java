@@ -105,8 +105,6 @@ public class DatasetWidget extends Composite {
     private final FlowPanel         leftColumn;
     private final FlowPanel         rightColumn;
 
-    private ContentCategory         category;
-
     private String                  uri;
 
     private Panel                   infoPanel;
@@ -187,9 +185,8 @@ public class DatasetWidget extends Composite {
         titlePanel.addStyleName("datasetTitleIcon");
         final Image image = new Image();
 
-        category = new ContentCategory(result.getDataset().getMimeType());
-        image.setUrl("images/icons/" + category.name + ".png");
-        image.setTitle(category.name + " File");
+        image.setUrl("images/icons/" + ContentCategory.getCategory(result.getDataset().getMimeType()) + ".png");
+        image.setTitle(ContentCategory.getCategory(result.getDataset().getMimeType()) + " File");
         titlePanel.add(image);
 
         // title
@@ -387,7 +384,7 @@ public class DatasetWidget extends Composite {
         String size = TextFormatter.humanBytes(data.getSize());
         addInfo("Size", size, panel);
 
-        String cat = category.name;
+        String cat = ContentCategory.getCategory(data.getMimeType());
         addInfo("Category", cat, panel);
 
         String type = data.getMimeType();

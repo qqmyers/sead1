@@ -50,6 +50,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
+import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 
@@ -95,7 +96,7 @@ public class DatasetTablePresenter extends DynamicTablePresenter<DatasetBean> {
         }
         event.setDate(item.getDate());
         event.setSize(TextFormatter.humanBytes(item.getSize()));
-        event.setType(item.getMimeType());
+        event.setType(ContentCategory.getCategory(item.getMimeType()));
     }
 
     @Override

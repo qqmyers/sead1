@@ -92,7 +92,7 @@ public class DatasetTableGridView extends DatasetTableView {
     @Override
     public void addRow(final String id, String title, String mimeType, Date date,
             String previewUri, String size, String authorsId) {
-        PreviewWidget pw = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
+        PreviewWidget pw = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, mimeType);
         pw.setWidth("120px");
         pw.setMaxWidth(100);
         // selection checkbox

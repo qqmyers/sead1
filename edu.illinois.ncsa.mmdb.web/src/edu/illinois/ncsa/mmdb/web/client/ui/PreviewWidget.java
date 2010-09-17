@@ -63,6 +63,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -133,16 +134,21 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
      */
     public PreviewWidget(final String datasetUri, String desiredSize,
             final String link) {
-        this(datasetUri, desiredSize, link, true);
+        this(datasetUri, desiredSize, link, "Unknown", true);
     }
 
     public PreviewWidget(final String datasetUri, String desiredSize,
-            final String link, final boolean checkPending) {
-        this(datasetUri, desiredSize, link, checkPending, true);
+            final String link, String type) {
+        this(datasetUri, desiredSize, link, type, true, true);
     }
 
     public PreviewWidget(final String datasetUri, String desiredSize,
-                final String link, final boolean checkPending, boolean initialDisplay) {
+            final String link, String type, final boolean checkPending) {
+        this(datasetUri, desiredSize, link, type, checkPending, true);
+    }
+
+    public PreviewWidget(final String datasetUri, String desiredSize,
+                final String link, String type, final boolean checkPending, boolean initialDisplay) {
         this.checkPending = checkPending;
         this.datasetUri = datasetUri;
         this.link = link;
@@ -155,6 +161,9 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             size = GetPreviews.SMALL;
         }
 
+        final AbsolutePanel imagePanel = new AbsolutePanel();
+        final Image overlay = new Image("images/video_overlay.png");
+
         contentPanel = new SimplePanel();
         // add the preview image
         if (initialDisplay) {
@@ -162,15 +171,30 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         } else {
             image = new Image(GRAY_URL.get(size));
         }
+
+        overlay.addStyleName("imageOverlay");
+        image.addStyleName("imageThumbnail");
+
+        imagePanel.add(image);
+
+        if (type == "Video") {
+            imagePanel.add(overlay);
+        }
+
         contentPanel.clear();
-        contentPanel.add(image);
+
+        contentPanel.add(imagePanel);
+
         addLink(image);
+        addLink(overlay);
+
         //
         safariForceTimer = new Timer() { // MMDB-620
             public void run() {
                 contentPanel.clear();
-                contentPanel.add(image);
+                contentPanel.add(imagePanel);
                 addLink(image);
+                addLink(overlay);
             }
         };
         safariForceTimer.schedule(50); // right away

@@ -50,8 +50,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
-import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicListPresenter.Display;
+import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
 /**
@@ -80,7 +80,7 @@ public class DynamicListView extends FlexTable implements Display {
         CheckBox checkBox = new CheckBox();
         setWidget(row, 0, checkBox);
 
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type);
         pre.setMaxWidth(100);
         setWidget(row, 1, pre);
 
@@ -129,7 +129,7 @@ public class DynamicListView extends FlexTable implements Display {
     }
 
     @Override
-    public int insertItem(String id) {
+    public int insertItem(String id, String type) {
 
         final int row = this.getRowCount();
 
@@ -137,7 +137,7 @@ public class DynamicListView extends FlexTable implements Display {
         CheckBox checkBox = new CheckBox();
         setWidget(row, 0, checkBox);
 
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type);
         pre.setMaxWidth(100);
         setWidget(row, 1, pre);
 

@@ -90,7 +90,7 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
 
         void removeAllRows();
 
-        int insertItem(String id, String title);
+        int insertItem(String id, String title, String type);
     }
 
     public DynamicGridPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
@@ -180,7 +180,7 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
     }
 
     public void addItem(final ShowItemEvent showItemEvent) {
-        int location = display.insertItem(showItemEvent.getId(), showItemEvent.getTitle());
+        int location = display.insertItem(showItemEvent.getId(), showItemEvent.getTitle(), showItemEvent.getType());
         items.put(showItemEvent.getId(), location);
         final HasValue<Boolean> selected = display.getSelected(location);
         selected.addValueChangeHandler(new ValueChangeHandler<Boolean>() {

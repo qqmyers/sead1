@@ -205,6 +205,21 @@ a:hover {
 	padding: 0px;
 }
 
+.imageOverlay {
+	position:absolute;
+	background-repeat: no-repeat;
+	z-index: 2;
+	top:00%;
+	left:03%;
+	cursor: pointer; 
+	cursor: hand;
+	}
+	
+.imageThumbnail {
+	
+	z-index: 1;
+	}
+
 /* ----------------------------------------------------------------------
  * Dataset Page Left Side
  * ---------------------------------------------------------------------- */

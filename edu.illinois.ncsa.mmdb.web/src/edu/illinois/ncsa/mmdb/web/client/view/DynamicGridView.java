@@ -78,7 +78,7 @@ public class DynamicGridView extends FlexTable implements Display {
     }
 
     @Override
-    public int insertItem(String id, String title) {
+    public int insertItem(String id, String title, String type) {
 
         final VerticalPanel layoutPanel = new VerticalPanel();
         layoutPanel.addStyleName("dynamicGridElement");
@@ -89,7 +89,7 @@ public class DynamicGridView extends FlexTable implements Display {
         titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
         // preview
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type);
         pre.setWidth("120px");
         pre.setMaxWidth(100);
         layoutPanel.add(pre);
@@ -131,7 +131,7 @@ public class DynamicGridView extends FlexTable implements Display {
         titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
         // preview
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type);
         pre.setWidth("120px");
         pre.setMaxWidth(100);
         layoutPanel.add(pre);

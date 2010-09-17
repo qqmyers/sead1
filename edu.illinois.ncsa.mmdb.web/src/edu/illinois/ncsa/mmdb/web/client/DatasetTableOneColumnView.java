@@ -144,7 +144,7 @@ public class DatasetTableOneColumnView extends DatasetTableView {
         });
 
         // preview
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type);
         pre.setMaxWidth(100);
         setWidget(row, 1, pre);
 

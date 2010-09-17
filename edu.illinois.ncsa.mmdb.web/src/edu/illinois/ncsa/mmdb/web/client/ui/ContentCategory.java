@@ -48,30 +48,30 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 public class ContentCategory {
 
-    public String name;
+    public static String name;
 
     public ContentCategory() {
 
     }
 
-    public ContentCategory(String mimetype) {
+    public static String getCategory(String mimetype) {
 
         //TODO MAP scalable
 
         if (mimetype.contains("image/")) {
-            name = "Image";
+            return "Image";
         } else if (mimetype.contains("video/")) {
-            name = "Video";
+            return "Video";
         } else if (mimetype.contains("audio/")) {
-            name = "Audio";
+            return "Audio";
         } else if (mimetype.contains("x-tgif")) {
-            name = "3D";
+            return "3D";
         } else if (mimetype.contains("text/") || mimetype.contains("pdf") || mimetype.contains("word") || mimetype.contains("powerpoint") || mimetype.contains("excel")) {
-            name = "Document";
+            return "Document";
         } else if (mimetype.contains("application/")) {
-            name = "Application";
+            return "Application";
         } else {
-            name = "Other";
+            return "Other";
         }
 
     }

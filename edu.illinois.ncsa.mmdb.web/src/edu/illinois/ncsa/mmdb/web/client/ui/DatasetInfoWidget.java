@@ -67,7 +67,7 @@ public class DatasetInfoWidget extends Composite {
         mainPanel.addStyleName("datasetInfoWidget");
         initWidget(mainPanel);
 
-        PreviewWidget thumbnail = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri());
+        PreviewWidget thumbnail = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri(), ContentCategory.getCategory(dataset.getMimeType()));
         thumbnail.setMaxWidth(100);
         SimplePanel previewPanel = new SimplePanel();
         previewPanel.addStyleName("datasetInfoThumbnail");
@@ -84,7 +84,7 @@ public class DatasetInfoWidget extends Composite {
         }
         descriptionPanel.add(new Label(DateTimeFormat.getLongDateFormat().format(dataset.getDate())));
         descriptionPanel.add(new Label(TextFormatter.humanBytes(dataset.getSize())));
-        descriptionPanel.add(new Label(dataset.getMimeType()));
+        descriptionPanel.add(new Label(ContentCategory.getCategory(dataset.getMimeType())));
         mainPanel.add(descriptionPanel);
 
         Label clearLabel = new Label();
