@@ -39,6 +39,7 @@
 
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+
 /**
  * MIME-type / category mapping
  * 
@@ -50,13 +51,17 @@ public class ContentCategory {
 
     public static String name;
 
+    //public static Map<String, String> type;
+
     public ContentCategory() {
 
     }
 
     public static String getCategory(String mimetype) {
 
-        //TODO MAP scalable
+        //TODO Implement map, for now not necessary as the majority of the categories
+        //     are covered by these expressions.
+        //type = new HashMap<String, String>();
 
         if (mimetype.contains("image/")) {
             return "Image";

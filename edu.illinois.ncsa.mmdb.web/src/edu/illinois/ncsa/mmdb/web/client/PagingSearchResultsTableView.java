@@ -43,6 +43,7 @@ import java.util.Map;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -169,7 +170,7 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
     @Override
     public void addItem(String uri, DatasetBean dataset, int position) {
         String title = dataset.getTitle();
-        String type = dataset.getMimeType();
+        String type = ContentCategory.getCategory(dataset.getMimeType());
         Date date = dataset.getDate();
         String previewUri = "/api/image/preview/small/" + uri;
         String size = TextFormatter.humanBytes(dataset.getSize());

@@ -162,7 +162,12 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         }
 
         final AbsolutePanel imagePanel = new AbsolutePanel();
-        final Image overlay = new Image("images/video_overlay.png");
+        final Image overlay = new Image();
+
+        //Icons that appear over thumbnail 
+        if (type != "Image") {
+            overlay.setUrl("images/icons/" + type + "_overlay.png");
+        }
 
         contentPanel = new SimplePanel();
         // add the preview image
@@ -176,8 +181,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         image.addStyleName("imageThumbnail");
 
         imagePanel.add(image);
-
-        if (type == "Video") {
+        if (type != "Unknown") {
             imagePanel.add(overlay);
         }
 
