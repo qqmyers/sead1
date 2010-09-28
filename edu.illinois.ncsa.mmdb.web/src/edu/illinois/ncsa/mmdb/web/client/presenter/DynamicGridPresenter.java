@@ -44,8 +44,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HasValue;
 
@@ -68,6 +66,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.RefreshEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEventHandler;
 import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
+import edu.illinois.ncsa.mmdb.web.client.ui.DatasetSelectionCheckboxHandler;
 
 /**
  * Show contents of a {@link DynamicTablePresenter} as a grid.
@@ -180,25 +179,11 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
     }
 
     public void addItem(final ShowItemEvent showItemEvent) {
-        int location = display.insertItem(showItemEvent.getId(), showItemEvent.getTitle(), showItemEvent.getType());
-        items.put(showItemEvent.getId(), location);
+        String id = showItemEvent.getId();
+        int location = display.insertItem(id, showItemEvent.getTitle(), showItemEvent.getType());
+        items.put(id, location);
         final HasValue<Boolean> selected = display.getSelected(location);
-        selected.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                if (selected.getValue()) {
-                    DatasetSelectedEvent datasetSelected = new DatasetSelectedEvent();
-                    datasetSelected.setUri(showItemEvent.getId());
-                    eventBus.fireEvent(datasetSelected);
-                } else {
-                    DatasetUnselectedEvent datasetUnselected = new DatasetUnselectedEvent();
-                    datasetUnselected.setUri(showItemEvent.getId());
-                    eventBus.fireEvent(datasetUnselected);
-                }
-
-            }
-        });
+        selected.addValueChangeHandler(new DatasetSelectionCheckboxHandler(id, eventBus));
         UserSessionState sessionState = MMDB.getSessionState();
         if (sessionState.getSelectedDatasets().contains(showItemEvent.getId())) {
             selected.setValue(true);

@@ -202,14 +202,6 @@ public class DynamicListPresenter extends BasePresenter<DynamicListPresenter.Dis
         items.put(id, location);
         final HasValue<Boolean> selected = display.getSelected(location);
         selected.addValueChangeHandler(new DatasetSelectionCheckboxHandler(id, eventBus));
-        addHandler(AllOnPageSelectedEvent.TYPE, new AllOnPageSelectedHandler() {
-            @Override
-            public void onAllOnPageSelected(AllOnPageSelectedEvent event) {
-                DatasetSelectedEvent datasetSelected = new DatasetSelectedEvent();
-                datasetSelected.setUri(id);
-                eventBus.fireEvent(datasetSelected);
-            }
-        });
         UserSessionState sessionState = MMDB.getSessionState();
         if (sessionState.getSelectedDatasets().contains(id)) {
             selected.setValue(true);
