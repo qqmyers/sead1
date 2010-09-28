@@ -41,7 +41,9 @@ package edu.illinois.ncsa.mmdb.web.server;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -251,23 +253,28 @@ public class ContextSetupListener implements ServletContextListener {
         rbac.addPermission(MMDB.REGULAR_MEMBER_ROLE, MMDB.VIEW_MEMBER_PAGES);
 
         // create accounts
+        Set<String> keys = new HashSet<String>();
         for (String key : props.stringPropertyNames() ) {
-            if (key.startsWith("user.") && key.endsWith(".username")) { //$NON-NLS-1$ //$NON-NLS-2$
+            if (key.startsWith("user.")) { //$NON-NLS-1$
                 String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
-                String username = props.getProperty(key);
-                String fullname = props.getProperty(pre + ".fullname", username);
-                String email = props.getProperty(pre + ".email");
-                String password = props.getProperty(pre + ".password", username);
+                if (!keys.contains(key)) {
+                    keys.add(key);
+                    String username = props.getProperty(pre + ".username");
+                    String fullname = props.getProperty(pre + ".fullname");
+                    String email = props.getProperty(pre + ".email");
+                    String password = props.getProperty(pre + ".password");
 
-                // create the user
-                Resource userid = auth.addUser(username, email, fullname, password);
+                    // create the user
+                    Resource userid = auth.addUser(username, email, fullname, password);
 
-                // add roles
-                rbac.addRole(userid, MMDB.REGULAR_MEMBER_ROLE);
-
-                for (String role : props.getProperty(pre + ".roles", "").split(",") ) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                    if ("ADMIN".equals(role)) { //$NON-NLS-1$
-                        rbac.addRole(userid, MMDB.ADMIN_ROLE);
+                    // add roles
+                    for (String role : props.getProperty(pre + ".roles", "").split(",") ) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                        if ("admin".equalsIgnoreCase(role)) { //$NON-NLS-1$
+                            rbac.addRole(userid, MMDB.ADMIN_ROLE);
+                        }
+                        if ("member".equalsIgnoreCase(role)) { //$NON-NLS-1$
+                            rbac.addRole(userid, MMDB.REGULAR_MEMBER_ROLE);
+                        }
                     }
                 }
             }
