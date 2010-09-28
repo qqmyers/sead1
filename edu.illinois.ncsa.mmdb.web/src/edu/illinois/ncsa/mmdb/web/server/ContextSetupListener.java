@@ -265,7 +265,13 @@ public class ContextSetupListener implements ServletContextListener {
                     String password = props.getProperty(pre + ".password");
 
                     // create the user
-                    Resource userid = auth.addUser(username, email, fullname, password);
+                    Resource userid;
+                    if ((username != null) && !username.equals(email)) {
+                        log.warn("username should not be used anymore in server.properties.");
+                        userid = auth.addUser(username, email, fullname, password);
+                    } else {
+                        userid = auth.addUser(email, fullname, password);
+                    }
 
                     // add roles
                     for (String role : props.getProperty(pre + ".roles", "").split(",") ) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
