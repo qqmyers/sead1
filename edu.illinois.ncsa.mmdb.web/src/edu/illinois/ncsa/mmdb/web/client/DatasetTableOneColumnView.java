@@ -202,7 +202,7 @@ public class DatasetTableOneColumnView extends DatasetTableView {
 
         GWT.log("Inserting dataset " + title + " to row " + row, null);
 
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, mimeType);
         pre.setMaxWidth(100);
         setWidget(row, 0, pre);
 

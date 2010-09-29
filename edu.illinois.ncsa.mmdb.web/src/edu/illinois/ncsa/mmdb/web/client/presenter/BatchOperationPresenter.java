@@ -150,14 +150,9 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 });
             }
         });
-        display.addMenuAction("Change license", new Command() {
-            public void execute() {
-                if (selectionEmpty()) {
-                    return;
-                }
-                new SetLicenseDialog(title("Set license for %s"), sessionState.getSelectedDatasets(), eventBus);
-            }
-        });
+
+        display.addMenuSeparator();
+
         // add tag action
         display.addMenuAction("Add tag(s)", new Command() {
 
@@ -186,6 +181,9 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 tagView.show();
             }
         });
+
+        display.addMenuSeparator();
+
         display.addMenuAction("Add metadata", new Command() {
             @Override
             public void execute() {
@@ -198,6 +196,17 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 view.show();
             }
         });
+        display.addMenuAction("Change license", new Command() {
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
+                }
+                new SetLicenseDialog(title("Set license for %s"), sessionState.getSelectedDatasets(), eventBus);
+            }
+        });
+
+        display.addMenuSeparator();
+
         display.addMenuAction("Create collection", new Command() {
             @Override
             public void execute() {
@@ -282,6 +291,9 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 });
             }
         });
+
+        display.addMenuSeparator();
+
         display.addMenuAction("Select all on page", new Command() {
             @Override
             public void execute() {
@@ -352,6 +364,8 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
         void setNumSelected(int num);
 
         void addMenuAction(String name, Command command);
+
+        void addMenuSeparator();
 
         Widget asWidget();
     }

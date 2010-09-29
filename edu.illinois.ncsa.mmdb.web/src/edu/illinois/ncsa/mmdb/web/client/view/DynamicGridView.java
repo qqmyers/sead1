@@ -68,6 +68,8 @@ public class DynamicGridView extends FlexTable implements Display {
     private final HashMap<Integer, CheckBox> checkBoxes;
     private final static DateTimeFormat      DATE_TIME_FORMAT  = DateTimeFormat.getShortDateTimeFormat();
     public static final int                  DEFAULT_PAGE_SIZE = 24;
+    public static final int                  PAGE_SIZE_X2      = 48;
+    public static final int                  PAGE_SIZE_X4      = 96;
     private final int                        ROW_WIDTH         = 6;
     private int                              numItems          = 0;
 

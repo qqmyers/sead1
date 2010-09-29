@@ -208,7 +208,6 @@ a:hover {
 .imageOverlay {
 	position:absolute;
 	background-repeat: no-repeat;
-	z-index: 2;
 	top:00%;
 	left:03%;
 	cursor: pointer; 
@@ -1003,6 +1002,14 @@ a:hover {
 	float: right;
 }
 
+.batchOperationCountLink { 
+
+	color: #2F4F4F;
+	font-size: 80%;
+	margin-right: 10px;	
+	
+}
+
 .batchOperationCount {
 	color: gray;
 	font-size: 80%;
@@ -1039,14 +1046,17 @@ a:hover {
 
 .gwt-MenuBar .gwt-MenuItem-selected {
 	background: #dddddd;
+		z-index: 3;
 }
 
 .gwt-MenuBar-vertical .subMenuIcon-selected {
   background: #dddddd;
+  	z-index: 3;
 }
 
 .gwt-MenuBar-horizontal .subMenuIcon-selected {
   background: #dddddd;
+  	z-index: 3;
 }
 
 .dynamicTable {

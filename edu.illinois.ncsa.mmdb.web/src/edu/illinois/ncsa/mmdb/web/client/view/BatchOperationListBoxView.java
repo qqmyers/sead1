@@ -81,6 +81,11 @@ public class BatchOperationListBoxView extends Composite implements Display {
     }
 
     @Override
+    public void addMenuSeparator() {
+
+    }
+
+    @Override
     public Widget asWidget() {
         return this;
     }

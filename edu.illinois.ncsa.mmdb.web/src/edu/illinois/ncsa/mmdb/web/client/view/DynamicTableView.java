@@ -64,6 +64,9 @@ public class DynamicTableView extends Composite implements Display {
     public static final String    LIST_VIEW_TYPE = "list";
     public static final String    GRID_VIEW_TYPE = "grid";
     public static final String    FLOW_VIEW_TYPE = "flow";
+    public static final String    PAGE_SIZE_X1   = "default";
+    public static final String    PAGE_SIZE_X2   = "two";
+    public static final String    PAGE_SIZE_X4   = "four";
     private final FlowPanel       mainPanel;
     private final HorizontalPanel topPagingPanel;
     private final VerticalPanel   middlePanel;
@@ -72,10 +75,13 @@ public class DynamicTableView extends Composite implements Display {
     private final PagingWidget    pagingWidgetBottom;
     private final LabeledListBox  sortOptionsTop;
     private final LabeledListBox  viewOptionsTop;
+    private final LabeledListBox  sizeOptionsTop;
     private String                sortKey;
     private String                viewType;
+    private String                sizeType;
     private final LabeledListBox  sortOptionsBottom;
     private final LabeledListBox  viewOptionsBottom;
+    private final LabeledListBox  sizeOptionsBottom;
 
     public DynamicTableView() {
         mainPanel = new FlowPanel();
@@ -99,6 +105,8 @@ public class DynamicTableView extends Composite implements Display {
         topPagingPanel.add(sortOptionsTop);
         viewOptionsTop = createViewOptions();
         topPagingPanel.add(viewOptionsTop);
+        sizeOptionsTop = createSizeOptions();
+        topPagingPanel.add(sizeOptionsTop);
         pagingWidgetBottom = new PagingWidget();
         bottomPagingPanel.add(pagingWidgetBottom);
         bottomPagingPanel.setCellWidth(pagingWidgetBottom, "50%");
@@ -106,6 +114,8 @@ public class DynamicTableView extends Composite implements Display {
         bottomPagingPanel.add(sortOptionsBottom);
         viewOptionsBottom = createViewOptions();
         bottomPagingPanel.add(viewOptionsBottom);
+        sizeOptionsBottom = createSizeOptions();
+        bottomPagingPanel.add(sizeOptionsBottom);
     }
 
     private LabeledListBox createSortOptions() {
@@ -126,6 +136,16 @@ public class DynamicTableView extends Composite implements Display {
         viewOptions.addItem("Grid", GRID_VIEW_TYPE);
         viewOptions.setSelected(viewType);
         return viewOptions;
+    }
+
+    private LabeledListBox createSizeOptions() {
+        LabeledListBox sizeOptions = new LabeledListBox("Page Size:");
+        sizeOptions.addStyleName("pagingLabel");
+        sizeOptions.addItem("5", PAGE_SIZE_X1);
+        sizeOptions.addItem("10", PAGE_SIZE_X2);
+        sizeOptions.addItem("20", PAGE_SIZE_X4);
+        sizeOptions.setSelected(sizeType);
+        return sizeOptions;
     }
 
     @Override
@@ -156,6 +176,40 @@ public class DynamicTableView extends Composite implements Display {
     }
 
     @Override
+    public void changeGridSizeNumbers() {
+
+        sizeOptionsTop.removeItem(PAGE_SIZE_X4);
+        sizeOptionsTop.removeItem(PAGE_SIZE_X2);
+        sizeOptionsTop.removeItem(PAGE_SIZE_X1);
+        sizeOptionsTop.addItem("24", PAGE_SIZE_X1);
+        sizeOptionsTop.addItem("48", PAGE_SIZE_X2);
+        sizeOptionsTop.addItem("96", PAGE_SIZE_X4);
+        sizeOptionsBottom.removeItem(PAGE_SIZE_X4);
+        sizeOptionsBottom.removeItem(PAGE_SIZE_X2);
+        sizeOptionsBottom.removeItem(PAGE_SIZE_X1);
+        sizeOptionsBottom.addItem("24", PAGE_SIZE_X1);
+        sizeOptionsBottom.addItem("48", PAGE_SIZE_X2);
+        sizeOptionsBottom.addItem("96", PAGE_SIZE_X4);
+    }
+
+    @Override
+    public void changeListSizeNumbers() {
+
+        sizeOptionsTop.removeItem(PAGE_SIZE_X4);
+        sizeOptionsTop.removeItem(PAGE_SIZE_X2);
+        sizeOptionsTop.removeItem(PAGE_SIZE_X1);
+        sizeOptionsTop.addItem("5", PAGE_SIZE_X1);
+        sizeOptionsTop.addItem("10", PAGE_SIZE_X2);
+        sizeOptionsTop.addItem("20", PAGE_SIZE_X4);
+        sizeOptionsBottom.removeItem(PAGE_SIZE_X4);
+        sizeOptionsBottom.removeItem(PAGE_SIZE_X2);
+        sizeOptionsBottom.removeItem(PAGE_SIZE_X1);
+        sizeOptionsBottom.addItem("5", PAGE_SIZE_X1);
+        sizeOptionsBottom.addItem("10", PAGE_SIZE_X2);
+        sizeOptionsBottom.addItem("20", PAGE_SIZE_X4);
+    }
+
+    @Override
     public Set<HasValueChangeHandlers<String>> getSortListBox() {
         Set<HasValueChangeHandlers<String>> set = new HashSet<HasValueChangeHandlers<String>>();
         set.add(sortOptionsTop);
@@ -168,6 +222,14 @@ public class DynamicTableView extends Composite implements Display {
         Set<HasValueChangeHandlers<String>> set = new HashSet<HasValueChangeHandlers<String>>();
         set.add(viewOptionsTop);
         set.add(viewOptionsBottom);
+        return set;
+    }
+
+    @Override
+    public Set<HasValueChangeHandlers<String>> getSizeListBox() {
+        Set<HasValueChangeHandlers<String>> set = new HashSet<HasValueChangeHandlers<String>>();
+        set.add(sizeOptionsTop);
+        set.add(sizeOptionsBottom);
         return set;
     }
 
@@ -202,5 +264,11 @@ public class DynamicTableView extends Composite implements Display {
     public void setViewType(String viewType) {
         viewOptionsTop.setSelected(viewType);
         viewOptionsBottom.setSelected(viewType);
+    }
+
+    @Override
+    public void setSizeType(String sizeType) {
+        sizeOptionsTop.setSelected(sizeType);
+        sizeOptionsBottom.setSelected(sizeType);
     }
 }

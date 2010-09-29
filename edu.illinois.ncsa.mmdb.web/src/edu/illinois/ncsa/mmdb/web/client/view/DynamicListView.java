@@ -64,6 +64,8 @@ public class DynamicListView extends FlexTable implements Display {
 
     private final static DateTimeFormat DATE_TIME_FORMAT  = DateTimeFormat.getShortDateTimeFormat();
     public static final int             DEFAULT_PAGE_SIZE = 5;
+    public static final int             PAGE_SIZE_X2      = 10;
+    public static final int             PAGE_SIZE_X4      = 20;
 
     public DynamicListView() {
         super();

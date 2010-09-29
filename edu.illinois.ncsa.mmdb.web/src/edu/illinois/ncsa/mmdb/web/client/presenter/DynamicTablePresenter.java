@@ -79,6 +79,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
     protected String                sortKey     = "date-desc";
     protected String                viewTypePreference;
     protected String                viewType    = DynamicTableView.LIST_VIEW_TYPE;
+    protected String                sizeType    = DynamicTableView.PAGE_SIZE_X1;
     protected int                   numberOfPages;
     protected int                   currentPage = 1;
     protected BasePresenter<?>      viewTypePresenter;
@@ -96,6 +97,8 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
 
         Set<HasValueChangeHandlers<String>> getViewListBox();
 
+        Set<HasValueChangeHandlers<String>> getSizeListBox();
+
         Widget asWidget();
 
         void removeAllRows();
@@ -107,6 +110,12 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         void setContentView(Widget contentView);
 
         void setViewType(String viewType);
+
+        void setSizeType(String sizeType);
+
+        void changeGridSizeNumbers();
+
+        void changeListSizeNumbers();
     }
 
     /**
@@ -120,7 +129,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         super(display, eventBus);
         this.dispatch = dispatch;
 
-        changeViewType(MMDB.getSessionPreference(getViewTypePreference(), DynamicTableView.LIST_VIEW_TYPE));
+        changeViewType(MMDB.getSessionPreference(getViewTypePreference(), DynamicTableView.LIST_VIEW_TYPE), sizeType);
 
         addHandler(RefreshEvent.TYPE, new RefreshHandler() {
             @Override
@@ -271,7 +280,20 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
                 @Override
                 public void onValueChange(ValueChangeEvent<String> event) {
                     GWT.log("View list box clicked " + event.getValue());
-                    changeViewType(event.getValue());
+                    changeViewType(event.getValue(), sizeType);
+                    setPage(1); // FIXME compute correct page for new view type?
+                    getContent();
+                }
+            });
+        }
+
+        for (HasValueChangeHandlers<String> handler : display.getSizeListBox() ) {
+            handler.addValueChangeHandler(new ValueChangeHandler<String>() {
+
+                @Override
+                public void onValueChange(ValueChangeEvent<String> event) {
+                    GWT.log("View page size box clicked " + event.getValue());
+                    changeViewType(viewType, event.getValue());
                     setPage(1); // FIXME compute correct page for new view type?
                     getContent();
                 }
@@ -289,7 +311,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
      * 
      * @param viewType
      */
-    protected void changeViewType(String viewType) {
+    protected void changeViewType(String viewType, String sizeType) {
         this.viewType = viewType;
         display.setViewType(viewType);
         MMDB.setSessionPreference(getViewTypePreference(), viewType);
@@ -299,14 +321,32 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         }
         if (viewType.equals(DynamicTableView.LIST_VIEW_TYPE)) {
             DynamicListView listView = new DynamicListView();
-            setPageSize(DynamicListView.DEFAULT_PAGE_SIZE);
+            display.changeListSizeNumbers();
+            display.setSizeType(sizeType);
+            if (sizeType.equals(DynamicTableView.PAGE_SIZE_X2)) {
+                setPageSize(DynamicListView.PAGE_SIZE_X2);
+            } else if (sizeType.equals(DynamicTableView.PAGE_SIZE_X4)) {
+                setPageSize(DynamicListView.PAGE_SIZE_X4);
+            } else {
+                setPageSize(DynamicListView.DEFAULT_PAGE_SIZE);
+            }
             DynamicListPresenter listPresenter = new DynamicListPresenter(dispatch, eventBus, listView);
             listPresenter.bind();
             viewTypePresenter = listPresenter;
             display.setContentView(listView);
         } else if (viewType.equals(DynamicTableView.GRID_VIEW_TYPE)) {
+            display.changeGridSizeNumbers();
+            display.setSizeType(sizeType);
             DynamicGridView gridView = new DynamicGridView();
-            setPageSize(DynamicGridView.DEFAULT_PAGE_SIZE);
+
+            if (sizeType.equals(DynamicTableView.PAGE_SIZE_X2)) {
+                setPageSize(DynamicGridView.PAGE_SIZE_X2);
+            } else if (sizeType.equals(DynamicTableView.PAGE_SIZE_X4)) {
+                setPageSize(DynamicGridView.PAGE_SIZE_X4);
+            } else {
+                setPageSize(DynamicGridView.DEFAULT_PAGE_SIZE);
+            }
+
             DynamicGridPresenter gridPresenter = new DynamicGridPresenter(dispatch, eventBus, gridView);
             gridPresenter.bind();
             viewTypePresenter = gridPresenter;
