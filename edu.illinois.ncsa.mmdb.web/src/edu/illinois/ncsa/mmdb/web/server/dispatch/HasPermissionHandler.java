@@ -49,11 +49,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.rdf.Resource;
 
+import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
@@ -76,37 +76,31 @@ public class HasPermissionHandler implements
         RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
 
         Resource userUri = createUserURI(action.getUser());
+        Permission permission = action.getPermission();
+        Resource permissionUri = Resource.uriRef(permission.getUri());
 
         try {
-            switch (action.getPermission()) {
-                case VIEW_MEMBER_PAGES:
-                    log.debug("Checking if user " + userUri + " has permission "
-                            + MMDB.VIEW_MEMBER_PAGES);
-                    if (rbac.checkPermission(userUri, MMDB.VIEW_MEMBER_PAGES)) {
-                        return new HasPermissionResult(true);
-                    }
-                    break;
-                case VIEW_ADMIN_PAGES:
-                    log.debug("Checking if user " + userUri + " has permission "
-                            + MMDB.VIEW_ADMIN_PAGES);
-                    if (rbac.checkPermission(userUri, MMDB.VIEW_ADMIN_PAGES)) {
-                        return new HasPermissionResult(true);
-                    }
-                    break;
-                default:
-                    return new HasPermissionResult(false);
+            log.debug("Checking if user " + userUri + " has permission " + permission.getLabel());
+            if (userUri.getString().endsWith("admin")) { // FIXME
+                log.debug("User is admin, automatically has permission. FIXME!!!!!!"); // FIXME
+                return new HasPermissionResult(true); // FIXME DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!11
+            } // FIXME
+            // FIXME
+            if (permission == Permission.VIEW_MEMBER_PAGES || permission == Permission.VIEW_ADMIN_PAGES) {
+                return new HasPermissionResult(rbac.checkLegacyPermission(userUri, permissionUri));
             }
+            return new HasPermissionResult(rbac.checkPermission(userUri, permissionUri));
         } catch (RBACException e) {
             log.error("Error checking user permissions", e);
             return new HasPermissionResult(false);
         }
-        return new HasPermissionResult(false);
     }
 
     /**
      * Create the proper user uri.
      * 
      * FIXME this seems like a hack
+     * FIXME is this used?
      * 
      * @param user
      * @return

@@ -46,8 +46,47 @@ package edu.illinois.ncsa.mmdb.web.client;
  * 
  */
 public class Permissions {
-
     public enum Permission {
-        VIEW_MEMBER_PAGES, VIEW_ADMIN_PAGES
+        // old permissions
+        VIEW_MEMBER_PAGES("View member pages", "ViewMemberPages"),
+        VIEW_ADMIN_PAGES("View administrative pages", "ViewAdminPages"),
+        // administration
+        EDIT_ROLES("Administer roles", "EditRoles"),
+        REINDEX_FULLTEXT("Rebuild full-text index", "ReindexFulltext"),
+        RERUN_EXTRACTION("Rerun extraction", "RerunExtraction"),
+        // authoring
+        UPLOAD_DATA("Upload data", "UploadData"),
+        EDIT_METADATA("Edit metadata", "EditMetadata"),
+        EDIT_USER_METADATA("Edit user metadata", "EditUserMetadata"),
+        DELETE_DATA("Delete data", "DeleteData"),
+        CHANGE_LICENSE("Change license", "ChangeLicense"),
+        // review
+        ADD_TAG("Add tags", "AddTag"),
+        DELETE_TAG("Delete tags", "DeleteTag"),
+        ADD_COMMENT("Add comments", "AddComment"),
+        EDIT_COMMENT("Edit/delete comments", "EditComment"),
+        ADD_RELATIONSHIP("Add relationships", "AddRelationship"),
+        DELETE_RELATIONSHIP("Delete relationships", "DeleteRelationship"),
+        // access
+        VIEW_DATA("View data", "ViewData"),
+        DOWNLOAD("Download originals", "Download");
+
+        private final String label;
+        private final String uri;
+
+        static final String  PREFIX = "http://cet.ncsa.uiuc.edu/2007/mmdb/permission/";
+
+        private Permission(String label, String id) {
+            this.label = label;
+            uri = PREFIX + id;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public String getUri() {
+            return uri;
+        }
     }
 }

@@ -199,8 +199,11 @@ public class HomePage extends Page {
     protected void createAdminTab() {
         adminPanel = new FlowPanel();
 
-        Hyperlink permissionsLink = new Hyperlink("Modify Permissions", "modifyPermissions");
+        Hyperlink permissionsLink = new Hyperlink("(old) Modify Permissions", "modifyPermissions");
         adminPanel.add(permissionsLink);
+
+        Hyperlink aclLink = new Hyperlink("(new) Modify Permissions", "accessControl");
+        adminPanel.add(aclLink);
 
         Hyperlink sparqlLink = new Hyperlink("Run SPARQL Query", "sparql");
         adminPanel.add(sparqlLink);

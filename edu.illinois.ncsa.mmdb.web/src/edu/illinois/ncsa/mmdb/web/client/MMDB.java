@@ -89,6 +89,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.NotEnabledPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.RoleAdministrationPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchBox;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchResultsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
@@ -467,6 +468,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showSearchResultsPage();
         } else if (token.startsWith("modifyPermissions")) {
             showUsersPage();
+        } else if (token.startsWith("accessControl")) {
+            showAccessControlPage();
         } else if (token.startsWith("signup")) {
             showSignupPage();
         } else if (token.startsWith("home")) {
@@ -540,7 +543,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     /**
-     * List users in the system.
      */
     private void showUsersPage() {
         // Check if the user has view admin pages permission
@@ -560,8 +562,35 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                     public void onSuccess(HasPermissionResult result) {
                         if (result.isPermitted()) {
                             mainContainer.clear();
-                            mainContainer.add(new UserManagementPage(
-                                    dispatchAsync));
+                            mainContainer.add(new UserManagementPage(dispatchAsync));
+                        } else {
+                            showNoAccessPage();
+                        }
+                    }
+                });
+    }
+
+    /**
+     */
+    private void showAccessControlPage() {
+        // Check if the user has view admin pages permission
+        dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
+                Permission.VIEW_ADMIN_PAGES),
+                new AsyncCallback<HasPermissionResult>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT
+                                .log(
+                                        "Error checking if the users has permissions to view admin pages",
+                                        caught);
+                    }
+
+                    @Override
+                    public void onSuccess(HasPermissionResult result) {
+                        if (result.isPermitted()) {
+                            mainContainer.clear();
+                            mainContainer.add(new RoleAdministrationPage(dispatchAsync));
                         } else {
                             showNoAccessPage();
                         }
