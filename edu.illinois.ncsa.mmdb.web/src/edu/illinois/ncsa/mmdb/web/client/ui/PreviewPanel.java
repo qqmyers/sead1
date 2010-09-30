@@ -65,6 +65,7 @@ import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.PreviewPyramidBean;
 import edu.uiuc.ncsa.cet.bean.PreviewThreeDimensionalBean;
 import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
+import edu.uiuc.ncsa.cet.bean.preview.PreviewAudioBean;
 
 /**
  * Show one or more preview related to each PreviewBean
@@ -117,6 +118,7 @@ public class PreviewPanel extends Composite {
         PreviewThreeDimensionalBean best3D = null;
         PreviewDocumentBean bestDoc = null;
         PreviewPyramidBean bestPyramid = null;
+        PreviewAudioBean bestAudio = null;
 
         // loop through all previews finding the best options
         for (PreviewBean pb : result.getPreviews() ) {
@@ -134,6 +136,8 @@ public class PreviewPanel extends Composite {
                 } else if (Math.abs(maxwidth - pvb.getWidth()) < Math.abs(maxwidth - bestVideo.getWidth())) {
                     bestVideo = pvb;
                 }
+            } else if (pb instanceof PreviewAudioBean) {
+                bestAudio = (PreviewAudioBean) pb;
             } else if (pb instanceof PreviewThreeDimensionalBean) {
                 PreviewThreeDimensionalBean p3Db = (PreviewThreeDimensionalBean) pb;
 
@@ -169,6 +173,7 @@ public class PreviewPanel extends Composite {
         leftColumn.add(previewPanel);
 
         // add previews, this order is important, add beans in order
+        // in case of multiple options first bean listed will win.
         PreviewBean shown = null;
 
         if (bestDoc != null) {
@@ -181,6 +186,9 @@ public class PreviewPanel extends Composite {
         }
         if (bestVideo != null) {
             shown = addAnchor(bestVideo, "Video", previewsPanel, shown);
+        }
+        if (bestAudio != null) {
+            shown = addAnchor(bestAudio, "Audio", previewsPanel, shown);
         }
         if (bestImage != null) {
             shown = addAnchor(bestImage, "Image", previewsPanel, shown);
@@ -263,6 +271,11 @@ public class PreviewPanel extends Composite {
                 container.getElement().setId("preview");
                 previewPanel.add(container);
 
+            } else if (pb instanceof PreviewAudioBean) {
+                Label container = new Label();
+                container.getElement().setId("preview");
+                previewPanel.add(container);
+
             } else if (pb instanceof PreviewThreeDimensionalBean) {
                 Label container = new Label();
                 container.getElement().setId("preview");
@@ -305,7 +318,19 @@ public class PreviewPanel extends Composite {
             if (pvb.getPreviewImage() != null) {
                 preview = BLOB_URL + pvb.getPreviewImage().getUri();
             }
-            showFlash(BLOB_URL + pb.getUri(), preview, "video", Long.toString(pvb.getWidth()), Long.toString(pvb.getHeight()));
+            showAudioVideo(BLOB_URL + pb.getUri(), preview, "video", Long.toString(pvb.getWidth()), Long.toString(pvb.getHeight()));
+
+        } else if (pb instanceof PreviewAudioBean) {
+            PreviewAudioBean pab = (PreviewAudioBean) pb;
+            String preview = null;
+            long width = 320;
+            long height = 240;
+            if (pab.getPreviewImage() != null) {
+                preview = BLOB_URL + pab.getPreviewImage().getUri();
+                width = pab.getPreviewImage().getWidth();
+                height = pab.getPreviewImage().getHeight();
+            }
+            showAudioVideo(BLOB_URL + pb.getUri(), preview, "sound", Long.toString(width), Long.toString(height));
 
         } else if (pb instanceof PreviewThreeDimensionalBean) {
             PreviewThreeDimensionalBean p3db = (PreviewThreeDimensionalBean) pb;
@@ -340,7 +365,7 @@ public class PreviewPanel extends Composite {
         img.height=h;
     }-*/;
 
-    public final native void showFlash(String url, String preview, String type, String w, String h) /*-{
+    public final native void showAudioVideo(String url, String preview, String type, String w, String h) /*-{
         if (url != null) {
         $wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');
         $wnd.player.addParam('allowfullscreen','true');
