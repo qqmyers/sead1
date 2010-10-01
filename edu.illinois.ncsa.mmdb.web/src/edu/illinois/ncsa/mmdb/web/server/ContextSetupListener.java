@@ -257,8 +257,8 @@ public class ContextSetupListener implements ServletContextListener {
         for (String key : props.stringPropertyNames() ) {
             if (key.startsWith("user.")) { //$NON-NLS-1$
                 String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
-                if (!keys.contains(key)) {
-                    keys.add(key);
+                if (!keys.contains(pre)) {
+                    keys.add(pre);
                     String username = props.getProperty(pre + ".username");
                     String fullname = props.getProperty(pre + ".fullname");
                     String email = props.getProperty(pre + ".email");
@@ -274,7 +274,7 @@ public class ContextSetupListener implements ServletContextListener {
                     }
 
                     // add roles
-                    for (String role : props.getProperty(pre + ".roles", "").split(",") ) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                    for (String role : props.getProperty(pre + ".roles", "").split("[,\\s]+") ) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                         if ("admin".equalsIgnoreCase(role)) { //$NON-NLS-1$
                             rbac.addRole(userid, MMDB.ADMIN_ROLE);
                         }
