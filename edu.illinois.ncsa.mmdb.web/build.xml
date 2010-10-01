@@ -93,7 +93,7 @@
 		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" />
 		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
-		<replace file="war/WEB-INF/classes/server.properties" token="#search.index=/home/futrelle/dev/scratch/luceneIndex" value="search.index=/data/lucene" />
+		<replace file="war/WEB-INF/classes/server.properties" token="#search.index=/home/futrelle/dev/scratch/luceneIndex" value="search.index=/home/medici/medici/lucene" />
 		<replace file="war/mmdb.html" token="sensor=false" value="sensor=false&amp;key=${googlemap}" />
 	</target>
 	
