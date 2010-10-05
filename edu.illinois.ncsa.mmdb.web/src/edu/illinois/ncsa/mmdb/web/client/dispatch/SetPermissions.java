@@ -36,71 +36,61 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
-/**
- * 
- */
-package edu.illinois.ncsa.mmdb.web.client;
+package edu.illinois.ncsa.mmdb.web.client.dispatch;
+
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
+import net.customware.gwt.dispatch.shared.Action;
+import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
+import edu.illinois.ncsa.mmdb.web.client.Permissions.PermissionValue;
 
 /**
- * @author lmarini
+ * This dispatch allows permissions to be set in bulk. This is more desirable
+ * then setting them one dispatch at a time,
+ * since an administrator may not want permissions to be in an intermediate
+ * state, when several of them are intended to be
+ * changed together.
+ * 
+ * @author futrelle
  * 
  */
-public class Permissions {
-    public enum Permission {
-        // old permissions
-        VIEW_MEMBER_PAGES("View member pages", "ViewMemberPages"),
-        VIEW_ADMIN_PAGES("View administrative pages", "ViewAdminPages"),
-        // administration
-        EDIT_ROLES("Administer roles", "EditRoles"),
-        REINDEX_FULLTEXT("Rebuild full-text index", "ReindexFulltext"),
-        RERUN_EXTRACTION("Rerun extraction", "RerunExtraction"),
-        // authoring
-        UPLOAD_DATA("Upload data", "UploadData"),
-        EDIT_METADATA("Edit metadata", "EditMetadata"),
-        EDIT_USER_METADATA("Edit user metadata", "EditUserMetadata"),
-        DELETE_DATA("Delete data", "DeleteData"),
-        CHANGE_LICENSE("Change license", "ChangeLicense"),
-        // review
-        ADD_TAG("Add tags", "AddTag"),
-        DELETE_TAG("Delete tags", "DeleteTag"),
-        ADD_COMMENT("Add comments", "AddComment"),
-        EDIT_COMMENT("Edit/delete comments", "EditComment"),
-        ADD_RELATIONSHIP("Add relationships", "AddRelationship"),
-        DELETE_RELATIONSHIP("Delete relationships", "DeleteRelationship"),
-        // access
-        VIEW_DATA("View data", "ViewData"),
-        DOWNLOAD("Download originals", "Download");
+@SuppressWarnings("serial")
+public class SetPermissions implements Action<SetPermissionsResult> {
+    List<PermissionSetting> settings;
 
-        private final String label;
-        private final String uri;
+    public SetPermissions() {
+    }
 
-        static final String  PREFIX = "http://cet.ncsa.uiuc.edu/2007/mmdb/permission/";
-
-        private Permission(String label, String id) {
-            this.label = label;
-            uri = PREFIX + id;
-        }
-
-        public String getLabel() {
-            return label;
-        }
-
-        public String getUri() {
-            return uri;
+    public SetPermissions(Collection<PermissionSetting> settings) {
+        for (PermissionSetting s : settings ) {
+            addSetting(s);
         }
     }
 
-    public enum PermissionValue {
-        DO_NOT_ALLOW("Do not allow"), ALLOW("Allow"), DENY("Deny");
-
-        private final String name;
-
-        private PermissionValue(String name) {
-            this.name = name;
+    public SetPermissions(PermissionSetting... setting) {
+        for (PermissionSetting s : setting ) {
+            addSetting(s);
         }
+    }
 
-        public String getName() {
-            return name;
+    public SetPermissions(String roleUri, Permission permission, PermissionValue value) {
+        addSetting(roleUri, permission, value);
+    }
+
+    public void addSetting(String roleUri, Permission permission, PermissionValue value) {
+        addSetting(new PermissionSetting(roleUri, permission, value));
+    }
+
+    public void addSetting(PermissionSetting setting) {
+        if (settings == null) {
+            settings = new LinkedList<PermissionSetting>();
         }
+        settings.add(setting);
+    }
+
+    public List<PermissionSetting> getSettings() {
+        return settings;
     }
 }

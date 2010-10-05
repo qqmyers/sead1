@@ -68,6 +68,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoPointHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLikeDislikeHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPermissionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRecentActivityHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRolesHandler;
@@ -78,6 +79,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUsersHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetViewCountHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.InitializeRolesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
@@ -89,6 +91,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetLicenseHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SetPermissionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetPropertyHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
@@ -151,6 +154,9 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new ListUserMetadataFieldsHandler());
         DispatchUtil.registerHandler(new DeleteDatasetsHandler());
         DispatchUtil.registerHandler(new SystemInfoHandler());
+        DispatchUtil.registerHandler(new GetPermissionsHandler());
+        DispatchUtil.registerHandler(new SetPermissionsHandler());
+        DispatchUtil.registerHandler(new InitializeRolesHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

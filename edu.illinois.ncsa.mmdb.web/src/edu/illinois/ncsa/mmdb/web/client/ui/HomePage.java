@@ -65,6 +65,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRecentActivity;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRecentActivityResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.InitializeRoles;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLuceneResult;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -204,6 +205,26 @@ public class HomePage extends Page {
 
         Hyperlink aclLink = new Hyperlink("(new) Modify Permissions", "accessControl");
         adminPanel.add(aclLink);
+
+        final Anchor initializeRoles = new Anchor("Set all global roles and permission to defaults");
+        initializeRoles.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                initializeRoles.setEnabled(false);
+                initializeRoles.setText("Setting default roles and permissions");
+                dispatchAsync.execute(new InitializeRoles(), new AsyncCallback<EmptyResult>() {
+                    public void onFailure(Throwable caught) {
+                        initializeRoles.setText("Default permissions failed");
+                        initializeRoles.setEnabled(true);
+                    }
+
+                    public void onSuccess(EmptyResult result) {
+                        initializeRoles.setText("All roles and permissions set to default");
+                        initializeRoles.setEnabled(true);
+                    }
+                });
+            }
+        });
+        adminPanel.add(initializeRoles);
 
         Hyperlink sparqlLink = new Hyperlink("Run SPARQL Query", "sparql");
         adminPanel.add(sparqlLink);
