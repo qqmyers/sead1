@@ -45,6 +45,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -158,8 +159,12 @@ public class DynamicListView extends FlexTable implements Display {
     @Override
     public void setTitle(int id, String title, String uri) {
         FlexTable panel = (FlexTable) getWidget(id, 2);
+        HorizontalPanel anchorPanel = new HorizontalPanel();
         Hyperlink hyperlink = new Hyperlink(title, "dataset?id=" + uri);
-        panel.setWidget(0, 0, hyperlink);
+        anchorPanel.add(hyperlink);
+        anchorPanel.add(new Label("")); //FIXME hack so entire row won't be linked
+        panel.setWidget(0, 0, anchorPanel);
+
     }
 
     @Override

@@ -44,7 +44,7 @@ package edu.illinois.ncsa.mmdb.web.client.view;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.Widget;
@@ -58,7 +58,7 @@ import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 public class BatchOperationView extends Composite implements BatchOperationPresenter.Display {
 
     private final FlowPanel mainLayout;
-    private final Label     numSelectedLabel;
+    private final Hyperlink numSelectedLabel;
     private final MenuBar   actionsMenu;
 
     //private final Anchor    viewSelected;
@@ -72,11 +72,13 @@ public class BatchOperationView extends Composite implements BatchOperationPrese
         actionsBar.addStyleName("batchOperationMenu");
         actionsMenu = new MenuBar(true);
         actionsBar.addItem("Actions", actionsMenu);
-        numSelectedLabel = new Label("0 selected datasets");
+        numSelectedLabel = new Hyperlink("0 selected datasets", "noneSelected");
         numSelectedLabel.addStyleName("batchOperationCount");
-        //viewSelected = new Anchor();
-        //viewSelected.setText("(view)");
-        //viewSelected.addStyleName("batchOperationCountLink");
+        /*
+        viewSelected = new Anchor();
+        viewSelected.setText("(view)");
+        viewSelected.addStyleName("batchOperationCountLink");
+        */
         mainLayout.add(numSelectedLabel);
         //mainLayout.add(viewSelected);
         mainLayout.add(actionsBar);
@@ -90,6 +92,11 @@ public class BatchOperationView extends Composite implements BatchOperationPrese
     @Override
     public void setNumSelected(int num) {
         numSelectedLabel.setText(num + " selected datasets");
+        if (num > 0) {
+            numSelectedLabel.setTargetHistoryToken("viewSelected");
+        } else {
+            numSelectedLabel.setTargetHistoryToken("noneSelected");
+        }
     }
 
     @Override

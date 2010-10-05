@@ -114,6 +114,7 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
         final UserSessionState sessionState = MMDB.getSessionState();
         final int nSelected = sessionState.getSelectedDatasets().size();
         display.setNumSelected(nSelected);
+
         // delete items
         display.addMenuAction("Delete", new Command() {
             public void execute() {

@@ -68,8 +68,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
@@ -80,6 +80,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.HomePage;
 import edu.illinois.ncsa.mmdb.web.client.ui.JiraIssuePage;
@@ -92,6 +93,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.RoleAdministrationPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchBox;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchResultsPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.SelectedDatasetsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SparqlPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
@@ -346,6 +348,18 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         }
     }
 
+    private void showSelected(boolean show) {
+
+        if (show == true) {
+            mainContainer.clear();
+            mainContainer.add(new SelectedDatasetsPage(dispatchAsync));
+
+        } else {
+            ConfirmDialog d = new ConfirmDialog("View Selected", "You must select at least one dataset to view the selected.", false);
+            d.getOkText().setText("OK");
+        }
+    }
+
     /**
      * History handler. Check if the user has been enabled first, otherwise show
      * the not enabled page.
@@ -476,6 +490,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showHomePage();
         } else if (token.startsWith("sparql")) {
             showSparqlPage();
+        } else if (token.startsWith("viewSelected")) {
+            showSelected(true);
+        } else if (token.startsWith("noneSelected")) {
+            showSelected(false);
         } else if (!previousHistoryToken.startsWith("listDatasets")) {
             showListDatasetsPage();
         }
@@ -699,8 +717,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     // FIXME move these into UserSessionState?
-    public static final String DATASET_VIEW_TYPE_PREFERENCE    = "datasetViewType";
-    public static final String COLLECTION_VIEW_TYPE_PREFERENCE = "collectionViewType";
+    public static final String DATASET_VIEW_TYPE_PREFERENCE     = "datasetViewType";
+    public static final String DATASET_VIEWSIZE_TYPE_PREFERENCE = "datasetViewSizeType";
+    public static final String COLLECTION_VIEW_TYPE_PREFERENCE  = "collectionViewType";
 
     // session state
     public static UserSessionState getSessionState() {
@@ -722,6 +741,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      */
     static void initializePreferences() {
         getSessionState().getPreferences().put(MMDB.DATASET_VIEW_TYPE_PREFERENCE, DynamicTableView.GRID_VIEW_TYPE);
+        getSessionState().getPreferences().put(MMDB.DATASET_VIEWSIZE_TYPE_PREFERENCE, DynamicTableView.PAGE_SIZE_X1);
         getSessionState().getPreferences().put(MMDB.COLLECTION_VIEW_TYPE_PREFERENCE, DynamicTableView.LIST_VIEW_TYPE);
     }
 

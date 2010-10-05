@@ -129,7 +129,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         super(display, eventBus);
         this.dispatch = dispatch;
 
-        changeViewType(MMDB.getSessionPreference(getViewTypePreference(), DynamicTableView.LIST_VIEW_TYPE), sizeType);
+        changeViewType(MMDB.getSessionPreference(getViewTypePreference(), DynamicTableView.LIST_VIEW_TYPE), MMDB.getSessionPreference(getViewSizeTypePreference(), DynamicTableView.PAGE_SIZE_X1));
 
         addHandler(RefreshEvent.TYPE, new RefreshHandler() {
             @Override
@@ -315,6 +315,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         this.viewType = viewType;
         display.setViewType(viewType);
         MMDB.setSessionPreference(getViewTypePreference(), viewType);
+        MMDB.setSessionPreference(getViewSizeTypePreference(), sizeType);
         // unbind the existing presenter if any
         if (viewTypePresenter != null) {
             viewTypePresenter.unbind();
@@ -372,4 +373,6 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
 
     /** Override to return the view type preference key for this kind of table */
     protected abstract String getViewTypePreference();
+
+    protected abstract String getViewSizeTypePreference();
 }

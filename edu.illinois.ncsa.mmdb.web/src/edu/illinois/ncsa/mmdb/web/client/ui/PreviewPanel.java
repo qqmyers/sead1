@@ -215,7 +215,7 @@ public class PreviewPanel extends Composite {
                     previewsPanel.getWidget(i).removeStyleName("deadlink");
                 }
                 anchor.addStyleName("deadlink");
-                showPreview(bean, 0);
+                showPreview(bean, method);
             }
         });
         previewsPanel.add(anchor);
@@ -341,13 +341,14 @@ public class PreviewPanel extends Composite {
                     showjvLite(EXTENSION_URL + p3db.getUri());
                     break;
                 case 1:
-                    hideWebGL();
-                    show3D(NOREFERENCE_URL + p3db.getUri());
-                    break;
-                case 2:
                     hideHTML5();
                     showWebGL(NOREFERENCE_URL + p3db.getUri());
                     break;
+                case 2:
+                    hideWebGL();
+                    show3D(NOREFERENCE_URL + p3db.getUri());
+                    break;
+
             }
         }
 
