@@ -44,6 +44,7 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -76,7 +77,13 @@ public class DatasetInfoWidget extends Composite {
 
         FlowPanel descriptionPanel = new FlowPanel();
         descriptionPanel.addStyleName("datasetInfoDescription");
-        descriptionPanel.add(new Hyperlink(dataset.getTitle(), "dataset?id=" + dataset.getUri()));
+        HorizontalPanel anchorPanel = new HorizontalPanel();
+        Hyperlink hyperlink = new Hyperlink(dataset.getTitle(), "dataset?id=" + dataset.getUri());
+        anchorPanel.add(hyperlink);
+        //so whitespace next to title won't get hyperlinked
+        anchorPanel.add(new Label(""));
+
+        descriptionPanel.add(anchorPanel);
         if (dataset.getCreator().getName() != null) {
             descriptionPanel.add(new Label(dataset.getCreator().getName()));
         } else {

@@ -76,6 +76,7 @@ public class SelectedDatasetsPage extends Page {
 
         super("Selected Datasets", dispatchAsync);
         selectedPanel = new FlowPanel();
+        selectedPanel.addStyleName("selectedContainer");
         final Set<String> selectedDatasets = new HashSet<String>(MMDB.getSessionState().getSelectedDatasets());
 
         num = MMDB.getSessionState().getSelectedDatasets().size();

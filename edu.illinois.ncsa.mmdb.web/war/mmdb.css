@@ -212,11 +212,12 @@ a:hover {
 	left:03%;
 	cursor: pointer; 
 	cursor: hand;
+	height:100px;
 	}
 	
 .imageThumbnail {
-	
-	z-index: 1;
+	position:relative;
+	height:100px;
 	}
 
 /* ----------------------------------------------------------------------
@@ -1131,4 +1132,9 @@ a:hover {
 	width: 130px;
 	text-align: left;
 	vertical-align: middle;
+}
+
+.selectedContainer {
+	margin-left: 12px;
+	text-align: left;
 }

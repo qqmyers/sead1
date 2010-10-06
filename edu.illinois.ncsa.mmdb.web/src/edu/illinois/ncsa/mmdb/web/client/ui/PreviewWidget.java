@@ -165,11 +165,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         final Image overlay = new Image();
 
         //Icons that appear over thumbnail 
-        if (type != "Image") {
-            overlay.setUrl("images/icons/" + type + "_overlay.png");
-        } else {
-            overlay.setUrl("images/icons/trans.png");
-        }
+        overlay.setUrl("images/icons/" + type + "_overlay.png");
 
         contentPanel = new SimplePanel();
         // add the preview image
@@ -180,10 +176,10 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         }
 
         overlay.addStyleName("imageOverlay");
-        image.addStyleName("imageThumbnail");
+        imagePanel.addStyleName("imageThumbnail");
 
         imagePanel.add(image);
-        if (type != "Unknown" && type != "Image") {
+        if (type != "Unknown") {
             imagePanel.add(overlay);
         }
 
