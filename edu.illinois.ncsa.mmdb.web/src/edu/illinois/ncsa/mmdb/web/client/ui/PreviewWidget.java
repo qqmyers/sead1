@@ -120,6 +120,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     Timer                                   retryTimer;
     Timer                                   safariForceTimer;
     private int                             previewTries;
+    final AbsolutePanel                     imagePanel;
 
     /**
      * Create a preview. If the desired size is small (thumbnail) try showing
@@ -161,25 +162,29 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             size = GetPreviews.SMALL;
         }
 
-        final AbsolutePanel imagePanel = new AbsolutePanel();
+        imagePanel = new AbsolutePanel();
         final Image overlay = new Image();
 
-        //Icons that appear over thumbnail 
-        overlay.setUrl("images/icons/" + type + "_overlay.png");
-
-        contentPanel = new SimplePanel();
         // add the preview image
-        if (initialDisplay) {
+        contentPanel = new SimplePanel();
+        if (initialDisplay || datasetUri != null) {
             image = new Image(PREVIEW_URL.get(size) + datasetUri);
         } else {
             image = new Image(GRAY_URL.get(size));
         }
 
-        overlay.addStyleName("imageOverlay");
-        imagePanel.addStyleName("imageThumbnail");
+        if (datasetUri == null) {
+            imagePanel.addStyleName("imageThumbnailBordered");
+        } else {
+            imagePanel.addStyleName("imageThumbnail");
+        }
 
         imagePanel.add(image);
+
+        //icons that appear over thumbnail 
         if (type != "Unknown") {
+            overlay.setUrl("images/icons/" + type + "_overlay.png");
+            overlay.addStyleName("imageOverlay");
             imagePanel.add(overlay);
         }
 
@@ -207,7 +212,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         safariForceTimer.schedule(1000); // somewhat later
         safariForceTimer.schedule(2000); // last attempt
         //
-        if (size != GetPreviews.LARGE) {
+        if (size != GetPreviews.LARGE && link != null) {
             image.addStyleName("thumbnail");
         } else {
             //image.setWidth(getMaxWidth() + "px");
@@ -248,6 +253,19 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             return image;
         } else {
             return noPreview;
+        }
+    }
+
+    public void changeImage(String newURL, String mime) {
+        String type = ContentCategory.getCategory(mime);
+        if (type == "Image" || type == "Video" || mime.contains("pdf") || type == "Audio") {
+            image.setUrl(PREVIEW_URL.get(size) + newURL);
+            imagePanel.removeStyleName("imageThumbnailBordered");
+            imagePanel.addStyleName("imageThumbnail");
+        } else {
+            imagePanel.removeStyleName("imageThumbnail");
+            imagePanel.addStyleName("ImageThumbnailBordered");
+            image.setUrl(GRAY_URL.get(size));
         }
     }
 

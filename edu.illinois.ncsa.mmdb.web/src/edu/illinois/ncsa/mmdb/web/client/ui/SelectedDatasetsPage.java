@@ -44,46 +44,78 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.customware.gwt.dispatch.client.DispatchAsync;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
  * View of the selected datasets
  * 
- * @author Luigi Marini
+ * @author Luis Mendez
  * 
  */
 public class SelectedDatasetsPage extends Page {
 
-    private final FlowPanel selectedPanel;
+    private final FlowPanel                 selectedPanel;
 
-    private final int       num;
+    private final FlowPanel                 leftcolumn;
+    private final FlowPanel                 rightcolumn;
+
+    private final int                       num;
+    private final Set<DatasetBean>          datasets;
+
+    private final CreateRelationshipsWidget relationshipWidget;
 
     /**
      * Create an instance of selected datasets view page.
      * 
      * @param dispatchAsync
      */
-    public SelectedDatasetsPage(DispatchAsync dispatchAsync) {
+    public SelectedDatasetsPage(MyDispatchAsync dispatchAsync) {
 
         super("Selected Datasets", dispatchAsync);
+
+        //user interface
         selectedPanel = new FlowPanel();
-        selectedPanel.addStyleName("selectedContainer");
+        selectedPanel.addStyleName("selectedMainContainer");
+
+        leftcolumn = new FlowPanel();
+        leftcolumn.addStyleName("selectedLeftContainer");
+        selectedPanel.add(leftcolumn);
+
+        rightcolumn = new FlowPanel();
+        rightcolumn.addStyleName("selectedRightContainer");
+        selectedPanel.add(rightcolumn);
+
+        SimplePanel clearFloat = new SimplePanel();
+        clearFloat.addStyleName("clearFloat");
+        selectedPanel.add(clearFloat);
+
+        //view selected datasets
         final Set<String> selectedDatasets = new HashSet<String>(MMDB.getSessionState().getSelectedDatasets());
+        datasets = new HashSet<DatasetBean>();
 
         num = MMDB.getSessionState().getSelectedDatasets().size();
-        selectedPanel.add(new Label("Showing " + num + " selected datasets"));
+        leftcolumn.add(new Label("Showing " + num + " selected datasets"));
 
         for (String datasetUri : selectedDatasets ) {
             fetchDataset(datasetUri);
+        }
+
+        //create relationship
+        relationshipWidget = new CreateRelationshipsWidget(datasets, selectedDatasets, dispatchAsync);
+        if (selectedDatasets.size() == 1) {
+            rightcolumn.add(new Label("You cannot create a relationship with 1 dataset"));
+        } else {
+            rightcolumn.add(relationshipWidget);
         }
 
         mainLayoutPanel.add(selectedPanel);
@@ -94,6 +126,8 @@ public class SelectedDatasetsPage extends Page {
 
         dispatchAsync.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
 
+            DatasetBean db = new DatasetBean();
+
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Error getting recent activity");
@@ -102,11 +136,22 @@ public class SelectedDatasetsPage extends Page {
             @Override
             public void onSuccess(GetDatasetResult result) {
 
-                selectedPanel.add(new DatasetInfoWidget(result.getDataset()));
+                final String value = result.getDataset().getUri();
+                db = result.getDataset();
+                datasets.add(db);
+                leftcolumn.add(new DatasetInfoWidget(result.getDataset(), true));
 
+                relationshipWidget.addToList(shortenTitle(result.getDataset().getTitle()), value);
             }
         });
+    }
 
+    private String shortenTitle(String title) {
+        if (title != null && title.length() > 22) {
+            return title.substring(0, 20) + "...";
+        } else {
+            return title;
+        }
     }
 
     @Override

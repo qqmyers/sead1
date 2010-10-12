@@ -61,8 +61,6 @@ public class BatchOperationView extends Composite implements BatchOperationPrese
     private final Hyperlink numSelectedLabel;
     private final MenuBar   actionsMenu;
 
-    //private final Anchor    viewSelected;
-
     public BatchOperationView() {
         mainLayout = new FlowPanel();
         mainLayout.addStyleName("batchOperationPanel");
@@ -74,13 +72,7 @@ public class BatchOperationView extends Composite implements BatchOperationPrese
         actionsBar.addItem("Actions", actionsMenu);
         numSelectedLabel = new Hyperlink("0 selected datasets", "noneSelected");
         numSelectedLabel.addStyleName("batchOperationCount");
-        /*
-        viewSelected = new Anchor();
-        viewSelected.setText("(view)");
-        viewSelected.addStyleName("batchOperationCountLink");
-        */
         mainLayout.add(numSelectedLabel);
-        //mainLayout.add(viewSelected);
         mainLayout.add(actionsBar);
     }
 

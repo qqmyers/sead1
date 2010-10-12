@@ -64,6 +64,10 @@ public class DatasetInfoWidget extends Composite {
     private final FlowPanel mainPanel;
 
     public DatasetInfoWidget(DatasetBean dataset) {
+        this(dataset, false);
+    }
+
+    public DatasetInfoWidget(DatasetBean dataset, boolean shortenTitle) {
         mainPanel = new FlowPanel();
         mainPanel.addStyleName("datasetInfoWidget");
         initWidget(mainPanel);
@@ -78,7 +82,12 @@ public class DatasetInfoWidget extends Composite {
         FlowPanel descriptionPanel = new FlowPanel();
         descriptionPanel.addStyleName("datasetInfoDescription");
         HorizontalPanel anchorPanel = new HorizontalPanel();
-        Hyperlink hyperlink = new Hyperlink(dataset.getTitle(), "dataset?id=" + dataset.getUri());
+        Hyperlink hyperlink;
+        if (shortenTitle) {
+            hyperlink = new Hyperlink(shortenTitle(dataset.getTitle()), "dataset?id=" + dataset.getUri());
+        } else {
+            hyperlink = new Hyperlink(dataset.getTitle(), "dataset?id=" + dataset.getUri());
+        }
         anchorPanel.add(hyperlink);
         //so whitespace next to title won't get hyperlinked
         anchorPanel.add(new Label(""));
@@ -97,5 +106,13 @@ public class DatasetInfoWidget extends Composite {
         Label clearLabel = new Label();
         clearLabel.addStyleName("clearFloat");
         mainPanel.add(clearLabel);
+    }
+
+    private String shortenTitle(String title) {
+        if (title != null && title.length() > 22) {
+            return title.substring(0, 20) + "...";
+        } else {
+            return title;
+        }
     }
 }
