@@ -68,8 +68,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
@@ -224,7 +224,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             GWT.log("failed to get rootpanel", null);
         }
         RootPanel.get("navMenu").clear();
-        HorizontalPanel navMenu = new HorizontalPanel();
+        final HorizontalPanel navMenu = new HorizontalPanel();
         navMenu.addStyleName("navMenu");
         RootPanel.get("navMenu").add(navMenu);
         // datasets

@@ -20,8 +20,6 @@ public class SetPermissionsHandler implements ActionHandler<SetPermissions, SetP
 
     public SetPermissionsResult execute(SetPermissions action, ExecutionContext arg1) throws ActionException {
 
-        // TODO: register this handler
-
         RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
 
         // for now, iterate over the settings

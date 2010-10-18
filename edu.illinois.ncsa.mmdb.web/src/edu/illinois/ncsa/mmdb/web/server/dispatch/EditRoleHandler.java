@@ -53,7 +53,6 @@ import org.tupeloproject.rdf.Resource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
-import edu.illinois.ncsa.mmdb.web.server.RoleResourceMap;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
@@ -73,7 +72,7 @@ public class EditRoleHandler implements ActionHandler<EditRole, EmptyResult> {
     @Override
     public EmptyResult execute(EditRole action, ExecutionContext arg1) throws ActionException {
         Resource user = Resource.uriRef(action.getUser());
-        Resource role = RoleResourceMap.getResource(action.getRole());
+        Resource role = Resource.uriRef(action.getRole());
         RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
 
         try {

@@ -45,11 +45,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
@@ -57,9 +58,11 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import edu.illinois.ncsa.mmdb.web.client.Role;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissions;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRoles;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRolesResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsers;
@@ -82,23 +85,19 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  */
 public class UserManagementPage extends Composite {
 
-    private final FlowPanel                 mainPanel;
+    private final FlowPanel                mainPanel;
 
-    private final Widget                    pageTitle;
+    private final Widget                   pageTitle;
 
-    private final FlexTable                 usersTable;
+    private final FlexTable                usersTable;
 
-    private final MyDispatchAsync           dispatchAsync;
+    private final MyDispatchAsync          dispatchAsync;
 
-    private final HashMap<String, CheckBox> usersMemberCheckboxMap;
-
-    private final HashMap<String, CheckBox> usersAdminCheckboxMap;
+    private final HashMap<String, Integer> columnByRole;
 
     public UserManagementPage(MyDispatchAsync dispatchAsync) {
 
         this.dispatchAsync = dispatchAsync;
-        usersMemberCheckboxMap = new HashMap<String, CheckBox>();
-        usersAdminCheckboxMap = new HashMap<String, CheckBox>();
 
         mainPanel = new FlowPanel();
         mainPanel.addStyleName("page");
@@ -112,8 +111,30 @@ public class UserManagementPage extends Composite {
         usersTable = createUsersTable();
         mainPanel.add(usersTable);
 
-        // load users from server side
-        loadUsers();
+        columnByRole = new HashMap<String, Integer>();
+        // load users and roles from server side
+        loadRolesAndUsers();
+    }
+
+    private void loadRolesAndUsers() {
+        dispatchAsync.execute(new GetPermissions(), new AsyncCallback<GetPermissionsResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(GetPermissionsResult result) {
+                int col = 2;
+                for (Map.Entry<String, String> entry : PermissionUtil.getRoles(result.getSettings()).entrySet() ) {
+                    String roleUri = entry.getKey();
+                    String roleName = entry.getValue();
+                    columnByRole.put(roleUri, col);
+                    usersTable.setText(0, col, roleName);
+                    col++;
+                }
+                loadUsers();
+            }
+        });
     }
 
     /**
@@ -166,7 +187,7 @@ public class UserManagementPage extends Composite {
      */
     protected void createRow(final PersonBean user) {
 
-        int row = usersTable.getRowCount() + 1;
+        final int row = usersTable.getRowCount() + 1;
 
         usersTable.setText(row, 0, user.getName());
         usersTable.setText(row, 1, user.getEmail());
@@ -175,60 +196,28 @@ public class UserManagementPage extends Composite {
             usersTable.setText(row, 0, user.getUri());
         }
 
-        // regular member
-        final CheckBox memberCheckBox = new CheckBox();
-        memberCheckBox.setEnabled(false);
-        memberCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                modifyPermissions(user.getUri(), Role.MEMBER, memberCheckBox);
-            }
-        });
-        usersTable.setWidget(row, 2, memberCheckBox);
-        usersMemberCheckboxMap.put(user.getUri(), memberCheckBox);
-
-        // admin group
-        final CheckBox adminCheckBox = new CheckBox();
-        adminCheckBox.setEnabled(false);
-        adminCheckBox.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (lastAdmin()) {
-                    adminCheckBox.setValue(true);
-                    Window.alert("You cannot remove the last admin");
-                } else {
-                    modifyPermissions(user.getUri(), Role.ADMIN, adminCheckBox);
-                }
-            }
-        });
-        usersTable.setWidget(row, 3, adminCheckBox);
-        usersAdminCheckboxMap.put(user.getUri(), adminCheckBox);
-
-        // get list of all roles and enable checkboxes
         dispatchAsync.execute(new GetRoles(user.getUri()), new AsyncCallback<GetRolesResult>() {
-
             @Override
             public void onFailure(Throwable caught) {
-                GWT.log("Error getting roles for user " + user.getUri(), caught);
             }
 
             @Override
             public void onSuccess(GetRolesResult result) {
-                for (Role role : result.getRoles() ) {
-                    switch (role) {
-                        case MEMBER:
-                            memberCheckBox.setValue(true);
-                            break;
-                        case ADMIN:
-                            adminCheckBox.setValue(true);
-                            break;
-                        default:
-                            GWT.log("Unknown role " + role, null);
-                    }
+                Set<String> roles = result.getRoles();
+                GWT.log("user " + user.getUri() + " belongs to roles " + roles);
+                for (Map.Entry<String, Integer> entry : columnByRole.entrySet() ) {
+                    final String roleUri = entry.getKey();
+                    final Integer col = entry.getValue();
+                    final CheckBox box = new CheckBox();
+                    box.setValue(roles.contains(roleUri));
+                    box.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            modifyPermissions(user.getUri(), roleUri, box);
+                        }
+                    });
+                    usersTable.setWidget(row, col, box);
                 }
-                memberCheckBox.setEnabled(true);
-                adminCheckBox.setEnabled(true);
             }
         });
     }
@@ -239,12 +228,7 @@ public class UserManagementPage extends Composite {
      * @return
      */
     protected boolean lastAdmin() {
-        for (CheckBox checkbox : usersAdminCheckboxMap.values() ) {
-            if (checkbox.getValue()) {
-                return false;
-            }
-        }
-        return true;
+        return false;
     }
 
     /**
@@ -258,12 +242,12 @@ public class UserManagementPage extends Composite {
      * @param type
      * @param adminCheckBox
      */
-    protected void modifyPermissions(final String userUri, final Role role, final CheckBox checkbox) {
+    protected void modifyPermissions(final String userUri, final String roleUri, final CheckBox checkbox) {
         ActionType type = ActionType.REMOVE;
         if (checkbox.getValue()) {
             type = ActionType.ADD;
         }
-        dispatchAsync.execute(new EditRole(userUri, role, type), new AsyncCallback<EmptyResult>() {
+        dispatchAsync.execute(new EditRole(userUri, roleUri, type), new AsyncCallback<EmptyResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -289,8 +273,6 @@ public class UserManagementPage extends Composite {
         // headers
         flexTable.setText(0, 0, "User");
         flexTable.setText(0, 1, "Email");
-        flexTable.setText(0, 2, "Member");
-        flexTable.setText(0, 3, "Admin");
         return flexTable;
     }
 

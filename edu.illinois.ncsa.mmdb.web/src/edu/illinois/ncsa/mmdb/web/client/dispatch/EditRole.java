@@ -42,7 +42,6 @@
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import net.customware.gwt.dispatch.shared.Action;
-import edu.illinois.ncsa.mmdb.web.client.Role;
 
 /**
  * @author Rob Kooper
@@ -52,7 +51,7 @@ import edu.illinois.ncsa.mmdb.web.client.Role;
 public class EditRole implements Action<EmptyResult> {
 
     private String     user;
-    private Role       role;
+    private String     role;
     private ActionType type;
 
     public enum ActionType {
@@ -62,7 +61,7 @@ public class EditRole implements Action<EmptyResult> {
     public EditRole() {
     }
 
-    public EditRole(String user, Role role, ActionType type) {
+    public EditRole(String user, String role, ActionType type) {
         this.user = user;
         this.role = role;
         this.type = type;
@@ -78,7 +77,7 @@ public class EditRole implements Action<EmptyResult> {
     /**
      * @return the permission
      */
-    public Role getRole() {
+    public String getRole() {
         return role;
     }
 

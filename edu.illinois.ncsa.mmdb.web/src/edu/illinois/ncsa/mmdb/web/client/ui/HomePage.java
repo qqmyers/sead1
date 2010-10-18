@@ -200,13 +200,13 @@ public class HomePage extends Page {
     protected void createAdminTab() {
         adminPanel = new FlowPanel();
 
-        Hyperlink permissionsLink = new Hyperlink("(old) Modify Permissions", "modifyPermissions");
+        Hyperlink permissionsLink = new Hyperlink("Administer users", "modifyPermissions");
         adminPanel.add(permissionsLink);
 
-        Hyperlink aclLink = new Hyperlink("(new) Modify Permissions", "accessControl");
+        Hyperlink aclLink = new Hyperlink("Administer permissions", "accessControl");
         adminPanel.add(aclLink);
 
-        final Anchor initializeRoles = new Anchor("Set all global roles and permission to defaults");
+        final Anchor initializeRoles = new Anchor("Set all roles and permissions to defaults");
         initializeRoles.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 initializeRoles.setEnabled(false);

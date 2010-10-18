@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.Permissions.PermissionValue;
@@ -35,6 +34,7 @@ public class RoleAdministrationPage extends Composite {
     Button                         cancelButton;
 
     Map<String, PermissionSetting> changes;
+    Map<String, Integer>           columnByRole;
 
     public RoleAdministrationPage(MyDispatchAsync dispatchAsync) {
 
@@ -48,8 +48,8 @@ public class RoleAdministrationPage extends Composite {
         pageTitle = new TitlePanel("Access control administration");
         mainPanel.add(pageTitle);
 
-        Label l = new Label("Note: the controls on this page do not currently do anything");
-        mainPanel.add(l);
+        //Label l = new Label("Note: the controls on this page do not currently do anything");
+        //mainPanel.add(l);
 
         // permissions table
         permissionsTable = createPermissionsTable();
@@ -67,10 +67,12 @@ public class RoleAdministrationPage extends Composite {
                 dispatch.execute(new SetPermissions(changes.values()), new AsyncCallback<SetPermissionsResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
+                        // FIXME notify someone
                     }
 
                     @Override
                     public void onSuccess(SetPermissionsResult result) {
+                        // FIXME notify someone
                     }
                 });
             }
@@ -95,18 +97,36 @@ public class RoleAdministrationPage extends Composite {
         mainPanel.add(cancelButton);
 
         int i = 0;
-        permissionsTable.setText(i++, 0, "Permission");
+        permissionsTable.setText(i++, 0, "");
         for (Permission p : Permission.values() ) {
             permissionsTable.setText(i++, 0, p.getLabel());
         }
         getPermissions();
 
         changes = new HashMap<String, PermissionSetting>();
+        columnByRole = new HashMap<String, Integer>();
     }
 
     private FlexTable createPermissionsTable() {
         permissionsTable = new FlexTable();
         return permissionsTable;
+    }
+
+    void showPermissionSetting(PermissionSetting s) {
+        Integer c = columnByRole.get(s.getRoleUri());
+        if (c == null) {
+            c = permissionsTable.getCellCount(0);
+            columnByRole.put(s.getRoleUri(), c);
+            permissionsTable.setText(0, c, s.getRoleName());
+        }
+        int i = 1;
+        for (Permission p : Permission.values() ) {
+            if (p == s.getPermission()) {
+                UndoableCheckBox box = newCheckBox(s);
+                permissionsTable.setWidget(i, c, box);
+            }
+            i++;
+        }
     }
 
     void getPermissions() {
@@ -117,24 +137,8 @@ public class RoleAdministrationPage extends Composite {
 
             @Override
             public void onSuccess(GetPermissionsResult result) {
-                int col = 1;
-                Map<String, Integer> columnByRole = new HashMap<String, Integer>();
                 for (PermissionSetting s : result.getSettings() ) {
-                    Integer c = columnByRole.get(s.getRoleUri());
-                    if (c == null) {
-                        columnByRole.put(s.getRoleUri(), col);
-                        permissionsTable.setText(0, col, s.getRoleName());
-                        c = col;
-                        col++;
-                    }
-                    int i = 1;
-                    for (Permission p : Permission.values() ) {
-                        if (p == s.getPermission()) {
-                            UndoableCheckBox box = newCheckBox(s);
-                            permissionsTable.setWidget(i, c, box);
-                        }
-                        i++;
-                    }
+                    showPermissionSetting(s);
                 }
             }
         });

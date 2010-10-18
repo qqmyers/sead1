@@ -51,7 +51,6 @@ import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRoles;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRolesResult;
-import edu.illinois.ncsa.mmdb.web.server.RoleResourceMap;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
@@ -75,12 +74,13 @@ public class GetRolesHandler implements ActionHandler<GetRoles, GetRolesResult> 
         GetRolesResult result = new GetRolesResult();
         try {
             for (Resource role : rbac.getRoles(userUri) ) {
-                result.add(RoleResourceMap.getRole(role));
+                result.add(role.getString());
             }
         } catch (RBACException exc) {
             log.error("Could not get roles for user " + action.getUri());
             throw (new ActionException("Could not get roles for user " + action.getUri(), exc));
         }
+        log.debug("user " + userUri + " belongs to roles " + result.getRoles());
         return result;
     }
 

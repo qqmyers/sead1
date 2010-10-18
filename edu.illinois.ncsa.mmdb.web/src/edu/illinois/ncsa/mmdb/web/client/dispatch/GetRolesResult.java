@@ -45,7 +45,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.customware.gwt.dispatch.shared.Result;
-import edu.illinois.ncsa.mmdb.web.client.Role;
 
 /**
  * Return the metadata attached to a resource.
@@ -55,24 +54,24 @@ import edu.illinois.ncsa.mmdb.web.client.Role;
  */
 @SuppressWarnings("serial")
 public class GetRolesResult implements Result {
-    private Set<Role> roles;
+    private Set<String> roleUris;
 
     public GetRolesResult() {
-        roles = new HashSet<Role>();
+        roleUris = new HashSet<String>();
     }
 
-    public void add(Role role) {
-        roles.add(role);
-    }
-
-    public void setMetadata(Set<Role> roles) {
-        this.roles = roles;
+    public void add(String roleUri) {
+        roleUris.add(roleUri);
     }
 
     /**
      * @return the roles
      */
-    public Set<Role> getRoles() {
-        return roles;
+    public Set<String> getRoles() {
+        return roleUris;
+    }
+
+    public void setRoles(Set<String> roles) {
+        roleUris = roles;
     }
 }
