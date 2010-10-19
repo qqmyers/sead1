@@ -75,7 +75,7 @@ public class AnnotationView extends Composite {
 
     private final FlexCellFormatter flexCellFormatter;
 
-    public AnnotationView(final String annotatedThingUri, final AnnotationBean annotationBean) {
+    public AnnotationView(final String annotatedThingUri, final AnnotationBean annotationBean, boolean deletable) {
 
         initWidget(mainPanel);
 
@@ -90,19 +90,6 @@ public class AnnotationView extends Composite {
         mainTable.setCellSpacing(10);
 
         flexCellFormatter = mainTable.getFlexCellFormatter();
-
-        Anchor deleteButton = new Anchor("Delete");
-        deleteButton.addStyleName("absoluteRight");
-        deleteButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                ConfirmDialog confirm = new ConfirmDialog("Delete", "Are you sure you want to delete this comment?");
-                confirm.addConfirmHandler(new ConfirmHandler() {
-                    public void onConfirm(ConfirmEvent event) {
-                        delete(annotatedThingUri, annotationBean.getUri());
-                    }
-                });
-            }
-        });
 
         String mediumDate = "";
 
@@ -131,7 +118,21 @@ public class AnnotationView extends Composite {
 
         flexCellFormatter.addStyleName(0, 0, "annotationAttributes");
 
-        mainTable.setWidget(0, 1, deleteButton);
+        if (deletable) {
+            Anchor deleteButton = new Anchor("Delete");
+            deleteButton.addStyleName("absoluteRight");
+            deleteButton.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    ConfirmDialog confirm = new ConfirmDialog("Delete", "Are you sure you want to delete this comment?");
+                    confirm.addConfirmHandler(new ConfirmHandler() {
+                        public void onConfirm(ConfirmEvent event) {
+                            delete(annotatedThingUri, annotationBean.getUri());
+                        }
+                    });
+                }
+            });
+            mainTable.setWidget(0, 1, deleteButton);
+        }
 
         String description = annotationBean.getDescription();
 

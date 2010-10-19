@@ -58,6 +58,8 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ContextConvert;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
@@ -79,12 +81,13 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  */
 public class HomePage extends Page {
 
-    private static final int MAX_DATASETS = 10;
-    protected Widget         userInfoTable;
-    private TabPanel         tabPanel;
-    private FlowPanel        preferencesPanel;
-    private FlowPanel        recentActivityPanel;
-    private FlowPanel        adminPanel;
+    private static final int     MAX_DATASETS = 10;
+    protected Widget             userInfoTable;
+    private TabPanel             tabPanel;
+    private FlowPanel            preferencesPanel;
+    private FlowPanel            recentActivityPanel;
+    private FlowPanel            adminPanel;
+    private final PermissionUtil rbac;
 
     /**
      * Create an instance of home page.
@@ -93,6 +96,7 @@ public class HomePage extends Page {
      */
     public HomePage(DispatchAsync dispatchAsync) {
         super("Home", dispatchAsync);
+        rbac = new PermissionUtil(dispatchAsync);
         createTabs();
         createRecentActivityTab();
         createSystemInfoTab();
@@ -200,79 +204,88 @@ public class HomePage extends Page {
     protected void createAdminTab() {
         adminPanel = new FlowPanel();
 
-        Hyperlink permissionsLink = new Hyperlink("Administer users", "modifyPermissions");
-        adminPanel.add(permissionsLink);
+        rbac.withPermissions(new PermissionsCallback() {
+            @Override
+            public void onPermissions(HasPermissionResult permissions) {
+                if (permissions.isPermitted(Permission.EDIT_ROLES)) {
+                    Hyperlink permissionsLink = new Hyperlink("Administer users", "modifyPermissions");
+                    adminPanel.add(permissionsLink);
 
-        Hyperlink aclLink = new Hyperlink("Administer permissions", "accessControl");
-        adminPanel.add(aclLink);
+                    Hyperlink aclLink = new Hyperlink("Administer permissions", "accessControl");
+                    adminPanel.add(aclLink);
 
-        final Anchor initializeRoles = new Anchor("Set all roles and permissions to defaults");
-        initializeRoles.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                initializeRoles.setEnabled(false);
-                initializeRoles.setText("Setting default roles and permissions");
-                dispatchAsync.execute(new InitializeRoles(), new AsyncCallback<EmptyResult>() {
-                    public void onFailure(Throwable caught) {
-                        initializeRoles.setText("Default permissions failed");
-                        initializeRoles.setEnabled(true);
-                    }
+                    final Anchor initializeRoles = new Anchor("Set all roles and permissions to defaults");
+                    initializeRoles.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            initializeRoles.setEnabled(false);
+                            initializeRoles.setText("Setting default roles and permissions");
+                            dispatchAsync.execute(new InitializeRoles(), new AsyncCallback<EmptyResult>() {
+                                public void onFailure(Throwable caught) {
+                                    initializeRoles.setText("Default permissions failed");
+                                    initializeRoles.setEnabled(true);
+                                }
 
-                    public void onSuccess(EmptyResult result) {
-                        initializeRoles.setText("All roles and permissions set to default");
-                        initializeRoles.setEnabled(true);
-                    }
-                });
-            }
-        });
-        adminPanel.add(initializeRoles);
+                                public void onSuccess(EmptyResult result) {
+                                    initializeRoles.setText("All roles and permissions set to default");
+                                    initializeRoles.setEnabled(true);
+                                }
+                            });
+                        }
+                    });
+                    adminPanel.add(initializeRoles);
+                }
+                Hyperlink sparqlLink = new Hyperlink("Run SPARQL Query", "sparql");
+                adminPanel.add(sparqlLink);
 
-        Hyperlink sparqlLink = new Hyperlink("Run SPARQL Query", "sparql");
-        adminPanel.add(sparqlLink);
+                final Anchor updateAnchor = new Anchor("Update Context");
+                updateAnchor.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        updateAnchor.setEnabled(false);
+                        updateAnchor.setText("Update Context Running...");
+                        dispatchAsync.execute(new ContextConvert(), new AsyncCallback<EmptyResult>() {
+                            public void onFailure(Throwable caught) {
+                                updateAnchor.setText("Update Context Failed");
+                                updateAnchor.setEnabled(true);
+                            }
 
-        final Anchor updateAnchor = new Anchor("Update Context");
-        updateAnchor.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                updateAnchor.setEnabled(false);
-                updateAnchor.setText("Update Context Running...");
-                dispatchAsync.execute(new ContextConvert(), new AsyncCallback<EmptyResult>() {
-                    public void onFailure(Throwable caught) {
-                        updateAnchor.setText("Update Context Failed");
-                        updateAnchor.setEnabled(true);
-                    }
-
-                    public void onSuccess(EmptyResult result) {
-                        updateAnchor.setText("Update Context Finished");
-                        updateAnchor.setEnabled(true);
-                    }
-                });
-            }
-        });
-        adminPanel.add(updateAnchor);
-        adminPanel.add(new HTML());
-
-        final Anchor luceneAnchor = new Anchor("Reindex Lucene");
-        luceneAnchor.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                luceneAnchor.setEnabled(false);
-                luceneAnchor.setText("Requesting...");
-                dispatchAsync.execute(new ReindexLucene(), new AsyncCallback<ReindexLuceneResult>() {
-                    public void onFailure(Throwable caught) {
-                        new ConfirmDialog("Error", "Error reindexing");
-                        luceneAnchor.setText("Reindex Lucene");
-                        luceneAnchor.setEnabled(true);
-                    }
-
-                    public void onSuccess(ReindexLuceneResult result) {
-                        new ConfirmDialog("Started", "Queued " + result.getNumberQueued() + " dataset(s) for reindexing");
-                        luceneAnchor.setText("Reindex Lucene");
-                        luceneAnchor.setEnabled(true);
+                            public void onSuccess(EmptyResult result) {
+                                updateAnchor.setText("Update Context Finished");
+                                updateAnchor.setEnabled(true);
+                            }
+                        });
                     }
                 });
-            }
-        });
-        adminPanel.add(luceneAnchor);
+                adminPanel.add(updateAnchor);
+                adminPanel.add(new HTML());
 
-        tabPanel.add(adminPanel, "Administrator");
+                if (permissions.isPermitted(Permission.REINDEX_FULLTEXT)) {
+                    final Anchor luceneAnchor = new Anchor("Re-build full-text index");
+                    luceneAnchor.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            luceneAnchor.setEnabled(false);
+                            luceneAnchor.setText("Requesting...");
+                            dispatchAsync.execute(new ReindexLucene(), new AsyncCallback<ReindexLuceneResult>() {
+                                public void onFailure(Throwable caught) {
+                                    new ConfirmDialog("Error", "Error reindexing");
+                                    luceneAnchor.setText("Reindex Lucene");
+                                    luceneAnchor.setEnabled(true);
+                                }
+
+                                public void onSuccess(ReindexLuceneResult result) {
+                                    new ConfirmDialog("Started", "Queued " + result.getNumberQueued() + " dataset(s) for reindexing");
+                                    luceneAnchor.setText("Reindex Lucene");
+                                    luceneAnchor.setEnabled(true);
+                                }
+                            });
+                        }
+                    });
+                    adminPanel.add(luceneAnchor);
+                }
+
+                tabPanel.add(adminPanel, "Administrator");
+            }
+        }, Permission.EDIT_ROLES, Permission.REINDEX_FULLTEXT);
+
     }
 
     @Override

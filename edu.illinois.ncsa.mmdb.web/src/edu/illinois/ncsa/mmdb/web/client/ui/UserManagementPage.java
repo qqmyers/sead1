@@ -56,6 +56,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
@@ -106,6 +107,9 @@ public class UserManagementPage extends Composite {
         // page title
         pageTitle = createPageTitle();
         mainPanel.add(pageTitle);
+
+        Hyperlink pAdmin = new Hyperlink("Administer access control", "accessControl");
+        mainPanel.add(pAdmin);
 
         // users table
         usersTable = createUsersTable();

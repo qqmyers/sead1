@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.Permissions.PermissionValue;
@@ -50,6 +51,8 @@ public class RoleAdministrationPage extends Composite {
 
         //Label l = new Label("Note: the controls on this page do not currently do anything");
         //mainPanel.add(l);
+        Hyperlink userAdminLink = new Hyperlink("Administer users", "modifyPermissions");
+        mainPanel.add(userAdminLink);
 
         // permissions table
         permissionsTable = createPermissionsTable();

@@ -60,6 +60,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTags;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -78,6 +81,7 @@ public class TagsWidget extends Composite {
     private final FlexTable       tagsPanel;
     private final String          id;
     private final MyDispatchAsync service;
+    private final PermissionUtil  rbac;
     private final Label           tagLabel;
     private AddTagWidget          tagWidget;
     final Set<String>             tagsShown;
@@ -95,6 +99,7 @@ public class TagsWidget extends Composite {
     public TagsWidget(final String id, final MyDispatchAsync service, boolean withTitle) {
         this.id = id;
         this.service = service;
+        rbac = new PermissionUtil(service);
         tagsShown = new HashSet<String>();
 
         mainPanel = new FlowPanel();
@@ -112,49 +117,54 @@ public class TagsWidget extends Composite {
         tagsPanel = new FlexTable();
         mainPanel.add(tagsPanel);
 
-        final Anchor addTagAnchor = new Anchor("Add tag(s)");
-        addTagAnchor.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                mainPanel.remove(addTagAnchor);
-
-                tagWidget = new AddTagWidget();
-
-                tagWidget.getSubmitLink().addClickHandler(new ClickHandler() {
-                    @Override
+        rbac.doIfAllowed(Permission.ADD_TAG, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                final Anchor addTagAnchor = new Anchor("Add tag(s)");
+                addTagAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        submitTag(tagWidget.getTags());
+                        mainPanel.remove(addTagAnchor);
+
+                        tagWidget = new AddTagWidget();
+
+                        tagWidget.getSubmitLink().addClickHandler(new ClickHandler() {
+                            @Override
+                            public void onClick(ClickEvent event) {
+                                submitTag(tagWidget.getTags());
+                            }
+                        });
+
+                        tagWidget.getTagBox().addKeyUpHandler(new KeyUpHandler() {
+                            @Override
+                            public void onKeyUp(KeyUpEvent event) {
+                                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                                    submitTag(tagWidget.getTags());
+                                }
+
+                            }
+                        });
+
+                        tagWidget.getCancelLink().addClickHandler(new ClickHandler() {
+
+                            @Override
+                            public void onClick(ClickEvent event) {
+                                mainPanel.remove(tagWidget);
+                                mainPanel.add(addTagAnchor);
+                            }
+                        });
+
+                        mainPanel.add(tagWidget);
+
+                        DeferredCommand.addCommand(new Command() {
+                            public void execute() {
+                                tagWidget.getTagBox().setFocus(true);
+                            }
+                        });
                     }
                 });
-
-                tagWidget.getTagBox().addKeyUpHandler(new KeyUpHandler() {
-                    @Override
-                    public void onKeyUp(KeyUpEvent event) {
-                        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                            submitTag(tagWidget.getTags());
-                        }
-
-                    }
-                });
-
-                tagWidget.getCancelLink().addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        mainPanel.remove(tagWidget);
-                        mainPanel.add(addTagAnchor);
-                    }
-                });
-
-                mainPanel.add(tagWidget);
-
-                DeferredCommand.addCommand(new Command() {
-                    public void execute() {
-                        tagWidget.getTagBox().setFocus(true);
-                    }
-                });
+                mainPanel.add(addTagAnchor);
             }
         });
-        mainPanel.add(addTagAnchor);
         //				mainPanel.setCellHorizontalAlignment(tagWidget, HasHorizontalAlignment.ALIGN_RIGHT);
 
         getTags();
@@ -165,15 +175,20 @@ public class TagsWidget extends Composite {
             tagsPanel.addStyleName("tagsLinks");
             final int row = tagsPanel.getRowCount();
             tagsPanel.setWidget(row, 0, tagHyperlink(tag));
-            Anchor delete = new Anchor("Delete");
-            delete.addStyleName("deleteLink");
-            delete.addClickHandler(new ClickHandler() {
-                public void onClick(ClickEvent event) {
-                    deleteTag(tag, row);
-                    tagWidget.getTagBox().setFocus(true);
+            rbac.doIfAllowed(Permission.DELETE_TAG, new PermissionCallback() {
+                @Override
+                public void onAllowed() {
+                    Anchor delete = new Anchor("Delete");
+                    delete.addStyleName("deleteLink");
+                    delete.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            deleteTag(tag, row);
+                            tagWidget.getTagBox().setFocus(true);
+                        }
+                    });
+                    tagsPanel.setWidget(row, 1, delete);
                 }
             });
-            tagsPanel.setWidget(row, 1, delete);
             tagsShown.add(tag);
         }
     }

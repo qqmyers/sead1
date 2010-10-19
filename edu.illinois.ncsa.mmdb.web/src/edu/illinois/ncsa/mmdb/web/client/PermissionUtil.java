@@ -4,16 +4,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 
 public class PermissionUtil {
-    MyDispatchAsync          dispatch;
+    DispatchAsync            dispatch;
     Map<Permission, Boolean> cache;
 
     public static abstract class PermissionCallback {
@@ -33,8 +34,8 @@ public class PermissionUtil {
         }
     }
 
-    public PermissionUtil(MyDispatchAsync d) {
-        dispatch = d;
+    public PermissionUtil(DispatchAsync dispatchAsync) {
+        dispatch = dispatchAsync;
         cache = new HashMap<Permission, Boolean>();
     }
 

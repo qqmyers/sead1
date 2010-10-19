@@ -51,10 +51,15 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
+import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResourceResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotations;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotationsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.DeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DeletedHandler;
@@ -69,17 +74,17 @@ import edu.uiuc.ncsa.cet.bean.AnnotationBean;
  */
 public class CommentsView extends Composite {
 
-    private final SimplePanel       mainPanel = new SimplePanel();
+    private final SimplePanel     mainPanel = new SimplePanel();
 
-    private final VerticalPanel     layoutPanel;
+    private final VerticalPanel   layoutPanel;
 
-    private final NewAnnotationView newAnnotationView;
+    private final String          resource;
 
-    private final String            resource;
+    private final VerticalPanel   commentsPanel;
 
-    private final VerticalPanel     commentsPanel;
+    private final MyDispatchAsync service;
 
-    private final MyDispatchAsync   service;
+    private final PermissionUtil  rbac;
 
     /**
      * Draws the main panel and the widget to input a new annotation. Calls the
@@ -93,6 +98,8 @@ public class CommentsView extends Composite {
         this.resource = resource;
 
         this.service = service;
+
+        rbac = new PermissionUtil(service);
 
         DisclosurePanel disclosurePanel = new DisclosurePanel("Comments");
 
@@ -118,37 +125,42 @@ public class CommentsView extends Composite {
 
         layoutPanel.add(commentsPanel);
 
-        newAnnotationView = new NewAnnotationView();
+        rbac.doIfAllowed(Permission.ADD_COMMENT, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                final NewAnnotationView newAnnotationView = new NewAnnotationView();
 
-        // add new annotation
-        newAnnotationView.addClickHandler(new ClickHandler() {
+                // add new annotation
+                newAnnotationView.addClickHandler(new ClickHandler() {
 
-            public void onClick(ClickEvent arg0) {
+                    public void onClick(ClickEvent arg0) {
 
-                service.execute(new AnnotateResource(resource,
-                        newAnnotationView.getAnnotationBean(), MMDB.getUsername()),
-                        new AsyncCallback<AnnotateResourceResult>() {
+                        service.execute(new AnnotateResource(resource,
+                                newAnnotationView.getAnnotationBean(), MMDB.getUsername()),
+                                new AsyncCallback<AnnotateResourceResult>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Failed to annotate resource "
-                                + resource, caught);
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        GWT.log("Failed to annotate resource "
+                                                + resource, caught);
+                                    }
+
+                                    @Override
+                                    public void onSuccess(AnnotateResourceResult result) {
+                                        newAnnotationView.clear();
+
+                                        refresh();
+
+                                    }
+                                });
+
                     }
 
-                    @Override
-                    public void onSuccess(AnnotateResourceResult result) {
-                        newAnnotationView.clear();
-
-                        refresh();
-
-                    }
                 });
 
+                layoutPanel.add(newAnnotationView);
             }
-
         });
-
-        layoutPanel.add(newAnnotationView);
 
         refresh();
     }
@@ -164,40 +176,47 @@ public class CommentsView extends Composite {
         service.execute(new GetAnnotations(resource),
                 new AsyncCallback<GetAnnotationsResult>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Error retrieving annotations", caught);
-            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error retrieving annotations", caught);
+                    }
 
-            @Override
-            public void onSuccess(GetAnnotationsResult result) {
+                    @Override
+                    public void onSuccess(GetAnnotationsResult result) {
 
-                ArrayList<AnnotationBean> annotations = result
-                        .getAnnotations();
+                        ArrayList<AnnotationBean> annotations = result
+                                .getAnnotations();
 
-                show(annotations);
-            }
-        });
+                        show(annotations);
+                    }
+                });
     }
 
     /**
      * 
      * @param annotations
      */
-    public void show(ArrayList<AnnotationBean> annotations) {
-        commentsPanel.clear();
+    public void show(final ArrayList<AnnotationBean> annotations) {
+        rbac.withPermissions(new PermissionsCallback() {
+            @Override
+            public void onPermissions(HasPermissionResult permissions) {
+                commentsPanel.clear();
 
-        commentsPanel.add(new Label(annotations.size() + " comment" + (annotations.size() != 1 ? "s" : "")));
+                commentsPanel.add(new Label(annotations.size() + " comment" + (annotations.size() != 1 ? "s" : "")));
 
-        for (AnnotationBean annotation : annotations ) {
-            AnnotationView v = new AnnotationView(resource, annotation);
-            v.addDeletedHandler(new DeletedHandler() {
-                public void onDeleted(DeletedEvent event) {
-                    refresh();
+                for (AnnotationBean annotation : annotations ) {
+                    AnnotationView v = new AnnotationView(resource, annotation, permissions.isPermitted(Permission.EDIT_COMMENT));
+                    if (permissions.isPermitted(Permission.EDIT_COMMENT)) {
+                        v.addDeletedHandler(new DeletedHandler() {
+                            public void onDeleted(DeletedEvent event) {
+                                refresh();
+                            }
+                        });
+                    }
+                    commentsPanel.add(v);
                 }
-            });
-            commentsPanel.add(v);
-        }
+            }
+        }, Permission.EDIT_COMMENT);
     }
 
 }
