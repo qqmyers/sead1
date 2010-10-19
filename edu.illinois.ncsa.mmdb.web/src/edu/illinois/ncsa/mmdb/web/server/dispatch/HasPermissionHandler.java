@@ -76,24 +76,29 @@ public class HasPermissionHandler implements
         RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
 
         Resource userUri = createUserURI(action.getUser());
-        Permission permission = action.getPermission();
-        Resource permissionUri = Resource.uriRef(permission.getUri());
 
-        try {
-            log.debug("Checking if user " + userUri + " has permission " + permission.getLabel());
-            if (userUri.getString().endsWith("admin")) { // FIXME
-                log.debug("User is admin, automatically has permission. FIXME!!!!!!"); // FIXME
-                return new HasPermissionResult(true); // FIXME DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!11
-            } // FIXME
-            // FIXME
-            if (permission == Permission.VIEW_MEMBER_PAGES || permission == Permission.VIEW_ADMIN_PAGES) {
-                return new HasPermissionResult(rbac.checkLegacyPermission(userUri, permissionUri));
+        HasPermissionResult result = new HasPermissionResult();
+
+        for (Permission permission : action.getPermissions() ) {
+            Resource permissionUri = Resource.uriRef(permission.getUri());
+            try {
+                log.debug("Checking if user " + userUri + " has permission " + permission.getLabel());
+                boolean hasPermission = false;
+                if (userUri.getString().endsWith("admin")) { // FIXME
+                    log.debug("User is admin, automatically has permission. FIXME!!!!!!"); // FIXME
+                    hasPermission = true;
+                } else {
+                    hasPermission = rbac.checkPermission(userUri, permissionUri);
+                }
+                result.setIsPermitted(permission, hasPermission);
+                log.debug("User " + userUri + " " + (hasPermission ? "has" : "does not have") + " permission " + permission.getLabel());
+            } catch (RBACException e) {
+                log.error("Error checking user permissions", e);
+                result.setIsPermitted(permission, false);
             }
-            return new HasPermissionResult(rbac.checkPermission(userUri, permissionUri));
-        } catch (RBACException e) {
-            log.error("Error checking user permissions", e);
-            return new HasPermissionResult(false);
         }
+
+        return result;
     }
 
     /**

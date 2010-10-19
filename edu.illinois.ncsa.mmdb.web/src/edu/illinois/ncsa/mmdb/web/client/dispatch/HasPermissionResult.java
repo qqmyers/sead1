@@ -41,29 +41,59 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.customware.gwt.dispatch.shared.Result;
+import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 
 /**
  * @author Luigi Marini
- *
+ * 
  */
 @SuppressWarnings("serial")
 public class HasPermissionResult implements Result {
-	
-	private boolean permitted;
 
-	public HasPermissionResult() {
-	}
-	
-	public HasPermissionResult(boolean permitted) {
-		this.permitted = permitted;
-	}
+    private Map<Permission, Boolean> permitted;
 
-	/**
-	 * @return the result
-	 */
-	public boolean isPermitted() {
-		return permitted;
-	}
+    public HasPermissionResult() {
+    }
 
+    public HasPermissionResult(Permission p, boolean permitted) {
+        setIsPermitted(p, permitted);
+    }
+
+    /**
+     * This only works properly if the result contains a value for a
+     * <b>single</b> permission.
+     * Otherwise it returns true if <b>any</b> of the permission values is ALLOW
+     * 
+     * @return
+     */
+    public boolean isPermitted() {
+        assert permitted.size() == 1;
+        return permitted.values().contains(Boolean.TRUE);
+    }
+
+    /**
+     * @return the result
+     */
+    public boolean isPermitted(Permission p) {
+        return permitted.get(p);
+    }
+
+    public void setIsPermitted(Permission p, boolean ip) {
+        getPermitted().put(p, ip);
+    }
+
+    public Map<Permission, Boolean> getPermitted() {
+        if (permitted == null) {
+            permitted = new HashMap<Permission, Boolean>();
+        }
+        return permitted;
+    }
+
+    public void setPermitted(Map<Permission, Boolean> p) {
+        permitted = p;
+    }
 }

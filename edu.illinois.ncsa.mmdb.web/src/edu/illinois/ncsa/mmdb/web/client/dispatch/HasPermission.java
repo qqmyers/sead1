@@ -41,38 +41,62 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import net.customware.gwt.dispatch.shared.Action;
 import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 
 /**
  * @author Luigi Marini
- *
+ * 
  */
 @SuppressWarnings("serial")
 public class HasPermission implements Action<HasPermissionResult> {
 
-	private String user;
-	private Permission permission;
-	
-	public HasPermission() {
-	}
-	
-	public HasPermission(String user, Permission permission) {
-		this.user = user;
-		this.permission = permission;
-	}
+    private String          user;
+    private Set<Permission> permissions;
 
-	/**
-	 * @return the user
-	 */
-	public String getUser() {
-		return user;
-	}
+    public HasPermission() {
+    }
 
-	/**
-	 * @return the permission
-	 */
-	public Permission getPermission() {
-		return permission;
-	}
+    public HasPermission(String user, Permission... permissions) {
+        this.user = user;
+        for (Permission p : permissions ) {
+            addPermission(p);
+        }
+    }
+
+    public HasPermission(String user, Collection<Permission> permissions) {
+        this.user = user;
+        for (Permission p : permissions ) {
+            addPermission(p);
+        }
+    }
+
+    /**
+     * @return the user
+     */
+    public String getUser() {
+        return user;
+    }
+
+    public void addPermission(Permission p) {
+        getPermissions().add(p);
+    }
+
+    /**
+     * @return the permission
+     */
+    public Set<Permission> getPermissions() {
+        if (permissions == null) {
+            permissions = new HashSet<Permission>();
+        }
+        return permissions;
+    }
+
+    public void setPermissions(Set<Permission> p) {
+        permissions = p;
+    }
 }

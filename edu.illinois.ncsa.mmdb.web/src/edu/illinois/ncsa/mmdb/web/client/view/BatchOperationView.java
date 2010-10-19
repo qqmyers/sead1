@@ -101,5 +101,4 @@ public class BatchOperationView extends Composite implements BatchOperationPrese
     public void addMenuSeparator() {
         actionsMenu.addSeparator();
     }
-
 }

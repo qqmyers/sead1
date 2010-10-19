@@ -64,8 +64,10 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
+import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
@@ -75,7 +77,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
@@ -111,12 +112,15 @@ public class DatasetWidget extends Composite {
     private FlexTable               informationTable;
     protected DerivedDatasetsWidget derivedDatasetsWidget;
 
+    private final PermissionUtil    rbac;
+
     /**
      * 
      * @param dispatchAsync
      */
     public DatasetWidget(MyDispatchAsync dispatchAsync) {
         this.service = dispatchAsync;
+        rbac = new PermissionUtil(service);
 
         FlowPanel mainPanel = new FlowPanel();
         mainPanel.addStyleName("datasetMainContainer");
@@ -292,50 +296,16 @@ public class DatasetWidget extends Composite {
             }
         });
 
-        // get permissions
-        service.execute(new HasPermission(MMDB.getUsername(), Permission.VIEW_ADMIN_PAGES), new AsyncCallback<HasPermissionResult>() {
+        rbac.withPermissions(new PermissionsCallback() {
             @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Error checking for admin privileges", caught);
-                addWidgets(false, result.getDataset().getCreator().getUri().equals(MMDB.getUsername()));
-            }
-
-            @Override
-            public void onSuccess(HasPermissionResult permresult) {
-                addWidgets(permresult.isPermitted(), result.getDataset().getCreator().getUri().equals(MMDB.getUsername()));
-            }
-
-            private void addWidgets(boolean isAdmin, boolean isCreator) {
-                // admins and owners can update some fields
-                if (isAdmin || isCreator) {
-                    // delete
-                    Anchor deleteAnchor = new Anchor("Delete");
-                    deleteAnchor.addStyleName("datasetActionLink");
-                    deleteAnchor.addClickHandler(new ClickHandler() {
-                        public void onClick(ClickEvent event) {
-                            showDeleteDialog();
-                        }
-                    });
-                    deleteWidget.add(deleteAnchor);
-
-                    // license
-                    license.setEditable(true);
-
-                    // title
+            public void onPermissions(HasPermissionResult p) {
+                if (p.isPermitted(Permission.EDIT_METADATA)) {
                     titleLabel.setEditable(true);
-
-                    // user specified metadata
-                    um.showFields(true);
-                } else {
-                    // license
-                    license.setEditable(false);
-
-                    // user specified metadata
-                    um.showFields(false);
                 }
-
-                // only admins can rerun extraction
-                if (isAdmin) {
+                if (p.isPermitted(Permission.CHANGE_LICENSE)) {
+                    license.setEditable(true);
+                }
+                if (p.isPermitted(Permission.RERUN_EXTRACTION)) {
                     Anchor extractAnchor = new Anchor("Rerun Extraction");
                     extractAnchor.addStyleName("datasetActionLink");
                     extractAnchor.addClickHandler(new ClickHandler() {
@@ -345,8 +315,24 @@ public class DatasetWidget extends Composite {
                     });
                     extractWidget.add(extractAnchor);
                 }
+                if (p.isPermitted(Permission.DELETE_DATA)) {
+                    Anchor deleteAnchor = new Anchor("Delete");
+                    deleteAnchor.addStyleName("datasetActionLink");
+                    deleteAnchor.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            showDeleteDialog();
+                        }
+                    });
+                    deleteWidget.add(deleteAnchor);
+                }
+                um.showFields(p.isPermitted(Permission.EDIT_USER_METADATA));
             }
-        });
+        }, Permission.EDIT_METADATA,
+                Permission.CHANGE_LICENSE,
+                Permission.RERUN_EXTRACTION,
+                Permission.DELETE_DATA,
+                Permission.EDIT_USER_METADATA);
+        // FIXME allow owner to do stuff
     }
 
     void addInfo(String name, String value, Panel panel) {

@@ -26,6 +26,13 @@ public class PermissionUtil {
         }
     }
 
+    public static abstract class PermissionsCallback {
+        public abstract void onPermissions(HasPermissionResult permissions);
+
+        public void onFailure() {
+        }
+    }
+
     public PermissionUtil(MyDispatchAsync d) {
         dispatch = d;
         cache = new HashMap<Permission, Boolean>();
@@ -70,5 +77,19 @@ public class PermissionUtil {
                 }
             });
         }
+    }
+
+    public void withPermissions(final PermissionsCallback callback, Permission... permissions) {
+        dispatch.execute(new HasPermission(MMDB.getUsername(), permissions), new AsyncCallback<HasPermissionResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure();
+            }
+
+            @Override
+            public void onSuccess(HasPermissionResult result) {
+                callback.onPermissions(result);
+            }
+        });
     }
 }
