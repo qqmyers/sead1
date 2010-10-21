@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.customware.gwt.dispatch.shared.Result;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * @author Luigi Marini

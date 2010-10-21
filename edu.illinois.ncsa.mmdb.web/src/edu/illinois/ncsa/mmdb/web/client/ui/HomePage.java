@@ -60,7 +60,6 @@ import com.google.gwt.user.client.ui.Widget;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ContextConvert;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRecentActivity;
@@ -71,6 +70,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.InitializeRoles;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLuceneResult;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * The home page is user specific. It contains a set of tabs to modify and view

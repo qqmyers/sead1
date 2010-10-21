@@ -43,8 +43,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.customware.gwt.dispatch.shared.Action;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.PermissionValue;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 
 /**
  * This dispatch allows permissions to be set in bulk. This is more desirable

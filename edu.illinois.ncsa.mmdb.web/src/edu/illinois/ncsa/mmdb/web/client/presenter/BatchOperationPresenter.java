@@ -57,7 +57,6 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
@@ -84,6 +83,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchAddMetadataView;
 import edu.illinois.ncsa.mmdb.web.client.view.CreateCollectionDialogView;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * @author LUigi Marini

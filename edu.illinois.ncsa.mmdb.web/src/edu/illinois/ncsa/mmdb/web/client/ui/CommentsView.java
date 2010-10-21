@@ -54,7 +54,6 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResourceResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotations;
@@ -64,6 +63,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.DeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DeletedHandler;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * Shows a list of comments (annotations) for a particular resource. Allows the

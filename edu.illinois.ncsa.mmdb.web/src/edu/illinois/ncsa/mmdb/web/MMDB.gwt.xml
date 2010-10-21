@@ -44,6 +44,7 @@
   
   <!-- Inherit the CET Beans -->
   <inherits name='edu.uiuc.ncsa.cet.bean.Bean' />
+  <inherits name='edu.uiuc.ncsa.cet.bean.rbac.medici.RBAC'/>
   
   <inherits name='net.customware.gwt.dispatch.Dispatch' />
   <inherits name="com.google.gwt.json.JSON" /> 

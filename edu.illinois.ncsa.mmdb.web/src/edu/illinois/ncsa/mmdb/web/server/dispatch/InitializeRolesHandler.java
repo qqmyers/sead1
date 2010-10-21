@@ -9,10 +9,10 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.rdf.Resource;
 
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.InitializeRoles;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 
 public class InitializeRolesHandler implements ActionHandler<InitializeRoles, EmptyResult> {

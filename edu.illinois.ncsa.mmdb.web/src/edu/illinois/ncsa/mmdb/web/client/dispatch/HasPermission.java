@@ -46,7 +46,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.customware.gwt.dispatch.shared.Action;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * @author Luigi Marini

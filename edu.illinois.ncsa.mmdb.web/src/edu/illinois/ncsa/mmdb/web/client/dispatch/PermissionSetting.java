@@ -2,8 +2,8 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import java.io.Serializable;
 
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.PermissionValue;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 
 @SuppressWarnings("serial")
 public class PermissionSetting implements Serializable {

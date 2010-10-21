@@ -57,7 +57,6 @@ import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTableView;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -66,6 +65,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * A widget showing a collection.

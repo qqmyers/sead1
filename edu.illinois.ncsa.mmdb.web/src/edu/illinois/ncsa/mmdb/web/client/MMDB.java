@@ -63,7 +63,6 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
@@ -102,6 +101,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.UploadPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.UserManagementPage;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * MMDB entry point.

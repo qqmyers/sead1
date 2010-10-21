@@ -62,12 +62,12 @@ import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTags;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * A widget listing tags and providing a way to add a new one.

@@ -9,12 +9,12 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.util.Tuple;
 
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
-import edu.illinois.ncsa.mmdb.web.client.Permissions.PermissionValue;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissions;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 

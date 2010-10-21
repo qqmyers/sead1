@@ -43,7 +43,7 @@ import java.util.Map;
 
 import org.tupeloproject.rdf.Resource;
 
-import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
