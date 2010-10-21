@@ -55,6 +55,9 @@ import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTableView;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.Permissions.Permission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -74,6 +77,7 @@ public class CollectionPage extends Composite {
 
     private final String                 uri;
     private final MyDispatchAsync        dispatchasync;
+    private final PermissionUtil         rbac;
     private final HandlerManager         eventBus;
     private final FlowPanel              mainContent;
     private final String                 PREVIEW_URL = "./api/image/preview/small/";
@@ -89,6 +93,7 @@ public class CollectionPage extends Composite {
             HandlerManager eventBus) {
         this.uri = uri;
         this.dispatchasync = dispatchasync;
+        rbac = new PermissionUtil(dispatchasync);
         this.eventBus = eventBus;
         mainContent = new FlowPanel();
         mainContent.addStyleName("page");
@@ -202,18 +207,23 @@ public class CollectionPage extends Composite {
 
         pageTitle.setText(collection.getTitle());
 
-        pageTitle.setEditable(true);
-        // collection title is editable
-        pageTitle.addValueChangeHandler(new ValueChangeHandler<String>() {
-            public void onValueChange(final ValueChangeEvent<String> event) {
-                dispatchasync.execute(new SetProperty(collection.getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue()),
-                        new AsyncCallback<SetPropertyResult>() {
-                    public void onFailure(Throwable caught) {
-                        pageTitle.getEditableLabel().cancel();
-                    }
+        rbac.doIfAllowed(Permission.EDIT_METADATA, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                pageTitle.setEditable(true);
+                // collection title is editable
+                pageTitle.addValueChangeHandler(new ValueChangeHandler<String>() {
+                    public void onValueChange(final ValueChangeEvent<String> event) {
+                        dispatchasync.execute(new SetProperty(collection.getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue()),
+                                new AsyncCallback<SetPropertyResult>() {
+                                    public void onFailure(Throwable caught) {
+                                        pageTitle.getEditableLabel().cancel();
+                                    }
 
-                    public void onSuccess(SetPropertyResult result) {
-                        pageTitle.setText(event.getValue());
+                                    public void onSuccess(SetPropertyResult result) {
+                                        pageTitle.setText(event.getValue());
+                                    }
+                                });
                     }
                 });
             }
