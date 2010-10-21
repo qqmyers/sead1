@@ -278,7 +278,7 @@ public class DatasetWidget extends Composite {
 
         rbac.withPermissions(new PermissionsCallback() {
             @Override
-            public void onPermissions(HasPermissionResult p) {
+            public void onPermissions(final HasPermissionResult p) {
                 if (p.isPermitted(Permission.EDIT_METADATA)) {
                     titleLabel.setEditable(true);
                 }
@@ -307,8 +307,7 @@ public class DatasetWidget extends Composite {
                 }
                 um.showFields(p.isPermitted(Permission.EDIT_USER_METADATA));
                 //
-                final boolean hasGlobalDownloadPermission = p.isPermitted(Permission.DOWNLOAD);
-                // add download link
+                // add download link, set editability of license widget
                 service.execute(new GetLicense(uri), new AsyncCallback<LicenseResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -317,7 +316,9 @@ public class DatasetWidget extends Composite {
 
                     public void onSuccess(LicenseResult result) {
                         String rights = result.getRights().toLowerCase();
-                        if (hasGlobalDownloadPermission || MMDB.getUsername().equals(result.getRightsHolderUri()) || rights.equals("pddl") || "cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights) || result.isAllowDownload()) {
+                        String rightsHolder = result.getRightsHolderUri();
+                        boolean isRightsHolder = MMDB.getUsername().equals(rightsHolder);
+                        if (p.isPermitted(Permission.DOWNLOAD) || isRightsHolder || rights.equals("pddl") || "cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights) || result.isAllowDownload()) {
                             Anchor downloadAnchor = new Anchor();
                             downloadAnchor.setHref(DOWNLOAD_URL + uri);
                             downloadAnchor.setText("Download");
@@ -325,6 +326,7 @@ public class DatasetWidget extends Composite {
                             downloadAnchor.addStyleName("datasetActionLink");
                             downloadWidget.add(downloadAnchor);
                         }
+                        license.setEditable(rightsHolder == null || isRightsHolder || p.isPermitted(Permission.CHANGE_LICENSE));
                     }
                 });
             }
