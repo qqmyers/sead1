@@ -276,26 +276,6 @@ public class DatasetWidget extends Composite {
         // social items
         rightColumn.add(new SocialWidget(uri, service));
 
-        // add download link
-        service.execute(new GetLicense(uri), new AsyncCallback<LicenseResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Error checking for download privileges", caught);
-            }
-
-            public void onSuccess(LicenseResult result) {
-                String rights = result.getRights().toLowerCase();
-                if (MMDB.getUsername().equals(result.getRightsHolderUri()) || rights.equals("pddl") || "cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights) || result.isAllowDownload()) {
-                    Anchor downloadAnchor = new Anchor();
-                    downloadAnchor.setHref(DOWNLOAD_URL + uri);
-                    downloadAnchor.setText("Download");
-                    downloadAnchor.setTarget("_blank");
-                    downloadAnchor.addStyleName("datasetActionLink");
-                    downloadWidget.add(downloadAnchor);
-                }
-            }
-        });
-
         rbac.withPermissions(new PermissionsCallback() {
             @Override
             public void onPermissions(HasPermissionResult p) {
@@ -326,12 +306,34 @@ public class DatasetWidget extends Composite {
                     deleteWidget.add(deleteAnchor);
                 }
                 um.showFields(p.isPermitted(Permission.EDIT_USER_METADATA));
+                //
+                final boolean hasGlobalDownloadPermission = p.isPermitted(Permission.DOWNLOAD);
+                // add download link
+                service.execute(new GetLicense(uri), new AsyncCallback<LicenseResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error checking for download privileges", caught);
+                    }
+
+                    public void onSuccess(LicenseResult result) {
+                        String rights = result.getRights().toLowerCase();
+                        if (hasGlobalDownloadPermission || MMDB.getUsername().equals(result.getRightsHolderUri()) || rights.equals("pddl") || "cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights) || result.isAllowDownload()) {
+                            Anchor downloadAnchor = new Anchor();
+                            downloadAnchor.setHref(DOWNLOAD_URL + uri);
+                            downloadAnchor.setText("Download");
+                            downloadAnchor.setTarget("_blank");
+                            downloadAnchor.addStyleName("datasetActionLink");
+                            downloadWidget.add(downloadAnchor);
+                        }
+                    }
+                });
             }
         }, Permission.EDIT_METADATA,
                 Permission.CHANGE_LICENSE,
                 Permission.RERUN_EXTRACTION,
                 Permission.DELETE_DATA,
-                Permission.EDIT_USER_METADATA);
+                Permission.EDIT_USER_METADATA,
+                Permission.DOWNLOAD);
         // FIXME allow owner to do stuff
     }
 
