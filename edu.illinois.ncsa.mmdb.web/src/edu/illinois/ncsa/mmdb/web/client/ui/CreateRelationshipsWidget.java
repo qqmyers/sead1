@@ -44,6 +44,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -59,6 +61,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationship;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -69,11 +73,12 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  */
 public class CreateRelationshipsWidget extends Composite {
 
-    public static final String RELATED = "relatedTo";
-    public static final String DERIVED = "derivedFrom";
+    public static final String RELATED  = "related";
+    public static final String DESCENDS = "descendant";
     private final FlowPanel    mainPanel;
     LabeledListBox             dataset1;
     LabeledListBox             dataset2;
+    LabeledListBox             relationships;
     PreviewWidget              pre1;
     PreviewWidget              pre2;
     HorizontalPanel            thumbs;
@@ -108,7 +113,7 @@ public class CreateRelationshipsWidget extends Composite {
         pre1.setWidth("100px");
         thumbs.add(pre1);
 
-        LabeledListBox relationships = createRelationshipOptions();
+        relationships = createRelationshipOptions();
         thumbs.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         thumbs.add(relationships);
 
@@ -127,7 +132,6 @@ public class CreateRelationshipsWidget extends Composite {
         dataset1.addValueChangeHandler(new ValueChangeHandler<String>() {
 
             public void onValueChange(ValueChangeEvent<String> event) {
-                GWT.log("Create Relationship: Dataset 1 changed" + event.getValue());
                 fetchDataset(event.getValue(), pre1);
             }
         });
@@ -138,7 +142,6 @@ public class CreateRelationshipsWidget extends Composite {
         dataset2.addValueChangeHandler(new ValueChangeHandler<String>() {
 
             public void onValueChange(ValueChangeEvent<String> event) {
-                GWT.log("Create Relationship: Dataset 2 changed" + event.getValue());
                 fetchDataset(event.getValue(), pre2);
             }
         });
@@ -150,6 +153,13 @@ public class CreateRelationshipsWidget extends Composite {
         finalize.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         finalize.setStyleName("relationshipStyle");
         Button submit = new Button("Submit");
+
+        submit.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                CreateRelationship();
+            }
+        });
+
         finalize.add(submit);
 
         mainPanel.add(finalize);
@@ -159,8 +169,8 @@ public class CreateRelationshipsWidget extends Composite {
     private LabeledListBox createRelationshipOptions() {
         LabeledListBox relationshipOptions = new LabeledListBox("");
         relationshipOptions.addStyleName("createRelationshipType");
-        relationshipOptions.addItem("Related To", RELATED);
-        relationshipOptions.addItem("Derived From", DERIVED);
+        relationshipOptions.addItem("Relates To", RELATED);
+        relationshipOptions.addItem("Descends From", DESCENDS);
         relationshipOptions.setSelected(RELATED);
         return relationshipOptions;
     }
@@ -169,11 +179,6 @@ public class CreateRelationshipsWidget extends Composite {
         LabeledListBox datasetOptions = new LabeledListBox("");
         datasetOptions.choice.addStyleName("relationshipDatasetPulldown");
         return datasetOptions;
-    }
-
-    public void addToList(String name, String value) {
-        dataset1.addItem(name, value);
-        dataset2.addItem(name, value);
     }
 
     private void fetchDataset(String uri, final PreviewWidget pw) {
@@ -192,4 +197,44 @@ public class CreateRelationshipsWidget extends Composite {
             }
         });
     }
+
+    private void CreateRelationship() {
+        //error handling - dataset cannot be related to itself
+        if (dataset1.getSelected().equals(dataset2.getSelected())) {
+            ConfirmDialog okay = new ConfirmDialog("Error", "Please select two different datasets", false);
+            okay.getOkText().setText("OK");
+
+        } else {
+            //try creating relationship
+            service.execute(new SetRelationship(dataset1.getSelected(), relationships.getSelected(), dataset2.getSelected()),
+                    new AsyncCallback<SetRelationshipResult>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log("Error creating relationship", caught);
+                        }
+
+                        public void onSuccess(SetRelationshipResult result) {
+                            //show feedback, bottom is temporary
+                            ConfirmDialog olay = new ConfirmDialog("Relationship Created", "test - implementation in progress", false);
+                            olay.okText.setText("ok");
+                            //createdFeedback(dataset1.getSelected(), relationships.getSelected(), dataset2.getSelected());
+                        }
+                    });
+
+        }
+    }
+
+    /*private void createdFeedback(String uri1, String type, String uri2) {
+        HorizontalPanel submitted = new HorizontalPanel();
+        Label newRelationship = new Label(uri1 + " has relationship " + type + " with " + uri2);
+        submitted.add(newRelationship);
+        mainPanel.add(submitted);
+    }
+    */
+
+    public void addToList(String name, String value) {
+        dataset1.addItem(name, value);
+        dataset2.addItem(name, value);
+    }
+
 }

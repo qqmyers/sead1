@@ -110,7 +110,7 @@ public class SelectedDatasetsPage extends Page {
             fetchDataset(datasetUri);
         }
 
-        //create relationship
+        //create relationship - widget
         relationshipWidget = new CreateRelationshipsWidget(datasets, selectedDatasets, dispatchAsync);
         if (selectedDatasets.size() == 1) {
             rightcolumn.add(new Label("You cannot create a relationship with 1 dataset"));
