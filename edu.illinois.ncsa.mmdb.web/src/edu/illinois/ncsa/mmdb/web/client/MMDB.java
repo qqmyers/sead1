@@ -63,10 +63,9 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
@@ -332,20 +331,28 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         return params;
     }
 
+    private PermissionUtil rbac() {
+        return new PermissionUtil(dispatchAsync);
+    }
+
     /**
      * Show information about a particular dataset.
      */
     private void showDataset() {
+        rbac().doIfAllowed(Permission.VIEW_DATA, new AccessOrMessageCallback() {
+            @Override
+            public void onAllowed() {
+                DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync);
+                mainContainer.clear();
+                mainContainer.add(datasetWidget);
 
-        DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync);
-        mainContainer.clear();
-        mainContainer.add(datasetWidget);
-
-        String datasetUri = getParams().get("id"); // FIXME should use
-        // "uri?"
-        if (datasetUri != null) {
-            datasetWidget.showDataset(datasetUri);
-        }
+                String datasetUri = getParams().get("id"); // FIXME should use
+                // "uri?"
+                if (datasetUri != null) {
+                    datasetWidget.showDataset(datasetUri);
+                }
+            }
+        });
     }
 
     private void showSelected(boolean show) {
@@ -394,28 +401,17 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * @param token
      */
     private void checkPermissions(final String token) {
-        // Check if the user has been activated by an administrator
-        dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
-                Permission.VIEW_MEMBER_PAGES),
-                new AsyncCallback<HasPermissionResult>() {
+        rbac().doIfAllowed(Permission.VIEW_MEMBER_PAGES, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                parseHistoryToken(token);
+            }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT
-                                .log(
-                                        "Error checking if the users has permissions to view member pages",
-                                        caught);
-                    }
-
-                    @Override
-                    public void onSuccess(HasPermissionResult result) {
-                        if (result.isPermitted()) {
-                            parseHistoryToken(token);
-                        } else {
-                            showNotEnabledPage();
-                        }
-                    }
-                });
+            @Override
+            public void onDenied() {
+                showNotEnabledPage();
+            }
+        });
     }
 
     /**
@@ -560,60 +556,36 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         mainContainer.add(new SignupPage(dispatchAsync));
     }
 
+    abstract class AccessOrMessageCallback extends PermissionCallback {
+        @Override
+        public void onDenied() {
+            showNoAccessPage();
+        }
+    }
+
     /**
      */
     private void showUsersPage() {
-        // Check if the user has view admin pages permission
-        dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
-                Permission.VIEW_ADMIN_PAGES),
-                new AsyncCallback<HasPermissionResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT
-                                .log(
-                                        "Error checking if the users has permissions to view admin pages",
-                                        caught);
-                    }
-
-                    @Override
-                    public void onSuccess(HasPermissionResult result) {
-                        if (result.isPermitted()) {
-                            mainContainer.clear();
-                            mainContainer.add(new UserManagementPage(dispatchAsync));
-                        } else {
-                            showNoAccessPage();
-                        }
-                    }
-                });
+        rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new AccessOrMessageCallback() {
+            @Override
+            public void onAllowed() {
+                mainContainer.clear();
+                mainContainer.add(new UserManagementPage(dispatchAsync));
+            }
+        });
     }
 
     /**
      */
     private void showAccessControlPage() {
         // Check if the user has view admin pages permission
-        dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
-                Permission.VIEW_ADMIN_PAGES),
-                new AsyncCallback<HasPermissionResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT
-                                .log(
-                                        "Error checking if the users has permissions to view admin pages",
-                                        caught);
-                    }
-
-                    @Override
-                    public void onSuccess(HasPermissionResult result) {
-                        if (result.isPermitted()) {
-                            mainContainer.clear();
-                            mainContainer.add(new RoleAdministrationPage(dispatchAsync));
-                        } else {
-                            showNoAccessPage();
-                        }
-                    }
-                });
+        rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new AccessOrMessageCallback() {
+            @Override
+            public void onAllowed() {
+                mainContainer.clear();
+                mainContainer.add(new RoleAdministrationPage(dispatchAsync));
+            }
+        });
     }
 
     /**
@@ -621,28 +593,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      */
     private void showSparqlPage() {
         // Check if the user has view admin pages permission
-        dispatchAsync.execute(new HasPermission(getSessionState().getCurrentUser().getUri(),
-                Permission.VIEW_ADMIN_PAGES),
-                new AsyncCallback<HasPermissionResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT
-                                .log(
-                                        "Error checking if the users has permissions to view admin pages",
-                                        caught);
-                    }
-
-                    @Override
-                    public void onSuccess(HasPermissionResult result) {
-                        if (result.isPermitted()) {
-                            mainContainer.clear();
-                            mainContainer.add(new SparqlPage(dispatchAsync));
-                        } else {
-                            showNoAccessPage();
-                        }
-                    }
-                });
+        rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new AccessOrMessageCallback() {
+            @Override
+            public void onAllowed() {
+                mainContainer.clear();
+                mainContainer.add(new SparqlPage(dispatchAsync));
+            }
+        });
     }
 
     /**
