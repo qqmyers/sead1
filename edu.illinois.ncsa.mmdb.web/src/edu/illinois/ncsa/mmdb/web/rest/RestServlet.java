@@ -71,6 +71,7 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
+import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
@@ -90,8 +91,10 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
  * RestServlet
@@ -353,6 +356,19 @@ public class RestServlet extends AuthenticatedServlet {
         String uri = decanonicalizeUrl(request);
         if (hasPrefix(IMAGE_DOWNLOAD_INFIX, request)) {
             log.trace("DOWNLOAD IMAGE " + uri);
+            // keep track who downloads the file
+            TripleWriter tw = new TripleWriter();
+            Resource personuri = Resource.uriRef(PersonBeanUtil.getPersonID(getHttpSessionUser(request)));
+            Resource downloaduri = Resource.uriRef();
+            tw.add(Resource.uriRef(uri), MMDB.DOWNLOADED_BY, downloaduri);
+            tw.add(downloaduri, Dc.CREATOR, personuri);
+            tw.add(downloaduri, Dc.DATE, new Date());
+            try {
+                getContext().perform(tw);
+            } catch (OperatorException e1) {
+                throw new ServletException("failed to count download for " + request.getRequestURI(), e1);
+            }
+
             try {
                 Thing imageThing = getImageThing(uri);
                 String contentType = imageThing.getString(Dc.FORMAT);
@@ -377,6 +393,18 @@ public class RestServlet extends AuthenticatedServlet {
             log.debug("Downloading Dataset " + uri);
             // TODO check that file ends in extension instead of assuming it does
             uri = uri.substring(0, uri.length() - 4);
+            // keep track who downloads the file
+            TripleWriter tw = new TripleWriter();
+            Resource personuri = Resource.uriRef(PersonBeanUtil.getPersonID(getHttpSessionUser(request)));
+            Resource downloaduri = Resource.uriRef();
+            tw.add(Resource.uriRef(uri), MMDB.DOWNLOADED_BY, downloaduri);
+            tw.add(downloaduri, Dc.CREATOR, personuri);
+            tw.add(downloaduri, Dc.DATE, new Date());
+            try {
+                getContext().perform(tw);
+            } catch (OperatorException e1) {
+                throw new ServletException("failed to count download for " + request.getRequestURI(), e1);
+            }
             try {
                 Thing imageThing = getImageThing(uri);
                 String contentType = imageThing.getString(Dc.FORMAT);
