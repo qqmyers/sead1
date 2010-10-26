@@ -11,15 +11,14 @@ import org.tupeloproject.kernel.OperatorException;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.InitializeRoles;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.RbacUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 public class InitializeRolesHandler implements ActionHandler<InitializeRoles, EmptyResult> {
     Log log = LogFactory.getLog(InitializeRolesHandler.class);
 
     @Override
     public EmptyResult execute(InitializeRoles arg0, ExecutionContext arg1) throws ActionException {
-        RbacUtil rbac = new RbacUtil(new RBAC(TupeloStore.getInstance().getContext()));
+        MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
 
         try {
             log.info("Initializing role-based access control");

@@ -54,8 +54,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * Check if a user has a specific permission.
@@ -73,9 +73,10 @@ public class HasPermissionHandler implements
     public HasPermissionResult execute(HasPermission action,
             ExecutionContext arg1) throws ActionException {
 
-        RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
+        MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
 
         Resource userUri = createUserURI(action.getUser());
+        Resource objectUri = action.getObject() != null ? Resource.uriRef(action.getObject()) : null;
 
         HasPermissionResult result = new HasPermissionResult();
 
@@ -88,7 +89,7 @@ public class HasPermissionHandler implements
                     log.debug("User is admin, automatically has permission. FIXME!!!!!!"); // FIXME
                     hasPermission = true;
                 } else {
-                    hasPermission = rbac.checkPermission(userUri, permissionUri);
+                    hasPermission = rbac.checkPermission(userUri, objectUri, permissionUri);
                 }
                 result.setIsPermitted(permission, hasPermission);
                 log.debug("User " + userUri + " " + (hasPermission ? "has" : "does not have") + " permission " + permission.getLabel());

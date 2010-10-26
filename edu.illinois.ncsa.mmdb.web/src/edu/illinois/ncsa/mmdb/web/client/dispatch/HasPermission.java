@@ -56,6 +56,7 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 public class HasPermission implements Action<HasPermissionResult> {
 
     private String          user;
+    private String          object;
     private Set<Permission> permissions;
 
     public HasPermission() {
@@ -73,6 +74,16 @@ public class HasPermission implements Action<HasPermissionResult> {
         for (Permission p : permissions ) {
             addPermission(p);
         }
+    }
+
+    public HasPermission(String user, String object, Permission... permissions) {
+        this(user, permissions);
+        setObject(object);
+    }
+
+    public HasPermission(String user, String object, Collection<Permission> permissions) {
+        this(user, permissions);
+        setObject(object);
     }
 
     /**
@@ -98,5 +109,13 @@ public class HasPermission implements Action<HasPermissionResult> {
 
     public void setPermissions(Set<Permission> p) {
         permissions = p;
+    }
+
+    public String getObject() {
+        return object;
+    }
+
+    public void setObject(String object) {
+        this.object = object;
     }
 }

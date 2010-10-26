@@ -71,6 +71,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsersResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole.ActionType;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
 
 /**
  * A page to manage users. Currently only the ability to enable/disable users is
@@ -131,10 +132,12 @@ public class UserManagementPage extends Composite {
                 int col = 2;
                 for (Map.Entry<String, String> entry : PermissionUtil.getRoles(result.getSettings()).entrySet() ) {
                     String roleUri = entry.getKey();
-                    String roleName = entry.getValue();
-                    columnByRole.put(roleUri, col);
-                    usersTable.setText(0, col, roleName);
-                    col++;
+                    if (!roleUri.equals(DefaultRole.OWNER.getUri())) {
+                        String roleName = entry.getValue();
+                        columnByRole.put(roleUri, col);
+                        usersTable.setText(0, col, roleName);
+                        col++;
+                    }
                 }
                 loadUsers();
             }
