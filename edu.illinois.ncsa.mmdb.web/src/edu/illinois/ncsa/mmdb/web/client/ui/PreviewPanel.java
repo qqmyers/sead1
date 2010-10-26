@@ -94,14 +94,18 @@ public class PreviewPanel extends Composite {
     private static final String PYRAMID_URL     = "pyramid/";
 
     public PreviewPanel() {
+    }
 
+    public void unload() {
+        hideSeadragon();
+        hideWebGL();
+        hideHTML5();
     }
 
     //@Override
     protected void onUnload() {
         super.onUnload();
-        alertWebGL("onUnload");
-        hideSeadragon();
+        unload();
     }
 
     //TODO Clean up code to allow two different instances:
@@ -450,11 +454,6 @@ public class PreviewPanel extends Composite {
     public final native void readWebGL(String fileData) /*-{
         // initialize WebGL application
         $wnd.init_webGL(fileData);
-    }-*/;
-
-    public final native void alertWebGL(String alert) /*-{
-        // hide the current WebGL viewer if open
-        $wnd.alert_webGL(alert);
     }-*/;
 
     public final native void hideWebGL() /*-{

@@ -65,8 +65,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
-import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
+import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
@@ -114,6 +114,8 @@ public class DatasetWidget extends Composite {
 
     private final PermissionUtil    rbac;
 
+    private PreviewPanel            previewPanel;
+
     /**
      * 
      * @param dispatchAsync
@@ -143,7 +145,7 @@ public class DatasetWidget extends Composite {
     @Override
     protected void onUnload() {
         super.onUnload();
-        //hideSeadragon();
+        previewPanel.unload();
     }
 
     /**
@@ -216,8 +218,8 @@ public class DatasetWidget extends Composite {
         leftColumn.add(titlePanel);
 
         // preview - selection text and preview
-        PreviewPanel Preview = new PreviewPanel();
-        Preview.drawPreview(result, leftColumn, uri);
+        previewPanel = new PreviewPanel();
+        previewPanel.drawPreview(result, leftColumn, uri);
 
         // dataset actions
         final FlowPanel actionsPanel = new FlowPanel();
