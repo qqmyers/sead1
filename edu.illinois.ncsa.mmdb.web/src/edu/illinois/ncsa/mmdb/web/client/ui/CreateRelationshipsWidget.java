@@ -55,8 +55,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -73,19 +75,20 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  */
 public class CreateRelationshipsWidget extends Composite {
 
-    public static final String RELATED  = "related";
-    public static final String DESCENDS = "descendant";
+    public static final String RELATED  = "relates";
+    public static final String DESCENDS = "descends";
     private final FlowPanel    mainPanel;
     LabeledListBox             dataset1;
     LabeledListBox             dataset2;
+    String                     title1;
+    String                     title2;
     LabeledListBox             relationships;
-    PreviewWidget              pre1;
-    PreviewWidget              pre2;
+    PreviewWidget              thumb1;
+    PreviewWidget              thumb2;
     HorizontalPanel            thumbs;
 
     MyDispatchAsync            service;
     Set<String>                selected;
-    DatasetBean                current;
 
     /**
      * A widget to manually create relationships between data
@@ -98,7 +101,6 @@ public class CreateRelationshipsWidget extends Composite {
 
         this.service = service;
         this.selected = selected;
-        current = new DatasetBean();
 
         mainPanel = new FlowPanel();
         initWidget(mainPanel);
@@ -109,17 +111,17 @@ public class CreateRelationshipsWidget extends Composite {
 
         //user interface: thumbnails & relationship Type
         thumbs = new HorizontalPanel();
-        pre1 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false);
-        pre1.setWidth("100px");
-        thumbs.add(pre1);
+        thumb1 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false);
+        thumb1.setWidth("100px");
+        thumbs.add(thumb1);
 
         relationships = createRelationshipOptions();
         thumbs.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         thumbs.add(relationships);
 
-        pre2 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false);
-        pre2.setMaxWidth(100);
-        thumbs.add(pre2);
+        thumb2 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false);
+        thumb2.setMaxWidth(100);
+        thumbs.add(thumb2);
 
         mainPanel.add(thumbs);
 
@@ -132,7 +134,7 @@ public class CreateRelationshipsWidget extends Composite {
         dataset1.addValueChangeHandler(new ValueChangeHandler<String>() {
 
             public void onValueChange(ValueChangeEvent<String> event) {
-                fetchDataset(event.getValue(), pre1);
+                fetchDataset(event.getValue(), thumb1);
             }
         });
 
@@ -142,7 +144,7 @@ public class CreateRelationshipsWidget extends Composite {
         dataset2.addValueChangeHandler(new ValueChangeHandler<String>() {
 
             public void onValueChange(ValueChangeEvent<String> event) {
-                fetchDataset(event.getValue(), pre2);
+                fetchDataset(event.getValue(), thumb2);
             }
         });
 
@@ -192,7 +194,6 @@ public class CreateRelationshipsWidget extends Composite {
 
             @Override
             public void onSuccess(GetDatasetResult result) {
-                current = result.getDataset();
                 pw.changeImage(result.getDataset().getUri(), result.getDataset().getMimeType());
             }
         });
@@ -206,7 +207,7 @@ public class CreateRelationshipsWidget extends Composite {
 
         } else {
             //try creating relationship
-            service.execute(new SetRelationship(dataset1.getSelected(), relationships.getSelected(), dataset2.getSelected()),
+            service.execute(new SetRelationship(dataset1.getSelected(), relationships.getSelected(), dataset2.getSelected(), MMDB.getUsername()),
                     new AsyncCallback<SetRelationshipResult>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -214,23 +215,29 @@ public class CreateRelationshipsWidget extends Composite {
                         }
 
                         public void onSuccess(SetRelationshipResult result) {
-                            //show feedback, bottom is temporary
-                            ConfirmDialog olay = new ConfirmDialog("Relationship Created", "test - implementation in progress", false);
-                            olay.okText.setText("ok");
-                            //createdFeedback(dataset1.getSelected(), relationships.getSelected(), dataset2.getSelected());
+                            createFeedback(dataset1.getSelected(), relationships.getSelected(), dataset2.getSelected());
                         }
                     });
 
         }
     }
 
-    /*private void createdFeedback(String uri1, String type, String uri2) {
+    //relationship created feedback
+    private void createFeedback(String uri1, String type, String uri2) {
         HorizontalPanel submitted = new HorizontalPanel();
-        Label newRelationship = new Label(uri1 + " has relationship " + type + " with " + uri2);
-        submitted.add(newRelationship);
+        Hyperlink hyperlink1 = new Hyperlink(dataset1.getTitle(), "dataset?id=" + uri1);
+        hyperlink1.addStyleName("relationshipHyperlink");
+        Hyperlink hyperlink2 = new Hyperlink(dataset2.getTitle(), "dataset?id=" + uri2);
+        hyperlink2.addStyleName("relationshipHyperlink");
+        submitted.addStyleName("relationshipCreated");
+        Label newRelationship1 = new Label("[Test] Relationship Created:");
+        Label newRelationship2 = new Label(type);
+        submitted.add(newRelationship1);
+        submitted.add(hyperlink1);
+        submitted.add(newRelationship2);
+        submitted.add(hyperlink2);
         mainPanel.add(submitted);
     }
-    */
 
     public void addToList(String name, String value) {
         dataset1.addItem(name, value);

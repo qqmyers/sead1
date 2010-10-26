@@ -52,38 +52,47 @@ import net.customware.gwt.dispatch.shared.Action;
 @SuppressWarnings("serial")
 public class SetRelationship implements Action<SetRelationshipResult> {
 
-    private String id1;
-    private String id2;
+    private String uri1;
+    private String uri2;
     private String type;
+    private String person;
 
     public SetRelationship() {
     }
 
-    public SetRelationship(String id1, String type, String id2) {
-        this.id1 = id1;
+    public SetRelationship(String uri1, String type, String uri2, String person) {
+        this.uri1 = uri1;
         this.type = type;
-        this.id2 = id2;
+        this.uri2 = uri2;
+        this.person = person;
     }
 
     /**
-     * @return the firstName
+     * @return dataset's first URI
      */
-    public String getID1() {
-        return id1;
+    public String getUri1() {
+        return uri1;
     }
 
     /**
-     * @return the lastName
+     * @return dataset 2's URI
      */
-    public String getID2() {
-        return id2;
+    public String getUri2() {
+        return uri2;
     }
 
     /**
-     * @return the email
+     * @return the relationship type
      */
     public String getType() {
         return type;
+    }
+
+    /**
+     * @return the relationship creator
+     */
+    public String getCreator() {
+        return person;
     }
 
 }

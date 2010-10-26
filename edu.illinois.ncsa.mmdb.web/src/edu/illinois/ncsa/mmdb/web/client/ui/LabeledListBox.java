@@ -117,6 +117,10 @@ public class LabeledListBox extends Composite implements ValueSelectionControl<S
         return label.getText();
     }
 
+    public String getTitle() {
+        return choice.getItemText(choice.getSelectedIndex());
+    }
+
     public Label getLabel() {
         return label;
     }

@@ -1181,3 +1181,13 @@ a:hover {
 .relationshipDatasetPulldown {
 	width: 140px;	
 }
+
+.relationshipCreated {
+	padding: 5px;
+	margin: 15px 0px 0px -10px;	
+	background-color: #EFF5FB;
+}
+
+.relationshipHyperlink{
+	margin: 0px 3px 0px 3px;	
+}

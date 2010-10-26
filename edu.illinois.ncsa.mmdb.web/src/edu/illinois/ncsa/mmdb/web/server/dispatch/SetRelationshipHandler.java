@@ -44,6 +44,12 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
+
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
 
@@ -55,17 +61,40 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
  */
 public class SetRelationshipHandler implements ActionHandler<SetRelationship, SetRelationshipResult> {
 
+    public static Resource MMDB_RELATIONSHIP         = Cet.cet("mmdb/relationship");
+    public static Resource MMDB_RELATIONSHIP_TYPE    = Cet.cet("mmdb/relationshipType");
+    public static Resource MMDB_RELATIONSHIP_DATASET = Cet.cet("mmdb/relationshipDataset");
+
     /** Commons logging **/
-    //o private static Log log = LogFactory.getLog(SetRelationshipHandler.class);
+    private static Log     log                       = LogFactory.getLog(SetRelationshipHandler.class);
 
     @Override
     public SetRelationshipResult execute(SetRelationship arg0, ExecutionContext arg1) throws ActionException {
 
-        String id1 = arg0.getID1();
-        String id2 = arg0.getID2();
+        Resource dataset = Resource.uriRef(arg0.getUri1());
+        Resource person = Resource.uriRef(arg0.getCreator());
+        Resource dataset2 = Resource.uriRef(arg0.getUri2());
         String type = arg0.getType();
 
+        /*
         //create relationship - add tuples
+        Unifier uf = new Unifier();
+
+        //one direction
+        uf.addPattern(dataset, MMDB_RELATIONSHIP, "relationship");
+        uf.addPattern("relationship", MMDB_RELATIONSHIP_TYPE, "type");
+        uf.addPattern("relationship", MMDB_RELATIONSHIP_DATASET, "dataset");
+        uf.addPattern("relationship", Dc.CREATOR, "creator");
+        uf.addPattern("relationship", Dc.DATE, "date");
+
+        uf.setColumnNames("type", "rightsHolder");
+        try {
+            TupeloStore.getInstance().getContext().perform(uf);
+        } catch (OperatorException e) {
+            log.warn("Could not get license information.", e);
+            throw (new ActionException("Could not ge license information.", e));
+        }
+        */
 
         //done
         return new SetRelationshipResult();
