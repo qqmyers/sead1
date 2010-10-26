@@ -509,9 +509,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     private void showUploadPage() {
-        GWT.log("Loading Upload Page", null);
-        mainContainer.clear();
-        mainContainer.add(new UploadPage(dispatchAsync));
+        rbac().doIfAllowed(Permission.UPLOAD_DATA, new AccessOrMessageCallback() {
+            @Override
+            public void onAllowed() {
+                GWT.log("Loading Upload Page", null);
+                mainContainer.clear();
+                mainContainer.add(new UploadPage(dispatchAsync));
+            }
+        });
     }
 
     private void showHomePage() {
