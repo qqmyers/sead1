@@ -57,11 +57,11 @@ import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTableView;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
@@ -214,13 +214,13 @@ public class CollectionPage extends Composite {
                 // collection title is editable
                 pageTitle.addValueChangeHandler(new ValueChangeHandler<String>() {
                     public void onValueChange(final ValueChangeEvent<String> event) {
-                        dispatchasync.execute(new SetProperty(collection.getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue()),
-                                new AsyncCallback<SetPropertyResult>() {
+                        dispatchasync.execute(new SetTitle(collection.getUri(), event.getValue()),
+                                new AsyncCallback<EmptyResult>() {
                                     public void onFailure(Throwable caught) {
                                         pageTitle.getEditableLabel().cancel();
                                     }
 
-                                    public void onSuccess(SetPropertyResult result) {
+                                    public void onSuccess(EmptyResult result) {
                                         pageTitle.setText(event.getValue());
                                     }
                                 });

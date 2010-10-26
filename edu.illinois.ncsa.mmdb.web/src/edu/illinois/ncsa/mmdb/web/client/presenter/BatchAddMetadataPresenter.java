@@ -45,9 +45,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 
 public class BatchAddMetadataPresenter extends EditableUserMetadataPresenter {
@@ -62,7 +62,7 @@ public class BatchAddMetadataPresenter extends EditableUserMetadataPresenter {
     protected void onSetMetadataField(String predicate, String value) {
         final BatchCompletedEvent done = new BatchCompletedEvent(selectedResources.size(), "modified");
         for (final String dataset : selectedResources ) {
-            dispatch.execute(new SetProperty(dataset, predicate, value), new AsyncCallback<SetPropertyResult>() {
+            dispatch.execute(new SetUserMetadata(dataset, predicate, value), new AsyncCallback<EmptyResult>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -75,7 +75,7 @@ public class BatchAddMetadataPresenter extends EditableUserMetadataPresenter {
                 }
 
                 @Override
-                public void onSuccess(SetPropertyResult result) {
+                public void onSuccess(EmptyResult result) {
                     GWT.log("Resource successfully modified", null);
                     editDisplay.onSuccess();
                     done.addSuccess(dataset);

@@ -92,8 +92,9 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetPermissionsHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.SetPropertyHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SetTitleHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SetUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
@@ -136,7 +137,6 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetDerivedFromHandler());
         DispatchUtil.registerHandler(new RunSparqlQueryHandler());
         DispatchUtil.registerHandler(new GetUserMetadataFieldsHandler());
-        DispatchUtil.registerHandler(new SetPropertyHandler());
         DispatchUtil.registerHandler(new ExtractionServiceHandler());
         DispatchUtil.registerHandler(new DeleteAnnotationHandler());
         DispatchUtil.registerHandler(new SearchHandler());
@@ -159,6 +159,8 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new SetPermissionsHandler());
         DispatchUtil.registerHandler(new InitializeRolesHandler());
         DispatchUtil.registerHandler(new SetRelationshipHandler());
+        DispatchUtil.registerHandler(new SetTitleHandler());
+        DispatchUtil.registerHandler(new SetUserMetadataHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

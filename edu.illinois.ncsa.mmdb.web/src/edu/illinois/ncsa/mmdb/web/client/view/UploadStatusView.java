@@ -62,9 +62,9 @@ import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
 import edu.illinois.ncsa.mmdb.web.client.presenter.UploadStatusPresenter.Display;
 import edu.illinois.ncsa.mmdb.web.client.ui.EditableLabel;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
@@ -169,13 +169,13 @@ public class UploadStatusView extends Composite implements Display {
         // FIXME this contains dispatching logic, and so should be moved to a presenter
         titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
             public void onValueChange(final ValueChangeEvent<String> event) {
-                SetProperty change = new SetProperty(ds.getUri(), "http://purl.org/dc/elements/1.1/title", event.getValue());
-                MMDB.dispatchAsync.execute(change, new AsyncCallback<SetPropertyResult>() {
+                SetTitle change = new SetTitle(ds.getUri(), event.getValue());
+                MMDB.dispatchAsync.execute(change, new AsyncCallback<EmptyResult>() {
                     public void onFailure(Throwable caught) {
                         titleLabel.cancel();
                     }
 
-                    public void onSuccess(SetPropertyResult result) {
+                    public void onSuccess(EmptyResult result) {
                         titleLabel.setText(event.getValue());
                     }
                 });

@@ -49,10 +49,12 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.rdf.Resource;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
-import edu.illinois.ncsa.mmdb.web.server.AccessControl;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * TODO Add comments
@@ -60,18 +62,25 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  * @author Joe Futrelle
  * 
  */
-public class SetPropertyHandler implements ActionHandler<SetProperty, SetPropertyResult> {
+public class SetUserMetadataHandler implements ActionHandler<SetUserMetadata, EmptyResult> {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(SetPropertyHandler.class);
+    private static Log log = LogFactory.getLog(SetUserMetadataHandler.class);
 
     @Override
-    public SetPropertyResult execute(SetProperty arg0, ExecutionContext arg1)
+    public EmptyResult execute(SetUserMetadata arg0, ExecutionContext arg1)
             throws ActionException {
-        // only allow resource creator to edit user metadata fields
-        if (ListUserMetadataFieldsHandler.listUserMetadataFields().containsKey(arg0.getPropertyUri()) &&
-                !AccessControl.isAdmin(arg0.getUser()) && !AccessControl.isCreator(arg0.getUser(), arg0.getUri())) {
-            throw new ActionException("Unauthorized");
+        // only allow user to edit user metadata fields
+        if (!ListUserMetadataFieldsHandler.listUserMetadataFields().containsKey(arg0.getPropertyUri())) {
+            throw new ActionException("specified property " + arg0.getPropertyUri() + " is not a user metadata field");
+        }
+        MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
+        try {
+            if (!rbac.checkPermission(arg0.getUser(), arg0.getUri(), Permission.EDIT_USER_METADATA)) {
+                throw new ActionException("Unauthorized");
+            }
+        } catch (RBACException e) {
+            throw new ActionException("access control failure", e);
         }
         try {
             Resource subject = Resource.uriRef(arg0.getUri());
@@ -93,7 +102,7 @@ public class SetPropertyHandler implements ActionHandler<SetProperty, SetPropert
 
             TupeloStore.getInstance().changed(subject.getString());
 
-            return new SetPropertyResult();
+            return new EmptyResult();
         } catch (Exception x) {
             log.error("Error setting metadata on " + arg0.getUri(), x);
             throw new ActionException("failed", x);
@@ -101,12 +110,12 @@ public class SetPropertyHandler implements ActionHandler<SetProperty, SetPropert
     }
 
     @Override
-    public Class<SetProperty> getActionType() {
-        return SetProperty.class;
+    public Class<SetUserMetadata> getActionType() {
+        return SetUserMetadata.class;
     }
 
     @Override
-    public void rollback(SetProperty arg0, SetPropertyResult arg1,
+    public void rollback(SetUserMetadata arg0, EmptyResult arg1,
             ExecutionContext arg2) throws ActionException {
         // TODO Auto-generated method stub
 

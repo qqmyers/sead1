@@ -69,6 +69,7 @@ import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionServiceResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
@@ -80,8 +81,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
@@ -202,13 +202,13 @@ public class DatasetWidget extends Composite {
         titleLabel.setEditableStyleName("datasetTitle");
         titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
             public void onValueChange(final ValueChangeEvent<String> event) {
-                SetProperty change = new SetProperty(uri, "http://purl.org/dc/elements/1.1/title", event.getValue());
-                service.execute(change, new AsyncCallback<SetPropertyResult>() {
+                SetTitle change = new SetTitle(uri, event.getValue());
+                service.execute(change, new AsyncCallback<EmptyResult>() {
                     public void onFailure(Throwable caught) {
                         titleLabel.cancel();
                     }
 
-                    public void onSuccess(SetPropertyResult result) {
+                    public void onSuccess(EmptyResult result) {
                         titleLabel.setText(event.getValue());
                     }
                 });

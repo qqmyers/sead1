@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -59,13 +60,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RunSparqlQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RunSparqlQueryResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetProperty;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPropertyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 
 public class UserMetadataWidget extends Composite {
     static String       availableFieldsQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" +
@@ -237,13 +238,15 @@ public class UserMetadataWidget extends Composite {
     private void addValue() {
         final String text = valueText.getText();
         final String property = fieldChoice.getSelected();
-        SetProperty prop = new SetProperty(uri, property, text);
+        SetUserMetadata prop = new SetUserMetadata(uri, property, text);
         valueText.setText("");
-        dispatch.execute(prop, new AsyncCallback<SetPropertyResult>() {
+        dispatch.execute(prop, new AsyncCallback<EmptyResult>() {
             public void onFailure(Throwable caught) {
+                GWT.log("FAILED", caught);
             }
 
-            public void onSuccess(SetPropertyResult result) {
+            public void onSuccess(EmptyResult result) {
+                GWT.log("set user metadata field");
                 setProperty(property, labels.get(property), text);
             }
         });
@@ -254,11 +257,11 @@ public class UserMetadataWidget extends Composite {
      * @param property
      */
     private void removeValue(final String property) {
-        dispatch.execute(new SetProperty(uri, property, new HashSet<String>()), new AsyncCallback<SetPropertyResult>() {
+        dispatch.execute(new SetUserMetadata(uri, property, new HashSet<String>()), new AsyncCallback<EmptyResult>() {
             public void onFailure(Throwable caught) {
             }
 
-            public void onSuccess(SetPropertyResult result) {
+            public void onSuccess(EmptyResult result) {
                 int row = getRowForField(property);
                 if (row != -1) {
                     fieldTable.removeRow(row);

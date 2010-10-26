@@ -38,7 +38,50 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Result;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-public class SetPropertyResult implements Result {
+public class SetUserMetadata extends SubjectAction<EmptyResult> {
+    /**
+	 * 
+	 */
+    private static final long serialVersionUID = -6257131114264143785L;
+
+    String                    propertyUri;
+
+    public SetUserMetadata() {
+    }
+
+    private Collection<String> values;
+
+    public SetUserMetadata(String uri, String propertyUri, Collection<String> values) {
+        this.uri = uri;
+        setPropertyUri(propertyUri);
+        this.setValues(values);
+    }
+
+    public SetUserMetadata(String uri, String propertyUri, String value) {
+        this.uri = uri;
+        setPropertyUri(propertyUri);
+        Set<String> values = new HashSet<String>();
+        values.add(value);
+        this.setValues(values);
+    }
+
+    public void setValues(Collection<String> values) {
+        this.values = values;
+    }
+
+    public Collection<String> getValues() {
+        return values;
+    }
+
+    public String getPropertyUri() {
+        return propertyUri;
+    }
+
+    public void setPropertyUri(String propertyUri) {
+        this.propertyUri = propertyUri;
+    }
 }

@@ -57,7 +57,10 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * Retrieve tags for a specific resource.
@@ -74,6 +77,7 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
     public TagResourceResult execute(TagResource arg0, ExecutionContext arg1)
             throws ActionException {
 
+        MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
         TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
@@ -84,6 +88,13 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
 
         try {
             if (arg0.isDelete()) {
+                try {
+                    if (!rbac.checkPermission(arg0.getUser(), uri, Permission.DELETE_TAG)) {
+                        throw new ActionException("unauthorized");
+                    }
+                } catch (RBACException e) {
+                    throw new ActionException("access control failure", e);
+                }
                 tebu.removeTags(Resource.uriRef(uri), tags);
                 for (String tag : tebu.getTags(arg0.getUri()) ) {
                     if (tags.contains(tag)) {
@@ -93,6 +104,13 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
                 TupeloStore.getInstance().changed(uri);
                 log.debug("removing tags " + tags + " from " + uri);
             } else {
+                try {
+                    if (!rbac.checkPermission(arg0.getUser(), uri, Permission.ADD_TAG)) {
+                        throw new ActionException("unauthorized");
+                    }
+                } catch (RBACException e) {
+                    throw new ActionException("access control failure", e);
+                }
                 Set<String> normalizedTags = new HashSet<String>();
                 for (String tag : tags ) {
                     // collapse multiple spaces and lowercase

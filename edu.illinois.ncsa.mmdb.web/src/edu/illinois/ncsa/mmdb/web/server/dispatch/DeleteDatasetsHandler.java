@@ -42,6 +42,7 @@ import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
@@ -51,8 +52,10 @@ import org.tupeloproject.rdf.terms.Rdf;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasets;
-import edu.illinois.ncsa.mmdb.web.server.AccessControl;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 public class DeleteDatasetsHandler implements ActionHandler<DeleteDatasets, BatchResult> {
 
@@ -60,14 +63,19 @@ public class DeleteDatasetsHandler implements ActionHandler<DeleteDatasets, Batc
     public BatchResult execute(DeleteDatasets arg0, ExecutionContext arg1) throws ActionException {
         BatchResult result = new BatchResult();
         TripleWriter mod = new TripleWriter();
-        boolean isAdmin = AccessControl.isAdmin(arg0.getUser());
+        Context context = TupeloStore.getInstance().getContext();
+        MediciRbac rbac = new MediciRbac(context);
         for (String datasetUri : arg0.getResources() ) {
             // check for authorization
-            if (!isAdmin && !AccessControl.isCreator(arg0.getUser(), datasetUri)) {
-                result.setFailure(datasetUri, "Unauthorized");
-            } else {
-                mod.add(Triple.create(Resource.uriRef(datasetUri), DcTerms.IS_REPLACED_BY, Rdf.NIL));
-                result.addSuccess(datasetUri);
+            try {
+                if (!rbac.checkPermission(arg0.getUser(), datasetUri, Permission.DELETE_DATA)) {
+                    result.setFailure(datasetUri, "Unauthorized");
+                } else {
+                    mod.add(Triple.create(Resource.uriRef(datasetUri), DcTerms.IS_REPLACED_BY, Rdf.NIL));
+                    result.addSuccess(datasetUri);
+                }
+            } catch (RBACException x) {
+                result.setFailure(datasetUri, "access control error");
             }
         }
         try {

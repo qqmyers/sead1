@@ -54,14 +54,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
-import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasets;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollectionResult;
@@ -83,7 +80,6 @@ import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchAddMetadataView;
 import edu.illinois.ncsa.mmdb.web.client.view.CreateCollectionDialogView;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * @author LUigi Marini
@@ -92,7 +88,6 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 public class BatchOperationPresenter extends BasePresenter<BatchOperationPresenter.Display> {
 
     private final MyDispatchAsync        dispatch;
-    private final PermissionUtil         rbac;
     private static BatchCompletedHandler batchCompletedHandler;
 
     String title(String fmt) {
@@ -115,149 +110,130 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
     public BatchOperationPresenter(final MyDispatchAsync theDispatch, final HandlerManager eventBus, final Display display) {
         super(display, eventBus);
         this.dispatch = theDispatch;
-        rbac = new PermissionUtil(theDispatch);
         // selected dataset
         final UserSessionState sessionState = MMDB.getSessionState();
         final int nSelected = sessionState.getSelectedDatasets().size();
         display.setNumSelected(nSelected);
 
-        rbac.withPermissions(new PermissionsCallback() {
-            @Override
-            public void onPermissions(HasPermissionResult p) {
-                GWT.log("Batch operation permissions callback entered"); // FIXME debug
-                if (p.isPermitted(Permission.DELETE_DATA)) {
-                    display.addMenuAction("Delete", new Command() {
-                        public void execute() {
-                            if (selectionEmpty()) {
-                                return;
-                            }
-                            final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
-                            ConfirmDialog cd = new ConfirmDialog(title("Delete %s"), title("Do you really want to delete %s?"));
-                            cd.addConfirmHandler(new ConfirmHandler() {
-                                public void onConfirm(ConfirmEvent event) {
-                                    final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "deleted");
-                                    dispatch.execute(new DeleteDatasets(selectedDatasets), new AsyncCallback<BatchResult>() {
-                                        public void onFailure(Throwable caught) {
-                                            GWT.log("Error deleting datasets", caught);
-                                            for (String datasetUri : selectedDatasets ) {
-                                                done.setFailure(datasetUri, "not deleted: " + caught.getMessage());
-                                            }
-                                            eventBus.fireEvent(done);
-                                        }
-
-                                        public void onSuccess(BatchResult result) {
-                                            for (String success : result.getSuccesses() ) {
-                                                done.addSuccess(success);
-                                                eventBus.fireEvent(new DatasetUnselectedEvent(success));
-                                            }
-                                            for (Map.Entry<String, String> failureEntry : result.getFailures().entrySet() ) {
-                                                done.setFailure(failureEntry.getKey(), failureEntry.getValue());
-                                            }
-                                            eventBus.fireEvent(done);
-                                            eventBus.fireEvent(new DatasetsDeletedEvent(result.getSuccesses()));
-                                        }
-                                    });
+        display.addMenuAction("Delete", new Command() {
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
+                }
+                final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
+                ConfirmDialog cd = new ConfirmDialog(title("Delete %s"), title("Do you really want to delete %s?"));
+                cd.addConfirmHandler(new ConfirmHandler() {
+                    public void onConfirm(ConfirmEvent event) {
+                        final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "deleted");
+                        dispatch.execute(new DeleteDatasets(selectedDatasets), new AsyncCallback<BatchResult>() {
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Error deleting datasets", caught);
+                                for (String datasetUri : selectedDatasets ) {
+                                    done.setFailure(datasetUri, "not deleted: " + caught.getMessage());
                                 }
-                            });
-                        }
-                    });
-                }
-
-                display.addMenuSeparator();
-
-                if (p.isPermitted(Permission.ADD_TAG)) {
-                    display.addMenuAction("Add tag(s)", new Command() {
-
-                        @Override
-                        public void execute() {
-                            if (selectionEmpty()) {
-                                return;
+                                eventBus.fireEvent(done);
                             }
-                            TagDialogView tagView = new TagDialogView(title("Add tag(s) to %s"));
-                            TagDialogPresenter tagPresenter = new TagDialogPresenter(dispatch, eventBus, tagView);
-                            tagPresenter.bind();
-                            tagPresenter.setSelectedResources(sessionState.getSelectedDatasets());
-                            tagView.show();
-                        }
-                    });
-                }
 
-                if (p.isPermitted(Permission.DELETE_TAG)) {
-                    display.addMenuAction("Remove tag(s)", new Command() {
-                        @Override
-                        public void execute() {
-                            if (selectionEmpty()) {
-                                return;
+                            public void onSuccess(BatchResult result) {
+                                for (String success : result.getSuccesses() ) {
+                                    done.addSuccess(success);
+                                    eventBus.fireEvent(new DatasetUnselectedEvent(success));
+                                }
+                                for (Map.Entry<String, String> failureEntry : result.getFailures().entrySet() ) {
+                                    done.setFailure(failureEntry.getKey(), failureEntry.getValue());
+                                }
+                                eventBus.fireEvent(done);
+                                eventBus.fireEvent(new DatasetsDeletedEvent(result.getSuccesses()));
                             }
-                            TagDialogView tagView = new TagDialogView(title("Remove tag(s) from %s"));
-                            TagDialogPresenter tagPresenter = new TagDialogPresenter(dispatch, eventBus, tagView, true);
-                            tagPresenter.bind();
-                            tagPresenter.setSelectedResources(sessionState.getSelectedDatasets());
-                            tagView.show();
-                        }
-                    });
-                }
-
-                if (p.isPermitted(Permission.ADD_TAG) || p.isPermitted(Permission.DELETE_TAG)) {
-                    display.addMenuSeparator();
-                }
-
-                if (p.isPermitted(Permission.EDIT_USER_METADATA)) {
-                    display.addMenuAction("Add metadata", new Command() {
-                        @Override
-                        public void execute() {
-                            if (selectionEmpty()) {
-                                return;
-                            }
-                            BatchAddMetadataView view = new BatchAddMetadataView(title("Add metadata to %s"));
-                            BatchAddMetadataPresenter presenter = new BatchAddMetadataPresenter(dispatch, eventBus, view, sessionState.getSelectedDatasets());
-                            presenter.bind();
-                            view.show();
-                        }
-                    });
-                }
-
-                if (p.isPermitted(Permission.CHANGE_LICENSE)) {
-                    display.addMenuAction("Change license", new Command() {
-                        public void execute() {
-                            if (selectionEmpty()) {
-                                return;
-                            }
-                            new SetLicenseDialog(title("Set license for %s"), sessionState.getSelectedDatasets(), eventBus);
-                        }
-                    });
-                }
-
-                if (p.isPermitted(Permission.EDIT_USER_METADATA) || p.isPermitted(Permission.CHANGE_LICENSE)) {
-                    display.addMenuSeparator();
-                }
-
-                display.addMenuAction("Create collection", new Command() {
-                    @Override
-                    public void execute() {
-                        if (selectionEmpty()) {
-                            return;
-                        }
-                        CreateCollectionDialogView view = new CreateCollectionDialogView(title("Create collection containing %s"));
-                        CreateCollectionDialogPresenter presenter = new CreateCollectionDialogPresenter(dispatch, eventBus, view);
-                        presenter.bind();
-                        presenter.setSelectedResources(sessionState.getSelectedDatasets());
-                        view.show();
+                        });
                     }
                 });
-                display.addMenuAction("Add to collection", new Command() {
-                    @Override
-                    public void execute() {
-                        if (selectionEmpty()) {
-                            return;
-                        }
-                        final AddToCollectionDialog atc = new AddToCollectionDialog(dispatch, title("Add %s to collection"));
-                        atc.addClickHandler(new ClickHandler() {
-                            public void onClick(ClickEvent event) {
-                                final String collectionUri = atc.getSelectedValue();
-                                final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
-                                final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "added");
-                                dispatch.execute(new AddToCollection(collectionUri, selectedDatasets),
+            }
+        });
+
+        display.addMenuSeparator();
+
+        display.addMenuAction("Add tag(s)", new Command() {
+
+            @Override
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
+                }
+                TagDialogView tagView = new TagDialogView(title("Add tag(s) to %s"));
+                TagDialogPresenter tagPresenter = new TagDialogPresenter(dispatch, eventBus, tagView);
+                tagPresenter.bind();
+                tagPresenter.setSelectedResources(sessionState.getSelectedDatasets());
+                tagView.show();
+            }
+        });
+
+        display.addMenuAction("Remove tag(s)", new Command() {
+            @Override
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
+                }
+                TagDialogView tagView = new TagDialogView(title("Remove tag(s) from %s"));
+                TagDialogPresenter tagPresenter = new TagDialogPresenter(dispatch, eventBus, tagView, true);
+                tagPresenter.bind();
+                tagPresenter.setSelectedResources(sessionState.getSelectedDatasets());
+                tagView.show();
+            }
+        });
+
+        display.addMenuSeparator();
+
+        display.addMenuAction("Add metadata", new Command() {
+            @Override
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
+                }
+                BatchAddMetadataView view = new BatchAddMetadataView(title("Add metadata to %s"));
+                BatchAddMetadataPresenter presenter = new BatchAddMetadataPresenter(dispatch, eventBus, view, sessionState.getSelectedDatasets());
+                presenter.bind();
+                view.show();
+            }
+        });
+
+        display.addMenuAction("Change license", new Command() {
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
+                }
+                new SetLicenseDialog(title("Set license for %s"), sessionState.getSelectedDatasets(), eventBus);
+            }
+        });
+
+        display.addMenuSeparator();
+
+        display.addMenuAction("Create collection", new Command() {
+            @Override
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
+                }
+                CreateCollectionDialogView view = new CreateCollectionDialogView(title("Create collection containing %s"));
+                CreateCollectionDialogPresenter presenter = new CreateCollectionDialogPresenter(dispatch, eventBus, view);
+                presenter.bind();
+                presenter.setSelectedResources(sessionState.getSelectedDatasets());
+                view.show();
+            }
+        });
+        display.addMenuAction("Add to collection", new Command() {
+            @Override
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
+                }
+                final AddToCollectionDialog atc = new AddToCollectionDialog(dispatch, title("Add %s to collection"));
+                atc.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        final String collectionUri = atc.getSelectedValue();
+                        final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
+                        final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "added");
+                        dispatch.execute(new AddToCollection(collectionUri, selectedDatasets),
                                         new AsyncCallback<AddToCollectionResult>() {
 
                                             @Override
@@ -276,24 +252,24 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                                                 atc.hide();
                                             }
                                         });
-                            }
-                        });
                     }
                 });
-                display.addMenuAction("Remove from collection", new Command() {
-                    // FIXME tile
-                    @Override
-                    public void execute() {
-                        if (selectionEmpty()) {
-                            return;
-                        }
-                        final AddToCollectionDialog atc = new AddToCollectionDialog(MMDB.dispatchAsync, title("Remove %s from collection"));
-                        atc.addClickHandler(new ClickHandler() {
-                            public void onClick(ClickEvent event) {
-                                final String collectionUri = atc.getSelectedValue();
-                                final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
-                                final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "removed");
-                                MMDB.dispatchAsync.execute(new RemoveFromCollection(collectionUri, selectedDatasets),
+            }
+        });
+        display.addMenuAction("Remove from collection", new Command() {
+            // FIXME tile
+            @Override
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
+                }
+                final AddToCollectionDialog atc = new AddToCollectionDialog(MMDB.dispatchAsync, title("Remove %s from collection"));
+                atc.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        final String collectionUri = atc.getSelectedValue();
+                        final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
+                        final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "removed");
+                        MMDB.dispatchAsync.execute(new RemoveFromCollection(collectionUri, selectedDatasets),
                                         new AsyncCallback<RemoveFromCollectionResult>() {
 
                                             @Override
@@ -312,33 +288,26 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                                                 eventBus.fireEvent(done);
                                             }
                                         });
-                            }
-                        });
-                    }
-                });
-
-                display.addMenuSeparator();
-
-                display.addMenuAction("Select all on page", new Command() {
-                    @Override
-                    public void execute() {
-                        selectAllOnPage();
-                    }
-                });
-                // unselect items
-                display.addMenuAction("Unselect all", new Command() {
-                    @Override
-                    public void execute() {
-                        unselectAll();
                     }
                 });
             }
-        }, /* with permissions */
-                Permission.DELETE_DATA,
-                Permission.ADD_TAG,
-                Permission.DELETE_TAG,
-                Permission.EDIT_USER_METADATA,
-                Permission.CHANGE_LICENSE);
+        });
+
+        display.addMenuSeparator();
+
+        display.addMenuAction("Select all on page", new Command() {
+            @Override
+            public void execute() {
+                selectAllOnPage();
+            }
+        });
+        // unselect items
+        display.addMenuAction("Unselect all", new Command() {
+            @Override
+            public void execute() {
+                unselectAll();
+            }
+        });
     }
 
     void selectAllOnPage() {
