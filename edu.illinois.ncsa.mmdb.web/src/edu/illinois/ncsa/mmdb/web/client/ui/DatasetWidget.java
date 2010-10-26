@@ -65,8 +65,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
-import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
@@ -278,7 +278,7 @@ public class DatasetWidget extends Composite {
         // social items
         rightColumn.add(new SocialWidget(uri, service));
 
-        rbac.withPermissions(new PermissionsCallback() {
+        rbac.withPermissions(uri, new PermissionsCallback() {
             @Override
             public void onPermissions(final HasPermissionResult p) {
                 if (p.isPermitted(Permission.EDIT_METADATA)) {

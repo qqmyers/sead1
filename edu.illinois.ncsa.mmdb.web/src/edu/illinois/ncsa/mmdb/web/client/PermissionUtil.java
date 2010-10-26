@@ -60,12 +60,16 @@ public class PermissionUtil {
         }
     }
 
-    public void doIfAllowed(final Permission p, final PermissionCallback callback) {
+    public void doIfAllowed(Permission p, PermissionCallback callback) {
+        doIfAllowed(p, null, callback);
+    }
+
+    public void doIfAllowed(final Permission p, String objectUri, final PermissionCallback callback) {
         Boolean cached = cache.get(p);
         if (cached != null) {
             doIf(cached, callback);
         } else {
-            dispatch.execute(new HasPermission(MMDB.getUsername(), p), new AsyncCallback<HasPermissionResult>() {
+            dispatch.execute(new HasPermission(MMDB.getUsername(), objectUri, p), new AsyncCallback<HasPermissionResult>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     callback.onFailure();
@@ -80,8 +84,8 @@ public class PermissionUtil {
         }
     }
 
-    public void withPermissions(final PermissionsCallback callback, Permission... permissions) {
-        dispatch.execute(new HasPermission(MMDB.getUsername(), permissions), new AsyncCallback<HasPermissionResult>() {
+    public void withPermissions(String objectUri, final PermissionsCallback callback, Permission... permissions) {
+        dispatch.execute(new HasPermission(MMDB.getUsername(), objectUri, permissions), new AsyncCallback<HasPermissionResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure();
@@ -92,5 +96,9 @@ public class PermissionUtil {
                 callback.onPermissions(result);
             }
         });
+    }
+
+    public void withPermissions(PermissionsCallback callback, Permission... permissions) {
+        withPermissions(null, callback, permissions);
     }
 }

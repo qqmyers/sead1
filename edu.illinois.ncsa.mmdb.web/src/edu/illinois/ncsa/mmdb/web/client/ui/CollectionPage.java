@@ -207,7 +207,7 @@ public class CollectionPage extends Composite {
 
         pageTitle.setText(collection.getTitle());
 
-        rbac.doIfAllowed(Permission.EDIT_METADATA, new PermissionCallback() {
+        rbac.doIfAllowed(Permission.EDIT_METADATA, collection.getUri(), new PermissionCallback() {
             @Override
             public void onAllowed() {
                 pageTitle.setEditable(true);

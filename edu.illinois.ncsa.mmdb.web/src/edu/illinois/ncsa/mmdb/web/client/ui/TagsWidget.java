@@ -117,7 +117,7 @@ public class TagsWidget extends Composite {
         tagsPanel = new FlexTable();
         mainPanel.add(tagsPanel);
 
-        rbac.doIfAllowed(Permission.ADD_TAG, new PermissionCallback() {
+        rbac.doIfAllowed(Permission.ADD_TAG, id, new PermissionCallback() {
             @Override
             public void onAllowed() {
                 final Anchor addTagAnchor = new Anchor("Add tag(s)");
@@ -175,7 +175,7 @@ public class TagsWidget extends Composite {
             tagsPanel.addStyleName("tagsLinks");
             final int row = tagsPanel.getRowCount();
             tagsPanel.setWidget(row, 0, tagHyperlink(tag));
-            rbac.doIfAllowed(Permission.DELETE_TAG, new PermissionCallback() {
+            rbac.doIfAllowed(Permission.DELETE_TAG, id, new PermissionCallback() {
                 @Override
                 public void onAllowed() {
                     Anchor delete = new Anchor("Delete");

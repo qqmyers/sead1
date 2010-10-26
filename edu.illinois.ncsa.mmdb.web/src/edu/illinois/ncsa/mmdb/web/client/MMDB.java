@@ -339,15 +339,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * Show information about a particular dataset.
      */
     private void showDataset() {
-        rbac().doIfAllowed(Permission.VIEW_DATA, new AccessOrMessageCallback() {
+        final String datasetUri = getParams().get("id");
+        rbac().doIfAllowed(Permission.VIEW_DATA, datasetUri, new AccessOrMessageCallback() {
             @Override
             public void onAllowed() {
                 DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync);
                 mainContainer.clear();
                 mainContainer.add(datasetWidget);
-
-                String datasetUri = getParams().get("id"); // FIXME should use
-                // "uri?"
                 if (datasetUri != null) {
                     datasetWidget.showDataset(datasetUri);
                 }

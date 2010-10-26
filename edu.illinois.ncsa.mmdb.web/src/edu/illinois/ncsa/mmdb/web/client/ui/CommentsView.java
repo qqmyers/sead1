@@ -125,7 +125,7 @@ public class CommentsView extends Composite {
 
         layoutPanel.add(commentsPanel);
 
-        rbac.doIfAllowed(Permission.ADD_COMMENT, new PermissionCallback() {
+        rbac.doIfAllowed(Permission.ADD_COMMENT, resource, new PermissionCallback() {
             @Override
             public void onAllowed() {
                 final NewAnnotationView newAnnotationView = new NewAnnotationView();
@@ -197,7 +197,7 @@ public class CommentsView extends Composite {
      * @param annotations
      */
     public void show(final ArrayList<AnnotationBean> annotations) {
-        rbac.withPermissions(new PermissionsCallback() {
+        rbac.withPermissions(resource, new PermissionsCallback() {
             @Override
             public void onPermissions(HasPermissionResult permissions) {
                 commentsPanel.clear();
@@ -218,5 +218,4 @@ public class CommentsView extends Composite {
             }
         }, Permission.EDIT_COMMENT);
     }
-
 }
