@@ -82,26 +82,8 @@ public class GetViewCountHandler implements ActionHandler<GetViewCount, GetViewC
         Resource dataset = Resource.uriRef(arg0.getResource());
         Resource person = Resource.uriRef(arg0.getPerson());
 
-        // find creator of dataset
-        Unifier uf = new Unifier();
-        uf.addPattern(dataset, Dc.CREATOR, "creator");
-        uf.setColumnNames("creator");
-        try {
-            TupeloStore.getInstance().getContext().perform(uf);
-        } catch (OperatorException e) {
-            log.warn("Could not get creator for dataset.", e);
-            throw (new ActionException("Could not get creator for dataset.", e));
-        }
-        Resource creator = null;
-        for (Tuple<Resource> row : uf.getResult() ) {
-            creator = row.get(0);
-        }
-        if (creator == null) {
-            log.warn("Creator is null for dataset " + dataset);
-        }
-
         // get all view cases
-        uf = new Unifier();
+        Unifier uf = new Unifier();
         uf.addPattern(dataset, MMDB_VIEWED, "viewed");
         uf.addPattern("viewed", Dc.CREATOR, "viewer");
         uf.setColumnNames("viewed", "viewer");
@@ -114,10 +96,7 @@ public class GetViewCountHandler implements ActionHandler<GetViewCount, GetViewC
         Resource viewed = null;
         int count = 0;
         for (Tuple<Resource> row : uf.getResult() ) {
-            // Don't count creator.
-            if (!creator.equals(row.get(1))) {
-                count++;
-            }
+            count++;
             if (row.get(1).equals(person)) {
                 viewed = row.get(1);
             }
@@ -126,9 +105,6 @@ public class GetViewCountHandler implements ActionHandler<GetViewCount, GetViewC
         // update the count
         TripleWriter tw = new TripleWriter();
         if (viewed == null) {
-            if ((creator != null) && !creator.equals(person)) {
-                count++;
-            }
             viewed = Resource.uriRef();
             tw.add(dataset, MMDB_VIEWED, viewed);
             tw.add(viewed, Dc.CREATOR, person);

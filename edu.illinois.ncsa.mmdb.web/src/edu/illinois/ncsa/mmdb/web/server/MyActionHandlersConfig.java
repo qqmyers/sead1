@@ -64,6 +64,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDerivedFromHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDownloadCountHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoPointHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLikeDislikeHandler;
@@ -159,6 +160,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new SetPermissionsHandler());
         DispatchUtil.registerHandler(new InitializeRolesHandler());
         DispatchUtil.registerHandler(new SetRelationshipHandler());
+        DispatchUtil.registerHandler(new GetDownloadCountHandler());
         DispatchUtil.registerHandler(new SetTitleHandler());
         DispatchUtil.registerHandler(new SetUserMetadataHandler());
     }

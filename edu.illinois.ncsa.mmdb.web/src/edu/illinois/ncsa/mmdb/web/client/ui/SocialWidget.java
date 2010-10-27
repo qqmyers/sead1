@@ -52,12 +52,14 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDownloadCount;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDownloadCountResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislike;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislike.LikeDislike;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislikeResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetViewCount;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetViewCountResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislike.LikeDislike;
 
 /**
  * Show social information about the dataset
@@ -91,7 +93,7 @@ public class SocialWidget extends Composite {
         }
 
         // get view count (including updating count)
-        final Label viewLabel = new Label("Viewed: N/A");
+        final Label viewLabel = new Label("Viewed by ...");
         viewLabel.addStyleName("datasetRightColText");
         service.execute(new GetViewCount(uri, MMDB.getUsername()), new AsyncCallback<GetViewCountResult>() {
             @Override
@@ -105,6 +107,22 @@ public class SocialWidget extends Composite {
             }
         });
         mainPanel.add(viewLabel);
+
+        // get download count
+        final Label downloadLabel = new Label("Downloaded by ...");
+        downloadLabel.addStyleName("datasetRightColText");
+        service.execute(new GetDownloadCount(uri), new AsyncCallback<GetDownloadCountResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error getting download count", caught);
+            }
+
+            public void onSuccess(GetDownloadCountResult result) {
+                String count = NumberFormat.getDecimalFormat().format(result.getUniqueCount());
+                downloadLabel.setText("Downloaded by " + count + " people");
+            }
+        });
+        mainPanel.add(downloadLabel);
 
         // like/dislike
         final Label likeCount = new Label();
