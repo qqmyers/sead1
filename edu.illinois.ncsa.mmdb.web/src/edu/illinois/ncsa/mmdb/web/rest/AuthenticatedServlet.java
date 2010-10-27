@@ -55,6 +55,7 @@ import org.tupeloproject.util.SecureHashMinter;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 public class AuthenticatedServlet extends HttpServlet {
     static Log                 log              = LogFactory.getLog(AuthenticatedServlet.class);
@@ -135,6 +136,10 @@ public class AuthenticatedServlet extends HttpServlet {
 
     protected static String getHttpSessionUser(HttpServletRequest request) {
         return (String) request.getSession(true).getAttribute(AUTHENTICATED_AS);
+    }
+
+    public static String getUserUri(HttpServletRequest req) {
+        return PersonBeanUtil.getPersonID(getHttpSessionUser(req));
     }
 
     public static boolean doAuthenticate(HttpServletRequest request, HttpServletResponse response, ServletContext context) {

@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,6 +70,9 @@ import org.tupeloproject.util.UnicodeTranscoder;
 import org.tupeloproject.util.Variable;
 
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * TupeloServlet
@@ -210,11 +214,29 @@ public class TupeloServlet extends HttpTupeloServlet {
         //return context;
     }
 
+    boolean isAllowed(HttpServletRequest req, HttpServletResponse resp) {
+        ServletContext sc = getServletContext();
+        if (!AuthenticatedServlet.doAuthenticate(req, resp, sc)) {
+            return false;
+        }
+        MediciRbac rbac = new MediciRbac(getContext());
+        Resource userUri = Resource.uriRef(AuthenticatedServlet.getUserUri(req));
+        Resource permissionUri = Resource.uriRef(Permission.USE_DESKTOP.getUri());
+        try {
+            if (!rbac.checkPermission(userUri, permissionUri)) {
+                return false;
+            }
+        } catch (RBACException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public void doDelete(HttpServletRequest arg0, HttpServletResponse arg1)
             throws ServletException, IOException {
-        // TODO Auto-generated method stub
-        if (!AuthenticatedServlet.doAuthenticate(arg0, arg1, getServletContext())) {
+        if (!isAllowed(arg0, arg1)) {
             return;
         }
         super.doDelete(arg0, arg1);
@@ -223,8 +245,7 @@ public class TupeloServlet extends HttpTupeloServlet {
     @Override
     public void doGet(HttpServletRequest arg0, HttpServletResponse arg1)
             throws ServletException, IOException {
-        // TODO Auto-generated method stub
-        if (!AuthenticatedServlet.doAuthenticate(arg0, arg1, getServletContext())) {
+        if (!isAllowed(arg0, arg1)) {
             return;
         }
         super.doGet(arg0, arg1);
@@ -233,8 +254,7 @@ public class TupeloServlet extends HttpTupeloServlet {
     @Override
     public void doPost(HttpServletRequest arg0, HttpServletResponse arg1)
             throws ServletException, IOException {
-        // TODO Auto-generated method stub
-        if (!AuthenticatedServlet.doAuthenticate(arg0, arg1, getServletContext())) {
+        if (!isAllowed(arg0, arg1)) {
             return;
         }
         super.doPost(arg0, arg1);
@@ -243,8 +263,7 @@ public class TupeloServlet extends HttpTupeloServlet {
     @Override
     public void doPut(HttpServletRequest arg0, HttpServletResponse arg1)
             throws ServletException, IOException {
-        // TODO Auto-generated method stub
-        if (!AuthenticatedServlet.doAuthenticate(arg0, arg1, getServletContext())) {
+        if (!isAllowed(arg0, arg1)) {
             return;
         }
         super.doPut(arg0, arg1);
