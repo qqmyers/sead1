@@ -39,6 +39,7 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -224,13 +225,16 @@ public class TupeloServlet extends HttpTupeloServlet {
         Resource permissionUri = Resource.uriRef(Permission.USE_DESKTOP.getUri());
         try {
             if (!rbac.checkPermission(userUri, permissionUri)) {
-                return false;
+                log.debug("user " + userUri + " does NOT have 'use desktop client' permission");
+                resp.setStatus(HttpURLConnection.HTTP_FORBIDDEN);
+            } else {
+                log.debug("user " + userUri + " has 'use desktop client' permission");
+                return true;
             }
         } catch (RBACException e) {
             e.printStackTrace();
-            return false;
         }
-        return true;
+        return false;
     }
 
     @Override
