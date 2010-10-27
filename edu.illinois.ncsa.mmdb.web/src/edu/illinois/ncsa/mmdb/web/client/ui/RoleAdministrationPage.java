@@ -14,6 +14,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -37,18 +38,17 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 
 public class RoleAdministrationPage extends Composite {
-    private final MyDispatchAsync  dispatch;
+    private final MyDispatchAsync dispatch;
 
-    FlowPanel                      mainPanel;
-    TitlePanel                     pageTitle;
-    FlexTable                      permissionsTable;
+    FlowPanel                     mainPanel;
+    TitlePanel                    pageTitle;
+    FlexTable                     permissionsTable;
 
-    Button                         saveButton;
-    Button                         cancelButton;
+    Button                        saveButton;
+    Button                        cancelButton;
 
-    Map<String, PermissionSetting> changes;
-    Map<String, Integer>           columnByRole;
-    Map<String, String>            nameByRole;
+    Map<String, Integer>          columnByRole;
+    Map<String, String>           nameByRole;
 
     public RoleAdministrationPage(MyDispatchAsync dispatchAsync) {
 
@@ -72,46 +72,6 @@ public class RoleAdministrationPage extends Composite {
         permissionsTable.addStyleName("usersTable"); // TODO: make a new style
         mainPanel.add(permissionsTable);
 
-        saveButton = new Button("Save");
-        // on save, submit all changes
-        saveButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                for (PermissionSetting setting : changes.values() ) {
-                    GWT.log("setting: " + setting.getRoleUri() + " " + setting.getPermission().getLabel());
-                }
-                dispatch.execute(new SetPermissions(changes.values()), new AsyncCallback<SetPermissionsResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // FIXME notify someone
-                    }
-
-                    @Override
-                    public void onSuccess(SetPermissionsResult result) {
-                        // FIXME notify someone
-                    }
-                });
-            }
-        });
-        mainPanel.add(saveButton);
-
-        cancelButton = new Button("Cancel");
-        // on cancel, undo all checkboxes and get rid of all changes
-        cancelButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                for (int row = 1; row < permissionsTable.getRowCount(); row++ ) {
-                    for (int col = 1; col < permissionsTable.getCellCount(row); col++ ) {
-                        Undoable control = (Undoable) permissionsTable.getWidget(row, col);
-                        control.undo();
-                    }
-                }
-                changes = new HashMap<String, PermissionSetting>();
-                GWT.log("cancelled permission settings");
-            }
-        });
-        mainPanel.add(cancelButton);
-
         getPermissions();
     }
 
@@ -131,7 +91,7 @@ public class RoleAdministrationPage extends Composite {
         int i = 1;
         for (Permission p : Permission.values() ) {
             if (p == s.getPermission()) {
-                UndoableCheckBox box = newCheckBox(s);
+                CheckBox box = newCheckBox(s);
                 permissionsTable.setWidget(i, c, box);
             }
             i++;
@@ -141,7 +101,6 @@ public class RoleAdministrationPage extends Composite {
     void getPermissions() {
         permissionsTable.clear(true);
 
-        changes = new HashMap<String, PermissionSetting>();
         columnByRole = new HashMap<String, Integer>();
         nameByRole = new HashMap<String, String>();
 
@@ -235,12 +194,8 @@ public class RoleAdministrationPage extends Composite {
         return roleUri + " " + permission.getUri();
     }
 
-    void addChange(String roleUri, Permission permission, PermissionValue value) {
-        changes.put(key(roleUri, permission), new PermissionSetting(roleUri, permission, value));
-    }
-
-    void removeChange(String roleUri, Permission permission) {
-        changes.remove(key(roleUri, permission));
+    PermissionValue valueFor(boolean condition) {
+        return condition ? PermissionValue.ALLOW : PermissionValue.DO_NOT_ALLOW;
     }
 
     /**
@@ -249,19 +204,27 @@ public class RoleAdministrationPage extends Composite {
      * @param setting
      * @return
      */
-    UndoableCheckBox newCheckBox(final PermissionSetting setting) {
-        final UndoableCheckBox box = new UndoableCheckBox();
+    CheckBox newCheckBox(final PermissionSetting setting) {
+        final CheckBox box = new CheckBox();
         box.setValue(setting.getValue() == PermissionValue.ALLOW);
-        box.mark();
-        // when the box is checked, add a change to the list of changes. when it is undone, remove said change
+        // when the box is checked, make the setting
         box.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                if (box.hasChanged()) {
-                    addChange(setting.getRoleUri(), setting.getPermission(), event.getValue() ? PermissionValue.ALLOW : PermissionValue.DO_NOT_ALLOW);
-                } else {
-                    removeChange(setting.getRoleUri(), setting.getPermission());
-                }
+            public void onValueChange(final ValueChangeEvent<Boolean> event) {
+                PermissionValue desiredValue = event.getValue() ? PermissionValue.ALLOW : PermissionValue.DO_NOT_ALLOW;
+                PermissionSetting newSetting = new PermissionSetting(setting.getRoleUri(), setting.getPermission(), desiredValue);
+                dispatch.execute(new SetPermissions(newSetting), new AsyncCallback<SetPermissionsResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        // failed, so toggle checkbox back, without firing an event
+                        box.setValue(!event.getValue());
+                    }
+
+                    @Override
+                    public void onSuccess(SetPermissionsResult result) {
+                        // succeeded, so no action necessary
+                    }
+                });
             }
         });
         return box;
