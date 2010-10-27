@@ -132,7 +132,7 @@ public class UserManagementPage extends Composite {
                 int col = 2;
                 for (Map.Entry<String, String> entry : PermissionUtil.getRoles(result.getSettings()).entrySet() ) {
                     String roleUri = entry.getKey();
-                    if (!roleUri.equals(DefaultRole.OWNER.getUri())) {
+                    if (!roleUri.equals(DefaultRole.OWNER.getUri())) { // don't allow admin to add or remove from special "owner" role.
                         String roleName = entry.getValue();
                         columnByRole.put(roleUri, col);
                         usersTable.setText(0, col, roleName);

@@ -57,6 +57,7 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
  * Add/remove user permissions.
@@ -78,8 +79,14 @@ public class EditRoleHandler implements ActionHandler<EditRole, EmptyResult> {
         try {
             switch (action.getType()) {
                 case ADD:
-                    rbac.addRole(user, role);
-                    emailNotification(user);
+                    try {
+                        rbac.addRole(user, role);
+                        if (rbac.getRoles(user).size() == 1) {
+                            emailNotification(user);
+                        }
+                    } catch (RBACException x) {
+                        log.error("error adding user to role", x);
+                    }
                     break;
                 case REMOVE:
                     rbac.removeRole(user, role);
