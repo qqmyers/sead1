@@ -49,24 +49,24 @@ import com.google.gwt.user.client.ui.HTML;
  * For users that haven't been enabled by an admin yet.
  * 
  * @author Luigi Marini
- *
+ * 
  */
 public class NotEnabledPage extends Composite {
 
-	private final FlowPanel mainPanel;
-	private Object pageTitle;
+    private final FlowPanel mainPanel;
+    private Object          pageTitle;
 
-	public NotEnabledPage() {
-		mainPanel = new FlowPanel();
-		mainPanel.addStyleName("page");
-		initWidget(mainPanel);
+    public NotEnabledPage() {
+        mainPanel = new FlowPanel();
+        mainPanel.addStyleName("page");
+        initWidget(mainPanel);
 
-		// page title
-		mainPanel.add(new TitlePanel("Account Not Enabled"));
-		
-		HTML message = new HTML("You are account has not been authorized by an administrator yet.");
-		// TODO change to more appropriate style
-		message.addStyleName("loginForm");
-		mainPanel.add(message);
-	}
+        // page title
+        mainPanel.add(new TitlePanel("Account Not Enabled"));
+
+        HTML message = new HTML("Your account has not yet been authorized by an administrator.");
+        // TODO change to more appropriate style
+        message.addStyleName("loginForm");
+        mainPanel.add(message);
+    }
 }
