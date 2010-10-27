@@ -51,9 +51,11 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ContextConvertHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.CreateRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteAnnotationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.EditRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ExtractionServiceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAllTagsHandler;
@@ -165,6 +167,8 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new SetTitleHandler());
         DispatchUtil.registerHandler(new SetUserMetadataHandler());
         DispatchUtil.registerHandler(new GetAvailableUserMetadataFieldsHandler());
+        DispatchUtil.registerHandler(new CreateRoleHandler());
+        DispatchUtil.registerHandler(new DeleteRoleHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

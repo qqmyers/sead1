@@ -56,6 +56,8 @@ import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import net.customware.gwt.dispatch.shared.Result;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
@@ -82,11 +84,14 @@ import org.tupeloproject.util.Tuple;
 
 import sun.misc.Service;
 import edu.illinois.ncsa.cet.search.SearchableTextIndex;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthorizedAction;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectAction;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
@@ -94,6 +99,8 @@ import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextCreator;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
@@ -300,6 +307,33 @@ public class TupeloStore {
      */
     public Context getContext() {
         return context;
+    }
+
+    /**
+     * Get rbac
+     * 
+     * @return
+     */
+    public MediciRbac getRbac() {
+        return new MediciRbac(getContext());
+    }
+
+    public boolean isAllowed(AuthorizedAction<? extends Result> action, Permission p) {
+        try {
+            return getRbac().checkPermission(action.getUser(), null, p);
+        } catch (RBACException e) {
+            log.error("cannot determine authorization", e);
+        }
+        return false;
+    }
+
+    public boolean isAllowed(SubjectAction<? extends Result> action, Permission p) {
+        try {
+            return getRbac().checkPermission(action.getUser(), action.getUri(), p);
+        } catch (RBACException e) {
+            log.error("cannot determine authorization", e);
+        }
+        return false;
     }
 
     /**

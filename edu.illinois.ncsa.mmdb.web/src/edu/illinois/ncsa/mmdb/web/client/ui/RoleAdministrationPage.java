@@ -6,21 +6,33 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.CreateRole;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteRole;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissions;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPermissions;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPermissionsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectResult;
+import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 
@@ -36,6 +48,7 @@ public class RoleAdministrationPage extends Composite {
 
     Map<String, PermissionSetting> changes;
     Map<String, Integer>           columnByRole;
+    Map<String, String>            nameByRole;
 
     public RoleAdministrationPage(MyDispatchAsync dispatchAsync) {
 
@@ -99,15 +112,7 @@ public class RoleAdministrationPage extends Composite {
         });
         mainPanel.add(cancelButton);
 
-        int i = 0;
-        permissionsTable.setText(i++, 0, "");
-        for (Permission p : Permission.values() ) {
-            permissionsTable.setText(i++, 0, p.getLabel());
-        }
         getPermissions();
-
-        changes = new HashMap<String, PermissionSetting>();
-        columnByRole = new HashMap<String, Integer>();
     }
 
     private FlexTable createPermissionsTable() {
@@ -120,6 +125,7 @@ public class RoleAdministrationPage extends Composite {
         if (c == null) {
             c = permissionsTable.getCellCount(0);
             columnByRole.put(s.getRoleUri(), c);
+            nameByRole.put(s.getRoleUri(), s.getRoleName());
             permissionsTable.setText(0, c, s.getRoleName());
         }
         int i = 1;
@@ -133,6 +139,17 @@ public class RoleAdministrationPage extends Composite {
     }
 
     void getPermissions() {
+        permissionsTable.clear(true);
+
+        changes = new HashMap<String, PermissionSetting>();
+        columnByRole = new HashMap<String, Integer>();
+        nameByRole = new HashMap<String, String>();
+
+        int i = 0;
+        permissionsTable.setText(i++, 0, "");
+        for (Permission p : Permission.values() ) {
+            permissionsTable.setText(i++, 0, p.getLabel());
+        }
         dispatch.execute(new GetPermissions(), new AsyncCallback<GetPermissionsResult>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -143,6 +160,73 @@ public class RoleAdministrationPage extends Composite {
                 for (PermissionSetting s : result.getSettings() ) {
                     showPermissionSetting(s);
                 }
+                for (Map.Entry<String, Integer> entry : columnByRole.entrySet() ) {
+                    final String roleUri = entry.getKey();
+                    final String roleName = nameByRole.get(roleUri);
+                    final int c = entry.getValue();
+                    int r = Permission.values().length + 2;
+                    Anchor deleteRole = new Anchor("Delete");
+                    deleteRole.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            ConfirmDialog cd = new ConfirmDialog("Delete " + roleName, "Do you really want to delete role \"" + roleName + "\"?");
+                            cd.addConfirmHandler(new ConfirmHandler() {
+                                @Override
+                                public void onConfirm(ConfirmEvent event) {
+                                    dispatch.execute(new DeleteRole(roleUri), new AsyncCallback<EmptyResult>() {
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            GWT.log("cannot delete role");
+                                        }
+
+                                        @Override
+                                        public void onSuccess(EmptyResult result) {
+                                            getPermissions(); // start over.
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                    permissionsTable.setWidget(r, c, deleteRole);
+                }
+                // now add the "add role" controls
+                VerticalPanel addRolePanel = new VerticalPanel();
+                final TextBox newRoleName = new TextBox();
+                newRoleName.setWidth("10em");
+                final Anchor addRole = new Anchor("Create role");
+                addRole.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        addRole(newRoleName.getText(), addRole);
+                    }
+                });
+                newRoleName.addKeyUpHandler(new KeyUpHandler() {
+                    public void onKeyUp(KeyUpEvent event) {
+                        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                            addRole(newRoleName.getText(), addRole);
+                        }
+                    }
+                });
+                addRolePanel.add(newRoleName);
+                addRolePanel.add(addRole);
+                permissionsTable.setWidget(0, permissionsTable.getCellCount(0), addRolePanel);
+            }
+        });
+    }
+
+    void addRole(String name, Anchor button) {
+        button.setText("Creating role ...");
+        button.setEnabled(false);
+        dispatch.execute(new CreateRole(name), new AsyncCallback<SubjectResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("error: can't create role");
+            }
+
+            @Override
+            public void onSuccess(SubjectResult result) {
+                getPermissions(); // start over
             }
         });
     }

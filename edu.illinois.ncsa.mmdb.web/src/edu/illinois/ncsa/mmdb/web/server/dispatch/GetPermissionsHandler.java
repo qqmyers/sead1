@@ -34,8 +34,6 @@ public class GetPermissionsHandler implements ActionHandler<GetPermissions, GetP
                 Resource valueType = row.get(2); // the value type (e.g., ALLOW, DENY, DO_NOT_ALLOW)
                 String roleName = row.get(3).getString();
 
-                log.debug(row);
-
                 PermissionValue v = PermissionValue.DO_NOT_ALLOW;
                 if (valueType.equals(RBAC.ALLOW)) {
                     v = PermissionValue.ALLOW;
@@ -50,7 +48,7 @@ public class GetPermissionsHandler implements ActionHandler<GetPermissions, GetP
                     }
                 }
 
-                log.debug("Permission " + p.getLabel() + " is set to " + v.getName() + " for " + roleName);
+                //log.debug("Permission " + p.getLabel() + " is set to " + v.getName() + " for " + roleName);
                 result.addSetting(new PermissionSetting(role.getString(), p, v, roleName));
             }
 
