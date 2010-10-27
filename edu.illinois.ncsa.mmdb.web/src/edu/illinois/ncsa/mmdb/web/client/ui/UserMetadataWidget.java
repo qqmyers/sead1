@@ -41,7 +41,6 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -61,31 +60,20 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAvailableUserMetadataFields;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAvailableUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.RunSparqlQuery;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.RunSparqlQueryResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 
 public class UserMetadataWidget extends Composite {
-    static String       availableFieldsQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" +
-                                                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\r\n" +
-                                                     "PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/>\r\n" +
-                                                     "\r\n" +
-                                                     "SELECT ?label ?f\r\n" +
-                                                     "WHERE {\r\n" +
-                                                     "  ?f <rdf:type> <cet:userMetadataField> .\r\n" +
-                                                     "  ?f <rdfs:label> ?label .\r\n" +
-                                                     "}\r\n" +
-                                                     "ORDER BY ASC(?label)";
-
     String              uri;
     MyDispatchAsync     dispatch;
     LabeledListBox      fieldChoice;
     TextBox             valueText;
     FlexTable           fieldTable;
-    Map<String, String> labels               = new HashMap<String, String>();
+    Map<String, String> labels = new HashMap<String, String>();
 
     public UserMetadataWidget(String uri, MyDispatchAsync dispatch) {
         this.uri = uri;
@@ -102,14 +90,15 @@ public class UserMetadataWidget extends Composite {
 
     public void showFields(final boolean canEdit) {
         // FIXME single get to get fields and values
-        dispatch.execute(new RunSparqlQuery(availableFieldsQuery), new AsyncCallback<RunSparqlQueryResult>() {
+        dispatch.execute(new GetAvailableUserMetadataFields(), new AsyncCallback<GetAvailableUserMetadataFieldsResult>() {
             public void onFailure(Throwable caught) {
             }
 
-            public void onSuccess(RunSparqlQueryResult result) {
-                if (result.getResult().size() > 0) {
+            public void onSuccess(GetAvailableUserMetadataFieldsResult result) {
+                Map<String, String> availableFields = result.getAvailableFields();
+                if (availableFields.size() > 0) {
                     if (canEdit) {
-                        addFieldAddControls(result.getResult());
+                        addFieldAddControls(availableFields);
                     }
                     dispatch.execute(new GetUserMetadataFields(uri), new AsyncCallback<GetUserMetadataFieldsResult>() {
                         public void onFailure(Throwable caught) {
@@ -193,8 +182,8 @@ public class UserMetadataWidget extends Composite {
      * 
      * @param result
      */
-    private void addFieldAddControls(List<List<String>> result) {
-
+    private void addFieldAddControls(Map<String, String> result) {
+        // result is label -> uri, sorted by alpha label
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         horizontalPanel.addStyleName("addMetadata");
         horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -205,9 +194,9 @@ public class UserMetadataWidget extends Composite {
         fieldTable.setWidget(row, 0, horizontalPanel);
 
         fieldChoice = new LabeledListBox("Set Field:");
-        for (List<String> entry : result ) {
-            String label = entry.get(0);
-            String predicate = entry.get(1);
+        for (Map.Entry<String, String> entry : result.entrySet() ) {
+            String label = entry.getKey();
+            String predicate = entry.getValue();
             fieldChoice.addItem(label, predicate);
             labels.put(predicate, label);
         }
