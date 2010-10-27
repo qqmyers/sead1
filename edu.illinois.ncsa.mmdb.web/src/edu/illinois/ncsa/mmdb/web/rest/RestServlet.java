@@ -91,10 +91,13 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * RestServlet
@@ -299,6 +302,22 @@ public class RestServlet extends AuthenticatedServlet {
         }
     }
 
+    protected boolean isAllowed(HttpServletRequest req, String objectUri, Permission permission) {
+        MediciRbac rbac = new MediciRbac(getContext());
+        Resource userUri = Resource.uriRef(AuthenticatedServlet.getUserUri(req));
+        Resource permissionUri = Resource.uriRef(permission.getUri());
+        Resource oUri = objectUri != null ? Resource.uriRef(objectUri) : null; // how I long for implicit type conversion
+        try {
+            if (!rbac.checkPermission(userUri, oUri, permissionUri)) {
+                return false;
+            }
+        } catch (RBACException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         long then = System.currentTimeMillis();
@@ -354,7 +373,7 @@ public class RestServlet extends AuthenticatedServlet {
             return;
         }
         String uri = decanonicalizeUrl(request);
-        if (hasPrefix(IMAGE_DOWNLOAD_INFIX, request)) {
+        if (hasPrefix(IMAGE_DOWNLOAD_INFIX, request) && isAllowed(request, uri, Permission.DOWNLOAD)) {
             log.trace("DOWNLOAD IMAGE " + uri);
             // keep track who downloads the file
             TripleWriter tw = new TripleWriter();
@@ -389,7 +408,7 @@ public class RestServlet extends AuthenticatedServlet {
             } catch (OperatorException e) {
                 throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
             }
-        } else if (hasPrefix(DATASET, request)) {
+        } else if (hasPrefix(DATASET, request) && isAllowed(request, uri, Permission.DOWNLOAD)) {
             log.debug("Downloading Dataset " + uri);
             // TODO check that file ends in extension instead of assuming it does
             uri = uri.substring(0, uri.length() - 4);
@@ -425,7 +444,7 @@ public class RestServlet extends AuthenticatedServlet {
             } catch (OperatorException e) {
                 throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
             }
-        } else if (hasPrefix(PREVIEW_ANY, request)) {
+        } else if (hasPrefix(PREVIEW_ANY, request) && isAllowed(request, uri, Permission.VIEW_MEMBER_PAGES)) {
             response.flushBuffer(); // MMDB-620
             long then = System.currentTimeMillis(); // FIXME debug
             PreviewImageBean preview = null;
@@ -458,7 +477,7 @@ public class RestServlet extends AuthenticatedServlet {
             }
             String previewUri = preview != null ? preview.getUri() : null;
             returnImage(request, response, previewUri, image404, shouldCache404(uri));
-        } else if (hasPrefix(COLLECTION_PREVIEW, request)) {
+        } else if (hasPrefix(COLLECTION_PREVIEW, request) && isAllowed(request, uri, Permission.VIEW_MEMBER_PAGES)) {
             log.debug("GET PREVIEW (collection) " + uri);
             String badge = TupeloStore.getInstance().getBadge(uri);
             String previewUri = TupeloStore.getInstance().getPreviewUri(badge, GetPreviews.SMALL); // should accept and propogate null
@@ -478,7 +497,7 @@ public class RestServlet extends AuthenticatedServlet {
             } catch (OperatorException e) {
                 throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
             }
-        } else if (hasPrefix(COLLECTION_INFIX, request)) {
+        } else if (hasPrefix(COLLECTION_INFIX, request) && isAllowed(request, uri, Permission.VIEW_MEMBER_PAGES)) {
             log.trace("LIST COLLECTION" + uri);
             try {
                 // TODO currently assumes that everything in a collection is an image
@@ -504,7 +523,7 @@ public class RestServlet extends AuthenticatedServlet {
             // for convenience, produce the session key as a string
             response.getWriter().print(lookupSessionKey(getHttpSessionUser(request)));
             response.flushBuffer();
-        } else if (hasPrefix(SEARCH_INFIX, request)) {
+        } else if (hasPrefix(SEARCH_INFIX, request) && isAllowed(request, uri, Permission.VIEW_MEMBER_PAGES)) {
             doSearch(request, response);
         } else {
             throw new ServletException("unrecognized API call " + request.getRequestURI());
@@ -612,53 +631,55 @@ public class RestServlet extends AuthenticatedServlet {
     void doPostImage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         InputStream imageData = null;
         //
-        Map<Resource, Object> md = new HashMap<Resource, Object>();
-        md.put(RestService.DATE_PROPERTY, new Date());
-        //
-        if (ServletFileUpload.isMultipartContent(request)) {
-            FileItemFactory factory = new DiskFileItemFactory();
-            ServletFileUpload upload = new ServletFileUpload(factory);
-            try {
-                List<FileItem> items = upload.parseRequest(request);
-                if (items.size() > 1) {
-                    log.trace("warning: ignoring all but first content item in multi-part POST");
-                } else if (items.size() == 0) {
-                    throw new ServletException("no file data in multi-part POST");
+        if (isAllowed(request, null, Permission.UPLOAD_DATA)) {
+            Map<Resource, Object> md = new HashMap<Resource, Object>();
+            md.put(RestService.DATE_PROPERTY, new Date());
+            //
+            if (ServletFileUpload.isMultipartContent(request)) {
+                FileItemFactory factory = new DiskFileItemFactory();
+                ServletFileUpload upload = new ServletFileUpload(factory);
+                try {
+                    List<FileItem> items = upload.parseRequest(request);
+                    if (items.size() > 1) {
+                        log.trace("warning: ignoring all but first content item in multi-part POST");
+                    } else if (items.size() == 0) {
+                        throw new ServletException("no file data in multi-part POST");
+                    }
+                    FileItem item = items.get(0);
+                    md.put(RestService.FORMAT_PROPERTY, item.getContentType());
+                    md.put(RestService.LABEL_PROPERTY, item.getName());
+                    md.put(RestService.FILENAME_PROPERTY, item.getName());
+                    md.put(Files.LENGTH, item.getSize());
+                    md.put(Dc.DATE, new Date()); // uploaded at current date
+                    imageData = item.getInputStream();
+                } catch (FileUploadException e) {
+                    throw new ServletException("cannot parse POST", e);
                 }
-                FileItem item = items.get(0);
-                md.put(RestService.FORMAT_PROPERTY, item.getContentType());
-                md.put(RestService.LABEL_PROPERTY, item.getName());
-                md.put(RestService.FILENAME_PROPERTY, item.getName());
-                md.put(Files.LENGTH, item.getSize());
-                md.put(Dc.DATE, new Date()); // uploaded at current date
-                imageData = item.getInputStream();
-            } catch (FileUploadException e) {
-                throw new ServletException("cannot parse POST", e);
+            } else {
+                md.put(RestService.FORMAT_PROPERTY, "image/*");
+                imageData = request.getInputStream();
             }
-        } else {
-            md.put(RestService.FORMAT_PROPERTY, "image/*");
-            imageData = request.getInputStream();
-        }
-        if (hasPrefix(IMAGE_INFIX, request)) {
-            try {
-                String uri = this.decanonicalizeUrl(request);
-                log.trace("UPLOAD IMAGE " + uri);
-                restService.updateImage(uri, md, imageData);
-            } catch (RestServiceException e) {
-                throw new ServletException("failed to write " + request.getRequestURI());
+            if (hasPrefix(IMAGE_INFIX, request)) {
+                try {
+                    String uri = this.decanonicalizeUrl(request);
+                    log.trace("UPLOAD IMAGE " + uri);
+                    restService.updateImage(uri, md, imageData);
+                } catch (RestServiceException e) {
+                    throw new ServletException("failed to write " + request.getRequestURI());
+                }
+            } else if (hasPrefix(IMAGE_CREATE_ANON_INFIX, request)) {
+                String uri = null;
+                try {
+                    log.trace("UPLOAD IMAGE (anonymous)");
+                    uri = restService.createImage(md, imageData);
+                } catch (RestServiceException e) {
+                    throw new ServletException("failed to create image", e);
+                }
+                response.getWriter().write(canonicalizeUri(uri, IMAGE_INFIX, request) + "\n");
+            } else {
+                // not sure how we would hit this case
+                throw new ServletException("server error: impossible case in image upload");
             }
-        } else if (hasPrefix(IMAGE_CREATE_ANON_INFIX, request)) {
-            String uri = null;
-            try {
-                log.trace("UPLOAD IMAGE (anonymous)");
-                uri = restService.createImage(md, imageData);
-            } catch (RestServiceException e) {
-                throw new ServletException("failed to create image", e);
-            }
-            response.getWriter().write(canonicalizeUri(uri, IMAGE_INFIX, request) + "\n");
-        } else {
-            // not sure how we would hit this case
-            throw new ServletException("server error: impossible case in image upload");
         }
     }
 
@@ -666,7 +687,7 @@ public class RestServlet extends AuthenticatedServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
         //dumpHeaders(request); // FIXME debug
-        if (!authenticate(request, response)) {
+        if (!authenticate(request, response) || !isAllowed(request, null, Permission.UPLOAD_DATA)) {
             return;
         }
         if (hasPrefix(ANY_IMAGE_INFIX, request)) {
