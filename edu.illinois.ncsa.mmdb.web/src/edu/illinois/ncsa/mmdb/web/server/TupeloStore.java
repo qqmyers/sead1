@@ -40,7 +40,6 @@ package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.FileNameMap;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -177,6 +176,7 @@ public class TupeloStore {
             }
             ContextConvert.updateContext(context);
             createBeanSession();
+            MimeMap.initializeContext(context);
         } catch (ClassNotFoundException e) {
             log.warn("Could not de-serialize context, missing context-creator?.", e);
         } catch (Exception e) {
@@ -337,12 +337,12 @@ public class TupeloStore {
     }
 
     /**
-     * Returns a FileNameMap that is initialized with default mappings as well
+     * Returns a MimeMap that is initialized with default mappings as well
      * as those stored inside the context.
      * 
      * @return the FileNameMap
      */
-    public FileNameMap getFileNameMap() {
+    public MimeMap getMimeMap() {
         if (mimemap == null) {
             mimemap = new MimeMap(context);
         }

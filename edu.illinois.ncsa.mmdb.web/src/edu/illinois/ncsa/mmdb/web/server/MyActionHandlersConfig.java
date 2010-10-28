@@ -72,6 +72,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoPointHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLikeDislikeHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMimeTypeCategoriesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPermissionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRecentActivityHandler;
@@ -169,6 +170,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetAvailableUserMetadataFieldsHandler());
         DispatchUtil.registerHandler(new CreateRoleHandler());
         DispatchUtil.registerHandler(new DeleteRoleHandler());
+        DispatchUtil.registerHandler(new GetMimeTypeCategoriesHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

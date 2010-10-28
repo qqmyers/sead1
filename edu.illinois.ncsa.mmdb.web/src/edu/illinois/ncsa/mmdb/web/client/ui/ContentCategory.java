@@ -39,46 +39,45 @@
 
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMimeTypeCategories;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMimeTypeCategoriesResult;
 
 /**
  * MIME-type / category mapping
  * 
- * @author Luis Mendez
+ * @author Luis Mendez, Rob Kooper
  * 
  */
 
 public class ContentCategory {
+    private static Map<String, String> categories = new HashMap<String, String>();
 
-    public static String name;
+    public static void initialize() {
+        MMDB.dispatchAsync.execute(new GetMimeTypeCategories(), new AsyncCallback<GetMimeTypeCategoriesResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Could not get mime to category mappings.", caught);
+            }
 
-    //public static Map<String, String> type;
-
-    public ContentCategory() {
-
+            @Override
+            public void onSuccess(GetMimeTypeCategoriesResult result) {
+                categories = result.getCategories();
+            }
+        });
     }
 
-    public static String getCategory(String mimetype) {
-
-        //TODO Implement map, for now not necessary as the majority of the categories
-        //     are covered by these expressions.
-        //type = new HashMap<String, String>();
-
-        if (mimetype.contains("image/")) {
-            return "Image";
-        } else if (mimetype.contains("video/")) {
-            return "Video";
-        } else if (mimetype.contains("audio/")) {
-            return "Audio";
-        } else if (mimetype.contains("x-tgif")) {
-            return "3D";
-        } else if (mimetype.contains("text/") || mimetype.contains("pdf") || mimetype.contains("word") || mimetype.contains("powerpoint") || mimetype.contains("excel")) {
-            return "Document";
-        } else if (mimetype.contains("application/")) {
-            return "Application";
-        } else {
-            return "Other";
+    public static String getCategory(String mimeType) {
+        String category = categories.get(mimeType);
+        if (category != null) {
+            return category;
         }
-
+        return "Other";
     }
-
 }
