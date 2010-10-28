@@ -81,8 +81,7 @@ public class TagTablePresenter extends DynamicTablePresenter<DatasetBean> {
         int offset = (currentPage - 1) * getPageSize();
         GWT.log("Getting datasets " + offset + " to " + (offset + getPageSize()) + " with tag " + tagName);
         ListQueryDatasets query = new ListQueryDatasets();
-        query.setOrderBy(uriForSortKey());
-        query.setDesc(descForSortKey());
+        query.setOrderBy(sortKey);
         query.setLimit(getPageSize());
         query.setOffset(offset);
         query.setWithTag(tagName);

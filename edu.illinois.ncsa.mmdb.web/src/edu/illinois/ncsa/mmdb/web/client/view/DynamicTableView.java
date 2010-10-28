@@ -125,6 +125,8 @@ public class DynamicTableView extends Composite implements Display {
         sortOptions.addItem("Date: oldest first", "date-asc");
         sortOptions.addItem("Title: A-Z", "title-asc");
         sortOptions.addItem("Title: Z-A", "title-desc");
+        sortOptions.addItem("Category: A-Z", "category-asc");
+        sortOptions.addItem("Category: Z-A", "category-desc");
         sortOptions.setSelected(sortKey);
         return sortOptions;
     }

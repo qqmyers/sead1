@@ -42,17 +42,15 @@ import net.customware.gwt.dispatch.shared.Action;
 
 @SuppressWarnings("serial")
 public class ListQuery<B> implements Action<ListQueryResult<B>> {
-    private String  orderBy;
-    private boolean desc;
-    private int     limit;
-    private int     offset;
+    private String orderBy;
+    private int    limit;
+    private int    offset;
 
     public ListQuery() {
     }
 
-    public ListQuery(String orderBy, boolean desc, int limit, int offset) {
+    public ListQuery(String orderBy, int limit, int offset) {
         this.orderBy = orderBy;
-        this.desc = desc;
         this.limit = limit;
         this.offset = offset;
     }
@@ -63,14 +61,6 @@ public class ListQuery<B> implements Action<ListQueryResult<B>> {
 
     public String getOrderBy() {
         return orderBy;
-    }
-
-    public void setDesc(boolean b) {
-        desc = b;
-    }
-
-    public boolean getDesc() {
-        return desc;
     }
 
     public void setLimit(int i) {

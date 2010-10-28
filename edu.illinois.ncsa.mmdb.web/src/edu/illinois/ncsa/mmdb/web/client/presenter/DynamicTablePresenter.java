@@ -207,28 +207,6 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         display.setTotalNumPages(numberOfPages);
     }
 
-    /**
-     * Set sorting descending.
-     * 
-     * @return true is sorting is descending
-     */
-    protected boolean descForSortKey() {
-        return !sortKey.endsWith("-asc"); // default is descending
-    }
-
-    /**
-     * URI used for the sort key.
-     * 
-     * @return uri for the sort key
-     */
-    protected String uriForSortKey() {
-        if (sortKey.startsWith("title-")) { // FIXME fragile
-            return "http://purl.org/dc/elements/1.1/title";
-        } else {
-            return "http://purl.org/dc/elements/1.1/date";
-        }
-    }
-
     protected boolean rememberPageNumber() {
         return false;
     }

@@ -75,8 +75,7 @@ public class DatasetTablePresenter extends DynamicTablePresenter<DatasetBean> {
         int offset = (currentPage - 1) * getPageSize();
         GWT.log("Getting datasets " + offset + " to " + (offset + getPageSize()));
         ListQueryDatasets query = new ListQueryDatasets();
-        query.setOrderBy(uriForSortKey());
-        query.setDesc(descForSortKey());
+        query.setOrderBy(sortKey);
         query.setLimit(getPageSize());
         query.setOffset(offset);
         return query;

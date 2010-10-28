@@ -53,6 +53,7 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Tags;
@@ -65,6 +66,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
  * TODO Add comments
@@ -80,17 +82,21 @@ public class ListQueryDatasetsHandler implements
     private static Log log = LogFactory.getLog(ListQueryDatasetsHandler.class);
 
     @Override
-    public ListQueryResult<DatasetBean> execute(ListQueryDatasets arg0, ExecutionContext arg1)
-            throws ActionException {
+    public ListQueryResult<DatasetBean> execute(ListQueryDatasets arg0, ExecutionContext arg1) throws ActionException {
 
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
         DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
 
+        String sortkey = arg0.getOrderBy();
+        boolean desc = !sortkey.endsWith("-asc");
+        int idx = sortkey.indexOf('-');
+        if (idx != -1) {
+            sortkey = sortkey.substring(0, idx);
+        }
+
         ListQueryResult<DatasetBean> queryResult = new ListQueryResult<DatasetBean>();
-        queryResult.setResults(listDatasets(arg0
-                .getOrderBy(), arg0.getDesc(), arg0.getLimit(), arg0
-                .getOffset(), arg0.getInCollection(), arg0.getWithTag(), dbu));
+        queryResult.setResults(listDatasets(sortkey, desc, arg0.getLimit(), arg0.getOffset(), arg0.getInCollection(), arg0.getWithTag(), dbu));
 
         queryResult.setTotalCount(TupeloStore.getInstance().countDatasets(arg0.getInCollection(), arg0.getWithTag(), false));
 
@@ -124,12 +130,25 @@ public class ListQueryDatasetsHandler implements
             u.setOffset(offset);
         }
         u.addPattern("s", Rdf.TYPE, dbu.getType());
-        u.addPattern("s", Resource.uriRef(orderBy), "o");
+
+        // translate orderBy to the right sort
+        if (orderBy.equals("date")) {
+            u.addPattern("s", Dc.DATE, "o");
+        } else if (orderBy.equals("title")) {
+            u.addPattern("s", Dc.TITLE, "o");
+        } else if (orderBy.equals("category")) {
+            u.addPattern("s", Dc.FORMAT, "f");
+            u.addPattern("m", Dc.FORMAT, "f");
+            u.addPattern("m", MimeMap.MIME_CATEGORY, "o");
+        }
+
+        // ascending or descending ordering
         if (desc) {
             u.addOrderByDesc("o");
         } else {
             u.addOrderBy("o");
         }
+
         return TupeloStore.getInstance().unifyExcludeDeleted(u, "s");
     }
 
@@ -176,13 +195,11 @@ public class ListQueryDatasetsHandler implements
      * @param dbu
      * @return
      */
-    public static List<DatasetBean> listDatasets(String orderBy, boolean desc,
-            int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu) {
+    public static List<DatasetBean> listDatasets(String orderBy, boolean desc, int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu) {
         return listDatasets(orderBy, desc, limit, offset, inCollection, withTag, dbu, true);
     }
 
-    public static List<DatasetBean> listDatasets(final String orderBy, final boolean desc,
-            final int limit, final int offset, final String inCollection, final String withTag, final DatasetBeanUtil dbu, boolean prefetch) {
+    public static List<DatasetBean> listDatasets(final String orderBy, final boolean desc, final int limit, final int offset, final String inCollection, final String withTag, final DatasetBeanUtil dbu, boolean prefetch) {
         try {
             List<String> uris;
             long then = System.currentTimeMillis(); //
