@@ -115,7 +115,7 @@ public class ListQueryDatasetsHandler implements
      */
     private static Table<Resource> list(String orderBy, boolean desc, int limit, int offset, String inCollection, String withTag, DatasetBeanUtil dbu) throws OperatorException {
         Unifier u = new Unifier();
-        u.setColumnNames("s", "o");
+        u.addColumnName("s");
         if (inCollection != null) {
             u.addPattern(Resource.uriRef(inCollection), DcTerms.HAS_PART, "s");
         }
@@ -133,20 +133,22 @@ public class ListQueryDatasetsHandler implements
 
         // translate orderBy to the right sort
         if (orderBy.equals("date")) {
-            u.addPattern("s", Dc.DATE, "o");
+            u.addPattern("s", Dc.DATE, "d");
+            u.addColumnName("d");
+            u.addOrderBy("d", !desc);
         } else if (orderBy.equals("title")) {
-            u.addPattern("s", Dc.TITLE, "o");
+            u.addPattern("s", Dc.TITLE, "t");
+            u.addColumnName("t");
+            u.addOrderBy("t", !desc);
         } else if (orderBy.equals("category")) {
+            u.addPattern("s", Dc.DATE, "d");
+            u.addColumnName("d");
             u.addPattern("s", Dc.FORMAT, "f");
             u.addPattern("m", Dc.FORMAT, "f");
-            u.addPattern("m", MimeMap.MIME_CATEGORY, "o");
-        }
-
-        // ascending or descending ordering
-        if (desc) {
-            u.addOrderByDesc("o");
-        } else {
-            u.addOrderBy("o");
+            u.addPattern("m", MimeMap.MIME_CATEGORY, "c");
+            u.addColumnName("c");
+            u.addOrderBy("c", !desc);
+            u.addOrderBy("d", false);
         }
 
         return TupeloStore.getInstance().unifyExcludeDeleted(u, "s");
