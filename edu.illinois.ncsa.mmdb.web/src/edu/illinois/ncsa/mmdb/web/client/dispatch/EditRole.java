@@ -41,16 +41,14 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
-
 /**
  * @author Rob Kooper
  * 
  */
 @SuppressWarnings("serial")
-public class EditRole implements Action<EmptyResult> {
+public class EditRole extends AuthorizedAction<EmptyResult> {
 
-    private String     user;
+    private String     targetUser;
     private String     role;
     private ActionType type;
 
@@ -62,7 +60,7 @@ public class EditRole implements Action<EmptyResult> {
     }
 
     public EditRole(String user, String role, ActionType type) {
-        this.user = user;
+        this.targetUser = user;
         this.role = role;
         this.type = type;
     }
@@ -70,8 +68,8 @@ public class EditRole implements Action<EmptyResult> {
     /**
      * @return the user
      */
-    public String getUser() {
-        return user;
+    public String getTargetUser() {
+        return targetUser;
     }
 
     /**

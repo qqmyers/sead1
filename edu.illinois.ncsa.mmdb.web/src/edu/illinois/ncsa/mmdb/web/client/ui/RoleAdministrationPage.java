@@ -34,6 +34,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPermissionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectResult;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 
@@ -121,33 +122,42 @@ public class RoleAdministrationPage extends Composite {
                 }
                 for (Map.Entry<String, Integer> entry : columnByRole.entrySet() ) {
                     final String roleUri = entry.getKey();
-                    final String roleName = nameByRole.get(roleUri);
-                    final int c = entry.getValue();
-                    int r = Permission.values().length + 2;
-                    Anchor deleteRole = new Anchor("Delete");
-                    deleteRole.addClickHandler(new ClickHandler() {
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            ConfirmDialog cd = new ConfirmDialog("Delete " + roleName, "Do you really want to delete role \"" + roleName + "\"?");
-                            cd.addConfirmHandler(new ConfirmHandler() {
-                                @Override
-                                public void onConfirm(ConfirmEvent event) {
-                                    dispatch.execute(new DeleteRole(roleUri), new AsyncCallback<EmptyResult>() {
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            GWT.log("cannot delete role");
-                                        }
-
-                                        @Override
-                                        public void onSuccess(EmptyResult result) {
-                                            getPermissions(); // start over.
-                                        }
-                                    });
-                                }
-                            });
+                    boolean deletable = true;
+                    for (DefaultRole r : DefaultRole.special() ) {
+                        if (roleUri.equals(r.getUri())) {
+                            deletable = false;
                         }
-                    });
-                    permissionsTable.setWidget(r, c, deleteRole);
+                    }
+                    if (deletable) {
+                        final String roleName = nameByRole.get(roleUri);
+                        final int c = entry.getValue();
+                        int r = Permission.values().length + 2;
+                        Anchor deleteRole = new Anchor("Delete");
+                        deleteRole.addClickHandler(new ClickHandler() {
+                            @Override
+                            public void onClick(ClickEvent event) {
+                                ConfirmDialog cd = new ConfirmDialog("Delete " + roleName, "Do you really want to delete role \"" + roleName + "\"?");
+                                cd.addConfirmHandler(new ConfirmHandler() {
+                                    @Override
+                                    public void onConfirm(ConfirmEvent event) {
+                                        dispatch.execute(new DeleteRole(roleUri), new AsyncCallback<EmptyResult>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                GWT.log("cannot delete role");
+                                                new ConfirmDialog("Role not deleted", caught.getMessage(), false);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(EmptyResult result) {
+                                                getPermissions(); // start over.
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                        permissionsTable.setWidget(r, c, deleteRole);
+                    }
                 }
                 // now add the "add role" controls
                 VerticalPanel addRolePanel = new VerticalPanel();
@@ -218,6 +228,7 @@ public class RoleAdministrationPage extends Composite {
                     public void onFailure(Throwable caught) {
                         // failed, so toggle checkbox back, without firing an event
                         box.setValue(!event.getValue());
+                        new ConfirmDialog("Permission not changed", caught.getMessage(), false);
                     }
 
                     @Override

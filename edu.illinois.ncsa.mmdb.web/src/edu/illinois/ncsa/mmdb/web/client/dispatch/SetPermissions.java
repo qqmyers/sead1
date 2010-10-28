@@ -42,7 +42,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.customware.gwt.dispatch.shared.Action;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 
@@ -57,7 +56,7 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
  * 
  */
 @SuppressWarnings("serial")
-public class SetPermissions implements Action<SetPermissionsResult> {
+public class SetPermissions extends AuthorizedAction<SetPermissionsResult> {
     List<PermissionSetting> settings;
 
     public SetPermissions() {

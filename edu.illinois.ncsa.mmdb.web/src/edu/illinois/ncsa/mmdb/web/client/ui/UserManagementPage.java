@@ -259,6 +259,8 @@ public class UserManagementPage extends Composite {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Error changing permissions", caught);
+                new ConfirmDialog("Role membership not changed", caught.getMessage(), false);
+                // FIXME notify user if the error is because they would lock themselves out
                 checkbox.setValue(!checkbox.getValue());
             }
 
