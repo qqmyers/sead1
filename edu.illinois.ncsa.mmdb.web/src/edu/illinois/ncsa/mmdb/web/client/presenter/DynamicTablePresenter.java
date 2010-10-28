@@ -281,7 +281,6 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
                 public void onValueChange(ValueChangeEvent<String> event) {
                     GWT.log("View list box clicked " + event.getValue());
                     changeViewType(event.getValue(), sizeType);
-                    setPage(1); // FIXME compute correct page for new view type?
                     getContent();
                 }
             });
@@ -294,7 +293,6 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
                 public void onValueChange(ValueChangeEvent<String> event) {
                     GWT.log("View page size box clicked " + event.getValue());
                     changeViewType(viewType, event.getValue());
-                    setPage(1); // FIXME compute correct page for new view type?
                     getContent();
                 }
             });
@@ -307,11 +305,17 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         getContent();
     }
 
+    int computeNewPage(int oldPage, int oldPageSize) {
+        return (((oldPage - 1) * oldPageSize) / pageSize) + 1;
+    }
+
     /**
      * 
      * @param viewType
      */
     protected void changeViewType(String viewType, String sizeType) {
+        int oldPage = currentPage;
+        int oldPageSize = pageSize;
         this.viewType = viewType;
         display.setViewType(viewType);
         MMDB.setSessionPreference(getViewTypePreference(), viewType);
@@ -353,6 +357,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
             viewTypePresenter = gridPresenter;
             display.setContentView(gridView);
         }
+        setPage(computeNewPage(oldPage, oldPageSize));
     }
 
     public int getPageSize() {
