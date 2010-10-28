@@ -50,11 +50,11 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Thing;
+import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.TripleWriter;
-import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
-import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetLicense;
@@ -87,56 +87,72 @@ public class SetLicenseHandler implements ActionHandler<SetLicense, BatchResult>
         // get license information
         TripleWriter tw = new TripleWriter();
         for (String uriString : arg0.getResources() ) {
-            if (isAdmin || AccessControl.isCreator(arg0.getUser(), uriString)) {
-                Resource uri = Resource.uriRef(uriString);
-                Unifier uf = new Unifier();
-                uf.addPattern(uri, DCTERMS_RIGHTS, "rights", true);
-                uf.addPattern(uri, DCTERMS_RIGHTS_HOLDER, "rightsHolder", true);
-                uf.addPattern(uri, DCTERMS_LICENSE, "license", true);
-                uf.addPattern(uri, MMDB_ALLOW_DOWNLOAD, "allowDownload", true);
-                uf.setColumnNames("rights", "rightsHolder", "license", "allowDownload");
-                try {
-                    TupeloStore.getInstance().getContext().perform(uf);
-                } catch (OperatorException e) {
-                    log.warn("Could not get license information.", e);
-                    throw (new ActionException("Could not get license information.", e));
-                }
-
-                // remove old data
-                for (Tuple<Resource> row : uf.getResult() ) {
-                    if (row.get(0) != null) {
-                        tw.remove(uri, DCTERMS_RIGHTS, row.get(0));
-                    }
-                    if (row.get(1) != null) {
-                        tw.remove(uri, DCTERMS_RIGHTS_HOLDER, row.get(1));
-                    }
-                    if (row.get(2) != null) {
-                        tw.remove(uri, DCTERMS_LICENSE, row.get(2));
-                    }
-                    if (row.get(3) != null) {
-                        tw.remove(uri, MMDB_ALLOW_DOWNLOAD, row.get(3));
-                    }
-                }
-
-                // add new data
-                if (arg0.getLicense().getRights() != null) {
-                    tw.add(uri, DCTERMS_RIGHTS, arg0.getLicense().getRights());
-                }
+            ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
+            Resource uri = Resource.uriRef(uriString);
+            try {
+                Thing thing = ts.fetchThing(uri);
+                boolean hadRightsHolder = thing.getValue(DCTERMS_RIGHTS_HOLDER) != null;
+                thing.setValue(DCTERMS_RIGHTS, arg0.getLicense().getRights());
                 if (arg0.getLicense().getRightsHolderUri() != null) {
-                    tw.add(uri, DCTERMS_RIGHTS_HOLDER, Resource.uriRef(arg0.getLicense().getRightsHolderUri()));
+                    thing.setValue(DCTERMS_RIGHTS_HOLDER, Resource.uriRef(arg0.getLicense().getRightsHolderUri()));
                 } else if (arg0.getLicense().getRightsHolder() != null) {
-                    tw.add(uri, DCTERMS_RIGHTS_HOLDER, arg0.getLicense().getRightsHolder());
+                    thing.setValue(DCTERMS_RIGHTS_HOLDER, arg0.getLicense().getRightsHolder());
                 }
-                if (arg0.getLicense().getLicense() != null) {
-                    tw.add(uri, DCTERMS_LICENSE, arg0.getLicense().getLicense());
+                thing.setValue(DCTERMS_LICENSE, arg0.getLicense().getLicense());
+                thing.setValue(MMDB_ALLOW_DOWNLOAD, arg0.getLicense().isAllowDownload());
+                if (!hadRightsHolder || isAdmin || AccessControl.isCreator(arg0.getUser(), uriString)) {
+                    ts.save();
+                } else {
+                    result.setFailure(uriString, "Unauthorized");
                 }
-                tw.add(uri, MMDB_ALLOW_DOWNLOAD, arg0.getLicense().isAllowDownload());
-
-                result.addSuccess(uriString);
-            } else {
-                log.info("not setting license for " + uriString + ": unauthorized");
-                result.setFailure(uriString, "unauthorized");
+            } catch (OperatorException x) {
+                result.setFailure(uriString, "Server error");
             }
+            /*
+            Unifier uf = new Unifier();
+            uf.addPattern(uri, DCTERMS_RIGHTS, "rights", true);
+            uf.addPattern(uri, DCTERMS_RIGHTS_HOLDER, "rightsHolder", true);
+            uf.addPattern(uri, DCTERMS_LICENSE, "license", true);
+            uf.addPattern(uri, MMDB_ALLOW_DOWNLOAD, "allowDownload", true);
+            uf.setColumnNames("rights", "rightsHolder", "license", "allowDownload");
+            try {
+                TupeloStore.getInstance().getContext().perform(uf);
+            } catch (OperatorException e) {
+                log.warn("Could not get license information.", e);
+                throw (new ActionException("Could not get license information.", e));
+            }
+
+            // remove old data
+            for (Tuple<Resource> row : uf.getResult() ) {
+                if (row.get(0) != null) {
+                    tw.remove(uri, DCTERMS_RIGHTS, row.get(0));
+                }
+                if (row.get(1) != null) {
+                    tw.remove(uri, DCTERMS_RIGHTS_HOLDER, row.get(1));
+                }
+                if (row.get(2) != null) {
+                    tw.remove(uri, DCTERMS_LICENSE, row.get(2));
+                }
+                if (row.get(3) != null) {
+                    tw.remove(uri, MMDB_ALLOW_DOWNLOAD, row.get(3));
+                }
+            }
+
+            // add new data
+            if (arg0.getLicense().getRights() != null) {
+                tw.add(uri, DCTERMS_RIGHTS, arg0.getLicense().getRights());
+            }
+            if (arg0.getLicense().getRightsHolderUri() != null) {
+                tw.add(uri, DCTERMS_RIGHTS_HOLDER, Resource.uriRef(arg0.getLicense().getRightsHolderUri()));
+            } else if (arg0.getLicense().getRightsHolder() != null) {
+                tw.add(uri, DCTERMS_RIGHTS_HOLDER, arg0.getLicense().getRightsHolder());
+            }
+            if (arg0.getLicense().getLicense() != null) {
+                tw.add(uri, DCTERMS_LICENSE, arg0.getLicense().getLicense());
+            }
+            tw.add(uri, MMDB_ALLOW_DOWNLOAD, arg0.getLicense().isAllowDownload());
+            */
+            result.addSuccess(uriString);
         }
 
         try {

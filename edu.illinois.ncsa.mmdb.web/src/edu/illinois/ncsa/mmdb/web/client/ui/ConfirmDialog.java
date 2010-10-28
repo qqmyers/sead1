@@ -71,6 +71,8 @@ public class ConfirmDialog extends DialogBox {
         setText(title);
         init(includeCancelButton);
 
+        this.setWidth("300px");
+
         if (message != null) {
             content.add(new Label(message));
         }

@@ -69,6 +69,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.InitializeRoles;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLuceneResult;
+import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
@@ -218,16 +220,22 @@ public class HomePage extends Page {
                     initializeRoles.addClickHandler(new ClickHandler() {
                         public void onClick(ClickEvent event) {
                             initializeRoles.setEnabled(false);
-                            initializeRoles.setText("Setting default roles and permissions");
-                            dispatchAsync.execute(new InitializeRoles(), new AsyncCallback<EmptyResult>() {
-                                public void onFailure(Throwable caught) {
-                                    initializeRoles.setText("Default permissions failed");
-                                    initializeRoles.setEnabled(true);
-                                }
+                            ConfirmDialog cd = new ConfirmDialog("Initialize permissions", "Are you sure you want to initialize all roles and permissions?\nThis operation cannot be undone, and may affect who can access the system.");
+                            cd.addConfirmHandler(new ConfirmHandler() {
+                                @Override
+                                public void onConfirm(ConfirmEvent event) {
+                                    initializeRoles.setText("Setting default roles and permissions");
+                                    dispatchAsync.execute(new InitializeRoles(), new AsyncCallback<EmptyResult>() {
+                                        public void onFailure(Throwable caught) {
+                                            initializeRoles.setText("Default permissions failed");
+                                            initializeRoles.setEnabled(true);
+                                        }
 
-                                public void onSuccess(EmptyResult result) {
-                                    initializeRoles.setText("All roles and permissions set to default");
-                                    initializeRoles.setEnabled(true);
+                                        public void onSuccess(EmptyResult result) {
+                                            initializeRoles.setText("All roles and permissions set to default");
+                                            initializeRoles.setEnabled(true);
+                                        }
+                                    });
                                 }
                             });
                         }

@@ -64,10 +64,13 @@ import org.tupeloproject.rdf.terms.Rdfs;
 import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
-import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * Create users and roles specified in the server.properties file.
@@ -242,15 +245,13 @@ public class ContextSetupListener implements ServletContextListener {
         }
     }
 
-    private void createAccounts(Properties props) throws OperatorException, AuthenticationException {
+    private void createAccounts(Properties props) throws OperatorException, AuthenticationException, RBACException {
         Context context = TupeloStore.getInstance().getContext();
         ContextAuthentication auth = new ContextAuthentication(context);
-        RBAC rbac = new RBAC(context);
+        MediciRbac rbac = new MediciRbac(context);
 
-        // add permissions
-        rbac.addPermission(MMDB.ADMIN_ROLE, MMDB.VIEW_ADMIN_PAGES);
-        rbac.addPermission(MMDB.ADMIN_ROLE, MMDB.VIEW_MEMBER_PAGES);
-        rbac.addPermission(MMDB.REGULAR_MEMBER_ROLE, MMDB.VIEW_MEMBER_PAGES);
+        // ensure base RBAC ontology exists
+        rbac.createBaseOntology();
 
         // create accounts
         Set<String> keys = new HashSet<String>();
@@ -276,14 +277,39 @@ public class ContextSetupListener implements ServletContextListener {
                     // add roles
                     for (String role : props.getProperty(pre + ".roles", "").split("[,\\s]+") ) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                         if ("admin".equalsIgnoreCase(role)) { //$NON-NLS-1$
-                            rbac.addRole(userid, MMDB.ADMIN_ROLE);
+                            Resource adminRole = Resource.uriRef(DefaultRole.ADMINISTRATOR.getUri());
+                            Resource viewMemberPages = Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri());
+                            Resource viewAdminPages = Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri());
+                            Resource editRoles = Resource.uriRef(Permission.EDIT_ROLES.getUri());
+                            // FIXME this set of permissions is described in multiple places; kill those tiles!
+                            ensureRoleExists(DefaultRole.ADMINISTRATOR, rbac);
+                            log.info("Adding " + userid + " to Administrator role");
+                            rbac.addRole(userid, adminRole);
+                            // this admin needs to have admin permissions. if they don't, create them
+                            if (!rbac.checkPermission(userid, viewMemberPages) &&
+                                    !rbac.checkPermission(userid, viewAdminPages) &&
+                                    !rbac.checkPermission(userid, editRoles)) {
+                                log.info("User " + userid + " cannot administer access control: adding permissions to Administrator role");
+                                rbac.setPermissionValue(adminRole, viewMemberPages, RBAC.ALLOW);
+                                rbac.setPermissionValue(adminRole, viewAdminPages, RBAC.ALLOW);
+                                rbac.setPermissionValue(adminRole, editRoles, RBAC.ALLOW);
+                            }
                         }
                         if ("member".equalsIgnoreCase(role)) { //$NON-NLS-1$
-                            rbac.addRole(userid, MMDB.REGULAR_MEMBER_ROLE);
+                            ensureRoleExists(DefaultRole.VIEWER, rbac);
+                            rbac.addRole(userid, Resource.uriRef(DefaultRole.VIEWER.getUri()));
                         }
                     }
                 }
             }
+        }
+    }
+
+    void ensureRoleExists(DefaultRole role, MediciRbac rbac) throws OperatorException, RBACException {
+        Resource roleUri = Resource.uriRef(role.getUri());
+        if (!rbac.getRoles().contains(roleUri)) {
+            log.warn("WARNING: " + role.getName() + " role does not exist, creating it");
+            rbac.createRole(roleUri, role.getName(), role.getPermissions());
         }
     }
 }
