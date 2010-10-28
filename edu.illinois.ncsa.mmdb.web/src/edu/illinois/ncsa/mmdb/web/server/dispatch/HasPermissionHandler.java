@@ -83,8 +83,14 @@ public class HasPermissionHandler implements
         for (Permission permission : action.getPermissions() ) {
             Resource permissionUri = Resource.uriRef(permission.getUri());
             try {
+                log.debug("Checking if user " + userUri + " has permission " + permission.getLabel());
                 boolean hasPermission = false;
-                hasPermission = rbac.checkPermission(userUri, objectUri, permissionUri);
+                if (userUri.getString().endsWith("admin")) { // FIXME
+                    log.debug("User is admin, automatically has permission. FIXME!!!!!!"); // FIXME
+                    hasPermission = true;
+                } else {
+                    hasPermission = rbac.checkPermission(userUri, objectUri, permissionUri);
+                }
                 result.setIsPermitted(permission, hasPermission);
                 log.debug("User " + userUri + " " + (hasPermission ? "has" : "does not have") + " permission " + permission.getLabel());
             } catch (RBACException e) {
