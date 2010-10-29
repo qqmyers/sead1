@@ -302,6 +302,8 @@ public class UploadBlob extends AuthenticatedServlet {
                 String contentType = item.getContentType();
                 if (MimeMap.UNKNOWN_TYPE.equals(contentType)) {
                     contentType = TupeloStore.getInstance().getMimeMap().getContentTypeFor(fileName);
+                } else {
+                    TupeloStore.getInstance().getMimeMap().checkMimeType(contentType);
                 }
                 boolean isInMemory = item.isInMemory();
                 long sizeInBytes = item.getSize();
