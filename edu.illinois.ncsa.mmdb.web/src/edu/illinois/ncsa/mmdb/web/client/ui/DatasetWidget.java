@@ -65,8 +65,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
-import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
+import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
@@ -270,6 +270,10 @@ public class DatasetWidget extends Composite {
         DerivedDatasetsWidget derivedDatasetsWidget = new DerivedDatasetsWidget(uri, service);
         derivedDatasetsWidget.showDepth(4);
         rightColumn.add(derivedDatasetsWidget);
+
+        // relationships widget
+        ShowRelationshipsWidget showRelationshipsWidget = new ShowRelationshipsWidget(uri, service);
+        rightColumn.add(showRelationshipsWidget);
 
         // license widget
         final LicenseWidget license = new LicenseWidget(uri, service, true, false, false);

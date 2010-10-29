@@ -39,9 +39,11 @@
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 
@@ -65,6 +67,17 @@ public class ShowRelationshipsWidget extends Composite {
             titleLabel.addStyleName("datasetRightColHeading");
             mainContainer.add(titleLabel);
         }
+
+        //Disclosure panels created dynamically based on relationship type
+        DisclosurePanel disclosurePanel = new DisclosurePanel("Relates To");
+        //disclosurePanel.addStyleName("datasetDisclosurePanel");
+        //disclosurePanel.setOpen(true);
+        disclosurePanel.setAnimationEnabled(true);
+
+        SimplePanel mainPanel = new SimplePanel();
+
+        disclosurePanel.setContent(mainPanel);
+        mainContainer.add(disclosurePanel);
 
         previews = new FlexTable();
         previews.setWidth("150px");

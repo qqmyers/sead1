@@ -103,6 +103,8 @@ public class CreateRelationshipsWidget extends Composite {
         this.selected = selected;
 
         mainPanel = new FlowPanel();
+        //commented out for now, until selected
+        //mainPanel.addStyleName("CreateRelationshipsContainer");
         initWidget(mainPanel);
 
         Label createRelationships = new Label("Create Relationship");
