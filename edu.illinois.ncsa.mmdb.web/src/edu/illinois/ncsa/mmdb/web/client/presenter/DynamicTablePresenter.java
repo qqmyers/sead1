@@ -129,7 +129,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         super(display, eventBus);
         this.dispatch = dispatch;
 
-        changeViewType(MMDB.getSessionPreference(getViewTypePreference(), DynamicTableView.LIST_VIEW_TYPE), MMDB.getSessionPreference(getViewSizeTypePreference(), DynamicTableView.PAGE_SIZE_X1));
+        setViewType(MMDB.getSessionPreference(getViewTypePreference(), DynamicTableView.LIST_VIEW_TYPE), MMDB.getSessionPreference(getViewSizeTypePreference(), DynamicTableView.PAGE_SIZE_X1));
 
         addHandler(RefreshEvent.TYPE, new RefreshHandler() {
             @Override
@@ -219,6 +219,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         currentPage = page;
         display.setPage(page);
         if (rememberPageNumber()) {
+            GWT.log("Remembering that we're on page " + page);
             MMDB.getSessionState().setPage(getPageKey(), page); // remember page number in session
         }
     }
@@ -231,7 +232,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
                 @Override
                 public void onValueChange(ValueChangeEvent<Integer> event) {
                     int page = event.getValue();
-                    GWT.log("Page changed to " + page);
+                    GWT.log("User changed page to " + page);
                     setPage(page);
                     getContent();
                 }
@@ -277,7 +278,9 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         }
 
         if (rememberPageNumber()) {
-            setPage(MMDB.getSessionState().getPage(getPageKey())); // restore last-viewed page #
+            int rememberedPage = MMDB.getSessionState().getPage(getPageKey());
+            GWT.log("Setting page to remembered page " + rememberedPage);
+            setPage(rememberedPage);
         }
 
         getContent();
@@ -288,12 +291,26 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
     }
 
     /**
+     * Change the view type. Adjust the page according to the current page on
+     * the previous view type.
      * 
      * @param viewType
+     * @param sizeType
      */
     protected void changeViewType(String viewType, String sizeType) {
         int oldPage = currentPage;
         int oldPageSize = pageSize;
+        setViewType(viewType, sizeType);
+        setPage(computeNewPage(oldPage, oldPageSize));
+    }
+
+    /**
+     * Set the view type. Do not adjust the page according to any existing
+     * currentPage value.
+     * 
+     * @param viewType
+     */
+    protected void setViewType(String viewType, String sizeType) {
         this.viewType = viewType;
         display.setViewType(viewType);
         MMDB.setSessionPreference(getViewTypePreference(), viewType);
@@ -335,7 +352,6 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
             viewTypePresenter = gridPresenter;
             display.setContentView(gridView);
         }
-        setPage(computeNewPage(oldPage, oldPageSize));
     }
 
     public int getPageSize() {
