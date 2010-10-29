@@ -56,10 +56,13 @@ import org.tupeloproject.client.HttpTupeloClient;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
@@ -71,6 +74,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
+import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
  * Create users and roles specified in the server.properties file.
@@ -138,6 +142,21 @@ public class ContextSetupListener implements ServletContextListener {
             } catch (Exception e) {
                 log.error("Could not set context for extraction service.", e);
             }
+        }
+
+        // FIXME remove this is to add all mime-types
+        Unifier uf = new Unifier();
+        uf.addPattern("s", Rdf.TYPE, Cet.DATASET);
+        uf.addPattern("s", Dc.FORMAT, "f");
+        uf.setColumnNames("f");
+        try {
+            TupeloStore.getInstance().getContext().perform(uf);
+        } catch (OperatorException e) {
+            log.error("Could not check mimeformats.", e);
+        }
+        MimeMap mimemap = TupeloStore.getInstance().getMimeMap();
+        for (Tuple<Resource> row : uf.getResult() ) {
+            mimemap.checkMimeType(row.get(0).getString());
         }
 
         // mail properties
