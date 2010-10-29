@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -212,9 +213,7 @@ public class UserManagementPage extends Composite {
                                     return o1.getName().compareToIgnoreCase(o2.getName());
                                 }
                             });
-                            for (PersonBean user : users ) {
-                                createRow(user);
-                            }
+                            createRows(users);
                         }
                     }
                 });
@@ -226,8 +225,12 @@ public class UserManagementPage extends Composite {
      * 
      * @param user
      */
-    protected void createRow(final PersonBean user) {
-
+    protected void createRows(final List<PersonBean> users) {
+        if (users.size() == 0) {
+            return;
+        }
+        final PersonBean user = users.get(0);
+        final List<PersonBean> rest = users.subList(1, users.size());
         dispatchAsync.execute(new GetRoles(user.getUri()), new AsyncCallback<GetRolesResult>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -238,7 +241,6 @@ public class UserManagementPage extends Composite {
                 Set<String> roles = result.getRoles();
                 FlexTable usersTable = roles.size() == 0 ? inactiveUsersTable : activeUsersTable;
 
-                // insertion sort
                 int row = usersTable.getRowCount() + 1;
 
                 usersTable.setText(row, 0, user.getName());
@@ -262,6 +264,7 @@ public class UserManagementPage extends Composite {
                     });
                     usersTable.setWidget(row, col, box);
                 }
+                createRows(rest);
             }
         });
     }
