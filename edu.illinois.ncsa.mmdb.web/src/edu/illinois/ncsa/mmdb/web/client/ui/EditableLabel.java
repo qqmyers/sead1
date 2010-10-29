@@ -38,6 +38,7 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -56,6 +57,7 @@ import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -64,6 +66,7 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
     Label           label;
     boolean         isEditable = true;
     String          editableStyleName;
+    Image           pencilIcon;
 
     public EditableLabel(String text) {
         super();
@@ -91,11 +94,20 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
                 label.removeStyleName("editHighlight");
             }
         });
+        pencilIcon = new Image("images/accessories-text-editor.png"); // FIXME magic number antipattern
+        panel.add(pencilIcon);
+        pencilIcon.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                displayEditControls();
+            }
+        });
         initWidget(panel);
     }
 
     public void displayEditControls() {
         panel.remove(label);
+        panel.remove(pencilIcon);
         HorizontalPanel editPanel = new HorizontalPanel();
         if (editableStyleName != null) {
             editPanel.addStyleName(editableStyleName);
@@ -143,6 +155,9 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
     public void cancel() {
         panel.clear();
         panel.add(label);
+        if (isEditable) {
+            panel.add(pencilIcon);
+        }
     }
 
     public void setText(String newValue) {
@@ -159,7 +174,16 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
     }
 
     public void setEditable(boolean isEditable) {
-        label.setTitle("");
+        if (this.isEditable == isEditable) {
+            return;
+        }
+        if (!isEditable) {
+            label.setTitle("");
+            GWT.log("'" + label.getText() + "' is not editable, removing pencil icon");
+            panel.remove(pencilIcon);
+        } else {
+            panel.add(pencilIcon);
+        }
         this.isEditable = isEditable;
     }
 
