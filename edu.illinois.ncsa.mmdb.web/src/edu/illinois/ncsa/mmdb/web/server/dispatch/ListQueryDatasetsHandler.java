@@ -144,8 +144,8 @@ public class ListQueryDatasetsHandler implements
             u.addPattern("s", Dc.DATE, "d");
             u.addColumnName("d");
             u.addPattern("s", Dc.FORMAT, "f");
-            u.addPattern("m", Dc.FORMAT, "f");
-            u.addPattern("m", MimeMap.MIME_CATEGORY, "c");
+            u.addPattern("m", Dc.FORMAT, "f", true);
+            u.addPattern("m", MimeMap.MIME_CATEGORY, "c", true);
             u.addColumnName("c");
             u.addOrderBy("c", !desc);
             u.addOrderBy("d", false);
