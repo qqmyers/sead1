@@ -41,24 +41,17 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.Date;
-
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.kernel.TripleWriter;
-import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
-import org.tupeloproject.rdf.terms.Dc;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
-import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
  * Create new relationship between datasets.
@@ -83,6 +76,7 @@ public class SetRelationshipHandler implements ActionHandler<SetRelationship, Se
         Resource dataset2 = Resource.uriRef(arg0.getUri2());
         String type = arg0.getType();
 
+        /*
         //create relationship - add tuples
         Unifier uf = new Unifier();
 
@@ -118,6 +112,7 @@ public class SetRelationshipHandler implements ActionHandler<SetRelationship, Se
                 throw (new ActionException("Could not create relationship.", e));
             }
         }
+        */
 
         //done
         return new SetRelationshipResult();

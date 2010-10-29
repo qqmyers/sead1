@@ -130,9 +130,16 @@ public class SelectedDatasetsPage extends Page {
                 } else {
                     rightcolumn.add(relationshipWidget);
                 }
-                mainLayoutPanel.add(selectedPanel);
+            }
+
+            @Override
+            public void onDenied() {
+                Label notAllowed = new Label("You do not have permission to create relationships");
+                rightcolumn.add(notAllowed);
             }
         });
+
+        mainLayoutPanel.add(selectedPanel);
 
     }
 
@@ -148,14 +155,20 @@ public class SelectedDatasetsPage extends Page {
             }
 
             @Override
-            public void onSuccess(GetDatasetResult result) {
+            public void onSuccess(final GetDatasetResult result) {
 
                 final String value = result.getDataset().getUri();
                 db = result.getDataset();
                 datasets.add(db);
                 leftcolumn.add(new DatasetInfoWidget(result.getDataset(), true));
 
-                relationshipWidget.addToList(shortenTitle(result.getDataset().getTitle()), value);
+                //create relationship - widget (if allowed)
+                rbac.doIfAllowed(Permission.ADD_RELATIONSHIP, new PermissionCallback() {
+                    @Override
+                    public void onAllowed() {
+                        relationshipWidget.addToList(shortenTitle(result.getDataset().getTitle()), value);
+                    }
+                });
             }
         });
     }

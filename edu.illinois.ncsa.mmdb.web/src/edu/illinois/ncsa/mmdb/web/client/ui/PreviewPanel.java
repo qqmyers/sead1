@@ -670,7 +670,7 @@ public class PreviewPanel extends Composite {
         Javaview.setHTML("<APPLET name=jvLite code='jvLite.class' width=480 " +
                 "height=360 archive='plugins/jvLite.jar'>" +
                 "<PARAM NAME='model' VALUE='" + url + ".obj" + "'>" +
-                //"<PARAM NAME='model' VALUE='images/metal.jpg'>" +
+                "<PARAM NAME='border' VALUE='hide'>" +
                 "</APPLET>");
         previewPanel.add(Javaview);
     }
