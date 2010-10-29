@@ -41,17 +41,24 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.Date;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.Dc;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
  * Create new relationship between datasets.
@@ -76,7 +83,6 @@ public class SetRelationshipHandler implements ActionHandler<SetRelationship, Se
         Resource dataset2 = Resource.uriRef(arg0.getUri2());
         String type = arg0.getType();
 
-        /*
         //create relationship - add tuples
         Unifier uf = new Unifier();
 
@@ -87,14 +93,31 @@ public class SetRelationshipHandler implements ActionHandler<SetRelationship, Se
         uf.addPattern("relationship", Dc.CREATOR, "creator");
         uf.addPattern("relationship", Dc.DATE, "date");
 
-        uf.setColumnNames("type", "rightsHolder");
+        uf.setColumnNames("relationship", "type", "dataset", "creator", "date");
         try {
             TupeloStore.getInstance().getContext().perform(uf);
         } catch (OperatorException e) {
-            log.warn("Could not get license information.", e);
-            throw (new ActionException("Could not ge license information.", e));
+            log.warn("Could not create relationship.", e);
+            throw (new ActionException("Could not create relationship.", e));
         }
-        */
+
+        TripleWriter tw = new TripleWriter();
+
+        Resource uri = Resource.uriRef();
+        tw.add(dataset, MMDB_RELATIONSHIP, uri);
+        tw.add(uri, MMDB_RELATIONSHIP_TYPE, type);
+        tw.add(uri, MMDB_RELATIONSHIP_DATASET, dataset2);
+        tw.add(uri, Dc.CREATOR, person);
+        tw.add(uri, Dc.DATE, new Date());
+
+        if ((tw.getToAdd().size() != 0)) {
+            try {
+                TupeloStore.getInstance().getContext().perform(tw);
+            } catch (OperatorException e) {
+                log.warn("Could not create relationship.", e);
+                throw (new ActionException("Could not create relationship.", e));
+            }
+        }
 
         //done
         return new SetRelationshipResult();

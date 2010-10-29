@@ -51,10 +51,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * View of the selected datasets
@@ -64,15 +67,19 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  */
 public class SelectedDatasetsPage extends Page {
 
-    private final FlowPanel                 selectedPanel;
+    private final FlowPanel           selectedPanel;
 
-    private final FlowPanel                 leftcolumn;
-    private final FlowPanel                 rightcolumn;
+    private final MyDispatchAsync     service;
 
-    private final int                       num;
-    private final Set<DatasetBean>          datasets;
+    private final FlowPanel           leftcolumn;
+    private final FlowPanel           rightcolumn;
 
-    private final CreateRelationshipsWidget relationshipWidget;
+    private final int                 num;
+    private final Set<DatasetBean>    datasets;
+
+    private CreateRelationshipsWidget relationshipWidget;
+
+    private final PermissionUtil      rbac;
 
     /**
      * Create an instance of selected datasets view page.
@@ -82,6 +89,9 @@ public class SelectedDatasetsPage extends Page {
     public SelectedDatasetsPage(MyDispatchAsync dispatchAsync) {
 
         super("Selected Datasets", dispatchAsync);
+
+        rbac = new PermissionUtil(dispatchAsync);
+        service = dispatchAsync;
 
         //user interface
         selectedPanel = new FlowPanel();
@@ -110,15 +120,19 @@ public class SelectedDatasetsPage extends Page {
             fetchDataset(datasetUri);
         }
 
-        //create relationship - widget
-        relationshipWidget = new CreateRelationshipsWidget(datasets, selectedDatasets, dispatchAsync);
-        if (selectedDatasets.size() == 1) {
-            rightcolumn.add(new Label("You cannot create a relationship with 1 dataset"));
-        } else {
-            rightcolumn.add(relationshipWidget);
-        }
-
-        mainLayoutPanel.add(selectedPanel);
+        //create relationship - widget (if allowed)
+        rbac.doIfAllowed(Permission.ADD_RELATIONSHIP, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                relationshipWidget = new CreateRelationshipsWidget(datasets, selectedDatasets, service);
+                if (selectedDatasets.size() == 1) {
+                    rightcolumn.add(new Label("You cannot create a relationship with 1 dataset"));
+                } else {
+                    rightcolumn.add(relationshipWidget);
+                }
+                mainLayoutPanel.add(selectedPanel);
+            }
+        });
 
     }
 
