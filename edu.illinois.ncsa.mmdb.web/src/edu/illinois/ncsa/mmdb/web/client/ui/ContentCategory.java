@@ -58,22 +58,27 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMimeTypeCategoriesResult;
 
 public class ContentCategory {
     private static Map<String, String> categories = new HashMap<String, String>();
+    private static long                age        = 0;
 
     public static void initialize() {
-        MMDB.dispatchAsync.execute(new GetMimeTypeCategories(), new AsyncCallback<GetMimeTypeCategoriesResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Could not get mime to category mappings.", caught);
-            }
+        if (System.currentTimeMillis() > age + 60000) {
+            age = System.currentTimeMillis();
+            MMDB.dispatchAsync.execute(new GetMimeTypeCategories(), new AsyncCallback<GetMimeTypeCategoriesResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Could not get mime to category mappings.", caught);
+                }
 
-            @Override
-            public void onSuccess(GetMimeTypeCategoriesResult result) {
-                categories = result.getCategories();
-            }
-        });
+                @Override
+                public void onSuccess(GetMimeTypeCategoriesResult result) {
+                    categories = result.getCategories();
+                }
+            });
+        }
     }
 
     public static String getCategory(String mimeType) {
+        initialize();
         String category = categories.get(mimeType);
         if (category != null) {
             return category;
