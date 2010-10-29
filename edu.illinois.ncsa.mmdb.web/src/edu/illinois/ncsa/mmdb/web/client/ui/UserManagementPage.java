@@ -51,9 +51,14 @@ import java.util.Set;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -91,7 +96,8 @@ public class UserManagementPage extends Composite {
 
     private final Widget                   pageTitle;
 
-    private final FlexTable                usersTable;
+    private final FlexTable                activeUsersTable;
+    private final FlexTable                inactiveUsersTable;
 
     private final MyDispatchAsync          dispatchAsync;
 
@@ -113,8 +119,10 @@ public class UserManagementPage extends Composite {
         mainPanel.add(pAdmin);
 
         // users table
-        usersTable = createUsersTable();
-        mainPanel.add(usersTable);
+        activeUsersTable = createUsersTable();
+        inactiveUsersTable = createUsersTable();
+        mainPanel.add(discloseAs(activeUsersTable, "Active users", true));
+        mainPanel.add(discloseAs(inactiveUsersTable, "Inactive users", "Inactive users (open to activate/select roles)", false));
 
         columnByRole = new HashMap<String, Integer>();
         // load users and roles from server side
@@ -135,13 +143,39 @@ public class UserManagementPage extends Composite {
                     if (!roleUri.equals(DefaultRole.OWNER.getUri())) { // don't allow admin to add or remove from special "owner" role.
                         String roleName = entry.getValue();
                         columnByRole.put(roleUri, col);
-                        usersTable.setText(0, col, roleName);
+                        activeUsersTable.setText(0, col, roleName);
+                        inactiveUsersTable.setText(0, col, roleName);
                         col++;
                     }
                 }
                 loadUsers();
             }
         });
+    }
+
+    DisclosurePanel discloseAs(Widget w, String openTitle, boolean open) {
+        return discloseAs(w, openTitle, openTitle, open);
+    }
+
+    DisclosurePanel discloseAs(Widget w, final String openTitle, final String closedTitle, boolean open) {
+        final DisclosurePanel dp = new DisclosurePanel(open ? openTitle : closedTitle);
+        dp.setAnimationEnabled(true);
+        dp.setOpen(open);
+
+        dp.add(w);
+        dp.addOpenHandler(new OpenHandler<DisclosurePanel>() {
+            @Override
+            public void onOpen(OpenEvent<DisclosurePanel> event) {
+                dp.getHeaderTextAccessor().setText(openTitle);
+            }
+        });
+        dp.addCloseHandler(new CloseHandler<DisclosurePanel>() {
+            @Override
+            public void onClose(CloseEvent<DisclosurePanel> event) {
+                dp.getHeaderTextAccessor().setText(closedTitle);
+            }
+        });
+        return dp;
     }
 
     /**
@@ -160,7 +194,7 @@ public class UserManagementPage extends Composite {
                     public void onSuccess(GetUsersResult result) {
                         ArrayList<PersonBean> users = result.getUsers();
                         if (users.size() == 0) {
-                            usersTable.setText(usersTable.getRowCount() + 1, 0, "No users found.");
+                            activeUsersTable.setText(activeUsersTable.getRowCount() + 1, 0, "No users found.");
                         } else {
                             // sort users by name
                             Collections.sort(users, new Comparator<PersonBean>() {
@@ -173,9 +207,9 @@ public class UserManagementPage extends Composite {
                                         return -1;
                                     }
                                     if (o1.getName().equals(o2.getName())) {
-                                        return o1.getEmail().compareTo(o2.getEmail());
+                                        return o1.getEmail().compareToIgnoreCase(o2.getEmail());
                                     }
-                                    return o1.getName().compareTo(o2.getName());
+                                    return o1.getName().compareToIgnoreCase(o2.getName());
                                 }
                             });
                             for (PersonBean user : users ) {
@@ -194,15 +228,6 @@ public class UserManagementPage extends Composite {
      */
     protected void createRow(final PersonBean user) {
 
-        final int row = usersTable.getRowCount() + 1;
-
-        usersTable.setText(row, 0, user.getName());
-        usersTable.setText(row, 1, user.getEmail());
-
-        if ((user.getName() == null) && (user.getEmail() == null)) {
-            usersTable.setText(row, 0, user.getUri());
-        }
-
         dispatchAsync.execute(new GetRoles(user.getUri()), new AsyncCallback<GetRolesResult>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -211,6 +236,18 @@ public class UserManagementPage extends Composite {
             @Override
             public void onSuccess(GetRolesResult result) {
                 Set<String> roles = result.getRoles();
+                FlexTable usersTable = roles.size() == 0 ? inactiveUsersTable : activeUsersTable;
+
+                // insertion sort
+                int row = usersTable.getRowCount() + 1;
+
+                usersTable.setText(row, 0, user.getName());
+                usersTable.setText(row, 1, user.getEmail());
+
+                if ((user.getName() == null) && (user.getEmail() == null)) {
+                    usersTable.setText(row, 0, user.getUri());
+                }
+
                 GWT.log("user " + user.getUri() + " belongs to roles " + roles);
                 for (Map.Entry<String, Integer> entry : columnByRole.entrySet() ) {
                     final String roleUri = entry.getKey();
