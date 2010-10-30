@@ -129,6 +129,8 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
         super(display, eventBus);
         this.dispatch = dispatch;
 
+        sortKey = MMDB.getSessionPreference(getViewSortPreference(), "date-desc");
+        display.setOrder(sortKey);
         setViewType(MMDB.getSessionPreference(getViewTypePreference(), DynamicTableView.LIST_VIEW_TYPE), MMDB.getSessionPreference(getViewSizeTypePreference(), DynamicTableView.PAGE_SIZE_X1));
 
         addHandler(RefreshEvent.TYPE, new RefreshHandler() {
@@ -248,6 +250,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
                     sortKey = event.getValue();
                     display.setOrder(sortKey);
                     setPage(1); // FIXME stay on same page?
+                    MMDB.setSessionPreference(getViewSortPreference(), sortKey);
                     getContent();
                 }
             });
@@ -371,7 +374,15 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
     }
 
     /** Override to return the view type preference key for this kind of table */
-    protected abstract String getViewTypePreference();
+    protected String getViewTypePreference() {
+        return MMDB.DATASET_VIEW_TYPE_PREFERENCE;
+    }
 
-    protected abstract String getViewSizeTypePreference();
+    protected String getViewSizeTypePreference() {
+        return MMDB.DATASET_VIEWSIZE_TYPE_PREFERENCE;
+    }
+
+    protected String getViewSortPreference() {
+        return MMDB.DATASET_VIEW_SORT_PREFERENCE;
+    }
 }

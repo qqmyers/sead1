@@ -110,13 +110,19 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
  * @author Rob Kooper
  */
 public class MMDB implements EntryPoint, ValueChangeHandler<String> {
+    // FIXME move these into UserSessionState?
+    public static final String          DATASET_VIEW_TYPE_PREFERENCE     = "datasetViewType";
+    public static final String          DATASET_VIEWSIZE_TYPE_PREFERENCE = "datasetViewSizeType";
+    public static final String          COLLECTION_VIEW_TYPE_PREFERENCE  = "collectionViewType";
+    public static final String          DATASET_VIEW_SORT_PREFERENCE     = "datasetViewSort";
+
     /**
      * The message displayed to the user when the server cannot be reached or
      * returns an error.
      */
-    public static final String          SERVER_ERROR         = "An error occurred while "
-                                                                     + "attempting to contact the server. Please check your network "
-                                                                     + "connection and try again.";
+    public static final String          SERVER_ERROR                     = "An error occurred while "
+                                                                                 + "attempting to contact the server. Please check your network "
+                                                                                 + "connection and try again.";
 
     public static ArrayList<String>     groups;
 
@@ -125,10 +131,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * go through this endpoint. To learn more look up gwt-dispatch and the
      * command pattern.
      */
-    public static final MyDispatchAsync dispatchAsync        = new MyDispatchAsync();
+    public static final MyDispatchAsync dispatchAsync                    = new MyDispatchAsync();
 
     /** Event bus for propagating events in the interface **/
-    public static final HandlerManager  eventBus             = new HandlerManager(null);
+    public static final HandlerManager  eventBus                         = new HandlerManager(null);
 
     /** The upload button */
     private Anchor                      uploadButton;
@@ -137,14 +143,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private FlowPanel                   uploadPanel;
 
     /** Main content panel **/
-    private static final FlowPanel      mainContainer        = new FlowPanel();
+    private static final FlowPanel      mainContainer                    = new FlowPanel();
 
     /** Place support for history management **/
     private PlaceService                placeService;
 
     public static LoginStatusWidget     loginStatusWidget;
 
-    private String                      previousHistoryToken = new String();
+    private String                      previousHistoryToken             = new String();
 
     private Label                       breadcrumb;
 
@@ -678,11 +684,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             LoginPage.checkRestAuth(onLoggedIn, onNotLoggedIn);
         }
     }
-
-    // FIXME move these into UserSessionState?
-    public static final String DATASET_VIEW_TYPE_PREFERENCE     = "datasetViewType";
-    public static final String DATASET_VIEWSIZE_TYPE_PREFERENCE = "datasetViewSizeType";
-    public static final String COLLECTION_VIEW_TYPE_PREFERENCE  = "collectionViewType";
 
     // session state
     public static UserSessionState getSessionState() {

@@ -44,7 +44,6 @@ package edu.illinois.ncsa.mmdb.web.client.presenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 
-import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryDatasets;
@@ -94,16 +93,6 @@ public class TagTablePresenter extends DynamicTablePresenter<DatasetBean> {
 
     public String getTagName() {
         return tagName;
-    }
-
-    @Override
-    protected String getViewTypePreference() {
-        return MMDB.DATASET_VIEW_TYPE_PREFERENCE;
-    }
-
-    @Override
-    protected String getViewSizeTypePreference() {
-        return MMDB.DATASET_VIEWSIZE_TYPE_PREFERENCE;
     }
 
     @Override
