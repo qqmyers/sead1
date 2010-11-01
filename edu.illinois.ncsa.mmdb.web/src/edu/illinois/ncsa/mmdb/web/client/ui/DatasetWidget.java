@@ -257,6 +257,13 @@ public class DatasetWidget extends Composite {
         infoPanel = createInfoPanel(result.getDataset());
         rightColumn.add(infoPanel);
 
+        // license widget
+        final LicenseWidget license = new LicenseWidget(uri, service, true, false, false);
+        rightColumn.add(license);
+
+        // social items
+        rightColumn.add(new SocialWidget(uri, service));
+
         // tag widget
         rightColumn.add(new TagsWidget(uri, service));
 
@@ -275,13 +282,7 @@ public class DatasetWidget extends Composite {
         ShowRelationshipsWidget showRelationshipsWidget = new ShowRelationshipsWidget(uri, service);
         rightColumn.add(showRelationshipsWidget);
 
-        // license widget
-        final LicenseWidget license = new LicenseWidget(uri, service, true, false, false);
-        rightColumn.add(license);
-
-        // social items
-        rightColumn.add(new SocialWidget(uri, service));
-
+        // additional operations based on 
         rbac.withPermissions(uri, new PermissionsCallback() {
             @Override
             public void onPermissions(final HasPermissionResult p) {
