@@ -57,6 +57,7 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetLicense;
 import edu.illinois.ncsa.mmdb.web.server.AccessControl;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
@@ -90,15 +91,20 @@ public class SetLicenseHandler implements ActionHandler<SetLicense, BatchResult>
             ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
             Resource uri = Resource.uriRef(uriString);
             try {
+                LicenseResult license = arg0.getLicense();
                 Thing thing = ts.fetchThing(uri);
                 boolean hadRightsHolder = thing.getValue(DCTERMS_RIGHTS_HOLDER) != null;
-                thing.setValue(DCTERMS_RIGHTS, arg0.getLicense().getRights());
-                if (arg0.getLicense().getRightsHolderUri() != null) {
-                    thing.setValue(DCTERMS_RIGHTS_HOLDER, Resource.uriRef(arg0.getLicense().getRightsHolderUri()));
-                } else if (arg0.getLicense().getRightsHolder() != null) {
-                    thing.setValue(DCTERMS_RIGHTS_HOLDER, arg0.getLicense().getRightsHolder());
+                if (license.getRights() != null) {
+                    thing.setValue(DCTERMS_RIGHTS, license.getRights());
                 }
-                thing.setValue(DCTERMS_LICENSE, arg0.getLicense().getLicense());
+                if (license.getRightsHolderUri() != null) {
+                    thing.setValue(DCTERMS_RIGHTS_HOLDER, Resource.uriRef(license.getRightsHolderUri()));
+                } else if (license.getRightsHolder() != null) {
+                    thing.setValue(DCTERMS_RIGHTS_HOLDER, license.getRightsHolder());
+                }
+                if (license.getLicense() != null) {
+                    thing.setValue(DCTERMS_LICENSE, license.getLicense());
+                }
                 thing.setValue(MMDB_ALLOW_DOWNLOAD, arg0.getLicense().isAllowDownload());
                 if (!hadRightsHolder || isAdmin || AccessControl.isCreator(arg0.getUser(), uriString)) {
                     ts.save();
