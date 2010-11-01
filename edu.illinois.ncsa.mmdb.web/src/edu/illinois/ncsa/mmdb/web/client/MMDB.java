@@ -66,8 +66,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
@@ -494,6 +494,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         } else if (token.startsWith("sparql")) {
             showSparqlPage();
         } else if (token.startsWith("viewSelected")) {
+            showSelected(true);
+        } else if (token.startsWith("editRelationships")) {
             showSelected(true);
         } else if (token.startsWith("noneSelected")) {
             showSelected(false);

@@ -50,6 +50,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -194,6 +195,16 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 BatchAddMetadataPresenter presenter = new BatchAddMetadataPresenter(dispatch, eventBus, view, sessionState.getSelectedDatasets());
                 presenter.bind();
                 view.show();
+            }
+        });
+
+        display.addMenuAction("Add/edit relationships", new Command() {
+            @Override
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
+                }
+                History.newItem("editRelationships");
             }
         });
 
