@@ -38,24 +38,37 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationship;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class ShowRelationshipsWidget extends Composite {
     private final FlowPanel mainContainer;
     private final FlexTable previews;
+    int                     count;
+    DisclosurePanel         disclosurePanel;
 
     public ShowRelationshipsWidget(String uri, MyDispatchAsync service) {
         this(uri, service, true);
     }
 
     public ShowRelationshipsWidget(final String uri, final MyDispatchAsync service, boolean withTitle) {
+
+        count = 0;
 
         mainContainer = new FlowPanel();
         mainContainer.addStyleName("datasetRightColSection");
@@ -68,20 +81,62 @@ public class ShowRelationshipsWidget extends Composite {
             mainContainer.add(titleLabel);
         }
 
-        //Disclosure panels created dynamically based on relationship type
-        DisclosurePanel disclosurePanel = new DisclosurePanel("Relates To");
-        //disclosurePanel.addStyleName("datasetDisclosurePanel");
-        //disclosurePanel.setOpen(true);
+        disclosurePanel = new DisclosurePanel("Relates To (" + count + ")");
+        disclosurePanel.setVisible(true);
         disclosurePanel.setAnimationEnabled(true);
-
-        SimplePanel mainPanel = new SimplePanel();
-
-        disclosurePanel.setContent(mainPanel);
-        mainContainer.add(disclosurePanel);
 
         previews = new FlexTable();
         previews.setWidth("150px");
-        mainContainer.add(previews);
+
+        disclosurePanel.add(previews);
+
+        mainContainer.add(disclosurePanel);
+
+        service.execute(new GetRelationship(uri), new AsyncCallback<GetRelationshipResult>() {
+            @Override
+            public void onFailure(Throwable arg0) {
+                // TODO Auto-generated method stub
+                GWT.log("ERROR SHOWING RELATIONSHIPS");
+            }
+
+            @Override
+            public void onSuccess(GetRelationshipResult arg0) {
+                HashMap<DatasetBean, String> rt = arg0.getRelationships();
+                for (Map.Entry<DatasetBean, String> db : rt.entrySet() ) {
+                    DatasetBean uri = db.getKey();
+                    //String type = db.getValue();
+                    addDataset(uri);
+                }
+
+                count = rt.size();
+
+                disclosurePanel.getHeaderTextAccessor().setText("Relates To (" + count + ")");
+                mainContainer.setVisible(previews.getRowCount() > 0);
+
+            }
+        });
+
+    }
+
+    private void addDataset(DatasetBean ds) {
+        String url = "dataset?id=" + ds.getUri();
+        PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url);
+        String title = ds.getTitle();
+        title = title.length() > 15 ? title.substring(0, 15) + "..." : title;
+        Hyperlink link = new Hyperlink(title, url);
+        int n = previews.getRowCount();
+
+        previews.setWidget(n++, 0, pw);
+        previews.setWidget(n++, 0, link);
+    }
+
+    //Disclosure panels created dynamically based on relationship type
+    @SuppressWarnings("unused")
+    private void createPanel(String type) {
+        //types.add(type);
+        DisclosurePanel disclosurePanel = new DisclosurePanel(type);
+        disclosurePanel.setAnimationEnabled(true);
+        mainContainer.add(disclosurePanel);
     }
 
 }

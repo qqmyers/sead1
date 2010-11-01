@@ -232,7 +232,7 @@ public class CreateRelationshipsWidget extends Composite {
         Hyperlink hyperlink2 = new Hyperlink(dataset2.getTitle(), "dataset?id=" + uri2);
         hyperlink2.addStyleName("relationshipHyperlink");
         submitted.addStyleName("relationshipCreated");
-        Label newRelationship1 = new Label("[Test] Relationship Created:");
+        Label newRelationship1 = new Label("Relationship Created:");
         Label newRelationship2 = new Label(type);
         submitted.add(newRelationship1);
         submitted.add(hyperlink1);

@@ -38,7 +38,7 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import java.util.List;
+import java.util.HashMap;
 
 import net.customware.gwt.dispatch.shared.Result;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -52,21 +52,22 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 @SuppressWarnings("serial")
 public class GetRelationshipResult implements Result {
-    List<DatasetBean> derivedFrom;
+
+    HashMap<DatasetBean, String> relatedTo;
 
     public GetRelationshipResult() {
     }
 
-    public GetRelationshipResult(List<DatasetBean> relatedTo) {
-        setDerivedFrom(derivedFrom);
+    public GetRelationshipResult(HashMap<DatasetBean, String> dataset) {
+        setRelatedTo(dataset);
     }
 
-    public List<DatasetBean> getRelationships() {
-        return derivedFrom;
+    public HashMap<DatasetBean, String> getRelationships() {
+        return relatedTo;
     }
 
-    public void setDerivedFrom(List<DatasetBean> derivedFrom) {
-        this.derivedFrom = derivedFrom;
+    public void setRelatedTo(HashMap<DatasetBean, String> relatedTo) {
+        this.relatedTo = relatedTo;
     }
 
 }

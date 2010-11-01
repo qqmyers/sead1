@@ -76,6 +76,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMimeTypeCategoriesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPermissionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRecentActivityHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRelationshipHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRolesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUploadDestinationHandler;
@@ -164,6 +165,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new SetPermissionsHandler());
         DispatchUtil.registerHandler(new InitializeRolesHandler());
         DispatchUtil.registerHandler(new SetRelationshipHandler());
+        DispatchUtil.registerHandler(new GetRelationshipHandler());
         DispatchUtil.registerHandler(new GetDownloadCountHandler());
         DispatchUtil.registerHandler(new SetTitleHandler());
         DispatchUtil.registerHandler(new SetUserMetadataHandler());

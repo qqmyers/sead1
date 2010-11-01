@@ -38,8 +38,7 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -49,6 +48,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationship;
@@ -65,8 +66,12 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 public class GetRelationshipHandler implements
         ActionHandler<GetRelationship, GetRelationshipResult> {
 
+    public static Resource MMDB_RELATIONSHIP         = Cet.cet("mmdb/relationship");
+    public static Resource MMDB_RELATIONSHIP_TYPE    = Cet.cet("mmdb/relationshipType");
+    public static Resource MMDB_RELATIONSHIP_DATASET = Cet.cet("mmdb/relationshipDataset");
+
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(GetRelationshipHandler.class);
+    private static Log     log                       = LogFactory.getLog(GetRelationshipHandler.class);
 
     @Override
     public GetRelationshipResult execute(GetRelationship arg0,
@@ -76,15 +81,26 @@ public class GetRelationshipHandler implements
         try {
             Resource subject = Resource.uriRef(arg0.getDatasetURI());
             Unifier u = new Unifier();
-            u.setColumnNames("input");
 
-            //query
+            //one direction
+            u.addPattern(subject, MMDB_RELATIONSHIP, "relationship");
+            u.addPattern("relationship", MMDB_RELATIONSHIP_TYPE, "type");
+            u.addPattern("relationship", MMDB_RELATIONSHIP_DATASET, "dataset");
+            u.addPattern("relationship", Dc.CREATOR, "creator");
+            u.addPattern("relationship", Dc.DATE, "date");
+
+            u.setColumnNames("relationship", "type", "dataset", "creator", "date");
 
             TupeloStore.getInstance().getContext().perform(u);
 
-            List<DatasetBean> rt = new LinkedList<DatasetBean>();
+            HashMap<DatasetBean, String> rt = new HashMap<DatasetBean, String>();
+
             for (Tuple<Resource> row : u.getResult() ) {
-                rt.add(TupeloStore.fetchDataset(row.get(0))); // dbu's only take strings
+
+                DatasetBean db = TupeloStore.fetchDataset(row.get(2)); // dbu's only take strings
+                String type = row.get(1).getString();
+
+                rt.put(db, type);
             }
 
             return new GetRelationshipResult(rt);
