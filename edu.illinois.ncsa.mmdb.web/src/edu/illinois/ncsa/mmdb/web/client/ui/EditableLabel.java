@@ -95,6 +95,7 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
             }
         });
         pencilIcon = new Image("images/accessories-text-editor.png"); // FIXME magic number antipattern
+        pencilIcon.addStyleName("pencilIcon");
         panel.add(pencilIcon);
         pencilIcon.addClickHandler(new ClickHandler() {
             @Override

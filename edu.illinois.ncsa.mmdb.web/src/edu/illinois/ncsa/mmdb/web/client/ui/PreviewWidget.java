@@ -98,7 +98,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         PREVIEW_URL.put(GetPreviews.BADGE, "./api/collection/preview/");
         GRAY_URL = new HashMap<String, String>(); // how I yearn for map literals
         GRAY_URL.put(GetPreviews.SMALL, "./images/nopreview-100.gif");
-        GRAY_URL.put(GetPreviews.LARGE, "./images/nopreview-100.gif");
+        GRAY_URL.put(GetPreviews.LARGE, "./images/nopreview-100.gif"); // TODO is this correct?
         GRAY_URL.put(GetPreviews.BADGE, "./images/nopreview-100.gif");
         PENDING_URL = new HashMap<String, String>(); // how I yearn for map literals
         PENDING_URL.put(GetPreviews.SMALL, "./images/loading-small.gif");

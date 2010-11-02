@@ -570,6 +570,9 @@ a:hover {
 	border: 1px solid red;
 }
 
+.pencilIcon {
+}
+
 .titleLabel {
 	text-align:left;
 	font-size: 1.5em;
@@ -704,21 +707,23 @@ a:hover {
 .datasetTitle {
 	font-size: 1.5em;
   	color: black;
-  	margin: 20px 20px 20px 10px;
   	text-align: left;
 }
 
 .datasetTitleIcon {
-	margin-left: 20px;	
-	
+	margin-left: 20px;		
+}
+
+.pencilIcon {
+	/* not just for dataset widget, so no extra padding */
+	margin-left: 10px;
+	margin-top: 1px;
 }
 
 .datasetMainContainer {
 	position: relative;
 	width: 100%;
 }
-
-
 
 .previewPanel {
 	width: 100%;
