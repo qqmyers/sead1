@@ -242,6 +242,12 @@ public class ContextSetupListener implements ServletContextListener {
         Context context = TupeloStore.getInstance().getContext();
         TripleWriter tw = new TripleWriter();
 
+        // delete fields as per MMDB-956
+        tw.remove(Resource.uriRef("http://purl.org/dc/terms/license"), Rdf.TYPE, MMDB.USER_METADATA_FIELD);
+        tw.remove(Resource.uriRef("http://purl.org/dc/terms/rightsHolder"), Rdf.TYPE, MMDB.USER_METADATA_FIELD);
+        tw.remove(Resource.uriRef("http://purl.org/dc/terms/rights"), Rdf.TYPE, MMDB.USER_METADATA_FIELD);
+        // FIXME remove before 1.2
+
         // add all the userfields
         for (String key : props.stringPropertyNames() ) {
             if (key.startsWith("userfield.") && key.endsWith(".predicate")) { //$NON-NLS-1$ //$NON-NLS-2$
