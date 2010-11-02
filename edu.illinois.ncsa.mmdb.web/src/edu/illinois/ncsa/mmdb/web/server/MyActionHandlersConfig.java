@@ -60,7 +60,6 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.EditRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ExtractionServiceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAllTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAnnotationsHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAvailableUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
@@ -169,7 +168,6 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetDownloadCountHandler());
         DispatchUtil.registerHandler(new SetTitleHandler());
         DispatchUtil.registerHandler(new SetUserMetadataHandler());
-        DispatchUtil.registerHandler(new GetAvailableUserMetadataFieldsHandler());
         DispatchUtil.registerHandler(new CreateRoleHandler());
         DispatchUtil.registerHandler(new DeleteRoleHandler());
         DispatchUtil.registerHandler(new GetMimeTypeCategoriesHandler());

@@ -616,7 +616,7 @@ public class RestServlet extends AuthenticatedServlet {
         try {
             ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
             // FIXME "endTime1" is a kludgy way to represent execution stage information
-            Date endTime = ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/Extractor/endTime1"));
+            Date endTime = ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/Extractor/endTime1")); // FIXME magic number antipattern
             if (endTime == null) {
                 endTime = ts.getDate(Resource.uriRef(datasetUri), Cet.cet("metadata/extractor/endTime1"));
             }

@@ -54,13 +54,13 @@ import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Cet;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetLicense;
 import edu.illinois.ncsa.mmdb.web.server.AccessControl;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
  * Get license attached to a specific resource.
@@ -73,9 +73,6 @@ public class SetLicenseHandler implements ActionHandler<SetLicense, BatchResult>
     public static Resource DCTERMS_RIGHTS_HOLDER = uriRef(dcTerms("rightsHolder"));
     public static Resource DCTERMS_RIGHTS        = uriRef(dcTerms("rights"));
     public static Resource DCTERMS_LICENSE       = uriRef(dcTerms("license"));
-
-    // FIXME move to MMDB
-    public static Resource MMDB_ALLOW_DOWNLOAD   = Cet.cet("mmdb/allowDownload");
 
     /** Commons logging **/
     private static Log     log                   = LogFactory.getLog(SetLicenseHandler.class);
@@ -105,7 +102,7 @@ public class SetLicenseHandler implements ActionHandler<SetLicense, BatchResult>
                 if (license.getLicense() != null) {
                     thing.setValue(DCTERMS_LICENSE, license.getLicense());
                 }
-                thing.setValue(MMDB_ALLOW_DOWNLOAD, arg0.getLicense().isAllowDownload());
+                thing.setValue(MMDB.ALLOW_DOWNLOAD, arg0.getLicense().isAllowDownload());
                 if (!hadRightsHolder || isAdmin || AccessControl.isCreator(arg0.getUser(), uriString)) {
                     ts.save();
                 } else {

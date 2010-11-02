@@ -69,6 +69,7 @@ import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
@@ -241,17 +242,13 @@ public class ContextSetupListener implements ServletContextListener {
         Context context = TupeloStore.getInstance().getContext();
         TripleWriter tw = new TripleWriter();
 
-        // FIXME remove the old code
-        tw.remove(Resource.uriRef("urn:strangeness"), Rdf.TYPE, Cet.cet("userMetadataField")); //$NON-NLS-1$ //$NON-NLS-2$
-        tw.remove(Resource.uriRef("urn:charm"), Rdf.TYPE, Cet.cet("userMetadataField")); //$NON-NLS-1$ //$NON-NLS-2$
-
         // add all the userfields
         for (String key : props.stringPropertyNames() ) {
             if (key.startsWith("userfield.") && key.endsWith(".predicate")) { //$NON-NLS-1$ //$NON-NLS-2$
                 String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
                 if (props.containsKey(pre + ".label")) { //$NON-NLS-1$
                     Resource r = Resource.uriRef(props.getProperty(key));
-                    tw.add(r, Rdf.TYPE, Cet.cet("userMetadataField")); //$NON-NLS-1$
+                    tw.add(r, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
                     tw.add(r, Rdfs.LABEL, props.getProperty(pre + ".label")); //$NON-NLS-1$
                 }
             }

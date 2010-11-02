@@ -38,19 +38,46 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
+import java.util.Comparator;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import net.customware.gwt.dispatch.shared.Result;
 
 @SuppressWarnings("serial")
 public class ListUserMetadataFieldsResult implements Result {
-    Map<String, String> fieldLabels;
+    Map<String, String> fields; // uri -> label, sorted alpha by label 
 
     public Map<String, String> getFieldLabels() {
-        return fieldLabels;
+        if (fields == null) {
+            fields = new TreeMap<String, String>(new Comparator<String>() {
+                @Override
+                public int compare(String arg0, String arg1) {
+                    return fields.get(arg0).compareTo(fields.get(arg1));
+                }
+            });
+        }
+        return fields;
+    }
+
+    public SortedMap<String, String> getFieldsOrderedByLabel() {
+        getFieldLabels();
+        SortedMap<String, String> result = new TreeMap<String, String>(new Comparator<String>() {
+            @Override
+            public int compare(String arg0, String arg1) {
+                return fields.get(arg0).compareTo(fields.get(arg1));
+            }
+        });
+        result.putAll(fields);
+        return result;
     }
 
     public void setFieldLabels(Map<String, String> fieldLabels) {
-        this.fieldLabels = fieldLabels;
+        this.fields = fieldLabels;
+    }
+
+    public void addField(String name, String uri) {
+        getFieldLabels().put(name, uri);
     }
 }

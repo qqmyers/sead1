@@ -57,7 +57,6 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
@@ -71,6 +70,7 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
  * Retrieve collections.
@@ -92,7 +92,7 @@ public class GetCollectionsHandler implements
                 public Integer computeValue() {
                     Unifier u = new Unifier();
                     u.setColumnNames("c");
-                    u.addPattern("c", Rdf.TYPE, Cet.cet("Collection"));
+                    u.addPattern("c", Rdf.TYPE, MMDB.COLLECTION_TYPE);
                     try {
                         long then = System.currentTimeMillis();
                         Table<Resource> result = TupeloStore.getInstance().unifyExcludeDeleted(u, "c");

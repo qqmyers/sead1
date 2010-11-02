@@ -38,8 +38,6 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
-
 /**
  * Retrieve the relationships a dataset is associated with
  * 
@@ -47,18 +45,16 @@ import net.customware.gwt.dispatch.shared.Action;
  * 
  */
 @SuppressWarnings("serial")
-public class GetRelationship implements Action<GetRelationshipResult> {
-
-    private String uri;
+public class GetRelationship extends SubjectAction<GetRelationshipResult> {
 
     public GetRelationship() {
     }
 
     public GetRelationship(String uri) {
-        this.uri = uri;
+        super(uri);
     }
 
     public String getDatasetURI() {
-        return uri;
+        return getUri();
     }
 }

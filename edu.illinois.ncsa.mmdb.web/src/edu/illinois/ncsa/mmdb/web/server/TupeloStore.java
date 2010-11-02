@@ -75,6 +75,7 @@ import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.rdf.terms.Tags;
 import org.tupeloproject.rdf.xml.RdfXml;
 import org.tupeloproject.util.ListTable;
@@ -704,6 +705,33 @@ public class TupeloStore {
         return getPreviewUri(collectionUri, GetPreviews.BADGE);
     }
 
+    public Map<String, String> listThingsOfType(Resource typeUri) throws OperatorException {
+        return listThingsOfType(typeUri, Rdfs.LABEL);
+    }
+
+    public Map<String, String> listThingsOfType(Resource typeUri, Resource labelPredicate) throws OperatorException {
+        Unifier u = new Unifier();
+        u.setColumnNames("field", "label");
+        u.addPattern("field", Rdf.TYPE, typeUri);
+        u.addPattern("field", labelPredicate, "label");
+        Map<String, String> result = new HashMap<String, String>();
+        for (Tuple<Resource> row : unifyExcludeDeleted(u, "field") ) {
+            result.put(row.get(0).getString(), row.get(1).getString());
+        }
+        return result;
+    }
+
+    /**
+     * Perform a unifier, but exclude anything that is marked as deleted
+     * (dcterms:isReplacedBy rdf:nil).
+     * 
+     * @param u
+     *            the unifier
+     * @param subjectVar
+     *            which variable will be bound to the possibly-deleted item
+     * @return the results, with deleted items excluded
+     * @throws OperatorException
+     */
     public ListTable<Resource> unifyExcludeDeleted(Unifier u, String subjectVar) throws OperatorException {
         List<String> newColumnNames = new LinkedList<String>(u.getColumnNames());
         newColumnNames.add("_ued");

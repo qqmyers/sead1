@@ -52,7 +52,6 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
@@ -60,6 +59,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
  * Get license attached to a specific resource.
@@ -72,9 +72,6 @@ public class GetLicenseHandler implements ActionHandler<GetLicense, LicenseResul
     public static Resource DCTERMS_RIGHTS_HOLDER = uriRef(dcTerms("rightsHolder"));
     public static Resource DCTERMS_RIGHTS        = uriRef(dcTerms("rights"));
     public static Resource DCTERMS_LICENSE       = uriRef(dcTerms("license"));
-
-    // FIXME move to MMDB
-    public static Resource MMDB_ALLOW_DOWNLOAD   = Cet.cet("mmdb/allowDownload");
 
     /** Commons logging **/
     private static Log     log                   = LogFactory.getLog(GetLicenseHandler.class);
@@ -91,7 +88,7 @@ public class GetLicenseHandler implements ActionHandler<GetLicense, LicenseResul
         uf.addPattern(uri, DCTERMS_RIGHTS, "rights", true);
         uf.addPattern(uri, DCTERMS_RIGHTS_HOLDER, "rightsHolder", true);
         uf.addPattern(uri, DCTERMS_LICENSE, "license", true);
-        uf.addPattern(uri, MMDB_ALLOW_DOWNLOAD, "allowDownload", true);
+        uf.addPattern(uri, MMDB.ALLOW_DOWNLOAD, "allowDownload", true);
         uf.setColumnNames("rights", "rightsHolder", "license", "allowDownload");
         try {
             TupeloStore.getInstance().getContext().perform(uf);

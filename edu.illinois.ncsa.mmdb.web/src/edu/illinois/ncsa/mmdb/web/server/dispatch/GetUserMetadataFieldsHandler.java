@@ -55,7 +55,6 @@ import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
@@ -63,6 +62,7 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
  * TODO Add comments
@@ -123,7 +123,7 @@ public class GetUserMetadataFieldsHandler implements
             throws OperatorException {
         Unifier u = new Unifier();
         u.setColumnNames("field", "label");
-        u.addPattern("field", Rdf.TYPE, Cet.cet("userMetadataField"));
+        u.addPattern("field", Rdf.TYPE, MMDB.USER_METADATA_FIELD);
         u.addPattern("field", Rdfs.LABEL, "label");
         Map<String, String> result = new HashMap<String, String>();
         for (Tuple<Resource> row : TupeloStore.getInstance()

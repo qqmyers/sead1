@@ -53,7 +53,6 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.util.Tuple;
 
@@ -61,6 +60,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislike;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislikeResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislike.LikeDislike;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
  * Get like dislike information
@@ -69,12 +69,8 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  * 
  */
 public class GetLikeDislikeHandler implements ActionHandler<GetLikeDislike, GetLikeDislikeResult> {
-    // FIXME move to MMDB
-    public static Resource MMDB_LIKE_DISLIKE       = Cet.cet("mmdb/isLikedDislikedBy");
-    public static Resource MMDB_LIKE_DISLIKE_STATE = Cet.cet("mmdb/likedDislikedState");
-
     /** Commons logging **/
-    private static Log     log                     = LogFactory.getLog(GetLikeDislikeHandler.class);
+    private static Log log = LogFactory.getLog(GetLikeDislikeHandler.class);
 
     @Override
     public GetLikeDislikeResult execute(GetLikeDislike arg0, ExecutionContext arg1) throws ActionException {
@@ -82,9 +78,9 @@ public class GetLikeDislikeHandler implements ActionHandler<GetLikeDislike, GetL
         Resource person = Resource.uriRef(arg0.getPerson());
 
         Unifier uf = new Unifier();
-        uf.addPattern(dataset, MMDB_LIKE_DISLIKE, "like");
+        uf.addPattern(dataset, MMDB.LIKE_DISLIKE, "like");
         uf.addPattern("like", Dc.CREATOR, "likee");
-        uf.addPattern("like", MMDB_LIKE_DISLIKE_STATE, "state");
+        uf.addPattern("like", MMDB.LIKE_DISLIKE_STATE, "state");
         uf.addPattern("like", Dc.DATE, "date");
         uf.setColumnNames("like", "likee", "state", "date");
         try {
@@ -101,9 +97,9 @@ public class GetLikeDislikeHandler implements ActionHandler<GetLikeDislike, GetL
         for (Tuple<Resource> row : uf.getResult() ) {
             if (row.get(1).equals(person) && (arg0.getState() != LikeDislike.UNKNOWN)) {
                 // remove everything
-                tw.remove(dataset, MMDB_LIKE_DISLIKE, row.get(0));
+                tw.remove(dataset, MMDB.LIKE_DISLIKE, row.get(0));
                 tw.remove(row.get(0), Dc.CREATOR, row.get(1));
-                tw.remove(row.get(0), MMDB_LIKE_DISLIKE_STATE, row.get(2));
+                tw.remove(row.get(0), MMDB.LIKE_DISLIKE_STATE, row.get(2));
                 tw.remove(row.get(0), Dc.DATE, row.get(3));
             } else {
                 LikeDislike cur = LikeDislike.valueOf(row.get(2).getString());
@@ -121,18 +117,18 @@ public class GetLikeDislikeHandler implements ActionHandler<GetLikeDislike, GetL
 
         if (arg0.getState() == LikeDislike.LIKE) {
             Resource uri = Resource.uriRef();
-            tw.add(dataset, MMDB_LIKE_DISLIKE, uri);
+            tw.add(dataset, MMDB.LIKE_DISLIKE, uri);
             tw.add(uri, Dc.CREATOR, person);
-            tw.add(uri, MMDB_LIKE_DISLIKE_STATE, arg0.getState().toString());
+            tw.add(uri, MMDB.LIKE_DISLIKE_STATE, arg0.getState().toString()); // FIXME literal used as identifier
             tw.add(uri, Dc.DATE, new Date());
             user = arg0.getState();
             likeCount++;
         }
         if (arg0.getState() == LikeDislike.DISLIKE) {
             Resource uri = Resource.uriRef();
-            tw.add(dataset, MMDB_LIKE_DISLIKE, uri);
+            tw.add(dataset, MMDB.LIKE_DISLIKE, uri);
             tw.add(uri, Dc.CREATOR, person);
-            tw.add(uri, MMDB_LIKE_DISLIKE_STATE, arg0.getState().toString());
+            tw.add(uri, MMDB.LIKE_DISLIKE_STATE, arg0.getState().toString());
             tw.add(uri, Dc.DATE, new Date());
             user = arg0.getState();
             dislikeCount++;
