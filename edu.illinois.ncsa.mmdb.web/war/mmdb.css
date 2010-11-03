@@ -514,9 +514,15 @@ a:hover {
 	width: 300px;
 }
 
+.userManagementMain {
+	float: left;
+	text-align: left;
+	width: 800px;
+}
+
 .usersTable {
 	width: 800px;
-	margin: 20px auto 100px auto;
+	margin: 10px auto 75px auto;
 }
 
 .textBoxWatermark {

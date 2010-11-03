@@ -63,6 +63,8 @@ import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
@@ -112,6 +114,9 @@ public class UserManagementPage extends Composite {
         mainPanel.addStyleName("page");
         initWidget(mainPanel);
 
+        VerticalPanel usersPanel = new VerticalPanel();
+        usersPanel.addStyleName("userManagementMain");
+
         // page title
         pageTitle = createPageTitle();
         mainPanel.add(pageTitle);
@@ -122,11 +127,17 @@ public class UserManagementPage extends Composite {
         // users table
         activeUsersTable = createUsersTable();
         inactiveUsersTable = createUsersTable();
-        mainPanel.add(discloseAs(activeUsersTable, "Active users", true));
-        mainPanel.add(discloseAs(inactiveUsersTable, "Inactive users", "Inactive users (open to activate/select roles)", false));
+        usersPanel.add(discloseAs(activeUsersTable, "Active users", true));
+        usersPanel.add(discloseAs(inactiveUsersTable, "Inactive users", "Inactive users (open to activate/select roles)", false));
+        mainPanel.add(usersPanel);
 
-        columnByRole = new HashMap<String, Integer>();
+        // necessary so that the main container wraps around center panel
+        SimplePanel clearFloat = new SimplePanel();
+        clearFloat.addStyleName("clearFloat");
+        mainPanel.add(clearFloat);
+
         // load users and roles from server side
+        columnByRole = new HashMap<String, Integer>();
         loadRolesAndUsers();
     }
 
