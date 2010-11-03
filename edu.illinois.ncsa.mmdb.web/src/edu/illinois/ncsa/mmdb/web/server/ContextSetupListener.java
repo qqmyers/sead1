@@ -124,6 +124,8 @@ public class ContextSetupListener implements ServletContextListener {
             }
         }
 
+        log.info("Setting up Tupelo context");
+
         // some global variables
         if (props.containsKey("extractor.url")) { //$NON-NLS-1$
             TupeloStore.getInstance().setExtractionServiceURL(props.getProperty("extractor.url")); //$NON-NLS-1$
@@ -188,6 +190,7 @@ public class ContextSetupListener implements ServletContextListener {
     private void startTimers() {
         // count datasets every hour
         // FIXME hack to force read of context every hour to solve MMDB-491
+        log.info("Starting dataset count timer");
         timer.schedule(new TimerTask() {
             @Override
             public void run()
@@ -197,6 +200,7 @@ public class ContextSetupListener implements ServletContextListener {
 
         }, 0, 60 * 60 * 1000);
 
+        log.info("Starting full-text indexing timers");
         // do a full-text index sweep every hour
         // FIXME do less often
         timer.schedule(new TimerTask() {
@@ -242,11 +246,16 @@ public class ContextSetupListener implements ServletContextListener {
         Context context = TupeloStore.getInstance().getContext();
         TripleWriter tw = new TripleWriter();
 
-        // delete fields as per MMDB-956
-        tw.remove(Resource.uriRef("http://purl.org/dc/terms/license"), Rdf.TYPE, MMDB.USER_METADATA_FIELD);
-        tw.remove(Resource.uriRef("http://purl.org/dc/terms/rightsHolder"), Rdf.TYPE, MMDB.USER_METADATA_FIELD);
-        tw.remove(Resource.uriRef("http://purl.org/dc/terms/rights"), Rdf.TYPE, MMDB.USER_METADATA_FIELD);
-        // FIXME remove before 1.2
+        Set<Resource> blacklistedPredicates = new HashSet<Resource>();
+        blacklistedPredicates.add(Resource.uriRef("http://purl.org/dc/terms/license"));
+        blacklistedPredicates.add(Resource.uriRef("http://purl.org/dc/terms/rightsHolder"));
+        blacklistedPredicates.add(Resource.uriRef("http://purl.org/dc/terms/rights"));
+        blacklistedPredicates.add(Dc.TITLE);
+        blacklistedPredicates.add(Dc.CREATOR);
+        blacklistedPredicates.add(Dc.IDENTIFIER);
+        blacklistedPredicates.add(Dc.CONTRIBUTOR); // should whitelist once we have multi-valued user properties
+        blacklistedPredicates.add(Rdfs.LABEL);
+        // there's an even longer list, but these are some of the ones I expect we'd have the most problems with
 
         // add all the userfields
         for (String key : props.stringPropertyNames() ) {
@@ -254,10 +263,17 @@ public class ContextSetupListener implements ServletContextListener {
                 String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
                 if (props.containsKey(pre + ".label")) { //$NON-NLS-1$
                     Resource r = Resource.uriRef(props.getProperty(key));
+                    String l = props.getProperty(pre + ".label");
                     tw.add(r, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
-                    tw.add(r, Rdfs.LABEL, props.getProperty(pre + ".label")); //$NON-NLS-1$
+                    tw.add(r, Rdfs.LABEL, l);
+                    log.debug("Adding user metadata field '" + l + "' (" + r + ")");
                 }
             }
+        }
+
+        // remove blacklisted predicates
+        for (Resource blacklisted : blacklistedPredicates ) {
+            tw.remove(blacklisted, Rdf.TYPE, MMDB.USER_METADATA_FIELD);
         }
 
         try {
