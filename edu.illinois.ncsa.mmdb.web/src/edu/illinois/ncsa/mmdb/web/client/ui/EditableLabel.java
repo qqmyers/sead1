@@ -69,6 +69,10 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
     Image           pencilIcon;
 
     public EditableLabel(String text) {
+        this(text, true);
+    }
+
+    public EditableLabel(String text, boolean editable) {
         super();
         panel = new HorizontalPanel();
         label = new Label(text);
@@ -94,21 +98,31 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
                 label.removeStyleName("editHighlight");
             }
         });
+        setEditable(editable);
+        initWidget(panel);
+    }
+
+    void addPencilIcon() {
         pencilIcon = new Image("images/accessories-text-editor.png"); // FIXME magic number antipattern
         pencilIcon.addStyleName("pencilIcon");
-        panel.add(pencilIcon);
         pencilIcon.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 displayEditControls();
             }
         });
-        initWidget(panel);
+        panel.add(pencilIcon);
+    }
+
+    void removePencilIcon() {
+        if (pencilIcon != null) {
+            panel.remove(pencilIcon);
+        }
     }
 
     public void displayEditControls() {
         panel.remove(label);
-        panel.remove(pencilIcon);
+        removePencilIcon();
         HorizontalPanel editPanel = new HorizontalPanel();
         if (editableStyleName != null) {
             editPanel.addStyleName(editableStyleName);
@@ -157,7 +171,7 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
         panel.clear();
         panel.add(label);
         if (isEditable) {
-            panel.add(pencilIcon);
+            addPencilIcon();
         }
     }
 
@@ -181,9 +195,9 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
         if (!isEditable) {
             label.setTitle("");
             GWT.log("'" + label.getText() + "' is not editable, removing pencil icon");
-            panel.remove(pencilIcon);
+            removePencilIcon();
         } else {
-            panel.add(pencilIcon);
+            addPencilIcon();
         }
         this.isEditable = isEditable;
     }
