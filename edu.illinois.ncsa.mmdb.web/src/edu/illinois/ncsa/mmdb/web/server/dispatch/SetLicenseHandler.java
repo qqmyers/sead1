@@ -50,13 +50,12 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.kernel.Thing;
-import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetLicense;
 import edu.illinois.ncsa.mmdb.web.server.AccessControl;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
@@ -85,38 +84,12 @@ public class SetLicenseHandler implements ActionHandler<SetLicense, BatchResult>
         // get license information
         TripleWriter tw = new TripleWriter();
         for (String uriString : arg0.getResources() ) {
-            ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
             Resource uri = Resource.uriRef(uriString);
-            try {
-                LicenseResult license = arg0.getLicense();
-                Thing thing = ts.fetchThing(uri);
-                boolean hadRightsHolder = thing.getValue(DCTERMS_RIGHTS_HOLDER) != null;
-                if (license.getRights() != null) {
-                    thing.setValue(DCTERMS_RIGHTS, license.getRights());
-                }
-                if (license.getRightsHolderUri() != null) {
-                    thing.setValue(DCTERMS_RIGHTS_HOLDER, Resource.uriRef(license.getRightsHolderUri()));
-                } else if (license.getRightsHolder() != null) {
-                    thing.setValue(DCTERMS_RIGHTS_HOLDER, license.getRightsHolder());
-                }
-                if (license.getLicense() != null) {
-                    thing.setValue(DCTERMS_LICENSE, license.getLicense());
-                }
-                thing.setValue(MMDB.ALLOW_DOWNLOAD, arg0.getLicense().isAllowDownload());
-                if (!hadRightsHolder || isAdmin || AccessControl.isCreator(arg0.getUser(), uriString)) {
-                    ts.save();
-                } else {
-                    result.setFailure(uriString, "Unauthorized");
-                }
-            } catch (OperatorException x) {
-                result.setFailure(uriString, "Server error");
-            }
-            /*
             Unifier uf = new Unifier();
             uf.addPattern(uri, DCTERMS_RIGHTS, "rights", true);
             uf.addPattern(uri, DCTERMS_RIGHTS_HOLDER, "rightsHolder", true);
             uf.addPattern(uri, DCTERMS_LICENSE, "license", true);
-            uf.addPattern(uri, MMDB_ALLOW_DOWNLOAD, "allowDownload", true);
+            uf.addPattern(uri, MMDB.ALLOW_DOWNLOAD, "allowDownload", true);
             uf.setColumnNames("rights", "rightsHolder", "license", "allowDownload");
             try {
                 TupeloStore.getInstance().getContext().perform(uf);
@@ -137,7 +110,7 @@ public class SetLicenseHandler implements ActionHandler<SetLicense, BatchResult>
                     tw.remove(uri, DCTERMS_LICENSE, row.get(2));
                 }
                 if (row.get(3) != null) {
-                    tw.remove(uri, MMDB_ALLOW_DOWNLOAD, row.get(3));
+                    tw.remove(uri, MMDB.ALLOW_DOWNLOAD, row.get(3));
                 }
             }
 
@@ -153,8 +126,8 @@ public class SetLicenseHandler implements ActionHandler<SetLicense, BatchResult>
             if (arg0.getLicense().getLicense() != null) {
                 tw.add(uri, DCTERMS_LICENSE, arg0.getLicense().getLicense());
             }
-            tw.add(uri, MMDB_ALLOW_DOWNLOAD, arg0.getLicense().isAllowDownload());
-            */
+            tw.add(uri, MMDB.ALLOW_DOWNLOAD, arg0.getLicense().isAllowDownload());
+
             result.addSuccess(uriString);
         }
 
