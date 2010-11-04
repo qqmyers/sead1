@@ -391,11 +391,11 @@ public class LicenseWidget extends Composite {
 
         if (pd.getValue()) {
             license.setRights("pddl");
-            license.setLicense("http://www.opendatacommons.org/licenses/pddl/summary/");
+            license.setLicense("http://creativecommons.org/publicdomain/zero/1.0/");
             license.setRightsHolder(null);
             license.setRightsHolderUri(null);
 
-        } else if (cc.getValue()) {
+        } else if (cc.getValue()) { // FIXME should use new CreativeCommonsLicense enum
             String rights = "cc-by";
             if (!allowCommercial.getValue()) {
                 rights += "-nc";
