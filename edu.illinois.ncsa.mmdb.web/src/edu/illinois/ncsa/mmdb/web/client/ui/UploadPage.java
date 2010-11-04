@@ -237,7 +237,7 @@ public class UploadPage extends Page {
      * @param parameter
      */
     public static native void pokeApplet(Element applet) /*-{
-        if ((applet != null) && (applet.isActive)) {
+        if ((applet != null) && (applet.isActive())) {
         applet.poke();
         }
     }-*/;
