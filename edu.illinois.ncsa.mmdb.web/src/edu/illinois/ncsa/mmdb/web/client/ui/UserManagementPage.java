@@ -252,7 +252,7 @@ public class UserManagementPage extends Composite {
                 Set<String> roles = result.getRoles();
                 FlexTable usersTable = roles.size() == 0 ? inactiveUsersTable : activeUsersTable;
 
-                int row = usersTable.getRowCount() + 1;
+                int row = usersTable.getRowCount();
 
                 usersTable.setText(row, 0, user.getName());
                 usersTable.setText(row, 1, user.getEmail());
@@ -275,6 +275,11 @@ public class UserManagementPage extends Composite {
                     });
                     usersTable.setWidget(row, col, box);
                 }
+
+                // stripe it
+                String rowStyle = (row - 1) % 2 == 0 ? "metadataTableEvenRow" : "metadataTableOddRow";
+                usersTable.getRowFormatter().addStyleName(row, rowStyle);
+
                 createRows(rest);
             }
         });

@@ -108,7 +108,10 @@ public class RoleAdministrationPage extends Composite {
         int i = 0;
         permissionsTable.setText(i++, 0, "");
         for (Permission p : Permission.values() ) {
-            permissionsTable.setText(i++, 0, p.getLabel());
+            permissionsTable.setText(i, 0, p.getLabel());
+            String rowStyle = (i + 1) % 2 == 0 ? "metadataTableEvenRow" : "metadataTableOddRow";
+            permissionsTable.getRowFormatter().addStyleName(i, rowStyle);
+            i++;
         }
         dispatch.execute(new GetPermissions(), new AsyncCallback<GetPermissionsResult>() {
             @Override
