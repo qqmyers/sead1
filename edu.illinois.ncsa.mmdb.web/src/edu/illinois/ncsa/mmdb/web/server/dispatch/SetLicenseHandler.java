@@ -56,6 +56,7 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetLicense;
 import edu.illinois.ncsa.mmdb.web.server.AccessControl;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
@@ -88,7 +89,7 @@ public class SetLicenseHandler implements ActionHandler<SetLicense, BatchResult>
             Unifier uf = new Unifier();
             uf.addPattern(uri, DCTERMS_RIGHTS, "rights", true);
             uf.addPattern(uri, DCTERMS_RIGHTS_HOLDER, "rightsHolder", true);
-            uf.addPattern(uri, DCTERMS_LICENSE, "license", true);
+            uf.addPattern(uri, DCTERMS_LICENSE, "license", true); // FIXME literal used as identifier
             uf.addPattern(uri, MMDB.ALLOW_DOWNLOAD, "allowDownload", true);
             uf.setColumnNames("rights", "rightsHolder", "license", "allowDownload");
             try {
@@ -114,19 +115,24 @@ public class SetLicenseHandler implements ActionHandler<SetLicense, BatchResult>
                 }
             }
 
+            boolean publicDomain = false;
             // add new data
-            if (arg0.getLicense().getRights() != null) {
-                tw.add(uri, DCTERMS_RIGHTS, arg0.getLicense().getRights());
+            LicenseResult license = arg0.getLicense();
+            if (license.getRights() != null) {
+                if (license.getRights().equalsIgnoreCase("pddl")) {
+                    publicDomain = true;
+                }
+                tw.add(uri, DCTERMS_RIGHTS, license.getRights());
             }
-            if (arg0.getLicense().getRightsHolderUri() != null) {
-                tw.add(uri, DCTERMS_RIGHTS_HOLDER, Resource.uriRef(arg0.getLicense().getRightsHolderUri()));
-            } else if (arg0.getLicense().getRightsHolder() != null) {
-                tw.add(uri, DCTERMS_RIGHTS_HOLDER, arg0.getLicense().getRightsHolder());
+            if (license.getRightsHolderUri() != null && !publicDomain) {
+                tw.add(uri, DCTERMS_RIGHTS_HOLDER, Resource.uriRef(license.getRightsHolderUri()));
+            } else if (license.getRightsHolder() != null && !publicDomain) {
+                tw.add(uri, DCTERMS_RIGHTS_HOLDER, license.getRightsHolder());
             }
-            if (arg0.getLicense().getLicense() != null) {
-                tw.add(uri, DCTERMS_LICENSE, arg0.getLicense().getLicense());
+            if (license.getLicense() != null) {
+                tw.add(uri, DCTERMS_LICENSE, license.getLicense());
             }
-            tw.add(uri, MMDB.ALLOW_DOWNLOAD, arg0.getLicense().isAllowDownload());
+            tw.add(uri, MMDB.ALLOW_DOWNLOAD, license.isAllowDownload());
 
             result.addSuccess(uriString);
         }

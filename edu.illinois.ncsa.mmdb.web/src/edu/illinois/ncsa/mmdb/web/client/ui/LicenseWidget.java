@@ -238,6 +238,7 @@ public class LicenseWidget extends Composite {
                 allowRemixing.setVisible(false);
                 allowCommercial.setVisible(false);
                 shareAlike.setVisible(false);
+                myData.setVisible(false);
                 lblRights.setVisible(false);
                 rights.setVisible(false);
                 lblLicense.setVisible(false);
@@ -256,6 +257,7 @@ public class LicenseWidget extends Composite {
                 allowRemixing.setVisible(true);
                 allowCommercial.setVisible(true);
                 shareAlike.setVisible(true);
+                myData.setVisible(true);
                 lblRights.setVisible(false);
                 rights.setVisible(false);
                 lblLicense.setVisible(false);
@@ -291,6 +293,7 @@ public class LicenseWidget extends Composite {
                 allowRemixing.setVisible(false);
                 allowCommercial.setVisible(false);
                 shareAlike.setVisible(false);
+                myData.setVisible(true);
                 lblRights.setVisible(true);
                 rights.setVisible(true);
                 lblLicense.setVisible(true);
@@ -389,6 +392,8 @@ public class LicenseWidget extends Composite {
         if (pd.getValue()) {
             license.setRights("pddl");
             license.setLicense("http://www.opendatacommons.org/licenses/pddl/summary/");
+            license.setRightsHolder(null);
+            license.setRightsHolderUri(null);
 
         } else if (cc.getValue()) {
             String rights = "cc-by";
@@ -453,8 +458,11 @@ public class LicenseWidget extends Composite {
             return;
         }
 
+        String rights = license.getRights().toLowerCase();
+        boolean publicDomain = rights.equals("pddl");
+
         // attribution
-        if (license.getRightsHolder() == null) {
+        if (license.getRightsHolder() == null || publicDomain) {
             attribution.setText("");
             attribution.setVisible(false);
         } else {
@@ -464,7 +472,8 @@ public class LicenseWidget extends Composite {
 
         // check to see the license type
         licenseText.removeStyleName("deadLink");
-        String rights = license.getRights().toLowerCase();
+        // FIXME literal used as identifier
+        // FIXME magic number antipattern, use an enum
         if (rights.equals("pddl")) {
             // Public Domain License
             Image icon = new Image("images/cc-pd.png");
@@ -497,7 +506,11 @@ public class LicenseWidget extends Composite {
         }
 
         // rightsholder
-        if (MMDB.getUsername().equals(license.getRightsHolderUri())) {
+        if (publicDomain) {
+            myData.setVisible(false);
+            lblRightsHolder.setVisible(false);
+            rightsHolder.setVisible(false);
+        } else if (MMDB.getUsername().equals(license.getRightsHolderUri())) {
             myData.setValue(true);
             lblRightsHolder.setVisible(false);
             rightsHolder.setVisible(false);
