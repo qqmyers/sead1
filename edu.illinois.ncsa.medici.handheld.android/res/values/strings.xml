@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="hello">Hello World, MyTwitter!</string>
+<resources  xmlns:android="http://schemas.android.com/apk/res/android">
     <string name="app_name">Medici</string>
-<string name="lblTitle">Medici</string>
-<string name="hintStatus">Enter 160 characters status update</string>
-<string name="labelUpdate">Update</string>
+    <string name="lblUpload">Medici Image Upload</string>
 </resources>

@@ -6,17 +6,21 @@ import java.util.Date;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 public class Medici extends Activity {
     public static final String TAG            = "Medici";
@@ -30,13 +34,60 @@ public class Medici extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         setContentView(R.layout.medici);
+
+        // DEBUG
+        //        ((EditText) findViewById(R.id.caption)).setText("Hello World");
+        //        Uri mediciUri = Uri.parse("android.resource://edu.illinois.ncsa.medici.handheld.android/" + R.drawable.medici);
+        //        showPicture(mediciUri);
 
         ((Button) findViewById(R.id.btnUpload)).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                String title = ((EditText) findViewById(R.id.title)).getText().toString();
-                MediciHelper.uploadData(Medici.this, selectedImageUri, title);
+                // make sure there is an image
+                if (selectedImageUri == null) {
+                    Toast.makeText(Medici.this, "No data selected.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // what's the caption?
+                String caption = ((EditText) findViewById(R.id.caption)).getText().toString();
+                if ((caption == null) || caption.equals("")) {
+                    caption = selectedImageUri.getLastPathSegment();
+                }
+
+                // get medici url, username, password from preferences
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Medici.this);
+                String server = prefs.getString("server", null);
+                String username = prefs.getString("username", null);
+                String password = prefs.getString("password", null);
+                if ((server == null) || server.equals("") || (username == null) || username.equals("") || (password == null) || password.equals("")) {
+                    Intent i = new Intent(Medici.this, Preferences.class);
+                    Medici.this.startActivity(i);
+                    Toast.makeText(Medici.this, "Invalid preferences.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!server.endsWith("/")) {
+                    server = server + "/";
+                }
+
+                // create the intent and start the service
+                Intent intent = new Intent(Medici.this, MediciUploadService.class);
+                intent.setData(selectedImageUri);
+                intent.putExtra(MediciUploadService.EXTRA_CAPTION, caption);
+                intent.putExtra(MediciUploadService.EXTRA_USERNAME, username);
+                intent.putExtra(MediciUploadService.EXTRA_PASSWORD, password);
+                intent.putExtra(MediciUploadService.EXTRA_SERVER, server);
+                startService(intent);
+            }
+        });
+
+        ((Button) findViewById(R.id.btnCancel)).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
 
@@ -114,7 +165,7 @@ public class Medici extends Activity {
         selectedImageUri = uri;
         if (selectedImageUri != null) {
             ((ImageView) findViewById(R.id.imgPreview)).setImageURI(selectedImageUri);
-            ((EditText) findViewById(R.id.title)).setText(selectedImageUri.getLastPathSegment());
+            ((EditText) findViewById(R.id.caption)).setText(selectedImageUri.getLastPathSegment());
         }
     }
 }
