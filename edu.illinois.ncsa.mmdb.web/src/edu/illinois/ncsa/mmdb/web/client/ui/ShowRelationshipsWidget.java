@@ -83,7 +83,7 @@ public class ShowRelationshipsWidget extends Composite {
 
         disclosurePanel = new DisclosurePanel("Relates To (" + count + ")");
         disclosurePanel.setVisible(true);
-        disclosurePanel.setAnimationEnabled(true);
+        disclosurePanel.setAnimationEnabled(false);
 
         previews = new FlexTable();
         previews.setWidth("150px");

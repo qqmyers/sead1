@@ -48,6 +48,9 @@ import java.util.SortedMap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -213,6 +216,14 @@ public class UserMetadataWidget extends Composite {
         valuePanel.add(valueText);
         //		fieldTable.setWidget(row,1,valuePanel);
         horizontalPanel.add(valueText);
+
+        valueText.addKeyUpHandler(new KeyUpHandler() {
+            public void onKeyUp(KeyUpEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    addValue();
+                }
+            }
+        });
 
         Button addButton = new Button("Set value");
         addButton.addClickHandler(new ClickHandler() {

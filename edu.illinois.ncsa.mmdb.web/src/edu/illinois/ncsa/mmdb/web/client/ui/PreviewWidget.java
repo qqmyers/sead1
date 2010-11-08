@@ -175,14 +175,14 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
         if (datasetUri == null) {
             imagePanel.addStyleName("imageThumbnailBordered");
-        } else {
+        } else if (desiredSize != GetPreviews.LARGE) {
             imagePanel.addStyleName("imageThumbnail");
         }
 
         imagePanel.add(image);
 
         //icons that appear over thumbnail 
-        if (type != "Unknown") {
+        if (type != "Unknown" && initialDisplay) {
             overlay.setUrl("images/icons/" + type + "_overlay.png");
             overlay.addStyleName("imageOverlay");
             imagePanel.add(overlay);
