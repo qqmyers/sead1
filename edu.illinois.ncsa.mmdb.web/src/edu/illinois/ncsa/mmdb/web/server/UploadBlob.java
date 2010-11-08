@@ -41,8 +41,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.server;
 
-import static org.tupeloproject.rdf.terms.Rdfs.LABEL;
-
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -77,6 +75,7 @@ import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.SecureHashMinter;
 
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
@@ -295,45 +294,56 @@ public class UploadBlob extends AuthenticatedServlet {
             for (FileItem item : items ) {
                 // process a file
                 String fieldName = item.getFieldName();
-                String fileName = item.getName();
-                if (fileName != null) {
-                    fileName = normalizeFilename(fileName);
-                }
-                String contentType = item.getContentType();
-                if (MimeMap.UNKNOWN_TYPE.equals(contentType)) {
-                    contentType = TupeloStore.getInstance().getMimeMap().getContentTypeFor(fileName);
-                } else {
-                    TupeloStore.getInstance().getMimeMap().checkMimeType(contentType);
-                }
-                boolean isInMemory = item.isInMemory();
-                long sizeInBytes = item.getSize();
-                log.info("Post: " + item.isFormField() + "|" + fieldName + "|" + fileName + "|" + isInMemory + "|" + contentType + "|" + sizeInBytes);
-                if (item.isFormField() && fieldName.equals("session") && listener == null) {
-                    sessionKey = item.getString();
-                    log.trace("POST: upload session key (part) = " + sessionKey);
-                    listener = trackProgress(upload, sessionKey);
-                }
-                if (item.isFormField() && fieldName.equals("collection")) {
-                    collectionName = item.getString();
-                    log.debug("POST: upload collection name = " + collectionName);
-                }
-                if (item.isFormField() && fieldName.equals("collectionUri")) {
-                    collectionUri = item.getString();
-                    log.debug("POST: upload collection uri = " + collectionUri);
-                }
-                // if it's a field from a form and the size is non-zero...
-                if (!item.isFormField() && (sizeInBytes > 0)) {
-                    nFiles++;
-                    BlobWriter bw = new BlobWriter();
+
+                // check to see if this a form field, if so remember for later
+                if (item.isFormField()) {
+                    if (fieldName.equals("session") && (listener == null)) {
+                        sessionKey = item.getString();
+                        listener = trackProgress(upload, sessionKey);
+                        log.trace("POST: upload session key (part) = " + sessionKey);
+                    } else if (fieldName.equals("collection")) {
+                        collectionName = item.getString();
+                        log.debug("POST: upload collection name = " + collectionName);
+                    } else if (fieldName.equals("collectionUri")) {
+                        collectionUri = item.getString();
+                        log.debug("POST: upload collection uri = " + collectionUri);
+                    }
+
+                } else if (item.getSize() > 0) {
+                    // item is the actual data, process it
+
+                    // orginal filename
+                    String fileName = item.getName();
+                    if (fileName != null) {
+                        fileName = normalizeFilename(fileName);
+                    }
+
+                    // Medici Android App uses fieldname to send the caption (BAD App)
+                    String caption = fileName;
+                    if (!fieldName.equals("f1")) {
+                        caption = fieldName;
+                    }
+                    if (caption == null) {
+                        caption = "Upload";
+                    }
+
+                    // mimetype
+                    String contentType = item.getContentType();
+                    if (MimeMap.UNKNOWN_TYPE.equals(contentType)) {
+                        contentType = TupeloStore.getInstance().getMimeMap().getContentTypeFor(fileName);
+                    }
+
                     // generate a URI based on the request using the REST service's minter
                     Map<Resource, Object> md = new HashMap<Resource, Object>();
-                    md.put(RestService.LABEL_PROPERTY, fileName);
+                    md.put(RestService.LABEL_PROPERTY, caption);
                     uri = RestUriMinter.getInstance().mintUri(md);
-                    //
+
+                    // create the blobwriter that will write the actual data
+                    BlobWriter bw = new BlobWriter();
                     bw.setUri(URI.create(uri));
                     UploadInfo u = null;
                     if (listener != null) {
-                        u = listener.addUploadInfo(URI.create(uri), trimFilename(fileName), sizeInBytes);
+                        u = listener.addUploadInfo(URI.create(uri), trimFilename(fileName), item.getSize());
                     }
                     final FileUploadListener _listener = listener;
                     bw.setInputStream(new FilterInputStream(item.getInputStream()) {
@@ -350,8 +360,7 @@ public class UploadBlob extends AuthenticatedServlet {
                         }
 
                         @Override
-                        public int read(byte[] arg0, int arg1, int arg2)
-                                throws IOException {
+                        public int read(byte[] arg0, int arg1, int arg2) throws IOException {
                             return wrote(super.read(arg0, arg1, arg2));
                         }
 
@@ -371,8 +380,8 @@ public class UploadBlob extends AuthenticatedServlet {
                         ThingSession ts = c.getThingSession();
                         Thing t = ts.newThing(Resource.uriRef(uri));
                         t.addType(RestService.IMAGE_TYPE);
-                        t.setValue(LABEL, fileName);
-                        t.setValue(RestService.LABEL_PROPERTY, fileName);
+                        t.setValue(Rdfs.LABEL, caption);
+                        t.setValue(RestService.LABEL_PROPERTY, caption);
                         t.setValue(RestService.FILENAME_PROPERTY, fileName);
                         t.setValue(RestService.DATE_PROPERTY, new Date());
                         createdByUser(t, request);
@@ -382,10 +391,15 @@ public class UploadBlob extends AuthenticatedServlet {
                             contentType = contentType.replaceFirst("; charset=.*", "");
                             // FIXME parse this properly and set the charset accordingly!
                             t.setValue(RestService.FORMAT_PROPERTY, contentType);
+
+                            // update context with new mime-type potentially
+                            TupeloStore.getInstance().getMimeMap().checkMimeType(contentType);
                         }
                         t.save();
                         ts.close();
-                        log.info("user uploaded " + fileName + " (" + sizeInBytes + " bytes), uri=" + uri);
+                        nFiles++;
+
+                        log.info("user uploaded " + fileName + " (" + bw.getSize() + " bytes), uri=" + uri);
 
                         uris.add(uri);
 
@@ -393,14 +407,20 @@ public class UploadBlob extends AuthenticatedServlet {
                             u.setUploaded(true);
                         }
 
-                        // submit to extraction service
-                        TupeloStore.getInstance().extractPreviews(uri);
                     } catch (OperatorException e) {
                         log.error("Error writing blob/label: " + e.getMessage());
                         throw new ServletException(e);
                     }
+
+                    // submit to extraction service
+                    try {
+                        TupeloStore.getInstance().extractPreviews(uri);
+                    } catch (Exception e) {
+                        log.info("Could not submit uri to extraction service, is it down?", e);
+                    }
                 }
             }
+
             // add a collection, if necessary
             if (collectionUri != null) {
                 try {
