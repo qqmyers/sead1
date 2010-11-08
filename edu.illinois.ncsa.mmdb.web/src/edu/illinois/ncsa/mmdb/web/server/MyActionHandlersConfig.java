@@ -89,6 +89,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryDatasetsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
@@ -171,6 +172,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new CreateRoleHandler());
         DispatchUtil.registerHandler(new DeleteRoleHandler());
         DispatchUtil.registerHandler(new GetMimeTypeCategoriesHandler());
+        DispatchUtil.registerHandler(new ListRelationshipTypesHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

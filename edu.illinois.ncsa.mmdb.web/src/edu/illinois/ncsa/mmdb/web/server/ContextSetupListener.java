@@ -57,6 +57,7 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
@@ -182,6 +183,7 @@ public class ContextSetupListener implements ServletContextListener {
             log.warn("Could not add accounts.", e);
         }
         createUserFields(props);
+        createRelationships(props);
 
         // start the timers
         startTimers();
@@ -240,6 +242,41 @@ public class ContextSetupListener implements ServletContextListener {
         search.setTextExtractor(new SearchableThingTextExtractor());
         search.setIdGetter(new SearchableThingIdGetter());
         TupeloStore.getInstance().setSearch(search);
+    }
+
+    private void createRelationships(Properties props) {
+        Context context = TupeloStore.getInstance().getContext();
+        try {
+            TripleWriter tw = new TripleWriter();
+
+            // add all the relationships
+            for (String key : props.stringPropertyNames() ) {
+                if (key.startsWith("relationship.") && key.endsWith(".predicate")) { //$NON-NLS-1$ //$NON-NLS-2$
+                    String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
+                    if (props.containsKey(pre + ".label")) { //$NON-NLS-1$
+                        Resource i = null;
+                        if (props.containsKey(pre + ".inverse")) {
+                            i = Resource.uriRef(props.getProperty(pre + ".inverse"));
+                        }
+                        Resource r = Resource.uriRef(props.getProperty(key));
+                        String l = props.getProperty(pre + ".label");
+                        tw.add(r, Rdf.TYPE, MMDB.USER_RELATIONSHIP); //$NON-NLS-1$
+                        // remove existing label
+                        context.removeTriples(context.match(r, Rdfs.LABEL, null));
+                        tw.add(r, Rdfs.LABEL, l);
+                        if (i != null) {
+                            tw.add(r, Resource.uriRef(Namespaces.owl("inverseOf")), i);
+                            tw.add(i, Resource.uriRef(Namespaces.owl("inverseOf")), r);
+                        }
+                        log.debug("Adding user relationship '" + l + "' (" + r + ")");
+                    }
+                }
+            }
+
+            context.perform(tw);
+        } catch (OperatorException exc) {
+            log.warn("Could not add user relationships.", exc);
+        }
     }
 
     private void createUserFields(Properties props) {

@@ -103,7 +103,7 @@ public class GetUserMetadataFieldsHandler implements
                 }
             }
             GetUserMetadataFieldsResult r = new GetUserMetadataFieldsResult();
-            r.setFieldLabels(labels);
+            r.setThingNames(labels);
             r.setValues(allValues);
             ts.close();
             return r;

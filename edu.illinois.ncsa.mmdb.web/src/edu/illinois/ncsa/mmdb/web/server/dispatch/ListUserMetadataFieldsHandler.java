@@ -38,53 +38,24 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.Map;
-
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.rdf.terms.Rdfs;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
-import edu.illinois.ncsa.mmdb.web.server.Memoized;
-import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
-public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMetadataFields, ListUserMetadataFieldsResult> {
-    private static Log                           log = LogFactory.getLog(ListUserMetadataFieldsHandler.class);
-
-    private static Memoized<Map<String, String>> cache;                                                       // key = uri, value = label
-
-    public static Map<String, String> listUserMetadataFields() {
-        if (cache == null) {
-            cache = new Memoized<Map<String, String>>() {
-                public Map<String, String> computeValue() {
-                    try {
-                        return TupeloStore.getInstance().listThingsOfType(MMDB.USER_METADATA_FIELD);
-                    } catch (OperatorException e) {
-                        log.error("query to fetch user metadata fields failed");
-                        return null;
-                    }
-                }
-            };
-            cache.setTtl(60 * 1000); // 1min
-        }
-        return cache.getValue();
-    }
-
+public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implements ActionHandler<ListUserMetadataFields, ListNamedThingsResult> {
     @Override
-    public ListUserMetadataFieldsResult execute(ListUserMetadataFields arg0, ExecutionContext arg1) throws ActionException {
-        Map<String, String> umf = listUserMetadataFields();
-        if (umf == null) {
+    public ListNamedThingsResult execute(ListUserMetadataFields arg0, ExecutionContext arg1) throws ActionException {
+        ListNamedThingsResult r = listNamedThings(MMDB.USER_METADATA_FIELD, Rdfs.LABEL);
+        if (r == null) {
             throw new ActionException("query to fetch user metadata fields failed");
         } else {
-            ListUserMetadataFieldsResult value = new ListUserMetadataFieldsResult();
-            value.setFieldLabels(umf);
-            return value;
+            return r;
         }
     }
 
@@ -94,7 +65,7 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
     }
 
     @Override
-    public void rollback(ListUserMetadataFields arg0, ListUserMetadataFieldsResult arg1, ExecutionContext arg2) throws ActionException {
+    public void rollback(ListUserMetadataFields arg0, ListNamedThingsResult arg1, ExecutionContext arg2) throws ActionException {
     }
 
 }

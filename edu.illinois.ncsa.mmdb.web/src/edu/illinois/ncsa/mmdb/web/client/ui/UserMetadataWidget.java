@@ -67,7 +67,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 
@@ -94,12 +94,12 @@ public class UserMetadataWidget extends Composite {
 
     public void showFields(final boolean canEdit) {
         // FIXME single get to get fields and values
-        dispatch.execute(new ListUserMetadataFields(), new AsyncCallback<ListUserMetadataFieldsResult>() {
+        dispatch.execute(new ListUserMetadataFields(), new AsyncCallback<ListNamedThingsResult>() {
             public void onFailure(Throwable caught) {
             }
 
-            public void onSuccess(ListUserMetadataFieldsResult result) {
-                SortedMap<String, String> availableFields = result.getFieldsOrderedByLabel();
+            public void onSuccess(ListNamedThingsResult result) {
+                SortedMap<String, String> availableFields = result.getThingsOrderedByName();
                 GWT.log("available fields: " + availableFields);
                 if (availableFields.size() > 0) {
                     if (canEdit) {
@@ -110,8 +110,8 @@ public class UserMetadataWidget extends Composite {
                         }
 
                         public void onSuccess(GetUserMetadataFieldsResult result) {
-                            for (String predicate : result.getFieldsOrderedByLabel().keySet() ) {
-                                String label = result.getFieldLabels().get(predicate);
+                            for (String predicate : result.getThingsOrderedByName().keySet() ) {
+                                String label = result.getThingNames().get(predicate);
                                 addNewField(predicate, label, result.getValues().get(predicate), canEdit);
                             }
                         }

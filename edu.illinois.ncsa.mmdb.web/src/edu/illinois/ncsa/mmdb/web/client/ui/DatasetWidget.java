@@ -65,8 +65,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
-import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;

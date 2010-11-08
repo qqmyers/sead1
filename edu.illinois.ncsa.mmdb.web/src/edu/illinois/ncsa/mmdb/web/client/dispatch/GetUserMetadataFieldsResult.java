@@ -42,7 +42,7 @@ import java.util.Collection;
 import java.util.Map;
 
 @SuppressWarnings("serial")
-public class GetUserMetadataFieldsResult extends ListUserMetadataFieldsResult {
+public class GetUserMetadataFieldsResult extends ListNamedThingsResult {
     Map<String, Collection<String>> values;
 
     public Map<String, Collection<String>> getValues() {

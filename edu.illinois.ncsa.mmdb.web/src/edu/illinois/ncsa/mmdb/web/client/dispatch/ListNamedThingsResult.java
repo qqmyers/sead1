@@ -38,46 +38,32 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.TreeMap;
 
 import net.customware.gwt.dispatch.shared.Result;
 
 @SuppressWarnings("serial")
-public class ListUserMetadataFieldsResult implements Result {
-    Map<String, String> fields; // uri -> label, sorted alpha by label 
+public class ListNamedThingsResult implements Result {
+    Map<String, String> thingNames; // uri -> name, sorted alpha by name 
 
-    public Map<String, String> getFieldLabels() {
-        if (fields == null) {
-            fields = new TreeMap<String, String>(new Comparator<String>() {
-                @Override
-                public int compare(String arg0, String arg1) {
-                    return fields.get(arg0).compareTo(fields.get(arg1));
-                }
-            });
+    public Map<String, String> getThingNames() {
+        if (thingNames == null) {
+            thingNames = new HashMap<String, String>();
         }
-        return fields;
+        return thingNames;
     }
 
-    public SortedMap<String, String> getFieldsOrderedByLabel() {
-        getFieldLabels();
-        SortedMap<String, String> result = new TreeMap<String, String>(new Comparator<String>() {
-            @Override
-            public int compare(String arg0, String arg1) {
-                return fields.get(arg0).compareTo(fields.get(arg1));
-            }
-        });
-        result.putAll(fields);
-        return result;
+    public SortedMap<String, String> getThingsOrderedByName() {
+        return MapUtil.sortByValue(getThingNames());
     }
 
-    public void setFieldLabels(Map<String, String> fieldLabels) {
-        this.fields = fieldLabels;
+    public void setThingNames(Map<String, String> thingNames) {
+        this.thingNames = thingNames;
     }
 
-    public void addField(String name, String uri) {
-        getFieldLabels().put(name, uri);
+    public void addThingName(String name, String uri) {
+        getThingNames().put(name, uri);
     }
 }

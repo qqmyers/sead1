@@ -43,7 +43,7 @@ import java.util.TreeSet;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
 
@@ -59,16 +59,16 @@ public class UserMetadataPresenter implements Presenter {
     @Override
     public void bind() {
         dispatch.execute(new ListUserMetadataFields(),
-                new AsyncCallback<ListUserMetadataFieldsResult>() {
+                new AsyncCallback<ListNamedThingsResult>() {
             public void onFailure(Throwable caught) {
             }
 
-            public void onSuccess(ListUserMetadataFieldsResult result) {
+            public void onSuccess(ListNamedThingsResult result) {
                 TreeSet<String> sortedUris = new TreeSet<String>();
-                sortedUris.addAll(result.getFieldLabels().keySet());
+                sortedUris.addAll(result.getThingNames().keySet());
                 for (String key : sortedUris ) {
                     String predicate = key;
-                    String label = result.getFieldLabels().get(key);
+                    String label = result.getThingNames().get(key);
                     display.addMetadataField(predicate, label);
                 }
             }
