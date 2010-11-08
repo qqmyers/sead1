@@ -38,7 +38,8 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -93,17 +94,20 @@ public class GetRelationshipHandler implements
 
             TupeloStore.getInstance().getContext().perform(u);
 
-            HashMap<DatasetBean, String> rt = new HashMap<DatasetBean, String>();
+            List<DatasetBean> rt = new LinkedList<DatasetBean>();
+            List<String> types = new LinkedList<String>();
+            //HashMap<DatasetBean, String> rt = new HashMap<DatasetBean, String>();
 
             for (Tuple<Resource> row : u.getResult() ) {
 
                 DatasetBean db = TupeloStore.fetchDataset(row.get(2)); // dbu's only take strings
                 String type = row.get(1).getString();
 
-                rt.put(db, type);
+                rt.add(db);
+                types.add(type);
             }
 
-            return new GetRelationshipResult(rt);
+            return new GetRelationshipResult(rt, types);
 
         } catch (Exception x) {
             log.error("Error getting related datasets for " + arg0.getDatasetURI(), x);

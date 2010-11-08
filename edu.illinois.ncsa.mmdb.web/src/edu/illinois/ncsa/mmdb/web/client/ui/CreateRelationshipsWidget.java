@@ -75,8 +75,9 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  */
 public class CreateRelationshipsWidget extends Composite {
 
-    public static final String RELATED  = "relates";
+    public static final String RELATES  = "relates";
     public static final String DESCENDS = "descends";
+
     private final FlowPanel    mainPanel;
     LabeledListBox             dataset1;
     LabeledListBox             dataset2;
@@ -129,6 +130,7 @@ public class CreateRelationshipsWidget extends Composite {
 
         //user interface: Filename dropdown forms
         HorizontalPanel forms = new HorizontalPanel();
+        forms.addStyleName("relationshipForms");
         dataset1 = createDatasetOptions();
         dataset1.addStyleName("relationshipDatasets");
         forms.add(dataset1);
@@ -152,6 +154,8 @@ public class CreateRelationshipsWidget extends Composite {
 
         mainPanel.add(forms);
 
+        fetchDataset(dataset1.getSelected(), thumb1);
+
         //user interface: submit button
         HorizontalPanel finalize = new HorizontalPanel();
         finalize.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -173,9 +177,9 @@ public class CreateRelationshipsWidget extends Composite {
     private LabeledListBox createRelationshipOptions() {
         LabeledListBox relationshipOptions = new LabeledListBox("");
         relationshipOptions.addStyleName("createRelationshipType");
-        relationshipOptions.addItem("Relates To", RELATED);
+        relationshipOptions.addItem("Relates To", RELATES);
         relationshipOptions.addItem("Descends From", DESCENDS);
-        relationshipOptions.setSelected(RELATED);
+        relationshipOptions.setSelected(RELATES);
         return relationshipOptions;
     }
 

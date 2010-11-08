@@ -38,11 +38,14 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -61,6 +64,7 @@ public class ShowRelationshipsWidget extends Composite {
     private final FlexTable previews;
     int                     count;
     DisclosurePanel         disclosurePanel;
+    List<String>            rTypes;
 
     public ShowRelationshipsWidget(String uri, MyDispatchAsync service) {
         this(uri, service, true);
@@ -69,6 +73,8 @@ public class ShowRelationshipsWidget extends Composite {
     public ShowRelationshipsWidget(final String uri, final MyDispatchAsync service, boolean withTitle) {
 
         count = 0;
+
+        rTypes = new LinkedList<String>();
 
         mainContainer = new FlowPanel();
         mainContainer.addStyleName("datasetRightColSection");
@@ -101,14 +107,20 @@ public class ShowRelationshipsWidget extends Composite {
 
             @Override
             public void onSuccess(GetRelationshipResult arg0) {
-                HashMap<DatasetBean, String> rt = arg0.getRelationships();
-                for (Map.Entry<DatasetBean, String> db : rt.entrySet() ) {
-                    DatasetBean uri = db.getKey();
-                    //String type = db.getValue();
-                    addDataset(uri);
+                List<DatasetBean> r = arg0.getRelationships();
+                List<String> types = arg0.getTypes();
+
+                for (String t : types ) {
+                    if (!rTypes.contains(t)) {
+                        //createPanel(t);
+                    }
                 }
 
-                count = rt.size();
+                for (DatasetBean d : r ) {
+                    addDataset(d);
+                }
+
+                count = r.size();
 
                 disclosurePanel.getHeaderTextAccessor().setText("Relates To (" + count + ")");
                 mainContainer.setVisible(previews.getRowCount() > 0);
@@ -120,20 +132,46 @@ public class ShowRelationshipsWidget extends Composite {
 
     private void addDataset(DatasetBean ds) {
         String url = "dataset?id=" + ds.getUri();
-        PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url);
+        final PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url);
         String title = ds.getTitle();
         title = title.length() > 15 ? title.substring(0, 15) + "..." : title;
         Hyperlink link = new Hyperlink(title, url);
         int n = previews.getRowCount();
 
+        final int rowToDelete = n;
+        Anchor removeButton = new Anchor("Remove");
+
+        removeButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                deleteRelationship(rowToDelete);
+                pw.setVisible(false);
+            }
+        });
+
         previews.setWidget(n++, 0, pw);
-        previews.setWidget(n++, 0, link);
+        previews.setWidget(n, 0, link);
+        previews.setWidget(n, 1, removeButton);
+    }
+
+    private void deleteRelationship(final int toDelete) {
+
+        previews.getRowFormatter().addStyleName(toDelete, "relationshipDelete");
+        previews.getRowFormatter().addStyleName(toDelete + 1, "relationshipDelete");
+
+        //
+
+        count--;
+
+        if (count == 0) {
+            disclosurePanel.setVisible(false);
+        } else {
+            disclosurePanel.getHeaderTextAccessor().setText("Relates To (" + count + ")");
+        }
     }
 
     //Disclosure panels created dynamically based on relationship type
-    @SuppressWarnings("unused")
     private void createPanel(String type) {
-        //types.add(type);
+        rTypes.add(type);
         DisclosurePanel disclosurePanel = new DisclosurePanel(type);
         disclosurePanel.setAnimationEnabled(true);
         mainContainer.add(disclosurePanel);

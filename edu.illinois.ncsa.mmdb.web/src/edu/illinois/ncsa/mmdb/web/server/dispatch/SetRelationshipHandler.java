@@ -68,12 +68,15 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  */
 public class SetRelationshipHandler implements ActionHandler<SetRelationship, SetRelationshipResult> {
 
-    public static Resource MMDB_RELATIONSHIP         = Cet.cet("mmdb/relationship");
-    public static Resource MMDB_RELATIONSHIP_TYPE    = Cet.cet("mmdb/relationshipType");
-    public static Resource MMDB_RELATIONSHIP_DATASET = Cet.cet("mmdb/relationshipDataset");
+    public static Resource     MMDB_RELATIONSHIP         = Cet.cet("mmdb/relationship");
+    public static Resource     MMDB_RELATIONSHIP_TYPE    = Cet.cet("mmdb/relationshipType");
+    public static Resource     MMDB_RELATIONSHIP_DATASET = Cet.cet("mmdb/relationshipDataset");
+
+    public static final String RELATES                   = "relates";
+    public static final String DESCENDS                  = "descends";
 
     /** Commons logging **/
-    private static Log     log                       = LogFactory.getLog(SetRelationshipHandler.class);
+    private static Log         log                       = LogFactory.getLog(SetRelationshipHandler.class);
 
     @Override
     public SetRelationshipResult execute(SetRelationship arg0, ExecutionContext arg1) throws ActionException {
@@ -110,13 +113,18 @@ public class SetRelationshipHandler implements ActionHandler<SetRelationship, Se
         tw.add(uri, Dc.CREATOR, person);
         tw.add(uri, Dc.DATE, new Date());
 
-        Resource uri2 = Resource.uriRef();
+        //for bidirectional relationship types
+        if (type.contains(RELATES)) {
 
-        tw.add(dataset2, MMDB_RELATIONSHIP, uri2);
-        tw.add(uri2, MMDB_RELATIONSHIP_TYPE, type);
-        tw.add(uri2, MMDB_RELATIONSHIP_DATASET, dataset);
-        tw.add(uri2, Dc.CREATOR, person);
-        tw.add(uri2, Dc.DATE, new Date());
+            Resource uri2 = Resource.uriRef();
+
+            tw.add(dataset2, MMDB_RELATIONSHIP, uri2);
+            tw.add(uri2, MMDB_RELATIONSHIP_TYPE, type);
+            tw.add(uri2, MMDB_RELATIONSHIP_DATASET, dataset);
+            tw.add(uri2, Dc.CREATOR, person);
+            tw.add(uri2, Dc.DATE, new Date());
+
+        }
 
         if ((tw.getToAdd().size() != 0)) {
             try {

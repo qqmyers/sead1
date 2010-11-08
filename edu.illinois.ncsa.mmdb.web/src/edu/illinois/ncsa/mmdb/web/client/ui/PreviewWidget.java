@@ -258,13 +258,14 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
     public void changeImage(String newURL, String mime) {
         String type = ContentCategory.getCategory(mime);
-        if (type == "Image" || type == "Video" || mime.contains("pdf") || type == "Audio") {
+        //FIXME a better way to specify whether a filetype will show a thumbnail or not
+        if (mime.contains("image") || type == "Video" || mime.contains("pdf") || type == "Audio") {
             image.setUrl(PREVIEW_URL.get(size) + newURL);
             imagePanel.removeStyleName("imageThumbnailBordered");
             imagePanel.addStyleName("imageThumbnail");
         } else {
-            imagePanel.removeStyleName("imageThumbnail");
-            imagePanel.addStyleName("ImageThumbnailBordered");
+            //imagePanel.removeStyleName("imageThumbnail");
+            //imagePanel.addStyleName("ImageThumbnailBordered");
             image.setUrl(GRAY_URL.get(size));
         }
     }
