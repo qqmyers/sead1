@@ -38,11 +38,6 @@ public class Medici extends Activity {
 
         setContentView(R.layout.medici);
 
-        // DEBUG
-        //        ((EditText) findViewById(R.id.caption)).setText("Hello World");
-        //        Uri mediciUri = Uri.parse("android.resource://edu.illinois.ncsa.medici.handheld.android/" + R.drawable.medici);
-        //        showPicture(mediciUri);
-
         ((Button) findViewById(R.id.btnUpload)).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -12,7 +12,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.widget.EditText;
+import android.util.Log;
 
 public class DeadCode extends Activity {
 
@@ -76,7 +76,7 @@ public class DeadCode extends Activity {
                     sb.append("\n--\n");
                     sb.append(location);
 
-                    ((EditText) findViewById(R.id.debug)).setText(sb.toString());
+                    Log.i(Medici.TAG, sb.toString());
                 }
 
                 public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -104,7 +104,7 @@ public class DeadCode extends Activity {
             sb.append("\n--\n");
             sb.append(location);
 
-            ((EditText) findViewById(R.id.debug)).setText(sb.toString());
+            Log.i(Medici.TAG, sb.toString());
         }
 
     }

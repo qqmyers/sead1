@@ -20,7 +20,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
-import android.util.Base64;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -139,6 +138,7 @@ public class MediciUploadService extends Service {
 
                 // Put the authentication details in the request
                 String up = username + ":" + password;
+
                 String encodedUsernamePassword = Base64.encodeToString(up.getBytes(), Base64.NO_WRAP);
                 conn.setRequestProperty("Authorization", "Basic " + encodedUsernamePassword);
 
@@ -157,7 +157,10 @@ public class MediciUploadService extends Service {
                 // write data
                 dataOS.writeBytes("--" + BOUNDRY + "\r\n");
                 dataOS.writeBytes("Content-Disposition: form-data; name=\"" + caption + "\"; filename=\"" + filename + "\";\r\n");
-                dataOS.writeBytes("Content-Type: " + MediciUploadService.this.getContentResolver().getType(uri) + "\r\n");
+                String mimetype = MediciUploadService.this.getContentResolver().getType(uri);
+                if (mimetype != null) {
+                    dataOS.writeBytes("Content-Type: " + mimetype + "\r\n");
+                }
                 dataOS.writeBytes("\r\n");
 
                 // actual data to be written
