@@ -114,6 +114,7 @@ public class CreateRelationshipsWidget extends Composite {
 
         //user interface: thumbnails & relationship Type
         thumbs = new HorizontalPanel();
+        thumbs.setStyleName("createRelationshipThumbs");
         thumb1 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false);
         thumb1.setWidth("100px");
         thumbs.add(thumb1);
@@ -132,7 +133,6 @@ public class CreateRelationshipsWidget extends Composite {
         HorizontalPanel forms = new HorizontalPanel();
         forms.addStyleName("relationshipForms");
         dataset1 = createDatasetOptions();
-        dataset1.addStyleName("relationshipDatasets");
         forms.add(dataset1);
 
         dataset1.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -143,6 +143,7 @@ public class CreateRelationshipsWidget extends Composite {
         });
 
         dataset2 = createDatasetOptions();
+        dataset2.addStyleName("relationshipDatasets");
         forms.add(dataset2);
 
         dataset2.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -154,12 +155,12 @@ public class CreateRelationshipsWidget extends Composite {
 
         mainPanel.add(forms);
 
-        fetchDataset(dataset1.getSelected(), thumb1);
+        thumb1.changeImage(dataset1.getSelected(), "hi");
 
         //user interface: submit button
         HorizontalPanel finalize = new HorizontalPanel();
         finalize.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        finalize.setStyleName("relationshipStyle");
+        finalize.setStyleName("relationshipSubmit");
         Button submit = new Button("Submit");
 
         submit.addClickHandler(new ClickHandler() {
@@ -169,7 +170,6 @@ public class CreateRelationshipsWidget extends Composite {
         });
 
         finalize.add(submit);
-
         mainPanel.add(finalize);
 
     }

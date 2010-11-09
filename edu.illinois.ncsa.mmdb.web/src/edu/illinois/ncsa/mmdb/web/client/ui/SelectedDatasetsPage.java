@@ -76,6 +76,7 @@ public class SelectedDatasetsPage extends Page {
 
     private final int                 num;
     private final Set<DatasetBean>    datasets;
+    int                               first;
 
     private CreateRelationshipsWidget relationshipWidget;
 
@@ -92,6 +93,7 @@ public class SelectedDatasetsPage extends Page {
 
         rbac = new PermissionUtil(dispatchAsync);
         service = dispatchAsync;
+        first = 1;
 
         //user interface
         selectedPanel = new FlowPanel();
@@ -116,10 +118,6 @@ public class SelectedDatasetsPage extends Page {
         num = MMDB.getSessionState().getSelectedDatasets().size();
         leftcolumn.add(new Label("Showing " + num + " selected datasets"));
 
-        for (String datasetUri : selectedDatasets ) {
-            fetchDataset(datasetUri);
-        }
-
         //create relationship - widget (if allowed)
         rbac.doIfAllowed(Permission.ADD_RELATIONSHIP, new PermissionCallback() {
             @Override
@@ -139,6 +137,11 @@ public class SelectedDatasetsPage extends Page {
             }
         });
 
+        //retrieve datasets
+        for (String datasetUri : selectedDatasets ) {
+            fetchDataset(datasetUri);
+        }
+
         mainLayoutPanel.add(selectedPanel);
 
     }
@@ -151,7 +154,7 @@ public class SelectedDatasetsPage extends Page {
 
             @Override
             public void onFailure(Throwable caught) {
-                GWT.log("Error getting recent activity");
+                GWT.log("Error getting datasetbean from uri");
             }
 
             @Override
@@ -166,7 +169,14 @@ public class SelectedDatasetsPage extends Page {
                 rbac.doIfAllowed(Permission.ADD_RELATIONSHIP, new PermissionCallback() {
                     @Override
                     public void onAllowed() {
+
                         relationshipWidget.addToList(shortenTitle(result.getDataset().getTitle()), value);
+                        if (first == 1) {
+                            relationshipWidget.thumb1.changeImage(result.getDataset().getUri(), result.getDataset().getMimeType());
+                            relationshipWidget.thumb2.changeImage(result.getDataset().getUri(), result.getDataset().getMimeType());
+                            first = 0;
+                        }
+
                     }
                 });
             }
