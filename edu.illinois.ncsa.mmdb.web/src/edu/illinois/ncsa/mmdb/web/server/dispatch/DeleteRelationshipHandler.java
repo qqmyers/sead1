@@ -1,6 +1,5 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Set;
@@ -18,7 +17,6 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
-import org.tupeloproject.rdf.xml.RdfXml;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
@@ -74,12 +72,14 @@ public class DeleteRelationshipHandler implements ActionHandler<DeleteRelationsh
             //
             c.perform(t);
             Set<Triple> toast = t.getResult();
+            /*
             try {
                 RdfXml.write(toast, System.out);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             } // FIXME debug;
+            */
             TripleWriter tw = new TripleWriter();
             tw.removeAll(toast);
             c.perform(tw);
