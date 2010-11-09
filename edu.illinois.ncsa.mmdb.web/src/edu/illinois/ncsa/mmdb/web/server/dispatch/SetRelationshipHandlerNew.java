@@ -59,7 +59,7 @@ public class SetRelationshipHandlerNew implements ActionHandler<SetRelationship,
         } catch (URISyntaxException e) {
             throw new ActionException("set relationship failed", e);
         }
-        return null;
+        return new SetRelationshipResult();
     }
 
     @Override
