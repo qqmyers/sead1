@@ -354,20 +354,21 @@ public class ContextSetupListener implements ServletContextListener {
                         if ("admin".equalsIgnoreCase(role)) { //$NON-NLS-1$
                             Resource adminRole = Resource.uriRef(DefaultRole.ADMINISTRATOR.getUri());
                             Resource viewMemberPages = Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri());
-                            Resource viewAdminPages = Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri());
+                            Resource viewAdminPages = Resource.uriRef(Permission.VIEW_ADMIN_PAGES.getUri());
                             Resource editRoles = Resource.uriRef(Permission.EDIT_ROLES.getUri());
                             // FIXME this set of permissions is described in multiple places; kill those tiles!
                             ensureRoleExists(DefaultRole.ADMINISTRATOR, rbac);
                             log.info("Adding " + userid + " to Administrator role");
                             rbac.addRole(userid, adminRole);
                             // this admin needs to have admin permissions. if they don't, create them
-                            if (!rbac.checkPermission(userid, viewMemberPages) &&
-                                    !rbac.checkPermission(userid, viewAdminPages) &&
+                            if (!rbac.checkPermission(userid, viewMemberPages) ||
+                                    !rbac.checkPermission(userid, viewAdminPages) ||
                                     !rbac.checkPermission(userid, editRoles)) {
                                 log.info("User " + userid + " cannot administer access control: adding permissions to Administrator role");
                                 rbac.setPermissionValue(adminRole, viewMemberPages, RBAC.ALLOW);
                                 rbac.setPermissionValue(adminRole, viewAdminPages, RBAC.ALLOW);
                                 rbac.setPermissionValue(adminRole, editRoles, RBAC.ALLOW);
+                                // FIXME the admin role should have these premissions regardless of whether the admin user needs to be created!
                             }
                         }
                         if ("member".equalsIgnoreCase(role)) { //$NON-NLS-1$
