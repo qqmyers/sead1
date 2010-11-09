@@ -11,6 +11,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationship;
@@ -27,9 +28,10 @@ public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship,
             Resource subject = Resource.uriRef(action.getDatasetURI());
 
             Unifier u = new Unifier();
-            u.setColumnNames("type", "dataset");
+            u.setColumnNames("label", "dataset");
             u.addPattern("type", Rdf.TYPE, MMDB.USER_RELATIONSHIP); // only fetch user relationship triples
             u.addPattern(subject, "type", "dataset"); // determine the target dataset uri from the relationship triple
+            u.addPattern("type", Rdfs.LABEL, "label");
             // don't fetch the reified stuff (the date and creator of the relationship) because these are not returned by this dispatch
 
             TupeloStore.getInstance().getContext().perform(u);
