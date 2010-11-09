@@ -577,6 +577,8 @@ a:hover {
 }
 
 .pencilIcon {
+	cursor: hand;
+	cursor: pointer;
 }
 
 .titleLabel {
@@ -960,6 +962,8 @@ a:hover {
 
 .editHighlight {
     background: #ffff99;
+    cursor: hand;
+    cursor: pointer;
 }
 
 .deleteLink {
