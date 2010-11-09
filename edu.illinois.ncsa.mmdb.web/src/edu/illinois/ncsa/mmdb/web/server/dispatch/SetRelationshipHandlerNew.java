@@ -52,6 +52,8 @@ public class SetRelationshipHandlerNew implements ActionHandler<SetRelationship,
                 tw.add(reified, Dc.CREATOR, creator);
                 tw.add(reified, Dc.DATE, new Date());
             }
+
+            c.perform(tw);
         } catch (OperatorException x) {
             throw new ActionException("set relationship failed", x);
         } catch (URISyntaxException e) {
