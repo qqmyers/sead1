@@ -66,8 +66,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 
@@ -76,6 +76,8 @@ public class UserMetadataWidget extends Composite {
     MyDispatchAsync     dispatch;
     LabeledListBox      fieldChoice;
     TextBox             valueText;
+    VerticalPanel       thePanel;
+    Label               noFields;
     FlexTable           fieldTable;
     Map<String, String> labels = new HashMap<String, String>();
 
@@ -89,7 +91,15 @@ public class UserMetadataWidget extends Composite {
         fieldTable.getColumnFormatter().setWidth(0, "30%");
         fieldTable.getColumnFormatter().setWidth(1, "50%");
         fieldTable.getColumnFormatter().setWidth(2, "20%");
-        initWidget(fieldTable);
+
+        thePanel = new VerticalPanel();
+        noFields = new Label("No user specified metadata");
+        noFields.addStyleName("metadataTable");
+        noFields.addStyleName("metadataTableCell");
+        noFields.addStyleName("hidden");
+        thePanel.add(noFields);
+        thePanel.add(fieldTable);
+        initWidget(thePanel);
     }
 
     public void showFields(final boolean canEdit) {
@@ -110,9 +120,14 @@ public class UserMetadataWidget extends Composite {
                         }
 
                         public void onSuccess(GetUserMetadataFieldsResult result) {
-                            for (String predicate : result.getThingsOrderedByName().keySet() ) {
-                                String label = result.getThingNames().get(predicate);
-                                addNewField(predicate, label, result.getValues().get(predicate), canEdit);
+                            Set<String> predicates = result.getThingsOrderedByName().keySet();
+                            if (predicates.size() == 0) {
+                                addNoFields();
+                            } else {
+                                for (String predicate : predicates ) {
+                                    String label = result.getThingNames().get(predicate);
+                                    addNewField(predicate, label, result.getValues().get(predicate), canEdit);
+                                }
                             }
                         }
                     });
@@ -133,13 +148,18 @@ public class UserMetadataWidget extends Composite {
         addNewField(predicate, label, v, true);
     }
 
+    /** number of fields set */
+    private int getFieldCount() {
+        return fieldTable.getRowCount();
+    }
+
     /**
      * 
      * @param predicate
      * @return
      */
     private int getRowForField(String predicate) {
-        for (int row = 0; row < fieldTable.getRowCount() - 1; row++ ) {
+        for (int row = 0; row < fieldTable.getRowCount(); row++ ) {
             Label l = (Label) fieldTable.getWidget(row, 0);
             if (predicate.equals(l.getTitle())) {
                 return row;
@@ -158,9 +178,6 @@ public class UserMetadataWidget extends Composite {
         int row = getRowForField(predicate);
         if (row == -1) {
             row = fieldTable.getRowCount();
-            if (fieldChoice != null) {
-                row--;
-            }
             fieldTable.insertRow(row);
         }
 
@@ -181,7 +198,16 @@ public class UserMetadataWidget extends Composite {
             });
             fieldTable.setWidget(row, 2, removeAnchor);
         }
+        removeNoFields();
         styleRows();
+    }
+
+    void addNoFields() {
+        noFields.removeStyleName("hidden");
+    }
+
+    void removeNoFields() {
+        noFields.addStyleName("hidden");
     }
 
     /**
@@ -195,9 +221,7 @@ public class UserMetadataWidget extends Composite {
         horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
-        int row = fieldTable.getRowCount();
-        fieldTable.getFlexCellFormatter().setColSpan(row, 0, 3);
-        fieldTable.setWidget(row, 0, horizontalPanel);
+        thePanel.add(horizontalPanel);
 
         fieldChoice = new LabeledListBox("Set Field:");
         for (Map.Entry<String, String> entry : result.entrySet() ) {
@@ -270,6 +294,9 @@ public class UserMetadataWidget extends Composite {
                     fieldTable.removeRow(row);
                     styleRows();
                 }
+                if (getFieldCount() == 0) {
+                    addNoFields();
+                }
             }
         });
     }
@@ -279,9 +306,6 @@ public class UserMetadataWidget extends Composite {
      */
     private void styleRows() {
         int rows = fieldTable.getRowCount();
-        if (fieldChoice != null) {
-            rows--;
-        }
         for (int row = 0; row < rows; row++ ) {
             fieldTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
             fieldTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
