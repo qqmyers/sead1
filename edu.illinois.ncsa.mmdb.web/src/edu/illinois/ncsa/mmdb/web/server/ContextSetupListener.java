@@ -326,7 +326,10 @@ public class ContextSetupListener implements ServletContextListener {
         MediciRbac rbac = new MediciRbac(context);
 
         // ensure base RBAC ontology exists
+        log.debug("Initializing Medici permission set...");
         rbac.createBaseOntology();
+        // ensure Medici permissions exist
+        rbac.intializePermissions();
 
         // create accounts
         Set<String> keys = new HashSet<String>();
