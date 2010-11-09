@@ -41,7 +41,9 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -62,6 +64,8 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListRelationshipTypes;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
@@ -105,7 +109,7 @@ public class CreateRelationshipsWidget extends Composite {
 
         mainPanel = new FlowPanel();
         //commented out for now, until selected
-        //mainPanel.addStyleName("CreateRelationshipsContainer");
+        //mainPanel.addStyleName("CreateRelationshipContainer");
         initWidget(mainPanel);
 
         Label createRelationships = new Label("Create Relationship");
@@ -175,11 +179,24 @@ public class CreateRelationshipsWidget extends Composite {
     }
 
     private LabeledListBox createRelationshipOptions() {
-        LabeledListBox relationshipOptions = new LabeledListBox("");
-        relationshipOptions.addStyleName("createRelationshipType");
-        relationshipOptions.addItem("Relates To", RELATES);
-        relationshipOptions.addItem("Descends From", DESCENDS);
-        relationshipOptions.setSelected(RELATES);
+
+        final LabeledListBox relationshipOptions = new LabeledListBox("");
+
+        service.execute(new ListRelationshipTypes(), new AsyncCallback<ListNamedThingsResult>() {
+            public void onFailure(Throwable caught) {
+            }
+
+            public void onSuccess(ListNamedThingsResult result) {
+                SortedMap<String, String> availableFields = result.getThingsOrderedByName();
+
+                for (Map.Entry<String, String> entry : availableFields.entrySet() ) {
+                    String label = entry.getValue();
+                    String predicate = entry.getKey();
+                    relationshipOptions.addItem(label, predicate);
+                }
+            }
+        });
+
         return relationshipOptions;
     }
 
@@ -221,7 +238,7 @@ public class CreateRelationshipsWidget extends Composite {
                         }
 
                         public void onSuccess(SetRelationshipResult result) {
-                            createFeedback(dataset1.getSelected(), relationships.getSelected(), dataset2.getSelected());
+                            createFeedback(dataset1.getSelected(), relationships.getTitle(), dataset2.getSelected());
                         }
                     });
 

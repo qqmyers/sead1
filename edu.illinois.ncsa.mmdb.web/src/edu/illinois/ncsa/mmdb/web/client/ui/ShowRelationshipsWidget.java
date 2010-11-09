@@ -78,7 +78,7 @@ public class ShowRelationshipsWidget extends Composite {
 
         mainContainer = new FlowPanel();
         mainContainer.addStyleName("datasetRightColSection");
-        mainContainer.setVisible(false);
+        mainContainer.setVisible(true);
         initWidget(mainContainer);
 
         if (withTitle) {
@@ -112,7 +112,7 @@ public class ShowRelationshipsWidget extends Composite {
 
                 for (String t : types ) {
                     if (!rTypes.contains(t)) {
-                        //createPanel(t);
+                        createPanel(t);
                     }
                 }
 
@@ -123,7 +123,7 @@ public class ShowRelationshipsWidget extends Composite {
                 count = r.size();
 
                 disclosurePanel.getHeaderTextAccessor().setText("Relates To (" + count + ")");
-                mainContainer.setVisible(previews.getRowCount() > 0);
+                //mainContainer.setVisible(previews.getRowCount() > 0);
 
             }
         });
@@ -158,7 +158,7 @@ public class ShowRelationshipsWidget extends Composite {
         previews.getRowFormatter().addStyleName(toDelete, "relationshipDelete");
         previews.getRowFormatter().addStyleName(toDelete + 1, "relationshipDelete");
 
-        //
+        //user interface only -> counts will change dynamically per type
 
         count--;
 

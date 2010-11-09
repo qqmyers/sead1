@@ -1176,6 +1176,10 @@ a:hover {
 	text-align: left;
 }
 
+.createRelationshipContainer{
+	position:fixed; 	
+}
+
 .createRelationshipThumbs{
 	margin-left: 25px;	
 }
