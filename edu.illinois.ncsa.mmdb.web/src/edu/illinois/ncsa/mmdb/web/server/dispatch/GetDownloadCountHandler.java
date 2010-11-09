@@ -79,7 +79,7 @@ public class GetDownloadCountHandler implements ActionHandler<GetDownloadCount, 
         Unifier uf = new Unifier();
         uf.addPattern(dataset, MMDB.DOWNLOADED_BY, "download");
         uf.addPattern("download", Dc.CREATOR, "downloader");
-        uf.setColumnNames("downloader");
+        uf.setColumnNames("download", "downloader");
         try {
             TupeloStore.getInstance().getContext().perform(uf);
         } catch (OperatorException e) {
@@ -90,7 +90,7 @@ public class GetDownloadCountHandler implements ActionHandler<GetDownloadCount, 
         Set<Resource> people = new HashSet<Resource>();
         for (Tuple<Resource> row : uf.getResult() ) {
             count++;
-            people.add(row.get(0));
+            people.add(row.get(1));
         }
 
         // done
