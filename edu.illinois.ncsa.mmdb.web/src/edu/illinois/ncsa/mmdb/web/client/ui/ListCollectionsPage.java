@@ -76,7 +76,7 @@ public class ListCollectionsPage extends Composite {
     private final MyDispatchAsync     dispatchasync;
     private final HandlerManager      eventBus;
     private final FlowPanel           mainContainer;
-    private final Label               noCollectionsLabel;
+    private final Label               statusLabel;
     private final FlowPanel           addCollectionWidget;
     private TitlePanel                pageTitle;
     private PagingCollectionTableView view;
@@ -95,8 +95,8 @@ public class ListCollectionsPage extends Composite {
         addCollectionWidget = createAddCollectionWidget();
         mainContainer.add(addCollectionWidget);
 
-        noCollectionsLabel = new Label("No collections available.");
-        mainContainer.add(noCollectionsLabel);
+        statusLabel = new Label("Loading...");
+        mainContainer.add(statusLabel);
 
         retrieveCollections();
     }
@@ -155,6 +155,7 @@ public class ListCollectionsPage extends Composite {
 
                     @Override
                     public void onFailure(Throwable arg0) {
+                        statusLabel.setText("Error: could not load collections");
                         GWT.log("Failed creating new collection", arg0);
                     }
 
@@ -175,11 +176,17 @@ public class ListCollectionsPage extends Composite {
                     @Override
                     public void onFailure(Throwable arg0) {
                         GWT.log("Error getting collections", arg0);
+
                     }
 
                     @Override
                     public void onSuccess(GetCollectionsResult arg0) {
-                        showCollections(arg0.getCollections());
+                        if (arg0.getCount() > 0) {
+                            statusLabel.addStyleName("hidden");
+                            showCollections(arg0.getCollections());
+                        } else {
+                            statusLabel.setText("No collections found.");
+                        }
                     }
                 });
     }
@@ -190,7 +197,6 @@ public class ListCollectionsPage extends Composite {
      * @param collections
      */
     protected void showCollections(ArrayList<CollectionBean> collections) {
-        mainContainer.remove(noCollectionsLabel);
         if (view != null) {
             mainContainer.remove(view);
         }
