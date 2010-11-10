@@ -94,7 +94,7 @@ public class UserMetadataWidget extends Composite {
 
         thePanel = new VerticalPanel();
         noFields = new Label("No user specified metadata");
-        noFields.addStyleName("metadataTable");
+        noFields.addStyleName("noMetadata");
         noFields.addStyleName("metadataTableCell");
         noFields.addStyleName("hidden");
         thePanel.add(noFields);
