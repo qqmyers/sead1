@@ -54,6 +54,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -100,6 +101,7 @@ public class LicenseWidget extends Composite {
     private Label                    lblLicense;
     private CheckBox                 myData;
     private Label                    lblRightsHolder;
+    private SimplePanel              licensePanel;
 
     public LicenseWidget(Collection<String> batch, MyDispatchAsync service, HandlerManager eventBus, boolean showTitle, boolean canEdit, boolean showEdit) {
         this.resources = batch;
@@ -121,13 +123,13 @@ public class LicenseWidget extends Composite {
         }
         if (showEdit) {
             mainPanel.remove(attribution);
-            mainPanel.remove(licenseText);
+            mainPanel.remove(licensePanel);
             mainPanel.remove(licenseEdit);
             mainPanel.add(licenseEditor);
         } else {
             mainPanel.remove(licenseEditor);
             mainPanel.add(attribution);
-            mainPanel.add(licenseText);
+            mainPanel.add(licensePanel);
             mainPanel.add(licenseEdit);
         }
     }
@@ -147,11 +149,13 @@ public class LicenseWidget extends Composite {
             mainPanel.add(title);
         }
 
-        licenseText = new Anchor("");
-        licenseText.setTarget("_blank");
-        licenseText.setStyleName("datasetRightColText");
-        licenseText.addStyleName("anchorBlock");
-        mainPanel.add(licenseText);
+        licensePanel = new SimplePanel();
+        mainPanel.add(licensePanel);
+        //        licenseText = new Anchor("");
+        //        licenseText.setTarget("_blank");
+        //        licenseText.setStyleName("datasetRightColText");
+        //        licenseText.addStyleName("anchorBlock");
+        //        licensePanel.add(licenseText);
 
         attribution = new Label();
         mainPanel.add(attribution);
@@ -241,6 +245,8 @@ public class LicenseWidget extends Composite {
                 myData.setVisible(false);
                 lblRights.setVisible(false);
                 rights.setVisible(false);
+                lblRightsHolder.setVisible(false);
+                rightsHolder.setVisible(false);
                 lblLicense.setVisible(false);
                 licenseURL.setVisible(false);
                 allowDownload.setVisible(false);
@@ -260,6 +266,8 @@ public class LicenseWidget extends Composite {
                 myData.setVisible(true);
                 lblRights.setVisible(false);
                 rights.setVisible(false);
+                lblRightsHolder.setVisible(true);
+                rightsHolder.setVisible(true);
                 lblLicense.setVisible(false);
                 licenseURL.setVisible(false);
                 allowDownload.setVisible(false);
@@ -296,6 +304,8 @@ public class LicenseWidget extends Composite {
                 myData.setVisible(true);
                 lblRights.setVisible(true);
                 rights.setVisible(true);
+                lblRightsHolder.setVisible(true);
+                rightsHolder.setVisible(true);
                 lblLicense.setVisible(true);
                 licenseURL.setVisible(true);
                 allowDownload.setVisible(true);
@@ -390,7 +400,7 @@ public class LicenseWidget extends Composite {
         }
 
         if (pd.getValue()) {
-            license.setRights("pddl");
+            license.setRights("cc-zero");
             license.setLicense("http://creativecommons.org/publicdomain/zero/1.0/");
             license.setRightsHolder(null);
             license.setRightsHolderUri(null);
@@ -459,7 +469,7 @@ public class LicenseWidget extends Composite {
         }
 
         String rights = license.getRights().toLowerCase();
-        boolean publicDomain = rights.equals("pddl");
+        boolean publicDomain = rights.equals("cc-zero");
 
         // attribution
         if (license.getRightsHolder() == null || publicDomain) {
@@ -471,10 +481,15 @@ public class LicenseWidget extends Composite {
         }
 
         // check to see the license type
-        licenseText.removeStyleName("deadLink");
+        licensePanel.clear();
+        licenseText = new Anchor("");
+        licenseText.setTarget("_blank");
+        licenseText.setStyleName("datasetRightColText");
+        licenseText.addStyleName("anchorBlock");
+        licensePanel.add(licenseText);
         // FIXME literal used as identifier
         // FIXME magic number antipattern, use an enum
-        if (rights.equals("pddl")) {
+        if (rights.equals("cc-zero")) {
             // Public Domain License
             Image icon = new Image("images/cc-pd.png");
             licenseText.setText("");
@@ -495,8 +510,8 @@ public class LicenseWidget extends Composite {
             if ((license.getLicense() != null) && license.getLicense().startsWith("http://")) {
                 licenseText.setHref(license.getLicense());
             } else {
-                licenseText.addStyleName("deadLink");
-                licenseText.setHref("javascript:;");
+                licensePanel.remove(licenseText);
+                licensePanel.add(new Label(license.getRights()));
             }
         }
 
@@ -525,7 +540,7 @@ public class LicenseWidget extends Composite {
             }
         }
 
-        if (rights.equals("pddl")) {
+        if (rights.equals("cc-zero")) {
             // Public Domain License
             pd.setValue(true);
 
@@ -540,6 +555,8 @@ public class LicenseWidget extends Composite {
             shareAlike.setEnabled(allowRemixing.getValue());
 
             lblRights.setVisible(false);
+            lblRightsHolder.setVisible(false);
+            rightsHolder.setVisible(false);
             this.rights.setVisible(false);
             this.rights.setText("All Rights Reserved");
 
@@ -565,6 +582,8 @@ public class LicenseWidget extends Composite {
             shareAlike.setEnabled(allowRemixing.getValue());
 
             lblRights.setVisible(false);
+            lblRightsHolder.setVisible(true);
+            rightsHolder.setVisible(true);
             this.rights.setVisible(false);
             this.rights.setText("All Rights Reserved");
 
@@ -598,6 +617,8 @@ public class LicenseWidget extends Composite {
             shareAlike.setEnabled(allowRemixing.getValue());
 
             lblRights.setVisible(true);
+            lblRightsHolder.setVisible(true);
+            rightsHolder.setVisible(true);
             this.rights.setVisible(true);
             this.rights.setText(license.getRights());
 
