@@ -191,8 +191,8 @@ public class RestServlet extends AuthenticatedServlet {
     String decanonicalizeUrl(HttpServletRequest request) throws ServletException {
         String canonical = request.getRequestURL().toString();
         String decanonicalized = getUriCanonicalizer(request).decanonicalize(canonical);
-        if (!decanonicalized.matches("^[a-z]+:.*")) {
-            log.warn("canonical url " + canonical + " decanonicalized as " + decanonicalized);
+        if (!decanonicalized.isEmpty() && !decanonicalized.matches("^[a-z]+:.*")) { // if it's empty, it means there is no URI suffix (e.g., search)
+            log.warn("canonical url " + canonical + " decanonicalized (incorrectly?) as " + decanonicalized);
         }
         return decanonicalized;
     }
@@ -316,6 +316,10 @@ public class RestServlet extends AuthenticatedServlet {
             return false;
         }
         return true;
+    }
+
+    protected boolean isAllowed(HttpServletRequest req, Permission permission) {
+        return isAllowed(req, null, permission);
     }
 
     @Override
@@ -523,7 +527,7 @@ public class RestServlet extends AuthenticatedServlet {
             // for convenience, produce the session key as a string
             response.getWriter().print(lookupSessionKey(getHttpSessionUser(request)));
             response.flushBuffer();
-        } else if (hasPrefix(SEARCH_INFIX, request) && isAllowed(request, uri, Permission.VIEW_MEMBER_PAGES)) {
+        } else if (hasPrefix(SEARCH_INFIX, request) && isAllowed(request, Permission.VIEW_MEMBER_PAGES)) {
             doSearch(request, response);
         } else {
             throw new ServletException("unrecognized API call " + request.getRequestURI());
@@ -631,7 +635,7 @@ public class RestServlet extends AuthenticatedServlet {
     void doPostImage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         InputStream imageData = null;
         //
-        if (isAllowed(request, null, Permission.UPLOAD_DATA)) {
+        if (isAllowed(request, Permission.UPLOAD_DATA)) {
             Map<Resource, Object> md = new HashMap<Resource, Object>();
             md.put(RestService.DATE_PROPERTY, new Date());
             //
@@ -687,7 +691,7 @@ public class RestServlet extends AuthenticatedServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
         //dumpHeaders(request); // FIXME debug
-        if (!authenticate(request, response) || !isAllowed(request, null, Permission.UPLOAD_DATA)) {
+        if (!authenticate(request, response) || !isAllowed(request, Permission.UPLOAD_DATA)) {
             return;
         }
         if (hasPrefix(ANY_IMAGE_INFIX, request)) {
@@ -728,7 +732,7 @@ public class RestServlet extends AuthenticatedServlet {
             } catch (RestServiceException e) {
                 throw new ServletException("could not modify collection", e);
             }
-        } else if (hasPrefix(SEARCH_INFIX, request)) {
+        } else if (hasPrefix(SEARCH_INFIX, request) && isAllowed(request, Permission.VIEW_MEMBER_PAGES)) { // FIXME check permissions
             doSearch(request, response);
         }
     }
@@ -749,6 +753,7 @@ public class RestServlet extends AuthenticatedServlet {
         for (Hit hit : TupeloStore.getInstance().getSearch().search(searchString, limit, offset) ) {
             result.add(hit.getId());
         }
+        log.debug("SEARCH returning " + result.size() + " result(s)");
         response.setContentType("text/html");
         response.getWriter().write(formatList(result, true));
         response.getWriter().flush();
