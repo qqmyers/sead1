@@ -56,6 +56,7 @@ public class DeleteRelationshipHandler implements ActionHandler<DeleteRelationsh
             t.addInPattern("S2", Dc.DATE, "date2");
             t.addInPattern("S2", Dc.CREATOR, "creator2");
             //
+            t.addOutPattern(source, predicate, target);
             t.addOutPattern(target, "inverse", source);
             t.addOutPattern("S1", Rdf.PREDICATE, predicate);
             t.addOutPattern("S1", Rdf.TYPE, Rdf.STATEMENT);
