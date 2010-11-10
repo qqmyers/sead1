@@ -143,24 +143,25 @@ public class CollectionMembershipWidget extends Composite {
         final String uri = collection.getUri();
         String href = "collection?uri=" + uri;
 
-        Hyperlink link = new Hyperlink(collection.getTitle(), href);
+        final Hyperlink link = new Hyperlink(collection.getTitle(), href);
 
         int row = collectionsPanel.getRowCount();
-        PreviewWidget badge = new PreviewWidget(uri, GetPreviews.BADGE, href);
+        final PreviewWidget badge = new PreviewWidget(uri, GetPreviews.BADGE, href);
         collectionsPanel.setWidget(row++, 0, badge);
         collectionsPanel.setWidget(row, 0, link);
 
-        final int rowToDelete = row - 1;
-        Anchor removeButton = new Anchor("Remove");
+        final Anchor removeButton = new Anchor("Remove");
         removeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 service.execute(new RemoveFromCollection(uri, datasetURI), new AsyncCallback<RemoveFromCollectionResult>() {
                     public void onSuccess(RemoveFromCollectionResult result) {
-                        collectionsPanel.removeRow(rowToDelete); // remove badge row
-                        collectionsPanel.removeRow(rowToDelete); // remove title row
+                        collectionsPanel.remove(badge); // remove badge row
+                        collectionsPanel.remove(link); // remove title row
+                        collectionsPanel.remove(removeButton); // remove remove link
                     }
 
                     public void onFailure(Throwable caught) {
+                        GWT.log("Error removing dataset from collection", caught);
                     }
                 });
             }
@@ -172,7 +173,7 @@ public class CollectionMembershipWidget extends Composite {
      * Clear the list of collections.
      */
     public void clear() {
-        collectionsPanel.clear();
+        collectionsPanel.removeAllRows();
     }
 
     /**
@@ -221,7 +222,7 @@ public class CollectionMembershipWidget extends Composite {
 
                             @Override
                             public void onSuccess(AddToCollectionResult arg0) {
-                                GWT.log("Data successfully added to collection", null);
+                                GWT.log("Data successfully added to collection");
                                 addToCollectionDialog.hide();
                                 loadCollections();
                             }
