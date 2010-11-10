@@ -49,8 +49,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
+import com.google.gwt.user.client.ui.SimplePanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteAnnotation;
@@ -136,6 +136,8 @@ public class AnnotationView extends Composite {
 
         String description = annotationBean.getDescription();
 
+        description = description.replaceAll("<", "&lt;");
+        description = description.replaceAll(">", "&gt;");
         description = description.replaceAll("\n", "<br>");
 
         mainTable.setHTML(1, 0, description);
