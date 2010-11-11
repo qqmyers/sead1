@@ -111,6 +111,7 @@ public class DatasetWidget extends Composite {
     private Panel                   infoPanel;
     private FlexTable               informationTable;
     protected DerivedDatasetsWidget derivedDatasetsWidget;
+    private Label                   noExtractedMetadata;
 
     private final PermissionUtil    rbac;
 
@@ -468,6 +469,10 @@ public class DatasetWidget extends Composite {
         verticalPanel.add(um);
 
         verticalPanel.add(new HTML("<b>Extracted</b>"));
+        noExtractedMetadata = new Label("No extracted metadata");
+        noExtractedMetadata.addStyleName("noMetadata");
+        noExtractedMetadata.addStyleName("hidden");
+        verticalPanel.add(noExtractedMetadata);
         verticalPanel.add(informationTable);
 
         leftColumn.add(additionalInformationPanel);
@@ -484,6 +489,9 @@ public class DatasetWidget extends Composite {
                     List<Metadata> metadata = arg0.getMetadata();
                     Collections.sort(metadata);
                     String category = "";
+                    if (metadata.size() == 0) {
+                        noExtractedMetadata.removeStyleName("hidden");
+                    }
                     for (Metadata tuple : metadata ) {
                         if (!category.equals(tuple.getCategory())) {
                             int row = informationTable.getRowCount() + 1;
