@@ -88,6 +88,7 @@ public class RoleAdministrationPage extends Composite {
             columnByRole.put(s.getRoleUri(), c);
             nameByRole.put(s.getRoleUri(), s.getRoleName());
             permissionsTable.setText(0, c, s.getRoleName());
+            permissionsTable.getColumnFormatter().addStyleName(c, "roleColumn");
         }
         int i = 1;
         for (Permission p : Permission.values() ) {
@@ -109,6 +110,7 @@ public class RoleAdministrationPage extends Composite {
         permissionsTable.setText(i++, 0, "");
         for (Permission p : Permission.values() ) {
             permissionsTable.setText(i, 0, p.getLabel());
+            permissionsTable.getColumnFormatter().addStyleName(0, "usersTableNameColumn");
             String rowStyle = (i + 1) % 2 == 0 ? "metadataTableEvenRow" : "metadataTableOddRow";
             permissionsTable.getRowFormatter().addStyleName(i, rowStyle);
             i++;

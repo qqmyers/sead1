@@ -526,7 +526,23 @@ a:hover {
 
 .usersTable {
 	width: 800px;
+	min-with: 800px;
 	margin: 10px auto 75px auto;
+}
+
+.usersTableNameColumn {
+	width: 175px;
+	min-width: 175px;
+}
+
+.usersTableEmailColumn {
+	width: 200px;
+	min-width: 200px;
+}
+
+.roleColumn {
+	width: 50px;
+	min-width: 50px;
 }
 
 .textBoxWatermark {

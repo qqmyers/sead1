@@ -156,7 +156,9 @@ public class UserManagementPage extends Composite {
                         String roleName = entry.getValue();
                         columnByRole.put(roleUri, col);
                         activeUsersTable.setText(0, col, roleName);
+                        activeUsersTable.getColumnFormatter().addStyleName(col, "roleColumn");
                         inactiveUsersTable.setText(0, col, roleName);
+                        inactiveUsersTable.getColumnFormatter().addStyleName(col, "roleColumn");
                         col++;
                     }
                 }
@@ -337,7 +339,9 @@ public class UserManagementPage extends Composite {
         flexTable.addStyleName("usersTable");
         // headers
         flexTable.setText(0, 0, "User");
+        flexTable.getColumnFormatter().addStyleName(0, "usersTableNameColumn");
         flexTable.setText(0, 1, "Email");
+        flexTable.getColumnFormatter().addStyleName(1, "usersTableEmailColumn");
         return flexTable;
     }
 
