@@ -160,6 +160,8 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
                     }
 
                     public void onSuccess(DeleteDatasetResult result) {
+                        table.clearCell(row, 0);
+                        table.clearCell(row, 1);
                         table.getRowFormatter().addStyleName(row, "hidden");
                         MMDB.eventBus.fireEvent(new DatasetDeletedEvent(uri));
                     }
