@@ -173,6 +173,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             ip.addStyleName("imageThumbnailBordered");
         } else if (!GetPreviews.LARGE.equals(sz)) {
             ip.addStyleName("imageThumbnail");
+            ip.addStyleName("thumbnail");
         }
         return ip;
     }
