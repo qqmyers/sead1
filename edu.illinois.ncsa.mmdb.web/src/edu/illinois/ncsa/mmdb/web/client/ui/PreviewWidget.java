@@ -374,6 +374,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
     /** For backwards compatibility with the old preview widget */
     public void changeImage(String datasetUri, String mimeType) {
+        state = State.BLANK;
         String type = ContentCategory.getCategory(mimeType);
         changeImage(datasetUri, size, null, type, false, true);
     }
