@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
     University of Illinois/NCSA
     Open Source License
    
@@ -91,6 +92,7 @@
 	<target name="mmdb-dev" depends="resources" description="setup for hudson build and deployment">
 		<copy tofile="war/WEB-INF/classes/context.xml" file="src/context_mmdbdev_hfc.xml" />
 		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" />
+		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
 		<replace file="war/WEB-INF/classes/server.properties" token="#search.index=/home/futrelle/dev/scratch/luceneIndex" value="search.index=/home/medici/medici/lucene" />
@@ -271,6 +273,7 @@
 				<include name="server.properties" />
 			</fileset>
 		</copy>
+		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
 	</target>
