@@ -65,8 +65,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
-import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
+import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
@@ -85,6 +85,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
@@ -443,6 +444,7 @@ public class DatasetWidget extends Composite {
 
                     public void onSuccess(DeleteDatasetResult result) {
                         MMDB.eventBus.fireEvent(new DatasetDeletedEvent(uri));
+                        MMDB.eventBus.fireEvent(new DatasetUnselectedEvent(uri));
                         History.back();
                     }
                 });
