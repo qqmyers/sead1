@@ -79,7 +79,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPendingResult;
  */
 public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
-    private static final int                MAXREQUEST   = 30;       // 5 minutes approx
+    private static final int                MAXREQUEST   = 30;         // 5 minutes approx
 
     public static final String              UNKNOWN_TYPE = "Unknown";
 
@@ -87,7 +87,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     public static final Map<String, String> GRAY_URL;
     public static final Map<String, String> PENDING_URL;
 
-    int                                     maxWidth     = 450;
+    int                                     maxWidth     = 600;
 
     final AbsolutePanel                     imagePanel;
     Image                                   currentImage;
@@ -98,6 +98,24 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     String                                  size;
     Timer                                   retryTimer;
     int                                     retriesLeft  = 10;
+    State                                   state        = State.BLANK;
+
+    // possible state transitions
+    // initially displayed -> failed -> no preview
+    // initially displayed -> failed -> pending
+    // initially displayed -> failed -> pending -> preview
+    // initially display -> preview
+    // blank -> preview
+    // blank -> no preview
+    // blank -> pending
+    // blank -> pending -> preview
+    private enum State {
+        BLANK,
+        PREVIEW,
+        INITIALLY_DISPLAYED,
+        PENDING,
+        NO_PREVIEW
+    }
 
     static {
         PREVIEW_URL = new HashMap<String, String>();
@@ -190,6 +208,10 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
                         @Override
                         public void onSuccess(IsPreviewPendingResult result) {
                             if (result.isReady()) {
+                                // the result is ready, which means either:
+                                // 1. it was pending at some point, which means we need to show the preview, or
+                                // 2. it was initially displayed, and was never pending, in which case we don't need to show the preview
+                                // 3. it was initially displayed, but the REST servlet returned 404 for it because it was pending when it was initially displayed, so we do need to show it
                                 GWT.log("Showing PREVIEW for " + uri);
                                 showPreview(uri, sz, link);
                                 retriesLeft = 0;
@@ -223,6 +245,10 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         }
     }
 
+    boolean isPreview() {
+        return currentImage != null && currentImage == preview;
+    }
+
     // show the preview with appropriate link and style
     void showPreview(String uri, String sz, final String link) {
         if (uri != null) {
@@ -230,7 +256,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             addLink(preview, link);
             if (!GetPreviews.LARGE.equals(sz)) {
                 preview.addStyleName("thumbnail");
-            } else if (!GetPreviews.LARGE.equals(sz)) {
+            } else {
                 preview.setWidth(getMaxWidth() + "px");
             }
             setImage(preview);
