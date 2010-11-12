@@ -62,7 +62,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollectionResult;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
@@ -146,7 +145,7 @@ public class CollectionMembershipWidget extends Composite {
         final Hyperlink link = new Hyperlink(collection.getTitle(), href);
 
         int row = collectionsPanel.getRowCount();
-        final PreviewWidget badge = new PreviewWidget(uri, GetPreviews.BADGE, href);
+        final PreviewWidget badge = PreviewWidget.newCollectionBadge(uri, href);
         collectionsPanel.setWidget(row++, 0, badge);
         collectionsPanel.setWidget(row, 0, link);
 

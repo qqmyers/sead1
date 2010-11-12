@@ -601,6 +601,7 @@ public class RestServlet extends AuthenticatedServlet {
             // return the 404 image
             URL fileLocation = this.getClass().getResource(image404);
             try {
+                log.debug("404 image location = " + fileLocation);
                 File file = new File(fileLocation.toURI());
                 FileInputStream fis = new FileInputStream(file);
                 CopyFile.copy(fis, response.getOutputStream());

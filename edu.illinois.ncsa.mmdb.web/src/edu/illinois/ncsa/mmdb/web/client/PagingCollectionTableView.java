@@ -60,7 +60,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewCollectionEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
@@ -183,7 +182,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
         Panel p = badgeImages.get(collectionUri);
         if (p != null) {
             p.clear();
-            PreviewWidget pw = new PreviewWidget(collectionUri, GetPreviews.BADGE, "collection?uri=" + collectionUri);
+            PreviewWidget pw = PreviewWidget.newCollectionBadge(collectionUri, "collection?uri=" + collectionUri);
             pw.setMaxWidth(100);
             p.add(pw);
         }

@@ -371,7 +371,6 @@ public class ContextSetupListener implements ServletContextListener {
                                 rbac.setPermissionValue(adminRole, viewMemberPages, RBAC.ALLOW);
                                 rbac.setPermissionValue(adminRole, viewAdminPages, RBAC.ALLOW);
                                 rbac.setPermissionValue(adminRole, editRoles, RBAC.ALLOW);
-                                // FIXME the admin role should have these premissions regardless of whether the admin user needs to be created!
                             }
                         }
                         if ("member".equalsIgnoreCase(role)) { //$NON-NLS-1$

@@ -41,10 +41,9 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.ErrorEvent;
-import com.google.gwt.event.dom.client.ErrorHandler;
 import com.google.gwt.event.dom.client.HasAllMouseHandlers;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -66,8 +65,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -82,14 +79,25 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPendingResult;
  */
 public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
-    private static final int                MAXREQUEST      = 30;                    // 5 minutes approx
+    private static final int                MAXREQUEST   = 30;       // 5 minutes approx
 
-    // FIXME use enums
+    public static final String              UNKNOWN_TYPE = "Unknown";
+
     public static final Map<String, String> PREVIEW_URL;
     public static final Map<String, String> GRAY_URL;
     public static final Map<String, String> PENDING_URL;
 
-    int                                     maxWidth        = 600;
+    int                                     maxWidth     = 450;
+
+    final AbsolutePanel                     imagePanel;
+    Image                                   currentImage;
+    Image                                   preview;
+    Image                                   overlay;
+    Image                                   pending;
+    Image                                   noPreview;
+    String                                  size;
+    Timer                                   retryTimer;
+    int                                     retriesLeft  = 10;
 
     static {
         PREVIEW_URL = new HashMap<String, String>();
@@ -106,22 +114,6 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         PENDING_URL.put(GetPreviews.BADGE, "./images/loading-small.gif");
     }
 
-    static final String                     LOADING_TEXT    = "Loading...";
-    static final String                     NO_PREVIEW_TEXT = "No preview available";
-    private final SimplePanel               contentPanel;
-    private final Image                     image;
-    private Label                           noPreview;
-    private String                          size;
-    private final String                    datasetUri;
-    private final String                    link;
-    private boolean                         checkPending    = true;
-    boolean                                 wasEverPending  = false;
-    boolean                                 checkingPending = false;
-    Timer                                   retryTimer;
-    Timer                                   safariForceTimer;
-    private int                             previewTries;
-    final AbsolutePanel                     imagePanel;
-
     /**
      * Create a preview. If the desired size is small (thumbnail) try showing
      * the thumbnail, if thumbnail notavailable show a no preview label. If the
@@ -133,110 +125,100 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
      * @param desiredSize
      * @param link
      */
-    public PreviewWidget(final String datasetUri, String desiredSize,
-            final String link) {
-        this(datasetUri, desiredSize, link, "Unknown", true);
+    public PreviewWidget(String datasetUri, String desiredSize, final String link) {
+        this(datasetUri, desiredSize, link, UNKNOWN_TYPE, true);
     }
 
-    public PreviewWidget(final String datasetUri, String desiredSize,
-            final String link, String type) {
+    public PreviewWidget(String datasetUri, String desiredSize, String link, String type) {
         this(datasetUri, desiredSize, link, type, true, true);
     }
 
-    public PreviewWidget(final String datasetUri, String desiredSize,
-            final String link, String type, final boolean checkPending) {
+    public PreviewWidget(String datasetUri, String desiredSize, String link, String type, final boolean checkPending) {
         this(datasetUri, desiredSize, link, type, checkPending, true);
     }
 
-    public PreviewWidget(final String datasetUri, String desiredSize,
-                final String link, String type, final boolean checkPending, boolean initialDisplay) {
-        this.checkPending = checkPending;
-        this.datasetUri = datasetUri;
-        this.link = link;
-        // default to small size if desired size is unrecognized
-        if (desiredSize == GetPreviews.BADGE) {
-            size = desiredSize;
-        } else if (desiredSize == GetPreviews.LARGE) {
-            size = desiredSize;
-        } else {
-            size = GetPreviews.SMALL;
-        }
-
-        imagePanel = new AbsolutePanel();
-        final Image overlay = new Image();
-
-        // add the preview image
-        contentPanel = new SimplePanel();
-        if (initialDisplay || datasetUri != null) {
-            image = new Image(PREVIEW_URL.get(size) + datasetUri);
-        } else {
-            image = new Image(GRAY_URL.get(size));
-        }
-
-        if (datasetUri == null) {
-            imagePanel.addStyleName("imageThumbnailBordered");
-        } else if (desiredSize != GetPreviews.LARGE) {
-            imagePanel.addStyleName("imageThumbnail");
-        }
-
-        imagePanel.add(image);
-
-        //icons that appear over thumbnail 
-        if (type != "Unknown" && initialDisplay) {
-            overlay.setUrl("images/icons/" + type + "_overlay.png");
-            overlay.addStyleName("imageOverlay");
-            imagePanel.add(overlay);
-        }
-
-        contentPanel.clear();
-
-        contentPanel.add(imagePanel);
-
-        addLink(image);
-        addLink(overlay);
-
-        //
-        safariForceTimer = new Timer() { // MMDB-620
-            public void run() {
-                contentPanel.clear();
-                contentPanel.add(imagePanel);
-                addLink(image);
-                addLink(overlay);
-            }
-        };
-        safariForceTimer.schedule(50); // right away
-        safariForceTimer.schedule(60); // and again
-        safariForceTimer.schedule(70); // rapid fire
-        safariForceTimer.schedule(100); // take that!
-        safariForceTimer.schedule(250); // will this work?
-        safariForceTimer.schedule(1000); // somewhat later
-        safariForceTimer.schedule(2000); // last attempt
-        //
-        if (size != GetPreviews.LARGE && link != null) {
-            image.addStyleName("thumbnail");
-        } else {
-            //image.setWidth(getMaxWidth() + "px");
-        }
-        if (checkPending) {
-            image.addErrorHandler(new ErrorHandler() {
-                public void onError(ErrorEvent event) {
-                    wasEverPending = false;
-                    grayImage();
-                    getPreview(datasetUri, link);
-                }
-            });
-            getPreview(datasetUri, link);
-        }
-
-        initWidget(contentPanel);
+    public static PreviewWidget newCollectionBadge(String collectionUri, String link) {
+        return new PreviewWidget(collectionUri, GetPreviews.BADGE, link, UNKNOWN_TYPE, true, false);
     }
 
-    /**
-     * If link is available for image add a click handler to the image.
-     */
-    private void addLink(Image image) {
-        if (link != null) {
-            image.addClickHandler(new ClickHandler() {
+    public PreviewWidget(String uri, String desiredSize, String link, String type, boolean checkPending, boolean initialDisplay) {
+        size = getSize(desiredSize); // use desired size or default
+        // set up panel
+        imagePanel = createImagePanel(uri, size);
+        //
+        changeImage(uri, size, link, type, checkPending, initialDisplay);
+        //
+        initWidget(imagePanel);
+    }
+
+    public void changeImage(String uri, String sz, String link, String type, boolean checkPending, boolean initialDisplay) {
+        killTimer();
+        // are we supposed to show the image immediately?
+        if (initialDisplay) {
+            // figure out if we need to show the overlay
+            if (knownType(type)) {
+                addOverlay(type, link);
+            }
+            showPreview(uri, size, link);
+        }
+        // check pending?
+        if (checkPending) {
+            checkPending(uri, size, link);
+        }
+    }
+
+    AbsolutePanel createImagePanel(String uri, String sz) {
+        AbsolutePanel ip = new AbsolutePanel();
+        if (uri == null) {
+            ip.addStyleName("imageThumbnailBordered");
+        } else if (!GetPreviews.LARGE.equals(sz)) {
+            ip.addStyleName("imageThumbnail");
+        }
+        return ip;
+    }
+
+    void checkPending(final String uri, final String sz, final String link) {
+        MMDB.dispatchAsync.execute(new IsPreviewPending(uri, sz), new AsyncCallback<IsPreviewPendingResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(IsPreviewPendingResult result) {
+                if (result.isReady()) {
+                    killTimer();
+                    GWT.log("Showing PREVIEW for " + uri);
+                    showPreview(uri, sz, link);
+                } else if (result.isPending() && retriesLeft > 0) {
+                    GWT.log("Showing PENDING for " + uri);
+                    showPending(sz);
+                    if (retryTimer == null) {
+                        retryTimer = new Timer() {
+                            public void run() {
+                                if (retriesLeft-- > 0) {
+                                    checkPending(uri, sz, link);
+                                }
+                            }
+                        };
+                        retriesLeft = MAXREQUEST;
+                        retryTimer.scheduleRepeating(1000);
+                    }
+                } else {
+                    killTimer();
+                    GWT.log("Showing NO PREVIEW for " + uri);
+                    showNoPreview(sz);
+                }
+            }
+        });
+
+    }
+
+    void retryIn(long ms) {
+    }
+
+    void addLink(Image i, final String link) {
+        if (i != null && link != null) {
+            i.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
                     History.newItem(link);
                 }
@@ -244,152 +226,97 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         }
     }
 
-    /**
-     * 
-     * @return
-     */
-    public HasClickHandlers getTarget() {
-        if (image != null) {
-            return image;
-        } else {
-            return noPreview;
-        }
-    }
-
-    public void changeImage(String newURL, String mime) {
-        String type = ContentCategory.getCategory(mime);
-        //FIXME a better way to specify whether a filetype will show a thumbnail or not
-        if (mime.contains("image") || type == "Video" || mime.contains("pdf") || type == "Audio") {
-            image.setUrl(PREVIEW_URL.get(size) + newURL);
-            imagePanel.removeStyleName("imageThumbnailBordered");
-            imagePanel.addStyleName("imageThumbnail");
-        } else {
-            //imagePanel.removeStyleName("imageThumbnail");
-            //imagePanel.addStyleName("ImageThumbnailBordered");
-            image.setUrl(GRAY_URL.get(size));
-        }
-    }
-
-    @Override
-    protected void onDetach() {
-        super.onDetach();
-        if (retryTimer != null) {
-            retryTimer.cancel();
-        }
-        if (safariForceTimer != null) {
-            safariForceTimer.cancel();
-        }
-    }
-
-    /**
-     * 
-     * @param <A>
-     * @param <R>
-     * @param action
-     * @param callback
-     */
-    protected void getPreview() {
-        getPreview(datasetUri, link);
-    }
-
-    protected void getPreview(final String datasetUri, final String link) {
-        getPreview(datasetUri, link, true);
-    }
-
-    protected void getPreview(final String datasetUri, final String link, final boolean display) {
-        checkingPending = true;
-        MMDB.dispatchAsync.execute(new IsPreviewPending(datasetUri, size), new AsyncCallback<IsPreviewPendingResult>() {
-            public void onFailure(Throwable caught) {
+    // show the preview with appropriate link and style
+    void showPreview(String uri, String sz, final String link) {
+        if (uri != null) {
+            preview = new Image(PREVIEW_URL.get(sz) + uri);
+            addLink(preview, link);
+            if (!GetPreviews.LARGE.equals(sz)) {
+                preview.addStyleName("thumbnail");
+            } else if (!GetPreviews.LARGE.equals(sz)) {
+                preview.setWidth(getMaxWidth() + "px");
             }
-
-            public void onSuccess(IsPreviewPendingResult result) {
-                previewTries++;
-                if (checkPending) { // do we need to know the pending state?
-                    if (result.isReady()) {
-                        //GWT.log("Preview is now READY for " + datasetUri);
-                        if (wasEverPending) {
-                            image.setUrl(PREVIEW_URL.get(size) + "new/" + datasetUri); // workaround firefox bug
-                        }
-                        if (size.equals(GetPreviews.LARGE)) {
-                            image.setWidth(getMaxWidth() + "px");
-                        }
-                        if (retryTimer != null) {
-                            retryTimer.cancel();
-                        }
-                        checkingPending = false;
-                        checkPending = false;
-                    } else if (result.isPending() && (previewTries < MAXREQUEST)) {
-                        //GWT.log("Preview is PENDING for " + datasetUri);
-                        if (!wasEverPending) {
-                            wasEverPending = true;
-                            pendingImage();
-                        }
-                        if (retryTimer == null) {
-                            previewTries = 0;
-                            retryTimer = new Timer() {
-                                public void run() {
-                                    getPreview(datasetUri, link);
-                                }
-                            };
-                            retryTimer.scheduleRepeating(1000); // every 1s
-                        }
-                    } else {
-                        //GWT.log("Preview is NOT READY, NOT PENDING for " + datasetUri);
-                        if (retryTimer != null) {
-                            retryTimer.cancel();
-                        }
-                        if (wasEverPending) {
-                            grayImage();
-                        }
-                        checkingPending = false;
-                        checkPending = false;
-                    }
-                }
-            }
-        });
-    }
-
-    boolean isGrayImage    = false;
-    boolean isPendingImage = false;
-
-    protected void grayImage() {
-        if (isPendingImage) {
-            image.removeStyleName("pendingLarge");
-            image.removeStyleName("pendingSmall");
-        }
-        if (!isGrayImage) {
-            image.setUrl(GRAY_URL.get(size));
-            isGrayImage = true;
-            isPendingImage = false;
+            setImage(preview);
         }
     }
 
-    protected void pendingImage() {
-        if (!isPendingImage) {
-            image.setUrl(PENDING_URL.get(size));
-            if (size.equals(GetPreviews.LARGE)) {
-                image.addStyleName("pendingLarge");
+    boolean isPending() {
+        return currentImage != null && currentImage == pending;
+    }
+
+    void showPending(String sz) {
+        if (!isPending()) {
+            pending = new Image(PENDING_URL.get(size));
+            if (GetPreviews.LARGE.equals(sz)) {
+                pending.addStyleName("pendingLarge");
             } else {
-                image.addStyleName("pendingSmall");
+                pending.addStyleName("pendingSmall");
             }
-            isPendingImage = true;
-            isGrayImage = false;
+            setImage(pending);
+        }
+    }
+
+    boolean isNoPreview() {
+        return currentImage != null && currentImage == noPreview;
+    }
+
+    void showNoPreview(String sz) {
+        if (!isNoPreview()) {
+            noPreview = new Image(GRAY_URL.get(sz));
+            setImage(noPreview);
         }
     }
 
     /**
-	 *
-	 */
-    protected void statusLabel(String text) {
-        // no preview is available
-        contentPanel.clear();
-        noPreview = new Label(text);
-        if (size == GetPreviews.LARGE) {
-            noPreview.setHeight("300px");
+     * Implements a default size of {@link GetPreviews#SMALL}.
+     * 
+     * @param size
+     *            the size
+     * @return the size, unless it's null or unknown, in which case return
+     *         {@link GetPreviews#SMALL}.
+     */
+    String getSize(String size) {
+        if (GetPreviews.BADGE.equals(size)) {
+            return size;
+        } else if (GetPreviews.LARGE.equals(size)) {
+            return size;
         } else {
-            noPreview.setHeight("75px");
+            return GetPreviews.SMALL;
         }
-        contentPanel.add(noPreview);
+    }
+
+    boolean knownType(String type) {
+        return type != null && !UNKNOWN_TYPE.equals(type);
+    }
+
+    void removeImage(Image i) {
+        if (i != null) {
+            imagePanel.remove(i);
+        }
+    }
+
+    void addImage(Image i) {
+        imagePanel.add(i);
+    }
+
+    void setImage(Image i) {
+        removeImage(currentImage);
+        addImage(i);
+        currentImage = i;
+    }
+
+    void addOverlay(String category, String link) {
+        if (category != null) {
+            removeImage(overlay);
+            overlay = new Image(getOverlayUrl(category));
+            overlay.addStyleName("imageOverlay");
+            addLink(overlay, link);
+            addImage(overlay);
+        }
+    }
+
+    String getOverlayUrl(String category) {
+        return "images/icons/" + category + "_overlay.png";
     }
 
     public int getMaxWidth() {
@@ -398,6 +325,12 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
     public void setMaxWidth(int maxWidth) {
         this.maxWidth = maxWidth;
+    }
+
+    /** For backwards compatibility with the old preview widget */
+    public void changeImage(String datasetUri, String mimeType) {
+        String type = ContentCategory.getCategory(mimeType);
+        changeImage(datasetUri, size, null, type, false, true);
     }
 
     @Override
@@ -428,6 +361,31 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     @Override
     public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
         return addDomHandler(handler, MouseDownEvent.getType());
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public HasClickHandlers getTarget() {
+        if (preview != null) {
+            return preview;
+        } else {
+            return noPreview;
+        }
+    }
+
+    void killTimer() {
+        if (retryTimer != null) {
+            retriesLeft = 0;
+            retryTimer.cancel();
+        }
+    }
+
+    @Override
+    protected void onDetach() {
+        super.onDetach();
+        killTimer();
     }
 
 }
