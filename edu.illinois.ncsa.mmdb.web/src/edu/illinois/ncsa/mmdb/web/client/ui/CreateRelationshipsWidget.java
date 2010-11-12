@@ -122,7 +122,8 @@ public class CreateRelationshipsWidget extends Composite {
         thumbs = new HorizontalPanel();
         thumbs.setStyleName("createRelationshipThumbs");
         thumb1 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false);
-        thumb1.setWidth("100px");
+        thumb1.setWidth("110px");
+        thumb1.setHeight("110px");
         thumbs.add(thumb1);
 
         relationships = createRelationshipOptions();
@@ -130,7 +131,8 @@ public class CreateRelationshipsWidget extends Composite {
         thumbs.add(relationships);
 
         thumb2 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false);
-        thumb2.setMaxWidth(100);
+        thumb2.setWidth("110px");
+        thumb2.setHeight("110px");
         thumbs.add(thumb2);
 
         mainPanel.add(thumbs);
@@ -160,8 +162,6 @@ public class CreateRelationshipsWidget extends Composite {
         });
 
         mainPanel.add(forms);
-
-        thumb1.changeImage(dataset1.getSelected(), "hi");
 
         //user interface: submit button
         HorizontalPanel finalize = new HorizontalPanel();
