@@ -235,13 +235,13 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
                                 showPreview(uri, sz, link);
                                 retriesLeft = 0;
                             } else if (result.isPending() && retriesLeft > 0) {
-                                state = State.PENDING;
                                 GWT.log("Showing PENDING for " + uri);
                                 showPending(sz);
+                                state = State.PENDING;
                             } else {
-                                state = State.NO_PREVIEW;
                                 GWT.log("Showing NO PREVIEW for " + uri);
                                 showNoPreview(sz);
+                                state = State.NO_PREVIEW;
                                 retriesLeft = 0;
                             }
                         }
