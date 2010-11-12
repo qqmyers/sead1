@@ -8,6 +8,8 @@ import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Transformer;
@@ -19,14 +21,18 @@ import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteRelationship;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
-public class DeleteRelationshipHandler implements ActionHandler<DeleteRelationship, SetRelationshipResult> {
+public class DeleteRelationshipHandler implements ActionHandler<DeleteRelationship, DeleteRelationshipResult> {
+
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog(DeleteRelationshipHandler.class);
 
     @Override
-    public SetRelationshipResult execute(DeleteRelationship action, ExecutionContext arg1) throws ActionException {
+    public DeleteRelationshipResult execute(DeleteRelationship action, ExecutionContext arg1) throws ActionException {
+
         // Here we interpret the "type" field of the action as the URI of the predicate to set
         try {
             Context c = TupeloStore.getInstance().getContext();
@@ -84,22 +90,23 @@ public class DeleteRelationshipHandler implements ActionHandler<DeleteRelationsh
             TripleWriter tw = new TripleWriter();
             tw.removeAll(toast);
             c.perform(tw);
+            log.info("Relationship Deleted");
         } catch (OperatorException x) {
             throw new ActionException("delete relationship failed", x);
         } catch (URISyntaxException e) {
             throw new ActionException("delete relationship failed", e);
         }
-        return new SetRelationshipResult();
+        return new DeleteRelationshipResult();
     }
 
     @Override
     public Class<DeleteRelationship> getActionType() {
         // TODO Auto-generated method stub
-        return null;
+        return DeleteRelationship.class;
     }
 
     @Override
-    public void rollback(DeleteRelationship arg0, SetRelationshipResult arg1, ExecutionContext arg2) throws ActionException {
+    public void rollback(DeleteRelationship arg0, DeleteRelationshipResult arg1, ExecutionContext arg2) throws ActionException {
         // TODO Auto-generated method stub
 
     }

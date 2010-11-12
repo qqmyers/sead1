@@ -36,39 +36,28 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
-package edu.illinois.ncsa.mmdb.web.client.dispatch;
+package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.Map;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
 
-import net.customware.gwt.dispatch.shared.Result;
-import edu.illinois.ncsa.mmdb.web.client.ui.Relationship;
-
-/**
- * Return the dataset's related
- * 
- * @author Luis Mendez
- * 
- */
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 @SuppressWarnings("serial")
-public class GetRelationshipResult implements Result {
+public class Relationship implements Serializable {
 
-    //List<DatasetBean>             resources;
-    //List<String>                  relationshipTypes;
-    Map<String, Relationship> data;
+    public String                  typeLabel;
+    public Collection<DatasetBean> datasets = new HashSet<DatasetBean>();
+    @SuppressWarnings("unused")
+    private int                    hello;
 
-    public GetRelationshipResult() {
+    public Relationship() {
+
     }
 
-    public GetRelationshipResult(Map<String, Relationship> data) {
-        setRelationship(data);
-    }
+    public Relationship(DatasetBean dataset) {
+        datasets.add(dataset);
 
-    public Map<String, Relationship> getRelationship() {
-        return data;
-    }
-
-    public void setRelationship(Map<String, Relationship> data) {
-        this.data = data;
     }
 }

@@ -38,37 +38,17 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import java.util.Map;
-
 import net.customware.gwt.dispatch.shared.Result;
-import edu.illinois.ncsa.mmdb.web.client.ui.Relationship;
 
 /**
- * Return the dataset's related
+ * Relationship has been successfully deleted
  * 
  * @author Luis Mendez
  * 
  */
-
 @SuppressWarnings("serial")
-public class GetRelationshipResult implements Result {
+public class DeleteRelationshipResult implements Result {
 
-    //List<DatasetBean>             resources;
-    //List<String>                  relationshipTypes;
-    Map<String, Relationship> data;
-
-    public GetRelationshipResult() {
-    }
-
-    public GetRelationshipResult(Map<String, Relationship> data) {
-        setRelationship(data);
-    }
-
-    public Map<String, Relationship> getRelationship() {
-        return data;
-    }
-
-    public void setRelationship(Map<String, Relationship> data) {
-        this.data = data;
+    public DeleteRelationshipResult() {
     }
 }

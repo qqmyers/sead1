@@ -36,39 +36,28 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
-package edu.illinois.ncsa.mmdb.web.client.dispatch;
+package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.Map;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
+import com.google.gwt.user.client.ui.FlexTable;
 
-import net.customware.gwt.dispatch.shared.Result;
-import edu.illinois.ncsa.mmdb.web.client.ui.Relationship;
+public class RelationshipPanel extends Composite {
+    public final DisclosurePanel disclosurePanel;
+    public FlexTable             previews;
+    public int                   count;
+    public String                type;
 
-/**
- * Return the dataset's related
- * 
- * @author Luis Mendez
- * 
- */
+    public RelationshipPanel() {
 
-@SuppressWarnings("serial")
-public class GetRelationshipResult implements Result {
+        count = 0;
 
-    //List<DatasetBean>             resources;
-    //List<String>                  relationshipTypes;
-    Map<String, Relationship> data;
+        disclosurePanel = new DisclosurePanel("Relationship");
+        disclosurePanel.setAnimationEnabled(false);
 
-    public GetRelationshipResult() {
-    }
+        previews = new FlexTable();
+        previews.setWidth("150px");
 
-    public GetRelationshipResult(Map<String, Relationship> data) {
-        setRelationship(data);
-    }
-
-    public Map<String, Relationship> getRelationship() {
-        return data;
-    }
-
-    public void setRelationship(Map<String, Relationship> data) {
-        this.data = data;
+        disclosurePanel.add(previews);
     }
 }
