@@ -40,14 +40,9 @@ public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship,
             u.addPattern("type", Rdfs.LABEL, "label");
             // don't fetch the reified stuff (the date and creator of the relationship) because these are not returned by this dispatch
 
-            TupeloStore.getInstance().getContext().perform(u);
-
-            //List<DatasetBean> rt = new LinkedList<DatasetBean>();
-            //List<String> types = new LinkedList<String>();
             Map<String, Relationship> dataset = new HashMap<String, Relationship>();
-            log.info("HELLO");
 
-            for (Tuple<Resource> row : u.getResult() ) {
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "dataset") ) {
 
                 DatasetBean db = TupeloStore.fetchDataset(row.get(1)); // dbu's only take strings
                 String label = row.get(0).getString();
