@@ -44,8 +44,12 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ErrorEvent;
+import com.google.gwt.event.dom.client.ErrorHandler;
 import com.google.gwt.event.dom.client.HasAllMouseHandlers;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -113,6 +117,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         BLANK,
         PREVIEW,
         INITIALLY_DISPLAYED,
+        FAILED,
         PENDING,
         NO_PREVIEW
     }
@@ -160,6 +165,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     }
 
     public PreviewWidget(String uri, String desiredSize, String link, String type, boolean checkPending, boolean initialDisplay) {
+        state = State.BLANK; // nothing shown, yet
         size = getSize(desiredSize); // use desired size or default
         // set up panel
         imagePanel = createImagePanel(uri, size);
@@ -178,6 +184,19 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
                 addOverlay(type, link);
             }
             showPreview(uri, size, link);
+            preview.addErrorHandler(new ErrorHandler() {
+                @Override
+                public void onError(ErrorEvent event) {
+                    state = State.FAILED;
+                }
+            });
+            preview.addLoadHandler(new LoadHandler() {
+                @Override
+                public void onLoad(LoadEvent event) {
+                    state = State.PREVIEW;
+                }
+            });
+            state = State.INITIALLY_DISPLAYED;
         }
         // check pending?
         if (checkPending) {
@@ -216,9 +235,11 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
                                 showPreview(uri, sz, link);
                                 retriesLeft = 0;
                             } else if (result.isPending() && retriesLeft > 0) {
+                                state = State.PENDING;
                                 GWT.log("Showing PENDING for " + uri);
                                 showPending(sz);
                             } else {
+                                state = State.NO_PREVIEW;
                                 GWT.log("Showing NO PREVIEW for " + uri);
                                 showNoPreview(sz);
                                 retriesLeft = 0;
@@ -246,12 +267,12 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     }
 
     boolean isPreview() {
-        return currentImage != null && currentImage == preview;
+        return state == State.PREVIEW;
     }
 
     // show the preview with appropriate link and style
     void showPreview(String uri, String sz, final String link) {
-        if (uri != null) {
+        if (uri != null && state != State.PREVIEW) {
             preview = new Image(PREVIEW_URL.get(sz) + uri);
             addLink(preview, link);
             if (!GetPreviews.LARGE.equals(sz)) {
@@ -261,10 +282,11 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             }
             setImage(preview);
         }
+        state = State.PREVIEW;
     }
 
     boolean isPending() {
-        return currentImage != null && currentImage == pending;
+        return state == State.PENDING;
     }
 
     void showPending(String sz) {
@@ -280,7 +302,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     }
 
     boolean isNoPreview() {
-        return currentImage != null && currentImage == noPreview;
+        return state == State.NO_PREVIEW;
     }
 
     void showNoPreview(String sz) {
