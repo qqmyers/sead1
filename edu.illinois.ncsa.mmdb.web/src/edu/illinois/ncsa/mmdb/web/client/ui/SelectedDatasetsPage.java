@@ -184,8 +184,8 @@ public class SelectedDatasetsPage extends Page {
     }
 
     private String shortenTitle(String title) {
-        if (title != null && title.length() > 22) {
-            return title.substring(0, 20) + "...";
+        if (title != null && title.length() > 15) {
+            return title.substring(0, 15) + "...";
         } else {
             return title;
         }

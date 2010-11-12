@@ -49,6 +49,10 @@ public class Relationship implements Serializable {
 
     public String                  typeLabel;
     public Collection<DatasetBean> datasets = new HashSet<DatasetBean>();
+
+    //keep similar collection for functions that only have URIs to acquire
+    public Collection<String>      uris     = new HashSet<String>();
+
     @SuppressWarnings("unused")
     private int                    hello;
 

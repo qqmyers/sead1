@@ -64,6 +64,8 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationship;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListRelationshipTypes;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -169,7 +171,7 @@ public class CreateRelationshipsWidget extends Composite {
 
         submit.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                CreateRelationship();
+                tryCreateRelationship();
             }
         });
 
@@ -222,43 +224,78 @@ public class CreateRelationshipsWidget extends Composite {
         });
     }
 
-    private void CreateRelationship() {
+    private void tryCreateRelationship() {
         //error handling - dataset cannot be related to itself
         if (dataset1.getSelected().equals(dataset2.getSelected())) {
             ConfirmDialog okay = new ConfirmDialog("Error", "Please select two different datasets", false);
             okay.getOkText().setText("OK");
 
         } else {
-            //try creating relationship
-            service.execute(new SetRelationship(dataset1.getSelected(), relationships.getSelected(), dataset2.getSelected(), MMDB.getUsername()),
-                    new AsyncCallback<SetRelationshipResult>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            GWT.log("Error creating relationship", caught);
-                        }
+            //check if relationship already exists
+            service.execute(new GetRelationship(dataset1.getSelected()), new AsyncCallback<GetRelationshipResult>() {
+                @Override
+                public void onFailure(Throwable arg0) {
+                    GWT.log("Error Retrieving Relationships of a Dataset");
+                }
 
-                        public void onSuccess(SetRelationshipResult result) {
-                            createFeedback(dataset1.getSelected(), relationships.getTitle(), dataset2.getSelected());
-                        }
-                    });
+                @Override
+                public void onSuccess(GetRelationshipResult arg0) {
+                    //Check if relationship exists
+                    Map<String, Relationship> relationship = arg0.getRelationship();
 
+                    if (relationship.containsKey(relationships.getSelected())) {
+                        Relationship check = relationship.get(relationships.getSelected());
+                        if (check.uris.contains(dataset2.getSelected())) {
+                            ConfirmDialog okay = new ConfirmDialog("Error", "That relationship already exists", false);
+                            okay.getOkText().setText("OK");
+                        } else {
+                            createRelationship();
+                        }
+                    }
+                    //try creating relationship
+                    else {
+                        createRelationship();
+                    }
+
+                }
+            });
         }
+    }
+
+    private void createRelationship() {
+        service.execute(new SetRelationship(dataset1.getSelected(), relationships.getSelected(), dataset2.getSelected(), MMDB.getUsername()),
+                new AsyncCallback<SetRelationshipResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error creating relationship", caught);
+                    }
+
+                    public void onSuccess(SetRelationshipResult result) {
+                        createFeedback(dataset1.getSelected(), relationships.getTitle(), dataset2.getSelected());
+                    }
+                });
     }
 
     //relationship created feedback
     private void createFeedback(String uri1, String type, String uri2) {
+
         HorizontalPanel submitted = new HorizontalPanel();
+        submitted.addStyleName("relationshipCreated");
+
+        Label newRelationship1 = new Label("Created:");
+        submitted.add(newRelationship1);
+
         Hyperlink hyperlink1 = new Hyperlink(dataset1.getTitle(), "dataset?id=" + uri1);
         hyperlink1.addStyleName("relationshipHyperlink");
+        submitted.add(hyperlink1);
+
+        Label newRelationship2 = new Label(type);
+        submitted.add(newRelationship2);
+
         Hyperlink hyperlink2 = new Hyperlink(dataset2.getTitle(), "dataset?id=" + uri2);
         hyperlink2.addStyleName("relationshipHyperlink");
-        submitted.addStyleName("relationshipCreated");
-        Label newRelationship1 = new Label("Relationship Created:");
-        Label newRelationship2 = new Label(type);
-        submitted.add(newRelationship1);
-        submitted.add(hyperlink1);
-        submitted.add(newRelationship2);
         submitted.add(hyperlink2);
+
         mainPanel.add(submitted);
     }
 

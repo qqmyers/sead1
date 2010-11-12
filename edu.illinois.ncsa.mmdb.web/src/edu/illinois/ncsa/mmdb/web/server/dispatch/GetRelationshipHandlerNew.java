@@ -7,8 +7,6 @@ import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
@@ -24,9 +22,6 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship, GetRelationshipResult> {
-
-    /** Commons logging **/
-    private static Log log = LogFactory.getLog(DeleteRelationshipHandler.class);
 
     @Override
     public GetRelationshipResult execute(GetRelationship action, ExecutionContext arg1) throws ActionException {
@@ -51,11 +46,13 @@ public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship,
                 if (dataset.containsKey(type)) {
                     Relationship rel = dataset.get(type);
                     dataset.get(type).datasets.add(db);
+                    dataset.get(type).uris.add(db.getUri());
                     dataset.put(type, rel);
 
                 } else {
                     Relationship result = new Relationship();
                     result.datasets.add(db);
+                    result.uris.add(db.getUri());
                     result.typeLabel = label;
                     dataset.put(type, result);
                 }

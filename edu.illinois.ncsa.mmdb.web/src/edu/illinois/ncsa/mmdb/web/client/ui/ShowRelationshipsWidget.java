@@ -38,8 +38,6 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
@@ -53,6 +51,8 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -60,12 +60,13 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 public class ShowRelationshipsWidget extends Composite {
     private final FlowPanel       mainContainer;
-    private final List<String>    rTypes;
     private final MyDispatchAsync service;
     private final String          currenturi;
+    private final PermissionUtil  rbac;
 
     public ShowRelationshipsWidget(String uri, MyDispatchAsync service) {
         this(uri, service, true);
@@ -75,9 +76,7 @@ public class ShowRelationshipsWidget extends Composite {
 
         currenturi = uri;
         this.service = service;
-
-        //holds unique types
-        rTypes = new LinkedList<String>();
+        rbac = new PermissionUtil(service);
 
         mainContainer = new FlowPanel();
         mainContainer.addStyleName("datasetRightColSection");
@@ -98,19 +97,14 @@ public class ShowRelationshipsWidget extends Composite {
 
             @Override
             public void onSuccess(GetRelationshipResult arg0) {
-                //Map<String, Relationship> dataset = new HashMap<String, Relationship>();
                 Map<String, Relationship> dataset = arg0.getRelationship();
-                //List<String> types = arg0.getTypes();
 
                 //for every unique type
                 for (Map.Entry<String, Relationship> entry : dataset.entrySet() ) {
 
-                    Relationship relationship = entry.getValue();
-
-                    String t = entry.getKey();
-                    //if (!rTypes.contains(t)) {
                     //initialize panel
-                    //rTypes.add(t);
+                    Relationship relationship = entry.getValue();
+                    String t = entry.getKey();
                     RelationshipPanel panel = new RelationshipPanel();
                     mainContainer.add(panel.disclosurePanel);
                     panel.type = relationship.typeLabel;
@@ -122,7 +116,7 @@ public class ShowRelationshipsWidget extends Composite {
 
                     panel.disclosurePanel.getHeaderTextAccessor().setText(panel.type + " (" + panel.count + ")");
                     mainContainer.setVisible(panel.previews.getRowCount() > 0);
-                    //}
+
                 }
             }
         });
@@ -145,18 +139,32 @@ public class ShowRelationshipsWidget extends Composite {
 
         removeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                service.execute(new DeleteRelationship(currenturi, type, ds.getUri(), MMDB.getUsername()), new AsyncCallback<DeleteRelationshipResult>() {
-                    public void onSuccess(DeleteRelationshipResult result) {
 
-                        deleteRelationship(rowToDelete, panel);
-                        pw.setVisible(false); //IE fix: bug where thumbnail remains
+                //create relationship - widget (if allowed)
+                rbac.doIfAllowed(Permission.DELETE_RELATIONSHIP, new PermissionCallback() {
+                    @Override
+                    public void onAllowed() {
+                        service.execute(new DeleteRelationship(currenturi, type, ds.getUri(), MMDB.getUsername()), new AsyncCallback<DeleteRelationshipResult>() {
+                            public void onSuccess(DeleteRelationshipResult result) {
 
+                                deleteRelationship(rowToDelete, panel);
+                                pw.setVisible(false); //IE fix: bug where thumbnail remains
+
+                            }
+
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Error deleting relationship");
+                            }
+                        });
                     }
 
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Error deleting relationship");
+                    @Override
+                    public void onDenied() {
+                        ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to delete relationships", false);
+                        okay.getOkText().setText("OK");
                     }
                 });
+
             }
         });
 
