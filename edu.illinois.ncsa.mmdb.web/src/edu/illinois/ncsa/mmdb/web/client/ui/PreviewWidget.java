@@ -178,39 +178,35 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     }
 
     void checkPending(final String uri, final String sz, final String link) {
-        MMDB.dispatchAsync.execute(new IsPreviewPending(uri, sz), new AsyncCallback<IsPreviewPendingResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-            }
+        retryTimer = new Timer() {
+            public void run() {
+                if (retriesLeft-- > 0) {
+                    MMDB.dispatchAsync.execute(new IsPreviewPending(uri, sz), new AsyncCallback<IsPreviewPendingResult>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
 
-            @Override
-            public void onSuccess(IsPreviewPendingResult result) {
-                if (result.isReady()) {
-                    killTimer();
-                    GWT.log("Showing PREVIEW for " + uri);
-                    showPreview(uri, sz, link);
-                } else if (result.isPending() && retriesLeft > 0) {
-                    GWT.log("Showing PENDING for " + uri);
-                    showPending(sz);
-                    if (retryTimer == null) {
-                        retryTimer = new Timer() {
-                            public void run() {
-                                if (retriesLeft-- > 0) {
-                                    checkPending(uri, sz, link);
-                                }
+                        @Override
+                        public void onSuccess(IsPreviewPendingResult result) {
+                            if (result.isReady()) {
+                                GWT.log("Showing PREVIEW for " + uri);
+                                showPreview(uri, sz, link);
+                                retriesLeft = 0;
+                            } else if (result.isPending() && retriesLeft > 0) {
+                                GWT.log("Showing PENDING for " + uri);
+                                showPending(sz);
+                            } else {
+                                GWT.log("Showing NO PREVIEW for " + uri);
+                                showNoPreview(sz);
+                                retriesLeft = 0;
                             }
-                        };
-                        retriesLeft = MAXREQUEST;
-                        retryTimer.scheduleRepeating(1000);
-                    }
-                } else {
-                    killTimer();
-                    GWT.log("Showing NO PREVIEW for " + uri);
-                    showNoPreview(sz);
+                        }
+                    });
                 }
             }
-        });
-
+        };
+        retryTimer.schedule(25); // pretty darn soon
+        retryTimer.scheduleRepeating(1000);
     }
 
     void retryIn(long ms) {
@@ -379,6 +375,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         if (retryTimer != null) {
             retriesLeft = 0;
             retryTimer.cancel();
+            retryTimer = null;
         }
     }
 
