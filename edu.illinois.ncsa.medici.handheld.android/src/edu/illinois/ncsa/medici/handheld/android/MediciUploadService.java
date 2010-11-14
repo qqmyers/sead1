@@ -4,8 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import org.apache.http.auth.AuthenticationException;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -22,6 +25,7 @@ import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 public class MediciUploadService extends Service {
     private static final String TAG             = "MediciUploadService";
@@ -105,18 +109,18 @@ public class MediciUploadService extends Service {
             // get image to upload
             Uri uri = intent.getData();
 
+            // get extra information
+            String username = intent.getStringExtra(EXTRA_USERNAME);
+            String password = intent.getStringExtra(EXTRA_PASSWORD);
+            final String server = intent.getStringExtra(EXTRA_SERVER);
+            final String caption = intent.getStringExtra(EXTRA_CAPTION);
+
             AssetFileDescriptor asset = null;
             HttpURLConnection conn = null;
             try {
                 // find the file that will be uploaded
                 asset = MediciUploadService.this.getContentResolver().openAssetFileDescriptor(uri, "r");
                 String filename = uri.getLastPathSegment();
-
-                // get extra information
-                String username = intent.getStringExtra(EXTRA_USERNAME);
-                String password = intent.getStringExtra(EXTRA_PASSWORD);
-                String server = intent.getStringExtra(EXTRA_SERVER);
-                final String caption = intent.getStringExtra(EXTRA_CAPTION);
 
                 // get the length
                 final long length = asset.getLength();
@@ -200,6 +204,9 @@ public class MediciUploadService extends Service {
 
                 // Ensure we got the HTTP 200 response code
                 int responseCode = conn.getResponseCode();
+                if (responseCode == 401) {
+                    throw new AuthenticationException("Invalid username/password");
+                }
                 if (responseCode != 200) {
                     throw new Exception(String.format("Received the response code %d from the URL %s", responseCode, conn.getResponseMessage()));
                 }
@@ -219,8 +226,29 @@ public class MediciUploadService extends Service {
                 String response = new String(bytesReceived);
                 Log.i(TAG, response);
 
+            } catch (ConnectException e) {
+                Log.w(TAG, "Could not send dataset.", e);
+                handler.post(new Runnable() {
+                    public void run() {
+                        Toast.makeText(MediciUploadService.this, "Could not connect to " + server, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            } catch (AuthenticationException e) {
+                Log.w(TAG, "Could not send dataset.", e);
+                handler.post(new Runnable() {
+                    public void run() {
+                        Toast.makeText(MediciUploadService.this, "Invalid username and/or password", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             } catch (Exception e) {
                 Log.w(TAG, "Could not send dataset.", e);
+                handler.post(new Runnable() {
+                    public void run() {
+                        Toast.makeText(MediciUploadService.this, "Failed to upload " + caption + ".", Toast.LENGTH_SHORT).show();
+                    }
+                });
             } finally {
                 if (asset != null) {
                     try {
