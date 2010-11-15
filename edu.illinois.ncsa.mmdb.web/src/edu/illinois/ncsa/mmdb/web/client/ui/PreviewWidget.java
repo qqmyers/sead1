@@ -183,7 +183,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             if (knownType(type)) {
                 addOverlay(type, link);
             }
-            showPreview(uri, size, link);
+            showPreview(uri, size, link, 0, 0);
             preview.addErrorHandler(new ErrorHandler() {
                 @Override
                 public void onError(ErrorEvent event) {
@@ -232,7 +232,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
                                 // 2. it was initially displayed, and was never pending, in which case we don't need to show the preview
                                 // 3. it was initially displayed, but the REST servlet returned 404 for it because it was pending when it was initially displayed, so we do need to show it
                                 GWT.log("Showing PREVIEW for " + uri);
-                                showPreview(uri, sz, link);
+                                showPreview(uri, sz, link, result.getWidth(), result.getHeight());
                                 retriesLeft = 0;
                             } else if (result.isPending() && retriesLeft > 0) {
                                 GWT.log("Showing PENDING for " + uri);
@@ -271,15 +271,22 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     }
 
     // show the preview with appropriate link and style
-    void showPreview(String uri, String sz, final String link) {
+    void showPreview(String uri, String sz, final String link, long width, long height) {
         if (uri != null && state != State.PREVIEW) {
-            String newPrefix = (state == State.PENDING) ? "new/" : ""; // workaround for MMDB-1048
+            String newPrefix = (state == State.PENDING || state == State.FAILED) ? "new/" : ""; // workaround for MMDB-1048
             preview = new Image(PREVIEW_URL.get(sz) + newPrefix + uri);
             addLink(preview, link);
             if (!GetPreviews.LARGE.equals(sz)) {
                 preview.addStyleName("thumbnail");
             } else {
-                preview.setWidth(getMaxWidth() + "px");
+                if (width > 0) {
+                    if (width < getMaxWidth()) {
+                        preview.setWidth(width + "px");
+                        preview.setHeight(height + "px");
+                    } else {
+                        preview.setWidth(getMaxWidth() + "px");
+                    }
+                }
             }
             setImage(preview);
         }

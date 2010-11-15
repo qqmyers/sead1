@@ -43,6 +43,7 @@ package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.Date;
@@ -496,9 +497,9 @@ public class UploadBlob extends AuthenticatedServlet {
      * @param blobUris
      */
     private void returnList(HttpServletResponse response, String collectionUri, Vector<URI> blobUris) throws IOException {
-        response.setContentType("text/html");
+        response.setContentType("text/html"); // do not allow browsers to parse and rewrite this response!
         // produce HTML the good old-fashioned way; println.
-        PrintWriter pw = new PrintWriter(response.getOutputStream());
+        PrintWriter pw = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
         pw.println("<ol>");
         for (URI datasetUri : blobUris ) {
             pw.println("  <li class=\"dataset\">" + datasetUri + "</li>");

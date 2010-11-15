@@ -44,17 +44,38 @@ import net.customware.gwt.dispatch.shared.Result;
 public class IsPreviewPendingResult implements Result {
     boolean isPending;
     boolean isReady;
+    long    width;
+    long    height;
 
     public boolean isPending() {
         return isPending;
     }
+
     public void setPending(boolean isPending) {
         this.isPending = isPending;
     }
+
     public boolean isReady() {
         return isReady;
     }
+
     public void setReady(boolean isReady) {
         this.isReady = isReady;
+    }
+
+    public long getWidth() {
+        return width;
+    }
+
+    public void setWidth(long width) {
+        this.width = width;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
     }
 }

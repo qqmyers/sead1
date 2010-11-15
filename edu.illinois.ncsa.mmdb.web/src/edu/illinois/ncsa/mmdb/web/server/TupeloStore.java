@@ -651,6 +651,24 @@ public class TupeloStore {
         return RestServlet.getPreviewUri(getPreview(uri, size));
     }
 
+    public long getPreviewHeight(String previewUri, String size) {
+        PreviewImageBean pib = getPreview(previewUri, size);
+        if (pib == null) {
+            return 0L;
+        } else {
+            return pib.getHeight();
+        }
+    }
+
+    public long getPreviewWidth(String uri, String size) {
+        PreviewImageBean pib = getPreview(uri, size);
+        if (pib == null) {
+            return 0L;
+        } else {
+            return pib.getWidth();
+        }
+    }
+
     public PreviewImageBean getPreview(final String uri, final String size) {
         // lazily initialize cache
         if (previewCache == null) {

@@ -605,6 +605,7 @@ public class RestServlet extends AuthenticatedServlet {
                 File file = new File(fileLocation.toURI());
                 FileInputStream fis = new FileInputStream(file);
                 CopyFile.copy(fis, response.getOutputStream());
+                response.getOutputStream().flush();
                 return;
             } catch (URISyntaxException e) {
                 // TODO Auto-generated catch block
