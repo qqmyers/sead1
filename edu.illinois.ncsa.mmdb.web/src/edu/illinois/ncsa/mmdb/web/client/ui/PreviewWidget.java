@@ -273,7 +273,8 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     // show the preview with appropriate link and style
     void showPreview(String uri, String sz, final String link) {
         if (uri != null && state != State.PREVIEW) {
-            preview = new Image(PREVIEW_URL.get(sz) + uri);
+            String newPrefix = (state == State.PENDING) ? "new/" : ""; // workaround for MMDB-1048
+            preview = new Image(PREVIEW_URL.get(sz) + newPrefix + uri);
             addLink(preview, link);
             if (!GetPreviews.LARGE.equals(sz)) {
                 preview.addStyleName("thumbnail");
