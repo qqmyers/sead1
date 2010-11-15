@@ -92,6 +92,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.MintHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
@@ -175,6 +176,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetMimeTypeCategoriesHandler());
         DispatchUtil.registerHandler(new ListRelationshipTypesHandler());
         DispatchUtil.registerHandler(new DeleteRelationshipHandler());
+        DispatchUtil.registerHandler(new MintHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {
