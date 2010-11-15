@@ -496,6 +496,7 @@ public class UploadBlob extends AuthenticatedServlet {
      * @param blobUris
      */
     private void returnList(HttpServletResponse response, String collectionUri, Vector<URI> blobUris) throws IOException {
+        response.setContentType("text/html");
         // produce HTML the good old-fashioned way; println.
         PrintWriter pw = new PrintWriter(response.getOutputStream());
         pw.println("<ol>");
