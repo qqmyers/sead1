@@ -52,7 +52,7 @@
 	
 	<property name="deprecation" value="true" />
 		
-	<property name="version" value="v1.0.100#${env.BUILD_NUMBER}" />
+	<property name="version" value="v1.1.100#${env.BUILD_NUMBER}" />
 	
 	<property name="googlemap" value="ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag" />
 	

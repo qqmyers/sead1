@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ui Plug-in
 Bundle-SymbolicName: ncsa.mmdb.ui; singleton:=true
-Bundle-Version: 1.0.100.qualifier
+Bundle-Version: 1.1.100.qualifier
 Bundle-Activator: ncsa.mmdb.ui.osgi.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
