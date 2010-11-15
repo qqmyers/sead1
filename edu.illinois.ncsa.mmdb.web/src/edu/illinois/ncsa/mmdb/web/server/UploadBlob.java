@@ -300,13 +300,13 @@ public class UploadBlob extends AuthenticatedServlet {
                     if (fieldName.equals("session") && (listener == null)) {
                         sessionKey = item.getString();
                         listener = trackProgress(upload, sessionKey);
-                        log.trace("POST: upload session key (part) = " + sessionKey);
+                        log.info("POST: upload session key (part) = " + sessionKey); // FIXME should be trace
                     } else if (fieldName.equals("collection")) {
                         collectionName = item.getString();
-                        log.debug("POST: upload collection name = " + collectionName);
+                        log.info("POST: upload collection name = " + collectionName); // FIXME should be trace
                     } else if (fieldName.equals("collectionUri")) {
                         collectionUri = item.getString();
-                        log.debug("POST: upload collection uri = " + collectionUri);
+                        log.info("POST: upload collection uri = " + collectionUri); // FIXME should be trace
                     }
 
                 } else if (item.getSize() > 0) {
@@ -344,6 +344,7 @@ public class UploadBlob extends AuthenticatedServlet {
                     UploadInfo u = null;
                     if (listener != null) {
                         u = listener.addUploadInfo(URI.create(uri), trimFilename(fileName), item.getSize());
+                        log.info("Added upload info with uri=" + uri + " for filename " + fileName); // FIXME debug
                     }
                     final FileUploadListener _listener = listener;
                     bw.setInputStream(new FilterInputStream(item.getInputStream()) {
@@ -458,9 +459,6 @@ public class UploadBlob extends AuthenticatedServlet {
                     }
                     ts.save();
                     TupeloStore.getInstance().setHistoryForUpload(sessionKey, "collection?uri=" + collectionUri);
-                    // FIXME need whole state, not just collection URI (see lines 410-411 commented out below)
-                    response.getOutputStream().print(collectionUri);
-                    response.getOutputStream().flush();
                 } catch (OperatorException x) {
                     //
                     x.printStackTrace();
@@ -470,18 +468,48 @@ public class UploadBlob extends AuthenticatedServlet {
             } else {
                 TupeloStore.getInstance().setHistoryForUpload(sessionKey, "listDatasets?sort=date-desc");
             }
-            // output state to output stream
-            /*
-            response.getOutputStream().println(stateToJSON(true,listener,request));
-            response.getOutputStream().flush();
-            */
+            // return list of URI's
+            returnList(response, collectionUri, listener.getBlobUris());
         } catch (FileUploadException e1) {
             log.error("file upload error: " + e1.getLocalizedMessage());
             e1.printStackTrace();
         }
     }
 
-    // certain browsers made in Redmond, WA return full pathnames. we just want the last component
+    /**
+     * Return, as a response, an HTML ordered list, each item of which contains
+     * a URI. The class attribute for each of these items will be "dataset" or
+     * "collection", depending on whether the URI identifies a dataset, or a
+     * collection. Datasets come first, any collection last. e.g.,:
+     * <p>
+     * 
+     * <pre>
+     * <ol>
+     *   <li class="dataset">http://foo.bar#myKewlDataset</li>
+     *   <li class="dataset">http://foo.bar#someOtherDataset</li>
+     *   <li class="collection">http://foo.bar#collection3</li>
+     * </ol>
+     * </pre>
+     * 
+     * @param response
+     * @param collectionUri
+     * @param blobUris
+     */
+    private void returnList(HttpServletResponse response, String collectionUri, Vector<URI> blobUris) throws IOException {
+        // produce HTML the good old-fashioned way; println.
+        PrintWriter pw = new PrintWriter(response.getOutputStream());
+        pw.println("<ol>");
+        for (URI datasetUri : blobUris ) {
+            pw.println("  <li class=\"dataset\">" + datasetUri + "</li>");
+        }
+        if (collectionUri != null) {
+            pw.println("  <li class=\"collection\">" + collectionUri + "</li>");
+        }
+        pw.println("</ol>");
+        pw.flush();
+    }
+
+    // certain browsers return full pathnames. we just want the last component
     private String normalizeFilename(String name) {
         name = name.replaceFirst(".*\\\\", "");
         return name;
@@ -611,7 +639,7 @@ public class UploadBlob extends AuthenticatedServlet {
             log.info("GET: minted session key = " + sessionKey); // FIXME make log.trace
         } else {
             String sessionKey = request.getParameter("session");
-            log.trace("GET: session key = " + sessionKey);
+            log.info("GET: session key = " + sessionKey); // FIXME trace
             // return if there's no progress yet
             if (listeners.get(sessionKey) == null) {
                 log("GET: no upload for session key " + sessionKey);
@@ -629,7 +657,7 @@ public class UploadBlob extends AuthenticatedServlet {
             response.setContentType("application/json");
             PrintWriter out = response.getWriter();
             out.print(stateToJSON(true, listener, request));
-            //log.trace("GET: reported " + stateToJSON(true, listener, request));
+            log.info("GET: reported " + stateToJSON(true, listener, request)); // FIXME trace
         }
     }
 
