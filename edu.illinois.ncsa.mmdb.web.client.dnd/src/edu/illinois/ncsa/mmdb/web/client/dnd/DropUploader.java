@@ -63,6 +63,7 @@ import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JApplet;
@@ -91,6 +92,8 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	private static final long serialVersionUID = 9000;
 	JSObject window = null;
 	
+	private final String VERSION = "1199";
+	
 	@Override
 	public void init() {
 		try {
@@ -106,6 +109,8 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	}
 	
 	public void duInit() throws Exception {
+		log("Drop Uploader version "+VERSION);
+		
 		setSize(150, 100);
 
 		ImageIcon dropIcon = getIcon("Load.png", "Upload");
@@ -445,7 +450,9 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				showErrorCard();
 				throw new Exception("post failed");
 			} else if(collectionName != null && collectionUri == null) {
-				collectionUri = post.getResponseBodyAsString();
+				String response = post.getResponseBodyAsString();
+				Pattern regex = Pattern.compile(".*<\\s*li\\s*class\\s*=\\s*['\"]\\s*collection\\s*['\"]\\s*>([^<]+).*", Pattern.MULTILINE | Pattern.DOTALL);
+				collectionUri = regex.matcher(response).replaceFirst("$1").trim().replaceAll("&amp;","&");
 				log("got collection uri from server: "+collectionUri);
 			}
 			Thread.sleep(2);
