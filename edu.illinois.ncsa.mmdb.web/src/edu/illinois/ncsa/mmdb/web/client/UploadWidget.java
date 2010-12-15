@@ -56,13 +56,13 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.event.CancelEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.CancelHandler;
@@ -79,7 +79,7 @@ public class UploadWidget extends Composite {
 
     void jsonRequest(String url, final JSONCallback callback) throws RequestException {
         RequestBuilder b = new RequestBuilder(RequestBuilder.GET, url);
-        b.setTimeoutMillis(200);
+        b.setTimeoutMillis(1000);
         b.sendRequest(null, new RequestCallback() {
             public void onError(Request request, Throwable exception) {
                 callback.error(exception);
@@ -156,6 +156,7 @@ public class UploadWidget extends Composite {
                 try {
                     jsonRequest(uploadServletUrl, new JSONCallback() {
                         public void error(Throwable t) {
+                            GWT.log("Error getting a session key for upload in JSONCallback", t);
                         }
 
                         public void gotJSON(JSONObject object) {
@@ -169,7 +170,7 @@ public class UploadWidget extends Composite {
                         }
                     });
                 } catch (RequestException e) {
-                    // TODO Auto-generated catch block
+                    GWT.log("Error getting a session key for upload in jsonRequest", e);
                     e.printStackTrace();
                 }
             }
