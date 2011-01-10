@@ -83,6 +83,7 @@ public class UploadPage extends Page {
     private static VerticalPanel           appletStatusPanel;
     private static UploadStatusPresenter   uploadStatusPresenter;
     private static BatchOperationPresenter batchOperationPresenter;
+    private static BatchOperationView      batchOperationView;
     private static UploadStatusView        uploadStatusView;
     Timer                                  safariWakeupTimer;
 
@@ -209,8 +210,8 @@ public class UploadPage extends Page {
         safariWakeupTimer.scheduleRepeating(500);
 
         // batch actions
-        BatchOperationView batchOperationView = new BatchOperationView();
-        batchOperationView.addStyleName("titlePanelRightElement");
+        batchOperationView = new BatchOperationView();
+        batchOperationView.addStyleName("hidden");
         batchOperationPresenter = new BatchOperationPresenter(MMDB.dispatchAsync, MMDB.eventBus, batchOperationView);
         batchOperationPresenter.bind();
         mainLayoutPanel.add(batchOperationView);
@@ -264,6 +265,8 @@ public class UploadPage extends Page {
 
     /** Called by the applet for each file dropped */
     public static void fileDropped(String filename, String sizeString) {
+        batchOperationView.removeStyleName("hidden");
+        batchOperationView.addStyleName("titlePanelRightElement");
         uploadStatusPresenter.onDropped(filename + "", sizeString + ""); // identity transforms required, do not remove
     }
 
