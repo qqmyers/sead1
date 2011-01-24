@@ -58,12 +58,7 @@
 		<servlet-name>RSS Servlet</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.RssServlet</servlet-class>
 	</servlet>
-	
-	<servlet>
-		<servlet-name>Image Pyramid Servlet</servlet-name>
-		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.ImagePyramidServlet</servlet-class>
-	</servlet>
-		
+			
 	<servlet>
 		<servlet-name>Extractor Servlet</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.ExtractorServlet</servlet-class>
@@ -109,11 +104,6 @@
 	</servlet-mapping>
 	
 	<servlet-mapping>
-		<servlet-name>Image Pyramid Servlet</servlet-name>
-		<url-pattern>/pyramid/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
 		<servlet-name>Extractor Servlet</servlet-name>
 		<url-pattern>/extractor/*</url-pattern>
 	</servlet-mapping>
@@ -158,10 +148,25 @@
             <param-value>com.bradmcevoy.http.http11.auth.BasicAuthHandler</param-value>
         </init-param>
 	</servlet>
-
+	
 	<servlet-mapping>
 		<servlet-name>WebDAV Servlet</servlet-name>
 		<url-pattern>/webdav/*</url-pattern>
+	</servlet-mapping>
+
+	<!--  Restlet endpoint -->
+	<servlet>
+		<servlet-name>restlet</servlet-name>
+		<servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
+		<init-param>
+			<param-name>org.restlet.application</param-name>
+			<param-value>edu.illinois.ncsa.mmdb.web.server.rest.MediciServerApplication</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>restlet</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
 
 	<!--  Servlet context listener -->

@@ -91,7 +91,7 @@ public class PreviewPanel extends Composite {
     private static final String BLOB_URL        = "api/image/";
     private static final String NOREFERENCE_URL = "api/image/";
     private static final String EXTENSION_URL   = "api/dataset/";
-    private static final String PYRAMID_URL     = "pyramid/";
+    private static final String PYRAMID_URL     = "rest/pyramid/";
 
     public PreviewPanel() {
     }
@@ -311,7 +311,8 @@ public class PreviewPanel extends Composite {
             showImage(BLOB_URL + pb.getUri(), Long.toString(w), Long.toString(h));
 
         } else if (pb instanceof PreviewPyramidBean) {
-            showSeadragon(PYRAMID_URL + pb.getUri() + "/xml");
+            GWT.log(URL.encodeComponent(pb.getUri()));
+            showSeadragon(PYRAMID_URL + URL.encodeComponent(pb.getUri()) + "/xml");
 
         } else if (pb instanceof PreviewDocumentBean) {
             showText(NOREFERENCE_URL + pb.getUri());

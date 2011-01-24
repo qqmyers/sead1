@@ -47,6 +47,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-dnd-3.0.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/rome-1.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/org.restlet.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
