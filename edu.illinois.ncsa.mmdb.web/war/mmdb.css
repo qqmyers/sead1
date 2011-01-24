@@ -345,7 +345,7 @@ a:hover {
 
 .datasetDisclosurePanel {
 	width: 90%;
-	margin: 20px 0px 20px 20px;
+	margin: 0px 0px 20px 20px;
 }
 
 .addMetadata {
@@ -499,7 +499,17 @@ a:hover {
 	cursor: pointer;
 	font-size: 0.8em;
 }
+
+.dndHTML5 {
+	width: 152px;
+	border: 2px dashed #002B55;
+	padding: 1px;
+	font-size: 0.8em;
+}
 	
+.dndHTML5Container {
+	width: 152px;
+}	
 	
 .twoColumnLayout {
 	width: 100%;
@@ -1238,4 +1248,35 @@ a:hover {
 	height: 0px;
 	clear: both;
 	visibility: hidden;
+}
+
+.relationshipShow{
+	margin: 0px 0px 10px 0px;	
+}
+
+#uploadForm {
+    position:absolute;
+    top:0;
+    left:0;
+    font-size:130px;
+    filter:alpha(opacity=0);
+    -khtml-opacity:0;
+    -webkit-opacity:0;
+    -moz-opacity:0;
+    opacity:0;
+}
+
+#dropbox {
+    width:200px;
+    overflow:hidden;
+    position:relative;
+    text-align:center;
+    color:#999;
+    font:normal 24px arial, helvetica, sans serif;
+}
+        
+#dropzone {
+    position:relative;
+    height:120px;
+    border: 2px dashed #999;
 }

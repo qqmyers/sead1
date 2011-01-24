@@ -54,7 +54,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -455,11 +454,27 @@ public class DatasetWidget extends Composite {
     }
 
     private Composite createMetaDataPanel(UserMetadataWidget um) {
+
+        //User Specified Information
+
+        DisclosurePanel userInformationPanel = new DisclosurePanel("User Specified Information");
+        userInformationPanel.addStyleName("datasetDisclosurePanel");
+        userInformationPanel.setOpen(true);
+        userInformationPanel.setAnimationEnabled(true);
+
+        VerticalPanel userPanel = new VerticalPanel();
+        userInformationPanel.add(userPanel);
+        userPanel.add(um);
+
+        leftColumn.add(userInformationPanel);
+
+        //Extracted Metadata
+
         informationTable = new FlexTable();
         informationTable.addStyleName("metadataTable");
         informationTable.setWidth("100%");
 
-        DisclosurePanel additionalInformationPanel = new DisclosurePanel("Additional Information");
+        DisclosurePanel additionalInformationPanel = new DisclosurePanel("Extracted Information");
         additionalInformationPanel.addStyleName("datasetDisclosurePanel");
         additionalInformationPanel.setOpen(false);
         additionalInformationPanel.setAnimationEnabled(true);
@@ -467,17 +482,11 @@ public class DatasetWidget extends Composite {
         VerticalPanel verticalPanel = new VerticalPanel();
         additionalInformationPanel.add(verticalPanel);
 
-        verticalPanel.add(new HTML("<b>User Specified</b>"));
-        verticalPanel.add(um);
-
-        verticalPanel.add(new HTML("<b>Extracted</b>"));
         noExtractedMetadata = new Label("No extracted metadata");
         noExtractedMetadata.addStyleName("noMetadata");
         noExtractedMetadata.addStyleName("hidden");
         verticalPanel.add(noExtractedMetadata);
         verticalPanel.add(informationTable);
-
-        leftColumn.add(additionalInformationPanel);
 
         if (uri != null) {
             service.execute(new GetMetadata(uri), new AsyncCallback<GetMetadataResult>() {

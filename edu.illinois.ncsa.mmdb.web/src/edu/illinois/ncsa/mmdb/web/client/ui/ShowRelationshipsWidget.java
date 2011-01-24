@@ -107,7 +107,18 @@ public class ShowRelationshipsWidget extends Composite {
                     String t = entry.getKey();
                     RelationshipPanel panel = new RelationshipPanel();
                     mainContainer.add(panel.disclosurePanel);
-                    panel.type = relationship.typeLabel;
+
+                    //Capitalize first letter of every word
+                    StringBuilder result = new StringBuilder(relationship.typeLabel.length());
+                    String[] words = relationship.typeLabel.split("\\s+");
+                    for (int i = 0, l = words.length; i < l; ++i ) {
+                        if (i > 0) {
+                            result.append(" ");
+                        }
+                        result.append(Character.toUpperCase(words[i].charAt(0))).append(words[i].substring(1));
+
+                    }
+                    panel.type = result.toString();
 
                     //add datasets
                     for (DatasetBean d : relationship.datasets ) {
