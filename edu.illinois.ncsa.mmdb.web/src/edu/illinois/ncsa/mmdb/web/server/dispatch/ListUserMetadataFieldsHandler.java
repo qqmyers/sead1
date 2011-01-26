@@ -38,6 +38,8 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.Map;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -46,17 +48,25 @@ import org.tupeloproject.rdf.terms.Rdfs;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
-public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implements ActionHandler<ListUserMetadataFields, ListNamedThingsResult> {
+public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implements ActionHandler<ListUserMetadataFields, ListUserMetadataFieldsResult> {
     @Override
-    public ListNamedThingsResult execute(ListUserMetadataFields arg0, ExecutionContext arg1) throws ActionException {
+    public ListUserMetadataFieldsResult execute(ListUserMetadataFields arg0, ExecutionContext arg1) throws ActionException {
+        ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
         ListNamedThingsResult r = listNamedThings(MMDB.USER_METADATA_FIELD, Rdfs.LABEL);
         if (r == null) {
             throw new ActionException("query to fetch user metadata fields failed");
-        } else {
-            return r;
         }
+        for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
+            UserMetadataField field = new UserMetadataField();
+            field.setUri(entry.getKey());
+            field.setLabel(entry.getValue());
+            result.addField(field);
+        }
+        return result;
     }
 
     @Override
@@ -65,7 +75,7 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
     }
 
     @Override
-    public void rollback(ListUserMetadataFields arg0, ListNamedThingsResult arg1, ExecutionContext arg2) throws ActionException {
+    public void rollback(ListUserMetadataFields arg0, ListUserMetadataFieldsResult arg1, ExecutionContext arg2) throws ActionException {
     }
 
 }

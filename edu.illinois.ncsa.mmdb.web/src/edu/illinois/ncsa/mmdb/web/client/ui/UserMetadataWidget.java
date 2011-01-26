@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
+import java.util.SortedSet;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -66,10 +66,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 
 public class UserMetadataWidget extends Composite {
     String              uri;
@@ -104,12 +105,12 @@ public class UserMetadataWidget extends Composite {
 
     public void showFields(final boolean canEdit) {
         // FIXME single get to get fields and values
-        dispatch.execute(new ListUserMetadataFields(), new AsyncCallback<ListNamedThingsResult>() {
+        dispatch.execute(new ListUserMetadataFields(), new AsyncCallback<ListUserMetadataFieldsResult>() {
             public void onFailure(Throwable caught) {
             }
 
-            public void onSuccess(ListNamedThingsResult result) {
-                SortedMap<String, String> availableFields = result.getThingsOrderedByName();
+            public void onSuccess(ListUserMetadataFieldsResult result) {
+                SortedSet<UserMetadataField> availableFields = result.getFieldsSortedByName();
                 GWT.log("available fields: " + availableFields);
                 if (availableFields.size() > 0) {
                     if (canEdit) {
@@ -212,10 +213,10 @@ public class UserMetadataWidget extends Composite {
 
     /**
      * 
-     * @param result
+     * @param availableFields
      */
-    private void addFieldAddControls(Map<String, String> result) {
-        // result is uri -> label, sorted by alpha label
+    private void addFieldAddControls(SortedSet<UserMetadataField> availableFields) {
+        // result is field -> label, sorted by alpha label
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         horizontalPanel.addStyleName("addMetadata");
         horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -224,9 +225,9 @@ public class UserMetadataWidget extends Composite {
         thePanel.add(horizontalPanel);
 
         fieldChoice = new LabeledListBox("Set Field:");
-        for (Map.Entry<String, String> entry : result.entrySet() ) {
-            String label = entry.getValue();
-            String predicate = entry.getKey();
+        for (UserMetadataField field : availableFields ) {
+            String label = field.getLabel();
+            String predicate = field.getUri();
             fieldChoice.addItem(label, predicate);
             labels.put(predicate, label);
         }

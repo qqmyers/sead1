@@ -38,13 +38,12 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
-import java.util.TreeSet;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
 
 public class UserMetadataPresenter implements Presenter {
@@ -59,20 +58,18 @@ public class UserMetadataPresenter implements Presenter {
     @Override
     public void bind() {
         dispatch.execute(new ListUserMetadataFields(),
-                new AsyncCallback<ListNamedThingsResult>() {
-            public void onFailure(Throwable caught) {
-            }
+                new AsyncCallback<ListUserMetadataFieldsResult>() {
+                    public void onFailure(Throwable caught) {
+                    }
 
-            public void onSuccess(ListNamedThingsResult result) {
-                TreeSet<String> sortedUris = new TreeSet<String>();
-                sortedUris.addAll(result.getThingNames().keySet());
-                for (String key : sortedUris ) {
-                    String predicate = key;
-                    String label = result.getThingNames().get(key);
-                    display.addMetadataField(predicate, label);
-                }
-            }
-        });
+                    public void onSuccess(ListUserMetadataFieldsResult result) {
+                        for (UserMetadataField field : result.getFieldsSortedByName() ) {
+                            String predicate = field.getUri();
+                            String label = field.getLabel();
+                            display.addMetadataField(predicate, label);
+                        }
+                    }
+                });
     }
 
     public interface Display {
