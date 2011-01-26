@@ -89,9 +89,10 @@ public class UserMetadataWidget extends Composite {
         fieldTable = new FlexTable();
         fieldTable.setWidth("100%");
         fieldTable.addStyleName("metadataTable");
-        fieldTable.getColumnFormatter().setWidth(0, "30%");
-        fieldTable.getColumnFormatter().setWidth(1, "50%");
-        fieldTable.getColumnFormatter().setWidth(2, "20%");
+        fieldTable.getColumnFormatter().setWidth(0, "25%");
+        fieldTable.getColumnFormatter().setWidth(1, "30%");
+        fieldTable.getColumnFormatter().setWidth(2, "25%");
+        fieldTable.getColumnFormatter().setWidth(3, "20%");
 
         thePanel = new VerticalPanel();
         noFields = new Label("No user specified metadata");
@@ -100,6 +101,7 @@ public class UserMetadataWidget extends Composite {
         noFields.addStyleName("hidden");
         thePanel.add(noFields);
         thePanel.add(fieldTable);
+
         initWidget(thePanel);
     }
 
@@ -176,6 +178,8 @@ public class UserMetadataWidget extends Composite {
      * @param values
      */
     private void addNewField(final String predicate, String label, Collection<String> values, boolean canEdit) {
+
+        removeNoFields();
         int row = getRowForField(predicate);
         if (row == -1) {
             row = fieldTable.getRowCount();
@@ -191,24 +195,42 @@ public class UserMetadataWidget extends Composite {
         }
         fieldTable.setWidget(row, 1, panel);
         if (canEdit) {
+            HorizontalPanel linkPanel = new HorizontalPanel();
+            Anchor editAnchor = new Anchor("Edit");
+            editAnchor.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    //editValue(predicate);
+                }
+            });
+            linkPanel.add(editAnchor);
             Anchor removeAnchor = new Anchor("Remove");
+            removeAnchor.addStyleName("multiAnchor");
             removeAnchor.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
                     removeValue(predicate);
                 }
             });
-            fieldTable.setWidget(row, 2, removeAnchor);
+            linkPanel.add(removeAnchor);
+            fieldTable.setWidget(row, 3, linkPanel);
         }
-        removeNoFields();
         styleRows();
+
     }
 
     void addNoFields() {
+        if (fieldTable.getRowCount() > 0) {
+            fieldTable.removeRow(0); //header row
+        }
         noFields.removeStyleName("hidden");
+
     }
 
     void removeNoFields() {
         noFields.addStyleName("hidden");
+        fieldTable.setWidget(0, 0, new Label("Field"));
+        fieldTable.setWidget(0, 1, new Label("Value"));
+        fieldTable.setWidget(0, 2, new Label("Applies To"));
+        fieldTable.setWidget(0, 3, new Label("Actions"));
     }
 
     /**
@@ -224,7 +246,7 @@ public class UserMetadataWidget extends Composite {
 
         thePanel.add(horizontalPanel);
 
-        fieldChoice = new LabeledListBox("Set Field:");
+        fieldChoice = new LabeledListBox("Add Field:");
         for (UserMetadataField field : availableFields ) {
             String label = field.getLabel();
             String predicate = field.getUri();
@@ -295,7 +317,7 @@ public class UserMetadataWidget extends Composite {
                     fieldTable.removeRow(row);
                     styleRows();
                 }
-                if (getFieldCount() == 0) {
+                if (getFieldCount() == 1) {
                     addNoFields();
                 }
             }
@@ -307,7 +329,11 @@ public class UserMetadataWidget extends Composite {
      */
     private void styleRows() {
         int rows = fieldTable.getRowCount();
-        for (int row = 0; row < rows; row++ ) {
+        fieldTable.getFlexCellFormatter().addStyleName(0, 0, "metadataTitle");
+        fieldTable.getFlexCellFormatter().addStyleName(0, 1, "metadataTitle");
+        fieldTable.getFlexCellFormatter().addStyleName(0, 2, "metadataTitle");
+        fieldTable.getFlexCellFormatter().addStyleName(0, 3, "metadataTitle");
+        for (int row = 1; row < rows; row++ ) {
             fieldTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
             fieldTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
             fieldTable.getFlexCellFormatter().addStyleName(row, 2, "metadataTableCell");
