@@ -4,6 +4,14 @@ public class NamedThing {
     String uri;
     String name;
 
+    public NamedThing() {
+    }
+
+    public NamedThing(String uri, String name) {
+        setUri(uri);
+        setName(name);
+    }
+
     public String getUri() {
         return uri;
     }

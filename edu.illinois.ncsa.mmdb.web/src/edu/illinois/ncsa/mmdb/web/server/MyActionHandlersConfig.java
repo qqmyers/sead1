@@ -78,6 +78,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRecentActivityHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRelationshipHandlerNew;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRolesHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetSubclassesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUploadDestinationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
@@ -177,6 +178,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new ListRelationshipTypesHandler());
         DispatchUtil.registerHandler(new DeleteRelationshipHandler());
         DispatchUtil.registerHandler(new MintHandler());
+        DispatchUtil.registerHandler(new GetSubclassesHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {
