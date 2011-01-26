@@ -60,6 +60,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.EditRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ExtractionServiceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAllTagsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAllowedValuesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAnnotationsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
@@ -179,6 +180,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new DeleteRelationshipHandler());
         DispatchUtil.registerHandler(new MintHandler());
         DispatchUtil.registerHandler(new GetSubclassesHandler());
+        DispatchUtil.registerHandler(new GetAllowedValuesHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {
