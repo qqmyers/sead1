@@ -90,9 +90,9 @@ public class UserMetadataWidget extends Composite {
         fieldTable.setWidth("100%");
         fieldTable.addStyleName("metadataTable");
         fieldTable.getColumnFormatter().setWidth(0, "25%");
-        fieldTable.getColumnFormatter().setWidth(1, "30%");
-        fieldTable.getColumnFormatter().setWidth(2, "25%");
-        fieldTable.getColumnFormatter().setWidth(3, "20%");
+        fieldTable.getColumnFormatter().setWidth(1, "35%");
+        fieldTable.getColumnFormatter().setWidth(2, "22%");
+        fieldTable.getColumnFormatter().setWidth(3, "18%");
 
         thePanel = new VerticalPanel();
         noFields = new Label("No user specified metadata");
@@ -177,7 +177,7 @@ public class UserMetadataWidget extends Composite {
      * @param label
      * @param values
      */
-    private void addNewField(final String predicate, String label, Collection<String> values, boolean canEdit) {
+    private void addNewField(final String predicate, String label, final Collection<String> values, boolean canEdit) {
 
         removeNoFields();
         int row = getRowForField(predicate);
@@ -193,13 +193,17 @@ public class UserMetadataWidget extends Composite {
         for (String value : values ) {
             panel.add(new Label(value));
         }
+
+        //placeholder for Applies To
+        fieldTable.setWidget(row, 2, new Label("Document"));
+
         fieldTable.setWidget(row, 1, panel);
         if (canEdit) {
             HorizontalPanel linkPanel = new HorizontalPanel();
             Anchor editAnchor = new Anchor("Edit");
             editAnchor.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
-                    //editValue(predicate);
+                    editValue(predicate, values);
                 }
             });
             linkPanel.add(editAnchor);
@@ -322,6 +326,19 @@ public class UserMetadataWidget extends Composite {
                 }
             }
         });
+    }
+
+    /**
+     * 
+     * @param property
+     */
+    private void editValue(String property, final Collection<String> values) {
+        fieldChoice.setSelected(property);
+        for (String value : values ) {
+            valueText.setText(value);
+        }
+        valueText.setFocus(true);
+
     }
 
     /**
