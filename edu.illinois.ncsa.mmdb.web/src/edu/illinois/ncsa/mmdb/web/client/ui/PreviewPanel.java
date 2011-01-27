@@ -91,7 +91,7 @@ public class PreviewPanel extends Composite {
     private static final String BLOB_URL        = "api/image/";
     private static final String NOREFERENCE_URL = "api/image/";
     private static final String EXTENSION_URL   = "api/dataset/";
-    private static final String PYRAMID_URL     = "rest/pyramid/";
+    private static final String PYRAMID_URL     = "rest/secure/pyramid/";
 
     public PreviewPanel() {
     }

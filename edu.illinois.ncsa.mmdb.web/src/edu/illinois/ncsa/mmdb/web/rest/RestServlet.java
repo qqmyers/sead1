@@ -391,6 +391,18 @@ public class RestServlet extends AuthenticatedServlet {
             } catch (OperatorException e1) {
                 throw new ServletException("failed to count download for " + request.getRequestURI(), e1);
             }
+            Unifier uf = new Unifier();
+            uf.addPattern(Resource.uriRef(uri), MMDB.DOWNLOADED_BY, "download");
+            uf.addPattern("download", Dc.CREATOR, "downloader");
+            uf.setColumnNames("download", "downloader");
+            try {
+                getContext().perform(uf);
+            } catch (OperatorException e) {
+                log.warn("Could not get download count for dataset.", e);
+            }
+            for (Tuple<Resource> row : uf.getResult() ) {
+                log.debug(row.get(0) + " " + row.get(1));
+            }
 
             try {
                 Thing imageThing = getImageThing(uri);
