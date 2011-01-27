@@ -83,7 +83,7 @@ public class Search extends SearchableTextIndex<String> {
     }
 
     @Override
-    public void deindex(String id) {
+    public void deindexId(String id) {
         // TODO Auto-generated method stub
 
     }

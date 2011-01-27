@@ -38,13 +38,15 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.search;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import edu.illinois.ncsa.cet.search.IdGetter;
 
 public class SearchableThingIdGetter implements IdGetter<String> {
-	@Override
-	public String getId(String object) {
-		assert object != null;
-		return object;
-	}
-
+    @Override
+    public Collection<String> getIds(String object) {
+        assert object != null;
+        return Arrays.asList(object);
+    }
 }

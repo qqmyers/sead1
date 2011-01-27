@@ -41,6 +41,7 @@ package edu.illinois.ncsa.mmdb.web.server.search;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +102,8 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
      * Extract a text representation of an mmdb thing (e.g., a dataset or collection)
      * for full-text indexing purposes.
      */
-    public String extractText(String uri) {
+    public Map<String, String> extractText(String uri) {
+        Map<String, String> result = new HashMap<String, String>();
         assert uri != null;
         String text = "";
         try {
@@ -110,19 +112,20 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
                 text = text((CETBean) bean);
                 bean = null;
                 /*log.debug("indexed text = " + text); // FIXME debug*/
-                return text;
+                result.put(uri, text);
+                return result;
             }
         } catch (Exception x) {
             log.warn("unexpected bean session behavior: " + x.getMessage());
         }
         // it's either not a bean or not a CETBean
         try {
-            text = text(uri);
             /*log.debug("indexed text = " + text); // FIXME debug*/
-            return text;
+            result.put(uri, text(uri));
+            return result;
         } catch (Exception x) { // something's wrong
             x.printStackTrace();
-            return "";
+            return result;
         }
     }
 
