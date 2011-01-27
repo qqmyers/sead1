@@ -1,0 +1,3160 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY dc "http://purl.org/dc/elements/1.1/" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY taxonomy "http://cas.sc.edu/iis/ruleoflaw/taxonomy#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://cas.sc.edu/iis/ruleoflaw/taxonomy#"
+     xml:base="http://cas.sc.edu/iis/ruleoflaw/taxonomy"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:taxonomy="http://cas.sc.edu/iis/ruleoflaw/taxonomy#">
+    <owl:Ontology rdf:about=""/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&dc;description"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ActiveCorruption -->
+
+    <owl:Class rdf:about="#ActiveCorruption">
+        <rdfs:label>Active</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Corruption"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#AfterActionReport -->
+
+    <owl:Class rdf:about="#AfterActionReport">
+        <rdfs:label
+            >After Action Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceContext"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#AgreedJurisdiction -->
+
+    <owl:Class rdf:about="#AgreedJurisdiction">
+        <rdfs:label
+            >AGREED JURISDICTION</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#AidToCivilPower -->
+
+    <owl:Class rdf:about="#AidToCivilPower">
+        <rdfs:label
+            >Aid to Civil Power</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Context"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#AidToWomen -->
+
+    <owl:Class rdf:about="#AidToWomen">
+        <rdfs:label>Aid to</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Women"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#AidingTerrorism -->
+
+    <owl:Class rdf:about="#AidingTerrorism">
+        <rdfs:label>Aiding</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Terrorism"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#AlcoholismAndDrugAddiction -->
+
+    <owl:Class rdf:about="#AlcoholismAndDrugAddiction">
+        <rdfs:label
+            >Alcoholism and Drug Addiction</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SocialProblems"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#AllOutWar -->
+
+    <owl:Class rdf:about="#AllOutWar">
+        <rdfs:label>All out War</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Context"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#AssociatedWithPolice -->
+
+    <owl:Class rdf:about="#AssociatedWithPolice">
+        <rdfs:label
+            >Associated with Police</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ExtraLegalCriminal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#BombingTerrorism -->
+
+    <owl:Class rdf:about="#BombingTerrorism">
+        <rdfs:label>Bombing</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Terrorism"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Category -->
+
+    <owl:Class rdf:about="#Category"/>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Censure -->
+
+    <owl:Class rdf:about="#Censure">
+        <rdfs:label>Censure</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Penalties"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#CivilSocietyDevelopment -->
+
+    <owl:Class rdf:about="#CivilSocietyDevelopment">
+        <rdfs:label
+            >Civil Society Development</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SocialLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Collective -->
+
+    <owl:Class rdf:about="#Collective">
+        <rdfs:label
+            >Collective + Type + Name</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ExtraLegalNonCriminal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#CommunityBased -->
+
+    <owl:Class rdf:about="#CommunityBased">
+        <rdfs:label>Community Based</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Penalties"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ConceptsAndApproaches -->
+
+    <owl:Class rdf:about="#ConceptsAndApproaches">
+        <rdfs:label
+            >ROL CONCEPTS and APPROACHES</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ConceptualFoundations -->
+
+    <owl:Class rdf:about="#ConceptualFoundations">
+        <rdfs:label
+            >ROL CONCEPTUAL FOUNDATIONS</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Constitution -->
+
+    <owl:Class rdf:about="#Constitution">
+        <rdfs:label>Constitution</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#LegalAuthority"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ConstructionAttemptByExternalIntervener -->
+
+    <owl:Class rdf:about="#ConstructionAttemptByExternalIntervener">
+        <rdfs:label
+            >Construction Attempt by External Intervener</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#RolCulture"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ConstructionAttemptByInternalActor -->
+
+    <owl:Class rdf:about="#ConstructionAttemptByInternalActor">
+        <rdfs:label
+            >Construction Attempt by Internal Actor(s)</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#RolCulture"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ContentValidity -->
+
+    <owl:Class rdf:about="#ContentValidity">
+        <rdfs:label
+            >Content Validity (Traditional type)</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Context -->
+
+    <owl:Class rdf:about="#Context">
+        <rdfs:label
+            >CONTEXT - General Classification</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#CorporateEntity -->
+
+    <owl:Class rdf:about="#CorporateEntity">
+        <rdfs:label
+            >Corporate/Business Entity + Type + Name</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ExtraLegalNonCriminal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#CorrectionsCorruption -->
+
+    <owl:Class rdf:about="#CorrectionsCorruption">
+        <rdfs:label>CORRECTIONS</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#CorruptionByAgency"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#CorrectionsFacilityConstruction -->
+
+    <owl:Class rdf:about="#CorrectionsFacilityConstruction">
+        <rdfs:label
+            >Corrections Facility Construction</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PhysicalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Correspondence -->
+
+    <owl:Class rdf:about="#Correspondence">
+        <rdfs:label>Correspondence</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceContext"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Corruption -->
+
+    <owl:Class rdf:about="#Corruption">
+        <rdfs:label>CORRUPTION TYPE</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#CorruptionByAgency -->
+
+    <owl:Class rdf:about="#CorruptionByAgency">
+        <rdfs:label
+            >CORRUPTION BY AGENCY/ENTITY</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Council -->
+
+    <owl:Class rdf:about="#Council">
+        <rdfs:label
+            >Council + Type + Name</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ExtraLegalNonCriminal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#CourtConstruction -->
+
+    <owl:Class rdf:about="#CourtConstruction">
+        <rdfs:label
+            >Court Construction</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PhysicalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#CourtLevel -->
+
+    <owl:Class rdf:about="#CourtLevel">
+        <rdfs:label>COURT LEVEL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Death -->
+
+    <owl:Class rdf:about="#Death">
+        <rdfs:label>Death</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Penalties"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Delinquency -->
+
+    <owl:Class rdf:about="#Delinquency">
+        <rdfs:label>Delinquency</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SocialProblems"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#DistrictCourt -->
+
+    <owl:Class rdf:about="#DistrictCourt">
+        <rdfs:label
+            >Tier Four &#8211; Local (State/District)</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#CourtLevel"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#DistrictJudicial -->
+
+    <owl:Class rdf:about="#DistrictJudicial">
+        <rdfs:label
+            >Tier Four &#8211; Local (State/District)</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#JudicialAppointmentLevel"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ElectionMonitoring -->
+
+    <owl:Class rdf:about="#ElectionMonitoring">
+        <rdfs:label
+            >Election Monitoring</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PoliticalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ElectionsDevelopment -->
+
+    <owl:Class rdf:about="#ElectionsDevelopment">
+        <rdfs:label
+            >Elections &#8211; Development of</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PoliticalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ElectoralRegulation -->
+
+    <owl:Class rdf:about="#ElectoralRegulation">
+        <rdfs:label
+            >Electoral Regulation</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PoliticalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#EmpowermentOfWomen -->
+
+    <owl:Class rdf:about="#EmpowermentOfWomen">
+        <rdfs:label>Empowerment of</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Women"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ExtraLegalCriminal -->
+
+    <owl:Class rdf:about="#ExtraLegalCriminal">
+        <rdfs:label
+            >EXTRA-LEGAL GOVERNANCE ENTITY &#8211; CRIMINAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ExtraLegalNonCriminal -->
+
+    <owl:Class rdf:about="#ExtraLegalNonCriminal">
+        <rdfs:label
+            >EXTRA-LEGAL GOVERNANCE ENTITY &#8211; NON-CRIMINAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ExtraLegalNonState -->
+
+    <owl:Class rdf:about="#ExtraLegalNonState">
+        <rdfs:label
+            >EXTRA-LEGAL &#8211; Non-state</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#GovernanceInstitutionType"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#FaceToFace -->
+
+    <owl:Class rdf:about="#FaceToFace">
+        <rdfs:label
+            >Face to Face Communication</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceContext"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#FinancingTerrorism -->
+
+    <owl:Class rdf:about="#FinancingTerrorism">
+        <rdfs:label>Financing</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Terrorism"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Fine -->
+
+    <owl:Class rdf:about="#Fine">
+        <rdfs:label>Fine</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Penalties"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Formal -->
+
+    <owl:Class rdf:about="#Formal">
+        <rdfs:label>Formal</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ConceptsAndApproaches"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#FragileState -->
+
+    <owl:Class rdf:about="#FragileState">
+        <rdfs:label
+            >Fragile/Unravelling State</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Context"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Functional -->
+
+    <owl:Class rdf:about="#Functional">
+        <rdfs:label>Functional</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ConceptsAndApproaches"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Genocide -->
+
+    <owl:Class rdf:about="#Genocide">
+        <rdfs:label
+            >GENOCIDE &#8211; acts against a group</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#GenocideBodilyHarm -->
+
+    <owl:Class rdf:about="#GenocideBodilyHarm">
+        <rdfs:label
+            >Serious Mental/Bodily Harm</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Genocide"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#GenocideConditionsOfLife -->
+
+    <owl:Class rdf:about="#GenocideConditionsOfLife">
+        <rdfs:label
+            >Deleterious Conditions of Life</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Genocide"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#GenocideKilling -->
+
+    <owl:Class rdf:about="#GenocideKilling">
+        <rdfs:label>Killing</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Genocide"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#GenocidePreventionOfBirth -->
+
+    <owl:Class rdf:about="#GenocidePreventionOfBirth">
+        <rdfs:label
+            >Prevention of Birth</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Genocide"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#GenocideTransferOfChildren -->
+
+    <owl:Class rdf:about="#GenocideTransferOfChildren">
+        <rdfs:label
+            >Transfer of Children</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Genocide"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#GoalOrientation -->
+
+    <owl:Class rdf:about="#GoalOrientation">
+        <rdfs:label
+            >GOAL ORIENTATION &#8211; Focus of Effort</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#GovernanceInstitutionType -->
+
+    <owl:Class rdf:about="#GovernanceInstitutionType">
+        <rdfs:label
+            >GOVERNANCE INSTITUTION/ ENTITY TYPE</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#GovernmentHearing -->
+
+    <owl:Class rdf:about="#GovernmentHearing">
+        <rdfs:label
+            >Hearing (Government)</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceContext"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#GovernmentPiracy -->
+
+    <owl:Class rdf:about="#GovernmentPiracy">
+        <rdfs:label>Government</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Piracy"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HostNationCivilianGovernmentAgency -->
+
+    <owl:Class rdf:about="#HostNationCivilianGovernmentAgency">
+        <rdfs:label
+            >Civilian Government Agency Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HostNationContractor -->
+
+    <owl:Class rdf:about="#HostNationContractor">
+        <rdfs:label
+            >Contractor Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HostNationDiplomat -->
+
+    <owl:Class rdf:about="#HostNationDiplomat">
+        <rdfs:label
+            >Diplomat + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HostNationIgo -->
+
+    <owl:Class rdf:about="#HostNationIgo">
+        <rdfs:label
+            >IGO Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HostNationIngo -->
+
+    <owl:Class rdf:about="#HostNationIngo">
+        <rdfs:label
+            >INGO Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HostNationMedia -->
+
+    <owl:Class rdf:about="#HostNationMedia">
+        <rdfs:label
+            >Media Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HostNationMilitary -->
+
+    <owl:Class rdf:about="#HostNationMilitary">
+        <rdfs:label
+            >Military Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HostNationNgo -->
+
+    <owl:Class rdf:about="#HostNationNgo">
+        <rdfs:label
+            >NGO Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HostNationPolitician -->
+
+    <owl:Class rdf:about="#HostNationPolitician">
+        <rdfs:label
+            >Politician + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HumanAuthority -->
+
+    <owl:Class rdf:about="#HumanAuthority">
+        <rdfs:label>Human Authority</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#LegalFoundations"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Hybrid -->
+
+    <owl:Class rdf:about="#Hybrid">
+        <rdfs:label
+            >Hybrid + Type + Name</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ExtraLegalNonCriminal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HybridExtraLegal -->
+
+    <owl:Class rdf:about="#HybridExtraLegal">
+        <rdfs:label
+            >HYBRID EXTRA-LEGAL &#8211; Non-state Hybrid form</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#GovernanceInstitutionType"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#HybridStateNonState -->
+
+    <owl:Class rdf:about="#HybridStateNonState">
+        <rdfs:label
+            >HYBRID &#8211; Non-state and state</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#GovernanceInstitutionType"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Imprisonment -->
+
+    <owl:Class rdf:about="#Imprisonment">
+        <rdfs:label>Imprisonment</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Penalties"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Institutional -->
+
+    <owl:Class rdf:about="#Institutional">
+        <rdfs:label>INSTITIONAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#GoalOrientation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#InstitutionalLocusOfEffort -->
+
+    <owl:Class rdf:about="#InstitutionalLocusOfEffort">
+        <rdfs:label
+            >LOCUS OF EFFORT &#8211; INSTITUTIONAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#InsurgentGroup -->
+
+    <owl:Class rdf:about="#InsurgentGroup">
+        <rdfs:label
+            >Insurgent Group + Name</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ExtraLegalCriminal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#InterStateConflict -->
+
+    <owl:Class rdf:about="#InterStateConflict">
+        <rdfs:label
+            >Inter-state Conflict</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Context"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#InternationalCourt -->
+
+    <owl:Class rdf:about="#InternationalCourt">
+        <rdfs:label
+            >Tier One &#8211; International</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#CourtLevel"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#InternationalJudicial -->
+
+    <owl:Class rdf:about="#InternationalJudicial">
+        <rdfs:label
+            >Tier One &#8211; International</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#JudicialAppointmentLevel"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#InternationalOrganizedCrime -->
+
+    <owl:Class rdf:about="#InternationalOrganizedCrime">
+        <rdfs:label
+            >International Organized Crime Group + Name</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ExtraLegalCriminal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Interview -->
+
+    <owl:Class rdf:about="#Interview">
+        <rdfs:label
+            >Interview &#8211; ROLC or related</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceContext"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#IntraStateConflict -->
+
+    <owl:Class rdf:about="#IntraStateConflict">
+        <rdfs:label
+            >Intra-state Conflict</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Context"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#JudicialAppointmentLevel -->
+
+    <owl:Class rdf:about="#JudicialAppointmentLevel">
+        <rdfs:label
+            >JUDICIAL APPOINTMENT LEVEL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#JudicialCorruption -->
+
+    <owl:Class rdf:about="#JudicialCorruption">
+        <rdfs:label>COURT/JUDICIAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#CorruptionByAgency"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#JurisdictionHybrid -->
+
+    <owl:Class rdf:about="#JurisdictionHybrid">
+        <rdfs:label
+            >Hybrid of Non-state and State</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#AgreedJurisdiction"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#JurisdictionNonState -->
+
+    <owl:Class rdf:about="#JurisdictionNonState">
+        <rdfs:label
+            >Non-state &#8211; Extra-legal</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#AgreedJurisdiction"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#JurisdictionState -->
+
+    <owl:Class rdf:about="#JurisdictionState">
+        <rdfs:label>State</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#AgreedJurisdiction"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#LandRights -->
+
+    <owl:Class rdf:about="#LandRights">
+        <rdfs:label>Land</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Rights"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Law -->
+
+    <owl:Class rdf:about="#Law">
+        <rdfs:label>Law</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#LegalAuthority"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#LegalAuthority -->
+
+    <owl:Class rdf:about="#LegalAuthority">
+        <rdfs:label>LEGAL AUTHORITY</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#LegalFoundations -->
+
+    <owl:Class rdf:about="#LegalFoundations">
+        <rdfs:label
+            >ROL LEGAL FOUNDATIONS</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Legislation -->
+
+    <owl:Class rdf:about="#Legislation">
+        <rdfs:label>Legislation</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#LegalAuthority"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Legitimacy -->
+
+    <owl:Class rdf:about="#Legitimacy">
+        <rdfs:label
+            >Legitimacy Power &#8211; Construction of</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ConceptualFoundations"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#LessonsLearnedReport -->
+
+    <owl:Class rdf:about="#LessonsLearnedReport">
+        <rdfs:label
+            >Lessons Learned Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceContext"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#LocalOrganizedCrime -->
+
+    <owl:Class rdf:about="#LocalOrganizedCrime">
+        <rdfs:label
+            >Local Organized Crime Group + Name</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ExtraLegalCriminal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Location -->
+
+    <owl:Class rdf:about="#Location">
+        <rdfs:label
+            >LOCATION (MAPPING)  &#8211; Descriptor (e.g. address or place name) to be followed by NN&#176;NN&#8217;NN.NN&#8221; N WW&#176;WW&#8217;WW.WW&#8221; W</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#LowIntensityConflict -->
+
+    <owl:Class rdf:about="#LowIntensityConflict">
+        <rdfs:label
+            >Low Intensity Conflict</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Context"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#MaterialNotCategorized -->
+
+    <owl:Class rdf:about="#MaterialNotCategorized">
+        <rdfs:label
+            >MATERIAL NOT CATEGORIZED</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#MediaInterview -->
+
+    <owl:Class rdf:about="#MediaInterview">
+        <rdfs:label>Media Interview</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceContext"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#MentoringCivilSocietyActors -->
+
+    <owl:Class rdf:about="#MentoringCivilSocietyActors">
+        <rdfs:label
+            >Mentoring of Civil Society Actors</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#InstitutionalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#MentoringCorrections -->
+
+    <owl:Class rdf:about="#MentoringCorrections">
+        <rdfs:label
+            >Mentoring Corrections</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#InstitutionalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#MentoringJudiciary -->
+
+    <owl:Class rdf:about="#MentoringJudiciary">
+        <rdfs:label
+            >Mentoring Judiciary</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#InstitutionalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#MentoringPolice -->
+
+    <owl:Class rdf:about="#MentoringPolice">
+        <rdfs:label
+            >Mentoring Police</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#InstitutionalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#MunicipalCourt -->
+
+    <owl:Class rdf:about="#MunicipalCourt">
+        <rdfs:label
+            >Tier Five &#8211; Local (City/Municipality)</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#CourtLevel"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#MunicipalJudicial -->
+
+    <owl:Class rdf:about="#MunicipalJudicial">
+        <rdfs:label
+            >Tier Five &#8211; Local (City/Municipality)</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#JudicialAppointmentLevel"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NationalCourt -->
+
+    <owl:Class rdf:about="#NationalCourt">
+        <rdfs:label
+            >Tier Two &#8211; National</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#CourtLevel"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NationalJudicial -->
+
+    <owl:Class rdf:about="#NationalJudicial">
+        <rdfs:label
+            >Tier Two &#8211; National</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#JudicialAppointmentLevel"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NationalOrganizedCrime -->
+
+    <owl:Class rdf:about="#NationalOrganizedCrime">
+        <rdfs:label
+            >National Organized Crime Group + Name</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ExtraLegalCriminal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NaturalDisasters -->
+
+    <owl:Class rdf:about="#NaturalDisasters">
+        <rdfs:label
+            >Natural Disasters</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SocialProblems"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NaturalLaw -->
+
+    <owl:Class rdf:about="#NaturalLaw">
+        <rdfs:label>Natural Law</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#LegalFoundations"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NgoDevelopment -->
+
+    <owl:Class rdf:about="#NgoDevelopment">
+        <rdfs:label>NGO Development</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SocialLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NgoRegulation -->
+
+    <owl:Class rdf:about="#NgoRegulation">
+        <rdfs:label>NGO Regulation</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SocialLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NonStateTorture -->
+
+    <owl:Class rdf:about="#NonStateTorture">
+        <rdfs:label>Non-state Actor</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Torture"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NonUsCivilianGovernmentAgency -->
+
+    <owl:Class rdf:about="#NonUsCivilianGovernmentAgency">
+        <rdfs:label
+            >Civilian Government Agency Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NonUsContractor -->
+
+    <owl:Class rdf:about="#NonUsContractor">
+        <rdfs:label
+            >Contractor Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NonUsDiplomat -->
+
+    <owl:Class rdf:about="#NonUsDiplomat">
+        <rdfs:label
+            >Diplomat + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NonUsIgo -->
+
+    <owl:Class rdf:about="#NonUsIgo">
+        <rdfs:label
+            >IGO Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NonUsIngo -->
+
+    <owl:Class rdf:about="#NonUsIngo">
+        <rdfs:label
+            >INGO Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NonUsMedia -->
+
+    <owl:Class rdf:about="#NonUsMedia">
+        <rdfs:label
+            >Media Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NonUsMilitary -->
+
+    <owl:Class rdf:about="#NonUsMilitary">
+        <rdfs:label
+            >Military Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NonUsNgo -->
+
+    <owl:Class rdf:about="#NonUsNgo">
+        <rdfs:label
+            >NGO Personnel + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#NonUsPolitician -->
+
+    <owl:Class rdf:about="#NonUsPolitician">
+        <rdfs:label
+            >Politician + Designation of Nationality</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Orientation -->
+
+    <owl:Class rdf:about="#Orientation">
+        <rdfs:label
+            >ORIENTATION (Dublin Core Format) - Not Generally in Main Body of Text</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#OtherConstruction -->
+
+    <owl:Class rdf:about="#OtherConstruction">
+        <rdfs:label
+            >Other ROL Related Construction</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PhysicalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#OtherPropertyRights -->
+
+    <owl:Class rdf:about="#OtherPropertyRights">
+        <rdfs:label>Other Property</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Rights"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Ownership -->
+
+    <owl:Class rdf:about="#Ownership">
+        <rdfs:label>OWNERSHIP</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#OwnershipOfAssets -->
+
+    <owl:Class rdf:about="#OwnershipOfAssets">
+        <rdfs:label>Assets</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Ownership"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#OwnershipOfCustomers -->
+
+    <owl:Class rdf:about="#OwnershipOfCustomers">
+        <rdfs:label>Customers</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Ownership"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#OwnershipOfEstates -->
+
+    <owl:Class rdf:about="#OwnershipOfEstates">
+        <rdfs:label>Estates</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Ownership"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#OwnershipOfFirms -->
+
+    <owl:Class rdf:about="#OwnershipOfFirms">
+        <rdfs:label>Firms</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Ownership"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#OwnershipOfLand -->
+
+    <owl:Class rdf:about="#OwnershipOfLand">
+        <rdfs:label>Land</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Ownership"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#OwnershipOfPeople -->
+
+    <owl:Class rdf:about="#OwnershipOfPeople">
+        <rdfs:label>People</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Ownership"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PassiveCorruption -->
+
+    <owl:Class rdf:about="#PassiveCorruption">
+        <rdfs:label>Passive</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Corruption"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Penalties -->
+
+    <owl:Class rdf:about="#Penalties">
+        <rdfs:label>PENALTIES</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Physical -->
+
+    <owl:Class rdf:about="#Physical">
+        <rdfs:label>PHYSICAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#GoalOrientation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PhysicalLocusOfEffort -->
+
+    <owl:Class rdf:about="#PhysicalLocusOfEffort">
+        <rdfs:label
+            >LOCUS OF EFFORT &#8211; PHYSICAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PhysicalPunishment -->
+
+    <owl:Class rdf:about="#PhysicalPunishment">
+        <rdfs:label
+            >Physical Punishment</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Penalties"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Piracy -->
+
+    <owl:Class rdf:about="#Piracy">
+        <rdfs:label>PIRACY</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PoliceCorruption -->
+
+    <owl:Class rdf:about="#PoliceCorruption">
+        <rdfs:label>POLICE</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#CorruptionByAgency"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PoliceStationConstruction -->
+
+    <owl:Class rdf:about="#PoliceStationConstruction">
+        <rdfs:label
+            >Police Station Construction</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PhysicalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Political -->
+
+    <owl:Class rdf:about="#Political">
+        <rdfs:label>POLITICAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#GoalOrientation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PoliticalCampaign -->
+
+    <owl:Class rdf:about="#PoliticalCampaign">
+        <rdfs:label
+            >Political Campaign</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PoliticalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PoliticalCorruption -->
+
+    <owl:Class rdf:about="#PoliticalCorruption">
+        <rdfs:label>POLITICAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#CorruptionByAgency"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PoliticalLocusOfEffort -->
+
+    <owl:Class rdf:about="#PoliticalLocusOfEffort">
+        <rdfs:label
+            >LOCUS OF EFFORT &#8211; POLITICAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PoliticalOffice -->
+
+    <owl:Class rdf:about="#PoliticalOffice">
+        <rdfs:label
+            >Political Office</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PoliticalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PostConflictReconstruction -->
+
+    <owl:Class rdf:about="#PostConflictReconstruction">
+        <rdfs:label
+            >Post-conflict Reconstruction/ Peacebuilding</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Context"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Poverty -->
+
+    <owl:Class rdf:about="#Poverty">
+        <rdfs:label>Poverty</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SocialProblems"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PreparedStatement -->
+
+    <owl:Class rdf:about="#PreparedStatement">
+        <rdfs:label
+            >Statement (Prepared)</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceContext"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PrimaryLocation -->
+
+    <owl:Class rdf:about="#PrimaryLocation">
+        <rdfs:label
+            >Primary - Source</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Location"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PrimaryTimeDate -->
+
+    <owl:Class rdf:about="#PrimaryTimeDate">
+        <rdfs:label
+            >Primary &#8211; Source</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#TimeDate"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PrivatePiracy -->
+
+    <owl:Class rdf:about="#PrivatePiracy">
+        <rdfs:label>Private</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Piracy"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProgramsForRol -->
+
+    <owl:Class rdf:about="#ProgramsForRol">
+        <rdfs:label>Programs for</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#RolCulture"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PropertyExchange -->
+
+    <owl:Class rdf:about="#PropertyExchange">
+        <rdfs:label>Exchange</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PropertyTransfer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PropertyManagement -->
+
+    <owl:Class rdf:about="#PropertyManagement">
+        <rdfs:label>Management</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PropertyTransfer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PropertyMerger -->
+
+    <owl:Class rdf:about="#PropertyMerger">
+        <rdfs:label>Merger</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PropertyTransfer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PropertyPurchase -->
+
+    <owl:Class rdf:about="#PropertyPurchase">
+        <rdfs:label>Purchase</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PropertyTransfer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PropertySuccession -->
+
+    <owl:Class rdf:about="#PropertySuccession">
+        <rdfs:label>Succession</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#PropertyTransfer"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#PropertyTransfer -->
+
+    <owl:Class rdf:about="#PropertyTransfer">
+        <rdfs:label
+            >PROPERTY TRANSFER</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAgainst -->
+
+    <owl:Class rdf:about="#ProtectionAgainst">
+        <rdfs:label
+            >PROTECTION AGAINST</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAgainstCompetition -->
+
+    <owl:Class rdf:about="#ProtectionAgainstCompetition">
+        <rdfs:label>Competition</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAgainst"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAgainstCriminals -->
+
+    <owl:Class rdf:about="#ProtectionAgainstCriminals">
+        <rdfs:label>Criminals</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAgainst"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAgainstDebtors -->
+
+    <owl:Class rdf:about="#ProtectionAgainstDebtors">
+        <rdfs:label>Debtors</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAgainst"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAgainstExtortion -->
+
+    <owl:Class rdf:about="#ProtectionAgainstExtortion">
+        <rdfs:label>Extortion</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAgainst"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAgainstGovernment -->
+
+    <owl:Class rdf:about="#ProtectionAgainstGovernment">
+        <rdfs:label
+            >Protection Against Government</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ConceptualFoundations"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAgainstInsurgents -->
+
+    <owl:Class rdf:about="#ProtectionAgainstInsurgents">
+        <rdfs:label>Insurgents</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAgainst"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAgainstKidnapping -->
+
+    <owl:Class rdf:about="#ProtectionAgainstKidnapping">
+        <rdfs:label>Kidnapping</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAgainst"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAgainstTerrorism -->
+
+    <owl:Class rdf:about="#ProtectionAgainstTerrorism">
+        <rdfs:label
+            >Terrorist Activity</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAgainst"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAgainstTheft -->
+
+    <owl:Class rdf:about="#ProtectionAgainstTheft">
+        <rdfs:label>Theft</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAgainst"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAgreements -->
+
+    <owl:Class rdf:about="#ProtectionAgreements">
+        <rdfs:label>Agreements</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAsCommodity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAnd -->
+
+    <owl:Class rdf:about="#ProtectionAnd">
+        <rdfs:label
+            >PROTECTION AND...</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAndAutonomy -->
+
+    <owl:Class rdf:about="#ProtectionAndAutonomy">
+        <rdfs:label>Autonomy</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAnd"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAndConflict -->
+
+    <owl:Class rdf:about="#ProtectionAndConflict">
+        <rdfs:label>Conflict</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAnd"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAndCorruption -->
+
+    <owl:Class rdf:about="#ProtectionAndCorruption">
+        <rdfs:label>Corruption</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAnd"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAndDemocratization -->
+
+    <owl:Class rdf:about="#ProtectionAndDemocratization">
+        <rdfs:label>Democratization</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAnd"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAndOpportunity -->
+
+    <owl:Class rdf:about="#ProtectionAndOpportunity">
+        <rdfs:label>Opportunity</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAnd"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAndPolice -->
+
+    <owl:Class rdf:about="#ProtectionAndPolice">
+        <rdfs:label>Police</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAnd"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAndReligiousAuthority -->
+
+    <owl:Class rdf:about="#ProtectionAndReligiousAuthority">
+        <rdfs:label
+            >Religious Authority</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAnd"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAndStability -->
+
+    <owl:Class rdf:about="#ProtectionAndStability">
+        <rdfs:label>Stability</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAnd"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAndTrust -->
+
+    <owl:Class rdf:about="#ProtectionAndTrust">
+        <rdfs:label>Trust</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAnd"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionAsCommodity -->
+
+    <owl:Class rdf:about="#ProtectionAsCommodity">
+        <rdfs:label
+            >PROTECTION &#8211; As Commodity</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionBy -->
+
+    <owl:Class rdf:about="#ProtectionBy">
+        <rdfs:label>PROTECTION BY</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionByCivilianAgencies -->
+
+    <owl:Class rdf:about="#ProtectionByCivilianAgencies">
+        <rdfs:label
+            >Civilian Agencies</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionBy"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionByCriminals -->
+
+    <owl:Class rdf:about="#ProtectionByCriminals">
+        <rdfs:label>Criminals</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionBy"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionByMilitary -->
+
+    <owl:Class rdf:about="#ProtectionByMilitary">
+        <rdfs:label>Military</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionBy"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionByNgo -->
+
+    <owl:Class rdf:about="#ProtectionByNgo">
+        <rdfs:label>NGO</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionBy"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionByPolice -->
+
+    <owl:Class rdf:about="#ProtectionByPolice">
+        <rdfs:label>Police</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionBy"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionByPrivate -->
+
+    <owl:Class rdf:about="#ProtectionByPrivate">
+        <rdfs:label
+            >Private Firms (Private Sector)</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionBy"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionByState -->
+
+    <owl:Class rdf:about="#ProtectionByState">
+        <rdfs:label
+            >The State &#8211; High Level</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionBy"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionCompetition -->
+
+    <owl:Class rdf:about="#ProtectionCompetition">
+        <rdfs:label>Competition</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAsCommodity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionConcept -->
+
+    <owl:Class rdf:about="#ProtectionConcept">
+        <rdfs:label
+            >PROTECTION CONCEPT</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionDemand -->
+
+    <owl:Class rdf:about="#ProtectionDemand">
+        <rdfs:label>Demand for</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAsCommodity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionGeneric -->
+
+    <owl:Class rdf:about="#ProtectionGeneric">
+        <rdfs:label>Generic</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionConcept"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionLogic -->
+
+    <owl:Class rdf:about="#ProtectionLogic">
+        <rdfs:label>Logic of</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionConcept"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionOf -->
+
+    <owl:Class rdf:about="#ProtectionOf">
+        <rdfs:label>PROTECTION OF</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionOfCivilLiberty -->
+
+    <owl:Class rdf:about="#ProtectionOfCivilLiberty">
+        <rdfs:label
+            >Protection of Civil Liberty</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ConceptualFoundations"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionOfGoods -->
+
+    <owl:Class rdf:about="#ProtectionOfGoods">
+        <rdfs:label>Goods</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionOf"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionOfLand -->
+
+    <owl:Class rdf:about="#ProtectionOfLand">
+        <rdfs:label>Land</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionOf"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionOfPeople -->
+
+    <owl:Class rdf:about="#ProtectionOfPeople">
+        <rdfs:label>People</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionOf"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionOfProperty -->
+
+    <owl:Class rdf:about="#ProtectionOfProperty">
+        <rdfs:label>Property</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionOf"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionOfRights -->
+
+    <owl:Class rdf:about="#ProtectionOfRights">
+        <rdfs:label>Rights</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionOf"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionOfStatus -->
+
+    <owl:Class rdf:about="#ProtectionOfStatus">
+        <rdfs:label>Status</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionOf"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionPayment -->
+
+    <owl:Class rdf:about="#ProtectionPayment">
+        <rdfs:label>Payment for</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAsCommodity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionPhilosophy -->
+
+    <owl:Class rdf:about="#ProtectionPhilosophy">
+        <rdfs:label
+            >Stated Philosophy behind</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionConcept"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionSale -->
+
+    <owl:Class rdf:about="#ProtectionSale">
+        <rdfs:label>Sale</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAsCommodity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionScientificMethod -->
+
+    <owl:Class rdf:about="#ProtectionScientificMethod">
+        <rdfs:label
+            >Scientific Method</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionConcept"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionSupply -->
+
+    <owl:Class rdf:about="#ProtectionSupply">
+        <rdfs:label>Supply</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionAsCommodity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ProtectionVsExtortion -->
+
+    <owl:Class rdf:about="#ProtectionVsExtortion">
+        <rdfs:label>Vs Extortion</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ProtectionConcept"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Realist -->
+
+    <owl:Class rdf:about="#Realist">
+        <rdfs:label>Realist</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ConceptsAndApproaches"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Recruitment -->
+
+    <owl:Class rdf:about="#Recruitment">
+        <rdfs:label
+            >ROL RELATED RECRUITMENT</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#RecruitmentChallenges -->
+
+    <owl:Class rdf:about="#RecruitmentChallenges">
+        <rdfs:label>Challenges</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Recruitment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#RecruitmentNonUsFunded -->
+
+    <owl:Class rdf:about="#RecruitmentNonUsFunded">
+        <rdfs:label
+            >Non-US Funded Initiative</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Recruitment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#RecruitmentOfIndividual -->
+
+    <owl:Class rdf:about="#RecruitmentOfIndividual">
+        <rdfs:label>Of Individual</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Recruitment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#RecruitmentRefusal -->
+
+    <owl:Class rdf:about="#RecruitmentRefusal">
+        <rdfs:label>Refusal</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Recruitment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#RecruitmentUsFunded -->
+
+    <owl:Class rdf:about="#RecruitmentUsFunded">
+        <rdfs:label
+            >US Funded Initiative</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Recruitment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#RegionalCourt -->
+
+    <owl:Class rdf:about="#RegionalCourt">
+        <rdfs:label
+            >Tier Three &#8211; Regional (Region of Country)</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#CourtLevel"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#RegionalJudicial -->
+
+    <owl:Class rdf:about="#RegionalJudicial">
+        <rdfs:label
+            >Tier Three &#8211; Regional (Region of Country)</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#JudicialAppointmentLevel"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Regulation -->
+
+    <owl:Class rdf:about="#Regulation">
+        <rdfs:label>Regulation</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#LegalAuthority"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ReligiousCourt -->
+
+    <owl:Class rdf:about="#ReligiousCourt">
+        <rdfs:label
+            >Religious Court + Type + Name</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ExtraLegalNonCriminal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ResistenceToRol -->
+
+    <owl:Class rdf:about="#ResistenceToRol">
+        <rdfs:label>Resistance to</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#RolCulture"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Restitution -->
+
+    <owl:Class rdf:about="#Restitution">
+        <rdfs:label>Restitution</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Penalties"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Restorative -->
+
+    <owl:Class rdf:about="#Restorative">
+        <rdfs:label>Restorative</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Penalties"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Rights -->
+
+    <owl:Class rdf:about="#Rights">
+        <rdfs:label>RIGHTS TO</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#RightsBased -->
+
+    <owl:Class rdf:about="#RightsBased">
+        <rdfs:label>Rights Based</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ConceptsAndApproaches"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#RightsOfWomen -->
+
+    <owl:Class rdf:about="#RightsOfWomen">
+        <rdfs:label>Rights of</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Women"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#RolCulture -->
+
+    <owl:Class rdf:about="#RolCulture">
+        <rdfs:label
+            >RULE OF LAW CULTURE</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Ruling -->
+
+    <owl:Class rdf:about="#Ruling">
+        <rdfs:label>Ruling</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#LegalAuthority"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SabotageTerrorism -->
+
+    <owl:Class rdf:about="#SabotageTerrorism">
+        <rdfs:label>Sabotage</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Terrorism"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandHostNation -->
+
+    <owl:Class rdf:about="#SecondHandHostNation">
+        <rdfs:label
+            >SOURCE ID &#8211; Second Hand Reports Host Nation &#8211; i.e. referenced in the text</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandHostNationAcademic -->
+
+    <owl:Class rdf:about="#SecondHandHostNationAcademic">
+        <rdfs:label>Academic Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandHostNationAudioMedia -->
+
+    <owl:Class rdf:about="#SecondHandHostNationAudioMedia">
+        <rdfs:label>Audio Media</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandHostNationContractor -->
+
+    <owl:Class rdf:about="#SecondHandHostNationContractor">
+        <rdfs:label
+            >Contractor Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandHostNationDigitalMedia -->
+
+    <owl:Class rdf:about="#SecondHandHostNationDigitalMedia">
+        <rdfs:label
+            >Digital Media &#8211; e.g. twitter or blog</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandHostNationGovernmentAgency -->
+
+    <owl:Class rdf:about="#SecondHandHostNationGovernmentAgency">
+        <rdfs:label
+            >Government Agency Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandHostNationNgo -->
+
+    <owl:Class rdf:about="#SecondHandHostNationNgo">
+        <rdfs:label>NGO Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandHostNationPrintMedia -->
+
+    <owl:Class rdf:about="#SecondHandHostNationPrintMedia">
+        <rdfs:label>Print Media</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandHostNationVideoMedia -->
+
+    <owl:Class rdf:about="#SecondHandHostNationVideoMedia">
+        <rdfs:label>Video Media</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandHostNation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandNonUs -->
+
+    <owl:Class rdf:about="#SecondHandNonUs">
+        <rdfs:label
+            >SOURCE ID &#8211; Second Hand Reports Non-US &#8211; i.e. referenced in the text</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandNonUsAcademic -->
+
+    <owl:Class rdf:about="#SecondHandNonUsAcademic">
+        <rdfs:label>Academic Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandNonUsAudioMedia -->
+
+    <owl:Class rdf:about="#SecondHandNonUsAudioMedia">
+        <rdfs:label>Audio Media</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandNonUsContractor -->
+
+    <owl:Class rdf:about="#SecondHandNonUsContractor">
+        <rdfs:label
+            >Contractor Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandNonUsDigitalMedia -->
+
+    <owl:Class rdf:about="#SecondHandNonUsDigitalMedia">
+        <rdfs:label
+            >Digital Media &#8211; e.g. twitter or blog</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandNonUsGovernmentAgency -->
+
+    <owl:Class rdf:about="#SecondHandNonUsGovernmentAgency">
+        <rdfs:label
+            >Government Agency Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandNonUsMilitary -->
+
+    <owl:Class rdf:about="#SecondHandNonUsMilitary">
+        <rdfs:label>Military Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandHostNation"/>
+        <rdfs:subClassOf rdf:resource="#SecondHandNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandNonUsNgo -->
+
+    <owl:Class rdf:about="#SecondHandNonUsNgo">
+        <rdfs:label>NGO Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandNonUsPrintMedia -->
+
+    <owl:Class rdf:about="#SecondHandNonUsPrintMedia">
+        <rdfs:label>Print Media</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandNonUsVideoMedia -->
+
+    <owl:Class rdf:about="#SecondHandNonUsVideoMedia">
+        <rdfs:label>Video Media</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SecondHandNonUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandUsAcademic -->
+
+    <owl:Class rdf:about="#SecondHandUsAcademic">
+        <rdfs:label
+            >US Academic Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdSecondHandUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandUsAudioMedia -->
+
+    <owl:Class rdf:about="#SecondHandUsAudioMedia">
+        <rdfs:label>US Audio Media</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdSecondHandUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandUsContractor -->
+
+    <owl:Class rdf:about="#SecondHandUsContractor">
+        <rdfs:label
+            >US Contractor Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdSecondHandUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandUsDigitalMedia -->
+
+    <owl:Class rdf:about="#SecondHandUsDigitalMedia">
+        <rdfs:label
+            >US Digital Media &#8211; e.g. twitter or blog</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdSecondHandUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandUsGovernmentAgency -->
+
+    <owl:Class rdf:about="#SecondHandUsGovernmentAgency">
+        <rdfs:label
+            >US Government Agency Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdSecondHandUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandUsMilitary -->
+
+    <owl:Class rdf:about="#SecondHandUsMilitary">
+        <rdfs:label
+            >US Military Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdSecondHandUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandUsNgo -->
+
+    <owl:Class rdf:about="#SecondHandUsNgo">
+        <rdfs:label>US NGO Report</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdSecondHandUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandUsPrintMedia -->
+
+    <owl:Class rdf:about="#SecondHandUsPrintMedia">
+        <rdfs:label>US Print Media</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdSecondHandUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondHandUsVideoMedia -->
+
+    <owl:Class rdf:about="#SecondHandUsVideoMedia">
+        <rdfs:label>US Video Media</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdSecondHandUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondaryLocation -->
+
+    <owl:Class rdf:about="#SecondaryLocation">
+        <rdfs:label
+            >Secondary &#8211; Described in Source</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Location"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SecondaryTimeDate -->
+
+    <owl:Class rdf:about="#SecondaryTimeDate">
+        <rdfs:label
+            >Secondary &#8211; Described in Source</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#TimeDate"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ShootingTerrorism -->
+
+    <owl:Class rdf:about="#ShootingTerrorism">
+        <rdfs:label>Shooting</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Terrorism"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SituationReport -->
+
+    <owl:Class rdf:about="#SituationReport">
+        <rdfs:label
+            >Situation Report (Prepared)</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceContext"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Social -->
+
+    <owl:Class rdf:about="#Social">
+        <rdfs:label>SOCIAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#GoalOrientation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SocialLocusOfEffort -->
+
+    <owl:Class rdf:about="#SocialLocusOfEffort">
+        <rdfs:label
+            >LOCUS OF EFFORT &#8211; SOCIAL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SocialProblems -->
+
+    <owl:Class rdf:about="#SocialProblems">
+        <rdfs:label>SOCIAL PROBLEMS</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SourceContext -->
+
+    <owl:Class rdf:about="#SourceContext">
+        <rdfs:label
+            >SOURCE CONTEXT (DIRECT)  &#8211; i.e. context in which sourced appears</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SourceEvaluationKey -->
+
+    <owl:Class rdf:about="#SourceEvaluationKey">
+        <rdfs:label
+            >Academic (HRAF) Source Evaluation Key</rdfs:label>
+        <dc:description
+            >An indiciation of the quality of the information</dc:description>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SourceIdHostNation -->
+
+    <owl:Class rdf:about="#SourceIdHostNation">
+        <rdfs:label
+            >SOURCE ID HOST NATION &#8211; First Hand/Witness &#8211; i.e. represented directly in the text</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SourceIdNonUs -->
+
+    <owl:Class rdf:about="#SourceIdNonUs">
+        <rdfs:label
+            >SOURCE ID NON-US &#8211; EXTERNAL INTERVENER &#8211; First Hand/Witness &#8211; i.e. represented directly in text</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SourceIdSecondHandUs -->
+
+    <owl:Class rdf:about="#SourceIdSecondHandUs">
+        <rdfs:label
+            >SOURCE ID &#8211; Second Hand Reports US &#8211; i.e. referenced in the text</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SourceIdUs -->
+
+    <owl:Class rdf:about="#SourceIdUs">
+        <rdfs:label
+            >SOURCE ID US &#8211; First Hand/Witness &#8211; i.e. represented directly in the text</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SourceReliability -->
+
+    <owl:Class rdf:about="#SourceReliability">
+        <rdfs:label
+            >Source Reliability (Traditional type)</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#State -->
+
+    <owl:Class rdf:about="#State">
+        <rdfs:label>STATE</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#GovernanceInstitutionType"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#StateMonopolyOnViolence -->
+
+    <owl:Class rdf:about="#StateMonopolyOnViolence">
+        <rdfs:label
+            >State Monopoly on Violence &#8211; Control of private violence</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ConceptualFoundations"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#StateSanctionedTorture -->
+
+    <owl:Class rdf:about="#StateSanctionedTorture">
+        <rdfs:label
+            >State Sanctioned</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Torture"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Substantive -->
+
+    <owl:Class rdf:about="#Substantive">
+        <rdfs:label>Substantive</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#ConceptsAndApproaches"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#SuccessfulDevelopmentOfRol -->
+
+    <owl:Class rdf:about="#SuccessfulDevelopmentOfRol">
+        <rdfs:label
+            >Successful Development of</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#RolCulture"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Terrorism -->
+
+    <owl:Class rdf:about="#Terrorism">
+        <rdfs:label>TERRORISM</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TerrorismAsChallengeToRol -->
+
+    <owl:Class rdf:about="#TerrorismAsChallengeToRol">
+        <rdfs:label
+            >As Challenge to ROL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Terrorism"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TerrorismInContextOfRol -->
+
+    <owl:Class rdf:about="#TerrorismInContextOfRol">
+        <rdfs:label
+            >In Context of ROL</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Terrorism"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TerroristsAsRolActors -->
+
+    <owl:Class rdf:about="#TerroristsAsRolActors">
+        <rdfs:label
+            >Terrorists as ROL actors</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Terrorism"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TimeDate -->
+
+    <owl:Class rdf:about="#TimeDate">
+        <rdfs:label
+            >TIME/DATE REFERENCE &#8211; To be followed by - hhmm-ddmmyyyy</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Torture -->
+
+    <owl:Class rdf:about="#Torture">
+        <rdfs:label>TORTURE</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TradingInInfluence -->
+
+    <owl:Class rdf:about="#TradingInInfluence">
+        <rdfs:label
+            >Trading in Influence</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Corruption"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Trafficking -->
+
+    <owl:Class rdf:about="#Trafficking">
+        <rdfs:label>TRAFFICKING</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TraffickingAmmunition -->
+
+    <owl:Class rdf:about="#TraffickingAmmunition">
+        <rdfs:label>Ammunition</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Trafficking"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TraffickingArms -->
+
+    <owl:Class rdf:about="#TraffickingArms">
+        <rdfs:label>Arms</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Trafficking"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TraffickingChildren -->
+
+    <owl:Class rdf:about="#TraffickingChildren">
+        <rdfs:label>Children</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Trafficking"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TraffickingDrugs -->
+
+    <owl:Class rdf:about="#TraffickingDrugs">
+        <rdfs:label>Drugs</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Trafficking"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TraffickingExplosives -->
+
+    <owl:Class rdf:about="#TraffickingExplosives">
+        <rdfs:label>Explosives</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Trafficking"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TraffickingMen -->
+
+    <owl:Class rdf:about="#TraffickingMen">
+        <rdfs:label>Men</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Trafficking"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TraffickingWomen -->
+
+    <owl:Class rdf:about="#TraffickingWomen">
+        <rdfs:label>Women</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Trafficking"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TrainingCorrections -->
+
+    <owl:Class rdf:about="#TrainingCorrections">
+        <rdfs:label
+            >Training Corrections</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#InstitutionalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TrainingJudiciary -->
+
+    <owl:Class rdf:about="#TrainingJudiciary">
+        <rdfs:label
+            >Training Judiciary</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#InstitutionalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#TrainingPolice -->
+
+    <owl:Class rdf:about="#TrainingPolice">
+        <rdfs:label>Training Police</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#InstitutionalLocusOfEffort"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Unemployment -->
+
+    <owl:Class rdf:about="#Unemployment">
+        <rdfs:label>Unemployment</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SocialProblems"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#UnsuccessfulDevelopmentOfRol -->
+
+    <owl:Class rdf:about="#UnsuccessfulDevelopmentOfRol">
+        <rdfs:label
+            >Unsuccessful Development of</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#RolCulture"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#UsCivilianGovernmentAgency -->
+
+    <owl:Class rdf:about="#UsCivilianGovernmentAgency">
+        <rdfs:label
+            >US Civilian Government Agency Personnel</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#UsContractor -->
+
+    <owl:Class rdf:about="#UsContractor">
+        <rdfs:label
+            >US Contractor Personnel</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#UsDiplomat -->
+
+    <owl:Class rdf:about="#UsDiplomat">
+        <rdfs:label>US Diplomat</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#UsIgo -->
+
+    <owl:Class rdf:about="#UsIgo">
+        <rdfs:label
+            >US IGO Personnel</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#UsIngo -->
+
+    <owl:Class rdf:about="#UsIngo">
+        <rdfs:label
+            >US INGO Personnel &#8211; i.e. US member of an IGO</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#UsMedia -->
+
+    <owl:Class rdf:about="#UsMedia">
+        <rdfs:label
+            >US Media Personnel</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#UsMilitary -->
+
+    <owl:Class rdf:about="#UsMilitary">
+        <rdfs:label
+            >US Military Personnel</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#UsNgo -->
+
+    <owl:Class rdf:about="#UsNgo">
+        <rdfs:label
+            >US NGO Personnel</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#UsPolitician -->
+
+    <owl:Class rdf:about="#UsPolitician">
+        <rdfs:label>US Politician</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#SourceIdUs"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ViolenceAgainstWomen -->
+
+    <owl:Class rdf:about="#ViolenceAgainstWomen">
+        <rdfs:label
+            >Violence against</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Women"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#ViolenceByWomen -->
+
+    <owl:Class rdf:about="#ViolenceByWomen">
+        <rdfs:label>Violence by</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Women"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#WaterRights -->
+
+    <owl:Class rdf:about="#WaterRights">
+        <rdfs:label>Water</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Rights"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#Women -->
+
+    <owl:Class rdf:about="#Women">
+        <rdfs:label>WOMEN</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Category"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#WomenAsPolice -->
+
+    <owl:Class rdf:about="#WomenAsPolice">
+        <rdfs:label>As Police</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Women"/>
+    </owl:Class>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#WomenSoldiers -->
+
+    <owl:Class rdf:about="#WomenSoldiers">
+        <rdfs:label>Solidiers</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Women"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#confirmed -->
+
+    <owl:Thing rdf:about="#confirmed">
+        <rdf:type rdf:resource="#ContentValidity"/>
+        <rdfs:label>Confirmed</rdfs:label>
+    </owl:Thing>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#doubtfullyTrue -->
+
+    <owl:Thing rdf:about="#doubtfullyTrue">
+        <rdf:type rdf:resource="#ContentValidity"/>
+        <rdfs:label>Doubtfully True</rdfs:label>
+    </owl:Thing>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#excellentPrimaryData -->
+
+    <owl:Thing rdf:about="#excellentPrimaryData">
+        <rdf:type rdf:resource="#SourceEvaluationKey"/>
+        <rdfs:label
+            >Excellent primary data</rdfs:label>
+    </owl:Thing>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#excellentSecondaryData -->
+
+    <owl:Thing rdf:about="#excellentSecondaryData">
+        <rdf:type rdf:resource="#SourceEvaluationKey"/>
+        <rdfs:label
+            >Excellent secondary data such as compilations or interpretations based on primary data</rdfs:label>
+    </owl:Thing>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#fairSource -->
+
+    <owl:Thing rdf:about="#fairSource">
+        <rdf:type rdf:resource="#SourceEvaluationKey"/>
+        <rdfs:label>Fair source</rdfs:label>
+    </owl:Thing>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#fairlyReliable -->
+
+    <SourceReliability rdf:about="#fairlyReliable">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <rdfs:label>Fairly Reliable</rdfs:label>
+    </SourceReliability>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#goodSource -->
+
+    <SourceEvaluationKey rdf:about="#goodSource">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <rdfs:label
+            >Good, useful source, but not uniformly excellent</rdfs:label>
+    </SourceEvaluationKey>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#improbable -->
+
+    <owl:Thing rdf:about="#improbable">
+        <rdf:type rdf:resource="#ContentValidity"/>
+        <rdfs:label>Improbable</rdfs:label>
+    </owl:Thing>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#notUsuallyReliable -->
+
+    <SourceReliability rdf:about="#notUsuallyReliable">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <rdfs:label
+            >Not Usually Reliable</rdfs:label>
+    </SourceReliability>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#poorSource -->
+
+    <owl:Thing rdf:about="#poorSource">
+        <rdf:type rdf:resource="#SourceEvaluationKey"/>
+        <rdfs:label>Poor source</rdfs:label>
+    </owl:Thing>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#possiblyTrue -->
+
+    <owl:Thing rdf:about="#possiblyTrue">
+        <rdf:type rdf:resource="#ContentValidity"/>
+        <rdfs:label>Possibly True</rdfs:label>
+    </owl:Thing>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#probablyTrue -->
+
+    <owl:Thing rdf:about="#probablyTrue">
+        <rdf:type rdf:resource="#ContentValidity"/>
+        <rdfs:label>Probably True</rdfs:label>
+    </owl:Thing>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#reliabilityCannotBeAssessed -->
+
+    <owl:Thing rdf:about="#reliabilityCannotBeAssessed">
+        <rdf:type rdf:resource="#SourceReliability"/>
+        <rdfs:label
+            >Cannot be Assessed</rdfs:label>
+    </owl:Thing>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#reliable -->
+
+    <SourceReliability rdf:about="#reliable">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <rdfs:label>Reliable</rdfs:label>
+    </SourceReliability>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#unreliable -->
+
+    <SourceReliability rdf:about="#unreliable">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <rdfs:label>Unreliable</rdfs:label>
+    </SourceReliability>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#usuallyReliable -->
+
+    <SourceReliability rdf:about="#usuallyReliable">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <rdfs:label
+            >Usually Reliable</rdfs:label>
+    </SourceReliability>
+    
+
+
+    <!-- http://cas.sc.edu/iis/ruleoflaw/taxonomy#validityCannotBeAssessed -->
+
+    <owl:Thing rdf:about="#validityCannotBeAssessed">
+        <rdf:type rdf:resource="#ContentValidity"/>
+        <rdfs:label
+            >Cannot be Assessed</rdfs:label>
+    </owl:Thing>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.1138) http://owlapi.sourceforge.net -->
+

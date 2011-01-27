@@ -148,6 +148,8 @@ public class TupeloStore {
     /** Use a single previewbeanutil for optimizations */
     private PreviewBeanUtil                                      extractorpbu;
 
+    private Context                                              ontologyContext;
+
     /**
      * Return singleton instance.
      * 
@@ -1001,5 +1003,14 @@ public class TupeloStore {
         URL url = TupeloStore.class.getResource(filename);
         log.info(String.format("Found %s as %s", filename, url.toExternalForm()));
         return url;
+    }
+
+    // get ontology context
+    public Context getOntologyContext() {
+        return ontologyContext;
+    }
+
+    public void setOntologyContext(Context c) {
+        ontologyContext = c;
     }
 }

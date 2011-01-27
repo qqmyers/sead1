@@ -39,6 +39,7 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
@@ -57,12 +58,15 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
+import org.tupeloproject.rdf.xml.RdfXml;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
@@ -185,8 +189,27 @@ public class ContextSetupListener implements ServletContextListener {
         createUserFields(props);
         createRelationships(props);
 
+        createOntology(props);
+
         // start the timers
         startTimers();
+    }
+
+    private void createOntology(Properties props) {
+        try {
+            MemoryContext oc = new MemoryContext();
+            InputStream is = TupeloStore.findFile("/taxonomy.owl").openStream();
+            Set<Triple> triples = RdfXml.parse(is);
+            oc.addTriples(triples);
+            TupeloStore.getInstance().setOntologyContext(oc);
+            log.debug("Read " + triples.size() + " ontology triple(s)");
+        } catch (FileNotFoundException e) {
+            log.warn("no ontology found");
+        } catch (IOException e) {
+            log.error("Error: could not read ontology", e);
+        } catch (OperatorException e) {
+            log.error("problem ingesting ontology", e);
+        }
     }
 
     private void startTimers() {
