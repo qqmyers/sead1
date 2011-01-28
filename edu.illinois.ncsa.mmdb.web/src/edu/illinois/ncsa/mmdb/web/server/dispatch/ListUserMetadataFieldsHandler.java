@@ -112,16 +112,18 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
 
     private void addNonEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {
         Unifier u = new Unifier();
-        u.setColumnNames("prop", "label");
+        u.setColumnNames("prop", "label", "clazz", "clazzLabel");
         u.addPattern("prop", Rdf.TYPE, owl("ObjectProperty"));
         u.addPattern("prop", Rdfs.LABEL, "label");
         u.addPattern("prop", Rdfs.RANGE, "clazz");
         u.addPattern("clazz", Rdf.TYPE, "clazz"); // this is the punning pattern for Individual <-> Class
+        u.addPattern("clazz", Rdfs.LABEL, "clazzLabel");
         TupeloStore.getInstance().getOntologyContext().perform(u);
         for (Tuple<Resource> row : u.getResult() ) {
             log.debug("Found class umf " + row.get(1));
             UserMetadataField umf = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
             umf.setType(UserMetadataField.CLASS);
+            umf.addToRange(row.get(2).getString(), row.get(3).getString());
             result.addField(umf);
         }
     }
