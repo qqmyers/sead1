@@ -20,7 +20,7 @@ public class UserMetadataField implements Serializable {
 
     String                    uri;                                    // ID
     String                    label;                                  // user-readable name
-    int                       type;                                   // property type
+    int                       type             = PLAIN;               // property type
     String                    datatype;                               // datatype URI, for DATATYPE properties
     Set<NamedThing>           range;                                  // range; interpretation depends on type
     int                       minCardinality;

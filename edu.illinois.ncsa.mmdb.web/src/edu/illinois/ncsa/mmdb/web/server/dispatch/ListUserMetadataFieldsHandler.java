@@ -90,6 +90,7 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
         return result;
     }
 
+    // FIXME this is not the correct way to represent "non-enumerated" properties in OWL
     private void addNonEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {
         Unifier u = new Unifier();
         u.setColumnNames("prop", "label", "value");
@@ -100,7 +101,9 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
         TupeloStore.getInstance().getOntologyContext().perform(u);
         for (Tuple<Resource> row : u.getResult() ) {
             if (row.get(2) == null) {
-                result.addField(new UserMetadataField(row.get(0).getString(), row.get(1).getString()));
+                UserMetadataField umf = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
+                umf.setType(UserMetadataField.CLASS);
+                result.addField(umf);
             }
         }
     }
@@ -119,6 +122,7 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
             UserMetadataField field = fields.get(row.get(0));
             if (field == null) {
                 field = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
+                field.setType(UserMetadataField.ENUMERATED);
                 fields.put(row.get(0), field);
             }
             field.addToRange(row.get(2).getString(), row.get(3).getString());
