@@ -71,11 +71,6 @@ public class SetUserMetadataHandler implements ActionHandler<SetUserMetadata, Em
     public EmptyResult execute(SetUserMetadata arg0, ExecutionContext arg1)
             throws ActionException {
         // only allow user to edit user metadata fields
-        /* deprecating the static method on that handler, that's a kludge!
-        if (!ListUserMetadataFieldsHandler.listUserMetadataFields().containsKey(arg0.getPropertyUri())) {
-            throw new ActionException("specified property " + arg0.getPropertyUri() + " is not a user metadata field");
-        }
-        */
         MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
         try {
             if (!rbac.checkPermission(arg0.getUser(), arg0.getUri(), Permission.EDIT_USER_METADATA)) {
@@ -92,7 +87,11 @@ public class SetUserMetadataHandler implements ActionHandler<SetUserMetadata, Em
             //
             ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
             for (String value : values ) {
-                ts.addValue(subject, predicate, value);
+                if (arg0.isUriType()) {
+                    ts.addValue(subject, predicate, Resource.uriRef(value));
+                } else {
+                    ts.addValue(subject, predicate, value);
+                }
             }
             ts.save();
             ts.close();

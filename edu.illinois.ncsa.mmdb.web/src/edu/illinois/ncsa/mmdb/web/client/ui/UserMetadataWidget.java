@@ -39,7 +39,6 @@
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,6 +85,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
@@ -229,9 +229,12 @@ public class UserMetadataWidget extends Composite {
                             } else {
                                 for (String predicate : predicates ) {
                                     String label = result.getThingNames().get(predicate);
-                                    String[] values = result.getValues().get(predicate).toArray(new String[0]);
-                                    Arrays.sort(values);
-                                    addNewField(predicate, label, Arrays.asList(values), canEdit);
+                                    SortedSet<NamedThing> values = NamedThing.orderByName(result.getValues().get(predicate));
+                                    List<String> displayedValues = new ArrayList<String>();
+                                    for (NamedThing nt : values ) {
+                                        displayedValues.add(nt.getName()); // name of thing, or literal value
+                                    }
+                                    addNewField(predicate, label, displayedValues, canEdit);
                                 }
                             }
                         }

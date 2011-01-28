@@ -18,6 +18,12 @@ public class NamedThing implements Serializable {
     public NamedThing() {
     }
 
+    public NamedThing(String u, String n) {
+        this();
+        setUri(u);
+        setName(n);
+    }
+
     public String getUri() {
         return uri;
     }
@@ -35,7 +41,7 @@ public class NamedThing implements Serializable {
     }
 
     public static SortedSet<NamedThing> orderByName(Collection<NamedThing> things) {
-        return new TreeSet<NamedThing>(new Comparator<NamedThing>() {
+        SortedSet<NamedThing> sorted = new TreeSet<NamedThing>(new Comparator<NamedThing>() {
             @Override
             public int compare(NamedThing k1, NamedThing k2) {
                 int c = k1.getName().compareTo(k2.getName());
@@ -46,6 +52,7 @@ public class NamedThing implements Serializable {
                 }
             }
         });
-
+        sorted.addAll(things);
+        return sorted;
     }
 }

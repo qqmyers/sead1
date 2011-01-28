@@ -49,6 +49,7 @@ public class SetUserMetadata extends SubjectAction<EmptyResult> {
     private static final long serialVersionUID = -6257131114264143785L;
 
     String                    propertyUri;
+    boolean                   isUriType;
 
     public SetUserMetadata() {
     }
@@ -56,21 +57,36 @@ public class SetUserMetadata extends SubjectAction<EmptyResult> {
     private Collection<String> values;
 
     public SetUserMetadata(String uri, String propertyUri, Collection<String> values) {
+        this(uri, propertyUri, values, false);
+    }
+
+    public SetUserMetadata(String uri, String propertyUri, Collection<String> values, boolean isUriType) {
         this.uri = uri;
         setPropertyUri(propertyUri);
+        setUriType(isUriType);
         this.setValues(values);
     }
 
     public SetUserMetadata(String uri, String propertyUri, String value) {
+        this(uri, propertyUri, value, false);
+    }
+
+    public SetUserMetadata(String uri, String propertyUri, String value, boolean isUriType) {
         this.uri = uri;
         setPropertyUri(propertyUri);
         Set<String> values = new HashSet<String>();
         values.add(value);
         this.setValues(values);
+        setUriType(isUriType);
     }
 
     public void setValues(Collection<String> values) {
         this.values = values;
+    }
+
+    public void setValues(Collection<String> values, boolean isUriType) {
+        this.values = values;
+        setUriType(isUriType);
     }
 
     public Collection<String> getValues() {
@@ -83,5 +99,13 @@ public class SetUserMetadata extends SubjectAction<EmptyResult> {
 
     public void setPropertyUri(String propertyUri) {
         this.propertyUri = propertyUri;
+    }
+
+    public boolean isUriType() {
+        return isUriType;
+    }
+
+    public void setUriType(boolean isUriType) {
+        this.isUriType = isUriType;
     }
 }

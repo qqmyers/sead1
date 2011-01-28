@@ -55,12 +55,15 @@ import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
@@ -78,23 +81,45 @@ public class GetUserMetadataFieldsHandler implements
     private static Log log = LogFactory
                                    .getLog(GetUserMetadataFieldsHandler.class);
 
+    private String nameOf(Resource uri) throws OperatorException {
+        Unifier u = new Unifier();
+        u.setColumnNames("label", "title");
+        u.addPattern(uri, Rdfs.LABEL, "label", true);
+        u.addPattern(uri, Dc.TITLE, "title", true);
+        TupeloStore.getInstance().getContext().perform(u); // FIXME memorize
+        for (Tuple<Resource> row : u.getResult() ) {
+            if (row.get(0) != null) {
+                return row.get(0).getString();
+            }
+            if (row.get(1) != null) {
+                return row.get(1).getString();
+            }
+        }
+        return uri.getString();
+    }
+
     @Override
     public GetUserMetadataFieldsResult execute(GetUserMetadataFields arg0,
             ExecutionContext arg1) throws ActionException {
 
         try {
             Map<String, String> labels = new HashMap<String, String>();
-            Map<String, Collection<String>> allValues = new HashMap<String, Collection<String>>();
+            Map<String, Collection<NamedThing>> allValues = new HashMap<String, Collection<NamedThing>>();
             ThingSession ts = new ThingSession(TupeloStore.getInstance()
                     .getContext());
             Thing t = ts.fetchThing(Resource.uriRef(arg0.getUri()));
             for (UserMetadataField field : ListUserMetadataFieldsHandler.listUserMetadataFields().getFieldsSortedByName() ) {
-                List<String> values = new LinkedList<String>();
+                List<NamedThing> values = new LinkedList<NamedThing>();
                 for (Object value : t.getValues(Resource.uriRef(field.getUri())) ) {
                     if (value instanceof Resource) {
-                        values.add(((Resource) value).getString());
+                        Resource v = (Resource) value;
+                        if (v instanceof UriRef) {
+                            values.add(new NamedThing(v.getString(), nameOf(v)));
+                        } else {
+                            values.add(new NamedThing(null, v.getString()));
+                        }
                     } else {
-                        values.add(value.toString());
+                        values.add(new NamedThing(null, value.toString()));
                     }
                 }
                 if (values.size() > 0) {
