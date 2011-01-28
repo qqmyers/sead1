@@ -38,28 +38,33 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -73,26 +78,31 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 
 public class UserMetadataWidget extends Composite {
-    String              uri;
-    MyDispatchAsync     dispatch;
-    LabeledListBox      fieldChoice;
-    TextBox             valueText;
-    VerticalPanel       thePanel;
-    Label               noFields;
-    FlexTable           fieldTable;
-    Map<String, String> labels = new HashMap<String, String>();
+    String                    uri;
+    MyDispatchAsync           dispatch;
+    ListBox                   fieldChoice;
+    TextBox                   valueText;
+    VerticalPanel             thePanel;
+    Label                     noFields;
+    FlexTable                 fieldTable;
+    Map<String, String>       labels = new HashMap<String, String>();
+    private final SimplePanel newFieldPanel;
+    protected PlainField      plainField;
 
     public UserMetadataWidget(String uri, MyDispatchAsync dispatch) {
         this.uri = uri;
         this.dispatch = dispatch;
 
+        // table of user specified metadata fields
         fieldTable = new FlexTable();
-        fieldTable.setWidth("100%");
         fieldTable.addStyleName("metadataTable");
-        fieldTable.getColumnFormatter().setWidth(0, "25%");
-        fieldTable.getColumnFormatter().setWidth(1, "35%");
-        fieldTable.getColumnFormatter().setWidth(2, "22%");
-        fieldTable.getColumnFormatter().setWidth(3, "18%");
+        fieldTable.getColumnFormatter().setWidth(0, "20%");
+        fieldTable.getColumnFormatter().setWidth(1, "40%");
+        fieldTable.getColumnFormatter().setWidth(2, "20%");
+        fieldTable.getColumnFormatter().setWidth(3, "20%");
+
+        // header
+        populateTableHeader();
 
         thePanel = new VerticalPanel();
         noFields = new Label("No user specified metadata");
@@ -102,13 +112,70 @@ public class UserMetadataWidget extends Composite {
         thePanel.add(noFields);
         thePanel.add(fieldTable);
 
+        // add new field
+        VerticalPanel verticalPanel = new VerticalPanel();
+        verticalPanel.addStyleName("addMetadata");
+        verticalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        verticalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        thePanel.add(verticalPanel);
+
+        // list box
+        fieldChoice = new ListBox();
+        fieldChoice.addStyleName("addMetadataListBox");
+        verticalPanel.add(fieldChoice);
+
+        // new field panel
+        newFieldPanel = new SimplePanel();
+        verticalPanel.add(newFieldPanel);
+
+        // selection handler
+        fieldChoice.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent event) {
+                newFieldPanel.clear();
+                int index = fieldChoice.getSelectedIndex();
+                if (index != 0) {
+
+                    ClickHandler addHandler = new ClickHandler() {
+
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            addValue();
+                        }
+                    };
+
+                    ClickHandler clearHandler = new ClickHandler() {
+
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            newFieldPanel.clear();
+                            fieldChoice.setSelectedIndex(0);
+                        }
+                    };
+
+                    plainField = new PlainField(addHandler, clearHandler);
+                    newFieldPanel.add(plainField);
+                }
+            }
+        });
+
         initWidget(thePanel);
+    }
+
+    private void populateTableHeader() {
+        fieldTable.setText(0, 0, "Field");
+        fieldTable.setText(0, 1, "Value");
+        fieldTable.setText(0, 2, "Applies To");
+        fieldTable.setText(0, 3, "Action");
+        fieldTable.getRowFormatter().addStyleName(0, "metadataTableHeader");
     }
 
     public void showFields(final boolean canEdit) {
         // FIXME single get to get fields and values
         dispatch.execute(new ListUserMetadataFields(), new AsyncCallback<ListUserMetadataFieldsResult>() {
             public void onFailure(Throwable caught) {
+                GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
             }
 
             public void onSuccess(ListUserMetadataFieldsResult result) {
@@ -116,10 +183,11 @@ public class UserMetadataWidget extends Composite {
                 GWT.log("available fields: " + availableFields);
                 if (availableFields.size() > 0) {
                     if (canEdit) {
-                        addFieldAddControls(availableFields);
+                        populateTypes(availableFields);
                     }
                     dispatch.execute(new GetUserMetadataFields(uri), new AsyncCallback<GetUserMetadataFieldsResult>() {
                         public void onFailure(Throwable caught) {
+                            GWT.log("Error retrieving User Specified Information", caught);
                         }
 
                         public void onSuccess(GetUserMetadataFieldsResult result) {
@@ -129,7 +197,9 @@ public class UserMetadataWidget extends Composite {
                             } else {
                                 for (String predicate : predicates ) {
                                     String label = result.getThingNames().get(predicate);
-                                    addNewField(predicate, label, result.getValues().get(predicate), canEdit);
+                                    String[] values = result.getValues().get(predicate).toArray(new String[0]);
+                                    Arrays.sort(values);
+                                    addNewField(predicate, label, Arrays.asList(values), canEdit);
                                 }
                             }
                         }
@@ -146,7 +216,7 @@ public class UserMetadataWidget extends Composite {
      * @param value
      */
     private void setProperty(String predicate, String label, String value) {
-        Set<String> v = new HashSet<String>();
+        List<String> v = new ArrayList<String>();
         v.add(value);
         addNewField(predicate, label, v, true);
     }
@@ -157,12 +227,14 @@ public class UserMetadataWidget extends Composite {
     }
 
     /**
+     * Given the name of a field, find the first row that has that name in
+     * column 0.
      * 
      * @param predicate
      * @return
      */
     private int getRowForField(String predicate) {
-        for (int row = 0; row < fieldTable.getRowCount(); row++ ) {
+        for (int row = 1; row < fieldTable.getRowCount(); row++ ) {
             Label l = (Label) fieldTable.getWidget(row, 0);
             if (predicate.equals(l.getTitle())) {
                 return row;
@@ -177,142 +249,145 @@ public class UserMetadataWidget extends Composite {
      * @param label
      * @param values
      */
-    private void addNewField(final String predicate, String label, final Collection<String> values, boolean canEdit) {
+    private void addNewField(final String predicate, String label, final List<String> values, boolean canEdit) {
 
         removeNoFields();
         int row = getRowForField(predicate);
+        // if not in table, add at the end
         if (row == -1) {
             row = fieldTable.getRowCount();
+        }
+
+        for (int i = 0; i < values.size(); i++ ) {
             fieldTable.insertRow(row);
-        }
+            // field name
+            Label predicateLabel = new Label(label);
+            predicateLabel.setTitle(predicate);
+            fieldTable.setWidget(row, 0, predicateLabel);
+            if (i != 0) {
+                predicateLabel.addStyleName("hidden");
+            }
+            // field value
+            fieldTable.setWidget(row, 1, new Label(values.get(i)));
 
-        Label predicateLabel = new Label(label);
-        predicateLabel.setTitle(predicate);
-        fieldTable.setWidget(row, 0, predicateLabel);
-        VerticalPanel panel = new VerticalPanel();
-        for (String value : values ) {
-            panel.add(new Label(value));
-        }
+            //placeholder for Applies To
+            fieldTable.setWidget(row, 2, new Label("Document"));
 
-        //placeholder for Applies To
-        fieldTable.setWidget(row, 2, new Label("Document"));
-
-        fieldTable.setWidget(row, 1, panel);
-        if (canEdit) {
-            HorizontalPanel linkPanel = new HorizontalPanel();
-            Anchor editAnchor = new Anchor("Edit");
-            editAnchor.addClickHandler(new ClickHandler() {
-                public void onClick(ClickEvent event) {
-                    editValue(predicate, values);
-                }
-            });
-            linkPanel.add(editAnchor);
-            Anchor removeAnchor = new Anchor("Remove");
-            removeAnchor.addStyleName("multiAnchor");
-            removeAnchor.addClickHandler(new ClickHandler() {
-                public void onClick(ClickEvent event) {
-                    removeValue(predicate);
-                }
-            });
-            linkPanel.add(removeAnchor);
-            fieldTable.setWidget(row, 3, linkPanel);
+            if (canEdit) {
+                FlowPanel links = new FlowPanel();
+                // edit link
+                final Anchor editAnchor = new Anchor("Edit");
+                editAnchor.addStyleName("metadataTableAction");
+                editAnchor.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        PopupPanel popupPanel = new PopupPanel(true);
+                        popupPanel.add(new Label("Sorry, not implemented yet."));
+                        popupPanel.showRelativeTo(editAnchor);
+                    }
+                });
+                links.add(editAnchor);
+                // remove link
+                Anchor removeAnchor = new Anchor("Remove");
+                removeAnchor.addStyleName("metadataTableAction");
+                removeAnchor.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        PopupPanel popupPanel = new PopupPanel(true);
+                        popupPanel.add(new Label("Sorry, not implemented yet."));
+                        popupPanel.showRelativeTo(editAnchor);
+                        //                        removeValue(predicate);
+                    }
+                });
+                links.add(removeAnchor);
+                fieldTable.setWidget(row, 3, links);
+            }
+            row++;
         }
         styleRows();
 
     }
 
-    void addNoFields() {
-        if (fieldTable.getRowCount() > 0) {
-            fieldTable.removeRow(0); //header row
-        }
+    /**
+     * Shows the "no field" label and hides the metadata table.
+     */
+    private void addNoFields() {
+        fieldTable.addStyleName("hidden");
         noFields.removeStyleName("hidden");
 
     }
 
-    void removeNoFields() {
+    /**
+     * Hides the "no field" label and shows the metadata table.
+     */
+    private void removeNoFields() {
+        fieldTable.removeStyleName("hidden");
         noFields.addStyleName("hidden");
-        fieldTable.setWidget(0, 0, new Label("Field"));
-        fieldTable.setWidget(0, 1, new Label("Value"));
-        fieldTable.setWidget(0, 2, new Label("Applies To"));
-        fieldTable.setWidget(0, 3, new Label("Actions"));
     }
 
     /**
+     * Widget to create new entry in table.
      * 
      * @param availableFields
      */
-    private void addFieldAddControls(SortedSet<UserMetadataField> availableFields) {
-        // result is field -> label, sorted by alpha label
-        HorizontalPanel horizontalPanel = new HorizontalPanel();
-        horizontalPanel.addStyleName("addMetadata");
-        horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        horizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-
-        thePanel.add(horizontalPanel);
-
-        fieldChoice = new LabeledListBox("Add Field:");
+    private void populateTypes(SortedSet<UserMetadataField> availableFields) {
+        fieldChoice.clear();
+        fieldChoice.addItem("Add Field", "");
         for (UserMetadataField field : availableFields ) {
             String label = field.getLabel();
             String predicate = field.getUri();
             fieldChoice.addItem(label, predicate);
             labels.put(predicate, label);
         }
-        horizontalPanel.add(fieldChoice);
-
-        //		fieldTable.setWidget(row,0,fieldChoice);
-
-        VerticalPanel valuePanel = new VerticalPanel();
-        valuePanel.add(new Label("Value to set it to:"));
-        valueText = new TextBox();
-        valuePanel.add(valueText);
-        //		fieldTable.setWidget(row,1,valuePanel);
-        horizontalPanel.add(valueText);
-
-        valueText.addKeyUpHandler(new KeyUpHandler() {
-            public void onKeyUp(KeyUpEvent event) {
-                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    addValue();
-                }
-            }
-        });
-
-        Button addButton = new Button("Set value");
-        addButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                addValue();
-            }
-        });
-        //		fieldTable.setWidget(row,2,addButton);
-        horizontalPanel.add(addButton);
     }
 
     /**
-	 * 
-	 */
+     * RPC call to add a new entry.
+     */
     private void addValue() {
-        final String text = valueText.getText();
-        final String property = fieldChoice.getSelected();
+        final String text = plainField.getValue();
+        final String property = fieldChoice.getValue(fieldChoice.getSelectedIndex());
         SetUserMetadata prop = new SetUserMetadata(uri, property, text);
-        valueText.setText("");
         dispatch.execute(prop, new AsyncCallback<EmptyResult>() {
             public void onFailure(Throwable caught) {
-                GWT.log("FAILED", caught);
+                GWT.log("Failed adding a new entry to the list", caught);
             }
 
             public void onSuccess(EmptyResult result) {
-                GWT.log("set user metadata field");
-                setProperty(property, labels.get(property), text);
+                GWT.log("User metadata field was successfully set");
+                refresh();
             }
         });
     }
 
     /**
+     * Refresh and redraw table.
+     */
+    private void refresh() {
+        clearTable();
+        showFields(true);
+        newFieldPanel.clear();
+        fieldChoice.setSelectedIndex(0);
+    }
+
+    /**
+     * Clears the contents of the table.
+     */
+    private void clearTable() {
+        fieldTable.removeAllRows();
+        populateTableHeader();
+    }
+
+    /**
+     * RPC call to remove an entry.
      * 
      * @param property
      */
     private void removeValue(final String property) {
+
+        // TODO have to implement a new dispatch to actually delete instead of setting to empty
+
         dispatch.execute(new SetUserMetadata(uri, property, new HashSet<String>()), new AsyncCallback<EmptyResult>() {
             public void onFailure(Throwable caught) {
+                GWT.log("Error removing value", caught);
             }
 
             public void onSuccess(EmptyResult result) {
@@ -333,7 +408,7 @@ public class UserMetadataWidget extends Composite {
      * @param property
      */
     private void editValue(String property, final Collection<String> values) {
-        fieldChoice.setSelected(property);
+        //        fieldChoice.setSelected(property);
         for (String value : values ) {
             valueText.setText(value);
         }
@@ -346,10 +421,6 @@ public class UserMetadataWidget extends Composite {
      */
     private void styleRows() {
         int rows = fieldTable.getRowCount();
-        fieldTable.getFlexCellFormatter().addStyleName(0, 0, "metadataTitle");
-        fieldTable.getFlexCellFormatter().addStyleName(0, 1, "metadataTitle");
-        fieldTable.getFlexCellFormatter().addStyleName(0, 2, "metadataTitle");
-        fieldTable.getFlexCellFormatter().addStyleName(0, 3, "metadataTitle");
         for (int row = 1; row < rows; row++ ) {
             fieldTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
             fieldTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
@@ -361,6 +432,48 @@ public class UserMetadataWidget extends Composite {
                 fieldTable.getRowFormatter().removeStyleName(row, "metadataTableEvenRow");
                 fieldTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
             }
+        }
+    }
+
+    class PlainField extends Composite {
+
+        private final TextBox textBox;
+
+        public PlainField(ClickHandler addHandler, ClickHandler clearHandler) {
+            // TODO switch to divs
+
+            // first div
+            FlexTable layout = new FlexTable();
+            layout.addStyleName("metadataPlainField");
+            textBox = new TextBox();
+            textBox.setWidth("500px");
+            layout.setWidget(0, 0, textBox);
+            Anchor addAnchor = new Anchor("Add");
+            addAnchor.addClickHandler(addHandler);
+            layout.setWidget(0, 1, addAnchor);
+            Anchor clearAnchor = new Anchor("Clear");
+            clearAnchor.addClickHandler(clearHandler);
+            layout.setWidget(0, 2, clearAnchor);
+
+            // second row
+            FlowPanel appliedToPanel = new FlowPanel();
+            appliedToPanel.addStyleName("metadataAppliedPanel");
+            appliedToPanel.add(new Label("Will be applied to"));
+            RadioButton documentButton = new RadioButton("appliedTo", "document");
+            documentButton.setValue(true);
+            appliedToPanel.add(documentButton);
+            RadioButton sectionButton = new RadioButton("appliedTo", "section");
+            appliedToPanel.add(sectionButton);
+            Label currentSection = new Label("[current section]");
+            appliedToPanel.add(currentSection);
+            layout.setWidget(1, 0, appliedToPanel);
+            layout.getFlexCellFormatter().setColSpan(1, 0, 3);
+
+            initWidget(layout);
+        }
+
+        public String getValue() {
+            return textBox.getValue();
         }
     }
 }

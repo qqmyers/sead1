@@ -343,21 +343,82 @@ a:hover {
 	position: relative;
 }
 
+.gwt-DisclosurePanel-open .header {
+	background-color: white;
+	color: black;
+}
+
+.gwt-DisclosurePanel .header {
+    color: black;
+    background: #F0F0F0  ;
+    border-top: solid 1px #B8B8B8;
+    border-left: solid 1px #B8B8B8;
+    border-bottom: solid 1px #A8A8A8;
+    border-right: solid 1px #A8A8A8;
+}
+
+.gwt-DisclosurePanel .content {
+    border-left: 3px solid #E0E0E0;
+    margin-left: 6px;
+    padding: 4px 0 4px 8px;
+}
+
+
 .datasetDisclosurePanel {
 	width: 90%;
 	margin: 0px 0px 20px 20px;
+}
+
+.userSpecifiedBody {
+	width: 99%;
+	margin: 0px;
+	padding: 0px;
 }
 
 .addMetadata {
 	width: 100%;
 	padding: 5px;
 	margin: 10px 0px 10px 0px;
-	background-color: #EFF5FB;
+}
+
+.addMetadataListBox {
+	width: 100%;
+}
+
+.metadataPlainField {
+	width: 95%;
+	border-right: 1px dashed #A8A8A8;
+	border-bottom: 1px dashed #A8A8A8;
+	border-left: 1px dashed #A8A8A8;
+	padding: 10px;
+}
+
+.metadataAppliedPanel div {
+
+	float: left;
+	margin: 5px;
+}
+
+.metadataAppliedPanel span {
+
+	float: left;
+	margin: 5px;
 }
 
 .metadataTable {
-	margin: 10px;
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
 	border-collapse: collapse;
+}
+
+.metadataTableAction {
+	margin-right: 5px;
+}
+
+.metadataTableHeader {
+	border-bottom: 1px solid black;
+	margin-top: 20px;
 }
 
 .metadataTableCell {

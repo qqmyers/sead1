@@ -463,7 +463,7 @@ public class DatasetWidget extends Composite {
         userInformationPanel.setAnimationEnabled(true);
 
         VerticalPanel userPanel = new VerticalPanel();
-        userPanel.setWidth("90%");
+        userPanel.addStyleName("userSpecifiedBody");
         userInformationPanel.add(userPanel);
         userPanel.add(um);
 

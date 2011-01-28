@@ -91,7 +91,9 @@ public class SetUserMetadataHandler implements ActionHandler<SetUserMetadata, Em
 
             //
             ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
-            ts.setValues(subject, predicate, values);
+            for (String value : values ) {
+                ts.addValue(subject, predicate, value);
+            }
             ts.save();
             ts.close();
 
