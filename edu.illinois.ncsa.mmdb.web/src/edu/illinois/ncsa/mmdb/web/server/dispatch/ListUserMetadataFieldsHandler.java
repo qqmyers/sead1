@@ -45,6 +45,8 @@ import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Namespaces;
@@ -57,37 +59,55 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
+import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implements ActionHandler<ListUserMetadataFields, ListUserMetadataFieldsResult> {
+    Log                                            log = LogFactory.getLog(ListUserMetadataFieldsHandler.class);
+
+    private Memoized<ListUserMetadataFieldsResult> resultCache;
+
+    private ListUserMetadataFieldsResult listUserMetadataFields() {
+        if (resultCache == null) {
+            resultCache = new Memoized<ListUserMetadataFieldsResult>() {
+                public ListUserMetadataFieldsResult computeValue() {
+                    ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
+                    ListNamedThingsResult r = listNamedThings(MMDB.USER_METADATA_FIELD, Rdfs.LABEL);
+                    if (r == null) {
+                        log.error("can't list plain metadata fields");
+                    }
+                    for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
+                        log.debug("Found plain umf " + entry.getValue());
+                        result.addField(new UserMetadataField(entry.getKey(), entry.getValue()));
+                    }
+                    // now run more queries to get user metadata fields of various other types
+                    try {
+                        addDatatypeProperties(result);
+                    } catch (OperatorException e) {
+                        log.error(e);
+                    }
+                    try {
+                        addEnumeratedProperties(result);
+                    } catch (OperatorException e) {
+                        log.error(e);
+                    }
+                    try {
+                        addNonEnumeratedProperties(result);
+                    } catch (OperatorException e) {
+                        log.error(e);
+                    }
+                    return result;
+                }
+            };
+            resultCache.setTtl(60 * 60 * 1000); // 1hr
+        }
+        return resultCache.getValue();
+    }
+
     @Override
     public ListUserMetadataFieldsResult execute(ListUserMetadataFields arg0, ExecutionContext arg1) throws ActionException {
-        ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
-        ListNamedThingsResult r = listNamedThings(MMDB.USER_METADATA_FIELD, Rdfs.LABEL);
-        if (r == null) {
-            throw new ActionException("query to fetch user metadata fields failed");
-        }
-        for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
-            result.addField(new UserMetadataField(entry.getKey(), entry.getValue()));
-        }
-        // now run more queries to get user metadata fields of various other types
-        try {
-            addDatatypeProperties(result);
-        } catch (OperatorException e) {
-            throw new ActionException(e);
-        }
-        try {
-            addEnumeratedProperties(result);
-        } catch (OperatorException e) {
-            throw new ActionException(e);
-        }
-        try {
-            addNonEnumeratedProperties(result);
-        } catch (OperatorException e) {
-            throw new ActionException(e);
-        }
-        return result;
+        return listUserMetadataFields();
     }
 
     private void addNonEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {
@@ -99,6 +119,7 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
         u.addPattern("clazz", Rdf.TYPE, "clazz"); // this is the punning pattern for Individual <-> Class
         TupeloStore.getInstance().getOntologyContext().perform(u);
         for (Tuple<Resource> row : u.getResult() ) {
+            log.debug("Found class umf " + row.get(1));
             UserMetadataField umf = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
             umf.setType(UserMetadataField.CLASS);
             result.addField(umf);
@@ -107,7 +128,7 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
 
     private void addEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {
         Unifier u = new Unifier();
-        u.setColumnNames("prop", "label", "value", "valueLabel");
+        u.setColumnNames("prop", "label", "value", "valueLabel", "clazz");
         u.addPattern("prop", Rdf.TYPE, owl("ObjectProperty"));
         u.addPattern("prop", Rdfs.LABEL, "label");
         u.addPattern("prop", Rdfs.RANGE, "clazz");
@@ -116,13 +137,17 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
         TupeloStore.getInstance().getOntologyContext().perform(u);
         Map<Resource, UserMetadataField> fields = new HashMap<Resource, UserMetadataField>();
         for (Tuple<Resource> row : u.getResult() ) {
-            UserMetadataField field = fields.get(row.get(0));
-            if (field == null) {
-                field = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
-                field.setType(UserMetadataField.ENUMERATED);
-                fields.put(row.get(0), field);
+            if (!row.get(2).equals(row.get(4))) { // punned: skip
+                UserMetadataField field = fields.get(row.get(0));
+                if (field == null) {
+                    log.debug("Found enumerated umf " + row.get(1));
+                    field = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
+                    field.setType(UserMetadataField.ENUMERATED);
+                    fields.put(row.get(0), field);
+                }
+                log.debug("Enumerated umf " + row.get(1) + " allows value " + row.get(3));
+                field.addToRange(row.get(2).getString(), row.get(3).getString());
             }
-            field.addToRange(row.get(2).getString(), row.get(3).getString());
         }
         for (UserMetadataField field : fields.values() ) {
             result.addField(field);
