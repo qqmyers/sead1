@@ -38,18 +38,26 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.rdf.Namespaces;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implements ActionHandler<ListUserMetadataFields, ListUserMetadataFieldsResult> {
@@ -61,12 +69,82 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
             throw new ActionException("query to fetch user metadata fields failed");
         }
         for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
-            UserMetadataField field = new UserMetadataField();
-            field.setUri(entry.getKey());
-            field.setLabel(entry.getValue());
-            result.addField(field);
+            result.addField(new UserMetadataField(entry.getKey(), entry.getValue()));
+        }
+        // now run more queries to get user metadata fields of various other types
+        try {
+            addDatatypeProperties(result);
+        } catch (OperatorException e) {
+            throw new ActionException(e);
+        }
+        try {
+            addEnumeratedProperties(result);
+        } catch (OperatorException e) {
+            throw new ActionException(e);
+        }
+        try {
+            addNonEnumeratedProperties(result);
+        } catch (OperatorException e) {
+            throw new ActionException(e);
         }
         return result;
+    }
+
+    private void addNonEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {
+        Unifier u = new Unifier();
+        u.setColumnNames("prop", "label", "value");
+        u.addPattern("prop", Rdf.TYPE, owl("ObjectProperty"));
+        u.addPattern("prop", Rdfs.LABEL, "label");
+        u.addPattern("prop", Rdfs.RANGE, "clazz");
+        u.addPattern("value", Rdf.TYPE, "clazz", true);
+        TupeloStore.getInstance().getOntologyContext().perform(u);
+        for (Tuple<Resource> row : u.getResult() ) {
+            if (row.get(2) == null) {
+                result.addField(new UserMetadataField(row.get(0).getString(), row.get(1).getString()));
+            }
+        }
+    }
+
+    private void addEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {
+        Unifier u = new Unifier();
+        u.setColumnNames("prop", "label", "value", "valueLabel");
+        u.addPattern("prop", Rdf.TYPE, owl("ObjectProperty"));
+        u.addPattern("prop", Rdfs.LABEL, "label");
+        u.addPattern("prop", Rdfs.RANGE, "clazz");
+        u.addPattern("value", Rdf.TYPE, "clazz");
+        u.addPattern("value", Rdfs.LABEL, "valueLabel");
+        TupeloStore.getInstance().getOntologyContext().perform(u);
+        Map<Resource, UserMetadataField> fields = new HashMap<Resource, UserMetadataField>();
+        for (Tuple<Resource> row : u.getResult() ) {
+            UserMetadataField field = fields.get(row.get(0));
+            if (field == null) {
+                field = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
+                fields.put(row.get(0), field);
+            }
+            field.addToRange(row.get(2).getString(), row.get(3).getString());
+        }
+        for (UserMetadataField field : fields.values() ) {
+            result.addField(field);
+        }
+    }
+
+    public static Resource owl(String s) {
+        return Resource.uriRef(Namespaces.owl(s));
+    }
+
+    private void addDatatypeProperties(ListUserMetadataFieldsResult result) throws OperatorException {
+        // find all datatype properties
+        Unifier u = new Unifier();
+        u.setColumnNames("prop", "label");
+        u.addPattern("prop", Rdf.TYPE, owl("DatatypeProperty"));
+        u.addPattern("prop", Rdfs.LABEL, "label");
+        TupeloStore.getInstance().getOntologyContext().perform(u);
+        for (Tuple<Resource> row : u.getResult() ) {
+            UserMetadataField field = new UserMetadataField();
+            field.setUri(row.get(0).getString());
+            field.setLabel(row.get(1).getString());
+            result.addField(field);
+        }
     }
 
     @Override

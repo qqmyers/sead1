@@ -1,15 +1,17 @@
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-public class NamedThing {
-    String uri;
-    String name;
+import java.io.Serializable;
+
+public class NamedThing implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -1597715944154418196L;
+
+    String                    uri;
+    String                    name;
 
     public NamedThing() {
-    }
-
-    public NamedThing(String uri, String name) {
-        setUri(uri);
-        setName(name);
     }
 
     public String getUri() {

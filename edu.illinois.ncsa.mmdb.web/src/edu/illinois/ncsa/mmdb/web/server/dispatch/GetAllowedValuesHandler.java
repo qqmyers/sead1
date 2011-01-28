@@ -37,7 +37,10 @@ public class GetAllowedValuesHandler implements ActionHandler<GetAllowedValues, 
         }
         List<NamedThing> avs = new ArrayList<NamedThing>();
         for (Tuple<Resource> row : u.getResult() ) {
-            avs.add(new NamedThing(row.get(0).getString(), row.get(1).getString()));
+            NamedThing n = new NamedThing();
+            n.setUri(row.get(0).getString());
+            n.setName(row.get(1).getString());
+            avs.add(n);
         }
         GetAllowedValuesResult result = new GetAllowedValuesResult();
         result.setAllowedValues(avs);

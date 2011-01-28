@@ -29,6 +29,11 @@ public class UserMetadataField implements Serializable {
     public UserMetadataField() {
     }
 
+    public UserMetadataField(String uri, String label) {
+        setUri(uri);
+        setLabel(label);
+    }
+
     public String getUri() {
         return uri;
     }
@@ -70,6 +75,13 @@ public class UserMetadataField implements Serializable {
 
     public void setRange(Set<NamedThing> range) {
         this.range = range;
+    }
+
+    public void addToRange(String uri, String name) {
+        NamedThing n = new NamedThing();
+        n.setUri(uri);
+        n.setName(name);
+        getRange().add(n);
     }
 
     public int getMinCardinality() {

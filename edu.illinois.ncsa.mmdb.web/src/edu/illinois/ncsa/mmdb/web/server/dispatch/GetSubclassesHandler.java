@@ -32,7 +32,10 @@ public class GetSubclassesHandler implements ActionHandler<GetSubclasses, GetSub
         try {
             TupeloStore.getInstance().getOntologyContext().perform(u);
             for (Tuple<Resource> row : u.getResult() ) {
-                subs.add(new NamedThing(row.get(0).getString(), row.get(1).getString()));
+                NamedThing n = new NamedThing();
+                n.setUri(row.get(0).getString());
+                n.setName(row.get(1).getString());
+                subs.add(n);
             }
         } catch (OperatorException e) {
             throw new ActionException(e);

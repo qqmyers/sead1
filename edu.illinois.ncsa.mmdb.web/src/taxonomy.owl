@@ -34,11 +34,20 @@
     
 
 
+    <!-- http://foo.bar/baz#category -->
+
+    <owl:ObjectProperty rdf:about="#category">
+        <rdfs:label>Category</rdfs:label>
+        <rdfs:range rdf:resource="#Category"/>
+    </owl:ObjectProperty>
+    
+
+
     <!-- http://foo.bar/baz#cromulence -->
 
     <owl:ObjectProperty rdf:about="#cromulence">
         <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:comment>Cromulence</rdfs:comment>
+        <rdfs:label>Cromulence</rdfs:label>
         <rdfs:range rdf:resource="#Cromulence"/>
     </owl:ObjectProperty>
     
