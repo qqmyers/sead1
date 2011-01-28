@@ -40,7 +40,9 @@ public class GetSubclassesHandler implements ActionHandler<GetSubclasses, GetSub
         } catch (OperatorException e) {
             throw new ActionException(e);
         }
-        result.setSubclasses(subs);
+        List<NamedThing> sortedSubs = new ArrayList<NamedThing>();
+        sortedSubs.addAll(NamedThing.orderByName(subs));
+        result.setSubclasses(sortedSubs);
         return result;
     }
 

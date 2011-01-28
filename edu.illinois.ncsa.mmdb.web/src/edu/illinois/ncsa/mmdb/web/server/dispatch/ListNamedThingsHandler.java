@@ -10,14 +10,14 @@ import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 public abstract class ListNamedThingsHandler {
-    private final Log                       log     = LogFactory.getLog(ListNamedThingsHandler.class);
+    private final Log                              log     = LogFactory.getLog(ListNamedThingsHandler.class);
 
-    protected boolean                       memoize = true;                                           // should we memoize?
-    protected long                          ttl     = 60 * 1000;                                      // what ttl in ms
+    protected static boolean                       memoize = true;                                           // should we memoize?
+    protected static long                          ttl     = 60 * 1000;                                      // what ttl in ms
 
-    private Memoized<ListNamedThingsResult> cache;
+    private static Memoized<ListNamedThingsResult> cache;
 
-    protected ListNamedThingsResult listNamedThings(final Resource typeUri, final Resource labelPredicate) {
+    protected static ListNamedThingsResult listNamedThings(final Resource typeUri, final Resource labelPredicate) {
         if (cache == null) {
             cache = new Memoized<ListNamedThingsResult>() {
                 public ListNamedThingsResult computeValue() {
@@ -26,7 +26,6 @@ public abstract class ListNamedThingsHandler {
                         r.setThingNames(TupeloStore.getInstance().listThingsOfType(typeUri, labelPredicate));
                         return r;
                     } catch (OperatorException e) {
-                        log.error("query to fetch user metadata fields failed");
                         return null;
                     }
                 }

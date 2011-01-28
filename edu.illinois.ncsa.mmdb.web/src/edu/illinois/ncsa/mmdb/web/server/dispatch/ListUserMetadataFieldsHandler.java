@@ -64,11 +64,11 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implements ActionHandler<ListUserMetadataFields, ListUserMetadataFieldsResult> {
-    Log                                            log = LogFactory.getLog(ListUserMetadataFieldsHandler.class);
+    static Log                                            log = LogFactory.getLog(ListUserMetadataFieldsHandler.class);
 
-    private Memoized<ListUserMetadataFieldsResult> resultCache;
+    private static Memoized<ListUserMetadataFieldsResult> resultCache;
 
-    private ListUserMetadataFieldsResult listUserMetadataFields() {
+    public static ListUserMetadataFieldsResult listUserMetadataFields() {
         if (resultCache == null) {
             resultCache = new Memoized<ListUserMetadataFieldsResult>() {
                 public ListUserMetadataFieldsResult computeValue() {
@@ -110,14 +110,14 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
         return listUserMetadataFields();
     }
 
-    private void addNonEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {
+    private static void addNonEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {
         Unifier u = new Unifier();
         u.setColumnNames("prop", "label", "clazz", "clazzLabel");
         u.addPattern("prop", Rdf.TYPE, owl("ObjectProperty"));
         u.addPattern("prop", Rdfs.LABEL, "label");
         u.addPattern("prop", Rdfs.RANGE, "clazz");
         u.addPattern("clazz", Rdf.TYPE, "clazz"); // this is the punning pattern for Individual <-> Class
-        u.addPattern("clazz", Rdfs.LABEL, "clazzLabel");
+        u.addPattern("clazz", Rdfs.LABEL, "clazzLabel"); // this is the punning pattern for Individual <-> Class
         TupeloStore.getInstance().getOntologyContext().perform(u);
         for (Tuple<Resource> row : u.getResult() ) {
             log.debug("Found class umf " + row.get(1));
@@ -128,7 +128,7 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
         }
     }
 
-    private void addEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {
+    private static void addEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {
         Unifier u = new Unifier();
         u.setColumnNames("prop", "label", "value", "valueLabel", "clazz");
         u.addPattern("prop", Rdf.TYPE, owl("ObjectProperty"));
@@ -160,7 +160,7 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
         return Resource.uriRef(Namespaces.owl(s));
     }
 
-    private void addDatatypeProperties(ListUserMetadataFieldsResult result) throws OperatorException {
+    private static void addDatatypeProperties(ListUserMetadataFieldsResult result) throws OperatorException {
         // find all datatype properties
         Unifier u = new Unifier();
         u.setColumnNames("prop", "label");

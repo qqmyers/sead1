@@ -61,6 +61,7 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
@@ -87,10 +88,9 @@ public class GetUserMetadataFieldsHandler implements
             ThingSession ts = new ThingSession(TupeloStore.getInstance()
                     .getContext());
             Thing t = ts.fetchThing(Resource.uriRef(arg0.getUri()));
-            for (Map.Entry<String, String> fl : getUserMetadataFields()
-                    .entrySet() ) {
+            for (UserMetadataField field : ListUserMetadataFieldsHandler.listUserMetadataFields().getFieldsSortedByName() ) {
                 List<String> values = new LinkedList<String>();
-                for (Object value : t.getValues(Resource.uriRef(fl.getKey())) ) {
+                for (Object value : t.getValues(Resource.uriRef(field.getUri())) ) {
                     if (value instanceof Resource) {
                         values.add(((Resource) value).getString());
                     } else {
@@ -98,8 +98,8 @@ public class GetUserMetadataFieldsHandler implements
                     }
                 }
                 if (values.size() > 0) {
-                    labels.put(fl.getKey(), fl.getValue()); // remember the label for this one
-                    allValues.put(fl.getKey(), values);
+                    labels.put(field.getUri(), field.getLabel()); // remember the label for this one
+                    allValues.put(field.getUri(), values);
                 }
             }
             GetUserMetadataFieldsResult r = new GetUserMetadataFieldsResult();

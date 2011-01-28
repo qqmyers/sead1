@@ -16,7 +16,12 @@ public class ListUserMetadataFieldsResult implements Result {
         SortedSet<UserMetadataField> result = new TreeSet<UserMetadataField>(new Comparator<UserMetadataField>() {
             @Override
             public int compare(UserMetadataField k1, UserMetadataField k2) {
-                return k1.getLabel().compareTo(k2.getLabel());
+                int c = k1.getLabel().compareTo(k2.getLabel());
+                if (c == 0) {
+                    return k1.getUri().compareTo(k2.getUri());
+                } else {
+                    return c;
+                }
             }
         });
         result.addAll(fields);
