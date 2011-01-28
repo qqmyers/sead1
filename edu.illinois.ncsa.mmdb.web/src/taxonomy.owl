@@ -175,6 +175,24 @@
     
 
 
+    <!-- http://foo.bar/baz#Boring -->
+
+    <Boring rdf:about="#Boring">
+        <rdf:type rdf:resource="&owl;Class"/>
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </Boring>
+    
+
+
+    <!-- http://foo.bar/baz#Category -->
+
+    <owl:Thing rdf:about="#Category">
+        <rdf:type rdf:resource="#Category"/>
+        <rdf:type rdf:resource="&owl;Class"/>
+    </owl:Thing>
+    
+
+
     <!-- http://foo.bar/baz#CromulenceUndetermined -->
 
     <Cromulence rdf:about="#CromulenceUndetermined">
@@ -182,6 +200,15 @@
         <rdfs:label
             >Cromulence Undetermined</rdfs:label>
     </Cromulence>
+    
+
+
+    <!-- http://foo.bar/baz#Fascinating -->
+
+    <Fascinating rdf:about="#Fascinating">
+        <rdf:type rdf:resource="&owl;Class"/>
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </Fascinating>
     
 
 
@@ -194,12 +221,48 @@
     
 
 
+    <!-- http://foo.bar/baz#Interesting -->
+
+    <owl:Thing rdf:about="#Interesting">
+        <rdf:type rdf:resource="#Interesting"/>
+        <rdf:type rdf:resource="&owl;Class"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://foo.bar/baz#MostlyBoring -->
+
+    <owl:Class rdf:about="#MostlyBoring">
+        <rdf:type rdf:resource="#MostlyBoring"/>
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </owl:Class>
+    
+
+
     <!-- http://foo.bar/baz#PartlyCromulent -->
 
     <owl:Thing rdf:about="#PartlyCromulent">
         <rdf:type rdf:resource="#Cromulence"/>
         <rdfs:label
             >Partly Cromulent</rdfs:label>
+    </owl:Thing>
+    
+
+
+    <!-- http://foo.bar/baz#Riveting -->
+
+    <owl:Thing rdf:about="#Riveting">
+        <rdf:type rdf:resource="#Riveting"/>
+        <rdf:type rdf:resource="&owl;Class"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://foo.bar/baz#TotallyBoring -->
+
+    <owl:Thing rdf:about="#TotallyBoring">
+        <rdf:type rdf:resource="#TotallyBoring"/>
+        <rdf:type rdf:resource="&owl;Class"/>
     </owl:Thing>
     
 

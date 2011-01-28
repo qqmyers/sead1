@@ -90,21 +90,18 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
         return result;
     }
 
-    // FIXME this is not the correct way to represent "non-enumerated" properties in OWL
     private void addNonEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {
         Unifier u = new Unifier();
-        u.setColumnNames("prop", "label", "value");
+        u.setColumnNames("prop", "label");
         u.addPattern("prop", Rdf.TYPE, owl("ObjectProperty"));
         u.addPattern("prop", Rdfs.LABEL, "label");
         u.addPattern("prop", Rdfs.RANGE, "clazz");
-        u.addPattern("value", Rdf.TYPE, "clazz", true);
+        u.addPattern("clazz", Rdf.TYPE, "clazz"); // this is the punning pattern for Individual <-> Class
         TupeloStore.getInstance().getOntologyContext().perform(u);
         for (Tuple<Resource> row : u.getResult() ) {
-            if (row.get(2) == null) {
-                UserMetadataField umf = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
-                umf.setType(UserMetadataField.CLASS);
-                result.addField(umf);
-            }
+            UserMetadataField umf = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
+            umf.setType(UserMetadataField.CLASS);
+            result.addField(umf);
         }
     }
 
@@ -159,5 +156,4 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
     @Override
     public void rollback(ListUserMetadataFields arg0, ListUserMetadataFieldsResult arg1, ExecutionContext arg2) throws ActionException {
     }
-
 }
