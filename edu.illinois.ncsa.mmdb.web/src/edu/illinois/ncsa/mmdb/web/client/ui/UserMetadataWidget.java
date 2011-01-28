@@ -43,22 +43,30 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+
+import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -66,30 +74,36 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Tree;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSubclasses;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSubclassesResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 
 public class UserMetadataWidget extends Composite {
-    String                    uri;
-    MyDispatchAsync           dispatch;
-    ListBox                   fieldChoice;
-    TextBox                   valueText;
-    VerticalPanel             thePanel;
-    Label                     noFields;
-    FlexTable                 fieldTable;
-    Map<String, String>       labels = new HashMap<String, String>();
-    private final SimplePanel newFieldPanel;
-    protected PlainField      plainField;
+    String                                 uri;
+    private final DispatchAsync            dispatch;
+    ListBox                                fieldChoice;
+    TextBox                                valueText;
+    VerticalPanel                          thePanel;
+    Label                                  noFields;
+    FlexTable                              fieldTable;
+    Map<String, String>                    labels = new HashMap<String, String>();
+    private final SimplePanel              newFieldPanel;
+    protected InputField                   inputField;
+    protected SortedSet<UserMetadataField> availableFields;
 
-    public UserMetadataWidget(String uri, MyDispatchAsync dispatch) {
+    public UserMetadataWidget(String uri, final DispatchAsync dispatch) {
         this.uri = uri;
         this.dispatch = dispatch;
 
@@ -154,8 +168,26 @@ public class UserMetadataWidget extends Composite {
                         }
                     };
 
-                    plainField = new PlainField(addHandler, clearHandler);
-                    newFieldPanel.add(plainField);
+                    // add input widget based on type
+                    UserMetadataField userMetadataField = availableFields.toArray(new UserMetadataField[0])[index - 1];
+                    switch (userMetadataField.getType()) {
+                        case UserMetadataField.PLAIN:
+                            inputField = new PlainField(userMetadataField, addHandler, clearHandler);
+                            break;
+                        case UserMetadataField.DATATYPE:
+                            inputField = new PlainField(userMetadataField, addHandler, clearHandler);
+                            break;
+                        case UserMetadataField.ENUMERATED:
+                            inputField = new ListField(userMetadataField, addHandler, clearHandler);
+                            break;
+                        case UserMetadataField.CLASS:
+                            inputField = new TreeField(dispatch, userMetadataField, addHandler, clearHandler);
+                            break;
+                        default:
+                            inputField = new PlainField(userMetadataField, addHandler, clearHandler);
+                            break;
+                    }
+                    newFieldPanel.add(inputField);
                 }
             }
         });
@@ -179,7 +211,7 @@ public class UserMetadataWidget extends Composite {
             }
 
             public void onSuccess(ListUserMetadataFieldsResult result) {
-                SortedSet<UserMetadataField> availableFields = result.getFieldsSortedByName();
+                availableFields = result.getFieldsSortedByName();
                 GWT.log("available fields: " + availableFields);
                 if (availableFields.size() > 0) {
                     if (canEdit) {
@@ -233,6 +265,9 @@ public class UserMetadataWidget extends Composite {
      * @param predicate
      * @return
      */
+
+    private TextBox textBox;
+
     private int getRowForField(String predicate) {
         for (int row = 1; row < fieldTable.getRowCount(); row++ ) {
             Label l = (Label) fieldTable.getWidget(row, 0);
@@ -343,7 +378,7 @@ public class UserMetadataWidget extends Composite {
      * RPC call to add a new entry.
      */
     private void addValue() {
-        final String text = plainField.getValue();
+        final String text = inputField.getValue();
         final String property = fieldChoice.getValue(fieldChoice.getSelectedIndex());
         SetUserMetadata prop = new SetUserMetadata(uri, property, text);
         dispatch.execute(prop, new AsyncCallback<EmptyResult>() {
@@ -435,19 +470,19 @@ public class UserMetadataWidget extends Composite {
         }
     }
 
-    class PlainField extends Composite {
+    abstract class InputField extends Composite implements HasValue<String> {
 
-        private final TextBox textBox;
+        protected final UserMetadataField userMetadataField;
 
-        public PlainField(ClickHandler addHandler, ClickHandler clearHandler) {
+        public InputField(UserMetadataField userMetadataField, ClickHandler addHandler, ClickHandler clearHandler) {
+            this.userMetadataField = userMetadataField;
             // TODO switch to divs
-
             // first div
             FlexTable layout = new FlexTable();
             layout.addStyleName("metadataPlainField");
-            textBox = new TextBox();
-            textBox.setWidth("500px");
-            layout.setWidget(0, 0, textBox);
+
+            layout.setWidget(0, 0, createInputWidget());
+
             Anchor addAnchor = new Anchor("Add");
             addAnchor.addClickHandler(addHandler);
             layout.setWidget(0, 1, addAnchor);
@@ -472,8 +507,205 @@ public class UserMetadataWidget extends Composite {
             initWidget(layout);
         }
 
+        abstract Widget createInputWidget();
+
+        @Override
+        public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public String getValue() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public void setValue(String value) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void setValue(String value, boolean fireEvents) {
+            // TODO Auto-generated method stub
+
+        }
+
+    }
+
+    class PlainField extends InputField {
+
+        private TextBox textBox;
+
+        public PlainField(UserMetadataField userMetadataField, ClickHandler addHandler, ClickHandler clearHandler) {
+            super(userMetadataField, addHandler, clearHandler);
+        }
+
+        @Override
         public String getValue() {
             return textBox.getValue();
+        }
+
+        @Override
+        Widget createInputWidget() {
+            textBox = new TextBox();
+            textBox.setWidth("500px");
+            return textBox;
+        }
+    }
+
+    class ListField extends InputField {
+
+        private ListBox listBox;
+
+        public ListField(UserMetadataField userMetadataField, ClickHandler addHandler, ClickHandler clearHandler) {
+            super(userMetadataField, addHandler, clearHandler);
+        }
+
+        @Override
+        public String getValue() {
+            return listBox.getValue(listBox.getSelectedIndex());
+        }
+
+        @Override
+        Widget createInputWidget() {
+            listBox = new ListBox();
+            listBox.setWidth("500px");
+            listBox.addItem("Select...", "");
+            for (NamedThing namedThing : userMetadataField.getRange() ) {
+                listBox.addItem(namedThing.getName(), namedThing.getUri());
+            }
+            return listBox;
+        }
+    }
+
+    class TreeField extends InputField {
+
+        private Tree                tree;
+        private final DispatchAsync dispatch;
+        private TaxonomyTreeItem    root;
+
+        public TreeField(DispatchAsync dispatch, UserMetadataField userMetadataField, ClickHandler addHandler, ClickHandler clearHandler) {
+            super(userMetadataField, addHandler, clearHandler);
+            this.dispatch = dispatch;
+            populateTree();
+        }
+
+        private void populateTree() {
+
+            Iterator<NamedThing> iterator = userMetadataField.getRange().iterator();
+            while (iterator.hasNext()) {
+                NamedThing thing = iterator.next();
+                root = new TaxonomyTreeItem(thing.getName(), thing.getUri());
+            }
+            root.addItem(new TreeItem());
+
+            // prefetch children of root
+            dispatch.execute(new GetSubclasses(root.getUri()), new AsyncCallback<GetSubclassesResult>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Error getting subclasses of " + userMetadataField.getUri(), caught);
+                }
+
+                @Override
+                public void onSuccess(GetSubclassesResult result) {
+                    for (NamedThing namedThing : result.getSubclasses() ) {
+                        TaxonomyTreeItem node = new TaxonomyTreeItem(namedThing.getName(), namedThing.getUri());
+                        root.addItem(node);
+                    }
+                }
+            });
+
+            tree.addOpenHandler(new OpenHandler<TreeItem>() {
+
+                @Override
+                public void onOpen(OpenEvent<TreeItem> event) {
+                    final TaxonomyTreeItem currentNode = (TaxonomyTreeItem) event.getTarget();
+                    currentNode.removeItems();
+                    dispatch.execute(new GetSubclasses(currentNode.getUri()), new AsyncCallback<GetSubclassesResult>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log("Error getting subclasses of " + userMetadataField.getUri(), caught);
+                        }
+
+                        @Override
+                        public void onSuccess(GetSubclassesResult result) {
+                            for (NamedThing namedThing : result.getSubclasses() ) {
+                                final TaxonomyTreeItem node = new TaxonomyTreeItem(namedThing.getName(), namedThing.getUri());
+                                currentNode.addItem(node);
+                                populateChildren(node);
+                            }
+                        }
+                    });
+                }
+            });
+
+            tree.addItem(root);
+        }
+
+        private void populateChildren(TaxonomyTreeItem node) {
+            node.removeItems();
+            dispatch.execute(new GetSubclasses(node.getUri()), new AsyncCallback<GetSubclassesResult>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Error getting subclasses of " + userMetadataField.getUri(), caught);
+                }
+
+                @Override
+                public void onSuccess(GetSubclassesResult result) {
+                    for (NamedThing namedThing : result.getSubclasses() ) {
+                        final TaxonomyTreeItem node = new TaxonomyTreeItem(namedThing.getName(), namedThing.getUri());
+                        node.addItem(node);
+                    }
+                }
+            });
+        }
+
+        @Override
+        Widget createInputWidget() {
+            tree = new Tree();
+            tree.setAnimationEnabled(true);
+            tree.setWidth("500px");
+            return tree;
+        }
+
+        @Override
+        public String getValue() {
+            return tree.getSelectedItem().getText();
+        }
+    }
+
+    class TaxonomyTreeItem extends TreeItem {
+
+        private String uri;
+        private String label;
+
+        public TaxonomyTreeItem() {
+            super();
+        }
+
+        public TaxonomyTreeItem(String label, String uri) {
+            super();
+            this.label = label;
+            this.uri = uri;
+            if (label.length() > 20) {
+                setText(label.substring(0, 20) + "...");
+            } else {
+                setText(label);
+            }
+        }
+
+        public String getUri() {
+            return uri;
+        }
+
+        public String getLabel() {
+            return label;
         }
     }
 }

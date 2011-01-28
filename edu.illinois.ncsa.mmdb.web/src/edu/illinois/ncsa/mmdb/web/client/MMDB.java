@@ -66,8 +66,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
@@ -87,6 +87,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.ListCollectionsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListDatasetsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
+import edu.illinois.ncsa.mmdb.web.client.ui.MapPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.NotEnabledPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.RoleAdministrationPage;
@@ -483,6 +484,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showCollectionPage();
         } else if (token.startsWith("search")) {
             showSearchResultsPage();
+        } else if (token.startsWith("map")) {
+            showMapPage();
         } else if (token.startsWith("modifyPermissions")) {
             showUsersPage();
         } else if (token.startsWith("accessControl")) {
@@ -503,6 +506,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showListDatasetsPage();
         }
         previousHistoryToken = token;
+    }
+
+    private void showMapPage() {
+        GWT.log("Loading Map Page", null);
+        mainContainer.clear();
+        mainContainer.add(new MapPage(dispatchAsync, eventBus));
     }
 
     private void shosTagsPage() {
