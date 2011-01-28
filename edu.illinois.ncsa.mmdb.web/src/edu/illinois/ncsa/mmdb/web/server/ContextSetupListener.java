@@ -209,6 +209,8 @@ public class ContextSetupListener implements ServletContextListener {
             log.error("Error: could not read ontology", e);
         } catch (OperatorException e) {
             log.error("problem ingesting ontology", e);
+        } catch (Exception e) {
+            log.error("problem ingesting ontology", e);
         }
     }
 
