@@ -37,7 +37,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 
-package edu.illinois.ncsa.mmdb.web.client.ui;
+package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -59,6 +59,7 @@ import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.PreviewDocumentBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
@@ -74,7 +75,7 @@ import edu.uiuc.ncsa.cet.bean.preview.PreviewAudioBean;
  * 
  */
 
-public class PreviewPanel extends Composite {
+public class OldPreviewPanel extends Composite {
 
     /** maximum width of a preview image */
     private static final long   MAX_WIDTH       = 600;
@@ -93,7 +94,7 @@ public class PreviewPanel extends Composite {
     private static final String EXTENSION_URL   = "api/dataset/";
     private static final String PYRAMID_URL     = "rest/secure/pyramid/";
 
-    public PreviewPanel() {
+    public OldPreviewPanel() {
     }
 
     public void unload() {
