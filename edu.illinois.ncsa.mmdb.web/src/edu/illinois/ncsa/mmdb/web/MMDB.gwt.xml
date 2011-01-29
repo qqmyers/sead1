@@ -70,6 +70,7 @@
   <entry-point class='edu.illinois.ncsa.mmdb.web.client.MMDB'/>
 
   <!-- Specify the paths for translatable code                    -->
+  <source path='common'/>
   <source path='client'/>
 
 </module>
