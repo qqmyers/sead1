@@ -1,5 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Image;
 
 import edu.illinois.ncsa.mmdb.web.common.RestEndpoints;
@@ -14,7 +15,9 @@ public class PreviewImageBeanWidget extends PreviewBeanWidget<PreviewImageBean> 
     private static final long MAX_HEIGHT = 600;
 
     public PreviewImageBeanWidget() {
-        super(new Image());
+        Image widget = new Image();
+        widget.getElement().setId(DOM.createUniqueId());
+        setWidget(widget);
     }
 
     @Override

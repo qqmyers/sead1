@@ -1,20 +1,17 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
 public abstract class PreviewBeanWidget<T extends PreviewBean> {
     /** preview bean that is rendered. */
-    private T            pb = null;
+    private T      pb = null;
 
     /** the actual widget that will hold the preview */
-    private final Widget widget;
+    private Widget widget;
 
-    public PreviewBeanWidget(Widget widget) {
-        widget.getElement().setId(DOM.createUniqueId());
-        this.widget = widget;
+    public PreviewBeanWidget() {
     }
 
     public void setPreviewBean(T pb) {
@@ -38,6 +35,10 @@ public abstract class PreviewBeanWidget<T extends PreviewBean> {
      * @return
      */
     public abstract Class<? extends PreviewBean> getPreviewBeanClass();
+
+    public void setWidget(Widget widget) {
+        this.widget = widget;
+    }
 
     /**
      * Return the Widget that is responsible for showing the preview. Once the

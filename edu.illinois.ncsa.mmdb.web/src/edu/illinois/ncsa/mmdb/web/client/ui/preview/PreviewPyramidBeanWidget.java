@@ -1,6 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.common.RestEndpoints;
@@ -9,8 +10,10 @@ import edu.uiuc.ncsa.cet.bean.PreviewPyramidBean;
 
 public class PreviewPyramidBeanWidget extends PreviewBeanWidget<PreviewPyramidBean> {
     public PreviewPyramidBeanWidget() {
-        super(new Label());
-        getWidget().addStyleName("seadragon"); //$NON-NLS-1$
+        Label widget = new Label();
+        widget.addStyleName("seadragon"); //$NON-NLS-1$
+        widget.getElement().setId(DOM.createUniqueId());
+        setWidget(widget);
     }
 
     public Class<? extends PreviewBean> getPreviewBeanClass() {

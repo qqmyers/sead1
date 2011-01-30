@@ -7,6 +7,7 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HTML;
 
 import edu.illinois.ncsa.mmdb.web.common.RestEndpoints;
@@ -15,7 +16,9 @@ import edu.uiuc.ncsa.cet.bean.PreviewDocumentBean;
 
 public class PreviewDocumentBeanWidget extends PreviewBeanWidget<PreviewDocumentBean> {
     public PreviewDocumentBeanWidget() {
-        super(new HTML());
+        HTML widget = new HTML();
+        widget.getElement().setId(DOM.createUniqueId());
+        setWidget(widget);
     }
 
     @Override

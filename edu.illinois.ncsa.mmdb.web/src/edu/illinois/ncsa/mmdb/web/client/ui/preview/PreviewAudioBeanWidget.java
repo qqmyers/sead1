@@ -1,6 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
-import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.common.RestEndpoints;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
@@ -8,7 +9,9 @@ import edu.uiuc.ncsa.cet.bean.preview.PreviewAudioBean;
 
 public class PreviewAudioBeanWidget extends PreviewBeanWidget<PreviewAudioBean> {
     public PreviewAudioBeanWidget() {
-        super(new Image());
+        Label widget = new Label();
+        widget.getElement().setId(DOM.createUniqueId());
+        setWidget(widget);
     }
 
     @Override
