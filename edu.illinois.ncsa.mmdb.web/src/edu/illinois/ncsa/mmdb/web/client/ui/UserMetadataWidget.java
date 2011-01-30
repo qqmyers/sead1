@@ -55,8 +55,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.OpenEvent;
-import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -85,7 +83,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
@@ -603,55 +600,17 @@ public class UserMetadataWidget extends Composite {
                 NamedThing thing = iterator.next();
                 root = new TaxonomyTreeItem(thing.getName(), thing.getUri());
             }
-            root.addItem(new TreeItem());
-
-            // prefetch children of root
-            dispatch.execute(new GetSubclasses(root.getUri()), new AsyncCallback<GetSubclassesResult>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    GWT.log("Error getting subclasses of " + userMetadataField.getUri(), caught);
-                }
-
-                @Override
-                public void onSuccess(GetSubclassesResult result) {
-                    for (NamedThing namedThing : result.getSubclasses() ) {
-                        TaxonomyTreeItem node = new TaxonomyTreeItem(namedThing.getName(), namedThing.getUri());
-                        root.addItem(node);
-                    }
-                }
-            });
-
-            tree.addOpenHandler(new OpenHandler<TreeItem>() {
-
-                @Override
-                public void onOpen(OpenEvent<TreeItem> event) {
-                    final TaxonomyTreeItem currentNode = (TaxonomyTreeItem) event.getTarget();
-                    currentNode.removeItems();
-                    dispatch.execute(new GetSubclasses(currentNode.getUri()), new AsyncCallback<GetSubclassesResult>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            GWT.log("Error getting subclasses of " + userMetadataField.getUri(), caught);
-                        }
-
-                        @Override
-                        public void onSuccess(GetSubclassesResult result) {
-                            for (NamedThing namedThing : result.getSubclasses() ) {
-                                final TaxonomyTreeItem node = new TaxonomyTreeItem(namedThing.getName(), namedThing.getUri());
-                                currentNode.addItem(node);
-                                populateChildren(node);
-                            }
-                        }
-                    });
-                }
-            });
-
+            populateChildren(root);
             tree.addItem(root);
         }
 
-        private void populateChildren(TaxonomyTreeItem node) {
-            node.removeItems();
+        /**
+         * Recursevely populate subtree starting at node.
+         * 
+         * @param node
+         */
+        private void populateChildren(final TaxonomyTreeItem node) {
+
             dispatch.execute(new GetSubclasses(node.getUri()), new AsyncCallback<GetSubclassesResult>() {
 
                 @Override
@@ -661,9 +620,14 @@ public class UserMetadataWidget extends Composite {
 
                 @Override
                 public void onSuccess(GetSubclassesResult result) {
-                    for (NamedThing namedThing : result.getSubclasses() ) {
-                        final TaxonomyTreeItem node = new TaxonomyTreeItem(namedThing.getName(), namedThing.getUri());
-                        node.addItem(node);
+                    List<NamedThing> children = result.getSubclasses();
+                    if (children.size() != 0) {
+                        for (NamedThing namedThing : children ) {
+                            GWT.log("Adding " + namedThing.getName() + " to " + node.getLabel());
+                            final TaxonomyTreeItem newNode = new TaxonomyTreeItem(namedThing.getName(), namedThing.getUri());
+                            node.addItem(newNode);
+                            populateChildren(newNode);
+                        }
                     }
                 }
             });
