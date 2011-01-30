@@ -86,7 +86,7 @@ public class GetUserMetadataFieldsHandler implements
         u.setColumnNames("label", "title");
         u.addPattern(uri, Rdfs.LABEL, "label", true);
         u.addPattern(uri, Dc.TITLE, "title", true);
-        TupeloStore.getInstance().getContext().perform(u); // FIXME memorize
+        TupeloStore.getInstance().getOntologyContext().perform(u); // FIXME memorize
         for (Tuple<Resource> row : u.getResult() ) {
             if (row.get(0) != null) {
                 return row.get(0).getString();

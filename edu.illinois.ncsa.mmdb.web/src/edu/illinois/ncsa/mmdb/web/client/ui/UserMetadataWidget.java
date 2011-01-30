@@ -379,8 +379,16 @@ public class UserMetadataWidget extends Composite {
      */
     private void addValue() {
         final String text = inputField.getValue();
+        final String metadataUri = inputField.getUri();
         final String property = fieldChoice.getValue(fieldChoice.getSelectedIndex());
-        SetUserMetadata prop = new SetUserMetadata(uri, property, text);
+        SetUserMetadata prop;
+        if (uri == null) {
+            GWT.log("Adding new metadata: " + uri + " | " + property + " | " + text);
+            prop = new SetUserMetadata(uri, property, text);
+        } else {
+            GWT.log("Adding new metadata: " + uri + " | " + property + " | " + metadataUri);
+            prop = new SetUserMetadata(uri, property, metadataUri, true);
+        }
         dispatch.execute(prop, new AsyncCallback<EmptyResult>() {
             public void onFailure(Throwable caught) {
                 GWT.log("Failed adding a new entry to the list", caught);
@@ -509,6 +517,8 @@ public class UserMetadataWidget extends Composite {
 
         abstract Widget createInputWidget();
 
+        abstract String getUri();
+
         @Override
         public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
             // TODO Auto-generated method stub
@@ -554,6 +564,12 @@ public class UserMetadataWidget extends Composite {
             textBox.setWidth("500px");
             return textBox;
         }
+
+        @Override
+        String getUri() {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
 
     class ListField extends InputField {
@@ -566,7 +582,7 @@ public class UserMetadataWidget extends Composite {
 
         @Override
         public String getValue() {
-            return listBox.getValue(listBox.getSelectedIndex());
+            return listBox.getItemText(listBox.getSelectedIndex());
         }
 
         @Override
@@ -578,6 +594,12 @@ public class UserMetadataWidget extends Composite {
                 listBox.addItem(namedThing.getName(), namedThing.getUri());
             }
             return listBox;
+        }
+
+        @Override
+        String getUri() {
+            // TODO Auto-generated method stub
+            return listBox.getValue(listBox.getSelectedIndex());
         }
     }
 
@@ -644,6 +666,11 @@ public class UserMetadataWidget extends Composite {
         @Override
         public String getValue() {
             return tree.getSelectedItem().getText();
+        }
+
+        @Override
+        public String getUri() {
+            return ((TaxonomyTreeItem) tree.getSelectedItem()).getUri();
         }
     }
 
