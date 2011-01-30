@@ -69,6 +69,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Tree;
@@ -657,10 +658,12 @@ public class UserMetadataWidget extends Composite {
 
         @Override
         Widget createInputWidget() {
+            ScrollPanel scrollPanel = new ScrollPanel();
+            scrollPanel.addStyleName("metadataTreeScrollPanel");
             tree = new Tree();
             tree.setAnimationEnabled(true);
-            tree.setWidth("500px");
-            return tree;
+            scrollPanel.add(tree);
+            return scrollPanel;
         }
 
         @Override
@@ -687,11 +690,12 @@ public class UserMetadataWidget extends Composite {
             super();
             this.label = label;
             this.uri = uri;
-            if (label.length() > 20) {
-                setText(label.substring(0, 20) + "...");
-            } else {
-                setText(label);
-            }
+            //            if (label.length() > 20) {
+            //                setText(label.substring(0, 20) + "...");
+            //            } else {
+            //                setText(label);
+            //            }
+            setText(label);
         }
 
         public String getUri() {
