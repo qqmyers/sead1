@@ -60,6 +60,7 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewDocumentBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewMultiImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewPyramidBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewThreeDimensionalBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewVideoBeanUtil;
@@ -91,6 +92,9 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
 
             // image previews
             previews.addAll(new PreviewImageBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+
+            // multi image previews
+            previews.addAll(new PreviewMultiImageBeanUtil(beanSession).getAssociationsFor(action.getUri()));
 
             // video previews
             previews.addAll(new PreviewVideoBeanUtil(beanSession).getAssociationsFor(action.getUri()));
