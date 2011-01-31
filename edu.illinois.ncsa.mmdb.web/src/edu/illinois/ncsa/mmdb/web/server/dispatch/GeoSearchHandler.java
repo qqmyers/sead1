@@ -55,7 +55,6 @@ import org.tupeloproject.rdf.terms.Gis;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
 
-import edu.illinois.ncsa.cet.search.SearchableTextIndex;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GeoSearch;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GeoSearchResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
@@ -75,7 +74,6 @@ public class GeoSearchHandler implements ActionHandler<GeoSearch, GeoSearchResul
     public GeoSearchResult execute(GeoSearch arg0, ExecutionContext arg1)
             throws ActionException {
         GeoSearchResult searchResult = new GeoSearchResult();
-        SearchableTextIndex<String> search = TupeloStore.getInstance().getSearch();
         long then = System.currentTimeMillis();
 
         Unifier u = new Unifier();
@@ -93,7 +91,7 @@ public class GeoSearchHandler implements ActionHandler<GeoSearch, GeoSearchResul
         }
 
         long elapsed = System.currentTimeMillis() - then;
-        log.debug("GeoSearch for '" + arg0.getQuery() + "' took " + elapsed + "ms");
+        log.debug("GeoSearch for '" + arg0.getQuery() + "' took " + elapsed + "ms" + " and returned " + searchResult.getHits().size() + " hits");
         return searchResult;
     }
 

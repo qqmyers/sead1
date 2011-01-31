@@ -15,13 +15,13 @@ import net.customware.gwt.dispatch.shared.Result;
 @SuppressWarnings("serial")
 public class GeoSearchResult implements Result {
 
-    private final List<String> hits = new ArrayList<String>();
+    private List<String> hits = new ArrayList<String>();
 
     public GeoSearchResult() {
     }
 
     public GeoSearchResult(List<String> hits) {
-        hits = hits;
+        this.hits = hits;
     }
 
     public List<String> getHits() {
