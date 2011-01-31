@@ -38,7 +38,9 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -76,6 +78,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserViews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserViewsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
@@ -247,6 +251,10 @@ public class DatasetWidget extends Composite {
         final UserMetadataWidget um = new UserMetadataWidget(uri, service);
         um.setWidth("100%");
         leftColumn.add(createMetaDataPanel(um));
+
+        // who viewed document
+        // FIXME need rbac control
+        leftColumn.add(createUserViewPanel());
 
         // comments
         leftColumn.add(new AnnotationsWidget(uri, service));
@@ -452,6 +460,48 @@ public class DatasetWidget extends Composite {
         });
 
         dialog.show();
+    }
+
+    private Composite createUserViewPanel() {
+        DisclosurePanel userViewPanel = new DisclosurePanel("User Views");
+        userViewPanel.addStyleName("datasetDisclosurePanel");
+        userViewPanel.setOpen(false);
+
+        final FlexTable userViewTable = new FlexTable();
+        userViewTable.addStyleName("metadataTable");
+        userViewTable.setWidth("100%");
+        userViewPanel.add(userViewTable);
+
+        if (uri != null) {
+            service.execute(new GetUserViews(uri), new AsyncCallback<GetUserViewsResult>() {
+                @Override
+                public void onFailure(Throwable arg0) {
+                    GWT.log("Error retrieving metadata about dataset " + uri, null);
+                }
+
+                @Override
+                public void onSuccess(GetUserViewsResult arg0) {
+                    List<Date> dates = new ArrayList<Date>(arg0.getViews().keySet());
+                    Collections.sort(dates, Collections.reverseOrder());
+                    for (Date date : dates ) {
+                        int row = userViewTable.getRowCount();
+                        userViewTable.setText(row, 0, date.toLocaleString());
+                        userViewTable.setText(row, 1, arg0.getViews().get(date));
+
+                        // formatting
+                        userViewTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
+                        userViewTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
+                        if (row % 2 == 0) {
+                            userViewTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
+                        } else {
+                            userViewTable.getRowFormatter().addStyleName(row, "metadataTableOddRow");
+                        }
+                    }
+                }
+            });
+        }
+
+        return userViewPanel;
     }
 
     private Composite createMetaDataPanel(UserMetadataWidget um) {

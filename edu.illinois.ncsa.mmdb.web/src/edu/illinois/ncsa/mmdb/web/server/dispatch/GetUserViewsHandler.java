@@ -42,8 +42,6 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -52,16 +50,16 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.util.Tuple;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetViewCount;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetViewCountResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserViews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserViewsResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Get license attached to a specific resource.
@@ -69,72 +67,49 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  * @author Rob Kooper
  * 
  */
-public class GetViewCountHandler implements ActionHandler<GetViewCount, GetViewCountResult> {
-    private static int     IGNORE      = 5 * 60 * 1000;                               // 5 minutes
-
-    // FIXME move to MMDB
-    public static Resource MMDB_VIEWED = Cet.cet("mmdb/isViewedBy");                  //$NON-NLS-1$
-
+public class GetUserViewsHandler implements ActionHandler<GetUserViews, GetUserViewsResult> {
     /** Commons logging **/
-    private static Log     log         = LogFactory.getLog(GetViewCountHandler.class);
+    private static Log log = LogFactory.getLog(GetUserViewsHandler.class);
 
     @Override
-    public GetViewCountResult execute(GetViewCount arg0, ExecutionContext arg1) throws ActionException {
+    public GetUserViewsResult execute(GetUserViews arg0, ExecutionContext arg1) throws ActionException {
         Resource dataset = Resource.uriRef(arg0.getResource());
-        Resource person = Resource.uriRef(arg0.getPerson());
+        GetUserViewsResult result = new GetUserViewsResult();
 
         // get all view cases
         Unifier uf = new Unifier();
-        uf.addPattern(dataset, MMDB_VIEWED, "viewed"); //$NON-NLS-1$
+        uf.addPattern(dataset, GetViewCountHandler.MMDB_VIEWED, "viewed"); //$NON-NLS-1$
         uf.addPattern("viewed", Dc.CREATOR, "viewer"); //$NON-NLS-1$//$NON-NLS-2$
         uf.addPattern("viewed", Dc.DATE, "date"); //$NON-NLS-1$//$NON-NLS-2$
         uf.setColumnNames("viewed", "viewer", "date"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         try {
             TupeloStore.getInstance().getContext().perform(uf);
         } catch (OperatorException e) {
-            log.warn("Could not get view count for dataset.", e);
-            throw (new ActionException("Could not get view count for dataset.", e));
+            log.warn("Could not get views for dataset.", e);
+            throw (new ActionException("Could not get views for dataset.", e));
         }
-
-        Date recent = new Date(new Date().getTime() - IGNORE);
-        boolean isRecent = false;
-        Set<Resource> users = new HashSet<Resource>();
+        PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
         for (Tuple<Resource> row : uf.getResult() ) {
-            users.add(row.get(1));
-            if (row.get(1).equals(person)) {
-                Date date = (Date) row.get(2).asObject();
-                if (date.compareTo(recent) > 0) {
-                    isRecent = true;
-                }
-            }
-        }
-
-        // update the count
-        if (!isRecent) {
-            TripleWriter tw = new TripleWriter();
-            Resource viewed = Resource.uriRef();
-            tw.add(dataset, MMDB_VIEWED, viewed);
-            tw.add(viewed, Dc.CREATOR, person);
-            tw.add(viewed, Dc.DATE, new Date());
             try {
-                TupeloStore.getInstance().getContext().perform(tw);
-            } catch (OperatorException e) {
-                log.warn("Could not add a view to dataset.", e);
-                throw (new ActionException("Could not add a view to dataset.", e));
+                Date date = (Date) row.get(2).asObject();
+                PersonBean pb = pbu.get(row.get(1));
+                result.addView(date, pb);
+            } catch (Exception e) {
+                log.warn("Could not get view for dataset.", e);
             }
         }
 
         // done
-        return new GetViewCountResult(users.size());
+        return result;
     }
 
     @Override
-    public Class<GetViewCount> getActionType() {
-        return GetViewCount.class;
+    public Class<GetUserViews> getActionType() {
+        return GetUserViews.class;
     }
 
     @Override
-    public void rollback(GetViewCount arg0, GetViewCountResult arg1, ExecutionContext arg2) throws ActionException {
+    public void rollback(GetUserViews arg0, GetUserViewsResult arg1, ExecutionContext arg2) throws ActionException {
     }
 
 }
