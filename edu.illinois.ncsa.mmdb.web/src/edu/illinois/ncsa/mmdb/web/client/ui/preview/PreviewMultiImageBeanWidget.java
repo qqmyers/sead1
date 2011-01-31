@@ -36,15 +36,13 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
 
     public PreviewMultiImageBeanWidget() {
         VerticalPanel vp = new VerticalPanel();
-
-        image = new Image();
-        image.getElement().setId(DOM.createUniqueId());
-        vp.add(image);
+        vp.addStyleName("centered");
 
         HorizontalPanel hp = new HorizontalPanel();
+        hp.addStyleName("centered");
         vp.add(hp);
 
-        prev = new Anchor("< prev");
+        prev = new Anchor("< ");
         prev.addStyleName("previewActionLink");
         prev.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -54,10 +52,11 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         });
         hp.add(prev);
 
-        page = new Label("");
-        hp.add(page);
+        image = new Image();
+        image.getElement().setId(DOM.createUniqueId());
+        hp.add(image);
 
-        next = new Anchor("next >");
+        next = new Anchor(" >");
         next.addStyleName("previewActionLink");
         next.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -66,6 +65,10 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
             }
         });
         hp.add(next);
+
+        page = new Label("");
+        page.addStyleName("centered");
+        vp.add(page);
 
         setWidget(vp);
     }
