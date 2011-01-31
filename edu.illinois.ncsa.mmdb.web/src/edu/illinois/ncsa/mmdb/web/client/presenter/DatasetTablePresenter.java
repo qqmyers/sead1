@@ -50,6 +50,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
+import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 
@@ -62,7 +63,7 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 public class DatasetTablePresenter extends DynamicTablePresenter<DatasetBean> {
 
     public DatasetTablePresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
-        super(dispatch, eventBus, display);
+        super(dispatch, eventBus, display, DynamicTableView.GRID_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
         // TODO Auto-generated constructor stub
     }
 

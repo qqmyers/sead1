@@ -126,12 +126,23 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
      * @param display
      */
     public DynamicTablePresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+        this(dispatch, eventBus, display, DynamicTableView.LIST_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
+    }
+
+    /**
+     * Setup a presenter and view for the inner table visualization.
+     * 
+     * @param dispatch
+     * @param eventBus
+     * @param display
+     */
+    public DynamicTablePresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display, String defaultview, String defaultsize) {
         super(display, eventBus);
         this.dispatch = dispatch;
 
         sortKey = MMDB.getSessionPreference(getViewSortPreference(), "date-desc");
         display.setOrder(sortKey);
-        setViewType(MMDB.getSessionPreference(getViewTypePreference(), DynamicTableView.LIST_VIEW_TYPE), MMDB.getSessionPreference(getViewSizeTypePreference(), DynamicTableView.PAGE_SIZE_X1));
+        setViewType(MMDB.getSessionPreference(getViewTypePreference(), defaultview), MMDB.getSessionPreference(getViewSizeTypePreference(), defaultsize));
 
         addHandler(RefreshEvent.TYPE, new RefreshHandler() {
             @Override
