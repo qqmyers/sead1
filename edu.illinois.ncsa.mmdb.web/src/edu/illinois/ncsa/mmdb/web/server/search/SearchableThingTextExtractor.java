@@ -55,10 +55,12 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.SubjectFacade;
 import org.tupeloproject.kernel.Thing;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdfs;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.TextExtractor;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
@@ -81,6 +83,7 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.AnnotationBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class SearchableThingTextExtractor implements TextExtractor<String> {
     Log log = LogFactory.getLog(SearchableThingTextExtractor.class);
@@ -114,20 +117,21 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
                 bean = null;
                 /*log.debug("indexed text = " + text); // FIXME debug*/
                 result.put(uri, text);
-                return result;
             }
         } catch (Exception x) {
             log.warn("unexpected bean session behavior: " + x.getMessage());
+            return result;
         }
         // it's either not a bean or not a CETBean
         try {
             /*log.debug("indexed text = " + text); // FIXME debug*/
             result.put(uri, text(uri));
-            return result;
         } catch (Exception x) { // something's wrong
             x.printStackTrace();
             return result;
         }
+        result.putAll(getSectionMetadata(uri));
+        return result;
     }
 
     String text(String uri) throws OperatorException, ClassNotFoundException {
@@ -279,6 +283,23 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
             }
         }
         return unsplit(allValues);
+    }
+
+    Map<String, String> getSectionMetadata(String uri) {
+        Map<String, String> sm = new HashMap<String, String>();
+        Unifier u = new Unifier();
+        u.setColumnNames("s", "t");
+        u.addPattern(uri, MMDB.METADATA_HASSECTION, "s");
+        u.addPattern("s", MMDB.SECTION_TEXT, "t");
+        try {
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "s") ) {
+                sm.put(row.get(0).getString(), row.get(1).getString());
+            }
+        } catch (OperatorException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return sm;
     }
 
     String allLiterals(CETBean bean) {
