@@ -96,7 +96,8 @@ public class UserMetadataWidget extends Composite {
     VerticalPanel                          thePanel;
     Label                                  noFields;
     FlexTable                              fieldTable;
-    Map<String, String>                    labels = new HashMap<String, String>();
+    Map<String, String>                    labels     = new HashMap<String, String>();
+    Map<String, Integer>                   indexLabel = new HashMap<String, Integer>();
     private final SimplePanel              newFieldPanel;
     protected InputField                   inputField;
     protected SortedSet<UserMetadataField> availableFields;
@@ -145,52 +146,60 @@ public class UserMetadataWidget extends Composite {
 
             @Override
             public void onChange(ChangeEvent event) {
-                newFieldPanel.clear();
-                int index = fieldChoice.getSelectedIndex();
-                if (index != 0) {
-
-                    ClickHandler addHandler = new ClickHandler() {
-
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            addValue();
-                        }
-                    };
-
-                    ClickHandler clearHandler = new ClickHandler() {
-
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            newFieldPanel.clear();
-                            fieldChoice.setSelectedIndex(0);
-                        }
-                    };
-
-                    // add input widget based on type
-                    UserMetadataField userMetadataField = availableFields.toArray(new UserMetadataField[0])[index - 1];
-                    switch (userMetadataField.getType()) {
-                        case UserMetadataField.PLAIN:
-                            inputField = new PlainField(userMetadataField, addHandler, clearHandler);
-                            break;
-                        case UserMetadataField.DATATYPE:
-                            inputField = new PlainField(userMetadataField, addHandler, clearHandler);
-                            break;
-                        case UserMetadataField.ENUMERATED:
-                            inputField = new ListField(userMetadataField, addHandler, clearHandler);
-                            break;
-                        case UserMetadataField.CLASS:
-                            inputField = new TreeField(dispatch, userMetadataField, addHandler, clearHandler);
-                            break;
-                        default:
-                            inputField = new PlainField(userMetadataField, addHandler, clearHandler);
-                            break;
-                    }
-                    newFieldPanel.add(inputField);
-                }
+                changeHandler();
             }
         });
 
         initWidget(thePanel);
+    }
+
+    /**
+     * Called by selection change handler and clicking Edit
+     */
+    private void changeHandler() {
+        newFieldPanel.clear();
+        int index = fieldChoice.getSelectedIndex();
+        if (index != 0) {
+
+            ClickHandler addHandler = new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    addValue();
+                }
+            };
+
+            ClickHandler clearHandler = new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    newFieldPanel.clear();
+                    fieldChoice.setSelectedIndex(0);
+                }
+            };
+
+            // add input widget based on type
+            UserMetadataField userMetadataField = availableFields.toArray(new UserMetadataField[0])[index - 1];
+            switch (userMetadataField.getType()) {
+                case UserMetadataField.PLAIN:
+                    inputField = new PlainField(userMetadataField, addHandler, clearHandler);
+                    break;
+                case UserMetadataField.DATATYPE:
+                    inputField = new PlainField(userMetadataField, addHandler, clearHandler);
+                    break;
+                case UserMetadataField.ENUMERATED:
+                    inputField = new ListField(userMetadataField, addHandler, clearHandler);
+                    break;
+                case UserMetadataField.CLASS:
+                    inputField = new TreeField(dispatch, userMetadataField, addHandler, clearHandler);
+                    break;
+                default:
+                    inputField = new PlainField(userMetadataField, addHandler, clearHandler);
+                    break;
+            }
+            newFieldPanel.add(inputField);
+        }
+
     }
 
     private void populateTableHeader() {
@@ -285,7 +294,7 @@ public class UserMetadataWidget extends Composite {
      * @param label
      * @param values
      */
-    private void addNewField(final String predicate, String label, final List<String> values, boolean canEdit) {
+    private void addNewField(final String predicate, final String label, final List<String> values, boolean canEdit) {
 
         removeNoFields();
         int row = getRowForField(predicate);
@@ -316,9 +325,7 @@ public class UserMetadataWidget extends Composite {
                 editAnchor.addStyleName("metadataTableAction");
                 editAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        PopupPanel popupPanel = new PopupPanel(true);
-                        popupPanel.add(new Label("Sorry, not implemented yet."));
-                        popupPanel.showRelativeTo(editAnchor);
+                        editValue(predicate, label, values);
                     }
                 });
                 links.add(editAnchor);
@@ -367,11 +374,14 @@ public class UserMetadataWidget extends Composite {
     private void populateTypes(SortedSet<UserMetadataField> availableFields) {
         fieldChoice.clear();
         fieldChoice.addItem("Add Field", "");
+        int count = 1;
         for (UserMetadataField field : availableFields ) {
             String label = field.getLabel();
             String predicate = field.getUri();
             fieldChoice.addItem(label, predicate);
             labels.put(predicate, label);
+            indexLabel.put(predicate, count);
+            count++;
         }
     }
 
@@ -448,15 +458,20 @@ public class UserMetadataWidget extends Composite {
     }
 
     /**
+     * Edit value
      * 
      * @param property
      */
-    private void editValue(String property, final Collection<String> values) {
-        //        fieldChoice.setSelected(property);
-        for (String value : values ) {
-            valueText.setText(value);
-        }
-        valueText.setFocus(true);
+    private void editValue(final String property, String label, final Collection<String> values) {
+        //for (String value : values ) {
+        //    valueText.setText(value);
+        //}
+        //valueText.setFocus(true);
+
+        //fieldChoice.setItemText(fieldChoice., "HELLO");
+        fieldChoice.setSelectedIndex(indexLabel.get(property));
+
+        changeHandler();
 
     }
 
