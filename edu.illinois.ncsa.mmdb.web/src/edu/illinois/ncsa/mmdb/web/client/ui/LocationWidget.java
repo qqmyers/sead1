@@ -63,12 +63,15 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddGeoLocation;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * Retrieve all geopointBeans associated with the URI and show them on a Map.
@@ -97,7 +100,7 @@ public class LocationWidget extends Composite {
         this.service = service;
     }
 
-    public LocationWidget(final String uri, MyDispatchAsync service, boolean withTitle) {
+    public LocationWidget(final String uri, MyDispatchAsync service, final boolean withTitle) {
         this.uri = uri;
         this.service = service;
         // mainpanel
@@ -106,15 +109,19 @@ public class LocationWidget extends Composite {
         //        mainPanel.setVisible(false);
         initWidget(mainPanel);
 
-        if (withTitle) {
-            Label mapHeader = new Label("Location");
-            mapHeader.addStyleName("datasetRightColHeading");
-            mainPanel.add(mapHeader);
-        }
-
         if (uri != null) {
-            getGeoPoint();
-
+            PermissionUtil rbac = new PermissionUtil(service);
+            rbac.doIfAllowed(Permission.VIEW_LOCATION, uri, new PermissionCallback() {
+                @Override
+                public void onAllowed() {
+                    if (withTitle) {
+                        Label mapHeader = new Label("Location");
+                        mapHeader.addStyleName("datasetRightColHeading");
+                        mainPanel.add(mapHeader);
+                    }
+                    getGeoPoint();
+                }
+            });
         }
     }
 
