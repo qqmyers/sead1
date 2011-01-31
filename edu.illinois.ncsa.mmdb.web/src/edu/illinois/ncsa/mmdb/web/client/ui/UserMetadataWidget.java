@@ -383,7 +383,7 @@ public class UserMetadataWidget extends Composite {
         final String metadataUri = inputField.getUri();
         final String property = fieldChoice.getValue(fieldChoice.getSelectedIndex());
         SetUserMetadata prop;
-        if (uri == null) {
+        if (metadataUri == null) {
             GWT.log("Adding new metadata: " + uri + " | " + property + " | " + text);
             prop = new SetUserMetadata(uri, property, text);
         } else {
