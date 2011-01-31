@@ -906,6 +906,8 @@ a:hover {
 
 .previewActionLink {
 	margin: 10px;
+	cursor: pointer;
+	cursor: hand;
 }
 	
 .commentsView {

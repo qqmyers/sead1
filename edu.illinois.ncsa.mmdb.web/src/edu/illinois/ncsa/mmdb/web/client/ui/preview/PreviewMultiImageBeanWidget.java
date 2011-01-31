@@ -3,7 +3,7 @@ package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -30,9 +30,9 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
     /** Image that is shown */
     private final Image       image;
 
-    private final Anchor      prev;
+    private final Image       prevImage;
 
-    private final Anchor      next;
+    private final Image       nextImage;
 
     public PreviewMultiImageBeanWidget() {
         VerticalPanel vp = new VerticalPanel();
@@ -42,29 +42,37 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         hp.addStyleName("centered");
         vp.add(hp);
 
-        prev = new Anchor("< ");
-        prev.addStyleName("previewActionLink");
-        prev.addClickHandler(new ClickHandler() {
+        prevImage = new Image("images/go-previous-gray.png");
+        prevImage.addStyleName("previewActionLink");
+        prevImage.setTitle("Previous");
+        prevImage.addClickHandler(new ClickHandler() {
+
+            @Override
             public void onClick(ClickEvent event) {
                 current--;
                 show();
             }
         });
-        hp.add(prev);
+        hp.add(prevImage);
+        hp.setCellVerticalAlignment(prevImage, HasVerticalAlignment.ALIGN_MIDDLE);
 
         image = new Image();
         image.getElement().setId(DOM.createUniqueId());
         hp.add(image);
 
-        next = new Anchor(" >");
-        next.addStyleName("previewActionLink");
-        next.addClickHandler(new ClickHandler() {
+        nextImage = new Image("images/go-next-gray.png");
+        nextImage.addStyleName("previewActionLink");
+        nextImage.setTitle("Next");
+        nextImage.addClickHandler(new ClickHandler() {
+
+            @Override
             public void onClick(ClickEvent event) {
                 current++;
                 show();
             }
         });
-        hp.add(next);
+        hp.add(nextImage);
+        hp.setCellVerticalAlignment(nextImage, HasVerticalAlignment.ALIGN_MIDDLE);
 
         page = new Label("");
         page.addStyleName("centered");
@@ -107,15 +115,15 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         }
 
         if (current == 0) {
-            prev.addStyleName("deadlink");
+            prevImage.addStyleName("hidden");
         } else if (maximage != 0) {
-            prev.removeStyleName("deadlink");
+            prevImage.removeStyleName("hidden");
         }
 
         if (current == maximage) {
-            next.addStyleName("deadlink");
+            nextImage.addStyleName("hidden");
         } else if (maximage != 0) {
-            next.removeStyleName("deadlink");
+            nextImage.removeStyleName("hidden");
         }
 
         PreviewImageBean pib = getPreviewBean().getImages().get(current);
