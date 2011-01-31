@@ -270,6 +270,15 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         HTML bullet3 = new HTML("&bull;");
         bullet3.addStyleName("navMenuText");
         navMenu.add(bullet3);
+        // tags
+        Hyperlink mapLink = new Hyperlink("Map",
+                "map");
+        mapLink.addStyleName("navMenuLink");
+        navMenu.add(mapLink);
+        // bullet
+        HTML bullet4 = new HTML("&bull;");
+        bullet4.addStyleName("navMenuText");
+        navMenu.add(bullet4);
         // upload link
         Hyperlink uploadLink = new Hyperlink("Upload", "upload");
         uploadLink.addStyleName("navMenuLink");
