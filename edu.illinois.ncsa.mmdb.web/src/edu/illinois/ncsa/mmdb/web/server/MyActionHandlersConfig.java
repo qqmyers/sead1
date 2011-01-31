@@ -45,6 +45,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddCollectionHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AddGeoLocationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
@@ -183,6 +184,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetSubclassesHandler());
         DispatchUtil.registerHandler(new GetAllowedValuesHandler());
         DispatchUtil.registerHandler(new GeoSearchHandler());
+        DispatchUtil.registerHandler(new AddGeoLocationHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

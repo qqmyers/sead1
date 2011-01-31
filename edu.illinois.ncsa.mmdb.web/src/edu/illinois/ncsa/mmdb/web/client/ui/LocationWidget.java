@@ -44,16 +44,27 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.event.MapClickHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
+import com.google.gwt.maps.client.overlay.Overlay;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddGeoLocation;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
@@ -69,6 +80,10 @@ import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 public class LocationWidget extends Composite {
     private final FlowPanel mainPanel;
     private MapWidget       map;
+    private MyDispatchAsync service;
+    private String          uri;
+    private Label           noLocationLabel;
+    private Anchor          addLocationAnchor;
 
     /**
      * A widget listing tags and providing a way to add a new one.
@@ -78,13 +93,17 @@ public class LocationWidget extends Composite {
      */
     public LocationWidget(String uri, MyDispatchAsync service) {
         this(uri, service, true);
+        this.uri = uri;
+        this.service = service;
     }
 
     public LocationWidget(final String uri, MyDispatchAsync service, boolean withTitle) {
+        this.uri = uri;
+        this.service = service;
         // mainpanel
         mainPanel = new FlowPanel();
         mainPanel.addStyleName("datasetRightColSection");
-        mainPanel.setVisible(false);
+        //        mainPanel.setVisible(false);
         initWidget(mainPanel);
 
         if (withTitle) {
@@ -94,20 +113,70 @@ public class LocationWidget extends Composite {
         }
 
         if (uri != null) {
-            service.execute(new GetGeoPoint(uri), new AsyncCallback<GetGeoPointResult>() {
-                @Override
-                public void onFailure(Throwable arg0) {
-                    GWT.log("Error retrieving geolocations for " + uri, arg0);
-                }
+            getGeoPoint();
 
-                @Override
-                public void onSuccess(GetGeoPointResult arg0) {
-                    if (!arg0.getGeoPoints().isEmpty()) {
-                        showPoints(arg0.getGeoPoints());
-                    }
-                }
-            });
         }
+    }
+
+    private void getGeoPoint() {
+        service.execute(new GetGeoPoint(uri), new AsyncCallback<GetGeoPointResult>() {
+            @Override
+            public void onFailure(Throwable arg0) {
+                GWT.log("Error retrieving geolocations for " + uri, arg0);
+            }
+
+            @Override
+            public void onSuccess(GetGeoPointResult arg0) {
+                if (!arg0.getGeoPoints().isEmpty()) {
+                    showPoints(arg0.getGeoPoints());
+                } else {
+                    showAddLocation();
+                }
+            }
+        });
+    }
+
+    protected void showAddLocation() {
+        noLocationLabel = new Label("No location set");
+        mainPanel.add(noLocationLabel);
+        addLocationAnchor = new Anchor("Set location");
+        addLocationAnchor.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                final PickLocationPanel locationPanel = new PickLocationPanel();
+                locationPanel.center();
+                locationPanel.show();
+                locationPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
+
+                    @Override
+                    public void onClose(CloseEvent<PopupPanel> event) {
+                        Marker location = locationPanel.getLocation();
+                        if (location != null) {
+                            submitNewLocation(location.getLatLng());
+                        }
+                    }
+                });
+            }
+        });
+        mainPanel.add(addLocationAnchor);
+    }
+
+    private void submitNewLocation(LatLng latLng) {
+        service.execute(new AddGeoLocation(uri, latLng.getLatitude(), latLng.getLongitude()), new AsyncCallback<EmptyResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error adding location for " + uri, caught);
+            }
+
+            @Override
+            public void onSuccess(EmptyResult result) {
+                mainPanel.remove(noLocationLabel);
+                mainPanel.remove(addLocationAnchor);
+                getGeoPoint();
+            }
+        });
     }
 
     public void showPoint(GeoPointBean bean) {
@@ -131,17 +200,78 @@ public class LocationWidget extends Composite {
             bounds.extend(loc);
             map.addOverlay(new Marker(loc, options));
         }
-        map.setCenter(bounds.getCenter(), map.getBoundsZoomLevel(bounds));
+        // if more then one point, set center and zoom level based on bounds
+        if (beans.size() > 1) {
+            map.setCenter(bounds.getCenter(), map.getBoundsZoomLevel(bounds));
+        } else if (beans.size() == 1) { // if only one point, default to zoom level 5
+            GeoPointBean point = beans.iterator().next();
+            map.setCenter(LatLng.newInstance(point.getLatitude(), point.getLongitude()));
+            map.setZoomLevel(5);
+        }
     }
 
     private void initialize() {
         if (map == null) {
-            setVisible(true);
+            //            setVisible(true);
 
             map = new MapWidget();
             map.setSize("200px", "200px");
             map.setUIToDefault();
             mainPanel.add(map);
+        }
+    }
+
+    class PickLocationPanel extends PopupPanel {
+        MapWidget map;
+        Marker    marker;
+
+        public PickLocationPanel() {
+            super();
+            setGlassEnabled(true);
+            setAnimationEnabled(true);
+            FlowPanel mainPanel = new FlowPanel();
+            // directions
+            mainPanel.add(new Label("Pick location by clicking on the map below"));
+            // map
+            map = new MapWidget();
+            map.setSize("500px", "500px");
+            map.setUIToDefault();
+            mainPanel.add(map);
+            map.addMapClickHandler(new MapClickHandler() {
+
+                @Override
+                public void onClick(MapClickEvent event) {
+                    MapWidget sender = event.getSender();
+                    Overlay overlay = event.getOverlay();
+                    LatLng point = event.getLatLng();
+
+                    if (overlay != null && overlay instanceof Marker) {
+                        sender.removeOverlay(overlay);
+                    } else {
+                        if (marker != null) {
+                            sender.removeOverlay(marker);
+                        }
+                        marker = new Marker(point);
+                        sender.addOverlay(marker);
+                    }
+
+                }
+
+            });
+            // close button
+            Button closeButton = new Button("Close", new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    hide();
+                }
+            });
+            mainPanel.add(closeButton);
+            setWidget(mainPanel);
+        }
+
+        public Marker getLocation() {
+            return marker;
         }
     }
 }
