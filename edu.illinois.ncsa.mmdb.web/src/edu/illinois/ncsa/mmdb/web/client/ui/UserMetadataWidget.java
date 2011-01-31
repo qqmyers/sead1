@@ -55,6 +55,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -392,6 +394,8 @@ public class UserMetadataWidget extends Composite {
         final String text = inputField.getValue();
         final String metadataUri = inputField.getUri();
         final String property = fieldChoice.getValue(fieldChoice.getSelectedIndex());
+        // TODO pass section value if selected to backend
+        final String section = inputField.getSectionValue(); // null if section not specified
         SetUserMetadata prop;
         if (metadataUri == null) {
             GWT.log("Adding new metadata: " + uri + " | " + property + " | " + text);
@@ -497,6 +501,9 @@ public class UserMetadataWidget extends Composite {
     abstract class InputField extends Composite implements HasValue<String> {
 
         protected final UserMetadataField userMetadataField;
+        private final TextBox             sectionTextBox;
+        private final RadioButton         sectionButton;
+        private final RadioButton         documentButton;
 
         public InputField(UserMetadataField userMetadataField, ClickHandler addHandler, ClickHandler clearHandler) {
             this.userMetadataField = userMetadataField;
@@ -518,13 +525,21 @@ public class UserMetadataWidget extends Composite {
             FlowPanel appliedToPanel = new FlowPanel();
             appliedToPanel.addStyleName("metadataAppliedPanel");
             appliedToPanel.add(new Label("Will be applied to"));
-            RadioButton documentButton = new RadioButton("appliedTo", "document");
+            documentButton = new RadioButton("appliedTo", "document");
             documentButton.setValue(true);
             appliedToPanel.add(documentButton);
-            RadioButton sectionButton = new RadioButton("appliedTo", "section");
+            sectionButton = new RadioButton("appliedTo", "section");
             appliedToPanel.add(sectionButton);
-            Label currentSection = new Label("[current section]");
-            appliedToPanel.add(currentSection);
+            sectionTextBox = new TextBox();
+            sectionTextBox.setWidth("100px");
+            sectionTextBox.addFocusHandler(new FocusHandler() {
+
+                @Override
+                public void onFocus(FocusEvent event) {
+                    sectionButton.setValue(true);
+                }
+            });
+            appliedToPanel.add(sectionTextBox);
             layout.setWidget(1, 0, appliedToPanel);
             layout.getFlexCellFormatter().setColSpan(1, 0, 3);
 
@@ -534,6 +549,14 @@ public class UserMetadataWidget extends Composite {
         abstract Widget createInputWidget();
 
         abstract String getUri();
+
+        public String getSectionValue() {
+            if (sectionButton.getValue()) {
+                return sectionTextBox.getValue();
+            } else {
+                return null;
+            }
+        }
 
         @Override
         public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
@@ -705,11 +728,6 @@ public class UserMetadataWidget extends Composite {
             super();
             this.label = label;
             this.uri = uri;
-            //            if (label.length() > 20) {
-            //                setText(label.substring(0, 20) + "...");
-            //            } else {
-            //                setText(label);
-            //            }
             setText(label);
         }
 
