@@ -392,11 +392,21 @@ public class UserMetadataWidget extends Composite {
      */
     private void addValue() {
         final String text = inputField.getValue();
+
+        if (text.isEmpty() || text.equals("Select...")) {
+            PopupPanel popupPanel = new PopupPanel(true);
+            popupPanel.add(new Label("Please enter a value"));
+            popupPanel.showRelativeTo(inputField);
+            return;
+        }
+
         final String metadataUri = inputField.getUri();
         final String property = fieldChoice.getValue(fieldChoice.getSelectedIndex());
         // TODO pass section value if selected to backend
         final String section = inputField.getSectionValue(); // null if section not specified
+
         SetUserMetadata prop;
+
         if (metadataUri == null) {
             GWT.log("Adding new metadata: " + uri + " | " + property + " | " + text);
             prop = new SetUserMetadata(uri, property, text);
@@ -404,6 +414,7 @@ public class UserMetadataWidget extends Composite {
             GWT.log("Adding new metadata: " + uri + " | " + property + " | " + metadataUri);
             prop = new SetUserMetadata(uri, property, metadataUri, true);
         }
+
         dispatch.execute(prop, new AsyncCallback<EmptyResult>() {
             public void onFailure(Throwable caught) {
                 GWT.log("Failed adding a new entry to the list", caught);
@@ -439,6 +450,7 @@ public class UserMetadataWidget extends Composite {
      * 
      * @param property
      */
+    @SuppressWarnings("unused")
     private void removeValue(final String property) {
 
         // TODO have to implement a new dispatch to actually delete instead of setting to empty
