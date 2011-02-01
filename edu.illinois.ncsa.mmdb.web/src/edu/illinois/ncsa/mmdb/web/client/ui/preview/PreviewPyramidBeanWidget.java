@@ -39,7 +39,7 @@ public class PreviewPyramidBeanWidget extends PreviewBeanWidget<PreviewPyramidBe
 
     @Override
     public String getSection() {
-        return "1"; //$NON-NLS-1$
+        return "Document"; //$NON-NLS-1$
     }
 
     @Override

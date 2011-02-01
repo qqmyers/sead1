@@ -42,6 +42,7 @@ package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -52,6 +53,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEventHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
@@ -99,6 +102,13 @@ public class PreviewPanel extends Composite {
     public PreviewPanel(HandlerManager eventBus) {
         initializePreviews(eventBus);
         previewWidget = null;
+
+        eventBus.addHandler(PreviewSectionChangedEvent.TYPE, new PreviewSectionChangedEventHandler() {
+            @Override
+            public void onSectionChanged(PreviewSectionChangedEvent sectionChangedEvent) {
+                GWT.log(sectionChangedEvent.getSection());
+            }
+        });
     }
 
     public void unload() {

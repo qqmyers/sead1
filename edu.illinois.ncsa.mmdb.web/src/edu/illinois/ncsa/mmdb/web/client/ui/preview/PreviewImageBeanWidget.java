@@ -51,7 +51,7 @@ public class PreviewImageBeanWidget extends PreviewBeanWidget<PreviewImageBean> 
 
     @Override
     public String getSection() {
-        return "1"; //$NON-NLS-1$
+        return "Image 1"; //$NON-NLS-1$
     }
 
     @Override

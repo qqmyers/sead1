@@ -112,7 +112,7 @@ public abstract class PreviewBeanWidget<T extends PreviewBean> {
     public void fireSectionChanged() {
         PreviewSectionChangedEvent event = new PreviewSectionChangedEvent();
         event.setSection(getSection());
-        eventBus.fireEvent(new PreviewSectionChangedEvent());
+        eventBus.fireEvent(event);
     }
 
     /**

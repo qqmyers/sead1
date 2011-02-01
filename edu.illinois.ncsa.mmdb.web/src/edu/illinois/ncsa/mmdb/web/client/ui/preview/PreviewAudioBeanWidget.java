@@ -37,7 +37,7 @@ public class PreviewAudioBeanWidget extends PreviewBeanWidget<PreviewAudioBean> 
 
     @Override
     public String getSection() {
-        return "1"; //$NON-NLS-1$
+        return "Document"; //$NON-NLS-1$
     }
 
     @Override

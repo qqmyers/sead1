@@ -1,5 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -128,14 +129,24 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
     @Override
     public void setSection(String section) {
         int page = current;
-        String[] text = section.split("\\D"); //$NON-NLS-1$
-        for (String x : text ) {
+
+        String[] text = section.split(" ", 2);
+        if (text.length == 2) {
+            if (text[0].equalsIgnoreCase("page") || text[0].equalsIgnoreCase("image")) {
+                try {
+                    page = Integer.parseInt(text[1]) - 1;
+                } catch (NumberFormatException e) {
+                    GWT.log("Could not parse " + section);
+                }
+            }
+        } else {
             try {
-                page = Integer.parseInt(x) - 1;
-                break;
+                page = Integer.parseInt(text[0]) - 1;
             } catch (NumberFormatException e) {
+                GWT.log("Could not parse " + section);
             }
         }
+
         if (page != current) {
             current = page;
             show();
@@ -144,7 +155,7 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
 
     @Override
     public String getSection() {
-        return Integer.toString(current + 1);
+        return "Image " + Integer.toString(current + 1);
     }
 
     @Override
