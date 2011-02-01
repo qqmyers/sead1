@@ -654,7 +654,9 @@ public class UserMetadataWidget extends Composite {
             listBox.setWidth("500px");
             listBox.addItem("Select...", "");
             int count = 1;
-            for (NamedThing namedThing : userMetadataField.getRange() ) {
+            List<NamedThing> range = new ArrayList<NamedThing>();
+            range.addAll(NamedThing.orderByName(userMetadataField.getRange()));
+            for (NamedThing namedThing : range ) {
                 listBox.addItem(namedThing.getName(), namedThing.getUri());
                 listLabel.put(namedThing.getName(), count);
                 count++;

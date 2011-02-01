@@ -15,7 +15,10 @@ import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GeoSearch;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GeoSearchResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
@@ -25,6 +28,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * Page plotting all datasets that have a geolocation on a google map.
@@ -39,6 +43,7 @@ public class MapPage extends Page {
     private final HandlerManager  eventbus;
     private final MyDispatchAsync dispatch;
     private MapWidget             map;
+    private Label                 permissionLabel;
 
     public MapPage(MyDispatchAsync dispatch, HandlerManager eventbus) {
         super(TITLE, dispatch);
@@ -48,16 +53,25 @@ public class MapPage extends Page {
     }
 
     private void populate() {
-        dispatch.execute(new GeoSearch(), new AsyncCallback<GeoSearchResult>() {
 
+        PermissionUtil rbac = new PermissionUtil(dispatch);
+        rbac.doIfAllowed(Permission.VIEW_LOCATION, new PermissionCallback() {
             @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Error geosearching in map page", caught);
-            }
+            public void onAllowed() {
+                mainLayoutPanel.remove(permissionLabel);
 
-            @Override
-            public void onSuccess(GeoSearchResult result) {
-                listResults(result);
+                dispatch.execute(new GeoSearch(), new AsyncCallback<GeoSearchResult>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error geosearching in map page", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(GeoSearchResult result) {
+                        listResults(result);
+                    }
+                });
             }
         });
     }
@@ -124,6 +138,8 @@ public class MapPage extends Page {
      */
     @Override
     public void layout() {
+        permissionLabel = new Label("We are sorry, but you don't have the proper permissions to view gelocation information.");
+        mainLayoutPanel.add(permissionLabel);
         map = new MapWidget();
         map.setSize("950px", "500px");
         map.setUIToDefault();
