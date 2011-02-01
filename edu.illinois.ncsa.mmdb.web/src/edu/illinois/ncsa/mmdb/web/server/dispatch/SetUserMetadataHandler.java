@@ -101,12 +101,12 @@ public class SetUserMetadataHandler implements ActionHandler<SetUserMetadata, Em
 
             // attempt to refetch the bean
             try {
-                TupeloStore.refetch(subject);
+                TupeloStore.refetch(action.getUri());
             } catch (Exception x) {
                 x.printStackTrace();
             }
 
-            TupeloStore.getInstance().changed(subject.getString());
+            TupeloStore.getInstance().changed(action.getUri());
 
             return new EmptyResult();
         } catch (Exception x) {

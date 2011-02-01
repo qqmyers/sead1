@@ -79,6 +79,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSubclasses;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSubclassesResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
@@ -86,6 +88,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.Section;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
@@ -407,26 +410,49 @@ public class UserMetadataWidget extends Composite {
         final String metadataUri = inputField.getUri();
         final String property = fieldChoice.getValue(fieldChoice.getSelectedIndex());
         // TODO pass section value if selected to backend
-        final String section = inputField.getSectionValue(); // null if section not specified
+        //final String section = inputField.getSectionUri(); // null if section not specified
 
-        SetUserMetadata prop;
+        final GetSection gs = new GetSection();
+        gs.setUri(uri); // dataset uri
+        gs.setMarker(inputField.getSectionMarker());
+        // null if no section specified; the getsection handler will respond with a single section uri
+        // equal to the dataseturi
 
-        if (metadataUri == null) {
-            GWT.log("Adding new metadata: " + uri + " | " + property + " | " + text);
-            prop = new SetUserMetadata(uri, property, text);
-        } else {
-            GWT.log("Adding new metadata: " + uri + " | " + property + " | " + metadataUri);
-            prop = new SetUserMetadata(uri, property, metadataUri, true);
-        }
+        dispatch.execute(gs, new AsyncCallback<GetSectionResult>() {
+            @Override
+            public void onSuccess(GetSectionResult result) {
+                SetUserMetadata prop;
 
-        dispatch.execute(prop, new AsyncCallback<EmptyResult>() {
-            public void onFailure(Throwable caught) {
-                GWT.log("Failed adding a new entry to the list", caught);
+                for (Section s : result.getSections() ) {
+                    String sectionUri = s.getUri();
+                    if (metadataUri == null) {
+                        GWT.log("Adding new metadata: " + sectionUri + " | " + property + " | " + text);
+                        prop = new SetUserMetadata(uri, property, text);
+                    } else {
+                        GWT.log("Adding new metadata: " + sectionUri + " | " + property + " | " + metadataUri);
+                        prop = new SetUserMetadata(uri, property, metadataUri, true);
+                    }
+                    prop.setSectionUri(sectionUri);
+
+                    dispatch.execute(prop, new AsyncCallback<EmptyResult>() {
+                        public void onFailure(Throwable caught) {
+                            GWT.log("Failed adding a new entry to the list", caught);
+                        }
+
+                        public void onSuccess(EmptyResult result) {
+                            GWT.log("User metadata field was successfully set");
+                            refresh();
+                            // FIXME this will refresh once per section!
+                        }
+                    });
+                }
             }
 
-            public void onSuccess(EmptyResult result) {
-                GWT.log("User metadata field was successfully set");
-                refresh();
+            @Override
+            public void onFailure(Throwable caught) {
+                // the section marker doesn't match any sections
+                ConfirmDialog okay = new ConfirmDialog("Error", "Unrecognized section: " + gs.getMarker(), false);
+                okay.getOkText().setText("OK");
             }
         });
     }
@@ -564,7 +590,7 @@ public class UserMetadataWidget extends Composite {
 
         abstract String getUri();
 
-        public String getSectionValue() {
+        public String getSectionMarker() {
             if (sectionButton.getValue()) {
                 return sectionTextBox.getValue();
             } else {
