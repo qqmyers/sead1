@@ -39,7 +39,6 @@
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -100,6 +99,7 @@ public class UserMetadataWidget extends Composite {
     FlexTable                              fieldTable;
     Map<String, String>                    labels     = new HashMap<String, String>();
     Map<String, Integer>                   indexLabel = new HashMap<String, Integer>();
+    Map<String, Integer>                   listLabel  = new HashMap<String, Integer>();
     private final SimplePanel              newFieldPanel;
     protected InputField                   inputField;
     protected SortedSet<UserMetadataField> availableFields;
@@ -309,13 +309,14 @@ public class UserMetadataWidget extends Composite {
             fieldTable.insertRow(row);
             // field name
             Label predicateLabel = new Label(label);
+            final String value = values.get(i);
             predicateLabel.setTitle(predicate);
             fieldTable.setWidget(row, 0, predicateLabel);
             if (i != 0) {
                 predicateLabel.addStyleName("hidden");
             }
             // field value
-            fieldTable.setWidget(row, 1, new Label(values.get(i)));
+            fieldTable.setWidget(row, 1, new Label(value));
 
             //placeholder for Applies To
             fieldTable.setWidget(row, 2, new Label("Document"));
@@ -324,15 +325,17 @@ public class UserMetadataWidget extends Composite {
                 FlowPanel links = new FlowPanel();
                 // edit link
                 final Anchor editAnchor = new Anchor("Edit");
+                editAnchor.setTitle("Edit the value for this property");
                 editAnchor.addStyleName("metadataTableAction");
                 editAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        editValue(predicate, label, values);
+                        editValue(predicate, label, value);
                     }
                 });
                 links.add(editAnchor);
                 // remove link
                 Anchor removeAnchor = new Anchor("Remove");
+                removeAnchor.setTitle("Remove this property from your dataset");
                 removeAnchor.addStyleName("metadataTableAction");
                 removeAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
@@ -474,20 +477,17 @@ public class UserMetadataWidget extends Composite {
     }
 
     /**
-     * Edit value
+     * Edit value of the property
      * 
      * @param property
      */
-    private void editValue(final String property, String label, final Collection<String> values) {
-        //for (String value : values ) {
-        //    valueText.setText(value);
-        //}
-        //valueText.setFocus(true);
+    private void editValue(final String property, String label, final String value) {
 
-        //fieldChoice.setItemText(fieldChoice., "HELLO");
         fieldChoice.setSelectedIndex(indexLabel.get(property));
 
         changeHandler();
+        inputField.setValue(value);
+        inputField.addAnchor.setText("Edit");
 
     }
 
@@ -516,6 +516,7 @@ public class UserMetadataWidget extends Composite {
         private final TextBox             sectionTextBox;
         private final RadioButton         sectionButton;
         private final RadioButton         documentButton;
+        public Anchor                     addAnchor;
 
         public InputField(UserMetadataField userMetadataField, ClickHandler addHandler, ClickHandler clearHandler) {
             this.userMetadataField = userMetadataField;
@@ -526,7 +527,7 @@ public class UserMetadataWidget extends Composite {
 
             layout.setWidget(0, 0, createInputWidget());
 
-            Anchor addAnchor = new Anchor("Add");
+            addAnchor = new Anchor("Add");
             addAnchor.addClickHandler(addHandler);
             layout.setWidget(0, 1, addAnchor);
             Anchor clearAnchor = new Anchor("Clear");
@@ -593,7 +594,6 @@ public class UserMetadataWidget extends Composite {
             // TODO Auto-generated method stub
 
         }
-
     }
 
     class PlainField extends InputField {
@@ -607,6 +607,12 @@ public class UserMetadataWidget extends Composite {
         @Override
         public String getValue() {
             return textBox.getValue();
+        }
+
+        @Override
+        public void setValue(String value) {
+            textBox.setValue(value);
+            textBox.setFocus(true);
         }
 
         @Override
@@ -637,12 +643,21 @@ public class UserMetadataWidget extends Composite {
         }
 
         @Override
+        public void setValue(String value) {
+            listBox.setSelectedIndex(listLabel.get(value));
+            listBox.setFocus(true);
+        }
+
+        @Override
         Widget createInputWidget() {
             listBox = new ListBox();
             listBox.setWidth("500px");
             listBox.addItem("Select...", "");
+            int count = 1;
             for (NamedThing namedThing : userMetadataField.getRange() ) {
                 listBox.addItem(namedThing.getName(), namedThing.getUri());
+                listLabel.put(namedThing.getName(), count);
+                count++;
             }
             return listBox;
         }
@@ -719,6 +734,12 @@ public class UserMetadataWidget extends Composite {
         @Override
         public String getValue() {
             return tree.getSelectedItem().getText();
+        }
+
+        @Override
+        public void setValue(String value) {
+            tree.setFocus(true);
+
         }
 
         @Override
