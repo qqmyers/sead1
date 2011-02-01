@@ -250,6 +250,14 @@ a:hover {
 	color: #505050; 
 }
 
+.Java3DPreview {
+	margin:0 auto; 
+	width:480px; 
+	height:360px; 
+	border:solid 1px #000;
+	border-color:#A8A8A8;
+}
+
 /* ----------------------------------------------------------------------
  * Dataset Page Right Side
  * ---------------------------------------------------------------------- */
