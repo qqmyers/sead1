@@ -39,10 +39,10 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
     private final Image       nextImage;
 
     /** What page are we looking at? */
-    private TextBox           currPage;
+    private final TextBox     currPage;
 
     /** How many pages are there? */
-    private Label             maxPage;
+    private final Label       maxPage;
 
     public PreviewMultiImageBeanWidget(HandlerManager eventBus) {
         super(eventBus);
@@ -92,6 +92,7 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
 
         hp.add(new Label("Page "));
         currPage = new TextBox();
+        currPage.setVisibleLength(4);
         hp.add(currPage);
         hp.add(new Label("of "));
         maxPage = new Label();
@@ -130,7 +131,7 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         String[] text = section.split("\\D"); //$NON-NLS-1$
         for (String x : text ) {
             try {
-                page = Integer.parseInt(x);
+                page = Integer.parseInt(x) - 1;
                 break;
             } catch (NumberFormatException e) {
             }
