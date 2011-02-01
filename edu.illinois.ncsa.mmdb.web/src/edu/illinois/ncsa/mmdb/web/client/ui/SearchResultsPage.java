@@ -51,8 +51,8 @@ import com.google.gwt.user.client.ui.HTML;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.PagingSearchResultsTableView;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHit;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHitResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Search;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchResult;
@@ -142,8 +142,8 @@ public class SearchResultsPage extends Page {
 
         final List<String> hits = result.getHits();
         for (final String hit : hits ) {
-            dispatchAsync.execute(new GetDataset(hit),
-                    new AsyncCallback<GetDatasetResult>() {
+            dispatchAsync.execute(new GetSearchHit(hit),
+                    new AsyncCallback<GetSearchHitResult>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -151,15 +151,22 @@ public class SearchResultsPage extends Page {
                         }
 
                         @Override
-                        public void onSuccess(GetDatasetResult result) {
-                            DatasetBean dataset = result.getDataset();
+                        public void onSuccess(GetSearchHitResult result) {
                             AddNewDatasetEvent event = new AddNewDatasetEvent();
-                            event.setDataset(dataset);
-                            int position = hits.indexOf(hit);
-                            event.setPosition(position);
-                            MMDB.eventBus.fireEvent(event);
-                            GWT.log("Event add dataset " + dataset.getTitle() +
-                                    " with position " + position + " sent", null);
+                            if (result.getSectionUri() != null) {
+                                event.setSectionUri(result.getSectionUri());
+                                event.setSectionLabel(result.getSectionLabel());
+                                event.setSectionMarker(result.getSectionMarker());
+                            }
+                            if (result.getDataset() != null) {
+                                DatasetBean dataset = result.getDataset();
+                                event.setDataset(dataset);
+                                int position = hits.indexOf(hit);
+                                event.setPosition(position);
+                                MMDB.eventBus.fireEvent(event);
+                                GWT.log("Event add dataset " + dataset.getTitle() +
+                                        " with position " + position + " sent", null);
+                            }
                         }
                     });
         }

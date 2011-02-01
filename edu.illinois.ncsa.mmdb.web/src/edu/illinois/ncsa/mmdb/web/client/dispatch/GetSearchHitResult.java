@@ -39,45 +39,41 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.client.event;
+package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import java.util.Collection;
+import java.util.HashSet;
 
-import com.google.gwt.event.shared.GwtEvent;
-
+import net.customware.gwt.dispatch.shared.Result;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
+import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
 /**
- * Triggered when a new dataset is added to the interface.
+ * Return information about a hit from a search.
  * 
- * @author Luigi Marini
+ * @author Luigi Marini <lmarini@ncsa.illinois.edu>
  * 
  */
-public class AddNewDatasetEvent extends GwtEvent<AddNewDatasetHandler> {
+public class GetSearchHitResult implements Result {
 
-    public static final GwtEvent.Type<AddNewDatasetHandler> TYPE     = new GwtEvent.Type<AddNewDatasetHandler>();
+    private static final long       serialVersionUID = -86488013616325220L;
 
-    private DatasetBean                                     dataset  = new DatasetBean();
+    private DatasetBean             dataset;
 
-    private Collection<PreviewImageBean>                    previews;
+    private Collection<PreviewBean> previews;
 
-    private int                                             position = -1;
-    /** Optional section information **/
-    private String                                          sectionUri;
-    /** Optional section information **/
-    private String                                          sectionLabel;
-    /** Optional section information **/
-    private String                                          sectionMarker;
+    private String                  sectionUri;
 
-    @Override
-    protected void dispatch(AddNewDatasetHandler handler) {
-        handler.onAddNewDataset(this);
+    private String                  sectionLabel;
+
+    private String                  sectionMarker;
+
+    public GetSearchHitResult() {
     }
 
-    @Override
-    public GwtEvent.Type<AddNewDatasetHandler> getAssociatedType() {
-        return TYPE;
+    public GetSearchHitResult(DatasetBean datasetBean, Collection<PreviewBean> previews) {
+        setDataset(datasetBean);
+        setPreviews(previews);
     }
 
     public void setDataset(DatasetBean dataset) {
@@ -88,20 +84,15 @@ public class AddNewDatasetEvent extends GwtEvent<AddNewDatasetHandler> {
         return dataset;
     }
 
-    public void setPreviews(Collection<PreviewImageBean> previews) {
+    public void setPreviews(Collection<PreviewBean> previews) {
         this.previews = previews;
     }
 
-    public Collection<PreviewImageBean> getPreviews() {
+    public Collection<PreviewBean> getPreviews() {
+        if (previews == null) {
+            return new HashSet<PreviewBean>();
+        }
         return previews;
-    }
-
-    public void setPosition(int position) {
-        this.position = position;
-    }
-
-    public int getPosition() {
-        return position;
     }
 
     public void setSectionUri(String sectionUri) {
@@ -127,5 +118,4 @@ public class AddNewDatasetEvent extends GwtEvent<AddNewDatasetHandler> {
     public String getSectionMarker() {
         return sectionMarker;
     }
-
 }
