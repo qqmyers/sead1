@@ -2,6 +2,7 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 public class UserMetadataValue extends NamedThing {
     String sectionUri;
+    String sectionMarker;
 
     public UserMetadataValue() {
         super();
@@ -23,4 +24,13 @@ public class UserMetadataValue extends NamedThing {
     public void setSectionUri(String sectionUri) {
         this.sectionUri = sectionUri;
     }
+
+    public String getSectionMarker() {
+        return sectionMarker;
+    }
+
+    public void setSectionMarker(String sectionMarker) {
+        this.sectionMarker = sectionMarker;
+    }
+
 }

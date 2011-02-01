@@ -39,6 +39,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -243,11 +244,7 @@ public class UserMetadataWidget extends Composite {
                                 for (String predicate : predicates ) {
                                     String label = result.getThingNames().get(predicate);
                                     SortedSet<UserMetadataValue> values = NamedThing.orderByName(result.getValues().get(predicate));
-                                    List<String> displayedValues = new ArrayList<String>();
-                                    for (NamedThing nt : values ) {
-                                        displayedValues.add(nt.getName()); // name of thing, or literal value
-                                    }
-                                    addNewField(predicate, label, displayedValues, canEdit);
+                                    addNewField(predicate, label, values, canEdit);
                                 }
                             }
                         }
@@ -255,18 +252,6 @@ public class UserMetadataWidget extends Composite {
                 }
             }
         });
-    }
-
-    /**
-     * 
-     * @param predicate
-     * @param label
-     * @param value
-     */
-    private void setProperty(String predicate, String label, String value) {
-        List<String> v = new ArrayList<String>();
-        v.add(value);
-        addNewField(predicate, label, v, true);
     }
 
     /** number of fields set */
@@ -300,7 +285,7 @@ public class UserMetadataWidget extends Composite {
      * @param label
      * @param values
      */
-    private void addNewField(final String predicate, final String label, final List<String> values, boolean canEdit) {
+    private void addNewField(final String predicate, final String label, final Collection<UserMetadataValue> values, boolean canEdit) {
 
         removeNoFields();
         int row = getRowForField(predicate);
@@ -309,21 +294,25 @@ public class UserMetadataWidget extends Composite {
             row = fieldTable.getRowCount();
         }
 
-        for (int i = 0; i < values.size(); i++ ) {
+        int i = 0;
+        for (final UserMetadataValue value : values ) {
             fieldTable.insertRow(row);
             // field name
             Label predicateLabel = new Label(label);
-            final String value = values.get(i);
             predicateLabel.setTitle(predicate);
             fieldTable.setWidget(row, 0, predicateLabel);
-            if (i != 0) {
+            if (i++ != 0) {
                 predicateLabel.addStyleName("hidden");
             }
             // field value
-            fieldTable.setWidget(row, 1, new Label(value));
+            fieldTable.setWidget(row, 1, new Label(value.getName()));
 
             //placeholder for Applies To
-            fieldTable.setWidget(row, 2, new Label("Document"));
+            String sectionLabel = value.getSectionMarker();
+            if (sectionLabel == null) {
+                sectionLabel = "Document";
+            }
+            fieldTable.setWidget(row, 2, new Label(sectionLabel));
 
             if (canEdit) {
                 FlowPanel links = new FlowPanel();
@@ -333,7 +322,7 @@ public class UserMetadataWidget extends Composite {
                 editAnchor.addStyleName("metadataTableAction");
                 editAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        editValue(predicate, label, value);
+                        editValue(predicate, label, value.getName());
                     }
                 });
                 links.add(editAnchor);

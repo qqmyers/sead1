@@ -98,18 +98,27 @@ public class GetUserMetadataFieldsHandler implements
     }
 
     private Collection<UserMetadataValue> getUserMetadataValues(Thing t, Resource predicate) throws OperatorException {
+        return getUserMetadataValues(t, predicate, null);
+    }
+
+    private Collection<UserMetadataValue> getUserMetadataValues(Thing t, Resource predicate, String marker) throws OperatorException {
         Collection<UserMetadataValue> values = new LinkedList<UserMetadataValue>();
         for (Object value : t.getValues(predicate) ) {
+            UserMetadataValue umv = null;
             if (value instanceof Resource) {
                 Resource v = (Resource) value;
                 if (v instanceof UriRef) {
-                    values.add(new UserMetadataValue(v.getString(), nameOf(v)));
+                    umv = new UserMetadataValue(v.getString(), nameOf(v));
                 } else {
-                    values.add(new UserMetadataValue(null, v.getString()));
+                    umv = new UserMetadataValue(null, v.getString());
                 }
             } else {
-                values.add(new UserMetadataValue(null, value.toString()));
+                umv = new UserMetadataValue(null, value.toString());
             }
+            if (marker != null) {
+                umv.setSectionMarker(marker);
+            }
+            values.add(umv);
         }
         return values;
     }
@@ -132,10 +141,11 @@ public class GetUserMetadataFieldsHandler implements
                 Unifier u = new Unifier();
                 u.addPattern(subject, MMDB.METADATA_HASSECTION, "section");
                 u.addPattern("section", predicate, "value");
-                u.setColumnNames("section");
+                u.addPattern("section", MMDB.SECTION_MARKER, "marker");
+                u.setColumnNames("section", "marker");
                 for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "section") ) {
                     Thing st = ts.fetchThing(row.get(0));
-                    values.addAll(getUserMetadataValues(st, predicate));
+                    values.addAll(getUserMetadataValues(st, predicate, row.get(1).getString()));
                 }
                 if (values.size() > 0) {
                     labels.put(field.getUri(), field.getLabel()); // remember the label for this one
