@@ -88,6 +88,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
 
 public class UserMetadataWidget extends Composite {
     String                                 uri;
@@ -238,7 +239,7 @@ public class UserMetadataWidget extends Composite {
                             } else {
                                 for (String predicate : predicates ) {
                                     String label = result.getThingNames().get(predicate);
-                                    SortedSet<NamedThing> values = NamedThing.orderByName(result.getValues().get(predicate));
+                                    SortedSet<UserMetadataValue> values = NamedThing.orderByName(result.getValues().get(predicate));
                                     List<String> displayedValues = new ArrayList<String>();
                                     for (NamedThing nt : values ) {
                                         displayedValues.add(nt.getName()); // name of thing, or literal value

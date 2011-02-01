@@ -43,13 +43,13 @@ import java.util.Map;
 
 @SuppressWarnings("serial")
 public class GetUserMetadataFieldsResult extends ListNamedThingsResult {
-    Map<String, Collection<NamedThing>> values;
+    Map<String, Collection<UserMetadataValue>> values;
 
-    public Map<String, Collection<NamedThing>> getValues() {
+    public Map<String, Collection<UserMetadataValue>> getValues() {
         return values;
     }
 
-    public void setValues(Map<String, Collection<NamedThing>> values) {
+    public void setValues(Map<String, Collection<UserMetadataValue>> values) {
         this.values = values;
     }
 

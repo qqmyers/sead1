@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -71,6 +72,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
@@ -276,7 +278,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
             return "";
         }
         List<String> allValues = new LinkedList<String>();
-        for (Map.Entry<String, Collection<NamedThing>> entry : gumfr.getValues().entrySet() ) {
+        for (Entry<String, Collection<UserMetadataValue>> entry : gumfr.getValues().entrySet() ) {
             //log.debug(entry.getKey()+"="+entry.getValue());
             for (NamedThing v : entry.getValue() ) {
                 allValues.add(v.getName());

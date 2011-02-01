@@ -68,26 +68,29 @@ public class SetUserMetadataHandler implements ActionHandler<SetUserMetadata, Em
     private static Log log = LogFactory.getLog(SetUserMetadataHandler.class);
 
     @Override
-    public EmptyResult execute(SetUserMetadata arg0, ExecutionContext arg1)
+    public EmptyResult execute(SetUserMetadata action, ExecutionContext arg1)
             throws ActionException {
         // only allow user to edit user metadata fields
         MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
         try {
-            if (!rbac.checkPermission(arg0.getUser(), arg0.getUri(), Permission.EDIT_USER_METADATA)) {
+            if (!rbac.checkPermission(action.getUser(), action.getUri(), Permission.EDIT_USER_METADATA)) {
                 throw new ActionException("Unauthorized");
             }
         } catch (RBACException e) {
             throw new ActionException("access control failure", e);
         }
         try {
-            Resource subject = Resource.uriRef(arg0.getUri());
-            Resource predicate = Resource.uriRef(arg0.getPropertyUri());
-            Collection<String> values = arg0.getValues();
+            Resource subject = Resource.uriRef(action.getUri());
+            if (action.getSectionUri() != null) {
+                subject = Resource.uriRef(action.getSectionUri());
+            }
+            Resource predicate = Resource.uriRef(action.getPropertyUri());
+            Collection<String> values = action.getValues();
 
             //
             ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
             for (String value : values ) {
-                if (arg0.isUriType()) {
+                if (action.isUriType()) {
                     ts.addValue(subject, predicate, Resource.uriRef(value));
                 } else {
                     ts.addValue(subject, predicate, value);
@@ -107,7 +110,7 @@ public class SetUserMetadataHandler implements ActionHandler<SetUserMetadata, Em
 
             return new EmptyResult();
         } catch (Exception x) {
-            log.error("Error setting metadata on " + arg0.getUri(), x);
+            log.error("Error setting metadata on " + action.getUri(), x);
             throw new ActionException("failed", x);
         }
     }

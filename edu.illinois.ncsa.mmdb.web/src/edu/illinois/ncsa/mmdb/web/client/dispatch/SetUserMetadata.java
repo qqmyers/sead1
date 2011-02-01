@@ -48,6 +48,7 @@ public class SetUserMetadata extends SubjectAction<EmptyResult> {
 	 */
     private static final long serialVersionUID = -6257131114264143785L;
 
+    String                    sectionUri;
     String                    propertyUri;
     boolean                   isUriType;
 
@@ -108,4 +109,13 @@ public class SetUserMetadata extends SubjectAction<EmptyResult> {
     public void setUriType(boolean isUriType) {
         this.isUriType = isUriType;
     }
+
+    public String getSectionUri() {
+        return sectionUri;
+    }
+
+    public void setSectionUri(String sectionUri) {
+        this.sectionUri = sectionUri;
+    }
+
 }

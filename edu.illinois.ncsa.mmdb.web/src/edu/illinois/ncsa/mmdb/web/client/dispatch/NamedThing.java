@@ -40,10 +40,10 @@ public class NamedThing implements Serializable {
         this.name = name;
     }
 
-    public static SortedSet<NamedThing> orderByName(Collection<NamedThing> things) {
-        SortedSet<NamedThing> sorted = new TreeSet<NamedThing>(new Comparator<NamedThing>() {
+    public static <T extends NamedThing> SortedSet<T> orderByName(Collection<T> things) {
+        SortedSet<T> sorted = new TreeSet<T>(new Comparator<T>() {
             @Override
-            public int compare(NamedThing k1, NamedThing k2) {
+            public int compare(T k1, T k2) {
                 int c = k1.getName().compareTo(k2.getName());
                 if (c == 0) {
                     return k1.getUri().compareTo(k2.getUri());

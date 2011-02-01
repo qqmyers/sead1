@@ -41,7 +41,6 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
@@ -63,8 +62,8 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
@@ -98,29 +97,45 @@ public class GetUserMetadataFieldsHandler implements
         return uri.getString();
     }
 
+    private Collection<UserMetadataValue> getUserMetadataValues(Thing t, Resource predicate) throws OperatorException {
+        Collection<UserMetadataValue> values = new LinkedList<UserMetadataValue>();
+        for (Object value : t.getValues(predicate) ) {
+            if (value instanceof Resource) {
+                Resource v = (Resource) value;
+                if (v instanceof UriRef) {
+                    values.add(new UserMetadataValue(v.getString(), nameOf(v)));
+                } else {
+                    values.add(new UserMetadataValue(null, v.getString()));
+                }
+            } else {
+                values.add(new UserMetadataValue(null, value.toString()));
+            }
+        }
+        return values;
+    }
+
     @Override
-    public GetUserMetadataFieldsResult execute(GetUserMetadataFields arg0,
+    public GetUserMetadataFieldsResult execute(GetUserMetadataFields action,
             ExecutionContext arg1) throws ActionException {
 
         try {
             Map<String, String> labels = new HashMap<String, String>();
-            Map<String, Collection<NamedThing>> allValues = new HashMap<String, Collection<NamedThing>>();
+            Map<String, Collection<UserMetadataValue>> allValues = new HashMap<String, Collection<UserMetadataValue>>();
             ThingSession ts = new ThingSession(TupeloStore.getInstance()
                     .getContext());
-            Thing t = ts.fetchThing(Resource.uriRef(arg0.getUri()));
+            Resource subject = Resource.uriRef(action.getUri());
+            Thing t = ts.fetchThing(subject);
             for (UserMetadataField field : ListUserMetadataFieldsHandler.listUserMetadataFields().getFieldsSortedByName() ) {
-                List<NamedThing> values = new LinkedList<NamedThing>();
-                for (Object value : t.getValues(Resource.uriRef(field.getUri())) ) {
-                    if (value instanceof Resource) {
-                        Resource v = (Resource) value;
-                        if (v instanceof UriRef) {
-                            values.add(new NamedThing(v.getString(), nameOf(v)));
-                        } else {
-                            values.add(new NamedThing(null, v.getString()));
-                        }
-                    } else {
-                        values.add(new NamedThing(null, value.toString()));
-                    }
+                Resource predicate = Resource.uriRef(field.getUri());
+                Collection<UserMetadataValue> values = getUserMetadataValues(t, predicate);
+                // now look for sections with this field set; this is gonna produce lots of traffic
+                Unifier u = new Unifier();
+                u.addPattern(subject, MMDB.METADATA_HASSECTION, "section");
+                u.addPattern("section", predicate, "value");
+                u.setColumnNames("section");
+                for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "section") ) {
+                    Thing st = ts.fetchThing(row.get(0));
+                    values.addAll(getUserMetadataValues(st, predicate));
                 }
                 if (values.size() > 0) {
                     labels.put(field.getUri(), field.getLabel()); // remember the label for this one
@@ -134,7 +149,7 @@ public class GetUserMetadataFieldsHandler implements
             return r;
         } catch (Exception x) {
             log.error("Error getting metadata specified by user for "
-                    + arg0.getUri());
+                    + action.getUri());
             throw new ActionException("failed", x);
         }
     }
