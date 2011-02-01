@@ -44,6 +44,7 @@ import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
@@ -68,17 +69,11 @@ public class PreviewPanel extends Composite {
     /** Mapping from preview to widget */
     private static List<PreviewBeanWidget>           widgets;
 
+    /** Check to see if all previews are added. */
+    private static boolean                           isInitialized = false;
+
     /** Panel that will hold the actual prevew widget */
     private AbsolutePanel                            previewPanel;
-
-    static {
-        addWidget(new PreviewVideoBeanWidget());
-        addWidget(new PreviewAudioBeanWidget());
-        addWidget(new PreviewDocumentBeanWidget());
-        addWidget(new PreviewImageBeanWidget());
-        addWidget(new PreviewPyramidBeanWidget());
-        addWidget(new PreviewMultiImageBeanWidget());
-    }
 
     static public void addWidget(PreviewBeanWidget<? extends PreviewBean> widget) {
         if (widgets == null) {
@@ -87,7 +82,22 @@ public class PreviewPanel extends Composite {
         widgets.add(widget);
     }
 
-    public PreviewPanel() {
+    static private void initializePreviews(HandlerManager eventBus) {
+        if (isInitialized) {
+            return;
+        }
+        isInitialized = true;
+
+        addWidget(new PreviewVideoBeanWidget(eventBus));
+        addWidget(new PreviewAudioBeanWidget(eventBus));
+        addWidget(new PreviewDocumentBeanWidget(eventBus));
+        addWidget(new PreviewImageBeanWidget(eventBus));
+        addWidget(new PreviewPyramidBeanWidget(eventBus));
+        addWidget(new PreviewMultiImageBeanWidget(eventBus));
+    }
+
+    public PreviewPanel(HandlerManager eventBus) {
+        initializePreviews(eventBus);
         previewWidget = null;
     }
 

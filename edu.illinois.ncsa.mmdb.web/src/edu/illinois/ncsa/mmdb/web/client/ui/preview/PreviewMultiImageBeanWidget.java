@@ -2,11 +2,16 @@ package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.common.RestEndpoints;
@@ -24,26 +29,33 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
     /** current image currently shown */
     private int               current    = 0;
 
-    /** What image are we looking at? */
-    private final Label       page;
-
     /** Image that is shown */
     private final Image       image;
 
+    /** Previous page navigation Icon */
     private final Image       prevImage;
 
+    /** Next page navigation Icon */
     private final Image       nextImage;
 
-    public PreviewMultiImageBeanWidget() {
+    /** What page are we looking at? */
+    private TextBox           currPage;
+
+    /** How many pages are there? */
+    private Label             maxPage;
+
+    public PreviewMultiImageBeanWidget(HandlerManager eventBus) {
+        super(eventBus);
+
         VerticalPanel vp = new VerticalPanel();
-        vp.addStyleName("centered");
+        vp.addStyleName("centered"); //$NON-NLS-1$
 
         HorizontalPanel hp = new HorizontalPanel();
-        hp.addStyleName("centered");
+        hp.addStyleName("centered"); //$NON-NLS-1$
         vp.add(hp);
 
-        prevImage = new Image("images/go-previous-gray.png");
-        prevImage.addStyleName("previewActionLink");
+        prevImage = new Image("images/go-previous-gray.png"); //$NON-NLS-1$
+        prevImage.addStyleName("previewActionLink"); //$NON-NLS-1$
         prevImage.setTitle("Previous");
         prevImage.addClickHandler(new ClickHandler() {
 
@@ -60,8 +72,8 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         image.getElement().setId(DOM.createUniqueId());
         hp.add(image);
 
-        nextImage = new Image("images/go-next-gray.png");
-        nextImage.addStyleName("previewActionLink");
+        nextImage = new Image("images/go-next-gray.png"); //$NON-NLS-1$
+        nextImage.addStyleName("previewActionLink"); //$NON-NLS-1$
         nextImage.setTitle("Next");
         nextImage.addClickHandler(new ClickHandler() {
 
@@ -74,16 +86,32 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         hp.add(nextImage);
         hp.setCellVerticalAlignment(nextImage, HasVerticalAlignment.ALIGN_MIDDLE);
 
-        page = new Label("");
-        page.addStyleName("centered");
-        vp.add(page);
+        hp = new HorizontalPanel();
+        hp.addStyleName("centered"); //$NON-NLS-1$
+        vp.add(hp);
+
+        hp.add(new Label("Page "));
+        currPage = new TextBox();
+        hp.add(currPage);
+        hp.add(new Label("of "));
+        maxPage = new Label();
+        hp.add(maxPage);
+
+        currPage.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getCharCode() == KeyCodes.KEY_ENTER) {
+                    setSection(currPage.getText());
+                }
+            }
+        });
 
         setWidget(vp);
     }
 
     @Override
     public PreviewBeanWidget<PreviewMultiImageBean> newWidget() {
-        return new PreviewMultiImageBeanWidget();
+        return new PreviewMultiImageBeanWidget(eventBus);
     }
 
     @Override
@@ -97,12 +125,29 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
     }
 
     @Override
-    public String getCurrent() {
+    public void setSection(String section) {
+        int page = current;
+        String[] text = section.split("\\D"); //$NON-NLS-1$
+        for (String x : text ) {
+            try {
+                page = Integer.parseInt(x);
+                break;
+            } catch (NumberFormatException e) {
+            }
+        }
+        if (page != current) {
+            current = page;
+            show();
+        }
+    }
+
+    @Override
+    public String getSection() {
         return Integer.toString(current + 1);
     }
 
     @Override
-    public void show() {
+    protected void showSection() {
         int maximage = (getPreviewBean().getImages().size() - 1);
         if (maximage < 0) {
             return;
@@ -115,15 +160,15 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         }
 
         if (current == 0) {
-            prevImage.addStyleName("hidden");
+            prevImage.addStyleName("hidden"); //$NON-NLS-1$
         } else if (maximage != 0) {
-            prevImage.removeStyleName("hidden");
+            prevImage.removeStyleName("hidden"); //$NON-NLS-1$
         }
 
         if (current == maximage) {
-            nextImage.addStyleName("hidden");
+            nextImage.addStyleName("hidden"); //$NON-NLS-1$
         } else if (maximage != 0) {
-            nextImage.removeStyleName("hidden");
+            nextImage.removeStyleName("hidden"); //$NON-NLS-1$
         }
 
         PreviewImageBean pib = getPreviewBean().getImages().get(current);
@@ -142,7 +187,9 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         }
 
         showImage(RestEndpoints.BLOB_URL + pib.getUri(), image.getElement().getId(), Long.toString(w), Long.toString(h));
-        page.setText((current + 1) + " / " + (maximage + 1));
+
+        maxPage.setText(Integer.toString(maximage + 1));
+        currPage.setText(Integer.toString(current + 1));
     }
 
     public final native void showImage(String url, String id, String w, String h) /*-{

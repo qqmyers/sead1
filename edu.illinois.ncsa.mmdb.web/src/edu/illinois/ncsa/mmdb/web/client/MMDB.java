@@ -362,7 +362,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         rbac().doIfAllowed(Permission.VIEW_DATA, datasetUri, new AccessOrMessageCallback() {
             @Override
             public void onAllowed() {
-                DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync);
+                DatasetWidget datasetWidget = new DatasetWidget(dispatchAsync, eventBus);
                 mainContainer.clear();
                 mainContainer.add(datasetWidget);
                 if (datasetUri != null) {

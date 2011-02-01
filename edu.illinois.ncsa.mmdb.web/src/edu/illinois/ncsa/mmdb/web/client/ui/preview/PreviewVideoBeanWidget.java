@@ -1,5 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Label;
 
@@ -8,7 +9,9 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
 
 public class PreviewVideoBeanWidget extends PreviewBeanWidget<PreviewVideoBean> {
-    public PreviewVideoBeanWidget() {
+    public PreviewVideoBeanWidget(HandlerManager eventBus) {
+        super(eventBus);
+
         Label widget = new Label();
         widget.getElement().setId(DOM.createUniqueId());
         setWidget(widget);
@@ -16,7 +19,7 @@ public class PreviewVideoBeanWidget extends PreviewBeanWidget<PreviewVideoBean> 
 
     @Override
     public PreviewVideoBeanWidget newWidget() {
-        return new PreviewVideoBeanWidget();
+        return new PreviewVideoBeanWidget(eventBus);
     }
 
     public Class<? extends PreviewBean> getPreviewBeanClass() {
@@ -37,12 +40,16 @@ public class PreviewVideoBeanWidget extends PreviewBeanWidget<PreviewVideoBean> 
     }
 
     @Override
-    public String getCurrent() {
+    public void setSection(String section) {
+    }
+
+    @Override
+    public String getSection() {
         return "1"; //$NON-NLS-1$
     }
 
     @Override
-    public void show() {
+    protected void showSection() {
         String preview = null;
         long width = getPreviewBean().getWidth();
         long height = getPreviewBean().getHeight();

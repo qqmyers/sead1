@@ -1,5 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Image;
 
@@ -14,7 +15,9 @@ public class PreviewImageBeanWidget extends PreviewBeanWidget<PreviewImageBean> 
     /** maximum height of a preview image */
     private static final long MAX_HEIGHT = 600;
 
-    public PreviewImageBeanWidget() {
+    public PreviewImageBeanWidget(HandlerManager eventBus) {
+        super(eventBus);
+
         Image widget = new Image();
         widget.getElement().setId(DOM.createUniqueId());
         setWidget(widget);
@@ -22,7 +25,7 @@ public class PreviewImageBeanWidget extends PreviewBeanWidget<PreviewImageBean> 
 
     @Override
     public PreviewImageBeanWidget newWidget() {
-        return new PreviewImageBeanWidget();
+        return new PreviewImageBeanWidget(eventBus);
     }
 
     public Class<? extends PreviewBean> getPreviewBeanClass() {
@@ -43,12 +46,16 @@ public class PreviewImageBeanWidget extends PreviewBeanWidget<PreviewImageBean> 
     }
 
     @Override
-    public String getCurrent() {
+    public void setSection(String section) {
+    }
+
+    @Override
+    public String getSection() {
         return "1"; //$NON-NLS-1$
     }
 
     @Override
-    public void show() {
+    protected void showSection() {
         long w = getPreviewBean().getWidth();
         long h = getPreviewBean().getHeight();
         if (w > h) {

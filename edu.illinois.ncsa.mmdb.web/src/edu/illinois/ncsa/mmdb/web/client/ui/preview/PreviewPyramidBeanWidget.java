@@ -1,5 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Label;
@@ -9,7 +10,9 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.PreviewPyramidBean;
 
 public class PreviewPyramidBeanWidget extends PreviewBeanWidget<PreviewPyramidBean> {
-    public PreviewPyramidBeanWidget() {
+    public PreviewPyramidBeanWidget(HandlerManager eventBus) {
+        super(eventBus);
+
         Label widget = new Label();
         widget.addStyleName("seadragon"); //$NON-NLS-1$
         widget.getElement().setId(DOM.createUniqueId());
@@ -22,7 +25,7 @@ public class PreviewPyramidBeanWidget extends PreviewBeanWidget<PreviewPyramidBe
 
     @Override
     public PreviewPyramidBeanWidget newWidget() {
-        return new PreviewPyramidBeanWidget();
+        return new PreviewPyramidBeanWidget(eventBus);
     }
 
     @Override
@@ -31,12 +34,16 @@ public class PreviewPyramidBeanWidget extends PreviewBeanWidget<PreviewPyramidBe
     }
 
     @Override
-    public String getCurrent() {
+    public void setSection(String section) {
+    }
+
+    @Override
+    public String getSection() {
         return "1"; //$NON-NLS-1$
     }
 
     @Override
-    public void show() {
+    protected void showSection() {
         showSeadragon(RestEndpoints.PYRAMID_URL + URL.encodeComponent(getPreviewBean().getUri()) + "/xml", getWidgetID()); //$NON-NLS-1$
     }
 

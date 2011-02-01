@@ -1,17 +1,23 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Widget;
 
+import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEvent;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
 public abstract class PreviewBeanWidget<T extends PreviewBean> {
     /** preview bean that is rendered. */
-    private T      pb = null;
+    private T                      pb = null;
 
     /** the actual widget that will hold the preview */
-    private Widget widget;
+    private Widget                 widget;
 
-    public PreviewBeanWidget() {
+    /** eventbus that is used when a new section is selected */
+    protected final HandlerManager eventBus;
+
+    public PreviewBeanWidget(HandlerManager eventBus) {
+        this.eventBus = eventBus;
     }
 
     public void setPreviewBean(T pb) {
@@ -80,10 +86,19 @@ public abstract class PreviewBeanWidget<T extends PreviewBean> {
     }
 
     /**
-     * Called when the preview widget is shown.
+     * Called when the preview widget is shown. This will first call showSection
+     * followed by firing an event. If this function is overridden the new
+     * function should call fireSectionChanged.
      */
     public void show() {
+        showSection();
+        fireSectionChanged();
     }
+
+    /**
+     * This function is called when the actual widget should be rendered.
+     */
+    protected abstract void showSection();
 
     /**
      * Called when the preview widget is hidden.
@@ -92,11 +107,28 @@ public abstract class PreviewBeanWidget<T extends PreviewBean> {
     }
 
     /**
-     * Return the current location in the preview bean.
-     * 
-     * @return current location shown.
+     * Fires a new event with the new current section on the eventbus.
      */
-    public abstract String getCurrent();
+    public void fireSectionChanged() {
+        PreviewSectionChangedEvent event = new PreviewSectionChangedEvent();
+        event.setSection(getSection());
+        eventBus.fireEvent(new PreviewSectionChangedEvent());
+    }
+
+    /**
+     * Sets the current location in the preview bean.
+     * 
+     * @param section
+     *            the current section shown.
+     */
+    public abstract void setSection(String section);
+
+    /**
+     * Return the current section in the preview bean.
+     * 
+     * @return current section shown.
+     */
+    public abstract String getSection();
 
     /**
      * Label to be shown for this widget.

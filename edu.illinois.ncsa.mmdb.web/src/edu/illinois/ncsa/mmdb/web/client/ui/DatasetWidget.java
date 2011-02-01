@@ -48,6 +48,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -122,12 +123,16 @@ public class DatasetWidget extends Composite {
 
     private PreviewPanel            previewPanel;
 
+    /** eventbus that is used when a new section is selected */
+    protected final HandlerManager  eventBus;
+
     /**
      * 
      * @param dispatchAsync
      */
-    public DatasetWidget(MyDispatchAsync dispatchAsync) {
+    public DatasetWidget(MyDispatchAsync dispatchAsync, HandlerManager eventBus) {
         this.service = dispatchAsync;
+        this.eventBus = eventBus;
         rbac = new PermissionUtil(service);
 
         FlowPanel mainPanel = new FlowPanel();
@@ -224,7 +229,7 @@ public class DatasetWidget extends Composite {
         leftColumn.add(titlePanel);
 
         // preview - selection text and preview
-        previewPanel = new PreviewPanel();
+        previewPanel = new PreviewPanel(eventBus);
         previewPanel.drawPreview(result, leftColumn, uri);
 
         // dataset actions

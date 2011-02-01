@@ -1,6 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -15,7 +16,9 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.PreviewDocumentBean;
 
 public class PreviewDocumentBeanWidget extends PreviewBeanWidget<PreviewDocumentBean> {
-    public PreviewDocumentBeanWidget() {
+    public PreviewDocumentBeanWidget(HandlerManager eventBus) {
+        super(eventBus);
+
         HTML widget = new HTML();
         widget.getElement().setId(DOM.createUniqueId());
         setWidget(widget);
@@ -23,7 +26,7 @@ public class PreviewDocumentBeanWidget extends PreviewBeanWidget<PreviewDocument
 
     @Override
     public PreviewDocumentBeanWidget newWidget() {
-        return new PreviewDocumentBeanWidget();
+        return new PreviewDocumentBeanWidget(eventBus);
     }
 
     public Class<? extends PreviewBean> getPreviewBeanClass() {
@@ -44,12 +47,16 @@ public class PreviewDocumentBeanWidget extends PreviewBeanWidget<PreviewDocument
     }
 
     @Override
-    public String getCurrent() {
+    public void setSection(String section) {
+    }
+
+    @Override
+    public String getSection() {
         return "1"; //$NON-NLS-1$
     }
 
     @Override
-    public void show() {
+    protected void showSection() {
         String url = GWT.getHostPageBaseURL() + RestEndpoints.BLOB_URL + getPreviewBean().getUri();
 
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
