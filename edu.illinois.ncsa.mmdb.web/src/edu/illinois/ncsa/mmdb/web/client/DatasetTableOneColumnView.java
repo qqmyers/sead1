@@ -51,6 +51,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -271,7 +272,7 @@ public class DatasetTableOneColumnView extends DatasetTableView {
         setWidget(row, 1, verticalPanel);
 
         // page link
-        Hyperlink pagelink = new Hyperlink(sectionLabel + " " + sectionMarker, "dataset?id=" + id + "&section=" + sectionLabel + " " + sectionMarker);
+        Hyperlink pagelink = new Hyperlink(sectionLabel + " " + sectionMarker, URL.encode("dataset?id=" + id + "&section=" + sectionLabel + " " + sectionMarker));
         verticalPanel.add(pagelink);
 
         // title
