@@ -270,11 +270,13 @@ public class DatasetTableOneColumnView extends DatasetTableView {
 
         setWidget(row, 1, verticalPanel);
 
-        verticalPanel.add(new Label(sectionLabel + ": " + sectionMarker));
+        // page link
+        Hyperlink pagelink = new Hyperlink(sectionLabel + " " + sectionMarker, "dataset?id=" + id + "&section=" + sectionLabel + " " + sectionMarker);
+        verticalPanel.add(pagelink);
 
         // title
-        Hyperlink hyperlink = new Hyperlink(title, "dataset?id=" + id);
-        verticalPanel.add(hyperlink);
+        Hyperlink datasetHyperlink = new Hyperlink(title, "dataset?id=" + id);
+        verticalPanel.add(datasetHyperlink);
 
         // date
         verticalPanel.add(new Label(DATE_TIME_FORMAT.format(date)));
