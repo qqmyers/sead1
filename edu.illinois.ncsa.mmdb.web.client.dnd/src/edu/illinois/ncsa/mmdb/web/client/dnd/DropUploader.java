@@ -90,7 +90,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	private static final long serialVersionUID = 9000;
 	JSObject window = null;
 
-	private final String VERSION = "1545";
+	private final String VERSION = "1642";
 
 	@Override
 	public void init() {
@@ -320,31 +320,32 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}
 	}
 
-	String getSessionKey() throws HttpException, IOException {
+	String getSessionKey() throws IOException {
 		GetMethod get = new GetMethod();
 		setUrl(get);
 		HttpClient client = new HttpClient();
 		log("requesting session key ...");
-		client.executeMethod(get);
-		String s = get.getResponseBodyAsString();
-		String sessionKey = s.replaceFirst(".*\"([0-9a-f]+)\".*", "$1"); // FIXME
-																			// hack
-																			// to
-																			// parse
-																			// JSON
-		log("got session key " + sessionKey);
-		return sessionKey;
-	}
-
-	String getRedirectUrl(String queryUrl) throws HttpException, IOException {
-		GetMethod get = new GetMethod();
-		get.setURI(new HttpURL(queryUrl));
-		HttpClient client = new HttpClient();
-		log("requesting redirect url ...");
-		client.executeMethod(get);
-		String s = get.getResponseBodyAsString();
-		log("got redirect url " + s);
-		return s;
+		try {
+			client.executeMethod(get);
+		} catch (HttpException e) {
+			e.printStackTrace();
+			throw e;
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw e;
+		}
+		String s;
+		try {
+			s = get.getResponseBodyAsString();
+			String sessionKey = s.replaceFirst(".*\"([0-9a-f]+)\".*", "$1");
+			// FIXME hack to parse JSON
+			log("got session key " + sessionKey);
+			return sessionKey;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	public void update() {
@@ -438,7 +439,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}
 
 		String postBatch(List<File> batch, int offset, int nFiles)
-				throws Exception {
+				throws IOException, InterruptedException {
 			// acquire the session key and start tracking progress
 			String sessionKey = getSessionKey();
 			ProgressThread progressThread = startProgressThread(sessionKey);
@@ -463,12 +464,22 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			}
 			post.setRequestEntity(new MultipartRequestEntity(parts
 					.toArray(new Part[] {}), post.getParams()));
-			client.executeMethod(post);
+			try {
+				client.executeMethod(post);
+			} catch (HttpException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw e;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw e;
+			}
 			if (post.getStatusCode() != 200) {
 				log("post failed! " + post.getStatusLine());
 				progressThread.stopShowingProgress();
 				showErrorCard();
-				throw new Exception("post failed");
+				throw new IOException("post failed");
 			} else if (collectionName != null && collectionUri == null) {
 				String response = post.getResponseBodyAsString();
 				Pattern regex = Pattern
