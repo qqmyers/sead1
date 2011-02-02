@@ -77,12 +77,14 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpURL;
 import org.apache.commons.httpclient.HttpsURL;
 import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.contrib.ssl.EasySSLProtocolSocketFactory;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.apache.commons.httpclient.protocol.Protocol;
 
 public class DropUploader extends JApplet implements DropTargetListener {
 	public DropTarget dropTarget;
@@ -90,7 +92,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	private static final long serialVersionUID = 9000;
 	JSObject window = null;
 
-	private final String VERSION = "1642";
+	private final String VERSION = "1643";
 
 	@Override
 	public void init() {
@@ -107,6 +109,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		return new ImageIcon(iconUrl, label);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void duInit() throws Exception {
 		log("Drop Uploader version " + VERSION);
 
@@ -149,6 +152,11 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		String auth = getParameter("credentials");
 		log("credentials = " + auth);
 
+		// accept self-signed certificates
+		Protocol.registerProtocol("https", new Protocol("https",
+				new EasySSLProtocolSocketFactory(), 443));
+		log("Accepting self-signed certificates");
+
 		mainCards.setBounds(0, 0, 150, 100);
 		// This class will handle the drop events
 		dropTarget = new DropTarget(mainCards, this);
@@ -163,6 +171,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}
 		// MMDB-576 applet to javascript communication
 		// callJavascript("Applet started");
+		log("successful init");
 	}
 
 	public void dragEnter(DropTargetDragEvent dtde) {
