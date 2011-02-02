@@ -326,7 +326,7 @@ public class UserMetadataWidget extends Composite {
                 editAnchor.addStyleName("metadataTableAction");
                 editAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        editValue(predicate, value.getName(), value.getUri());
+                        editValue(predicate, value);
                     }
                 });
                 links.add(editAnchor);
@@ -336,7 +336,7 @@ public class UserMetadataWidget extends Composite {
                 removeAnchor.addStyleName("metadataTableAction");
                 removeAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        removeValue(predicate, value.getName(), value.getUri(), true);
+                        removeValue(predicate, value, true);
                     }
                 });
                 links.add(removeAnchor);
@@ -470,23 +470,45 @@ public class UserMetadataWidget extends Composite {
      * 
      * @param property
      */
-    private void removeValue(final String property, final String value, String valueUri, final boolean refresh) {
+    //private void removeValue(final String property, String sectionMarker, final String value, final String valueUri, final boolean refresh) {
+    private void removeValue(final String property, final UserMetadataValue value, final boolean refresh) {
 
-        RemoveUserMetadata remove;
-        if (valueUri == null) {
-            remove = new RemoveUserMetadata(uri, property, value);
-        } else {
-            remove = new RemoveUserMetadata(uri, property, valueUri, true);
-        }
+        final GetSection gs = new GetSection();
+        gs.setUri(uri);
+        gs.setMarker(value.getSectionMarker());
 
-        dispatch.execute(remove, new AsyncCallback<EmptyResult>() {
+        dispatch.execute(gs, new AsyncCallback<GetSectionResult>() {
+            @Override
             public void onFailure(Throwable caught) {
-                GWT.log("Error removing value", caught);
             }
 
-            public void onSuccess(EmptyResult result) {
-                if (refresh) {
-                    refresh();
+            @Override
+            public void onSuccess(GetSectionResult result) {
+                for (Section s : result.getSections() ) {
+                    String sectionUri = s.getUri();
+                    RemoveUserMetadata remove;
+                    if (value.getUri() == null) {
+                        GWT.log("removing literal value '" + value.getName() + "'");
+                        remove = new RemoveUserMetadata(uri, property, value.getName());
+                    } else {
+                        GWT.log("removing URI value '" + value.getUri() + "'");
+                        remove = new RemoveUserMetadata(uri, property, value.getUri(), true);
+                    }
+
+                    GWT.log("section URI = " + value.getSectionUri());
+                    remove.setSectionUri(sectionUri);
+
+                    dispatch.execute(remove, new AsyncCallback<EmptyResult>() {
+                        public void onFailure(Throwable caught) {
+                            GWT.log("Error removing value", caught);
+                        }
+
+                        public void onSuccess(EmptyResult result) {
+                            if (refresh) {
+                                refresh();
+                            }
+                        }
+                    });
                 }
             }
         });
@@ -497,18 +519,18 @@ public class UserMetadataWidget extends Composite {
      * 
      * @param property
      */
-    private void editValue(final String property, final String value, final String valueUri) {
+    private void editValue(final String property, final UserMetadataValue oldValue) {
 
         fieldChoice.setSelectedIndex(indexLabel.get(property));
         changeHandler();
-        inputField.setValue(value);
+        inputField.setValue(oldValue.getName());
         inputField.addAnchor.setText("Edit");
 
         ClickHandler editHandler = new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                removeValue(property, value, valueUri, false);
+                removeValue(property, oldValue, false);
             }
         };
 
