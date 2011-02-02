@@ -102,6 +102,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.MintHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchHandler;
@@ -178,6 +179,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetDownloadCountHandler());
         DispatchUtil.registerHandler(new SetTitleHandler());
         DispatchUtil.registerHandler(new SetUserMetadataHandler());
+        DispatchUtil.registerHandler(new RemoveUserMetadataHandler());
         DispatchUtil.registerHandler(new CreateRoleHandler());
         DispatchUtil.registerHandler(new DeleteRoleHandler());
         DispatchUtil.registerHandler(new GetMimeTypeCategoriesHandler());

@@ -41,7 +41,6 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +88,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Section;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
@@ -305,7 +305,11 @@ public class UserMetadataWidget extends Composite {
                 predicateLabel.addStyleName("hidden");
             }
             // field value
-            fieldTable.setWidget(row, 1, new Label(value.getName()));
+            Label name = new Label(value.getName());
+            if (value.getUri() != null) {
+                name.setTitle(value.getUri());
+            }
+            fieldTable.setWidget(row, 1, name);
 
             //placeholder for Applies To
             String sectionLabel = value.getSectionMarker();
@@ -322,7 +326,7 @@ public class UserMetadataWidget extends Composite {
                 editAnchor.addStyleName("metadataTableAction");
                 editAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        editValue(predicate, label, value.getName());
+                        editValue(predicate, value.getName(), value.getUri());
                     }
                 });
                 links.add(editAnchor);
@@ -332,10 +336,7 @@ public class UserMetadataWidget extends Composite {
                 removeAnchor.addStyleName("metadataTableAction");
                 removeAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        PopupPanel popupPanel = new PopupPanel(true);
-                        popupPanel.add(new Label("Sorry, not implemented yet."));
-                        popupPanel.showRelativeTo(editAnchor);
-                        //                        removeValue(predicate);
+                        removeValue(predicate, value.getName(), value.getUri(), true);
                     }
                 });
                 links.add(removeAnchor);
@@ -469,24 +470,23 @@ public class UserMetadataWidget extends Composite {
      * 
      * @param property
      */
-    @SuppressWarnings("unused")
-    private void removeValue(final String property) {
+    private void removeValue(final String property, final String value, String valueUri, final boolean refresh) {
 
-        // TODO have to implement a new dispatch to actually delete instead of setting to empty
+        RemoveUserMetadata remove;
+        if (valueUri == null) {
+            remove = new RemoveUserMetadata(uri, property, value);
+        } else {
+            remove = new RemoveUserMetadata(uri, property, valueUri, true);
+        }
 
-        dispatch.execute(new SetUserMetadata(uri, property, new HashSet<String>()), new AsyncCallback<EmptyResult>() {
+        dispatch.execute(remove, new AsyncCallback<EmptyResult>() {
             public void onFailure(Throwable caught) {
                 GWT.log("Error removing value", caught);
             }
 
             public void onSuccess(EmptyResult result) {
-                int row = getRowForField(property);
-                if (row != -1) {
-                    fieldTable.removeRow(row);
-                    styleRows();
-                }
-                if (getFieldCount() == 1) {
-                    addNoFields();
+                if (refresh) {
+                    refresh();
                 }
             }
         });
@@ -497,13 +497,22 @@ public class UserMetadataWidget extends Composite {
      * 
      * @param property
      */
-    private void editValue(final String property, String label, final String value) {
+    private void editValue(final String property, final String value, final String valueUri) {
 
         fieldChoice.setSelectedIndex(indexLabel.get(property));
-
         changeHandler();
         inputField.setValue(value);
         inputField.addAnchor.setText("Edit");
+
+        ClickHandler editHandler = new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                removeValue(property, value, valueUri, false);
+            }
+        };
+
+        inputField.addAnchor.addClickHandler(editHandler);
 
     }
 

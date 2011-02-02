@@ -99,7 +99,7 @@ public class PreviewPanel extends Composite {
         addWidget(new PreviewMultiImageBeanWidget(eventBus));
         addWidget(new Preview3DJavaBeanWidget(eventBus));
         addWidget(new Preview3DHTML5BeanWidget(eventBus));
-        addWidget(new Preview3DWebGLBeanWidget(eventBus));
+        //addWidget(new Preview3DWebGLBeanWidget(eventBus)); TODO Uncomment after bug fix
     }
 
     public PreviewPanel(HandlerManager eventBus) {
