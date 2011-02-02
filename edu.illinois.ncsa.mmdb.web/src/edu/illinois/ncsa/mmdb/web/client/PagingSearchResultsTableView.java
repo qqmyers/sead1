@@ -100,20 +100,6 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
         return new HorizontalPanel();
     }
 
-    @Override
-    public void addItem(String uri, DatasetBean dataset) {
-        String title = dataset.getTitle();
-        String type = dataset.getMimeType();
-        Date date = dataset.getDate();
-        String previewUri = "/api/image/preview/small/" + uri;
-        String size = TextFormatter.humanBytes(dataset.getSize());
-        String authorsId = "Anonymous";
-        if (dataset.getCreator() != null) {
-            authorsId = dataset.getCreator().getName();
-        }
-        table.addRow(uri, title, type, date, previewUri, size, authorsId);
-    }
-
     public DatasetTableView getTable() {
         return table;
     }
@@ -168,6 +154,20 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
     }
 
     @Override
+    public void addItem(String uri, DatasetBean dataset) {
+        String title = dataset.getTitle();
+        String type = dataset.getMimeType();
+        Date date = dataset.getDate();
+        String previewUri = "/api/image/preview/small/" + uri;
+        String size = TextFormatter.humanBytes(dataset.getSize());
+        String authorsId = "Anonymous";
+        if (dataset.getCreator() != null) {
+            authorsId = dataset.getCreator().getName();
+        }
+        table.addRow(uri, title, type, date, previewUri, size, authorsId);
+    }
+
+    @Override
     public void addItem(String uri, DatasetBean dataset, int position) {
         String title = dataset.getTitle();
         String type = ContentCategory.getCategory(dataset.getMimeType());
@@ -179,5 +179,25 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
             authorsId = dataset.getCreator().getName();
         }
         table.insertRow(position, uri, title, type, date, previewUri, size, authorsId);
+    }
+
+    @Override
+    public void addItem(String uri, DatasetBean dataset, int position, String sectionUri, String sectionLabel, String sectionMarker) {
+        String title = dataset.getTitle();
+        String type = ContentCategory.getCategory(dataset.getMimeType());
+        Date date = dataset.getDate();
+        String previewUri = "/api/image/preview/small/" + uri;
+        String size = TextFormatter.humanBytes(dataset.getSize());
+        String authorsId = "Anonymous";
+        if (dataset.getCreator() != null) {
+            authorsId = dataset.getCreator().getName();
+        }
+        table.insertRow(position, uri, title, type, date, previewUri, size, authorsId, sectionUri, sectionLabel, sectionMarker);
+    }
+
+    @Override
+    public void addItem(String uri, DatasetBean item, String sectionUri, String sectionLabel, String sectionMarker) {
+        // TODO Auto-generated method stub
+
     }
 }

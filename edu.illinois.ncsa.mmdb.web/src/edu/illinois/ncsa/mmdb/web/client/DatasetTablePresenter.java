@@ -104,6 +104,8 @@ public class DatasetTablePresenter extends
         List<String> getSelectedDatasets();
 
         HasClickHandlers getShowSelectedAnchor();
+
+        void insertRow(int row, String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId, String sectionUri, String sectionLabel, String sectionMarker);
     }
 
     public Widget getWidget() {

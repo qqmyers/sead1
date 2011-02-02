@@ -202,4 +202,16 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
         // TODO Auto-generated method stub
 
     }
+
+    @Override
+    public void addItem(String uri, DatasetBean item, String sectionUri, String sectionLabel, String sectionMarker) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void addItem(String uri, DatasetBean item, int position, String sectionUri, String sectionLabel, String sectionMarker) {
+        // TODO Auto-generated method stub
+
+    }
 }

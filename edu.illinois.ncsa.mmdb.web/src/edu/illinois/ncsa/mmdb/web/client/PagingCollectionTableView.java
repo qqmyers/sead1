@@ -264,4 +264,16 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
         // TODO Auto-generated method stub
 
     }
+
+    @Override
+    public void addItem(String uri, CollectionBean item, String sectionUri, String sectionLabel, String sectionMarker) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void addItem(String uri, CollectionBean item, int position, String sectionUri, String sectionLabel, String sectionMarker) {
+        // TODO Auto-generated method stub
+
+    }
 }

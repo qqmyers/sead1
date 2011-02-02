@@ -241,6 +241,66 @@ public class DatasetTableOneColumnView extends DatasetTableView {
         getRowFormatter().addStyleName(row, "oddRow");
     }
 
+    /**
+     * Adds information about a section of a dataset and the dataset itself.
+     * 
+     * @param uri
+     * @param title
+     * @param type
+     * @param date
+     * @param previewUri
+     * @param size
+     * @param authorsId
+     * @param sectionUri
+     * @param sectionLabel
+     * @param sectionMarker
+     */
+    @Override
+    public void insertRow(int row, String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId, String sectionUri, String sectionLabel, String sectionMarker) {
+
+        GWT.log("Inserting dataset " + title + " to row " + row, null);
+
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, mimeType);
+        pre.setMaxWidth(100);
+        setWidget(row, 0, pre);
+
+        VerticalPanel verticalPanel = new VerticalPanel();
+
+        verticalPanel.setSpacing(5);
+
+        setWidget(row, 1, verticalPanel);
+
+        verticalPanel.add(new Label(sectionLabel + ": " + sectionMarker));
+
+        // title
+        Hyperlink hyperlink = new Hyperlink(title, "dataset?id=" + id);
+        verticalPanel.add(hyperlink);
+
+        // date
+        verticalPanel.add(new Label(DATE_TIME_FORMAT.format(date)));
+
+        // size
+        verticalPanel.add(new Label(size));
+
+        // author
+        verticalPanel.add(new Label(authorsId));
+
+        // type
+        verticalPanel.add(new Label(mimeType));
+
+        // FIXME debug
+        /*
+        Anchor zoomLink = new Anchor("zoom", GWT.getHostPageBaseURL()+"pyramid/uri="+id);
+        verticalPanel.add(zoomLink);
+        */
+        // FIXME end debug
+
+        getCellFormatter().addStyleName(row, 0, "leftCell");
+        getCellFormatter().addStyleName(row, 1, "rightCell");
+        getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP); // FIXME move to CSS
+        getRowFormatter().addStyleName(row, "oddRow");
+    }
+
     @Override
     public List<String> getSelectedDatasets() {
         List<String> selectedDataset = new ArrayList<String>();

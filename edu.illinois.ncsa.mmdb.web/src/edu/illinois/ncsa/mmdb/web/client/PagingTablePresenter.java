@@ -57,6 +57,10 @@ public class PagingTablePresenter<T> extends BasePresenter<PagingTablePresenter.
     public interface Display<T> extends View {
         void addItem(String uri, T item);
 
+        void addItem(String uri, T item, String sectionUri, String sectionLabel, String sectionMarker);
+
         void addItem(String uri, T item, int position);
+
+        void addItem(String uri, T item, int position, String sectionUri, String sectionLabel, String sectionMarker);
     }
 }

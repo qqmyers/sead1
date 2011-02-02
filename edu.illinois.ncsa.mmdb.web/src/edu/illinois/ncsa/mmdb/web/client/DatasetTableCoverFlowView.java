@@ -120,4 +120,10 @@ public class DatasetTableCoverFlowView extends DatasetTableView {
         return null;
     }
 
+    @Override
+    public void insertRow(int row, String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId, String sectionUri, String sectionLabel, String sectionMarker) {
+        // TODO Auto-generated method stub
+
+    }
+
 }

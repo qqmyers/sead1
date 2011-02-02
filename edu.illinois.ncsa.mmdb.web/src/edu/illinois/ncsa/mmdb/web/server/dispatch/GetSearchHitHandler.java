@@ -81,7 +81,7 @@ public class GetSearchHitHandler implements ActionHandler<GetSearchHit, GetSearc
     @Override
     public GetSearchHitResult execute(GetSearchHit action, ExecutionContext arg1) throws ActionException {
 
-        String datasetURI;
+        String datasetURI = null;
         GetSearchHitResult result = new GetSearchHitResult();
 
         // get the type of the hit
@@ -99,8 +99,7 @@ public class GetSearchHitHandler implements ActionHandler<GetSearchHit, GetSearc
             Resource type = row.get(0);
             if (Cet.DATASET.equals(type)) {
                 datasetURI = action.getUri();
-            } else if (MMDB.SECTION_TYPE.equals(type) && row.get(1) != null) {
-                datasetURI = row.get(1).getString();
+            } else if (MMDB.SECTION_TYPE.equals(type)) {
                 // get section info
                 Unifier us = new Unifier();
                 us.setColumnNames("dataset", "label", "marker");
@@ -108,9 +107,9 @@ public class GetSearchHitHandler implements ActionHandler<GetSearchHit, GetSearc
                 us.addPattern(Resource.uriRef(action.getUri()), MMDB.SECTION_LABEL, "label");
                 us.addPattern(Resource.uriRef(action.getUri()), MMDB.SECTION_MARKER, "marker");
                 try {
-                    TupeloStore.getInstance().getContext().perform(u);
+                    TupeloStore.getInstance().getContext().perform(us);
                 } catch (OperatorException e) {
-                    log.error("Error querying for section of dataset " + datasetURI, e);
+                    log.error("Error querying for information about section of dataset " + action.getUri(), e);
                 }
                 for (Tuple<Resource> row2 : us.getResult() ) {
                     datasetURI = row2.get(0).getString();
@@ -118,31 +117,27 @@ public class GetSearchHitHandler implements ActionHandler<GetSearchHit, GetSearc
                     result.setSectionLabel(row2.get(1).getString());
                     result.setSectionMarker(row2.get(2).getString());
                 }
-            } else {
-                return new GetSearchHitResult();
             }
         }
 
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+        if (datasetURI != null) {
+            BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+            DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+            try {
+                DatasetBean datasetBean = dbu.get(datasetURI);
+                datasetBean = dbu.update(datasetBean);
+                result.setDataset(datasetBean);
+                Collection<PreviewBean> previews = new HashSet<PreviewBean>();
 
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-
-        try {
-            DatasetBean datasetBean = dbu.get(action.getUri());
-            datasetBean = dbu.update(datasetBean);
-            result.setDataset(datasetBean);
-            Collection<PreviewBean> previews = new HashSet<PreviewBean>();
-
-            // image previews
-            previews.addAll(new PreviewImageBeanUtil(beanSession).getAssociationsFor(action.getUri()));
-            result.setPreviews(previews);
-            // return dataset and preview
-            return result;
-        } catch (Exception e) {
-            log.error("Error retrieving dataset " + action.getUri(), e);
-            throw new ActionException(e);
+                // image previews
+                previews.addAll(new PreviewImageBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+                result.setPreviews(previews);
+            } catch (Exception e) {
+                log.error("Error retrieving dataset " + action.getUri(), e);
+                throw new ActionException(e);
+            }
         }
-
+        return result;
     }
 
     @Override

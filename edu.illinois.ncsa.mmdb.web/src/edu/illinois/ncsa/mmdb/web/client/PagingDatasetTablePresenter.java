@@ -62,9 +62,17 @@ public class PagingDatasetTablePresenter extends PagingTablePresenter<DatasetBea
                         DatasetBean dataset = event.getDataset();
                         String id = dataset.getUri();
                         if (event.getPosition() == -1) {
-                            display.addItem(id, dataset);
+                            if (event.getSectionUri() == null) {
+                                display.addItem(id, dataset);
+                            } else {
+                                display.addItem(id, dataset, event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
+                            }
                         } else {
-                            display.addItem(id, dataset, event.getPosition());
+                            if (event.getSectionUri() == null) {
+                                display.addItem(id, dataset, event.getPosition());
+                            } else {
+                                display.addItem(id, dataset, event.getPosition(), event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
+                            }
                         }
                     }
                 });
