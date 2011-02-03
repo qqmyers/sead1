@@ -64,11 +64,11 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implements ActionHandler<ListUserMetadataFields, ListUserMetadataFieldsResult> {
-    static Log                                            log = LogFactory.getLog(ListUserMetadataFieldsHandler.class);
+    static Log                                     log = LogFactory.getLog(ListUserMetadataFieldsHandler.class);
 
-    private static Memoized<ListUserMetadataFieldsResult> resultCache;
+    private Memoized<ListUserMetadataFieldsResult> resultCache;
 
-    public static ListUserMetadataFieldsResult listUserMetadataFields() {
+    public ListUserMetadataFieldsResult listUserMetadataFields() {
         if (resultCache == null) {
             resultCache = new Memoized<ListUserMetadataFieldsResult>() {
                 public ListUserMetadataFieldsResult computeValue() {

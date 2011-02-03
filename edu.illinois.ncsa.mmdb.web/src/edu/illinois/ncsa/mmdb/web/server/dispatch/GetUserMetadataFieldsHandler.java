@@ -77,8 +77,10 @@ public class GetUserMetadataFieldsHandler implements
         ActionHandler<GetUserMetadataFields, GetUserMetadataFieldsResult> {
 
     /** Commons logging **/
-    private static Log log = LogFactory
-                                   .getLog(GetUserMetadataFieldsHandler.class);
+    private static Log            log       = LogFactory
+                                                    .getLog(GetUserMetadataFieldsHandler.class);
+
+    ListUserMetadataFieldsHandler umfHelper = new ListUserMetadataFieldsHandler();
 
     private String nameOf(Resource uri) throws OperatorException {
         Unifier u = new Unifier();
@@ -134,7 +136,7 @@ public class GetUserMetadataFieldsHandler implements
                     .getContext());
             Resource subject = Resource.uriRef(action.getUri());
             Thing t = ts.fetchThing(subject);
-            for (UserMetadataField field : ListUserMetadataFieldsHandler.listUserMetadataFields().getFieldsSortedByName() ) {
+            for (UserMetadataField field : umfHelper.listUserMetadataFields().getFieldsSortedByName() ) {
                 Resource predicate = Resource.uriRef(field.getUri());
                 Collection<UserMetadataValue> values = getUserMetadataValues(t, predicate);
                 // now look for sections with this field set; this is gonna produce lots of traffic
