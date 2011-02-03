@@ -99,6 +99,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextCreator;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
@@ -945,6 +946,21 @@ public class TupeloStore {
                     logged = true;
                 }
                 log.info("deindexing " + toDeindex.size() + " deleted dataset(s) @ " + new Date());
+                for (String datasetUri : toDeindex ) {
+                    Unifier uf = new Unifier();
+                    uf.addPattern(Resource.uriRef(datasetUri), MMDB.METADATA_HASSECTION, "section");
+                    uf.setColumnNames("section");
+                    try {
+                        getContext().perform(uf);
+                        Set<String> sections = new HashSet<String>();
+                        for (Tuple<Resource> row : uf.getResult() ) {
+                            sections.add(row.get(0).getString());
+                        }
+                        getSearch().deindex(sections);
+                    } catch (OperatorException e) {
+                        log.warn("Could not find/remove sections.", e);
+                    }
+                }
                 getSearch().deindex(toDeindex);
                 log.info("deindexed " + toDeindex.size() + " deleted dataset(s) @ " + new Date());
             }
@@ -956,6 +972,20 @@ public class TupeloStore {
                 long then = System.currentTimeMillis();
                 log.info("indexing " + toIndex.size() + " dataset(s) @ " + new Date());
                 for (String datasetUri : toIndex ) {
+                    Unifier uf = new Unifier();
+                    uf.addPattern(Resource.uriRef(datasetUri), MMDB.METADATA_HASSECTION, "section");
+                    uf.setColumnNames("section");
+                    try {
+                        getContext().perform(uf);
+                        Set<String> sections = new HashSet<String>();
+                        for (Tuple<Resource> row : uf.getResult() ) {
+                            sections.add(row.get(0).getString());
+                        }
+                        getSearch().deindex(sections);
+                    } catch (OperatorException e) {
+                        log.warn("Could not find/remove sections.", e);
+                    }
+
                     getSearch().reindex(datasetUri);
                 }
                 long elapsed = System.currentTimeMillis() - then;
