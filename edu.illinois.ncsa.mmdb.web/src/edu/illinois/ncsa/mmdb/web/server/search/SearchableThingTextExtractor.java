@@ -291,7 +291,7 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
         Map<String, String> sm = new HashMap<String, String>();
         Unifier u = new Unifier();
         u.setColumnNames("s", "t");
-        u.addPattern(uri, MMDB.METADATA_HASSECTION, "s");
+        u.addPattern(Resource.uriRef(uri), MMDB.METADATA_HASSECTION, "s");
         u.addPattern("s", MMDB.SECTION_TEXT, "t");
         try {
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "s") ) {
