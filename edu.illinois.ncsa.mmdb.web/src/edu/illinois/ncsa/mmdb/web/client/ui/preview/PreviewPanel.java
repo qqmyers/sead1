@@ -39,8 +39,11 @@
 
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -55,6 +58,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEventHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEventHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
@@ -70,7 +75,7 @@ public class PreviewPanel extends Composite {
     private PreviewBeanWidget<? extends PreviewBean> previewWidget;
 
     /** Mapping from preview to widget */
-    private static List<PreviewBeanWidget>           widgets;
+    private static List<PreviewBeanWidget>           registeredWidgets;
 
     /** Check to see if all previews are added. */
     private static boolean                           isInitialized = false;
@@ -78,11 +83,17 @@ public class PreviewPanel extends Composite {
     /** Panel that will hold the actual prevew widget */
     private AbsolutePanel                            previewPanel;
 
+    /** List of widgets used to show dataset */
+    private List<PreviewBeanWidget>                  widgets;
+
+    /** Mapping from widget to corresponding anchor */
+    private final Map<PreviewBeanWidget, Anchor>     anchors       = new HashMap<PreviewBeanWidget, Anchor>();
+
     static public void addWidget(PreviewBeanWidget<? extends PreviewBean> widget) {
-        if (widgets == null) {
-            widgets = new ArrayList<PreviewBeanWidget>();
+        if (registeredWidgets == null) {
+            registeredWidgets = new ArrayList<PreviewBeanWidget>();
         }
-        widgets.add(widget);
+        registeredWidgets.add(widget);
     }
 
     static private void initializePreviews(HandlerManager eventBus) {
@@ -112,6 +123,26 @@ public class PreviewPanel extends Composite {
                 GWT.log(sectionChangedEvent.getSection());
             }
         });
+
+        eventBus.addHandler(PreviewSectionShowEvent.TYPE, new PreviewSectionShowEventHandler() {
+            @Override
+            public void onSectionShow(PreviewSectionShowEvent sectionShowEvent) {
+                GWT.log(sectionShowEvent.getSection());
+                showSection(sectionShowEvent.getSection());
+            }
+        });
+
+    }
+
+    public void showSection(String section) {
+        for (PreviewBeanWidget widget : widgets ) {
+            try {
+                widget.setSection(section);
+                clickEvent(widget);
+            } catch (ParseException exc) {
+                //GWT.log(widget + " could not parse section " + section, exc);
+            }
+        }
     }
 
     public void unload() {
@@ -122,41 +153,6 @@ public class PreviewPanel extends Composite {
     }
 
     /**
-     * Create ordered list of all preview beans. Each preview bean type will
-     * only appear once in the list.
-     * 
-     * @param result
-     *            unordered list of all preview beans
-     * @param maxwidth
-     *            the maximum widht of the panel
-     * @return ordered list of all preview beans.
-     */
-    private List<PreviewBeanWidget> getOrderedBeans(GetDatasetResult result, int maxwidth) {
-        List<PreviewBeanWidget> list = new ArrayList<PreviewBeanWidget>();
-
-        for (PreviewBeanWidget widget : widgets ) {
-            PreviewBean best = null;
-            for (PreviewBean pb : result.getPreviews() ) {
-                if (widget.getPreviewBeanClass() == pb.getClass()) {
-                    if (best == null) {
-                        best = pb;
-                    } else {
-                        best = widget.bestFit(best, pb, maxwidth, -1);
-                    }
-                }
-            }
-            if (best != null) {
-                PreviewBeanWidget pbw = widget.newWidget();
-                pbw.setPreviewBean(best);
-                list.add(pbw);
-            }
-        }
-
-        // all done
-        return list;
-    }
-
-    /**
      * Show all the previews to the user.
      * 
      * @param result
@@ -164,7 +160,8 @@ public class PreviewPanel extends Composite {
      * @param uri
      */
     public void drawPreview(final GetDatasetResult result, FlowPanel leftColumn, String uri) {
-        List<PreviewBeanWidget> widgets = getOrderedBeans(result, leftColumn.getOffsetWidth());
+        widgets = getOrderedBeans(result, leftColumn.getOffsetWidth());
+        anchors.clear();
 
         // preview options
         FlowPanel previewsPanel = new FlowPanel();
@@ -188,16 +185,47 @@ public class PreviewPanel extends Composite {
         }
     }
 
-    private void createAnchor(final PreviewBeanWidget pbw, final FlowPanel previewsPanel, boolean showme) {
-        final Anchor anchor = new Anchor(pbw.getAnchorText());
+    /**
+     * Create ordered list of all preview beans. Each preview bean type will
+     * only appear once in the list.
+     * 
+     * @param result
+     *            unordered list of all preview beans
+     * @param maxwidth
+     *            the maximum widht of the panel
+     * @return ordered list of all preview beans.
+     */
+    private List<PreviewBeanWidget> getOrderedBeans(GetDatasetResult result, int maxwidth) {
+        List<PreviewBeanWidget> list = new ArrayList<PreviewBeanWidget>();
+
+        for (PreviewBeanWidget widget : registeredWidgets ) {
+            PreviewBean best = null;
+            for (PreviewBean pb : result.getPreviews() ) {
+                if (widget.getPreviewBeanClass() == pb.getClass()) {
+                    if (best == null) {
+                        best = pb;
+                    } else {
+                        best = widget.bestFit(best, pb, maxwidth, -1);
+                    }
+                }
+            }
+            if (best != null) {
+                PreviewBeanWidget pbw = widget.newWidget();
+                pbw.setPreviewBean(best);
+                list.add(pbw);
+            }
+        }
+
+        // all done
+        return list;
+    }
+
+    private void createAnchor(final PreviewBeanWidget pbw, FlowPanel previewsPanel, boolean showme) {
+        Anchor anchor = new Anchor(pbw.getAnchorText());
         anchor.addStyleName("previewActionLink");
         anchor.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                for (int i = 0; i < previewsPanel.getWidgetCount(); i++ ) {
-                    previewsPanel.getWidget(i).removeStyleName("deadlink");
-                }
-                anchor.addStyleName("deadlink");
-                showPreview(pbw);
+                clickEvent(pbw);
             }
         });
         previewsPanel.add(anchor);
@@ -206,19 +234,28 @@ public class PreviewPanel extends Composite {
             showPreview(pbw);
             anchor.addStyleName("deadlink");
         }
+
+        anchors.put(pbw, anchor);
+    }
+
+    private void clickEvent(PreviewBeanWidget pbw) {
+        for (Anchor x : anchors.values() ) {
+            x.removeStyleName("deadlink");
+        }
+        anchors.get(pbw).addStyleName("deadlink");
+        showPreview(pbw);
     }
 
     private void showPreview(PreviewBeanWidget pbw) {
-        if (previewWidget == pbw) {
-            return;
-        }
-        if (previewWidget != null) {
-            previewWidget.hide();
-        }
-        previewPanel.clear();
+        if (previewWidget != pbw) {
+            if (previewWidget != null) {
+                previewWidget.hide();
+            }
+            previewPanel.clear();
 
-        previewWidget = pbw;
-        previewPanel.add(pbw.getWidget());
+            previewWidget = pbw;
+            previewPanel.add(pbw.getWidget());
+        }
         pbw.show();
     }
 }

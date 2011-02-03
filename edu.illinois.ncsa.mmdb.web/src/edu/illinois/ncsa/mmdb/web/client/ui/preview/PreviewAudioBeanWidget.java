@@ -1,5 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import java.text.ParseException;
+
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Label;
@@ -32,7 +34,8 @@ public class PreviewAudioBeanWidget extends PreviewBeanWidget<PreviewAudioBean> 
     }
 
     @Override
-    public void setSection(String section) {
+    public void setSection(String section) throws ParseException {
+        throw (new ParseException("Could not parse section.", 0));
     }
 
     @Override

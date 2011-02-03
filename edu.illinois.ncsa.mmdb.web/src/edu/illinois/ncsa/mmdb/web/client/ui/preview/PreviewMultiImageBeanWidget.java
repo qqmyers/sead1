@@ -1,13 +1,14 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import java.text.ParseException;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -70,7 +71,6 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         hp.setCellVerticalAlignment(prevImage, HasVerticalAlignment.ALIGN_MIDDLE);
 
         image = new Image();
-        image.getElement().setId(DOM.createUniqueId());
         hp.add(image);
 
         nextImage = new Image("images/go-next-gray.png"); //$NON-NLS-1$
@@ -92,18 +92,31 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         vp.add(hp);
 
         hp.add(new Label("Page "));
+
         currPage = new TextBox();
+        //currPage.addStyleName("multiAnchor");
         currPage.setVisibleLength(4);
         hp.add(currPage);
-        hp.add(new Label("of "));
+
+        Label lbl = new Label(" of ");
+        lbl.addStyleName("multiAnchor");
+        hp.add(lbl);
+
         maxPage = new Label();
+        maxPage.addStyleName("multiAnchor");
         hp.add(maxPage);
 
-        currPage.addKeyPressHandler(new KeyPressHandler() {
+        currPage.addKeyDownHandler(new KeyDownHandler() {
+
             @Override
-            public void onKeyPress(KeyPressEvent event) {
-                if (event.getCharCode() == KeyCodes.KEY_ENTER) {
-                    setSection(currPage.getText());
+            public void onKeyDown(KeyDownEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    try {
+                        current = Integer.parseInt(currPage.getText()) - 1;
+                    } catch (NumberFormatException e) {
+                        GWT.log("Could not parse " + currPage.getText(), e);
+                    }
+                    show();
                 }
             }
         });
@@ -127,29 +140,20 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
     }
 
     @Override
-    public void setSection(String section) {
-        int page = current;
-
-        String[] text = section.split(" ", 2);
-        if (text.length == 2) {
-            if (text[0].equalsIgnoreCase("page") || text[0].equalsIgnoreCase("image")) {
-                try {
-                    page = Integer.parseInt(text[1]) - 1;
-                } catch (NumberFormatException e) {
-                    GWT.log("Could not parse " + section);
-                }
-            }
-        } else {
-            try {
-                page = Integer.parseInt(text[0]) - 1;
-            } catch (NumberFormatException e) {
-                GWT.log("Could not parse " + section);
-            }
+    public void setSection(String section) throws ParseException {
+        if ((section == null) || (section.length() < 6) || !section.toLowerCase().startsWith("page ")) {
+            throw (new ParseException("Expected text to start with page", 0));
         }
 
-        if (page != current) {
+        String text = section.substring(5);
+        try {
+            int page = Integer.parseInt(text) - 1;
+            if (current == page) {
+                return;
+            }
             current = page;
-            show();
+        } catch (NumberFormatException e) {
+            throw (new ParseException("Could not parse " + section, 6));
         }
     }
 
@@ -198,17 +202,11 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
             }
         }
 
-        showImage(RestEndpoints.BLOB_URL + pib.getUri(), image.getElement().getId(), Long.toString(w), Long.toString(h));
+        image.setWidth(Long.toString(w));
+        image.setHeight(Long.toString(h));
+        image.setUrl(RestEndpoints.BLOB_URL + pib.getUri());
 
         maxPage.setText(Integer.toString(maximage + 1));
         currPage.setText(Integer.toString(current + 1));
     }
-
-    public final native void showImage(String url, String id, String w, String h) /*-{
-        img = $doc.getElementById(id);
-        img.src=url;
-        img.width=w;
-        img.height=h;
-    }-*/;
-
 }

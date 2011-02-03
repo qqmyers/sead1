@@ -1,5 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import java.text.ParseException;
+
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Image;
@@ -15,12 +17,14 @@ public class PreviewImageBeanWidget extends PreviewBeanWidget<PreviewImageBean> 
     /** maximum height of a preview image */
     private static final long MAX_HEIGHT = 600;
 
+    /** Image that is shown */
+    private final Image       image;
+
     public PreviewImageBeanWidget(HandlerManager eventBus) {
         super(eventBus);
 
-        Image widget = new Image();
-        widget.getElement().setId(DOM.createUniqueId());
-        setWidget(widget);
+        image = new Image();
+        setWidget(image);
     }
 
     @Override
@@ -46,7 +50,8 @@ public class PreviewImageBeanWidget extends PreviewBeanWidget<PreviewImageBean> 
     }
 
     @Override
-    public void setSection(String section) {
+    public void setSection(String section) throws ParseException {
+        throw (new ParseException("Could not parse section.", 0));
     }
 
     @Override
@@ -70,14 +75,8 @@ public class PreviewImageBeanWidget extends PreviewBeanWidget<PreviewImageBean> 
             }
         }
 
-        showImage(RestEndpoints.BLOB_URL + getPreviewBean().getUri(), getWidgetID(), Long.toString(w), Long.toString(h));
+        image.setWidth(Long.toString(w));
+        image.setHeight(Long.toString(h));
+        image.setUrl(RestEndpoints.BLOB_URL + getPreviewBean().getUri());
     }
-
-    public final native void showImage(String url, String id, String w, String h) /*-{
-        img = $doc.getElementById(id);
-        img.src=url;
-        img.width=w;
-        img.height=h;
-    }-*/;
-
 }

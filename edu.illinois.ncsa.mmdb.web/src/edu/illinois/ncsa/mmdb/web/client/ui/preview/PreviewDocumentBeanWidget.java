@@ -1,5 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import java.text.ParseException;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.http.client.Request;
@@ -47,7 +49,8 @@ public class PreviewDocumentBeanWidget extends PreviewBeanWidget<PreviewDocument
     }
 
     @Override
-    public void setSection(String section) {
+    public void setSection(String section) throws ParseException {
+        throw (new ParseException("Could not parse section.", 0));
     }
 
     @Override

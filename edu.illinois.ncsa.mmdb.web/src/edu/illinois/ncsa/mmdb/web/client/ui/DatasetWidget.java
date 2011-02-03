@@ -90,6 +90,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
@@ -165,7 +166,7 @@ public class DatasetWidget extends Composite {
      * @param uri
      *            dataset uri
      */
-    public void showDataset(String uri) {
+    public void showDataset(String uri, final String section) {
         this.uri = uri;
         leftColumn.clear();
         rightColumn.clear();
@@ -180,6 +181,12 @@ public class DatasetWidget extends Composite {
             @Override
             public void onSuccess(GetDatasetResult result) {
                 drawPage(result);
+
+                if (section != null) {
+                    PreviewSectionShowEvent event = new PreviewSectionShowEvent();
+                    event.setSection(section);
+                    eventBus.fireEvent(event);
+                }
             }
         });
     }
@@ -253,7 +260,7 @@ public class DatasetWidget extends Composite {
         actionsPanel.add(extractWidget);
 
         // metadata        
-        final UserMetadataWidget um = new UserMetadataWidget(uri, service);
+        final UserMetadataWidget um = new UserMetadataWidget(uri, service, eventBus);
         um.setWidth("100%");
         leftColumn.add(createMetaDataPanel(um));
 
@@ -430,7 +437,7 @@ public class DatasetWidget extends Composite {
                             dialog.getCancelText().setText("Later");
                             dialog.addConfirmHandler(new ConfirmHandler() {
                                 public void onConfirm(ConfirmEvent event) {
-                                    showDataset(uri);
+                                    showDataset(uri, null);
                                 }
                             });
                             dialog.show();

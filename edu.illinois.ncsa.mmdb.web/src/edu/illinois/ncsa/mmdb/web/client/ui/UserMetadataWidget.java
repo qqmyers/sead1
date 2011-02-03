@@ -57,6 +57,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -93,6 +94,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.Section;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
+import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 
 public class UserMetadataWidget extends Composite {
     String                                 uri;
@@ -108,10 +110,12 @@ public class UserMetadataWidget extends Composite {
     private final SimplePanel              newFieldPanel;
     protected InputField                   inputField;
     protected SortedSet<UserMetadataField> availableFields;
+    private final HandlerManager           eventBus;
 
-    public UserMetadataWidget(String uri, final DispatchAsync dispatch) {
+    public UserMetadataWidget(String uri, final DispatchAsync dispatch, HandlerManager eventBus) {
         this.uri = uri;
         this.dispatch = dispatch;
+        this.eventBus = eventBus;
 
         // table of user specified metadata fields
         fieldTable = new FlexTable();
@@ -312,11 +316,20 @@ public class UserMetadataWidget extends Composite {
             fieldTable.setWidget(row, 1, name);
 
             //placeholder for Applies To
-            String sectionLabel = value.getSectionMarker();
-            if (sectionLabel == null) {
-                sectionLabel = "Document";
+            if (value.getSectionMarker() == null) {
+                fieldTable.setWidget(row, 2, new Label("Document"));
+            } else {
+                final Anchor anchor = new Anchor(value.getSectionMarker());
+                anchor.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        PreviewSectionShowEvent show = new PreviewSectionShowEvent();
+                        show.setSection(anchor.getText());
+                        eventBus.fireEvent(show);
+                    }
+                });
+                fieldTable.setWidget(row, 2, anchor);
             }
-            fieldTable.setWidget(row, 2, new Label(sectionLabel));
 
             if (canEdit) {
                 FlowPanel links = new FlowPanel();

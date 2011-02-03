@@ -141,11 +141,13 @@ public class GetUserMetadataFieldsHandler implements
                 Unifier u = new Unifier();
                 u.addPattern(subject, MMDB.METADATA_HASSECTION, "section");
                 u.addPattern("section", predicate, "value");
+                u.addPattern("section", MMDB.SECTION_LABEL, "label");
                 u.addPattern("section", MMDB.SECTION_MARKER, "marker");
-                u.setColumnNames("section", "marker");
+                u.setColumnNames("section", "label", "marker");
                 for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "section") ) {
                     Thing st = ts.fetchThing(row.get(0));
-                    values.addAll(getUserMetadataValues(st, predicate, row.get(1).getString()));
+                    String section = row.get(1).getString() + " " + row.get(2).getString();
+                    values.addAll(getUserMetadataValues(st, predicate, section));
                 }
                 if (values.size() > 0) {
                     labels.put(field.getUri(), field.getLabel()); // remember the label for this one

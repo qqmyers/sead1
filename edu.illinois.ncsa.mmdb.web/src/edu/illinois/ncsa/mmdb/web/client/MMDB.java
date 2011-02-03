@@ -358,7 +358,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * Show information about a particular dataset.
      */
     private void showDataset() {
-        final String datasetUri = getParams().get("id");
+        Map<String, String> params = getParams();
+        final String datasetUri = params.get("id");
+        final String section = params.get("section");
         rbac().doIfAllowed(Permission.VIEW_DATA, datasetUri, new AccessOrMessageCallback() {
             @Override
             public void onAllowed() {
@@ -366,7 +368,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 mainContainer.clear();
                 mainContainer.add(datasetWidget);
                 if (datasetUri != null) {
-                    datasetWidget.showDataset(datasetUri);
+                    if (section != null) {
+                        datasetWidget.showDataset(datasetUri, URL.decode(section));
+                    } else {
+                        datasetWidget.showDataset(datasetUri, null);
+                    }
                 }
             }
         });
