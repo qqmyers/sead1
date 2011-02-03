@@ -55,6 +55,8 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
 
     @Override
     protected void showSection() {
+        ((HTML) getWidget()).setHTML("<center><div id='viewer' style='border:solid 1px #A8A8A8;width:480px;height:360px'></div></center>");
+
         String url = GWT.getHostPageBaseURL() + RestEndpoints.BLOB_URL + getPreviewBean().getUri();
 
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
@@ -67,24 +69,32 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
 
                 public void onResponseReceived(Request request, Response response) {
                     if (200 == response.getStatusCode()) {
-
-                        //Read file successfully; call Javascript to initialize html5 canvas
-                        readOBJ(response.getText());
+                        initThingView(response.getText());
 
                     } else {
                         ((HTML) getWidget()).setText("Error\n" + response.getStatusText());
                     }
-
                 }
-
             });
         } catch (RequestException e) {
             ((HTML) getWidget()).setText("Error\n" + e.getMessage());
         }
 
-        ((HTML) getWidget()).setHTML("<STYLE type='text/css'> canvas {border:solid 1px #000;}</STYLE>" +
+        //OLD HTML5 Widget
+        //Read file successfully; call Javascript to initialize html5 canvas
+        //readOBJ(response.getText());
+        //<script src='js/html5_3Dplugin.js' ></script>
+        //String url = GWT.getHostPageBaseURL() + RestEndpoints.BLOB_URL + getPreviewBean().getUri();
+        /*((HTML) getWidget()).setHTML("<STYLE type='text/css'> canvas {border:solid 1px #000;}</STYLE>" +
                 "<CANVAS id='canvas' width='480' height='360'><P>If you are seeing this, " +
                 "your browser does not support <a href='http://www.google.com/chrome/'>" +
                 "HTML5</a></P></CANVAS>");
+                */
     }
+
+    public final native void initThingView(String fileData) /*-{
+        // hide the current WebGL viewer if open
+        $wnd.initThingView(fileData);
+    }-*/;
+
 }
