@@ -1,7 +1,5 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
-import java.text.ParseException;
-
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -126,11 +124,11 @@ public abstract class PreviewBeanWidget<T extends PreviewBean> {
      * 
      * @param section
      *            the current section shown.
-     * @throws ParseException
-     *             will throw a ParseException if the section given is not
-     *             formated same as returned by getSection().
+     * @throws IllegalArgumentException
+     *             will throw a IllegalArgumentException if the section given is
+     *             not formated same as returned by getSection().
      */
-    public abstract void setSection(String section) throws ParseException;
+    public abstract void setSection(String section) throws IllegalArgumentException;
 
     /**
      * Return the current section in the preview bean.

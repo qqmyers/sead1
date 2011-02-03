@@ -39,7 +39,6 @@
 
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -139,7 +138,7 @@ public class PreviewPanel extends Composite {
             try {
                 widget.setSection(section);
                 clickEvent(widget);
-            } catch (ParseException exc) {
+            } catch (IllegalArgumentException exc) {
                 //GWT.log(widget + " could not parse section " + section, exc);
             }
         }

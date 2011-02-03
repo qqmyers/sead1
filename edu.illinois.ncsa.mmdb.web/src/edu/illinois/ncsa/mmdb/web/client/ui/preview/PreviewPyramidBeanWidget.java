@@ -1,7 +1,5 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
-import java.text.ParseException;
-
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.DOM;
@@ -36,8 +34,8 @@ public class PreviewPyramidBeanWidget extends PreviewBeanWidget<PreviewPyramidBe
     }
 
     @Override
-    public void setSection(String section) throws ParseException {
-        throw (new ParseException("Could not parse section.", 0));
+    public void setSection(String section) throws IllegalArgumentException {
+        throw (new IllegalArgumentException("Could not parse section."));
     }
 
     @Override

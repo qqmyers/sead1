@@ -1,7 +1,5 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
-import java.text.ParseException;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -140,9 +138,9 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
     }
 
     @Override
-    public void setSection(String section) throws ParseException {
+    public void setSection(String section) throws IllegalArgumentException {
         if ((section == null) || (section.length() < 6) || !section.toLowerCase().startsWith("page ")) {
-            throw (new ParseException("Expected text to start with page", 0));
+            throw (new IllegalArgumentException("Expected text to start with page"));
         }
 
         String text = section.substring(5);
@@ -153,7 +151,7 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
             }
             current = page;
         } catch (NumberFormatException e) {
-            throw (new ParseException("Could not parse " + section, 6));
+            throw (new IllegalArgumentException("Could not parse " + section));
         }
     }
 
