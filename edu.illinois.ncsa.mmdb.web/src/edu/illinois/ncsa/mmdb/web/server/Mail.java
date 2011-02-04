@@ -52,6 +52,8 @@ import javax.mail.internet.MimeMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.uiuc.ncsa.cet.bean.PersonBean;
+
 /**
  * Send email for notification purposes.
  * 
@@ -83,27 +85,27 @@ public class Mail {
      * 
      * @param userAddress
      */
-    public static void userAuthorized(String userAddress) {
+    public static void userAuthorized(PersonBean user) {
         String server = configuration.getProperty("mail.servername");
         String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
         String subject = presubj + " Account Activated";
         String body = String.format("Your account for use on server %s has been activated.", server);
         try {
-            sendMessage(userAddress, subject, body);
+            sendMessage(user.getEmail(), subject, body);
         } catch (MessagingException e) {
-            log.error(String.format("Could not send email to '%s' about '%s'.", userAddress, subject), e);
+            log.error(String.format("Could not send email to '%s' about '%s'.", user.getEmail(), subject), e);
         }
     }
 
-    public static void sendNewPassword(String email, String newPassword) {
+    public static void sendNewPassword(PersonBean user, String newPassword) {
         String server = configuration.getProperty("mail.servername");
         String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
         String subject = presubj + " New Password";
         String body = String.format("Your new password for use on server %s is : %s", server, newPassword);
         try {
-            sendMessage(email, subject, body);
+            sendMessage(user.getEmail(), subject, body);
         } catch (MessagingException e) {
-            log.error(String.format("Could not send email to '%s' about '%s'.", email, subject), e);
+            log.error(String.format("Could not send email to '%s' about '%s'.", user.getEmail(), subject), e);
         }
     }
 
@@ -112,14 +114,17 @@ public class Mail {
      * 
      * @param userAddress
      */
-    public static void userAdded(String userAddress) {
+    public static void userAdded(PersonBean user) {
         String server = configuration.getProperty("mail.servername");
         String rcpt = configuration.getProperty("mail.from");
         String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
         String subject = presubj + " New User";
-        String body = String.format("A new user has registered on server %s with email address %s", server, userAddress);
+        StringBuilder body = new StringBuilder();
+        body.append(String.format("A new user has registered on server %s\n\n", server));
+        body.append(String.format("NAME  : %s\n", user.getName()));
+        body.append(String.format("EMAIL : %s\n", user.getEmail()));
         try {
-            sendMessage(rcpt, subject, body); //$NON-NLS-1$
+            sendMessage(rcpt, subject, body.toString()); //$NON-NLS-1$
         } catch (MessagingException e) {
             log.error(String.format("Could not send email to '%s' about '%s'.", rcpt, subject), e);
         }

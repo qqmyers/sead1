@@ -52,6 +52,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUserResult;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 
@@ -69,18 +71,19 @@ public class AddUserHandler implements ActionHandler<AddUser, AddUserResult> {
     @Override
     public AddUserResult execute(AddUser arg0, ExecutionContext arg1) throws ActionException {
 
-        String name = arg0.getFirstName() + " " + arg0.getLastName();
-        String email = arg0.getEmail();
-        String password = arg0.getPassword();
+        PersonBean pb = new PersonBean();
+        pb.setUri(PersonBeanUtil.getPersonID(arg0.getEmail()));
+        pb.setEmail(arg0.getEmail());
+        pb.setName(arg0.getFirstName() + " " + arg0.getLastName());
 
         try {
             ContextAuthentication auth = new ContextAuthentication(TupeloStore.getInstance().getContext());
-            auth.addUser(null, email, name, password);
+            auth.addUser(pb.getEmail(), pb.getName(), arg0.getPassword());
         } catch (AuthenticationException e) {
-            log.error("Error adding user " + name + " , " + email, e);
+            log.error(String.format("Error adding user %s with email %s.", pb.getName(), pb.getEmail()), e);
         }
 
-        Mail.userAdded(email);
+        Mail.userAdded(pb);
 
         return new AddUserResult();
     }

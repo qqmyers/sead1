@@ -153,7 +153,7 @@ public class EditRoleHandler implements ActionHandler<EditRole, EmptyResult> {
             PersonBean personBean = pbu.get(user);
 
             if (personBean.getEmail() != null && !personBean.getEmail().isEmpty()) {
-                Mail.userAuthorized(personBean.getEmail());
+                Mail.userAuthorized(personBean);
             } else {
                 log.debug("User " + user + " email was null/empty. Email not sent.");
             }

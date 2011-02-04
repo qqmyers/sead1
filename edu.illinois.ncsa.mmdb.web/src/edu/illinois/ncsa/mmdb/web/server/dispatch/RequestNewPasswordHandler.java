@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.Collection;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -48,16 +50,14 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Context;
-import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Foaf;
-import org.tupeloproject.rdf.terms.Rdf;
-import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RequestNewPassword;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RequestNewPasswordResult;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 
 /**
@@ -81,23 +81,17 @@ public class RequestNewPasswordHandler implements ActionHandler<RequestNewPasswo
         try {
             ContextAuthentication auth = new ContextAuthentication(context);
 
-            Unifier uf = new Unifier();
-            uf.addPattern("user", Foaf.MBOX, Resource.literal(email));
-            uf.addPattern("user", Rdf.TYPE, Foaf.PERSON);
-            uf.addColumnName("user");
-            context.perform(uf);
-            int count = 0;
-            for (Tuple<Resource> row : uf.getResult() ) {
+            Collection<PersonBean> people = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession()).findByEmail(email);
+            for (PersonBean pb : people ) {
                 String password = auth.generatePassword(PASSWORD_LENGTH);
-                auth.changePassword(row.get(0), password);
-                Mail.sendNewPassword(email, password);
-                count++;
+                auth.changePassword(Resource.uriRef(pb.getUri()), password);
+                Mail.sendNewPassword(pb, password);
             }
-            if (count == 0) {
+            if (people.size() == 0) {
                 return new RequestNewPasswordResult(false, "Unable to find account.");
             }
-            if (count > 1) {
-                log.error(String.format("Found %d people with same email address [%s]!!", count, email));
+            if (people.size() > 1) {
+                log.error(String.format("Found %d people with same email address [%s]!!", people.size(), email));
             }
             return new RequestNewPasswordResult(true, "Your new password has been sent to your email address.");
         } catch (Exception e) {
