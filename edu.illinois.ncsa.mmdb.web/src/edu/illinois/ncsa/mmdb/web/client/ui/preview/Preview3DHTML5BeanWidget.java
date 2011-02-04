@@ -35,7 +35,7 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
 
     @Override
     public String getAnchorText() {
-        return "HTML5";
+        return "3D (HTML5)";
     }
 
     @Override

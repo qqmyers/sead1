@@ -35,7 +35,7 @@ public class Preview3DWebGLBeanWidget extends PreviewBeanWidget<PreviewThreeDime
 
     @Override
     public String getAnchorText() {
-        return "WebGL";
+        return "3D (WebGL)";
     }
 
     @Override

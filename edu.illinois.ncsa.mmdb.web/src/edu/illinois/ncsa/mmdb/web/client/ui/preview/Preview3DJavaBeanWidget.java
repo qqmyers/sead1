@@ -29,7 +29,7 @@ public class Preview3DJavaBeanWidget extends PreviewBeanWidget<PreviewThreeDimen
 
     @Override
     public String getAnchorText() {
-        return "Java";
+        return "3D (Java)";
     }
 
     @Override
