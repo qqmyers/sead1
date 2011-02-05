@@ -44,6 +44,16 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
     }
 
     @Override
+    public void hide() {
+        hideHTML5();
+    }
+
+    public final native void hideHTML5() /*-{
+        // hide the current WebGL viewer if open
+        $wnd.hideThingView();
+    }-*/;
+
+    @Override
     public String getSection() {
         return "Document"; //$NON-NLS-1$
     }

@@ -1,3 +1,5 @@
+
+ 
  initThingView = function(url){
       thingiurlbase = "js/thingview";
       thingiview = new Thingiview("viewer");
@@ -6,6 +8,12 @@
       thingiview.initScene();
       thingiview.loadOBJString(url);
   }
+  
+  hideThingView = function(){
+   thingiview.hide();
+    
+    
+}
 
 Thingiview = function(containerId) {
   scope = this;
@@ -63,6 +71,13 @@ Thingiview = function(containerId) {
 
 
   var geometry;
+  
+  this.hide = function() {
+    clearInterval(rotateTimer);
+    rotateTimer = null;
+    renderer.setSize(1, 1);
+    renderer.domElement.width = renderer.domElement.height;
+  }
 
   this.initScene = function() {
     container.style.position = 'relative';
@@ -780,5 +795,7 @@ if(typeof(window) === "undefined"){
 } else {
     customPostMessage = WorkerFacade.add("path/to/thisworker.js", nameOfWorkerFunction);
 }
+
+
 
 */
