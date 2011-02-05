@@ -45,13 +45,13 @@ public class Preview3DJavaBeanWidget extends PreviewBeanWidget<PreviewThreeDimen
     @Override
     protected void showSection() {
         String url = GWT.getHostPageBaseURL() + RestEndpoints.EXTENSION_URL + getPreviewBean().getUri();
-
-        ((HTML) getWidget()).setHTML("<div class='Java3DPreview'>" +
+        ((HTML) getWidget()).setHTML(url);
+        /*((HTML) getWidget()).setHTML("<div class='Java3DPreview'>" +
                 "<APPLET name=jvLite code='jvLite.class' width=480 " +
                 "height=360 archive='plugins/jvLite.jar'>" +
                 "<PARAM NAME='model' VALUE='" + url + ".obj" + "'>" +
                 "<PARAM NAME='border' VALUE='hide'>" +
-                "</APPLET></div>");
+                "</APPLET></div>");*/
 
     }
 }

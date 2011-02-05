@@ -53,7 +53,7 @@ Thingiview = function(containerId) {
   var backgroundColor = '#606060';
   var objectMaterial = 'solid';
   var objectColor = 0xffffff;
-  var showPlane = true;
+  var showPlane = false;
   var isWebGl = false;
 
 
