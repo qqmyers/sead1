@@ -11,9 +11,12 @@
   
   hideThingView = function(){
    thingiview.hide();
-    
-    
-}
+   }
+   
+   saveImgThingView = function(){
+   return thingiview.saveImage();
+
+   }
 
 Thingiview = function(containerId) {
   scope = this;
@@ -77,6 +80,11 @@ Thingiview = function(containerId) {
     rotateTimer = null;
     renderer.setSize(1, 1);
     renderer.domElement.width = renderer.domElement.height;
+  }
+  
+  this.saveImage = function() { 
+  	return renderer.domElement.toDataURL();
+  
   }
 
   this.initScene = function() {

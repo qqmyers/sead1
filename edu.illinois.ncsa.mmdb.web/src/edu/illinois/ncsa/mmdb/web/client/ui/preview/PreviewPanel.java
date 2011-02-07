@@ -60,6 +60,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEventHandler
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEventHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
 /**
@@ -84,6 +85,8 @@ public class PreviewPanel extends Composite {
 
     /** List of widgets used to show dataset */
     private List<PreviewBeanWidget>                  widgets;
+
+    private DatasetBean                              dataset;
 
     /** Mapping from widget to corresponding anchor */
     private final Map<PreviewBeanWidget, Anchor>     anchors       = new HashMap<PreviewBeanWidget, Anchor>();
@@ -159,6 +162,7 @@ public class PreviewPanel extends Composite {
      * @param uri
      */
     public void drawPreview(final GetDatasetResult result, FlowPanel leftColumn, String uri) {
+        dataset = result.getDataset();
         widgets = getOrderedBeans(result, leftColumn.getOffsetWidth());
         anchors.clear();
 
@@ -211,6 +215,7 @@ public class PreviewPanel extends Composite {
             if (best != null) {
                 PreviewBeanWidget pbw = widget.newWidget();
                 pbw.setPreviewBean(best);
+                pbw.setDatasetBean(dataset);
                 list.add(pbw);
             }
         }

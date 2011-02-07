@@ -52,6 +52,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ContextConvertHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.Create3DImageHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.CreateRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteAnnotationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetHandler;
@@ -193,6 +194,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new AddGeoLocationHandler());
         DispatchUtil.registerHandler(new GetSearchHitHandler());
         DispatchUtil.registerHandler(new GetSectionHandler());
+        DispatchUtil.registerHandler(new Create3DImageHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

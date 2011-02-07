@@ -4,11 +4,13 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEvent;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
 public abstract class PreviewBeanWidget<T extends PreviewBean> {
     /** preview bean that is rendered. */
     private T                      pb = null;
+    private DatasetBean            dataset;
 
     /** the actual widget that will hold the preview */
     private Widget                 widget;
@@ -26,6 +28,14 @@ public abstract class PreviewBeanWidget<T extends PreviewBean> {
 
     public T getPreviewBean() {
         return pb;
+    }
+
+    public DatasetBean getDataset() {
+        return dataset;
+    }
+
+    public void setDatasetBean(DatasetBean dataset) {
+        this.dataset = dataset;
     }
 
     /**
