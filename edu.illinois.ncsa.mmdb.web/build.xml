@@ -53,9 +53,7 @@
 	<property name="deprecation" value="true" />
 		
 	<property name="version" value="v1.1.100#${env.BUILD_NUMBER}" />
-	
-	<property name="googlemap" value="ABQIAAAASEElYb9IDDsAc5ZKA3a2sRQmgYtTImkVBc-VhblDgOLOdwhVaBSGMDSn-_9k3bx4tYolchXvrvB8Ag" />
-	
+		
 	<condition property="deps" value=".." else="../plugins">
 		<available file="../edu.uiuc.ncsa.cet.bean/build.properties" />
 	</condition>		
@@ -96,7 +94,6 @@
 		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
 		<replace file="war/WEB-INF/classes/server.properties" token="#search.index=/home/futrelle/dev/scratch/luceneIndex" value="search.index=/home/medici/medici/lucene" />
-		<replace file="war/mmdb.html" token="sensor=false" value="sensor=false&amp;key=${googlemap}" />
 	</target>
 	
 	<!-- copy the tupelo jar files -->
