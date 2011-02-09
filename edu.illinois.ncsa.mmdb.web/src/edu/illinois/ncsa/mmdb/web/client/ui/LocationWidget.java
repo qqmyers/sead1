@@ -147,6 +147,7 @@ public class LocationWidget extends Composite {
             @Override
             public void run() {
                 GWT.log("Loaded google maps." + Maps.getVersion());
+                getGeoPoint();
             }
         });
 
