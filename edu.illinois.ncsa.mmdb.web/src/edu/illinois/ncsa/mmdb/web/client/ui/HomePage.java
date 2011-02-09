@@ -46,33 +46,18 @@ import java.util.List;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
-import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ContextConvert;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRecentActivity;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRecentActivityResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.InitializeRoles;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLuceneResult;
-import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
-import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * The home page is user specific. It contains a set of tabs to modify and view
@@ -88,7 +73,6 @@ public class HomePage extends Page {
     private TabPanel             tabPanel;
     private FlowPanel            preferencesPanel;
     private FlowPanel            recentActivityPanel;
-    private FlowPanel            adminPanel;
     private final PermissionUtil rbac;
 
     /**
@@ -104,7 +88,6 @@ public class HomePage extends Page {
         createSystemInfoTab();
         createProfileTab();
         //        createPreferencesTab();
-        // checkAdminPermissions();
         tabPanel.selectTab(0);
     }
 
@@ -175,125 +158,6 @@ public class HomePage extends Page {
         tabPanel = new TabPanel();
         tabPanel.setWidth("99%");
         mainLayoutPanel.add(tabPanel);
-    }
-
-    /**
-     * Check if the user has admin permissions. If so show a tab with
-     * admin-level functions.
-     */
-    private void checkAdminPermissions() {
-        dispatchAsync.execute(new HasPermission(MMDB.getUsername(),
-                Permission.VIEW_ADMIN_PAGES),
-                new AsyncCallback<HasPermissionResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Error checking for admin privileges", caught);
-                    }
-
-                    @Override
-                    public void onSuccess(HasPermissionResult result) {
-                        if (result.isPermitted()) {
-                            createAdminTab();
-                        }
-                    }
-                });
-    }
-
-    /**
-     * Create a tab that includes things that only admins can do.
-     */
-    protected void createAdminTab() {
-        adminPanel = new FlowPanel();
-
-        rbac.withPermissions(new PermissionsCallback() {
-            @Override
-            public void onPermissions(HasPermissionResult permissions) {
-                if (permissions.isPermitted(Permission.EDIT_ROLES)) {
-                    Hyperlink permissionsLink = new Hyperlink("Administer users", "modifyPermissions");
-                    adminPanel.add(permissionsLink);
-
-                    Hyperlink aclLink = new Hyperlink("Administer permissions", "accessControl");
-                    adminPanel.add(aclLink);
-
-                    final Anchor initializeRoles = new Anchor("Set all roles and permissions to defaults");
-                    initializeRoles.addClickHandler(new ClickHandler() {
-                        public void onClick(ClickEvent event) {
-                            initializeRoles.setEnabled(false);
-                            ConfirmDialog cd = new ConfirmDialog("Initialize permissions", "Are you sure you want to initialize all roles and permissions?\nThis operation cannot be undone, and may affect who can access the system.");
-                            cd.addConfirmHandler(new ConfirmHandler() {
-                                @Override
-                                public void onConfirm(ConfirmEvent event) {
-                                    initializeRoles.setText("Setting default roles and permissions");
-                                    dispatchAsync.execute(new InitializeRoles(), new AsyncCallback<EmptyResult>() {
-                                        public void onFailure(Throwable caught) {
-                                            initializeRoles.setText("Default permissions failed");
-                                            initializeRoles.setEnabled(true);
-                                        }
-
-                                        public void onSuccess(EmptyResult result) {
-                                            initializeRoles.setText("All roles and permissions set to default");
-                                            initializeRoles.setEnabled(true);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                    adminPanel.add(initializeRoles);
-                }
-                Hyperlink sparqlLink = new Hyperlink("Run SPARQL Query", "sparql");
-                adminPanel.add(sparqlLink);
-
-                final Anchor updateAnchor = new Anchor("Update Context");
-                updateAnchor.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        updateAnchor.setEnabled(false);
-                        updateAnchor.setText("Update Context Running...");
-                        dispatchAsync.execute(new ContextConvert(), new AsyncCallback<EmptyResult>() {
-                            public void onFailure(Throwable caught) {
-                                updateAnchor.setText("Update Context Failed");
-                                updateAnchor.setEnabled(true);
-                            }
-
-                            public void onSuccess(EmptyResult result) {
-                                updateAnchor.setText("Update Context Finished");
-                                updateAnchor.setEnabled(true);
-                            }
-                        });
-                    }
-                });
-                adminPanel.add(updateAnchor);
-                adminPanel.add(new HTML());
-
-                if (permissions.isPermitted(Permission.REINDEX_FULLTEXT)) {
-                    final Anchor luceneAnchor = new Anchor("Re-build full-text index");
-                    luceneAnchor.addClickHandler(new ClickHandler() {
-                        public void onClick(ClickEvent event) {
-                            luceneAnchor.setEnabled(false);
-                            luceneAnchor.setText("Requesting...");
-                            dispatchAsync.execute(new ReindexLucene(), new AsyncCallback<ReindexLuceneResult>() {
-                                public void onFailure(Throwable caught) {
-                                    new ConfirmDialog("Error", "Error reindexing");
-                                    luceneAnchor.setText("Reindex Lucene");
-                                    luceneAnchor.setEnabled(true);
-                                }
-
-                                public void onSuccess(ReindexLuceneResult result) {
-                                    new ConfirmDialog("Started", "Queued " + result.getNumberQueued() + " dataset(s) for reindexing");
-                                    luceneAnchor.setText("Reindex Lucene");
-                                    luceneAnchor.setEnabled(true);
-                                }
-                            });
-                        }
-                    });
-                    adminPanel.add(luceneAnchor);
-                }
-
-                tabPanel.add(adminPanel, "Administrator");
-            }
-        }, Permission.EDIT_ROLES, Permission.REINDEX_FULLTEXT);
-
     }
 
     @Override

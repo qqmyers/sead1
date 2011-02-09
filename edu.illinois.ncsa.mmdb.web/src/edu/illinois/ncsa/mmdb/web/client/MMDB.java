@@ -93,16 +93,13 @@ import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.MapPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.NotEnabledPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
-import edu.illinois.ncsa.mmdb.web.client.ui.RoleAdministrationPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchBox;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchResultsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SelectedDatasetsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
-import edu.illinois.ncsa.mmdb.web.client.ui.SparqlPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.UploadPage;
-import edu.illinois.ncsa.mmdb.web.client.ui.UserManagementPage;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
@@ -161,9 +158,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private static UserSessionState    sessionState;
 
     private Label                      debugLabel;
-    private HorizontalPanel             navMenu;
-    private HTML                        adminBbullet;
-    private Hyperlink                   adminLink;
+    private HorizontalPanel            navMenu;
+    private HTML                       adminBbullet;
+    private Hyperlink                  adminLink;
 
     /**
      * This is the entry point method.
@@ -533,16 +530,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showSearchResultsPage();
         } else if (token.startsWith("map")) {
             showMapPage();
-        } else if (token.startsWith("modifyPermissions")) {
-            showUsersPage();
-        } else if (token.startsWith("accessControl")) {
-            showAccessControlPage();
         } else if (token.startsWith("signup")) {
             showSignupPage();
         } else if (token.startsWith("home")) {
             showHomePage();
-        } else if (token.startsWith("sparql")) {
-            showSparqlPage();
         } else if (token.startsWith("viewSelected")) {
             showSelected(true);
         } else if (token.startsWith("editRelationships")) {
@@ -639,45 +630,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         public void onDenied() {
             showNoAccessPage();
         }
-    }
-
-    /**
-     */
-    private void showUsersPage() {
-        rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new AccessOrMessageCallback() {
-            @Override
-            public void onAllowed() {
-                mainContainer.clear();
-                mainContainer.add(new UserManagementPage(dispatchAsync));
-            }
-        });
-    }
-
-    /**
-     */
-    private void showAccessControlPage() {
-        // Check if the user has view admin pages permission
-        rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new AccessOrMessageCallback() {
-            @Override
-            public void onAllowed() {
-                mainContainer.clear();
-                mainContainer.add(new RoleAdministrationPage(dispatchAsync));
-            }
-        });
-    }
-
-    /**
-     * List users in the system.
-     */
-    private void showSparqlPage() {
-        // Check if the user has view admin pages permission
-        rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new AccessOrMessageCallback() {
-            @Override
-            public void onAllowed() {
-                mainContainer.clear();
-                mainContainer.add(new SparqlPage(dispatchAsync));
-            }
-        });
     }
 
     /**
