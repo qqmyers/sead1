@@ -51,6 +51,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.event.MapClickHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
@@ -65,12 +66,16 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddGeoLocation;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
@@ -97,11 +102,9 @@ public class LocationWidget extends Composite {
      */
     public LocationWidget(String uri, DispatchAsync service) {
         this(uri, service, true);
-        this.uri = uri;
-        this.service = service;
     }
 
-    public LocationWidget(final String uri, DispatchAsync service, final boolean withTitle) {
+    public LocationWidget(final String uri, final DispatchAsync service, final boolean withTitle) {
         this.uri = uri;
         this.service = service;
         // mainpanel
@@ -120,10 +123,33 @@ public class LocationWidget extends Composite {
                         mapHeader.addStyleName("datasetRightColHeading");
                         mainPanel.add(mapHeader);
                     }
-                    getGeoPoint();
+
+                    service.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.GoogleMapKey), new AsyncCallback<ConfigurationResult>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log("Could not get GoogleMapKey", caught);
+                            loadMaps(null);
+                        }
+
+                        @Override
+                        public void onSuccess(ConfigurationResult result) {
+                            loadMaps(result.getConfiguration(ConfigurationKey.GoogleMapKey));
+                        }
+                    });
                 }
             });
         }
+    }
+
+    private void loadMaps(String googlekey) {
+        GWT.log("Loading google maps." + googlekey);
+        Maps.loadMapsApi(googlekey, "2", false, new Runnable() {
+            @Override
+            public void run() {
+                GWT.log("Loaded google maps." + Maps.getVersion());
+            }
+        });
+
     }
 
     private void getGeoPoint() {
@@ -187,17 +213,7 @@ public class LocationWidget extends Composite {
         });
     }
 
-    public void showPoint(GeoPointBean bean) {
-        initialize();
-
-        MarkerOptions options = MarkerOptions.newInstance();
-        options.setTitle("lat=" + bean.getLatitude() + " lon=" + bean.getLongitude() + " alt=" + bean.getAltitude());
-        LatLng loc = LatLng.newInstance(bean.getLatitude(), bean.getLongitude());
-        map.addOverlay(new Marker(loc, options));
-        map.setCenter(loc, 15);
-    }
-
-    public void showPoints(Collection<GeoPointBean> beans) {
+    private void showPoints(Collection<GeoPointBean> beans) {
         initialize();
 
         LatLngBounds bounds = LatLngBounds.newInstance();

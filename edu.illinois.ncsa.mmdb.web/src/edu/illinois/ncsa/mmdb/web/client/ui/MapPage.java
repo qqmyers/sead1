@@ -11,6 +11,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.maps.client.InfoWindow;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.event.MarkerClickHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Marker;
@@ -19,14 +20,18 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GeoSearch;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GeoSearchResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
@@ -40,29 +45,55 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
  */
 public class MapPage extends Page {
 
-    private static final String  TITLE = "Datasets by Location";
-    private final HandlerManager eventbus;
-    private final DispatchAsync  dispatch;
-    private MapWidget            map;
-    private Label                permissionLabel;
+    private static final String TITLE = "Datasets by Location";
+    private MapWidget           map;
+    private Label               permissionLabel;
 
     public MapPage(DispatchAsync dispatch, HandlerManager eventbus) {
-        super(TITLE, dispatch);
-        this.dispatch = dispatch;
-        this.eventbus = eventbus;
-        populate();
+        super(TITLE, dispatch, eventbus);
+        initialize();
     }
 
-    private void populate() {
+    private void initialize() {
+        permissionLabel = new Label("We are sorry, but you don't have the proper permissions to view gelocation information.");
+        mainLayoutPanel.add(permissionLabel);
 
-        PermissionUtil rbac = new PermissionUtil(dispatch);
+        PermissionUtil rbac = new PermissionUtil(dispatchAsync);
         rbac.doIfAllowed(Permission.VIEW_LOCATION, new PermissionCallback() {
             @Override
             public void onAllowed() {
                 mainLayoutPanel.remove(permissionLabel);
 
-                dispatch.execute(new GeoSearch(), new AsyncCallback<GeoSearchResult>() {
+                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.GoogleMapKey), new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get GoogleMapKey", caught);
+                        populate(null);
+                    }
 
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        populate(result.getConfiguration(ConfigurationKey.GoogleMapKey));
+                    }
+                });
+            }
+        });
+    }
+
+    private void populate(String googlekey) {
+        GWT.log("Loading google maps." + googlekey);
+
+        Maps.loadMapsApi(googlekey, "2", false, new Runnable() {
+            @Override
+            public void run() {
+                GWT.log("Loaded google maps." + Maps.getVersion());
+
+                map = new MapWidget();
+                map.setSize("950px", "500px");
+                map.setUIToDefault();
+                mainLayoutPanel.add(map);
+
+                dispatchAsync.execute(new GeoSearch(), new AsyncCallback<GeoSearchResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Error geosearching in map page", caught);
@@ -80,7 +111,7 @@ public class MapPage extends Page {
     private void listResults(GeoSearchResult result) {
         for (final String hit : result.getHits() ) {
             // get dataset bean
-            dispatch.execute(new GetDataset(hit), new AsyncCallback<GetDatasetResult>() {
+            dispatchAsync.execute(new GetDataset(hit), new AsyncCallback<GetDatasetResult>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -91,7 +122,7 @@ public class MapPage extends Page {
                 public void onSuccess(GetDatasetResult result) {
                     final DatasetBean dataset = result.getDataset();
                     // get geopoint of dataset
-                    dispatch.execute(new GetGeoPoint(hit), new AsyncCallback<GetGeoPointResult>() {
+                    dispatchAsync.execute(new GetGeoPoint(hit), new AsyncCallback<GetGeoPointResult>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -139,11 +170,5 @@ public class MapPage extends Page {
      */
     @Override
     public void layout() {
-        permissionLabel = new Label("We are sorry, but you don't have the proper permissions to view gelocation information.");
-        mainLayoutPanel.add(permissionLabel);
-        map = new MapWidget();
-        map.setSize("950px", "500px");
-        map.setUIToDefault();
-        mainLayoutPanel.add(map);
     }
 }
