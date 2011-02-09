@@ -71,7 +71,7 @@ public class Mail {
      */
     public static void userAuthorized(PersonBean user) {
         TupeloStore ts = TupeloStore.getInstance();
-        String server = ts.getConfiguration(ConfigurationKey.MailServer);
+        String server = ts.getConfiguration(ConfigurationKey.MediciName);
         String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
         String subject = presubj + " Account Activated";
         String body = String.format("Your account for use on server %s has been activated.", server);
@@ -84,7 +84,7 @@ public class Mail {
 
     public static void sendNewPassword(PersonBean user, String newPassword) {
         TupeloStore ts = TupeloStore.getInstance();
-        String server = ts.getConfiguration(ConfigurationKey.MailServer);
+        String server = ts.getConfiguration(ConfigurationKey.MediciName);
         String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
         String subject = presubj + " New Password";
         String body = String.format("Your new password for use on server %s is : %s", server, newPassword);
@@ -102,7 +102,7 @@ public class Mail {
      */
     public static void userAdded(PersonBean user) {
         TupeloStore ts = TupeloStore.getInstance();
-        String server = ts.getConfiguration(ConfigurationKey.MailServer);
+        String server = ts.getConfiguration(ConfigurationKey.MediciName);
         String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
         String rcpt = ts.getConfiguration(ConfigurationKey.MailFrom);
         String subject = presubj + " New User";
