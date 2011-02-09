@@ -133,7 +133,7 @@ public class Mail {
 
         Properties props = new Properties();
         props.put(ConfigurationKey.MailServer.getPropertyKey(), ts.getConfiguration(ConfigurationKey.MailServer));
-        Session session = Session.getDefaultInstance(null);
+        Session session = Session.getDefaultInstance(props);
         MimeMessage message = new MimeMessage(session);
         try {
             message.setFrom(new InternetAddress(from, fullname));
