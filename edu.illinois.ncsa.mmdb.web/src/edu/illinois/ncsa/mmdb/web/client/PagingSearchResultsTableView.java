@@ -41,9 +41,10 @@ package edu.illinois.ncsa.mmdb.web.client;
 import java.util.Date;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
-import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -53,18 +54,20 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  * 
  */
 public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean> {
-    DatasetTableView table;
-    int              numberOfPages = 0;
-    int              pageOffset    = 0;
-    int              pageSize;
-    private String   queryString;
+    DatasetTableView            table;
+    int                         numberOfPages = 0;
+    int                         pageOffset    = 0;
+    int                         pageSize;
+    private String              queryString;
+    private final DispatchAsync dispatchAsync;
 
-    public PagingSearchResultsTableView() {
+    public PagingSearchResultsTableView(DispatchAsync dispatchAsync) {
         super();
+        this.dispatchAsync = dispatchAsync;
     }
 
-    public PagingSearchResultsTableView(String inCollection) {
-        this();
+    public PagingSearchResultsTableView(String inCollection, DispatchAsync dispatchAsync) {
+        this(dispatchAsync);
     }
 
     protected Map<String, String> parseHistoryToken(String token) {
@@ -107,11 +110,11 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
     protected void displayView() {
         DatasetTableView datasetTableView = null;
         if (getViewType().equals("grid")) {
-            datasetTableView = new DatasetTableGridView();
+            datasetTableView = new DatasetTableGridView(dispatchAsync);
         } else if (getViewType().equals("flow")) {
-            datasetTableView = new DatasetTableCoverFlowView();
+            datasetTableView = new DatasetTableCoverFlowView(dispatchAsync);
         } else {
-            datasetTableView = new DatasetTableOneColumnView();
+            datasetTableView = new DatasetTableOneColumnView(dispatchAsync);
         }
         setTable(datasetTableView);
     }
@@ -154,9 +157,8 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
     }
 
     @Override
-    public void addItem(String uri, DatasetBean dataset) {
+    public void addItem(String uri, DatasetBean dataset, String type) {
         String title = dataset.getTitle();
-        String type = dataset.getMimeType();
         Date date = dataset.getDate();
         String previewUri = "/api/image/preview/small/" + uri;
         String size = TextFormatter.humanBytes(dataset.getSize());
@@ -168,9 +170,8 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
     }
 
     @Override
-    public void addItem(String uri, DatasetBean dataset, int position) {
+    public void addItem(String uri, DatasetBean dataset, String type, int position) {
         String title = dataset.getTitle();
-        String type = ContentCategory.getCategory(dataset.getMimeType());
         Date date = dataset.getDate();
         String previewUri = "/api/image/preview/small/" + uri;
         String size = TextFormatter.humanBytes(dataset.getSize());
@@ -182,9 +183,8 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
     }
 
     @Override
-    public void addItem(String uri, DatasetBean dataset, int position, String sectionUri, String sectionLabel, String sectionMarker) {
+    public void addItem(String uri, DatasetBean dataset, String type, int position, String sectionUri, String sectionLabel, String sectionMarker) {
         String title = dataset.getTitle();
-        String type = ContentCategory.getCategory(dataset.getMimeType());
         Date date = dataset.getDate();
         String previewUri = "/api/image/preview/small/" + uri;
         String size = TextFormatter.humanBytes(dataset.getSize());
@@ -196,7 +196,7 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
     }
 
     @Override
-    public void addItem(String uri, DatasetBean item, String sectionUri, String sectionLabel, String sectionMarker) {
+    public void addItem(String uri, DatasetBean item, String type, String sectionUri, String sectionLabel, String sectionMarker) {
         // TODO Auto-generated method stub
 
     }

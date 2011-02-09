@@ -41,13 +41,14 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotations;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotationsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 
 /**
  * @author lmarini
@@ -57,7 +58,7 @@ public class AnnotationsWidget extends Composite {
 
     private final CommentsView commentsView;
 
-    public AnnotationsWidget(String id, MyDispatchAsync service) {
+    public AnnotationsWidget(String id, DispatchAsync service) {
         commentsView = new CommentsView(id, service);
         initWidget(commentsView);
 

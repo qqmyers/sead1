@@ -145,7 +145,7 @@ public class CollectionMembershipWidget extends Composite {
         final Hyperlink link = new Hyperlink(collection.getTitle(), href);
 
         int row = collectionsPanel.getRowCount();
-        final PreviewWidget badge = PreviewWidget.newCollectionBadge(uri, href);
+        final PreviewWidget badge = PreviewWidget.newCollectionBadge(uri, href, service);
         collectionsPanel.setWidget(row++, 0, badge);
         collectionsPanel.setWidget(row, 0, link);
 

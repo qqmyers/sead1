@@ -38,19 +38,20 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.client.mvp.Presenter;
 
 public class UserMetadataPresenter implements Presenter {
-    protected final MyDispatchAsync dispatch;
-    protected final Display         display;
+    protected final DispatchAsync dispatch;
+    protected final Display       display;
 
-    public UserMetadataPresenter(MyDispatchAsync dispatch, Display display) {
+    public UserMetadataPresenter(DispatchAsync dispatch, Display display) {
         this.dispatch = dispatch;
         this.display = display;
     }

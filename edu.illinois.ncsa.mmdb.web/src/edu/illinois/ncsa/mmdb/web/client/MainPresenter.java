@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.shared.HandlerManager;
 
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
@@ -63,10 +65,10 @@ public class MainPresenter extends BasePresenter<MainView> {
     private final DatasetPresenter      datasetPresenter;
     private Presenter                   currentPresenter;
 
-    public MainPresenter(MainView display, HandlerManager eventBus,
+    public MainPresenter(MainView display, DispatchAsync dispatchAsync, HandlerManager eventBus,
             DatasetTablePresenter tablePresenter,
             DatasetPresenter datasetPresenter) {
-        super(display, eventBus);
+        super(display, dispatchAsync, eventBus);
         this.tablePresenter = tablePresenter;
         this.datasetPresenter = datasetPresenter;
 

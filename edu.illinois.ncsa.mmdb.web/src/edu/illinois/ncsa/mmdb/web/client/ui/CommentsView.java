@@ -40,6 +40,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.ArrayList;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -59,7 +61,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResourceResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotations;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAnnotationsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.DeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DeletedHandler;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
@@ -74,17 +75,17 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
  */
 public class CommentsView extends Composite {
 
-    private final SimplePanel     mainPanel = new SimplePanel();
+    private final SimplePanel    mainPanel = new SimplePanel();
 
-    private final VerticalPanel   layoutPanel;
+    private final VerticalPanel  layoutPanel;
 
-    private final String          resource;
+    private final String         resource;
 
-    private final VerticalPanel   commentsPanel;
+    private final VerticalPanel  commentsPanel;
 
-    private final MyDispatchAsync service;
+    private final DispatchAsync  service;
 
-    private final PermissionUtil  rbac;
+    private final PermissionUtil rbac;
 
     /**
      * Draws the main panel and the widget to input a new annotation. Calls the
@@ -93,7 +94,7 @@ public class CommentsView extends Composite {
      * 
      * @param resource
      */
-    public CommentsView(final String resource, final MyDispatchAsync service) {
+    public CommentsView(final String resource, final DispatchAsync service) {
 
         this.resource = resource;
 
@@ -205,7 +206,7 @@ public class CommentsView extends Composite {
                 commentsPanel.add(new Label(annotations.size() + " comment" + (annotations.size() != 1 ? "s" : "")));
 
                 for (AnnotationBean annotation : annotations ) {
-                    AnnotationView v = new AnnotationView(resource, annotation, permissions.isPermitted(Permission.EDIT_COMMENT));
+                    AnnotationView v = new AnnotationView(service, resource, annotation, permissions.isPermitted(Permission.EDIT_COMMENT));
                     if (permissions.isPermitted(Permission.EDIT_COMMENT)) {
                         v.addDeletedHandler(new DeletedHandler() {
                             public void onDeleted(DeletedEvent event) {

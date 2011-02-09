@@ -42,6 +42,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -62,7 +64,6 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetLicense;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 
@@ -76,7 +77,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 // and an editor that fires handleable events
 public class LicenseWidget extends Composite {
 
-    private final MyDispatchAsync    service;
+    private final DispatchAsync      service;
     private final Collection<String> resources;
     private LicenseResult            license;
     private HandlerManager           eventBus;
@@ -103,14 +104,14 @@ public class LicenseWidget extends Composite {
     private Label                    lblRightsHolder;
     private SimplePanel              licensePanel;
 
-    public LicenseWidget(Collection<String> batch, MyDispatchAsync service, HandlerManager eventBus, boolean showTitle, boolean canEdit, boolean showEdit) {
+    public LicenseWidget(Collection<String> batch, DispatchAsync service, HandlerManager eventBus, boolean showTitle, boolean canEdit, boolean showEdit) {
         this.resources = batch;
         this.service = service;
         this.eventBus = eventBus;
         init(showTitle, canEdit, showEdit);
     }
 
-    public LicenseWidget(String resource, MyDispatchAsync service, boolean showTitle, boolean canEdit, boolean showEdit) {
+    public LicenseWidget(String resource, DispatchAsync service, boolean showTitle, boolean canEdit, boolean showEdit) {
         this.resources = new HashSet<String>();
         this.resources.add(resource);
         this.service = service;

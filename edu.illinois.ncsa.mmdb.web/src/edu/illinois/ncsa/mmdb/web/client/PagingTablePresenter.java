@@ -38,6 +38,8 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.shared.HandlerManager;
 
 import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
@@ -45,8 +47,8 @@ import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 
 public class PagingTablePresenter<T> extends BasePresenter<PagingTablePresenter.Display<T>> {
 
-    public PagingTablePresenter(Display<T> display, HandlerManager eventBus) {
-        super(display, eventBus);
+    public PagingTablePresenter(Display<T> display, DispatchAsync dispatchAsync, HandlerManager eventBus) {
+        super(display, dispatchAsync, eventBus);
     }
 
     @Override
@@ -55,12 +57,12 @@ public class PagingTablePresenter<T> extends BasePresenter<PagingTablePresenter.
     }
 
     public interface Display<T> extends View {
-        void addItem(String uri, T item);
+        void addItem(String uri, T item, String type);
 
-        void addItem(String uri, T item, String sectionUri, String sectionLabel, String sectionMarker);
+        void addItem(String uri, T item, String type, String sectionUri, String sectionLabel, String sectionMarker);
 
-        void addItem(String uri, T item, int position);
+        void addItem(String uri, T item, String type, int position);
 
-        void addItem(String uri, T item, int position, String sectionUri, String sectionLabel, String sectionMarker);
+        void addItem(String uri, T item, String type, int position, String sectionUri, String sectionLabel, String sectionMarker);
     }
 }

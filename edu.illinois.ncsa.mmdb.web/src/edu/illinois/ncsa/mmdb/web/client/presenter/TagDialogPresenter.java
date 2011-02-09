@@ -41,6 +41,8 @@ package edu.illinois.ncsa.mmdb.web.client.presenter;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -50,7 +52,6 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
@@ -61,17 +62,17 @@ import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
  */
 public class TagDialogPresenter extends TextDialogPresenter {
 
-    private final MyDispatchAsync dispatch;
-    private final HandlerManager  eventBus;
-    private final Display         display;
-    private Set<String>           selectedResources;
-    private final boolean         delete;           // should we delete the tags instead?
+    private final DispatchAsync  dispatch;
+    private final HandlerManager eventBus;
+    private final Display        display;
+    private Set<String>          selectedResources;
+    private final boolean        delete;           // should we delete the tags instead?
 
-    public TagDialogPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+    public TagDialogPresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
         this(dispatch, eventBus, display, false);
     }
 
-    public TagDialogPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display, boolean delete) {
+    public TagDialogPresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display, boolean delete) {
         this.dispatch = dispatch;
         this.eventBus = eventBus;
         this.display = display;

@@ -38,6 +38,8 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.shared.HandlerManager;
 
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
@@ -46,8 +48,8 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class PagingSearchResultsTablePresenter extends PagingTablePresenter<DatasetBean> {
 
-    public PagingSearchResultsTablePresenter(Display<DatasetBean> display, HandlerManager eventBus) {
-        super(display, eventBus);
+    public PagingSearchResultsTablePresenter(Display<DatasetBean> display, DispatchAsync dispatchAsync, HandlerManager eventBus) {
+        super(display, dispatchAsync, eventBus);
     }
 
     @Override
@@ -62,7 +64,7 @@ public class PagingSearchResultsTablePresenter extends PagingTablePresenter<Data
                         DatasetBean dataset = event.getDataset();
                         String id = dataset.getUri();
                         int position = event.getPosition();
-                        display.addItem(id, dataset, position);
+                        display.addItem(id, dataset, dataset.getMimeType(), position);
                     }
                 });
     }

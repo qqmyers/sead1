@@ -47,6 +47,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -85,8 +87,17 @@ public class DatasetTableOneColumnView extends DatasetTableView {
 
     private final Map<CheckBox, String> checkBoxes;
 
-    public DatasetTableOneColumnView() {
+    private final DispatchAsync         dispatchAsync;
+
+    /**
+     * TODO dispatch is currently required because PreviewWidget does not have a
+     * presenter
+     * 
+     * @param dispatchAsync
+     */
+    public DatasetTableOneColumnView(DispatchAsync dispatchAsync) {
         super();
+        this.dispatchAsync = dispatchAsync;
         addStyleName("datasetTable");
         checkBoxes = new HashMap<CheckBox, String>();
     }
@@ -145,7 +156,7 @@ public class DatasetTableOneColumnView extends DatasetTableView {
         });
 
         // preview
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
         pre.setMaxWidth(100);
         setWidget(row, 1, pre);
 
@@ -203,7 +214,7 @@ public class DatasetTableOneColumnView extends DatasetTableView {
 
         GWT.log("Inserting dataset " + title + " to row " + row, null);
 
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, mimeType);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, mimeType, dispatchAsync);
         pre.setMaxWidth(100);
         setWidget(row, 0, pre);
 
@@ -261,7 +272,7 @@ public class DatasetTableOneColumnView extends DatasetTableView {
 
         GWT.log("Inserting dataset " + title + " to row " + row, null);
 
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, mimeType);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, mimeType, dispatchAsync);
         pre.setMaxWidth(100);
         setWidget(row, 0, pre);
 

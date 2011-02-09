@@ -41,6 +41,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -70,7 +72,6 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 
-import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPending;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPendingResult;
@@ -103,6 +104,8 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     Timer                                   retryTimer;
     int                                     retriesLeft  = 10;
     State                                   state        = State.BLANK;
+
+    private final DispatchAsync             dispatchAsync;
 
     // possible state transitions
     // initially displayed -> failed -> no preview
@@ -148,23 +151,24 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
      * @param desiredSize
      * @param link
      */
-    public PreviewWidget(String datasetUri, String desiredSize, final String link) {
-        this(datasetUri, desiredSize, link, UNKNOWN_TYPE, true);
+    public PreviewWidget(String datasetUri, String desiredSize, final String link, DispatchAsync dispatchAsync) {
+        this(datasetUri, desiredSize, link, UNKNOWN_TYPE, true, dispatchAsync);
     }
 
-    public PreviewWidget(String datasetUri, String desiredSize, String link, String type) {
-        this(datasetUri, desiredSize, link, type, true, true);
+    public PreviewWidget(String datasetUri, String desiredSize, String link, String type, DispatchAsync dispatchAsync) {
+        this(datasetUri, desiredSize, link, type, true, true, dispatchAsync);
     }
 
-    public PreviewWidget(String datasetUri, String desiredSize, String link, String type, final boolean checkPending) {
-        this(datasetUri, desiredSize, link, type, checkPending, true);
+    public PreviewWidget(String datasetUri, String desiredSize, String link, String type, final boolean checkPending, DispatchAsync dispatchAsync) {
+        this(datasetUri, desiredSize, link, type, checkPending, true, dispatchAsync);
     }
 
-    public static PreviewWidget newCollectionBadge(String collectionUri, String link) {
-        return new PreviewWidget(collectionUri, GetPreviews.BADGE, link, UNKNOWN_TYPE, true, false);
+    public static PreviewWidget newCollectionBadge(String collectionUri, String link, DispatchAsync dispatchAsync) {
+        return new PreviewWidget(collectionUri, GetPreviews.BADGE, link, UNKNOWN_TYPE, true, false, dispatchAsync);
     }
 
-    public PreviewWidget(String uri, String desiredSize, String link, String type, boolean checkPending, boolean initialDisplay) {
+    public PreviewWidget(String uri, String desiredSize, String link, String type, boolean checkPending, boolean initialDisplay, DispatchAsync dispatchAsync) {
+        this.dispatchAsync = dispatchAsync;
         state = State.BLANK; // nothing shown, yet
         size = getSize(desiredSize); // use desired size or default
         // set up panel
@@ -219,9 +223,10 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         retryTimer = new Timer() {
             public void run() {
                 if (retriesLeft-- > 0) {
-                    MMDB.dispatchAsync.execute(new IsPreviewPending(uri, sz), new AsyncCallback<IsPreviewPendingResult>() {
+                    dispatchAsync.execute(new IsPreviewPending(uri, sz), new AsyncCallback<IsPreviewPendingResult>() {
                         @Override
                         public void onFailure(Throwable caught) {
+                            GWT.log("Error getting preview status", caught);
                         }
 
                         @Override
@@ -383,7 +388,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     /** For backwards compatibility with the old preview widget */
     public void changeImage(String datasetUri, String mimeType) {
         state = State.BLANK;
-        String type = ContentCategory.getCategory(mimeType);
+        String type = ContentCategory.getCategory(mimeType, dispatchAsync);
         changeImage(datasetUri, size, null, type, false, true);
     }
 

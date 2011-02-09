@@ -49,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -69,6 +71,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole.ActionType;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissions;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
@@ -76,8 +79,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRoles;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRolesResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsers;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsersResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole.ActionType;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
 
@@ -102,11 +103,11 @@ public class UserManagementPage extends Composite {
     private final FlexTable                activeUsersTable;
     private final FlexTable                inactiveUsersTable;
 
-    private final MyDispatchAsync          dispatchAsync;
+    private final DispatchAsync            dispatchAsync;
 
     private final HashMap<String, Integer> columnByRole;
 
-    public UserManagementPage(MyDispatchAsync dispatchAsync) {
+    public UserManagementPage(DispatchAsync dispatchAsync) {
 
         this.dispatchAsync = dispatchAsync;
 

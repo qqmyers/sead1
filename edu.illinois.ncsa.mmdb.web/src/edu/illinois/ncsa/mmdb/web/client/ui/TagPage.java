@@ -41,13 +41,14 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.presenter.TagTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
@@ -57,13 +58,13 @@ import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
  */
 public class TagPage extends Composite {
 
-    private final FlowPanel       mainPanel;
-    private TitlePanel            pageTitle;
-    private final String          tagName;
-    private final MyDispatchAsync dispatchAsync;
-    private final HandlerManager  eventBus;
+    private final FlowPanel      mainPanel;
+    private TitlePanel           pageTitle;
+    private final String         tagName;
+    private final DispatchAsync  dispatchAsync;
+    private final HandlerManager eventBus;
 
-    public TagPage(String uri, MyDispatchAsync dispatchAsync, HandlerManager eventBus) {
+    public TagPage(String uri, DispatchAsync dispatchAsync, HandlerManager eventBus) {
         this.tagName = uri;
         this.dispatchAsync = dispatchAsync;
         this.eventBus = eventBus;

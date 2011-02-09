@@ -38,6 +38,8 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.shared.HandlerManager;
 
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewCollectionEvent;
@@ -46,25 +48,25 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 public class PagingCollectionTablePresenter extends PagingTablePresenter<CollectionBean> {
 
-	public PagingCollectionTablePresenter(Display<CollectionBean> display,
-			HandlerManager eventBus) {
-		super(display, eventBus);
-		// TODO Auto-generated constructor stub
-	}
-	
-	@Override
-	public void bind() {
+    public PagingCollectionTablePresenter(Display<CollectionBean> display, DispatchAsync dispatchAsync,
+            HandlerManager eventBus) {
+        super(display, dispatchAsync, eventBus);
+        // TODO Auto-generated constructor stub
+    }
 
-		super.bind();
+    @Override
+    public void bind() {
 
-		eventBus.addHandler(AddNewCollectionEvent.TYPE,
-				new AddNewCollectionHandler() {
-					@Override
-					public void onAddNewCollection(AddNewCollectionEvent event) {
-						CollectionBean collection = event.getCollection();
-						display.addItem(collection.getUri(), collection);
-					}
-				});
-	}
+        super.bind();
+
+        eventBus.addHandler(AddNewCollectionEvent.TYPE,
+                new AddNewCollectionHandler() {
+                    @Override
+                    public void onAddNewCollection(AddNewCollectionEvent event) {
+                        CollectionBean collection = event.getCollection();
+                        display.addItem(collection.getUri(), collection, "");
+                    }
+                });
+    }
 
 }

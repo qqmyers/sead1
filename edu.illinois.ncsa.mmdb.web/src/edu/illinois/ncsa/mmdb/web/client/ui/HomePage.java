@@ -145,7 +145,7 @@ public class HomePage extends Page {
                     int num = datasets.size() < MAX_DATASETS ? datasets.size() : MAX_DATASETS;
                     recentActivityPanel.add(new Label("Showing latest " + num + " datasets you have uploaded"));
                     for (DatasetBean dataset : datasets ) {
-                        recentActivityPanel.add(new DatasetInfoWidget(dataset));
+                        recentActivityPanel.add(new DatasetInfoWidget(dataset, dispatchAsync));
                     }
                 }
             }

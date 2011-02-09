@@ -41,6 +41,8 @@ package edu.illinois.ncsa.mmdb.web.client;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -66,10 +68,12 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 public class PagingCollectionTableView extends PagingDcThingView<CollectionBean> implements Display<CollectionBean> {
-    FlexTable table;
+    FlexTable                   table;
+    private final DispatchAsync dispatchAsync;
 
-    public PagingCollectionTableView() {
+    public PagingCollectionTableView(DispatchAsync dispatchAsync) {
         super();
+        this.dispatchAsync = dispatchAsync;
         addStyleName("datasetTable"); // gotta style ourselves like a dataset table
         displayView();
     }
@@ -86,7 +90,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
     Map<String, Panel> badgeImages = new HashMap<String, Panel>();
 
     @Override
-    public void addItem(final String uri, CollectionBean item) {
+    public void addItem(final String uri, CollectionBean item, String type) {
         HorizontalPanel previewPanel = new HorizontalPanel();
         previewPanel.add(new Image("./images/preview-100.gif")); // is this necessary?
         previewPanel.addStyleName("centered");
@@ -154,7 +158,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
         Anchor deleteAnchor = new Anchor("Delete");
         deleteAnchor.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                MMDB.dispatchAsync.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
+                dispatchAsync.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
                     public void onFailure(Throwable caught) {
                     }
 
@@ -182,7 +186,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
         Panel p = badgeImages.get(collectionUri);
         if (p != null) {
             p.clear();
-            PreviewWidget pw = PreviewWidget.newCollectionBadge(collectionUri, "collection?uri=" + collectionUri);
+            PreviewWidget pw = PreviewWidget.newCollectionBadge(collectionUri, "collection?uri=" + collectionUri, dispatchAsync);
             pw.setMaxWidth(100);
             p.add(pw);
         }
@@ -221,7 +225,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
         query.setOffset(pageOffset);
         query.setLimit(pageSize);
 
-        MMDB.dispatchAsync.execute(query, new AsyncCallback<GetCollectionsResult>() {
+        dispatchAsync.execute(query, new AsyncCallback<GetCollectionsResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 // TODO Auto-generated method stub
@@ -260,19 +264,19 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
     }
 
     @Override
-    public void addItem(String uri, CollectionBean item, int position) {
+    public void addItem(String uri, CollectionBean item, String type, int position) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void addItem(String uri, CollectionBean item, String sectionUri, String sectionLabel, String sectionMarker) {
+    public void addItem(String uri, CollectionBean item, String type, String sectionUri, String sectionLabel, String sectionMarker) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void addItem(String uri, CollectionBean item, int position, String sectionUri, String sectionLabel, String sectionMarker) {
+    public void addItem(String uri, CollectionBean item, String type, int position, String sectionUri, String sectionLabel, String sectionMarker) {
         // TODO Auto-generated method stub
 
     }

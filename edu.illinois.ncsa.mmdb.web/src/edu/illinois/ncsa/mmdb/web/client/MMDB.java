@@ -45,6 +45,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -112,59 +114,59 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
  */
 public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     // FIXME move these into UserSessionState?
-    public static final String          DATASET_VIEW_TYPE_PREFERENCE     = "datasetViewType";
-    public static final String          DATASET_VIEWSIZE_TYPE_PREFERENCE = "datasetViewSizeType";
-    public static final String          COLLECTION_VIEW_TYPE_PREFERENCE  = "collectionViewType";
-    public static final String          DATASET_VIEW_SORT_PREFERENCE     = "datasetViewSort";
+    public static final String         DATASET_VIEW_TYPE_PREFERENCE     = "datasetViewType";
+    public static final String         DATASET_VIEWSIZE_TYPE_PREFERENCE = "datasetViewSizeType";
+    public static final String         COLLECTION_VIEW_TYPE_PREFERENCE  = "collectionViewType";
+    public static final String         DATASET_VIEW_SORT_PREFERENCE     = "datasetViewSort";
 
     /**
      * The message displayed to the user when the server cannot be reached or
      * returns an error.
      */
-    public static final String          SERVER_ERROR                     = "An error occurred while "
+    public static final String         SERVER_ERROR                     = "An error occurred while "
                                                                                  + "attempting to contact the server. Please check your network "
                                                                                  + "connection and try again.";
 
-    public static ArrayList<String>     groups;
+    public static ArrayList<String>    groups;
 
     /**
      * Dispatch service. Should be the only service needed. All commands should
      * go through this endpoint. To learn more look up gwt-dispatch and the
      * command pattern.
      */
-    public static final MyDispatchAsync dispatchAsync                    = new MyDispatchAsync();
+    public final DispatchAsync         dispatchAsync                    = new MyDispatchAsync();
 
     /** Event bus for propagating events in the interface **/
-    public static final HandlerManager  eventBus                         = new HandlerManager(null);
+    public static final HandlerManager eventBus                         = new HandlerManager(null);
 
     /** The upload button */
-    private Anchor                      uploadButton;
+    private Anchor                     uploadButton;
 
     /** The upload widget in the upload toolbar */
-    private FlowPanel                   uploadPanel;
+    private FlowPanel                  uploadPanel;
 
     /** Main content panel **/
-    private static final FlowPanel      mainContainer                    = new FlowPanel();
+    private static final FlowPanel     mainContainer                    = new FlowPanel();
 
     /** Place support for history management **/
-    private PlaceService                placeService;
+    private PlaceService               placeService;
 
-    public static LoginStatusWidget     loginStatusWidget;
+    public static LoginStatusWidget    loginStatusWidget;
 
-    private String                      previousHistoryToken             = new String();
+    private String                     previousHistoryToken             = new String();
 
-    private Label                       breadcrumb;
+    private Label                      breadcrumb;
 
-    private static UserSessionState     sessionState;
+    private static UserSessionState    sessionState;
 
-    private Label                       debugLabel;
+    private Label                      debugLabel;
 
     /**
      * This is the entry point method.
      */
     public void onModuleLoad() {
         // get mapping of mime-type -> category from server
-        ContentCategory.initialize();
+        ContentCategory.initialize(dispatchAsync);
 
         RootPanel rootPanel = RootPanel.get("mmdb-mainContainer");
 
@@ -454,7 +456,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         GetUser getUser = new GetUser();
         getUser.setUserId(userId);
-        MMDB.dispatchAsync.execute(getUser, new AsyncCallback<GetUserResult>() {
+        dispatchAsync.execute(getUser, new AsyncCallback<GetUserResult>() {
 
             @Override
             public void onFailure(Throwable caught) {

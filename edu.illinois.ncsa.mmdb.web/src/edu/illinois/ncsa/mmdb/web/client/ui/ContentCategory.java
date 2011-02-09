@@ -42,10 +42,11 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMimeTypeCategories;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMimeTypeCategoriesResult;
 
@@ -60,10 +61,10 @@ public class ContentCategory {
     private static Map<String, String> categories = new HashMap<String, String>();
     private static long                age        = 0;
 
-    public static void initialize() {
+    public static void initialize(DispatchAsync dispatchAsync) {
         if (System.currentTimeMillis() > age + 60000) {
             age = System.currentTimeMillis();
-            MMDB.dispatchAsync.execute(new GetMimeTypeCategories(), new AsyncCallback<GetMimeTypeCategoriesResult>() {
+            dispatchAsync.execute(new GetMimeTypeCategories(), new AsyncCallback<GetMimeTypeCategoriesResult>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     GWT.log("Could not get mime to category mappings.", caught);
@@ -77,8 +78,8 @@ public class ContentCategory {
         }
     }
 
-    public static String getCategory(String mimeType) {
-        initialize();
+    public static String getCategory(String mimeType, DispatchAsync dispatchAsync) {
+        initialize(dispatchAsync);
         String category = categories.get(mimeType);
         if (category != null) {
             return category;

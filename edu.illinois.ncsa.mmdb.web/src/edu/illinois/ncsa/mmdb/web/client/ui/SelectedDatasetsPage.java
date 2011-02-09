@@ -44,6 +44,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -55,7 +57,6 @@ import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
@@ -69,7 +70,7 @@ public class SelectedDatasetsPage extends Page {
 
     private final FlowPanel           selectedPanel;
 
-    private final MyDispatchAsync     service;
+    private final DispatchAsync       service;
 
     private final FlowPanel           leftcolumn;
     private final FlowPanel           rightcolumn;
@@ -87,7 +88,7 @@ public class SelectedDatasetsPage extends Page {
      * 
      * @param dispatchAsync
      */
-    public SelectedDatasetsPage(MyDispatchAsync dispatchAsync) {
+    public SelectedDatasetsPage(DispatchAsync dispatchAsync) {
 
         super("Selected Datasets", dispatchAsync);
 
@@ -163,7 +164,7 @@ public class SelectedDatasetsPage extends Page {
                 final String value = result.getDataset().getUri();
                 db = result.getDataset();
                 datasets.add(db);
-                leftcolumn.add(new DatasetInfoWidget(result.getDataset(), true));
+                leftcolumn.add(new DatasetInfoWidget(result.getDataset(), true, dispatchAsync));
 
                 //create relationship - widget (if allowed)
                 rbac.doIfAllowed(Permission.ADD_RELATIONSHIP, new PermissionCallback() {

@@ -39,6 +39,8 @@
 
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -93,8 +95,10 @@ public class OldPreviewPanel extends Composite {
     private static final String NOREFERENCE_URL = "api/image/";
     private static final String EXTENSION_URL   = "api/dataset/";
     private static final String PYRAMID_URL     = "rest/secure/pyramid/";
+    private final DispatchAsync service;
 
-    public OldPreviewPanel() {
+    public OldPreviewPanel(DispatchAsync service) {
+        this.service = service;
     }
 
     public void unload() {
@@ -202,7 +206,7 @@ public class OldPreviewPanel extends Composite {
             shown = addAnchor(bestPyramid, "Zoom", previewsPanel, shown);
         }
         if (shown == null) {
-            previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null));
+            previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null, service));
         }
     }
 

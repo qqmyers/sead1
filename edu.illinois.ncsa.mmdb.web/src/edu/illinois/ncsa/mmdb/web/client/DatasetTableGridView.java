@@ -42,6 +42,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -61,11 +63,19 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
 public class DatasetTableGridView extends DatasetTableView {
 
-    int       n     = 0;
-    final int WIDTH = 5;
+    int                         n     = 0;
+    final int                   WIDTH = 5;
+    private final DispatchAsync dispatchAsync;
 
-    public DatasetTableGridView() {
+    /**
+     * TODO dispatch is currently required because PreviewWidget does not have a
+     * presenter
+     * 
+     * @param dispatchAsync
+     */
+    public DatasetTableGridView(DispatchAsync dispatchAsync) {
         super();
+        this.dispatchAsync = dispatchAsync;
         addStyleName("datasetTable");
     }
 
@@ -92,7 +102,7 @@ public class DatasetTableGridView extends DatasetTableView {
     @Override
     public void addRow(final String id, String title, String mimeType, Date date,
             String previewUri, String size, String authorsId) {
-        PreviewWidget pw = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, mimeType);
+        PreviewWidget pw = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, mimeType, dispatchAsync);
         pw.setWidth("120px");
         pw.setMaxWidth(100);
         // selection checkbox

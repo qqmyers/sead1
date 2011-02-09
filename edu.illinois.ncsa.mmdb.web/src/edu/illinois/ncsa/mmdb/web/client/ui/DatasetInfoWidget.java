@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -61,18 +63,20 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  */
 public class DatasetInfoWidget extends Composite {
 
-    private final FlowPanel mainPanel;
+    private final FlowPanel     mainPanel;
+    private final DispatchAsync service;
 
-    public DatasetInfoWidget(DatasetBean dataset) {
-        this(dataset, false);
+    public DatasetInfoWidget(DatasetBean dataset, DispatchAsync service) {
+        this(dataset, false, service);
     }
 
-    public DatasetInfoWidget(DatasetBean dataset, boolean shortenTitle) {
+    public DatasetInfoWidget(DatasetBean dataset, boolean shortenTitle, DispatchAsync service) {
+        this.service = service;
         mainPanel = new FlowPanel();
         mainPanel.addStyleName("datasetInfoWidget");
         initWidget(mainPanel);
 
-        PreviewWidget thumbnail = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri(), ContentCategory.getCategory(dataset.getMimeType()));
+        PreviewWidget thumbnail = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri(), ContentCategory.getCategory(dataset.getMimeType(), service), service);
         thumbnail.setMaxWidth(100);
         SimplePanel previewPanel = new SimplePanel();
         previewPanel.addStyleName("datasetInfoThumbnail");
@@ -100,7 +104,7 @@ public class DatasetInfoWidget extends Composite {
         }
         descriptionPanel.add(new Label(DateTimeFormat.getLongDateFormat().format(dataset.getDate())));
         descriptionPanel.add(new Label(TextFormatter.humanBytes(dataset.getSize())));
-        descriptionPanel.add(new Label(ContentCategory.getCategory(dataset.getMimeType())));
+        descriptionPanel.add(new Label(ContentCategory.getCategory(dataset.getMimeType(), service)));
         mainPanel.add(descriptionPanel);
 
         Label clearLabel = new Label();

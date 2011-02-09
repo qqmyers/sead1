@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -59,7 +61,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislike.LikeDislike;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLikeDislikeResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetViewCount;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetViewCountResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 
 /**
  * Show social information about the dataset
@@ -76,11 +77,11 @@ public class SocialWidget extends Composite {
      * @param id
      * @param service
      */
-    public SocialWidget(String uri, MyDispatchAsync service) {
+    public SocialWidget(String uri, DispatchAsync service) {
         this(uri, service, true);
     }
 
-    public SocialWidget(final String uri, final MyDispatchAsync service, boolean withTitle) {
+    public SocialWidget(final String uri, final DispatchAsync service, boolean withTitle) {
         // mainpanel
         mainPanel = new FlowPanel();
         mainPanel.addStyleName("datasetRightColSection");

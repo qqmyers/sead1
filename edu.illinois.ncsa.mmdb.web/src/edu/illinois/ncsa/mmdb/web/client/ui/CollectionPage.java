@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -60,7 +62,6 @@ import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
@@ -76,7 +77,7 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 public class CollectionPage extends Composite {
 
     private final String                 uri;
-    private final MyDispatchAsync        dispatchasync;
+    private final DispatchAsync          dispatchasync;
     private final PermissionUtil         rbac;
     private final HandlerManager         eventBus;
     private final FlowPanel              mainContent;
@@ -89,7 +90,7 @@ public class CollectionPage extends Composite {
     private Label                        authorLabel;
     private final PagingDatasetTableView datasetTableView;
 
-    public CollectionPage(String uri, MyDispatchAsync dispatchasync,
+    public CollectionPage(String uri, DispatchAsync dispatchasync,
             HandlerManager eventBus) {
         this.uri = uri;
         this.dispatchasync = dispatchasync;
@@ -103,11 +104,11 @@ public class CollectionPage extends Composite {
 
         mainContent.add(createInfoPanel());
 
-        datasetTableView = new PagingDatasetTableView(uri);
+        datasetTableView = new PagingDatasetTableView(uri, dispatchasync);
         datasetTableView.addStyleName("datasetTable");
 
         PagingDatasetTablePresenter datasetTablePresenter =
-                new PagingDatasetTablePresenter(datasetTableView, eventBus);
+                new PagingDatasetTablePresenter(datasetTableView, dispatchasync, eventBus);
         datasetTablePresenter.bind();
 
         mainContent.add(datasetTableView);

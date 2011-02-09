@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -66,7 +68,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 
 /**
  * Page to request an account
@@ -76,19 +77,19 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
  */
 public class SignupPage extends Composite {
 
-    private static final String   EMAIL_REGEX = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
-    private final MyDispatchAsync dispatchAsync;
-    private final FlowPanel       mainPanel;
-    private final Widget          pageTitle;
-    private final Widget          signupForm;
-    private SimplePanel           feedbackPanel;
-    private TextBox               firstNameBox;
-    private TextBox               passwordBox;
-    private TextBox               emailBox;
-    private TextBox               confirmPasswordBox;
-    private TextBox               lastNameBox;
+    private static final String EMAIL_REGEX = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
+    private final DispatchAsync dispatchAsync;
+    private final FlowPanel     mainPanel;
+    private final Widget        pageTitle;
+    private final Widget        signupForm;
+    private SimplePanel         feedbackPanel;
+    private TextBox             firstNameBox;
+    private TextBox             passwordBox;
+    private TextBox             emailBox;
+    private TextBox             confirmPasswordBox;
+    private TextBox             lastNameBox;
 
-    public SignupPage(MyDispatchAsync dispatchAsync) {
+    public SignupPage(DispatchAsync dispatchAsync) {
         this.dispatchAsync = dispatchAsync;
 
         mainPanel = new FlowPanel();

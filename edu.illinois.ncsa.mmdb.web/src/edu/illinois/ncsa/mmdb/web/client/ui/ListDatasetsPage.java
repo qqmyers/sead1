@@ -41,13 +41,14 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
@@ -59,10 +60,10 @@ import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
  */
 public class ListDatasetsPage extends Page {
 
-    private final MyDispatchAsync dispatch;
-    private final HandlerManager  eventbus;
+    private final DispatchAsync  dispatch;
+    private final HandlerManager eventbus;
 
-    public ListDatasetsPage(MyDispatchAsync dispatch, HandlerManager eventBus) {
+    public ListDatasetsPage(DispatchAsync dispatch, HandlerManager eventBus) {
         super("Data", dispatch);
         this.dispatch = dispatch;
         this.eventbus = eventBus;

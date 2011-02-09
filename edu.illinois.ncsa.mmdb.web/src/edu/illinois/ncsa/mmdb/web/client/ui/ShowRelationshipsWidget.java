@@ -40,6 +40,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -58,21 +60,20 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationshipResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 public class ShowRelationshipsWidget extends Composite {
-    private final FlowPanel       mainContainer;
-    private final MyDispatchAsync service;
-    private final String          currenturi;
-    private final PermissionUtil  rbac;
+    private final FlowPanel      mainContainer;
+    private final DispatchAsync  service;
+    private final String         currenturi;
+    private final PermissionUtil rbac;
 
-    public ShowRelationshipsWidget(String uri, MyDispatchAsync service) {
+    public ShowRelationshipsWidget(String uri, DispatchAsync service) {
         this(uri, service, true);
     }
 
-    public ShowRelationshipsWidget(final String uri, final MyDispatchAsync service, boolean withTitle) {
+    public ShowRelationshipsWidget(final String uri, final DispatchAsync service, boolean withTitle) {
 
         currenturi = uri;
         this.service = service;
@@ -138,7 +139,7 @@ public class ShowRelationshipsWidget extends Composite {
 
         //initialize preview with image and title
         String url = "dataset?id=" + ds.getUri();
-        final PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url);
+        final PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url, service);
         String title = ds.getTitle();
         title = title.length() > 15 ? title.substring(0, 15) + "..." : title;
         Hyperlink link = new Hyperlink(title, url);

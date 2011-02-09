@@ -41,13 +41,14 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryDatasets;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
@@ -62,7 +63,7 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  */
 public class DatasetTablePresenter extends DynamicTablePresenter<DatasetBean> {
 
-    public DatasetTablePresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+    public DatasetTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
         super(dispatch, eventBus, display, DynamicTableView.GRID_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
         // TODO Auto-generated constructor stub
     }
@@ -95,7 +96,7 @@ public class DatasetTablePresenter extends DynamicTablePresenter<DatasetBean> {
         }
         event.setDate(item.getDate());
         event.setSize(TextFormatter.humanBytes(item.getSize()));
-        event.setType(ContentCategory.getCategory(item.getMimeType()));
+        event.setType(ContentCategory.getCategory(item.getMimeType(), service));
     }
 
     @Override

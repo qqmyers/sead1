@@ -44,6 +44,8 @@ package edu.illinois.ncsa.mmdb.web.client;
 import java.util.Date;
 import java.util.List;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Widget;
@@ -62,8 +64,8 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 public class DatasetTablePresenter extends
         BasePresenter<DatasetTablePresenter.Display> {
 
-    public DatasetTablePresenter(Display widget, HandlerManager eventBus) {
-        super(widget, eventBus);
+    public DatasetTablePresenter(Display widget, DispatchAsync dispatchAsync, HandlerManager eventBus) {
+        super(widget, dispatchAsync, eventBus);
     }
 
     @Override

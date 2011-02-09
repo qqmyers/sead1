@@ -43,6 +43,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.Collection;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -69,7 +71,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddGeoLocation;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
@@ -83,7 +84,7 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 public class LocationWidget extends Composite {
     private final FlowPanel mainPanel;
     private MapWidget       map;
-    private MyDispatchAsync service;
+    private DispatchAsync   service;
     private String          uri;
     private Label           noLocationLabel;
     private Anchor          addLocationAnchor;
@@ -94,13 +95,13 @@ public class LocationWidget extends Composite {
      * @param id
      * @param service
      */
-    public LocationWidget(String uri, MyDispatchAsync service) {
+    public LocationWidget(String uri, DispatchAsync service) {
         this(uri, service, true);
         this.uri = uri;
         this.service = service;
     }
 
-    public LocationWidget(final String uri, MyDispatchAsync service, final boolean withTitle) {
+    public LocationWidget(final String uri, DispatchAsync service, final boolean withTitle) {
         this.uri = uri;
         this.service = service;
         // mainpanel

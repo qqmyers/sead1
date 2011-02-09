@@ -41,6 +41,8 @@ package edu.illinois.ncsa.mmdb.web.client.view;
 import java.util.Date;
 import java.util.Set;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -67,9 +69,11 @@ public class DynamicListView extends FlexTable implements Display {
     public static final int             DEFAULT_PAGE_SIZE = 5;
     public static final int             PAGE_SIZE_X2      = 10;
     public static final int             PAGE_SIZE_X4      = 20;
+    private final DispatchAsync         dispatchAsync;
 
-    public DynamicListView() {
+    public DynamicListView(DispatchAsync dispatchAsync) {
         super();
+        this.dispatchAsync = dispatchAsync;
         addStyleName("dynamicTableList");
     }
 
@@ -83,7 +87,7 @@ public class DynamicListView extends FlexTable implements Display {
         CheckBox checkBox = new CheckBox();
         setWidget(row, 0, checkBox);
 
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
         pre.setMaxWidth(100);
         setWidget(row, 1, pre);
 
@@ -140,7 +144,7 @@ public class DynamicListView extends FlexTable implements Display {
         CheckBox checkBox = new CheckBox();
         setWidget(row, 0, checkBox);
 
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
         pre.setMaxWidth(100);
         setWidget(row, 1, pre);
 

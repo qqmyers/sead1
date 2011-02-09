@@ -43,13 +43,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HasValue;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsEvent;
@@ -76,7 +77,6 @@ import edu.illinois.ncsa.mmdb.web.client.ui.DatasetSelectionCheckboxHandler;
  */
 public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Display> {
 
-    private final MyDispatchAsync      dispatch;
     /** Map from uri to location in view **/
     private final Map<String, Integer> items;
 
@@ -92,9 +92,8 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
         int insertItem(String id, String title, String type);
     }
 
-    public DynamicGridPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
-        super(display, eventBus);
-        this.dispatch = dispatch;
+    public DynamicGridPresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
+        super(display, dispatch, eventBus);
         this.items = new HashMap<String, Integer>();
     }
 

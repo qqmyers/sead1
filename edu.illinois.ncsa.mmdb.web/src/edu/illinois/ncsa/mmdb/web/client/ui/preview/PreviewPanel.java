@@ -44,6 +44,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -91,6 +93,8 @@ public class PreviewPanel extends Composite {
     /** Mapping from widget to corresponding anchor */
     private final Map<PreviewBeanWidget, Anchor>     anchors       = new HashMap<PreviewBeanWidget, Anchor>();
 
+    private final DispatchAsync                      dispatchAsync;
+
     static public void addWidget(PreviewBeanWidget<? extends PreviewBean> widget) {
         if (registeredWidgets == null) {
             registeredWidgets = new ArrayList<PreviewBeanWidget>();
@@ -115,7 +119,8 @@ public class PreviewPanel extends Composite {
         addWidget(new Preview3DJavaBeanWidget(eventBus));
     }
 
-    public PreviewPanel(HandlerManager eventBus) {
+    public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus) {
+        this.dispatchAsync = dispatchAsync;
         initializePreviews(eventBus);
         previewWidget = null;
 
@@ -184,7 +189,7 @@ public class PreviewPanel extends Composite {
         }
 
         if (showme) {
-            previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null));
+            previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null, dispatchAsync));
         }
     }
 

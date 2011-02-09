@@ -38,16 +38,19 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.shared.HandlerManager;
 
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
+import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class PagingDatasetTablePresenter extends PagingTablePresenter<DatasetBean> {
 
-    public PagingDatasetTablePresenter(Display<DatasetBean> display, HandlerManager eventBus) {
-        super(display, eventBus);
+    public PagingDatasetTablePresenter(Display<DatasetBean> display, DispatchAsync service, HandlerManager eventBus) {
+        super(display, service, eventBus);
     }
 
     @Override
@@ -61,17 +64,18 @@ public class PagingDatasetTablePresenter extends PagingTablePresenter<DatasetBea
                     public void onAddNewDataset(AddNewDatasetEvent event) {
                         DatasetBean dataset = event.getDataset();
                         String id = dataset.getUri();
+                        String type = ContentCategory.getCategory(dataset.getMimeType(), service);
                         if (event.getPosition() == -1) {
                             if (event.getSectionUri() == null) {
-                                display.addItem(id, dataset);
+                                display.addItem(id, dataset, type);
                             } else {
-                                display.addItem(id, dataset, event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
+                                display.addItem(id, dataset, type, event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
                             }
                         } else {
                             if (event.getSectionUri() == null) {
-                                display.addItem(id, dataset, event.getPosition());
+                                display.addItem(id, dataset, type, event.getPosition());
                             } else {
-                                display.addItem(id, dataset, event.getPosition(), event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
+                                display.addItem(id, dataset, type, event.getPosition(), event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
                             }
                         }
                     }

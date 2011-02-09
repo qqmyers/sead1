@@ -41,6 +41,8 @@ package edu.illinois.ncsa.mmdb.web.client.view;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -60,7 +62,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -73,12 +74,14 @@ import edu.illinois.ncsa.mmdb.web.client.ui.TagsWidget;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class UploadStatusView extends Composite implements Display {
-    VerticalPanel          thePanel;
-    HorizontalPanel        progressPanel;
-    FlexTable              statusTable;
-    Map<Integer, CheckBox> selectionCheckboxes;
+    VerticalPanel               thePanel;
+    HorizontalPanel             progressPanel;
+    FlexTable                   statusTable;
+    Map<Integer, CheckBox>      selectionCheckboxes;
+    private final DispatchAsync dispatchAsync;
 
-    public UploadStatusView() {
+    public UploadStatusView(DispatchAsync dispatchAsync) {
+        this.dispatchAsync = dispatchAsync;
         thePanel = new VerticalPanel();
         progressPanel = new HorizontalPanel();
         thePanel.add(progressPanel);
@@ -126,12 +129,12 @@ public class UploadStatusView extends Composite implements Display {
         DeferredCommand.addCommand(new Command() {
             public void execute() {
                 // check pending, but don't initially display
-                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri(), dataset.getMimeType(), true, false);
+                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri(), dataset.getMimeType(), true, false, dispatchAsync);
                 statusTable.setWidget(ix, 1, preview);
             }
         });
         statusTable.setWidget(ix, 2, editableDatasetInfo(dataset));
-        TagsWidget tags = new TagsWidget(dataset.getUri(), MMDB.dispatchAsync, false);
+        TagsWidget tags = new TagsWidget(dataset.getUri(), dispatchAsync, false);
         statusTable.setWidget(ix, 3, tags);
         Anchor hideAnchor = new Anchor("Hide");
         hideAnchor.addClickHandler(new ClickHandler() {
@@ -161,7 +164,7 @@ public class UploadStatusView extends Composite implements Display {
         statusTable.setWidget(ix, 3, new ProgressBar(percent));
     }
 
-    static Widget editableDatasetInfo(final DatasetBean ds) {
+    public Widget editableDatasetInfo(final DatasetBean ds) {
         FlexTable layout = new FlexTable();
         int row = 0;
         layout.setWidget(row, 0, new Label("Title:"));
@@ -170,7 +173,7 @@ public class UploadStatusView extends Composite implements Display {
         titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
             public void onValueChange(final ValueChangeEvent<String> event) {
                 SetTitle change = new SetTitle(ds.getUri(), event.getValue());
-                MMDB.dispatchAsync.execute(change, new AsyncCallback<EmptyResult>() {
+                dispatchAsync.execute(change, new AsyncCallback<EmptyResult>() {
                     public void onFailure(Throwable caught) {
                         titleLabel.cancel();
                     }

@@ -38,18 +38,18 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerManager;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-
 public abstract class EditableUserMetadataPresenter extends UserMetadataPresenter {
     Display                  editDisplay;
     protected HandlerManager eventBus;
 
-    public EditableUserMetadataPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+    public EditableUserMetadataPresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
         super(dispatch, display);
         editDisplay = display;
         this.eventBus = eventBus;

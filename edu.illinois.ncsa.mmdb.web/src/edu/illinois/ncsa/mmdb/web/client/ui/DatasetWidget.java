@@ -43,6 +43,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -84,7 +86,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserViewsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
@@ -108,7 +109,7 @@ public class DatasetWidget extends Composite {
 
     private static final String     DOWNLOAD_URL = "./api/image/download/";
 
-    private final MyDispatchAsync   service;
+    private final DispatchAsync     service;
 
     private final FlowPanel         leftColumn;
     private final FlowPanel         rightColumn;
@@ -131,7 +132,7 @@ public class DatasetWidget extends Composite {
      * 
      * @param dispatchAsync
      */
-    public DatasetWidget(MyDispatchAsync dispatchAsync, HandlerManager eventBus) {
+    public DatasetWidget(DispatchAsync dispatchAsync, HandlerManager eventBus) {
         this.service = dispatchAsync;
         this.eventBus = eventBus;
         rbac = new PermissionUtil(service);
@@ -209,8 +210,8 @@ public class DatasetWidget extends Composite {
         titlePanel.addStyleName("datasetTitleIcon");
         final Image image = new Image();
 
-        image.setUrl("images/icons/" + ContentCategory.getCategory(result.getDataset().getMimeType()) + ".png");
-        image.setTitle(ContentCategory.getCategory(result.getDataset().getMimeType()) + " File");
+        image.setUrl("images/icons/" + ContentCategory.getCategory(result.getDataset().getMimeType(), service) + ".png");
+        image.setTitle(ContentCategory.getCategory(result.getDataset().getMimeType(), service) + " File");
         titlePanel.add(image);
 
         // title
@@ -236,7 +237,7 @@ public class DatasetWidget extends Composite {
         leftColumn.add(titlePanel);
 
         // preview - selection text and preview
-        previewPanel = new PreviewPanel(eventBus);
+        previewPanel = new PreviewPanel(service, eventBus);
         previewPanel.drawPreview(result, leftColumn, uri);
 
         // dataset actions
@@ -403,7 +404,7 @@ public class DatasetWidget extends Composite {
         String size = TextFormatter.humanBytes(data.getSize());
         addInfo("Size", size, panel);
 
-        String cat = ContentCategory.getCategory(data.getMimeType());
+        String cat = ContentCategory.getCategory(data.getMimeType(), service);
         addInfo("Category", cat, panel);
 
         String type = data.getMimeType();

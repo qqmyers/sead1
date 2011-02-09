@@ -38,6 +38,8 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
@@ -47,7 +49,6 @@ import com.google.gwt.user.client.ui.HasValue;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
@@ -65,13 +66,13 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  * 
  */
 public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.Display> {
-    MyDispatchAsync dispatch;
+    private final DispatchAsync dispatch;
 
-    int             nDropped  = 0;
-    int             nUploaded = 0;
+    private int                 nDropped  = 0;
+    private int                 nUploaded = 0;
 
-    public UploadStatusPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
-        super(display, eventBus);
+    public UploadStatusPresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
+        super(display, dispatch, eventBus);
         this.dispatch = dispatch;
     }
 

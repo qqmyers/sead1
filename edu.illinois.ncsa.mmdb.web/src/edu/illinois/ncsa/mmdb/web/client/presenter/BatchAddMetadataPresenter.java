@@ -41,19 +41,20 @@ package edu.illinois.ncsa.mmdb.web.client.presenter;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 
 public class BatchAddMetadataPresenter extends EditableUserMetadataPresenter {
     Set<String> selectedResources = new HashSet<String>();
 
-    public BatchAddMetadataPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display, Set<String> selectedResources) {
+    public BatchAddMetadataPresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display, Set<String> selectedResources) {
         super(dispatch, eventBus, display);
         this.selectedResources = selectedResources;
     }

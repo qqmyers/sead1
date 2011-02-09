@@ -44,6 +44,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -64,7 +66,6 @@ import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTags;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
@@ -77,14 +78,14 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
  */
 public class TagsWidget extends Composite {
 
-    private final FlowPanel       mainPanel;
-    private final FlexTable       tagsPanel;
-    private final String          id;
-    private final MyDispatchAsync service;
-    private final PermissionUtil  rbac;
-    private final Label           tagLabel;
-    private AddTagWidget          tagWidget;
-    final Set<String>             tagsShown;
+    private final FlowPanel      mainPanel;
+    private final FlexTable      tagsPanel;
+    private final String         id;
+    private final DispatchAsync  service;
+    private final PermissionUtil rbac;
+    private final Label          tagLabel;
+    private AddTagWidget         tagWidget;
+    final Set<String>            tagsShown;
 
     /**
      * A widget listing tags and providing a way to add a new one.
@@ -92,11 +93,11 @@ public class TagsWidget extends Composite {
      * @param id
      * @param service
      */
-    public TagsWidget(final String id, final MyDispatchAsync service) {
+    public TagsWidget(final String id, final DispatchAsync service) {
         this(id, service, true);
     }
 
-    public TagsWidget(final String id, final MyDispatchAsync service, boolean withTitle) {
+    public TagsWidget(final String id, final DispatchAsync service, boolean withTitle) {
         this.id = id;
         this.service = service;
         rbac = new PermissionUtil(service);

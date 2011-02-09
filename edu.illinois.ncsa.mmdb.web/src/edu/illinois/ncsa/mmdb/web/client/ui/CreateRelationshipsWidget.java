@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -68,7 +70,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListRelationshipTypes;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -94,7 +95,7 @@ public class CreateRelationshipsWidget extends Composite {
     PreviewWidget              thumb2;
     HorizontalPanel            thumbs;
 
-    MyDispatchAsync            service;
+    DispatchAsync              service;
     Set<String>                selected;
 
     /**
@@ -104,7 +105,7 @@ public class CreateRelationshipsWidget extends Composite {
      * @param service
      */
 
-    public CreateRelationshipsWidget(final Set<DatasetBean> datasets, final Set<String> selected, final MyDispatchAsync service) {
+    public CreateRelationshipsWidget(final Set<DatasetBean> datasets, final Set<String> selected, final DispatchAsync service) {
 
         this.service = service;
         this.selected = selected;
@@ -121,7 +122,7 @@ public class CreateRelationshipsWidget extends Composite {
         //user interface: thumbnails & relationship Type
         thumbs = new HorizontalPanel();
         thumbs.setStyleName("createRelationshipThumbs");
-        thumb1 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false);
+        thumb1 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false, service);
         thumb1.setWidth("110px");
         thumb1.setHeight("110px");
         thumbs.add(thumb1);
@@ -130,7 +131,7 @@ public class CreateRelationshipsWidget extends Composite {
         thumbs.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         thumbs.add(relationships);
 
-        thumb2 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false);
+        thumb2 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false, service);
         thumb2.setWidth("110px");
         thumb2.setHeight("110px");
         thumbs.add(thumb2);

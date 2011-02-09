@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -76,7 +78,6 @@ import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Authenticate;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthenticateResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 
 /**
  * @author Luigi Marini
@@ -84,20 +85,20 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
  */
 public class LoginPage extends Composite {
 
-    private final FlowPanel       mainPanel;
-    private Label                 pageTitle;
-    private TextBox               usernameBox;
-    private PasswordTextBox       passwordBox;
-    private SimplePanel           feedbackPanel;
-    private Label                 progressLabel;
-    private final MyDispatchAsync dispatchasync;
-    private final MMDB            mainWindow;
+    private final FlowPanel     mainPanel;
+    private Label               pageTitle;
+    private TextBox             usernameBox;
+    private PasswordTextBox     passwordBox;
+    private SimplePanel         feedbackPanel;
+    private Label               progressLabel;
+    private final DispatchAsync dispatchasync;
+    private final MMDB          mainWindow;
 
     /**
      * @param dispatchasync
      * 
      */
-    public LoginPage(MyDispatchAsync dispatchasync, MMDB mainWindow) {
+    public LoginPage(DispatchAsync dispatchasync, MMDB mainWindow) {
 
         this.dispatchasync = dispatchasync;
         this.mainWindow = mainWindow;
@@ -226,7 +227,7 @@ public class LoginPage extends Composite {
         final String password = passwordBox.getText();
         logout(new Command() { // ensure we're logged out before authenticating
             public void execute() {
-                MMDB.dispatchAsync.execute(new Authenticate(username, password),
+                dispatchasync.execute(new Authenticate(username, password),
                         new AsyncCallback<AuthenticateResult>() {
 
                             @Override

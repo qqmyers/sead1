@@ -3,6 +3,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ErrorEvent;
@@ -31,7 +33,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 
-import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPending;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPendingResult;
@@ -87,6 +88,8 @@ public class OldPreviewWidget extends Composite implements HasAllMouseHandlers {
     private int                             previewTries;
     final AbsolutePanel                     imagePanel;
 
+    private final DispatchAsync             dispatchAsync;
+
     /**
      * Create a preview. If the desired size is small (thumbnail) try showing
      * the thumbnail, if thumbnail notavailable show a no preview label. If the
@@ -98,27 +101,28 @@ public class OldPreviewWidget extends Composite implements HasAllMouseHandlers {
      * @param desiredSize
      * @param link
      */
-    public OldPreviewWidget(final String datasetUri, String desiredSize,
+    public OldPreviewWidget(DispatchAsync dispatchAsync, final String datasetUri, String desiredSize,
             final String link) {
-        this(datasetUri, desiredSize, link, UNKNOWN_TYPE, true);
+        this(dispatchAsync, datasetUri, desiredSize, link, UNKNOWN_TYPE, true);
     }
 
-    public OldPreviewWidget(final String datasetUri, String desiredSize,
+    public OldPreviewWidget(DispatchAsync dispatchAsync, final String datasetUri, String desiredSize,
             final String link, String type) {
-        this(datasetUri, desiredSize, link, type, true, true);
+        this(dispatchAsync, datasetUri, desiredSize, link, type, true, true);
     }
 
-    public OldPreviewWidget(final String datasetUri, String desiredSize,
+    public OldPreviewWidget(DispatchAsync dispatchAsync, final String datasetUri, String desiredSize,
             final String link, String type, final boolean checkPending) {
-        this(datasetUri, desiredSize, link, type, checkPending, true);
+        this(dispatchAsync, datasetUri, desiredSize, link, type, checkPending, true);
     }
 
-    public static OldPreviewWidget newCollectionBadge(String collectionUri, String link) {
-        return new OldPreviewWidget(collectionUri, GetPreviews.BADGE, link, UNKNOWN_TYPE, true, false);
+    public static OldPreviewWidget newCollectionBadge(DispatchAsync dispatchAsync, String collectionUri, String link) {
+        return new OldPreviewWidget(dispatchAsync, collectionUri, GetPreviews.BADGE, link, UNKNOWN_TYPE, true, false);
     }
 
-    public OldPreviewWidget(final String datasetUri, String desiredSize,
+    public OldPreviewWidget(DispatchAsync dispatchAsync, final String datasetUri, String desiredSize,
                 final String link, String type, final boolean checkPending, boolean initialDisplay) {
+        this.dispatchAsync = dispatchAsync;
         this.checkPending = checkPending;
         this.datasetUri = datasetUri;
         this.link = link;
@@ -241,7 +245,7 @@ public class OldPreviewWidget extends Composite implements HasAllMouseHandlers {
     }
 
     public void changeImage(String newURL, String mime) {
-        String type = ContentCategory.getCategory(mime);
+        String type = ContentCategory.getCategory(mime, dispatchAsync);
         //FIXME a better way to specify whether a filetype will show a thumbnail or not
         if (mime.contains("image") || "Video".equals(type) || mime.contains("pdf") || "Audio".equals(type)) {
             imagePanel.remove(image);
@@ -283,7 +287,7 @@ public class OldPreviewWidget extends Composite implements HasAllMouseHandlers {
 
     protected void getPreview(final String datasetUri, final String link, final boolean display) {
         checkingPending = true;
-        MMDB.dispatchAsync.execute(new IsPreviewPending(datasetUri, size), new AsyncCallback<IsPreviewPendingResult>() {
+        dispatchAsync.execute(new IsPreviewPending(datasetUri, size), new AsyncCallback<IsPreviewPendingResult>() {
             public void onFailure(Throwable caught) {
             }
 

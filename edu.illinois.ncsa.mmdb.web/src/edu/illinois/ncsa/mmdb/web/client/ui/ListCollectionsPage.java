@@ -43,6 +43,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.ArrayList;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -62,7 +64,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**
@@ -73,7 +74,7 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
  */
 public class ListCollectionsPage extends Composite {
 
-    private final MyDispatchAsync     dispatchasync;
+    private final DispatchAsync       dispatchasync;
     private final HandlerManager      eventBus;
     private final FlowPanel           mainContainer;
     private final Label               statusLabel;
@@ -81,7 +82,7 @@ public class ListCollectionsPage extends Composite {
     private TitlePanel                pageTitle;
     private PagingCollectionTableView view;
 
-    public ListCollectionsPage(MyDispatchAsync dispatchasync,
+    public ListCollectionsPage(DispatchAsync dispatchasync,
             HandlerManager eventBus) {
         this.dispatchasync = dispatchasync;
         this.eventBus = eventBus;
@@ -201,10 +202,10 @@ public class ListCollectionsPage extends Composite {
             mainContainer.remove(view);
         }
 
-        view = new PagingCollectionTableView();
+        view = new PagingCollectionTableView(dispatchasync);
         view.addStyleName("datasetTable");
         PagingCollectionTablePresenter presenter = new PagingCollectionTablePresenter(
-                        view, eventBus);
+                        view, dispatchasync, eventBus);
         presenter.bind();
 
         view.setNumberOfPages(0);

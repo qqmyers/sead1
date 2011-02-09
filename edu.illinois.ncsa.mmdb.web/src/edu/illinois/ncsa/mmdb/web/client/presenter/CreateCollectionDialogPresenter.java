@@ -43,6 +43,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -55,17 +57,16 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 public class CreateCollectionDialogPresenter extends TextDialogPresenter {
-    private final MyDispatchAsync dispatch;         // FIXME duplicated in multiple presenters, can we generalize?
-    private final HandlerManager  eventBus;
-    private final Display         display;
-    private Set<String>           selectedResources;
+    private final DispatchAsync  dispatch;         // FIXME duplicated in multiple presenters, can we generalize?
+    private final HandlerManager eventBus;
+    private final Display        display;
+    private Set<String>          selectedResources;
 
-    public CreateCollectionDialogPresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+    public CreateCollectionDialogPresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
         this.dispatch = dispatch;
         this.eventBus = eventBus;
         this.display = display;

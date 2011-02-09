@@ -44,6 +44,8 @@ package edu.illinois.ncsa.mmdb.web.client.mvp;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
@@ -61,10 +63,12 @@ public class BasePresenter<D> implements Presenter {
     protected D                             display;
     protected final HandlerManager          eventBus;
     private final List<HandlerRegistration> handlerRegistrations = new LinkedList<HandlerRegistration>();
+    protected final DispatchAsync           service;
 
-    public BasePresenter(D display, HandlerManager eventBus) {
+    public BasePresenter(D display, DispatchAsync service, HandlerManager eventBus) {
         this.display = display;
         this.eventBus = eventBus;
+        this.service = service;
     }
 
     protected <T extends EventHandler> void addHandler(GwtEvent.Type<T> type, T handler) {

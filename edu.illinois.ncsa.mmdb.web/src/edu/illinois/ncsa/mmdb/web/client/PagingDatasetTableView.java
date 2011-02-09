@@ -41,6 +41,8 @@ package edu.illinois.ncsa.mmdb.web.client;
 import java.util.Date;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -49,7 +51,6 @@ import com.google.gwt.user.client.ui.Label;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
-import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -59,18 +60,20 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  * 
  */
 public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
-    DatasetTableView table;
-    String           inCollection;
-    int              numberOfPages = 0;
-    int              pageOffset    = 0;
-    int              pageSize;
+    DatasetTableView            table;
+    String                      inCollection;
+    int                         numberOfPages = 0;
+    int                         pageOffset    = 0;
+    int                         pageSize;
+    private final DispatchAsync dispatchAsync;
 
-    public PagingDatasetTableView() {
+    public PagingDatasetTableView(DispatchAsync dispatchAsync) {
         super();
+        this.dispatchAsync = dispatchAsync;
     }
 
-    public PagingDatasetTableView(String inCollection) {
-        this();
+    public PagingDatasetTableView(String inCollection, DispatchAsync dispatchAsync) {
+        this(dispatchAsync);
         setInCollection(inCollection);
     }
 
@@ -100,9 +103,8 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
     }
 
     @Override
-    public void addItem(String uri, DatasetBean dataset) {
+    public void addItem(String uri, DatasetBean dataset, String type) {
         String title = dataset.getTitle();
-        String type = ContentCategory.getCategory(dataset.getMimeType());
         Date date = dataset.getDate();
         String previewUri = "/api/image/preview/small/" + uri;
         String size = TextFormatter.humanBytes(dataset.getSize());
@@ -120,11 +122,11 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
     protected void displayView() {
         DatasetTableView datasetTableView = null;
         if (getViewType().equals("grid")) {
-            datasetTableView = new DatasetTableGridView();
+            datasetTableView = new DatasetTableGridView(dispatchAsync);
         } else if (getViewType().equals("flow")) {
-            datasetTableView = new DatasetTableCoverFlowView();
+            datasetTableView = new DatasetTableCoverFlowView(dispatchAsync);
         } else {
-            datasetTableView = new DatasetTableOneColumnView();
+            datasetTableView = new DatasetTableOneColumnView(dispatchAsync);
         }
         setTable(datasetTableView);
     }
@@ -162,7 +164,7 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
         query.setLimit(adjustedPageSize);
         query.setOffset(pageOffset);
         query.setInCollection(inCollection);
-        MMDB.dispatchAsync.execute(query,
+        dispatchAsync.execute(query,
                 new AsyncCallback<ListDatasetsResult>() {
 
                     public void onFailure(Throwable caught) {
@@ -198,19 +200,19 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
     }
 
     @Override
-    public void addItem(String uri, DatasetBean item, int position) {
+    public void addItem(String uri, DatasetBean item, String type, int position) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void addItem(String uri, DatasetBean item, String sectionUri, String sectionLabel, String sectionMarker) {
+    public void addItem(String uri, DatasetBean item, String type, String sectionUri, String sectionLabel, String sectionMarker) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void addItem(String uri, DatasetBean item, int position, String sectionUri, String sectionLabel, String sectionMarker) {
+    public void addItem(String uri, DatasetBean item, String type, int position, String sectionUri, String sectionLabel, String sectionMarker) {
         // TODO Auto-generated method stub
 
     }

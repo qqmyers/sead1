@@ -3,6 +3,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -27,7 +29,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissions;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPermissions;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPermissionsResult;
@@ -39,19 +40,19 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 
 public class RoleAdministrationPage extends Composite {
-    private final MyDispatchAsync dispatch;
+    private final DispatchAsync dispatch;
 
-    FlowPanel                     mainPanel;
-    TitlePanel                    pageTitle;
-    FlexTable                     permissionsTable;
+    FlowPanel                   mainPanel;
+    TitlePanel                  pageTitle;
+    FlexTable                   permissionsTable;
 
-    Button                        saveButton;
-    Button                        cancelButton;
+    Button                      saveButton;
+    Button                      cancelButton;
 
-    Map<String, Integer>          columnByRole;
-    Map<String, String>           nameByRole;
+    Map<String, Integer>        columnByRole;
+    Map<String, String>         nameByRole;
 
-    public RoleAdministrationPage(MyDispatchAsync dispatchAsync) {
+    public RoleAdministrationPage(DispatchAsync dispatchAsync) {
 
         dispatch = dispatchAsync;
 

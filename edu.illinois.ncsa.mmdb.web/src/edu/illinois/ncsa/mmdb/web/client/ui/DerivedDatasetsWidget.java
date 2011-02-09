@@ -40,6 +40,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.List;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -50,23 +52,22 @@ import com.google.gwt.user.client.ui.Label;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFrom;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDerivedFromResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class DerivedDatasetsWidget extends Composite {
-    private final FlowPanel       mainContainer;
-    private final FlexTable       previews;
+    private final FlowPanel     mainContainer;
+    private final FlexTable     previews;
 
-    private final String          uri;
-    private final MyDispatchAsync service;
+    private final String        uri;
+    private final DispatchAsync service;
 
-    public DerivedDatasetsWidget(String uri, MyDispatchAsync service) {
-        this(uri, service, true);
+    public DerivedDatasetsWidget(String uri, DispatchAsync service) {
+        this(uri, true, service);
     }
 
-    public DerivedDatasetsWidget(final String uri, final MyDispatchAsync service, boolean withTitle) {
-        this.uri = uri;
+    public DerivedDatasetsWidget(final String uri, boolean withTitle, DispatchAsync service) {
         this.service = service;
+        this.uri = uri;
 
         mainContainer = new FlowPanel();
         mainContainer.addStyleName("datasetRightColSection");
@@ -112,7 +113,7 @@ public class DerivedDatasetsWidget extends Composite {
 
     private void addDataset(DatasetBean ds) {
         String url = "dataset?id=" + ds.getUri();
-        PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url);
+        PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url, service);
         String title = ds.getTitle();
         title = title.length() > 15 ? title.substring(0, 15) + "..." : title;
         Hyperlink link = new Hyperlink(title, url);

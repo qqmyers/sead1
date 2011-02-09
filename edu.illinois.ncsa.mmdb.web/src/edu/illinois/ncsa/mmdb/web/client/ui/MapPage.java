@@ -3,6 +3,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -25,7 +27,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
@@ -39,13 +40,13 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
  */
 public class MapPage extends Page {
 
-    private static final String   TITLE = "Datasets by Location";
-    private final HandlerManager  eventbus;
-    private final MyDispatchAsync dispatch;
-    private MapWidget             map;
-    private Label                 permissionLabel;
+    private static final String  TITLE = "Datasets by Location";
+    private final HandlerManager eventbus;
+    private final DispatchAsync  dispatch;
+    private MapWidget            map;
+    private Label                permissionLabel;
 
-    public MapPage(MyDispatchAsync dispatch, HandlerManager eventbus) {
+    public MapPage(DispatchAsync dispatch, HandlerManager eventbus) {
         super(TITLE, dispatch);
         this.dispatch = dispatch;
         this.eventbus = eventbus;

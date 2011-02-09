@@ -42,6 +42,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -51,10 +53,16 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
 public class DatasetTableCoverFlowView extends DatasetTableView {
-    int n = 0;
+    int                         n = 0;
+    private final DispatchAsync dispatchAsync;
 
-    public DatasetTableCoverFlowView() {
+    /**
+     * TODO dispatch is currently required because PreviewWidget does not have a
+     * presenter
+     */
+    public DatasetTableCoverFlowView(DispatchAsync dispatchAsync) {
         super();
+        this.dispatchAsync = dispatchAsync;
         setWidth("715px");
     }
 
@@ -70,13 +78,13 @@ public class DatasetTableCoverFlowView extends DatasetTableView {
         PreviewWidget preview = null;
         Label titleLabel = new Label(title);
         if (n++ == 1) {
-            preview = new PreviewWidget(id, GetPreviews.LARGE, "dataset?id=" + id);
+            preview = new PreviewWidget(id, GetPreviews.LARGE, "dataset?id=" + id, dispatchAsync);
             preview.setWidth("400px");
             preview.setMaxWidth(400);
             getCellFormatter().addStyleName(0, n, "flowPreviewLarge");
             titleLabel.addStyleName("flowLabelLarge");
         } else {
-            preview = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id);
+            preview = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, dispatchAsync);
             preview.setMaxWidth(150);
             preview.setWidth("150px");
             getCellFormatter().addStyleName(0, n, "flowPreviewSmall");

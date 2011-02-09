@@ -39,8 +39,6 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
         VerticalPanel vp = new VerticalPanel();
         vp.addStyleName("centered"); //$NON-NLS-1$
 
-        dispatch = MMDB.dispatchAsync;
-
         widget = new HTML();
         widget.getElement().setId(DOM.createUniqueId());
         vp.add(widget);

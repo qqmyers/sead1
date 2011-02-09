@@ -42,6 +42,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Timer;
@@ -72,9 +74,11 @@ public class DynamicGridView extends FlexTable implements Display {
     public static final int                  PAGE_SIZE_X4      = 96;
     private final int                        ROW_WIDTH         = 6;
     private int                              numItems          = 0;
+    private final DispatchAsync              dispatchAsync;
 
-    public DynamicGridView() {
+    public DynamicGridView(DispatchAsync dispatchAsync) {
         super();
+        this.dispatchAsync = dispatchAsync;
         addStyleName("dynamicGrid");
         checkBoxes = new HashMap<Integer, CheckBox>();
     }
@@ -91,7 +95,7 @@ public class DynamicGridView extends FlexTable implements Display {
         titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
         // preview
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
         pre.setWidth("120px");
         pre.setMaxWidth(100);
         layoutPanel.add(pre);
@@ -133,7 +137,7 @@ public class DynamicGridView extends FlexTable implements Display {
         titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
         // preview
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
         pre.setWidth("120px");
         pre.setMaxWidth(100);
         layoutPanel.add(pre);

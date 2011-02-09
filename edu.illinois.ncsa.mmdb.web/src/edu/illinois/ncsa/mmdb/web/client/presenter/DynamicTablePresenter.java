@@ -40,6 +40,8 @@ package edu.illinois.ncsa.mmdb.web.client.presenter;
 
 import java.util.Set;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -53,7 +55,6 @@ import com.google.gwt.user.client.ui.Widget;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.NoMoreItemsEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.RefreshEvent;
@@ -74,15 +75,14 @@ import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
  */
 public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTablePresenter.Display> {
 
-    protected final MyDispatchAsync dispatch;
-    private int                     pageSize    = DynamicListView.DEFAULT_PAGE_SIZE;
-    protected String                sortKey     = "date-desc";
-    protected String                viewTypePreference;
-    protected String                viewType    = DynamicTableView.LIST_VIEW_TYPE;
-    protected String                sizeType    = DynamicTableView.PAGE_SIZE_X1;
-    protected int                   numberOfPages;
-    protected int                   currentPage = 1;
-    protected BasePresenter<?>      viewTypePresenter;
+    private int                pageSize    = DynamicListView.DEFAULT_PAGE_SIZE;
+    protected String           sortKey     = "date-desc";
+    protected String           viewTypePreference;
+    protected String           viewType    = DynamicTableView.LIST_VIEW_TYPE;
+    protected String           sizeType    = DynamicTableView.PAGE_SIZE_X1;
+    protected int              numberOfPages;
+    protected int              currentPage = 1;
+    protected BasePresenter<?> viewTypePresenter;
 
     public interface Display {
         void setCurrentPage(int num);
@@ -125,7 +125,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
      * @param eventBus
      * @param display
      */
-    public DynamicTablePresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display) {
+    public DynamicTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
         this(dispatch, eventBus, display, DynamicTableView.LIST_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
     }
 
@@ -136,9 +136,8 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
      * @param eventBus
      * @param display
      */
-    public DynamicTablePresenter(MyDispatchAsync dispatch, HandlerManager eventBus, Display display, String defaultview, String defaultsize) {
-        super(display, eventBus);
-        this.dispatch = dispatch;
+    public DynamicTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display, String defaultview, String defaultsize) {
+        super(display, dispatch, eventBus);
 
         sortKey = MMDB.getSessionPreference(getViewSortPreference(), "date-desc");
         display.setOrder(sortKey);
@@ -162,7 +161,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
      */
     private void getContent() {
         ListQuery<B> query = getQuery();
-        dispatch.execute(query,
+        service.execute(query,
                 new AsyncCallback<ListQueryResult<B>>() {
 
                     public void onFailure(Throwable caught) {
@@ -334,7 +333,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
             viewTypePresenter.unbind();
         }
         if (viewType.equals(DynamicTableView.LIST_VIEW_TYPE)) {
-            DynamicListView listView = new DynamicListView();
+            DynamicListView listView = new DynamicListView(service);
             display.changeListSizeNumbers();
             display.setSizeType(sizeType);
             if (sizeType.equals(DynamicTableView.PAGE_SIZE_X2)) {
@@ -344,14 +343,14 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
             } else {
                 setPageSize(DynamicListView.DEFAULT_PAGE_SIZE);
             }
-            DynamicListPresenter listPresenter = new DynamicListPresenter(dispatch, eventBus, listView);
+            DynamicListPresenter listPresenter = new DynamicListPresenter(service, eventBus, listView);
             listPresenter.bind();
             viewTypePresenter = listPresenter;
             display.setContentView(listView);
         } else if (viewType.equals(DynamicTableView.GRID_VIEW_TYPE)) {
             display.changeGridSizeNumbers();
             display.setSizeType(sizeType);
-            DynamicGridView gridView = new DynamicGridView();
+            DynamicGridView gridView = new DynamicGridView(service);
 
             if (sizeType.equals(DynamicTableView.PAGE_SIZE_X2)) {
                 setPageSize(DynamicGridView.PAGE_SIZE_X2);
@@ -361,7 +360,7 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
                 setPageSize(DynamicGridView.DEFAULT_PAGE_SIZE);
             }
 
-            DynamicGridPresenter gridPresenter = new DynamicGridPresenter(dispatch, eventBus, gridView);
+            DynamicGridPresenter gridPresenter = new DynamicGridPresenter(service, eventBus, gridView);
             gridPresenter.bind();
             viewTypePresenter = gridPresenter;
             display.setContentView(gridView);

@@ -43,6 +43,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import java.util.List;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -53,7 +55,6 @@ import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.PagingSearchResultsTableView;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHit;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHitResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Search;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchResult;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
@@ -75,7 +76,7 @@ public class SearchResultsPage extends Page {
     private final String                 query;
     private PagingDatasetTablePresenter  datasetTablePresenter;
 
-    public SearchResultsPage(MyDispatchAsync dispatchasync, HandlerManager eventbus) {
+    public SearchResultsPage(DispatchAsync dispatchasync, HandlerManager eventbus) {
         super(TITLE, dispatchasync);
         this.eventbus = eventbus;
         query = PlaceService.getParams().get("q");
@@ -133,10 +134,10 @@ public class SearchResultsPage extends Page {
 
     protected void showResults(SearchResult result) {
         // paged table of datasets
-        datasetTableView = new PagingSearchResultsTableView();
+        datasetTableView = new PagingSearchResultsTableView(dispatchAsync);
         datasetTableView.addStyleName("datasetTable");
         datasetTablePresenter =
-                new PagingDatasetTablePresenter(datasetTableView, eventbus);
+                new PagingDatasetTablePresenter(datasetTableView, dispatchAsync, eventbus);
         datasetTablePresenter.bind();
         mainLayoutPanel.add(datasetTableView);
 

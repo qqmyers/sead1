@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -52,7 +54,6 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 import com.google.gwt.user.client.ui.SimplePanel;
 
-import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteAnnotation;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteAnnotationResult;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
@@ -75,8 +76,11 @@ public class AnnotationView extends Composite {
 
     private final FlexCellFormatter flexCellFormatter;
 
-    public AnnotationView(final String annotatedThingUri, final AnnotationBean annotationBean, boolean deletable) {
+    private final DispatchAsync     dispatchAsync;
 
+    public AnnotationView(DispatchAsync dispatchAsync, final String annotatedThingUri, final AnnotationBean annotationBean, boolean deletable) {
+
+        this.dispatchAsync = dispatchAsync;
         initWidget(mainPanel);
 
         mainPanel.addStyleName("annotationMainPanel");
@@ -149,7 +153,7 @@ public class AnnotationView extends Composite {
 
     // delete this annotation
     void delete(final String annotatedThingUri, final String annotationUri) {
-        MMDB.dispatchAsync.execute(new DeleteAnnotation(annotatedThingUri, annotationUri), new AsyncCallback<DeleteAnnotationResult>() {
+        dispatchAsync.execute(new DeleteAnnotation(annotatedThingUri, annotationUri), new AsyncCallback<DeleteAnnotationResult>() {
             public void onFailure(Throwable caught) {
                 GWT.log("Error deleting annotation", caught);
             }

@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -59,7 +61,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UploadWidget;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
@@ -94,7 +95,7 @@ public class UploadPage extends Page {
         setPageTitle(TITLE);
     }
 
-    public UploadPage(MyDispatchAsync dispatchasync) {
+    public UploadPage(DispatchAsync dispatchasync) {
         super(TITLE, dispatchasync);
     }
 
@@ -212,15 +213,15 @@ public class UploadPage extends Page {
         // batch actions
         batchOperationView = new BatchOperationView();
         batchOperationView.addStyleName("hidden");
-        batchOperationPresenter = new BatchOperationPresenter(MMDB.dispatchAsync, MMDB.eventBus, batchOperationView);
+        batchOperationPresenter = new BatchOperationPresenter(dispatchAsync, MMDB.eventBus, batchOperationView);
         batchOperationPresenter.bind();
         mainLayoutPanel.add(batchOperationView);
 
         // applet status
         appletStatusPanel = new VerticalPanel();
 
-        uploadStatusView = new UploadStatusView();
-        uploadStatusPresenter = new UploadStatusPresenter(MMDB.dispatchAsync, MMDB.eventBus, uploadStatusView);
+        uploadStatusView = new UploadStatusView(dispatchAsync);
+        uploadStatusPresenter = new UploadStatusPresenter(dispatchAsync, MMDB.eventBus, uploadStatusView);
         uploadStatusPresenter.bind();
 
         appletStatusPanel.add(uploadStatusView);
