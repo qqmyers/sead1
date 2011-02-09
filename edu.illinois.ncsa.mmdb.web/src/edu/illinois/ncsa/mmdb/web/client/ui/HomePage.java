@@ -104,7 +104,7 @@ public class HomePage extends Page {
         createSystemInfoTab();
         createProfileTab();
         //        createPreferencesTab();
-        checkAdminPermissions();
+        // checkAdminPermissions();
         tabPanel.selectTab(0);
     }
 

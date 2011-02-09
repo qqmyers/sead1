@@ -79,6 +79,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
+import edu.illinois.ncsa.mmdb.web.client.ui.AdminPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
@@ -160,6 +161,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private static UserSessionState    sessionState;
 
     private Label                      debugLabel;
+    private HorizontalPanel             navMenu;
+    private HTML                        adminBbullet;
+    private Hyperlink                   adminLink;
 
     /**
      * This is the entry point method.
@@ -235,7 +239,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             GWT.log("failed to get rootpanel", null);
         }
         RootPanel.get("navMenu").clear();
-        final HorizontalPanel navMenu = new HorizontalPanel();
+        navMenu = new HorizontalPanel();
         navMenu.addStyleName("navMenu");
         RootPanel.get("navMenu").add(navMenu);
         // datasets
@@ -282,9 +286,20 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         bullet4.addStyleName("navMenuText");
         navMenu.add(bullet4);
         // upload link
-        Hyperlink uploadLink = new Hyperlink("Upload", "upload");
+        final Hyperlink uploadLink = new Hyperlink("Upload", "upload");
         uploadLink.addStyleName("navMenuLink");
         navMenu.add(uploadLink);
+
+        adminBbullet = new HTML("&bull;");
+        adminBbullet.addStyleName("navMenuText");
+        adminBbullet.addStyleName("hidden");
+        navMenu.add(adminBbullet);
+
+        // upload link
+        adminLink = new Hyperlink("Administration", "administration");
+        adminLink.addStyleName("navMenuLink");
+        adminLink.addStyleName("hidden");
+        navMenu.add(adminLink);
 
         // FIXME debug
         debugLabel = new Label();
@@ -437,6 +452,21 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 showNotEnabledPage();
             }
         });
+
+        // admin menu
+        rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                adminBbullet.removeStyleName("hidden");
+                adminLink.removeStyleName("hidden");
+            }
+
+            @Override
+            public void onDenied() {
+                adminBbullet.addStyleName("hidden");
+                adminLink.addStyleName("hidden");
+            }
+        });
     }
 
     /**
@@ -519,10 +549,18 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showSelected(true);
         } else if (token.startsWith("noneSelected")) {
             showSelected(false);
+        } else if (token.startsWith("administration")) {
+            showAdminPage();
         } else if (!previousHistoryToken.startsWith("listDatasets")) {
             showListDatasetsPage();
         }
         previousHistoryToken = token;
+    }
+
+    private void showAdminPage() {
+        GWT.log("Loading Admin Page", null);
+        mainContainer.clear();
+        mainContainer.add(new AdminPage(dispatchAsync, eventBus));
     }
 
     private void showMapPage() {
@@ -664,14 +702,15 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      */
     private void showTagPage() {
         mainContainer.clear();
-        mainContainer.add(new TagPage(getParams().get("title"), dispatchAsync,
-                eventBus));
+        mainContainer.add(new TagPage(getParams().get("title"), dispatchAsync, eventBus));
     }
 
     /**
      * Show a set of widgets to authenticate with the server.
      */
     private void showLoginPage() {
+        adminBbullet.addStyleName("hidden");
+        adminLink.addStyleName("hidden");
         loginStatusWidget.logout();
         mainContainer.clear();
         mainContainer.add(new LoginPage(dispatchAsync, this));

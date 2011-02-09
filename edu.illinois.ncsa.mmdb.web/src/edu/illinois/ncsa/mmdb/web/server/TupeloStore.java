@@ -40,8 +40,12 @@ package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -50,6 +54,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -64,6 +69,7 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.PeerFacade;
 import org.tupeloproject.kernel.Thing;
+import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.kernel.beans.FetchBeanPostprocessor;
 import org.tupeloproject.kernel.impl.MemoryContext;
@@ -87,6 +93,7 @@ import edu.illinois.ncsa.cet.search.SearchableTextIndex;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthorizedAction;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectAction;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -148,6 +155,11 @@ public class TupeloStore {
 
     /** Use a single previewbeanutil for optimizations */
     private PreviewBeanUtil                                      extractorpbu;
+
+    /**
+     * configuration values, either stored in context or from server.properties.
+     */
+    private Map<Resource, String>                                configuration         = new HashMap<Resource, String>();
 
     private Context                                              ontologyContext;
 
@@ -1042,5 +1054,83 @@ public class TupeloStore {
 
     public void setOntologyContext(Context c) {
         ontologyContext = c;
+    }
+
+    // ----------------------------------------------------------------------
+    // Configuration, this section will read/write the configuration to the
+    // context. If any values are set in the server.properties they will be
+    // used as defaults.
+    // ----------------------------------------------------------------------
+    public void initializeConfiguration(Properties defaults) throws OperatorException {
+        String server = "localhost";
+        try {
+            server = InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (UnknownHostException e) {
+            log.warn("Could not get hostname.", e);
+        }
+        for (ConfigurationKey key : ConfigurationKey.values() ) {
+            Resource rkey = getURI(key);
+            if (defaults.containsKey(key.getPropertyKey())) {
+                configuration.put(rkey, defaults.getProperty(key.getPropertyKey()));
+            } else if (key == ConfigurationKey.MediciName) {
+                configuration.put(rkey, server);
+            } else {
+                configuration.put(rkey, key.getDefaultValue());
+            }
+        }
+
+        // values stored in context
+        readConfiguration();
+    }
+
+    public String getConfiguration(ConfigurationKey key) {
+        return configuration.get(getURI(key));
+    }
+
+    public void setConfiguration(ConfigurationKey key, String value) throws OperatorException {
+        Resource rkey = getURI(key);
+        writeConfiguration(rkey, value);
+        configuration.put(rkey, value);
+    }
+
+    private Resource getURI(ConfigurationKey key) {
+        try {
+            return MMDB.medici("configuration/" + URLEncoder.encode(key.toString(), "UTF8")); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (UnsupportedEncodingException e) {
+            return MMDB.medici("configuration/" + key.toString()); //$NON-NLS-1$ 
+        }
+    }
+
+    private void writeConfiguration(Resource key, String value) throws OperatorException {
+        TripleWriter tw = new TripleWriter();
+
+        Unifier uf = new Unifier();
+        uf.addPattern("configuration", Rdf.TYPE, MMDB.CONFIGURATION);
+        uf.addPattern("configuration", MMDB.CONFIGURATION_KEY, key);
+        uf.addPattern("configuration", MMDB.CONFIGURATION_VALUE, "value");
+        uf.setColumnNames("configuration", "value");
+        getContext().perform(uf);
+        for (Tuple<Resource> row : uf.getResult() ) {
+            tw.remove(row.get(0), Rdf.TYPE, MMDB.CONFIGURATION);
+            tw.remove(row.get(0), MMDB.CONFIGURATION_KEY, key);
+            tw.remove(row.get(0), MMDB.CONFIGURATION_VALUE, row.get(1));
+        }
+        Resource x = Resource.uriRef();
+        tw.add(x, Rdf.TYPE, MMDB.CONFIGURATION);
+        tw.add(x, MMDB.CONFIGURATION_KEY, key);
+        tw.add(x, MMDB.CONFIGURATION_VALUE, Resource.literal(value));
+        getContext().perform(tw);
+    }
+
+    private void readConfiguration() throws OperatorException {
+        Unifier uf = new Unifier();
+        uf.addPattern("configuration", Rdf.TYPE, MMDB.CONFIGURATION);
+        uf.addPattern("configuration", MMDB.CONFIGURATION_KEY, "key");
+        uf.addPattern("configuration", MMDB.CONFIGURATION_VALUE, "value");
+        uf.setColumnNames("key", "value");
+        getContext().perform(uf);
+        for (Tuple<Resource> row : uf.getResult() ) {
+            configuration.put(row.get(0), row.get(1).getString());
+        }
     }
 }

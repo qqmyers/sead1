@@ -128,8 +128,14 @@ public class ContextSetupListener implements ServletContextListener {
                 log.warn("Could not close server.properties.", exc);
             }
         }
-
         log.info("Setting up Tupelo context");
+
+        // initialize default configurations
+        try {
+            TupeloStore.getInstance().initializeConfiguration(props);
+        } catch (OperatorException exc) {
+            log.warn("Could not read configuration values from context.", exc);
+        }
 
         // some global variables
         if (props.containsKey("extractor.url")) { //$NON-NLS-1$
@@ -166,15 +172,6 @@ public class ContextSetupListener implements ServletContextListener {
         for (Tuple<Resource> row : uf.getResult() ) {
             mimemap.checkMimeType(row.get(0).getString());
         }
-
-        // mail properties
-        Properties mail = new Properties();
-        for (String key : props.stringPropertyNames() ) {
-            if (key.startsWith("mail.")) {
-                mail.put(key, props.getProperty(key));
-            }
-        }
-        Mail.setProperties(mail);
 
         // set up full-text search
         String indexFile = props.getProperty("search.index", null);

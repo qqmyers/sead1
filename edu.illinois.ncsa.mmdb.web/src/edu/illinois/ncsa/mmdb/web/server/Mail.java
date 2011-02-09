@@ -39,7 +39,6 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -52,6 +51,7 @@ import javax.mail.internet.MimeMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
@@ -62,23 +62,7 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  */
 public class Mail {
     /** Commons logging **/
-    private static Log        log           = LogFactory.getLog(Mail.class);
-
-    private static Properties configuration = new Properties();
-
-    public static void setProperties(Properties mail) {
-        configuration.clear();
-        configuration.putAll(mail);
-
-        if (configuration.get("mail.servername") == null) {
-            try {
-                configuration.put("mail.servername", InetAddress.getLocalHost().getHostName());
-            } catch (java.net.UnknownHostException uhe) {
-                log.warn("Could not determine hostname.", uhe);
-                configuration.put("mail.servername", "UNKNOWN");
-            }
-        }
-    }
+    private static Log log = LogFactory.getLog(Mail.class);
 
     /**
      * Notify user of authorization change.
@@ -86,8 +70,9 @@ public class Mail {
      * @param userAddress
      */
     public static void userAuthorized(PersonBean user) {
-        String server = configuration.getProperty("mail.servername");
-        String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
+        TupeloStore ts = TupeloStore.getInstance();
+        String server = ts.getConfiguration(ConfigurationKey.MailServer);
+        String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
         String subject = presubj + " Account Activated";
         String body = String.format("Your account for use on server %s has been activated.", server);
         try {
@@ -98,8 +83,9 @@ public class Mail {
     }
 
     public static void sendNewPassword(PersonBean user, String newPassword) {
-        String server = configuration.getProperty("mail.servername");
-        String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
+        TupeloStore ts = TupeloStore.getInstance();
+        String server = ts.getConfiguration(ConfigurationKey.MailServer);
+        String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
         String subject = presubj + " New Password";
         String body = String.format("Your new password for use on server %s is : %s", server, newPassword);
         try {
@@ -115,9 +101,10 @@ public class Mail {
      * @param userAddress
      */
     public static void userAdded(PersonBean user) {
-        String server = configuration.getProperty("mail.servername");
-        String rcpt = configuration.getProperty("mail.from");
-        String presubj = configuration.getProperty("mail.subject", "[MEDICI]"); //$NON-NLS-1$
+        TupeloStore ts = TupeloStore.getInstance();
+        String server = ts.getConfiguration(ConfigurationKey.MailServer);
+        String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
+        String rcpt = ts.getConfiguration(ConfigurationKey.MailFrom);
         String subject = presubj + " New User";
         StringBuilder body = new StringBuilder();
         body.append(String.format("A new user has registered on server %s\n\n", server));
@@ -140,10 +127,13 @@ public class Mail {
      * @throws MessagingException
      */
     public static void sendMessage(String rcpt, String subject, String body) throws MessagingException {
-        String from = configuration.getProperty("mail.from"); //$NON-NLS-1$
-        String fullname = configuration.getProperty("mail.fullname", "Medici"); //$NON-NLS-1$
+        TupeloStore ts = TupeloStore.getInstance();
+        String from = ts.getConfiguration(ConfigurationKey.MailFrom);
+        String fullname = ts.getConfiguration(ConfigurationKey.MailFullName);
 
-        Session session = Session.getDefaultInstance(configuration, null);
+        Properties props = new Properties();
+        props.put(ConfigurationKey.MailServer.getPropertyKey(), ts.getConfiguration(ConfigurationKey.MailServer));
+        Session session = Session.getDefaultInstance(null);
         MimeMessage message = new MimeMessage(session);
         try {
             message.setFrom(new InternetAddress(from, fullname));
