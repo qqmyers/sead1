@@ -59,6 +59,7 @@ import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
@@ -67,6 +68,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -309,11 +311,21 @@ public class UserMetadataWidget extends Composite {
                 predicateLabel.addStyleName("hidden");
             }
             // field value
+            Hyperlink namelink = new Hyperlink();
+            namelink.setTargetHistoryToken("search?q=\"" + value.getName() + "\"");
+            namelink.setText(value.getName());
             Label name = new Label(value.getName());
             if (value.getUri() != null) {
                 name.setTitle(value.getUri());
             }
-            fieldTable.setWidget(row, 1, name);
+            name.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+
+                    History.newItem("search?q=\"" + value.getName() + "\"");
+                }
+            });
+            fieldTable.setWidget(row, 1, namelink);
 
             //placeholder for Applies To
             if (value.getSectionMarker() == null) {

@@ -1,5 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -11,6 +13,7 @@ public abstract class PreviewBeanWidget<T extends PreviewBean> {
     /** preview bean that is rendered. */
     private T                      pb = null;
     private DatasetBean            dataset;
+    private DispatchAsync          dispatch;
 
     /** the actual widget that will hold the preview */
     private Widget                 widget;
@@ -36,6 +39,14 @@ public abstract class PreviewBeanWidget<T extends PreviewBean> {
 
     public void setDatasetBean(DatasetBean dataset) {
         this.dataset = dataset;
+    }
+
+    public DispatchAsync getDispatch() {
+        return dispatch;
+    }
+
+    public void setDispatch(DispatchAsync dispatch) {
+        this.dispatch = dispatch;
     }
 
     /**

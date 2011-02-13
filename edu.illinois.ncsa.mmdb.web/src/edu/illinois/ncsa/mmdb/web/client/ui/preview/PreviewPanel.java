@@ -221,6 +221,7 @@ public class PreviewPanel extends Composite {
                 PreviewBeanWidget pbw = widget.newWidget();
                 pbw.setPreviewBean(best);
                 pbw.setDatasetBean(dataset);
+                pbw.setDispatch(dispatchAsync);
                 list.add(pbw);
             }
         }

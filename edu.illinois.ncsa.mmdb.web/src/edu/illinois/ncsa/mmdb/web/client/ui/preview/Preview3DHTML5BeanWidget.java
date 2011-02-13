@@ -1,5 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -22,7 +24,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Create3DImage;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.common.RestEndpoints;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.PreviewThreeDimensionalBean;
@@ -30,12 +31,11 @@ import edu.uiuc.ncsa.cet.bean.PreviewThreeDimensionalBean;
 public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDimensionalBean> {
 
     private final HTML widget;
-    MyDispatchAsync    dispatch;
+    DispatchAsync      dispatch;
     Label              convert;
 
     public Preview3DHTML5BeanWidget(HandlerManager eventBus) {
         super(eventBus);
-
         VerticalPanel vp = new VerticalPanel();
         vp.addStyleName("centered"); //$NON-NLS-1$
 
@@ -108,6 +108,7 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
     private void setImage() {
         final String fileData = getCanvasData();
         convert.removeStyleName("hidden");
+        dispatch = getDispatch();
         dispatch.execute(new Create3DImage(fileData, MMDB.getUsername(), getDataset()), new AsyncCallback<EmptyResult>() {
 
             @Override
