@@ -103,8 +103,6 @@ public class AdminPage extends Page {
         // Configuration
         tabPanel.add(new ConfigurationWidget(dispatchAsync, permissions), "Configuration");
 
-        tabPanel.add(new SystemInfoWidget(dispatchAsync, false), "System Info");
-
         // Users and permissions
         if (permissions.isPermitted(Permission.EDIT_ROLES)) {
             // users
@@ -113,6 +111,9 @@ public class AdminPage extends Page {
             // Permissions
             tabPanel.insert(new RoleAdministrationWidget(dispatchAsync), "Permissions", 2);
         }
+
+        // System information
+        tabPanel.add(new SystemInfoWidget(dispatchAsync, false), "System Info");
 
         // SPARQL Queries
         tabPanel.add(new SparqlWidget(dispatchAsync), "SPARQL");
