@@ -352,6 +352,7 @@ public class ContextSetupListener implements ServletContextListener {
         rbac.createBaseOntology();
         // ensure Medici permissions exist
         rbac.intializePermissions();
+        rbac.associatePermissionsWithRoles();
 
         // create accounts
         Set<String> keys = new HashSet<String>();
