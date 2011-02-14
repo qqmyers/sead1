@@ -85,7 +85,6 @@ public class HomePage extends Page {
         rbac = new PermissionUtil(dispatchAsync);
         createTabs();
         createRecentActivityTab();
-        createSystemInfoTab();
         createProfileTab();
         //        createPreferencesTab();
         tabPanel.selectTab(0);
@@ -98,13 +97,6 @@ public class HomePage extends Page {
         recentActivityPanel = new FlowPanel();
         tabPanel.add(recentActivityPanel, "Recent Activity");
         getRecentActivity();
-    }
-
-    /**
-     * A tab to show system info
-     */
-    private void createSystemInfoTab() {
-        tabPanel.add(new SystemInfoWidget(dispatchAsync, false), "System Info");
     }
 
     /**

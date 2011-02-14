@@ -39,7 +39,7 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.client.ui;
+package edu.illinois.ncsa.mmdb.web.client.ui.admin;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -53,10 +53,7 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
-import edu.illinois.ncsa.mmdb.web.client.ui.admin.ConfigurationWidget;
-import edu.illinois.ncsa.mmdb.web.client.ui.admin.RoleAdministrationWidget;
-import edu.illinois.ncsa.mmdb.web.client.ui.admin.SparqlWidget;
-import edu.illinois.ncsa.mmdb.web.client.ui.admin.UserManagementWidget;
+import edu.illinois.ncsa.mmdb.web.client.ui.Page;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
@@ -105,6 +102,8 @@ public class AdminPage extends Page {
 
         // Configuration
         tabPanel.add(new ConfigurationWidget(dispatchAsync, permissions), "Configuration");
+
+        tabPanel.add(new SystemInfoWidget(dispatchAsync, false), "System Info");
 
         // Users and permissions
         if (permissions.isPermitted(Permission.EDIT_ROLES)) {

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.client.ui;
+package edu.illinois.ncsa.mmdb.web.client.ui.admin;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
