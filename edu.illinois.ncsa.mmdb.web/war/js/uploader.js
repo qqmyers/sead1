@@ -61,7 +61,11 @@ function LoadEnd(evt) {
 				var boundary = 'xxxxxxxxx';
 	 			var body = '--' + boundary + "\r\n";  
 				body += "Content-Disposition: form-data; name=f1; filename=" + file.name + "\r\n";  
-				body += "Content-Type:" + file.type + "\r\n\r\n";  
+				//if null, add UNKNOWN mimetype so MimeMap can create one
+				if (file.type)
+					body += "Content-Type:" + file.type + "\r\n\r\n";
+				else
+					body += "Content-Type: application/octet-stream \r\n\r\n";  
 				body += binary + "\r\n";  
 				body += '--' + boundary + '--';      
 				xhr.setRequestHeader('content-type', 'multipart/form-data; boundary=' + boundary);
@@ -84,7 +88,7 @@ function LoadEnd(evt) {
 				}
 				
 				var newFile  = document.createElement('div');
-				newFile.innerHTML = file.name;
+				newFile.innerHTML = file.type;
 				document.getElementById("list").appendChild(newFile);
 }
 
