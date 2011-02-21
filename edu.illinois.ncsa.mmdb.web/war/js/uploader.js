@@ -29,6 +29,7 @@ initializeUploader = function(){
 }
 
 function drop(evt) {
+
 	document.getElementById("box").style.backgroundColor='#ffffff';
 	evt.stopPropagation();
 	evt.preventDefault();
@@ -36,10 +37,18 @@ function drop(evt) {
 	var files = evt.dataTransfer.files;
 	var count = files.length;
 
-	for (var i = 0; i < count; i++) {			
+	for (var i = 0; i < count; i++) {
+	
+						
 		
 		var file = files[i],
 		reader = new FileReader();
+		
+		var name = new String(file.name);
+		var size = new String(file.size);
+		
+		dndAppletFileDropped(name, size);
+		
 		reader.index = i;
 		reader.file = file;
 	
@@ -56,6 +65,20 @@ function LoadEnd(evt) {
 		
 				//Construct the POST request
 				xhr = new XMLHttpRequest();
+				
+				xhr.onreadystatechange = function(){
+					if(xhr.readyState == 4){
+						if(xhr.status == 200){
+						    var replaced = new String(xhr.responseText);
+						    var replacedall = replaced.replace(/<[^>]+>/g,"");
+							var trimmed = replacedall.replace(/^\s\s*/,"").replace(/\s\s*$/,"");
+							//dndAppletFileUploaded(trimmed);
+						}
+						else
+							alert("FAILED");
+					}
+				}
+				
 				xhr.open('POST', 'UploadBlob', true);
 				
 				var boundary = 'xxxxxxxxx';
