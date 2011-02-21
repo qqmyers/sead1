@@ -53,6 +53,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -202,6 +203,19 @@ public class UploadPage extends Page {
         tableLayout.getCellFormatter().addStyleName(0, 2, "uploadPageLargeCell");
         tableLayout.getCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_CENTER);
 
+        //HTML5 Upload Widget
+        //  TODO -- div id = list is temporary, will remove once uploadpresenter is attached with this
+        VerticalPanel html5Panel = new VerticalPanel();
+        HTML html5Upload = new HTML();
+        html5Upload.setHTML("<div id='box'><div id='drop'><br><br>Drag and drop files here!</div></div> <div id='list'></div>");
+
+        //Comment out the next line to remove html5 upload 
+        html5Panel.add(html5Upload);
+
+        tableLayout.setWidget(0, 4, html5Panel);
+        tableLayout.getCellFormatter().addStyleName(0, 4, "uploadPageLargeCell");
+        tableLayout.getCellFormatter().setHorizontalAlignment(0, 4, HasAlignment.ALIGN_CENTER);
+
         // wake the applet up periodically, so it doesn't block on javascript calls
         safariWakeupTimer = new Timer() {
             public void run() {
@@ -230,6 +244,11 @@ public class UploadPage extends Page {
         // publish js methods outside of gwt code
         publishMethods();
     }
+
+    private final native void initUploader() /*-{
+        // initialize HTML5 uploader
+        $wnd.initUploader();
+    }-*/;
 
     /**
      * "poke" the applet. this keeps it awake in WebKit browsers where
@@ -319,6 +338,12 @@ public class UploadPage extends Page {
         if (safariWakeupTimer != null) {
             safariWakeupTimer.cancel();
         }
+    }
+
+    @Override
+    protected void onLoad() {
+        super.onLoad();
+        initUploader();
     }
 
 }
