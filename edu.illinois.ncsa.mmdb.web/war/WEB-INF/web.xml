@@ -1,47 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?><!--
-    University of Illinois/NCSA
-    Open Source License
-   
-    Copyright (c) 2010 , NCSA.  All rights reserved.
-   
-    Developed by:
-    Cyberenvironments and Technologies (CET)
-    http://cet.ncsa.illinois.edu/
-   
-    National Center for Supercomputing Applications (NCSA)
-    http://www.ncsa.illinois.edu/
-   
-    Permission is hereby granted, free of charge, to any person obtaining
-    a copy of this software and associated documentation files (the
-    "Software"), to deal with the Software without restriction, including
-    without limitation the rights to use, copy, modify, merge, publish,
-    distribute, sublicense, and/or sell copies of the Software, and to
-    permit persons to whom the Software is furnished to do so, subject to
-    the following conditions:
-   
-    - Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimers.
-    - Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimers in the
-      documentation and/or other materials provided with the distribution.
-    - Neither the names of CET, University of Illinois/NCSA, nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this Software without specific prior written permission.
-   
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-    IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-    ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-    CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
- -->
+<?xml version="1.0" encoding="UTF-8"?><!-- University of Illinois/NCSA Open 
+	Source License Copyright (c) 2010 , NCSA. All rights reserved. Developed 
+	by: Cyberenvironments and Technologies (CET) http://cet.ncsa.illinois.edu/ 
+	National Center for Supercomputing Applications (NCSA) http://www.ncsa.illinois.edu/ 
+	Permission is hereby granted, free of charge, to any person obtaining a copy 
+	of this software and associated documentation files (the "Software"), to 
+	deal with the Software without restriction, including without limitation 
+	the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+	and/or sell copies of the Software, and to permit persons to whom the Software 
+	is furnished to do so, subject to the following conditions: - Redistributions 
+	of source code must retain the above copyright notice, this list of conditions 
+	and the following disclaimers. - Redistributions in binary form must reproduce 
+	the above copyright notice, this list of conditions and the following disclaimers 
+	in the documentation and/or other materials provided with the distribution. 
+	- Neither the names of CET, University of Illinois/NCSA, nor the names of 
+	its contributors may be used to endorse or promote products derived from 
+	this Software without specific prior written permission. THE SOFTWARE IS 
+	PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
+	BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+	PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT 
+	HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN 
+	ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE. -->
 
-<!DOCTYPE web-app
-    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-    "http://java.sun.com/dtd/web-app_2_3.dtd">
-
-<web-app>
+<web-app id="medici" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
 	<!-- Servlets -->
 	<servlet>
@@ -53,17 +36,17 @@
 		<servlet-name>REST Servlet</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.RestServlet</servlet-class>
 	</servlet>
-	
+
 	<servlet>
 		<servlet-name>RSS Servlet</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.RssServlet</servlet-class>
 	</servlet>
-			
+
 	<servlet>
 		<servlet-name>Extractor Servlet</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.ExtractorServlet</servlet-class>
 	</servlet>
-		
+
 	<servlet>
 		<servlet-name>tupelo</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.server.TupeloServlet</servlet-class>
@@ -71,18 +54,38 @@
 
 	<servlet>
 		<servlet-name>Dataset</servlet-name>
-		<servlet-class>
-			edu.illinois.ncsa.mmdb.web.server.DatasetServiceImpl
-		</servlet-class>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.server.DatasetServiceImpl</servlet-class>
 	</servlet>
 
 	<servlet>
 		<servlet-name>UploadBlob</servlet-name>
-		<servlet-class>
-			edu.illinois.ncsa.mmdb.web.server.UploadBlob
-    </servlet-class>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.server.UploadBlob</servlet-class>
 	</servlet>
 
+	<servlet>
+		<servlet-name>WebDAV Servlet</servlet-name>
+		<servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
+		<init-param>
+			<param-name>resource.factory.class</param-name>
+			<param-value>edu.illinois.ncsa.mmdb.web.server.webdav.MediciResourceFactory</param-value>
+		</init-param>
+		<!-- <init-param> <param-name>response.handler.class</param-name> <param-value>com.bradmcevoy.http.webdav.DefaultWebDavResponseHandler</param-value> 
+			</init-param> -->
+		<init-param>
+			<param-name>authentication.handler.classes</param-name>
+			<param-value>com.bradmcevoy.http.http11.auth.BasicAuthHandler</param-value>
+		</init-param>
+	</servlet>
+	<servlet>
+		<servlet-name>restlet</servlet-name>
+		<servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
+		<init-param>
+			<param-name>org.restlet.application</param-name>
+			<param-value>edu.illinois.ncsa.mmdb.web.server.rest.MediciServerApplication</param-value>
+		</init-param>
+	</servlet>
+
+	<!-- servlet mapping -->
 	<servlet-mapping>
 		<servlet-name>dispatch</servlet-name>
 		<url-pattern>/mmdb/dispatch</url-pattern>
@@ -92,17 +95,17 @@
 		<servlet-name>REST Servlet</servlet-name>
 		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>REST Servlet</servlet-name>
 		<url-pattern>/mmdb/api/*</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>RSS Servlet</servlet-name>
 		<url-pattern>/rss.xml</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>Extractor Servlet</servlet-name>
 		<url-pattern>/extractor/*</url-pattern>
@@ -122,70 +125,34 @@
 		<servlet-name>UploadBlob</servlet-name>
 		<url-pattern>/UploadBlob</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>UploadBlob</servlet-name>
 		<url-pattern>/mmdb/UploadBlob</url-pattern>
-		<!--  this additional mapping is kludgy, but necessary for GWT -->
+		<!-- this additional mapping is kludgy, but necessary for GWT -->
 	</servlet-mapping>
 
-	<!--  WebDAV endpoint -->
-	<servlet>
-		<servlet-name>WebDAV Servlet</servlet-name>
-       	<servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
-        <init-param>
-            <param-name>resource.factory.class</param-name>
-            <param-value>edu.illinois.ncsa.mmdb.web.server.webdav.MediciResourceFactory</param-value>            
-        </init-param>
-<!--  
-        <init-param>
-	        <param-name>response.handler.class</param-name>
-            <param-value>com.bradmcevoy.http.webdav.DefaultWebDavResponseHandler</param-value>    
-        </init-param>
-        -->
-        <init-param>
-            <param-name>authentication.handler.classes</param-name>
-            <param-value>com.bradmcevoy.http.http11.auth.BasicAuthHandler</param-value>
-        </init-param>
-	</servlet>
-	
 	<servlet-mapping>
 		<servlet-name>WebDAV Servlet</servlet-name>
 		<url-pattern>/webdav/*</url-pattern>
 	</servlet-mapping>
-
-	<!--  Restlet endpoint -->
-	<servlet>
-		<servlet-name>restlet</servlet-name>
-		<servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
-		<init-param>
-			<param-name>org.restlet.application</param-name>
-			<param-value>edu.illinois.ncsa.mmdb.web.server.rest.MediciServerApplication</param-value>
-		</init-param>
-	</servlet>
 
 	<servlet-mapping>
 		<servlet-name>restlet</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
 
-	<!--  Servlet context listener -->
+	<!-- Servlet context listener -->
 	<listener>
-		<listener-class>
-			edu.illinois.ncsa.mmdb.web.server.TupeloContextListener
-  		</listener-class>
+		<listener-class>edu.illinois.ncsa.mmdb.web.server.ContextSetupListener</listener-class>
 	</listener>
 
 	<listener>
-		<listener-class>
-			edu.illinois.ncsa.mmdb.web.server.MyActionHandlersConfig
-		</listener-class>
+		<listener-class>edu.illinois.ncsa.mmdb.web.server.TupeloContextListener</listener-class>
 	</listener>
 
 	<listener>
-		<listener-class>
-			edu.illinois.ncsa.mmdb.web.server.ContextSetupListener
-		</listener-class>
+		<listener-class>edu.illinois.ncsa.mmdb.web.server.MyActionHandlersConfig</listener-class>
 	</listener>
 
 	<!-- Default page to serve -->
