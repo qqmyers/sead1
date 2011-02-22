@@ -16,6 +16,8 @@ initializeUploader = function(){
 	
 	dropBox.addEventListener("dragexit", function(event) {
 		document.getElementById("box").style.backgroundColor='#ffffff';
+		event.stopPropagation(); 
+		event.preventDefault();
 	}, true);
 	
 	
@@ -38,21 +40,23 @@ function drop(evt) {
 	var count = files.length;
 
 	for (var i = 0; i < count; i++) {
-	
-						
-		
+
 		var file = files[i],
 		reader = new FileReader();
 		
 		var name = new String(file.name);
 		var size = new String(file.size);
 		
+		//Add to presenter interface
 		dndAppletFileDropped(name, size);
 		
 		reader.index = i;
 		reader.file = file;
 	
+		//Handle upload
 		reader.onloadend = LoadEnd;
+		reader.onprogress = LoadProgress;
+		
 		reader.readAsBinaryString(file);
 	
 	}
@@ -64,23 +68,32 @@ function LoadEnd(evt) {
 				binary = evt.target.result;
 		
 				//Construct the POST request
+				var xhr = false
+				if(window.XMLHttpRequest){
 				xhr = new XMLHttpRequest();
+				}
+				xhr.open('POST', 'UploadBlob', true);
 				
+				//Handle server response
 				xhr.onreadystatechange = function(){
 					if(xhr.readyState == 4){
 						if(xhr.status == 200){
+							//Remove <ol><li> ... </li></ol>
 						    var replaced = new String(xhr.responseText);
 						    var replacedall = replaced.replace(/<[^>]+>/g,"");
 							var trimmed = replacedall.replace(/^\s\s*/,"").replace(/\s\s*$/,"");
-							//dndAppletFileUploaded(trimmed);
+							//Debugging - Check URI Response Received
+							//var newFile  = document.createElement('div');
+							//newFile.innerHTML = xhr.responseText;
+							//document.getElementById("list").appendChild(newFile);
+							dndAppletFileUploaded(trimmed);
 						}
 						else
-							alert("FAILED");
+							var alert;
 					}
 				}
 				
-				xhr.open('POST', 'UploadBlob', true);
-				
+				//Setup POST header content in data
 				var boundary = 'xxxxxxxxx';
 	 			var body = '--' + boundary + "\r\n";  
 				body += "Content-Disposition: form-data; name=f1; filename=" + file.name + "\r\n";  
@@ -109,10 +122,14 @@ function LoadEnd(evt) {
 						xhr.send(data);
 
 				}
-				
-				var newFile  = document.createElement('div');
-				newFile.innerHTML = file.type;
-				document.getElementById("list").appendChild(newFile);
+}
+
+function LoadProgress(evt) {
+	if (evt.lengthComputable) {
+		var percentage = Math.round((evt.loaded * 100) / evt.total);
+		dndAppletProgress(percentage);
+	}
+
 }
 
 
