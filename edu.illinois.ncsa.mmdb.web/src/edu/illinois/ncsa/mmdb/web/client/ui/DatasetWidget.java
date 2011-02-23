@@ -38,9 +38,7 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
@@ -81,12 +79,13 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserViews;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserViewsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserActions;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserActionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UserAction;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
@@ -485,7 +484,7 @@ public class DatasetWidget extends Composite {
                 @Override
                 public void onPermissions(final HasPermissionResult p) {
                     if (p.isPermitted(Permission.VIEW_ACTIVITY)) {
-                        service.execute(new GetUserViews(uri), new AsyncCallback<GetUserViewsResult>() {
+                        service.execute(new GetUserActions(uri), new AsyncCallback<GetUserActionsResult>() {
                             @Override
                             public void onFailure(Throwable arg0) {
                                 GWT.log("Error retrieving metadata about dataset " + uri, null);
@@ -493,22 +492,24 @@ public class DatasetWidget extends Composite {
                             }
 
                             @Override
-                            public void onSuccess(GetUserViewsResult arg0) {
+                            public void onSuccess(GetUserActionsResult arg0) {
                                 FlexTable userViewTable = new FlexTable();
                                 userViewTable.addStyleName("metadataTable");
                                 userViewTable.setWidth("100%");
                                 userViewPanel.add(userViewTable);
 
-                                List<Date> dates = new ArrayList<Date>(arg0.getViews().keySet());
-                                Collections.sort(dates, Collections.reverseOrder());
-                                for (Date date : dates ) {
+                                List<UserAction> userActions = arg0.getUserActions();
+                                Collections.sort(userActions, Collections.reverseOrder());
+                                for (UserAction ua : userActions ) {
                                     int row = userViewTable.getRowCount();
-                                    userViewTable.setText(row, 0, date.toLocaleString());
-                                    userViewTable.setText(row, 1, arg0.getViews().get(date));
+                                    userViewTable.setText(row, 0, ua.getWhen().toLocaleString());
+                                    userViewTable.setText(row, 1, ua.getName());
+                                    userViewTable.setText(row, 2, ua.getAction());
 
                                     // formatting
                                     userViewTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
                                     userViewTable.getFlexCellFormatter().addStyleName(row, 1, "metadataTableCell");
+                                    userViewTable.getFlexCellFormatter().addStyleName(row, 2, "metadataTableCell");
                                     if (row % 2 == 0) {
                                         userViewTable.getRowFormatter().addStyleName(row, "metadataTableEvenRow");
                                     } else {

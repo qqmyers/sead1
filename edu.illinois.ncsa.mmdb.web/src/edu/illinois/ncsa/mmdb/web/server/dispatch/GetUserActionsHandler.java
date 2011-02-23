@@ -55,11 +55,12 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.util.Tuple;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserViews;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserViewsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserActions;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserActionsResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
  * Get license attached to a specific resource.
@@ -67,14 +68,15 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
  * @author Rob Kooper
  * 
  */
-public class GetUserViewsHandler implements ActionHandler<GetUserViews, GetUserViewsResult> {
+public class GetUserActionsHandler implements ActionHandler<GetUserActions, GetUserActionsResult> {
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(GetUserViewsHandler.class);
+    private static Log log = LogFactory.getLog(GetUserActionsHandler.class);
 
     @Override
-    public GetUserViewsResult execute(GetUserViews arg0, ExecutionContext arg1) throws ActionException {
+    public GetUserActionsResult execute(GetUserActions arg0, ExecutionContext arg1) throws ActionException {
         Resource dataset = Resource.uriRef(arg0.getResource());
-        GetUserViewsResult result = new GetUserViewsResult();
+        GetUserActionsResult result = new GetUserActionsResult();
+        PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
 
         // get all view cases
         Unifier uf = new Unifier();
@@ -86,9 +88,7 @@ public class GetUserViewsHandler implements ActionHandler<GetUserViews, GetUserV
             TupeloStore.getInstance().getContext().perform(uf);
         } catch (OperatorException e) {
             log.warn("Could not get views for dataset.", e);
-            throw (new ActionException("Could not get views for dataset.", e));
         }
-        PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
         for (Tuple<Resource> row : uf.getResult() ) {
             try {
                 Date date = (Date) row.get(2).asObject();
@@ -99,17 +99,38 @@ public class GetUserViewsHandler implements ActionHandler<GetUserViews, GetUserV
             }
         }
 
+        // get all download cases
+        uf = new Unifier();
+        uf.addPattern(dataset, MMDB.DOWNLOADED_BY, "download"); //$NON-NLS-1$
+        uf.addPattern("download", Dc.CREATOR, "downloader"); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addPattern("download", Dc.DATE, "date"); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.setColumnNames("download", "downloader", "date"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        try {
+            TupeloStore.getInstance().getContext().perform(uf);
+        } catch (OperatorException e) {
+            log.warn("Could not get downloads for dataset.", e);
+        }
+        for (Tuple<Resource> row : uf.getResult() ) {
+            try {
+                Date date = (Date) row.get(2).asObject();
+                PersonBean pb = pbu.get(row.get(1));
+                result.addDownload(date, pb);
+            } catch (Exception e) {
+                log.warn("Could not get download for dataset.", e);
+            }
+        }
+
         // done
         return result;
     }
 
     @Override
-    public Class<GetUserViews> getActionType() {
-        return GetUserViews.class;
+    public Class<GetUserActions> getActionType() {
+        return GetUserActions.class;
     }
 
     @Override
-    public void rollback(GetUserViews arg0, GetUserViewsResult arg1, ExecutionContext arg2) throws ActionException {
+    public void rollback(GetUserActions arg0, GetUserActionsResult arg1, ExecutionContext arg2) throws ActionException {
     }
 
 }

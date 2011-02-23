@@ -41,9 +41,9 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import net.customware.gwt.dispatch.shared.Result;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
@@ -55,17 +55,24 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  * 
  */
 @SuppressWarnings("serial")
-public class GetUserViewsResult implements Result {
-    private Map<Date, String> views = new HashMap<Date, String>(); ;
+public class GetUserActionsResult implements Result {
+    public static final String VIEW        = "view";
+    public static final String DOWNLOAD    = "download";
 
-    public GetUserViewsResult() {
+    private List<UserAction>   userActions = new ArrayList<UserAction>();
+
+    public GetUserActionsResult() {
     }
 
     public void addView(Date when, PersonBean who) {
-        views.put(when, who.getName());
+        userActions.add(new UserAction(when, who, VIEW));
     }
 
-    public Map<Date, String> getViews() {
-        return views;
+    public void addDownload(Date when, PersonBean who) {
+        userActions.add(new UserAction(when, who, DOWNLOAD));
+    }
+
+    public List<UserAction> getUserActions() {
+        return userActions;
     }
 }

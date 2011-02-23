@@ -36,34 +36,55 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
-/**
- * 
- */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
+import java.io.Serializable;
+import java.util.Date;
 
-/**
- * Retrieve license for a particular resource.
- * 
- * @author Rob Kooper
- * 
- */
+import edu.uiuc.ncsa.cet.bean.PersonBean;
+
 @SuppressWarnings("serial")
-public class GetUserViews implements Action<GetUserViewsResult> {
-    private String resource;
+public class UserAction implements Comparable<UserAction>, Serializable {
+    private Date   when;
+    private String name;
+    private String action;
 
-    /**
-     * For serialization only.
-     */
-    public GetUserViews() {
+    public UserAction() {
     }
 
-    public GetUserViews(String resource) {
-        this.resource = resource;
+    public UserAction(Date when, PersonBean who, String action) {
+        this.when = when;
+        this.name = who.getName();
+        this.action = action;
     }
 
-    public String getResource() {
-        return resource;
+    public Date getWhen() {
+        return when;
     }
+
+    public void setWhen(Date when) {
+        this.when = when;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    @Override
+    public int compareTo(UserAction o) {
+        return when.compareTo(o.when);
+    }
+
 }
