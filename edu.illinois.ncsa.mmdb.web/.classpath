@@ -23,8 +23,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jcr-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/org.apache.commons.httpclient.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/oro-2.0.8.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.illinois.ncsa.bard.jaas.context.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/edu.illinois.ncsa.bard.jaas.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-maps.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jena-2.6.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.5.3.jar"/>
@@ -48,6 +46,9 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-dnd-3.0.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/rome-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/org.restlet.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/mysql-connector-java-5.0.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-mysql-2.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-sql-2.6.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
