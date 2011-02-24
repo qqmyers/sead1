@@ -84,16 +84,14 @@
 				<filter token="VERSION" value="${version}" />
 			</filterset>
 		</copy>
-		<exec executable="./versions.sh" os="Linux"/>
 	</target>
 
 	<target name="mmdb-dev" depends="resources" description="setup for hudson build and deployment">
-		<copy tofile="war/WEB-INF/classes/context.xml" file="src/context_mmdbdev_hfc.xml" />
 		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" />
 		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
-		<replace file="war/WEB-INF/classes/server.properties" token="#search.index=/home/futrelle/dev/scratch/luceneIndex" value="search.index=/home/medici/medici/lucene" />
+		<replace file="war/WEB-INF/classes/server.properties" token="#search.path=" value="search.path=/home/medici/medici/lucene" />
 	</target>
 	
 	<!-- copy the tupelo jar files -->
@@ -149,97 +147,6 @@
 		<delete dir="beanclass" />
 	</target>
 
-	<!-- make sure we have the latest contexts jars -->
-	<target name="contexts" depends="cetbean" description="Compile contexts jars">
-		<delete dir="contextsTemp" />
-
-		<!-- compile the mysql context jar -->
-		<mkdir dir="contextsTemp" />
-		<javac destdir="contextsTemp" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-			<src path="../edu.illinois.ncsa.bard.context.mysql/src" />
-			<classpath>
-				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
-			</classpath>
-			<exclude name="**/osgi/**/*.java" />
-		</javac>
-		<jar jarfile="war/WEB-INF/lib/edu.illinois.ncsa.bard.context.mysql.jar">
-			<fileset dir="contextsTemp" />
-			<fileset dir="../edu.illinois.ncsa.bard.context.mysql" includes="META-INF/services/*" />
-		</jar>
-		<delete dir="contextsTemp" />
-
-		<!-- compile the tupeloserver context jar -->
-		<mkdir dir="contextsTemp" />
-		<javac destdir="contextsTemp" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-			<src path="../edu.illinois.ncsa.bard.context.tupeloserver/src" />
-			<classpath>
-				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
-			</classpath>
-			<exclude name="**/osgi/**/*.java" />
-		</javac>
-		<jar jarfile="war/WEB-INF/lib/edu.illinois.ncsa.bard.context.tupeloserver.jar">
-			<fileset dir="contextsTemp" />
-			<fileset dir="../edu.illinois.ncsa.bard.context.tupeloserver" includes="META-INF/services/*" />
-		</jar>
-		<delete dir="contextsTemp" />
-
-	</target>
-
-	<!-- make sure we have the latest jaas jars -->
-	<target name="jaas" description="Compile jaas jars">
-		<!-- compile the basic jaas jar -->
-		<delete dir="jaasTemp" />
-		<mkdir dir="jaasTemp" />
-		<javac destdir="jaasTemp" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-			<src path="../edu.illinois.ncsa.bard.jaas/src" />
-			<classpath>
-				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
-			</classpath>
-			<exclude name="**/osgi/**/*.java" />
-			<exclude name="edu/illinois/ncsa/bard/jaas/CETConfiguration.java" />
-		</javac>
-		<jar jarfile="war/WEB-INF/lib/edu.illinois.ncsa.bard.jaas.jar">
-			<fileset dir="jaasTemp" />
-			<fileset dir="../edu.illinois.ncsa.bard.jaas/src">
-				<exclude name="**/osgi/**/*.java" />
-				<exclude name="edu/illinois/ncsa/bard/jaas/CETConfiguration.java" />
-			</fileset>
-		</jar>
-
-		<!-- compile the context based jaas module -->
-		<delete dir="jaasTemp" />
-		<mkdir dir="jaasTemp" />
-		<javac destdir="jaasTemp" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-			<src path="../edu.illinois.ncsa.bard.jaas.context/src" />
-			<classpath>
-				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
-			</classpath>
-			<exclude name="**/osgi/**/*.java" />
-		</javac>
-		<jar jarfile="war/WEB-INF/lib/edu.illinois.ncsa.bard.jaas.context.jar">
-			<fileset dir="jaasTemp" />
-			<fileset dir="../edu.illinois.ncsa.bard.jaas.context/src">
-				<exclude name="**/osgi/**/*.java" />
-			</fileset>
-		</jar>
-
-		<!-- compile the always authenticate jaas module -->
-		<delete dir="jaasTemp" />
-		<mkdir dir="jaasTemp" />
-		<javac destdir="jaasTemp" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-			<src path="../edu.illinois.ncsa.bard.jaas.always/src" />
-			<exclude name="**/osgi/**/*.java" />
-		</javac>
-		<jar jarfile="war/WEB-INF/lib/edu.illinois.ncsa.bard.jaas.always.jar">
-			<fileset dir="jaasTemp" />
-			<fileset dir="../edu.illinois.ncsa.bard.jaas.always/src">
-				<exclude name="**/osgi/**/*.java" />
-			</fileset>
-		</jar>
-		<!-- delete temp directory -->
-		<delete dir="jaasTemp" />
-	</target>
-
 	<target name="copy_mmdb_html" unless="mmdb_tmp_exists">
 		<copy file="war/mmdb.html" tofile="war/mmdb.tmp" />
 	</target>
@@ -265,8 +172,6 @@
 		<copy todir="war/WEB-INF/classes">
 			<fileset dir="src">
 				<include name="commons-logging.properties" />
-				<include name="configuration.xml" />
-				<include name="jaas.config" />
 				<include name="server.properties" />
 				<include name="taxonomy.owl" />
 			</fileset>
