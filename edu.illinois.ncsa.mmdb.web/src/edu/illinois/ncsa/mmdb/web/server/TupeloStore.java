@@ -39,6 +39,7 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -50,7 +51,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -67,12 +67,10 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.kernel.PeerFacade;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.kernel.beans.FetchBeanPostprocessor;
-import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
@@ -83,12 +81,10 @@ import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.rdf.terms.Tags;
-import org.tupeloproject.rdf.xml.RdfXml;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tables;
 import org.tupeloproject.util.Tuple;
 
-import sun.misc.Service;
 import edu.illinois.ncsa.cet.search.SearchableTextIndex;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthorizedAction;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -103,9 +99,6 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
-import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
-import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextCreator;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
@@ -122,9 +115,6 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 public class TupeloStore {
     /** Commons logging **/
     private static Log                                           log                   = LogFactory.getLog(TupeloStore.class);
-
-    /** Default location of serialized tupelo context **/
-    private static final String                                  CONTEXT_PATH          = "/context.xml";
 
     /** URL of extraction service */
     private String                                               extractionServiceURL  = "http://localhost:9856/";
@@ -170,77 +160,35 @@ public class TupeloStore {
      */
     public static synchronized TupeloStore getInstance() {
         if (instance == null) {
-            instance = new TupeloStore();
+            log.error("Called getInstance() before createInstance().", new Exception());
         }
         return instance;
     }
 
     /**
-     * Use getInstance() to retrieve singleton instance.
+     * Return singleton instance.
+     * 
+     * @return singleton TupeloStore
      */
-    private TupeloStore() {
-        // FIXME if there are any problems creating the context or the
-        // beansession, these objects remain null. Should this method throw
-        // an exception when there is an error creating an instance of the
-        // Tupelo store?
-        try {
-            context = createSerializeContext();
-            if (context == null) {
-                log.error("no context deserialized!");
-            } else {
-                log.info("context deserialized: " + context);
-            }
-            ContextConvert.updateContext(context);
-            createBeanSession();
-            MimeMap.initializeContext(context);
-        } catch (ClassNotFoundException e) {
-            log.warn("Could not de-serialize context, missing context-creator?.", e);
-        } catch (Exception e) {
-            log.warn("Could not de-serialize context.", e);
+    public static synchronized void createInstance(Context context) {
+        if (instance != null) {
+            log.error("Called createInstance() again.", new Exception());
+        } else {
+            instance = new TupeloStore(context);
         }
     }
 
     /**
-     * Load context from disk.
-     * 
-     * @return
-     * @throws Exception
+     * Use getInstance() to retrieve singleton instance.
      */
-    private Context createSerializeContext() throws Exception {
-        // context location
-        String path = CONTEXT_PATH;
+    private TupeloStore(Context context) {
+        // FIXME if there are any problems creating the context or the
+        // beansession, these objects remain null. Should this method throw
+        // an exception when there is an error creating an instance of the
+        // Tupelo store?
 
-        // Register all context creators. This uses the Service providers method, a poor man version
-        // of the eclipse plugin mechanism.
-        Iterator<ContextCreator> iter = Service.providers(ContextCreator.class);
-        while (iter.hasNext()) {
-            ContextBeanUtil.addContextCreator(iter.next());
-        }
-
-        if (!path.startsWith("/")) {
-            path = "/" + path;
-        }
-
-        URL fileLocation = findFile(path);
-        Context context = null;
-
-        try {
-            // load default context
-            log.info("Loading serialized context " + fileLocation);
-            ContextBeanUtil.setContextBeanStore(fileLocation.openStream());
-            context = ContextBeanUtil.getContextBeanStore().getDefaultContext();
-        } catch (OperatorException x) {
-            // OK, that didn't work, now just use PeerFacade.
-            PeerFacade pf = new PeerFacade();
-            pf.setContext(new MemoryContext(RdfXml.parse(fileLocation.openStream())));
-            context = pf.loadDefaultPeer();
-        }
-        if (context != null) {
-            log.info("Loaded context from " + fileLocation);
-            return context;
-        } else {
-            throw new Exception("no context found!");
-        }
+        this.context = context;
+        createBeanSession();
     }
 
     /**
@@ -1062,20 +1010,28 @@ public class TupeloStore {
     // used as defaults.
     // ----------------------------------------------------------------------
     public void initializeConfiguration(Properties defaults) throws OperatorException {
-        String server = "localhost";
-        try {
-            server = InetAddress.getLocalHost().getCanonicalHostName();
-        } catch (UnknownHostException e) {
-            log.warn("Could not get hostname.", e);
-        }
         for (ConfigurationKey key : ConfigurationKey.values() ) {
             Resource rkey = getURI(key);
             if (defaults.containsKey(key.getPropertyKey())) {
                 configuration.put(rkey, defaults.getProperty(key.getPropertyKey()));
-            } else if (key == ConfigurationKey.MediciName) {
-                configuration.put(rkey, server);
-            } else {
+            } else if (key.getDefaultValue() != null) {
                 configuration.put(rkey, key.getDefaultValue());
+            } else if (key == ConfigurationKey.MediciName) {
+                try {
+                    configuration.put(rkey, InetAddress.getLocalHost().getCanonicalHostName());
+                } catch (UnknownHostException e) {
+                    log.warn("Could not get hostname.", e);
+                    configuration.put(rkey, "unknown");
+                }
+            } else if (key == ConfigurationKey.SearchPath) {
+                try {
+                    File folder = File.createTempFile("mmdb", ".lucene");
+                    folder.delete();
+                    folder.mkdirs();
+                    configuration.put(rkey, folder.getAbsolutePath());
+                } catch (IOException e) {
+                    log.warn("Could not create index folder.", e);
+                }
             }
         }
 

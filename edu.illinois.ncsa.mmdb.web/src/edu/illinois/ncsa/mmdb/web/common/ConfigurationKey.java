@@ -1,11 +1,22 @@
 package edu.illinois.ncsa.mmdb.web.common;
 
 public enum ConfigurationKey {
+    // information when sending email
     MailServer("mail.host", "localhost"), //$NON-NLS-1$ //$NON-NLS-2$
     MailSubject("mail.subject", "[MEDICI]"), //$NON-NLS-1$ //$NON-NLS-2$
     MailFrom("mail.from", "noreply@localhost"), //$NON-NLS-1$ //$NON-NLS-2$
     MailFullName("mail.fullname", "Medici Server"), //$NON-NLS-1$ //$NON-NLS-2$
-    MediciName("medici.name", ""), //$NON-NLS-1$ //$NON-NLS-2$ 
+    
+    // name of medici server
+    MediciName("medici.name", null), //$NON-NLS-1$ 
+
+    // location of lucene search index
+    SearchPath("search.path", null), //$NON-NLS-1$ 
+
+    // location of taxonomy file
+    TaxonomyFile("taxonomy.file", "taxonomy.owl"), //$NON-NLS-1$ //$NON-NLS-2$ 
+
+    // google map key
     GoogleMapKey("google.mapkey", ""); //$NON-NLS-1$ //$NON-NLS-2$
 
     private final String propertyKey;

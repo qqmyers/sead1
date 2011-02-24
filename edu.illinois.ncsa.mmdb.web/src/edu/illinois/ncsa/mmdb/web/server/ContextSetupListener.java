@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -54,11 +55,14 @@ import javax.servlet.ServletContextListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.client.HttpTupeloClient;
+import org.tupeloproject.kernel.ContentStoreContext;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.kernel.impl.HashFileContext;
 import org.tupeloproject.kernel.impl.MemoryContext;
+import org.tupeloproject.mysql.MysqlContext;
 import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
@@ -70,10 +74,12 @@ import org.tupeloproject.rdf.xml.RdfXml;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
@@ -128,7 +134,37 @@ public class ContextSetupListener implements ServletContextListener {
                 log.warn("Could not close server.properties.", exc);
             }
         }
-        log.info("Setting up Tupelo context");
+
+        // create the context
+        Context md = null;
+        if ("mysql".equals(props.getProperty("context.type"))) {
+            MysqlContext mc = new MysqlContext();
+            mc.setUser(props.getProperty("mysql.user"));
+            mc.setPassword(props.getProperty("mysql.password"));
+            mc.setSchema(props.getProperty("mysql.schema"));
+            try {
+                mc.connect();
+                md = mc;
+            } catch (SQLException e) {
+                log.error("Could not connect to database.", e);
+            }
+        }
+        if (md == null) {
+            log.error("Could not connect to persistent storage, creating memory database.");
+            md = new MemoryContext();
+        }
+
+        if (props.containsKey("hfc.path") && new File(props.getProperty("hfc.path")).isDirectory()) {
+            HashFileContext hfc = new HashFileContext();
+            hfc.setDepth(3);
+            hfc.setDirectory(new File(props.getProperty("hfc.path")));
+            ContentStoreContext csc = new ContentStoreContext();
+            csc.setMetadataContext(md);
+            csc.setDataContext(hfc);
+            TupeloStore.createInstance(csc);
+        } else {
+            TupeloStore.createInstance(md);
+        }
 
         // initialize default configurations
         try {
@@ -137,12 +173,41 @@ public class ContextSetupListener implements ServletContextListener {
             log.warn("Could not read configuration values from context.", exc);
         }
 
-        // some global variables
+        // make sure context is up to latest version
+        try {
+            ContextConvert.updateContext(TupeloStore.getInstance().getContext());
+        } catch (OperatorException e) {
+            log.warn("Could not update context.", e);
+        }
+
+        // initialize mime map (i.e. make sure all know mime types are in context.)
+        try {
+            MimeMap.initializeContext(TupeloStore.getInstance().getContext());
+        } catch (OperatorException e) {
+            log.warn("Could not initialize mimemap.", e);
+        }
+
+        // MMDB-1131 remove this code
+        // add all mimetypes in context
+        Unifier uf = new Unifier();
+        uf.addPattern("s", Rdf.TYPE, Cet.DATASET);
+        uf.addPattern("s", Dc.FORMAT, "f");
+        uf.setColumnNames("f");
+        try {
+            TupeloStore.getInstance().getContext().perform(uf);
+        } catch (OperatorException e) {
+        }
+        MimeMap mimemap = TupeloStore.getInstance().getMimeMap();
+        for (Tuple<Resource> row : uf.getResult() ) {
+            mimemap.checkMimeType(row.get(0).getString());
+        }
+
+        // set extractor URL
         if (props.containsKey("extractor.url")) { //$NON-NLS-1$
             TupeloStore.getInstance().setExtractionServiceURL(props.getProperty("extractor.url")); //$NON-NLS-1$
         }
 
-        //
+        // set extractor context
         if (props.containsKey("extractor.contextUrl")) {
             String contextUrl = props.getProperty("extractor.contextUrl");
             String contextUser = props.getProperty("extractor.contextUser", "admin");
@@ -158,44 +223,30 @@ public class ContextSetupListener implements ServletContextListener {
             }
         }
 
-        // FIXME remove this is to add all mime-types
-        Unifier uf = new Unifier();
-        uf.addPattern("s", Rdf.TYPE, Cet.DATASET);
-        uf.addPattern("s", Dc.FORMAT, "f");
-        uf.setColumnNames("f");
-        try {
-            TupeloStore.getInstance().getContext().perform(uf);
-        } catch (OperatorException e) {
-            log.error("Could not check mimeformats.", e);
-        }
-        MimeMap mimemap = TupeloStore.getInstance().getMimeMap();
-        for (Tuple<Resource> row : uf.getResult() ) {
-            mimemap.checkMimeType(row.get(0).getString());
-        }
-
         // set up full-text search
-        String indexFile = props.getProperty("search.index", null);
-        setUpSearch(indexFile);
+        setUpSearch();
 
-        // initialize system
+        // create accounts
         try {
             createAccounts(props);
         } catch (Exception e) {
             log.warn("Could not add accounts.", e);
         }
+
+        // load taxonomy
         createUserFields(props);
         createRelationships(props);
-
-        createOntology(props);
+        createOntology();
 
         // start the timers
         startTimers();
     }
 
-    private void createOntology(Properties props) {
+    private void createOntology() {
         try {
+            String filename = TupeloStore.getInstance().getConfiguration(ConfigurationKey.TaxonomyFile);
             MemoryContext oc = new MemoryContext();
-            InputStream is = TupeloStore.findFile("/taxonomy.owl").openStream();
+            InputStream is = TupeloStore.findFile(filename).openStream();
             Set<Triple> triples = RdfXml.parse(is);
             oc.addTriples(triples);
             TupeloStore.getInstance().setOntologyContext(oc);
@@ -241,23 +292,8 @@ public class ContextSetupListener implements ServletContextListener {
         }, 2 * 1000, 10 * 1000);
     }
 
-    private void setUpSearch(String indexFile) {
-        File folder = null;
-        if (indexFile != null) {
-            folder = new File(indexFile);
-            if (!folder.exists()) {
-                if (!folder.mkdirs()) {
-                    folder = null;
-                }
-            } else if (!folder.isDirectory()) {
-                folder = null;
-            }
-        }
-
-        if (folder == null) {
-            folder = new File(System.getProperty("java.io.tmpdir"), "mmdb.lucene");
-            folder.mkdirs();
-        }
+    private void setUpSearch() {
+        File folder = new File(TupeloStore.getInstance().getConfiguration(ConfigurationKey.SearchPath));
 
         log.info("Lucene search index directory = " + folder.getAbsolutePath());
         LuceneTextIndex<String> search = new LuceneTextIndex<String>(folder);
