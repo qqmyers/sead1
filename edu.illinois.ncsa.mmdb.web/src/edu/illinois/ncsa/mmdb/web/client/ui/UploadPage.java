@@ -272,6 +272,7 @@ public class UploadPage extends Page {
         $wnd.dndAppletFileDropped = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileDropped(Ljava/lang/String;Ljava/lang/String;);
         $wnd.dndAppletFileUploaded = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileUploaded(Ljava/lang/String;);
         $wnd.dndAppletProgress = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileProgress(I);
+        $wnd.dndAppletProgressIndex = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileProgressIndex(II);
     }-*/;
 
     // on applet callbacks we need to post-process values with an identity transformations to work around applet-to-Javascript issues
@@ -297,6 +298,16 @@ public class UploadPage extends Page {
      */
     public static void fileProgress(int percent) {
         uploadStatusPresenter.onProgress(percent + 0); // identity transform required, do not remove
+    }
+
+    /**
+     * Called by the html5 upload widget to report progress on current batch
+     * 
+     * @param percent
+     *            , index
+     */
+    public static void fileProgressIndex(int index, int percent) {
+        uploadStatusPresenter.onProgressIndex(index, percent + 0); // identity transform required, do not remove
     }
 
     /**

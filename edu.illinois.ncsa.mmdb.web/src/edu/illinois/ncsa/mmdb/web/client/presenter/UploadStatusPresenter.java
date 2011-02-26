@@ -116,6 +116,12 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
         }
     }
 
+    public void onProgressIndex(int index, int percent) {
+        if (nUploaded < nDropped) { // ignore spurious updates to last completed upload
+            display.onProgress(index, percent);
+        }
+    }
+
     public void onComplete(final String uri) {
         final int ix = nUploaded;
         display.onComplete(ix, uri, nDropped);

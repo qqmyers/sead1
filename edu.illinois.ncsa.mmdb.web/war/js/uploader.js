@@ -121,13 +121,14 @@ function LoadEnd(evt) {
 						}
 						xhr.send(data);
 
-				}
+				}			
 }
 
 function LoadProgress(evt) {
+
 	if (evt.lengthComputable) {
 		var percentage = Math.round((evt.loaded * 100) / evt.total);
-		dndAppletProgress(percentage);
+		dndAppletProgressIndex(evt.target.index, percentage);
 	}
 
 }
