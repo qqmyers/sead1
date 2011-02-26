@@ -123,10 +123,11 @@
 		<javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
 			<src path="${deps}/edu.uiuc.ncsa.cet.bean/src" />
 			<exclude name="**/sdl/**/*.java" />
+			<exclude name="**/jre/**/*.java" />
 		</javac>
 		<jar jarfile="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.jar">
 			<fileset dir="beanclass" />
-			<fileset dir="${deps}/edu.uiuc.ncsa.cet.bean/src">
+			<fileset dir="${deps}/edu.uiuc.ncsa.cet.bean/src/main/java">
 				<exclude name="**/sdl/**/*.java" />
 			</fileset>
 		</jar>
