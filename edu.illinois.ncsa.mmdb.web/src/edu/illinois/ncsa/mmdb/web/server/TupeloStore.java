@@ -98,6 +98,7 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
@@ -555,9 +556,7 @@ public class TupeloStore {
                 u.addPattern(Resource.uriRef(inCollection), DcTerms.HAS_PART, "d");
             }
             if (withTag != null) {
-                u.addPattern("d", Tags.HAS_TAGGING_EVENT, "tagEvent");
-                u.addPattern("tagEvent", Tags.HAS_TAG_OBJECT, "tag");
-                u.addPattern("tag", Tags.HAS_TAG_TITLE, Resource.literal(withTag));
+                u.addPattern("d", Tags.TAGGED_WITH_TAG, TagEventBeanUtil.createTagUri(withTag));
             }
             long now = System.currentTimeMillis();
             HashSet<Resource> set = new HashSet<Resource>(Tables.getColumn(unifyExcludeDeleted(u, "d"), 0));
