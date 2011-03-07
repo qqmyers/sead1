@@ -209,8 +209,12 @@ public class UploadPage extends Page {
         HTML html5Upload = new HTML();
         html5Upload.setHTML("<div id='box'><div id='drop'><br><br>Drag and drop files here!</div></div> <div id='list'></div>");
 
+        HTML formMultiple = new HTML();
+        formMultiple.setHTML("<br><br><input type='file' id='files' name='files[]' multiple='multiple' />");
+
         //Comment out the next line to remove html5 upload 
         html5Panel.add(html5Upload);
+        html5Panel.add(formMultiple);
 
         tableLayout.setWidget(0, 4, html5Panel);
         tableLayout.getCellFormatter().addStyleName(0, 4, "uploadPageLargeCell");

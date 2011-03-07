@@ -1,12 +1,13 @@
 initUploader = function(){
 
-	//new uploader('drop', 'status', 'uploader.php', 'list');
 	initializeUploader();		
 	
 }
 
 initializeUploader = function(){
 	dropBox =  document.getElementById("box");
+	
+	document.getElementById('files').addEventListener('change', handleFiles, false);
 	
 	dropBox.addEventListener("dragenter", function(event) {
 		document.getElementById("box").style.backgroundColor='#eeeeee';
@@ -30,6 +31,37 @@ initializeUploader = function(){
 
 }
 
+function uploadFile(file, num){
+	
+	reader = new FileReader();
+	
+	var name = new String(file.name);
+	var size = new String(file.size);
+	
+	//Add to presenter interface
+	dndAppletFileDropped(name, size);
+	
+	reader.index = num;
+	reader.file = file;
+
+	//Handle upload
+	reader.onprogress = LoadProgress;
+	reader.onerror = LoadError;
+	reader.onloadend = LoadEnd;
+	reader.onabort = LoadAbort;
+	
+	reader.readAsBinaryString(file);
+	
+}
+
+function handleFiles(evt){
+	var files = evt.target.files;
+	for( var i = 0, f; f = files[i]; i++){
+		uploadFile(files[i], i);
+		
+	}
+}
+
 function drop(evt) {
 
 	document.getElementById("box").style.backgroundColor='#ffffff';
@@ -40,24 +72,19 @@ function drop(evt) {
 	var count = files.length;
 
 	for (var i = 0; i < count; i++) {
+		
+		/*var worker = new Worker('js/synchronous_uploader.js')
+		
+		worker.addEventListener('message', function(evt) {
+		  alert("Worker said:");
+		}, false);
+		
+		worker.postMessage(files[i]); // Send data to our worker.
+		*/
+		
+		uploadFile(files[i], i);
+		
 
-		var file = files[i],
-		reader = new FileReader();
-		
-		var name = new String(file.name);
-		var size = new String(file.size);
-		
-		//Add to presenter interface
-		dndAppletFileDropped(name, size);
-		
-		reader.index = i;
-		reader.file = file;
-	
-		//Handle upload
-		reader.onloadend = LoadEnd;
-		reader.onprogress = LoadProgress;
-		
-		reader.readAsBinaryString(file);
 	
 	}
 }
@@ -82,14 +109,14 @@ function LoadEnd(evt) {
 						    var replaced = new String(xhr.responseText);
 						    var replacedall = replaced.replace(/<[^>]+>/g,"");
 							var trimmed = replacedall.replace(/^\s\s*/,"").replace(/\s\s*$/,"");
-							//Debugging - Check URI Response Received
-							//var newFile  = document.createElement('div');
-							//newFile.innerHTML = xhr.responseText;
-							//document.getElementById("list").appendChild(newFile);
 							dndAppletFileUploaded(trimmed);
 						}
-						else
-							var alert;
+						else{
+							//Retry Upload
+							var newFile  = document.createElement('div');
+							newFile.innerHTML = "Server Error, Status: " + xhr.status;
+							document.getElementById("list").appendChild(newFile);
+						}
 					}
 				}
 				
@@ -128,9 +155,66 @@ function LoadProgress(evt) {
 
 	if (evt.lengthComputable) {
 		var percentage = Math.round((evt.loaded * 100) / evt.total);
-		dndAppletProgressIndex(evt.target.index, percentage);
+		//if (percentage < 100)
+			dndAppletProgressIndex(evt.target.index, percentage);
 	}
 
 }
+
+function LoadError(evt) {
+	var newFile  = document.createElement('div');
+	
+	switch(evt.target.error.code) {
+		case evt.target.error.NOT_FOUND_ERR:
+			newFile.innerHTML = "File not found";
+			document.getElementById("list").appendChild(newFile);
+			break;
+	
+		case evt.target.error.NOT_READABLE_ERR:
+			newFile.innerHTML = "File not readable";
+			document.getElementById("list").appendChild(newFile);
+			break;
+	
+		case evt.target.error.ABORT_ERR:
+			newFile.innerHTML = "Abort Error";
+			document.getElementById("list").appendChild(newFile);
+			break; 
+			
+		case evt.target.error.ENCODING_ERR:
+			newFile.innerHTML = "Encoding error";
+			document.getElementById("list").appendChild(newFile);
+			break;
+			
+		case evt.target.error.NO_MODIFICATION_ALLOWED_ERR:
+			newFile.innerHTML = "No modification allowed error";
+			document.getElementById("list").appendChild(newFile);
+			break;
+			
+		case evt.target.error.INVALID_STATE_ERR:
+			newFile.innerHTML = "Invalid state error";
+			document.getElementById("list").appendChild(newFile);
+			break;
+			
+		case evt.target.error.SYNTAX_ERR:
+			newFile.innerHTML = "Syntax Error";
+			document.getElementById("list").appendChild(newFile);
+			break;
+	
+		default:
+			newFile.innerHTML = "Read error";
+			document.getElementById("list").appendChild(newFile);
+	}	
+}
+
+function LoadAbort(evt) {
+	var newFile  = document.createElement('div');
+	newFile.innerHTML = "Aborted reading file";
+	document.getElementById("list").appendChild(newFile);
+
+}
+
+
+
+
 
 
