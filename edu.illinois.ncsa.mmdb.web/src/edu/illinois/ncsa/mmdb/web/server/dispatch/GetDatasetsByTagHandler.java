@@ -63,6 +63,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTag;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
  * Handler to retrieve datasets from repository tagged with a particular tag.
@@ -89,9 +90,7 @@ public class GetDatasetsByTagHandler implements
         HashSet<DatasetBean> datasets = new HashSet<DatasetBean>();
 
         Unifier uf = new Unifier();
-        uf.addPattern("dataset", Tags.HAS_TAGGING_EVENT, "event");
-        uf.addPattern("event", Tags.HAS_TAG_OBJECT, "tag");
-        uf.addPattern("tag", Tags.HAS_TAG_TITLE, Resource.literal(tagName));
+        uf.addPattern("dataset", Tags.TAGGED_WITH_TAG, TagEventBeanUtil.createTagUri(tagName));
         uf.addPattern("dataset", Rdf.TYPE, Cet.DATASET);
         uf.setColumnNames("dataset");
 
