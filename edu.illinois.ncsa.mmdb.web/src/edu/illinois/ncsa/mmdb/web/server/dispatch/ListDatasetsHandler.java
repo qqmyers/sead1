@@ -65,6 +65,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListDatasetsResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
  * TODO Add comments
@@ -113,9 +114,7 @@ public class ListDatasetsHandler implements
             u.addPattern(Resource.uriRef(inCollection), DcTerms.HAS_PART, "s");
         }
         if (withTag != null) {
-            u.addPattern("s", Tags.HAS_TAGGING_EVENT, "_te");
-            u.addPattern("_te", Tags.HAS_TAG_OBJECT, "_to");
-            u.addPattern("_to", Tags.HAS_TAG_TITLE, Resource.literal(withTag)); // FIXME normalize?
+            u.addPattern("s", Tags.TAGGED_WITH_TAG, TagEventBeanUtil.createTagUri(withTag));
         }
         u.addPattern("s", Rdf.TYPE, dbu.getType());
         u.addPattern("s", Resource.uriRef(orderBy), "o");
