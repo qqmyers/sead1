@@ -141,11 +141,10 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
             Set<String> tags = new HashSet<String>();
 
             Unifier uf = new Unifier();
-            uf.addPattern(Resource.uriRef(id), Tags.HAS_TAGGING_EVENT, "tevent"); //$NON-NLS-1$
-            uf.addPattern("tevent", Tags.HAS_TAG_OBJECT, "tag"); //$NON-NLS-1$ //$NON-NLS-2$
+            uf.addPattern(Resource.uriRef(id), Tags.TAGGED_WITH_TAG, "tag"); //$NON-NLS-1$
             uf.addPattern("tag", Tags.HAS_TAG_TITLE, "title"); //$NON-NLS-1$ //$NON-NLS-2$
             uf.addColumnName("title"); //$NON-NLS-1$
-            uf.addColumnName("tag");
+            uf.addColumnName("tag"); //$NON-NLS-1$
             TupeloStore.getInstance().getContext().perform(uf);
 
             for (Tuple<Resource> row : uf.getResult() ) {
