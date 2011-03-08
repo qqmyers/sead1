@@ -86,9 +86,8 @@ public class GetAllTagsHandler implements ActionHandler<GetAllTags, GetTagsResul
                 public GetTagsResult computeValue() {
                     Unifier u = new Unifier();
                     u.setColumnNames("label", "resource");
-                    u.addPattern("resource", Tags.HAS_TAGGING_EVENT, "tagEvent");
+                    u.addPattern("resource", Tags.TAGGED_WITH_TAG, "tag");
                     u.addPattern("resource", Rdf.TYPE, Cet.DATASET);
-                    u.addPattern("tagEvent", Tags.HAS_TAG_OBJECT, "tag");
                     u.addPattern("tag", Tags.HAS_TAG_TITLE, "label");
 
                     // only count one tag per label per non-deleted resource
