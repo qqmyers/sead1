@@ -73,13 +73,11 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
  * @author Rob Kooper
  * 
  */
-public class TagBeanResource extends AbstractCollectionResource
-{
-    private static Log log = LogFactory.getLog( TagBeanResource.class );
+public class TagBeanResource extends AbstractCollectionResource {
+    private static Log log = LogFactory.getLog(TagBeanResource.class);
 
-    public TagBeanResource( String tag, Context context, SecurityManager security )
-    {
-        super( tag, context, security );
+    public TagBeanResource(String tag, Context context, SecurityManager security) {
+        super(tag, context, security);
     }
 
     // ----------------------------------------------------------------------
@@ -87,79 +85,72 @@ public class TagBeanResource extends AbstractCollectionResource
     // ----------------------------------------------------------------------
 
     @Override
-    public Map<String, AbstractResource> getResourceList()
-    {
+    public Map<String, AbstractResource> getResourceList() {
         Map<String, AbstractResource> result = new HashMap<String, AbstractResource>();
 
         Unifier uf = new Unifier();
-        uf.addPattern( "data", Rdf.TYPE, Cet.DATASET ); //$NON-NLS-1$
-        uf.addColumnName( "data" ); //$NON-NLS-1$
-        uf.addPattern( "data", Tags.HAS_TAGGING_EVENT, "tevent" ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addPattern( "tevent", Rdf.TYPE, Tags.TAGGING_EVENT ); //$NON-NLS-1$
-        uf.addPattern( "tevent", Tags.HAS_TAG_OBJECT, "tag" ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addPattern( "tag", Tags.HAS_TAG_TITLE, Resource.literal( getName() ) ); //$NON-NLS-1$
-        uf.addPattern( "data", DcTerms.IS_REPLACED_BY, "replaced", true ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addColumnName( "replaced" ); //$NON-NLS-1$
-        uf.addPattern( "data", Dc.DATE, "date" ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addColumnName( "date" ); //$NON-NLS-1$
-        uf.addPattern( "data", Files.LENGTH, "size", true ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addColumnName( "size" ); //$NON-NLS-1$
-        uf.addPattern( "data", Dc.TITLE, "title", true ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addColumnName( "title" ); //$NON-NLS-1$
-        uf.addPattern( "data", Rdfs.LABEL, "label", true ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addColumnName( "label" ); //$NON-NLS-1$
-        uf.addPattern( "data", Dc.FORMAT, "format" ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addColumnName( "format" ); //$NON-NLS-1$
+        uf.addPattern("data", Rdf.TYPE, Cet.DATASET); //$NON-NLS-1$
+        uf.addColumnName("data"); //$NON-NLS-1$
+        uf.addPattern("data", Tags.TAGGED_WITH_TAG, TagEventBeanUtil.createTagUri(getName())); //$NON-NLS-1$
+        uf.addPattern("data", DcTerms.IS_REPLACED_BY, "replaced", true); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addColumnName("replaced"); //$NON-NLS-1$
+        uf.addPattern("data", Dc.DATE, "date"); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addColumnName("date"); //$NON-NLS-1$
+        uf.addPattern("data", Files.LENGTH, "size", true); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addColumnName("size"); //$NON-NLS-1$
+        uf.addPattern("data", Dc.TITLE, "title", true); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addColumnName("title"); //$NON-NLS-1$
+        uf.addPattern("data", Rdfs.LABEL, "label", true); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addColumnName("label"); //$NON-NLS-1$
+        uf.addPattern("data", Dc.FORMAT, "format"); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addColumnName("format"); //$NON-NLS-1$
         try {
-            getContext().perform( uf );
-        } catch ( OperatorException e ) {
-            log.warn( "Could not get list of datasets.", e );
+            getContext().perform(uf);
+        } catch (OperatorException e) {
+            log.warn("Could not get list of datasets.", e);
         }
-        for ( Tuple<Resource> row : uf.getResult() ) {
-            if ( !Rdf.NIL.equals( row.get( 1 ) ) ) {
+        for (Tuple<Resource> row : uf.getResult() ) {
+            if (!Rdf.NIL.equals(row.get(1))) {
                 String label;
-                if ( row.get( 5 ) != null ) {
-                    label = row.get( 5 ).toString();
+                if (row.get(5) != null) {
+                    label = row.get(5).toString();
                 } else {
-                    label = row.get( 4 ).toString();
+                    label = row.get(4).toString();
                 }
                 Date date;
                 try {
-                    date = Iso8601.string2Date( row.get( 2 ).getString() ).getTime();
-                } catch ( ParseException e ) {
-                    log.info( "Could not parse date.", e );
+                    date = Iso8601.string2Date(row.get(2).getString()).getTime();
+                } catch (ParseException e) {
+                    log.info("Could not parse date.", e);
                     date = null;
                 }
                 long size = -1;
-                if ( row.get( 3 ) != null ) {
-                    size = Long.parseLong( row.get( 3 ).getString() );
+                if (row.get(3) != null) {
+                    size = Long.parseLong(row.get(3).getString());
                 }
-                String format = row.get( 6 ).getString();
-                AbstractResource r = new DeletableDatasetBeanResource( label, row.get( 0 ), size, date, format, getContext(), getSecurity() );
-                result.put( row.get( 0 ).getString(), r );
+                String format = row.get(6).getString();
+                AbstractResource r = new DeletableDatasetBeanResource(label, row.get(0), size, date, format, getContext(), getSecurity());
+                result.put(row.get(0).getString(), r);
             }
         }
 
         return result;
     }
 
-    class DeletableDatasetBeanResource extends DatasetBeanResource implements DeletableResource
-    {
-        public DeletableDatasetBeanResource( String name, Resource uri, long size, Date date, String mimetype, Context context, SecurityManager security )
-        {
-            super( name, uri, size, date, mimetype, context, security );
+    class DeletableDatasetBeanResource extends DatasetBeanResource implements DeletableResource {
+        public DeletableDatasetBeanResource(String name, Resource uri, long size, Date date, String mimetype, Context context, SecurityManager security) {
+            super(name, uri, size, date, mimetype, context, security);
         }
 
         // ----------------------------------------------------------------------
         // DeletableResource
         // ----------------------------------------------------------------------
 
-        public void delete()
-        {
+        public void delete() {
             try {
-                new TagEventBeanUtil( new BeanSession( getContext() ) ).removeTags( getUri(), TagBeanResource.this.getName() );
-            } catch ( OperatorException e ) {
-                log.warn( "Could not remove tag.", e );
+                new TagEventBeanUtil(new BeanSession(getContext())).removeTags(getUri(), TagBeanResource.this.getName());
+            } catch (OperatorException e) {
+                log.warn("Could not remove tag.", e);
             }
         }
     }
