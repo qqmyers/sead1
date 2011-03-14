@@ -117,6 +117,10 @@
 		
 	<!-- make sure we have the latest beans -->
 	<target name="cetbean" description="Compile CET beans.">
+		<delete>
+			<fileset dir="war/WEB-INF/lib" includes="**/cet-bean*.jar"/>
+		</delete>
+		
 		<!-- compile the CET beans -->
 		<delete dir="beanclass" />
 		<mkdir dir="beanclass" />
@@ -125,7 +129,7 @@
 			<exclude name="**/sdl/**/*.java" />
 			<exclude name="**/jre/**/*.java" />
 		</javac>
-		<jar jarfile="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.jar">
+		<jar jarfile="war/WEB-INF/lib/cet-bean.jar">
 			<fileset dir="beanclass" />
 			<fileset dir="${deps}/edu.uiuc.ncsa.cet.bean/src/main/java">
 				<exclude name="**/sdl/**/*.java" />
@@ -142,7 +146,7 @@
 			</classpath>
 			<exclude name="**/sdl/**/*.java" />
 		</javac>
-		<jar jarfile="war/WEB-INF/lib/edu.uiuc.ncsa.cet.bean.tupelo.jar" basedir="beanclass" />
+		<jar jarfile="war/WEB-INF/lib/cet-bean-tupelo.jar" basedir="beanclass" />
 
 		<!-- remove the temp folder -->
 		<delete dir="beanclass" />

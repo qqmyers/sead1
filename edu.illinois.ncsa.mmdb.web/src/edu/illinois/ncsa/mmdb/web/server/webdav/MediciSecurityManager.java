@@ -49,11 +49,13 @@ import org.tupeloproject.rdf.Resource;
 
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.Request;
-import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.Request.Method;
+import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.http11.auth.DigestResponse;
 
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
@@ -79,8 +81,8 @@ public class MediciSecurityManager implements SecurityManager {
     }
 
     @Override
-    public String getRealm() {
-        return "medici"; //$NON-NLS-1$
+    public String getRealm(String host) {
+        return TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName);
     }
 
     @Override

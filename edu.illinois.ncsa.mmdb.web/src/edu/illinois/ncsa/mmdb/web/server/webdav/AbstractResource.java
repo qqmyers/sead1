@@ -47,9 +47,12 @@ import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.DigestResource;
 import com.bradmcevoy.http.PropFindableResource;
 import com.bradmcevoy.http.Request;
-import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.Request.Method;
+import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.http11.auth.DigestResponse;
+
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
  * Helper class to easily create a resource (file/folder). This will take care
@@ -58,8 +61,7 @@ import com.bradmcevoy.http.http11.auth.DigestResponse;
  * @author Rob Kooper
  * 
  */
-public abstract class AbstractResource implements com.bradmcevoy.http.Resource, DigestResource, PropFindableResource
-{
+public abstract class AbstractResource implements com.bradmcevoy.http.Resource, DigestResource, PropFindableResource {
     private String          name;
     private Resource        uri;
     private Date            created;
@@ -67,23 +69,19 @@ public abstract class AbstractResource implements com.bradmcevoy.http.Resource, 
     private Context         context;
     private SecurityManager security;
 
-    public AbstractResource( String name, Context context, SecurityManager security )
-    {
-        this( name, null, null, null, context, security );
+    public AbstractResource(String name, Context context, SecurityManager security) {
+        this(name, null, null, null, context, security);
     }
 
-    public AbstractResource( String name, Resource uri, Context context, SecurityManager security )
-    {
-        this( name, uri, null, null, context, security );
+    public AbstractResource(String name, Resource uri, Context context, SecurityManager security) {
+        this(name, uri, null, null, context, security);
     }
 
-    public AbstractResource( String name, Resource uri, Date created, Context context, SecurityManager security )
-    {
-        this( name, uri, created, created, context, security );
+    public AbstractResource(String name, Resource uri, Date created, Context context, SecurityManager security) {
+        this(name, uri, created, created, context, security);
     }
 
-    public AbstractResource( String name, Resource uri, Date created, Date modified, Context context, SecurityManager security )
-    {
+    public AbstractResource(String name, Resource uri, Date created, Date modified, Context context, SecurityManager security) {
         this.name = name;
         this.uri = uri;
         this.created = created;
@@ -99,16 +97,14 @@ public abstract class AbstractResource implements com.bradmcevoy.http.Resource, 
     /**
      * @return the context
      */
-    public Context getContext()
-    {
+    public Context getContext() {
         return context;
     }
 
     /**
      * @return the uri
      */
-    public Resource getUri()
-    {
+    public Resource getUri() {
         return uri;
     }
 
@@ -116,8 +112,7 @@ public abstract class AbstractResource implements com.bradmcevoy.http.Resource, 
      * @param uri
      *            the uri to set
      */
-    public void setUri( Resource uri )
-    {
+    public void setUri(Resource uri) {
         this.uri = uri;
     }
 
@@ -125,16 +120,14 @@ public abstract class AbstractResource implements com.bradmcevoy.http.Resource, 
      * @param name
      *            the name to set
      */
-    public void setName( String name )
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
     /**
      * @return the security
      */
-    public SecurityManager getSecurity()
-    {
+    public SecurityManager getSecurity() {
         return security;
     }
 
@@ -142,48 +135,46 @@ public abstract class AbstractResource implements com.bradmcevoy.http.Resource, 
     // Resource
     // ----------------------------------------------------------------------
     @Override
-    public String getRealm()
-    {
-        return security.getRealm();
+    public String getRealm() {
+        return security.getRealm(TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName));
     }
 
     @Override
-    public Object authenticate( String user, String password )
-    {
-        return security.authenticate( user, password );
+    public boolean isDigestAllowed() {
+        return false;
     }
 
     @Override
-    public boolean authorise( Request request, Method method, Auth auth )
-    {
-        return security.authorise( request, method, auth, this );
+    public Object authenticate(String user, String password) {
+        return security.authenticate(user, password);
     }
 
     @Override
-    public String checkRedirect( Request request )
-    {
+    public boolean authorise(Request request, Method method, Auth auth) {
+        return security.authorise(request, method, auth, this);
+    }
+
+    @Override
+    public String checkRedirect(Request request) {
         return null;
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
     @Override
-    public String getUniqueId()
-    {
-        if ( uri != null ) {
+    public String getUniqueId() {
+        if (uri != null) {
             return uri.getString();
         }
         return null;
     }
 
     @Override
-    public Date getModifiedDate()
-    {
-        if ( modified == null ) {
+    public Date getModifiedDate() {
+        if (modified == null) {
             return created;
         }
         return modified;
@@ -192,9 +183,8 @@ public abstract class AbstractResource implements com.bradmcevoy.http.Resource, 
     // ----------------------------------------------------------------------
     // DigestResource
     // ----------------------------------------------------------------------
-    public Object authenticate( DigestResponse digestRequest )
-    {
-        return security.authenticate( digestRequest );
+    public Object authenticate(DigestResponse digestRequest) {
+        return security.authenticate(digestRequest);
     }
 
     // ----------------------------------------------------------------------
@@ -202,8 +192,7 @@ public abstract class AbstractResource implements com.bradmcevoy.http.Resource, 
     // ----------------------------------------------------------------------
 
     @Override
-    public Date getCreateDate()
-    {
+    public Date getCreateDate() {
         return created;
     }
 }
