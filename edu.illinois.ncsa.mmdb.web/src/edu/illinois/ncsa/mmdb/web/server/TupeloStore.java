@@ -124,7 +124,7 @@ public class TupeloStore {
     private static TupeloStore                                   instance;
 
     /** Tupelo context loaded from disk **/
-    private Context                                              context;
+    private final Context                                        context;
 
     /** Tupelo beansession facing tupelo context **/
     private BeanSession                                          beanSession;
@@ -150,7 +150,7 @@ public class TupeloStore {
     /**
      * configuration values, either stored in context or from server.properties.
      */
-    private Map<Resource, String>                                configuration         = new HashMap<Resource, String>();
+    private final Map<Resource, String>                          configuration         = new HashMap<Resource, String>();
 
     private Context                                              ontologyContext;
 
@@ -990,7 +990,11 @@ public class TupeloStore {
 
         // ask classloader
         URL url = TupeloStore.class.getResource(filename);
-        log.info(String.format("Found %s as %s", filename, url.toExternalForm()));
+        if (url == null) {
+            log.info(String.format("Did not find %s", filename));
+        } else {
+            log.info(String.format("Found %s as %s", filename, url.toExternalForm()));
+        }
         return url;
     }
 

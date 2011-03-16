@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Properties;
@@ -243,13 +244,21 @@ public class ContextSetupListener implements ServletContextListener {
     }
 
     private void createOntology() {
+        MemoryContext oc = new MemoryContext();
+        TupeloStore.getInstance().setOntologyContext(oc);
+
         try {
             String filename = TupeloStore.getInstance().getConfiguration(ConfigurationKey.TaxonomyFile);
-            MemoryContext oc = new MemoryContext();
-            InputStream is = TupeloStore.findFile(filename).openStream();
+            if (filename == null) {
+                return;
+            }
+            URL url = TupeloStore.findFile(filename);
+            if (url == null) {
+                return;
+            }
+            InputStream is = url.openStream();
             Set<Triple> triples = RdfXml.parse(is);
             oc.addTriples(triples);
-            TupeloStore.getInstance().setOntologyContext(oc);
             log.debug("Read " + triples.size() + " ontology triple(s)");
         } catch (FileNotFoundException e) {
             log.warn("no ontology found");
