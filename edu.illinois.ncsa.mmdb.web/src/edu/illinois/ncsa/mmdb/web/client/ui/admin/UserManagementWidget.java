@@ -120,8 +120,8 @@ public class UserManagementWidget extends Composite {
         // users table
         activeUsersTable = createUsersTable();
         inactiveUsersTable = createUsersTable();
-        usersPanel.add(discloseAs(activeUsersTable, "Active users", true));
-        usersPanel.add(discloseAs(inactiveUsersTable, "Inactive users", "Inactive users (open to activate/select roles)", false));
+        usersPanel.add(discloseAs(inactiveUsersTable, "Inactive users", "Inactive usersa", true));
+        usersPanel.add(discloseAs(activeUsersTable, "Active users", false));
         mainPanel.add(usersPanel);
 
         // necessary so that the main container wraps around center panel
