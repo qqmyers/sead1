@@ -63,8 +63,6 @@
 	<path id="classpath">
 		<pathelement path="build" />
 		<pathelement path="src" />
-		<pathelement location="lib/gwt-user.jar" />
-		<pathelement location="lib/gwt-dev.jar" />
 		<fileset dir="war/WEB-INF/lib">
 			<include name="**/*.jar" />
 		</fileset>
@@ -192,7 +190,9 @@
 
 	<target name="war" depends="clean, compile, gwtc, resources" description="builds the war file">
 		<zip destfile="${war}" basedir="war" >
-			<exclude name="WEB-INF/lib/commons-logging.jar" />
+			<exclude name="WEB-INF/lib/gwt-user-2.1.0.jar" />
+			<exclude name="WEB-INF/lib/gwt-dev-2.1.0.jar" />
+			<exclude name="WEB-INF/lib/commons-logging-1.1.1.jar" />
 			<exclude name="WEB-INF/lib/mysql-connector-java-5.0.4.jar" />
 			<exclude name="WEB-INF/lib/xercesImpl-2.6.2.jar" />
 		</zip>
