@@ -478,6 +478,10 @@ a:hover {
 	padding: 20px;
 }
 
+.uploadStatusColumn {
+    padding: 15px;
+}
+
 .centered {
 	text-align: center;
 	margin: 5px auto 5px auto;

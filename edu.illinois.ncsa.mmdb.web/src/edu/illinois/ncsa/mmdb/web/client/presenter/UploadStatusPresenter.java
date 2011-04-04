@@ -40,9 +40,8 @@ package edu.illinois.ncsa.mmdb.web.client.presenter;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasValue;
@@ -147,19 +146,20 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
     }
 
     void fetchDataset(final int ix, final String uri) {
-        DeferredCommand.addCommand(new Command() {
-            public void execute() {
-                dispatch.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
-                    public void onFailure(Throwable caught) {
-                        Window.alert("GetDataset failed for " + uri); // FIXME debug
-                    }
+        //Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+        //public void execute() {
+        dispatch.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
+            public void onFailure(Throwable caught) {
+                Window.alert("GetDataset failed for " + uri); // FIXME debug
+            }
 
-                    public void onSuccess(GetDatasetResult result) {
-                        display.onPostComplete(ix, result.getDataset());
-                    }
-                });
+            public void onSuccess(GetDatasetResult result) {
+                GWT.log("fetchDataset " + ix);
+                display.onPostComplete(ix, result.getDataset());
             }
         });
+        //}
+        //});
     }
 
     @Override

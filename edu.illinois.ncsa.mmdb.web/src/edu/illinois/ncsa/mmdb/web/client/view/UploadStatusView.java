@@ -44,12 +44,12 @@ import java.util.Map;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -126,23 +126,29 @@ public class UploadStatusView extends Composite implements Display {
 
     @Override
     public void onPostComplete(final int ix, final DatasetBean dataset) {
-        DeferredCommand.addCommand(new Command() {
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             public void execute() {
                 // check pending, but don't initially display
-                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, "dataset?id=" + dataset.getUri(), dataset.getMimeType(), true, false, dispatchAsync);
+                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, null/*"dataset?id=" + dataset.getUri()*/, dataset.getMimeType(), true, false, dispatchAsync);
                 statusTable.setWidget(ix, 1, preview);
+                //
+                statusTable.setWidget(ix, 2, editableDatasetInfo(dataset));
+                TagsWidget tags = new TagsWidget(dataset.getUri(), dispatchAsync, false);
+                statusTable.setWidget(ix, 3, tags);
+                Anchor anchor = new Anchor("View", "#dataset?id=" + dataset.getUri());
+                anchor.setTarget("_blank");
+                statusTable.setWidget(ix, 4, anchor);
+                statusTable.getCellFormatter().addStyleName(ix, 4, "uploadStatusColumn");
+                Anchor hideAnchor = new Anchor("Hide");
+                hideAnchor.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        statusTable.getRowFormatter().addStyleName(ix, "hidden");
+                    }
+                });
+                statusTable.setWidget(ix, 5, hideAnchor);
+                statusTable.getCellFormatter().addStyleName(ix, 5, "uploadStatusColumn");
             }
         });
-        statusTable.setWidget(ix, 2, editableDatasetInfo(dataset));
-        TagsWidget tags = new TagsWidget(dataset.getUri(), dispatchAsync, false);
-        statusTable.setWidget(ix, 3, tags);
-        Anchor hideAnchor = new Anchor("Hide");
-        hideAnchor.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                statusTable.getRowFormatter().addStyleName(ix, "hidden");
-            }
-        });
-        statusTable.setWidget(ix, 4, hideAnchor);
         GWT.log("onPostComplete " + ix);
     }
 
