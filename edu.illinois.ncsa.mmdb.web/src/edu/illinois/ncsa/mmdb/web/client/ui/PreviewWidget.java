@@ -236,16 +236,16 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
                                 // 1. it was pending at some point, which means we need to show the preview, or
                                 // 2. it was initially displayed, and was never pending, in which case we don't need to show the preview
                                 // 3. it was initially displayed, but the REST servlet returned 404 for it because it was pending when it was initially displayed, so we do need to show it
-                                GWT.log("Showing PREVIEW for " + uri);
+                                //GWT.log("Showing PREVIEW for " + uri);
                                 showPreview(uri, sz, link, result.getWidth(), result.getHeight());
                                 retriesLeft = 0;
                             } else if (result.isPending() && retriesLeft > 0) {
-                                GWT.log("Showing PENDING for " + uri);
+                                //GWT.log("Showing PENDING for " + uri);
                                 showPending(sz);
                                 state = State.PENDING;
                             } else {
-                                GWT.log("Showing NO PREVIEW for " + uri);
-                                showNoPreview(sz);
+                                //GWT.log("Showing NO PREVIEW for " + uri);
+                                showNoPreview(sz, link);
                                 state = State.NO_PREVIEW;
                                 retriesLeft = 0;
                             }
@@ -318,9 +318,10 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         return state == State.NO_PREVIEW;
     }
 
-    void showNoPreview(String sz) {
+    void showNoPreview(String sz, String link) {
         if (!isNoPreview()) {
             noPreview = new Image(GRAY_URL.get(sz));
+            addLink(noPreview, link);
             setImage(noPreview);
         }
     }
