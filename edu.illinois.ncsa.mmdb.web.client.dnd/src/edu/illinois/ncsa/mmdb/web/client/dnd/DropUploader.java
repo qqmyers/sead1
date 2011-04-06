@@ -92,7 +92,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	private static final long serialVersionUID = 9000;
 	JSObject window = null;
 
-	public static final String VERSION = "1645";
+	public static final String VERSION = "1780";
 
 	@Override
 	public void init() {
@@ -510,6 +510,11 @@ public class DropUploader extends JApplet implements DropTargetListener {
 						.trim().replaceAll("&amp;", "&");
 				log("got collection uri from server: " + collectionUri);
 			}
+			System.out.println("Joining progress thread " + offset); // FIXME
+																		// trace
+			progressThread.join(2000);
+			System.out.println("Joined progress thread " + offset); // FIXME
+																	// trace
 			return sessionKey;
 		}
 
