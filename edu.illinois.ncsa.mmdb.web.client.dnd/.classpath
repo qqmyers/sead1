@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="deps/commons-httpclient-contrib-ssl-3.1.jar"/>
 	<classpathentry kind="lib" path="deps/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="deps/plugin.jar"/>
+	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/commons-httpclient-contrib-ssl-3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
