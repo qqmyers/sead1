@@ -38,9 +38,14 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -70,6 +75,8 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
     private int                 nDropped  = 0;
     private int                 nUploaded = 0;
 
+    Set<Integer>                completed = new HashSet<Integer>();
+
     public UploadStatusPresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
         super(display, dispatch, eventBus);
         this.dispatch = dispatch;
@@ -82,11 +89,11 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
 
         void onProgress(int ix, int percent);
 
-        void onComplete(int ix, String uri, int total);
+        HasValue<Boolean> onComplete(int ix, String uri, int total);
 
         void onPostComplete(int ix, DatasetBean dataset);
 
-        HasValue<Boolean> getSelectionControl(int ix);
+        //HasValue<Boolean> getSelectionControl(int ix);
     }
 
     /**
@@ -115,34 +122,38 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
         }
     }
 
-    public void onProgressIndex(int index, int percent) {
-        if (nUploaded < nDropped) { // ignore spurious updates to last completed upload
+    public void onProgressIndex(int percent, int index) {
+        if (!completed.contains(index)) {
             display.onProgress(index, percent);
         }
     }
 
-    public void onComplete(final String uri) {
-        final int ix = nUploaded;
-        display.onComplete(ix, uri, nDropped);
-        display.getSelectionControl(ix).addValueChangeHandler(new DatasetSelectionCheckboxHandler(uri, eventBus));
-        display.getSelectionControl(ix).setValue(true, true); // select, and fire the selection event
-        // checkbox should also respond to selection and deselection events coming from elsewhere
-        addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
-            public void onDatasetSelected(DatasetSelectedEvent event) {
-                if (event.getUri().equals(uri)) {
-                    display.getSelectionControl(ix).setValue(true, false); // select, but don't fire another selection event
-                }
-            }
-        });
-        addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
-            public void onDatasetUnselected(DatasetUnselectedEvent datasetUnselectedEvent) {
-                if (datasetUnselectedEvent.getUri().equals(uri)) {
-                    display.getSelectionControl(ix).setValue(false, false); // deselect, but don't fire another deselection event
-                }
-            }
-        });
-        fetchDataset(ix, uri);
+    public void onComplete(final String uri, final int ix) {
+        completed.add(ix);
         nUploaded++;
+        final HasValue<Boolean> selectionControl = display.onComplete(ix, uri, nDropped);
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            public void execute() {
+                selectionControl.addValueChangeHandler(new DatasetSelectionCheckboxHandler(uri, eventBus));
+                selectionControl.setValue(true, true); // select, and fire the selection event
+                // checkbox should also respond to selection and deselection events coming from elsewhere
+                addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
+                    public void onDatasetSelected(DatasetSelectedEvent event) {
+                        if (event.getUri().equals(uri)) {
+                            selectionControl.setValue(true, false); // select, but don't fire another selection event
+                        }
+                    }
+                });
+                addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
+                    public void onDatasetUnselected(DatasetUnselectedEvent datasetUnselectedEvent) {
+                        if (datasetUnselectedEvent.getUri().equals(uri)) {
+                            selectionControl.setValue(false, false); // deselect, but don't fire another deselection event
+                        }
+                    }
+                });
+                fetchDataset(ix, uri);
+            }
+        });
     }
 
     void fetchDataset(final int ix, final String uri) {

@@ -96,22 +96,26 @@ public class UploadStatusView extends Composite implements Display {
         statusTable.removeAllRows();
     }
 
+    /*
     @Override
     public HasValue<Boolean> getSelectionControl(int ix) {
-        if (ix >= selectionCheckboxes.size()) {
-            GWT.log("error: uploadstatus presenter asked for a nonexistent selection control");
+        if (selectionCheckboxes.get(ix) == null) {
+            GWT.log("error: uploadstatus presenter asked for a nonexistent selection control " + ix);
             return null;
         }
         return selectionCheckboxes.get(ix);
     }
+    */
 
     @Override
-    public void onComplete(int ix, String uri, int total) {
+    public HasValue<Boolean> onComplete(int ix, String uri, int total) {
+        GWT.log("onComplete " + ix + " " + uri);
         Anchor anchor = new Anchor("View", "#dataset?id=" + uri);
         anchor.setTarget("_blank");
         CheckBox selectionCheckbox = new CheckBox();
         selectionCheckboxes.put(ix, selectionCheckbox);
         statusTable.setWidget(ix, 0, selectionCheckbox);
+        GWT.log("created selection checkbox " + ix); // FIXME debug
         statusTable.setWidget(ix, 1, anchor);
         statusTable.setWidget(ix, 3, new Label("Complete"));
         //
@@ -122,10 +126,12 @@ public class UploadStatusView extends Composite implements Display {
             progressPanel.add(new Label((ix + 1) + " of " + total + " file(s) uploaded"));
             progressPanel.setSpacing(20);
         }
+        return selectionCheckbox;
     }
 
     @Override
     public void onPostComplete(final int ix, final DatasetBean dataset) {
+        GWT.log("onPostComplete " + ix + " " + dataset.getFilename());
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             public void execute() {
                 // check pending, but don't initially display
@@ -167,6 +173,7 @@ public class UploadStatusView extends Composite implements Display {
 
     @Override
     public void onProgress(int ix, int percent) {
+        GWT.log("onProgress " + ix + " " + percent + "%");
         statusTable.setWidget(ix, 3, new ProgressBar(percent));
     }
 

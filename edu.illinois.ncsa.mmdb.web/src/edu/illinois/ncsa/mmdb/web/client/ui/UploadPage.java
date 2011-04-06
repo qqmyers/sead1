@@ -274,7 +274,7 @@ public class UploadPage extends Page {
     private native void publishMethods() /*-{
         $wnd.dndAppletPoke = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::appletPoke();
         $wnd.dndAppletFileDropped = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileDropped(Ljava/lang/String;Ljava/lang/String;);
-        $wnd.dndAppletFileUploaded = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileUploaded(Ljava/lang/String;);
+        $wnd.dndAppletFileUploaded = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileUploaded(Ljava/lang/String;Ljava/lang/String;);
         $wnd.dndAppletProgress = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileProgress(I);
         $wnd.dndAppletProgressIndex = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileProgressIndex(II);
     }-*/;
@@ -282,10 +282,10 @@ public class UploadPage extends Page {
     // on applet callbacks we need to post-process values with an identity transformations to work around applet-to-Javascript issues
 
     /** Called by the applet after a file is uploaded. */
-    public static void fileUploaded(String uriUploaded) {
+    public static void fileUploaded(String uriUploaded, String offset) {
         String uri = uriUploaded + ""; // identity transform required, do not remove
         GWT.log("applet says " + uri + " uploaded");
-        uploadStatusPresenter.onComplete(uri);
+        uploadStatusPresenter.onComplete(uri, Integer.parseInt(offset + "")); // identity transform required, do not remove
     }
 
     /** Called by the applet for each file dropped */
@@ -333,7 +333,7 @@ public class UploadPage extends Page {
         id:'dragdropApplet',
         MAYSCRIPT:'true',
         code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-        archive:'dnd/DropUploader-1643.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+        archive:'dnd/DropUploader-1645.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
         width:150,
         height:100
         };
