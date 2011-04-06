@@ -92,7 +92,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	private static final long serialVersionUID = 9000;
 	JSObject window = null;
 
-	public static final String VERSION = "1780";
+	public static final String VERSION = "1781";
 
 	@Override
 	public void init() {

@@ -110,7 +110,8 @@ public class ProgressThread extends Thread {
 																		// JSON
 					percentComplete = Integer.parseInt(pc);
 				}
-				if (urisUploaded.size() == 0 && line.contains("uris\":[\"")) {
+				if (urisUploaded.size() == 0 && line.contains("uris\":[\"")
+						&& line.contains("\"isFinished\":true")) {
 					line = line.replaceFirst(".*\"uris\":\\[\"([^\\]]*)\\].*",
 							"$1");
 					log("looking for uris in " + line); // FIXME debug
