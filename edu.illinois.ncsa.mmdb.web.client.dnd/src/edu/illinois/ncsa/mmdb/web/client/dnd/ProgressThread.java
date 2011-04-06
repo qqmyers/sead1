@@ -57,7 +57,7 @@ public class ProgressThread extends Thread {
 	int offset = 0; // offset into file list
 
 	void log(String s) {
-		// System.out.println(s);
+		System.out.println("ProgressThread " + offset + ": " + s);
 	} // FIXME debug
 
 	public ProgressThread(DropUploader applet, String sessionKey, int offset) {

@@ -92,7 +92,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	private static final long serialVersionUID = 9000;
 	JSObject window = null;
 
-	public static final String VERSION = "1781";
+	public static final String VERSION = "1782";
 
 	@Override
 	public void init() {
@@ -191,7 +191,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	}
 
 	void log(String s) {
-		// System.out.println(s);
+		System.out.println("DropUploader: " + s);
 	}
 
 	void droppedFile(URI uri, List<File> files) {
@@ -495,6 +495,9 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				e.printStackTrace();
 				throw e;
 			}
+			// FIXME trace
+			System.out.println("HTTP " + post.getStatusCode() + " " + offset
+					+ " " + batch);
 			if (post.getStatusCode() != 200) {
 				log("post failed! " + post.getStatusLine());
 				progressThread.stopShowingProgress();
@@ -518,29 +521,32 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			return sessionKey;
 		}
 
+		void safePostBatch(List<File> batch, int i, int n) {
+			try {
+				postBatch(batch, i, n);
+			} catch (Exception x) {
+				x.printStackTrace();
+			}
+		}
+
 		@Override
 		public void run() {
 			client = new HttpClient();
-			try {
-				List<File> batch = new LinkedList<File>();
-				int i = 0;
-				for (File file : files) {
-					batch.add(file);
-					if (batch.size() == BATCH_SIZE) {
-						postBatch(batch, i, files.size());
-						batch = new LinkedList<File>();
-					}
-					i++;
+			List<File> batch = new LinkedList<File>();
+			int i = 0;
+			for (File file : files) {
+				batch.add(file);
+				if (batch.size() == BATCH_SIZE) {
+					safePostBatch(batch, i, files.size());
+					batch = new LinkedList<File>();
 				}
-				// remember to do the last batch
-				if (batch.size() > 0) {
-					postBatch(batch, i, files.size());
-				}
-				// we're done
-			} catch (Exception x) {
-				x.printStackTrace();
-				showErrorCard();
+				i++;
 			}
+			// remember to do the last batch
+			if (batch.size() > 0) {
+				safePostBatch(batch, i, files.size());
+			}
+			// we're done
 		}
 	}
 
