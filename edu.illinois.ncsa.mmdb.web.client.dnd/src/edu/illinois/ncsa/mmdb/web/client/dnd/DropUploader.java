@@ -92,7 +92,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	private static final long serialVersionUID = 9000;
 	JSObject window = null;
 
-	public static final String VERSION = "1785";
+	public static final String VERSION = "1787";
 
 	@Override
 	public void init() {
@@ -485,38 +485,27 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				// FIXME trace
 				System.out.println("POST " + offset + " " + batch);
 				client.executeMethod(post);
-			} catch (HttpException e) {
-				log("HTTP exception! " + e.getMessage());
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				throw e;
-			} catch (IOException e) {
-				log("IO exception! " + e.getMessage());
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				throw e;
-			} catch (RuntimeException x) {
-				log("Runtime exception! " + x.getMessage());
+				// FIXME trace
+				System.out.println("HTTP " + post.getStatusCode() + " "
+						+ offset + " " + batch);
+				if (post.getStatusCode() != 200) {
+					log("post failed! " + post.getStatusLine());
+					progressThread.stopShowingProgress();
+					showErrorCard();
+					throw new IOException("post failed");
+				} else if (collectionName != null && collectionUri == null) {
+					String response = post.getResponseBodyAsString();
+					Pattern regex = Pattern
+							.compile(
+									".*<\\s*li\\s*class\\s*=\\s*['\"]\\s*collection\\s*['\"]\\s*>([^<]+).*",
+									Pattern.MULTILINE | Pattern.DOTALL);
+					collectionUri = regex.matcher(response).replaceFirst("$1")
+							.trim().replaceAll("&amp;", "&");
+					log("got collection uri from server: " + collectionUri);
+				}
+			} catch (Exception x) {
+				log("Exception during POST: " + x.getMessage());
 				x.printStackTrace();
-				throw x;
-			}
-			// FIXME trace
-			System.out.println("HTTP " + post.getStatusCode() + " " + offset
-					+ " " + batch);
-			if (post.getStatusCode() != 200) {
-				log("post failed! " + post.getStatusLine());
-				progressThread.stopShowingProgress();
-				showErrorCard();
-				throw new IOException("post failed");
-			} else if (collectionName != null && collectionUri == null) {
-				String response = post.getResponseBodyAsString();
-				Pattern regex = Pattern
-						.compile(
-								".*<\\s*li\\s*class\\s*=\\s*['\"]\\s*collection\\s*['\"]\\s*>([^<]+).*",
-								Pattern.MULTILINE | Pattern.DOTALL);
-				collectionUri = regex.matcher(response).replaceFirst("$1")
-						.trim().replaceAll("&amp;", "&");
-				log("got collection uri from server: " + collectionUri);
 			}
 			System.out.println("Joining progress thread " + offset); // FIXME
 																		// trace
