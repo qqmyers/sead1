@@ -90,6 +90,7 @@
 		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
 		<replace file="war/WEB-INF/classes/server.properties" token="#search.path=" value="search.path=/home/medici/medici/lucene" />
+		<replace file="war/WEB-INF/classes/server.properties" token="#hfc.path=" value="search.path=/home/medici/medici/data" />
 	</target>
 	
 	<!-- copy the tupelo jar files -->
