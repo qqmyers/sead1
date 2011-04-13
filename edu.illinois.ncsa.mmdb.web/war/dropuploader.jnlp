@@ -14,7 +14,7 @@
     <jar href="lib/commons-httpclient-3.0.1.jar"/>
     <jar href="lib/commons-httpclient-contrib-ssl-3.1.jar"/>
     <jar href="lib/commons-logging-1.0.4.jar"/>
-    <jar href="DropUploader-1787.jar" main="true"/>
+    <jar href="DropUploader-1789.jar" main="true"/>
   </resources>
   <applet-desc
      name="Drop Uploader for Medici"
