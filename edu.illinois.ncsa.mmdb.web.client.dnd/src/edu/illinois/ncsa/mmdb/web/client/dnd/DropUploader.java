@@ -92,7 +92,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	private static final long serialVersionUID = 9000;
 	JSObject window = null;
 
-	public static final String VERSION = "1789";
+	public static final String VERSION = "1796";
 
 	@Override
 	public void init() {
@@ -237,6 +237,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			}
 			if (files.size() == 0) {
 				log("no files dropped! " + dtde);
+				dtde.dropComplete(true);
 			} else {
 				// FIXME use a better way of determining collection name than
 				// selecting from first file
@@ -246,17 +247,12 @@ public class DropUploader extends JApplet implements DropTargetListener {
 					log("collection name = " + collectionName);
 				}
 				files = expandDirectories(files, false); // expand directories
-				for (File file : files) {
-					call("dndAppletFileDropped", new Object[] { file.getName(),
-							file.length() + "" });
-				}
 				// ta.setText(files.size()+" file(s) dropped: "+files);
-				uploadFiles(files, collectionName);
+				dtde.dropComplete(uploadFiles(files, collectionName));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			dtde.dropComplete(true);
+			dtde.dropComplete(false);
 		}
 	}
 
@@ -553,33 +549,35 @@ public class DropUploader extends JApplet implements DropTargetListener {
 
 	BatchPostThread postThread;
 
-	void uploadFiles(List<File> files) throws HttpException, IOException {
-		uploadFiles(files, null);
+	boolean uploadFiles(List<File> files) throws HttpException, IOException {
+		return uploadFiles(files, null);
 	}
 
-	void uploadFiles(List<File> files, String collectionName)
+	boolean uploadFiles(List<File> files, String collectionName)
 			throws HttpException, IOException {
 		if (postThread != null) {
 			if (!postThread.isAlive()) {
 				postThread = null;
 			} else {
-				return;
+				return false;
 			}
 		} // can't post while posting
-			// redirect the browser to start checking progress
-			// getAppletContext().showDocument(new
-			// URL(getStatusPage()+"#upload?session="+sessionKey));
-			// getAppletContext().showDocument(new
-			// URL("javascript:uploadAppletCallback('"+sessionKey+"')"));
 		try {
+			// notify the ifc that files were dropped
+			for (File file : files) {
+				call("dndAppletFileDropped", new Object[] { file.getName(),
+						file.length() + "" });
+			}
 			// post the data
 			postThread = new BatchPostThread(this);
 			postThread.files = files;
 			postThread.collectionName = collectionName;
 			log("posting data for " + files.size() + " file(s)");
 			postThread.start();
+			return true;
 		} catch (Exception x) {
 			showErrorCard();
+			return false;
 		} finally {
 			// showDropTarget();
 		}
