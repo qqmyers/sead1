@@ -47,6 +47,9 @@ import java.util.List;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.DefaultHttpParams;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
+import org.apache.commons.httpclient.params.HttpParams;
 
 public class ProgressThread extends Thread {
 	DropUploader applet;
@@ -85,6 +88,7 @@ public class ProgressThread extends Thread {
 		try {
 			GetMethod get = new GetMethod();
 			applet.setUrl(get,sessionKey);
+			DefaultHttpParams.getDefaultParams().setIntParameter(HttpConnectionParams.SO_TIMEOUT, 1000);
 			HttpClient client = new HttpClient();
 			log("requesting progress ...");
 			client.executeMethod(get);

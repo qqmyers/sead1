@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="medici applet" default="archive">
+	<property name="classes" location="build/classes"/>
+	<property name="signed" location="../edu.illinois.ncsa.mmdb.web/war/dnd"/>
+
+	<path id="classpath">
+		<fileset dir="deps">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+	
+	<target name="compile" description="Compiles the Java source code">
+		<mkdir dir="${classes}"/>
+		<javac srcdir="src" destdir="${classes}" classpathref="classpath" debug="true"/>
+	</target>
+	
+	<target name="archive" depends="clean, compile" description="Creates the JAR file">
+		<jar destfile="build/DropUploader.jar">
+			<fileset dir="${classes}"/>
+			<fileset dir="src" includes="**/*.png"/>
+		</jar>
+
+		<input message="keystore password:" addproperty="storepass"/>
+
+		<mkdir dir="${signed}/lib"/>
+        <signjar jar="build/DropUploader.jar" signedjar="${signed}/DropUploader-1789.jar" alias="mykey" storepass="${storepass}"/>
+
+		<signjar destDir="${signed}/lib" alias="mykey" storepass="${storepass}" preservelastmodified="true">
+		  <path>
+		    <fileset dir="deps" includes="*.jar" excludes="plugin.jar"/>
+		  </path>
+		</signjar>
+	</target>	
+		
+	<target name="clean" description="Deletes all generated files">
+		<delete dir="signed"/>
+		<delete dir="build"/>
+	</target>
+</project>

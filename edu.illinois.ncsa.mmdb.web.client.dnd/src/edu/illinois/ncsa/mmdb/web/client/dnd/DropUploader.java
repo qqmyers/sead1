@@ -92,7 +92,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	private static final long serialVersionUID = 9000;
 	JSObject window = null;
 	
-	private final String VERSION = "1199";
+	private final String VERSION = "1199-rob";
 	
 	@Override
 	public void init() {
@@ -353,6 +353,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	}
 	
 	public void call(String functionName, Object[] args) {
+		try {
 		if(window == null) {
 			window = JSObject.getWindow(this);
 		}
@@ -363,10 +364,16 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		synchronized(window) {
 			try {
 				log("calling javascript "+functionName+" with args "+args);
+				for(Object o : args) {
+					log("  " + o);
+				}
 				window.call(functionName,args);
 			} catch(JSException x) {
 				x.printStackTrace();
 			}
+		}
+		} catch (Throwable e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -455,11 +462,13 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				collectionUri = regex.matcher(response).replaceFirst("$1").trim().replaceAll("&amp;","&");
 				log("got collection uri from server: "+collectionUri);
 			}
-			Thread.sleep(2);
 			// now figure out which uri's were uploaded
+			while(progressThread.getUrisUploaded().size() ==0) {
+				Thread.sleep(100);
+			}
 			for(String uri : progressThread.getUrisUploaded()) {
 				log("got uris for uploaded files = "+uri); // FIXME
-				applet.call("dndAppletFileUploaded",new Object[] { uri });
+				applet.call("dndAppletFileUploaded",new Object[] { uri, "" + offset });
 			}
 			progressThread.stopShowingProgress();
 			return sessionKey;
@@ -484,6 +493,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				}
 				// we're done
 			} catch(Exception x) {
+				x.printStackTrace();
 				showErrorCard();
 			}
 		}
@@ -510,6 +520,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			log("posting data for "+files.size()+" file(s)");
 			postThread.start();
 		} catch(Exception x) {
+			x.printStackTrace();
 			showErrorCard();
 		} finally {
 			//showDropTarget();
@@ -526,6 +537,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			}
 			return w.toString();
 		} catch(IOException x) {
+			x.printStackTrace();
 			return "[error]";
 		}
 	}
