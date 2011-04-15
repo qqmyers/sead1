@@ -4,7 +4,7 @@
     <options buildIfNeeded="true" compress="true" descriptionLocation="/edu.illinois.ncsa.mmdb.web.client.dnd/build/DropUploader.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="true" overwrite="true" saveDescription="true" storeRefactorings="true" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
-    <manifest generateManifest="true" mainClassHandleIdentifier="=edu.illinois.ncsa.mmdb.web.client.dnd/src&lt;edu.illinois.ncsa.mmdb.web.client.dnd{DropUploader.java[DropUploader" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+    <manifest generateManifest="true" mainClassHandleIdentifier="=edu.illinois.ncsa.mmdb.web.client.dnd/src&lt;edu.illinois.ncsa.mmdb.web.client.dnd{Main.java[Main" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
         <sealing sealJar="false">
             <packagesToSeal/>
             <packagesToUnSeal/>

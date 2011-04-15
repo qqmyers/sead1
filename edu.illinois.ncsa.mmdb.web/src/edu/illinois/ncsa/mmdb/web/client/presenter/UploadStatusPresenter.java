@@ -106,7 +106,7 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
      * @param file
      */
     public void onDropped(String filename, String sizeString) {
-        if (nDropped == 0 || nUploaded > 0) {
+        if (nDropped == 0) {
             nUploaded = 0;
             nDropped = 0;
             display.clear();
@@ -114,12 +114,6 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
             eventBus.fireEvent(new AllDatasetsUnselectedEvent());
         }
         display.onDropped(nDropped++, filename, sizeString);
-    }
-
-    public void onProgress(int percent) {
-        if (nUploaded < nDropped) { // ignore spurious updates to last completed upload
-            display.onProgress(nUploaded, percent);
-        }
     }
 
     public void onProgressIndex(int percent, int index) {

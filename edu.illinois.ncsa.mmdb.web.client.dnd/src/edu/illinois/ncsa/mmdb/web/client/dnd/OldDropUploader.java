@@ -52,7 +52,7 @@ import java.awt.dnd.DropTargetListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.net.FileNameMap;
 import java.net.URI;
@@ -61,9 +61,6 @@ import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
@@ -89,36 +86,31 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.protocol.Protocol;
 
-@SuppressWarnings("serial")
-public class DropUploader extends JApplet implements DropTargetListener {
-	// upload queue management
-	ConcurrentMap<File, Collection> collections = new ConcurrentHashMap<File, Collection>();
-	ConcurrentLinkedQueue<FileUpload> uploadQueue = new ConcurrentLinkedQueue<FileUpload>();
-	Object queueLock = new Object();
-	int index = 0;
-
-	// UI
-	private JPanel mainCards;
-	JSObject window = null;
+public class OldDropUploader extends JApplet implements DropTargetListener {
 	public DropTarget dropTarget;
+	private JPanel mainCards;
+	private static final long serialVersionUID = 9000;
+	JSObject window = null;
 
-	public static final String VERSION = "1799";
+	public static final String VERSION = "1796";
 
-	// ersatz logging
-
-	void log(String message) {
-		System.out.println(message);
+	@Override
+	public void init() {
+		try {
+			duInit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	void log(String message, Throwable x) {
-		log(message);
-		x.printStackTrace(System.out);
+	ImageIcon getIcon(String name, String label) {
+		URL iconUrl = getClass().getResource(
+				"/edu/illinois/ncsa/mmdb/web/client/dnd/" + name);
+		return new ImageIcon(iconUrl, label);
 	}
-
-	// initial setup
 
 	@SuppressWarnings("deprecation")
-	public void init() {
+	public void duInit() throws Exception {
 		System.out.println("Drop Uploader version " + VERSION);
 
 		setSize(150, 100);
@@ -177,52 +169,45 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		if (window == null) {
 			log("warn: window is null in init()");
 		}
-
-		log("starting upload thread ...");
-		startUploadThread();
-
+		// MMDB-576 applet to javascript communication
+		// callJavascript("Applet started");
 		log("successful init");
 	}
 
-	ImageIcon getIcon(String name, String label) {
-		URL iconUrl = getClass().getResource(
-				"/edu/illinois/ncsa/mmdb/web/client/dnd/" + name);
-		return new ImageIcon(iconUrl, label);
+	public void dragEnter(DropTargetDragEvent dtde) {
+		// System.out.println("Drag Enter");
 	}
 
-	// DND implementation
-
-	public void dragEnter(DropTargetDragEvent arg0) {
-		// TODO Auto-generated method stub
+	public void dragExit(DropTargetEvent dte) {
+		// System.out.println("Drag Exit");
 	}
 
-	public void dragExit(DropTargetEvent arg0) {
-		// TODO Auto-generated method stub
+	public void dragOver(DropTargetDragEvent dtde) {
+		// System.out.println("Drag Over");
 	}
 
-	public void dragOver(DropTargetDragEvent arg0) {
-		// TODO Auto-generated method stub
+	public void dropActionChanged(DropTargetDragEvent dtde) {
+		// System.out.println("Drop Action Changed");
 	}
 
-	public void dropActionChanged(DropTargetDragEvent arg0) {
-		// TODO Auto-generated method stub
+	void log(String s) {
+		System.out.println("DropUploader: " + s);
 	}
 
-	File getFileForFileUri(URI uri) {
+	void droppedFile(URI uri, List<File> files) {
 		if (uri != null && uri.isAbsolute() && uri.getScheme().equals("file")) {
-			return new File(uri.getPath());
-		} else {
-			return null;
+			droppedFile(new File(uri.getPath()), files);
 		}
 	}
 
-	void addFile(File f, List<File> files) {
+	void droppedFile(File f, List<File> files) {
 		if (f != null && !files.contains(f)) {
 			log("dropped file " + f);
 			files.add(f);
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void drop(DropTargetDropEvent dtde) {
 		try {
 			dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
@@ -233,42 +218,40 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				log("DataFlavor = " + flavor);
 				if (flavor.isFlavorJavaFileListType()) {
 					for (File file : (List<File>) tr.getTransferData(flavor)) {
-						addFile(file, files);
+						droppedFile(file, files);
 					}
 				} else if (flavor.isFlavorTextType()) {
 					BufferedReader br = new BufferedReader(
 							flavor.getReaderForText(tr));
 					String s = null;
 					while ((s = br.readLine()) != null) {
-						File file = getFileForFileUri(new URI(s));
-						addFile(file, files);
+						URI uri = new URI(s);
+						droppedFile(uri, files);
 					}
 				} else if (flavor.isMimeTypeEqual("application/x-java-url")) {
-					File file = getFileForFileUri(URI.create(tr
-							.getTransferData(flavor) + ""));
-					addFile(file, files);
+					URI url = URI.create(tr.getTransferData(flavor) + "");
+					droppedFile(url, files);
 				} else {
-					log("unknown flavor = " + flavor);
+					log("unknown " + flavor);
 				}
 			}
 			if (files.size() == 0) {
 				log("no files dropped! " + dtde);
 				dtde.dropComplete(true);
 			} else {
-				File collectionFolder = null;
+				// FIXME use a better way of determining collection name than
+				// selecting from first file
+				String collectionName = null;
 				if (files.get(0).isDirectory()) {
-					collectionFolder = files.get(0);
-					log("collection folder = " + collectionFolder);
+					collectionName = files.get(0).getName();
+					log("collection name = " + collectionName);
 				}
 				files = expandDirectories(files, false); // expand directories
-				//
-				for (File file : files) {
-					droppedFile(file, collectionFolder);
-				}
-				dtde.dropComplete(true);
+				// ta.setText(files.size()+" file(s) dropped: "+files);
+				dtde.dropComplete(uploadFiles(files, collectionName));
 			}
 		} catch (Exception e) {
-			log("Exception during drop", e);
+			e.printStackTrace();
 			dtde.dropComplete(false);
 		}
 	}
@@ -299,94 +282,6 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		return expanded;
 	}
 
-	// queue management
-
-	// add dropped file to queue
-	void droppedFile(File file, File collectionFolder) {
-		FileUpload upload = new FileUpload(file);
-		// is there a collection folder associated with this file?
-		if (collectionFolder != null) {
-			Collection collection = collections.get(collectionFolder);
-			if (collection == null) {
-				collection = new Collection(collectionFolder);
-				collections.put(collectionFolder, collection);
-			}
-			upload.setCollection(collection);
-		}
-		synchronized (this) {
-			upload.setIndex(index);
-			index++;
-		}
-		uploadQueue.add(upload);
-		upload.setState(UploadState.PENDING);
-		log("Queued " + upload);
-		call("dndAppletFileDropped",
-				new Object[] { file.getName(), file.length() + "" });
-		// wake up the upload thread
-		synchronized (queueLock) {
-			queueLock.notifyAll();
-		}
-	}
-
-	void startUploadThread() {
-		Thread uploadThread = new Thread() {
-			public void run() {
-				while (true) {
-					synchronized (queueLock) {
-						try {
-							queueLock.wait();
-							log("Woken up and will consume queue: "
-									+ uploadQueue);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-					// upload all files in the queue
-					while (!uploadQueue.isEmpty()) {
-						FileUpload upload = uploadQueue.poll();
-						if (upload != null) {
-							upload(upload);
-						}
-					}
-				}
-			}
-		};
-		uploadThread.start();
-	}
-
-	// applet-to-Javascript communication
-
-	public void call(String functionName, Object[] args) {
-		if (window == null) {
-			window = JSObject.getWindow(this);
-		}
-		if (window == null) {
-			log("error: unable to call javascript " + functionName
-					+ " (JSObject.getWindow(this) returned null)");
-			return;
-		}
-		synchronized (window) {
-			try {
-				// FIXME trace
-				StringWriter trace = new StringWriter();
-				trace.append("JavaScript: ").append(functionName);
-				for (Object arg : args) {
-					trace.append(" ").append(arg.toString());
-				}
-				System.out.println(trace);
-				window.call(functionName, args);
-			} catch (JSException x) {
-				x.printStackTrace();
-			}
-		}
-	}
-
-	public void poke() {
-		repaint();
-	}
-
-	// heavy lifting on upload
-
 	String getContextUrl() {
 		return getStatusPage().replaceFirst("/[^/]+$", "/");
 	}
@@ -394,7 +289,6 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	String getStatusPage() {
 		String statusPage = getParameter("statusPage");
 		if (statusPage == null) {
-			log("ERROR: no status page!");
 			return "http://localhost:8080/mmdb.html"; // development: hosted
 		} else {
 			return statusPage;
@@ -426,7 +320,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		if (creds != null && !creds.equals("")) {
 			method.addRequestHeader("Cookie", "sessionKey=" + creds);
 		} else {
-			log("ERROR: no credentials!");
+			showErrorCard();
 		}
 	}
 
@@ -458,118 +352,256 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}
 	}
 
-	// upload a single file
-	void upload(FileUpload upload) {
-		try {
-			// acquire the session key
-			upload.setSessionKey(getSessionKey());
-			// set up the POST
-			PostMethod post = new PostMethod();
-			setUrl(post, upload.getSessionKey());
-			List<Part> parts = new LinkedList<Part>();
-			FileNameMap fileNameMap = URLConnection.getFileNameMap();
-			String mimeType = fileNameMap.getContentTypeFor(upload.getName());
-			parts.add(new FilePart("f1", upload.getFile(), mimeType, null));
-			// see if we need to add a collection URI and name part
-			Collection collection = upload.getCollection();
-			if (upload.hasCollection()) {
-				String collectionUri = collection.getUri();
-				if (collectionUri != null) {
-					log("adding collection uri part " + collectionUri);
-					parts.add(new StringPart("collectionUri", collectionUri));
+	public void update() {
+	}
+
+	/**
+	 * Simple function called from javascript for testing.
+	 */
+	public void poke() {
+		repaint();
+	}
+
+	/**
+	 * Test function calling function in javascript.
+	 * 
+	 * @param msg
+	 */
+	public void callJavascript(String msg) {
+		poke();
+		JSObject window = JSObject.getWindow(this);
+		window.call("dndAppletPoke", null);
+	}
+
+	public void call(String functionName, Object[] args) {
+		if (window == null) {
+			window = JSObject.getWindow(this);
+		}
+		if (window == null) {
+			log("error: unable to call javascript " + functionName
+					+ " (JSObject.getWindow(this) returned null)");
+			return;
+		}
+		synchronized (window) {
+			try {
+				// FIXME trace
+				StringWriter trace = new StringWriter();
+				trace.append("JavaScript: ").append(functionName);
+				for (Object arg : args) {
+					trace.append(" ").append(arg.toString());
 				}
-				String collectionName = collection.getName();
+				System.out.println(trace);
+				window.call(functionName, args);
+			} catch (JSException x) {
+				x.printStackTrace();
+			}
+		}
+	}
+
+	void showCard(String name) {
+		((CardLayout) mainCards.getLayout()).show(mainCards, name);
+		repaint();
+	}
+
+	void showDropTarget() {
+		showCard("drop");
+	}
+
+	void showDoneCard() {
+		showCard("done");
+	}
+
+	void showErrorCard() {
+		showCard("error");
+		log("sleeping");
+		(new Thread() {
+			@Override
+			public void run() {
+				try {
+					sleep(2500);
+				} catch (InterruptedException x) {
+				} finally {
+					log("showing drop card");
+					showCard("drop");
+				}
+			}
+		}).start();
+	}
+
+	// TODO get rid of batch stuff. batch size MUST be 1 for javascript
+	// UI stuff to work.
+	public static final int BATCH_SIZE = 1;
+
+	class BatchPostThread extends Thread {
+		public List<File> files;
+		public String collectionName;
+		String collectionUri;
+		HttpClient client;
+		OldDropUploader applet;
+
+		public BatchPostThread(OldDropUploader a) {
+			applet = a;
+		}
+
+		String postBatch(List<File> batch, int offset, int nFiles)
+				throws IOException, InterruptedException {
+			return postBatch(batch, offset, nFiles, false);
+		}
+
+		String postBatch(List<File> batch, int offset, int nFiles,
+				boolean showProgress) throws IOException, InterruptedException {
+			// acquire the session key and start tracking progress
+			String sessionKey = getSessionKey();
+			OldProgressThread progressThread = new OldProgressThread(
+					OldDropUploader.this, sessionKey, offset);
+			if (showProgress) {
+				progressThread.start();
+			}
+			// set up the POST batch
+			PostMethod post = new PostMethod();
+			setUrl(post, sessionKey);
+			List<Part> parts = new LinkedList<Part>();
+			int i = 1;
+			for (File file : batch) {
+				FileNameMap fileNameMap = URLConnection.getFileNameMap();
+				String mimeType = fileNameMap.getContentTypeFor(file.getName());
+				FilePart part = new FilePart("f" + i, file, mimeType, null);
+				parts.add(part);
+				i++;
+			}
+			if (collectionUri != null) {
+				log("adding collection uri part " + collectionUri);
+				parts.add(new StringPart("collectionUri", collectionUri));
+			} else if (collectionName != null) {
 				log("adding collection name part " + collectionName);
 				parts.add(new StringPart("collection", collectionName));
 			}
 			post.setRequestEntity(new MultipartRequestEntity(parts
 					.toArray(new Part[] {}), post.getParams()));
 			try {
-				HttpClient client = new HttpClient();
 				// FIXME trace
-				upload.setState(UploadState.IN_PROGRESS);
-				System.out.println("POST " + upload);
+				System.out.println("POST " + offset + " " + batch);
 				client.executeMethod(post);
 				// FIXME trace
+				System.out.println("HTTP " + post.getStatusCode() + " "
+						+ offset + " " + batch);
 				if (post.getStatusCode() != 200) {
-					upload.setState(UploadState.FAILED);
-					log(upload + " " + post.getStatusCode()
-							+ post.getStatusLine());
+					log("post failed! " + post.getStatusLine());
+					if (showProgress) {
+						progressThread.stopShowingProgress();
+					}
+					showErrorCard();
 					throw new IOException("post failed");
-				}
-				if (upload.hasCollection() && !collection.hasUri()) {
+				} else if (collectionName != null && collectionUri == null) {
 					String response = post.getResponseBodyAsString();
 					Pattern regex = Pattern
 							.compile(
 									".*<\\s*li\\s*class\\s*=\\s*['\"]\\s*collection\\s*['\"]\\s*>([^<]+).*",
 									Pattern.MULTILINE | Pattern.DOTALL);
-					String collectionUri = regex.matcher(response)
-							.replaceFirst("$1").trim().replaceAll("&amp;", "&");
+					collectionUri = regex.matcher(response).replaceFirst("$1")
+							.trim().replaceAll("&amp;", "&");
 					log("got collection uri from server: " + collectionUri);
-					collection.setUri(collectionUri);
 				}
-				upload.setState(UploadState.COMPLETE);
-				log(upload + "");
 			} catch (Exception x) {
-				upload.setState(UploadState.FAILED);
-				log(upload + ", Exception during POST: " + x.getMessage(), x);
+				log("Exception during POST: " + x.getMessage());
+				x.printStackTrace();
 			}
-			switch (upload.getState()) {
-			case COMPLETE:
-				onProgress(upload);
-				break;
-			case FAILED:
-				// FIXME notify page
-				break;
-			default:
-				// wha...?
-				break;
+			if (showProgress) {
+				// FIXME trace
+				System.out.println("Joining progress thread " + offset);
+				progressThread.join(2000);
+				// FIXME trace
+				System.out.println("Joined progress thread " + offset);
+			} else {
+				progressThread.updateProgress(); // final update
 			}
-		} catch (IOException x) {
-			upload.setState(UploadState.FAILED);
-			log(upload + ", Exception setting up POST: " + x.getMessage(), x);
+			return sessionKey;
+		}
+
+		void safePostBatch(List<File> batch, int i, int n) {
+			try {
+				postBatch(batch, i, n);
+			} catch (Exception x) {
+				x.printStackTrace();
+			}
+		}
+
+		@Override
+		public void run() {
+			client = new HttpClient();
+			List<File> batch = new LinkedList<File>();
+			int i = 0;
+			for (File file : files) {
+				batch.add(file);
+				if (batch.size() == BATCH_SIZE) {
+					safePostBatch(batch, i, files.size());
+					batch = new LinkedList<File>();
+				}
+				i++;
+			}
+			// remember to do the last batch
+			if (batch.size() > 0) {
+				safePostBatch(batch, i, files.size());
+			}
+			// we're done
 		}
 	}
 
-	void onProgress(FileUpload upload) throws HttpException, IOException {
-		try {
-			GetMethod get = new GetMethod();
-			setUrl(get, upload.getSessionKey());
-			HttpClient client = new HttpClient();
-			log(upload + " requesting progress ...");
-			client.executeMethod(get);
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					get.getResponseBodyAsStream()));
-			String line = "";
-			int percentComplete = 0;
-			while ((line = br.readLine()) != null) {
-				log(line);
-				System.out.println("server reported " + line); // FIXME trace
-				if (line.contains("percentComplete")) {
-					String pc = line.replaceFirst(
-							".*\"percentComplete\":([0-9]+).*", "$1");
-					percentComplete = Integer.parseInt(pc);
-					upload.setProgress(percentComplete);
-				}
-				if (line.contains("uris\":[\"")
-						&& line.contains("\"isFinished\":true")) {
-					upload.setState(UploadState.COMPLETE);
-					line = line.replaceFirst(".*\"uris\":\\[\"([^\\]]*)\\].*",
-							"$1");
-					log("looking for uris in " + line); // FIXME debug
-					// there should only be one.
-					String uri = null;
-					for (String uriReported : line.split("\",?\"?")) {
-						uri = uriReported;
-					}
-					upload.setUri(uri);
-					call("dndAppletFileUploaded",
-							new Object[] { uri, upload.getIndex() + "" });
-				}
+	BatchPostThread postThread;
+
+	boolean uploadFiles(List<File> files) throws HttpException, IOException {
+		return uploadFiles(files, null);
+	}
+
+	boolean uploadFiles(List<File> files, String collectionName)
+			throws HttpException, IOException {
+		if (postThread != null) {
+			if (!postThread.isAlive()) {
+				postThread = null;
+			} else {
+				return false;
 			}
+		} // can't post while posting
+		try {
+			// notify the ifc that files were dropped
+			for (File file : files) {
+				call("dndAppletFileDropped", new Object[] { file.getName(),
+						file.length() + "" });
+			}
+			// post the data
+			postThread = new BatchPostThread(this);
+			postThread.files = files;
+			postThread.collectionName = collectionName;
+			log("posting data for " + files.size() + " file(s)");
+			postThread.start();
+			return true;
 		} catch (Exception x) {
-			log(upload + " no progress, or progress not available: "
-					+ x.getMessage());
+			showErrorCard();
+			return false;
+		} finally {
+			// showDropTarget();
+		}
+	}
+
+	String readString(Reader r) {
+		StringWriter w = new StringWriter();
+		char buf[] = new char[8192];
+		int n;
+		try {
+			while ((n = r.read(buf)) != -1) {
+				w.write(buf, 0, n);
+			}
+			return w.toString();
+		} catch (IOException x) {
+			return "[error]";
+		}
+	}
+
+	public static void main(String args[]) {
+		if (args.length == 1 && args[0].equals("-v")) {
+			System.out.println(VERSION);
+		} else {
+			new OldDropUploader();
 		}
 	}
 }

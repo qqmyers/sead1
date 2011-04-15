@@ -48,8 +48,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 
-public class ProgressThread extends Thread {
-	DropUploader applet;
+public class OldProgressThread extends Thread {
+	OldDropUploader applet;
 	String sessionKey = null;
 	boolean stop = false;
 	int progress = 0;
@@ -60,8 +60,9 @@ public class ProgressThread extends Thread {
 		System.out.println("ProgressThread " + offset + ": " + s);
 	} // FIXME debug
 
-	public ProgressThread(DropUploader applet, String sessionKey, int offset) {
-		this.applet = applet;
+	public OldProgressThread(OldDropUploader oldDropUploader, String sessionKey,
+			int offset) {
+		this.applet = oldDropUploader;
 		this.offset = offset;
 		setSessionKey(sessionKey);
 	}
