@@ -8,7 +8,7 @@ import java.io.StringWriter;
  * 
  * @author futrelle
  */
-public class FileUpload {
+public class FileUpload implements Comparable<FileUpload> {
 	/** Local file */
 	File file;
 	/** % complete */
@@ -122,7 +122,7 @@ public class FileUpload {
 	// equals. is this necessary?
 
 	private String getIdentityToken() {
-		return file.getAbsolutePath() + (uri != null ? (" " + uri) : "");
+		return file.getAbsolutePath();
 	}
 
 	@Override
@@ -141,5 +141,9 @@ public class FileUpload {
 	@Override
 	public int hashCode() {
 		return getIdentityToken().hashCode();
+	}
+
+	public int compareTo(FileUpload arg0) {
+		return getIdentityToken().compareTo(arg0.getIdentityToken());
 	}
 }

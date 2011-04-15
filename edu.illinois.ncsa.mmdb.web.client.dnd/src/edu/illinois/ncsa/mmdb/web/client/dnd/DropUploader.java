@@ -61,9 +61,11 @@ import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
@@ -94,6 +96,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	// upload queue management
 	ConcurrentMap<File, Collection> collections = new ConcurrentHashMap<File, Collection>();
 	ConcurrentLinkedQueue<FileUpload> uploadQueue = new ConcurrentLinkedQueue<FileUpload>();
+	Set<FileUpload> uploading = new ConcurrentSkipListSet<FileUpload>();
 	Object queueLock = new Object();
 	int index = 0;
 
@@ -102,7 +105,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	JSObject window = null;
 	public DropTarget dropTarget;
 
-	public static final String VERSION = "1799";
+	public static final String VERSION = "1800";
 
 	// ersatz logging
 
@@ -178,8 +181,11 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			log("warn: window is null in init()");
 		}
 
-		log("starting upload thread ...");
 		startUploadThread();
+		log("started upload thread ...");
+
+		startProgressThread();
+		log("started progress thread ...");
 
 		log("successful init");
 	}
@@ -345,6 +351,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 					while (!uploadQueue.isEmpty()) {
 						FileUpload upload = uploadQueue.poll();
 						if (upload != null) {
+							uploading.add(upload);
 							upload(upload);
 						}
 					}
@@ -352,6 +359,30 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			}
 		};
 		uploadThread.start();
+	}
+
+	void startProgressThread() {
+		Thread progressThread = new Thread() {
+			public void run() {
+				while (true) {
+					try {
+						sleep(250);
+						for (FileUpload upload : uploading) {
+							try {
+								onProgress(upload);
+							} catch (HttpException e) {
+								e.printStackTrace();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		progressThread.start();
 	}
 
 	// applet-to-Javascript communication
@@ -516,7 +547,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			}
 			switch (upload.getState()) {
 			case COMPLETE:
-				onProgress(upload);
+				onComplete(upload);
 				break;
 			case FAILED:
 				// FIXME notify page
@@ -531,7 +562,16 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}
 	}
 
+	void onComplete(FileUpload upload) throws HttpException, IOException {
+		checkProgress(upload, true);
+	}
+
 	void onProgress(FileUpload upload) throws HttpException, IOException {
+		checkProgress(upload, false);
+	}
+
+	void checkProgress(FileUpload upload, boolean checkComplete)
+			throws HttpException, IOException {
 		try {
 			GetMethod get = new GetMethod();
 			setUrl(get, upload.getSessionKey());
@@ -545,14 +585,17 @@ public class DropUploader extends JApplet implements DropTargetListener {
 			while ((line = br.readLine()) != null) {
 				log(line);
 				System.out.println("server reported " + line); // FIXME trace
-				if (line.contains("percentComplete")) {
+				if (!checkComplete && line.contains("percentComplete")) {
 					String pc = line.replaceFirst(
 							".*\"percentComplete\":([0-9]+).*", "$1");
 					percentComplete = Integer.parseInt(pc);
 					upload.setProgress(percentComplete);
+					call("dndAppletProgressIndex", new Object[] {
+							percentComplete, upload.getIndex() });
 				}
-				if (line.contains("uris\":[\"")
+				if (checkComplete && line.contains("uris\":[\"")
 						&& line.contains("\"isFinished\":true")) {
+					uploading.remove(upload);
 					upload.setState(UploadState.COMPLETE);
 					line = line.replaceFirst(".*\"uris\":\\[\"([^\\]]*)\\].*",
 							"$1");
