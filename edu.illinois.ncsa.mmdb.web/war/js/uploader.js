@@ -31,34 +31,48 @@ initializeUploader = function(){
 
 }
 
-function uploadFile(file, num){
+var uploading = false;
+var count = 0;
+var processing = null;
+var queue = [];
+
+function uploadFile(){
 	
 	reader = new FileReader();
-	
-	var name = new String(file.name);
-	var size = new String(file.size);
-	
-	//Add to presenter interface
-	dndAppletFileDropped(name, size);
-	
-	reader.index = num;
-	reader.file = file;
+	reader.index = count;
 
-	//Handle upload
+	//Begin processing next in queue
+	processing = queue.shift();
+	
+	reader.file = processing;
+	
+	//Handle upload cases
 	reader.onprogress = LoadProgress;
 	reader.onerror = LoadError;
 	reader.onloadend = LoadEnd;
 	reader.onabort = LoadAbort;
 	
-	reader.readAsBinaryString(file);
+	reader.readAsBinaryString(processing);
 	
 }
 
 function handleFiles(evt){
 	var files = evt.target.files;
+	
 	for( var i = 0, f; f = files[i]; i++){
-		uploadFile(files[i], i);
 		
+		var name = new String(files[i].name);
+		var size = new String(files[i].size);
+		
+		//Add to presenter interface
+		dndAppletFileDropped(name, size);
+		
+		queue.push(files[i]);
+	}
+	
+	if(uploading == false){
+		uploading = true;
+		uploadFile();
 	}
 }
 
@@ -81,16 +95,27 @@ function drop(evt) {
 		
 		worker.postMessage(files[i]); // Send data to our worker.
 		*/
-		
-		uploadFile(files[i], i);
-		
 
-	
+		var name = new String(files[i].name);
+		var size = new String(files[i].size);
+		
+		//Add to presenter interface
+		dndAppletFileDropped(name, size);
+		
+		queue.push(files[i]);
+		
 	}
+	
+	if(uploading == false){
+		uploading = true;
+		uploadFile();
+	}
+	
 }
 
 function LoadEnd(evt) {
 		
+				index = evt.target.index;
 				file = evt.target.file;
 				binary = evt.target.result;
 		
@@ -109,7 +134,14 @@ function LoadEnd(evt) {
 						    var replaced = new String(xhr.responseText);
 						    var replacedall = replaced.replace(/<[^>]+>/g,"");
 							var trimmed = replacedall.replace(/^\s\s*/,"").replace(/\s\s*$/,"");
-							dndAppletFileUploaded(trimmed);
+							
+							dndAppletFileUploaded(trimmed, index.toString());
+							count += 1;
+							
+							if(queue.length > 0){
+								uploadFile();
+							}
+							else uploading = false;
 						}
 						else{
 							//Retry Upload
@@ -156,7 +188,7 @@ function LoadProgress(evt) {
 	if (evt.lengthComputable) {
 		var percentage = Math.round((evt.loaded * 100) / evt.total);
 		//if (percentage < 100)
-			dndAppletProgressIndex(evt.target.index, percentage);
+			dndAppletProgressIndex(percentage, evt.target.index);
 	}
 
 }

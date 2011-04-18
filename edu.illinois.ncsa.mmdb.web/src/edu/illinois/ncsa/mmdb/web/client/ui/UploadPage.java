@@ -148,7 +148,6 @@ public class UploadPage extends Page {
             }
         });
         singleUpload.add(uploadWidget);
-        tableLayout.setWidget(0, 0, singleUpload);
 
         VerticalPanel dndPanel = new VerticalPanel();
 
@@ -194,31 +193,32 @@ public class UploadPage extends Page {
         dndTooltip.addStyleName("dndTooltip");
         dndPanel.add(dndTooltip);
 
+        // HTML5 Upload Widget
+        VerticalPanel html5Panel = new VerticalPanel();
+        HTML html5Upload = new HTML();
+        html5Upload.setHTML("<div id='box'><div id='drop'><br><br>Drag and drop files here!</div></div> <div id='list'></div>");
+        html5Panel.add(html5Upload);
+
+        VerticalPanel html5Form = new VerticalPanel();
+        HTML formMultiple = new HTML();
+        formMultiple.setHTML("<br><br><input type='file' id='files' name='files[]' multiple='multiple' />");
+        html5Form.add(hp);
+        html5Form.add(formMultiple);
+
         Label or = new Label("OR");
         or.addStyleName("uploadOrLabel");
         tableLayout.setWidget(0, 1, or);
-        tableLayout.setWidget(0, 2, dndPanel);
+        if (getUserAgent().contains("firefox") || getUserAgent().contains("chrome")) {
+            tableLayout.setWidget(0, 0, html5Form);
+            tableLayout.setWidget(0, 2, html5Panel);
+        } else {
+            tableLayout.setWidget(0, 0, singleUpload);
+            tableLayout.setWidget(0, 2, dndPanel);
+        }
         tableLayout.getCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
         tableLayout.getCellFormatter().addStyleName(0, 0, "uploadPageLargeCell");
         tableLayout.getCellFormatter().addStyleName(0, 2, "uploadPageLargeCell");
         tableLayout.getCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_CENTER);
-
-        //HTML5 Upload Widget
-        //  TODO -- div id = list is temporary, will remove once uploadpresenter is attached with this
-        VerticalPanel html5Panel = new VerticalPanel();
-        HTML html5Upload = new HTML();
-        html5Upload.setHTML("<div id='box'><div id='drop'><br><br>Drag and drop files here!</div></div> <div id='list'></div>");
-
-        HTML formMultiple = new HTML();
-        formMultiple.setHTML("<br><br><input type='file' id='files' name='files[]' multiple='multiple' />");
-
-        //Comment out the next line to remove html5 upload 
-        html5Panel.add(html5Upload);
-        html5Panel.add(formMultiple);
-
-        tableLayout.setWidget(0, 4, html5Panel);
-        tableLayout.getCellFormatter().addStyleName(0, 4, "uploadPageLargeCell");
-        tableLayout.getCellFormatter().setHorizontalAlignment(0, 4, HasAlignment.ALIGN_CENTER);
 
         // wake the applet up periodically, so it doesn't block on javascript calls
         safariWakeupTimer = new Timer() {
@@ -250,8 +250,8 @@ public class UploadPage extends Page {
     }
 
     private final native void initUploader() /*-{
-        // initialize HTML5 uploader
-        $wnd.initUploader();
+		// initialize HTML5 uploader
+		$wnd.initUploader();
     }-*/;
 
     /**
@@ -262,9 +262,9 @@ public class UploadPage extends Page {
      * @param parameter
      */
     public static native void pokeApplet(Element applet) /*-{
-        if ((applet != null) && (applet.isActive())) {
-        applet.poke();
-        }
+		if ((applet != null) && (applet.isActive())) {
+			applet.poke();
+		}
     }-*/;
 
     /**
@@ -351,4 +351,7 @@ public class UploadPage extends Page {
         initUploader();
     }
 
+    public static native String getUserAgent() /*-{
+		return navigator.userAgent.toLowerCase();
+    }-*/;
 }
