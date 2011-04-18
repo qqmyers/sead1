@@ -98,7 +98,10 @@ public class EditableLabel extends Composite implements HasValueChangeHandlers<S
                 label.removeStyleName("editHighlight");
             }
         });
-        setEditable(editable);
+        isEditable = editable;
+        if (editable) {
+            addPencilIcon();
+        }
         initWidget(panel);
     }
 
