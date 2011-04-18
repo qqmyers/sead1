@@ -10,7 +10,7 @@
 
 	<properties>
 		<gwt.maven>2.1.0-1</gwt.maven>
-		<gwt.version>2.1.0</gwt.version>
+		<gwt.version>2.2.0</gwt.version>
 	</properties>
 
 	<build>
@@ -261,6 +261,13 @@
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
+			<version>${gwt.version}</version>
+			<type>jar</type>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-dev</artifactId>
 			<version>${gwt.version}</version>
 			<type>jar</type>
 			<scope>provided</scope>

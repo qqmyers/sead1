@@ -20,7 +20,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-2.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-dispatch-1.0.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-maps-1.0.4.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-user-2.1.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-user-2.2.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/iri-0.7.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackrabbit-jcr-commons-1.6.0.jar"/>
