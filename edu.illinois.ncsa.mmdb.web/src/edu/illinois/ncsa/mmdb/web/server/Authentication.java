@@ -43,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.rdf.Resource;
 
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.Anonymous;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 
@@ -59,6 +60,10 @@ public class Authentication {
 
         try {
             Resource person = Resource.uriRef(PersonBeanUtil.getPersonID(username));
+            if (person.getString().equals(Anonymous.USER)) {
+                log.debug("LOGIN: anonymous login successful");
+                return true;
+            }
             ContextAuthentication ca = new ContextAuthentication(TupeloStore.getInstance().getContext());
             if (ca.checkPassword(person, password)) {
                 log.debug("LOGIN: authentication suceeded for " + username);

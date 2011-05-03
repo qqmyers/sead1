@@ -224,7 +224,7 @@ public class LoginPage extends Composite {
      */
     protected void authenticate() {
         final String username = usernameBox.getText();
-        final String password = passwordBox.getText();
+        final String password = passwordBox.getText().length() > 0 ? passwordBox.getText() : "(none)";
         logout(new Command() { // ensure we're logged out before authenticating
             public void execute() {
                 dispatchasync.execute(new Authenticate(username, password),
