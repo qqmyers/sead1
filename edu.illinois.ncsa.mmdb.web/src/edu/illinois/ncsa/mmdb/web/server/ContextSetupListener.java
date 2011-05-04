@@ -78,8 +78,10 @@ import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
+import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
@@ -398,6 +400,11 @@ public class ContextSetupListener implements ServletContextListener {
         // ensure Medici permissions exist
         rbac.intializePermissions();
         rbac.associatePermissionsWithRoles();
+
+        // ensure anonymous user and role exist
+        ensureRoleExists(DefaultRole.ANONYMOUS, rbac);
+        PersonBean anon = PersonBeanUtil.getAnonymous();
+        auth.addUser(anon.getEmail(), anon.getName(), "none");
 
         // create accounts
         Set<String> keys = new HashSet<String>();
