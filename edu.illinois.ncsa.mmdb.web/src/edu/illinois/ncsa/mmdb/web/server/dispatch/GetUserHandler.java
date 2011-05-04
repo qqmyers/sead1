@@ -82,6 +82,10 @@ public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
 
         try {
             String email = action.getEmailAddress();
+            if (PersonBeanUtil.getAnonymous().getEmail().equals(email) ||
+                    PersonBeanUtil.getAnonymousURI().getString().equals(action.getUserId())) {
+                return new GetUserResult(PersonBeanUtil.getAnonymous());
+            }
             if (email != null) {
                 Unifier u = new Unifier();
                 u.setColumnNames("uri");

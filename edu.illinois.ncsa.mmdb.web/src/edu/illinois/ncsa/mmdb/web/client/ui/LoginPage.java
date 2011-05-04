@@ -218,21 +218,24 @@ public class LoginPage extends Composite {
         return table;
     }
 
+    protected void authenticate() {
+        String password = passwordBox.getText().length() > 0 ? passwordBox.getText() : "(none)";
+        authenticate(usernameBox.getText(), password);
+    }
+
     /**
      * Authenticate against the REST endpoint to make sure user is
      * authenticated on the server side. If successful, login local.
      */
-    protected void authenticate() {
-        final String username = usernameBox.getText();
-        final String password = passwordBox.getText().length() > 0 ? passwordBox.getText() : "(none)";
+    public static void authenticate(final DispatchAsync dispatch, final MMDB mainWindow, final String username, final String password, final AuthenticationCallback callback) {
         logout(new Command() { // ensure we're logged out before authenticating
             public void execute() {
-                dispatchasync.execute(new Authenticate(username, password),
+                dispatch.execute(new Authenticate(username, password),
                         new AsyncCallback<AuthenticateResult>() {
 
                             @Override
                             public void onFailure(Throwable arg0) {
-                                fail();
+                                callback.onFailure();
                             }
 
                             @Override
@@ -247,7 +250,7 @@ public class LoginPage extends Composite {
                                         GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
                                         builder.sendRequest("", new RequestCallback() {
                                             public void onError(Request request, Throwable exception) {
-                                                fail();
+                                                callback.onFailure();
                                             }
 
                                             public void onResponseReceived(Request request, Response response) {
@@ -256,23 +259,37 @@ public class LoginPage extends Composite {
                                                 GWT.log("REST auth status code = " + response.getStatusCode(), null);
                                                 if (response.getStatusCode() > 300) {
                                                     GWT.log("authentication failed: " + sessionKey, null);
-                                                    fail();
+                                                    callback.onFailure();
                                                 }
                                                 GWT.log("user " + username + " associated with session key " + sessionKey, null);
                                                 // login local
-                                                mainWindow.login(arg0.getSessionId(), sessionKey);
-                                                redirect();
+                                                mainWindow.login(arg0.getSessionId(), sessionKey, callback);
                                             }
                                         });
                                     } catch (RequestException x) {
                                         // another error condition
-                                        fail();
+                                        callback.onFailure();
                                     }
                                 } else {
-                                    fail();
+                                    callback.onFailure();
                                 }
                             }
                         });
+            }
+        });
+    }
+
+    protected void authenticate(final String username, final String password) {
+        authenticate(dispatchasync, mainWindow, username, password, new AuthenticationCallback() {
+            @Override
+            public void onFailure() {
+                fail();
+            }
+
+            @Override
+            public void onSuccess(String userUri, String sessionKey) {
+                GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
+                redirect();
             }
         });
     }

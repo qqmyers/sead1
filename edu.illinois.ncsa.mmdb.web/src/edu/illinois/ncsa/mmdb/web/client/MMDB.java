@@ -79,6 +79,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
+import edu.illinois.ncsa.mmdb.web.client.ui.AuthenticationCallback;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
@@ -473,6 +474,18 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * 
      */
     public void login(final String userId, final String sessionKey) {
+        login(userId, sessionKey, new AuthenticationCallback() {
+            @Override
+            public void onFailure() {
+            }
+
+            @Override
+            public void onSuccess(String userUri, String sessionKey) {
+            }
+        });
+    }
+
+    public void login(final String userId, final String sessionKey, final AuthenticationCallback callback) {
         final UserSessionState state = MMDB.getSessionState();
         state.setSessionKey(sessionKey);
         // set cookie
@@ -481,13 +494,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         final Date expires = new Date(System.currentTimeMillis() + DURATION);
         Cookies.setCookie("sessionKey", sessionKey, expires);
 
-        GetUser getUser = new GetUser();
-        getUser.setUserId(userId);
-        dispatchAsync.execute(getUser, new AsyncCallback<GetUserResult>() {
-
+        AsyncCallback<GetUserResult> handler = new AsyncCallback<GetUserResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Error retrieving user with id " + userId);
+                callback.onFailure();
             }
 
             @Override
@@ -498,9 +509,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 GWT.log("Current user set to " + personBean.getUri());
                 Cookies.setCookie("sid", personBean.getUri(), expires);
                 checkPermissions(History.getToken());
+                callback.onSuccess(userId, sessionKey);
             }
-        });
+        };
 
+        GetUser getUser = new GetUser();
+        getUser.setUserId(userId);
+        dispatchAsync.execute(getUser, handler);
     }
 
     /**
@@ -686,18 +701,34 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         } else {
             loggedIn = false;
         }
-        Command onNotLoggedIn = new Command() {
-            public void execute() {
-                showLoginPage();
-            }
-        };
         if (!loggedIn) {
-            onNotLoggedIn.execute();
+            //showLoginPage();
+            GWT.log("not logged in, attempting to login as anonymous");
+            LoginPage.authenticate(dispatchAsync, MMDB.this,
+                    "anonymous", "none", new
+                    AuthenticationCallback() {
+
+                        @Override
+                        public void onFailure() {
+                            showLoginPage();
+                        }
+
+                        @Override
+                        public void onSuccess(String userUri, String
+                                sessionKey) {
+                            GWT.log("logged in as anonymous");
+                        }
+                    });
         } else {
             // now check REST auth
             Command onLoggedIn = new Command() {
                 public void execute() {
-                    login(cookieSID, cookieSessionKey); // ?
+                    login(cookieSID, cookieSessionKey); // do we need to do this?
+                }
+            };
+            Command onNotLoggedIn = new Command() {
+                public void execute() {
+                    showLoginPage();
                 }
             };
             LoginPage.checkRestAuth(onLoggedIn, onNotLoggedIn);
