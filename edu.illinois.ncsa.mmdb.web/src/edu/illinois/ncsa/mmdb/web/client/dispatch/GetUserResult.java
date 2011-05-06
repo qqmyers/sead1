@@ -46,23 +46,32 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
  * @author Luigi Marini
- *
+ * 
  */
 @SuppressWarnings("serial")
 public class GetUserResult implements Result {
+    boolean            isAnonymous;
+    private PersonBean personBean;
 
-	private PersonBean personBean;
+    public GetUserResult() {
+    }
 
-	public GetUserResult() {}
-	
-	public GetUserResult(PersonBean personBean) {
-		this.personBean = personBean;
-	}
+    public GetUserResult(PersonBean personBean) {
+        this.personBean = personBean;
+    }
 
-	/**
-	 * @return the personBean
-	 */
-	public PersonBean getPersonBean() {
-		return personBean;
-	}
+    /**
+     * @return the personBean
+     */
+    public PersonBean getPersonBean() {
+        return personBean;
+    }
+
+    public boolean isAnonymous() {
+        return isAnonymous;
+    }
+
+    public void setAnonymous(boolean isAnonymous) {
+        this.isAnonymous = isAnonymous;
+    }
 }

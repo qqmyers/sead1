@@ -447,7 +447,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
             @Override
             public void onDenied() {
-                showNotEnabledPage();
+                if (getSessionState().isAnonymous()) {
+                    showLoginPage();
+                } else {
+                    showNotEnabledPage();
+                }
             }
         });
 
@@ -505,8 +509,15 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             public void onSuccess(GetUserResult result) {
                 PersonBean personBean = result.getPersonBean();
                 state.setCurrentUser(personBean);
-                MMDB.loginStatusWidget.login(personBean.getName());
-                GWT.log("Current user set to " + personBean.getUri());
+                if (result.isAnonymous()) {
+                    MMDB.loginStatusWidget.logout();
+                    getSessionState().setAnonymous(true);
+                    GWT.log("Current user is anonymous");
+                } else {
+                    MMDB.loginStatusWidget.login(personBean.getName());
+                    getSessionState().setAnonymous(false);
+                    GWT.log("Current user set to " + personBean.getUri());
+                }
                 Cookies.setCookie("sid", personBean.getUri(), expires);
                 checkPermissions(History.getToken());
                 callback.onSuccess(userId, sessionKey);

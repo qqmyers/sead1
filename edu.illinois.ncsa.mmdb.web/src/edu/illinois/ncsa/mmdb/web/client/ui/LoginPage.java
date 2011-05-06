@@ -398,6 +398,7 @@ public class LoginPage extends Composite {
         // in case anyone is holding refs to the state, zero out the auth information in it
         state.setCurrentUser(null);
         state.setSessionKey(null);
+        state.setAnonymous(false); // not logged in as anonymous, or anyone
         Cookies.removeCookie("sid");
         Cookies.removeCookie("sessionKey");
         clearBrowserCreds(onSuccess);

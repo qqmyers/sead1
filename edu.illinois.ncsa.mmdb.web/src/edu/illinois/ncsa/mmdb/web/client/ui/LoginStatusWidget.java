@@ -60,9 +60,6 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 public class LoginStatusWidget extends Composite {
 
     private final HorizontalPanel mainPanel;
-    private final Hyperlink       loginAnchor;
-    private final Hyperlink       signupAnchor;
-    private final Hyperlink       logoutAnchor;
 
     /**
      * Create a main panel and show the appropriate
@@ -73,24 +70,17 @@ public class LoginStatusWidget extends Composite {
         mainPanel.addStyleName("navMenu");
         initWidget(mainPanel);
 
-        // login anchor
-        loginAnchor = new Hyperlink("Login", "login");
-        loginAnchor.addStyleName("navMenuLink");
-
-        // signup anchor
-        signupAnchor = new Hyperlink("Sign up", "signup");
-        signupAnchor.addStyleName("navMenuLink");
-
-        // logout anchor
-        logoutAnchor = new Hyperlink("Logout", "logout");
-        logoutAnchor.addStyleName("navMenuLink");
-
         if (MMDB.getUsername() == null) {
-            mainPanel.add(loginAnchor);
-            mainPanel.add(signupAnchor);
+            login(MMDB.getUsername());
         } else {
-            mainPanel.add(logoutAnchor);
+            logout();
         }
+    }
+
+    Hyperlink anchor(String name, String link) {
+        Hyperlink anchor = new Hyperlink(name, link);
+        anchor.addStyleName("navMenuLink");
+        return anchor;
     }
 
     /**
@@ -102,10 +92,10 @@ public class LoginStatusWidget extends Composite {
      */
     public void login(String name) {
         mainPanel.clear();
-        Label label = new Label("(" + name + ")");
+        Label label = new Label(name);
         label.setStyleName("navMenuText");
-        mainPanel.add(logoutAnchor);
         mainPanel.add(label);
+        mainPanel.add(anchor("(Logout)", "logout"));
     }
 
     /**
@@ -113,7 +103,7 @@ public class LoginStatusWidget extends Composite {
      */
     public void logout() {
         mainPanel.clear();
-        mainPanel.add(loginAnchor);
-        mainPanel.add(signupAnchor);
+        mainPanel.add(anchor("Login", "login"));
+        mainPanel.add(anchor("Sign up", "signup"));
     }
 }

@@ -57,6 +57,7 @@ public class UserSessionState {
     private Set<String>          selectedDatasets;
     private PersonBean           currentUser;
     private Map<String, Integer> currentPage;
+    boolean                      isAnonymous;
 
     public UserSessionState() {
         initialize();
@@ -86,6 +87,14 @@ public class UserSessionState {
 
     public PersonBean getCurrentUser() {
         return currentUser;
+    }
+
+    public boolean isAnonymous() {
+        return isAnonymous;
+    }
+
+    public void setAnonymous(boolean isAnonymous) {
+        this.isAnonymous = isAnonymous;
     }
 
     public void datasetSelected(String uri) {
