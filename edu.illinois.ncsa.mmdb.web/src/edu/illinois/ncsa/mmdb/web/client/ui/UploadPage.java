@@ -208,6 +208,7 @@ public class UploadPage extends Page {
         Label or = new Label("OR");
         or.addStyleName("uploadOrLabel");
         tableLayout.setWidget(0, 1, or);
+
         if (getUserAgent().contains("firefox") || getUserAgent().contains("chrome")) {
             tableLayout.setWidget(0, 0, html5Form);
             tableLayout.setWidget(0, 2, html5Panel);
@@ -323,7 +324,7 @@ public class UploadPage extends Page {
         id:'dragdropApplet',
         MAYSCRIPT:'true',
         code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-        archive:'dnd/DropUploader-1800.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+        archive:'dnd/DropUploader-1801.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
         width:150,
         height:100
         };

@@ -58,7 +58,6 @@ import java.net.FileNameMap;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -105,7 +104,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 	JSObject window = null;
 	public DropTarget dropTarget;
 
-	public static final String VERSION = "1800";
+	public static final String VERSION = "1801";
 
 	// ersatz logging
 
@@ -261,16 +260,7 @@ public class DropUploader extends JApplet implements DropTargetListener {
 				log("no files dropped! " + dtde);
 				dtde.dropComplete(true);
 			} else {
-				File collectionFolder = null;
-				if (files.get(0).isDirectory()) {
-					collectionFolder = files.get(0);
-					log("collection folder = " + collectionFolder);
-				}
-				files = expandDirectories(files, false); // expand directories
-				//
-				for (File file : files) {
-					droppedFile(file, collectionFolder);
-				}
+				expandDirectories(files); // expand directories
 				dtde.dropComplete(true);
 			}
 		} catch (Exception e) {
@@ -279,30 +269,21 @@ public class DropUploader extends JApplet implements DropTargetListener {
 		}
 	}
 
-	List<File> expandDirectories(List<File> files, boolean recursive) {
-		List<File> expanded = new LinkedList<File>();
+	void expandDirectories(List<File> files) {
 		for (File f : files) {
 			if (f.isDirectory()) {
-				if (recursive) {
-					log("recursively expanding directory " + f);
-					expanded.addAll(expandDirectories(
-							Arrays.asList(f.listFiles()), true));
-				} else {
-					log("listing directory " + f);
-					for (File kid : f.listFiles()) {
-						if (!kid.isDirectory()) {
-							log("adding file " + kid);
-							expanded.add(kid);
-						}
+				log("listing directory " + f);
+				for (File kid : f.listFiles()) {
+					if (!kid.isDirectory()) {
+						log("adding file " + kid + " from directory " + f);
+						droppedFile(kid, f);
 					}
 				}
 			} else {
 				log("adding file " + f);
-				expanded.add(f);
+				droppedFile(f, null);
 			}
 		}
-		log("added " + expanded.size() + " file(s)");
-		return expanded;
 	}
 
 	// queue management
