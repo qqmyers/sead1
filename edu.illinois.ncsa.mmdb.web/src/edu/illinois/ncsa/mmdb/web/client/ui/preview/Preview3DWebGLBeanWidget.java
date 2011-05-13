@@ -49,6 +49,11 @@ public class Preview3DWebGLBeanWidget extends PreviewBeanWidget<PreviewThreeDime
     }
 
     @Override
+    public void hide() {
+        hideWebGL();
+    }
+
+    @Override
     protected void showSection() {
         String url = GWT.getHostPageBaseURL() + RestEndpoints.BLOB_URL + getPreviewBean().getUri();
 
@@ -83,12 +88,12 @@ public class Preview3DWebGLBeanWidget extends PreviewBeanWidget<PreviewThreeDime
     }
 
     public final native void readWebGL(String fileData) /*-{
-        // initialize WebGL application
-        $wnd.init_webGL(fileData);
+		// initialize WebGL application
+		$wnd.init_webGL(fileData);
     }-*/;
 
     public final native void hideWebGL() /*-{
-        // hide the current WebGL viewer if open
-        $wnd.hide_webGL();
+		// hide the current WebGL viewer if open
+		$wnd.hide_webGL();
     }-*/;
 }
