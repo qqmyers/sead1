@@ -349,7 +349,9 @@ public class UploadPage extends Page {
     @Override
     protected void onLoad() {
         super.onLoad();
-        initUploader();
+        if (getUserAgent().contains("firefox") || getUserAgent().contains("chrome")) {
+            initUploader();
+        }
     }
 
     public static native String getUserAgent() /*-{

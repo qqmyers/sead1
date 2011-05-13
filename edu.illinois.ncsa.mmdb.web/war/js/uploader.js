@@ -4,6 +4,11 @@ initUploader = function(){
 	
 }
 
+var uploading = false;
+var count = 0;
+var processing = null;
+var queue = [];
+
 initializeUploader = function(){
 	dropBox =  document.getElementById("box");
 	
@@ -29,12 +34,8 @@ initializeUploader = function(){
 
 	dropBox.addEventListener("drop", drop, false); 
 
+	count = 0;
 }
-
-var uploading = false;
-var count = 0;
-var processing = null;
-var queue = [];
 
 function uploadFile(){
 	
