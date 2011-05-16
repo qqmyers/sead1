@@ -4987,7 +4987,13 @@ Magi.Node = Klass({
 			  this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 			 
 		},
-
+		
+		getCanvasData : function(canvas) {
+			return canvas.toDataURL();
+			
+			
+		},
+		
 		  getDefaultCamera : function() {
 		    var cam = new Magi.Camera();
 		    vec3.set([0, 1.0, 0], cam.lookAt);
@@ -5786,4 +5792,9 @@ Magi.Node = Klass({
                 g_s.scene.appendChild(n);
               }
       }
+    
+    saveImgWebGL = function(){
+    	   return g_s.getCanvasData($('c'));
+
+    }
 	  

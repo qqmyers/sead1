@@ -57,6 +57,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHit;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHitResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Search;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchWithFilter;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -80,7 +81,13 @@ public class SearchResultsPage extends Page {
         super(TITLE, dispatchasync);
         this.eventbus = eventbus;
         query = PlaceService.getParams().get("q");
-        if (query != null) {
+        String filter = PlaceService.getParams().get("f");
+        if (filter != null) {
+            queryText = new HTML("Your search for datasets with metadata <b>" + query
+                    + "</b> returned the following results:");
+            mainLayoutPanel.add(queryText);
+            queryWithFilter(query, filter);
+        } else if (query != null) {
             queryText = new HTML("Your search for <b>" + query
                     + "</b> returned the following results:");
             mainLayoutPanel.add(queryText);
@@ -88,12 +95,36 @@ public class SearchResultsPage extends Page {
         }
     }
 
-    private void queryServer(String query) {
+    private void queryServer(final String query) {
         dispatchAsync.execute(new Search(query), new AsyncCallback<SearchResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
-                GWT.log("Error executing search", caught);
+                GWT.log("Error executing search for: " + query, caught);
+            }
+
+            @Override
+            public void onSuccess(SearchResult result) {
+                if (result.getHits().size() == 0) {
+                    noResults();
+                } else {
+                    showResults(result);
+                }
+            }
+        });
+    }
+
+    /**
+     * Search for datasets that fall within the search of the filter
+     * eg. Search for datasets with filter=Language query=English
+     * or filter=MIME Type query=image/jpeg
+     */
+    private void queryWithFilter(final String query, final String filter) {
+        dispatchAsync.execute(new SearchWithFilter(query, filter), new AsyncCallback<SearchResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error executing search for: " + query, caught);
             }
 
             @Override

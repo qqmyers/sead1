@@ -1,6 +1,10 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -9,19 +13,51 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.Create3DImage;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.common.RestEndpoints;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.PreviewThreeDimensionalBean;
 
 public class Preview3DWebGLBeanWidget extends PreviewBeanWidget<PreviewThreeDimensionalBean> {
+    private final HTML widget;
+    DispatchAsync      dispatch;
+    Label              convert;
+
     public Preview3DWebGLBeanWidget(HandlerManager eventBus) {
         super(eventBus);
+        VerticalPanel vp = new VerticalPanel();
+        vp.addStyleName("centered"); //$NON-NLS-1$
 
-        HTML widget = new HTML();
+        widget = new HTML();
         widget.getElement().setId(DOM.createUniqueId());
-        setWidget(widget);
+        vp.add(widget);
+
+        final Anchor setImage = new Anchor("Create Thumbnail");
+        setImage.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                setImage();
+            }
+        });
+        vp.add(setImage);
+
+        convert = new Label("(Creating...)");
+        convert.addStyleName("hidden");
+        vp.add(convert);
+
+        vp.setCellHorizontalAlignment(setImage, HasHorizontalAlignment.ALIGN_CENTER);
+        vp.setCellHorizontalAlignment(convert, HasHorizontalAlignment.ALIGN_CENTER);
+
+        setWidget(vp);
     }
 
     @Override
@@ -53,6 +89,31 @@ public class Preview3DWebGLBeanWidget extends PreviewBeanWidget<PreviewThreeDime
         hideWebGL();
     }
 
+    private final native String getCanvasData() /*-{
+		// initialize HTML5 application
+		return $wnd.saveImgWebGL();
+    }-*/;
+
+    private void setImage() {
+        final String fileData = getCanvasData();
+        convert.removeStyleName("hidden");
+        dispatch = getDispatch();
+        dispatch.execute(new Create3DImage(fileData, MMDB.getUsername(), getDataset()), new AsyncCallback<EmptyResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error creating 3d image from html5 canvas");
+            }
+
+            @Override
+            public void onSuccess(final EmptyResult result) {
+                //reload page 
+                Window.Location.reload();
+            }
+        });
+
+    }
+
     @Override
     protected void showSection() {
         String url = GWT.getHostPageBaseURL() + RestEndpoints.BLOB_URL + getPreviewBean().getUri();
@@ -62,7 +123,7 @@ public class Preview3DWebGLBeanWidget extends PreviewBeanWidget<PreviewThreeDime
             @SuppressWarnings("unused")
             Request request = builder.sendRequest(null, new RequestCallback() {
                 public void onError(Request request, Throwable exception) {
-                    ((HTML) getWidget()).setText("Error\n" + exception.getMessage());
+                    widget.setText("Error\n" + exception.getMessage());
                 }
 
                 public void onResponseReceived(Request request, Response response) {
@@ -72,15 +133,15 @@ public class Preview3DWebGLBeanWidget extends PreviewBeanWidget<PreviewThreeDime
                         readWebGL(response.getText());
 
                     } else {
-                        ((HTML) getWidget()).setText("Error\n" + response.getStatusText());
+                        widget.setText("Error\n" + response.getStatusText());
                     }
                 }
             });
         } catch (RequestException e) {
-            ((HTML) getWidget()).setText("Error\n" + e.getMessage());
+            widget.setText("Error\n" + e.getMessage());
         }
 
-        ((HTML) getWidget()).setHTML("<STYLE type='text/css'> canvas {border:solid 1px #000;} body{overflow:hidden;}</STYLE>" +
+        widget.setHTML("<STYLE type='text/css'> canvas {border:solid 1px #000;} body{overflow:hidden;}</STYLE>" +
                 "<CANVAS id='c' width='480' height='360'><P>If you are seeing this, " +
                 "your browser does not support <a href='http://www.google.com/chrome/'>" +
                 "HTML5</a></P></CANVAS>" + "<p id='info'></p>");

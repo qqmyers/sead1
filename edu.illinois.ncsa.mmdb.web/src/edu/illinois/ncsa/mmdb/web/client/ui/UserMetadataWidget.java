@@ -59,7 +59,6 @@ import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
@@ -312,19 +311,8 @@ public class UserMetadataWidget extends Composite {
             }
             // field value
             Hyperlink namelink = new Hyperlink();
-            namelink.setTargetHistoryToken("search?q=\"" + value.getName() + "\"");
+            namelink.setTargetHistoryToken("search?q=" + value.getName() + "&f=" + predicate);
             namelink.setText(value.getName());
-            Label name = new Label(value.getName());
-            if (value.getUri() != null) {
-                name.setTitle(value.getUri());
-            }
-            name.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-
-                    History.newItem("search?q=\"" + value.getName() + "\"");
-                }
-            });
             fieldTable.setWidget(row, 1, namelink);
 
             //placeholder for Applies To

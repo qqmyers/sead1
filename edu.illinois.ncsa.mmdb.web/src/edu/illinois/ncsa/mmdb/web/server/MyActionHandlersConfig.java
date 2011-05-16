@@ -88,9 +88,9 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetSectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetSubclassesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUploadDestinationHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserActionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserActionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUsersHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetViewCountHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
@@ -108,6 +108,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchWithFilterHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetConfigurationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetPermissionsHandler;
@@ -199,6 +200,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new Create3DImageHandler());
         DispatchUtil.registerHandler(new GetConfigurationHandler());
         DispatchUtil.registerHandler(new SetConfigurationHandler());
+        DispatchUtil.registerHandler(new SearchWithFilterHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {
