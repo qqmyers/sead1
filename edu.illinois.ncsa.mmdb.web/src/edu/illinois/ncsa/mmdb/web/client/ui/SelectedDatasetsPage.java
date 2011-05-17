@@ -41,6 +41,9 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -55,8 +58,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsBySet;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsBySetResult;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
@@ -113,7 +116,8 @@ public class SelectedDatasetsPage extends Page {
         selectedPanel.add(clearFloat);
 
         //view selected datasets
-        final Set<String> selectedDatasets = new HashSet<String>(MMDB.getSessionState().getSelectedDatasets());
+        final HashSet<String> selectedDatasets = new HashSet<String>(MMDB.getSessionState().getSelectedDatasets());
+
         datasets = new HashSet<DatasetBean>();
 
         num = MMDB.getSessionState().getSelectedDatasets().size();
@@ -138,20 +142,16 @@ public class SelectedDatasetsPage extends Page {
             }
         });
 
-        //retrieve datasets
-        for (String datasetUri : selectedDatasets ) {
-            fetchDataset(datasetUri);
-        }
+        //fetch all datasets via their URI to add to list & relationship widget
+        fetchDatasets(selectedDatasets);
 
         mainLayoutPanel.add(selectedPanel);
 
     }
 
-    private void fetchDataset(String uri) {
+    private void fetchDatasets(HashSet<String> datasetsUri) {
 
-        dispatchAsync.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
-
-            DatasetBean db = new DatasetBean();
+        dispatchAsync.execute(new GetDatasetsBySet(datasetsUri), new AsyncCallback<GetDatasetsBySetResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -159,27 +159,36 @@ public class SelectedDatasetsPage extends Page {
             }
 
             @Override
-            public void onSuccess(final GetDatasetResult result) {
+            public void onSuccess(GetDatasetsBySetResult result) {
 
-                final String value = result.getDataset().getUri();
-                db = result.getDataset();
-                datasets.add(db);
-                leftcolumn.add(new DatasetInfoWidget(result.getDataset(), true, dispatchAsync));
+                //alphabetically sort list
+                ArrayList<DatasetBean> sortedList = new ArrayList<DatasetBean>(result.getDatasets());
+                Collections.sort(sortedList, new Comparator<DatasetBean>() {
 
-                //create relationship - widget (if allowed)
-                rbac.doIfAllowed(Permission.ADD_RELATIONSHIP, new PermissionCallback() {
-                    @Override
-                    public void onAllowed() {
-
-                        relationshipWidget.addToList(shortenTitle(result.getDataset().getTitle()), value);
-                        if (first == 1) {
-                            relationshipWidget.thumb1.changeImage(result.getDataset().getUri(), result.getDataset().getMimeType());
-                            relationshipWidget.thumb2.changeImage(result.getDataset().getUri(), result.getDataset().getMimeType());
-                            first = 0;
-                        }
-
+                    public int compare(DatasetBean k1, DatasetBean k2) {
+                        return k1.getTitle().toLowerCase().compareTo(k2.getTitle().toLowerCase());
                     }
                 });
+
+                //add each one to relationship widget & list to the left
+                for (final DatasetBean dataset : sortedList ) {
+                    leftcolumn.add(new DatasetInfoWidget(dataset, true, dispatchAsync));
+                    datasets.add(dataset);
+                    //create relationship - widget (if allowed)
+                    rbac.doIfAllowed(Permission.ADD_RELATIONSHIP, new PermissionCallback() {
+                        @Override
+                        public void onAllowed() {
+
+                            relationshipWidget.addToList(shortenTitle(dataset.getTitle()), dataset.getUri());
+                            if (first == 1) {
+                                relationshipWidget.thumb1.changeImage(dataset.getUri(), dataset.getMimeType());
+                                relationshipWidget.thumb2.changeImage(dataset.getUri(), dataset.getMimeType());
+                                first = 0;
+                            }
+
+                        }
+                    });
+                }
             }
         });
     }

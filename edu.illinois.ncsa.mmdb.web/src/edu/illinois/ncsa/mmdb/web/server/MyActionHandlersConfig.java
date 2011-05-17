@@ -69,6 +69,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetConfigurationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsBySetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDerivedFromHandler;
@@ -201,6 +202,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetConfigurationHandler());
         DispatchUtil.registerHandler(new SetConfigurationHandler());
         DispatchUtil.registerHandler(new SearchWithFilterHandler());
+        DispatchUtil.registerHandler(new GetDatasetsBySetHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {
