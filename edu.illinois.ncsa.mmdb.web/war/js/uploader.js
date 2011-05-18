@@ -8,6 +8,7 @@ var uploading = false;
 var count = 0;
 var processing = null;
 var queue = [];
+var error_occurred = false;
 
 initializeUploader = function(){
 	dropBox =  document.getElementById("box");
@@ -37,6 +38,8 @@ initializeUploader = function(){
 	count = 0;
 }
 
+var reader;
+
 function uploadFile(){
 	
 	reader = new FileReader();
@@ -52,6 +55,8 @@ function uploadFile(){
 	reader.onerror = LoadError;
 	reader.onloadend = LoadEnd;
 	reader.onabort = LoadAbort;
+	
+	//TODO detect folder, resume uploading
 	
 	reader.readAsBinaryString(processing);
 	
@@ -114,14 +119,19 @@ function drop(evt) {
 	
 }
 
+var xhr;
+
 function LoadEnd(evt) {
-		
+	if(!error_occurred){	
+	
 				index = evt.target.index;
 				file = evt.target.file;
 				binary = evt.target.result;
 		
 				//Construct the POST request
-				var xhr = false
+				xhr = false;
+				//xhr.abort();
+				
 				if(window.XMLHttpRequest){
 				xhr = new XMLHttpRequest();
 				}
@@ -181,11 +191,25 @@ function LoadEnd(evt) {
 						}
 						xhr.send(data);
 
-				}			
+				}
+	}
+	else {
+		count += 1;
+		
+		if(queue.length > 0){
+			uploadFile();
+		}
+		else 
+			uploading = false;
+		
+		error_occurred = false;
+		
+	}
+	
 }
 
 function LoadProgress(evt) {
-
+	
 	if (evt.lengthComputable) {
 		var percentage = Math.round((evt.loaded * 100) / evt.total);
 		//if (percentage < 100)
@@ -204,7 +228,7 @@ function LoadError(evt) {
 			break;
 	
 		case evt.target.error.NOT_READABLE_ERR:
-			newFile.innerHTML = "File not readable";
+			newFile.innerHTML = "ERROR: File size too large -" + evt.target.file.name;
 			document.getElementById("list").appendChild(newFile);
 			break;
 	
@@ -236,7 +260,11 @@ function LoadError(evt) {
 		default:
 			newFile.innerHTML = "Read error";
 			document.getElementById("list").appendChild(newFile);
-	}	
+	}
+	
+	reader.abort();
+	error_occurred = true;
+	
 }
 
 function LoadAbort(evt) {
