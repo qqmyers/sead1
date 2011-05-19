@@ -108,10 +108,31 @@ public class GetRecentActivityHandler implements ActionHandler<GetRecentActivity
 
         try {
             int showIndex = 0;
+            int equalCounter = 0;
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf, "dataset") ) {
-                if (showIndex < getRecentActivity.getMaxNum() && row.get(0) != null) {
-                    datasets.add(dbu.get(row.get(0)));
-                    showIndex++;
+                if (getRecentActivity.getFirst()) {
+                    if (showIndex < getRecentActivity.getMaxNum() && row.get(0) != null) {
+                        datasets.add(dbu.get(row.get(0)));
+                        showIndex++;
+                    }
+
+                } else {
+                    long compareDate = dbu.get(row.get(0)).getDate().getTime();
+                    long staticDate = getRecentActivity.getDate().getTime();
+                    log.info("Static: " + staticDate);
+                    log.info("Compare: " + compareDate);
+                    //Used in the instance of datasets having exact same date
+                    if (staticDate == compareDate) {
+                        if (equalCounter > 0) {
+                            staticDate = staticDate + 1;
+                        }
+                        equalCounter++;
+                    }
+                    if (showIndex < getRecentActivity.getMaxNum() && row.get(0) != null && staticDate > compareDate) {
+                        datasets.add(dbu.get(row.get(0)));
+                        showIndex++;
+                    }
+
                 }
             }
         } catch (OperatorException e1) {

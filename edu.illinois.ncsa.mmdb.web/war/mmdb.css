@@ -551,6 +551,15 @@ a:hover {
 	padding-left: 10px;	
 }
 
+.homeButton {
+	padding-left: 10px;
+	width: 200px;	
+}
+
+.homePending {
+	margin-left: 75px;	
+}
+
 .uploadPageLayout {
 	width: 95%;
 	margin: 10px auto 10px auto;
@@ -1363,30 +1372,31 @@ a:hover {
     border: 2px dashed #999;
 }
 
-	#box {
-	    font:normal 24px arial, helvetica, sans serif;
-		 color:#999;
-		background-color: #fff;
-		width: 200px;
-		border: 2px dashed #999;
-		-webkit-border-radius: 6px;
-		-moz-border-radius: 6px;
-		border-radius: 6px;
-		padding-bottom: 10px;
-            text-align:center;
-	}
-	#drop {
+#box {
+	font:normal 24px arial, helvetica, sans serif;
+	color:#999;
+	background-color: #fff;
+	width: 200px;
+	border: 2px dashed #999;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	padding-bottom: 10px;
+    text-align:center;
+}
+#drop {
 	position:relative;
-		width: 200px;
-		height: 170px;
-	}
-		#list {
-		width: 210px;
-		font-size: 10px;
-		float: left;
-		margin-left: 10px;
-	}
-	.addedIMG {
-		width: 100px;
-		height: 100px;
-	}
+	width: 200px;
+	height: 170px;
+}
+
+#list {
+	width: 210px;
+	font-size: 10px;
+	float: left;
+	margin-left: 10px;
+}
+.addedIMG {
+	width: 100px;
+	height: 100px;
+}

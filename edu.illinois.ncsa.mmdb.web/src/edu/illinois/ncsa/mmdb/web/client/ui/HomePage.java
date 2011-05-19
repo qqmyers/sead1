@@ -41,14 +41,19 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.Date;
 import java.util.List;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -74,6 +79,10 @@ public class HomePage extends Page {
     private FlowPanel            preferencesPanel;
     private FlowPanel            recentActivityPanel;
     private final PermissionUtil rbac;
+    private Date                 latestDate;
+    private final Image          pending;
+    private final Button         viewButton;
+    private final Label          latestNum;
 
     /**
      * Create an instance of home page.
@@ -84,10 +93,16 @@ public class HomePage extends Page {
         super("Home", dispatchAsync);
         rbac = new PermissionUtil(dispatchAsync);
         createTabs();
+        viewButton = new Button("View More");
+        viewButton.addStyleName("homeButton");
         createRecentActivityTab();
         createProfileTab();
-        //        createPreferencesTab();
+        //      createPreferencesTab();
         tabPanel.selectTab(0);
+        latestDate = null;
+        pending = new Image("./images/loading-small-white.gif");
+        pending.addStyleName("homePending");
+        latestNum = new Label();
     }
 
     /**
@@ -97,6 +112,18 @@ public class HomePage extends Page {
         recentActivityPanel = new FlowPanel();
         tabPanel.add(recentActivityPanel, "Recent Activity");
         getRecentActivity();
+        viewButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                getMoreActivity(latestDate);
+                recentActivityPanel.add(pending);
+                if (viewButton.isAttached()) {
+                    recentActivityPanel.remove(viewButton);
+                    if (latestNum.isAttached()) {
+                        recentActivityPanel.remove(latestNum);
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -112,19 +139,58 @@ public class HomePage extends Page {
 
             @Override
             public void onSuccess(GetRecentActivityResult result) {
-                recentActivityPanel.clear();
+                //recentActivityPanel.clear();
                 List<DatasetBean> datasets = result.getDatasets();
                 if (datasets.size() == 0) {
                     recentActivityPanel.add(new HTML("No recent activity to report."));
                 } else {
                     int num = datasets.size() < MAX_DATASETS ? datasets.size() : MAX_DATASETS;
-                    recentActivityPanel.add(new Label("Showing latest " + num + " datasets you have uploaded"));
+                    latestNum.setText("Showing latest " + num + " datasets you have uploaded");
+                    recentActivityPanel.add(latestNum);
                     for (DatasetBean dataset : datasets ) {
                         recentActivityPanel.add(new DatasetInfoWidget(dataset, dispatchAsync));
+                        latestDate = dataset.getDate();
+                    }
+                    recentActivityPanel.add(viewButton);
+                }
+            }
+        });
+
+    }
+
+    /**
+     * Get more recent activity from server.
+     */
+    private void getMoreActivity(Date latest) {
+        dispatchAsync.execute(new GetRecentActivity(MMDB.getUsername(), MAX_DATASETS, true, latest), new AsyncCallback<GetRecentActivityResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error getting recent activity");
+            }
+
+            @Override
+            public void onSuccess(GetRecentActivityResult result) {
+                //recentActivityPanel.clear();
+                recentActivityPanel.remove(pending);
+                List<DatasetBean> datasets = result.getDatasets();
+                if (datasets.size() == 0) {
+                    recentActivityPanel.add(new HTML("No recent activity to report."));
+                } else {
+                    int num = datasets.size() < MAX_DATASETS ? datasets.size() : MAX_DATASETS;
+                    for (DatasetBean dataset : datasets ) {
+                        recentActivityPanel.add(new DatasetInfoWidget(dataset, dispatchAsync));
+                        latestDate = dataset.getDate();
+                    }
+                    if (num == 10) {
+                        recentActivityPanel.add(viewButton);
+                    } else {
+                        recentActivityPanel.add(new HTML("No more recent activity to report."));
                     }
                 }
             }
         });
+
     }
 
     /**

@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
+import java.util.Date;
+
 import net.customware.gwt.dispatch.shared.Action;
 
 /**
@@ -52,8 +54,10 @@ import net.customware.gwt.dispatch.shared.Action;
 @SuppressWarnings("serial")
 public class GetRecentActivity implements Action<GetRecentActivityResult> {
 
-    private String user;
-    private int    maxNum;
+    private String  user;
+    private int     maxNum;
+    private boolean first;
+    private Date    latest;
 
     public GetRecentActivity() {
     }
@@ -61,6 +65,14 @@ public class GetRecentActivity implements Action<GetRecentActivityResult> {
     public GetRecentActivity(String user, int maxNum) {
         this.user = user;
         this.maxNum = maxNum;
+        this.first = true;
+    }
+
+    public GetRecentActivity(String user, int maxNum, boolean first, Date latest) {
+        this.user = user;
+        this.maxNum = maxNum;
+        this.first = false;
+        this.latest = latest;
     }
 
     public String getUser() {
@@ -69,5 +81,13 @@ public class GetRecentActivity implements Action<GetRecentActivityResult> {
 
     public int getMaxNum() {
         return maxNum;
+    }
+
+    public boolean getFirst() {
+        return first;
+    }
+
+    public Date getDate() {
+        return latest;
     }
 }
