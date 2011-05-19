@@ -71,7 +71,8 @@ public class ConfirmDialog extends DialogBox {
         setText(title);
         init(includeCancelButton);
 
-        this.setWidth("300px");
+        this.addStyleName("confirmDialog");
+        //this.setWidth("275px");
 
         if (message != null) {
             content.add(new Label(message));
@@ -83,6 +84,7 @@ public class ConfirmDialog extends DialogBox {
         panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         content = new VerticalPanel();
+        content.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         panel.add(content);
 
         HorizontalPanel buttonsPanel = new HorizontalPanel();
@@ -93,6 +95,7 @@ public class ConfirmDialog extends DialogBox {
                 hide();
             }
         });
+        yesButton.addStyleName("confirmDialogButton");
         okText = yesButton;
 
         buttonsPanel.add(yesButton);
@@ -104,6 +107,7 @@ public class ConfirmDialog extends DialogBox {
                     hide();
                 }
             });
+            noButton.addStyleName("confirmDialogButtonNo");
             cancelText = noButton;
 
             buttonsPanel.add(noButton);

@@ -937,6 +937,19 @@ a:hover {
 	padding: 20px;
 }
 
+.confirmDialog {
+	width: 275px;	
+}
+
+.confirmDialogButton {
+	width: 75px;	
+}
+
+.confirmDialogButtonNo{
+	width: 75px;
+	margin-left: 15px;	
+}
+
 .addToCollectionDialog {
 	text-align: center;
 	}
@@ -1273,6 +1286,10 @@ a:hover {
 .dynamicGridElement {
 	border: 1px solid #CCC;
 	margin: 10px;
+}
+
+.dynamicGridSelected {
+	background-color: #f1f5ff
 }
 
 .dynamicGridElementTitle {

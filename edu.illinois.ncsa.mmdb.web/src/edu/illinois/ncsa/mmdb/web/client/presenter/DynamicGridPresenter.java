@@ -90,6 +90,8 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
         void removeAllRows();
 
         int insertItem(String id, String title, String type);
+
+        void showSelected(boolean checked, int location);
     }
 
     public DynamicGridPresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
@@ -108,6 +110,7 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
                 String uri = datasetUnselectedEvent.getUri();
                 if (items.containsKey(uri)) {
                     HasValue<Boolean> selected = display.getSelected(items.get(uri));
+                    display.showSelected(false, items.get(uri));
                     selected.setValue(false);
                 }
             }
@@ -120,6 +123,7 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
                 String uri = datasetSelectedEvent.getUri();
                 if (items.containsKey(uri)) {
                     HasValue<Boolean> selected = display.getSelected(items.get(uri));
+                    display.showSelected(true, items.get(uri));
                     selected.setValue(true);
                 }
             }
@@ -186,6 +190,7 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
         UserSessionState sessionState = MMDB.getSessionState();
         if (sessionState.getSelectedDatasets().contains(showItemEvent.getId())) {
             selected.setValue(true);
+            display.showSelected(true, location);
         } else {
             selected.setValue(false);
         }

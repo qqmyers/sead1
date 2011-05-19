@@ -67,20 +67,22 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
  */
 public class DynamicGridView extends FlexTable implements Display {
 
-    private final HashMap<Integer, CheckBox> checkBoxes;
-    private final static DateTimeFormat      DATE_TIME_FORMAT  = DateTimeFormat.getShortDateTimeFormat();
-    public static final int                  DEFAULT_PAGE_SIZE = 24;
-    public static final int                  PAGE_SIZE_X2      = 48;
-    public static final int                  PAGE_SIZE_X4      = 96;
-    private final int                        ROW_WIDTH         = 6;
-    private int                              numItems          = 0;
-    private final DispatchAsync              dispatchAsync;
+    private final HashMap<Integer, CheckBox>      checkBoxes;
+    private final HashMap<Integer, VerticalPanel> layouts;
+    private final static DateTimeFormat           DATE_TIME_FORMAT  = DateTimeFormat.getShortDateTimeFormat();
+    public static final int                       DEFAULT_PAGE_SIZE = 24;
+    public static final int                       PAGE_SIZE_X2      = 48;
+    public static final int                       PAGE_SIZE_X4      = 96;
+    private final int                             ROW_WIDTH         = 6;
+    private int                                   numItems          = 0;
+    private final DispatchAsync                   dispatchAsync;
 
     public DynamicGridView(DispatchAsync dispatchAsync) {
         super();
         this.dispatchAsync = dispatchAsync;
         addStyleName("dynamicGrid");
         checkBoxes = new HashMap<Integer, CheckBox>();
+        layouts = new HashMap<Integer, VerticalPanel>();
     }
 
     @Override
@@ -90,6 +92,7 @@ public class DynamicGridView extends FlexTable implements Display {
         layoutPanel.addStyleName("dynamicGridElement");
         layoutPanel.setHeight("130px");
         layoutPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        layouts.put(numItems, layoutPanel);
 
         HorizontalPanel titlePanel = new HorizontalPanel();
         titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -200,4 +203,12 @@ public class DynamicGridView extends FlexTable implements Display {
         return checkBoxes.get(location);
     }
 
+    @Override
+    public void showSelected(boolean checked, int location) {
+        if (checked) {
+            layouts.get(location).addStyleName("dynamicGridSelected");
+        } else {
+            layouts.get(location).removeStyleName("dynamicGridSelected");
+        }
+    }
 }
