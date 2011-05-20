@@ -76,10 +76,10 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetsDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
+import edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.AddToCollectionDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
-import edu.illinois.ncsa.mmdb.web.client.view.BatchAddMetadataView;
 import edu.illinois.ncsa.mmdb.web.client.view.CreateCollectionDialogView;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
 
@@ -192,14 +192,16 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 if (selectionEmpty()) {
                     return;
                 }
-                BatchAddMetadataView view = new BatchAddMetadataView(title("Add metadata to %s"));
-                BatchAddMetadataPresenter presenter = new BatchAddMetadataPresenter(service, eventBus, view, sessionState.getSelectedDatasets());
-                presenter.bind();
-                view.show();
+                //BatchAddMetadataView view = new BatchAddMetadataView(title("Add metadata to %s"));
+                //BatchAddMetadataPresenter presenter = new BatchAddMetadataPresenter(service, eventBus, view, sessionState.getSelectedDatasets());
+                // presenter.bind();
+                //view.show();
+                new AddMetadataDialog(title("Add metadata to %s"), sessionState.getSelectedDatasets(), service, eventBus);
+
             }
         });
 
-        display.addMenuAction("Add/edit relationships", new Command() {
+        display.addMenuAction("Add relationships", new Command() {
             @Override
             public void execute() {
                 if (selectionEmpty()) {

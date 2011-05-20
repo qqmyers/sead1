@@ -334,7 +334,7 @@ public class DatasetWidget extends Composite {
                     });
                     deleteWidget.add(deleteAnchor);
                 }
-                um.showFields(p.isPermitted(Permission.EDIT_USER_METADATA));
+                um.showTableFields(p.isPermitted(Permission.EDIT_USER_METADATA));
                 //
                 // add download link, set editability of license widget
                 service.execute(new GetLicense(uri), new AsyncCallback<LicenseResult>() {
