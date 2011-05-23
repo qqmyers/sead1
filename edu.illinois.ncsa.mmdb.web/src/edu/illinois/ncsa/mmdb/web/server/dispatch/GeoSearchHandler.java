@@ -81,13 +81,11 @@ public class GeoSearchHandler implements ActionHandler<GeoSearch, GeoSearchResul
         u.addPattern("d", Gis.HAS_GEO_POINT, "p");
         u.addPattern("d", Rdf.TYPE, Cet.DATASET);
         try {
-            TupeloStore.getInstance().getContext().perform(u);
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "d") ) {
+                searchResult.addHit(row.get(0).getString());
+            }
         } catch (OperatorException e) {
             throw new ActionException(e);
-        }
-
-        for (Tuple<Resource> row : u.getResult() ) {
-            searchResult.addHit(row.get(0).getString());
         }
 
         long elapsed = System.currentTimeMillis() - then;

@@ -1104,7 +1104,6 @@ a:hover {
 }
 
 .deleteLink {
-    color: gray !important;
     width: 30px;
     text-align: right;
 }

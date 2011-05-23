@@ -179,7 +179,7 @@ public class TagsWidget extends Composite {
             rbac.doIfAllowed(Permission.DELETE_TAG, id, new PermissionCallback() {
                 @Override
                 public void onAllowed() {
-                    Anchor delete = new Anchor("Delete");
+                    Anchor delete = new Anchor("Remove");
                     delete.addStyleName("deleteLink");
                     delete.addClickHandler(new ClickHandler() {
                         public void onClick(ClickEvent event) {

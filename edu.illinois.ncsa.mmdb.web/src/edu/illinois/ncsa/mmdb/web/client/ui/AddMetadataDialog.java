@@ -99,7 +99,7 @@ public class AddMetadataDialog extends DialogBox {
             @Override
             public void onDenied() {
                 thePanel.remove(pending);
-                Label notAllowed = new Label("You do not have permission to create relationships");
+                Label notAllowed = new Label("You do not have permission to add metadata");
                 thePanel.add(notAllowed);
                 thePanel.add(cancelButton);
             }
