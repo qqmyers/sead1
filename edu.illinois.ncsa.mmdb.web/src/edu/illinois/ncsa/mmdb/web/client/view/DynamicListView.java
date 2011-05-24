@@ -43,12 +43,17 @@ import java.util.Set;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -66,6 +71,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 public class DynamicListView extends FlexTable implements Display {
 
     private final static DateTimeFormat DATE_TIME_FORMAT  = DateTimeFormat.getShortDateTimeFormat();
+    public static final String          UNKNOWN_TYPE      = "Unknown";
     public static final int             DEFAULT_PAGE_SIZE = 5;
     public static final int             PAGE_SIZE_X2      = 10;
     public static final int             PAGE_SIZE_X4      = 20;
@@ -136,7 +142,7 @@ public class DynamicListView extends FlexTable implements Display {
     }
 
     @Override
-    public int insertItem(String id, String type) {
+    public int insertItem(final String id, String type) {
 
         final int row = this.getRowCount();
 
@@ -144,9 +150,28 @@ public class DynamicListView extends FlexTable implements Display {
         CheckBox checkBox = new CheckBox();
         setWidget(row, 0, checkBox);
 
+        //image thumbnail
+        FlowPanel images = new FlowPanel();
+        images.setStyleName("imageOverlayPanel");
+
         PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
         pre.setMaxWidth(100);
-        setWidget(row, 1, pre);
+        images.add(pre);
+
+        //badge type overlay
+        if (type != null && !UNKNOWN_TYPE.equals(type)) {
+            Image overlay = new Image("images/icons/" + type + ".png");
+            overlay.addStyleName("imageOverlayList");
+            overlay.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    History.newItem("dataset?id=" + id);
+                }
+            });
+
+            images.add(overlay);
+        }
+
+        setWidget(row, 1, images);
 
         FlexTable informationPanel = new FlexTable();
         informationPanel.addStyleName("dynamicTableListInformation");

@@ -45,15 +45,20 @@ import java.util.Set;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -70,6 +75,7 @@ public class DynamicGridView extends FlexTable implements Display {
     private final HashMap<Integer, CheckBox>      checkBoxes;
     private final HashMap<Integer, VerticalPanel> layouts;
     private final static DateTimeFormat           DATE_TIME_FORMAT  = DateTimeFormat.getShortDateTimeFormat();
+    public static final String                    UNKNOWN_TYPE      = "Unknown";
     public static final int                       DEFAULT_PAGE_SIZE = 24;
     public static final int                       PAGE_SIZE_X2      = 48;
     public static final int                       PAGE_SIZE_X4      = 96;
@@ -86,7 +92,7 @@ public class DynamicGridView extends FlexTable implements Display {
     }
 
     @Override
-    public int insertItem(String id, String title, String type) {
+    public int insertItem(final String id, String title, String type) {
 
         final VerticalPanel layoutPanel = new VerticalPanel();
         layoutPanel.addStyleName("dynamicGridElement");
@@ -97,11 +103,29 @@ public class DynamicGridView extends FlexTable implements Display {
         HorizontalPanel titlePanel = new HorizontalPanel();
         titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
+        FlowPanel images = new FlowPanel();
+        images.setStyleName("imageOverlayPanel");
+
         // preview
         PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
         pre.setWidth("120px");
         pre.setMaxWidth(100);
-        layoutPanel.add(pre);
+        images.add(pre);
+
+        //badge type overlay
+        if (type != null && !UNKNOWN_TYPE.equals(type)) {
+            Image overlay = new Image("images/icons/" + type + ".png");
+            overlay.addStyleName("imageOverlay");
+            overlay.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    History.newItem("dataset?id=" + id);
+                }
+            });
+
+            images.add(overlay);
+        }
+
+        layoutPanel.add(images);
 
         // selection checkbox
         CheckBox checkBox = new CheckBox();

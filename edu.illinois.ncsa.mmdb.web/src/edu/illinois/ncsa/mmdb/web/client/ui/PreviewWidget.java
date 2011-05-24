@@ -184,9 +184,6 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         // are we supposed to show the image immediately?
         if (initialDisplay) {
             // figure out if we need to show the overlay
-            if (knownType(type)) {
-                addOverlay(type, link);
-            }
             showPreview(uri, size, link, 0, 0);
             preview.addErrorHandler(new ErrorHandler() {
                 @Override
@@ -282,7 +279,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             preview = new Image(PREVIEW_URL.get(sz) + newPrefix + uri);
             addLink(preview, link);
             if (!GetPreviews.LARGE.equals(sz)) {
-                preview.addStyleName("thumbnail");
+                //preview.addStyleName("thumbnail");
             } else {
                 if (width > 0) {
                     if (width < getMaxWidth()) {
@@ -344,10 +341,6 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         }
     }
 
-    boolean knownType(String type) {
-        return type != null && !UNKNOWN_TYPE.equals(type);
-    }
-
     void removeImage(Image i) {
         if (i != null) {
             imagePanel.remove(i);
@@ -362,20 +355,6 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         removeImage(currentImage);
         addImage(i);
         currentImage = i;
-    }
-
-    void addOverlay(String category, String link) {
-        if (category != null) {
-            removeImage(overlay);
-            overlay = new Image(getOverlayUrl(category));
-            overlay.addStyleName("imageOverlay");
-            addLink(overlay, link);
-            addImage(overlay);
-        }
-    }
-
-    String getOverlayUrl(String category) {
-        return "images/icons/" + category + "_overlay.png";
     }
 
     public int getMaxWidth() {
