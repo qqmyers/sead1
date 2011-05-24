@@ -60,11 +60,14 @@ import com.google.gwt.user.client.ui.Widget;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PagingCollectionTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.PagingCollectionTableView;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * List all collections in system.
@@ -117,26 +120,39 @@ public class ListCollectionsPage extends Composite {
      * @return
      */
     private FlowPanel createAddCollectionWidget() {
-        FlowPanel addCollectionPanel = new FlowPanel();
-        Label createLabel = new Label("Create new collection: ");
-        createLabel.addStyleName("inline");
-        addCollectionPanel.add(createLabel);
-        final WatermarkTextBox addCollectionBox = new WatermarkTextBox("",
-                "Collection name");
-        addCollectionBox.addStyleName("inline");
-        addCollectionPanel.add(addCollectionBox);
-        Button addButton = new Button("Add", new ClickHandler() {
+        final FlowPanel addCollectionPanel = new FlowPanel();
+
+        PermissionUtil rbac = new PermissionUtil(dispatchasync);
+        rbac.doIfAllowed(Permission.ADD_COLLECTION, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                Label createLabel = new Label("Create new collection: ");
+                createLabel.addStyleName("inline");
+                addCollectionPanel.add(createLabel);
+                final WatermarkTextBox addCollectionBox = new WatermarkTextBox("",
+                        "Collection name");
+                addCollectionBox.addStyleName("inline");
+                addCollectionPanel.add(addCollectionBox);
+                Button addButton = new Button("Add", new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent arg0) {
+                        createNewCollection(addCollectionBox.getText());
+                    }
+                });
+                addButton.addStyleName("inline");
+                addCollectionPanel.add(addButton);
+                SimplePanel clearBoth = new SimplePanel();
+                clearBoth.addStyleName("clearBoth");
+                addCollectionPanel.add(clearBoth);
+            }
 
             @Override
-            public void onClick(ClickEvent arg0) {
-                createNewCollection(addCollectionBox.getText());
+            public void onDenied() {
+                //Label notAllowed = new Label("You do not have permission to create collections");
             }
         });
-        addButton.addStyleName("inline");
-        addCollectionPanel.add(addButton);
-        SimplePanel clearBoth = new SimplePanel();
-        clearBoth.addStyleName("clearBoth");
-        addCollectionPanel.add(clearBoth);
+
         return addCollectionPanel;
     }
 

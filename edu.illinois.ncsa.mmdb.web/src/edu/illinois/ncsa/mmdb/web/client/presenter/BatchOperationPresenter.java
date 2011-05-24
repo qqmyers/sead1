@@ -57,6 +57,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
@@ -82,6 +84,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
 import edu.illinois.ncsa.mmdb.web.client.view.CreateCollectionDialogView;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * @author LUigi Marini
@@ -244,28 +247,42 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Add %s to collection"));
                 atc.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        final String collectionUri = atc.getSelectedValue();
-                        final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
-                        final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "added");
-                        service.execute(new AddToCollection(collectionUri, selectedDatasets),
-                                        new AsyncCallback<AddToCollectionResult>() {
 
-                                            @Override
-                                            public void onFailure(Throwable arg0) {
-                                                GWT.log("Error adding dataset(s) to collection", arg0);
-                                                done.setFailure(selectedDatasets, arg0);
-                                                eventBus.fireEvent(done);
-                                            }
+                        PermissionUtil rbac = new PermissionUtil(service);
+                        rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
+                            @Override
+                            public void onAllowed() {
+                                final String collectionUri = atc.getSelectedValue();
+                                final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
+                                final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "added");
+                                service.execute(new AddToCollection(collectionUri, selectedDatasets),
+                                                new AsyncCallback<AddToCollectionResult>() {
 
-                                            @Override
-                                            public void onSuccess(AddToCollectionResult arg0) {
-                                                // FIXME AddToCollectionResult doesn't tell us how many were actually added
-                                                GWT.log("Dataset(s) successfully added to collection", null);
-                                                done.addSuccesses(selectedDatasets);
-                                                eventBus.fireEvent(done);
-                                                atc.hide();
-                                            }
-                                        });
+                                                    @Override
+                                                    public void onFailure(Throwable arg0) {
+                                                        GWT.log("Error adding dataset(s) to collection", arg0);
+                                                        done.setFailure(selectedDatasets, arg0);
+                                                        eventBus.fireEvent(done);
+                                                    }
+
+                                                    @Override
+                                                    public void onSuccess(AddToCollectionResult arg0) {
+                                                        // FIXME AddToCollectionResult doesn't tell us how many were actually added
+                                                        GWT.log("Dataset(s) successfully added to collection", null);
+                                                        done.addSuccesses(selectedDatasets);
+                                                        eventBus.fireEvent(done);
+                                                        atc.hide();
+                                                    }
+                                                });
+                            }
+
+                            @Override
+                            public void onDenied() {
+                                ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to add datasets to a collection", false);
+                                okay.getOkText().setText("OK");
+                            }
+                        });
+
                     }
                 });
             }
@@ -280,28 +297,42 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Remove %s from collection"));
                 atc.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        final String collectionUri = atc.getSelectedValue();
-                        final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
-                        final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "removed");
-                        service.execute(new RemoveFromCollection(collectionUri, selectedDatasets),
-                                        new AsyncCallback<RemoveFromCollectionResult>() {
 
-                                            @Override
-                                            public void onFailure(Throwable arg0) {
-                                                GWT.log("Error adding dataset(s) to collection", arg0);
-                                                done.setFailure(selectedDatasets, arg0);
-                                                eventBus.fireEvent(done);
-                                            }
+                        PermissionUtil rbac = new PermissionUtil(service);
+                        rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
+                            @Override
+                            public void onAllowed() {
+                                final String collectionUri = atc.getSelectedValue();
+                                final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
+                                final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "removed");
+                                service.execute(new RemoveFromCollection(collectionUri, selectedDatasets),
+                                                new AsyncCallback<RemoveFromCollectionResult>() {
 
-                                            @Override
-                                            public void onSuccess(RemoveFromCollectionResult result) {
-                                                // FIXME AddToCollectionResult doesn't tell us how many were actually removed
-                                                GWT.log("Dataset(s) successfully removed from collection", null);
-                                                done.addSuccesses(selectedDatasets);
-                                                atc.hide();
-                                                eventBus.fireEvent(done);
-                                            }
-                                        });
+                                                    @Override
+                                                    public void onFailure(Throwable arg0) {
+                                                        GWT.log("Error adding dataset(s) to collection", arg0);
+                                                        done.setFailure(selectedDatasets, arg0);
+                                                        eventBus.fireEvent(done);
+                                                    }
+
+                                                    @Override
+                                                    public void onSuccess(RemoveFromCollectionResult result) {
+                                                        // FIXME AddToCollectionResult doesn't tell us how many were actually removed
+                                                        GWT.log("Dataset(s) successfully removed from collection", null);
+                                                        done.addSuccesses(selectedDatasets);
+                                                        atc.hide();
+                                                        eventBus.fireEvent(done);
+                                                    }
+                                                });
+                            }
+
+                            @Override
+                            public void onDenied() {
+                                ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to remove datasets from a collection", false);
+                                okay.getOkText().setText("OK");
+                            }
+                        });
+
                     }
                 });
             }

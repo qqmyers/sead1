@@ -58,6 +58,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
@@ -65,6 +67,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollectionResult;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * Widget showing collections a particular detaset is part of.
@@ -78,7 +81,7 @@ public class CollectionMembershipWidget extends Composite {
 
     private final Label           titleLabel;
 
-    private final Anchor          addAnchor;
+    private Anchor                addAnchor;
 
     private AddToCollectionDialog addToCollectionDialog;
 
@@ -108,16 +111,23 @@ public class CollectionMembershipWidget extends Composite {
         mainContainer.add(collectionsPanel);
 
         // add to collection anchor
-        addAnchor = new Anchor("Add to a collection");
-
-        addAnchor.addClickHandler(new ClickHandler() {
-
+        PermissionUtil rbac = new PermissionUtil(service);
+        rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
             @Override
-            public void onClick(ClickEvent event) {
-                showAddToCollectionDialog();
+            public void onAllowed() {
+                addAnchor = new Anchor("Add to a collection");
+
+                addAnchor.addClickHandler(new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        showAddToCollectionDialog();
+                    }
+                });
+                mainContainer.add(addAnchor);
             }
         });
-        mainContainer.add(addAnchor);
+
         loadCollections();
     }
 
@@ -148,24 +158,32 @@ public class CollectionMembershipWidget extends Composite {
         final PreviewWidget badge = PreviewWidget.newCollectionBadge(uri, href, service);
         collectionsPanel.setWidget(row++, 0, badge);
         collectionsPanel.setWidget(row, 0, link);
+        final int other = row;
 
-        final Anchor removeButton = new Anchor("Remove");
-        removeButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                service.execute(new RemoveFromCollection(uri, datasetURI), new AsyncCallback<RemoveFromCollectionResult>() {
-                    public void onSuccess(RemoveFromCollectionResult result) {
-                        collectionsPanel.remove(badge); // remove badge row
-                        collectionsPanel.remove(link); // remove title row
-                        collectionsPanel.remove(removeButton); // remove remove link
-                    }
+        PermissionUtil rbac = new PermissionUtil(service);
+        rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                final Anchor removeButton = new Anchor("Remove");
+                removeButton.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        service.execute(new RemoveFromCollection(uri, datasetURI), new AsyncCallback<RemoveFromCollectionResult>() {
+                            public void onSuccess(RemoveFromCollectionResult result) {
+                                collectionsPanel.remove(badge); // remove badge row
+                                collectionsPanel.remove(link); // remove title row
+                                collectionsPanel.remove(removeButton); // remove remove link
+                            }
 
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Error removing dataset from collection", caught);
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Error removing dataset from collection", caught);
+                            }
+                        });
                     }
                 });
+                collectionsPanel.setWidget(other, 1, removeButton);
             }
         });
-        collectionsPanel.setWidget(row, 1, removeButton);
+
     }
 
     /**

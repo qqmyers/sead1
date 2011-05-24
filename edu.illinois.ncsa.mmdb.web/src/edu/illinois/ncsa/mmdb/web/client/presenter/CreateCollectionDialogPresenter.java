@@ -55,10 +55,14 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
+import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 public class CreateCollectionDialogPresenter extends TextDialogPresenter {
     private final DispatchAsync  dispatch;         // FIXME duplicated in multiple presenters, can we generalize?
@@ -106,27 +110,40 @@ public class CreateCollectionDialogPresenter extends TextDialogPresenter {
      * Tag resources if tag is not empty.
      */
     protected void create() {
-        final List<String> members = new LinkedList<String>();
-        members.addAll(selectedResources);
-        CollectionBean collection = new CollectionBean();
-        collection.setTitle(display.getTextString().getText());
-        final BatchCompletedEvent done = new BatchCompletedEvent(members.size(), "added to new collection");
-        dispatch.execute(new AddCollection(collection, MMDB.getUsername(), members), new AsyncCallback<AddCollectionResult>() {
+        PermissionUtil rbac = new PermissionUtil(dispatch);
+        rbac.doIfAllowed(Permission.ADD_COLLECTION, new PermissionCallback() {
             @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Failed creating collection from selected resources", caught);
-                done.setFailure(members, caught);
-                eventBus.fireEvent(done);
+            public void onAllowed() {
+                final List<String> members = new LinkedList<String>();
+                members.addAll(selectedResources);
+                CollectionBean collection = new CollectionBean();
+                collection.setTitle(display.getTextString().getText());
+                final BatchCompletedEvent done = new BatchCompletedEvent(members.size(), "added to new collection");
+                dispatch.execute(new AddCollection(collection, MMDB.getUsername(), members), new AsyncCallback<AddCollectionResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Failed creating collection from selected resources", caught);
+                        done.setFailure(members, caught);
+                        eventBus.fireEvent(done);
+                    }
+
+                    @Override
+                    public void onSuccess(AddCollectionResult result) {
+                        // FIXME AddCollectionResult should include URI, so we can change the history token 
+                        GWT.log("Succeeded creating collection from selected resources", null);
+                        done.addSuccesses(members);
+                        eventBus.fireEvent(done);
+                    }
+                });
             }
 
             @Override
-            public void onSuccess(AddCollectionResult result) {
-                // FIXME AddCollectionResult should include URI, so we can change the history token 
-                GWT.log("Succeeded creating collection from selected resources", null);
-                done.addSuccesses(members);
-                eventBus.fireEvent(done);
+            public void onDenied() {
+                ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to add collections", false);
+                okay.getOkText().setText("OK");
             }
         });
+
     }
 
     public void setSelectedResources(Set<String> selectedResources) {

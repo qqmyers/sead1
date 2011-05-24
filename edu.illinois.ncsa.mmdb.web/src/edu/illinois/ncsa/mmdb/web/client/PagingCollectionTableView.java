@@ -58,6 +58,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.PagingTablePresenter.Display;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
@@ -66,6 +67,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.AddNewCollectionEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 public class PagingCollectionTableView extends PagingDcThingView<CollectionBean> implements Display<CollectionBean> {
     FlexTable                   table;
@@ -136,7 +138,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 
     private void addListItem(final String uri, CollectionBean item, Panel previewPanel) {
 
-        VerticalPanel infoPanel = new VerticalPanel();
+        final VerticalPanel infoPanel = new VerticalPanel();
 
         infoPanel.setSpacing(5);
 
@@ -155,23 +157,29 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 
         final int row = table.getRowCount();
 
-        Anchor deleteAnchor = new Anchor("Delete");
-        deleteAnchor.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                dispatchAsync.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
-                    public void onFailure(Throwable caught) {
-                    }
+        PermissionUtil rbac = new PermissionUtil(dispatchAsync);
+        rbac.doIfAllowed(Permission.DELETE_COLLECTION, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                Anchor deleteAnchor = new Anchor("Delete");
+                deleteAnchor.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        dispatchAsync.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
+                            public void onFailure(Throwable caught) {
+                            }
 
-                    public void onSuccess(DeleteDatasetResult result) {
-                        table.clearCell(row, 0);
-                        table.clearCell(row, 1);
-                        table.getRowFormatter().addStyleName(row, "hidden");
-                        MMDB.eventBus.fireEvent(new DatasetDeletedEvent(uri));
+                            public void onSuccess(DeleteDatasetResult result) {
+                                table.clearCell(row, 0);
+                                table.clearCell(row, 1);
+                                table.getRowFormatter().addStyleName(row, "hidden");
+                                MMDB.eventBus.fireEvent(new DatasetDeletedEvent(uri));
+                            }
+                        });
                     }
                 });
+                infoPanel.add(deleteAnchor);
             }
         });
-        infoPanel.add(deleteAnchor);
 
         // yoinked from DatasetTableOneColumnView
         table.setWidget(row, 0, previewPanel);
