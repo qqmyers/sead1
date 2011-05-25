@@ -114,9 +114,9 @@ public class PreviewPanel extends Composite {
         addWidget(new PreviewImageBeanWidget(eventBus));
         addWidget(new PreviewPyramidBeanWidget(eventBus));
         addWidget(new PreviewMultiImageBeanWidget(eventBus));
+        addWidget(new Preview3DJavaBeanWidget(eventBus));
         addWidget(new Preview3DHTML5BeanWidget(eventBus));
         addWidget(new Preview3DWebGLBeanWidget(eventBus));
-        //addWidget(new Preview3DJavaBeanWidget(eventBus));
     }
 
     public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus) {
