@@ -5,7 +5,6 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HTML;
 
-import edu.illinois.ncsa.mmdb.web.common.RestEndpoints;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.PreviewThreeDimensionalBean;
 
@@ -44,12 +43,12 @@ public class Preview3DJavaBeanWidget extends PreviewBeanWidget<PreviewThreeDimen
 
     @Override
     protected void showSection() {
-        String url = GWT.getHostPageBaseURL() + RestEndpoints.EXTENSION_URL + getPreviewBean().getUri();
+        String url = GWT.getHostPageBaseURL() + "api/image/" + getPreviewBean().getUri();
 
         ((HTML) getWidget()).setHTML("<div class='Java3DPreview'>" +
                 "<APPLET name=jvLite code='edu.illinois.ncsa.mmdb.javaView.javaViewer.class' width=480 " +
                 "height=360 archive=plugins/javaview.jar,plugins/javaViewer.jar>" +
-                "<PARAM NAME='model' VALUE='" + url + ".obj" + "'>" +
+                "<PARAM NAME='model' VALUE='" + url + "" + "'>" +
                 "<PARAM NAME='border' VALUE='hide'>" +
                 "<PARAM NAME='control' VALUE='hide'>" +
                 "</APPLET></div>");

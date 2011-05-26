@@ -340,6 +340,8 @@ public class AddMetadataWidget extends Composite {
         dispatch.execute(gs, new AsyncCallback<GetSectionResult>() {
             @Override
             public void onFailure(Throwable caught) {
+                ConfirmDialog okay = new ConfirmDialog("Error", "Unrecognized section: " + gs.getMarker() + " / " + value.getSectionMarker(), false);
+                okay.getOkText().setText("OK");
             }
 
             @Override
@@ -361,6 +363,8 @@ public class AddMetadataWidget extends Composite {
                     dispatch.execute(remove, new AsyncCallback<EmptyResult>() {
                         public void onFailure(Throwable caught) {
                             GWT.log("Error removing value", caught);
+                            ConfirmDialog okay = new ConfirmDialog("Error", "Oh no!: " + gs.getMarker(), false);
+                            okay.getOkText().setText("OK");
                         }
 
                         public void onSuccess(EmptyResult result) {
