@@ -100,10 +100,10 @@ public class GetUserMetadataFieldsHandler implements
     }
 
     private Collection<UserMetadataValue> getUserMetadataValues(Thing t, Resource predicate) throws OperatorException {
-        return getUserMetadataValues(t, predicate, null);
+        return getUserMetadataValues(t, predicate, null, null);
     }
 
-    private Collection<UserMetadataValue> getUserMetadataValues(Thing t, Resource predicate, String marker) throws OperatorException {
+    private Collection<UserMetadataValue> getUserMetadataValues(Thing t, Resource predicate, String marker, String sectionValue) throws OperatorException {
         Collection<UserMetadataValue> values = new LinkedList<UserMetadataValue>();
         for (Object value : t.getValues(predicate) ) {
             UserMetadataValue umv = null;
@@ -119,6 +119,7 @@ public class GetUserMetadataFieldsHandler implements
             }
             if (marker != null) {
                 umv.setSectionMarker(marker);
+                umv.setSectionValue(sectionValue);
             }
             values.add(umv);
         }
@@ -149,7 +150,8 @@ public class GetUserMetadataFieldsHandler implements
                 for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "section") ) {
                     Thing st = ts.fetchThing(row.get(0));
                     String section = row.get(1).getString() + " " + row.get(2).getString();
-                    values.addAll(getUserMetadataValues(st, predicate, section));
+                    String sectionValue = row.get(2).getString();
+                    values.addAll(getUserMetadataValues(st, predicate, section, sectionValue));
                 }
                 if (values.size() > 0) {
                     labels.put(field.getUri(), field.getLabel()); // remember the label for this one

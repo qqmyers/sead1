@@ -56,6 +56,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -103,6 +106,7 @@ public class AddMetadataWidget extends Composite {
     VerticalPanel                          thePanel;
     Label                                  noFields;
     FlexTable                              fieldTable;
+    KeyUpHandler                           pressEnter;
     Map<String, String>                    labels     = new HashMap<String, String>();
     Map<String, Integer>                   indexLabel = new HashMap<String, Integer>();
     Map<String, Integer>                   listLabel  = new HashMap<String, Integer>();
@@ -174,6 +178,17 @@ public class AddMetadataWidget extends Composite {
                 public void onClick(ClickEvent event) {
                     newFieldPanel.clear();
                     fieldChoice.setSelectedIndex(0);
+                }
+            };
+
+            pressEnter = new KeyUpHandler() {
+
+                @Override
+                public void onKeyUp(KeyUpEvent event) {
+                    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                        addValue();
+                    }
+
                 }
             };
 
@@ -272,6 +287,7 @@ public class AddMetadataWidget extends Composite {
 
             gs.setUri(uris); // dataset uri
             gs.setMarker(inputField.getSectionMarker());
+            GWT.log(gs.getMarker() + " / " + inputField.getSectionMarker());
             // null if no section specified; the getsection handler will respond with a single section uri
             // equal to the dataseturi
 
@@ -335,13 +351,11 @@ public class AddMetadataWidget extends Composite {
 
         final GetSection gs = new GetSection();
         gs.setUri(uri);
-        gs.setMarker(value.getSectionMarker());
+        gs.setMarker(value.getSectionValue());
 
         dispatch.execute(gs, new AsyncCallback<GetSectionResult>() {
             @Override
             public void onFailure(Throwable caught) {
-                ConfirmDialog okay = new ConfirmDialog("Error", "Unrecognized section: " + gs.getMarker() + " / " + value.getSectionMarker(), false);
-                okay.getOkText().setText("OK");
             }
 
             @Override
@@ -363,8 +377,6 @@ public class AddMetadataWidget extends Composite {
                     dispatch.execute(remove, new AsyncCallback<EmptyResult>() {
                         public void onFailure(Throwable caught) {
                             GWT.log("Error removing value", caught);
-                            ConfirmDialog okay = new ConfirmDialog("Error", "Oh no!: " + gs.getMarker(), false);
-                            okay.getOkText().setText("OK");
                         }
 
                         public void onSuccess(EmptyResult result) {
@@ -510,6 +522,7 @@ public class AddMetadataWidget extends Composite {
         @Override
         Widget createInputWidget() {
             textBox = new TextBox();
+            textBox.addKeyUpHandler(pressEnter);
             textBox.setWidth("500px");
             return textBox;
         }
@@ -545,6 +558,7 @@ public class AddMetadataWidget extends Composite {
             listBox = new ListBox();
             listBox.setWidth("500px");
             listBox.addItem("Select...", "");
+            listBox.addKeyUpHandler(pressEnter);
             int count = 1;
             List<NamedThing> range = new ArrayList<NamedThing>();
             range.addAll(NamedThing.orderByName(userMetadataField.getRange()));
