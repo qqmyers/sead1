@@ -58,6 +58,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class DownloadDialog extends DialogBox {
 
     public DownloadDialog(String title, HashSet<String> uris) {
+        this(title, uris, "medici");
+    }
+
+    public DownloadDialog(String title, HashSet<String> uris, String zipName) {
         super();
 
         setAnimationEnabled(true);
@@ -89,7 +93,7 @@ public class DownloadDialog extends DialogBox {
         Label titleLabel = new Label("Filename:");
         final TextBox titleText = new TextBox();
         titleText.setName("filename");
-        titleText.setText("medici");
+        titleText.setText(zipName);
         titleText.setHeight("24px");
         titleText.setMaxLength(32);
 

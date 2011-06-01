@@ -63,8 +63,12 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsInCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsInCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewCollectionEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
+import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
+import edu.illinois.ncsa.mmdb.web.client.ui.DownloadDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
@@ -136,7 +140,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
         n++;
     }
 
-    private void addListItem(final String uri, CollectionBean item, Panel previewPanel) {
+    private void addListItem(final String uri, final CollectionBean item, Panel previewPanel) {
 
         final VerticalPanel infoPanel = new VerticalPanel();
 
@@ -158,6 +162,14 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
         final int row = table.getRowCount();
 
         PermissionUtil rbac = new PermissionUtil(dispatchAsync);
+
+        rbac.doIfAllowed(Permission.DOWNLOAD, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                infoPanel.add(downloadCollection(uri, item.getTitle()));
+            }
+        });
+
         rbac.doIfAllowed(Permission.DELETE_COLLECTION, new PermissionCallback() {
             @Override
             public void onAllowed() {
@@ -188,6 +200,32 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
         table.getCellFormatter().addStyleName(row, 1, "rightCell");
         table.getCellFormatter().setVerticalAlignment(row, 1, HasVerticalAlignment.ALIGN_TOP);
         table.getRowFormatter().addStyleName(row, "oddRow");
+    }
+
+    private Anchor downloadCollection(final String collectionURI, final String name) {
+
+        Anchor downloadAnchor = new Anchor("Download");
+        downloadAnchor.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                dispatchAsync.execute(new GetDatasetsInCollection(collectionURI), new AsyncCallback<GetDatasetsInCollectionResult>() {
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Failed retrieving datasets in collection");
+                    }
+
+                    public void onSuccess(GetDatasetsInCollectionResult result) {
+                        if (result.getDatasets().size() > 0) {
+                            new DownloadDialog("Download Collection", result.getDatasets(), name);
+                        }
+                        else {
+                            ConfirmDialog okay = new ConfirmDialog("Error", "No datasets in collection", false);
+                            okay.getOkText().setText("OK");
+                        }
+
+                    }
+                });
+            }
+        });
+        return downloadAnchor;
     }
 
     public void addBadge(String collectionUri) {

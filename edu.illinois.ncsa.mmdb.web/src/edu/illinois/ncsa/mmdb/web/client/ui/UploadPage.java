@@ -138,7 +138,6 @@ public class UploadPage extends Page {
                 presenter.addContent(new Label(helpText));
             }
         });
-        pageTitle.addEast(helpButton);
         singleUpload.add(hp);
 
         uploadWidget = new UploadWidget(false);
@@ -213,6 +212,7 @@ public class UploadPage extends Page {
             tableLayout.setWidget(0, 0, html5Form);
             tableLayout.setWidget(0, 2, html5Panel);
         } else {
+            pageTitle.addEast(helpButton);
             tableLayout.setWidget(0, 0, singleUpload);
             tableLayout.setWidget(0, 2, dndPanel);
         }
