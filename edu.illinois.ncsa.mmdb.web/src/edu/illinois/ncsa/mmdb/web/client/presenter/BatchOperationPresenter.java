@@ -81,6 +81,7 @@ import edu.illinois.ncsa.mmdb.web.client.mvp.BasePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.AddToCollectionDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
+import edu.illinois.ncsa.mmdb.web.client.ui.DownloadDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
 import edu.illinois.ncsa.mmdb.web.client.view.CreateCollectionDialogView;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
@@ -153,6 +154,32 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                         });
                     }
                 });
+            }
+        });
+
+        display.addMenuAction("Download", new Command() {
+            @Override
+            public void execute() {
+
+                final HashSet<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedDatasets());
+                if (selectionEmpty()) {
+                    return;
+                }
+
+                PermissionUtil rbac = new PermissionUtil(service);
+                rbac.doIfAllowed(Permission.DOWNLOAD, new PermissionCallback() {
+                    @Override
+                    public void onAllowed() {
+                        new DownloadDialog(title("Download files"), selectedDatasets);
+                    }
+
+                    @Override
+                    public void onDenied() {
+                        ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to download datasets", false);
+                        okay.getOkText().setText("OK");
+                    }
+                });
+
             }
         });
 

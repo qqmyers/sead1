@@ -61,6 +61,12 @@
 		<servlet-name>UploadBlob</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.server.UploadBlob</servlet-class>
 	</servlet>
+	
+	<servlet>
+		<servlet-name>BatchDownload</servlet-name>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.server.BatchDownload</servlet-class>
+	</servlet>
+	
 
 	<servlet>
 		<servlet-name>WebDAV Servlet</servlet-name>
@@ -140,6 +146,11 @@
 	<servlet-mapping>
 		<servlet-name>restlet</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>BatchDownload</servlet-name>
+		<url-pattern>/BatchDownload</url-pattern>
 	</servlet-mapping>
 
 	<!-- Servlet context listener -->

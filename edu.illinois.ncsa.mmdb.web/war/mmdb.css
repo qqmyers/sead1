@@ -1434,3 +1434,7 @@ a:hover {
 	width: 100px;
 	height: 100px;
 }
+
+.downloadDialog {
+	margin-top: 15px;	
+}
