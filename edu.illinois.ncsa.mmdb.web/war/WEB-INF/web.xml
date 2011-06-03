@@ -169,6 +169,7 @@
 	<!-- Default page to serve -->
 	<welcome-file-list>
 		<welcome-file>mmdb.html</welcome-file>
+		<welcome-file>embed.html</welcome-file>
 	</welcome-file-list>
 
 </web-app>
