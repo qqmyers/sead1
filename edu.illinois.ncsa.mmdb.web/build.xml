@@ -169,6 +169,12 @@
 			<!-- <arg line="-style OBFUSCATE" /> -->
 			<arg value="edu.illinois.ncsa.mmdb.web.MMDB" />
 		</java>
+		<java classname="com.google.gwt.dev.Compiler" classpathref="classpath" fork="true" failonerror="true">
+			<jvmarg value="-Xms256m" />
+			<jvmarg value="-Xmx512m" />
+			<!-- <arg line="-style OBFUSCATE" /> -->
+			<arg value="edu.illinois.ncsa.mmdb.web.Embed" />
+		</java>
 	</target>
 
 	<target name="resources" description="Copy all resources to output folder.">
