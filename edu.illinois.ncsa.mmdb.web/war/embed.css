@@ -1,0 +1,91 @@
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 100%;
+	margin: 0px;
+	padding: 0px;
+	background-color:white;	
+	overflow:hidden; 
+}
+
+.mainMenu, .mainContainer, .bottomMenu {
+	font-size: 0.8em;
+	
+}
+
+/* 													 */
+/* 				Previews          					 */
+
+.previewPanel {
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	height: auto;
+}
+
+.deadlink {
+	color: black !important;
+	text-decoration: none !important;
+}
+
+.textboxPreview {
+	text-align: left;
+	overflow:auto; 
+	color: #505050; 
+}
+
+.Java3DPreview {
+}
+
+.seadragon {
+	display: block;
+	margin: 0px 0px 0px 0px;
+	background-color: white;
+	color: black;
+}
+
+.webGL3DPreview { 
+	
+}
+
+.previewActionLink {
+	margin: 5px 10px 0px 5px;
+	cursor: pointer;
+	cursor: hand;
+}
+
+.multiAnchor {
+	padding-left: 5px;
+}
+
+.hidden {
+	display: none;
+}
+
+.centered {
+	text-align: center;
+	margin: 5px auto 5px auto;
+}
+
+.fileTitle { 
+	font-size: 1.5em;
+  	color: black;
+}
+
+/* 													 */
+/* 				Sides and Buttons					 */
+
+.datasetActions {
+	margin: 0px;
+	padding: 0px 0px 0px 0px;
+	height: 26px;
+	background-color: #f0f0f0;
+}
+
+.bottomRow {
+	background-color: #f0f0f0;
+	height: 26px;
+}
+
+.bottomLogo {
+	float: right;	
+}

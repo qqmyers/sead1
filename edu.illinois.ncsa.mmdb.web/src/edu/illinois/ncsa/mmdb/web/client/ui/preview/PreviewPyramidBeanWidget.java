@@ -10,10 +10,12 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.PreviewPyramidBean;
 
 public class PreviewPyramidBeanWidget extends PreviewBeanWidget<PreviewPyramidBean> {
+    private final Label widget;
+
     public PreviewPyramidBeanWidget(HandlerManager eventBus) {
         super(eventBus);
 
-        Label widget = new Label();
+        widget = new Label();
         widget.addStyleName("seadragon"); //$NON-NLS-1$
         widget.getElement().setId(DOM.createUniqueId());
         setWidget(widget);
@@ -45,6 +47,9 @@ public class PreviewPyramidBeanWidget extends PreviewBeanWidget<PreviewPyramidBe
 
     @Override
     protected void showSection() {
+        if (getEmbedded()) {
+            widget.setSize(getWidth() + "px", getHeight() + "px");
+        }
         showSeadragon(RestEndpoints.PYRAMID_URL + URL.encodeComponent(getPreviewBean().getUri()) + "/xml", getWidgetID()); //$NON-NLS-1$
     }
 
@@ -54,32 +59,32 @@ public class PreviewPyramidBeanWidget extends PreviewBeanWidget<PreviewPyramidBe
     }
 
     public final native void showSeadragon(String url, String id) /*-{
-        $wnd.Seadragon.Config.debug = true;
-        $wnd.Seadragon.Config.imagePath = "img/";
-        $wnd.Seadragon.Config.autoHideControls = true;
+		$wnd.Seadragon.Config.debug = true;
+		$wnd.Seadragon.Config.imagePath = "img/";
+		$wnd.Seadragon.Config.autoHideControls = true;
 
-        // close existing viewer
-        if ($wnd.viewer) {
-        $wnd.viewer.setFullPage(false);
-        $wnd.viewer.setVisible(false);
-        $wnd.viewer.close();
-        $wnd.viewer = null;            
-        }
+		// close existing viewer
+		if ($wnd.viewer) {
+			$wnd.viewer.setFullPage(false);
+			$wnd.viewer.setVisible(false);
+			$wnd.viewer.close();
+			$wnd.viewer = null;
+		}
 
-        // open with new url
-        if (url != null) {
-        $wnd.viewer = new $wnd.Seadragon.Viewer(id);
-        $wnd.viewer.openDzi(url);
-        }
+		// open with new url
+		if (url != null) {
+			$wnd.viewer = new $wnd.Seadragon.Viewer(id);
+			$wnd.viewer.openDzi(url);
+		}
     }-*/;
 
     public final native void hideSeadragon() /*-{
-        // hide the current viewer if open
-        if ($wnd.viewer) {
-        $wnd.viewer.setFullPage(false);
-        $wnd.viewer.setVisible(false);
-        $wnd.viewer.close();
-        $wnd.viewer = null;            
-        }
+		// hide the current viewer if open
+		if ($wnd.viewer) {
+			$wnd.viewer.setFullPage(false);
+			$wnd.viewer.setVisible(false);
+			$wnd.viewer.close();
+			$wnd.viewer = null;
+		}
     }-*/;
 }

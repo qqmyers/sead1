@@ -1007,6 +1007,16 @@ a:hover {
 	color: black;
 }
 
+.viewer {
+	vertical-align: middle;
+	
+}
+
+.webGL3DPreview { 
+	text-align: center;
+	margin: 0px auto 0px auto;
+}
+
 .anchorButton {
     padding: 3px;
 }

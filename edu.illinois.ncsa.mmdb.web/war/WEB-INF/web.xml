@@ -98,6 +98,11 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
+		<servlet-name>dispatch</servlet-name>
+		<url-pattern>/embed/dispatch</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
 		<servlet-name>REST Servlet</servlet-name>
 		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>

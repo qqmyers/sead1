@@ -94,6 +94,10 @@ public class PreviewPanel extends Composite {
     private final Map<PreviewBeanWidget, Anchor>     anchors       = new HashMap<PreviewBeanWidget, Anchor>();
 
     private final DispatchAsync                      dispatchAsync;
+    private final boolean                            isEmbedded;
+    private final int                                width;
+    private final int                                height;
+    private static final int                         MAX_WIDTH     = 600;
 
     static public void addWidget(PreviewBeanWidget<? extends PreviewBean> widget) {
         if (registeredWidgets == null) {
@@ -120,6 +124,10 @@ public class PreviewPanel extends Composite {
     }
 
     public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus) {
+        this(dispatchAsync, eventBus, false, 600, 600);
+    }
+
+    public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus, boolean isEmbedded, int width, int height) {
         this.dispatchAsync = dispatchAsync;
         initializePreviews(eventBus);
         previewWidget = null;
@@ -139,6 +147,9 @@ public class PreviewPanel extends Composite {
             }
         });
 
+        this.isEmbedded = isEmbedded;
+        this.width = width;
+        this.height = height - 52;
     }
 
     public void showSection(String section) {
@@ -191,6 +202,13 @@ public class PreviewPanel extends Composite {
         if (showme) {
             previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null, dispatchAsync));
         }
+
+        if (isEmbedded) {
+            Anchor metadata = new Anchor("Metadata");
+            metadata.addStyleName("previewActionLink");
+            previewsPanel.add(metadata);
+        }
+
     }
 
     /**
@@ -213,6 +231,10 @@ public class PreviewPanel extends Composite {
                     if (best == null) {
                         best = pb;
                     } else {
+                        if (isEmbedded) {
+                            //needed for embedded widget so large widget always chosen
+                            maxwidth = MAX_WIDTH;
+                        }
                         best = widget.bestFit(best, pb, maxwidth, -1);
                     }
                 }
@@ -222,6 +244,12 @@ public class PreviewPanel extends Composite {
                 pbw.setPreviewBean(best);
                 pbw.setDatasetBean(dataset);
                 pbw.setDispatch(dispatchAsync);
+                pbw.setEmbedded(isEmbedded);
+                if (isEmbedded) {
+                    pbw.setWidth(width);
+                    pbw.setHeight(height);
+                }
+
                 list.add(pbw);
             }
         }

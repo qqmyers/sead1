@@ -45,9 +45,17 @@ public class Preview3DJavaBeanWidget extends PreviewBeanWidget<PreviewThreeDimen
     protected void showSection() {
         String url = GWT.getHostPageBaseURL() + "api/image/" + getPreviewBean().getUri();
 
+        int width = 480;
+        int height = 360;
+        if (getEmbedded()) {
+            width = getWidth();
+            height = getHeight();
+        }
+        GWT.log("Java height: " + height);
+
         ((HTML) getWidget()).setHTML("<div class='Java3DPreview'>" +
-                "<APPLET name=jvLite code='edu.illinois.ncsa.mmdb.javaView.javaViewer.class' width=480 " +
-                "height=360 archive=plugins/javaview.jar,plugins/javaViewer.jar>" +
+                "<APPLET name=jvLite code='edu.illinois.ncsa.mmdb.javaView.javaViewer.class' width=" + width +
+                " height=" + height + " archive=plugins/javaview.jar,plugins/javaViewer.jar>" +
                 "<PARAM NAME='model' VALUE='" + url + "" + "'>" +
                 "<PARAM NAME='border' VALUE='hide'>" +
                 "<PARAM NAME='control' VALUE='hide'>" +

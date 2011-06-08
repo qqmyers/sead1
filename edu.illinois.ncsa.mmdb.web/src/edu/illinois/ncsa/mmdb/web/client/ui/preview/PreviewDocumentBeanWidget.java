@@ -74,6 +74,10 @@ public class PreviewDocumentBeanWidget extends PreviewBeanWidget<PreviewDocument
                         text = text.replaceAll("<", "&lt;");
                         text = text.replaceAll(" ", "&nbsp;");
                         text = text.replaceAll("\n", "<br />");
+                        if (getEmbedded()) {
+                            ((HTML) getWidget()).setSize(getWidth() + "px", getHeight() + "px");
+                            ((HTML) getWidget()).addStyleName("textboxPreview");
+                        }
                         ((HTML) getWidget()).setHTML("<div class='textboxPreview'>" + text + "</div>");
                     } else {
                         ((HTML) getWidget()).setText("Error\n" + response.getStatusText());

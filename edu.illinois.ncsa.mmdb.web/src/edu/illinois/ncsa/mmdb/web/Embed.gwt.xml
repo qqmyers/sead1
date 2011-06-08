@@ -58,7 +58,7 @@
   <!-- Inherit the default GWT style sheet.                       -->
   <inherits name='com.google.gwt.user.theme.standard.Standard'/>
 
-  <stylesheet src="../mmdb.css" />
+  <stylesheet src="../embed.css" />
   
   <!-- Specify the app entry point class.                         -->
   <entry-point class='edu.illinois.ncsa.mmdb.web.client.Embed'/>

@@ -33,17 +33,19 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
     private final HTML widget;
     DispatchAsync      dispatch;
     Label              convert;
+    VerticalPanel      vp;
+    Anchor             setImage;
 
     public Preview3DHTML5BeanWidget(HandlerManager eventBus) {
         super(eventBus);
-        VerticalPanel vp = new VerticalPanel();
-        vp.addStyleName("centered"); //$NON-NLS-1$
+        vp = new VerticalPanel();
+        vp.addStyleName("webGL3DPreview");
 
         widget = new HTML();
         widget.getElement().setId(DOM.createUniqueId());
         vp.add(widget);
 
-        final Anchor setImage = new Anchor("Create Thumbnail");
+        setImage = new Anchor("Create Thumbnail");
         setImage.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 setImage();
@@ -86,8 +88,8 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
     }
 
     public final native void hideHTML5() /*-{
-        // hide the current WebGL viewer if open
-        $wnd.hideThingView();
+		// hide the current WebGL viewer if open
+		$wnd.hideThingView();
     }-*/;
 
     @Override
@@ -96,13 +98,13 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
     }
 
     private final native void readOBJ(String fileData) /*-{
-        // initialize HTML5 application
-        $wnd.initialize(fileData);
+		// initialize HTML5 application
+		$wnd.initialize(fileData);
     }-*/;
 
     private final native String getCanvasData() /*-{
-        // initialize HTML5 application
-        return $wnd.saveImgThingView();
+		// initialize HTML5 application
+		return $wnd.saveImgThingView();
     }-*/;
 
     private void setImage() {
@@ -127,7 +129,19 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
 
     @Override
     protected void showSection() {
-        widget.setHTML("<center><div id='viewer' style='border:solid 1px #A8A8A8;width:480px;height:360px'></div></center><br>");
+
+        int width = 480;
+        int height = 360;
+        if (getEmbedded()) {
+            width = getWidth();
+            height = getHeight();
+            vp.remove(setImage);
+            vp.remove(convert);
+        }
+        final int new_width = width;
+        final int new_height = height;
+
+        widget.setHTML("<center><div id='viewer' style='width:" + width + "px;height:" + height + "px'></div></center>");
 
         String url = GWT.getHostPageBaseURL() + RestEndpoints.BLOB_URL + getPreviewBean().getUri();
 
@@ -141,7 +155,7 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
 
                 public void onResponseReceived(Request request, Response response) {
                     if (200 == response.getStatusCode()) {
-                        initThingView(response.getText());
+                        initThingView(response.getText(), new_width, new_height);
 
                     } else {
                         widget.setText("Error\n" + response.getStatusText());
@@ -164,9 +178,9 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
                 */
     }
 
-    public final native void initThingView(String fileData) /*-{
-        // hide the current WebGL viewer if open
-        $wnd.initThingView(fileData);
+    public final native void initThingView(String fileData, int width, int height) /*-{
+		// hide the current WebGL viewer if open
+		$wnd.initThingView(fileData, width, height);
     }-*/;
 
 }

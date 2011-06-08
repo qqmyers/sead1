@@ -1,12 +1,17 @@
 
  
- initThingView = function(url){
+ initThingView = function(url, thing_width, thing_height){
+	 
       thingiurlbase = "js/thingview";
       thingiview = new Thingiview("viewer");
+      thingiview.setWidth(thing_width);
+      thingiview.setHeight(thing_height);
       thingiview.setObjectColor('#C0D8F0');
 	  thingiview.setBackgroundColor('#ffffff');
       thingiview.initScene();
       thingiview.loadOBJString(url);
+      
+      
   }
   
   hideThingView = function(){
@@ -69,8 +74,8 @@ Thingiview = function(containerId) {
 
 
 
-	var width = 480;
-	var height = 360;
+	var width;
+	var height;
 
 
   var geometry;
@@ -84,7 +89,14 @@ Thingiview = function(containerId) {
   
   this.saveImage = function() { 
   	return renderer.domElement.toDataURL();
+  }
   
+  this.setWidth = function(new_width) {
+  width = new_width;
+  }
+
+  this.setHeight = function(new_height) {
+	 height = new_height;
   }
 
   this.initScene = function() {

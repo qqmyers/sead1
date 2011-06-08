@@ -46,6 +46,10 @@ public class PreviewAudioBeanWidget extends PreviewBeanWidget<PreviewAudioBean> 
         String preview = null;
         long width = 320;
         long height = 240;
+        if (getEmbedded()) {
+            width = getWidth();
+            height = getHeight();
+        }
         if (getPreviewBean().getPreviewImage() != null) {
             preview = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
             width = getPreviewBean().getPreviewImage().getWidth();
@@ -56,22 +60,22 @@ public class PreviewAudioBeanWidget extends PreviewBeanWidget<PreviewAudioBean> 
     }
 
     public final native void showAudioVideo(String url, String preview, String id, String w, String h) /*-{
-        if (url != null) {
-        $wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');
-        $wnd.player.addParam('allowfullscreen','true');
-        $wnd.player.addParam('allowscriptaccess','always');
-        $wnd.player.addParam('wmode','opaque');
-        $wnd.player.addVariable('file',url);
-        $wnd.player.addVariable('autostart','false');
-        if (preview != null) {
-        $wnd.player.addVariable('image',preview);
-        }            
-        //            $wnd.player.addVariable('author','Joe');
-        //            $wnd.player.addVariable('description','Bob');
-        //            $wnd.player.addVariable('title','title');
-        //            $wnd.player.addVariable('debug','console');
-        $wnd.player.addVariable('provider','sound');
-        $wnd.player.write(id);
-        }
+		if (url != null) {
+			$wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');
+			$wnd.player.addParam('allowfullscreen', 'true');
+			$wnd.player.addParam('allowscriptaccess', 'always');
+			$wnd.player.addParam('wmode', 'opaque');
+			$wnd.player.addVariable('file', url);
+			$wnd.player.addVariable('autostart', 'false');
+			if (preview != null) {
+				$wnd.player.addVariable('image', preview);
+			}
+			//            $wnd.player.addVariable('author','Joe');
+			//            $wnd.player.addVariable('description','Bob');
+			//            $wnd.player.addVariable('title','title');
+			//            $wnd.player.addVariable('debug','console');
+			$wnd.player.addVariable('provider', 'sound');
+			$wnd.player.write(id);
+		}
     }-*/;
 }

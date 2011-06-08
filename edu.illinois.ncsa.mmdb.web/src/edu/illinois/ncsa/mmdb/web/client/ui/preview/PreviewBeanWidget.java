@@ -14,6 +14,9 @@ public abstract class PreviewBeanWidget<T extends PreviewBean> {
     private T                      pb = null;
     private DatasetBean            dataset;
     private DispatchAsync          dispatch;
+    private int                    width;
+    private int                    height;
+    private boolean                embedded;
 
     /** the actual widget that will hold the preview */
     private Widget                 widget;
@@ -47,6 +50,30 @@ public abstract class PreviewBeanWidget<T extends PreviewBean> {
 
     public void setDispatch(DispatchAsync dispatch) {
         this.dispatch = dispatch;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setEmbedded(boolean embedded) {
+        this.embedded = embedded;
+    }
+
+    public boolean getEmbedded() {
+        return embedded;
     }
 
     /**

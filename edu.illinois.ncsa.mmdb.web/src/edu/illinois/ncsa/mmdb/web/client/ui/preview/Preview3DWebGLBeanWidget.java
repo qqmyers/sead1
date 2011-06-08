@@ -32,17 +32,19 @@ public class Preview3DWebGLBeanWidget extends PreviewBeanWidget<PreviewThreeDime
     private final HTML widget;
     DispatchAsync      dispatch;
     Label              convert;
+    VerticalPanel      vp;
+    Anchor             setImage;
 
     public Preview3DWebGLBeanWidget(HandlerManager eventBus) {
         super(eventBus);
-        VerticalPanel vp = new VerticalPanel();
-        vp.addStyleName("centered"); //$NON-NLS-1$
+        vp = new VerticalPanel();
+        vp.addStyleName("WebGL3DPreview"); //$NON-NLS-1$
 
         widget = new HTML();
         widget.getElement().setId(DOM.createUniqueId());
         vp.add(widget);
 
-        final Anchor setImage = new Anchor("Create Thumbnail");
+        setImage = new Anchor("Create Thumbnail");
         setImage.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 setImage();
@@ -141,10 +143,19 @@ public class Preview3DWebGLBeanWidget extends PreviewBeanWidget<PreviewThreeDime
             widget.setText("Error\n" + e.getMessage());
         }
 
-        widget.setHTML("<STYLE type='text/css'> canvas {border:solid 1px #000;} body{overflow:hidden;}</STYLE>" +
-                "<CANVAS id='c' width='480' height='360'><P>If you are seeing this, " +
+        int width = 480;
+        int height = 360;
+        if (getEmbedded()) {
+            width = getWidth();
+            height = getHeight();
+            vp.remove(setImage);
+            vp.remove(convert);
+        }
+
+        widget.setHTML("<STYLE type='text/css'> canvas {} body{overflow:hidden;}</STYLE>" +
+                "<CANVAS id='c' width='" + width + "' height='" + height + "'>If you are seeing this, " +
                 "your browser does not support <a href='http://www.google.com/chrome/'>" +
-                "HTML5</a></P></CANVAS>" + "<p id='info'></p>");
+                "HTML5</a></CANVAS>" + "<div id='info'></div>");
 
     }
 

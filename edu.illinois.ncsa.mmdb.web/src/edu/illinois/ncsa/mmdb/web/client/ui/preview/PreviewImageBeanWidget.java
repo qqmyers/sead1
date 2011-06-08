@@ -71,9 +71,17 @@ public class PreviewImageBeanWidget extends PreviewBeanWidget<PreviewImageBean> 
                 h = MAX_HEIGHT;
             }
         }
+        if (getEmbedded()) {
+            w = getWidth();
+            h = getHeight();
+        }
 
         image.setWidth(Long.toString(w));
         image.setHeight(Long.toString(h));
-        image.setUrl(RestEndpoints.BLOB_URL + getPreviewBean().getUri());
+        if (getEmbedded()) {
+            image.setUrl(RestEndpoints.BLOB_URL + getPreviewBean().getUri());
+        } else {
+            image.setUrl(RestEndpoints.BLOB_URL + getPreviewBean().getUri());
+        }
     }
 }

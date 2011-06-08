@@ -54,6 +54,10 @@ public class PreviewVideoBeanWidget extends PreviewBeanWidget<PreviewVideoBean> 
         String preview = null;
         long width = getPreviewBean().getWidth();
         long height = getPreviewBean().getHeight();
+        if (getEmbedded()) {
+            width = getWidth();
+            height = getHeight();
+        }
         if (getPreviewBean().getPreviewImage() != null) {
             preview = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
         }
@@ -61,22 +65,22 @@ public class PreviewVideoBeanWidget extends PreviewBeanWidget<PreviewVideoBean> 
     }
 
     public final native void showAudioVideo(String url, String preview, String id, String w, String h) /*-{
-        if (url != null) {
-        $wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');
-        $wnd.player.addParam('allowfullscreen','true');
-        $wnd.player.addParam('allowscriptaccess','always');
-        $wnd.player.addParam('wmode','opaque');
-        $wnd.player.addVariable('file',url);
-        $wnd.player.addVariable('autostart','false');
-        if (preview != null) {
-        $wnd.player.addVariable('image',preview);
-        }            
-        //            $wnd.player.addVariable('author','Joe');
-        //            $wnd.player.addVariable('description','Bob');
-        //            $wnd.player.addVariable('title','title');
-        //            $wnd.player.addVariable('debug','console');
-        $wnd.player.addVariable('provider','video');
-        $wnd.player.write(id);
-        }
+		if (url != null) {
+			$wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');
+			$wnd.player.addParam('allowfullscreen', 'true');
+			$wnd.player.addParam('allowscriptaccess', 'always');
+			$wnd.player.addParam('wmode', 'opaque');
+			$wnd.player.addVariable('file', url);
+			$wnd.player.addVariable('autostart', 'false');
+			if (preview != null) {
+				$wnd.player.addVariable('image', preview);
+			}
+			//            $wnd.player.addVariable('author','Joe');
+			//            $wnd.player.addVariable('description','Bob');
+			//            $wnd.player.addVariable('title','title');
+			//            $wnd.player.addVariable('debug','console');
+			$wnd.player.addVariable('provider', 'video');
+			$wnd.player.write(id);
+		}
     }-*/;
 }
