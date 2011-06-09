@@ -102,7 +102,7 @@ public class Embed implements EntryPoint {
 
                 final HorizontalPanel bottom = new HorizontalPanel();
                 bottom.addStyleName("bottomRow");
-                bottom.setWidth(width + "px");
+                bottom.setWidth((width - 2) + "px");
                 rootPanel.add(bottom);
 
                 final Anchor link = new Anchor();
@@ -111,7 +111,7 @@ public class Embed implements EntryPoint {
 
                 //Logo
                 final Image logo = new Image("images/logo_embedded.png");
-                logo.setSize("65px", "26px");
+                logo.setSize("60px", "24px");
                 logo.addStyleName("bottomLogo");
                 link.getElement().appendChild(logo.getElement());
 

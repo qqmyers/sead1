@@ -54,6 +54,8 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -98,6 +100,7 @@ public class PreviewPanel extends Composite {
     private final int                                width;
     private final int                                height;
     private static final int                         MAX_WIDTH     = 600;
+    private HorizontalPanel                          anchorTabs;
 
     static public void addWidget(PreviewBeanWidget<? extends PreviewBean> widget) {
         if (registeredWidgets == null) {
@@ -148,7 +151,7 @@ public class PreviewPanel extends Composite {
         });
 
         this.isEmbedded = isEmbedded;
-        this.width = width;
+        this.width = width - 2;
         this.height = height - 52;
     }
 
@@ -194,8 +197,23 @@ public class PreviewPanel extends Composite {
 
         // add previews, if no preview is available fall back on PreviewWidget
         boolean showme = true;
+
+        if (isEmbedded) {
+            anchorTabs = new HorizontalPanel();
+            anchorTabs.addStyleName("anchorTabs");
+            previewsPanel.add(anchorTabs);
+        }
+
         for (PreviewBeanWidget pbw : widgets ) {
-            createAnchor(pbw, previewsPanel, showme);
+            if (isEmbedded) {
+                final FocusPanel tab = new FocusPanel();
+                tab.add(createAnchor(pbw, showme));
+                tab.setStyleName("tabPreview");
+                anchorTabs.add(tab);
+            } else {
+                previewsPanel.add(createAnchor(pbw, showme));
+            }
+
             showme = false;
         }
 
@@ -204,9 +222,12 @@ public class PreviewPanel extends Composite {
         }
 
         if (isEmbedded) {
+            FocusPanel metadataTab = new FocusPanel();
+            metadataTab.addStyleName("tabPreview");
             Anchor metadata = new Anchor("Metadata");
             metadata.addStyleName("previewActionLink");
-            previewsPanel.add(metadata);
+            metadataTab.add(metadata);
+            anchorTabs.add(metadataTab);
         }
 
     }
@@ -258,7 +279,7 @@ public class PreviewPanel extends Composite {
         return list;
     }
 
-    private void createAnchor(final PreviewBeanWidget pbw, FlowPanel previewsPanel, boolean showme) {
+    private Anchor createAnchor(final PreviewBeanWidget pbw, boolean showme) {
         Anchor anchor = new Anchor(pbw.getAnchorText());
         anchor.addStyleName("previewActionLink");
         anchor.addClickHandler(new ClickHandler() {
@@ -266,7 +287,6 @@ public class PreviewPanel extends Composite {
                 clickEvent(pbw);
             }
         });
-        previewsPanel.add(anchor);
 
         if (showme) {
             showPreview(pbw);
@@ -274,6 +294,8 @@ public class PreviewPanel extends Composite {
         }
 
         anchors.put(pbw, anchor);
+
+        return anchor;
     }
 
     private void clickEvent(PreviewBeanWidget pbw) {

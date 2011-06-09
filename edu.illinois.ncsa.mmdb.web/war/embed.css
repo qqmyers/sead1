@@ -8,8 +8,8 @@ body {
 }
 
 .mainMenu, .mainContainer, .bottomMenu {
-	font-size: 0.8em;
-	
+	font-size: .8em;
+	border: 1px solid #888888;
 }
 
 /* 													 */
@@ -20,11 +20,6 @@ body {
 	margin: 0px;
 	padding: 0px;
 	height: auto;
-}
-
-.deadlink {
-	color: black !important;
-	text-decoration: none !important;
 }
 
 .textboxPreview {
@@ -47,10 +42,39 @@ body {
 	
 }
 
+.anchorTabs {
+	margin-top: 0px;
+}
+
+.tabPreview {
+	border-right: 1px solid #000000;
+}
+
 .previewActionLink {
-	margin: 5px 10px 0px 5px;
+	display: block;
+	padding: 3px 5px 0px 5px;
+	background-color: #e4e8f4;
+	height: 21px;
+	text-decoration: none;
+	color: black;
 	cursor: pointer;
 	cursor: hand;
+}
+
+.previewActionLink:hover {
+	color: #000000;
+	background-color: #86a0bf;
+}
+
+.deadlink {
+	background-color: #c7ccdf;
+	color: black !important;
+	text-decoration: none !important;
+	cursor: default !important;
+}
+
+.previewActionLink:visited {
+	background-color: blue;
 }
 
 .multiAnchor {
@@ -67,7 +91,8 @@ body {
 }
 
 .fileTitle { 
-	font-size: 1.5em;
+	font-size: 1.3em;
+	margin-left: 3px;
   	color: black;
 }
 
@@ -75,17 +100,23 @@ body {
 /* 				Sides and Buttons					 */
 
 .datasetActions {
-	margin: 0px;
-	padding: 0px 0px 0px 0px;
-	height: 26px;
-	background-color: #f0f0f0;
+	height: 24px;
+	border-bottom: 1px solid #888888;
+	background: url('images/bar_inv.gif');
 }
 
 .bottomRow {
-	background-color: #f0f0f0;
-	height: 26px;
+	background: url('images/bar.gif');
+	height: 24px;
+	border-top: 1px solid #888888;
 }
 
 .bottomLogo {
-	float: right;	
+	float: right;
+	background: url('images/bar.gif');
+}
+
+.bottomLogo:hover {
+	height: 24px;
+	background: url('images/bar_hover.gif');
 }

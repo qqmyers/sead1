@@ -259,6 +259,29 @@ public class DatasetWidget extends Composite {
         extractWidget.addStyleName("inlineBlock");
         actionsPanel.add(extractWidget);
 
+        // embed action
+        final FlowPanel embedWidget = new FlowPanel();
+        embedWidget.addStyleName("inlineBlock");
+        actionsPanel.add(embedWidget);
+        final FlowPanel embedBox = new FlowPanel();
+
+        Anchor embedAnchor = new Anchor("Embed");
+        embedAnchor.addStyleName("datasetActionLink");
+        embedAnchor.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                if (embedBox.getWidgetCount() > 0) {
+                    embedBox.clear();
+                }
+                else {
+                    embedBox.add(new EmbedWidget(uri));
+                }
+
+            }
+        });
+        embedWidget.add(embedAnchor);
+
+        leftColumn.add(embedBox);
+
         // metadata        
         final UserMetadataWidget um = new UserMetadataWidget(uri, service, eventBus);
         um.setWidth("100%");
