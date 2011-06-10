@@ -49,7 +49,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -61,14 +60,12 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
-import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
@@ -92,8 +89,6 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
@@ -115,7 +110,7 @@ public class DatasetWidget extends Composite {
 
     private String                  uri;
 
-    private Panel                   infoPanel;
+    private InfoWidget              infoPanel;
     private FlexTable               informationTable;
     protected DerivedDatasetsWidget derivedDatasetsWidget;
     private Label                   noExtractedMetadata;
@@ -299,7 +294,7 @@ public class DatasetWidget extends Composite {
         // ----------------------------------------------------------------------
 
         // dataset information
-        infoPanel = createInfoPanel(result.getDataset());
+        infoPanel = new InfoWidget(result.getDataset(), service);
         rightColumn.add(infoPanel);
 
         // license widget
@@ -389,56 +384,6 @@ public class DatasetWidget extends Composite {
                 Permission.EDIT_USER_METADATA,
                 Permission.DOWNLOAD);
         // FIXME allow owner to do stuff
-    }
-
-    void addInfo(String name, String value, Panel panel) {
-        if (value != null && !value.equals("")) {
-            Label lbl = new Label(name + ": " + value);
-            lbl.addStyleName("datasetRightColText");
-            panel.add(lbl);
-        }
-    }
-
-    /**
-     * Create the panel containing the information about the dataset.
-     * 
-     * @return panel with information about the dataset.
-     */
-    protected Panel createInfoPanel(DatasetBean data) {
-        FlowPanel panel = new FlowPanel();
-        panel.addStyleName("datasetRightColSection");
-        Label lbl = new Label("Info");
-        lbl.addStyleName("datasetRightColHeading");
-        panel.add(lbl);
-
-        lbl = new Label("Contributor: ");
-        lbl.addStyleName("datasetRightColText");
-        PersonBean creator = data.getCreator();
-        if (creator != null) {
-            lbl.setTitle(creator.getEmail());
-            lbl.setText("Contributor: " + creator.getName());
-        }
-        panel.add(lbl);
-
-        String filename = data.getFilename();
-        addInfo("Filename", filename, panel);
-
-        String size = TextFormatter.humanBytes(data.getSize());
-        addInfo("Size", size, panel);
-
-        String cat = ContentCategory.getCategory(data.getMimeType(), service);
-        addInfo("Category", cat, panel);
-
-        String type = data.getMimeType();
-        addInfo("MIME Type", type, panel);
-
-        String date = "";
-        if (data.getDate() != null) {
-            date += DateTimeFormat.getShortDateTimeFormat().format(data.getDate());
-        }
-        addInfo("Uploaded", date, panel);
-
-        return panel;
     }
 
     protected void showRerunExtraction() {

@@ -106,7 +106,6 @@ table td, select {
   border-bottom: 1px solid white;
 }
 
-
 /* ----------------------------------------------------------------------
  * Links
  * ---------------------------------------------------------------------- */
@@ -1460,9 +1459,19 @@ a:hover {
 }
 
 .embedTextArea {
+	color: black;
 	margin: 10px 0px 7px 0px;
 }
 
 .embedPreviewButton {
 	margin-bottom: 10px;	
+}
+
+.embedSizeBoxes {
+	margin: 0px 3px 0px 3px;
+}
+
+.embedBoxSpacer {
+	margin-right: 20px;	
+	margin-bottom: 15px;
 }

@@ -41,26 +41,79 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class EmbedWidget extends Composite {
     private final VerticalPanel mainContainer;
 
-    public EmbedWidget(String uri) {
+    public EmbedWidget(final String uri) {
         mainContainer = new VerticalPanel();
         mainContainer.addStyleName("embeddedWidget");
         mainContainer.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
+        //Width and Height Text Boxes
+        HorizontalPanel textBoxes = new HorizontalPanel();
+
+        final TextBox widthBox = new TextBox();
+        widthBox.setStyleName("embedSizeBoxes");
+        widthBox.setMaxLength(4);
+        widthBox.setWidth("2.7em");
+        widthBox.setText("500");
+        textBoxes.add(new Label("Width:"));
+        textBoxes.add(widthBox);
+        Label pixels = new Label("px");
+        pixels.addStyleName("embedBoxSpacer");
+        textBoxes.add(pixels);
+
+        final TextBox heightBox = new TextBox();
+        heightBox.setStyleName("embedSizeBoxes");
+        heightBox.setMaxLength(4);
+        heightBox.setWidth("2.7em");
+        heightBox.setText("500");
+        textBoxes.add(new Label("Height:"));
+        textBoxes.add(heightBox);
+        textBoxes.add(new Label("px"));
+
+        //Text box to copy code from
         final TextArea iframe = new TextArea();
         iframe.addStyleName("embedTextArea");
-        iframe.setText("<iframe width=\"500px\" height=\"500px\" src=\"" + GWT.getHostPageBaseURL() + "embed.html#d?id=" + uri + "\" frameborder=\"0\">");
-        iframe.setWidth("90%");
+        iframe.setText(iframeText(uri, widthBox, heightBox));
+        iframe.setWidth("95%");
+        iframe.setReadOnly(true);
+        iframe.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                iframe.selectAll();
+            }
+        });
+
+        //Change width and height of iframe dynamically
+        widthBox.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                iframe.setText(iframeText(uri, widthBox, heightBox));
+            }
+        });
+
+        //Change width and height of iframe dynamically
+        heightBox.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                iframe.setText(iframeText(uri, widthBox, heightBox));
+            }
+        });
 
         mainContainer.add(iframe);
+        mainContainer.add(textBoxes);
 
         Button preview = new Button("Preview");
         preview.addStyleName("embedPreviewButton");
@@ -75,6 +128,12 @@ public class EmbedWidget extends Composite {
         mainContainer.add(preview);
 
         initWidget(mainContainer);
+    }
+
+    private String iframeText(String uri, TextBox width, TextBox height) {
+        return "<iframe width=\"" + width.getText() + "px\" height=\"" + height.getText() + "px\" " +
+                "src=\"" + GWT.getHostPageBaseURL() + "embed.html#d?id=" + uri + "\" frameborder=\"0\">";
+
     }
 
 }

@@ -96,7 +96,10 @@ public class PreviewPanel extends Composite {
     private final Map<PreviewBeanWidget, Anchor>     anchors       = new HashMap<PreviewBeanWidget, Anchor>();
 
     private final DispatchAsync                      dispatchAsync;
-    private final boolean                            isEmbedded;
+    private final HandlerManager                     eventBus;
+
+    /** Width and height values only use in embedded widet */
+    private static boolean                           isEmbedded;
     private final int                                width;
     private final int                                height;
     private static final int                         MAX_WIDTH     = 600;
@@ -120,10 +123,13 @@ public class PreviewPanel extends Composite {
         addWidget(new PreviewDocumentBeanWidget(eventBus));
         addWidget(new PreviewImageBeanWidget(eventBus));
         addWidget(new PreviewPyramidBeanWidget(eventBus));
-        addWidget(new PreviewMultiImageBeanWidget(eventBus));
         addWidget(new Preview3DJavaBeanWidget(eventBus));
         addWidget(new Preview3DHTML5BeanWidget(eventBus));
         addWidget(new Preview3DWebGLBeanWidget(eventBus));
+        //The following previews currently not supported in embedded previewer
+        if (!isEmbedded) {
+            addWidget(new PreviewMultiImageBeanWidget(eventBus));
+        }
     }
 
     public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus) {
@@ -132,7 +138,9 @@ public class PreviewPanel extends Composite {
 
     public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus, boolean isEmbedded, int width, int height) {
         this.dispatchAsync = dispatchAsync;
+        this.isEmbedded = isEmbedded;
         initializePreviews(eventBus);
+
         previewWidget = null;
 
         eventBus.addHandler(PreviewSectionChangedEvent.TYPE, new PreviewSectionChangedEventHandler() {
@@ -150,9 +158,10 @@ public class PreviewPanel extends Composite {
             }
         });
 
-        this.isEmbedded = isEmbedded;
         this.width = width - 2;
         this.height = height - 52;
+        this.eventBus = eventBus;
+
     }
 
     public void showSection(String section) {
@@ -221,12 +230,14 @@ public class PreviewPanel extends Composite {
             previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null, dispatchAsync));
         }
 
+        //Add Metadata Preview to Embedded Widget
         if (isEmbedded) {
             FocusPanel metadataTab = new FocusPanel();
             metadataTab.addStyleName("tabPreview");
-            Anchor metadata = new Anchor("Metadata");
-            metadata.addStyleName("previewActionLink");
-            metadataTab.add(metadata);
+            PreviewMetadataWidget metadataWidget = new PreviewMetadataWidget(eventBus, dataset, dispatchAsync);
+            metadataWidget.setWidth(width);
+            metadataWidget.setHeight(height);
+            metadataTab.add(createAnchor(metadataWidget, false));
             anchorTabs.add(metadataTab);
         }
 

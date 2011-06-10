@@ -81,9 +81,7 @@ public class Embed implements EntryPoint {
      */
     public void onModuleLoad() {
 
-        GWT.log("Hello world!");
         final RootPanel rootPanel = RootPanel.get("mmdb-mainContainer");
-
         if (rootPanel != null) {
 
             Map<String, String> params = getParams();
