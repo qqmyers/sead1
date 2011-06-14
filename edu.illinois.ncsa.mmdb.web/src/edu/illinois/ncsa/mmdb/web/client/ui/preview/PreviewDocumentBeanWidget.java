@@ -59,8 +59,10 @@ public class PreviewDocumentBeanWidget extends PreviewBeanWidget<PreviewDocument
     @Override
     protected void showSection() {
         String url = GWT.getHostPageBaseURL() + RestEndpoints.BLOB_URL + getPreviewBean().getUri();
-        setWidth(600);
-        setHeight(500);
+        if (!getEmbedded()) {
+            setWidth(600);
+            setHeight(500);
+        }
 
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
         try {
