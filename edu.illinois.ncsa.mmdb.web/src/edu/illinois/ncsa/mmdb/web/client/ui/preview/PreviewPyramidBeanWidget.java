@@ -49,6 +49,9 @@ public class PreviewPyramidBeanWidget extends PreviewBeanWidget<PreviewPyramidBe
     protected void showSection() {
         if (getEmbedded()) {
             widget.setSize(getWidth() + "px", getHeight() + "px");
+        } else {
+            setWidth(600);
+            setHeight(400);
         }
         showSeadragon(RestEndpoints.PYRAMID_URL + URL.encodeComponent(getPreviewBean().getUri()) + "/xml", getWidgetID()); //$NON-NLS-1$
     }

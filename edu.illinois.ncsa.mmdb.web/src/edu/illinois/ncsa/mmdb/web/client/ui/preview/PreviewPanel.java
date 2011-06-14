@@ -133,7 +133,7 @@ public class PreviewPanel extends Composite {
     }
 
     public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus) {
-        this(dispatchAsync, eventBus, false, 600, 600);
+        this(dispatchAsync, eventBus, false, 500, 500);
     }
 
     public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus, boolean isEmbedded, int width, int height) {
@@ -241,6 +241,26 @@ public class PreviewPanel extends Composite {
             anchorTabs.add(metadataTab);
         }
 
+    }
+
+    /**
+     * Calculate best fit ratio for embedded previews
+     * 
+     */
+    public float getSizeRatio() {
+
+        float ratio = 1;
+        boolean showme = true;
+
+        for (PreviewBeanWidget pbw : widgets ) {
+            if (showme) {
+                GWT.log("Preview Width: " + pbw.getWidth());
+                GWT.log("Preview height: " + pbw.getHeight());
+                ratio = (float) pbw.getWidth() / (float) pbw.getHeight();
+            }
+            showme = false;
+        }
+        return ratio;
     }
 
     /**

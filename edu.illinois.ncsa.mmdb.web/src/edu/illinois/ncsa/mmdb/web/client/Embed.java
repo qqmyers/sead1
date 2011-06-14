@@ -125,9 +125,13 @@ public class Embed implements EntryPoint {
                     public void onSuccess(GetDatasetResult result) {
                         PreviewPanel previewPanel = new PreviewPanel(dispatchAsync, eventBus, true, width, height);
                         previewPanel.drawPreview(result, column, uri);
-                        Label title = new Label(result.getDataset().getTitle());
+                        String subTitle = result.getDataset().getTitle().substring(0, 20) + "...";
+                        Label title = new Label(subTitle);
                         title.setStyleName("fileTitle");
-                        bottom.add(title);
+                        //If width too small, don't bother putting file title
+                        if (width > 200) {
+                            bottom.add(title);
+                        }
                         bottom.add(link);
                     }
                 });

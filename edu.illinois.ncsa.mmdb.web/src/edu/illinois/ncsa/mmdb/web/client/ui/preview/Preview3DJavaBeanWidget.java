@@ -47,12 +47,13 @@ public class Preview3DJavaBeanWidget extends PreviewBeanWidget<PreviewThreeDimen
 
         int width = 480;
         int height = 360;
-        if (getEmbedded()) {
+        if (!getEmbedded()) {
+            setWidth(width);
+            setHeight(height);
+        } else {
             width = getWidth();
             height = getHeight();
         }
-        GWT.log("Java height: " + height);
-
         ((HTML) getWidget()).setHTML("<div class='Java3DPreview'>" +
                 "<APPLET name=jvLite code='edu.illinois.ncsa.mmdb.javaView.javaViewer.class' width=" + width +
                 " height=" + height + " archive=plugins/javaview.jar,plugins/javaViewer.jar>" +

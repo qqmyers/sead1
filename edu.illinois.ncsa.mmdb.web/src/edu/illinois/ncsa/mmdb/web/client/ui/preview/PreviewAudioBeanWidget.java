@@ -46,14 +46,18 @@ public class PreviewAudioBeanWidget extends PreviewBeanWidget<PreviewAudioBean> 
         String preview = null;
         long width = 320;
         long height = 240;
-        if (getEmbedded()) {
-            width = getWidth();
-            height = getHeight();
-        }
+
         if (getPreviewBean().getPreviewImage() != null) {
             preview = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
             width = getPreviewBean().getPreviewImage().getWidth();
             height = getPreviewBean().getPreviewImage().getHeight();
+        }
+        if (!getEmbedded()) {
+            setWidth((int) width);
+            setHeight((int) height);
+        } else {
+            width = getWidth();
+            height = getHeight();
         }
 
         showAudioVideo(RestEndpoints.BLOB_URL + getPreviewBean().getUri(), preview, getWidgetID(), Long.toString(width), Long.toString(height));

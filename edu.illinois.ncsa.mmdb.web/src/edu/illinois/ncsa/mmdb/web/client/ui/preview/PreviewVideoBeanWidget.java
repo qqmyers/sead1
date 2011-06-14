@@ -54,7 +54,10 @@ public class PreviewVideoBeanWidget extends PreviewBeanWidget<PreviewVideoBean> 
         String preview = null;
         long width = getPreviewBean().getWidth();
         long height = getPreviewBean().getHeight();
-        if (getEmbedded()) {
+        if (!getEmbedded()) {
+            setWidth((int) width);
+            setHeight((int) height);
+        } else {
             width = getWidth();
             height = getHeight();
         }

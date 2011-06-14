@@ -233,6 +233,7 @@ public class DatasetWidget extends Composite {
         // preview - selection text and preview
         previewPanel = new PreviewPanel(service, eventBus);
         previewPanel.drawPreview(result, leftColumn, uri);
+        final float embedPreviewRatio = previewPanel.getSizeRatio();
 
         // dataset actions
         final FlowPanel actionsPanel = new FlowPanel();
@@ -268,7 +269,7 @@ public class DatasetWidget extends Composite {
                     embedBox.clear();
                 }
                 else {
-                    embedBox.add(new EmbedWidget(uri));
+                    embedBox.add(new EmbedWidget(uri, embedPreviewRatio));
                 }
 
             }

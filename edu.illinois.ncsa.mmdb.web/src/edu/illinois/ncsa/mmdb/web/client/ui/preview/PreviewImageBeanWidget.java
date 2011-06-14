@@ -74,6 +74,9 @@ public class PreviewImageBeanWidget extends PreviewBeanWidget<PreviewImageBean> 
         if (getEmbedded()) {
             w = getWidth();
             h = getHeight();
+        } else {
+            setWidth((int) w);
+            setHeight((int) h);
         }
 
         image.setWidth(Long.toString(w));

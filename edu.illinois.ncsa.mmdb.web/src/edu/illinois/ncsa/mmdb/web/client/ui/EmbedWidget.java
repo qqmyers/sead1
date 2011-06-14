@@ -55,7 +55,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class EmbedWidget extends Composite {
     private final VerticalPanel mainContainer;
 
-    public EmbedWidget(final String uri) {
+    public EmbedWidget(final String uri, final float ratio) {
         mainContainer = new VerticalPanel();
         mainContainer.addStyleName("embeddedWidget");
         mainContainer.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -63,11 +63,16 @@ public class EmbedWidget extends Composite {
         //Width and Height Text Boxes
         HorizontalPanel textBoxes = new HorizontalPanel();
 
+        //Embed widget has extra padding height of 52
+        int width = (int) (448 * ratio) + 2;
+
+        int height = 500;
+
         final TextBox widthBox = new TextBox();
         widthBox.setStyleName("embedSizeBoxes");
         widthBox.setMaxLength(4);
         widthBox.setWidth("2.7em");
-        widthBox.setText("500");
+        widthBox.setText(Integer.toString(width));
         textBoxes.add(new Label("Width:"));
         textBoxes.add(widthBox);
         Label pixels = new Label("px");
@@ -78,7 +83,7 @@ public class EmbedWidget extends Composite {
         heightBox.setStyleName("embedSizeBoxes");
         heightBox.setMaxLength(4);
         heightBox.setWidth("2.7em");
-        heightBox.setText("500");
+        heightBox.setText(Integer.toString(height));
         textBoxes.add(new Label("Height:"));
         textBoxes.add(heightBox);
         textBoxes.add(new Label("px"));
@@ -100,7 +105,11 @@ public class EmbedWidget extends Composite {
         widthBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                iframe.setText(iframeText(uri, widthBox, heightBox));
+                if (!widthBox.getText().isEmpty()) {
+                    int width_box = Integer.parseInt(widthBox.getText());
+                    heightBox.setText(Integer.toString((int) (((width_box - 2) / ratio) + 52)));
+                    iframe.setText(iframeText(uri, widthBox, heightBox));
+                }
             }
         });
 
@@ -108,7 +117,12 @@ public class EmbedWidget extends Composite {
         heightBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                iframe.setText(iframeText(uri, widthBox, heightBox));
+                if (!heightBox.getText().isEmpty()) {
+                    int height_box = Integer.parseInt(heightBox.getText());
+                    widthBox.setText(Integer.toString((int) (((height_box - 52) * ratio)) + 2));
+                    iframe.setText(iframeText(uri, widthBox, heightBox));
+                }
+
             }
         });
 
