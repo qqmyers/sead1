@@ -676,6 +676,15 @@ public class TupeloStore {
         return preview;
     }
 
+    public void removeCachedPreview(final String uri, final String size) {
+        if (previewCache.get(size) != null) {
+            if (previewCache.get(size).get(uri) != null) {
+                log.info("Removing PreviewBean from cache");
+                previewCache.get(size).remove(uri);
+            }
+        }
+    }
+
     /**
      * 
      * @param collectionUri

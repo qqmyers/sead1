@@ -31,6 +31,7 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Create3DImage;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
@@ -74,6 +75,7 @@ public class Create3DImageHandler implements ActionHandler<Create3DImage, EmptyR
             int realh = 360;
 
             try {
+                TupeloStore.getInstance().removeCachedPreview(action.getDataset().getUri(), GetPreviews.SMALL);
                 new PreviewImageBeanUtil(beanSession).thumbnail(action.getDataset(), img, 100, 100, false, small, CLASS_RESOURCE);
                 new PreviewImageBeanUtil(beanSession).thumbnail(action.getDataset(), img, realw, realh, false, medium, CLASS_RESOURCE);
             } catch (Throwable thr) {
