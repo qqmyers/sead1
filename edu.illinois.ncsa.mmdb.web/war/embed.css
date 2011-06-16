@@ -18,6 +18,18 @@ a, a:link, a:visited, a:hover, a:active {
 	border: 1px solid #888888;
 }
 
+.homePageLink {
+	color: blue !important;	
+}
+
+.permissionPanel {
+	text-align: center;
+	position:absolute; 
+	top:50%; 
+	margin-top:-3em ;
+	
+}
+
 /* 													 */
 /* 				Previews          					 */
 

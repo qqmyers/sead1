@@ -65,11 +65,15 @@ public class PermissionUtil {
     }
 
     public void doIfAllowed(final Permission p, String objectUri, final PermissionCallback callback) {
+        doIfAllowed(p, objectUri, callback, MMDB.getUsername());
+    }
+
+    public void doIfAllowed(final Permission p, String objectUri, final PermissionCallback callback, String username) {
         Boolean cached = cache.get(p);
         if (cached != null) {
             doIf(cached, callback);
         } else {
-            dispatch.execute(new HasPermission(MMDB.getUsername(), objectUri, p), new AsyncCallback<HasPermissionResult>() {
+            dispatch.execute(new HasPermission(username, objectUri, p), new AsyncCallback<HasPermissionResult>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     callback.onFailure();
