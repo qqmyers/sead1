@@ -91,6 +91,7 @@ public class Embed implements EntryPoint {
     public static final String         ANONYMOUS     = "http://cet.ncsa.uiuc.edu/2007/person/anonymous";
 
     private RootPanel                  rootPanel;
+    private String                     uri;
     private int                        width;
     private int                        height;
 
@@ -107,6 +108,9 @@ public class Embed implements EntryPoint {
             height = Window.getClientHeight();
             GWT.log("Width: " + width + " Height: " + height);
 
+            Map<String, String> params = getParams();
+            uri = params.get("id");
+
             //Ensure a user is already logged in, if not log in anonymous
             checkLogin();
 
@@ -114,8 +118,6 @@ public class Embed implements EntryPoint {
     }
 
     private void displayPreview() {
-        Map<String, String> params = getParams();
-        final String uri = params.get("id");
 
         if (uri != null) {
 
@@ -305,11 +307,17 @@ public class Embed implements EntryPoint {
                 noPermission.addStyleName("datasetRightColText");
                 noPermission.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-                Anchor homePage = new Anchor("Home Page");
+                Anchor viewDataset = new Anchor("View Dataset");
+                viewDataset.setHref(GWT.getHostPageBaseURL() + "mmdb.html#dataset?id=" + uri);
+                viewDataset.addStyleName("homePageLink");
+
+                Anchor homePage = new Anchor("Medici Home Page");
                 homePage.addStyleName("homePageLink");
+                homePage.addStyleName("permissionMultiAnchor");
                 homePage.setHref(GWT.getHostPageBaseURL());
 
                 column.add(noPermission);
+                column.add(viewDataset);
                 column.add(homePage);
                 rootPanel.add(column);
             }

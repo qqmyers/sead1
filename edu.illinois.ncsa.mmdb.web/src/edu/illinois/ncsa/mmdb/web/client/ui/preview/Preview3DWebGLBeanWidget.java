@@ -38,10 +38,11 @@ public class Preview3DWebGLBeanWidget extends PreviewBeanWidget<PreviewThreeDime
     public Preview3DWebGLBeanWidget(HandlerManager eventBus) {
         super(eventBus);
         vp = new VerticalPanel();
-        vp.addStyleName("WebGL3DPreview"); //$NON-NLS-1$
+        vp.addStyleName("webGL3DPreview"); //$NON-NLS-1$
 
         widget = new HTML();
         widget.getElement().setId(DOM.createUniqueId());
+        widget.addStyleName("viewer");
         vp.add(widget);
 
         setImage = new Anchor("Create Thumbnail");

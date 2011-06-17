@@ -1007,8 +1007,8 @@ a:hover {
 }
 
 .viewer {
-	vertical-align: middle;
-	
+	/*vertical-align: middle;*/
+	border: 1px solid #888888;
 }
 
 .webGL3DPreview { 

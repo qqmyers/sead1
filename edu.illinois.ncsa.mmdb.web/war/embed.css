@@ -22,6 +22,10 @@ a, a:link, a:visited, a:hover, a:active {
 	color: blue !important;	
 }
 
+.permissionMultiAnchor { 
+	padding-left: 25px;	
+}
+
 .permissionPanel {
 	text-align: center;
 	position:absolute; 

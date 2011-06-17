@@ -43,6 +43,7 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
 
         widget = new HTML();
         widget.getElement().setId(DOM.createUniqueId());
+        widget.addStyleName("viewer");
         vp.add(widget);
 
         setImage = new Anchor("Create Thumbnail");
