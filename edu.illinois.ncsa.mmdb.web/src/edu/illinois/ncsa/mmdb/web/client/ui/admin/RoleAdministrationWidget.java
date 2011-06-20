@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -49,7 +50,7 @@ public class RoleAdministrationWidget extends Composite {
     public RoleAdministrationWidget(DispatchAsync dispatchAsync) {
         dispatch = dispatchAsync;
 
-        FlowPanel mainPanel = new FlowPanel();
+        final FlowPanel mainPanel = new FlowPanel();
         initWidget(mainPanel);
 
         // permissions table
@@ -66,6 +67,9 @@ public class RoleAdministrationWidget extends Composite {
                 cd.addConfirmHandler(new ConfirmHandler() {
                     @Override
                     public void onConfirm(ConfirmEvent event) {
+                        final Image pending = new Image("./images/loading-small-white.gif");
+                        pending.addStyleName("addTagsLink");
+                        mainPanel.add(pending);
                         initializeRoles.setText("Setting default roles and permissions");
                         dispatch.execute(new InitializeRoles(), new AsyncCallback<EmptyResult>() {
                             public void onFailure(Throwable caught) {
@@ -74,6 +78,7 @@ public class RoleAdministrationWidget extends Composite {
                             }
 
                             public void onSuccess(EmptyResult result) {
+                                mainPanel.remove(pending);
                                 initializeRoles.setText("All roles and permissions set to default");
                                 initializeRoles.setEnabled(true);
                             }
@@ -113,6 +118,7 @@ public class RoleAdministrationWidget extends Composite {
 
     void getPermissions() {
         permissionsTable.clear(true);
+        permissionsTable.removeAllRows();
 
         columnByRole = new HashMap<String, Integer>();
         nameByRole = new HashMap<String, String>();
@@ -201,19 +207,24 @@ public class RoleAdministrationWidget extends Composite {
     }
 
     void addRole(String name, Anchor button) {
-        button.setText("Creating role ...");
-        button.setEnabled(false);
-        dispatch.execute(new CreateRole(name), new AsyncCallback<SubjectResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("error: can't create role");
-            }
+        if (name.isEmpty()) {
+            ConfirmDialog emptyRole = new ConfirmDialog("Error", "Please enter a name for the role", false);
+            emptyRole.getOkText().setText("OK");
+        } else {
+            button.setText("Creating role ...");
+            button.setEnabled(false);
+            dispatch.execute(new CreateRole(name), new AsyncCallback<SubjectResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("error: can't create role");
+                }
 
-            @Override
-            public void onSuccess(SubjectResult result) {
-                getPermissions(); // start over
-            }
-        });
+                @Override
+                public void onSuccess(SubjectResult result) {
+                    getPermissions(); // start over
+                }
+            });
+        }
     }
 
     String key(String roleUri, Permission permission) {
