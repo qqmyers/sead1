@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.CreateRole;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.DefaultTheRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissions;
@@ -81,6 +82,7 @@ public class RoleAdministrationWidget extends Composite {
                                 mainPanel.remove(pending);
                                 initializeRoles.setText("All roles and permissions set to default");
                                 initializeRoles.setEnabled(true);
+                                getPermissions();
                             }
                         });
                     }
@@ -145,6 +147,8 @@ public class RoleAdministrationWidget extends Composite {
                 for (Map.Entry<String, Integer> entry : columnByRole.entrySet() ) {
                     final String roleUri = entry.getKey();
                     boolean deletable = true;
+                    boolean isDefault = false;
+                    //Add delete button to capable role
                     for (DefaultRole r : DefaultRole.special() ) {
                         if (roleUri.equals(r.getUri())) {
                             deletable = false;
@@ -153,7 +157,7 @@ public class RoleAdministrationWidget extends Composite {
                     if (deletable) {
                         final String roleName = nameByRole.get(roleUri);
                         final int c = entry.getValue();
-                        int r = Permission.values().length + 2;
+                        int r = Permission.values().length + 3;
                         Anchor deleteRole = new Anchor("Delete");
                         deleteRole.addClickHandler(new ClickHandler() {
                             @Override
@@ -179,6 +183,42 @@ public class RoleAdministrationWidget extends Composite {
                             }
                         });
                         permissionsTable.setWidget(r, c, deleteRole);
+                    }
+                    //Add default button to default roles
+                    for (DefaultRole r : DefaultRole.values() ) {
+                        if (roleUri.equals(r.getUri())) {
+                            isDefault = true;
+                        }
+                    }
+                    if (isDefault) {
+                        final String roleName = nameByRole.get(roleUri);
+                        final int c = entry.getValue();
+                        int r = Permission.values().length + 2;
+                        Anchor defaultRole = new Anchor("Default");
+                        defaultRole.addClickHandler(new ClickHandler() {
+                            @Override
+                            public void onClick(ClickEvent event) {
+                                ConfirmDialog cd = new ConfirmDialog("Default " + roleName, "Do you really want to set permissions to their default for \"" + roleName + "\"?");
+                                cd.addConfirmHandler(new ConfirmHandler() {
+                                    @Override
+                                    public void onConfirm(ConfirmEvent event) {
+                                        dispatch.execute(new DefaultTheRole(roleUri), new AsyncCallback<EmptyResult>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                GWT.log("Cannot Default role");
+                                                new ConfirmDialog("Role not defaulted", caught.getMessage(), false);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(EmptyResult result) {
+                                                getPermissions(); // start over.
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                        permissionsTable.setWidget(r, c, defaultRole);
                     }
                 }
                 // now add the "add role" controls

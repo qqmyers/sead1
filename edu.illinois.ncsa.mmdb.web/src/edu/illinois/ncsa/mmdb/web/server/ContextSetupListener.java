@@ -397,12 +397,17 @@ public class ContextSetupListener implements ServletContextListener {
         // ensure base RBAC ontology exists
         log.debug("Initializing Medici permission set...");
         rbac.createBaseOntology();
+
         // ensure Medici permissions exist
         rbac.intializePermissions();
         rbac.associatePermissionsWithRoles();
 
-        // ensure anonymous user and role exist
-        ensureRoleExists(DefaultRole.ANONYMOUS, rbac);
+        //ensure default roles exist
+        for (DefaultRole role : DefaultRole.values() ) {
+            ensureRoleExists(role, rbac);
+        }
+
+        // ensure anonymous user exists
         PersonBean anon = PersonBeanUtil.getAnonymous();
         auth.addUser(anon.getEmail(), anon.getName(), "none");
 
@@ -434,8 +439,6 @@ public class ContextSetupListener implements ServletContextListener {
                             Resource viewMemberPages = Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri());
                             Resource viewAdminPages = Resource.uriRef(Permission.VIEW_ADMIN_PAGES.getUri());
                             Resource editRoles = Resource.uriRef(Permission.EDIT_ROLES.getUri());
-                            // FIXME this set of permissions is described in multiple places; kill those tiles!
-                            ensureRoleExists(DefaultRole.ADMINISTRATOR, rbac);
                             log.info("Adding " + userid + " to Administrator role");
                             rbac.addRole(userid, adminRole);
                             // this admin needs to have admin permissions. if they don't, create them

@@ -54,6 +54,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ContextConvertHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.Create3DImageHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.CreateRoleHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.DefaultRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteAnnotationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetsHandler;
@@ -205,6 +206,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new SearchWithFilterHandler());
         DispatchUtil.registerHandler(new GetDatasetsBySetHandler());
         DispatchUtil.registerHandler(new GetDatasetsInCollectionHandler());
+        DispatchUtil.registerHandler(new DefaultRoleHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {
