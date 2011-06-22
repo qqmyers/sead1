@@ -163,12 +163,14 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 
         PermissionUtil rbac = new PermissionUtil(dispatchAsync);
 
+        final Anchor download = new Anchor();
         rbac.doIfAllowed(Permission.DOWNLOAD, new PermissionCallback() {
             @Override
             public void onAllowed() {
-                infoPanel.add(downloadCollection(uri, item.getTitle()));
+                downloadCollection(uri, item.getTitle(), download);
             }
         });
+        infoPanel.add(download);
 
         rbac.doIfAllowed(Permission.DELETE_COLLECTION, new PermissionCallback() {
             @Override
@@ -202,10 +204,10 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
         table.getRowFormatter().addStyleName(row, "oddRow");
     }
 
-    private Anchor downloadCollection(final String collectionURI, final String name) {
+    private void downloadCollection(final String collectionURI, final String name, Anchor download) {
 
-        Anchor downloadAnchor = new Anchor("Download");
-        downloadAnchor.addClickHandler(new ClickHandler() {
+        download.setText("Download");
+        download.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 dispatchAsync.execute(new GetDatasetsInCollection(collectionURI), new AsyncCallback<GetDatasetsInCollectionResult>() {
                     public void onFailure(Throwable caught) {
@@ -225,7 +227,6 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
                 });
             }
         });
-        return downloadAnchor;
     }
 
     public void addBadge(String collectionUri) {
