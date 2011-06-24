@@ -170,6 +170,20 @@
 	<listener>
 		<listener-class>edu.illinois.ncsa.mmdb.web.server.MyActionHandlersConfig</listener-class>
 	</listener>
+	
+	<!--  Filters -->
+	<filter>
+ 		<filter-name>CacheFilter</filter-name>
+ 		<filter-class>edu.illinois.ncsa.mmdb.web.server.CacheFilter</filter-class>
+	</filter>
+	<filter-mapping>
+ 		<filter-name>CacheFilter</filter-name>
+ 		<url-pattern>*.js</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+ 		<filter-name>CacheFilter</filter-name>
+ 		<url-pattern>*.png</url-pattern>
+	</filter-mapping>
 
 	<!-- Default page to serve -->
 	<welcome-file-list>
