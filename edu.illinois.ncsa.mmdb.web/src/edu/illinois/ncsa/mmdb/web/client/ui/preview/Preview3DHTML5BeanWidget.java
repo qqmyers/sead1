@@ -180,8 +180,8 @@ public class Preview3DHTML5BeanWidget extends PreviewBeanWidget<PreviewThreeDime
     }
 
     public final native void initThingView(String fileData, int width, int height) /*-{
-		// hide the current WebGL viewer if open
-		$wnd.initThingView(fileData, width, height);
+		$wnd.LazyLoad.js('js/thingview/Three.js', function() {
+			$wnd.initThingView(fileData, width, height);
+		});
     }-*/;
-
 }

@@ -93,6 +93,7 @@ public class EmbedWidget extends Composite {
         iframe.addStyleName("embedTextArea");
         iframe.setText(iframeText(uri, widthBox, heightBox));
         iframe.setWidth("95%");
+        iframe.setHeight("65px");
         iframe.setReadOnly(true);
         iframe.addClickHandler(new ClickHandler() {
             @Override

@@ -320,7 +320,8 @@ public class UploadPage extends Page {
      * @param credentials
      */
     private native void deployDndApplet(String credentials) /*-{
-        var attributes = {
+        $wnd.LazyLoad.js('js/deployJava.js', function() {
+           var attributes = {
         id:'dragdropApplet',
         MAYSCRIPT:'true',
         code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
@@ -336,6 +337,7 @@ public class UploadPage extends Page {
         };
         $wnd.deployJava.runApplet(attributes, parameters, '1.5');
         $wnd.document.getElementById('dndAppletId').innerHTML = $wnd.deployJava.getDocument();
+        });       
     }-*/;
 
     @Override

@@ -1,6 +1,71 @@
+/**
+ * @author mr.doob / http://mrdoob.com/
+ * based on http://papervision3d.googlecode.com/svn/trunk/as3/trunk/src/org/papervision3d/objects/primitives/Plane.as
+ */
 
- 
- initThingView = function(url, thing_width, thing_height){
+var Plane = function ( width, height, segments_width, segments_height ) {
+
+	THREE.Geometry.call( this );
+
+	var ix, iy,
+	width_half = width / 2,
+	height_half = height / 2,
+	gridX = segments_width || 1,
+	gridY = segments_height || 1,
+	gridX1 = gridX + 1,
+	gridY1 = gridY + 1,
+	segment_width = width / gridX,
+	segment_height = height / gridY;
+
+
+	for( iy = 0; iy < gridY1; iy++ ) {
+
+		for( ix = 0; ix < gridX1; ix++ ) {
+
+			var x = ix * segment_width - width_half;
+			var y = iy * segment_height - height_half;
+
+			this.vertices.push( new THREE.Vertex( new THREE.Vector3( x, - y, 0 ) ) );
+
+		}
+
+	}
+
+	for( iy = 0; iy < gridY; iy++ ) {
+
+		for( ix = 0; ix < gridX; ix++ ) {
+
+			var a = ix + gridX1 * iy;
+			var b = ix + gridX1 * ( iy + 1 );
+			var c = ( ix + 1 ) + gridX1 * ( iy + 1 );
+			var d = ( ix + 1 ) + gridX1 * iy;
+
+			this.faces.push( new THREE.Face4( a, b, c, d ) );
+			this.uvs.push( [
+						new THREE.UV( ix / gridX, iy / gridY ),
+						new THREE.UV( ix / gridX, ( iy + 1 ) / gridY ),
+						new THREE.UV( ( ix + 1 ) / gridX, ( iy + 1 ) / gridY ),
+						new THREE.UV( ( ix + 1 ) / gridX, iy / gridY )
+					] );
+
+		}
+
+	}
+
+	this.computeCentroids();
+	this.computeFaceNormals();
+	this.sortFacesByMaterial();
+
+};
+
+Plane.prototype = new THREE.Geometry();
+Plane.prototype.constructor = Plane;
+
+/**
+ * ThingIview
+ */
+
+initThingView = function(url, thing_width, thing_height){
 	 
       thingiurlbase = "js/thingview";
       thingiview = new Thingiview("viewer");
@@ -28,7 +93,6 @@ Thingiview = function(containerId) {
   
   this.containerId  = containerId;
   var container     = document.getElementById(containerId);
-  // var stats    = null;
   var camera   = null;
   var scene    = null;
   var renderer = null;
@@ -71,13 +135,8 @@ Thingiview = function(containerId) {
   var objectColor = 0xffffff;
   var showPlane = false;
   var isWebGl = false;
-
-
-
-	var width;
-	var height;
-
-
+  var width;
+  var height;
   var geometry;
   
   this.hide = function() {
@@ -145,13 +204,9 @@ Thingiview = function(containerId) {
     alertBox.style.height = '50%';
     alertBox.style.backgroundColor = '#dddddd';
     alertBox.style.padding = '10px';
-    // alertBox.style.overflowY = 'scroll';
     alertBox.style.display = 'none';
     alertBox.style.zIndex = 100;
     container.appendChild(alertBox);
-    
-    // load a blank object
-    // this.loadSTLString('');
 
     if (showPlane) {
       loadPlaneGeometry();
@@ -163,39 +218,22 @@ Thingiview = function(containerId) {
     testCanvas = document.createElement('canvas');
     try {
       if (testCanvas.getContext('experimental-webgl')) {
-        // showPlane = false;
         isWebGl = true;
         renderer = new THREE.WebGLRenderer();
-        // renderer = new THREE.CanvasRenderer();
       } else {
         renderer = new THREE.CanvasRenderer();
       }
     } catch(e) {
       renderer = new THREE.CanvasRenderer();
-      // log("failed webgl detection");
     }
-
-    // renderer.setSize(container.innerWidth, container.innerHeight);
 
   	renderer.setSize(width, height);
     renderer.domElement.style.backgroundColor = backgroundColor;
   	container.appendChild(renderer.domElement);
-
-    // stats = new Stats();
-    // stats.domElement.style.position  = 'absolute';
-    // stats.domElement.style.top       = '0px';
-    // container.appendChild(stats.domElement);
-
-    // TODO: figure out how to get the render window to resize when window resizes
-    // window.addEventListener('resize', onContainerResize(), false);
-    // container.addEventListener('resize', onContainerResize(), false);
-
-    // renderer.domElement.addEventListener('mousemove',      onRendererMouseMove,     false);    
   	window.addEventListener('mousemove',      onRendererMouseMove,     false);    
     renderer.domElement.addEventListener('mouseover',      onRendererMouseOver,     false);
     renderer.domElement.addEventListener('mouseout',       onRendererMouseOut,      false);
   	renderer.domElement.addEventListener('mousedown',      onRendererMouseDown,     false);
-    // renderer.domElement.addEventListener('mouseup',        onRendererMouseUp,       false);
     window.addEventListener('mouseup',        onRendererMouseUp,       false);
 
   	renderer.domElement.addEventListener('touchstart',     onRendererTouchStart,    false);
@@ -206,39 +244,21 @@ Thingiview = function(containerId) {
   	renderer.domElement.addEventListener('mousewheel',     onRendererScroll,        false);
   	renderer.domElement.addEventListener('gesturechange',  onRendererGestureChange, false);
   }
-
-  // FIXME
-  // onContainerResize = function(event) {
-  //   width  = parseFloat(document.defaultView.getComputedStyle(container,null).getPropertyValue('width'));
-  //   height = parseFloat(document.defaultView.getComputedStyle(container,null).getPropertyValue('height'));
-  // 
-  //   // log("resized width: " + width + ", height: " + height);
-  // 
-  //   if (renderer) {
-  //     renderer.setSize(width, height);
-  //     camera.projectionMatrix = THREE.Matrix4.makePerspective(70, width / height, 1, 10000);
-  //     sceneLoop();
-  //   }    
-  // };
   
   onRendererScroll = function(event) {
-    event.preventDefault();
+  event.preventDefault();
 
     var rolled = 0;
 
     if (event.wheelDelta === undefined) {
-      // Firefox
-      // The measurement units of the detail and wheelDelta properties are different.
       rolled = -40 * event.detail;
     } else {
       rolled = event.wheelDelta;
     }
 
     if (rolled > 0) {
-      // up
       scope.setCameraZoom(+10);
     } else {
-      // down
       scope.setCameraZoom(-10);
     }
   }
@@ -255,16 +275,12 @@ Thingiview = function(containerId) {
 
   onRendererMouseOver = function(event) {
     mouseOver = true;
-    // targetRotation = object.rotation.z;
     if (timer == null) {
-      // log('starting loop');
       timer = setInterval(sceneLoop, 1000/60);
     }
   }
 
   onRendererMouseDown = function(event) {
-    // log("down");
-
     event.preventDefault();
   	mouseDown = true;
   	
@@ -279,15 +295,12 @@ Thingiview = function(containerId) {
   }
 
   onRendererMouseMove = function(event) {
-    // log("move");
 
     if (mouseDown) {
   	  mouseX = event.clientX - windowHalfX;
-      // targetXRotation = targetXRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.02;
   	  xrot = targetXRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.02;
 
   	  mouseY = event.clientY - windowHalfY;
-      // targetYRotation = targetYRotationOnMouseDown + (mouseY - mouseYOnMouseDown) * 0.02;
   	  yrot = targetYRotationOnMouseDown + (mouseY - mouseYOnMouseDown) * 0.02;
   	  
   	  targetXRotation = xrot;
@@ -296,7 +309,6 @@ Thingiview = function(containerId) {
   }
 
   onRendererMouseUp = function(event) {
-    // log("up");
     if (mouseDown) {
       mouseDown = false;
       if (!mouseOver) {
@@ -334,8 +346,6 @@ Thingiview = function(containerId) {
   onRendererTouchEnd = function(event) {
     clearInterval(timer);
     timer = null;
-    // targetXRotation = object.rotation.z;
-    // targetYRotation = object.rotation.x;
   }
 
   onRendererTouchMove = function(event) {
@@ -352,20 +362,6 @@ Thingiview = function(containerId) {
 
   sceneLoop = function() {
     if (object) {
-      // if (view == 'bottom') {
-      //   if (showPlane) {
-      //     plane.rotation.z = object.rotation.z -= (targetRotation + object.rotation.z) * 0.05;
-      //   } else {
-      //     object.rotation.z -= (targetRotation + object.rotation.z) * 0.05;
-      //   }
-      // } else {
-      //   if (showPlane) {
-      //     plane.rotation.z = object.rotation.z += (targetRotation - object.rotation.z) * 0.05;
-      //   } else {
-      //     object.rotation.z += (targetRotation - object.rotation.z) * 0.05;
-      //   }
-      // }
-
       if (showPlane) {
         plane.rotation.z = object.rotation.z = (targetXRotation - object.rotation.z) * 0.2;
         plane.rotation.x = object.rotation.x = (targetYRotation - object.rotation.x) * 0.2;
@@ -373,8 +369,6 @@ Thingiview = function(containerId) {
         object.rotation.z = (targetXRotation - object.rotation.z) * 0.2;
         object.rotation.x = (targetYRotation - object.rotation.x) * 0.2;
       }
-
-      // log(object.rotation.x);
 
       camera.updateMatrix();
       object.updateMatrix();
@@ -384,12 +378,10 @@ Thingiview = function(containerId) {
       }
 
     	renderer.render(scene, camera);
-      // stats.update();
     }
   }
 
   rotateLoop = function() {
-    // targetRotation += 0.01;
     targetXRotation += 0.05;
     sceneLoop();
   }
@@ -402,12 +394,9 @@ Thingiview = function(containerId) {
         loadPlaneGeometry();
       }
       plane.material[0].opacity = 1;
-      // plane.updateMatrix();
     } else {
       if (scene && plane) {
-        // alert(plane.material[0].opacity);
         plane.material[0].opacity = 0;
-        // plane.updateMatrix();
       }
     }
     
@@ -452,18 +441,6 @@ Thingiview = function(containerId) {
         plane.flipSided = false;
       }
     } else if (dir == 'side') {
-      // camera.position.y = 100;
-      // camera.position.z = -0.1;
-      // camera.position.z = 10;
-      // camera.target.position.z = 50;
-
-      // if (object) {
-      //   object.rotation.x = -0.75;
-      // }
-      // 
-      // if (showPlane) {
-      //   plane.rotation.x = -0.75;
-      // }
 
       camera.position.y = -70;
       camera.position.z = 70;
@@ -573,13 +550,11 @@ Thingiview = function(containerId) {
   }
 
   this.loadArray = function(array) {
-    log("loading array...");
     geometry = new STLGeometry(array);
     loadObjectGeometry();
     clearInterval(rotateTimer);
     rotateTimer = null;
     rotateTimer = setInterval(rotateLoop, 1000/60);
-    log("finished loading " + geometry.faces.length + " faces.");
   }
 
   this.newWorker = function(cmd, param) {
@@ -591,7 +566,6 @@ Thingiview = function(containerId) {
     worker.onmessage = function(event) {
       if (event.data.status == "complete") {
         progressBar.innerHTML = 'Initializing geometry...';
-        // scene.removeObject(object);
         geometry = new STLGeometry(event.data.content);
         loadObjectGeometry();
         progressBar.innerHTML = '';
@@ -604,11 +578,9 @@ Thingiview = function(containerId) {
       } else if (event.data.status == "progress") {
         progressBar.style.display = 'block';
         progressBar.style.width = event.data.content;
-        // log(event.data.content);
       } else if (event.data.status == "message") {
         progressBar.style.display = 'block';
         progressBar.innerHTML = event.data.content;
-        // log(event.data.content);
       } else if (event.data.status == "alert") {
         scope.displayAlert(event.data.content);
       } else {
@@ -638,12 +610,10 @@ Thingiview = function(containerId) {
     
     alertBox.innerHTML = msg;
     alertBox.style.display = 'block';
-    
-    // log(msg);
+ 
   }
 
   function loadPlaneGeometry() {
-    // TODO: switch to lines instead of the Plane object so we can get rid of the horizontal lines in canvas renderer...
     plane = new THREE.Mesh(new Plane(100, 100, 10, 10), new THREE.MeshBasicMaterial({color:0xafafaf,wireframe:true}));
     scene.addObject(plane);
   }
@@ -651,28 +621,18 @@ Thingiview = function(containerId) {
   function loadObjectGeometry() {
     if (scene && geometry) {
       if (objectMaterial == 'wireframe') {
-        // material = new THREE.MeshColorStrokeMaterial(objectColor, 1, 1);
         material = new THREE.MeshBasicMaterial({color:objectColor,wireframe:true});
       } else {
         if (isWebGl) {
-          // material = new THREE.MeshPhongMaterial(objectColor, objectColor, 0xffffff, 50, 1.0);
-          // material = new THREE.MeshColorFillMaterial(objectColor);
-          // material = new THREE.MeshLambertMaterial({color:objectColor});
           material = new THREE.MeshLambertMaterial({color:objectColor, shading: THREE.FlatShading});
         } else {
-          // material = new THREE.MeshColorFillMaterial(objectColor);
           material = new THREE.MeshLambertMaterial({color:objectColor, shading: THREE.FlatShading});
         }
-      }
-
-      // scene.removeObject(object);      
+      }   
 
       if (object) {
-        // shouldn't be needed, but this fixes a bug with webgl not removing previous object when loading a new one dynamically
         object.materials = [new THREE.MeshBasicMaterial({color:0xffffff, opacity:0})];
         scene.removeObject(object);        
-        // object.geometry = geometry;
-        // object.materials = [material];
       }
 
       object = new THREE.Mesh(geometry, material);
@@ -694,15 +654,10 @@ Thingiview = function(containerId) {
 };
 
 var STLGeometry = function(STLArray) {
-  // log("building geometry...");
 	THREE.Geometry.call(this);
 
 	var scope = this;
-
-  // var vertexes = STLArray[0];
-  // var normals  = STLArray[1];
-  // var faces    = STLArray[2];
-
+	
   for (var i=0; i<STLArray[0].length; i++) {    
     v(STLArray[0][i][0], STLArray[0][i][1], STLArray[0][i][2]);
   }
@@ -712,22 +667,16 @@ var STLGeometry = function(STLArray) {
   }
 
   function v(x, y, z) {
-    // log("adding vertex: " + x + "," + y + "," + z);
     scope.vertices.push( new THREE.Vertex( new THREE.Vector3( x, y, z ) ) );
   }
 
   function f3(a, b, c) {
-    // log("adding face: " + a + "," + b + "," + c)
     scope.faces.push( new THREE.Face3( a, b, c ) );
   }
 
-  // log("computing centroids...");
   this.computeCentroids();
-  // log("computing normals...");
-  // this.computeNormals();
 	this.computeFaceNormals();
 	this.sortFacesByMaterial();
-  // log("finished building geometry");
 }
 
 STLGeometry.prototype = new THREE.Geometry();
@@ -738,11 +687,6 @@ function log(msg) {
     console.log(msg);
   }
 }
-
-/* A facade for the Web Worker API that fakes it in case it's missing. 
-Good when web workers aren't supported in the browser, but it's still fast enough, so execution doesn't hang too badly (e.g. Opera 10.5).
-By Stefan Wehrmeyer, licensed under MIT
-*/
 
 var WorkerFacade;
 if(!!window.Worker){
@@ -803,19 +747,3 @@ if(!!window.Worker){
         return that;
     }());
 }
-
-/* Then just use WorkerFacade instead of Worker (or alias it)
-
-The Worker code must should use a custom function (name it how you want) instead of postMessage.
-Put this at the end of the Worker:
-
-if(typeof(window) === "undefined"){
-    onmessage = nameOfWorkerFunction;
-    customPostMessage = postMessage;
-} else {
-    customPostMessage = WorkerFacade.add("path/to/thisworker.js", nameOfWorkerFunction);
-}
-
-
-
-*/

@@ -162,7 +162,10 @@ public class Preview3DWebGLBeanWidget extends PreviewBeanWidget<PreviewThreeDime
 
     public final native void readWebGL(String fileData) /*-{
 		// initialize WebGL application
-		$wnd.init_webGL(fileData);
+		$wnd.LazyLoad.js('js/webGL.js', function() {
+			$wnd.init_webGL(fileData);
+		});
+
     }-*/;
 
     public final native void hideWebGL() /*-{
