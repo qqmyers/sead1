@@ -60,19 +60,16 @@ import org.tupeloproject.kernel.ContentStoreContext;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
-import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.kernel.impl.HashFileContext;
 import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.mysql.MysqlContext;
 import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
-import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.rdf.xml.RdfXml;
-import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
@@ -190,21 +187,6 @@ public class ContextSetupListener implements ServletContextListener {
             log.warn("Could not initialize mimemap.", e);
         }
 
-        // MMDB-1131 remove this code
-        // add all mimetypes in context
-        Unifier uf = new Unifier();
-        uf.addPattern("s", Rdf.TYPE, Cet.DATASET);
-        uf.addPattern("s", Dc.FORMAT, "f");
-        uf.setColumnNames("f");
-        try {
-            TupeloStore.getInstance().getContext().perform(uf);
-        } catch (OperatorException e) {
-        }
-        MimeMap mimemap = TupeloStore.getInstance().getMimeMap();
-        for (Tuple<Resource> row : uf.getResult() ) {
-            mimemap.checkMimeType(row.get(0).getString());
-        }
-
         // set extractor URL
         if (props.containsKey("extractor.url")) { //$NON-NLS-1$
             TupeloStore.getInstance().setExtractionServiceURL(props.getProperty("extractor.url")); //$NON-NLS-1$
@@ -280,9 +262,9 @@ public class ContextSetupListener implements ServletContextListener {
         timer.schedule(new TimerTask() {
             @Override
             public void run()
-                {
-                    TupeloStore.getInstance().countDatasets(null, true);
-                }
+            {
+                TupeloStore.getInstance().countDatasets(null, true);
+            }
 
         }, 0, 60 * 60 * 1000);
 

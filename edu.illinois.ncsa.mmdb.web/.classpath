@@ -6,8 +6,8 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/arq-2.8.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-1.0.1-20110314.041204-1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo-1.0.1-20110314.041240-1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.1-20110314.041314-1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-beanutils-1.8.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.4.jar"/>
@@ -19,7 +19,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gin-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-2.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-dispatch-1.0.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-maps-1.0.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-maps-1.1.0-RK.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-user-2.2.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/iri-0.7.jar"/>
