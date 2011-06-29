@@ -134,7 +134,7 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
 
     @Override
     public String getAnchorText() {
-        return "Multi Image";
+        return "Pages";
     }
 
     @Override
