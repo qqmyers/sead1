@@ -71,19 +71,20 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
 
     @Override
     public ConfigurationResult execute(GetConfiguration arg0, ExecutionContext arg1) throws ActionException {
-        MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
-        try {
-            if (!rbac.checkPermission(arg0.getUser(), Permission.VIEW_ADMIN_PAGES)) {
-                throw (new ActionException("No admin permission."));
-            }
-        } catch (RBACException exc) {
-            throw (new ActionException("No admin permission.", exc));
-        }
 
         Set<ConfigurationKey> keys = arg0.getKeys();
         if (keys.size() == 0) {
+            MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
+            try {
+                if (!rbac.checkPermission(arg0.getUser(), Permission.VIEW_ADMIN_PAGES)) {
+                    throw (new ActionException("No admin permission."));
+                }
+            } catch (RBACException exc) {
+                throw (new ActionException("No admin permission.", exc));
+            }
             keys.addAll(Arrays.asList(ConfigurationKey.values()));
         }
+        //Don't require permission "View Admin Pages" to get single key value like Google Key
         ConfigurationResult result = new ConfigurationResult();
         for (ConfigurationKey key : keys ) {
             result.setConfiguration(key, TupeloStore.getInstance().getConfiguration(key));
