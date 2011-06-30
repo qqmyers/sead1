@@ -54,6 +54,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
@@ -64,6 +66,9 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 public class DatasetTableGridView extends DatasetTableView {
 
     int                         n     = 0;
+
+    public List<String>         datasets;
+
     final int                   WIDTH = 5;
     private final DispatchAsync dispatchAsync;
 
@@ -144,6 +149,19 @@ public class DatasetTableGridView extends DatasetTableView {
             }
 
         });
+
+        MMDB.eventBus.addHandler(AllOnPageSelectedEvent.TYPE, new AllOnPageSelectedHandler() {
+
+            @Override
+            public void onAllOnPageSelected(AllOnPageSelectedEvent event) {
+                DatasetSelectedEvent ue = new DatasetSelectedEvent();
+                ue.setUri(id);
+                MMDB.eventBus.fireEvent(ue);
+                checkBox.setValue(true);
+            }
+
+        });
+
         // title label
         Label titleLabel = new Label(shortenTitle(title));
         titleLabel.addStyleName("smallText");
@@ -165,6 +183,10 @@ public class DatasetTableGridView extends DatasetTableView {
         setWidget((row * 2) + 1, col, titlePanel);
         getCellFormatter().addStyleName((row * 2) + 1, col, "gridLabelSmall");
         n++;
+    }
+
+    public void setSelectAllEvent(List<String> datasets) {
+
     }
 
     public void doneAddingRows() {

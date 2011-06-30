@@ -63,6 +63,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
@@ -151,6 +153,18 @@ public class DatasetTableOneColumnView extends DatasetTableView {
                     checkBox.setValue(false);
                 }
 
+            }
+
+        });
+
+        MMDB.eventBus.addHandler(AllOnPageSelectedEvent.TYPE, new AllOnPageSelectedHandler() {
+
+            @Override
+            public void onAllOnPageSelected(AllOnPageSelectedEvent event) {
+                DatasetSelectedEvent ue = new DatasetSelectedEvent();
+                ue.setUri(id);
+                MMDB.eventBus.fireEvent(ue);
+                checkBox.setValue(true);
             }
 
         });
