@@ -42,8 +42,17 @@ import java.util.Collection;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
+
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 public class SetLicenseDialog extends DialogBox {
 
@@ -52,7 +61,9 @@ public class SetLicenseDialog extends DialogBox {
 
         setText(title);
 
-        LicenseWidget lw = new LicenseWidget(batch, service, eventBus, false, true, true) {
+        final VerticalPanel widget = new VerticalPanel();
+
+        final LicenseWidget lw = new LicenseWidget(batch, service, eventBus, false, true, true) {
             protected void onOK() {
                 super.onOK();
                 SetLicenseDialog.this.hide();
@@ -64,7 +75,31 @@ public class SetLicenseDialog extends DialogBox {
             }
         };
 
-        add(lw);
+        widget.add(lw);
+
+        final PermissionUtil rbac = new PermissionUtil(service);
+        rbac.doIfAllowed(Permission.CHANGE_LICENSE, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                lw.setEditable(true);
+            }
+
+            @Override
+            public void onDenied() {
+                lw.setEditable(false);
+                widget.add(new Label("You don't have permission to edit licenses"));
+                Anchor cancel = new Anchor("Cancel");
+                cancel.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        SetLicenseDialog.this.hide();
+                    }
+                });
+                widget.add(cancel);
+            }
+        });
+
+        add(widget);
         center();
     }
 }

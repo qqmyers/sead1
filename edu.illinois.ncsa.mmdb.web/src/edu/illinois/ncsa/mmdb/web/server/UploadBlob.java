@@ -301,13 +301,13 @@ public class UploadBlob extends AuthenticatedServlet {
                     if (fieldName.equals("session") && (listener == null)) {
                         sessionKey = item.getString();
                         listener = trackProgress(upload, sessionKey);
-                        log.info("POST: upload session key (part) = " + sessionKey); // FIXME should be trace
+                        log.trace("POST: upload session key (part) = " + sessionKey);
                     } else if (fieldName.equals("collection")) {
                         collectionName = item.getString();
-                        log.info("POST: upload collection name = " + collectionName); // FIXME should be trace
+                        log.trace("POST: upload collection name = " + collectionName);
                     } else if (fieldName.equals("collectionUri")) {
                         collectionUri = item.getString();
-                        log.info("POST: upload collection uri = " + collectionUri); // FIXME should be trace
+                        log.trace("POST: upload collection uri = " + collectionUri);
                     }
 
                 } else if (item.getSize() > 0) {
@@ -345,7 +345,7 @@ public class UploadBlob extends AuthenticatedServlet {
                     UploadInfo u = null;
                     if (listener != null) {
                         u = listener.addUploadInfo(URI.create(uri), trimFilename(fileName), item.getSize());
-                        log.info("Added upload info with uri=" + uri + " for filename " + fileName); // FIXME debug
+                        log.debug("Added upload info with uri=" + uri + " for filename " + fileName); // FIXME debug
                     }
                     final FileUploadListener _listener = listener;
                     bw.setInputStream(new FilterInputStream(item.getInputStream()) {
@@ -401,7 +401,7 @@ public class UploadBlob extends AuthenticatedServlet {
                         ts.close();
                         nFiles++;
 
-                        log.info("user uploaded " + fileName + " (" + bw.getSize() + " bytes), uri=" + uri);
+                        log.debug("user uploaded " + fileName + " (" + bw.getSize() + " bytes), uri=" + uri);
 
                         uris.add(uri);
 
@@ -638,10 +638,10 @@ public class UploadBlob extends AuthenticatedServlet {
             // report
             PrintWriter out = response.getWriter();
             out.println("{\"session\":\"" + sessionKey + "\"}");
-            log.info("GET: minted session key = " + sessionKey); // FIXME make log.trace
+            log.trace("GET: minted session key = " + sessionKey);
         } else {
             String sessionKey = request.getParameter("session");
-            log.info("GET: session key = " + sessionKey); // FIXME trace
+            log.trace("GET: session key = " + sessionKey);
             // return if there's no progress yet
             if (listeners.get(sessionKey) == null) {
                 log("GET: no upload for session key " + sessionKey);
@@ -659,7 +659,7 @@ public class UploadBlob extends AuthenticatedServlet {
             response.setContentType("application/json");
             PrintWriter out = response.getWriter();
             out.print(stateToJSON(true, listener, request));
-            log.info("GET: reported " + stateToJSON(true, listener, request)); // FIXME trace
+            log.trace("GET: reported " + stateToJSON(true, listener, request));
         }
     }
 
