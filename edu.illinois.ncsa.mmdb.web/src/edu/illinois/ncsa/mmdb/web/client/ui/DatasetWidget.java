@@ -330,9 +330,6 @@ public class DatasetWidget extends Composite {
                 if (p.isPermitted(Permission.EDIT_METADATA)) {
                     titleLabel.setEditable(true);
                 }
-                if (p.isPermitted(Permission.CHANGE_LICENSE)) {
-                    license.setEditable(true);
-                }
                 if (p.isPermitted(Permission.RERUN_EXTRACTION)) {
                     Anchor extractAnchor = new Anchor("Rerun Extraction");
                     extractAnchor.addStyleName("datasetActionLink");
@@ -365,6 +362,7 @@ public class DatasetWidget extends Composite {
                     public void onSuccess(LicenseResult result) {
                         String rights = result.getRights().toLowerCase();
                         String rightsHolder = result.getRightsHolderUri();
+
                         boolean isRightsHolder = MMDB.getUsername().equals(rightsHolder);
                         if (p.isPermitted(Permission.DOWNLOAD) || isRightsHolder || rights.equals("pddl") || "cc-by".equals(rights) || "cc-by-sa".equals(rights) || "cc-by-nd".equals(rights) || "cc-by-nc".equals(rights) || "cc-by-nc-sa".equals(rights) || "cc-by-nc-nd".equals(rights) || result.isAllowDownload()) {
                             Anchor downloadAnchor = new Anchor();
@@ -374,7 +372,7 @@ public class DatasetWidget extends Composite {
                             downloadAnchor.addStyleName("datasetActionLink");
                             downloadWidget.add(downloadAnchor);
                         }
-                        license.setEditable(rightsHolder == null || isRightsHolder || p.isPermitted(Permission.CHANGE_LICENSE));
+                        license.setEditable(isRightsHolder || p.isPermitted(Permission.CHANGE_LICENSE));
                     }
                 });
             }
