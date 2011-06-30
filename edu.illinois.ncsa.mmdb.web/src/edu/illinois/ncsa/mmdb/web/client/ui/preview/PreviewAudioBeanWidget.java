@@ -12,7 +12,7 @@ public class PreviewAudioBeanWidget extends PreviewBeanWidget<PreviewAudioBean> 
     public PreviewAudioBeanWidget(HandlerManager eventBus) {
         super(eventBus);
 
-        Label widget = new Label();
+        Label widget = new Label("Get Adobe Flash: http://www.adobe.com/products/flashplayer/");
         widget.getElement().setId(DOM.createUniqueId());
         setWidget(widget);
     }
