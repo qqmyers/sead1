@@ -299,14 +299,13 @@ a:hover {
  * Dataset Page Right Side
  * ---------------------------------------------------------------------- */
  
-.datasetMainContainerRightColumn, .datasetRightColHeading, .datasetRightColSection {
-	max-width: 200px;
+.datasetMainContainerRightColumn, .datasetRightColHeading, .datasetRightColSection {	
 	text-align: left;
 	padding: 0px;
 }
 
 .datasetMainContainerRightColumn {
-	float: right;
+	margin: 10px 0px 0px 775px;
 }
 
 .datasetRightColSection {
