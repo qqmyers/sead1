@@ -51,6 +51,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -120,9 +121,9 @@ public class UploadPage extends Page {
 
         mainLayoutPanel.add(tableLayout);
 
-        VerticalPanel singleUpload = new VerticalPanel();
+        final VerticalPanel singleUpload = new VerticalPanel();
         final HorizontalPanel hp = new HorizontalPanel();
-        hp.add(new Label("Select a file you want to upload:"));
+        hp.add(new Label("Select files you want to upload:"));
         Image helpButton = new Image("./images/help-browser.png");
         helpButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -148,7 +149,7 @@ public class UploadPage extends Page {
         });
         singleUpload.add(uploadWidget);
 
-        VerticalPanel dndPanel = new VerticalPanel();
+        final VerticalPanel dndPanel = new VerticalPanel();
 
         final boolean dndEnabled = MMDB.getSessionPreference(DND_ENABLED_PREFERENCE) != null;
         final String disabledMsg = "Click here to upload multiple files. You may be asked by your web browser to accept a security exception.";
@@ -192,7 +193,7 @@ public class UploadPage extends Page {
         dndTooltip.addStyleName("dndTooltip");
         dndPanel.add(dndTooltip);
 
-        // HTML5 Upload Widget
+        // HTML5 Upload Widgets
         VerticalPanel html5Panel = new VerticalPanel();
         HTML html5Upload = new HTML();
         html5Upload.setHTML("<div id='box'><div id='drop'><br><br>Drag and drop files here!</div></div> <div id='list'></div>");
@@ -204,6 +205,22 @@ public class UploadPage extends Page {
         html5Form.add(hp);
         html5Form.add(formMultiple);
 
+        HorizontalPanel switchUploader = new HorizontalPanel();
+        switchUploader.addStyleName("pagingButton");
+        Label basicLabel = new Label("Having problems? Click here to try the");
+        Anchor basicUploader = new Anchor("basic uploaders.");
+        basicUploader.addStyleName("addTagsLink");
+        basicUploader.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                tableLayout.setWidget(0, 0, singleUpload);
+                tableLayout.setWidget(0, 2, dndPanel);
+
+            }
+        });
+        switchUploader.add(basicLabel);
+        switchUploader.add(basicUploader);
+
         Label or = new Label("OR");
         or.addStyleName("uploadOrLabel");
         tableLayout.setWidget(0, 1, or);
@@ -211,6 +228,7 @@ public class UploadPage extends Page {
         if (getUserAgent().contains("firefox") || getUserAgent().contains("chrome")) {
             tableLayout.setWidget(0, 0, html5Form);
             tableLayout.setWidget(0, 2, html5Panel);
+            tableLayout.setWidget(1, 0, switchUploader);
         } else {
             pageTitle.addEast(helpButton);
             tableLayout.setWidget(0, 0, singleUpload);
@@ -218,6 +236,8 @@ public class UploadPage extends Page {
         }
         tableLayout.getCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
         tableLayout.getCellFormatter().addStyleName(0, 0, "uploadPageLargeCell");
+        tableLayout.getCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);
+        tableLayout.getCellFormatter().addStyleName(1, 0, "uploadPageLargeCell");
         tableLayout.getCellFormatter().addStyleName(0, 2, "uploadPageLargeCell");
         tableLayout.getCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_CENTER);
 
@@ -319,25 +339,31 @@ public class UploadPage extends Page {
      * 
      * @param credentials
      */
+
     private native void deployDndApplet(String credentials) /*-{
-        $wnd.LazyLoad.js('js/deployJava.js', function() {
-           var attributes = {
-        id:'dragdropApplet',
-        MAYSCRIPT:'true',
-        code:'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-        archive:'dnd/DropUploader-1801.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
-        width:150,
-        height:100
-        };
-        var parameters = {
-        jnlp_href: 'dropuploader.jnlp',
-        statusPage: $wnd.document.URL,
-        "credentials": credentials,
-        background: "0xFFFFFF",
-        };
-        $wnd.deployJava.runApplet(attributes, parameters, '1.5');
-        $wnd.document.getElementById('dndAppletId').innerHTML = $wnd.deployJava.getDocument();
-        });       
+		$wnd.LazyLoad
+				.js(
+						'js/deployJava.js',
+						function() {
+							var attributes = {
+								id : 'dragdropApplet',
+								MAYSCRIPT : 'true',
+								code : 'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
+								archive : 'dnd/DropUploader-1801.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
+								width : 150,
+								height : 100
+							};
+							var parameters = {
+								jnlp_href : 'dropuploader.jnlp',
+								statusPage : $wnd.document.URL,
+								"credentials" : credentials,
+								background : "0xFFFFFF",
+							};
+							$wnd.deployJava.runApplet(attributes, parameters,
+									'1.5');
+							$wnd.document.getElementById('dndAppletId').innerHTML = $wnd.deployJava
+									.getDocument();
+						});
     }-*/;
 
     @Override
