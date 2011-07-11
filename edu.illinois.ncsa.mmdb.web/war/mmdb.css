@@ -14,7 +14,7 @@ body {
 
 .mainMenu, .mainContainer, .bottomMenu {
 	font-size: 0.9em;
-	width: 975px;
+	width: 1000px;
 }
 
 /* ----------------------------------------------------------------------
@@ -271,7 +271,7 @@ a:hover {
 .datasetMainContainerLeftColumn {
 	float: left;
 	text-align: left;
-	width: 750px;
+	width: 75%
 }
 
 .textboxPreview {
@@ -305,7 +305,10 @@ a:hover {
 }
 
 .datasetMainContainerRightColumn {
-	margin: 10px 0px 0px 775px;
+	width: 20%;
+	overflow: hidden\9;
+	float: right;
+	margin: 10px 0px 0px 0px;
 }
 
 .datasetRightColSection {

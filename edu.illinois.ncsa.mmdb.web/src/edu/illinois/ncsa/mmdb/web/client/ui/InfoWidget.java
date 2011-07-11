@@ -103,6 +103,7 @@ public class InfoWidget extends Composite {
     void addInfo(String name, String value, Panel panel) {
         if (value != null && !value.equals("")) {
             Label lbl = new Label(name + ": " + value);
+            lbl.setTitle(lbl.getText());
             lbl.addStyleName("datasetRightColText");
             panel.add(lbl);
         }
