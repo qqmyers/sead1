@@ -205,7 +205,7 @@ public class UploadPage extends Page {
         html5Form.add(hp);
         html5Form.add(formMultiple);
 
-        HorizontalPanel switchUploader = new HorizontalPanel();
+        final HorizontalPanel switchUploader = new HorizontalPanel();
         switchUploader.addStyleName("pagingButton");
         Label basicLabel = new Label("Having problems? Click here to try the");
         Anchor basicUploader = new Anchor("basic uploaders.");
@@ -215,7 +215,7 @@ public class UploadPage extends Page {
             public void onClick(ClickEvent event) {
                 tableLayout.setWidget(0, 0, singleUpload);
                 tableLayout.setWidget(0, 2, dndPanel);
-
+                tableLayout.remove(switchUploader);
             }
         });
         switchUploader.add(basicLabel);
