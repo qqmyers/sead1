@@ -968,6 +968,14 @@ public class TupeloStore {
     // ----------------------------------------------------------------------
 
     public static URL findFile(String filename) {
+        // see if file is absolute
+        if (new File(filename).exists()) {
+            try {
+                return new File(filename).toURI().toURL();
+            } catch (MalformedURLException e) {
+                log.info("Could not conver filename to URL.", e);
+            }
+        }
         // Default folder for MMDB stuff
         File dataDir = new File(System.getProperty("user.home"), "NCSA/MMDBServer"); //$NON-NLS-1$ //$NON-NLS-2$
         File file = new File(dataDir, filename);
