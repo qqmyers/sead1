@@ -61,61 +61,66 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  */
 public class MediciResourceFactory implements ResourceFactory
 {
-    private static Log     log = LogFactory.getLog( MediciResourceFactory.class );
+    private static Log           log = LogFactory.getLog(MediciResourceFactory.class);
 
-    private FolderResource root;
+    private final FolderResource root;
 
     public MediciResourceFactory()
     {
         Context context = TupeloStore.getInstance().getContext();
-        SecurityManager security = new MediciSecurityManager( context, false );
+        SecurityManager security = new MediciSecurityManager(context, false);
 
-        root = new FolderResource( "/", security ); //$NON-NLS-1$
+        root = new FolderResource("/", security); //$NON-NLS-1$
         try {
-            root.add( new CollectionRootResource( context, security ) );
-        } catch ( IOException e ) {
-            log.warn( "Could not add collections.", e );
+            root.add(new PersonBeanResource("HOME", org.tupeloproject.rdf.Resource.uriRef("uri:home"), context, security));
+        } catch (IOException e) {
+            log.warn("Could not add collections.", e);
         }
         try {
-            root.add( new TagRootResource( context, security ) );
-        } catch ( IOException e ) {
-            log.warn( "Could not add tags.", e );
+            root.add(new CollectionRootResource(context, security));
+        } catch (IOException e) {
+            log.warn("Could not add collections.", e);
         }
         try {
-            root.add( new PersonRootResource( context, security ) );
-        } catch ( IOException e ) {
-            log.warn( "Could not add people.", e );
+            root.add(new TagRootResource(context, security));
+        } catch (IOException e) {
+            log.warn("Could not add tags.", e);
+        }
+        try {
+            root.add(new PersonRootResource(context, security));
+        } catch (IOException e) {
+            log.warn("Could not add people.", e);
         }
     }
 
     @Override
-    public Resource getResource( String host, String path )
+    public Resource getResource(String host, String path)
     {
         // get path minus servlet
         String servlet = MiltonServlet.request().getContextPath() + MiltonServlet.request().getServletPath() + "/?";
-        path = path.replaceFirst( servlet, "" );
+        path = path.replaceFirst(servlet, "");
 
         // remove leading slash
-        if ( path.startsWith( "/" ) ) { //$NON-NLS-1$
-            path = path.substring( 1 );
+        if (path.startsWith("/")) { //$NON-NLS-1$
+            path = path.substring(1);
         }
 
         // special case for root
-        if ( path.equals( "" ) || path.equals( "/" ) ) { //$NON-NLS-1$ //$NON-NLS-2$
+        if (path.equals("") || path.equals("/")) { //$NON-NLS-1$ //$NON-NLS-2$
             return root;
         }
 
         // find the path and return item
         Resource found = root;
-        for ( String part : path.split( "/" ) ) { //$NON-NLS-1$
-            if ( found instanceof CollectionResource ) {
-                found = ((CollectionResource) found).child( part );
-                if ( found == null ) {
-                    log.debug( "Did not find " + path );
+        for (String part : path.split("/") ) { //$NON-NLS-1$
+            if (found instanceof CollectionResource) {
+                found = ((CollectionResource) found).child(part);
+                if (found == null) {
+                    log.debug("Did not find " + path);
                     return null;
                 }
             } else {
-                log.debug( "Found non collectionresource " + path );
+                log.debug("Found non collectionresource " + path);
                 return null;
             }
         }

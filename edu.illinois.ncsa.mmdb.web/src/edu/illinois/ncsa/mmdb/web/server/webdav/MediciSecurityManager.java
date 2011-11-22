@@ -45,7 +45,7 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Context;
-import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.kernel.OperatorException;
 
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.Request;
@@ -56,10 +56,12 @@ import com.bradmcevoy.http.http11.auth.DigestResponse;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * Simple implementation of SecurityManger for medici. This will use the medici
@@ -72,27 +74,22 @@ public class MediciSecurityManager implements SecurityManager {
     private static Log                log      = LogFactory.getLog(MediciSecurityManager.class);
 
     private final Map<String, String> accepted = new HashMap<String, String>();
-    private final RBAC                rbac;
+    private final MediciRbac          rbac;
     private final boolean             allowDelete;
+    private PersonBean                user;
 
     public MediciSecurityManager(Context context, boolean allowDelete) {
-        this.rbac = new RBAC(context);
+        this.rbac = new MediciRbac(context);
         this.allowDelete = allowDelete;
+    }
+
+    public PersonBean getUser() {
+        return user;
     }
 
     @Override
     public String getRealm(String host) {
         return TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName);
-    }
-
-    @Override
-    public String authenticate(String user, String password) {
-        if (new Authentication().authenticate(user, password)) {
-            String token = UUID.randomUUID().toString();
-            accepted.put(token, user);
-            return token;
-        }
-        return null;
     }
 
     @Override
@@ -106,6 +103,30 @@ public class MediciSecurityManager implements SecurityManager {
     }
 
     @Override
+    public String authenticate(String user, String password) {
+        if (new Authentication().authenticate(user, password)) {
+            String userid = PersonBeanUtil.getPersonID(user);
+            try {
+                this.user = new PersonBeanUtil(CETBeans.createBeanSession(rbac.getContext())).get(userid);
+            } catch (OperatorException e) {
+                log.warn("Could not find user.", e);
+                return null;
+            } catch (ClassNotFoundException e) {
+                log.warn("Could not find user.", e);
+                return null;
+            } catch (Exception e) {
+                log.warn("Could not find user.", e);
+                return null;
+            }
+
+            String token = UUID.randomUUID().toString();
+            accepted.put(token, user);
+            return token;
+        }
+        return null;
+    }
+
+    @Override
     public boolean authorise(Request request, Method method, Auth auth, com.bradmcevoy.http.Resource resource) {
         if (auth == null) {
             return false;
@@ -114,19 +135,18 @@ public class MediciSecurityManager implements SecurityManager {
             return false;
         }
 
-        // check permissions
-        String userid = PersonBeanUtil.getPersonID(accepted.get(auth.getTag()));
         try {
-            if (!rbac.checkPermission(Resource.uriRef(userid), MMDB.VIEW_MEMBER_PAGES)) {
+            // get resource
+            if (!rbac.checkPermission(user.getUri(), resource.getUniqueId(), Permission.VIEW_DATA)) {
+                return false;
+            }
+
+            // delete resource
+            if (method.equals(Method.DELETE) && !(allowDelete || rbac.checkPermission(user.getUri(), resource.getUniqueId(), Permission.DELETE_DATA))) {
                 return false;
             }
         } catch (RBACException e) {
             log.info("Could not check permissions.", e);
-            return false;
-        }
-
-        // no delete
-        if (!allowDelete && method.equals(Method.DELETE)) {
             return false;
         }
 
