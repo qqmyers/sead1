@@ -96,14 +96,13 @@ public class MediciSecurityManager implements SecurityManager {
     }
 
     @Override
+    public boolean isDigestAllowed() {
+        return false;
+    }
+
+    @Override
     public String authenticate(DigestResponse digestRequest) {
         return null;
-        //com.bradmcevoy.http.http11.auth.DigestGenerator
-        // Hex(MD5(username + ":" + realm + ":" + password))
-        //                LogFactory.getLog( MediciSecurityManager.class ).info("Accepting digest blindly.");
-        //                String token = UUID.randomUUID().toString();
-        //                accepted.put( token, digestRequest.getUser() );
-        //                return token;
     }
 
     @Override
