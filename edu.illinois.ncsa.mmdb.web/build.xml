@@ -200,11 +200,12 @@
 
 	<target name="war" depends="clean, compile, gwtc, resources" description="builds the war file">
 		<zip destfile="${war}" basedir="war" >
-			<exclude name="WEB-INF/lib/gwt-user-2.1.0.jar" />
-			<exclude name="WEB-INF/lib/gwt-dev-2.1.0.jar" />
-			<exclude name="WEB-INF/lib/commons-logging-1.1.1.jar" />
-			<exclude name="WEB-INF/lib/mysql-connector-java-5.0.4.jar" />
-			<exclude name="WEB-INF/lib/xercesImpl-2.6.2.jar" />
+			<exclude name="WEB-INF/deploy/**" />
+			<exclude name="WEB-INF/lib/gwt-user*.jar" />
+			<exclude name="WEB-INF/lib/gwt-dev-*.jar" />
+			<exclude name="WEB-INF/lib/commons-logging-*.jar" />
+			<exclude name="WEB-INF/lib/mysql-connector-java-*.jar" />
+			<exclude name="WEB-INF/lib/xercesImpl-*.jar" />
 		</zip>
 	</target>
 </project>
