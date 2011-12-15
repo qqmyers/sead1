@@ -38,6 +38,8 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.webdav;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,8 +63,13 @@ import org.tupeloproject.util.Iso8601;
 import org.tupeloproject.util.Tuple;
 
 import com.bradmcevoy.http.DeletableResource;
+import com.bradmcevoy.http.PutableResource;
 import com.bradmcevoy.http.SecurityManager;
+import com.bradmcevoy.http.exceptions.BadRequestException;
+import com.bradmcevoy.http.exceptions.ConflictException;
+import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 
+import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
@@ -73,7 +80,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
  * @author Rob Kooper
  * 
  */
-public class TagBeanResource extends AbstractCollectionResource {
+public class TagBeanResource extends AbstractCollectionResource implements PutableResource {
     private static Log log = LogFactory.getLog(TagBeanResource.class);
 
     public TagBeanResource(String tag, Context context, SecurityManager security) {
@@ -135,6 +142,30 @@ public class TagBeanResource extends AbstractCollectionResource {
         }
 
         return result;
+    }
+
+    // ----------------------------------------------------------------------
+    // PutableResource
+    // ----------------------------------------------------------------------
+    @Override
+    public com.bradmcevoy.http.Resource createNew(String newName, InputStream stream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
+        com.bradmcevoy.http.Resource result = upload(newName, stream, length, contentType);
+        if (result == null) {
+            return null;
+        }
+
+        try {
+            BeanSession bs = CETBeans.createBeanSession(getContext());
+
+            TagEventBeanUtil tebu = new TagEventBeanUtil(bs);
+            tebu.addTags(result.getUniqueId(), ((MediciSecurityManager) getSecurity()).getUser().getUri(), getName());
+
+            return result;
+        } catch (OperatorException e) {
+            throw (new BadRequestException(result));
+        } catch (ClassNotFoundException e) {
+            throw (new BadRequestException(result));
+        }
     }
 
     class DeletableDatasetBeanResource extends DatasetBeanResource implements DeletableResource {

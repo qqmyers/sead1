@@ -126,6 +126,15 @@ public class MediciSecurityManager implements SecurityManager {
         return null;
     }
 
+    public boolean checkPermission(com.bradmcevoy.http.Resource resource, Permission permission) {
+        try {
+            return rbac.checkPermission(user.getUri(), resource.getUniqueId(), permission);
+        } catch (RBACException e) {
+            log.info("Could not check permission.", e);
+            return false;
+        }
+    }
+
     @Override
     public boolean authorise(Request request, Method method, Auth auth, com.bradmcevoy.http.Resource resource) {
         if (auth == null) {
@@ -135,22 +144,50 @@ public class MediciSecurityManager implements SecurityManager {
             return false;
         }
 
-        try {
-            // get resource
-            if (!rbac.checkPermission(user.getUri(), resource.getUniqueId(), Permission.VIEW_DATA)) {
-                return false;
-            }
-
-            // delete resource
-            if (method.equals(Method.DELETE) && !(allowDelete || rbac.checkPermission(user.getUri(), resource.getUniqueId(), Permission.DELETE_DATA))) {
-                return false;
-            }
-        } catch (RBACException e) {
-            log.info("Could not check permissions.", e);
+        // can the user be here?
+        // TODO add WEBDAV permission
+        if (!checkPermission(resource, Permission.VIEW_DATA)) {
             return false;
         }
 
-        // done
-        return true;
+        switch (method) {
+            case GET:
+                if (resource instanceof DatasetBeanResource) {
+                    return checkPermission(resource, Permission.DOWNLOAD);
+                }
+                return true;
+
+            case DELETE:
+                if (resource instanceof DatasetBeanResource) {
+                    return allowDelete && checkPermission(resource, Permission.DELETE_DATA);
+                }
+                return false;
+
+            case PUT:
+                if (!checkPermission(resource, Permission.UPLOAD_DATA)) {
+                    return false;
+                }
+                if (resource instanceof TagBeanResource) {
+                    return checkPermission(resource, Permission.ADD_TAG);
+                }
+                if (resource instanceof CollectionBeanResource) {
+                    // TODO add permission to check for permisson to add to collection
+                    return true;
+                }
+                if (resource instanceof PersonBeanResource) {
+                    return resource.getUniqueId().equals(PersonBeanResource.HOME.getString()) || resource.getUniqueId().equals(getUser().getUri());
+                }
+                return false;
+
+            case PROPFIND:
+                return true;
+
+            case LOCK:
+                return true;
+
+            default:
+                log.info(method + " " + resource);
+                return false;
+        }
     }
 }

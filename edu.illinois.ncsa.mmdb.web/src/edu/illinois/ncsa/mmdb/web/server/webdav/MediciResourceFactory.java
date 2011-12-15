@@ -72,7 +72,7 @@ public class MediciResourceFactory implements ResourceFactory
 
         root = new FolderResource("/", security); //$NON-NLS-1$
         try {
-            root.add(new PersonBeanResource("HOME", org.tupeloproject.rdf.Resource.uriRef("uri:home"), context, security));
+            root.add(new PersonBeanResource("HOME", PersonBeanResource.HOME, context, security));
         } catch (IOException e) {
             log.warn("Could not add collections.", e);
         }
