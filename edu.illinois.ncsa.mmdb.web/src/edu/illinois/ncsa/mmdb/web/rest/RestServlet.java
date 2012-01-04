@@ -688,7 +688,12 @@ public class RestServlet extends AuthenticatedServlet {
             } else if (hasPrefix(IMAGE_CREATE_ANON_INFIX, request)) {
                 String uri = null;
                 try {
-                    log.trace("UPLOAD IMAGE (anonymous)");
+                    log.trace("UPLOAD IMAGE");
+                    /* Don't want anonymous uploads, so add the username */
+                    String username = getHttpSessionUser(request);
+                    if (username != null) {
+                        md.put(Dc.CREATOR, Resource.uriRef(PersonBeanUtil.getPersonID(username)));
+                    }
                     uri = restService.createImage(md, imageData);
                 } catch (RestServiceException e) {
                     throw new ServletException("failed to create image", e);
