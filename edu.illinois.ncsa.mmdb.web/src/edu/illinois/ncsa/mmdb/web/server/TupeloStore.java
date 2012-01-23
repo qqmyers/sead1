@@ -410,7 +410,7 @@ public class TupeloStore {
                                              RestServlet.SEARCH_INFIX,
                                              RestServlet.JIRA_ISSUE,
                                              RestServlet.DATASET,
-                                                     };
+                                             };
 
     /**
      * return a path to the iamge in the "/images" directory of the webapp
@@ -502,18 +502,19 @@ public class TupeloStore {
      */
     public String extractPreviews(String uri, boolean rerun) {
         Long lastRequest = lastExtractionRequest.get(uri);
-
+        String result = null;
         // give it a minute
         if (rerun || lastRequest == null || lastRequest < System.currentTimeMillis() - 120000) {
-            log.info("EXTRACT PREVIEWS " + uri);
+            log.debug("EXTRACT PREVIEWS " + uri);
             lastExtractionRequest.put(uri, System.currentTimeMillis());
             try {
-                return extractorpbu.callExtractor(extractionServiceURL, uri, null, rerun);
+                result = extractorpbu.callExtractor(extractionServiceURL, uri, null, rerun);
             } catch (Exception e) {
                 log.error(String.format("Extraction service %s unavailable", extractionServiceURL), e);
             }
+            log.debug("EXTRACT PREVIEWS " + uri + " DONE");
         }
-        return null;
+        return result;
     }
 
     public int countDatasets() {
@@ -530,9 +531,9 @@ public class TupeloStore {
         if (count == null) {
             count = new Memoized<Integer>() {
                 public Integer computeValue()
-                    {
-                        return countDatasetsInCollectionWithTag(inCollection, withTag);
-                    }
+                {
+                    return countDatasetsInCollectionWithTag(inCollection, withTag);
+                }
             };
             if (inCollection != null || withTag != null) {
                 count.setTtl(10000);
