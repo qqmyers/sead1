@@ -87,12 +87,12 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
  * 
  */
 public class LocationWidget extends Composite {
-    private final FlowPanel mainPanel;
-    private MapWidget       map;
-    private DispatchAsync   service;
-    private String          uri;
-    private Label           noLocationLabel;
-    private Anchor          addLocationAnchor;
+    private final FlowPanel     mainPanel;
+    private MapWidget           map;
+    private final DispatchAsync service;
+    private final String        uri;
+    private Label               noLocationLabel;
+    private Anchor              addLocationAnchor;
 
     /**
      * A widget listing tags and providing a way to add a new one.
@@ -270,16 +270,17 @@ public class LocationWidget extends Composite {
                     Overlay overlay = event.getOverlay();
                     LatLng point = event.getLatLng();
 
-                    if (overlay != null && overlay instanceof Marker) {
+                    if (marker != null) {
+                        sender.removeOverlay(marker);
+                    }
+
+                    if (overlay != null && marker.equals(overlay)) {
                         sender.removeOverlay(overlay);
+                        marker = null;
                     } else {
-                        if (marker != null) {
-                            sender.removeOverlay(marker);
-                        }
                         marker = new Marker(point);
                         sender.addOverlay(marker);
                     }
-
                 }
 
             });
