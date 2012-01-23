@@ -389,6 +389,8 @@ function uploadFile(){
 	processing = queue.shift();
 	
 	reader.file = processing;
+
+	console.log("File " + processing.name + " being uploaded");
 	
 	//Handle upload cases
 	reader.onprogress = LoadProgress;
@@ -399,7 +401,6 @@ function uploadFile(){
 	//TODO detect folder, resume uploading
 	
 	reader.readAsBinaryString(processing);
-	
 }
 
 function handleFiles(evt){
@@ -447,7 +448,6 @@ function drop(evt) {
 		
 		//Add to presenter interface
 		dndAppletFileDropped(name, size);
-		
 		queue.push(files[i]);
 		
 	}
@@ -534,6 +534,9 @@ function LoadEnd(evt) {
 				}
 	}
 	else {
+
+		console.log("Error uploading file");
+		
 		count += 1;
 		
 		if(queue.length > 0){
@@ -560,7 +563,7 @@ function LoadProgress(evt) {
 
 function LoadError(evt) {
 	var newFile  = document.createElement('div');
-	
+	console.error("Error uploading file " + evt.target.error.code);
 	switch(evt.target.error.code) {
 		case evt.target.error.NOT_FOUND_ERR:
 			newFile.innerHTML = "File not found";
