@@ -38,8 +38,6 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.webdav;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,11 +59,7 @@ import org.tupeloproject.util.Iso8601;
 import org.tupeloproject.util.Tuple;
 
 import com.bradmcevoy.http.DeletableResource;
-import com.bradmcevoy.http.PutableResource;
 import com.bradmcevoy.http.SecurityManager;
-import com.bradmcevoy.http.exceptions.BadRequestException;
-import com.bradmcevoy.http.exceptions.ConflictException;
-import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 
 /**
  * Wrapper around the CollectionBean. This will show a folder called 'people'
@@ -75,7 +69,7 @@ import com.bradmcevoy.http.exceptions.NotAuthorizedException;
  * @author Rob Kooper
  * 
  */
-public class PersonBeanResource extends AbstractCollectionResource implements PutableResource
+public class PersonBeanResource extends AbstractCollectionResource //implements PutableResource
 {
     private static Log           log  = LogFactory.getLog(PersonBeanResource.class);
 
@@ -147,14 +141,6 @@ public class PersonBeanResource extends AbstractCollectionResource implements Pu
         }
 
         return result;
-    }
-
-    // ----------------------------------------------------------------------
-    // PutableResource
-    // ----------------------------------------------------------------------
-    @Override
-    public com.bradmcevoy.http.Resource createNew(String newName, InputStream stream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
-        return upload(newName, stream, length, contentType);
     }
 
     // ----------------------------------------------------------------------

@@ -163,7 +163,7 @@ public class CollectionBeanResource extends AbstractCollectionResource implement
     // ----------------------------------------------------------------------
     @Override
     public com.bradmcevoy.http.Resource createNew(String newName, InputStream stream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
-        com.bradmcevoy.http.Resource result = upload(newName, stream, length, contentType);
+        com.bradmcevoy.http.Resource result = super.createNew(newName, stream, length, contentType);
         if (result == null) {
             return null;
         }

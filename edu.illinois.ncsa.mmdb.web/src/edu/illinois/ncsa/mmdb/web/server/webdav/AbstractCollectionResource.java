@@ -301,7 +301,7 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
     // ----------------------------------------------------------------------
     // PutableResource
     // ----------------------------------------------------------------------
-    public Resource upload(String newName, InputStream stream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
+    public Resource createNew(String newName, InputStream stream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
         // create the bean
         DatasetBean db = new DatasetBean();
         db.setFilename(newName);

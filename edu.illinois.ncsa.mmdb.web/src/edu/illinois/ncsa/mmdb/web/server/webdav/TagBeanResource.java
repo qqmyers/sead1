@@ -63,7 +63,6 @@ import org.tupeloproject.util.Iso8601;
 import org.tupeloproject.util.Tuple;
 
 import com.bradmcevoy.http.DeletableResource;
-import com.bradmcevoy.http.PutableResource;
 import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.ConflictException;
@@ -80,7 +79,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
  * @author Rob Kooper
  * 
  */
-public class TagBeanResource extends AbstractCollectionResource implements PutableResource {
+public class TagBeanResource extends AbstractCollectionResource {//implements PutableResource {
     private static Log log = LogFactory.getLog(TagBeanResource.class);
 
     public TagBeanResource(String tag, Context context, SecurityManager security) {
@@ -147,9 +146,8 @@ public class TagBeanResource extends AbstractCollectionResource implements Putab
     // ----------------------------------------------------------------------
     // PutableResource
     // ----------------------------------------------------------------------
-    @Override
     public com.bradmcevoy.http.Resource createNew(String newName, InputStream stream, Long length, String contentType) throws IOException, ConflictException, NotAuthorizedException, BadRequestException {
-        com.bradmcevoy.http.Resource result = upload(newName, stream, length, contentType);
+        com.bradmcevoy.http.Resource result = super.createNew(newName, stream, length, contentType);
         if (result == null) {
             return null;
         }
