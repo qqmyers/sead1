@@ -91,6 +91,8 @@ public class CollectionMembershipWidget extends Composite {
 
     private final FlexTable       collectionsPanel;
 
+    private boolean               hasPermission = false;
+
     /**
      * Create empty widget showing a title and a add to collection link.
      */
@@ -115,6 +117,7 @@ public class CollectionMembershipWidget extends Composite {
         rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
             @Override
             public void onAllowed() {
+                hasPermission = true;
                 addAnchor = new Anchor("Add to a collection");
 
                 addAnchor.addClickHandler(new ClickHandler() {
@@ -215,6 +218,8 @@ public class CollectionMembershipWidget extends Composite {
                             for (CollectionBean collection : collections ) {
                                 addCollection(collection);
                             }
+                        } else if (!hasPermission) {
+                            mainContainer.setVisible(false);
                         }
                     }
                 });

@@ -86,6 +86,7 @@ public class TagsWidget extends Composite {
     private final Label          tagLabel;
     private AddTagWidget         tagWidget;
     final Set<String>            tagsShown;
+    private boolean              hasPermission;
 
     /**
      * A widget listing tags and providing a way to add a new one.
@@ -121,6 +122,7 @@ public class TagsWidget extends Composite {
         rbac.doIfAllowed(Permission.ADD_TAG, id, new PermissionCallback() {
             @Override
             public void onAllowed() {
+                hasPermission = true;
                 final Anchor addTagAnchor = new Anchor("Add tag(s)");
                 addTagAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
@@ -212,6 +214,8 @@ public class TagsWidget extends Composite {
                     for (final String tag : result.getTags().keySet() ) {
                         addTag(tag);
                     }
+                } else if (!hasPermission) {
+                    mainPanel.setVisible(false);
                 }
             }
         });
