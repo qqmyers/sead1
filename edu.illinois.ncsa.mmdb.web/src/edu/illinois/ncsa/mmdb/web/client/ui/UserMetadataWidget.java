@@ -132,6 +132,7 @@ public class UserMetadataWidget extends Composite {
     public void showTableFields(final boolean canEdit) {
         // FIXME single get to get fields and values
         addMetadata.showFields(canEdit);
+        addMetadata.setVisible(canEdit);
         dispatch.execute(new ListUserMetadataFields(), new AsyncCallback<ListUserMetadataFieldsResult>() {
             public void onFailure(Throwable caught) {
                 GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
