@@ -64,7 +64,6 @@ import org.tupeloproject.util.Iso8601;
 import org.tupeloproject.util.Tuple;
 
 import com.bradmcevoy.http.DeletableResource;
-import com.bradmcevoy.http.PutableResource;
 import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.exceptions.BadRequestException;
 import com.bradmcevoy.http.exceptions.ConflictException;
@@ -81,7 +80,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
  * @author Rob Kooper
  * 
  */
-public class CollectionBeanResource extends AbstractCollectionResource implements PutableResource
+public class CollectionBeanResource extends AbstractCollectionResource //implements PutableResource
 {
     private static Log log = LogFactory.getLog(CollectionBeanResource.class);
 
