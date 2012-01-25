@@ -1,4 +1,3 @@
-
 initUploader = function(){
 	initializeUploader();		
 }
@@ -12,29 +11,28 @@ initializeUploader = function(){
 	document.getElementById('files').addEventListener('change', handleFiles, false);
 	
 	dropBox.addEventListener("dragenter", function(event) {
+		document.getElementById("box").style.backgroundColor='#eeeeee';
 		event.preventDefault();
 		event.stopPropagation();
-		document.getElementById("box").style.backgroundColor='#eeeeee';
-	}, false);
+	}, true);
 	
 	dropBox.addEventListener("dragexit", function(event) {
+		document.getElementById("box").style.backgroundColor='#ffffff';
 		event.preventDefault();
 		event.stopPropagation();
-		document.getElementById("box").style.backgroundColor='#ffffff';
-	}, false);
+	}, true);
 	
 	
 	dropBox.addEventListener("dragover", function(event) {
 		event.preventDefault();
 		event.stopPropagation();
-	}, false);
+	}, true);
 
 	dropBox.addEventListener("drop", function(event) {
+		document.getElementById("box").style.backgroundColor='#ffffff';		
+		drop(event);
 		event.preventDefault();
 		event.stopPropagation();
-		document.getElementById("box").style.backgroundColor='#ffffff';
-		
-		drop(event);
 	}, false); 
 	
 	uploadcount = 0;
@@ -62,8 +60,8 @@ function drop(evt) {
 	var count = files.length;
 
 	for (var i = 0; i < count; i++) {
-		var name = new String(files[i].name);
-		var size = new String(files[i].size);
+		var name = files[i].name.toString();
+		var size = files[i].size.toString();
 		
 		//Add to presenter interface
 		dndAppletFileDropped(name, size);
@@ -77,7 +75,7 @@ function uploadFile() {
 	var file = queue.shift();
 	
 	var fd = new FormData();
-	fd.append(file.name, file);
+	fd.append(file.name.toString(), file);
 
 	var xhr = new XMLHttpRequest();
 	xhr.upload.count=uploadcount++;
@@ -104,7 +102,9 @@ function uploadComplete(evt) {
 	var trimmed = replacedall.replace(/^\s\s*/,"").replace(/\s\s*$/,"");
 	
 	dndAppletFileUploaded(trimmed, evt.target.upload.count.toString());
-	uploadFile();
+	if (queue.length > 0) {
+		uploadFile();
+	}
 }
 
 function uploadFailed(evt) {
@@ -151,7 +151,9 @@ function uploadFailed(evt) {
 			document.getElementById("list").appendChild(newFile);
 	}
 	
-	uploadFile();
+	if (queue.length > 0) {
+		uploadFile();
+	}
 }
 
 function uploadCanceled(evt) {

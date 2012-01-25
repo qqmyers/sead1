@@ -89,6 +89,7 @@ public class UploadPage extends Page {
     private static BatchOperationView      batchOperationView;
     private static UploadStatusView        uploadStatusView;
     Timer                                  safariWakeupTimer;
+    private boolean                        showhtml5;
 
     public static final String             DND_ENABLED_PREFERENCE = "dndAppletEnabled";
 
@@ -103,6 +104,15 @@ public class UploadPage extends Page {
 
     @Override
     public void layout() {
+        showhtml5 = true;
+        if (getUserAgent().contains("msie")) {
+            if (getUserAgent().matches(".*msie [0-9].[0-9].*")) {
+                showhtml5 = false;
+            }
+        }
+        if (getUserAgent().contains("opera")) {
+            showhtml5 = false;
+        }
 
         tableLayout = new FlexTable() {
             @Override
@@ -225,15 +235,6 @@ public class UploadPage extends Page {
         or.addStyleName("uploadOrLabel");
         tableLayout.setWidget(0, 1, or);
 
-        boolean showhtml5 = true;
-        if (getUserAgent().contains("msie")) {
-            if (getUserAgent().matches(".*msie [0-9].[0-9].*")) {
-                showhtml5 = false;
-            }
-        }
-        if (getUserAgent().contains("opera")) {
-            showhtml5 = false;
-        }
         if (showhtml5) {
             tableLayout.setWidget(0, 0, html5Form);
             tableLayout.setWidget(0, 2, html5Panel);
@@ -387,7 +388,7 @@ public class UploadPage extends Page {
     @Override
     protected void onLoad() {
         super.onLoad();
-        if (getUserAgent().contains("firefox") || getUserAgent().contains("chrome")) {
+        if (showhtml5) {
             initUploader();
         }
     }
