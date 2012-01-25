@@ -1,14 +1,9 @@
 initUploader = function(){
-
 	initializeUploader();		
-	
 }
 
-var uploading = false;
-var count = 0;
-var processing = null;
+var uploadcount = 0;
 var queue = [];
-var error_occurred = false;
 
 initializeUploader = function(){
 	dropBox =  document.getElementById("box");
@@ -34,33 +29,10 @@ initializeUploader = function(){
 	}, true);
 
 	dropBox.addEventListener("drop", drop, false); 
-
-	count = 0;
+	
+	uploadcount = 0;
 }
 
-var reader;
-
-function uploadFile(){
-	
-	reader = new FileReader();
-	reader.index = count;
-
-	//Begin processing next in queue
-	processing = queue.shift();
-	
-	reader.file = processing;
-	
-	//Handle upload cases
-	reader.onprogress = LoadProgress;
-	reader.onerror = LoadError;
-	reader.onloadend = LoadEnd;
-	reader.onabort = LoadAbort;
-	
-	//TODO detect folder, resume uploading
-	
-	reader.readAsBinaryString(processing);
-	
-}
 
 function handleFiles(evt){
 	var files = evt.target.files;
@@ -72,18 +44,13 @@ function handleFiles(evt){
 		
 		//Add to presenter interface
 		dndAppletFileDropped(name, size);
-		
 		queue.push(files[i]);
 	}
 	
-	if(uploading == false){
-		uploading = true;
-		uploadFile();
-	}
+	uploadFile();
 }
 
 function drop(evt) {
-
 	document.getElementById("box").style.backgroundColor='#ffffff';
 	evt.stopPropagation();
 	evt.preventDefault();
@@ -92,133 +59,53 @@ function drop(evt) {
 	var count = files.length;
 
 	for (var i = 0; i < count; i++) {
-		
-		/*var worker = new Worker('js/synchronous_uploader.js')
-		
-		worker.addEventListener('message', function(evt) {
-		  alert("Worker said:");
-		}, false);
-		
-		worker.postMessage(files[i]); // Send data to our worker.
-		*/
-
 		var name = new String(files[i].name);
 		var size = new String(files[i].size);
 		
 		//Add to presenter interface
 		dndAppletFileDropped(name, size);
-		
 		queue.push(files[i]);
-		
 	}
 	
-	if(uploading == false){
-		uploading = true;
-		uploadFile();
-	}
-	
+	uploadFile();
 }
 
-var xhr;
-
-function LoadEnd(evt) {
-	if(!error_occurred){	
+function uploadFile() {
+	var file = queue.shift();
 	
-				index = evt.target.index;
-				file = evt.target.file;
-				binary = evt.target.result;
-		
-				//Construct the POST request
-				xhr = false;
-				//xhr.abort();
-				
-				if(window.XMLHttpRequest){
-				xhr = new XMLHttpRequest();
-				}
-				xhr.open('POST', 'UploadBlob', true);
-				
-				//Handle server response
-				xhr.onreadystatechange = function(){
-					if(xhr.readyState == 4){
-						if(xhr.status == 200){
-							//Remove <ol><li> ... </li></ol>
-						    var replaced = new String(xhr.responseText);
-						    var replacedall = replaced.replace(/<[^>]+>/g,"");
-							var trimmed = replacedall.replace(/^\s\s*/,"").replace(/\s\s*$/,"");
-							
-							dndAppletFileUploaded(trimmed, index.toString());
-							count += 1;
-							
-							if(queue.length > 0){
-								uploadFile();
-							}
-							else uploading = false;
-						}
-						else{
-							//Retry Upload
-							var newFile  = document.createElement('div');
-							newFile.innerHTML = "Server Error, Status: " + xhr.status;
-							document.getElementById("list").appendChild(newFile);
-						}
-					}
-				}
-				
-				//Setup POST header content in data
-				var boundary = 'xxxxxxxxx';
-	 			var body = '--' + boundary + "\r\n";  
-				body += "Content-Disposition: form-data; name=f1; filename=" + file.name + "\r\n";  
-				//if null, add UNKNOWN mimetype so MimeMap can create one
-				if (file.type)
-					body += "Content-Type:" + file.type + "\r\n\r\n";
-				else
-					body += "Content-Type: application/octet-stream \r\n\r\n";  
-				body += binary + "\r\n";  
-				body += '--' + boundary + '--';      
-				xhr.setRequestHeader('content-type', 'multipart/form-data; boundary=' + boundary);
+	var fd = new FormData();
+	fd.append("filename", file.name);
+	fd.append("file", file);
 
-				//Firefox only method
-				if(xhr.sendAsBinary != null) { 
-					xhr.sendAsBinary(body); 		
-				}
-				//Chrome 9+
-				else {
-						//Follow this Chrome dev forum for updates as its relatively new
-						//http://code.google.com/p/chromium/issues/detail?id=35705
-				        var data = new ArrayBuffer(body.length);
-						var ui8a = new Uint8Array(data, 0);
-						for (var i=0; i<body.length; i++) {
-						ui8a[i] = (body.charCodeAt(i) & 0xff);
-						}
-						xhr.send(data);
-
-				}
-	}
-	else {
-		count += 1;
-		
-		if(queue.length > 0){
-			uploadFile();
-		}
-		else 
-			uploading = false;
-		
-		error_occurred = false;
-		
-	}
-	
+	var xhr = new XMLHttpRequest();
+	xhr.upload.count=uploadcount++;
+	xhr.upload.addEventListener("progress", uploadProgress, false);
+	xhr.addEventListener("load", uploadComplete, false);
+	xhr.addEventListener("error", uploadFailed, false);
+	xhr.addEventListener("abort", uploadCanceled, false);
+	// TODO if uploading multiple files in parallel
+	// - files can be finished uploading in random order in case of async.
+	xhr.open("POST", "UploadBlob", true);
+	xhr.send(fd);
 }
 
-function LoadProgress(evt) {
-	
+function uploadProgress(evt) {	
 	if (evt.lengthComputable) {
 		var percentage = Math.round((evt.loaded * 100) / evt.total);
-		//if (percentage < 100)
-			dndAppletProgressIndex(percentage, evt.target.index);
+		dndAppletProgressIndex(percentage, evt.target.count);
 	}
-
 }
 
-function LoadError(evt) {
+function uploadComplete(evt) {
+    var replaced = new String(evt.target.responseText);
+    var replacedall = replaced.replace(/<[^>]+>/g,"");
+	var trimmed = replacedall.replace(/^\s\s*/,"").replace(/\s\s*$/,"");
+	
+	dndAppletFileUploaded(trimmed, evt.target.upload.count.toString());
+	uploadFile();
+}
+
+function uploadFailed(evt) {
 	var newFile  = document.createElement('div');
 	
 	switch(evt.target.error.code) {
@@ -262,20 +149,11 @@ function LoadError(evt) {
 			document.getElementById("list").appendChild(newFile);
 	}
 	
-	reader.abort();
-	error_occurred = true;
-	
+	uploadFile();
 }
 
-function LoadAbort(evt) {
-	var newFile  = document.createElement('div');
-	newFile.innerHTML = "Aborted reading file";
-	document.getElementById("list").appendChild(newFile);
-
+function uploadCanceled(evt) {
+	var newDiv  = document.createElement('div');
+	newDiv.innerHTML = "Aborted reading file";
+	document.getElementById("list").appendChild(newDiv);
 }
-
-
-
-
-
-
