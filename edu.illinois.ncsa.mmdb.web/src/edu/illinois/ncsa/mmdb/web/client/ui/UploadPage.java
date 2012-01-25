@@ -225,7 +225,16 @@ public class UploadPage extends Page {
         or.addStyleName("uploadOrLabel");
         tableLayout.setWidget(0, 1, or);
 
-        if (getUserAgent().contains("firefox") || getUserAgent().contains("chrome")) {
+        boolean showhtml5 = true;
+        if (getUserAgent().contains("msie")) {
+            if (getUserAgent().matches(".*msie [0-9].[0-9].*")) {
+                showhtml5 = false;
+            }
+        }
+        if (getUserAgent().contains("opera")) {
+            showhtml5 = false;
+        }
+        if (showhtml5) {
             tableLayout.setWidget(0, 0, html5Form);
             tableLayout.setWidget(0, 2, html5Panel);
             tableLayout.setWidget(1, 0, switchUploader);
@@ -234,6 +243,7 @@ public class UploadPage extends Page {
             tableLayout.setWidget(0, 0, singleUpload);
             tableLayout.setWidget(0, 2, dndPanel);
         }
+
         tableLayout.getCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
         tableLayout.getCellFormatter().addStyleName(0, 0, "uploadPageLargeCell");
         tableLayout.getCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);

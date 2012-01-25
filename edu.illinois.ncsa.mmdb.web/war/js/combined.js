@@ -351,24 +351,30 @@ initializeUploader = function(){
 	document.getElementById('files').addEventListener('change', handleFiles, false);
 	
 	dropBox.addEventListener("dragenter", function(event) {
-		document.getElementById("box").style.backgroundColor='#eeeeee';
-		event.stopPropagation(); 
 		event.preventDefault();
-	}, true);
+		event.stopPropagation();
+		document.getElementById("box").style.backgroundColor='#eeeeee';
+	}, false);
 	
 	dropBox.addEventListener("dragexit", function(event) {
-		document.getElementById("box").style.backgroundColor='#ffffff';
-		event.stopPropagation(); 
 		event.preventDefault();
-	}, true);
+		event.stopPropagation();
+		document.getElementById("box").style.backgroundColor='#ffffff';
+	}, false);
 	
 	
 	dropBox.addEventListener("dragover", function(event) {
-		event.stopPropagation(); 
 		event.preventDefault();
-	}, true);
+		event.stopPropagation();
+	}, false);
 
-	dropBox.addEventListener("drop", drop, false); 
+	dropBox.addEventListener("drop", function(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		document.getElementById("box").style.backgroundColor='#ffffff';
+		
+		drop(event);
+	}, false); 
 	
 	uploadcount = 0;
 }
@@ -376,9 +382,9 @@ initializeUploader = function(){
 
 function handleFiles(evt){
 	var files = evt.target.files;
-	
-	for( var i = 0, f; f = files[i]; i++){
-		
+	var count = files.length;
+
+	for (var i = 0; i < count; i++) {
 		var name = new String(files[i].name);
 		var size = new String(files[i].size);
 		
@@ -391,10 +397,6 @@ function handleFiles(evt){
 }
 
 function drop(evt) {
-	document.getElementById("box").style.backgroundColor='#ffffff';
-	evt.stopPropagation();
-	evt.preventDefault();
-
 	var files = evt.dataTransfer.files;
 	var count = files.length;
 
@@ -414,8 +416,7 @@ function uploadFile() {
 	var file = queue.shift();
 	
 	var fd = new FormData();
-	fd.append("filename", file.name);
-	fd.append("file", file);
+	fd.append(file.name, file);
 
 	var xhr = new XMLHttpRequest();
 	xhr.upload.count=uploadcount++;
