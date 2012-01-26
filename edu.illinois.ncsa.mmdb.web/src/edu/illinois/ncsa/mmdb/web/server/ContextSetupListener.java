@@ -142,6 +142,7 @@ public class ContextSetupListener implements ServletContextListener {
             mc.setUser(props.getProperty("mysql.user"));
             mc.setPassword(props.getProperty("mysql.password"));
             mc.setSchema(props.getProperty("mysql.schema"));
+            mc.setHost(props.getProperty("mysql.host"));
             try {
                 mc.connect();
                 md = mc;
@@ -391,7 +392,18 @@ public class ContextSetupListener implements ServletContextListener {
 
         // ensure anonymous user exists
         PersonBean anon = PersonBeanUtil.getAnonymous();
-        auth.addUser(anon.getEmail(), anon.getName(), "none");
+        //        auth.addUser(anon.getEmail(), anon.getName(), "none");
+        PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
+        try {
+            pbu.update(anon);
+        } catch (Exception e) {
+            log.error("Error saving anonymous user", e);
+        }
+        TupeloStore.getInstance().getBeanSession().save();
+        Resource anonymousRole = Resource.uriRef(DefaultRole.ANONYMOUS.getUri());
+        Resource anonymousURI = Resource.uriRef(anon.getUri());
+        rbac.addRole(anonymousURI, anonymousRole);
+        log.debug("User " + anonymousURI + " was given role " + anonymousRole);
 
         // create accounts
         Set<String> keys = new HashSet<String>();

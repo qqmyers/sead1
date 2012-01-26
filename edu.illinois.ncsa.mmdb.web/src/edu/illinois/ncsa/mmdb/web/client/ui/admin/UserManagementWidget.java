@@ -138,6 +138,7 @@ public class UserManagementWidget extends Composite {
         dispatchAsync.execute(new GetPermissions(), new AsyncCallback<GetPermissionsResult>() {
             @Override
             public void onFailure(Throwable caught) {
+                GWT.log("Error getting user permissions", caught);
             }
 
             @Override
@@ -145,7 +146,9 @@ public class UserManagementWidget extends Composite {
                 int col = 2;
                 for (Map.Entry<String, String> entry : PermissionUtil.getRoles(result.getSettings()).entrySet() ) {
                     String roleUri = entry.getKey();
-                    if (!roleUri.equals(DefaultRole.OWNER.getUri())) { // don't allow admin to add or remove from special "owner" role.
+                    // don't allow admin to add or remove from special owner and anonymous role
+                    if (!roleUri.equals(DefaultRole.OWNER.getUri()) &&
+                            !roleUri.equals(DefaultRole.ANONYMOUS.getUri())) {
                         String roleName = entry.getValue();
                         columnByRole.put(roleUri, col);
                         activeUsersTable.setText(0, col, roleName);
@@ -194,7 +197,7 @@ public class UserManagementWidget extends Composite {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        GWT.log("Error getting users", null);
+                        GWT.log("Error getting users", caught);
                     }
 
                     @Override

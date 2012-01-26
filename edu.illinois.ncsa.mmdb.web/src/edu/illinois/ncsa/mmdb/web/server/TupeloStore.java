@@ -1025,11 +1025,14 @@ public class TupeloStore {
         ontologyContext = c;
     }
 
-    // ----------------------------------------------------------------------
-    // Configuration, this section will read/write the configuration to the
-    // context. If any values are set in the server.properties they will be
-    // used as defaults.
-    // ----------------------------------------------------------------------
+    /**
+     * Configuration, this section will read/write the configuration to the
+     * context. If any values are set in the server.properties they will be
+     * used as defaults.
+     * 
+     * @param defaults
+     * @throws OperatorException
+     */
     public void initializeConfiguration(Properties defaults) throws OperatorException {
         for (ConfigurationKey key : ConfigurationKey.values() ) {
             Resource rkey = getURI(key);

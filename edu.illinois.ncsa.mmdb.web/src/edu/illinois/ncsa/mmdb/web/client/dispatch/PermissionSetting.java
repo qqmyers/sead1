@@ -12,8 +12,6 @@ public class PermissionSetting implements Serializable {
     PermissionValue value;
     String          roleName;
 
-    // post 1.1, this will also include an optional object uri parameter
-
     public PermissionSetting() {
     }
 
