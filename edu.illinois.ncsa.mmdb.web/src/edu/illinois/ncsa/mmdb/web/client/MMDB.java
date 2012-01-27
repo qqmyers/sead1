@@ -123,8 +123,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * returns an error.
      */
     public static final String         SERVER_ERROR                     = "An error occurred while "
-                                                                                 + "attempting to contact the server. Please check your network "
-                                                                                 + "connection and try again.";
+                                                                                + "attempting to contact the server. Please check your network "
+                                                                                + "connection and try again.";
 
     public static ArrayList<String>    groups;
 
@@ -310,6 +310,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         // search box
         SearchBox searchBox = new SearchBox("Search");
+        searchBox.setWidth("150px"); // maybe add this as CSS style?
         RootPanel.get("searchMenu").add(searchBox);
 
     }
