@@ -175,6 +175,7 @@ public class ContextSetupListener implements ServletContextListener {
         }
 
         // make sure context is up to latest version
+        // TODO remove? always false?
         try {
             ContextConvert.updateContext(TupeloStore.getInstance().getContext());
         } catch (OperatorException e) {
