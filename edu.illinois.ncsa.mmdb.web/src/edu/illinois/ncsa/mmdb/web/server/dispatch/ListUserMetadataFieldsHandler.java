@@ -78,7 +78,7 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
                         log.error("can't list plain metadata fields");
                     }
                     for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
-                        log.debug("Found plain umf " + entry.getValue());
+                        //log.debug("Found plain umf " + entry.getValue());
                         result.addField(new UserMetadataField(entry.getKey(), entry.getValue()));
                     }
                     // now run more queries to get user metadata fields of various other types
@@ -120,7 +120,7 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
         u.addPattern("clazz", Rdfs.LABEL, "clazzLabel"); // this is the punning pattern for Individual <-> Class
         TupeloStore.getInstance().getOntologyContext().perform(u);
         for (Tuple<Resource> row : u.getResult() ) {
-            log.debug("Found class umf " + row.get(1));
+            //log.debug("Found class umf " + row.get(1));
             UserMetadataField umf = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
             umf.setType(UserMetadataField.CLASS);
             umf.addToRange(row.get(2).getString(), row.get(3).getString());
@@ -142,12 +142,12 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
             if (!row.get(2).equals(row.get(4))) { // punned: skip
                 UserMetadataField field = fields.get(row.get(0));
                 if (field == null) {
-                    log.debug("Found enumerated umf " + row.get(1));
+                    //log.debug("Found enumerated umf " + row.get(1));
                     field = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
                     field.setType(UserMetadataField.ENUMERATED);
                     fields.put(row.get(0), field);
                 }
-                log.debug("Enumerated umf " + row.get(1) + " allows value " + row.get(3));
+                //log.debug("Enumerated umf " + row.get(1) + " allows value " + row.get(3));
                 field.addToRange(row.get(2).getString(), row.get(3).getString());
             }
         }
