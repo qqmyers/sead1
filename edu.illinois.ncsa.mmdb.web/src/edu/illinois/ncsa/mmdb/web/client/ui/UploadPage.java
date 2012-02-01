@@ -218,7 +218,7 @@ public class UploadPage extends Page {
         final HorizontalPanel switchUploader = new HorizontalPanel();
         switchUploader.addStyleName("pagingButton");
         Label basicLabel = new Label("Having problems? Click here to try the");
-        Anchor basicUploader = new Anchor("basic uploaders.");
+        Anchor basicUploader = new Anchor("Java uploader.");
         basicUploader.addStyleName("addTagsLink");
         basicUploader.addClickHandler(new ClickHandler() {
             @Override
