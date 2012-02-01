@@ -122,49 +122,10 @@ function uploadComplete(evt) {
 }
 
 function uploadFailed(evt) {
-	var newFile  = document.createElement('div');
-	
-	switch(evt.target.error.code) {
-		case evt.target.error.NOT_FOUND_ERR:
-			newFile.innerHTML = "File not found";
-			document.getElementById("list").appendChild(newFile);
-			break;
-	
-		case evt.target.error.NOT_READABLE_ERR:
-			newFile.innerHTML = "ERROR: File size too large -" + evt.target.file.name;
-			document.getElementById("list").appendChild(newFile);
-			break;
-	
-		case evt.target.error.ABORT_ERR:
-			newFile.innerHTML = "Abort Error";
-			document.getElementById("list").appendChild(newFile);
-			break; 
-			
-		case evt.target.error.ENCODING_ERR:
-			newFile.innerHTML = "Encoding error";
-			document.getElementById("list").appendChild(newFile);
-			break;
-			
-		case evt.target.error.NO_MODIFICATION_ALLOWED_ERR:
-			newFile.innerHTML = "No modification allowed error";
-			document.getElementById("list").appendChild(newFile);
-			break;
-			
-		case evt.target.error.INVALID_STATE_ERR:
-			newFile.innerHTML = "Invalid state error";
-			document.getElementById("list").appendChild(newFile);
-			break;
-			
-		case evt.target.error.SYNTAX_ERR:
-			newFile.innerHTML = "Syntax Error";
-			document.getElementById("list").appendChild(newFile);
-			break;
-	
-		default:
-			newFile.innerHTML = "Read error";
-			document.getElementById("list").appendChild(newFile);
-	}
-	
+	var newDiv  = document.createElement('div');	
+	newDiv.innerHTML = "Error uploading file.";
+	document.getElementById("list").appendChild(newDiv);
+
 	if (queue.length > 0) {
 		uploadFile();
 	}
