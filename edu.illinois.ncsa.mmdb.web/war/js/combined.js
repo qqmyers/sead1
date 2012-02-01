@@ -398,22 +398,37 @@ function handleFiles(evt){
 function drop(evt) {
 	var files = evt.dataTransfer.files;
 	var count = files.length;
-
-	for (var i = 0; i < count; i++) {
-		var name = files[i].name.toString();
-		var size = files[i].size.toString();
-		
-		//Add to presenter interface
-		dndAppletFileDropped(name, size);
-		queue.push(files[i]);
+	var folders = false;
+	console.log("Uploading " + files.length + " files");
+	if (files.length == 0) {
+		folders = true;
 	}
-	
-	uploadFile();
+	for (var i = 0; i < count; i++) {
+		console.log("file type" + files[i].type + " | " + files[i].size);
+		if (files[i].type == "" || files[i].size == 0) {
+			console.log("Found folder")
+			folders = true;
+		} else {
+			var name = files[i].name.toString();
+			var size = files[i].size.toString();
+			
+			//Add to presenter interface
+			dndAppletFileDropped(name, size);
+			queue.push(files[i]);
+		}
+	}
+	if (queue.length > 0) {
+		uploadFile();
+	}
+	if (folders) {
+		alert("The HTML5 drag and drop currently does not surport folders. Please try the Java uploader.")
+	}
 }
 
 function uploadFile() {
 	var file = queue.shift();
 	
+
 	var fd = new FormData();
 	fd.append(file.name.toString(), file);
 
