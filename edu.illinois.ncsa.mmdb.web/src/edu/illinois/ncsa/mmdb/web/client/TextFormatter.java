@@ -49,31 +49,36 @@ package edu.illinois.ncsa.mmdb.web.client;
  */
 public class TextFormatter {
 
-	/**
-	 * Format bytes.
-	 * 
-	 * @param x
-	 *            number of bytes
-	 * @return formatted string
-	 */
-	public static String humanBytes(long x) {
-		if (x == Integer.MAX_VALUE) {
-			return "No limit";
-		}
-		if (x < 1e3) {
-			return x + " bytes";
-		} else if (x < 1e6) {
-			return (int) (x / 1e3 * 100) / 100.0 + " KB";
-		} else if (x < 1e9) {
-			return (int) (x / 1e6 * 100) / 100.0 + " MB";
-		} else if (x < 1e12) {
-			return (int) (x / 1e9 * 100) / 100.0 + " GB";
-		} else if (x < 1e15) {
-			return (int) (x / 1e12 * 100) / 100.0 + " TB";
-		} else {
-			return x + " bytes";
-		}
-	}
+    /**
+     * Format bytes.
+     * 
+     * @param x
+     *            number of bytes
+     * @return formatted string
+     */
+    public static String humanBytes(long x) {
+        if (x == Integer.MAX_VALUE) {
+            return "No limit";
+        }
+        if (x < -3) {
+            x += Math.pow(2, 32);
+        } else if (x < 0) {
+            x = 0;
+        }
+        if (x < 1e3) {
+            return x + " bytes";
+        } else if (x < 1e6) {
+            return (int) (x / 1e3 * 100) / 100.0 + " KB";
+        } else if (x < 1e9) {
+            return (int) (x / 1e6 * 100) / 100.0 + " MB";
+        } else if (x < 1e12) {
+            return (int) (x / 1e9 * 100) / 100.0 + " GB";
+        } else if (x < 1e15) {
+            return (int) (x / 1e12 * 100) / 100.0 + " TB";
+        } else {
+            return x + " bytes";
+        }
+    }
 
     public static String escapeEmailAddress(String emailAddress) {
         return emailAddress.replaceAll("@", "_at_").replaceAll("\\.", "_dot_");
