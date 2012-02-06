@@ -166,11 +166,15 @@ public class TagsWidget extends Composite {
                     }
                 });
                 mainPanel.add(addTagAnchor);
+                getTags();
+            }
+
+            @Override
+            public void onDenied() {
+                getTags();
             }
         });
         //				mainPanel.setCellHorizontalAlignment(tagWidget, HasHorizontalAlignment.ALIGN_RIGHT);
-
-        getTags();
     }
 
     void addTag(final String tag) {
