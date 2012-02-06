@@ -67,12 +67,14 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  * 
  */
 public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoResult> {
-    static private long             last       = 0;
-    static private SystemInfoResult result     = null;
-    static private long             HISTORESIS = 60 * 1000;                                 // 1 minute
+    static private long             UNSIGNED_INT = (long) Math.pow(2, 32);
+
+    static private long             last         = 0;
+    static private SystemInfoResult result       = null;
+    static private long             HISTORESIS   = 60 * 1000;                                 // 1 minute
 
     /** Commons logging **/
-    private static Log              log        = LogFactory.getLog(SystemInfoHandler.class);
+    private static Log              log          = LogFactory.getLog(SystemInfoHandler.class);
 
     @Override
     public SystemInfoResult execute(SystemInfo arg0, ExecutionContext arg1) throws ActionException {
@@ -83,26 +85,35 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
         SystemInfoResult info = new SystemInfoResult();
 
         Unifier uf = new Unifier();
-        uf.addPattern("ds", Rdf.TYPE, Cet.DATASET);
-        uf.addPattern("ds", Files.LENGTH, "size", true);
-        uf.setColumnNames("ds", "size");
-        long size = 0;
-        int count = 0;
+        uf.addPattern("ds", Rdf.TYPE, "type");
+        uf.addPattern("ds", Files.LENGTH, "size");
+        uf.setColumnNames("ds", "type", "size");
+        long datasetSize = 0;
+        long derivedSize = 0;
+        int datasetCount = 0;
         try {
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf, "ds") ) {
-                count++;
-                if (row.get(1) != null) {
-                    long l = Long.parseLong(row.get(1).getString());
-                    if (l > 0) {
-                        size += l;
+                long size = 0;
+                if (row.get(2) != null) {
+                    size = Long.parseLong(row.get(2).getString());
+                    if (size < -3) {
+                        size += UNSIGNED_INT;
                     }
+                }
+                if (Cet.DATASET.equals(row.get(1))) {
+                    datasetCount++;
+                    datasetSize += size;
+                } else {
+                    derivedSize += size;
                 }
             }
         } catch (OperatorException e) {
             throw (new ActionException("Could not count datasets."));
         }
-        info.add("Datasets", "" + count);
-        info.add("Total Bytes", TextFormatter.humanBytes(size));
+        info.add("Datasets", "" + datasetCount);
+        info.add("Bytes from uploaded dataset", TextFormatter.humanBytes(datasetSize));
+        info.add("Bytes from derived data", TextFormatter.humanBytes(derivedSize));
+        info.add("Total number of bytes", TextFormatter.humanBytes(datasetSize + derivedSize));
 
         // done
         result = info;
