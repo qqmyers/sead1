@@ -128,10 +128,14 @@ public class CollectionMembershipWidget extends Composite {
                     }
                 });
                 mainContainer.add(addAnchor);
+                loadCollections();
+            }
+
+            @Override
+            public void onDenied() {
+                loadCollections();
             }
         });
-
-        loadCollections();
     }
 
     /**
