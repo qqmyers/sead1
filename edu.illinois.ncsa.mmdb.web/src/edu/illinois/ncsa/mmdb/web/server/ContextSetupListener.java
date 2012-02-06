@@ -55,6 +55,8 @@ import javax.servlet.ServletContextListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.store.FSDirectory;
 import org.tupeloproject.client.HttpTupeloClient;
 import org.tupeloproject.kernel.ContentStoreContext;
 import org.tupeloproject.kernel.Context;
@@ -211,7 +213,11 @@ public class ContextSetupListener implements ServletContextListener {
         }
 
         // set up full-text search
-        setUpSearch();
+        try {
+            setUpSearch();
+        } catch (IOException e) {
+            log.error("Error setting up lucene index", e);
+        }
 
         // create accounts
         try {
@@ -287,10 +293,12 @@ public class ContextSetupListener implements ServletContextListener {
         }, 2 * 1000, 10 * 1000);
     }
 
-    private void setUpSearch() {
+    private void setUpSearch() throws IOException {
         File folder = new File(TupeloStore.getInstance().getConfiguration(ConfigurationKey.SearchPath));
 
         log.info("Lucene search index directory = " + folder.getAbsolutePath());
+        FSDirectory dir = FSDirectory.getDirectory(folder);
+        IndexWriter.unlock(dir);
         LuceneTextIndex<String> search = new LuceneTextIndex<String>(folder);
         search.setTextExtractor(new SearchableThingTextExtractor());
         search.setIdGetter(new SearchableThingIdGetter());
