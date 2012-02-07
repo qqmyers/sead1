@@ -1,5 +1,5 @@
-FROM="1.0.100"
-TO="1.1.100"
+FROM="1.1.100"
+TO="1.2.0"
 FOLDERS="../*"
 
 for f in $FOLDERS; do
