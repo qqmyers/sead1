@@ -22,12 +22,6 @@
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>
-
-        <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
-            <uri format="https://opensource.ncsa.illinois.edu/svn/dse/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
-                <bc:propertyRef key="buckminster.component" />
-            </uri>
-        </provider>
     </searchPath>
 
     <searchPath name="tupelo">
