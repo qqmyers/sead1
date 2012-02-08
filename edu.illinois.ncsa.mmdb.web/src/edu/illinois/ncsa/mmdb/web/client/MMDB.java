@@ -425,6 +425,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showSignupPage();
         } else if (token.startsWith("requestNewPassword")) {
             showRequestNewPasswordPage();
+        } else if (token.startsWith("feedback")) {
+            showJiraFeaturePage();
         } else if (token.startsWith("jiraBug")) {
             showJiraBugPage();
         } else if (token.startsWith("jiraFeature")) {

@@ -71,12 +71,12 @@ public class JiraIssuePage extends Page {
      * @param dispatchAsync
      */
     public JiraIssuePage(final DispatchAsync dispatchAsync, final JiraIssueType type) {
-        super("Jira Issue", dispatchAsync);
+        super("Medici Feedback", dispatchAsync);
 
         if (type == JiraIssueType.BUG) {
             setPageTitle("Report a problem");
         } else {
-            setPageTitle("Request a feature");
+            setPageTitle("Provide feedback");
         }
 
         FlexTable table = new FlexTable();
@@ -103,12 +103,12 @@ public class JiraIssuePage extends Page {
             public void onClick(ClickEvent event) {
                 submit.setEnabled(false);
                 if (txtSummary.getText().trim().length() == 0) {
-                    showFeedbackMessage("Please enter a summary of this issue.");
+                    showFeedbackMessage("Please enter a summary.");
                     txtSummary.setFocus(true);
                     return;
                 }
                 if (txtDescription.getText().trim().length() == 0) {
-                    showFeedbackMessage("Please enter a description of this issue.");
+                    showFeedbackMessage("Please enter a description.");
                     txtDescription.setFocus(true);
                     return;
                 }
@@ -120,14 +120,14 @@ public class JiraIssuePage extends Page {
                 dispatchAsync.execute(issue, new AsyncCallback<EmptyResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        GWT.log("Error submitting Jira Issue.", caught);
-                        showFeedbackMessage("Error submitting Issue, please mail to medici@ncsa.illinois.edu");
+                        GWT.log("Error submitting feedback.", caught);
+                        showFeedbackMessage("Error sending your feedback, please mail medici@ncsa.illinois.edu directly.");
                         submit.setEnabled(true);
                     }
 
                     @Override
                     public void onSuccess(EmptyResult result) {
-                        showFeedbackMessage("Thank you for submitting this issue");
+                        showFeedbackMessage("Thank you for providing your feedback.");
                         txtSummary.setText("");
                         txtDescription.setText("");
                         submit.setEnabled(true);
