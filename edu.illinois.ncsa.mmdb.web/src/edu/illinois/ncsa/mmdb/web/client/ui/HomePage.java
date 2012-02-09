@@ -96,8 +96,10 @@ public class HomePage extends Page {
         viewButton = new Button("View More");
         viewButton.addStyleName("homeButton");
         createRecentActivityTab();
-        createProfileTab();
-        //      createPreferencesTab();
+        if (!MMDB.getSessionState().isAnonymous()) {
+            createProfileTab();
+            //      createPreferencesTab();
+        }
         tabPanel.selectTab(0);
         latestDate = null;
         pending = new Image("./images/loading-small-white.gif");
