@@ -7,4 +7,5 @@
     <cq:advisorNode namePattern="edu.uiuc.ncsa.*" branchTagPath="main"/>
     <cq:advisorNode namePattern="edu.illinois.ncsa.*" branchTagPath="main"/>
     <cq:advisorNode namePattern="org.tupeloproject.*" branchTagPath="main"/>
+    <cq:advisorNode namePattern="org.eclipse.equinox.launcher.*" skipComponent="true"/>
 </cq:componentQuery>
