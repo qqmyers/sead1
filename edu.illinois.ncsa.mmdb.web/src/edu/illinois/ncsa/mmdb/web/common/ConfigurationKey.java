@@ -6,7 +6,11 @@ public enum ConfigurationKey {
     MailSubject("mail.subject", "[MEDICI]"), //$NON-NLS-1$ //$NON-NLS-2$
     MailFrom("mail.from", "noreply@localhost"), //$NON-NLS-1$ //$NON-NLS-2$
     MailFullName("mail.fullname", "Medici Server"), //$NON-NLS-1$ //$NON-NLS-2$
-    
+
+    //Start - Added by Ram
+    VIVOJOSEKIURL("vivo-joseki.url", "http://sead-dev.ccni.rpi.edu/joseki/sparql?query="), //$NON-NLS-1$ //$NON-NLS-2$
+    //END - Added by Ram
+
     // name of medici server
     MediciName("medici.name", null), //$NON-NLS-1$ 
 
