@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -34,10 +33,10 @@ import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 public class ConfigurationWidget extends Composite {
-    private DispatchAsync       dispatchAsync;
-    private TextBox             key;
-    private HasPermissionResult permissions;
-    private VerticalPanel       mainPanel;
+    private final DispatchAsync       dispatchAsync;
+    private TextBox                   key;
+    private final HasPermissionResult permissions;
+    private final VerticalPanel       mainPanel;
 
     public ConfigurationWidget(final DispatchAsync dispatchAsync, HasPermissionResult permissions) {
         this.dispatchAsync = dispatchAsync;
@@ -69,6 +68,9 @@ public class ConfigurationWidget extends Composite {
 
         // server updates.
         mainPanel.add(createUpdateSection());
+
+        // vivo configuration.
+        mainPanel.add(createVIVOConfigurationSection(configuration));
 
     }
 
@@ -186,18 +188,22 @@ public class ConfigurationWidget extends Composite {
         vp.setWidth("100%");
         dp.add(vp);
 
-        HorizontalPanel hp = new HorizontalPanel();
+        /*HorizontalPanel hp = new HorizontalPanel();
         vp.add(hp);
 
-        hp.add(new Label("Google Map Key"));
+        hp.add(new Label("Google Map Key"));*/
+        FlexTable table = new FlexTable();
         key = new TextBox();
         key.addStyleName("multiAnchor");
         key.setText(configuration.getConfiguration(ConfigurationKey.GoogleMapKey));
         key.setVisibleLength(80);
-        hp.add(key);
+        table.setText(0, 0, "Google Map Key");
+        table.setWidget(0, 1, key);
+        vp.add(table);
+        /*hp.add(key);*/
 
         // buttons
-        hp = new HorizontalPanel();
+        HorizontalPanel hp = new HorizontalPanel();
         vp.add(hp);
 
         Button button = new Button("Submit", new ClickHandler() {
@@ -300,4 +306,71 @@ public class ConfigurationWidget extends Composite {
         return dp;
     }
 
+    private DisclosurePanel createVIVOConfigurationSection(ConfigurationResult configuration) {
+        DisclosurePanel dp = new DisclosurePanel("VIVO Configuration");
+        dp.addStyleName("datasetDisclosurePanel");
+        dp.setOpen(false);
+        VerticalPanel vp = new VerticalPanel();
+        vp.setWidth("100%");
+        dp.add(vp);
+
+        /*HorizontalPanel hp = new HorizontalPanel();
+        vp.add(hp);*/
+
+        FlexTable table = new FlexTable();
+        table.setText(0, 0, "VIVO-Joseki End Point");
+        /*hp.add(new Label("VIVO-Joseki End Point"));*/
+        key = new TextBox();
+        key.addStyleName("multiAnchor");
+        key.setText(configuration.getConfiguration(ConfigurationKey.VIVOJOSEKIURL));
+        key.setVisibleLength(80);
+        table.setWidget(0, 1, key);
+        /*hp.add(key);*/
+        vp.add(table);
+        // buttons
+        HorizontalPanel hp = new HorizontalPanel();
+        vp.add(hp);
+
+        Button button = new Button("Submit", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                query.setConfiguration(ConfigurationKey.VIVOJOSEKIURL, key.getText());
+                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        key.setText(result.getConfiguration(ConfigurationKey.VIVOJOSEKIURL));
+                    }
+                });
+            }
+        });
+        hp.add(button);
+
+        button = new Button("Reset", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.VIVOJOSEKIURL), new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        key.setText(result.getConfiguration(ConfigurationKey.VIVOJOSEKIURL));
+                    }
+                });
+            }
+        });
+        button.addStyleName("multiAnchor");
+        hp.add(button);
+
+        return dp;
+
+    }
 }

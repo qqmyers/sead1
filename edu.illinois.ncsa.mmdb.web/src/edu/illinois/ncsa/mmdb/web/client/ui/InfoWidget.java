@@ -41,15 +41,29 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.Set;
+import java.util.SortedSet;
+
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 
@@ -60,9 +74,21 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  */
 public class InfoWidget extends Composite {
 
-    private final FlowPanel panel;
+    private final FlowPanel     panel;
+    private final DispatchAsync _service;
+    private final String        _uri;
 
+    String                      creatorName;
+    Anchor                      creatorLink;
+    String                      httpString = "http://";
+    Label                       creatorNameLabel;
+    Label                       remainderLabel;
+
+    /*public InfoWidget(DataSetBean data, DispatchAsync service) {*/
     public InfoWidget(DatasetBean data, DispatchAsync service) {
+        _uri = data.getUri();
+        this._service = service;
+
         panel = new FlowPanel();
         panel.addStyleName("datasetRightColSection");
         Label lbl = new Label("Info");
@@ -75,8 +101,30 @@ public class InfoWidget extends Composite {
         if (creator != null) {
             lbl.setTitle(creator.getEmail());
             lbl.setText("Contributor: " + creator.getName());
+            /*editableLbl.setText(creator.getName());*/
         }
         panel.add(lbl);
+
+        HorizontalPanel creatorPanel = new HorizontalPanel();
+        VerticalPanel creatorDetailsPanel = new VerticalPanel();
+        Label creatorLabel = new Label("Creator: ");
+        creatorLabel.addStyleName("datasetRightColText");
+
+        creatorNameLabel = new Label();
+        creatorDetailsPanel.add(creatorNameLabel);
+
+        creatorLink = new Anchor();
+        creatorDetailsPanel.add(creatorLink);
+
+        remainderLabel = new Label();
+        creatorDetailsPanel.add(remainderLabel);
+
+        creatorPanel.add(creatorLabel);
+        creatorPanel.add(creatorDetailsPanel);
+
+        /*ownerPanel.add(editableLbl);*/
+
+        panel.add(creatorPanel);
 
         String filename = data.getFilename();
         addInfo("Filename", filename, panel);
@@ -97,6 +145,83 @@ public class InfoWidget extends Composite {
         addInfo("Uploaded", date, panel);
 
         initWidget(panel);
+
+        //START - Added by Ram on Nov.21, 2011
+        //FIXME : Need to refresh automatically on adding creator metadata
+        if (_uri != null) {
+            _service.execute(new ListUserMetadataFields(), new AsyncCallback<ListUserMetadataFieldsResult>() {
+                public void onFailure(Throwable caught) {
+                    GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
+                }
+
+                public void onSuccess(ListUserMetadataFieldsResult result) {
+
+                    _service.execute(new GetUserMetadataFields(_uri), new AsyncCallback<GetUserMetadataFieldsResult>() {
+                        public void onFailure(Throwable caught) {
+                            GWT.log("Error retrieving User Specified Information", caught);
+                        }
+
+                        public void onSuccess(GetUserMetadataFieldsResult result) {
+                            Set<String> predicates = result.getThingsOrderedByName().keySet();
+                            if (predicates.size() == 0) {
+
+                            } else {
+                                for (String predicate : predicates ) {
+                                    if (predicate.toLowerCase().contains("creator")) {
+
+                                        SortedSet<UserMetadataValue> values = NamedThing.orderByName(result.getValues().get(predicate));
+                                        if (!values.isEmpty()) {
+                                            try {
+                                                String creator = values.first().getName();
+                                                String link = (creator != null && creator.contains(httpString)) ? creator.substring(creator.indexOf(httpString)) : "";
+                                                creatorLink.setHref(link);
+                                                creatorLink.setText(link);
+
+                                                String remainder = link.contains(" ") ? link.substring(creatorLink.getText().indexOf(" ") + 1) : "";
+                                                remainderLabel.setText(remainder);
+                                                //creatorLink = creatorLink.substring(creatorLink.indexOf(" "));
+                                                creatorName = creator.replace(link, "");
+
+                                                creatorNameLabel.setText(creatorName);
+
+                                            }
+                                            catch (Exception ex) {
+                                                GWT.log(ex.getMessage());
+                                            }
+                                        }
+                                        break;
+                                    }
+
+                                }
+                            }
+                        }
+                    });
+
+                }
+
+            });
+        }
+
+        /*        Label ownerLabel = new Label("Owner: ");
+                final EditableLabelSuggestBox editableLbl = new EditableLabelSuggestBox("", true);
+                editableLbl.addValueChangeHandler(new ValueChangeHandler<String>() {
+                    public void onValueChange(final ValueChangeEvent<String> event) {
+                        SetOwner change = new SetOwner(_uri, event.getValue());
+                        _service.execute(change, new AsyncCallback<EmptyResult>() {
+                            public void onFailure(Throwable caught) {
+                                editableLbl.cancel();
+
+                            }
+
+                            public void onSuccess(EmptyResult result) {
+                                String text = event.getValue();
+
+                                editableLbl.setText(text);
+                            }
+                        });
+                    }
+                });*/
+        //END - Added by Ram on Nov.21, 2011
 
     }
 
