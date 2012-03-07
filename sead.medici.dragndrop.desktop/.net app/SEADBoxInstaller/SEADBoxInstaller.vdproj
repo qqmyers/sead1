@@ -21,13 +21,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_775CBE278EB1446C9BED55BA1C364AFD"
+        "MsmKey" = "8:_8508B22E5DD6401D8A17564A439AC134"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C84EFDCC31854A95B9A6B7480B056E65"
+        "MsmKey" = "8:_DBB86CA7737E4006B3FDF7DEFCAB1FAC"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -99,6 +99,19 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.0,Profile=Client"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4 Client Profile (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.0,Profile=Client"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
             }
         }
     }
@@ -160,10 +173,10 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_775CBE278EB1446C9BED55BA1C364AFD"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8508B22E5DD6401D8A17564A439AC134"
             {
-            "SourcePath" = "8:..\\..\\dnd-TopLevelTransferHandlerDemoProject\\DragDropMedici\\MediciPreferences.properties"
-            "TargetName" = "8:MediciPreferences.properties"
+            "SourcePath" = "8:..\\..\\dist\\DragDropMedici.jar"
+            "TargetName" = "8:DragDropMedici.jar"
             "Tag" = "8:"
             "Folder" = "8:_BF2E056480A14C628585F76218B66D17"
             "Condition" = "8:"
@@ -180,10 +193,10 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C84EFDCC31854A95B9A6B7480B056E65"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DBB86CA7737E4006B3FDF7DEFCAB1FAC"
             {
-            "SourcePath" = "8:..\\..\\dnd-TopLevelTransferHandlerDemoProject\\DragDropMedici\\dist\\DragDropMedici.jar"
-            "TargetName" = "8:DragDropMedici.jar"
+            "SourcePath" = "8:..\\..\\src\\dnd\\MediciPreferences.properties"
+            "TargetName" = "8:MediciPreferences.properties"
             "Tag" = "8:"
             "Folder" = "8:_BF2E056480A14C628585F76218B66D17"
             "Condition" = "8:"

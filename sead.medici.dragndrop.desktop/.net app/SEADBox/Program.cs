@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.Configuration;
 
 namespace SEADBox
 {
@@ -18,7 +19,8 @@ namespace SEADBox
                     argsList += "\"" + arg + "\" ";
                 }
                 argsList.TrimEnd();
-                Process.Start("DragDropMedici.jar", argsList);
+                string jarName = ConfigurationManager.AppSettings["jarname"];
+                Process.Start(jarName, argsList);
             }
             catch (Exception ex)
             {
