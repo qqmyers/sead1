@@ -64,6 +64,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
@@ -285,7 +286,7 @@ public class AddMetadataWidget extends Composite {
 			window[callback + "done"] = true;
 		}
 
-		// [4] JSON download has 1-second timeout.
+		// [4] JSON download has 10-second timeout.
 		setTimeout(
 				function() {
 					if (!window[callback + "done"]) {
@@ -296,7 +297,7 @@ public class AddMetadataWidget extends Composite {
 					document.body.removeChild(script);
 					delete window[callback];
 					delete window[callback + "done"];
-				}, 90000);
+				}, 10000);
 
 		// [6] Attach the script element to the document body.
 		document.body.appendChild(script);
@@ -305,9 +306,12 @@ public class AddMetadataWidget extends Composite {
 
     //Called when the getJson method hits the server and a response is obtained
     public void handleJsonResponse(JavaScriptObject jso) {
+
         if (jso == null) {
+
+            displayMessage(SERVER_ERROR);
             //FIXME : Need to come up with a mechanism to handle NULL responses
-            /*displayMessage(SERVER_ERROR);*/
+            refresh();
             return;
         }
 
@@ -330,13 +334,18 @@ public class AddMetadataWidget extends Composite {
         }
     }
 
+    private void displayMessage(String errorMessage) {
+        // TODO Auto-generated method stub
+        Window.alert(errorMessage);
+    }
+
     private final native ParentJson getParentJson(JavaScriptObject jso) /*-{
 		return jso;
     }-*/;
 
     private void InitializeVIVOConnection() {
         //FIXME : Change this hard coded URL using some ORM-like implementation available for SPARQL in Jena
-        String urlPrefix = "PREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0D%0APREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0D%0APREFIX+xsd%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema%23%3E%0D%0APREFIX+owl%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23%3E%0D%0APREFIX+swrl%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2003%2F11%2Fswrl%23%3E%0D%0APREFIX+swrlb%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2003%2F11%2Fswrlb%23%3E%0D%0APREFIX+vitro%3A+%3Chttp%3A%2F%2Fvitro.mannlib.cornell.edu%2Fns%2Fvitro%2F0.7%23%3E%0D%0APREFIX+bibo%3A+%3Chttp%3A%2F%2Fpurl.org%2Fontology%2Fbibo%2F%3E%0D%0APREFIX+dcelem%3A+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Felements%2F1.1%2F%3E%0D%0APREFIX+dcterms%3A+%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%3E%0D%0APREFIX+event%3A+%3Chttp%3A%2F%2Fpurl.org%2FNET%2Fc4dm%2Fevent.owl%23%3E%0D%0APREFIX+foaf%3A+%3Chttp%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2F%3E%0D%0APREFIX+geo%3A+%3Chttp%3A%2F%2Faims.fao.org%2Faos%2Fgeopolitical.owl%23%3E%0D%0APREFIX+pvs%3A+%3Chttp%3A%2F%2Fvivoweb.org%2Fontology%2Fprovenance-support%23%3E%0D%0APREFIX+ero%3A+%3Chttp%3A%2F%2Fpurl.obolibrary.org%2Fobo%2F%3E%0D%0APREFIX+scires%3A+%3Chttp%3A%2F%2Fvivoweb.org%2Fontology%2Fscientific-research%23%3E%0D%0APREFIX+skos%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23%3E%0D%0APREFIX+core%3A+%3Chttp%3A%2F%2Fvivoweb.org%2Fontology%2Fcore%23%3E%0D%0A%0D%0ASELECT+distinct+%3FPerson+%3FFirstName+%3FLastName%0D%0AWHERE%7B%0D%0A%3FPerson+rdf%3Atype+foaf%3APerson+.%0D%0A%3FPerson+foaf%3AfirstName+%3FFirstName+.%0D%0A%3FPerson+foaf%3AlastName+%3FLastName+.%0D%0A%7D%0D%0A&default-graph-uri=&stylesheet=%2Fxml-to-html.xsl&output=json"
+        String urlPrefix = "PREFIX+foaf%3A+<http%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2F>%0D%0APREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0ASELECT+distinct+%3FPerson+%3FFirstName+%3FLastName%0D%0AWHERE%7B%0D%0A%3FPerson+rdf%3Atype+foaf%3APerson+.%0D%0A%3FPerson+foaf%3AfirstName+%3FFirstName+.%0D%0A%3FPerson+foaf%3AlastName+%3FLastName+.%0D%0A%7D%0D%0A&default-graph-uri=&stylesheet=%2Fxml-to-html.xsl&output=json"
                 + "&callback=";
         String url = _configValues.getConfiguration(ConfigurationKey.VIVOJOSEKIURL) + urlPrefix;
         // Send request to server to get the json object.
