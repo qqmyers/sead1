@@ -31,6 +31,8 @@
 package dnd;
 
 import java.beans.PropertyChangeEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
@@ -43,6 +45,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Properties;
+import javax.naming.AuthenticationException;
 import javax.swing.border.Border;
 
 /**
@@ -62,6 +67,18 @@ public class DragAndDropMedici extends JFrame {
     //private JProgressBar progressBar;
     static DragAndDropMedici dragDropWindow = null;
     GridLayout experimentLayout;
+    final String UPLOADING_STRING = "Uploading...";
+    static LoginForm loginForm = null;
+
+    private Properties getProperties() {
+        Properties _properties = new Properties();
+        try {
+            _properties.load(new FileInputStream("MediciPreferences.properties"));
+        } catch (IOException ex) {
+            Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return _properties;
+    }
 
     private class MediciFileHandler extends InternalFrameAdapter implements PropertyChangeListener {
 
@@ -99,10 +116,14 @@ public class DragAndDropMedici extends JFrame {
             }
 
             private void upload() throws Exception {
-                // get extra information
-                String username = "admin";
-                String password = "copper";
-                final String server = "http://sead-dev.ccni.rpi.edu/medici/";
+
+                Properties properties = dragDropWindow.getProperties();
+                if (properties == null) {
+                    throw new AuthenticationException("Properties not loaded. No user name/ password found");
+                }
+                String username = properties.getProperty("user");
+                String password = getDecryptedPassword(properties.getProperty("pass"));
+                final String server = properties.getProperty("server");
 
                 //AssetFileDescriptor asset = null;
                 HttpURLConnection conn = null;
@@ -159,7 +180,7 @@ public class DragAndDropMedici extends JFrame {
                     // Ensure we got the HTTP 200 response code
                     int responseCode = conn.getResponseCode();
                     if (responseCode == 401) {
-                        //   throw new AuthenticationException("Invalid username/password");
+                        throw new AuthenticationException("Invalid username/password");
                     }
                     if (responseCode != 200) {
                         throw new Exception(String.format("Received the response code %d from the URL %s", responseCode, conn.getResponseMessage()));
@@ -176,12 +197,23 @@ public class DragAndDropMedici extends JFrame {
                     }
                     _inputStream.close();
                 } catch (Exception ex) {
+                    String message = ex.getMessage();
+                    JOptionPane.showMessageDialog(dragDropWindow, message);
+                    progressBar.setString("Error while uploading...");
+                    DragAndDropMedici.showLoginForm();
                 }
             }
 
+            private String getDecryptedPassword(String encryptedPassword) {
+                DesEncrypter encrypter = new DesEncrypter("MyP@$$w0rd");
+                // Decrypt
+                String decrypted = encrypter.decrypt(encryptedPassword);
+                return decrypted;
+            }
             /*
              * Main task. Executed in background thread.
              */
+
             @Override
             public Void doInBackground() {
 
@@ -198,7 +230,9 @@ public class DragAndDropMedici extends JFrame {
             @Override
             public void done() {
                 Toolkit.getDefaultToolkit().beep();
-                progressBar.setString("Upload completed");
+                if (progressBar.getString().equals(UPLOADING_STRING)) {
+                    progressBar.setString("Upload completed");
+                }
                 progressBar.setIndeterminate(false);
             }
         }
@@ -225,18 +259,18 @@ public class DragAndDropMedici extends JFrame {
                 JPanel horizontalPanel = new JPanel();
                 horizontalPanel.setPreferredSize(new Dimension(200, 100));
                 JLabel label = new JLabel(file.getName() + ": ");
-                label.setPreferredSize(new Dimension(100, 50));
+                label.setPreferredSize(new Dimension(200, 50));
                 //label.setSize(100, 50);
                 progressBar = new JProgressBar(0, 100);
-                progressBar.setString("Uploading...");
+                progressBar.setString(UPLOADING_STRING);
                 progressBar.setStringPainted(true);
                 progressBar.setSize(75, 40);
                 progressBar.setIndeterminate(true);
 
-               horizontalPanel.setLayout(new BoxLayout(horizontalPanel, BoxLayout.X_AXIS));
+                horizontalPanel.setLayout(new BoxLayout(horizontalPanel, BoxLayout.X_AXIS));
 
-               horizontalPanel.add(label);
-               horizontalPanel.add(progressBar);
+                horizontalPanel.add(label);
+                horizontalPanel.add(progressBar);
 //                pnlLabels.add(label);
 //                pnlProgressBars.add(progressBar);
                 panel.add(horizontalPanel, BorderLayout.NORTH);
@@ -330,9 +364,6 @@ public class DragAndDropMedici extends JFrame {
 
     private void createAndShowGUI(String[] args) {
 
-        if (args.length > 0) {
-            JOptionPane.showMessageDialog(this, args[0]);
-        }
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         panel.setTransferHandler(handler);
@@ -348,7 +379,37 @@ public class DragAndDropMedici extends JFrame {
         dragDropWindow.setLocationRelativeTo(null);
         dragDropWindow.validate();
         dragDropWindow.setVisible(true);
+
+        Properties properties = getProperties();
+
+        String userName = properties.getProperty("user");
+        String password = properties.getProperty("pass");
+
+        if (userName.equals("") || password.equals("")) {
+
+            showLoginForm();
+        }
+
+        if (args.length > 0) {
+            for (int index = 0; index < args.length; index++) {
+                File file = new File(args[index]);
+                new MediciFileHandler(file);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(DragAndDropMedici.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
         //showSystemTrayIcon();
+    }
+
+    private static void showLoginForm() {
+
+        if (loginForm == null) {
+            loginForm = new LoginForm();
+        }
+        loginForm.setVisible(true);
     }
 
     private static void showSystemTrayIcon() {
@@ -434,6 +495,7 @@ public class DragAndDropMedici extends JFrame {
 
             @Override
             public void run() {
+
                 dragDropWindow = new DragAndDropMedici();
 
                 dragDropWindow.createAndShowGUI(args);
