@@ -27,6 +27,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_D012951EA02C49B5A24B6C1646310E68"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_DBB86CA7737E4006B3FDF7DEFCAB1FAC"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -193,6 +199,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D012951EA02C49B5A24B6C1646310E68"
+            {
+            "SourcePath" = "8:..\\SEADBox\\bin\\Release\\SEADBox.exe.config"
+            "TargetName" = "8:SEADBox.exe.config"
+            "Tag" = "8:"
+            "Folder" = "8:_BF2E056480A14C628585F76218B66D17"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DBB86CA7737E4006B3FDF7DEFCAB1FAC"
             {
             "SourcePath" = "8:..\\..\\src\\dnd\\MediciPreferences.properties"
@@ -270,7 +296,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:SEADBoxInstaller"
         "ProductCode" = "8:{B96CA092-C501-4A56-B88F-FE6480036154}"
-        "PackageCode" = "8:{13DEC321-20CF-423F-9BD3-3706C9280E78}"
+        "PackageCode" = "8:{B7EE09FE-3525-4962-8DDB-DBE8BF4881C1}"
         "UpgradeCode" = "8:{A3B81219-2447-41D6-AB50-25A4D6143C91}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"

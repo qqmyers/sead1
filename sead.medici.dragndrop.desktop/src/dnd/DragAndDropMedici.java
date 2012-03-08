@@ -71,13 +71,16 @@ public class DragAndDropMedici extends JFrame {
     static LoginForm loginForm = null;
 
     private Properties getProperties() {
-        Properties _properties = new Properties();
-        try {
-            _properties.load(new FileInputStream("MediciPreferences.properties"));
-        } catch (IOException ex) {
-            Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return _properties;
+        MediciPreferences mediciPreferences = MediciPreferences.getInstance();
+        return mediciPreferences.getProperties();
+//        try {
+////            _properties.load(new FileInputStream("MediciPreferences.properties"));
+//            _properties.load(new FileInputStream("MediciPreferences.properties"));
+//
+//        } catch (IOException ex) {
+//            Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return _properties;
     }
 
     private class MediciFileHandler extends InternalFrameAdapter implements PropertyChangeListener {

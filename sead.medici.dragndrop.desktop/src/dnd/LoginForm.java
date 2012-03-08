@@ -10,11 +10,13 @@
  */
 package dnd;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -114,14 +116,21 @@ public class LoginForm extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
     private Properties _properties = null;
+    private String _propertyFilePath = "";
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
 
         // TODO add your handling code here:
         setProperties(new Properties());
         try {
+            _properties = MediciPreferences.getInstance().getProperties();
 //            getProperties().load(LoginForm.class.getResourceAsStream("MediciPreferences.properties"));
-            getProperties().load(new FileInputStream("MediciPreferences.properties"));
-            getProperties().setProperty("user", txtUserName.getText());
+//            getProperties().load(new FileInputStream("MediciPreferences.properties"));
+            getProperties().load(new FileInputStream(_propertyFilePath));
+            if (!getProperties().containsKey("user")) {
+                getProperties().put("user", txtUserName.getText());
+            } else {
+                getProperties().setProperty("user", txtUserName.getText());
+            }
             StringBuilder password = new StringBuilder();
             char[] pass = txtPassword.getPassword();
             for (int i = 0; i < pass.length; i++) {
@@ -129,9 +138,12 @@ public class LoginForm extends javax.swing.JFrame {
             }
 
             String encryptedPassword = getEncryptedPassword(password.toString());
-
-            getProperties().setProperty("pass", encryptedPassword);
-            getProperties().store(new FileOutputStream("MediciPreferences.properties"), null);
+            if (!getProperties().containsKey("pass")) {
+                getProperties().put("pass", encryptedPassword);
+            } else {
+                getProperties().setProperty("pass", encryptedPassword);
+            }
+            getProperties().store(new FileOutputStream(_propertyFilePath), null);
             this.setVisible(false);
         } catch (IOException ex) {
             Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -201,5 +213,23 @@ public class LoginForm extends javax.swing.JFrame {
      */
     public void setProperties(Properties properties) {
         this._properties = properties;
+    }
+
+    /**
+     * @return the _propertyFilePath
+     */
+    public String getPropertyFilePath() {
+        return _propertyFilePath;
+    }
+
+    /**
+     * @param propertyFilePath the _propertyFilePath to set
+     */
+    public void setPropertyFilePath(String propertyFilePath) {
+        this._propertyFilePath = propertyFilePath;
+    }
+
+    private void InitializePropertiesFile() {
+        
     }
 }
