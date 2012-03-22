@@ -48,21 +48,12 @@ import java.beans.PropertyChangeListener;
 import java.util.Properties;
 import javax.naming.AuthenticationException;
 
-/**
- * Demonstration of the top-level {@code TransferHandler}
- * support on {@code JFrame}.
- *
- * @author Shannon Hickey
- */
 public class DragAndDropMedici extends JFrame {
 
     TrayIcon ti;
     private static final String BOUNDRY = "==================================";
     public static final int NOTIFICATION_ID = 1001;
     private JPanel panel = new JPanel();
-//    private JPanel pnlLabels;// = new JPanel();
-//    private JPanel pnlProgressBars;// = new JPanel();
-    //private JProgressBar progressBar;
     static DragAndDropMedici dragDropWindow = null;
     GridLayout experimentLayout;
     final String UPLOADING_STRING = "Uploading...";
@@ -71,14 +62,6 @@ public class DragAndDropMedici extends JFrame {
     private Properties getProperties() {
         MediciPreferences mediciPreferences = MediciPreferences.getInstance();
         return mediciPreferences.getProperties();
-//        try {
-////            _properties.load(new FileInputStream("MediciPreferences.properties"));
-//            _properties.load(new FileInputStream("MediciPreferences.properties"));
-//
-//        } catch (IOException ex) {
-//            Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return _properties;
     }
 
     private class MediciFileHandler extends InternalFrameAdapter implements PropertyChangeListener {
@@ -89,16 +72,6 @@ public class DragAndDropMedici extends JFrame {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-//            if ("progress" == evt.getPropertyName()) {
-//                int progress = (Integer) evt.getNewValue();
-//                try {
-//                    progressBar.setValue(progress);
-//
-//                } catch (Exception ex) {
-//                    String message = ex.getMessage();
-//                    message = message;
-//                }
-//            }
         }
         JProgressBar progressBar;
 
@@ -172,7 +145,7 @@ public class DragAndDropMedici extends JFrame {
                         dataOS.write(buf, 0, len);
                     }
                     _inputStream.close();
-//Modified by Ram
+
                     // write final boundary and done
                     dataOS.writeBytes("\r\n--" + BOUNDRY + "--");
                     dataOS.flush();
@@ -241,22 +214,6 @@ public class DragAndDropMedici extends JFrame {
         public MediciFileHandler(File file) {
             this.name = file.getName();
             try {
-//                if (pnlLabels == null || pnlProgressBars == null) {
-//                    pnlLabels = new JPanel();
-//                    pnlLabels.setLayout(new BoxLayout(pnlLabels, BoxLayout.Y_AXIS));
-//                    pnlProgressBars = new JPanel();
-//                    pnlProgressBars.setLayout(new BoxLayout(pnlProgressBars, BoxLayout.Y_AXIS));
-//                    try {
-//                        panel.add(pnlLabels, BorderLayout.NORTH);
-//                        panel.add(pnlProgressBars, BorderLayout.NORTH);
-//                    } catch (Exception ex) {
-//                        String msg = ex.getMessage();
-//
-//                        System.out.println(msg);
-//                    }
-//
-//                }
-
                 JPanel horizontalPanel = new JPanel();
                 horizontalPanel.setPreferredSize(new Dimension(200, 100));
                 JLabel label = new JLabel(file.getName() + ": ");
@@ -272,8 +229,6 @@ public class DragAndDropMedici extends JFrame {
 
                 horizontalPanel.add(label);
                 horizontalPanel.add(progressBar);
-//                pnlLabels.add(label);
-//                pnlProgressBars.add(progressBar);
                 panel.add(horizontalPanel, BorderLayout.NORTH);
 
                 if (scroller == null) {

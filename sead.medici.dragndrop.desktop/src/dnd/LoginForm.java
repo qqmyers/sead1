@@ -10,20 +10,9 @@
  */
 package dnd;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -123,9 +112,6 @@ public class LoginForm extends javax.swing.JFrame {
         //setProperties(new Properties());
         try {
             _properties = MediciPreferences.getInstance().getProperties();
-//            getProperties().load(LoginForm.class.getResourceAsStream("MediciPreferences.properties"));
-//            getProperties().load(new FileInputStream("MediciPreferences.properties"));
-            //_properties.load(new FileInputStream(_propertyFilePath));
             if (!_properties.containsKey("user")) {
                 _properties.put("user", txtUserName.getText());
             } else {
@@ -144,7 +130,6 @@ public class LoginForm extends javax.swing.JFrame {
                 _properties.setProperty("pass", encryptedPassword);
             }
             MediciPreferences.getInstance().storeProperties(_properties);
-            //_properties.store(new FileOutputStream(_propertyFilePath), null);
             this.setVisible(false);
         } catch (Exception ex) {
             Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
