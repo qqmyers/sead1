@@ -6,7 +6,9 @@ package dnd;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +35,7 @@ public class MediciPreferences {
         }
         return _instance;
     }
+    private String _propertyFilePath = "";
 
     Properties getProperties() {
         Properties properties = new Properties();
@@ -53,13 +56,13 @@ public class MediciPreferences {
 
             File preferencesFile = new File(seadFolder, preferencesFileName);
 
-            String propertyFilePath = preferencesFile.getPath();
+            _propertyFilePath = preferencesFile.getPath();
 
             if (!preferencesFile.exists()) {
                 preferencesFile.createNewFile();
             }
             properties.clear();
-            properties.load(new FileInputStream(propertyFilePath));
+            properties.load(new FileInputStream(getPropertyFilePath()));
 
         } catch (IOException ex) {
             Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -72,5 +75,20 @@ public class MediciPreferences {
      */
     public String getServerName() {
         return _serverName;
+    }
+
+    void storeProperties(Properties _properties) {
+        try {
+            _properties.store(new FileOutputStream(_propertyFilePath), null);
+        } catch (IOException ex) {
+            Logger.getLogger(MediciPreferences.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * @return the propertyFilePath
+     */
+    public String getPropertyFilePath() {
+        return _propertyFilePath;
     }
 }

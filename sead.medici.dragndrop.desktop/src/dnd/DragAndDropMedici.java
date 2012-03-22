@@ -45,10 +45,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.Properties;
 import javax.naming.AuthenticationException;
-import javax.swing.border.Border;
 
 /**
  * Demonstration of the top-level {@code TransferHandler}
@@ -126,7 +124,7 @@ public class DragAndDropMedici extends JFrame {
                 }
                 String username = properties.getProperty("user");
                 String password = getDecryptedPassword(properties.getProperty("pass"));
-                final String server = properties.getProperty("server");
+                final String server = MediciPreferences.getInstance().getServerName();
 
                 //AssetFileDescriptor asset = null;
                 HttpURLConnection conn = null;
@@ -174,7 +172,7 @@ public class DragAndDropMedici extends JFrame {
                         dataOS.write(buf, 0, len);
                     }
                     _inputStream.close();
-
+//Modified by Ram
                     // write final boundary and done
                     dataOS.writeBytes("\r\n--" + BOUNDRY + "--");
                     dataOS.flush();
@@ -388,7 +386,7 @@ public class DragAndDropMedici extends JFrame {
         String userName = properties.getProperty("user");
         String password = properties.getProperty("pass");
 
-        if (userName.equals("") || password.equals("")) {
+        if (userName == null || password == null || userName.equals("") || password.equals("")) {
 
             showLoginForm();
         }

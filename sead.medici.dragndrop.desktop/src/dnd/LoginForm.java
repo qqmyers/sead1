@@ -120,16 +120,16 @@ public class LoginForm extends javax.swing.JFrame {
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
 
         // TODO add your handling code here:
-        setProperties(new Properties());
+        //setProperties(new Properties());
         try {
             _properties = MediciPreferences.getInstance().getProperties();
 //            getProperties().load(LoginForm.class.getResourceAsStream("MediciPreferences.properties"));
 //            getProperties().load(new FileInputStream("MediciPreferences.properties"));
-            getProperties().load(new FileInputStream(_propertyFilePath));
-            if (!getProperties().containsKey("user")) {
-                getProperties().put("user", txtUserName.getText());
+            //_properties.load(new FileInputStream(_propertyFilePath));
+            if (!_properties.containsKey("user")) {
+                _properties.put("user", txtUserName.getText());
             } else {
-                getProperties().setProperty("user", txtUserName.getText());
+                _properties.setProperty("user", txtUserName.getText());
             }
             StringBuilder password = new StringBuilder();
             char[] pass = txtPassword.getPassword();
@@ -138,14 +138,15 @@ public class LoginForm extends javax.swing.JFrame {
             }
 
             String encryptedPassword = getEncryptedPassword(password.toString());
-            if (!getProperties().containsKey("pass")) {
-                getProperties().put("pass", encryptedPassword);
+            if (!_properties.containsKey("pass")) {
+                _properties.put("pass", encryptedPassword);
             } else {
-                getProperties().setProperty("pass", encryptedPassword);
+                _properties.setProperty("pass", encryptedPassword);
             }
-            getProperties().store(new FileOutputStream(_propertyFilePath), null);
+            MediciPreferences.getInstance().storeProperties(_properties);
+            //_properties.store(new FileOutputStream(_propertyFilePath), null);
             this.setVisible(false);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnOKActionPerformed
@@ -204,17 +205,15 @@ public class LoginForm extends javax.swing.JFrame {
     /**
      * @return the _properties
      */
-    public Properties getProperties() {
-        return _properties;
-    }
-
+//    public Properties getProperties() {
+//        return _properties;
+//    }
     /**
      * @param properties the _properties to set
      */
-    public void setProperties(Properties properties) {
-        this._properties = properties;
-    }
-
+//    public void setProperties(Properties properties) {
+//        this._properties = properties;
+//    }
     /**
      * @return the _propertyFilePath
      */
@@ -227,9 +226,5 @@ public class LoginForm extends javax.swing.JFrame {
      */
     public void setPropertyFilePath(String propertyFilePath) {
         this._propertyFilePath = propertyFilePath;
-    }
-
-    private void InitializePropertiesFile() {
-        
     }
 }
