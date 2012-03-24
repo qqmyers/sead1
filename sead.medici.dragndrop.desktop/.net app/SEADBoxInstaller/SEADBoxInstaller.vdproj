@@ -15,32 +15,44 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_61EF23B6D5BC4653AFC02ABBC36F36F7"
+        "MsmKey" = "8:_0DE75B855FA54BD39ADEA384B73AED71"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_8508B22E5DD6401D8A17564A439AC134"
+        "MsmKey" = "8:_360745800C354059B8CC4EB9A9CA18B4"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_D012951EA02C49B5A24B6C1646310E68"
+        "MsmKey" = "8:_6F4DEA337498402FBFC9DE28DF3F3D55"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_DBB86CA7737E4006B3FDF7DEFCAB1FAC"
+        "MsmKey" = "8:_86C6AFA8AB264D7DA23F7EA32D1E9095"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_87F67C5F4B9742AA99CD26FE002C72B7"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_61EF23B6D5BC4653AFC02ABBC36F36F7"
+        "OwnerKey" = "8:_87F67C5F4B9742AA99CD26FE002C72B7"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_360745800C354059B8CC4EB9A9CA18B4"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -51,7 +63,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\SEADBoxInstaller.msi"
+        "OutputFilename" = "8:Debug\\SEADBox.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -125,6 +137,48 @@
     {
         "CustomAction"
         {
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_514B7416450A443AB0ADA1ACC89D058E"
+            {
+            "Name" = "8:Primary output from InstallerActions (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_87F67C5F4B9742AA99CD26FE002C72B7"
+            "FileType" = "3:1"
+            "InstallAction" = "3:4"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_B43FC6EB_752E_4D28_ADF7_C2F3704E766E"
+            "InstallerClass" = "11:TRUE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_534D3C8065194CECB71F7DD96D82C45C"
+            {
+            "Name" = "8:Primary output from InstallerActions (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_87F67C5F4B9742AA99CD26FE002C72B7"
+            "FileType" = "3:1"
+            "InstallAction" = "3:1"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_5CFC0FD2_66C2_4D89_88D9_98FCA6874668"
+            "InstallerClass" = "11:TRUE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_83A990E0349D4A659E432F4FD63A5E4C"
+            {
+            "Name" = "8:Primary output from InstallerActions (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_87F67C5F4B9742AA99CD26FE002C72B7"
+            "FileType" = "3:1"
+            "InstallAction" = "3:2"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_DCF11335_D899_4DC5_867A_DED39B8DDE0B"
+            "InstallerClass" = "11:TRUE"
+            "CustomActionData" = "8:/name=\"[TARGETDIR]\\\""
+            }
         }
         "DefaultFeature"
         {
@@ -148,21 +202,10 @@
         }
         "File"
         {
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_61EF23B6D5BC4653AFC02ABBC36F36F7"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_0DE75B855FA54BD39ADEA384B73AED71"
             {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SEADBox, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86"
-                "ScatterAssemblies"
-                {
-                    "_61EF23B6D5BC4653AFC02ABBC36F36F7"
-                    {
-                    "Name" = "8:SEADBox.exe"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:..\\SEADBox\\bin\\Debug\\SEADBox.exe"
-            "TargetName" = "8:"
+            "SourcePath" = "8:..\\InstallerActions\\bin\\Debug\\InstallerActions.dll.config"
+            "TargetName" = "8:InstallerActions.dll.config"
             "Tag" = "8:"
             "Folder" = "8:_BF2E056480A14C628585F76218B66D17"
             "Condition" = "8:"
@@ -179,7 +222,7 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8508B22E5DD6401D8A17564A439AC134"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6F4DEA337498402FBFC9DE28DF3F3D55"
             {
             "SourcePath" = "8:..\\..\\dist\\DragDropMedici.jar"
             "TargetName" = "8:DragDropMedici.jar"
@@ -199,29 +242,9 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D012951EA02C49B5A24B6C1646310E68"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_86C6AFA8AB264D7DA23F7EA32D1E9095"
             {
-            "SourcePath" = "8:..\\SEADBox\\bin\\Release\\SEADBox.exe.config"
-            "TargetName" = "8:SEADBox.exe.config"
-            "Tag" = "8:"
-            "Folder" = "8:_BF2E056480A14C628585F76218B66D17"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DBB86CA7737E4006B3FDF7DEFCAB1FAC"
-            {
-            "SourcePath" = "8:..\\..\\src\\dnd\\MediciPreferences.properties"
+            "SourcePath" = "8:..\\..\\MediciPreferences.properties"
             "TargetName" = "8:MediciPreferences.properties"
             "Tag" = "8:"
             "Folder" = "8:_BF2E056480A14C628585F76218B66D17"
@@ -269,7 +292,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_BF2E056480A14C628585F76218B66D17"
             {
-            "DefaultLocation" = "8:[ProgramFilesFolder]\\[ProductName]"
+            "DefaultLocation" = "8:[ProgramFilesFolder]\\SEADBox"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -294,9 +317,9 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:SEADBoxInstaller"
+        "ProductName" = "8:SEADBox"
         "ProductCode" = "8:{B96CA092-C501-4A56-B88F-FE6480036154}"
-        "PackageCode" = "8:{B7EE09FE-3525-4962-8DDB-DBE8BF4881C1}"
+        "PackageCode" = "8:{BA015694-D2F5-402A-993F-4476C303D0A3}"
         "UpgradeCode" = "8:{A3B81219-2447-41D6-AB50-25A4D6143C91}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -307,7 +330,7 @@
         "Manufacturer" = "8:Hewlett-Packard"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
-        "Title" = "8:SEADBoxInstaller"
+        "Title" = "8:SEADBox"
         "Subject" = "8:"
         "ARPCONTACT" = "8:Hewlett-Packard"
         "Keywords" = "8:"
@@ -371,20 +394,6 @@
                     "Transitive" = "11:FALSE"
                         "Keys"
                         {
-                            "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_B01C523C8DF04CE19F5BE0EAC51A4968"
-                            {
-                            "Name" = "8:[Manufacturer]"
-                            "Condition" = "8:"
-                            "AlwaysCreate" = "11:FALSE"
-                            "DeleteAtUninstall" = "11:FALSE"
-                            "Transitive" = "11:FALSE"
-                                "Keys"
-                                {
-                                }
-                                "Values"
-                                {
-                                }
-                            }
                         }
                         "Values"
                         {
@@ -416,20 +425,6 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_251E65C93B7546349CF3DCE99A4FD2F3"
-            {
-            "Name" = "8:SEADBox.exe"
-            "Arguments" = "8:"
-            "Description" = "8:"
-            "ShowCmd" = "3:1"
-            "IconIndex" = "3:0"
-            "Transitive" = "11:FALSE"
-            "Target" = "8:_61EF23B6D5BC4653AFC02ABBC36F36F7"
-            "Folder" = "8:_20C227AA97D3403CA6C62BBD44F31935"
-            "WorkingFolder" = "8:_BF2E056480A14C628585F76218B66D17"
-            "Icon" = "8:"
-            "Feature" = "8:"
-            }
         }
         "UserInterface"
         {
@@ -829,6 +824,62 @@
         }
         "ProjectOutput"
         {
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_360745800C354059B8CC4EB9A9CA18B4"
+            {
+            "SourcePath" = "8:..\\SEADBox\\obj\\x86\\Debug\\SEADBox.exe"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_BF2E056480A14C628585F76218B66D17"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:"
+            "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{E00F4342-8854-4852-B4CF-08682620D30E}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_87F67C5F4B9742AA99CD26FE002C72B7"
+            {
+            "SourcePath" = "8:..\\InstallerActions\\obj\\Debug\\InstallerActions.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_BF2E056480A14C628585F76218B66D17"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:"
+            "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{6306E753-072F-4523-9AF3-1A1714806642}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
         }
     }
 }

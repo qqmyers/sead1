@@ -41,6 +41,7 @@ public class MediciPreferences {
         try {
             properties.load(new FileInputStream("MediciPreferences.properties"));
             _serverName = properties.getProperty("server");
+            _serverName = _serverName.endsWith("/") ? _serverName : _serverName + "/";
             String appDataKeyWord = properties.getProperty("appdatakeyword");
             File appdatapath = new File(System.getenv(appDataKeyWord));
             String seadBoxFolderName = properties.getProperty("seadboxfoldername");

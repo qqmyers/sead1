@@ -57,7 +57,7 @@ public class DragAndDropMedici extends JFrame {
     static DragAndDropMedici dragDropWindow = null;
     GridLayout experimentLayout;
     final String UPLOADING_STRING = "Uploading...";
-    static LoginForm loginForm = null;
+    final String INVALIDUSERNAMEPASSWORD = "Invalid username/password";
 
     private Properties getProperties() {
         MediciPreferences mediciPreferences = MediciPreferences.getInstance();
@@ -90,18 +90,24 @@ public class DragAndDropMedici extends JFrame {
             }
 
             private void upload() throws Exception {
-
-                Properties properties = dragDropWindow.getProperties();
-                if (properties == null) {
-                    throw new AuthenticationException("Properties not loaded. No user name/ password found");
-                }
-                String username = properties.getProperty("user");
-                String password = getDecryptedPassword(properties.getProperty("pass"));
-                final String server = MediciPreferences.getInstance().getServerName();
-
-                //AssetFileDescriptor asset = null;
-                HttpURLConnection conn = null;
                 try {
+                    Properties properties = dragDropWindow.getProperties();
+                    if (properties == null) {
+                        throw new AuthenticationException("Properties not loaded. No user name/ password found");
+                    }
+                    String username = properties.getProperty("user");
+                    String encryptedPassword = properties.getProperty("pass");
+
+                    if (username == null || username.equals("") || encryptedPassword == null || encryptedPassword.equals("")) {
+                        showLoginForm();
+                    }
+
+                    String password = getDecryptedPassword(encryptedPassword);
+                    final String server = MediciPreferences.getInstance().getServerName();
+
+                    //AssetFileDescriptor asset = null;
+                    HttpURLConnection conn = null;
+
                     // Make a connect to the server
                     URL url = new URL(server + "UploadBlob");
                     conn = (HttpURLConnection) url.openConnection();
@@ -154,7 +160,7 @@ public class DragAndDropMedici extends JFrame {
                     // Ensure we got the HTTP 200 response code
                     int responseCode = conn.getResponseCode();
                     if (responseCode == 401) {
-                        throw new AuthenticationException("Invalid username/password");
+                        throw new AuthenticationException(INVALIDUSERNAMEPASSWORD);
                     }
                     if (responseCode != 200) {
                         throw new Exception(String.format("Received the response code %d from the URL %s", responseCode, conn.getResponseMessage()));
@@ -171,18 +177,19 @@ public class DragAndDropMedici extends JFrame {
                     }
                     _inputStream.close();
                 } catch (Exception ex) {
-                    String message = ex.getMessage();
-                    JOptionPane.showMessageDialog(dragDropWindow, message);
-                    progressBar.setString("Error while uploading...");
-                    DragAndDropMedici.showLoginForm();
+                    reportError(ex.getMessage());
                 }
             }
 
-            private String getDecryptedPassword(String encryptedPassword) {
-                DesEncrypter encrypter = new DesEncrypter("MyP@$$w0rd");
-                // Decrypt
-                String decrypted = encrypter.decrypt(encryptedPassword);
-                return decrypted;
+            private String getDecryptedPassword(String encryptedPassword) throws Exception {
+                try {
+                    DesEncrypter encrypter = new DesEncrypter("MyP@$$w0rd");
+                    // Decrypt
+                    String decrypted = encrypter.decrypt(encryptedPassword);
+                    return decrypted;
+                } catch (Exception ex) {
+                    throw new Exception(INVALIDUSERNAMEPASSWORD);
+                }
             }
             /*
              * Main task. Executed in background thread.
@@ -194,6 +201,7 @@ public class DragAndDropMedici extends JFrame {
                 try {
                     upload();
                 } catch (Exception ex) {
+                    reportError(ex.getMessage());
                 }
                 return null;
             }
@@ -208,6 +216,13 @@ public class DragAndDropMedici extends JFrame {
                     progressBar.setString("Upload completed");
                 }
                 progressBar.setIndeterminate(false);
+            }
+
+            private void reportError(String message) {
+                
+                    JOptionPane.showMessageDialog(dragDropWindow, message);
+                    progressBar.setString("Error while uploading...");
+                    DragAndDropMedici.showLoginForm();
             }
         }
 
@@ -361,11 +376,22 @@ public class DragAndDropMedici extends JFrame {
     }
 
     private static void showLoginForm() {
-
-        if (loginForm == null) {
+        try {
+            LoginForm loginForm = null;
+            //if (loginForm == null) {
             loginForm = new LoginForm();
+            Point loginFormLocation = new Point();
+            loginFormLocation = dragDropWindow.getLocation();
+            loginFormLocation.x += 25;
+            loginFormLocation.y += 25;
+            loginForm.setLocation(loginFormLocation);
+            loginForm.setModal(true);
+            //}
+            loginForm.setVisible(true);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(dragDropWindow, ex.getMessage());
         }
-        loginForm.setVisible(true);
+
     }
 
     private static void showSystemTrayIcon() {

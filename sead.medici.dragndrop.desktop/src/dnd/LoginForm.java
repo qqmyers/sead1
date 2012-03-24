@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  *
  * @author Ram
  */
-public class LoginForm extends javax.swing.JFrame {
+public class LoginForm extends javax.swing.JDialog {
 
     /** Creates new form LoginForm */
     public LoginForm() {
@@ -41,7 +41,7 @@ public class LoginForm extends javax.swing.JFrame {
         btnOK = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         lblUserName.setText("User Name");
         lblUserName.setName("lblUserName"); // NOI18N
@@ -63,6 +63,11 @@ public class LoginForm extends javax.swing.JFrame {
 
         btnCancel.setText("Cancel");
         btnCancel.setName("btnCancel"); // NOI18N
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -135,6 +140,11 @@ public class LoginForm extends javax.swing.JFrame {
             Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnOKActionPerformed
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        // TODO add your handling code here:
+        System.exit(0);
+    }//GEN-LAST:event_btnCancelActionPerformed
 
     private String getEncryptedPassword(String password) {
         DesEncrypter encrypter = new DesEncrypter("MyP@$$w0rd");
