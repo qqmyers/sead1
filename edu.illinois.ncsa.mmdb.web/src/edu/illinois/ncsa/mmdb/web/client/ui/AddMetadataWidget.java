@@ -286,7 +286,7 @@ public class AddMetadataWidget extends Composite {
 			window[callback + "done"] = true;
 		}
 
-		// [4] JSON download has 10-second timeout.
+		// [4] JSON download has 3-second timeout.
 		setTimeout(
 				function() {
 					if (!window[callback + "done"]) {
@@ -297,7 +297,7 @@ public class AddMetadataWidget extends Composite {
 					document.body.removeChild(script);
 					delete window[callback];
 					delete window[callback + "done"];
-				}, 10000);
+				}, 3000);
 
 		// [6] Attach the script element to the document body.
 		document.body.appendChild(script);
@@ -344,9 +344,15 @@ public class AddMetadataWidget extends Composite {
     }-*/;
 
     private void InitializeVIVOConnection() {
+        if (_configValues == null) {
+            displayMessage("Unable to load vivo configuration. Admin privileges are currently required.");
+            refresh();
+            return;
+        }
         //FIXME : Change this hard coded URL using some ORM-like implementation available for SPARQL in Jena
         String urlPrefix = "PREFIX+foaf%3A+<http%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2F>%0D%0APREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0ASELECT+distinct+%3FPerson+%3FFirstName+%3FLastName%0D%0AWHERE%7B%0D%0A%3FPerson+rdf%3Atype+foaf%3APerson+.%0D%0A%3FPerson+foaf%3AfirstName+%3FFirstName+.%0D%0A%3FPerson+foaf%3AlastName+%3FLastName+.%0D%0A%7D%0D%0A&default-graph-uri=&stylesheet=%2Fxml-to-html.xsl&output=json"
                 + "&callback=";
+
         String url = _configValues.getConfiguration(ConfigurationKey.VIVOJOSEKIURL) + urlPrefix;
         // Send request to server to get the json object.
         getJson(1, url, this);
