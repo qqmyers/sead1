@@ -31,6 +31,9 @@
 package dnd;
 
 import java.beans.PropertyChangeEvent;
+import java.awt.dnd.*;
+import java.util.List;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -40,16 +43,22 @@ import java.io.*;
 import java.net.*;
 import java.awt.datatransfer.*;
 import java.awt.TrayIcon;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import javax.naming.AuthenticationException;
 
-public class DragAndDropMedici extends JFrame {
+public class DragAndDropMedici extends JFrame implements DropTargetListener {
 
+    DropTarget dropTarget = null;
     TrayIcon ti;
     private static final String BOUNDRY = "==================================";
     public static final int NOTIFICATION_ID = 1001;
@@ -62,6 +71,89 @@ public class DragAndDropMedici extends JFrame {
     private Properties getProperties() {
         MediciPreferences mediciPreferences = MediciPreferences.getInstance();
         return mediciPreferences.getProperties();
+    }
+
+    @Override
+    public void dragEnter(DropTargetDragEvent event) {
+        event.acceptDrag(DnDConstants.ACTION_MOVE);
+    }
+
+    @Override
+    public void dragOver(DropTargetDragEvent event) {
+    }
+
+    @Override
+    public void dropActionChanged(DropTargetDragEvent event) {
+    }
+
+    @Override
+    public void dragExit(DropTargetEvent event) {
+    }
+    private static final String URI_LIST_MIME_TYPE = "text/uri-list;class=java.lang.String";
+    DataFlavor uriListFlavor = null;
+
+    @Override
+    public void drop(DropTargetDropEvent event) {
+        Transferable transferable = event.getTransferable();
+
+        DefaultListModel model = new DefaultListModel();
+
+        event.acceptDrop(DnDConstants.ACTION_MOVE);
+
+        try {
+            uriListFlavor = new DataFlavor(URI_LIST_MIME_TYPE);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+
+                java.util.List<File> droppedFilesList =
+                        (java.util.List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+
+                for (File file : droppedFilesList) {
+                    new MediciFileHandler(file);
+                }
+
+            } else if (transferable.isDataFlavorSupported(uriListFlavor)) {
+                String data = (String) transferable.getTransferData(uriListFlavor);
+                java.util.List<File> droppedFilesList = textURIListToFileList(data);
+                for (File file : droppedFilesList) {
+                    new MediciFileHandler(file);
+                }
+//                String data = (String) transferable.getTransferData(uriListFlavor);
+//                List files = textURIListToFileList(data);
+//                for (Object o : files) {
+//                    model.addElement(o);
+//                }
+//                System.out.println(files);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //setModel(model);
+    }
+
+    private java.util.List<File> textURIListToFileList(String data) {
+        java.util.List<File> list = new ArrayList(1);
+        for (StringTokenizer st = new StringTokenizer(data, "\r\n"); st.hasMoreTokens();) {
+            String s = st.nextToken();
+            if (s.startsWith("#")) {
+                // the line is a comment (as per the RFC 2483)
+                continue;
+            }
+            try {
+                URI uri = new URI(s);
+                File file = new File(uri);
+                list.add(file);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
     }
 
     private class MediciFileHandler extends InternalFrameAdapter implements PropertyChangeListener {
@@ -219,10 +311,10 @@ public class DragAndDropMedici extends JFrame {
             }
 
             private void reportError(String message) {
-                
-                    JOptionPane.showMessageDialog(dragDropWindow, message);
-                    progressBar.setString("Error while uploading...");
-                    DragAndDropMedici.showLoginForm();
+
+                JOptionPane.showMessageDialog(dragDropWindow, message);
+                progressBar.setString("Error while uploading...");
+                DragAndDropMedici.showLoginForm();
             }
         }
 
@@ -292,44 +384,48 @@ public class DragAndDropMedici extends JFrame {
             return name;
         }
     }
-    private TransferHandler handler = new TransferHandler() {
-
-        @Override
-        public boolean canImport(TransferHandler.TransferSupport support) {
-            if (!support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public boolean importData(TransferHandler.TransferSupport support) {
-            if (!canImport(support)) {
-                return false;
-            }
-
-            Transferable t = support.getTransferable();
-
-            try {
-                java.util.List<File> droppedFilesList =
-                        (java.util.List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
-
-                for (File file : droppedFilesList) {
-                    new MediciFileHandler(file);
-                }
-            } catch (UnsupportedFlavorException e) {
-                return false;
-            } catch (IOException e) {
-                return false;
-            }
-
-            return true;
-        }
-    };
+//    private TransferHandler handler = new TransferHandler() {
+//
+//        @Override
+//        public boolean canImport(TransferHandler.TransferSupport support) {
+//
+//            if (support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+//                return true;
+//            } else if (support.isDataFlavorSupported(uriListFlavor)) {
+//                return true;
+//            }
+//            return false;
+//        }
+//
+//        @Override
+//        public boolean importData(TransferHandler.TransferSupport support) {
+//            if (!canImport(support)) {
+//                return false;
+//            }
+//
+//            Transferable t = support.getTransferable();
+//
+//            try {
+//                java.util.List<File> droppedFilesList =
+//                        (java.util.List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+//
+//                for (File file : droppedFilesList) {
+//                    new MediciFileHandler(file);
+//                }
+//            } catch (UnsupportedFlavorException e) {
+//                return false;
+//            } catch (IOException e) {
+//                return false;
+//            }
+//
+//            return true;
+//        }
+//    };
     JScrollPane scroller;
 
     public DragAndDropMedici() {
         super("Drop files to upload");
+        dropTarget = new DropTarget(this, this);
         //setResizable(false);
     }
 
@@ -337,7 +433,7 @@ public class DragAndDropMedici extends JFrame {
 
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        panel.setTransferHandler(handler);
+//        panel.setTransferHandler(handler);
         panel.setAutoscrolls(true);
 
         dragDropWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

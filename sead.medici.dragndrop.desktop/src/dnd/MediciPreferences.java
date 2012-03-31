@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,8 +43,16 @@ public class MediciPreferences {
             properties.load(new FileInputStream("MediciPreferences.properties"));
             _serverName = properties.getProperty("server");
             _serverName = _serverName.endsWith("/") ? _serverName : _serverName + "/";
-            String appDataKeyWord = properties.getProperty("appdatakeyword");
-            File appdatapath = new File(System.getenv(appDataKeyWord));
+            String appDataKeyWord = "";
+            File appdatapath = null;
+
+            String OS = System.getProperty("os.name").toUpperCase();
+            if (OS.contains("WIN")) {
+                appDataKeyWord = properties.getProperty("appdatakeyword_windows");
+                appdatapath = new File(System.getenv(appDataKeyWord));
+            } else {
+                appdatapath = new File(".");
+            }
             String seadBoxFolderName = properties.getProperty("seadboxfoldername");
             File seadFolder = new File(appdatapath, seadBoxFolderName);
 
@@ -51,8 +60,6 @@ public class MediciPreferences {
                 seadFolder.mkdir();
             }
             String preferencesFileName = properties.getProperty("preferencesfilename");
-
-
 
             File preferencesFile = new File(seadFolder, preferencesFileName);
 
