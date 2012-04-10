@@ -27,29 +27,6 @@ public class Geo_webapp implements EntryPoint {
 			.create(WmsProxyService.class);
 
 	public void onModuleLoad() {
-		// RequestBuilder requestBuilder = new
-		// RequestBuilder(RequestBuilder.GET,
-		// URL);
-		//
-		// try {
-		// requestBuilder.sendRequest(null, new RequestCallback() {
-		//
-		// @Override
-		// public void onResponseReceived(Request request,
-		// Response response) {
-		// System.out.println(response.getText());
-		//
-		// }
-		//
-		// @Override
-		// public void onError(Request request, Throwable exception) {
-		// System.out.println("ERROR");
-		// }
-		// });
-		// } catch (RequestException e) {
-		// e.printStackTrace();
-		// }
-
 		wmsProxySvc.getCapabilities(new AsyncCallback<String>() {
 
 			@Override
@@ -117,7 +94,7 @@ public class Geo_webapp implements EntryPoint {
 						layers : n,
 						transparent : true
 					}, {
-						opacity : 0.5
+						opacity : 0.8
 					}));
 		}
 		var bbox = new $wnd.OpenLayers.Bounds(-14376519.92, 2908438.48,
