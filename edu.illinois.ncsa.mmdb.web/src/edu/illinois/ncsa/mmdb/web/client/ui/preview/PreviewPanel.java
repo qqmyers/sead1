@@ -129,6 +129,7 @@ public class PreviewPanel extends Composite {
         //The following previews currently not supported in embedded previewer
         if (!isEmbedded) {
             addWidget(new PreviewMultiImageBeanWidget(eventBus));
+            addWidget(new PreviewMultiVideoBeanWidget(eventBus));
         }
     }
 

@@ -509,9 +509,9 @@ public class RestServlet extends AuthenticatedServlet {
                 response.flushBuffer();
                 CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
             } catch (RestServiceException e) {
-                throw new ServletException("failed to retrieve " + request.getRequestURI());
+                throw new ServletException("failed to retrieve " + request.getRequestURI(), e);
             } catch (OperatorException e) {
-                throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
+                throw new ServletException("failed to retrieve metadata for " + request.getRequestURI(), e);
             }
         } else if (hasPrefix(COLLECTION_INFIX, request) && isAllowed(request, uri, Permission.VIEW_MEMBER_PAGES)) {
             log.trace("LIST COLLECTION" + uri);
