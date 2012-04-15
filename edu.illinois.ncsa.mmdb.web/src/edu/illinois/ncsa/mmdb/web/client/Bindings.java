@@ -13,21 +13,11 @@ public class Bindings extends JavaScriptObject {
 
     }
 
-    public final native Person getPerson() /*-{
-		return this.Person;
+    public final native URL getURL() /*-{
+		return this.URL;
     }-*/;
 
-    public final native FirstName getFirstName() /*-{
-		return this.FirstName;
+    public final native Label getLabel() /*-{
+		return this.Label;
     }-*/;
-
-    public final native LastName getLastName() /*-{
-		return this.LastName;
-    }-*/;
-
-    public final String getFullName() {
-
-        return getFirstName().getValue() + " " + getLastName().getValue();
-    }
-
 }

@@ -129,6 +129,7 @@ public class AddMetadataWidget extends Composite {
     ClickHandler                           _addCreatorHandler;
     ClickHandler                           _clearCreatorHandler;
     ConfigurationResult                    _configValues;
+    UserMetadataField                      userMetadataField;
 
     public AddMetadataWidget(String uri, final DispatchAsync dispatch, HandlerManager events) {
         this(new HashSet<String>(), dispatch, events);
@@ -219,9 +220,9 @@ public class AddMetadataWidget extends Composite {
 
                 }
             };
-
+            String query = "";
             // add input widget based on type
-            UserMetadataField userMetadataField = availableFields.toArray(new UserMetadataField[0])[index - 1];
+            userMetadataField = availableFields.toArray(new UserMetadataField[0])[index - 1];
             switch (userMetadataField.getType()) {
                 case UserMetadataField.PLAIN:
                     inputField = new PlainField(userMetadataField, addHandler, clearHandler);
@@ -242,12 +243,25 @@ public class AddMetadataWidget extends Composite {
 
                 //START - ADDED BY RAM
                 //Set handlers to be used by the inner classes for fetching JSON from VIVO
-                case UserMetadataField.VIVO:
+                case UserMetadataField.VIVO_CREATOR:
                     _creatorMetadataField = userMetadataField;
                     _clearCreatorHandler = clearHandler;
                     _addCreatorHandler = addHandler;
                     //Initialize the connection to VIVO
-                    InitializeVIVOConnection();
+
+                    //FIXME : Change this hard coded URL using some ORM-like implementation available for SPARQL in Jena
+                    query = "PREFIX+foaf%3A+<http%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2F>%0D%0APREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0APREFIX+rdfs%3A+<http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23>%0D%0ASELECT+distinct+%3FURL+%3FLabel%0D%0AWHERE%7B%0D%0A%3FURL+rdf%3Atype+foaf%3APerson+.%0D%0A%3FURL+rdfs%3Alabel+%3FLabel+.%0D%0A%7D%0D%0A&output=json"
+                            + "&callback=";
+                    InitializeVIVOConnection(query);
+                    break;
+                case UserMetadataField.VIVO_PART_OF:
+                    _creatorMetadataField = userMetadataField;
+                    _clearCreatorHandler = clearHandler;
+                    _addCreatorHandler = addHandler;
+                    //Initialize the connection to VIVO
+                    query = "PREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0APREFIX+rdfs%3A+<http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23>%0D%0A%0D%0APREFIX+vivo%3A+<http%3A%2F%2Fvivoweb.org%2Fontology%2Fcore%23>%0D%0A%0D%0ASELECT+distinct+%3FURL+%3FLabel%0D%0AWHERE%7B%0D%0A%3FURL+rdf%3Atype+vivo%3AConferencePaper+.%0D%0A%3FURL+rdfs%3Alabel+%3FLabel+.%0D%0A%7D%0D%0A%0D%0A&output=json"
+                            + "&callback=";
+                    InitializeVIVOConnection(query);
                     break;
                 //END - ADDED BY RAM
 
@@ -266,6 +280,7 @@ public class AddMetadataWidget extends Composite {
                                                         + "This may be as a result of a faulty internet connection or the server "
                                                         + "is experiencing a down time. Please check your network connection and try again.";
     Results                        results;
+
     private MultiWordSuggestOracle oracle       = null;
 
     /**
@@ -310,7 +325,6 @@ public class AddMetadataWidget extends Composite {
         if (jso == null) {
 
             displayMessage(SERVER_ERROR);
-            //FIXME : Need to come up with a mechanism to handle NULL responses
             refresh();
             return;
         }
@@ -323,10 +337,11 @@ public class AddMetadataWidget extends Composite {
                 oracle = new MultiWordSuggestOracle();
             }
             for (int i = 0; i < results.getBindings().length(); i++ ) {
-                String fullName = results.getBindings().get(i).getFullName();
-                String vivoURL = results.getBindings().get(i).getPerson().getValue();
-                oracle.add(fullName + " - " + vivoURL);
+                String name = results.getBindings().get(i).getLabel().getValue();
+                String vivoURL = results.getBindings().get(i).getURL().getValue();
+                oracle.add(name + " - " + vivoURL);
             }
+            //FIXME: Naming conventions
             inputField = new CreatorField(_creatorMetadataField, _addCreatorHandler, _clearCreatorHandler);
             newFieldPanel.add(inputField);
         } catch (Exception e) {
@@ -343,17 +358,14 @@ public class AddMetadataWidget extends Composite {
 		return jso;
     }-*/;
 
-    private void InitializeVIVOConnection() {
+    private void InitializeVIVOConnection(String query) {
         if (_configValues == null) {
             displayMessage("Unable to load vivo configuration. Admin privileges are currently required.");
             refresh();
             return;
         }
-        //FIXME : Change this hard coded URL using some ORM-like implementation available for SPARQL in Jena
-        String urlPrefix = "PREFIX+foaf%3A+<http%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2F>%0D%0APREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0ASELECT+distinct+%3FPerson+%3FFirstName+%3FLastName%0D%0AWHERE%7B%0D%0A%3FPerson+rdf%3Atype+foaf%3APerson+.%0D%0A%3FPerson+foaf%3AfirstName+%3FFirstName+.%0D%0A%3FPerson+foaf%3AlastName+%3FLastName+.%0D%0A%7D%0D%0A&default-graph-uri=&stylesheet=%2Fxml-to-html.xsl&output=json"
-                + "&callback=";
 
-        String url = _configValues.getConfiguration(ConfigurationKey.VIVOJOSEKIURL) + urlPrefix;
+        String url = _configValues.getConfiguration(ConfigurationKey.VIVOJOSEKIURL) + query;
         // Send request to server to get the json object.
         getJson(1, url, this);
 
@@ -716,6 +728,44 @@ public class AddMetadataWidget extends Composite {
             vivoCreatorSuggestBox.addKeyUpHandler(pressEnter);
             vivoCreatorSuggestBox.setWidth("500px");
             return vivoCreatorSuggestBox;
+        }
+
+        @Override
+        String getUri() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    }
+
+    class PartOfField extends InputField {
+
+        //The suggest box contains the list of VIVO persons retrieved from the VIVO server 
+        private SuggestBox partOfSuggestBox;
+
+        public PartOfField(UserMetadataField userMetadataField, ClickHandler addHandler, ClickHandler clearHandler) {
+            super(userMetadataField, addHandler, clearHandler);
+            isAppliedToSectionVisible(false);
+        }
+
+        @Override
+        public String getValue() {
+            return partOfSuggestBox.getValue();
+        }
+
+        @Override
+        public void setValue(String value) {
+            partOfSuggestBox.setValue(value);
+            partOfSuggestBox.setFocus(true);
+        }
+
+        @Override
+        Widget createInputWidget() {
+
+            partOfSuggestBox = new SuggestBox(oracle);
+
+            partOfSuggestBox.addKeyUpHandler(pressEnter);
+            partOfSuggestBox.setWidth("500px");
+            return partOfSuggestBox;
         }
 
         @Override
