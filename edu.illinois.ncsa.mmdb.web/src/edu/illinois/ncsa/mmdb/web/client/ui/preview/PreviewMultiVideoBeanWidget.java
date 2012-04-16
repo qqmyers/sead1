@@ -77,16 +77,21 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
             height = getHeight();
         }
 
+        String preview = null;
+        if (getPreviewBean().getPreviewImage() != null) {
+            preview = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
+        }
+
         PreviewVideoBean mp4 = null;
 
-        sb.append("<video width=\"" + width + "\" height=\"" + height + "\" controls>");
+        sb.append("<video width=\"" + width + "\" height=\"" + height + "\" controls poster=\"" + preview + "\">");
 
         // show videos
         for (PreviewVideoBean video : getPreviewBean().getVideos() ) {
             if (video.getMimeType().equals("video/flv")) {
                 continue;
             }
-            if (video.getMimeType().equals("video/m4v")) {
+            if (video.getMimeType().equals("video/mp4")) {
                 mp4 = video;
             }
             sb.append("<source src=\"" + RestEndpoints.BLOB_URL + video.getUri() + "\" type=\"" + video.getMimeType() + "\" />");
@@ -94,10 +99,6 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
 
         // flash video
         if (mp4 != null) {
-            String preview = null;
-            if (getPreviewBean().getPreviewImage() != null) {
-                preview = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
-            }
         }
 
         // done
