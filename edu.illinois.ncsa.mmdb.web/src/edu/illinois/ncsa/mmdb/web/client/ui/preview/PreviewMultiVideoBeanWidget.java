@@ -82,8 +82,6 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
             preview = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
         }
 
-        PreviewVideoBean mp4 = null;
-
         sb.append("<video width=\"" + width + "\" height=\"" + height + "\" controls poster=\"" + preview + "\">");
 
         // show videos
@@ -91,15 +89,11 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
             if (video.getMimeType().equals("video/flv")) {
                 continue;
             }
-            if (video.getMimeType().equals("video/mp4")) {
-                mp4 = video;
-            }
             sb.append("<source src=\"" + RestEndpoints.BLOB_URL + video.getUri() + "\" type=\"" + video.getMimeType() + "\" />");
         }
 
-        // flash video
-        if (mp4 != null) {
-        }
+        // show error message
+        sb.append("Your browser does not support the html video tag.");
 
         // done
         sb.append("</video>");
