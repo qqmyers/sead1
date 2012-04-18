@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -17,6 +18,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
@@ -72,8 +75,8 @@ public class Geo_webapp implements EntryPoint {
 				System.out.println(result);
 				if (result != null) {
 					showMap(result);
-					VerticalPanel vp = createLayerSwitcher(result);
-					RootPanel.get("layers").add(vp);
+					TabLayoutPanel tlp = createLayerSwitcher(result);
+					RootPanel.get("layers").add(tlp);
 				}
 
 			}
@@ -87,8 +90,11 @@ public class Geo_webapp implements EntryPoint {
 
 	}
 
-	protected VerticalPanel createLayerSwitcher(String result) {
+	protected TabLayoutPanel createLayerSwitcher(String result) {
 		String[] layerNames = result.split(",");
+		TabLayoutPanel tlp = new TabLayoutPanel(60, Unit.PX);
+		tlp.setWidth("200px");
+		tlp.setHeight("250px");
 		VerticalPanel vp = new VerticalPanel();
 		for (final String name : layerNames) {
 			HorizontalPanel hp = new HorizontalPanel();
@@ -104,7 +110,7 @@ public class Geo_webapp implements EntryPoint {
 				}
 			});
 			hp.add(visibleCheckBox);
-			
+
 			Label nameLabel = new Label();
 			nameLabel.setText(name);
 			hp.add(nameLabel);
@@ -131,7 +137,9 @@ public class Geo_webapp implements EntryPoint {
 
 			vp.add(hp);
 		}
-		return vp;
+		tlp.add(vp, "Layer manager");
+
+		return tlp;
 	}
 
 	public List<String> getLayerList(String namespace, String xml) {
@@ -179,7 +187,7 @@ public class Geo_webapp implements EntryPoint {
 		});
 
 		map.addControl(new $wnd.OpenLayers.Control.MousePosition());
-		map.addControl(new $wnd.OpenLayers.Control.LayerSwitcher());
+		//map.addControl(new $wnd.OpenLayers.Control.LayerSwitcher());
 		osm = new $wnd.OpenLayers.Layer.OSM("Open Street Map");
 		map.addLayer(osm);
 
