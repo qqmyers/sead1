@@ -1,5 +1,8 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HTML;
@@ -96,7 +99,13 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
             } else if (video.getMimeType().equals("video/mp4")) {
                 mp4 = RestEndpoints.BLOB_URL + video.getUri() + ext;
             }
-            sb.append("<source src=\"" + RestEndpoints.BLOB_URL + video.getUri() + ext + "\" type=\"" + video.getMimeType() + "\" />");
+            String x = RestEndpoints.BLOB_URL + video.getUri() + ext;
+            try {
+                x = URLEncoder.encode(x + ext, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            sb.append("<source src=\"" + x + "\" type=\"" + video.getMimeType() + "\" />");
         }
 
         // fall back on flash

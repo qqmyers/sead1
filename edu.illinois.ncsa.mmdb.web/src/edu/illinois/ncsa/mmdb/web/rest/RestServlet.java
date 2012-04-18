@@ -44,8 +44,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -191,6 +193,11 @@ public class RestServlet extends AuthenticatedServlet {
     String decanonicalizeUrl(HttpServletRequest request) throws ServletException {
         String canonical = request.getRequestURL().toString();
         String decanonicalized = getUriCanonicalizer(request).decanonicalize(canonical);
+        try {
+            decanonicalized = URLDecoder.decode(decanonicalized, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.warn("Could not urldecode uri", e);
+        }
         if (!decanonicalized.isEmpty() && !decanonicalized.matches("^[a-z]+:.*")) { // if it's empty, it means there is no URI suffix (e.g., search)
             log.warn("canonical url " + canonical + " decanonicalized (incorrectly?) as " + decanonicalized);
         }
