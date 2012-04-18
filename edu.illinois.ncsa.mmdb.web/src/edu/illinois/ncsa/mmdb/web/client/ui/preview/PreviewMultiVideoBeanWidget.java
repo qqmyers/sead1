@@ -85,16 +85,28 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
         sb.append("<video width=\"" + width + "\" height=\"" + height + "\" controls poster=\"" + preview + "\">");
 
         // show videos
+        String mp4 = null;
         for (PreviewVideoBean video : getPreviewBean().getVideos() ) {
             if (video.getMimeType().equals("video/flv")) {
                 continue;
             } else if (video.getMimeType().equals("video/m4v")) {
+                mp4 = RestEndpoints.BLOB_URL + video.getUri();
                 sb.append("<source src=\"" + RestEndpoints.BLOB_URL + video.getUri() + ".m4v\" type=\"" + video.getMimeType() + "\" />");
             } else if (video.getMimeType().equals("video/mp4")) {
+                mp4 = RestEndpoints.BLOB_URL + video.getUri();
                 sb.append("<source src=\"" + RestEndpoints.BLOB_URL + video.getUri() + ".mp4\" type=\"" + video.getMimeType() + "\" />");
             } else {
                 sb.append("<source src=\"" + RestEndpoints.BLOB_URL + video.getUri() + "\" type=\"" + video.getMimeType() + "\" />");
             }
+        }
+
+        // fall back on flash
+        if (mp4 != null) {
+            sb.append("<object width=\"" + width + "\" height=\"" + height + "\" type=\"application/x-shockwave-flash\" data=\"player.swf\">");
+            sb.append("<param name=\"movie\" value=\"player.swf\" />");
+            sb.append("<param name=\"flashvars\" value=\"controlbar=over&amp;image=" + preview + "&amp;file=" + mp4 + "\" />");
+            sb.append("<img src=\"" + preview + "\" width=\"" + width + "\" height=\"" + height + "\" alt=\"video\" title=\"No video playback capabilities\" />");
+            sb.append("</object>");
         }
 
         // show error message
