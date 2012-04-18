@@ -19,11 +19,14 @@
 
 
 <!-- OpenLayers JS -->
-<script type="text/javascript" language="javascript" src="openlayers/OpenLayers.js"></script>
+<script type="text/javascript" language="javascript"
+	src="openlayers/OpenLayers.js"></script>
 <!-- proj4js JS for projection transformation -->
-<script type="text/javascript" language="javascript" src="proj4js/proj4js-compressed.js"></script>
+<script type="text/javascript" language="javascript"
+	src="proj4js/proj4js-compressed.js"></script>
 
-<script type="text/javascript" language="javascript" src="geo_webapp/geo_webapp.nocache.js"></script>
+<script type="text/javascript" language="javascript"
+	src="geo_webapp/geo_webapp.nocache.js"></script>
 
 </head>
 
@@ -46,7 +49,17 @@
 			application to display correctly.</div>
 	</noscript>
 
-	<div id="map" class="smallmap"></div>
-	<div id="layers"></div>
+	<table>
+		<tr>
+			<td>
+				<div id="map" class="smallmap"></div>
+			</td>
+			<td valign="top">
+				<div id="layers"></div>
+			</td>
+		</tr>
+	</table>
+
+
 </body>
 </html>
