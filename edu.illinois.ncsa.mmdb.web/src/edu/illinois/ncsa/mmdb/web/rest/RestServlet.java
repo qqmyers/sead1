@@ -502,6 +502,9 @@ public class RestServlet extends AuthenticatedServlet {
             if (uri.endsWith(".m4v") || uri.endsWith(".mp4")) {
                 uri = uri.substring(0, uri.length() - 4);
             }
+            if (uri.endsWith(".webm")) {
+                uri = uri.substring(0, uri.length() - 5);
+            }
             log.trace("GET IMAGE " + uri);
             try {
                 Thing imageThing = getImageThing(uri);
