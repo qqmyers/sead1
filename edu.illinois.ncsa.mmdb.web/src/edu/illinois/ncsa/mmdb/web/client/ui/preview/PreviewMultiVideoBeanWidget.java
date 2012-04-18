@@ -91,6 +91,7 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
             if (video.getMimeType().equals("video/flv")) {
                 continue;
             } else if (video.getMimeType().equals("video/m4v")) {
+                ext = ".mp4";
                 mp4 = RestEndpoints.BLOB_URL + video.getUri() + ext;
             } else if (video.getMimeType().equals("video/mp4")) {
                 mp4 = RestEndpoints.BLOB_URL + video.getUri() + ext;

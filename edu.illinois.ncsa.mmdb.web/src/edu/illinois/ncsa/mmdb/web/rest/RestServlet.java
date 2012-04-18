@@ -499,10 +499,9 @@ public class RestServlet extends AuthenticatedServlet {
             String previewUri = TupeloStore.getInstance().getPreviewUri(badge, GetPreviews.SMALL); // should accept and propogate null
             returnImage(request, response, previewUri, SMALL_404, shouldCache404(badge)); // should accept and propagate null
         } else if (hasPrefix(IMAGE_INFIX, request)) {
-            if (uri.endsWith(".m4v") || uri.endsWith(".mp4")) {
+            if (uri.endsWith(".mp4")) {
                 uri = uri.substring(0, uri.length() - 4);
-            }
-            if (uri.endsWith(".webm")) {
+            } else if (uri.endsWith(".webm")) {
                 uri = uri.substring(0, uri.length() - 5);
             }
             log.trace("GET IMAGE " + uri);
