@@ -88,8 +88,13 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
         for (PreviewVideoBean video : getPreviewBean().getVideos() ) {
             if (video.getMimeType().equals("video/flv")) {
                 continue;
+            } else if (video.getMimeType().equals("video/m4v")) {
+                sb.append("<source src=\"" + RestEndpoints.BLOB_URL + video.getUri() + ".m4v\" type=\"" + video.getMimeType() + "\" />");
+            } else if (video.getMimeType().equals("video/mp4")) {
+                sb.append("<source src=\"" + RestEndpoints.BLOB_URL + video.getUri() + ".mp4\" type=\"" + video.getMimeType() + "\" />");
+            } else {
+                sb.append("<source src=\"" + RestEndpoints.BLOB_URL + video.getUri() + "\" type=\"" + video.getMimeType() + "\" />");
             }
-            sb.append("<source src=\"" + RestEndpoints.BLOB_URL + video.getUri() + "\" type=\"" + video.getMimeType() + "\" />");
         }
 
         // show error message
