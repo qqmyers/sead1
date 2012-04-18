@@ -1,43 +1,91 @@
-/** Add css rules here for your application. */
-
-
-/** Example rules used by the template application (remove for your app) */
-h1 {
-  font-size: 2em;
-  font-weight: bold;
-  color: #777777;
-  margin: 40px 0px 70px;
-  text-align: center;
+* {
+	margin: 0;
+	padding: 0;
 }
 
-.sendButton {
-  display: block;
-  font-size: 16pt;
+header, nav, section, article, aside, footer {
+	display: block;
+}
+body {
+	font: 12px/18px Arial, Tahoma, Verdana, sans-serif;
+}
+a {
+	color: blue;
+	outline: none;
+	text-decoration: underline;
+}
+a:hover {
+	text-decoration: none;
+}
+p {
+	margin: 0 0 18px
+}
+img {
+	border: none;
+}
+input {
+	vertical-align: middle;
+}
+#wrapper {
+	width: 100%;
+	min-width: 1000px;
 }
 
-/** Most GWT widgets already have a style name defined */
-.gwt-DialogBox {
-  width: 400px;
+
+/* Header
+-----------------------------------------------------------------------------*/
+#header {
+	height: 50px;
 }
 
-.dialogVPanel {
-  margin: 5px;
+
+/* Middle
+-----------------------------------------------------------------------------*/
+#middle {
+	width: 100%;
+	height: 1%;
+	position: relative;
+}
+#middle:after {
+	content: '.';
+	display: block;
+	clear: both;
+	visibility: hidden;
+	height: 0;
+}
+#container {
+	width: 100%;
+	float: left;
+	overflow: hidden;
+}
+#content {
+	padding: 0 0 0 230px;
 }
 
-.serverResponseLabelError {
-  color: red;
+
+/* Sidebar Left
+-----------------------------------------------------------------------------*/
+#sideLeft {
+	float: left;
+	width: 150px;
+	margin-left: -100%;
+	position: relative;
 }
 
-/** Set ids using widget.getElement().setId("idOfElement") */
-#closeButton {
-  margin: 15px 6px 6px;
+
+/* Footer
+-----------------------------------------------------------------------------*/
+#footer {
+	height: 50px;
 }
 
 /**
  * Map Examples Specific
  */
 .smallmap {
-    width: 650px;
-    height: 350px;
+    /* width: 650px; */
+    height: 500px;
     border: 1px solid #ccc;
 }
+
+
