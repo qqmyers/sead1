@@ -117,6 +117,8 @@ public class RestServlet extends AuthenticatedServlet {
 
     public static final String ANY_COLLECTION_INFIX         = "/collection";
 
+    public static final String VIDEO_INFIX                  = "/video/";
+
     public static final String IMAGE_DOWNLOAD_INFIX         = "/image/download/";
 
     public static final String IMAGE_CREATE_ANON_INFIX      = "/image";
@@ -198,7 +200,7 @@ public class RestServlet extends AuthenticatedServlet {
         } catch (UnsupportedEncodingException e) {
             log.warn("Could not urldecode uri", e);
         }
-        if (!decanonicalized.isEmpty() && !decanonicalized.matches("^[a-z]+:.*")) { // if it's empty, it means there is no URI suffix (e.g., search)
+        if (!canonical.contains(VIDEO_INFIX) && !decanonicalized.isEmpty() && !decanonicalized.matches("^[a-z]+:.*")) { // if it's empty, it means there is no URI suffix (e.g., search)
             log.warn("canonical url " + canonical + " decanonicalized (incorrectly?) as " + decanonicalized);
         }
         return decanonicalized;
@@ -505,12 +507,23 @@ public class RestServlet extends AuthenticatedServlet {
             String badge = TupeloStore.getInstance().getBadge(uri);
             String previewUri = TupeloStore.getInstance().getPreviewUri(badge, GetPreviews.SMALL); // should accept and propogate null
             returnImage(request, response, previewUri, SMALL_404, shouldCache404(badge)); // should accept and propagate null
-        } else if (hasPrefix(IMAGE_INFIX, request)) {
-            if (uri.endsWith(".mp4")) {
-                uri = uri.substring(0, uri.length() - 4);
-            } else if (uri.endsWith(".webm")) {
-                uri = uri.substring(0, uri.length() - 5);
+        } else if (hasPrefix(VIDEO_INFIX, request)) {
+            int idx = uri.lastIndexOf(".");
+            String ext = null;
+            if (idx > 0) {
+                ext = uri.substring(idx + 1);
+                uri = uri.substring(0, idx);
             }
+            try {
+                if (ext != null) {
+                    response.setContentType("video/" + ext);
+                }
+                response.flushBuffer();
+                CopyFile.copy(restService.retrieveImage("tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri), response.getOutputStream());
+            } catch (RestServiceException e) {
+                throw new ServletException("failed to retrieve " + request.getRequestURI(), e);
+            }
+        } else if (hasPrefix(IMAGE_INFIX, request)) {
             log.trace("GET IMAGE " + uri);
             try {
                 Thing imageThing = getImageThing(uri);

@@ -1,7 +1,6 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HTML;
 
@@ -89,16 +88,19 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
         String mp4 = null;
         for (PreviewVideoBean video : getPreviewBean().getVideos() ) {
             String ext = "." + video.getMimeType().substring(6);
+            String url = video.getUri();
+            String magic = "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/";
+            if (video.getUri().startsWith(magic)) {
+                url = "api/video/" + video.getUri().substring(magic.length()) + ext;
+            } else {
+                url = RestEndpoints.BLOB_URL + video.getUri() + ext;
+            }
             if (video.getMimeType().equals("video/flv")) {
                 continue;
-            } else if (video.getMimeType().equals("video/m4v")) {
-                ext = ".mp4";
-                mp4 = RestEndpoints.BLOB_URL + video.getUri() + ext;
             } else if (video.getMimeType().equals("video/mp4")) {
-                mp4 = RestEndpoints.BLOB_URL + video.getUri() + ext;
+                mp4 = url;
             }
-            String x = URL.encode(RestEndpoints.BLOB_URL + video.getUri() + ext);
-            sb.append("<source src=\"" + x + "\" type=\"" + video.getMimeType() + "\" />");
+            sb.append("<source src=\"" + url + "\" type=\"" + video.getMimeType() + "\" />");
         }
 
         // fall back on flash

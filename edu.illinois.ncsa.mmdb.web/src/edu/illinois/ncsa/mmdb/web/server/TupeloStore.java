@@ -393,6 +393,7 @@ public class TupeloStore {
     static final String REST_INFIXES[]       = new String[] {
                                              RestServlet.ANY_IMAGE_INFIX,
                                              RestServlet.IMAGE_INFIX,
+                                             RestServlet.VIDEO_INFIX,
                                              RestServlet.PREVIEW_ANY,
                                              RestServlet.PREVIEW_SMALL,
                                              RestServlet.PREVIEW_LARGE,
@@ -678,7 +679,7 @@ public class TupeloStore {
     }
 
     public void removeCachedPreview(final String uri, final String size) {
-        if (previewCache.get(size) != null) {
+        if ((previewCache != null) && (previewCache.get(size) != null)) {
             if (previewCache.get(size).get(uri) != null) {
                 log.info("Removing PreviewBean from cache");
                 previewCache.get(size).remove(uri);
