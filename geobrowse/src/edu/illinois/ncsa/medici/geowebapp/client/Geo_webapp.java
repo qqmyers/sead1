@@ -96,7 +96,10 @@ public class Geo_webapp implements EntryPoint {
 		tlp.setWidth("200px");
 		tlp.setHeight("250px");
 		VerticalPanel vp = new VerticalPanel();
-		for (final String name : layerNames) {
+		// build layer switcher with reverse order
+		// since the top layer should be on top of the list
+		for(int i=layerNames.length-1;i>=0;i--) {
+			final String name = layerNames[i];
 			HorizontalPanel hp = new HorizontalPanel();
 			CheckBox visibleCheckBox = new CheckBox();
 			visibleCheckBox.setValue(true);
