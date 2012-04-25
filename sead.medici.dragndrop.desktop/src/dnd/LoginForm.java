@@ -42,6 +42,8 @@ public class LoginForm extends javax.swing.JDialog {
         btnCancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Login");
+        setName("frmLogin"); // NOI18N
 
         lblUserName.setText("User Name");
         lblUserName.setName("lblUserName"); // NOI18N

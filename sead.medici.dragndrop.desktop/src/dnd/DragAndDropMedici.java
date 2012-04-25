@@ -121,12 +121,6 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
                 for (File file : droppedFilesList) {
                     new MediciFileHandler(file);
                 }
-//                String data = (String) transferable.getTransferData(uriListFlavor);
-//                List files = textURIListToFileList(data);
-//                for (Object o : files) {
-//                    model.addElement(o);
-//                }
-//                System.out.println(files);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -163,7 +157,15 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
         private Task task;
 
         @Override
+        /**
+         * Invoked when task's progress property changes.
+         */
         public void propertyChange(PropertyChangeEvent evt) {
+            if ("progress" == evt.getPropertyName()) {
+                int progress = (Integer) evt.getNewValue();
+                progressBar.setValue(progress);
+                progressBar.setString(String.valueOf(progress + "%"));
+            }
         }
         JProgressBar progressBar;
 
@@ -197,6 +199,9 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
                     String password = getDecryptedPassword(encryptedPassword);
                     final String server = MediciPreferences.getInstance().getServerName();
 
+                    System.out.println("Going to upload file : " + _fileName);
+                    System.out.println("File length : " + _fileLength);
+                    System.out.println("Server : " + server);
                     //AssetFileDescriptor asset = null;
                     HttpURLConnection conn = null;
 
@@ -215,40 +220,57 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
                     conn.setDoInput(true);
                     conn.setUseCaches(false);
                     conn.setRequestMethod("POST");
-
+                    //conn.setFixedLengthStreamingMode(_fileLength);
+                    conn.setChunkedStreamingMode(10240);
                     // mark it as multipart
                     conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDRY);
 
-                    // create output stream
-                    DataOutputStream dataOS = new DataOutputStream(conn.getOutputStream());
-
+                    progressBar.setIndeterminate(true);
+                    OutputStream outputStream = conn.getOutputStream();
                     // write data
-                    dataOS.writeBytes("--" + BOUNDRY + "\r\n");
-                    dataOS.writeBytes("Content-Disposition: form-data; name=\"" + _fileName + "\"; filename=\"" + _fileName + "\";\r\n");
+                    String temp = "--" + BOUNDRY + "\r\n";
+                    outputStream.write(temp.getBytes());
+                    temp = "Content-Disposition: form-data; name=\"" + _fileName + "\"; filename=\"" + _fileName + "\";\r\n";
+                    outputStream.write(temp.getBytes());
 
                     if (_mimeType != null) {
-                        dataOS.writeBytes("Content-Type: " + _mimeType + "\r\n");
+                        temp = "Content-Type: " + _mimeType + "\r\n";
+                        outputStream.write(temp.getBytes());
                     }
-                    dataOS.writeBytes("\r\n");
+                    temp = "\r\n";
+                    outputStream.write(temp.getBytes());
+                    progressBar.setIndeterminate(false);
+                    try {
+                        // actual data to be written
+                        byte[] buf = new byte[10240];
+                        int len = 0;
+                        long count = 0;
+                        double percent = 0;
+                        int percentProgress = 0;
+                        while ((len = _inputStream.read(buf)) > 0) {
+                            System.out.println("Going to write buf into dataOS");
+                            outputStream.write(buf, 0, len);
+                            System.out.println("Written");
+                            count += len;
 
-                    // actual data to be written
-                    byte[] buf = new byte[10240];
-                    int len = 0;
-                    int count = 0;
-                    while ((len = _inputStream.read(buf)) > 0) {
-                        count++;
-                        if (count >= 10) {
-                            count = 0;
+                            percent = (100.0 * count) / ((double) _fileLength);
+                            percentProgress = (int) Math.round(percent);
+
+                            setProgress(percentProgress);
                         }
-                        dataOS.write(buf, 0, len);
+                        _inputStream.close();
+                    } catch (Exception ex) {
+                        String exM = ex.getMessage();
+                        exM = exM.toLowerCase();
                     }
-                    _inputStream.close();
-
+                    System.out.println("File upload completed. Writing boundary");
+                    progressBar.setIndeterminate(true);
                     // write final boundary and done
-                    dataOS.writeBytes("\r\n--" + BOUNDRY + "--");
-                    dataOS.flush();
-                    dataOS.close();
-
+                    temp = "\r\n--" + BOUNDRY + "--";
+                    outputStream.write(temp.getBytes());
+                    outputStream.flush();
+                    outputStream.close();
+                    System.out.println("Going to fetch response");
                     // Ensure we got the HTTP 200 response code
                     int responseCode = conn.getResponseCode();
                     if (responseCode == 401) {
@@ -268,8 +290,10 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
                         baos.write(bytes, 0, bytesRead);
                     }
                     _inputStream.close();
+                    System.out.println("Upload completed at : " + server);
                 } catch (Exception ex) {
-                    reportError(ex.getMessage());
+                    boolean isAuthenticationError = ex instanceof AuthenticationException;
+                    reportError(ex.getMessage(), isAuthenticationError);
                 }
             }
 
@@ -293,7 +317,7 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
                 try {
                     upload();
                 } catch (Exception ex) {
-                    reportError(ex.getMessage());
+                    reportError(ex.getMessage(), false);
                 }
                 return null;
             }
@@ -310,11 +334,13 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
                 progressBar.setIndeterminate(false);
             }
 
-            private void reportError(String message) {
+            private void reportError(String message, boolean isAuthenticationException) {
 
                 JOptionPane.showMessageDialog(dragDropWindow, message);
                 progressBar.setString("Error while uploading...");
-                DragAndDropMedici.showLoginForm();
+                if (isAuthenticationException) {
+                    DragAndDropMedici.showLoginForm();
+                }
             }
         }
 
@@ -330,7 +356,9 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
                 progressBar.setString(UPLOADING_STRING);
                 progressBar.setStringPainted(true);
                 progressBar.setSize(75, 40);
-                progressBar.setIndeterminate(true);
+                progressBar.setIndeterminate(false);
+                progressBar.setMinimum(0);
+                progressBar.setMaximum(100);
 
                 horizontalPanel.setLayout(new BoxLayout(horizontalPanel, BoxLayout.X_AXIS));
 
@@ -384,56 +412,17 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
             return name;
         }
     }
-//    private TransferHandler handler = new TransferHandler() {
-//
-//        @Override
-//        public boolean canImport(TransferHandler.TransferSupport support) {
-//
-//            if (support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-//                return true;
-//            } else if (support.isDataFlavorSupported(uriListFlavor)) {
-//                return true;
-//            }
-//            return false;
-//        }
-//
-//        @Override
-//        public boolean importData(TransferHandler.TransferSupport support) {
-//            if (!canImport(support)) {
-//                return false;
-//            }
-//
-//            Transferable t = support.getTransferable();
-//
-//            try {
-//                java.util.List<File> droppedFilesList =
-//                        (java.util.List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
-//
-//                for (File file : droppedFilesList) {
-//                    new MediciFileHandler(file);
-//                }
-//            } catch (UnsupportedFlavorException e) {
-//                return false;
-//            } catch (IOException e) {
-//                return false;
-//            }
-//
-//            return true;
-//        }
-//    };
     JScrollPane scroller;
 
     public DragAndDropMedici() {
-        super("Drop files to upload");
+        super("Drop files to upload - SEADBox v1.2");
         dropTarget = new DropTarget(this, this);
-        //setResizable(false);
     }
 
     private void createAndShowGUI(String[] args) {
 
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-//        panel.setTransferHandler(handler);
         panel.setAutoscrolls(true);
 
         dragDropWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -441,7 +430,6 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
         int width = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width / 2;
         dragDropWindow.setSize(width, 200);
         dragDropWindow.add(panel);
-        //dragDropWindow.add(scroller, BorderLayout.CENTER);
 
         dragDropWindow.setLocationRelativeTo(null);
         dragDropWindow.validate();
@@ -468,7 +456,6 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
                 }
             }
         }
-        //showSystemTrayIcon();
     }
 
     private static void showLoginForm() {
@@ -488,83 +475,6 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
             JOptionPane.showMessageDialog(dragDropWindow, ex.getMessage());
         }
 
-    }
-
-    private static void showSystemTrayIcon() {
-        final TrayIcon trayIcon;
-
-        if (SystemTray.isSupported()) {
-
-            SystemTray tray = SystemTray.getSystemTray();
-            Image image = Toolkit.getDefaultToolkit().getImage("c:\\tray.png");
-
-            MouseListener mouseListener = new MouseListener() {
-
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    System.out.println("Tray Icon - Mouse clicked!");
-                }
-
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    System.out.println("Tray Icon - Mouse entered!");
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    System.out.println("Tray Icon - Mouse exited!");
-                }
-
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    System.out.println("Tray Icon - Mouse pressed!");
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    System.out.println("Tray Icon - Mouse released!");
-                }
-            };
-
-            ActionListener exitListener = new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    System.out.println("Exiting...");
-                    System.exit(0);
-                }
-            };
-
-            PopupMenu popup = new PopupMenu();
-            MenuItem defaultItem = new MenuItem("Exit");
-            defaultItem.addActionListener(exitListener);
-            popup.add(defaultItem);
-
-            trayIcon = new TrayIcon(image, "Medici", popup);
-
-            ActionListener actionListener = new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    trayIcon.displayMessage("Action Event",
-                            "An Action Event Has Been Performed!",
-                            TrayIcon.MessageType.INFO);
-                }
-            };
-
-            trayIcon.setImageAutoSize(true);
-            trayIcon.addActionListener(actionListener);
-            trayIcon.addMouseListener(mouseListener);
-
-            try {
-                tray.add(trayIcon);
-            } catch (AWTException e) {
-                System.err.println("TrayIcon could not be added.");
-            }
-
-        } else {
-            //  System Tray is not supported
-        }
     }
 
     public static void main(final String[] args) {

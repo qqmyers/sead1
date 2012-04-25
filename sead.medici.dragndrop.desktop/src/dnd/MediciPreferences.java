@@ -39,7 +39,7 @@ public class MediciPreferences {
     Properties getProperties() {
         Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream("MediciPreferences.properties"));
+            properties.load(getClass().getResourceAsStream("MediciPreferences.properties"));
             _serverName = properties.getProperty("server");
             _serverName = _serverName.endsWith("/") ? _serverName : _serverName + "/";
             String appDataKeyWord = "";

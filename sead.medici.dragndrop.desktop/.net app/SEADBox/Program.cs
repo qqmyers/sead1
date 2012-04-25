@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using System.Configuration;
@@ -8,26 +7,10 @@ using System.IO;
 
 namespace SEADBox
 {
-    class A
-    {
-        public void disp()
-        {
-            Console.WriteLine("A");
-        }
-    }
-
-    class B : A
-    {
-        public void disp()
-        {
-            Console.WriteLine("B");
-        }
-    }
     class Program
     {
         static void Main(string[] args)
         {
-            
             try
             {
                 string argsList = string.Empty;
@@ -44,9 +27,19 @@ namespace SEADBox
                 string installPathIdentifierFilePath = Path.Combine(appDataFolderPath, installPathIdentifierFileName);
                 StreamReader sr = new StreamReader(new FileStream(installPathIdentifierFilePath, FileMode.Open, FileAccess.Read));
                 string installDir = sr.ReadLine();
-                jarName = Path.Combine(installDir, jarName);
 
-                Process.Start(jarName, argsList);
+                jarName = Path.Combine(installDir, jarName);
+                string argument = "-jar" + " \"" + jarName + "\" " + argsList;
+                argument = argument.Trim();
+                Process process = new System.Diagnostics.Process();
+                ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+                startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                //startInfo.UseShellExecute = false;
+                startInfo.FileName = "java";
+                startInfo.Arguments = argument;
+                process.StartInfo = startInfo;
+                process.Start();
+                //Process.Start(jarName);
             }
             catch (Exception ex)
             {
