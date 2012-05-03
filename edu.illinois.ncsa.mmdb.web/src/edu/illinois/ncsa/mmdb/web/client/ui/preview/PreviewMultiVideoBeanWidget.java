@@ -1,8 +1,9 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.common.RestEndpoints;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
@@ -10,14 +11,12 @@ import edu.uiuc.ncsa.cet.bean.PreviewMultiVideoBean;
 import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
 
 public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiVideoBean> {
-    private final HTML videowidget;
-
     public PreviewMultiVideoBeanWidget(HandlerManager eventBus) {
         super(eventBus);
 
-        videowidget = new HTML("Here be video");
-        videowidget.getElement().setId(DOM.createUniqueId());
-        setWidget(videowidget);
+        Label widget = new Label("HTML5 Video");
+        widget.getElement().setId(DOM.createUniqueId());
+        setWidget(widget);
     }
 
     @Override
@@ -52,21 +51,8 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
         return "Time"; //$NON-NLS-1$
     }
 
-    /*
-     * <video width="640" height="360" controls>
-        <source src="vid_360.mp4"   type="video/mp4" />
-        <source src="vid_360.webm"  type="video/webm" />
-        <object width="640" height="360" type="application/x-shockwave-flash" data="player.swf">
-                <param name="movie" value="player.swf" />
-                <param name="flashvars" value="controlbar=over&amp;image=vid_360.png&amp;file=vid_360.m4v" />
-                <img src="vid_360.png" width="640" height="360" alt="video" title="No video playback capabilities" />
-        </object>
-        </video>
-     */
     @Override
     protected void showSection() {
-        StringBuilder sb = new StringBuilder();
-
         long width = getPreviewBean().getWidth();
         long height = getPreviewBean().getHeight();
         if (!getEmbedded()) {
@@ -77,15 +63,14 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
             height = getHeight();
         }
 
+        // poster image
         String preview = null;
         if (getPreviewBean().getPreviewImage() != null) {
             preview = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
         }
 
-        sb.append("<video width=\"" + width + "\" height=\"" + height + "\" controls poster=\"" + preview + "\">");
-
-        // show videos
-        String mp4 = null;
+        // videos
+        JsArrayString urls = (JsArrayString) JsArrayString.createArray();
         for (PreviewVideoBean video : getPreviewBean().getVideos() ) {
             String ext = "." + video.getMimeType().substring(6);
             String url = video.getUri();
@@ -95,26 +80,52 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
             } else {
                 url = RestEndpoints.BLOB_URL + video.getUri() + ext;
             }
-            if (video.getMimeType().equals("video/flv")) {
-                continue;
-            } else if (video.getMimeType().equals("video/mp4")) {
-                mp4 = url;
-            }
-            sb.append("<source src=\"" + url + "\" type=\"" + video.getMimeType() + "\" />");
+            urls.push(url);
         }
 
-        // fall back on flash
-        if (mp4 != null) {
-            sb.append("<object width=\"" + width + "\" height=\"" + height + "\" type=\"application/x-shockwave-flash\" data=\"player.swf\">");
-            sb.append("<param name=\"movie\" value=\"player.swf\" />");
-            sb.append("<param name=\"flashvars\" value=\"controlbar=over&amp;image=" + preview + "&amp;file=" + mp4 + "\" />");
-            sb.append("Your browser does not support video playback.");
-            sb.append("</object>");
-        }
-
-        // done
-        sb.append("</video>");
-
-        videowidget.setHTML(sb.toString());
+        // call javascript
+        showVideo(urls, preview, getWidgetID(), Long.toString(width), Long.toString(height));
     }
+
+    public final native void showVideo(JsArrayString urls, String preview, String id, String w, String h) /*-{
+		if (urls != null) {
+			// create the levels
+			var levels = $wnd.createAnArray();
+			var len = urls.length;
+			for ( var i = 0; i < len; i++) {
+				levels.push({
+					file : urls[i]
+				});
+			}
+
+			// force html5 first
+			var modes = $wnd.createAnArray();
+			modes.push({
+				type : "html5"
+			});
+			modes.push({
+				type : "flash",
+				src : "player.swf"
+			});
+			modes.push({
+				type : "download"
+			});
+
+			// create the player
+			$wnd.jwplayer(id).setup({
+				height : h,
+				width : w,
+				image : preview,
+				modes : modes,
+				levels : levels,
+				provider : 'video',
+			//                controlbar: 'over',
+			//                skin: 'skins/glow/glow.zip',
+			//                provider: "http",
+			//                "http.startparam":"starttime"
+			});
+		} else {
+			$wnd.jwplayer(id).remove();
+		}
+    }-*/;
 }

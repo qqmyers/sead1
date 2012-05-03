@@ -64,22 +64,35 @@ public class PreviewAudioBeanWidget extends PreviewBeanWidget<PreviewAudioBean> 
     }
 
     public final native void showAudioVideo(String url, String preview, String id, String w, String h) /*-{
-		if (url != null) {
-			$wnd.player = new $wnd.SWFObject('player.swf', 'player', w, h, '9');
-			$wnd.player.addParam('allowfullscreen', 'true');
-			$wnd.player.addParam('allowscriptaccess', 'always');
-			$wnd.player.addParam('wmode', 'opaque');
-			$wnd.player.addVariable('file', url);
-			$wnd.player.addVariable('autostart', 'false');
-			if (preview != null) {
-				$wnd.player.addVariable('image', preview);
-			}
-			//            $wnd.player.addVariable('author','Joe');
-			//            $wnd.player.addVariable('description','Bob');
-			//            $wnd.player.addVariable('title','title');
-			//            $wnd.player.addVariable('debug','console');
-			$wnd.player.addVariable('provider', 'sound');
-			$wnd.player.write(id);
+		if (urls != null) {
+			// force html5 first
+			var modes = $wnd.createAnArray();
+			modes.push({
+				type : "html5"
+			});
+			modes.push({
+				type : "flash",
+				src : "player.swf"
+			});
+			modes.push({
+				type : "download"
+			});
+
+			// create the player
+			$wnd.jwplayer(id).setup({
+				height : h,
+				width : w,
+				image : preview,
+				modes : modes,
+				file : url,
+				provider : 'sound',
+			//                controlbar: 'over',
+			//                skin: 'skins/glow/glow.zip',
+			//                provider: "http",
+			//                "http.startparam":"starttime"
+			});
+		} else {
+			$wnd.jwplayer(id).remove();
 		}
     }-*/;
 }
