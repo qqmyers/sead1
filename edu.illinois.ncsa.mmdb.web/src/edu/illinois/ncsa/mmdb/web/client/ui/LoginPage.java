@@ -147,17 +147,15 @@ public class LoginPage extends Composite {
         table.setWidget(1, 0, usernameLabel);
 
         usernameBox = new TextBox();
-
+        usernameBox.getElement().setAttribute("autocapitalize", "none");
+        usernameBox.getElement().setAttribute("autocorrect", "off");
         usernameBox.setTabIndex(1);
-
         usernameBox.addKeyUpHandler(new KeyUpHandler() {
-
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
                     authenticate();
                 }
-
             }
         });
 
