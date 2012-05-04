@@ -205,6 +205,8 @@ public class AuthenticatedServlet extends HttpServlet {
                     session.setAttribute(AUTHENTICATED_AS, validUser);
                 }
                 return authorized(request);
+            } else {
+                log.info("Video request from non authenticated user with User-Agent=" + request.getHeader("User-Agent"));
             }
         }
         // no. reject
