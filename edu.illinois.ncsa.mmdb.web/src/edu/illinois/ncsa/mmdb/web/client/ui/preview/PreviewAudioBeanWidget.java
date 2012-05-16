@@ -12,7 +12,7 @@ public class PreviewAudioBeanWidget extends PreviewBeanWidget<PreviewAudioBean> 
     public PreviewAudioBeanWidget(HandlerManager eventBus) {
         super(eventBus);
 
-        Label widget = new Label("Get Adobe Flash: http://www.adobe.com/products/flashplayer/");
+        Label widget = new Label("Audio Player");
         widget.getElement().setId(DOM.createUniqueId());
         setWidget(widget);
     }
@@ -64,19 +64,20 @@ public class PreviewAudioBeanWidget extends PreviewBeanWidget<PreviewAudioBean> 
     }
 
     public final native void showAudioVideo(String url, String preview, String id, String w, String h) /*-{
-		if (urls != null) {
+		if (url != null) {
 			// force html5 first
 			var modes = $wnd.createAnArray();
 			modes.push({
 				type : "html5"
 			});
-			modes.push({
-				type : "flash",
-				src : "player.swf"
-			});
+			//			modes.push({
+			//				type : "flash",
+			//				src : "player.swf"
+			//			});
 			modes.push({
 				type : "download"
 			});
+			console.log(modes);
 
 			// create the player
 			$wnd.jwplayer(id).setup({
