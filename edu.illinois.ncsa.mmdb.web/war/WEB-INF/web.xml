@@ -26,6 +26,18 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
+	<!-- Auto scan REST service -->
+	<context-param>
+		<param-name>resteasy.scan</param-name>
+		<param-value>true</param-value>
+	</context-param>
+
+	<!-- this need same with resteasy servlet url-pattern -->
+    <context-param>
+        <param-name>resteasy.servlet.mapping.prefix</param-name>
+        <param-value>/resteasy</param-value>
+    </context-param>
+
 	<!-- Servlets -->
 	<servlet>
 		<servlet-name>dispatch</servlet-name>
@@ -67,7 +79,6 @@
 		<servlet-class>edu.illinois.ncsa.mmdb.web.server.BatchDownload</servlet-class>
 	</servlet>
 	
-
 	<servlet>
 		<servlet-name>WebDAV Servlet</servlet-name>
 		<servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
@@ -82,6 +93,7 @@
 			<param-value>com.bradmcevoy.http.http11.auth.BasicAuthHandler</param-value>
 		</init-param>
 	</servlet>
+	
 	<servlet>
 		<servlet-name>restlet</servlet-name>
 		<servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
@@ -90,6 +102,17 @@
 			<param-value>edu.illinois.ncsa.mmdb.web.server.rest.MediciServerApplication</param-value>
 		</init-param>
 	</servlet>
+	
+	<servlet>
+        <servlet-name>Resteasy</servlet-name>
+        <servlet-class>
+            org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
+        </servlet-class>
+        <init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>edu.illinois.ncsa.mmdb.web.server.resteasy.ResteasyApplication</param-value>
+		</init-param>
+    </servlet>
 
 	<!-- servlet mapping -->
 	<servlet-mapping>
@@ -152,6 +175,11 @@
 		<servlet-name>restlet</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
+	
+	<servlet-mapping>
+        <servlet-name>Resteasy</servlet-name>
+        <url-pattern>/resteasy/*</url-pattern>
+    </servlet-mapping>
 	
 	<servlet-mapping>
 		<servlet-name>BatchDownload</servlet-name>
