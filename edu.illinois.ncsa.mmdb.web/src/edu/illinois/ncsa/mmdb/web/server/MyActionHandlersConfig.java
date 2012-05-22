@@ -113,6 +113,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchWithFilterHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetConfigurationHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SetInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetPermissionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandlerNew;
@@ -185,6 +186,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetRelationshipHandlerNew());
         DispatchUtil.registerHandler(new GetDownloadCountHandler());
         DispatchUtil.registerHandler(new SetTitleHandler());
+        DispatchUtil.registerHandler(new SetInfoHandler());
         DispatchUtil.registerHandler(new SetUserMetadataHandler());
         DispatchUtil.registerHandler(new RemoveUserMetadataHandler());
         DispatchUtil.registerHandler(new CreateRoleHandler());
