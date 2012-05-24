@@ -38,13 +38,18 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.Collection;
@@ -65,6 +70,7 @@ import net.customware.gwt.dispatch.shared.Result;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.BlobChecker;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
@@ -153,6 +159,8 @@ public class TupeloStore {
     private final Map<Resource, String>                          configuration         = new HashMap<Resource, String>();
 
     private Context                                              ontologyContext;
+
+    private Properties                                           mongoProps;
 
     /**
      * Return singleton instance.
@@ -457,6 +465,17 @@ public class TupeloStore {
         return canon;
     }
 
+    public void setMongoDBProperties(String host, String db, String username, String password) {
+        if (mongoProps == null) {
+            mongoProps = new Properties();
+        }
+
+        mongoProps.put("mongo.host", host);
+        mongoProps.put("mongo.database", db);
+        mongoProps.put("mongo.username", username);
+        mongoProps.put("mongo.password", password);
+    }
+
     /**
      * Sets the URL to use for the extraction service.
      * 
@@ -509,7 +528,73 @@ public class TupeloStore {
             log.debug("EXTRACT PREVIEWS " + uri);
             lastExtractionRequest.put(uri, System.currentTimeMillis());
             try {
-                result = extractorpbu.callExtractor(extractionServiceURL, uri, null, rerun);
+                StringBuilder sb = new StringBuilder();
+
+                // is there a blob to extract
+                BlobChecker bc = new BlobChecker();
+                bc.setSubject(Resource.uriRef(uri));
+                getBeanSession().getContext().perform(bc);
+                if (!bc.exists()) {
+                    log.debug("BlobChecker does not exist.");
+                    return null;
+                }
+
+                String stringContext = URLEncoder.encode(CETBeans.contextToNTriples(getBeanSession().getContext()), "UTF-8"); //$NON-NLS-1$
+
+                // create the body of the message
+                sb.append("context="); //$NON-NLS-1$
+                sb.append(stringContext);
+                sb.append("&dataset="); //$NON-NLS-1$
+                sb.append(URLEncoder.encode(uri, "UTF-8")); //$NON-NLS-1$
+
+                if (mongoProps != null) {
+                    sb.append("&mongo=");
+                    StringWriter writer = new StringWriter();
+                    mongoProps.store(writer, "MongoDB Properties");
+                    sb.append(URLEncoder.encode(writer.toString(), "UTF-8"));
+                    writer.close();
+                }
+
+                if (rerun) {
+                    sb.append("&removeOld=true"); //$NON-NLS-1$
+                }
+
+                // launch the job
+                String server = extractionServiceURL;
+                if (!server.endsWith("/")) { //$NON-NLS-1$
+                    server += "/"; //$NON-NLS-1$
+                }
+
+                server += "extractor/extract"; //$NON-NLS-1$
+
+                URL url = new URL(server);
+                URLConnection conn = url.openConnection();
+                conn.setReadTimeout(1000);
+                if (conn.getReadTimeout() != 1000) {
+                    log.info("Could not set read timeout! (set to " + conn.getReadTimeout() + ").");
+                }
+
+                // send post
+                conn.setDoOutput(true);
+                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                wr.write(sb.toString());
+                wr.flush();
+                wr.close();
+
+                // Get the response
+                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line;
+                sb = new StringBuilder();
+                while ((line = rd.readLine()) != null) {
+                    log.debug(line);
+                    sb.append(line);
+                    sb.append("\n"); //$NON-NLS-1$
+                }
+                rd.close();
+
+                // done
+                return sb.toString();
+                //result = extractorpbu.callExtractor(extractionServiceURL, uri, null, rerun);
             } catch (Exception e) {
                 log.error(String.format("Extraction service %s unavailable", extractionServiceURL), e);
             }

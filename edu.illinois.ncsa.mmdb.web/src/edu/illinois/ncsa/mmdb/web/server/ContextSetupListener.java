@@ -212,6 +212,15 @@ public class ContextSetupListener implements ServletContextListener {
             }
         }
 
+        // set mongo properties
+        if (props.containsKey("mongo.host")) {
+            String host = props.getProperty("mongo.host");
+            String db = props.getProperty("mongo.database");
+            String username = props.getProperty("mongo.username");
+            String password = props.getProperty("mongo.password");
+            TupeloStore.getInstance().setMongoDBProperties(host, db, username, password);
+        }
+
         // set up full-text search
         try {
             setUpSearch();
