@@ -281,11 +281,23 @@ a:hover {
 	width:600px; 
 	height:500px; 
 	padding: 5 5 5 5; 
-	border:solid 1px #000;
-	border-color:#A8A8A8;
+	border:solid 1px #A8A8A8;
     font: 0.8em Courier, sans-serif; 
 	color: #505050; 
 }
+
+.tablePreview {
+	overflow-x:scroll;
+	overflow-y:scroll;
+	max-width:600px; 
+	max-height:500px; 
+	text-align: center;
+	border:solid 1px #A8A8A8;
+	margin:0 auto;
+	padding: 5 5 5 5; 
+    font: 0.8em Courier, sans-serif; 
+}
+
 
 .Java3DPreview {
 	margin:0 auto; 
@@ -525,7 +537,6 @@ a:hover {
 	text-align: center;
 	margin: 5px auto 5px auto;
 }
-
 
 .datasetsPager {
 	width: 700px;
