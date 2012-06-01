@@ -61,8 +61,10 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewDocumentBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewMultiImageBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewMultiTabularDataBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewMultiVideoBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewPyramidBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewTabularDataBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewThreeDimensionalBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewVideoBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.preview.PreviewAudioBeanUtil;
@@ -111,6 +113,12 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
 
             // document previews
             previews.addAll(new PreviewDocumentBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+
+            // multi spreadsheet previews
+            previews.addAll(new PreviewMultiTabularDataBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+
+            // spreadsheet previews
+            previews.addAll(new PreviewTabularDataBeanUtil(beanSession).getAssociationsFor(action.getUri()));
 
             // audio previews
             previews.addAll(new PreviewAudioBeanUtil(beanSession).getAssociationsFor(action.getUri()));

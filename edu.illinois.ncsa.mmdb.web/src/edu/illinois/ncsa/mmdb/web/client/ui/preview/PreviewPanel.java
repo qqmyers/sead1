@@ -121,6 +121,7 @@ public class PreviewPanel extends Composite {
         addWidget(new PreviewVideoBeanWidget(eventBus));
         addWidget(new PreviewAudioBeanWidget(eventBus));
         addWidget(new PreviewDocumentBeanWidget(eventBus));
+        addWidget(new PreviewTabularDataBeanWidget(eventBus));
         addWidget(new PreviewImageBeanWidget(eventBus));
         addWidget(new PreviewPyramidBeanWidget(eventBus));
         addWidget(new Preview3DJavaBeanWidget(eventBus));
@@ -129,6 +130,7 @@ public class PreviewPanel extends Composite {
         //The following previews currently not supported in embedded previewer
         if (!isEmbedded) {
             addWidget(new PreviewMultiImageBeanWidget(eventBus));
+            addWidget(new PreviewMultiTabularDataBeanWidget(eventBus));
             addWidget(new PreviewMultiVideoBeanWidget(eventBus));
         }
     }
