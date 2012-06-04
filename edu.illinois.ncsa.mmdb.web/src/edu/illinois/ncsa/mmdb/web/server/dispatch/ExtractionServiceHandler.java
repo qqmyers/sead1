@@ -44,10 +44,15 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionServiceResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
 /**
  * Retrieve a specific dataset.
@@ -56,10 +61,29 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  * 
  */
 public class ExtractionServiceHandler implements ActionHandler<ExtractionService, ExtractionServiceResult> {
+
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog(EditRoleHandler.class);
+
     @Override
     public ExtractionServiceResult execute(ExtractionService action, ExecutionContext arg1) throws ActionException {
-        TupeloStore.getInstance().removeCachedPreview(action.getUri(), GetPreviews.SMALL);
-        return new ExtractionServiceResult(TupeloStore.getInstance().extractPreviews(action.getUri(), true));
+        if (action.getUri() != null) {
+            TupeloStore.getInstance().removeCachedPreview(action.getUri(), GetPreviews.SMALL);
+            return new ExtractionServiceResult(TupeloStore.getInstance().extractPreviews(action.getUri(), action.getDelete()));
+        } else {
+            try {
+                // get the collection of all IDs (URL) and convert them into String[]
+                String[] ids = new DatasetBeanUtil(TupeloStore.getInstance().getBeanSession()).getIDs().toArray(new String[0]);
+                for (int i = 0; i < ids.length; i++ ) {
+                    // rerun extraction on all data
+                    TupeloStore.getInstance().removeCachedPreview(ids[i], GetPreviews.SMALL);
+                    TupeloStore.getInstance().extractPreviews(ids[i], action.getDelete());
+                }
+            } catch (Throwable thr) {
+                log.warn("Unable to retrieve IDs of all databeans");
+            }
+            return new ExtractionServiceResult("OK");
+        }
     }
 
     @Override
