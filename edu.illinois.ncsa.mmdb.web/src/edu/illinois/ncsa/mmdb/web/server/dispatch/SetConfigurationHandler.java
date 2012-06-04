@@ -41,6 +41,9 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Map.Entry;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
@@ -84,7 +87,41 @@ public class SetConfigurationHandler implements ActionHandler<SetConfiguration, 
         for (Entry<ConfigurationKey, String> entry : arg0.getConfiguration().entrySet() ) {
             ConfigurationKey key = entry.getKey();
             try {
-                TupeloStore.getInstance().setConfiguration(key, entry.getValue());
+                if (key != ConfigurationKey.ExtractorUrl) {
+                    TupeloStore.getInstance().setConfiguration(key, entry.getValue());
+                }
+                else {
+                    // if the key is extrator URL, then need to check its validity
+                    final ConfigurationKey extractorKey = key;
+                    String server = entry.getValue();
+                    if (!server.endsWith("/")) {
+                        server += "/";
+                    }
+                    final String serverUrl = server;
+
+                    server += "extractor/status";
+
+                    // check validity by getting the response code from ($EXTRACTOR_URL)/extractor/status
+                    try {
+                        URL testUrl = new URL(server);
+                        URLConnection connection = testUrl.openConnection();
+                        connection.connect();
+
+                        if (connection instanceof HttpURLConnection)
+                        {
+                            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+
+                            // 200 means valid URL
+                            if (200 == httpConnection.getResponseCode()) {
+                                TupeloStore.getInstance().setConfiguration(extractorKey, serverUrl);
+                            }
+                        }
+
+                    } catch (Throwable thr) {
+                        log.warn("Could not connect to the Extraction Server URL : " + extractorKey, thr);
+                    }
+
+                }
             } catch (OperatorException e) {
                 log.warn("Could not store entry for key : " + key, e);
             }
