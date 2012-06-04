@@ -6,7 +6,7 @@ public enum ConfigurationKey {
     MailSubject("mail.subject", "[MEDICI]"), //$NON-NLS-1$ //$NON-NLS-2$
     MailFrom("mail.from", "noreply@localhost"), //$NON-NLS-1$ //$NON-NLS-2$
     MailFullName("mail.fullname", "Medici Server"), //$NON-NLS-1$ //$NON-NLS-2$
-    
+
     // name of medici server
     MediciName("medici.name", null), //$NON-NLS-1$ 
 
@@ -17,7 +17,10 @@ public enum ConfigurationKey {
     TaxonomyFile("taxonomy.file", "taxonomy.owl"), //$NON-NLS-1$ //$NON-NLS-2$ 
 
     // google map key
-    GoogleMapKey("google.mapkey", ""); //$NON-NLS-1$ //$NON-NLS-2$
+    GoogleMapKey("google.mapkey", ""), //$NON-NLS-1$ //$NON-NLS-2$
+
+    // extractor url
+    ExtractorUrl("extractor.url", "http://localhost:9856/"); //$NON-NLS-1$ //$NON-NLS-2$
 
     private final String propertyKey;
     private final String defaultValue;
