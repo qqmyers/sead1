@@ -48,13 +48,30 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 public class ExtractionService extends SubjectAction<ExtractionServiceResult>
 {
 
+    private boolean delete = false;
+
     @SuppressWarnings("unused")
     private ExtractionService()
     {
     }
 
-    public ExtractionService( String uri )
+    public ExtractionService(boolean delete)
     {
-        super( uri );
+        this(null, delete);
+    }
+
+    public ExtractionService(String uri)
+    {
+        this(uri, true);
+    }
+
+    public ExtractionService(String uri, boolean delete)
+    {
+        super(uri);
+        this.delete = delete;
+    }
+
+    public boolean getDelete() {
+        return delete;
     }
 }

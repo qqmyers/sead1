@@ -392,7 +392,7 @@ public class DatasetWidget extends Composite {
 
         dialog.addConfirmHandler(new ConfirmHandler() {
             public void onConfirm(ConfirmEvent event) {
-                service.execute(new ExtractionService(uri), new AsyncCallback<ExtractionServiceResult>() {
+                service.execute(new ExtractionService(uri, true), new AsyncCallback<ExtractionServiceResult>() {
                     public void onFailure(Throwable caught)
                     {
                         GWT.log("Error submitting extraction job", caught);
