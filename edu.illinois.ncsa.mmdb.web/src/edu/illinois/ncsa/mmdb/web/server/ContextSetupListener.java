@@ -57,7 +57,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.FSDirectory;
-import org.tupeloproject.client.HttpTupeloClient;
 import org.tupeloproject.kernel.ContentStoreContext;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
@@ -189,27 +188,6 @@ public class ContextSetupListener implements ServletContextListener {
             MimeMap.initializeContext(TupeloStore.getInstance().getContext());
         } catch (OperatorException e) {
             log.warn("Could not initialize mimemap.", e);
-        }
-
-        // set extractor URL
-        if (props.containsKey("extractor.url")) { //$NON-NLS-1$
-            TupeloStore.getInstance().setExtractionServiceURL(props.getProperty("extractor.url")); //$NON-NLS-1$
-        }
-
-        // set extractor context
-        if (props.containsKey("extractor.contextUrl")) {
-            String contextUrl = props.getProperty("extractor.contextUrl");
-            String contextUser = props.getProperty("extractor.contextUser", "admin");
-            String contextPassword = props.getProperty("extractor.contextPassword", "admin");
-            HttpTupeloClient cc = new HttpTupeloClient();
-            cc.setTupeloUrl(contextUrl);
-            cc.setUsername(contextUser);
-            cc.setPassword(contextPassword);
-            try {
-                TupeloStore.getInstance().setExtractorContext(cc);
-            } catch (Exception e) {
-                log.error("Could not set context for extraction service.", e);
-            }
         }
 
         // set mongo properties

@@ -103,7 +103,6 @@ import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
@@ -122,9 +121,6 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 public class TupeloStore {
     /** Commons logging **/
     private static Log                                           log                   = LogFactory.getLog(TupeloStore.class);
-
-    /** URL of extraction service */
-    private String                                               extractionServiceURL  = "http://localhost:9856/";
 
     /** Singleton instance **/
     private static TupeloStore                                   instance;
@@ -149,9 +145,6 @@ public class TupeloStore {
 
     /** FileNameMap to map from extension to MIME type. */
     private MimeMap                                              mimemap;
-
-    /** Use a single previewbeanutil for optimizations */
-    private PreviewBeanUtil                                      extractorpbu;
 
     /**
      * configuration values, either stored in context or from server.properties.
@@ -265,9 +258,6 @@ public class TupeloStore {
                     setExpirationTime(bean);
                 }
             });
-            if (extractorpbu == null) {
-                extractorpbu = new PreviewBeanUtil(beanSession);
-            }
         } catch (Exception e) {
             log.error("Could not create bean sessions.", e);
         }
@@ -477,25 +467,6 @@ public class TupeloStore {
     }
 
     /**
-     * Sets the URL to use for the extraction service.
-     * 
-     * @param extractionServiceURL
-     *            the URL to use for the extraction service.
-     */
-    public void setExtractionServiceURL(String extractionServiceURL) {
-        this.extractionServiceURL = extractionServiceURL;
-    }
-
-    /**
-     * Returns the URL of the extraction service.
-     * 
-     * @return the URL of the extraction service.
-     */
-    public String getExtractionServiceURL() {
-        return extractionServiceURL;
-    }
-
-    /**
      * Extract metadata and previews from the given URI.
      * 
      * @param uri
@@ -504,10 +475,6 @@ public class TupeloStore {
      */
     public String extractPreviews(String uri) {
         return extractPreviews(uri, false);
-    }
-
-    public void setExtractorContext(Context extractorContext) throws OperatorException, ClassNotFoundException {
-        extractorpbu = new PreviewBeanUtil(CETBeans.createBeanSession(extractorContext));
     }
 
     /**
@@ -523,6 +490,7 @@ public class TupeloStore {
     public String extractPreviews(String uri, boolean rerun) {
         Long lastRequest = lastExtractionRequest.get(uri);
         String result = null;
+        String server = getConfiguration(ConfigurationKey.ExtractorUrl);
         // give it a minute
         if (rerun || lastRequest == null || lastRequest < System.currentTimeMillis() - 120000) {
             log.debug("EXTRACT PREVIEWS " + uri);
@@ -560,7 +528,6 @@ public class TupeloStore {
                 }
 
                 // launch the job
-                String server = extractionServiceURL;
                 if (!server.endsWith("/")) { //$NON-NLS-1$
                     server += "/"; //$NON-NLS-1$
                 }
@@ -596,7 +563,7 @@ public class TupeloStore {
                 return sb.toString();
                 //result = extractorpbu.callExtractor(extractionServiceURL, uri, null, rerun);
             } catch (Exception e) {
-                log.error(String.format("Extraction service %s unavailable", extractionServiceURL), e);
+                log.error(String.format("Extraction service %s unavailable", server), e);
             }
             log.debug("EXTRACT PREVIEWS " + uri + " DONE");
         }
