@@ -205,7 +205,7 @@ public class InfoWidget extends Composite {
     private boolean isValidMIMEType(String MIME) {
         // valid MIME type is X/Y 
         // where X = word that contains only a-z or A-Z
-        // and Y = word that contains a-z, A-Z, 0-9, _, or -
+        // and Y = word that contains a-z, A-Z, 0-9, _, -, or .
         RegExp pattern = RegExp.compile("^([a-zA-Z]+)\\/([\\w|\\-|\\.]+)$");
         if (pattern.test(MIME)) {
             return true;
