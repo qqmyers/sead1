@@ -89,6 +89,13 @@ public class PreviewMultiTabularDataBeanWidget extends PreviewBeanWidget<Preview
             }
             current = lb.getValue(lb.getSelectedIndex());
         }
+        for (int i = 0; i < lb.getItemCount(); i++ ) {
+            if (lb.getItemText(i).equals(current)) {
+                lb.setSelectedIndex(i);
+                i = lb.getItemCount();
+            }
+
+        }
         PreviewTabularDataBean ptb = getPreviewBean().getTables().get(current);
         if (ptb != null) {
             String url = GWT.getHostPageBaseURL() + RestEndpoints.BLOB_URL + ptb.getUri();
