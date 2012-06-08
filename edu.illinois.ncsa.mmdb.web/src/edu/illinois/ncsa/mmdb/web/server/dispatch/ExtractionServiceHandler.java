@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.Collection;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -73,11 +75,11 @@ public class ExtractionServiceHandler implements ActionHandler<ExtractionService
         } else {
             try {
                 // get the collection of all IDs (URL) and convert them into String[]
-                String[] ids = new DatasetBeanUtil(TupeloStore.getInstance().getBeanSession()).getIDs().toArray(new String[0]);
-                for (int i = 0; i < ids.length; i++ ) {
+                Collection<String> ids = new DatasetBeanUtil(TupeloStore.getInstance().getBeanSession()).getIDs();
+                for (String id : ids ) {
                     // rerun extraction on all data
-                    TupeloStore.getInstance().removeCachedPreview(ids[i], GetPreviews.SMALL);
-                    TupeloStore.getInstance().extractPreviews(ids[i], action.getDelete());
+                    TupeloStore.getInstance().removeCachedPreview(id, GetPreviews.SMALL);
+                    TupeloStore.getInstance().extractPreviews(id, action.getDelete());
                 }
             } catch (Throwable thr) {
                 log.warn("Unable to retrieve IDs of all databeans");
