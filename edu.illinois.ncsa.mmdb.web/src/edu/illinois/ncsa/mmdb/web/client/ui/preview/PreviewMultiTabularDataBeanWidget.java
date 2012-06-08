@@ -1,5 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import java.util.Collection;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -82,10 +84,10 @@ public class PreviewMultiTabularDataBeanWidget extends PreviewBeanWidget<Preview
     protected void showSection() {
         if (lb.getItemCount() == 0) {
             GWT.log("add sheet's names");
-            String[] names = getPreviewBean().getTables().keySet().toArray(new String[0]);
+            Collection<String> names = getPreviewBean().getTables().keySet();
 
-            for (int i = 0; i < names.length; i++ ) {
-                lb.addItem(names[i]);
+            for (String name : names ) {
+                lb.addItem(name);
             }
             current = lb.getValue(lb.getSelectedIndex());
         }
