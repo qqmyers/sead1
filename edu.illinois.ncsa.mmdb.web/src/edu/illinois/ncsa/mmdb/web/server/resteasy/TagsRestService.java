@@ -3,7 +3,12 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -24,7 +29,9 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.TagBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.TagBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
@@ -36,6 +43,44 @@ public class TagsRestService {
 
     /** Commons logging **/
     private static Log log = LogFactory.getLog(TagsRestService.class);
+
+    @GET
+    @Path("")
+    public Response getTag() {
+
+        String result = "";
+
+        try {
+            Collection<TagBean> tags = new TagBeanUtil(TupeloStore.getInstance().getBeanSession()).getAll();
+            for (TagBean tag : tags ) {
+                result += tag.getTagString() + "<br>";
+            }
+        } catch (Exception e1) {
+            log.error("Error getting All TagBeans");
+            e1.printStackTrace();
+            return Response.status(500).entity("Error getting All TagBeans").build();
+        }
+        return Response.status(200).entity(result).build();
+    }
+
+    @GET
+    @Path("")
+    @Produces("application/json")
+    public Response getTagAsJSON() {
+        List<String> result = new ArrayList<String>();
+        try {
+            Collection<TagBean> tags = new TagBeanUtil(TupeloStore.getInstance().getBeanSession()).getAll();
+            for (TagBean tag : tags ) {
+                result.add(tag.getTagString());
+            }
+
+        } catch (Exception e1) {
+            log.error("Error getting All TagBeans");
+            e1.printStackTrace();
+            return Response.status(500).entity("Error getting All TagBeans").build();
+        }
+        return Response.status(200).entity(result).build();
+    }
 
     @GET
     @Path("/{tag}")
@@ -69,12 +114,17 @@ public class TagsRestService {
                 if (row.get(0) != null) {
                     Resource id = row.get(0);
                     datasets.add(dbu.get(id));
-                    result += id.toString() + "\n";
+                    result += URLEncoder.encode(id.toString(), "UTF-8") + "<br>";
                 }
             }
         } catch (OperatorException e1) {
             log.error("Error retrieving datasets with tag " + tag);
             e1.printStackTrace();
+            return Response.status(500).entity("Error retrieving datasets with tag " + tag).build();
+        } catch (UnsupportedEncodingException e1) {
+            log.error("Error encoding datasets' url for " + tag, e1);
+            e1.printStackTrace();
+            return Response.status(500).entity("Error encoding datasets' url for " + tag).build();
         }
 
         log.debug("Found " + datasets.size() + " datasets with tag '"
@@ -110,6 +160,7 @@ public class TagsRestService {
         } catch (OperatorException e1) {
             log.error("Error retrieving datasets with tag " + tag);
             e1.printStackTrace();
+            return Response.status(500).entity("Error retrieving datasets with tag " + tag).build();
         }
 
         log.debug("Found " + datasets.size() + " datasets with tag '"

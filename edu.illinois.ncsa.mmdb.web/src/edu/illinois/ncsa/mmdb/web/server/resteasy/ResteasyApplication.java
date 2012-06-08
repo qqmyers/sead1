@@ -18,6 +18,8 @@ public class ResteasyApplication extends Application {
 
     public ResteasyApplication() {
         singletons.add(new TagsRestService());
+        singletons.add(new CollectionsRestService());
+        singletons.add(new DatasetsRestService());
     }
 
     @Override
