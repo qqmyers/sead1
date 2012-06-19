@@ -21,6 +21,7 @@ public class ResteasyApplication extends Application {
         singletons.add(new CollectionsRestService());
         singletons.add(new DatasetsRestService());
         singletons.add(new SparqlRestService());
+        singletons.add(new AuthenticationInterceptor());
         singletons.add(new UpdateLuceneRestService());
         singletons.add(new ImagePyramidRestService());
     }
