@@ -1,7 +1,7 @@
-package edu.illinois.ncsa.mmdb.web.server.rest;
+package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
-import org.restlet.resource.Get;
-import org.restlet.resource.ServerResource;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
@@ -11,8 +11,9 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  * @author Rob Kooper
  * 
  */
-public class UpdateLuceneResource extends ServerResource {
-    @Get
+public class UpdateLuceneRestService {
+    @GET
+    @Path("/search/reindex")
     public int reindex() {
         return TupeloStore.getInstance().indexFullTextAll();
     }

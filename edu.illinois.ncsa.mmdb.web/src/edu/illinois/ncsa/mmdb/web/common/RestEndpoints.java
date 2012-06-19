@@ -9,10 +9,10 @@ package edu.illinois.ncsa.mmdb.web.common;
  */
 public class RestEndpoints {
     /** endpoints returning dataset */
-    public static final String BLOB_URL      = "api/image/";          //$NON-NLS-1$
+    public static final String BLOB_URL      = "api/image/";       //$NON-NLS-1$
     public static final String EXTENSION_URL = "api/dataset/";
 
     /** endpoint returning image pyramd */
-    public static final String PYRAMID_URL   = "rest/secure/pyramid/";
+    public static final String PYRAMID_URL   = "resteasy/pyramid/";
 
 }

@@ -95,15 +95,6 @@
 	</servlet>
 	
 	<servlet>
-		<servlet-name>restlet</servlet-name>
-		<servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
-		<init-param>
-			<param-name>org.restlet.application</param-name>
-			<param-value>edu.illinois.ncsa.mmdb.web.server.rest.MediciServerApplication</param-value>
-		</init-param>
-	</servlet>
-	
-	<servlet>
         <servlet-name>Resteasy</servlet-name>
         <servlet-class>
             org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
@@ -171,11 +162,6 @@
 		<url-pattern>/webdav/*</url-pattern>
 	</servlet-mapping>
 
-	<servlet-mapping>
-		<servlet-name>restlet</servlet-name>
-		<url-pattern>/rest/*</url-pattern>
-	</servlet-mapping>
-	
 	<servlet-mapping>
         <servlet-name>Resteasy</servlet-name>
         <url-pattern>/resteasy/*</url-pattern>
