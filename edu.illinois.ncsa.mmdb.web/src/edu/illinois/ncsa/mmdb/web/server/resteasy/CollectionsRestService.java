@@ -40,7 +40,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 public class CollectionsRestService {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(TagsRestService.class);
+    private static Log log = LogFactory.getLog(CollectionsRestService.class);
 
     @GET
     @Path("")

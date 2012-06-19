@@ -20,6 +20,7 @@ public class ResteasyApplication extends Application {
         singletons.add(new TagsRestService());
         singletons.add(new CollectionsRestService());
         singletons.add(new DatasetsRestService());
+        singletons.add(new SparqlRestService());
     }
 
     @Override

@@ -48,7 +48,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 public class DatasetsRestService {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(TagsRestService.class);
+    private static Log log = LogFactory.getLog(DatasetsRestService.class);
 
     @GET
     @Path("/{id}")
