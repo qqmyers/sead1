@@ -32,10 +32,9 @@ package dnd;
 
 import java.beans.PropertyChangeEvent;
 import java.awt.dnd.*;
-import java.util.List;
+import org.apache.log4j.Logger;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
@@ -46,15 +45,15 @@ import java.awt.TrayIcon;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import javax.naming.AuthenticationException;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.RollingFileAppender;
+//import sun.security.mscapi.KeyStore.MY;
 
 public class DragAndDropMedici extends JFrame implements DropTargetListener {
 
@@ -207,6 +206,9 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
 
                     // Make a connect to the server
                     URL url = new URL(server + "UploadBlob");
+
+                    //TODO: Check for credentials
+
                     conn = (HttpURLConnection) url.openConnection();
 
                     // Put the authentication details in the request
@@ -215,6 +217,14 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
                     String encodedUsernamePassword = Base64.encodeToString(up.getBytes(), Base64.NO_WRAP);
                     conn.setRequestProperty("Authorization", "Basic " + encodedUsernamePassword);
 
+                    int responseCode = conn.getResponseCode();
+                    if (responseCode == 401) {
+                        throw new AuthenticationException(INVALIDUSERNAMEPASSWORD);
+                    }
+                    conn.disconnect();
+
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestProperty("Authorization", "Basic " + encodedUsernamePassword);
                     // make it a post request
                     conn.setDoOutput(true);
                     conn.setDoInput(true);
@@ -272,10 +282,10 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
                     outputStream.close();
                     System.out.println("Going to fetch response");
                     // Ensure we got the HTTP 200 response code
-                    int responseCode = conn.getResponseCode();
-                    if (responseCode == 401) {
-                        throw new AuthenticationException(INVALIDUSERNAMEPASSWORD);
-                    }
+                    responseCode = conn.getResponseCode();
+//                    if (responseCode == 401) {
+//                        throw new AuthenticationException(INVALIDUSERNAMEPASSWORD);
+//                    }
                     if (responseCode != 200) {
                         throw new Exception(String.format("Received the response code %d from the URL %s", responseCode, conn.getResponseMessage()));
                     }
@@ -452,7 +462,7 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(DragAndDropMedici.class.getName()).log(Level.SEVERE, null, ex);
+                    //Logger.getLogger(DragAndDropMedici.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -476,9 +486,12 @@ public class DragAndDropMedici extends JFrame implements DropTargetListener {
         }
 
     }
+    private static org.apache.log4j.Logger log = Logger.getLogger(DragAndDropMedici.class);
 
-    public static void main(final String[] args) {
-
+    public static void main(final String[] args) throws IOException {
+        BasicConfigurator.configure(new RollingFileAppender(new PatternLayout("%d %-5p  [%c{1}] %m %n"), "seadbox.log"));
+        
+        log.debug("Logging initialized!");
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override
