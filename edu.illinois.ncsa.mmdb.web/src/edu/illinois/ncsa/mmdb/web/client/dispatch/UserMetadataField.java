@@ -36,7 +36,7 @@ public class UserMetadataField implements Serializable {
     }
 
     String creatorLabel = "creator";
-    String partOfLabel  = "partof";
+    String partOfLabel  = "published in";
 
     public UserMetadataField(String uri, String label) {
         setUri(uri);

@@ -135,6 +135,7 @@ public class AddMetadataWidget extends Composite {
         this(new HashSet<String>(), dispatch, events);
         this.resources.add(uri);
         this.uri = uri;
+        PropertiesReader.initializePropertiesFile();
     }
 
     public AddMetadataWidget(Collection<String> batch, final DispatchAsync dispatch, HandlerManager eventBus) {
@@ -359,13 +360,18 @@ public class AddMetadataWidget extends Composite {
     }-*/;
 
     private void InitializeVIVOConnection(String query) {
-        if (_configValues == null) {
-            displayMessage("Unable to load vivo configuration. Admin privileges are currently required.");
-            refresh();
-            return;
-        }
 
-        String url = _configValues.getConfiguration(ConfigurationKey.VIVOJOSEKIURL) + query;
+        String url = PropertiesReader.getVIVOURL() + query;
+
+        //        if (_configValues == null) {
+        //            displayMessage("Unable to load vivo configuration. Admin privileges are currently required.");
+        //            refresh();
+        //            return;
+        //        }
+
+        if (url == "") {
+            url = _configValues.getConfiguration(ConfigurationKey.VIVOJOSEKIURL) + query;
+        }
         // Send request to server to get the json object.
         getJson(1, url, this);
 
