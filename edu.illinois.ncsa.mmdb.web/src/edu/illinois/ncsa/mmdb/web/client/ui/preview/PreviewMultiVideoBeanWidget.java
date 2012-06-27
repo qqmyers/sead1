@@ -80,15 +80,22 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
             } else {
                 url = RestEndpoints.BLOB_URL + video.getUri() + ext;
             }
+            logObject(url);
             urls.push(url);
         }
+        logObject(urls);
 
         // call javascript
         showVideo(urls, preview, getWidgetID(), Long.toString(width), Long.toString(height));
     }
 
+    public final native void logObject(Object obj) /*-{
+		console.log(obj);
+    }-*/;
+
     public final native void showVideo(JsArrayString urls, String preview, String id, String w, String h) /*-{
 		if (urls != null) {
+			console.log("showVideo")
 			console.log(urls);
 			// create the levels
 			var levels = $wnd.createAnArray();
