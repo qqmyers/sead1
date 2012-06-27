@@ -89,6 +89,7 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
 
     public final native void showVideo(JsArrayString urls, String preview, String id, String w, String h) /*-{
 		if (urls != null) {
+			console.log(urls);
 			// create the levels
 			var levels = $wnd.createAnArray();
 			var len = urls.length;
@@ -96,6 +97,7 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
 				levels.push({
 					file : urls[i]
 				});
+				console.log(urls[i]);
 			}
 
 			// force html5 first
