@@ -131,7 +131,7 @@ public class PreviewPanel extends Composite {
         if (!isEmbedded) {
             addWidget(new PreviewMultiImageBeanWidget(eventBus));
             addWidget(new PreviewMultiTabularDataBeanWidget(eventBus));
-            //            addWidget(new PreviewMultiVideoBeanWidget(eventBus));
+            addWidget(new PreviewMultiVideoBeanWidget(eventBus));
         }
     }
 

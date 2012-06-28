@@ -1,8 +1,9 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.HTML;
 
 import edu.illinois.ncsa.mmdb.web.common.RestEndpoints;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
@@ -12,7 +13,7 @@ public class PreviewVideoBeanWidget extends PreviewBeanWidget<PreviewVideoBean> 
     public PreviewVideoBeanWidget(HandlerManager eventBus) {
         super(eventBus);
 
-        Label widget = new Label("Get Adobe Flash: http://www.adobe.com/products/flashplayer/");
+        HTML widget = new HTML("Video Player");
         widget.getElement().setId(DOM.createUniqueId());
         setWidget(widget);
     }
@@ -46,12 +47,14 @@ public class PreviewVideoBeanWidget extends PreviewBeanWidget<PreviewVideoBean> 
 
     @Override
     public String getSection() {
-        return "Document"; //$NON-NLS-1$
+        return "Time"; //$NON-NLS-1$
     }
 
     @Override
     protected void showSection() {
-        String preview = null;
+        String html = "<video controls";
+
+        // compute widht and height of video widget
         long width = getPreviewBean().getWidth();
         long height = getPreviewBean().getHeight();
         if (!getEmbedded()) {
@@ -61,42 +64,31 @@ public class PreviewVideoBeanWidget extends PreviewBeanWidget<PreviewVideoBean> 
             width = getWidth();
             height = getHeight();
         }
+        html += " width=\"" + width + "px\"";
+        html += " height=\"" + height + "px\"";
+
+        // poster image
         if (getPreviewBean().getPreviewImage() != null) {
-            preview = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
+            String poster = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
+            html += " poster=\"" + poster + "\"";
         }
-        showAudioVideo(RestEndpoints.BLOB_URL + getPreviewBean().getUri(), preview, getWidgetID(), Long.toString(width), Long.toString(height));
+
+        // videos
+        html += ">";
+        PreviewVideoBean video = getPreviewBean();
+        String ext = "." + video.getMimeType().substring(6);
+        String url = video.getUri();
+        String magic = "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/";
+        if (video.getUri().startsWith(magic)) {
+            url = "api/video/" + video.getUri().substring(magic.length()) + ext;
+        } else {
+            url = RestEndpoints.BLOB_URL + video.getUri() + ext;
+        }
+        html += "<source src=\"" + url + "\" type=\"" + video.getMimeType() + "\">";
+        html += "</video>";
+
+        // show the video
+        GWT.log(html);
+        ((HTML) getWidget()).setHTML(html);
     }
-
-    public final native void showAudioVideo(String url, String preview, String id, String w, String h) /*-{
-		if (url != null) {
-			// force html5 first
-			var modes = $wnd.createAnArray();
-			modes.push({
-				type : "html5"
-			});
-			modes.push({
-				type : "flash",
-				src : "player.swf"
-			});
-			modes.push({
-				type : "download"
-			});
-
-			// create the player
-			$wnd.jwplayer(id).setup({
-				height : h,
-				width : w,
-				image : preview,
-				modes : modes,
-				file : url,
-				provider : 'video',
-			//                controlbar: 'over',
-			//                skin: 'skins/glow/glow.zip',
-			//                provider: "http",
-			//                "http.startparam":"starttime"
-			});
-		} else {
-			$wnd.jwplayer(id).remove();
-		}
-    }-*/;
 }

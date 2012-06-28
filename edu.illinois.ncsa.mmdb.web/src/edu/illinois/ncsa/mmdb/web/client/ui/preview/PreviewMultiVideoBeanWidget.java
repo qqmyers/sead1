@@ -1,9 +1,9 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
-import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.HTML;
 
 import edu.illinois.ncsa.mmdb.web.common.RestEndpoints;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
@@ -14,7 +14,7 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
     public PreviewMultiVideoBeanWidget(HandlerManager eventBus) {
         super(eventBus);
 
-        Label widget = new Label("HTML5 Video");
+        HTML widget = new HTML("HTML5 Video");
         widget.getElement().setId(DOM.createUniqueId());
         setWidget(widget);
     }
@@ -53,6 +53,9 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
 
     @Override
     protected void showSection() {
+        String html = "<video controls";
+
+        // compute widht and height of video widget
         long width = getPreviewBean().getWidth();
         long height = getPreviewBean().getHeight();
         if (!getEmbedded()) {
@@ -62,16 +65,17 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
             width = getWidth();
             height = getHeight();
         }
+        html += " width=\"" + width + "px\"";
+        html += " height=\"" + height + "px\"";
 
         // poster image
-        String preview = null;
         if (getPreviewBean().getPreviewImage() != null) {
-            preview = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
+            String poster = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
+            html += " poster=\"" + poster + "\"";
         }
 
         // videos
-        logObject("Creating URLs.");
-        JsArrayString urls = (JsArrayString) JsArrayString.createArray();
+        html += ">";
         for (PreviewVideoBean video : getPreviewBean().getVideos() ) {
             String ext = "." + video.getMimeType().substring(6);
             String url = video.getUri();
@@ -81,62 +85,12 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
             } else {
                 url = RestEndpoints.BLOB_URL + video.getUri() + ext;
             }
-            logObject(url);
-            urls.push(url);
+            html += "<source src=\"" + url + "\" type=\"" + video.getMimeType() + "\">";
         }
-        logObject("Showing URLs.");
-        logObject(urls);
+        html += "</video>";
 
-        // call javascript
-        showVideo(urls, preview, getWidgetID(), Long.toString(width), Long.toString(height));
+        // show the video
+        GWT.log(html);
+        ((HTML) getWidget()).setHTML(html);
     }
-
-    public final native void logObject(Object obj) /*-{
-		console.log(obj);
-    }-*/;
-
-    public final native void showVideo(JsArrayString urls, String preview, String id, String w, String h) /*-{
-		if (urls != null) {
-			console.log("showVideo")
-			console.log(urls);
-			// create the levels
-			var levels = $wnd.createAnArray();
-			var len = urls.length;
-			for ( var i = 0; i < len; i++) {
-				levels.push({
-					file : urls[i]
-				});
-				console.log(urls[i]);
-			}
-
-			// force html5 first
-			var modes = $wnd.createAnArray();
-			modes.push({
-				type : "html5"
-			});
-			modes.push({
-				type : "flash",
-				src : "player.swf"
-			});
-			modes.push({
-				type : "download"
-			});
-
-			// create the player
-			$wnd.jwplayer(id).setup({
-				height : h,
-				width : w,
-				image : preview,
-				modes : modes,
-				levels : levels,
-				provider : 'video',
-			//                controlbar: 'over',
-			//                skin: 'skins/glow/glow.zip',
-			//                provider: "http",
-			//                "http.startparam":"starttime"
-			});
-		} else {
-			$wnd.jwplayer(id).remove();
-		}
-    }-*/;
 }
