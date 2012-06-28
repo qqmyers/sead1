@@ -46,6 +46,7 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 
 		try {
 			String responseStr = httpclient.execute(httpget, responseHandler);
+			System.out.println(responseStr);
 			return getLayerNames(responseStr);
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();

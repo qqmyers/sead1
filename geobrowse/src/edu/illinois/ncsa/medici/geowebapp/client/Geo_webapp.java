@@ -13,13 +13,14 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
-import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
@@ -77,6 +78,8 @@ public class Geo_webapp implements EntryPoint {
 					showMap(result);
 					TabLayoutPanel tlp = createLayerSwitcher(result);
 					RootPanel.get("layers").add(tlp);
+					HorizontalPanel hp = createLegendPanel(result);
+					RootPanel.get("info").add(hp);
 				}
 
 			}
@@ -90,35 +93,58 @@ public class Geo_webapp implements EntryPoint {
 
 	}
 
+	protected HorizontalPanel createLegendPanel(String result) {
+		String[] layerNames = result.split(",");
+		HorizontalPanel hp = new HorizontalPanel();
+		for(String n: layerNames) {
+			VerticalPanel vp  = new VerticalPanel();
+			HTML label = new HTML("<b><center>"+n+"</center></b>");
+			
+			vp.add(label);
+			
+			String url = "http://sead.ncsa.illinois.edu/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="+n;
+			Image img = new Image(url);
+			
+			vp.add(img);
+			
+			hp.add(vp);
+			
+		}
+		return hp;
+	}
+
 	protected TabLayoutPanel createLayerSwitcher(String result) {
 		String[] layerNames = result.split(",");
 		TabLayoutPanel tlp = new TabLayoutPanel(60, Unit.PX);
 		tlp.setWidth("200px");
-		tlp.setHeight("250px");
-		VerticalPanel vp = new VerticalPanel();
+		tlp.setHeight("500px");
+
+		FlexTable ft = new FlexTable();
+		ft.setWidget(0, 0, new HTML("<b><center>Show?</center></b>"));
+		ft.setWidget(0, 1, new HTML("<b><center>Opacity</center></b>"));
+		ft.setWidget(0, 2, new HTML("<b><center>Name</center></b>"));
+		// VerticalPanel vp = new VerticalPanel();
 		// build layer switcher with reverse order
 		// since the top layer should be on top of the list
-		for(int i=layerNames.length-1;i>=0;i--) {
+		for (int i = layerNames.length - 1; i >= 0; i--) {
+			int currentRow = ft.getRowCount();
 			final String name = layerNames[i];
-			HorizontalPanel hp = new HorizontalPanel();
-			CheckBox visibleCheckBox = new CheckBox();
-			visibleCheckBox.setValue(true);
-			visibleCheckBox.addClickHandler(new ClickHandler() {
+			ToggleButton vizToggleButton = new ToggleButton("Off", "On");
+			vizToggleButton.setValue(true);
+			vizToggleButton.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
-					CheckBox cb = (CheckBox) event.getSource();
-					boolean visibility = cb.getValue();
+					ToggleButton tb = (ToggleButton) event.getSource();
+					boolean visibility = tb.getValue();
 					eventBus.fireEvent(new LayerVisibilityChangeEvent(name,
 							visibility));
 				}
 			});
-			hp.add(visibleCheckBox);
 
-			Label nameLabel = new Label();
-			nameLabel.setText(name);
-			hp.add(nameLabel);
+			ft.setWidget(currentRow, 0, vizToggleButton);
 
 			ListBox opacityListBox = new ListBox();
+			opacityListBox.setWidth("50px");
 			opacityListBox.addItem("1.0");
 			opacityListBox.addItem("0.9");
 			opacityListBox.addItem("0.8");
@@ -136,11 +162,13 @@ public class Geo_webapp implements EntryPoint {
 				}
 			});
 
-			hp.add(opacityListBox);
+			ft.setWidget(currentRow, 1, opacityListBox);
 
-			vp.add(hp);
+			HTML nameLabel = new HTML(name);
+
+			ft.setWidget(currentRow, 2, nameLabel);
 		}
-		tlp.add(vp, "Layer manager");
+		tlp.add(ft, "Layer manager");
 
 		return tlp;
 	}
@@ -195,6 +223,9 @@ public class Geo_webapp implements EntryPoint {
 		map.addLayer(osm);
 
 		var layerNames = layerNamesStr.split(",");
+		var infoControls = new Array();
+
+		var defaultLayer = layerNames[layerNames.length-1];
 
 		for ( var i = 0; i < layerNames.length; i++) {
 			var n = layerNames[i];
@@ -205,16 +236,13 @@ public class Geo_webapp implements EntryPoint {
 					}, {
 						opacity : 1.0
 					});
-		}
-		for (key in layers) {
-			map.addLayer(layers[key]);
-		}
-		//map.addLayers(layers);
+			map.addLayer(layers[n]);
 
+		}
+		
 		var bbox = new $wnd.OpenLayers.Bounds(-14376519.92, 2908438.48,
 				-7155972.48, 6528496.14);
 		map.zoomToExtent(bbox);
-
 	}-*/;
 
 }
