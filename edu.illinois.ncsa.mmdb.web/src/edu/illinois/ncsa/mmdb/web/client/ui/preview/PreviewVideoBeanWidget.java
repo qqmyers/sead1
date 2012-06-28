@@ -68,7 +68,7 @@ public class PreviewVideoBeanWidget extends PreviewBeanWidget<PreviewVideoBean> 
     }
 
     public final native void showAudioVideo(String url, String preview, String id, String w, String h) /*-{
-		if (urls != null) {
+		if (url != null) {
 			// force html5 first
 			var modes = $wnd.createAnArray();
 			modes.push({
