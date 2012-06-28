@@ -118,6 +118,7 @@ public class PreviewPanel extends Composite {
         }
         isInitialized = true;
 
+        addWidget(new PreviewMultiVideoBeanWidget(eventBus));
         addWidget(new PreviewVideoBeanWidget(eventBus));
         addWidget(new PreviewAudioBeanWidget(eventBus));
         addWidget(new PreviewDocumentBeanWidget(eventBus));
@@ -131,7 +132,6 @@ public class PreviewPanel extends Composite {
         if (!isEmbedded) {
             addWidget(new PreviewMultiImageBeanWidget(eventBus));
             addWidget(new PreviewMultiTabularDataBeanWidget(eventBus));
-            addWidget(new PreviewMultiVideoBeanWidget(eventBus));
         }
     }
 
@@ -277,9 +277,15 @@ public class PreviewPanel extends Composite {
      * @return ordered list of all preview beans.
      */
     private List<PreviewBeanWidget> getOrderedBeans(GetDatasetResult result, int maxwidth) {
+        boolean hasMultiVideo = false;
+
         List<PreviewBeanWidget> list = new ArrayList<PreviewBeanWidget>();
 
         for (PreviewBeanWidget widget : registeredWidgets ) {
+            if ((widget instanceof PreviewVideoBeanWidget) && hasMultiVideo) {
+                GWT.log("Skipping " + widget.getClass());
+                continue;
+            }
             PreviewBean best = null;
             for (PreviewBean pb : result.getPreviews() ) {
                 if (widget.getPreviewBeanClass() == pb.getClass()) {
@@ -295,6 +301,9 @@ public class PreviewPanel extends Composite {
                 }
             }
             if (best != null) {
+                if (widget instanceof PreviewMultiVideoBeanWidget) {
+                    hasMultiVideo = true;
+                }
                 PreviewBeanWidget pbw = widget.newWidget();
                 pbw.setPreviewBean(best);
                 pbw.setDatasetBean(dataset);
@@ -304,7 +313,6 @@ public class PreviewPanel extends Composite {
                     pbw.setWidth(width);
                     pbw.setHeight(height);
                 }
-
                 list.add(pbw);
             }
         }

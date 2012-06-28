@@ -30,7 +30,7 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
 
     @Override
     public String getAnchorText() {
-        return "Video (HTML5)";
+        return "Video";
     }
 
     @Override
