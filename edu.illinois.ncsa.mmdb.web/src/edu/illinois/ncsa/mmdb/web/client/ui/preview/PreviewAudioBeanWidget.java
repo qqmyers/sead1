@@ -54,11 +54,11 @@ public class PreviewAudioBeanWidget extends PreviewBeanWidget<PreviewAudioBean> 
         if (getPreviewBean().getPreviewImage() != null) {
             if (!getEmbedded()) {
                 width = getPreviewBean().getPreviewImage().getWidth();
-                height = getPreviewBean().getPreviewImage().getHeight();
+                height = getPreviewBean().getPreviewImage().getHeight() + 50;
             }
 
             String preview = RestEndpoints.BLOB_URL + getPreviewBean().getPreviewImage().getUri();
-            html += "<img src=\"" + preview + "\" width=\"" + width + "px\" height=\"" + height + "\"><br>";
+            html += "<img src=\"" + preview + "\" width=\"" + width + "px\" height=\"" + (height - 50) + "\" /><br />";
         }
 
         // set width and height
