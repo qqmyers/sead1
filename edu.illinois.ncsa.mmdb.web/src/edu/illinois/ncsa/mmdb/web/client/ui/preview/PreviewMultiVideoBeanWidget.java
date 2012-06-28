@@ -70,6 +70,7 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
         }
 
         // videos
+        logObject("Creating URLs.");
         JsArrayString urls = (JsArrayString) JsArrayString.createArray();
         for (PreviewVideoBean video : getPreviewBean().getVideos() ) {
             String ext = "." + video.getMimeType().substring(6);
@@ -83,6 +84,7 @@ public class PreviewMultiVideoBeanWidget extends PreviewBeanWidget<PreviewMultiV
             logObject(url);
             urls.push(url);
         }
+        logObject("Showing URLs.");
         logObject(urls);
 
         // call javascript
