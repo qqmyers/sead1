@@ -16,7 +16,13 @@
 	type="text/css">
 
 <title>SEAD Geospatial Visualization</title>
+<script>
+function showInfo(evt) {
+	console.info("show info");
+    $('info').innerHTML = evt.text;
+}
 
+</script>
 
 <!-- OpenLayers JS -->
 <script type="text/javascript" language="javascript"
@@ -51,7 +57,8 @@
 
 	<div id="wrapper">
 		<header id="header">
-			<h1>Visualizing Geospatial Data from Medici</h1>
+			<h2>SEAD</h2>
+			Visualizing Geospatial Data from Medici (by using OpenLayers)
 		</header>
 		<!-- #header-->
 
@@ -59,6 +66,8 @@
 			<div id="container">
 				<div id="content">
 					<div id="map" class="smallmap"></div>
+					<div id="info"></div>
+					
 				</div>
 				<!-- #content-->
 			</div>
@@ -71,7 +80,8 @@
 		</section>
 		<!-- #middle-->
 
-		<footer id="footer"> Developed by CET, NCSA </footer>
+		<footer id="footer"> 
+		<hr> Developed by CET, NCSA </footer>
 		<!-- #footer -->
 
 	</div>
