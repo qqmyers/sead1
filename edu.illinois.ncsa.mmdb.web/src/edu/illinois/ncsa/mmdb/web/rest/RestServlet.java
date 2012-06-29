@@ -553,10 +553,9 @@ public class RestServlet extends AuthenticatedServlet {
                 OutputStream os = response.getOutputStream();
                 try {
                     byte[] buf = new byte[10240];
-                    long left = 1 + end - start;
                     int x = 0;
-                    while ((left > 0) && (x = is.read(buf, 0, (int) Math.min(buf.length, left))) > 0) {
-                        left -= x;
+                    while ((len > 0) && (x = is.read(buf, 0, (int) Math.min(buf.length, len))) > 0) {
+                        len -= x;
                         os.write(buf, 0, x);
                     }
                 } finally {
