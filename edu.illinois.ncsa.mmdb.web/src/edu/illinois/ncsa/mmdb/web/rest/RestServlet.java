@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -55,6 +56,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.MessagingException;
 import javax.servlet.ServletException;
@@ -93,9 +96,11 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
+import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewVideoBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
@@ -514,13 +519,51 @@ public class RestServlet extends AuthenticatedServlet {
                 ext = uri.substring(idx + 1);
                 uri = uri.substring(0, idx);
             }
+            uri = "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri;
             try {
-                if (ext != null) {
-                    response.setContentType("video/" + ext);
+                PreviewVideoBean pvb = new PreviewVideoBeanUtil(TupeloStore.getInstance().getBeanSession()).get(uri);
+
+                if (request.getHeader("If-Modified-Since") != null) {
+                    Date d = new Date(request.getHeader("If-Modified-Since"));
+                    if ((pvb.getDate().getTime() - d.getTime()) < 1000) {
+                        response.setStatus(304);
+                        return;
+                    }
                 }
+                long start = 0;
+                long end = pvb.getSize();
+                long len = pvb.getSize();
+                if (request.getHeader("Range") != null) {
+                    Pattern p = Pattern.compile("bytes=(\\d+)-(\\d+)");
+                    Matcher m = p.matcher(request.getHeader("Range"));
+                    m.find();
+                    start = Long.parseLong(m.group(1));
+                    end = Long.parseLong(m.group(2));
+                    len = (end - start) + 1;
+                    response.setStatus(206);
+                    response.setHeader("Content-Range", "bytes " + start + "-" + end + "/" + pvb.getSize());
+                }
+                response.setHeader("Accept-Ranges", "bytes");
+                response.setContentType(pvb.getMimeType());
+                response.setContentLength((int) len);
+                response.setDateHeader("Last-Modified", pvb.getDate().getTime());
+                response.setHeader("Expires", null);
                 response.flushBuffer();
-                CopyFile.copy(restService.retrieveImage("tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri), response.getOutputStream());
-            } catch (RestServiceException e) {
+                InputStream is = restService.retrieveImage(uri);
+                OutputStream os = response.getOutputStream();
+                try {
+                    byte[] buf = new byte[10240];
+                    long left = 1 + end - start;
+                    int x = 0;
+                    while ((left > 0) && (x = is.read(buf, 0, (int) Math.min(buf.length, left))) > 0) {
+                        left -= x;
+                        os.write(buf, 0, x);
+                    }
+                } finally {
+                    is.close();
+                    os.close();
+                }
+            } catch (Exception e) {
                 throw new ServletException("failed to retrieve " + request.getRequestURI(), e);
             }
         } else if (hasPrefix(IMAGE_INFIX, request)) {
