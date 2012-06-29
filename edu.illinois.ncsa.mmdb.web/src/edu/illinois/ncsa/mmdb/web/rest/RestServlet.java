@@ -550,6 +550,9 @@ public class RestServlet extends AuthenticatedServlet {
                 response.setHeader("Expires", null);
                 response.flushBuffer();
                 InputStream is = restService.retrieveImage(uri);
+                if (start > 0) {
+                    is.skip(start);
+                }
                 OutputStream os = response.getOutputStream();
                 try {
                     byte[] buf = new byte[10240];
