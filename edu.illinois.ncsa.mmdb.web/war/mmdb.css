@@ -836,6 +836,10 @@ a:hover {
 	padding: 5px;
 	}
 
+.collectionImageCollage {
+	margin: 2px 0 0 2px;
+}
+
 .collectionInfo {
 	text-align: left;
 	margin-left: 20px;

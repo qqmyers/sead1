@@ -41,38 +41,51 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
+import java.util.Collection;
+
 import net.customware.gwt.dispatch.shared.Result;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
+import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
 /**
  * @author lmarini
- *
+ * 
  */
 @SuppressWarnings("serial")
 public class GetCollectionResult implements Result {
-	
-	private CollectionBean collection;
-	private int collectionSize;
 
-	public GetCollectionResult() {}
-	
-	public GetCollectionResult(CollectionBean collection, int collectionSize) {
-		this.collection = collection;
-		this.collectionSize = collectionSize;
-	}
+    private CollectionBean          collection;
+    private int                     collectionSize;
+    private Collection<PreviewBean> previews;
 
-	/**
-	 * @return the collection
-	 */
-	public CollectionBean getCollection() {
-		return collection;
-	}
+    public GetCollectionResult() {
+    }
 
-	public int getCollectionSize() {
-		return collectionSize;
-	}
+    public GetCollectionResult(CollectionBean collection, int collectionSize) {
+        this.collection = collection;
+        this.collectionSize = collectionSize;
+    }
 
-	public void setCollectionSize(int collectionSize) {
-		this.collectionSize = collectionSize;
-	}
+    /**
+     * @return the collection
+     */
+    public CollectionBean getCollection() {
+        return collection;
+    }
+
+    public int getCollectionSize() {
+        return collectionSize;
+    }
+
+    public void setCollectionSize(int collectionSize) {
+        this.collectionSize = collectionSize;
+    }
+
+    public Collection<PreviewBean> getPreviews() {
+        return this.previews;
+    }
+
+    public void setPreviews(Collection<PreviewBean> previews) {
+        this.previews = previews;
+    }
 }

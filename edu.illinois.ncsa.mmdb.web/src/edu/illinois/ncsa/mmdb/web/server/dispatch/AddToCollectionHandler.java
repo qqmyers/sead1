@@ -91,6 +91,7 @@ public class AddToCollectionHandler implements ActionHandler<AddToCollection, Ad
         try {
             CollectionBean collectionBean = cbu.get(arg0.getCollectionUri(), true);
             cbu.addToCollection(collectionBean, resources);
+            TupeloStore.getInstance().extractPreviews(arg0.getCollectionUri(), true); // rerun the extraction(s).
         } catch (OperatorException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

@@ -57,6 +57,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEvent;
@@ -64,6 +65,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEventHandler
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEventHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
@@ -82,9 +84,12 @@ public class PreviewPanel extends Composite {
     private static List<PreviewBeanWidget>           registeredWidgets;
 
     /** Check to see if all previews are added. */
-    private static boolean                           isInitialized = false;
+    private static boolean                           isInitialized       = false;
 
-    /** Panel that will hold the actual prevew widget */
+    /** Check to see if this Panel is initialized to display collection previews */
+    private boolean                                  collectionPreviewer = false;
+
+    /** Panel that will hold the actual preview widget */
     private AbsolutePanel                            previewPanel;
 
     /** List of widgets used to show dataset */
@@ -102,7 +107,7 @@ public class PreviewPanel extends Composite {
     private static boolean                           isEmbedded;
     private final int                                width;
     private final int                                height;
-    private static final int                         MAX_WIDTH     = 600;
+    private static final int                         MAX_WIDTH           = 600;
     private HorizontalPanel                          anchorTabs;
 
     static public void addWidget(PreviewBeanWidget<? extends PreviewBean> widget) {
@@ -112,37 +117,54 @@ public class PreviewPanel extends Composite {
         registeredWidgets.add(widget);
     }
 
-    static private void initializePreviews(HandlerManager eventBus) {
+    static private void initializePreviews(HandlerManager eventBus, boolean collectionPreviewer) {
         if (isInitialized) {
             return;
         }
         isInitialized = true;
 
-        addWidget(new PreviewMultiVideoBeanWidget(eventBus));
-        addWidget(new PreviewVideoBeanWidget(eventBus));
-        addWidget(new PreviewAudioBeanWidget(eventBus));
-        addWidget(new PreviewDocumentBeanWidget(eventBus));
-        addWidget(new PreviewTabularDataBeanWidget(eventBus));
-        addWidget(new PreviewImageBeanWidget(eventBus));
-        addWidget(new PreviewPyramidBeanWidget(eventBus));
-        addWidget(new Preview3DJavaBeanWidget(eventBus));
-        addWidget(new Preview3DHTML5BeanWidget(eventBus));
-        addWidget(new Preview3DWebGLBeanWidget(eventBus));
-        //The following previews currently not supported in embedded previewer
-        if (!isEmbedded) {
-            addWidget(new PreviewMultiImageBeanWidget(eventBus));
-            addWidget(new PreviewMultiTabularDataBeanWidget(eventBus));
+        if (!collectionPreviewer) {
+            //register dataset specific previewers here.
+        	addWidget(new PreviewMultiVideoBeanWidget(eventBus));
+            addWidget(new PreviewVideoBeanWidget(eventBus));
+            addWidget(new PreviewAudioBeanWidget(eventBus));
+            addWidget(new PreviewDocumentBeanWidget(eventBus));
+            addWidget(new PreviewTabularDataBeanWidget(eventBus));
+            addWidget(new PreviewImageBeanWidget(eventBus));
+            addWidget(new PreviewPyramidBeanWidget(eventBus));
+            addWidget(new Preview3DJavaBeanWidget(eventBus));
+            addWidget(new Preview3DHTML5BeanWidget(eventBus));
+            addWidget(new Preview3DWebGLBeanWidget(eventBus));
+            //The following previews currently not supported in embedded previewer
+            if (!isEmbedded) {
+                addWidget(new PreviewMultiImageBeanWidget(eventBus));
+                addWidget(new PreviewMultiTabularDataBeanWidget(eventBus));
+            }
+        } else {
+            //register collection specific previewers here.
+            addWidget(new PreviewImageBeanWidget(eventBus));
+            addWidget(new PreviewCollectionMultiImageBeanWidget(eventBus));
+            addWidget(new PreviewGeoPointBeanWidget(eventBus));
         }
     }
 
     public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus) {
-        this(dispatchAsync, eventBus, false, 500, 500);
+        this(dispatchAsync, eventBus, false);
+    }
+
+    public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus, boolean collectionPreviewer) {
+        this(dispatchAsync, eventBus, false, 500, 500, collectionPreviewer);
     }
 
     public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus, boolean isEmbedded, int width, int height) {
+        this(dispatchAsync, eventBus, isEmbedded, width, height, false);
+    }
+
+    public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus, boolean isEmbedded, int width, int height, boolean collectionPreviewer) {
         this.dispatchAsync = dispatchAsync;
         this.isEmbedded = isEmbedded;
-        initializePreviews(eventBus);
+        this.collectionPreviewer = collectionPreviewer;
+        initializePreviews(eventBus, collectionPreviewer);
 
         previewWidget = null;
 
@@ -244,6 +266,38 @@ public class PreviewPanel extends Composite {
             anchorTabs.add(metadataTab);
         }
 
+    }
+
+    /**
+     * Shows the previews associated with the GetCollectionResult collection.
+     * 
+     * @param result
+     * @param leftColumn
+     * @param uri
+     * @throws IllegalStateExecption
+     *             if this PreviewPanel was not initialized to handle
+     *             collection previews.
+     */
+    public void drawPreview(GetCollectionResult result, FlowPanel leftColumn, String uri) {
+        if (!collectionPreviewer) {
+            throw new IllegalStateException("The PreviewPanel was initialized as a Dataset previewer," +
+                    "but was asked to draw Collection previews.");
+        }
+
+        CollectionBean collection = result.getCollection();
+
+        // Mock up a DatasetBean to pass to the drawPreview method.
+        DatasetBean fakeDataset = new DatasetBean();
+
+        fakeDataset.setCreator(collection.getCreator());
+        fakeDataset.setDate(collection.getCreationDate());
+        fakeDataset.setDescription(collection.getDescription());
+        fakeDataset.setLabel(collection.getLabel());
+        fakeDataset.setTitle(collection.getTitle());
+        fakeDataset.setUri(collection.getUri());
+
+        GetDatasetResult datasetResult = new GetDatasetResult(fakeDataset, result.getPreviews());
+        drawPreview(datasetResult, leftColumn, uri);
     }
 
     /**

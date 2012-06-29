@@ -102,6 +102,7 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
+import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
@@ -503,8 +504,13 @@ public class TupeloStore {
                 bc.setSubject(Resource.uriRef(uri));
                 getBeanSession().getContext().perform(bc);
                 if (!bc.exists()) {
-                    log.debug("BlobChecker does not exist.");
-                    return null;
+                    CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+                    try {
+                        cbu.get(uri);
+                    } catch (OperatorException e) {
+                        log.debug("BlobChecker does not exist, and there is no collection with uri = " + uri);
+                        return null;
+                    }
                 }
 
                 String stringContext = URLEncoder.encode(CETBeans.contextToNTriples(getBeanSession().getContext()), "UTF-8"); //$NON-NLS-1$
