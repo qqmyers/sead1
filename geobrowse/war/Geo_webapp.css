@@ -63,7 +63,7 @@ input {
 	overflow: hidden;
 }
 #content {
-	padding: 0 0 0 230px;
+	padding: 0 0 0 330px;
 }
 
 
@@ -71,7 +71,7 @@ input {
 -----------------------------------------------------------------------------*/
 #sideLeft {
 	float: left;
-	width: 150px;
+	width: 300px;
 	margin-left: -100%;
 	position: relative;
 }

@@ -16,13 +16,6 @@
 	type="text/css">
 
 <title>SEAD Geospatial Visualization</title>
-<script>
-function showInfo(evt) {
-	console.info("show info");
-    $('info').innerHTML = evt.text;
-}
-
-</script>
 
 <!-- OpenLayers JS -->
 <script type="text/javascript" language="javascript"
@@ -30,6 +23,8 @@ function showInfo(evt) {
 <!-- proj4js JS for projection transformation -->
 <script type="text/javascript" language="javascript"
 	src="proj4js/proj4js-compressed.js"></script>
+<!-- stamen layer -->
+<script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.1.1"></script>
 
 <script type="text/javascript" language="javascript"
 	src="geo_webapp/geo_webapp.nocache.js"></script>
@@ -75,6 +70,7 @@ function showInfo(evt) {
 
 			<aside id="sideLeft">
 				<div id="layers"></div>
+				<div id="bg"></div>
 			</aside>
 			<!-- #sideLeft -->
 		</section>
