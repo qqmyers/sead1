@@ -2,6 +2,8 @@ package edu.illinois.ncsa.medici.geowebapp.client.service;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
+
 /**
  * 
  * @author Jong Lee <jonglee1@illinois.edu>
@@ -10,6 +12,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface WmsProxyServiceAsync {
 
-	void getCapabilities(AsyncCallback<String> callback);
+	void getCapabilities(AsyncCallback<LayerInfo[]> callback);
 
 }

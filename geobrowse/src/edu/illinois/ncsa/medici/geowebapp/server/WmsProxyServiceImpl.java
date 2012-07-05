@@ -17,6 +17,7 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -25,6 +26,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import edu.illinois.ncsa.medici.geowebapp.client.Geo_webapp;
 import edu.illinois.ncsa.medici.geowebapp.client.service.WmsProxyService;
+import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
 
 /**
  * 
@@ -38,7 +40,7 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 	private HttpClient httpclient = new DefaultHttpClient();
 
 	@Override
-	public String getCapabilities() {
+	public LayerInfo[] getCapabilities() {
 		String requestUrl = Geo_webapp.URL;
 		HttpGet httpget = new HttpGet(requestUrl);
 
@@ -46,8 +48,8 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 
 		try {
 			String responseStr = httpclient.execute(httpget, responseHandler);
-			System.out.println(responseStr);
-			return getLayerNames(responseStr);
+			// System.out.println(responseStr);
+			return getLayerInfos(responseStr);
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -62,45 +64,65 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 		return null;
 	}
 
-	public String getLayerNames(String xml) throws ParserConfigurationException, SAXException, IOException {
-		List<String> nameList = new ArrayList<String>();
+	public LayerInfo[] getLayerInfos(String xml)
+			throws ParserConfigurationException, SAXException, IOException {
+		List<LayerInfo> infoList = new ArrayList<LayerInfo>();
+
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = dbf.newDocumentBuilder();
-		Document dom = docBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
-		
+		Document dom = docBuilder
+				.parse(new ByteArrayInputStream(xml.getBytes()));
+
 		Element docEle = dom.getDocumentElement();
 		NodeList layerList = docEle.getElementsByTagName("Layer");
-		for(int i=0;i < layerList.getLength(); i++) {
+		for (int i = 0; i < layerList.getLength(); i++) {
 			Node layer = layerList.item(i);
-			String layerName = getLayerName(layer);
-			if(layerName.startsWith("medici:")) {
-				nameList.add(layerName);
+			LayerInfo layerInfo = getLayerInfo(layer);
+			if (layerInfo.getName() == null)
+				continue;
+			if (layerInfo.getName().startsWith("medici:")) {
+				infoList.add(layerInfo);
 			}
 		}
-		if (!nameList.isEmpty()) {
-			String list = "";
-			for (String n : nameList) {
-				list += n + ",";
-			}
-			String namelist = list.substring(0, list.length() - 1);
-			return namelist;
-		}
-		
-		return null;
+		return infoList.toArray(new LayerInfo[infoList.size()]);
 	}
 
-	public String getLayerName(Node layer) {
-		NodeList childNodes = layer.getChildNodes(); 
+	public LayerInfo getLayerInfo(Node layer) {
+		LayerInfo layerInfo = new LayerInfo();
+		NodeList childNodes = layer.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node e = childNodes.item(i);
 			if (e.getNodeName().toUpperCase().equals("NAME")) {
 				Node text = e.getFirstChild();
 				String name = text.getNodeValue();
-				System.out.println(name);
-				return name;
+				layerInfo.setName(name);
+			}
+			if (e.getNodeName().toUpperCase().equals("BOUNDINGBOX")) {
+				NamedNodeMap attributes = e.getAttributes();
+				Node namedItem = attributes.getNamedItem("CRS");
+				String crsText = namedItem.getTextContent();
+				if (crsText.startsWith("EPSG:")) {
+					layerInfo.setCrs(crsText);
+					Node minx = attributes.getNamedItem("minx");
+					layerInfo
+							.setMinx(Double.parseDouble(minx.getTextContent()));
+
+					Node miny = attributes.getNamedItem("miny");
+					layerInfo
+							.setMiny(Double.parseDouble(miny.getTextContent()));
+
+					Node maxx = attributes.getNamedItem("maxx");
+					layerInfo
+							.setMaxx(Double.parseDouble(maxx.getTextContent()));
+
+					Node maxy = attributes.getNamedItem("maxy");
+					layerInfo
+							.setMaxy(Double.parseDouble(maxy.getTextContent()));
+				}
 			}
 		}
-		return "";
+		System.out.println("getLayerInfo: " + layerInfo);
+		return layerInfo;
 	}
-	
+
 }

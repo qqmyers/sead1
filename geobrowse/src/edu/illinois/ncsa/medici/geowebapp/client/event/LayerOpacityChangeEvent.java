@@ -8,9 +8,9 @@ public class LayerOpacityChangeEvent extends
 	public static Type<LayerOpacityChangeHandler> TYPE = new Type<LayerOpacityChangeHandler>();
 
 	private String layerName;
-	private double opacity = 1.0;
+	private float opacity = 1.0f;
 
-	public LayerOpacityChangeEvent(String layerName, double opacity) {
+	public LayerOpacityChangeEvent(String layerName, float opacity) {
 		this.layerName = layerName;
 		this.opacity = opacity;
 	}
@@ -29,7 +29,7 @@ public class LayerOpacityChangeEvent extends
 		return layerName;
 	}
 
-	public double getOpacity() {
+	public float getOpacity() {
 		return opacity;
 	}
 
