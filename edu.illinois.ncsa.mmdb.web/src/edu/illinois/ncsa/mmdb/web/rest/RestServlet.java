@@ -531,13 +531,13 @@ public class RestServlet extends AuthenticatedServlet {
                     }
                 }
                 long start = 0;
-                long end = pvb.getSize();
                 long len = pvb.getSize();
                 if (request.getHeader("Range") != null) {
                     Pattern p = Pattern.compile("bytes=(\\d+)-(\\d+)?");
                     Matcher m = p.matcher(request.getHeader("Range"));
                     if (m.find()) {
                         start = Long.parseLong(m.group(1));
+                        long end = pvb.getSize() - 1;
                         if (m.group(2) != null) {
                             end = Long.parseLong(m.group(2));
                         }
