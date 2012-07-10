@@ -534,14 +534,17 @@ public class RestServlet extends AuthenticatedServlet {
                 long end = pvb.getSize();
                 long len = pvb.getSize();
                 if (request.getHeader("Range") != null) {
-                    Pattern p = Pattern.compile("bytes=(\\d+)-(\\d+)");
+                    Pattern p = Pattern.compile("bytes=(\\d+)-(\\d+)?");
                     Matcher m = p.matcher(request.getHeader("Range"));
-                    m.find();
-                    start = Long.parseLong(m.group(1));
-                    end = Long.parseLong(m.group(2));
-                    len = (end - start) + 1;
-                    response.setStatus(206);
-                    response.setHeader("Content-Range", "bytes " + start + "-" + end + "/" + pvb.getSize());
+                    if (m.find()) {
+                        start = Long.parseLong(m.group(1));
+                        if (m.group(2) != null) {
+                            end = Long.parseLong(m.group(2));
+                        }
+                        len = (end - start) + 1;
+                        response.setStatus(206);
+                        response.setHeader("Content-Range", "bytes " + start + "-" + end + "/" + pvb.getSize());
+                    }
                 }
                 response.setHeader("Accept-Ranges", "bytes");
                 response.setContentType(pvb.getMimeType());
