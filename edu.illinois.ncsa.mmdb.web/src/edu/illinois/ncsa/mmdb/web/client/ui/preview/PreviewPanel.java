@@ -98,7 +98,7 @@ public class PreviewPanel extends Composite {
     private DatasetBean                              dataset;
 
     /** Mapping from widget to corresponding anchor */
-    private final Map<PreviewBeanWidget, Anchor>     anchors       = new HashMap<PreviewBeanWidget, Anchor>();
+    private final Map<PreviewBeanWidget, Anchor>     anchors             = new HashMap<PreviewBeanWidget, Anchor>();
 
     private final DispatchAsync                      dispatchAsync;
     private final HandlerManager                     eventBus;
@@ -125,7 +125,7 @@ public class PreviewPanel extends Composite {
 
         if (!collectionPreviewer) {
             //register dataset specific previewers here.
-        	addWidget(new PreviewMultiVideoBeanWidget(eventBus));
+            addWidget(new PreviewMultiVideoBeanWidget(eventBus));
             addWidget(new PreviewVideoBeanWidget(eventBus));
             addWidget(new PreviewAudioBeanWidget(eventBus));
             addWidget(new PreviewDocumentBeanWidget(eventBus));
@@ -135,6 +135,7 @@ public class PreviewPanel extends Composite {
             addWidget(new Preview3DJavaBeanWidget(eventBus));
             addWidget(new Preview3DHTML5BeanWidget(eventBus));
             addWidget(new Preview3DWebGLBeanWidget(eventBus));
+            addWidget(new PreviewPTMBeanWidget(eventBus));
             //The following previews currently not supported in embedded previewer
             if (!isEmbedded) {
                 addWidget(new PreviewMultiImageBeanWidget(eventBus));
