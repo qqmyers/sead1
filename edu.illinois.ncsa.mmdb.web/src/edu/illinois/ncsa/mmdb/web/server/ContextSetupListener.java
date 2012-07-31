@@ -219,6 +219,9 @@ public class ContextSetupListener implements ServletContextListener {
             log.warn("Could not read configuration values from context.", exc);
         }
 
+        // use dataset table?
+        TupeloStore.getInstance().setUseDatasetTable(Boolean.parseBoolean(props.getProperty("enable.table.dataset", "false")));
+
         // make sure context is up to latest version
         // TODO remove? always false?
         try {

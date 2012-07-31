@@ -156,6 +156,8 @@ public class TupeloStore {
 
     private Properties                                           mongoProps;
 
+    private boolean                                              useDatasetTable;
+
     /**
      * Return singleton instance.
      * 
@@ -311,6 +313,19 @@ public class TupeloStore {
             mimemap = new MimeMap(context);
         }
         return mimemap;
+    }
+
+    public boolean useDatasetTable() {
+        return useDatasetTable;
+    }
+
+    public void setUseDatasetTable(boolean useDatasetTable) {
+        this.useDatasetTable = useDatasetTable;
+        if (useDatasetTable) {
+            beanSession.setBeanPreprocessor(DatasourceBeanPreprocessor.createDatasourceBeanPreprocessor(context));
+        } else {
+            beanSession.setBeanPreprocessor(null);
+        }
     }
 
     public boolean authenticate(String username, String password) {

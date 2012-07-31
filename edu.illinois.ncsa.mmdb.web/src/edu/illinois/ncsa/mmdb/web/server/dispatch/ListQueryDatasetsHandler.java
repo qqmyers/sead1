@@ -38,6 +38,10 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
@@ -63,9 +67,11 @@ import org.tupeloproject.util.Tables;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult;
+import edu.illinois.ncsa.mmdb.web.server.DatasourceBeanPreprocessor;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
@@ -84,22 +90,87 @@ public class ListQueryDatasetsHandler implements
 
     @Override
     public ListQueryResult<DatasetBean> execute(ListQueryDatasets arg0, ExecutionContext arg1) throws ActionException {
-
+        long l = System.currentTimeMillis();
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-
+        ListQueryResult<DatasetBean> queryResult = new ListQueryResult<DatasetBean>();
         DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
 
-        String sortkey = arg0.getOrderBy();
-        boolean desc = !sortkey.endsWith("-asc");
-        int idx = sortkey.indexOf('-');
-        if (idx != -1) {
-            sortkey = sortkey.substring(0, idx);
+        if (TupeloStore.getInstance().useDatasetTable() && (arg0.getInCollection() == null) && (arg0.getWithTag() == null)) {
+            try {
+                DatasourceBeanPreprocessor proc = (DatasourceBeanPreprocessor) beanSession.getBeanPreprocessor();
+                Connection connection = proc.getDataSource().getConnection();
+                Statement statement = connection.createStatement();
+
+                String query = "SELECT * FROM `dataset` ";
+
+                if (arg0.getOrderBy().equals("date")) {
+                    query += " ORDER BY date DESC";
+                } else if (arg0.getOrderBy().equals("date-asc")) {
+                    query += " ORDER BY date ASC";
+                } else if (arg0.getOrderBy().equals("title")) {
+                    query += " ORDER BY title DESC";
+                } else if (arg0.getOrderBy().equals("title-asc")) {
+                    query += " ORDER BY title ASC";
+                } else if (arg0.getOrderBy().equals("category")) {
+                    query += " ORDER BY category DESC";
+                } else if (arg0.getOrderBy().equals("category-asc")) {
+                    query += " ORDER BY category ASC";
+                } else {
+                    query += " ORDER BY date DESC";
+                }
+
+                if (arg0.getOffset() > 0) {
+                    query += " LIMIT " + arg0.getOffset();
+                    if (arg0.getLimit() > 0) {
+                        query += ", " + arg0.getLimit();
+                    }
+                } else if (arg0.getLimit() > 0) {
+                    query += " LIMIT 0, " + arg0.getLimit();
+                }
+
+                List<DatasetBean> datasets = new ArrayList<DatasetBean>();
+                PersonBeanUtil pbu = new PersonBeanUtil(beanSession);
+
+                ResultSet resultset = statement.executeQuery(query);
+                while (resultset.next()) {
+                    DatasetBean db = new DatasetBean();
+                    db.setUri(resultset.getString("uri"));
+                    db.setTitle(resultset.getString("title"));
+                    db.setCreator(pbu.get(resultset.getString("creator")));
+                    db.setDate(resultset.getTimestamp("date"));
+                    db.setSize(resultset.getLong("size"));
+                    db.setMimeType(resultset.getString("mimetype"));
+                    datasets.add(db);
+                }
+                resultset.close();
+                queryResult.setResults(datasets);
+
+                resultset = statement.executeQuery("SELECT COUNT(*) FROM `dataset`;");
+                if (resultset.next()) {
+                    queryResult.setTotalCount(resultset.getInt(1));
+                }
+                resultset.close();
+
+                statement.close();
+                connection.close();
+                log.debug("Dataset fetch results : " + (System.currentTimeMillis() - l));
+            } catch (Exception exc) {
+                log.error("Could not get datasets from dataset table.", exc);
+                throw new ActionException("Could not get datasets from dataset table.", exc);
+            }
+        } else {
+            String sortkey = arg0.getOrderBy();
+            boolean desc = !sortkey.endsWith("-asc");
+            int idx = sortkey.indexOf('-');
+            if (idx != -1) {
+                sortkey = sortkey.substring(0, idx);
+            }
+
+            queryResult.setResults(listDatasets(sortkey, desc, arg0.getLimit(), arg0.getOffset(), arg0.getInCollection(), arg0.getWithTag(), dbu));
+            queryResult.setTotalCount(TupeloStore.getInstance().countDatasets(arg0.getInCollection(), arg0.getWithTag(), false));
+            log.debug("Tupelo fetch results : " + (System.currentTimeMillis() - l));
+            l = System.currentTimeMillis();
         }
-
-        ListQueryResult<DatasetBean> queryResult = new ListQueryResult<DatasetBean>();
-        queryResult.setResults(listDatasets(sortkey, desc, arg0.getLimit(), arg0.getOffset(), arg0.getInCollection(), arg0.getWithTag(), dbu));
-
-        queryResult.setTotalCount(TupeloStore.getInstance().countDatasets(arg0.getInCollection(), arg0.getWithTag(), false));
 
         return queryResult;
     }
