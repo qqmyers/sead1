@@ -40,16 +40,20 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
     public ServerResponse preProcess(HttpRequest request, ResourceMethod method)
             throws UnauthorizedException {
 
-        if (request.getHttpHeaders().getRequestHeader("Authorization") != null) {
+        if (request.getHttpHeaders().getCookies().containsKey("sid")) {
+            log.debug("Found cookie - Sucessfully authenticated");
+            return null;
+        } else if (request.getHttpHeaders().getRequestHeader("Authorization") != null) {
             String token = request.getHttpHeaders().getRequestHeader("Authorization").get(0);
 
             if (token != null && checkLoggedIn(token)) {
-                log.info("Sucessfully authenticated");
+                log.debug("Authorization header found - Sucessfully authenticated");
                 return null;
             } else {
                 return unauthorizedResponse(request.getPreprocessedPath());
             }
         } else {
+            log.debug("Not authenticated");
             return unauthorizedResponse(request.getPreprocessedPath());
         }
     }
