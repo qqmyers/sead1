@@ -126,6 +126,9 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
 
             previews.addAll(new PreviewPTMBeanUtil(beanSession).getAssociationsFor(action.getUri()));
 
+            // geoserver previews
+            previews.addAll(new PreviewGeoserverBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+
             // return dataset and preview
             return new GetDatasetResult(datasetBean, previews);
         } catch (Exception e) {
