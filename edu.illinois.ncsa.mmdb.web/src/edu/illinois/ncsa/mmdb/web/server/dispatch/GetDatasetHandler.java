@@ -59,6 +59,7 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewDocumentBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewGeoserverBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewMultiImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewMultiTabularDataBeanUtil;
