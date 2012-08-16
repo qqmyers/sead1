@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
+import edu.uiuc.ncsa.cet.bean.PreviewGeoserverBean;
 
 /**
  * @author Jong Lee <jonglee1@illinois.edu>
@@ -67,7 +68,7 @@ public class PreviewGeoserverBeanWidget extends PreviewBeanWidget<PreviewGeoserv
     }
 
     @Override
-    public PreviewBeanWidget<PreviewGeoservertBean> newWidget() {
+    public PreviewBeanWidget<PreviewGeoserverBean> newWidget() {
         return new PreviewGeoserverBeanWidget(eventBus);
     }
 
