@@ -38,6 +38,7 @@ import org.tupeloproject.mysql.MysqlContext;
 import org.tupeloproject.mysql.NewMysqlContext;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
+import org.tupeloproject.rdf.terms.DcTerms;
 
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -88,21 +89,25 @@ public class MediciIngester {
         for (String arg : args) {
             File file = new File(arg);
             if (file.isDirectory()) {
-                uploadCollection(file);
+                uploadCollection(file, "", null);
             } else {
                 uploadFile(file);
             }
         }
     }
 
-    private static void uploadCollection(File dir) throws OperatorException, IOException {
+    private static void uploadCollection(File dir, String prefix, Resource parent) throws OperatorException, IOException {
         CollectionBean collection = new CollectionBean();
         collection.setCreationDate(new Date(dir.lastModified()));
         collection.setCreator(creator);
         collection.setLabel(dir.getName());
         collection.setLastModifiedDate(new Date(dir.lastModified()));
-        collection.setTitle(dir.getName());
+        collection.setTitle(prefix + dir.getName());
         beansession.save(collection);
+        
+        if (parent != null) {
+            beansession.getContext().addTriple(parent, DcTerms.HAS_PART, Resource.uriRef(collection.getUri()));
+        }
 
         System.out.println(String.format("Collection : %s ", collection.getTitle()));
 
@@ -111,7 +116,9 @@ public class MediciIngester {
             if (file.getName().startsWith(".")) {
                 continue;
             }
-            if (file.isFile()) {
+            if (file.isDirectory()) {
+                uploadCollection(file, prefix +"_" + collection.getTitle(), Resource.uriRef(collection.getUri()));  
+            } else {
                 beans.add(uploadFile(file));
             }
         }
