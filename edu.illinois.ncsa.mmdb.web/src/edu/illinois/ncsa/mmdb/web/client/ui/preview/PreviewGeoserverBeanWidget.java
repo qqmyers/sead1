@@ -3,6 +3,7 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
+import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
@@ -98,7 +99,9 @@ public class PreviewGeoserverBeanWidget extends PreviewBeanWidget<PreviewGeoserv
                 geoBean.getWmsUrl(), params,
                 options);
         map.addLayer(wms);
-
+        Double[] extent = geoBean.getExtent();
+        Bounds bbox = new Bounds(extent[0], extent[1], extent[2], extent[3]);
+        map.zoomToExtent(bbox);
     }
 
     @Override
