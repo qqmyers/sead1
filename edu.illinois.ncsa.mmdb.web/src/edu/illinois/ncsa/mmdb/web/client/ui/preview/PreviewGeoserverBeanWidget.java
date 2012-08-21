@@ -7,6 +7,7 @@ import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
+import org.gwtopenmaps.openlayers.client.control.MousePosition;
 import org.gwtopenmaps.openlayers.client.layer.OSM;
 import org.gwtopenmaps.openlayers.client.layer.WMS;
 import org.gwtopenmaps.openlayers.client.layer.WMSOptions;
@@ -27,7 +28,7 @@ public class PreviewGeoserverBeanWidget extends PreviewBeanWidget<PreviewGeoserv
     private static final String   ANCHOR_TEXT = "Geolocation";
 
     private static final String   MAX_WIDTH   = "800px";
-    private static final String   MAX_HEIGHT  = "600px";
+    private static final String   MAX_HEIGHT  = "400px";
 
     private static final String   EPSG_900913 = "EPSG:900913";
 
@@ -101,6 +102,8 @@ public class PreviewGeoserverBeanWidget extends PreviewBeanWidget<PreviewGeoserv
         map.addLayer(wms);
         Double[] extent = geoBean.getExtent();
         Bounds bbox = new Bounds(extent[0], extent[1], extent[2], extent[3]);
+
+        map.addControl(new MousePosition());
         map.zoomToExtent(bbox);
     }
 
