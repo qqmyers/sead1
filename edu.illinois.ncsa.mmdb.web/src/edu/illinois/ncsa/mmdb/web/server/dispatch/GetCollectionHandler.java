@@ -66,6 +66,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoPointBean;
+import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoserverCollectionBean;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -75,6 +76,7 @@ import edu.uiuc.ncsa.cet.bean.PreviewMultiImageBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewGeoserverBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.gis.GeoPointBeanUtil;
 
@@ -168,6 +170,7 @@ public class GetCollectionHandler implements
         }
 
         PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(beanSession);
+        PreviewGeoserverBeanUtil pgbu = new PreviewGeoserverBeanUtil(beanSession);
         DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
         GeoPointBeanUtil gpbu = new GeoPointBeanUtil(beanSession);
 
@@ -177,6 +180,7 @@ public class GetCollectionHandler implements
         ArrayList<PreviewImageBean> previewImages = new ArrayList<PreviewImageBean>();
 
         PreviewGeoPointBean previewGeoPointBean = new PreviewGeoPointBean();
+        PreviewGeoserverCollectionBean previewGeoserverCollecitonBean = new PreviewGeoserverCollectionBean();
 
         for (String datasetUri : datasetUris ) {
             // Grab the small preview image uri associated with the given dataset
@@ -198,6 +202,13 @@ public class GetCollectionHandler implements
             } catch (OperatorException e) {
                 log.warn("Could not get geo points for dataset with uri = " + datasetUri, e);
             }
+
+            try {
+                previewGeoserverCollecitonBean.addAll(pgbu.getAssociationsFor(datasetUri), new ArrayList<DatasetBean>());
+            } catch (OperatorException e) {
+                log.warn("Could not get geoserver preview for dataset with uri = " + datasetUri, e);
+            }
+
         }
 
         PreviewMultiImageBean multiImagePreview = new PreviewMultiImageBean();
@@ -207,6 +218,10 @@ public class GetCollectionHandler implements
 
         if (!previewGeoPointBean.getGeoPoints().isEmpty()) {
             previews.add(previewGeoPointBean);
+        }
+
+        if (!previewGeoserverCollecitonBean.getPreviewGeoservers().isEmpty()) {
+            previews.add(previewGeoserverCollecitonBean);
         }
 
         return previews;
