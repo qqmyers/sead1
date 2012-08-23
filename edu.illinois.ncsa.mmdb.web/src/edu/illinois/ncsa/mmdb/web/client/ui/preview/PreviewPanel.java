@@ -147,6 +147,7 @@ public class PreviewPanel extends Composite {
             addWidget(new PreviewImageBeanWidget(eventBus));
             addWidget(new PreviewCollectionMultiImageBeanWidget(eventBus));
             addWidget(new PreviewGeoPointBeanWidget(eventBus));
+            addWidget(new PreviewGeoserverCollectionBeanWidget(eventBus));
         }
     }
 
