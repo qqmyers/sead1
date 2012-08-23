@@ -7,6 +7,7 @@ import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
+import org.gwtopenmaps.openlayers.client.control.LayerSwitcher;
 import org.gwtopenmaps.openlayers.client.control.MousePosition;
 import org.gwtopenmaps.openlayers.client.layer.OSM;
 import org.gwtopenmaps.openlayers.client.layer.WMS;
@@ -25,7 +26,7 @@ import edu.uiuc.ncsa.cet.bean.PreviewGeoserverBean;
  * 
  */
 public class PreviewGeoserverCollectionBeanWidget extends PreviewBeanWidget<PreviewGeoserverCollectionBean> {
-    private static final String   ANCHOR_TEXT = "Geolocation";
+    private static final String   ANCHOR_TEXT = "Geospatial Data";
 
     private static final String   MAX_WIDTH   = "800px";
     private static final String   MAX_HEIGHT  = "400px";
@@ -113,6 +114,7 @@ public class PreviewGeoserverCollectionBeanWidget extends PreviewBeanWidget<Prev
         }
 
         map.addControl(new MousePosition());
+        map.addControl(new LayerSwitcher());
         map.zoomToExtent(bbox);
     }
 

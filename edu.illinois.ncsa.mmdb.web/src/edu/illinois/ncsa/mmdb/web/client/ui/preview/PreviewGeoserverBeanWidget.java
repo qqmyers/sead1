@@ -15,7 +15,8 @@ import org.gwtopenmaps.openlayers.client.layer.WMSParams;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.PreviewGeoserverBean;
@@ -25,22 +26,24 @@ import edu.uiuc.ncsa.cet.bean.PreviewGeoserverBean;
  * 
  */
 public class PreviewGeoserverBeanWidget extends PreviewBeanWidget<PreviewGeoserverBean> {
-    private static final String   ANCHOR_TEXT = "Geolocation";
+    private static final String ANCHOR_TEXT = "Geospatial Data";
 
-    private static final String   MAX_WIDTH   = "800px";
-    private static final String   MAX_HEIGHT  = "400px";
+    private static final String MAX_WIDTH   = "800px";
+    private static final String MAX_HEIGHT  = "400px";
 
-    private static final String   EPSG_900913 = "EPSG:900913";
+    private static final String EPSG_900913 = "EPSG:900913";
 
-    private final HorizontalPanel container   = new HorizontalPanel();
+    private final VerticalPanel container   = new VerticalPanel();
 
-    private boolean               initialized;
+    private boolean             initialized;
 
-    private MapWidget             mapWidget;
+    private MapWidget           mapWidget;
 
-    private Map                   map;
+    private Label               errorMsg;
 
-    private OSM                   baseLayer;
+    private Map                 map;
+
+    private OSM                 baseLayer;
 
     public PreviewGeoserverBeanWidget(HandlerManager eventBus) {
         super(eventBus);
@@ -53,18 +56,21 @@ public class PreviewGeoserverBeanWidget extends PreviewBeanWidget<PreviewGeoserv
     }
 
     private void initialize() {
+        PreviewGeoserverBean geoBean = getPreviewBean();
+
         MapOptions defaultMapOptions = new MapOptions();
-        defaultMapOptions.setProjection(EPSG_900913);
+        if (!geoBean.getProjection().equals("-1")) {
+            defaultMapOptions.setProjection(EPSG_900913);
+        }
         // defaultMapOptions.setAllOverlays(true);
 
         mapWidget = new MapWidget(MAX_WIDTH, MAX_HEIGHT, defaultMapOptions);
 
         map = mapWidget.getMap();
+        errorMsg = new Label();
 
-        baseLayer = new OSM();
-        // map.setBaseLayer(osm);
-        map.addLayer(baseLayer);
         container.add(mapWidget);
+        container.add(errorMsg);
 
         initialized = true;
     }
@@ -86,11 +92,22 @@ public class PreviewGeoserverBeanWidget extends PreviewBeanWidget<PreviewGeoserv
         }
         PreviewGeoserverBean geoBean = getPreviewBean();
 
+        String projection = geoBean.getProjection();
+        if (!projection.equals("-1")) {
+            baseLayer = new OSM();
+            map.addLayer(baseLayer);
+        } else {
+            errorMsg.setText("Projection is unknown");
+        }
+
         map.removeOverlayLayers();
 
         // add wms layer from geoserver
         WMSOptions options = new WMSOptions();
-        options.setProjection(EPSG_900913);
+
+        if (!projection.equals("-1")) {
+            options.setProjection(EPSG_900913);
+        }
         options.setLayerOpacity(0.8);
 
         WMSParams params = new WMSParams();
@@ -100,11 +117,15 @@ public class PreviewGeoserverBeanWidget extends PreviewBeanWidget<PreviewGeoserv
                 geoBean.getWmsUrl(), params,
                 options);
         map.addLayer(wms);
-        Double[] extent = geoBean.getExtent();
-        Bounds bbox = new Bounds(extent[0], extent[1], extent[2], extent[3]);
-
         map.addControl(new MousePosition());
-        map.zoomToExtent(bbox);
+
+        if (!projection.equals("-1")) {
+            Double[] extent = geoBean.getExtent();
+            Bounds bbox = new Bounds(extent[0], extent[1], extent[2], extent[3]);
+
+            map.zoomToExtent(bbox);
+        }
+
     }
 
     @Override
