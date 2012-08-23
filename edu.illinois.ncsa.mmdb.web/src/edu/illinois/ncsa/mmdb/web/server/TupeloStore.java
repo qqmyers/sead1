@@ -38,13 +38,18 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.Collection;
@@ -65,6 +70,7 @@ import net.customware.gwt.dispatch.shared.Result;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.BlobChecker;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
@@ -96,8 +102,8 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
+import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.PreviewBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
@@ -116,9 +122,6 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 public class TupeloStore {
     /** Commons logging **/
     private static Log                                           log                   = LogFactory.getLog(TupeloStore.class);
-
-    /** URL of extraction service */
-    private String                                               extractionServiceURL  = "http://localhost:9856/";
 
     /** Singleton instance **/
     private static TupeloStore                                   instance;
@@ -144,15 +147,16 @@ public class TupeloStore {
     /** FileNameMap to map from extension to MIME type. */
     private MimeMap                                              mimemap;
 
-    /** Use a single previewbeanutil for optimizations */
-    private PreviewBeanUtil                                      extractorpbu;
-
     /**
      * configuration values, either stored in context or from server.properties.
      */
     private final Map<Resource, String>                          configuration         = new HashMap<Resource, String>();
 
     private Context                                              ontologyContext;
+
+    private Properties                                           mongoProps;
+
+    private boolean                                              useDatasetTable;
 
     /**
      * Return singleton instance.
@@ -257,9 +261,6 @@ public class TupeloStore {
                     setExpirationTime(bean);
                 }
             });
-            if (extractorpbu == null) {
-                extractorpbu = new PreviewBeanUtil(beanSession);
-            }
         } catch (Exception e) {
             log.error("Could not create bean sessions.", e);
         }
@@ -312,6 +313,19 @@ public class TupeloStore {
             mimemap = new MimeMap(context);
         }
         return mimemap;
+    }
+
+    public boolean useDatasetTable() {
+        return useDatasetTable;
+    }
+
+    public void setUseDatasetTable(boolean useDatasetTable) {
+        this.useDatasetTable = useDatasetTable;
+        if (useDatasetTable) {
+            beanSession.setBeanPreprocessor(DatasourceBeanPreprocessor.createDatasourceBeanPreprocessor(context));
+        } else {
+            beanSession.setBeanPreprocessor(null);
+        }
     }
 
     public boolean authenticate(String username, String password) {
@@ -393,6 +407,7 @@ public class TupeloStore {
     static final String REST_INFIXES[]       = new String[] {
                                              RestServlet.ANY_IMAGE_INFIX,
                                              RestServlet.IMAGE_INFIX,
+                                             RestServlet.VIDEO_INFIX,
                                              RestServlet.PREVIEW_ANY,
                                              RestServlet.PREVIEW_SMALL,
                                              RestServlet.PREVIEW_LARGE,
@@ -456,23 +471,15 @@ public class TupeloStore {
         return canon;
     }
 
-    /**
-     * Sets the URL to use for the extraction service.
-     * 
-     * @param extractionServiceURL
-     *            the URL to use for the extraction service.
-     */
-    public void setExtractionServiceURL(String extractionServiceURL) {
-        this.extractionServiceURL = extractionServiceURL;
-    }
+    public void setMongoDBProperties(String host, String db, String username, String password) {
+        if (mongoProps == null) {
+            mongoProps = new Properties();
+        }
 
-    /**
-     * Returns the URL of the extraction service.
-     * 
-     * @return the URL of the extraction service.
-     */
-    public String getExtractionServiceURL() {
-        return extractionServiceURL;
+        mongoProps.put("mongo.host", host);
+        mongoProps.put("mongo.database", db);
+        mongoProps.put("mongo.username", username);
+        mongoProps.put("mongo.password", password);
     }
 
     /**
@@ -484,10 +491,6 @@ public class TupeloStore {
      */
     public String extractPreviews(String uri) {
         return extractPreviews(uri, false);
-    }
-
-    public void setExtractorContext(Context extractorContext) throws OperatorException, ClassNotFoundException {
-        extractorpbu = new PreviewBeanUtil(CETBeans.createBeanSession(extractorContext));
     }
 
     /**
@@ -503,14 +506,85 @@ public class TupeloStore {
     public String extractPreviews(String uri, boolean rerun) {
         Long lastRequest = lastExtractionRequest.get(uri);
         String result = null;
+        String server = getConfiguration(ConfigurationKey.ExtractorUrl);
         // give it a minute
         if (rerun || lastRequest == null || lastRequest < System.currentTimeMillis() - 120000) {
             log.debug("EXTRACT PREVIEWS " + uri);
             lastExtractionRequest.put(uri, System.currentTimeMillis());
             try {
-                result = extractorpbu.callExtractor(extractionServiceURL, uri, null, rerun);
+                StringBuilder sb = new StringBuilder();
+
+                // is there a blob to extract
+                BlobChecker bc = new BlobChecker();
+                bc.setSubject(Resource.uriRef(uri));
+                getBeanSession().getContext().perform(bc);
+                if (!bc.exists()) {
+                    CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+                    try {
+                        cbu.get(uri);
+                    } catch (OperatorException e) {
+                        log.debug("BlobChecker does not exist, and there is no collection with uri = " + uri);
+                        return null;
+                    }
+                }
+
+                String stringContext = URLEncoder.encode(CETBeans.contextToNTriples(getBeanSession().getContext()), "UTF-8"); //$NON-NLS-1$
+
+                // create the body of the message
+                sb.append("context="); //$NON-NLS-1$
+                sb.append(stringContext);
+                sb.append("&dataset="); //$NON-NLS-1$
+                sb.append(URLEncoder.encode(uri, "UTF-8")); //$NON-NLS-1$
+
+                if (mongoProps != null) {
+                    sb.append("&mongo=");
+                    StringWriter writer = new StringWriter();
+                    mongoProps.store(writer, "MongoDB Properties");
+                    sb.append(URLEncoder.encode(writer.toString(), "UTF-8"));
+                    writer.close();
+                }
+
+                if (rerun) {
+                    sb.append("&removeOld=true"); //$NON-NLS-1$
+                }
+
+                // launch the job
+                if (!server.endsWith("/")) { //$NON-NLS-1$
+                    server += "/"; //$NON-NLS-1$
+                }
+
+                server += "extractor/extract"; //$NON-NLS-1$
+
+                URL url = new URL(server);
+                URLConnection conn = url.openConnection();
+                conn.setReadTimeout(1000);
+                if (conn.getReadTimeout() != 1000) {
+                    log.info("Could not set read timeout! (set to " + conn.getReadTimeout() + ").");
+                }
+
+                // send post
+                conn.setDoOutput(true);
+                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                wr.write(sb.toString());
+                wr.flush();
+                wr.close();
+
+                // Get the response
+                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line;
+                sb = new StringBuilder();
+                while ((line = rd.readLine()) != null) {
+                    log.debug(line);
+                    sb.append(line);
+                    sb.append("\n"); //$NON-NLS-1$
+                }
+                rd.close();
+
+                // done
+                return sb.toString();
+                //result = extractorpbu.callExtractor(extractionServiceURL, uri, null, rerun);
             } catch (Exception e) {
-                log.error(String.format("Extraction service %s unavailable", extractionServiceURL), e);
+                log.error(String.format("Extraction service %s unavailable", server), e);
             }
             log.debug("EXTRACT PREVIEWS " + uri + " DONE");
         }
@@ -678,7 +752,7 @@ public class TupeloStore {
     }
 
     public void removeCachedPreview(final String uri, final String size) {
-        if (previewCache.get(size) != null) {
+        if ((previewCache != null) && (previewCache.get(size) != null)) {
             if (previewCache.get(size).get(uri) != null) {
                 log.info("Removing PreviewBean from cache");
                 previewCache.get(size).remove(uri);

@@ -59,9 +59,14 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewDocumentBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewGeoserverBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewMultiImageBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewMultiTabularDataBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewMultiVideoBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewPTMBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewPyramidBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewTabularDataBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewThreeDimensionalBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewVideoBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.preview.PreviewAudioBeanUtil;
@@ -99,6 +104,9 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
             // video previews
             previews.addAll(new PreviewVideoBeanUtil(beanSession).getAssociationsFor(action.getUri()));
 
+            // multi video previews
+            previews.addAll(new PreviewMultiVideoBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+
             // pyramid previews
             previews.addAll(new PreviewPyramidBeanUtil(beanSession).getAssociationsFor(action.getUri()));
 
@@ -108,8 +116,19 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
             // document previews
             previews.addAll(new PreviewDocumentBeanUtil(beanSession).getAssociationsFor(action.getUri()));
 
-            // document previews
+            // multi spreadsheet previews
+            previews.addAll(new PreviewMultiTabularDataBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+
+            // spreadsheet previews
+            previews.addAll(new PreviewTabularDataBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+
+            // audio previews
             previews.addAll(new PreviewAudioBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+
+            previews.addAll(new PreviewPTMBeanUtil(beanSession).getAssociationsFor(action.getUri()));
+
+            // geoserver previews
+            previews.addAll(new PreviewGeoserverBeanUtil(beanSession).getAssociationsFor(action.getUri()));
 
             // return dataset and preview
             return new GetDatasetResult(datasetBean, previews);

@@ -57,7 +57,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.FSDirectory;
-import org.tupeloproject.client.HttpTupeloClient;
 import org.tupeloproject.kernel.ContentStoreContext;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
@@ -65,6 +64,9 @@ import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.impl.HashFileContext;
 import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.mysql.MysqlContext;
+import org.tupeloproject.mysql.NewMysqlContext;
+import org.tupeloproject.postgresql.NewPostgresqlContext;
+import org.tupeloproject.postgresql.PostgresqlContext;
 import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
@@ -138,7 +140,7 @@ public class ContextSetupListener implements ServletContextListener {
         }
 
         // create the context
-        Context md = null;
+        Context context = null;
         if ("mysql".equals(props.getProperty("context.type"))) {
             MysqlContext mc = new MysqlContext();
             mc.setUser(props.getProperty("mysql.user"));
@@ -147,27 +149,68 @@ public class ContextSetupListener implements ServletContextListener {
             mc.setHost(props.getProperty("mysql.host"));
             try {
                 mc.connect();
-                md = mc;
+                context = mc;
             } catch (SQLException e) {
                 log.error("Could not connect to database.", e);
             }
-        }
-        if (md == null) {
-            log.error("Could not connect to persistent storage, creating memory database.");
-            md = new MemoryContext();
+        } else if ("newmysql".equals(props.getProperty("context.type"))) {
+            NewMysqlContext mc = new NewMysqlContext();
+            mc.setUsername(props.getProperty("mysql.user"));
+            mc.setPassword(props.getProperty("mysql.password"));
+            mc.setDatabase(props.getProperty("mysql.schema"));
+            mc.setHostname(props.getProperty("mysql.host"));
+            if (mc.open()) {
+                context = mc;
+            } else {
+                log.error("Could not connect to database.");
+            }
+        } else if ("psql".equals(props.getProperty("context.type"))) {
+            PostgresqlContext mc = new PostgresqlContext();
+            mc.setUser(props.getProperty("psql.user"));
+            mc.setPassword(props.getProperty("psql.password"));
+            mc.setSchema(props.getProperty("psql.schema"));
+            mc.setHost(props.getProperty("psql.host"));
+            try {
+                mc.connect();
+                context = mc;
+            } catch (SQLException e) {
+                log.error("Could not connect to database.", e);
+            }
+        } else if ("newpsql".equals(props.getProperty("context.type"))) {
+            NewPostgresqlContext mc = new NewPostgresqlContext();
+            mc.setUsername(props.getProperty("psql.user"));
+            mc.setPassword(props.getProperty("psql.password"));
+            mc.setDatabase(props.getProperty("psql.schema"));
+            mc.setHostname(props.getProperty("psql.host"));
+            if (mc.open()) {
+                context = mc;
+            } else {
+                log.error("Could not connect to database.");
+            }
         }
 
-        if (props.containsKey("hfc.path") && new File(props.getProperty("hfc.path")).isDirectory()) {
-            HashFileContext hfc = new HashFileContext();
-            hfc.setDepth(3);
-            hfc.setDirectory(new File(props.getProperty("hfc.path")));
-            ContentStoreContext csc = new ContentStoreContext();
-            csc.setMetadataContext(md);
-            csc.setDataContext(hfc);
-            TupeloStore.createInstance(csc);
-        } else {
-            TupeloStore.createInstance(md);
+        if (context == null) {
+            log.error("Could not connect to persistent storage, creating memory database.");
+            context = new MemoryContext();
         }
+
+        if (props.containsKey("hfc.path")) {
+            File hfcpath = new File(props.getProperty("hfc.path"));
+            if (!hfcpath.exists()) {
+                hfcpath.mkdirs();
+            }
+            if (hfcpath.isDirectory()) {
+                HashFileContext hfc = new HashFileContext();
+                hfc.setDepth(3);
+                hfc.setDirectory(hfcpath);
+                ContentStoreContext csc = new ContentStoreContext();
+                csc.setMetadataContext(context);
+                csc.setDataContext(hfc);
+                context = csc;
+            }
+        }
+
+        TupeloStore.createInstance(context);
 
         // initialize default configurations
         try {
@@ -175,6 +218,9 @@ public class ContextSetupListener implements ServletContextListener {
         } catch (OperatorException exc) {
             log.warn("Could not read configuration values from context.", exc);
         }
+
+        // use dataset table?
+        TupeloStore.getInstance().setUseDatasetTable(Boolean.parseBoolean(props.getProperty("enable.table.dataset", "false")));
 
         // make sure context is up to latest version
         // TODO remove? always false?
@@ -191,25 +237,13 @@ public class ContextSetupListener implements ServletContextListener {
             log.warn("Could not initialize mimemap.", e);
         }
 
-        // set extractor URL
-        if (props.containsKey("extractor.url")) { //$NON-NLS-1$
-            TupeloStore.getInstance().setExtractionServiceURL(props.getProperty("extractor.url")); //$NON-NLS-1$
-        }
-
-        // set extractor context
-        if (props.containsKey("extractor.contextUrl")) {
-            String contextUrl = props.getProperty("extractor.contextUrl");
-            String contextUser = props.getProperty("extractor.contextUser", "admin");
-            String contextPassword = props.getProperty("extractor.contextPassword", "admin");
-            HttpTupeloClient cc = new HttpTupeloClient();
-            cc.setTupeloUrl(contextUrl);
-            cc.setUsername(contextUser);
-            cc.setPassword(contextPassword);
-            try {
-                TupeloStore.getInstance().setExtractorContext(cc);
-            } catch (Exception e) {
-                log.error("Could not set context for extraction service.", e);
-            }
+        // set mongo properties
+        if (props.containsKey("mongo.host")) {
+            String host = props.getProperty("mongo.host");
+            String db = props.getProperty("mongo.database");
+            String username = props.getProperty("mongo.username");
+            String password = props.getProperty("mongo.password");
+            TupeloStore.getInstance().setMongoDBProperties(host, db, username, password);
         }
 
         // set up full-text search

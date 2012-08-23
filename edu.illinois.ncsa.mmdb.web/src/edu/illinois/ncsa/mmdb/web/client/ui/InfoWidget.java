@@ -47,7 +47,10 @@ import java.util.SortedSet;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
@@ -57,15 +60,22 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetInfo;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetInfo.Type;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * Create the panel containing the information about the dataset.
@@ -74,20 +84,26 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  */
 public class InfoWidget extends Composite {
 
-    private final FlowPanel     panel;
-    private final DispatchAsync _service;
-    private final String        _uri;
-
-    String                      creatorName;
-    Anchor                      creatorLink;
-    String                      httpString = "http://";
-    Label                       creatorNameLabel;
-    Label                       remainderLabel;
+    private final FlowPanel      panel;
+    private final DispatchAsync  service;
+    private final String         uri;
+    private final PermissionUtil rbac;
+    String                       creatorName;
+    Anchor                       creatorLink;
+    String                       httpString = "http://";
+    Label                        creatorNameLabel;
+    Label                        remainderLabel;
 
     /*public InfoWidget(DataSetBean data, DispatchAsync service) {*/
-    public InfoWidget(DatasetBean data, DispatchAsync service) {
-        _uri = data.getUri();
-        this._service = service;
+
+    private EditableLabel        fileNameLabel;
+    private EditableLabel        mimeTypeLabel;
+    private Label                categoryLabel;
+
+    public InfoWidget(DatasetBean data, final DispatchAsync service) {
+        this.service = service;
+        this.uri = data.getUri();
+        rbac = new PermissionUtil(service);
 
         panel = new FlowPanel();
         panel.addStyleName("datasetRightColSection");
@@ -127,36 +143,51 @@ public class InfoWidget extends Composite {
         panel.add(creatorPanel);
 
         String filename = data.getFilename();
-        addInfo("Filename", filename, panel);
+        addInfo("Filename", filename, panel, true, Type.FILENAME);
 
         String size = TextFormatter.humanBytes(data.getSize());
-        addInfo("Size", size, panel);
+        addInfo("Size", size, panel, false, Type.NONE);
 
         String cat = ContentCategory.getCategory(data.getMimeType(), service);
-        addInfo("Category", cat, panel);
+        addInfo("Category", cat, panel, false, Type.CATEGORY);
 
         String type = data.getMimeType();
-        addInfo("MIME Type", type, panel);
+        addInfo("MIME\u00a0Type", type, panel, true, Type.MIMETYPE);
 
         String date = "";
         if (data.getDate() != null) {
             date += DateTimeFormat.getShortDateTimeFormat().format(data.getDate());
         }
-        addInfo("Uploaded", date, panel);
+        addInfo("Uploaded", date, panel, false, Type.NONE);
+
+        // check permission to enable Filename's and MIME type's editor.
+        rbac.withPermissions(uri, new PermissionsCallback() {
+            @Override
+            public void onPermissions(final HasPermissionResult p) {
+                if (p.isPermitted(Permission.EDIT_METADATA)) {
+                    if (fileNameLabel != null) {
+                        fileNameLabel.setEditable(true);
+                    }
+                    if (mimeTypeLabel != null) {
+                        mimeTypeLabel.setEditable(true);
+                    }
+                }
+            }
+        }, Permission.EDIT_METADATA);
 
         initWidget(panel);
 
         //START - Added by Ram on Nov.21, 2011
         //FIXME : Need to refresh automatically on adding creator metadata
-        if (_uri != null) {
-            _service.execute(new ListUserMetadataFields(), new AsyncCallback<ListUserMetadataFieldsResult>() {
+        if (uri != null) {
+            service.execute(new ListUserMetadataFields(), new AsyncCallback<ListUserMetadataFieldsResult>() {
                 public void onFailure(Throwable caught) {
                     GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
                 }
 
                 public void onSuccess(ListUserMetadataFieldsResult result) {
 
-                    _service.execute(new GetUserMetadataFields(_uri), new AsyncCallback<GetUserMetadataFieldsResult>() {
+                    service.execute(new GetUserMetadataFields(uri), new AsyncCallback<GetUserMetadataFieldsResult>() {
                         public void onFailure(Throwable caught) {
                             GWT.log("Error retrieving User Specified Information", caught);
                         }
@@ -225,17 +256,78 @@ public class InfoWidget extends Composite {
 
     }
 
-    void addInfo(String name, String value, Panel panel) {
+    void addInfo(String name, String value, Panel panel, boolean editable, final Type t) {
         if (value != null && !value.equals("")) {
-            Label lbl = new Label(name + ": " + value);
-            lbl.setTitle(lbl.getText());
-            lbl.addStyleName("datasetRightColText");
-            panel.add(lbl);
+            // if editable, use label for name and editable label for label
+            if (editable) {
+                HorizontalPanel hPanel = new HorizontalPanel();
+                hPanel.addStyleName("datasetRightColText");
+                // \u00a0 = non-breaking space 
+                Label lbl = new Label(name + ":\u00a0");
+                lbl.setTitle(lbl.getText());
+                lbl.addStyleName("datasetRightColText");
+                hPanel.add(lbl);
+                final EditableLabel editlbl = new EditableLabel(value);
+                // save editable label for filename and MIME type
+                if (t == Type.FILENAME) {
+                    fileNameLabel = editlbl;
+                }
+                if (t == Type.MIMETYPE) {
+                    mimeTypeLabel = editlbl;
+                }
+                editlbl.setEditable(false);
+                editlbl.getLabel().addStyleName("datasetRightColText_Value");
+                editlbl.setEditableStyleName("datasetRightColText_Value");
+                editlbl.addValueChangeHandler(new ValueChangeHandler<String>() {
+                    public void onValueChange(final ValueChangeEvent<String> event) {
+                        SetInfo change = new SetInfo(uri, event.getValue(), t);
+                        if (t == Type.FILENAME || isValidMIMEType(event.getValue())) {
+                            service.execute(change, new AsyncCallback<EmptyResult>() {
+                                public void onFailure(Throwable caught) {
+                                    editlbl.cancel();
+                                }
+
+                                public void onSuccess(EmptyResult result) {
+                                    editlbl.setText(event.getValue());
+                                    // immediately change Category if MIME type is changed
+                                    if (t == Type.MIMETYPE && categoryLabel != null) {
+                                        String cat = ContentCategory.getCategory(event.getValue(), service);
+                                        categoryLabel.setText("Category:\u00a0" + cat);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+                hPanel.add(editlbl);
+                panel.add(hPanel);
+            }
+            // otherwise, use label for the whole line
+            else {
+                Label lbl = new Label(name + ":\u00a0" + value);
+                if (t == Type.CATEGORY) {
+                    categoryLabel = lbl;
+                }
+                lbl.setTitle(lbl.getText());
+                lbl.addStyleName("datasetRightColText");
+                panel.add(lbl);
+            }
         }
     }
 
     public void add(Label lbl) {
         panel.add(lbl);
 
+    }
+
+    private boolean isValidMIMEType(String MIME) {
+        // valid MIME type is X/Y 
+        // where X = word that contains only a-z or A-Z
+        // and Y = word that contains a-z, A-Z, 0-9, _, -, or .
+        RegExp pattern = RegExp.compile("^([a-zA-Z]+)\\/([\\w|\\-|\\.]+)$");
+        if (pattern.test(MIME)) {
+            return true;
+        }
+        return false;
     }
 }

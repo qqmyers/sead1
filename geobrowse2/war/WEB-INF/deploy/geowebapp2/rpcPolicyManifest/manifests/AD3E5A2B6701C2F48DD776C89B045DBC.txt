@@ -1,0 +1,2 @@
+serviceClass: edu.illinois.ncsa.medici.geowebapp2.client.service.WmsProxyService
+path: 129A32C35A28081CF3D723DB218EF4F2.gwt.rpc

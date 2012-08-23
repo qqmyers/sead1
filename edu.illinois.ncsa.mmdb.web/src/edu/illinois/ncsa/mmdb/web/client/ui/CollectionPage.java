@@ -48,6 +48,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.maps.client.Maps;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -55,17 +56,24 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTableView;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
+import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoPointBean;
+import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
+import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
@@ -86,9 +94,12 @@ public class CollectionPage extends Composite {
     private Label                        descriptionLabel;
     private Label                        dateLabel;
     private FlowPanel                    infoPanel;
+    private FlowPanel                    previewFlowPanel;
     private Label                        numDatasetsLabel;
     private Label                        authorLabel;
     private final PagingDatasetTableView datasetTableView;
+
+    private PreviewPanel                 previewPanel;
 
     public CollectionPage(String uri, DispatchAsync dispatchasync,
             HandlerManager eventBus) {
@@ -103,6 +114,8 @@ public class CollectionPage extends Composite {
         mainContent.add(createPageTitle());
 
         mainContent.add(createInfoPanel());
+
+        mainContent.add(createPreviewPanel());
 
         datasetTableView = new PagingDatasetTableView(uri, dispatchasync);
         datasetTableView.addStyleName("datasetTable");
@@ -180,10 +193,19 @@ public class CollectionPage extends Composite {
         return pageTitle;
     }
 
+    private Widget createPreviewPanel() {
+        previewPanel = new PreviewPanel(dispatchasync, eventBus, true);
+        previewFlowPanel = new FlowPanel();
+
+        return previewFlowPanel;
+    }
+
     /**
      * Request collection from the server.
      */
     private void retrieveCollection() {
+        GWT.log("The collection uri is " + uri);
+
         dispatchasync.execute(new GetCollection(uri), new AsyncCallback<GetCollectionResult>() {
 
             @Override
@@ -192,8 +214,16 @@ public class CollectionPage extends Composite {
             }
 
             @Override
-            public void onSuccess(GetCollectionResult arg0) {
-                showCollection(arg0.getCollection(), arg0.getCollectionSize());
+            public void onSuccess(GetCollectionResult result) {
+                showCollection(result.getCollection(), result.getCollectionSize());
+                for (PreviewBean bean : result.getPreviews() ) {
+                    if (bean instanceof PreviewGeoPointBean) {
+                        initializePreviewPanel(result);
+                        return;
+                    }
+                }
+
+                previewPanel.drawPreview(result, previewFlowPanel, result.getCollection().getUri());
             }
         });
     }
@@ -241,7 +271,38 @@ public class CollectionPage extends Composite {
             dateLabel.setText(formatter.format(collection.getCreationDate()));
         }
         numDatasetsLabel.setText(collectionSize + " dataset(s)");
-
     }
 
+    private void initializePreviewPanel(final GetCollectionResult result) {
+        rbac.doIfAllowed(Permission.VIEW_LOCATION, new PermissionCallback() {
+
+            @Override
+            public void onAllowed() {
+                dispatchasync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.GoogleMapKey), new AsyncCallback<ConfigurationResult>() {
+
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        loadMapsApi("", result);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult configResult) {
+                        loadMapsApi(configResult.getConfiguration(ConfigurationKey.GoogleMapKey), result);
+                    }
+                });
+            }
+
+        });
+    }
+
+    private void loadMapsApi(String key, final GetCollectionResult result) {
+        Maps.loadMapsApi(key, "2", false, new Runnable() {
+
+            @Override
+            public void run() {
+                previewPanel.drawPreview(result, previewFlowPanel, result.getCollection().getUri());
+            }
+
+        });
+    }
 }

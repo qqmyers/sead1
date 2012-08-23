@@ -187,11 +187,7 @@ public class AuthenticatedServlet extends HttpServlet {
             }
         }
         // now are we authenticated?
-        if (validUser == null) {
-            // no. reject
-            log.info("Client provided no credentials, returning 403 Unauthorized");
-            return unauthorized(request, response);
-        } else {
+        if (validUser != null) {
             // yes. record the user id in the http session
             HttpSession session = request.getSession(true);
             if (session.getAttribute(AUTHENTICATED_AS) == null) {
@@ -199,7 +195,23 @@ public class AuthenticatedServlet extends HttpServlet {
                 session.setAttribute(AUTHENTICATED_AS, validUser);
             }
             return authorized(request);
+        } else if (request.getRequestURI().contains("api/video")) {
+            if (request.getHeader("User-Agent").startsWith("AppleCoreMedia") || request.getHeader("User-Agent").startsWith("QuickTime")) {
+                // special case for quicktime player.
+                validUser = PersonBeanUtil.getAnonymousURI().toString();
+                HttpSession session = request.getSession(true);
+                if (session.getAttribute(AUTHENTICATED_AS) == null) {
+                    log.info("Special Apple case, validated as anonymous in HTTP session " + session.getId());
+                    session.setAttribute(AUTHENTICATED_AS, validUser);
+                }
+                return authorized(request);
+            } else {
+                log.info("Video request from non authenticated user with User-Agent=" + request.getHeader("User-Agent"));
+            }
         }
+        // no. reject
+        log.info("Client provided no credentials, returning 403 Unauthorized");
+        return unauthorized(request, response);
     }
 
     static boolean unauthorized(HttpServletRequest request, HttpServletResponse response) {

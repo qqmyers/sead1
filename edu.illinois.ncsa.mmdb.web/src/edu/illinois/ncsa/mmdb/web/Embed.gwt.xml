@@ -57,7 +57,7 @@
   
   <!-- Inherit the default GWT style sheet.                       -->
   <inherits name='com.google.gwt.user.theme.standard.Standard'/>
-
+	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
   <stylesheet src="../embed.css" />
   
   <!-- Specify the app entry point class.                         -->

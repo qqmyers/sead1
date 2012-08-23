@@ -152,7 +152,9 @@ public class DatasetWidget extends Composite {
     @Override
     protected void onUnload() {
         super.onUnload();
-        previewPanel.unload();
+        if (previewPanel != null) {
+            previewPanel.unload();
+        }
     }
 
     /**
@@ -390,25 +392,25 @@ public class DatasetWidget extends Composite {
 
         dialog.addConfirmHandler(new ConfirmHandler() {
             public void onConfirm(ConfirmEvent event) {
-                service.execute(new ExtractionService(uri), new AsyncCallback<ExtractionServiceResult>() {
+                service.execute(new ExtractionService(uri, true), new AsyncCallback<ExtractionServiceResult>() {
                     public void onFailure(Throwable caught)
-                        {
-                            GWT.log("Error submitting extraction job", caught);
-                        }
+                    {
+                        GWT.log("Error submitting extraction job", caught);
+                    }
 
                     public void onSuccess(ExtractionServiceResult result)
-                        {
-                            GWT.log("Success submitting extraction job " + result.getJobid(), null);
-                            ConfirmDialog dialog = new ConfirmDialog("Refresh Page", "Extraction resubmitted, should page be refreshed now, or later? (it can take a few minutes before results show up)");
-                            dialog.getOkText().setText("Now");
-                            dialog.getCancelText().setText("Later");
-                            dialog.addConfirmHandler(new ConfirmHandler() {
-                                public void onConfirm(ConfirmEvent event) {
-                                    showDataset(uri, null);
-                                }
-                            });
-                            dialog.show();
-                        }
+                    {
+                        GWT.log("Success submitting extraction job " + result.getJobid(), null);
+                        ConfirmDialog dialog = new ConfirmDialog("Refresh Page", "Extraction resubmitted, should page be refreshed now, or later? (it can take a few minutes before results show up)");
+                        dialog.getOkText().setText("Now");
+                        dialog.getCancelText().setText("Later");
+                        dialog.addConfirmHandler(new ConfirmHandler() {
+                            public void onConfirm(ConfirmEvent event) {
+                                showDataset(uri, null);
+                            }
+                        });
+                        dialog.show();
+                    }
                 });
             }
         });

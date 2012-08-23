@@ -1,0 +1,81 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>edu.illinois.ncsa.medici</groupId>
+	<artifactId>medici-ingest</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>Medici Ingester</name>
+
+	<repositories>
+		<repository>
+			<id>NCSA OpenSource</id>
+			<url>https://opensource.ncsa.illinois.edu/nexus/content/repositories/snapshots/</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>edu.illinois.ncsa.medici.ingest.MediciIngester</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-my-jar-with-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.tupeloproject</groupId>
+			<artifactId>tupelo-kernel</artifactId>
+			<version>2.7.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.tupeloproject</groupId>
+			<artifactId>tupelo-mysql</artifactId>
+			<version>2.7.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>edu.illinois.ncsa.cet</groupId>
+			<artifactId>cet-bean</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>edu.illinois.ncsa.cet</groupId>
+			<artifactId>cet-bean-tupelo</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.drewnoakes</groupId>
+			<artifactId>metadata-extractor</artifactId>
+			<version>2.4.0-beta-1</version>
+		</dependency>
+	</dependencies>
+</project>

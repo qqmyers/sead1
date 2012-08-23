@@ -42,10 +42,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -53,6 +56,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.MessagingException;
 import javax.servlet.ServletException;
@@ -91,9 +96,11 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
+import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewVideoBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
@@ -114,6 +121,8 @@ public class RestServlet extends AuthenticatedServlet {
     public static final String COLLECTION_INFIX             = "/collection/";
 
     public static final String ANY_COLLECTION_INFIX         = "/collection";
+
+    public static final String VIDEO_INFIX                  = "/video/";
 
     public static final String IMAGE_DOWNLOAD_INFIX         = "/image/download/";
 
@@ -191,7 +200,12 @@ public class RestServlet extends AuthenticatedServlet {
     String decanonicalizeUrl(HttpServletRequest request) throws ServletException {
         String canonical = request.getRequestURL().toString();
         String decanonicalized = getUriCanonicalizer(request).decanonicalize(canonical);
-        if (!decanonicalized.isEmpty() && !decanonicalized.matches("^[a-z]+:.*")) { // if it's empty, it means there is no URI suffix (e.g., search)
+        try {
+            decanonicalized = URLDecoder.decode(decanonicalized, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.warn("Could not urldecode uri", e);
+        }
+        if (!canonical.contains(VIDEO_INFIX) && !decanonicalized.isEmpty() && !decanonicalized.matches("^[a-z]+:.*")) { // if it's empty, it means there is no URI suffix (e.g., search)
             log.warn("canonical url " + canonical + " decanonicalized (incorrectly?) as " + decanonicalized);
         }
         return decanonicalized;
@@ -498,6 +512,65 @@ public class RestServlet extends AuthenticatedServlet {
             String badge = TupeloStore.getInstance().getBadge(uri);
             String previewUri = TupeloStore.getInstance().getPreviewUri(badge, GetPreviews.SMALL); // should accept and propogate null
             returnImage(request, response, previewUri, SMALL_404, shouldCache404(badge)); // should accept and propagate null
+        } else if (hasPrefix(VIDEO_INFIX, request)) {
+            int idx = uri.lastIndexOf(".");
+            String ext = null;
+            if (idx > 0) {
+                ext = uri.substring(idx + 1);
+                uri = uri.substring(0, idx);
+            }
+            uri = "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri;
+            try {
+                PreviewVideoBean pvb = new PreviewVideoBeanUtil(TupeloStore.getInstance().getBeanSession()).get(uri);
+
+                if (request.getHeader("If-Modified-Since") != null) {
+                    Date d = new Date(request.getHeader("If-Modified-Since"));
+                    if ((pvb.getDate().getTime() - d.getTime()) < 1000) {
+                        response.setStatus(304);
+                        return;
+                    }
+                }
+                long start = 0;
+                long len = pvb.getSize();
+                if (request.getHeader("Range") != null) {
+                    Pattern p = Pattern.compile("bytes=(\\d+)-(\\d+)?");
+                    Matcher m = p.matcher(request.getHeader("Range"));
+                    if (m.find()) {
+                        start = Long.parseLong(m.group(1));
+                        long end = pvb.getSize() - 1;
+                        if (m.group(2) != null) {
+                            end = Long.parseLong(m.group(2));
+                        }
+                        len = (end - start) + 1;
+                        response.setStatus(206);
+                        response.setHeader("Content-Range", "bytes " + start + "-" + end + "/" + pvb.getSize());
+                    }
+                }
+                response.setHeader("Accept-Ranges", "bytes");
+                response.setContentType(pvb.getMimeType());
+                response.setContentLength((int) len);
+                response.setDateHeader("Last-Modified", pvb.getDate().getTime());
+                response.setHeader("Expires", null);
+                response.flushBuffer();
+                InputStream is = restService.retrieveImage(uri);
+                if (start > 0) {
+                    is.skip(start);
+                }
+                OutputStream os = response.getOutputStream();
+                try {
+                    byte[] buf = new byte[10240];
+                    int x = 0;
+                    while ((len > 0) && (x = is.read(buf, 0, (int) Math.min(buf.length, len))) > 0) {
+                        len -= x;
+                        os.write(buf, 0, x);
+                    }
+                } finally {
+                    is.close();
+                    os.close();
+                }
+            } catch (Exception e) {
+                throw new ServletException("failed to retrieve " + request.getRequestURI(), e);
+            }
         } else if (hasPrefix(IMAGE_INFIX, request)) {
             log.trace("GET IMAGE " + uri);
             try {
@@ -509,9 +582,9 @@ public class RestServlet extends AuthenticatedServlet {
                 response.flushBuffer();
                 CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
             } catch (RestServiceException e) {
-                throw new ServletException("failed to retrieve " + request.getRequestURI());
+                throw new ServletException("failed to retrieve " + request.getRequestURI(), e);
             } catch (OperatorException e) {
-                throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
+                throw new ServletException("failed to retrieve metadata for " + request.getRequestURI(), e);
             }
         } else if (hasPrefix(COLLECTION_INFIX, request) && isAllowed(request, uri, Permission.VIEW_MEMBER_PAGES)) {
             log.trace("LIST COLLECTION" + uri);

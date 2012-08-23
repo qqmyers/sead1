@@ -9,13 +9,19 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -23,6 +29,8 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ContextConvert;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionServiceResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
@@ -37,6 +45,8 @@ public class ConfigurationWidget extends Composite {
     private TextBox                   key;
     private final HasPermissionResult permissions;
     private final VerticalPanel       mainPanel;
+    private boolean                   deleteOld;
+    private SimplePanel               feedbackPanel;
 
     public ConfigurationWidget(final DispatchAsync dispatchAsync, HasPermissionResult permissions) {
         this.dispatchAsync = dispatchAsync;
@@ -72,6 +82,8 @@ public class ConfigurationWidget extends Composite {
         // vivo configuration.
         mainPanel.add(createVIVOConfigurationSection(configuration));
 
+        // extractor configuration
+        mainPanel.add(createExtractorSection(configuration));
     }
 
     private DisclosurePanel createMailSection(ConfigurationResult configuration) {
@@ -188,11 +200,15 @@ public class ConfigurationWidget extends Composite {
         vp.setWidth("100%");
         dp.add(vp);
 
-        /*HorizontalPanel hp = new HorizontalPanel();
-        vp.add(hp);
+        HorizontalPanel hp = new HorizontalPanel();
+        /*vp.add(hp);
 
         hp.add(new Label("Google Map Key"));*/
         FlexTable table = new FlexTable();
+
+        hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        hp.add(new Label("Google Map Key"));
+
         key = new TextBox();
         key.addStyleName("multiAnchor");
         key.setText(configuration.getConfiguration(ConfigurationKey.GoogleMapKey));
@@ -203,7 +219,7 @@ public class ConfigurationWidget extends Composite {
         /*hp.add(key);*/
 
         // buttons
-        HorizontalPanel hp = new HorizontalPanel();
+        //HorizontalPanel hp = new HorizontalPanel();
         vp.add(hp);
 
         Button button = new Button("Submit", new ClickHandler() {
@@ -373,4 +389,134 @@ public class ConfigurationWidget extends Composite {
         return dp;
 
     }
+
+    private DisclosurePanel createExtractorSection(ConfigurationResult configuration) {
+        DisclosurePanel dp = new DisclosurePanel("Extraction Service");
+        dp.addStyleName("datasetDisclosurePanel");
+        dp.setOpen(false);
+
+        VerticalPanel vp = new VerticalPanel();
+        vp.setWidth("100%");
+        dp.add(vp);
+
+        HorizontalPanel hp = new HorizontalPanel();
+        vp.add(hp);
+
+        hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        hp.add(new Label("URL"));
+        key = new TextBox();
+        key.addStyleName("multiAnchor");
+        key.setText(configuration.getConfiguration(ConfigurationKey.ExtractorUrl));
+        key.setVisibleLength(80);
+        hp.add(key);
+        deleteOld = false;
+        feedbackPanel = new SimplePanel();
+        hp.add(feedbackPanel);
+
+        // buttons
+        hp = new HorizontalPanel();
+        vp.add(hp);
+
+        // submit new url button
+        Button button = new Button("Submit", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                query.setConfiguration(ConfigurationKey.ExtractorUrl,
+                        key.getText());
+                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        // if the input url is not saved in the configuration key by the execution, then it is invalid
+                        String input = key.getText();
+                        if (!input.endsWith("/")) {
+                            input += "/";
+                        }
+                        if (result.getConfiguration(ConfigurationKey.ExtractorUrl).equalsIgnoreCase(input)) {
+                            feedbackPanel.clear();
+                            key.setText(result.getConfiguration(ConfigurationKey.ExtractorUrl));
+                        }
+                        else {
+                            GWT.log("Invalid Extraction Server URL", null);
+                            // display feedback message
+                            Label message = new Label(
+                                    "Invalid Extraction Server URL");
+                            message.addStyleName("loginError");
+                            feedbackPanel.clear();
+                            feedbackPanel.add(message);
+                        }
+                    }
+                });
+            }
+        });
+        hp.add(button);
+
+        // reset URL button
+        button = new Button("Reset", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ExtractorUrl), new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        // clear feedback message and pull the current extractor's URL from the server
+                        feedbackPanel.clear();
+                        key.setText(result.getConfiguration(ConfigurationKey.ExtractorUrl));
+                    }
+                });
+            }
+        });
+        button.addStyleName("multiAnchor");
+        hp.add(button);
+
+        // rerun panel
+        hp = new HorizontalPanel();
+        vp.add(hp);
+
+        hp.add(new Label("Rerun Extraction on All Data: "));
+
+        final CheckBox deleteOldBox = new CheckBox();
+        deleteOldBox.setValue(false);
+        deleteOldBox.setText(" Delete Old");
+        hp.add(deleteOldBox);
+
+        deleteOldBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(final ValueChangeEvent<Boolean> event) {
+                deleteOld = deleteOldBox.getValue();
+            }
+        });
+
+        // rerun button
+        hp = new HorizontalPanel();
+        vp.add(hp);
+        button = new Button("OK", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                dispatchAsync.execute(new ExtractionService(null, deleteOld), new AsyncCallback<ExtractionServiceResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error submitting extraction jobs.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ExtractionServiceResult result) {
+                        GWT.log("Success submitting extraction jobs ");
+                    }
+                });
+            }
+        });
+        hp.add(button);
+        return dp;
+    }
+
 }

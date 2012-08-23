@@ -73,6 +73,7 @@ public class RemoveFromCollectionHandler implements ActionHandler<RemoveFromColl
         try {
             CollectionBean collectionBean = cbu.get(action.getCollectionUri(), true);
             cbu.removeFromCollection(collectionBean, resources);
+            TupeloStore.getInstance().extractPreviews(action.getCollectionUri(), true); //rerun the extraction(s).
             for (Resource r : resources ) {
                 TupeloStore.getInstance().changed(r.getString());
             }
