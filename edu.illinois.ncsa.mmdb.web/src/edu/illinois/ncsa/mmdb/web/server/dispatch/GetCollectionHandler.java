@@ -210,11 +210,12 @@ public class GetCollectionHandler implements
             }
 
         }
+        if (!previewImages.isEmpty()) {
+            PreviewMultiImageBean multiImagePreview = new PreviewMultiImageBean();
+            multiImagePreview.setImages(previewImages);
 
-        PreviewMultiImageBean multiImagePreview = new PreviewMultiImageBean();
-        multiImagePreview.setImages(previewImages);
-
-        previews.add(multiImagePreview);
+            previews.add(multiImagePreview);
+        }
 
         if (!previewGeoPointBean.getGeoPoints().isEmpty()) {
             previews.add(previewGeoPointBean);
