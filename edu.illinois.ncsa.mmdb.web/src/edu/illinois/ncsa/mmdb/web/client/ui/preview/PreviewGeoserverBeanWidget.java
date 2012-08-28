@@ -28,7 +28,7 @@ import edu.uiuc.ncsa.cet.bean.PreviewGeoserverBean;
 public class PreviewGeoserverBeanWidget extends PreviewBeanWidget<PreviewGeoserverBean> {
     private static final String ANCHOR_TEXT = "Geospatial Data";
 
-    private static final String MAX_WIDTH   = "800px";
+    private static final String MAX_WIDTH   = "650px";
     private static final String MAX_HEIGHT  = "400px";
 
     private static final String EPSG_900913 = "EPSG:900913";
