@@ -129,7 +129,7 @@ public class MediciIngester {
                 continue;
             }
             if (file.isDirectory()) {
-                numberOfFiles += uploadCollection(file, path, Resource.uriRef(collection.getUri()));
+                uploadCollection(file, path, Resource.uriRef(collection.getUri()));
             } else {
                 numberOfFiles += 1;
                 // fileStats[1] += file.length();
