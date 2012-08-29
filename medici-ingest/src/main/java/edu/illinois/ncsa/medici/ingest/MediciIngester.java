@@ -38,6 +38,7 @@ import org.tupeloproject.mysql.MysqlContext;
 import org.tupeloproject.mysql.NewMysqlContext;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
@@ -58,9 +59,12 @@ public class MediciIngester {
     private static String      server;
 
     public static void main(String[] args) throws Exception {
+        
+        InputStream in = MediciIngester.class.getClassLoader().getResourceAsStream("server.properties");
+        
         // load properties
         final Properties props = new Properties();
-        props.load(new FileInputStream("server.properties"));
+        props.load(in);
 
         // create beansession
         beansession = createBeanSession(props);
@@ -96,33 +100,46 @@ public class MediciIngester {
         }
     }
 
-    private static void uploadCollection(File dir, String prefix, Resource parent) throws OperatorException, IOException {
+    private static int uploadCollection(File dir, String prefix, Resource parent) throws OperatorException, IOException {
         CollectionBean collection = new CollectionBean();
         collection.setCreationDate(new Date(dir.lastModified()));
         collection.setCreator(creator);
-        collection.setLabel(dir.getName());
+        //collection.setLabel(dir.getName());
         collection.setLastModifiedDate(new Date(dir.lastModified()));
-        collection.setTitle(prefix + dir.getName());
+        
+        collection.setTitle(prefix  +"/" +dir.getName());
         beansession.save(collection);
         
         if (parent != null) {
             beansession.getContext().addTriple(parent, DcTerms.HAS_PART, Resource.uriRef(collection.getUri()));
         }
+        
+        beansession.getContext().addTriple(Resource.uriRef(collection.getUri()), Dc.IDENTIFIER, collection.getTitle());
 
         System.out.println(String.format("Collection : %s ", collection.getTitle()));
 
         Collection<DatasetBean> beans = new HashSet<DatasetBean>();
+        
+        int numberOfFiles = 0;
+        
         for (File file : dir.listFiles()) {
             if (file.getName().startsWith(".")) {
                 continue;
             }
             if (file.isDirectory()) {
-                uploadCollection(file, prefix +"_" + collection.getTitle(), Resource.uriRef(collection.getUri()));  
+                numberOfFiles += uploadCollection(file, collection.getTitle(), Resource.uriRef(collection.getUri()));  
             } else {
+                numberOfFiles += 1;
+                //fileStats[1] += file.length();
                 beans.add(uploadFile(file));
             }
         }
+        collection.setMemberCount(numberOfFiles);
         new CollectionBeanUtil(beansession).addBeansToCollection(collection, beans);
+        
+        log.info("Collection:"+ dir.getName()+" ---- Number of files:"+numberOfFiles);
+        
+        return numberOfFiles;
     }
 
     private static DatasetBean uploadFile(File file) throws OperatorException, IOException {
@@ -141,7 +158,9 @@ public class MediciIngester {
             public int read(byte[] b) throws IOException {
                 int count = super.read(b);
                 total += count;
-                int perc = (int) (total * 100 / dataset.getSize());
+                int perc = 0;
+                if (dataset.getSize()!=0)
+                   perc = (int) (total * 100 / dataset.getSize());
                 System.out.print(String.format("Dataset    : %s [%d, %s] %d%%\r", dataset.getTitle(), dataset.getSize(), dataset.getMimeType(), perc));
                 return count;
             };
@@ -162,7 +181,6 @@ public class MediciIngester {
             e.printStackTrace();
             server = null;
         }
-
         return dataset;
     }
 
