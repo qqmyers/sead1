@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<link href="css/bootstrap.css" rel="stylesheet">
+<script src="http://code.jquery.com/jquery-1.8.1.min.js"
+	type="text/javascript"></script>
+<script type="text/javascript">
+	$(function() {
+		var url = window.location.href;
+		var tagID = url.substring(url.indexOf("?") + 3, url.indexOf("&"));
+		var title = url.substring(url.indexOf("&") + 3);
+
+		//alert(query);
+		$.ajax({
+			type : "GET",
+			url : "Contents",
+			dataType : "xml",
+			data : "tagID=" + tagID + "&title=" + title,
+			success : xmlParser
+		});
+		$("#pageheader").text(title);
+        document.title = title;
+
+	});
+
+	function xmlParser(xml) {
+
+		var div_html = '';
+		$(xml)
+				.find("result")
+				.each(
+						function() {
+							var urlToLoad = "";
+							uri = $(this).find("uri").text();
+							literal = $(this).find("literal").text();
+							if (uri.indexOf("Dataset") != -1) {
+								urlToLoad = "http://sead.ncsa.illinois.edu/nced/#dataset?id="
+										+ uri;
+								div_html += "<div class='well'>"
+										+ "<a href='" + urlToLoad
+									+ "' target='_blank'>"
+										+ literal + "</a><br /></div>";
+							} else {
+								urlToLoad = "contents.html?i=" + uri + "&t="
+										+ literal;
+								div_html += "<div class='well'>"
+										+ "<a href='" + urlToLoad
+									+ "'>"
+										+ literal + "</a><br /></div>";
+							}
+						});
+		$("#xmlBody").html(div_html);
+
+	}
+</script>
+
+<body>
+	<div class="page-header">
+		<h1 id="pageheader"></h1>
+	</div>
+	<div style="width: 500px; margin-top: 50px; margin-left: 100px"
+		id="xmlBody"></div>
+</body>
+</html>
