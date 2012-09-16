@@ -50,6 +50,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Beans;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
@@ -103,6 +104,8 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
                 if (Cet.DATASET.equals(row.get(1))) {
                     datasetCount++;
                     datasetSize += size;
+                } else if (Beans.STORAGE_TYPE_BEAN_ENTRY.equals(row.get(1))) {
+                    // don't count double
                 } else {
                     derivedSize += size;
                 }

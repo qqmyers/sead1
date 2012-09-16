@@ -38,6 +38,7 @@ import org.tupeloproject.mysql.MysqlContext;
 import org.tupeloproject.mysql.NewMysqlContext;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
@@ -49,7 +50,12 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 public class MediciIngester {
-    private static Log         log = LogFactory.getLog(MediciIngester.class);
+    private static Log         log            = LogFactory.getLog(MediciIngester.class);
+
+    private static boolean     CALL_EXTRACTOR = false;
+    private static boolean     USE_DATABASE   = false;
+
+    private static Resource    DCTERMS_ID     = Resource.uriRef("http://purl.org/dc/terms/identifier");
 
     private static BeanSession beansession;
     private static MimeMap     mimemap;
@@ -70,7 +76,9 @@ public class MediciIngester {
         mimemap = new MimeMap(beansession.getContext());
 
         // add special hook
-        DatasourceBeanPreprocessor.setDatasourceBeanPreprocessor(beansession);
+        if (USE_DATABASE) {
+            DatasourceBeanPreprocessor.setDatasourceBeanPreprocessor(beansession);
+        }
 
         // creator
         creator(props);
@@ -79,7 +87,7 @@ public class MediciIngester {
         // extractor
         server = props.getProperty("extractor.url");
         // launch the job
-        if (!server.endsWith("/")) { //$NON-NLS-1$
+        if ((server != null) && !server.endsWith("/")) { //$NON-NLS-1$
             server += "/"; //$NON-NLS-1$
         }
         server += "extractor/extract"; //$NON-NLS-1$
@@ -91,20 +99,21 @@ public class MediciIngester {
             if (file.isDirectory()) {
                 uploadCollection(file, "", null);
             } else {
-                uploadFile(file);
+                uploadFile(file, "");
             }
         }
     }
 
-    private static void uploadCollection(File dir, String prefix, Resource parent) throws OperatorException, IOException {
+    private static int uploadCollection(File dir, String path, Resource parent) throws OperatorException, IOException {
+        path += "/" + dir.getName();
+
         CollectionBean collection = new CollectionBean();
         collection.setCreationDate(new Date(dir.lastModified()));
         collection.setCreator(creator);
-        collection.setLabel(dir.getName());
         collection.setLastModifiedDate(new Date(dir.lastModified()));
-        collection.setTitle(prefix + dir.getName());
+        collection.setTitle(path);
         beansession.save(collection);
-        
+
         if (parent != null) {
             beansession.getContext().addTriple(parent, DcTerms.HAS_PART, Resource.uriRef(collection.getUri()));
         }
@@ -112,23 +121,35 @@ public class MediciIngester {
         System.out.println(String.format("Collection : %s ", collection.getTitle()));
 
         Collection<DatasetBean> beans = new HashSet<DatasetBean>();
+
+        int numberOfFiles = 0;
+
         for (File file : dir.listFiles()) {
             if (file.getName().startsWith(".")) {
                 continue;
             }
             if (file.isDirectory()) {
-                uploadCollection(file, prefix +"_" + collection.getTitle(), Resource.uriRef(collection.getUri()));  
+                uploadCollection(file, path, Resource.uriRef(collection.getUri()));
             } else {
-                beans.add(uploadFile(file));
+                numberOfFiles += 1;
+                // fileStats[1] += file.length();
+                beans.add(uploadFile(file, path));
             }
         }
+        collection.setMemberCount(numberOfFiles);
+
         new CollectionBeanUtil(beansession).addBeansToCollection(collection, beans);
+        beansession.getContext().addTriple(Resource.uriRef(collection.getUri()), DCTERMS_ID, path);
+
+        log.info("Collection: " + path + " ---- Number of files:" + numberOfFiles);
+
+        return numberOfFiles;
     }
 
-    private static DatasetBean uploadFile(File file) throws OperatorException, IOException {
+    private static DatasetBean uploadFile(File file, String path) throws OperatorException, IOException {
         final DatasetBean dataset = new DatasetBean();
         dataset.setCreator(creator);
-        dataset.setDate(new Date());
+        dataset.setDate(new Date(file.lastModified()));
         dataset.setFilename(file.getName());
         dataset.setLabel(file.getName());
         dataset.setMimeType(mimemap.getContentTypeFor(file.getName()));
@@ -141,7 +162,9 @@ public class MediciIngester {
             public int read(byte[] b) throws IOException {
                 int count = super.read(b);
                 total += count;
-                int perc = (int) (total * 100 / dataset.getSize());
+                int perc = 0;
+                if (dataset.getSize() != 0)
+                    perc = (int) (total * 100 / dataset.getSize());
                 System.out.print(String.format("Dataset    : %s [%d, %s] %d%%\r", dataset.getTitle(), dataset.getSize(), dataset.getMimeType(), perc));
                 return count;
             };
@@ -154,15 +177,17 @@ public class MediciIngester {
         is.close();
 
         beansession.save(dataset);
-        System.out.println(String.format("Dataset    : %s [%d, %s] 100%%", dataset.getTitle(), dataset.getSize(), dataset.getMimeType()));
-        
-        try {
-            callExtractor(dataset);
-        } catch (Exception e) {
-            e.printStackTrace();
-            server = null;
-        }
+        beansession.getContext().addTriple(Resource.uriRef(dataset.getUri()), DCTERMS_ID, path);
+        System.out.println(String.format("Dataset    : %s [%d, %s] %d%%", dataset.getTitle(), dataset.getSize(), dataset.getMimeType(), 100));
 
+        if (CALL_EXTRACTOR) {
+            try {
+                callExtractor(dataset);
+            } catch (Exception e) {
+                e.printStackTrace();
+                CALL_EXTRACTOR = false;
+            }
+        }
         return dataset;
     }
 
@@ -196,9 +221,9 @@ public class MediciIngester {
         if (server == null) {
             return;
         }
-        
+
         StringBuilder sb = new StringBuilder();
-        
+
         // create the body of the message
         sb.append("context="); //$NON-NLS-1$
         sb.append(stringContext);

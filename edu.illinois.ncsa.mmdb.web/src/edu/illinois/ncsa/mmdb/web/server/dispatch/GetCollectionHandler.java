@@ -44,6 +44,7 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
@@ -65,16 +66,21 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoCollectionBean;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoPointBean;
+import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoserverCollectionBean;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
+import edu.uiuc.ncsa.cet.bean.PreviewGeoserverBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.PreviewMultiImageBean;
+import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PreviewGeoserverBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.gis.GeoPointBeanUtil;
 
@@ -168,6 +174,7 @@ public class GetCollectionHandler implements
         }
 
         PreviewImageBeanUtil pibu = new PreviewImageBeanUtil(beanSession);
+        PreviewGeoserverBeanUtil pgbu = new PreviewGeoserverBeanUtil(beanSession);
         DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
         GeoPointBeanUtil gpbu = new GeoPointBeanUtil(beanSession);
 
@@ -177,39 +184,78 @@ public class GetCollectionHandler implements
         ArrayList<PreviewImageBean> previewImages = new ArrayList<PreviewImageBean>();
 
         PreviewGeoPointBean previewGeoPointBean = new PreviewGeoPointBean();
+        PreviewGeoserverCollectionBean previewGeoserverCollecitonBean = new PreviewGeoserverCollectionBean();
+
+        PreviewGeoCollectionBean previewGeoCollecitonBean = new PreviewGeoCollectionBean();
 
         for (String datasetUri : datasetUris ) {
-            // Grab the small preview image uri associated with the given dataset
-            String smallImageUri = TupeloStore.getInstance().getPreviewUri(datasetUri, GetPreviews.SMALL);
-
-            if (smallImageUri != null) {
-                try {
-                    // Grab the image bean.
-                    PreviewImageBean preview = pibu.get(smallImageUri, true);
-                    preview.setLabel(datasetUri);
-                    previewImages.add(preview);
-                } catch (OperatorException e) {
-                    log.error("Could not get small preview for dataset with uri = " + datasetUri, e);
-                }
-            }
-
+            log.info("processing datasetUri = " + datasetUri);
             try {
-                previewGeoPointBean.addAll(gpbu.getAssociationsFor(datasetUri), new ArrayList<DatasetBean>());
-            } catch (OperatorException e) {
-                log.warn("Could not get geo points for dataset with uri = " + datasetUri, e);
+                DatasetBean dataset = dbu.get(datasetUri);
+                // Grab the small preview image uri associated with the given dataset
+                String smallImageUri = TupeloStore.getInstance().getPreviewUri(datasetUri, GetPreviews.SMALL);
+
+                if (smallImageUri != null) {
+                    try {
+                        // Grab the image bean.
+                        PreviewImageBean preview = pibu.get(smallImageUri, true);
+                        preview.setLabel(datasetUri);
+                        previewImages.add(preview);
+                    } catch (OperatorException e) {
+                        log.error("Could not get small preview for dataset with uri = " + datasetUri, e);
+                    }
+                }
+
+                try {
+                    Collection<GeoPointBean> associations = gpbu.getAssociationsFor(datasetUri);
+                    Iterator<GeoPointBean> iter = associations.iterator();
+                    while (iter.hasNext()) {
+                        GeoPointBean next = iter.next();
+                        previewGeoPointBean.add(next, dataset);
+                    }
+                } catch (OperatorException e) {
+                    log.warn("Could not get geo points for dataset with uri = " + datasetUri, e);
+                }
+
+                try {
+                    Collection<PreviewGeoserverBean> associations = pgbu.getAssociationsFor(datasetUri);
+                    Iterator<PreviewGeoserverBean> iter = associations.iterator();
+                    while (iter.hasNext()) {
+                        PreviewGeoserverBean next = iter.next();
+                        previewGeoserverCollecitonBean.add(next, dataset);
+                    }
+                } catch (OperatorException e) {
+                    log.warn("Could not get geoserver preview for dataset with uri = " + datasetUri, e);
+                }
+
+            } catch (Exception e1) {
+                log.error("Could not get DatasetBean with uri = " + datasetUri, e1);
             }
         }
+        if (!previewImages.isEmpty()) {
+            PreviewMultiImageBean multiImagePreview = new PreviewMultiImageBean();
+            multiImagePreview.setImages(previewImages);
 
-        PreviewMultiImageBean multiImagePreview = new PreviewMultiImageBean();
-        multiImagePreview.setImages(previewImages);
+            previews.add(multiImagePreview);
+        }
 
-        previews.add(multiImagePreview);
-
+        boolean addPreviewGeo = false;
         if (!previewGeoPointBean.getGeoPoints().isEmpty()) {
-            previews.add(previewGeoPointBean);
+            previewGeoCollecitonBean.setPreviewGeoPointBean(previewGeoPointBean);
+            addPreviewGeo = true;
+        }
+
+        if (!previewGeoserverCollecitonBean.getPreviewGeoservers().isEmpty()) {
+            previewGeoCollecitonBean.setPreviewGeoserverCollectionBean(previewGeoserverCollecitonBean);
+            addPreviewGeo = true;
+        }
+
+        if (addPreviewGeo) {
+            previews.add(previewGeoCollecitonBean);
         }
 
         return previews;
+
     }
 
     @Override
