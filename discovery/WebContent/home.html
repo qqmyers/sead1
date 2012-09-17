@@ -7,8 +7,17 @@
 <link href="css/bootstrap.css" rel="stylesheet">
 <script src="http://code.jquery.com/jquery-1.8.1.min.js"
 	type="text/javascript"></script>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="scripts/jquery-cookie.js"></script>
 <script type="text/javascript">
 	$(function() {
+		/* var userName = document.cookie.substring(0, document.cookie
+				.indexOf("="));
+		var password = document.cookie
+				.substring(document.cookie.indexOf("=") + 1);
+		$.cookie(userName, null);
+		$.cookie(userName, password); */
+
 		$.ajax({
 			type : "GET",
 			url : "Home",

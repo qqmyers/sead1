@@ -30,11 +30,8 @@ public class Contents extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		String redirectionFile = "";
 		try {
-			String userName = "govinr2@rpi.edu";
-			String password = "C0pper";
 			String tagID = request.getParameter("tagID");
-			String responseXML = NCEDProxy.getInstance().getContents(userName,
-					password, tagID);
+			String responseXML = NCEDProxy.getInstance().getContents(tagID);
 
 			PrintWriter pw = response.getWriter();
 			response.setContentType("text/xml");
@@ -52,8 +49,7 @@ public class Contents extends HttpServlet {
 
 		if (redirectionFile != "") {
 			response.sendRedirect(response
-					.encodeRedirectURL("http://localhost:8080/nced_medici/"
-							+ redirectionFile));
+					.encodeRedirectURL(redirectionFile));
 		}
 	}
 

@@ -44,6 +44,12 @@ public class Login extends HttpServlet {
 			NCEDProxy.getInstance().Authenticate(userName, password);			
 			redirectionFile = "home.html";
 			
+			/*Cookie cookie = new Cookie(userName, password);
+			response.addCookie(cookie);*/
+			
+			NCEDProxy.getInstance().setUserName(userName);
+			NCEDProxy.getInstance().setPassword(password);
+			
 		} catch (HTTPException e) {
 			if (e.getStatusCode() == HttpServletResponse.SC_UNAUTHORIZED) {
 				redirectionFile = "autherror.html";

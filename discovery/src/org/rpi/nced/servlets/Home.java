@@ -27,14 +27,12 @@ public class Home extends HttpServlet {
 	 * , javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 		String redirectionFile = "";
 		try {
-			String userName = "govinr2@rpi.edu";
-			String password = "C0pper";
-			String responseXML = NCEDProxy.getInstance().getAllCollections(
-					userName, password);
+			
+			String responseXML = NCEDProxy.getInstance().getAllCollections();
 			PrintWriter pw = response.getWriter();
 			response.setContentType("text/xml");
 			pw.write(responseXML);
