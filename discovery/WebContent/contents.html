@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
+<title>Contents</title>
 </head>
 <link href="css/bootstrap.css" rel="stylesheet">
 <script src="http://code.jquery.com/jquery-1.8.1.min.js"
@@ -22,21 +22,54 @@
 			success : xmlParser
 		});
 		$("#pageheader").text(title);
-        document.title = title;
+		document.title = "Contents: "+title;
 
 	});
 
 	function xmlParser(xml) {
 
 		var div_html = '';
+		var title = '';
+		var length = '';
+		var uri = '';
 		$(xml)
 				.find("result")
 				.each(
 						function() {
 							var urlToLoad = "";
-							uri = $(this).find("uri").text();
-							literal = $(this).find("literal").text();
+							if ($(this).find("binding").each(function() {
+								if ($(this).attr("name") == "tagID") {
+									uri = $(this).find("uri").text();
+									//alert(uri);
+								} else if ($(this).attr("name") == "title") {
+									title = $(this).find("literal").text();
+									//alert(title);
+								} else if ($(this).attr("name") == "length") {
+									length = $(this).find("literal").text();
+									//alert(length);
+								}
+							}))
+								;
 							if (uri.indexOf("Dataset") != -1) {
+								urlToLoad = "http://sead.ncsa.illinois.edu/nced/#dataset?id="
+										+ uri;
+								div_html += "<tr><td>"
+										+ "<a href='" + urlToLoad
+						+ "' target='_blank'>"
+										+ title + "</a></td><td>Dataset</td><td>" + length
+										+ " bytes</td></tr>";
+							} else {
+								urlToLoad = "contents.html?i=" + uri + "&t="
+										+ title;
+								div_html += "<tr><td>"
+										+ "<a href='" + urlToLoad
+						+ "'>"
+										+ title + "</a></td><td>Collection</td><td>N/A</td></tr>";
+							}
+							/* uri = $(this).find("uri").text();
+							literal = $(this).find("literal").text(); */
+							//length = $(this).find("")
+							/* if (uri.indexOf("Dataset") != -1) {
 								urlToLoad = "http://sead.ncsa.illinois.edu/nced/#dataset?id="
 										+ uri;
 								div_html += "<div class='well'>"
@@ -50,8 +83,9 @@
 										+ "<a href='" + urlToLoad
 									+ "'>"
 										+ literal + "</a><br /></div>";
-							}
+							} */
 						});
+		div_html = "<table class='table table-striped'><tbody><tr><th>File Name</th><th>Type</th><th>Size</th></tr>" + div_html + "</tbody></table>";
 		$("#xmlBody").html(div_html);
 
 	}

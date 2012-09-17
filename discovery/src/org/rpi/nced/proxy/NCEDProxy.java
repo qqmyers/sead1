@@ -20,9 +20,9 @@ public class NCEDProxy {
 	}
 
 	public String getContents(String tagID) throws Exception {
-		String query = "SELECT ?tagID ?title WHERE { <"
+		String query = "SELECT ?tagID ?title ?length WHERE { <"
 				+ tagID
-				+ "> <http://purl.org/dc/terms/hasPart> ?tagID .	?tagID <http://purl.org/dc/elements/1.1/title> ?title . }";
+				+ "> <http://purl.org/dc/terms/hasPart> ?tagID .	?tagID <http://purl.org/dc/elements/1.1/title> ?title . OPTIONAL { ?tagID <tag:tupeloproject.org,2006:/2.0/files/length> ?length .} }";
 		String responseText = DataAccess.getResponse(_userName, _password,
 				query);
 

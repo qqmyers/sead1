@@ -10,6 +10,19 @@
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 <script src="scripts/jquery-cookie.js"></script>
 <script type="text/javascript">
+	function toggle(elementID) {
+		var divElement = document.getElementById(elementID);
+		var buttonElement = document.getElementById("btn" + elementID);
+		if (divElement.style.display == "block") {
+			divElement.style.display = "none";
+			buttonElement.innerHTML = "+";
+		} else {
+			divElement.style.display = "block";
+			buttonElement.innerHTML = "-";
+		}
+
+	}
+
 	$(function() {
 		/* var userName = document.cookie.substring(0, document.cookie
 				.indexOf("="));
@@ -28,17 +41,44 @@
 	});
 
 	function xmlParser(xml) {
-
+		var uri = '';
+		var title = '';
 		var div_html = '';
-		$(xml).find("result").each(
-				function() {
-					uri = $(this).find("uri").text();
-					literal = $(this).find("literal").text();
-					div_html += "<div class='well'>"
-							+ "<a href='contents.html?i=" + uri + "&t="
-							+ literal + "'>" + literal + "</a><br />"
-							+ "<b>Abstract: </b>To be updated</div>";
-				});
+		$(xml)
+				.find("result")
+				.each(
+						function() {
+
+							if ($(this).find("binding").each(function() {
+								if ($(this).attr("name") == "tagID") {
+									uri = $(this).find("uri").text();
+								} else if ($(this).attr("name") == "title") {
+									title = $(this).find("literal").text();
+								}
+							}))
+								;
+
+							div_html += "<div class='well'><table><tbody><tr><td width='400'>"
+									+ "<a href='contents.html?i="
+									+ uri
+									+ "&t="
+									+ title
+									+ "'>"
+									+ title
+									+ "</a></td><td><a id='btn"
+									+ uri
+									+ "' class='btn btn-mini btn' href='javascript:toggle(\""
+									+ uri
+									+ "\")'> + <a/></td></tr></tbody></table><div id='"+ uri +"' style='display:none'>"
+									+ "<b>Abstract: </b>To be updated</div></div>";
+
+							/* uri = $(this).find("uri").text();
+							literal = $(this).find("literal").text(); */
+							/* div_html += "<div class='well'>"
+									+ "<a href='contents.html?i=" + uri + "&t="
+									+ literal + "'>" + literal + "</a><br />"
+									+ "<b>Abstract: </b>To be updated</div>"; */
+						});
 		$("#xmlBody").html(div_html);
 
 	}
@@ -48,7 +88,7 @@
 	<div class="page-header">
 		<h1>NCED Collections</h1>
 	</div>
-	<div style="width: 500px; margin-top: 50px; margin-left: 100px"
+	<div style="width: 425px; margin-top: 50px; margin-left: 100px"
 		id="xmlBody"></div>
 </body>
 </html>
