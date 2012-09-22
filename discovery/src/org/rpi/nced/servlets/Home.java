@@ -34,7 +34,7 @@ public class Home extends HttpServlet {
 			
 			String responseXML = NCEDProxy.getInstance().getAllCollections();
 			PrintWriter pw = response.getWriter();
-			response.setContentType("text/xml");
+			response.setContentType("application/json");
 			pw.write(responseXML);
 			pw.flush();
 			pw.close();

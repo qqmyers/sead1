@@ -34,7 +34,7 @@ public class Contents extends HttpServlet {
 			String responseXML = NCEDProxy.getInstance().getContents(tagID);
 
 			PrintWriter pw = response.getWriter();
-			response.setContentType("text/xml");
+			response.setContentType("application/json");
 			pw.write(responseXML);
 			pw.flush();
 			pw.close();
