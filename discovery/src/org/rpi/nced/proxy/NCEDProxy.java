@@ -30,7 +30,7 @@ public class NCEDProxy {
 				+ "> <http://purl.org/dc/terms/abstract> ?abstract . } }";
 		String responseText = DataAccess.getResponse(_userName, _password,
 				query);
-		
+
 		return convertToJson(responseText);
 
 	}
@@ -43,11 +43,11 @@ public class NCEDProxy {
 	}
 
 	private String convertToJson(String responseText) throws JSONException {
-		
-		if(responseText.contains("&")){
+
+		if (responseText.contains("&")) {
 			responseText = responseText.replace("&", "and");
 		}
-		
+
 		JSONObject jsonObject = XML.toJSONObject(responseText);
 		System.out.println(jsonObject.toString());
 		return jsonObject.toString();
@@ -67,5 +67,13 @@ public class NCEDProxy {
 
 	public void setPassword(String password) {
 		_password = password;
+	}
+
+	public String getCreators(String tagID) throws Exception {
+		String query = "SELECT ?creator WHERE { <" + tagID
+				+ "> <http://purl.org/dc/terms/creator> ?creator . }";
+		String responseText = DataAccess.getResponse(_userName, _password,
+				query);
+		return convertToJson(responseText);
 	}
 }

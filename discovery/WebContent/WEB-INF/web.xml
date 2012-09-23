@@ -34,4 +34,13 @@
     <servlet-name>Contents</servlet-name>
     <url-pattern>/Contents</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <servlet-name>GetCreators</servlet-name>
+    <servlet-class>org.rpi.nced.servlets.GetCreators</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetCreators</servlet-name>
+    <url-pattern>/GetCreators</url-pattern>
+  </servlet-mapping>
+  
 </web-app>

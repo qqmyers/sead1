@@ -8,152 +8,27 @@
 <script src="http://code.jquery.com/jquery-1.8.1.min.js"
 	type="text/javascript"></script>
 <script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="scripts/commons.js"></script>
+<script src="scripts/homepage.js"></script>
 <script src="scripts/jquery-cookie.js"></script>
 <script type="text/javascript">
-	function toggle(elementID) {
-		var divElement = document.getElementById(elementID);
-		var buttonElement = document.getElementById("btn" + elementID);
-		if (divElement.style.display == "block") {
-			divElement.style.display = "none";
-			buttonElement.innerHTML = "+";
-		} else {
-			divElement.style.display = "block";
-			buttonElement.innerHTML = "-";
-		}
-
-	}
 
 	$(function() {
-		/* var userName = document.cookie.substring(0, document.cookie
-				.indexOf("="));
-		var password = document.cookie
-				.substring(document.cookie.indexOf("=") + 1);
-		$.cookie(userName, null);
-		$.cookie(userName, password); */
-		$("#loading").show();
+		$("#home-loading").show();
 		$.ajax({
 			type : "GET",
 			url : "Home",
 			dataType : "json",
-			success : jsonParser
+			success : homePageJsonParser
 		});
-
 	});
-
-	function jsonParser(json) {
-
-		var uri = '';
-		var title = '';
-		var div_html = '';
-		var abs = '';
-		var displayTitle = '';
-		var jsonString = JSON.stringify(json);
-		var obj = jQuery.parseJSON(jsonString);
-
-		for ( var i = 0; i < obj.sparql.results.result.length; ++i) {
-			var jsonBinding = obj.sparql.results.result[i].binding;
-			for ( var j = 0; j < jsonBinding.length; j++) {
-				$.each(jsonBinding[j], function(key, value) {
-					if (value == 'tagID') {
-						uri = jsonBinding[j]['uri'];
-						//alert(uri);
-					} else if (value == 'title') {
-						title = jsonBinding[j]['literal'];
-
-						displayTitle = title;
-						if (title.indexOf("/") != -1) {
-							displayTitle = title.substring(title
-									.lastIndexOf("/") + 1);
-						}
-					}
-					if (value == 'abstract') {
-						abs = jsonBinding[j]['literal'];
-						//alert(abs);
-					}
-				});
-			}
-
-			div_html += "<div class='well'><h4 style='margin-top:-10px;' class='page-header'>"
-					+ "<a href='contents.html?i="
-					+ uri
-					+ "&t="
-					+ displayTitle
-					+ "'>"
-					+ displayTitle
-					+ "</a></h4><div style='margin-top:-20px;'>"
-					+ "<b>Abstract: </b>"
-					+ abs.substring(0, abs.indexOf(".") + 1)
-					+ " <a href='contents.html?i="
-					+ uri
-					+ "&t="
-					+ displayTitle
-					+ "'>Click here for more details.</a></div></div>";
-		}
-		$("#loading").hide();
-		$("#xmlBody").html(div_html);
-
-		//This could be useful in future
-		/* if (typeof obj == "object") {
-			$.each(obj, function(k, v) {
-				// k is either an array index or object key
-				var str = jsonParser(v);
-				console.log(str);
-
-			});
-		} else {
-			return obj;
-		} */
-
-	}
-
-	/* function xmlParser(xml) {
-		console.log(xml);
-		var uri = '';
-		var title = '';
-		var div_html = '';
-		var abs = '';
-		$(xml)
-				.find("result")
-				.each(
-						function() {
-
-							if ($(this).find("binding").each(function() {
-								if ($(this).attr("name") == "tagID") {
-									uri = $(this).find("uri").text();
-								} else if ($(this).attr("name") == "title") {
-									title = $(this).find("literal").text();
-								} else if ($(this).attr("name") == "abstract") {
-									abs = $(this).find("literal").text();
-								}
-							}))
-								;
-
-							div_html += "<div class='well'><h4 style='margin-top:-10px;' class='page-header'>"
-									+ "<a href='contents.html?i="
-									+ uri
-									+ "&t="
-									+ title
-									+ "'>"
-									+ title
-									+ "</a></h4><div style='margin-top:-20px;'>"
-									+ "<b>Abstract: </b>"
-									+ abs.substring(0, abs.indexOf(".") + 1)
-									+ "<a href='contents.html?i="
-									+ uri
-									+ "&t="
-									+ title
-									+ "'> Click here for more details.</a></div></div>";
-						});
-		$("#xmlBody").html(div_html);
-
-	} */
 </script>
 
 <body>
 	<div class="page-header">
-		<h1>NCED Collections</h1>
+		<h1 style="margin-left: 20px;">NCED Collections</h1>
 	</div>
-	<div id="loading"
+	<div id="home-loading"
 		style="width: 300px; margin-left: auto; margin-right: auto; margin-top: 200px; display: none">
 		<img src="img/loading.gif"></img>
 	</div>
