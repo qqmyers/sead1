@@ -1,3 +1,6 @@
+var instanceURL_Dataset = 'http://sead.ncsa.illinois.edu/nced/#dataset?id=';
+var instanceURL_Collection = 'http://sead.ncsa.illinois.edu/nced/#dataset?id=';
+
 function toggleVisibility(elementID) {
 	var divElement = document.getElementById(elementID);
 	var buttonElement = document.getElementById("btn" + elementID);

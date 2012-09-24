@@ -42,5 +42,12 @@
     <servlet-name>GetCreators</servlet-name>
     <url-pattern>/GetCreators</url-pattern>
   </servlet-mapping>
-  
+  <servlet>
+    <servlet-name>GetDescriptors</servlet-name>
+    <servlet-class>org.rpi.nced.servlets.GetDescriptors</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetDescriptors</servlet-name>
+    <url-pattern>/GetDescriptors</url-pattern>
+  </servlet-mapping>
 </web-app>

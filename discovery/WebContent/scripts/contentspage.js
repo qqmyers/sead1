@@ -8,6 +8,7 @@ var uri = '';
 var displayTitle = '';
 var abs = '';
 var creator = '';
+var descriptor = '';
 
 function populateEntries(jsonBinding) {
 
@@ -79,7 +80,7 @@ function contentsPageJsonParser(jsonObj) {
 	}
 	if (abs != "") {
 		main_html = "<div class='well'><h3 style='margin-top:-5px;' class='page-header'>Abstract:</h3><p style='margin-top:-25px;'><b>Authors: </b>$author$</p>"
-				+ abs + "</div><br/>";
+				+ abs + "<br /><p><b>Descriptors:</b> $descriptor$</p></div><br/>";
 	}
 	
 	$.ajax({
@@ -91,10 +92,41 @@ function contentsPageJsonParser(jsonObj) {
 		async : false
 	});
 	
+	$.ajax({
+		type : "GET",
+		url : "GetDescriptors",
+		dataType : "json",
+		data : "tagID=" + tagID,
+		success : contentsPageDescriptorsJsonParser,
+		async : false
+	});
+	
 	main_html += "<table class='table table-striped'><tbody><tr><th width='10'></th><th width='500'>File Name</th><th width='100'>Size</th></tr>"
 			+ div_html_collections + div_html_datasets + "</tbody></table>";
 	$("#contents-loading").hide();
 	$("#xmlBody").html(main_html);
+}
+
+function contentsPageDescriptorsJsonParser(json){
+	
+	descriptor = '';
+	var jsonString = JSON.stringify(json);
+	var obj = jQuery.parseJSON(jsonString);
+
+	if (obj.sparql.results.result != null) {
+		if (obj.sparql.results.result.length == null) {
+			var jsonBinding = obj.sparql.results.result.binding;
+			getDescriptorsForContentsPage(jsonBinding, 1);
+		} else {
+			for ( var i = 0; i < obj.sparql.results.result.length; i++) {
+				var jsonBinding = obj.sparql.results.result[i].binding;
+				var index = i+1;
+				getDescriptorsForContentsPage(jsonBinding, index);
+			}
+		}
+	}
+	main_html = main_html.replace("$descriptor$", descriptor.substring(0, descriptor
+			.lastIndexOf(",")));
 }
 
 function contentsPageAuthorsJsonParser(json) {
@@ -129,6 +161,18 @@ function getAuthorNamesForContentsPage(jsonBinding) {
 							.indexOf(':') + 1);
 
 					creator += "<a href='" + creatorURL + "'>" + creatorName
+							+ "</a>, ";
+				}
+			});
+}
+
+function getDescriptorsForContentsPage(jsonBinding, index) {
+	
+	$.each(jsonBinding,
+			function(key, value) {
+				if (value == 'descriptor') {
+					var tempDescriptor = jsonBinding['literal'];
+					descriptor += "<a href='http://sead.ncsa.illinois.edu/nced/#dataset?id=" + tempDescriptor + "' target=_blank>image_" + index
 							+ "</a>, ";
 				}
 			});

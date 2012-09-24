@@ -5,6 +5,7 @@
 <title>Contents</title>
 </head>
 <link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/common.css" rel="stylesheet">
 <script src="http://code.jquery.com/jquery-1.8.1.min.js"
 	type="text/javascript"></script>
 <script src="scripts/commons.js"></script>
@@ -31,7 +32,17 @@
 </script>
 
 <body>
-	<div class="page-header">
+	<div id="banner">
+		<map name="bannermap" id="bannermap">
+			<area href="http://www.nced.umn.edu" target="_blank"
+				coords="0,0,595,0,568,40,100,40,80,65,0,65" shape="polygon">
+			<area href="https://repository.nced.umn.edu/browser.php"
+				target="_blank" coords="0,75,500,134" shape="rect">
+		</map>
+		<img usemap="#bannermap" src="img/header-image.png"
+			style="border: none;">
+	</div>
+	<div style='margin-top: 12%;' class="page-header">
 		<h1 style="margin-left: 20px;" id="pageheader"></h1>
 	</div>
 	<div id="contents-loading"

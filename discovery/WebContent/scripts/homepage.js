@@ -78,8 +78,8 @@ function homePageJsonParser(json) {
 				+ displayTitle
 				+ "</a></h4><div style='margin-top:-20px;'><p><b>Authors: </b> $author$</p>"
 				+ "<b>Abstract: </b>"
-				+ abs.substring(0, abs.indexOf(".") + 1)
-				+ " <a href='contents.html?i="
+				+ abs.substring(0, 750)
+				+ "... <a href='contents.html?i="
 				+ uri
 				+ "&t="
 				+ displayTitle

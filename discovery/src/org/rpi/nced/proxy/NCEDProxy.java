@@ -76,4 +76,12 @@ public class NCEDProxy {
 				query);
 		return convertToJson(responseText);
 	}
+
+	public String getDescriptors(String tagID) throws Exception {
+		String query = "SELECT ?name ?descriptor WHERE { <" + tagID
+				+ "> <http://purl.org/dc/terms/description> ?descriptor . }";
+		String responseText = DataAccess.getResponse(_userName, _password,
+				query);
+		return convertToJson(responseText);
+	}
 }
