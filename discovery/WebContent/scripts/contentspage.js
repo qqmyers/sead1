@@ -79,7 +79,7 @@ function contentsPageJsonParser(jsonObj) {
 		}
 	}
 	if (abs != "") {
-		main_html = "<div class='well'><h3 style='margin-top:-5px;' class='page-header'>Abstract:</h3><p style='margin-top:-25px;'><b>Authors: </b>$author$</p>"
+		main_html = "<div class='well'><h3 style='margin-top:-5px;' class='page-header'>Abstract:</h3><p style='margin-top:-25px;'><b>Authors: </b>$author$</p><p><b>Contacts: </b>$contact$</p>"
 				+ abs + "<br /><p><b>Descriptors:</b> $descriptor$</p></div><br/>";
 	}
 	
@@ -89,6 +89,15 @@ function contentsPageJsonParser(jsonObj) {
 		dataType : "json",
 		data : "tagID=" + tagID,
 		success : contentsPageAuthorsJsonParser,
+		async : false
+	});
+	
+	$.ajax({
+		type : "GET",
+		url : "GetContacts",
+		dataType : "json",
+		data : "tagID=" + tagID,
+		success : contentsPageContactsJsonParser,
 		async : false
 	});
 	
@@ -105,6 +114,43 @@ function contentsPageJsonParser(jsonObj) {
 			+ div_html_collections + div_html_datasets + "</tbody></table>";
 	$("#contents-loading").hide();
 	$("#xmlBody").html(main_html);
+}
+
+function contentsPageContactsJsonParser(json) {
+
+	contact = '';
+	var jsonString = JSON.stringify(json);
+	var obj = jQuery.parseJSON(jsonString);
+	if (obj.sparql.results.result != null) {
+		if (obj.sparql.results.result.length == null) {
+			var jsonBinding = obj.sparql.results.result.binding;
+			getContactNamesForContentsPage(jsonBinding);
+		} else {
+			for ( var i = 0; i < obj.sparql.results.result.length; i++) {
+				var jsonBinding = obj.sparql.results.result[i].binding;
+				getContactNamesForContentsPage(jsonBinding);
+			}
+		}
+	}
+	main_html = main_html.replace("$contact$", contact.substring(0, contact
+			.lastIndexOf(",")));
+}
+
+function getContactNamesForContentsPage(jsonBinding) {
+	$.each(jsonBinding,
+			function(key, value) {
+				if (value == 'contact') {
+					var tempContact = jsonBinding['literal'];
+
+					var contactName = tempContact.substring(0, tempContact
+							.indexOf(':') - 1);
+					var contactURL = tempContact.substring(tempContact
+							.indexOf(':') + 1);
+
+					contact += "<a href='" + contactURL + "' target='_blank'>" + contactName
+							+ "</a>, ";
+				}
+			});
 }
 
 function contentsPageDescriptorsJsonParser(json){

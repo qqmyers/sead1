@@ -43,6 +43,14 @@
     <url-pattern>/GetCreators</url-pattern>
   </servlet-mapping>
   <servlet>
+    <servlet-name>GetContacts</servlet-name>
+    <servlet-class>org.rpi.nced.servlets.GetContacts</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetContacts</servlet-name>
+    <url-pattern>/GetContacts</url-pattern>
+  </servlet-mapping>
+  <servlet>
     <servlet-name>GetDescriptors</servlet-name>
     <servlet-class>org.rpi.nced.servlets.GetDescriptors</servlet-class>
   </servlet>

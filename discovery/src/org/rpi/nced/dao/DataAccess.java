@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.http.HTTPException;
 
 import org.rpi.nced.utilties.Base64;
+import org.rpi.nced.utilties.PropertiesLoader;
 
 public class DataAccess {
 
@@ -17,8 +18,9 @@ public class DataAccess {
 			String query) throws Exception {
 		HttpURLConnection conn = null;
 
+		String strURL = PropertiesLoader.getProperties().getProperty("domain");
 		// Make a connect to the server
-		URL url = new URL("http://sead.ncsa.illinois.edu/nced/resteasy/sparql");
+		URL url = new URL(strURL);
 
 		conn = (HttpURLConnection) url.openConnection();
 
