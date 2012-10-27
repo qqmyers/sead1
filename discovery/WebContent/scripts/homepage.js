@@ -2,8 +2,9 @@ var div_html = '';
 var title = '';
 var creator = '';
 var contact = '';
+var keyword = '';
 
-function homePageAuthorsJsonParser(json) {
+/* function homePageAuthorsJsonParser(json) {
 
 	creator = '';
 	var jsonString = JSON.stringify(json);
@@ -40,6 +41,8 @@ function getAuthorNamesForHomePage(jsonBinding) {
 			});
 }
 
+
+
 function homePageContactsJsonParser(json) {
 
 	contact = '';
@@ -61,21 +64,21 @@ function homePageContactsJsonParser(json) {
 }
 
 function getContactNamesForHomePage(jsonBinding) {
-	$.each(jsonBinding,
-			function(key, value) {
-				if (value == 'contact') {
-					var tempContact = jsonBinding['literal'];
+	$.each(jsonBinding, function(key, value) {
+		if (value == 'contact') {
+			var tempContact = jsonBinding['literal'];
 
-					var contactName = tempContact.substring(0, tempContact
-							.indexOf(':') - 1);
-					var contactURL = tempContact.substring(tempContact
-							.indexOf(':') + 1);
+			var contactName = tempContact.substring(0,
+					tempContact.indexOf(':') - 1);
+			var contactURL = tempContact
+					.substring(tempContact.indexOf(':') + 1);
 
-					contact += "<a href='" + contactURL + "' target='_blank'>" + contactName
-							+ "</a>, ";
-				}
-			});
+			contact += "<a href='" + contactURL + "' target='_blank'>"
+					+ contactName + "</a>, ";
+		}
+	});
 }
+*/
 
 function homePageJsonParser(json) {
 
@@ -121,7 +124,7 @@ function homePageJsonParser(json) {
 				+ displayTitle
 				+ "'>"
 				+ displayTitle
-				+ "</a></h4><div style='margin-top:-20px;'><p><b>Authors: </b> $author$</p><p><b>Contacts: </b> $contact$</p>"
+				+ "</a></h4><div style='margin-top:-20px;'><p><b>Authors: </b> $author$</p><p><b>Contacts: </b> $contact$</p><p><b>Keywords: </b><i>$keyword$</i></p>"
 				+ "<b>Abstract: </b>"
 				+ abs.substring(0, 750)
 				+ "... <a href='contents.html?i="
@@ -134,7 +137,10 @@ function homePageJsonParser(json) {
 			url : "GetCreators",
 			dataType : "json",
 			data : "tagID=" + uri,
-			success : homePageAuthorsJsonParser,
+			// success : homePageAuthorsJsonParser,
+			success : function(json) {
+				homePageAttributesJsonParser(json, "creator");
+			},
 			async : false
 		});
 
@@ -143,10 +149,87 @@ function homePageJsonParser(json) {
 			url : "GetContacts",
 			dataType : "json",
 			data : "tagID=" + uri,
-			success : homePageContactsJsonParser,
+			// success : homePageContactsJsonParser,
+			success : function(json) {
+				homePageAttributesJsonParser(json, "contact");
+			},
+			async : false
+		});
+
+		$.ajax({
+			type : "GET",
+			url : "GetKeywords",
+			dataType : "json",
+			data : "tagID=" + uri,
+			success : function(json) {
+				homePageAttributesJsonParser(json, "keyword");
+			},
 			async : false
 		});
 	}
 	$("#home-loading").hide();
 	$("#xmlBody").html(div_html);
+}
+
+function getAttributesForHomePage(jsonBinding, element) {
+	$.each(jsonBinding, function(key, value) {
+		if (value == 'creator' || value == 'contact') {
+			var temp = jsonBinding['literal'];
+			var name = temp.substring(0, temp.indexOf(':') - 1);
+			var url = temp.substring(temp.indexOf(':') + 1);
+
+			if (value == 'creator') {
+				creator += "<a href='" + url + "' target=_blank>" + name + "</a>, ";
+			} else if (value == 'contact') {
+				contact += "<a href='" + url + "' target=_blank>" + name + "</a>, ";
+			}
+		}
+
+		else if (value == 'keyword') {
+			var temp = jsonBinding['uri'];
+			temp = temp.substring(temp.indexOf("#") + 1);
+			temp = decodeURIComponent(temp);
+			
+			//replaceAll + from temp
+			while (temp.indexOf("+") != -1) {
+				temp = temp.replace('+', " ");
+			}
+			keyword += temp + ", ";
+		}
+	});
+}
+
+function homePageAttributesJsonParser(json, element) {
+
+	if (element == 'creator')
+		creator = '';
+	else if (element == 'contact')
+		contact = '';
+	else if (element == 'keyword')
+		keyword = '';
+
+	var jsonString = JSON.stringify(json);
+	var obj = jQuery.parseJSON(jsonString);
+	if (obj.sparql.results.result != null) {
+		if (obj.sparql.results.result.length == null) {
+			var jsonBinding = obj.sparql.results.result.binding;
+			getAttributesForHomePage(jsonBinding, element);
+		} else {
+			for ( var i = 0; i < obj.sparql.results.result.length; i++) {
+				var jsonBinding = obj.sparql.results.result[i].binding;
+				getAttributesForHomePage(jsonBinding, element);
+			}
+		}
+	}
+
+	if (element == 'creator')
+		div_html = div_html.replace("$author$", creator.substring(0, creator
+				.lastIndexOf(",")));
+	else if (element == 'contact')
+		div_html = div_html.replace("$contact$", contact.substring(0, contact
+				.lastIndexOf(",")));
+	else if (element == 'keyword')
+		div_html = div_html.replace("$keyword$", keyword.substring(0, keyword
+				.lastIndexOf(",")));
+
 }

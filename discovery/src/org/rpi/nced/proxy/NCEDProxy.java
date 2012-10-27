@@ -53,7 +53,7 @@ public class NCEDProxy {
 				+ " "
 				+ "Prefix tag: <http://www.holygoat.co.uk/owl/redwood/0.1/tags/>"
 				+ " "
-				+ "SELECT ?tagID ?title ?abstract WHERE {"
+				+ "SELECT ?tagID ?title ?abstract ?keywords WHERE {"
 				+ " "
 				+ "?tagID <rdf:type> <cet:Collection> ."
 				+ " "
@@ -122,4 +122,13 @@ public class NCEDProxy {
 				query);
 		return convertToJson(responseText);
 	}
+	
+	public String getKeywords(String tagID) throws Exception {
+		String query = "SELECT ?name ?keyword WHERE { <" + tagID
+				+ "> <http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag> ?keyword . }";
+		String responseText = DataAccess.getResponse(_userName, _password,
+				query);
+		return convertToJson(responseText);
+	}
+	
 }

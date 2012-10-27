@@ -1,5 +1,5 @@
-var instanceURL_Dataset = 'http://sead.ncsa.illinois.edu/nced/#dataset?id=';
-var instanceURL_Collection = 'http://sead.ncsa.illinois.edu/nced/#dataset?id=';
+var instanceURL_Dataset = 'http://nced.ncsa.illinois.edu/acr/#dataset?id=';
+var instanceURL_Collection = 'http://nced.ncsa.illinois.edu/acr/#collection?id=';
 
 function toggleVisibility(elementID) {
 	var divElement = document.getElementById(elementID);

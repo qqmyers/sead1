@@ -9,6 +9,7 @@ var displayTitle = '';
 var abs = '';
 var creator = '';
 var descriptor = '';
+var keyword = '';
 
 function populateEntries(jsonBinding) {
 
@@ -36,23 +37,23 @@ function populateEntries(jsonBinding) {
 	}
 
 	if (uri.indexOf("Dataset") != -1) {
-		urlToLoad = "http://sead.ncsa.illinois.edu/nced/#dataset?id=" + uri;
-		div_html_datasets += "<tr><td align='center'><i class='icon-file'></i></td><td>"
+		urlToLoad = instanceURL_Dataset + uri;
+		div_html_datasets += "<tr><td width='10' align='center'><i class='icon-file'></i></td><td>"
 				+ "<a href='"
 				+ urlToLoad
 				+ "' target='_blank'>"
 				+ displayTitle
-				+ "</a></td><td>"
+				+ "</a></td><td width='100'>"
 				+ roundNumber((length / 1024), 2)
 				+ " KB</td></tr>";
 	} else {
 		urlToLoad = "contents.html?i=" + uri + "&t=" + displayTitle;
-		div_html_collections += "<tr><td align='center'><i class='icon-folder-close'></i></td><td>"
+		div_html_collections += "<tr><td width='10' align='center'><i class='icon-folder-close'></i></td><td>"
 				+ "<a href='"
 				+ urlToLoad
 				+ "'>"
 				+ displayTitle
-				+ "</a></td><td>N/A</td></tr>";
+				+ "</a></td><td width='100'>N/A</td></tr>";
 	}
 }
 
@@ -79,43 +80,66 @@ function contentsPageJsonParser(jsonObj) {
 		}
 	}
 	if (abs != "") {
-		main_html = "<div class='well'><h3 style='margin-top:-5px;' class='page-header'>Abstract:</h3><p style='margin-top:-25px;'><b>Authors: </b>$author$</p><p><b>Contacts: </b>$contact$</p>"
-				+ abs + "<br /><p><b>Descriptors:</b> $descriptor$</p></div><br/>";
+		main_html = "<div class='well'><h3 style='margin-top:-5px;' class='page-header'>Abstract</h3><p style='margin-top:-25px;'><b>Authors: </b>$author$</p><p><b>Contacts: </b>$contact$</p><p><b>Keywords: </b><i>$keyword$</i></p><p>"
+				+ abs
+				+ "</p><p><b>Descriptors:</b> $descriptor$</p></div><br/>";
 	}
-	
+
 	$.ajax({
 		type : "GET",
 		url : "GetCreators",
 		dataType : "json",
 		data : "tagID=" + tagID,
-		success : contentsPageAuthorsJsonParser,
+		//success : contentsPageAuthorsJsonParser,
+		success : function(json) {
+			contentsPageAttributesJsonParser(json, "creator");
+		},
 		async : false
 	});
-	
+
 	$.ajax({
 		type : "GET",
 		url : "GetContacts",
 		dataType : "json",
 		data : "tagID=" + tagID,
-		success : contentsPageContactsJsonParser,
+		//success : contentsPageContactsJsonParser,
+		success : function(json) {
+			contentsPageAttributesJsonParser(json, "contact");
+		},
 		async : false
 	});
-	
+
 	$.ajax({
 		type : "GET",
 		url : "GetDescriptors",
 		dataType : "json",
 		data : "tagID=" + tagID,
-		success : contentsPageDescriptorsJsonParser,
+		//success : contentsPageDescriptorsJsonParser,
+		success : function(json) {
+			contentsPageAttributesJsonParser(json, "descriptor");
+		},
 		async : false
 	});
 	
+	$.ajax({
+		type : "GET",
+		url : "GetKeywords",
+		dataType : "json",
+		data : "tagID=" + tagID,
+		//success : contentsPageDescriptorsJsonParser,
+		success : function(json) {
+			contentsPageAttributesJsonParser(json, "keyword");
+		},
+		async : false
+	});
+
 	main_html += "<table class='table table-striped'><tbody><tr><th width='10'></th><th width='500'>File Name</th><th width='100'>Size</th></tr>"
 			+ div_html_collections + div_html_datasets + "</tbody></table>";
 	$("#contents-loading").hide();
 	$("#xmlBody").html(main_html);
 }
 
+/*
 function contentsPageContactsJsonParser(json) {
 
 	contact = '';
@@ -137,24 +161,23 @@ function contentsPageContactsJsonParser(json) {
 }
 
 function getContactNamesForContentsPage(jsonBinding) {
-	$.each(jsonBinding,
-			function(key, value) {
-				if (value == 'contact') {
-					var tempContact = jsonBinding['literal'];
+	$.each(jsonBinding, function(key, value) {
+		if (value == 'contact') {
+			var tempContact = jsonBinding['literal'];
 
-					var contactName = tempContact.substring(0, tempContact
-							.indexOf(':') - 1);
-					var contactURL = tempContact.substring(tempContact
-							.indexOf(':') + 1);
+			var contactName = tempContact.substring(0,
+					tempContact.indexOf(':') - 1);
+			var contactURL = tempContact
+					.substring(tempContact.indexOf(':') + 1);
 
-					contact += "<a href='" + contactURL + "' target='_blank'>" + contactName
-							+ "</a>, ";
-				}
-			});
+			contact += "<a href='" + contactURL + "' target='_blank'>"
+					+ contactName + "</a>, ";
+		}
+	});
 }
 
-function contentsPageDescriptorsJsonParser(json){
-	
+function contentsPageDescriptorsJsonParser(json) {
+
 	descriptor = '';
 	var jsonString = JSON.stringify(json);
 	var obj = jQuery.parseJSON(jsonString);
@@ -166,13 +189,13 @@ function contentsPageDescriptorsJsonParser(json){
 		} else {
 			for ( var i = 0; i < obj.sparql.results.result.length; i++) {
 				var jsonBinding = obj.sparql.results.result[i].binding;
-				var index = i+1;
+				var index = i + 1;
 				getDescriptorsForContentsPage(jsonBinding, index);
 			}
 		}
 	}
-	main_html = main_html.replace("$descriptor$", descriptor.substring(0, descriptor
-			.lastIndexOf(",")));
+	main_html = main_html.replace("$descriptor$", descriptor.substring(0,
+			descriptor.lastIndexOf(",")));
 }
 
 function contentsPageAuthorsJsonParser(json) {
@@ -213,13 +236,87 @@ function getAuthorNamesForContentsPage(jsonBinding) {
 }
 
 function getDescriptorsForContentsPage(jsonBinding, index) {
-	
-	$.each(jsonBinding,
-			function(key, value) {
-				if (value == 'descriptor') {
-					var tempDescriptor = jsonBinding['literal'];
-					descriptor += "<a href='http://sead.ncsa.illinois.edu/nced/#dataset?id=" + tempDescriptor + "' target=_blank>image_" + index
-							+ "</a>, ";
-				}
-			});
+
+	$.each(jsonBinding, function(key, value) {
+		if (value == 'descriptor') {
+			var tempDescriptor = jsonBinding['literal'];
+			descriptor += "<a href='" + instanceURL_Dataset + tempDescriptor
+					+ "' target=_blank>image_" + index + "</a>, ";
+		}
+	});
+}
+
+*/
+
+function getAttributesForContentPage(jsonBinding, element) {
+	$.each(jsonBinding, function(key, value) {
+		if (value == 'creator' || value == 'contact') {
+			var temp = jsonBinding['literal'];
+			var name = temp.substring(0, temp.indexOf(':') - 1);
+			var url = temp.substring(temp.indexOf(':') + 1);
+
+			if (value == 'creator') {
+				creator += "<a href='" + url + "' target=_blank>" + name + "</a>, ";
+			} else if (value == 'contact') {
+				contact += "<a href='" + url + "' target=_blank>" + name + "</a>, ";
+			}
+		}
+		
+		else if (value == 'descriptor') {
+			var tempDescriptor = jsonBinding['literal'];
+			descriptor += "<a href='" + instanceURL_Dataset + tempDescriptor
+					+ "' target=_blank>image_" + index + "</a>, ";
+		}
+
+		else if (value == 'keyword') {
+			var temp = jsonBinding['uri'];
+			temp = temp.substring(temp.indexOf("#") + 1);
+			temp = decodeURIComponent(temp);
+			
+			//replaceAll + from temp
+			while (temp.indexOf("+") != -1) {
+				temp = temp.replace('+', " ");
+			}
+			keyword += temp + ", ";
+		}
+	});
+}
+
+function contentsPageAttributesJsonParser(json, element) {
+
+	if (element == 'creator')
+		creator = '';
+	else if (element == 'contact')
+		contact = '';
+	else if (element == 'keyword')
+		keyword = '';
+	else if (element == 'descriptor')
+		descriptor = '';
+
+	var jsonString = JSON.stringify(json);
+	var obj = jQuery.parseJSON(jsonString);
+	if (obj.sparql.results.result != null) {
+		if (obj.sparql.results.result.length == null) {
+			var jsonBinding = obj.sparql.results.result.binding;
+			getAttributesForContentPage(jsonBinding, element);
+		} else {
+			for ( var i = 0; i < obj.sparql.results.result.length; i++) {
+				var jsonBinding = obj.sparql.results.result[i].binding;
+				getAttributesForContentPage(jsonBinding, element);
+			}
+		}
+	}
+
+	if (element == 'creator')
+		main_html = main_html.replace("$author$", creator.substring(0, creator
+				.lastIndexOf(",")));
+	else if (element == 'contact')
+		main_html = main_html.replace("$contact$", contact.substring(0, contact
+				.lastIndexOf(",")));
+	else if (element == 'keyword')
+		main_html = main_html.replace("$keyword$", keyword.substring(0, keyword
+				.lastIndexOf(",")));
+	else if (element == 'descriptor')
+		main_html = main_html.replace("$descriptor$", descriptor.substring(0, descriptor
+				.lastIndexOf(",")));
 }
