@@ -245,6 +245,7 @@ public class AddMetadataWidget extends Composite {
                 //START - ADDED BY RAM
                 //Set handlers to be used by the inner classes for fetching JSON from VIVO
                 case UserMetadataField.VIVO_CREATOR:
+                case UserMetadataField.VIVO_CONTACT:
                     _creatorMetadataField = userMetadataField;
                     _clearCreatorHandler = clearHandler;
                     _addCreatorHandler = addHandler;
@@ -260,7 +261,7 @@ public class AddMetadataWidget extends Composite {
                     _clearCreatorHandler = clearHandler;
                     _addCreatorHandler = addHandler;
                     //Initialize the connection to VIVO
-                    query = "PREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0APREFIX+rdfs%3A+<http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23>%0D%0A%0D%0APREFIX+vivo%3A+<http%3A%2F%2Fvivoweb.org%2Fontology%2Fcore%23>%0D%0A%0D%0ASELECT+distinct+%3FURL+%3FLabel%0D%0AWHERE%7B%0D%0A%3FURL+rdf%3Atype+vivo%3AConferencePaper+.%0D%0A%3FURL+rdfs%3Alabel+%3FLabel+.%0D%0A%7D%0D%0A%0D%0A&output=json"
+                    query = "PREFIX+bibo%3A+<http%3A%2F%2Fpurl.org%2Fontology%2Fbibo%2F>%0D%0APREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0APREFIX+rdfs%3A+<http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23>%0D%0A%0D%0A%0D%0ASELECT+distinct+%3FURL+%3FLabel%0D%0AWHERE{%0D%0A%3FURL+rdf%3Atype+bibo%3AAcademicArticle+.%0D%0A%3FURL+rdfs%3Alabel+%3FLabel+.%0D%0A}%0D%0A&output=json"
                             + "&callback=";
                     InitializeVIVOConnection(query);
                     break;
@@ -340,7 +341,8 @@ public class AddMetadataWidget extends Composite {
             for (int i = 0; i < results.getBindings().length(); i++ ) {
                 String name = results.getBindings().get(i).getLabel().getValue();
                 String vivoURL = results.getBindings().get(i).getURL().getValue();
-                oracle.add(name + " - " + vivoURL);
+
+                oracle.add(name + " : " + vivoURL);
             }
             //FIXME: Naming conventions
             inputField = new CreatorField(_creatorMetadataField, _addCreatorHandler, _clearCreatorHandler);

@@ -51,9 +51,11 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
@@ -129,6 +131,34 @@ public class CollectionPage extends Composite {
         mainContent.add(createSocialAnnotationsPanel());
 
         retrieveCollection();
+
+        final UserMetadataWidget um = new UserMetadataWidget(uri, dispatchasync, eventBus);
+        um.setWidth("100%");
+
+        mainContent.add(createMetadataPanel(um));
+
+        rbac.doIfAllowed(Permission.EDIT_METADATA, uri, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+
+                um.showTableFields(true);
+
+            }
+        });
+    }
+
+    private Widget createMetadataPanel(UserMetadataWidget um) {
+        DisclosurePanel userInformationPanel = new DisclosurePanel("User Specified Information");
+        userInformationPanel.addStyleName("datasetDisclosurePanel");
+        userInformationPanel.setOpen(true);
+        userInformationPanel.setAnimationEnabled(true);
+
+        VerticalPanel userPanel = new VerticalPanel();
+        userPanel.addStyleName("userSpecifiedBody");
+        userInformationPanel.add(userPanel);
+        userPanel.add(um);
+
+        return userInformationPanel;
     }
 
     /**
