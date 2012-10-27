@@ -590,6 +590,11 @@ public class DatasetWidget extends Composite {
                             lbl.addStyleName("datasetRightColText");
                             infoPanel.add(lbl);
                         }
+                        if ("VA".equals(tuple.getCategory()) && "DOI".equals(tuple.getLabel())) {
+                            Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                            lbl.addStyleName("datasetRightColText");
+                            infoPanel.add(lbl);
+                        }
                     }
                 }
             });
