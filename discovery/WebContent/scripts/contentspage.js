@@ -10,6 +10,7 @@ var abs = '';
 var creator = '';
 var descriptor = '';
 var keyword = '';
+var index = 1;
 
 function populateEntries(jsonBinding) {
 
@@ -109,6 +110,7 @@ function contentsPageJsonParser(jsonObj) {
 		async : false
 	});
 
+	index = 1;
 	$.ajax({
 		type : "GET",
 		url : "GetDescriptors",
@@ -139,115 +141,6 @@ function contentsPageJsonParser(jsonObj) {
 	$("#xmlBody").html(main_html);
 }
 
-/*
-function contentsPageContactsJsonParser(json) {
-
-	contact = '';
-	var jsonString = JSON.stringify(json);
-	var obj = jQuery.parseJSON(jsonString);
-	if (obj.sparql.results.result != null) {
-		if (obj.sparql.results.result.length == null) {
-			var jsonBinding = obj.sparql.results.result.binding;
-			getContactNamesForContentsPage(jsonBinding);
-		} else {
-			for ( var i = 0; i < obj.sparql.results.result.length; i++) {
-				var jsonBinding = obj.sparql.results.result[i].binding;
-				getContactNamesForContentsPage(jsonBinding);
-			}
-		}
-	}
-	main_html = main_html.replace("$contact$", contact.substring(0, contact
-			.lastIndexOf(",")));
-}
-
-function getContactNamesForContentsPage(jsonBinding) {
-	$.each(jsonBinding, function(key, value) {
-		if (value == 'contact') {
-			var tempContact = jsonBinding['literal'];
-
-			var contactName = tempContact.substring(0,
-					tempContact.indexOf(':') - 1);
-			var contactURL = tempContact
-					.substring(tempContact.indexOf(':') + 1);
-
-			contact += "<a href='" + contactURL + "' target='_blank'>"
-					+ contactName + "</a>, ";
-		}
-	});
-}
-
-function contentsPageDescriptorsJsonParser(json) {
-
-	descriptor = '';
-	var jsonString = JSON.stringify(json);
-	var obj = jQuery.parseJSON(jsonString);
-
-	if (obj.sparql.results.result != null) {
-		if (obj.sparql.results.result.length == null) {
-			var jsonBinding = obj.sparql.results.result.binding;
-			getDescriptorsForContentsPage(jsonBinding, 1);
-		} else {
-			for ( var i = 0; i < obj.sparql.results.result.length; i++) {
-				var jsonBinding = obj.sparql.results.result[i].binding;
-				var index = i + 1;
-				getDescriptorsForContentsPage(jsonBinding, index);
-			}
-		}
-	}
-	main_html = main_html.replace("$descriptor$", descriptor.substring(0,
-			descriptor.lastIndexOf(",")));
-}
-
-function contentsPageAuthorsJsonParser(json) {
-
-	creator = '';
-	var jsonString = JSON.stringify(json);
-	var obj = jQuery.parseJSON(jsonString);
-
-	if (obj.sparql.results.result != null) {
-		if (obj.sparql.results.result.length == null) {
-			var jsonBinding = obj.sparql.results.result.binding;
-			getAuthorNamesForContentsPage(jsonBinding);
-		} else {
-			for ( var i = 0; i < obj.sparql.results.result.length; i++) {
-				var jsonBinding = obj.sparql.results.result[i].binding;
-				getAuthorNamesForContentsPage(jsonBinding);
-			}
-		}
-	}
-	main_html = main_html.replace("$author$", creator.substring(0, creator
-			.lastIndexOf(",")));
-}
-
-function getAuthorNamesForContentsPage(jsonBinding) {
-	$.each(jsonBinding,
-			function(key, value) {
-				if (value == 'creator') {
-					var tempCreator = jsonBinding['literal'];
-					var creatorName = tempCreator.substring(0, tempCreator
-							.indexOf(':') - 1);
-					var creatorURL = tempCreator.substring(tempCreator
-							.indexOf(':') + 1);
-
-					creator += "<a href='" + creatorURL + "'>" + creatorName
-							+ "</a>, ";
-				}
-			});
-}
-
-function getDescriptorsForContentsPage(jsonBinding, index) {
-
-	$.each(jsonBinding, function(key, value) {
-		if (value == 'descriptor') {
-			var tempDescriptor = jsonBinding['literal'];
-			descriptor += "<a href='" + instanceURL_Dataset + tempDescriptor
-					+ "' target=_blank>image_" + index + "</a>, ";
-		}
-	});
-}
-
-*/
-
 function getAttributesForContentPage(jsonBinding, element) {
 	$.each(jsonBinding, function(key, value) {
 		if (value == 'creator' || value == 'contact') {
@@ -266,6 +159,7 @@ function getAttributesForContentPage(jsonBinding, element) {
 			var tempDescriptor = jsonBinding['literal'];
 			descriptor += "<a href='" + instanceURL_Dataset + tempDescriptor
 					+ "' target=_blank>image_" + index + "</a>, ";
+			index++;
 		}
 
 		else if (value == 'keyword') {

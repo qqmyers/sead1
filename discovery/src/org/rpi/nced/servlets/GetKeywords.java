@@ -28,7 +28,7 @@ public class GetKeywords extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		String redirectionFile = "";
+
 		try {
 			String tagID = request.getParameter("tagID");
 			String responseXML = NCEDProxy.getInstance().getKeywords(tagID);
@@ -40,16 +40,15 @@ public class GetKeywords extends HttpServlet {
 			pw.close();
 		} catch (HTTPException e) {
 			if (e.getStatusCode() == HttpServletResponse.SC_UNAUTHORIZED) {
-				redirectionFile = "autherror.html";
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.getWriter().write("Unauthorized");
+				response.flushBuffer();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			redirectionFile = "error.html";
-		}
-
-		if (redirectionFile != "") {
-			response.sendRedirect(response
-					.encodeRedirectURL(redirectionFile));
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().write("error");
+			response.flushBuffer();
 		}
 	}
 

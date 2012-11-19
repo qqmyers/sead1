@@ -3,7 +3,6 @@ package org.rpi.nced.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +28,7 @@ public class GetCreators extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		String redirectionFile = "";
+
 		try {
 			String tagID = request.getParameter("tagID");
 			String responseXML = NCEDProxy.getInstance().getCreators(tagID);
@@ -40,20 +39,15 @@ public class GetCreators extends HttpServlet {
 			pw.close();
 		} catch (HTTPException e) {
 			if (e.getStatusCode() == HttpServletResponse.SC_UNAUTHORIZED) {
-				redirectionFile = "autherror.html";
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.getWriter().write("Unauthorized");
+				response.flushBuffer();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			redirectionFile = "error.html";
-		}
-
-		if (redirectionFile != "") {
-			// Also handles error response - If user was not authenticated
-			// or if user details could not be loaded
-			RequestDispatcher rd = request
-					.getRequestDispatcher(redirectionFile);
-
-			rd.forward(request, response);
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().write("error");
+			response.flushBuffer();
 		}
 	}
 

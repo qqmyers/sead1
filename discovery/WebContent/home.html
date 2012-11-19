@@ -20,9 +20,19 @@
 			type : "GET",
 			url : "Home",
 			dataType : "json",
-			success : homePageJsonParser
+			success : homePageJsonParser,
+			error : homePageErrorParser
 		});
 	});
+	
+	function homePageErrorParser(jqXHR, textStatus, errorThrown) {
+		if (jqXHR.responseText == 'Unauthorized') {
+			window.location.replace("login.html");
+		}
+		else {
+			window.location.replace("error.html");
+		}
+	}
 </script>
 
 <body>

@@ -8,6 +8,7 @@
 <link href="css/common.css" rel="stylesheet">
 <script src="http://code.jquery.com/jquery-1.8.1.min.js"
 	type="text/javascript"></script>
+<script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
 <script src="scripts/commons.js"></script>
 <script src="scripts/json2.js"></script>
 <script src="scripts/contentspage.js"></script>
@@ -16,21 +17,34 @@
 		var url = window.location.href;
 		tagID = url.substring(url.indexOf("?") + 3, url.indexOf("&"));
 		var title = url.substring(url.indexOf("&t") + 3);
-		
+
 		$("#contents-loading").show();
 		$.ajax({
 			type : "GET",
 			url : "Contents",
 			dataType : "json",
 			data : "tagID=" + tagID + "&title=" + title,
-			success : contentsPageJsonParser
+			success : contentsPageJsonParser,
+			error : contentsPageErrorParser
 		});
-		
+
 		var displayTitle = decodeURIComponent(title);
 		$("#pageheader").text(displayTitle);
 		document.title = "Contents: " + displayTitle;
 
 	});
+	
+	function contentsPageErrorParser(jqXHR, textStatus, errorThrown) {
+		if (jqXHR.responseText == 'Unauthorized') {
+			var currentURL = window.location.href;
+			query = currentURL.substring(currentURL.indexOf("?"));
+			window.location.replace("login.html" + query);
+		}
+		else {
+			window.location.replace("error.html");
+		}
+	}
+	
 </script>
 
 <body>

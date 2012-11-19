@@ -5,7 +5,6 @@ package org.rpi.nced.servlets;
 
 import java.io.IOException;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -35,14 +34,12 @@ public class Login extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String redirectionFile = "";
 		try {
 
 			String userName = request.getParameter("userName");
 			String password = request.getParameter("password");
 			
 			NCEDProxy.getInstance().Authenticate(userName, password);			
-			redirectionFile = "home.html";
 			
 			/*Cookie cookie = new Cookie(userName, password);
 			response.addCookie(cookie);*/
@@ -52,18 +49,15 @@ public class Login extends HttpServlet {
 			
 		} catch (HTTPException e) {
 			if (e.getStatusCode() == HttpServletResponse.SC_UNAUTHORIZED) {
-				redirectionFile = "autherror.html";
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.getWriter().write("Unauthorized");
+				response.flushBuffer();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			redirectionFile = "error.html";
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().write("error");
+			response.flushBuffer();
 		}
-
-		// Also handles error response - If user was not authenticated
-		// or if user details could not be loaded
-		RequestDispatcher rd = request.getRequestDispatcher(redirectionFile);
-		
-		rd.forward(request, response);
-
 	}
 }
