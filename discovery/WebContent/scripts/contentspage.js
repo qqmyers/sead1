@@ -171,7 +171,8 @@ function getAttributesForContentPage(jsonBinding, element) {
 			while (temp.indexOf("+") != -1) {
 				temp = temp.replace('+', " ");
 			}
-			keyword += temp + ", ";
+			//keyword += temp + ", ";
+			keyword += "<a href='" + instanceURL_Tag + temp + "' target=_blank>" + temp + "</a>, ";
 		}
 	});
 }

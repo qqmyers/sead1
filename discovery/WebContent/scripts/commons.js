@@ -1,6 +1,6 @@
 var instanceURL_Dataset = 'http://nced.ncsa.illinois.edu/acr/#dataset?id=';
 var instanceURL_Collection = 'http://nced.ncsa.illinois.edu/acr/#collection?id=';
-
+var instanceURL_Tag = 'http://nced.ncsa.illinois.edu/acr/#tag?title=';
 function toggleVisibility(elementID) {
 	var divElement = document.getElementById(elementID);
 	var buttonElement = document.getElementById("btn" + elementID);
