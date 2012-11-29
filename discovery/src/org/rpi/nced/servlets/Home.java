@@ -30,10 +30,10 @@ public class Home extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 
 		try {
-			String responseXML = NCEDProxy.getInstance().getAllCollections();
+			String responseJSON = NCEDProxy.getInstance().getAllCollections();
 			PrintWriter pw = response.getWriter();
 			response.setContentType("application/json");
-			pw.write(responseXML);
+			pw.write(responseJSON);
 			pw.flush();
 			pw.close();
 		} catch (HTTPException e) {

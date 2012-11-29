@@ -1,10 +1,15 @@
 package org.rpi.nced.proxy;
 
+import java.util.Collections;
+
 import org.rpi.nced.dao.DataAccess;
+import org.rpi.nced.objects.MainCollection;
 import org.rpi.nced.utilties.PropertiesLoader;
 import org.rpi.nced.utilties.json.JSONException;
 import org.rpi.nced.utilties.json.JSONObject;
 import org.rpi.nced.utilties.json.XML;
+
+import com.google.gson.Gson;
 
 public class NCEDProxy {
 
@@ -64,8 +69,18 @@ public class NCEDProxy {
 				+ "OPTIONAL { ?tagID <http://purl.org/dc/terms/abstract> ?abstract . } }";
 		String responseText = DataAccess.getResponse(_userName, _password,
 				query);
-		return convertToJson(responseText);
+		
+		String responseJSON = sortItems(convertToJson(responseText));
+		return responseJSON;
 	}
+
+	private String sortItems(String jsonResponse) {
+		Gson gson = new Gson();
+		MainCollection collectionsResult = gson.fromJson(jsonResponse, MainCollection.class); 
+		Collections.sort(collectionsResult.getSparql().getResults().getResult());
+		return gson.toJson(collectionsResult, MainCollection.class);
+	}
+
 
 	private String convertToJson(String responseText) throws JSONException {
 
