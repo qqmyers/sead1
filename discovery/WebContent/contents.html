@@ -18,8 +18,9 @@
 		tagID = url.substring(url.indexOf("?") + 3, url.indexOf("&"));
 		var title = url.substring(url.indexOf("&t") + 3);
 		
+		var acrLink = instanceURL_Collection + tagID;
 		var pageHeaderHTML = $("#pageHeaderTable").html();
-		pageHeaderHTML = pageHeaderHTML.replace("$acrlink$", instanceURL_Collection + tagID);
+		pageHeaderHTML = pageHeaderHTML.replace("$acrlink$", acrLink);
 		$("#pageHeaderTable").html(pageHeaderHTML);
 		
 		$("#contents-loading").show();
