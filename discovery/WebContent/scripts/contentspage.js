@@ -91,7 +91,7 @@ function contentsPageJsonParser(jsonObj) {
 		url : "GetCreators",
 		dataType : "json",
 		data : "tagID=" + tagID,
-		//success : contentsPageAuthorsJsonParser,
+		// success : contentsPageAuthorsJsonParser,
 		success : function(json) {
 			contentsPageAttributesJsonParser(json, "creator");
 		},
@@ -103,7 +103,7 @@ function contentsPageJsonParser(jsonObj) {
 		url : "GetContacts",
 		dataType : "json",
 		data : "tagID=" + tagID,
-		//success : contentsPageContactsJsonParser,
+		// success : contentsPageContactsJsonParser,
 		success : function(json) {
 			contentsPageAttributesJsonParser(json, "contact");
 		},
@@ -116,19 +116,19 @@ function contentsPageJsonParser(jsonObj) {
 		url : "GetDescriptors",
 		dataType : "json",
 		data : "tagID=" + tagID,
-		//success : contentsPageDescriptorsJsonParser,
+		// success : contentsPageDescriptorsJsonParser,
 		success : function(json) {
 			contentsPageAttributesJsonParser(json, "descriptor");
 		},
 		async : false
 	});
-	
+
 	$.ajax({
 		type : "GET",
 		url : "GetKeywords",
 		dataType : "json",
 		data : "tagID=" + tagID,
-		//success : contentsPageDescriptorsJsonParser,
+		// success : contentsPageDescriptorsJsonParser,
 		success : function(json) {
 			contentsPageAttributesJsonParser(json, "keyword");
 		},
@@ -149,12 +149,14 @@ function getAttributesForContentPage(jsonBinding, element) {
 			var url = temp.substring(temp.indexOf(':') + 1);
 
 			if (value == 'creator') {
-				creator += "<a href='" + url + "' target=_blank>" + name + "</a>, ";
+				creator += "<a href='" + url + "' target=_blank>" + name
+						+ "</a>, ";
 			} else if (value == 'contact') {
-				contact += "<a href='" + url + "' target=_blank>" + name + "</a>, ";
+				contact += "<a href='" + url + "' target=_blank>" + name
+						+ "</a>, ";
 			}
 		}
-		
+
 		else if (value == 'descriptor') {
 			var tempDescriptor = jsonBinding['literal'];
 			descriptor += "<a href='" + instanceURL_Dataset + tempDescriptor
@@ -166,13 +168,14 @@ function getAttributesForContentPage(jsonBinding, element) {
 			var temp = jsonBinding['uri'];
 			temp = temp.substring(temp.indexOf("#") + 1);
 			temp = decodeURIComponent(temp);
-			
-			//replaceAll + from temp
+
+			// replaceAll + from temp
 			while (temp.indexOf("+") != -1) {
 				temp = temp.replace('+', " ");
 			}
-			//keyword += temp + ", ";
-			keyword += "<a href='" + instanceURL_Tag + temp + "' target=_blank>" + temp + "</a>, ";
+			// keyword += temp + ", ";
+			keyword += "<a href='" + instanceURL_Tag + temp
+					+ "' target=_blank>" + temp + "</a>, ";
 		}
 	});
 }
@@ -212,6 +215,6 @@ function contentsPageAttributesJsonParser(json, element) {
 		main_html = main_html.replace("$keyword$", keyword.substring(0, keyword
 				.lastIndexOf(",")));
 	else if (element == 'descriptor')
-		main_html = main_html.replace("$descriptor$", descriptor.substring(0, descriptor
-				.lastIndexOf(",")));
+		main_html = main_html.replace("$descriptor$", descriptor.substring(0,
+				descriptor.lastIndexOf(",")));
 }

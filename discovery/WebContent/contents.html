@@ -17,7 +17,11 @@
 		var url = window.location.href;
 		tagID = url.substring(url.indexOf("?") + 3, url.indexOf("&"));
 		var title = url.substring(url.indexOf("&t") + 3);
-
+		
+		var pageHeaderHTML = $("#pageHeaderTable").html();
+		pageHeaderHTML = pageHeaderHTML.replace("$acrlink$", instanceURL_Collection + tagID);
+		$("#pageHeaderTable").html(pageHeaderHTML);
+		
 		$("#contents-loading").show();
 		$.ajax({
 			type : "GET",
@@ -33,18 +37,16 @@
 		document.title = "Contents: " + displayTitle;
 
 	});
-	
+
 	function contentsPageErrorParser(jqXHR, textStatus, errorThrown) {
 		if (jqXHR.responseText == 'Unauthorized') {
 			var currentURL = window.location.href;
 			query = currentURL.substring(currentURL.indexOf("?"));
 			window.location.replace("login.html" + query);
-		}
-		else {
+		} else {
 			window.location.replace("error.html");
 		}
 	}
-	
 </script>
 
 <body>
@@ -58,7 +60,16 @@
 			style="border: none;">
 	</div>
 	<div style='margin-top: 12%;' class="page-header">
-		<h1 style="margin-left: 20px;" id="pageheader"></h1>
+		<table id='pageHeaderTable'>
+			<tr>
+				<td>
+					<h1 style="margin-left: 20px;" id="pageheader"></h1>
+				</td>
+				<td>
+					<a href="$acrlink$" target=_blank><img src="img/open_in_acr.png" title="View in ACR" alt="View in ACR" border="0" /></a>
+				</td>
+			</tr>
+		</table>
 	</div>
 	<div id="contents-loading"
 		style="width: 300px; margin-left: auto; margin-right: auto; margin-top: 200px; display: none">
