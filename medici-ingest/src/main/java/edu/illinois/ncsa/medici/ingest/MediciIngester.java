@@ -3,27 +3,23 @@ package edu.illinois.ncsa.medici.ingest;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.Set;
 
-import javax.imageio.stream.FileImageInputStream;
-
-import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
@@ -31,15 +27,21 @@ import org.tupeloproject.kernel.BlobWriter;
 import org.tupeloproject.kernel.ContentStoreContext;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.kernel.beans.SaveBeanPreprocessor;
+import org.tupeloproject.kernel.SubjectRemover;
+import org.tupeloproject.kernel.TripleMatcher;
+import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.kernel.beans.reflect.BeanMapping;
 import org.tupeloproject.kernel.impl.HashFileContext;
 import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.mysql.MysqlContext;
 import org.tupeloproject.mysql.NewMysqlContext;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
+import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.Tuple;
+
+import com.hp.hpl.jena.vocabulary.DC;
 
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -56,17 +58,30 @@ public class MediciIngester {
     private static boolean     USE_DATABASE   = false;
 
     private static Resource    DCTERMS_ID     = Resource.uriRef("http://purl.org/dc/terms/identifier");
+    private static Resource    FRBRCORE_ID     = Resource.uriRef("http://purl.org/vocab/frbr/core#embodimentOf");
 
     private static BeanSession beansession;
     private static MimeMap     mimemap;
     private static PersonBean  creator;
     private static String      stringContext;
     private static String      server;
+    
+    private static boolean     ingestOnlyMissing = false;
+    private static boolean     deleteCollectionAndChilds = false;
+    private static boolean     countDatasetWithinCollection = false;
+    private static Map<String, String> ingestedCollections = new HashMap<String, String>();
+    private static int dataSetCount = 0;
 
     public static void main(String[] args) throws Exception {
         // load properties
         final Properties props = new Properties();
         props.load(new FileInputStream("server.properties"));
+        
+        /*InputStream in = MediciIngester.class.getClassLoader().getResourceAsStream("server.properties");
+        
+        // load properties
+        final Properties props = new Properties();
+        props.load(in);*/
 
         // create beansession
         beansession = createBeanSession(props);
@@ -92,15 +107,80 @@ public class MediciIngester {
         }
         server += "extractor/extract"; //$NON-NLS-1$
         stringContext = URLEncoder.encode(CETBeans.contextToNTriples(beansession.getContext()), "UTF-8"); //$NON-NLS-1$
+        
+        
+        //This loop checks for the operation that needs to be performed based on the second argument 
+        for(String arg: args){
+            
+            if(arg.equals("missing")){
+                ingestOnlyMissing = true;
+                break;
+            }else if(arg.equals("delete")){                
+                Scanner user_input = new Scanner( System.in );
+                System.out.println("Are you sure you want to delete Collection and all its child? (Y/N)");
+                String yesOrNo = user_input.next();
+                if(yesOrNo!=null && yesOrNo.equalsIgnoreCase("Y")){
+                    deleteCollectionAndChilds = true;
+                    break;
+                }else{
+                    System.out.println("Exiting");
+                    System.exit(0);
+                }
+            }else if(arg.equals("count")){
+                countDatasetWithinCollection = true;
+                break;
+            }
+            
+        }
 
         // go through arguments
-        for (String arg : args) {
-            File file = new File(arg);
-            if (file.isDirectory()) {
-                uploadCollection(file, "", null);
-            } else {
-                uploadFile(file, "");
+        // Based on the operation that needs to be performed respective methods are invoked
+        if(ingestOnlyMissing){
+            //Enters into this only when the missing collection or dataset needs to be ingested
+            Unifier uf = new Unifier();
+            uf.addPattern("c", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/Collection"));
+            uf.addPattern("c", Dc.TITLE, "t");
+            uf.setColumnNames("c", "t");
+            
+            beansession.getContext().perform(uf);
+            
+            for (Tuple<Resource> row : uf.getResult()) {
+                    ingestedCollections.put(row.get(1).getString(), row.get(0).getString());
             }
+            
+            for (String arg : args) {
+                File file = new File(arg);
+                if (file.isDirectory()) {
+                    uploadMissingCollection(file, "", null);
+                } else {
+                    uploadFile(file, "");
+                }
+            }
+            
+        }else if(countDatasetWithinCollection){
+            //Enters when the number of datasets is to be counted, argument should be the tagURI of the collection
+            datasetCountWithinCollection(args[0]);
+            
+            System.out.println("Total number of datasets in given collection: "+dataSetCount);
+            
+        }else if(deleteCollectionAndChilds){
+            
+            //Enters when the collection and all its child needs to be deregistered (once the dataset is ingested it can't be deleted only deregistered) from medici
+            //Argument should be tagURI of the Collection
+            deleteDatasets(args[0]);
+            
+        } else {
+                        
+            //Enters when the collection is to be ingested, argument should be the absolute path to the collection
+            for (String arg : args) {
+                File file = new File(arg);
+                if (file.isDirectory()) {
+                    uploadCollection(file, "", null);
+                } else {
+                    uploadFile(file, "");
+                }
+            }
+            
         }
     }
 
@@ -132,7 +212,6 @@ public class MediciIngester {
                 uploadCollection(file, path, Resource.uriRef(collection.getUri()));
             } else {
                 numberOfFiles += 1;
-                // fileStats[1] += file.length();
                 beans.add(uploadFile(file, path));
             }
         }
@@ -145,6 +224,88 @@ public class MediciIngester {
 
         return numberOfFiles;
     }
+    
+    private static int uploadMissingCollection(File dir, String path, Resource parent) throws OperatorException, IOException {
+        path += "/" + dir.getName();
+        
+        Resource collectionUri = null;
+
+        CollectionBean collection = new CollectionBean();
+        collection.setCreationDate(new Date(dir.lastModified()));
+        collection.setCreator(creator);
+        collection.setLastModifiedDate(new Date(dir.lastModified()));
+        collection.setTitle(path);
+        if(ingestedCollections.get(path)!=null) {
+            collectionUri = Resource.uriRef(ingestedCollections.get(path));
+            System.out.println("Already present");
+        }else{
+            beansession.save(collection);
+            if (parent != null) {
+                beansession.getContext().addTriple(parent, DcTerms.HAS_PART, Resource.uriRef(collection.getUri()));
+            }
+            System.out.println(String.format("Collection : %s ", collection.getTitle()));
+        }        
+
+        System.out.println(String.format("Collection : %s ", collection.getTitle()));
+
+        Collection<DatasetBean> beans = new HashSet<DatasetBean>();
+
+        int numberOfFiles = 0;
+
+        for (File file : dir.listFiles()) {
+            if (file.getName().startsWith(".")) {
+                continue;
+            }
+            if (file.isDirectory()) {
+                if(collectionUri!=null)
+                    uploadCollection(file, path, collectionUri);
+                else
+                    uploadCollection(file, path, Resource.uriRef(collection.getUri()));
+                
+                
+            } else {
+                TripleMatcher tf = new TripleMatcher();
+                tf.setObject(Resource.literal(file.getName()));
+                tf.setPredicate(Dc.TITLE);
+                beansession.getContext().perform(tf);
+                
+                if(tf.getResult()!=null && tf.getResult().size()!=0){
+                    boolean isPresent = false;
+                    for (Tuple<Resource> row : tf.getResult()) {                            
+                            TripleMatcher tf1 = new TripleMatcher();
+                            tf1.setSubject(collectionUri);
+                            tf1.setPredicate(DcTerms.HAS_PART);
+                            tf1.setObject(Resource.uriRef(row.get(0).getString()));
+                            beansession.getContext().perform(tf1);
+                            
+                            if(tf1.getResult()!=null && tf1.getResult().size()!=0){
+                                isPresent = true;
+                                break;
+                            }                              
+                    }
+                    if(!isPresent){
+                        beans.add(uploadFile(file, path));
+                    }  
+                }else{
+                    beans.add(uploadFile(file, path));
+                }
+            }
+        }
+        collection.setMemberCount(numberOfFiles);
+
+        if(collectionUri==null) {            
+            new CollectionBeanUtil(beansession).addBeansToCollection(collection, beans);
+            beansession.getContext().addTriple(Resource.uriRef(collection.getUri()), FRBRCORE_ID, path);
+            log.info("Collection: " + path + " ---- Number of files:" + numberOfFiles);
+        }else{
+            collection.setUri(ingestedCollections.get(path));
+            new CollectionBeanUtil(beansession).addBeansToCollection(collection, beans);
+            beansession.getContext().addTriple(Resource.uriRef(collection.getUri()), FRBRCORE_ID, path);
+            log.info("Collection: " + path + " ---- Number of files:" + numberOfFiles);
+        }
+
+        return numberOfFiles;
+    }
 
     private static DatasetBean uploadFile(File file, String path) throws OperatorException, IOException {
         final DatasetBean dataset = new DatasetBean();
@@ -152,7 +313,7 @@ public class MediciIngester {
         dataset.setDate(new Date(file.lastModified()));
         dataset.setFilename(file.getName());
         dataset.setLabel(file.getName());
-        dataset.setMimeType(mimemap.getContentTypeFor(file.getName()));
+        dataset.setMimeType(mimemap.getContentTypeFor(file.getName().toLowerCase())); //Converting to lowercase to fix mime type bug
         dataset.setSize(file.length());
         dataset.setTitle(file.getName());
 
@@ -189,6 +350,53 @@ public class MediciIngester {
             }
         }
         return dataset;
+    }    
+    
+    private static void datasetCountWithinCollection(String tagURI) throws OperatorException{
+        TripleMatcher tf = new TripleMatcher();
+        tf.setSubject(Resource.uriRef(tagURI));
+        tf.setPredicate(DcTerms.HAS_PART);
+        beansession.getContext().perform(tf);
+        DatasetBean dataset = null;
+        for (Tuple<Resource> row : tf.getResult()) {
+            if(row.get(2).getString().contains("tag:cet.ncsa.uiuc.edu,2008:/bean/Dataset")){
+                dataset = (DatasetBean)beansession.fetchBean(Resource.uriRef(row.get(2).getString()));
+                if(dataset.getTitle().contains(".JPG") && dataset.getMimeType().contains("application/octet-stream")){
+                    System.out.println(dataset.getMimeType());
+                    dataset.setMimeType("image/jpeg");
+                    beansession.save(dataset);
+                    dataSetCount++;
+                }else{
+                    System.out.println(dataset.getMimeType());
+                    System.out.println(dataset.getTitle());
+                }
+                dataset = null;
+                if(dataSetCount%500==0){
+                    System.gc();
+                }
+            }else{
+                datasetCountWithinCollection(row.get(2).getString());
+            }
+        }
+    }
+    
+    
+    private static void deleteDatasets(String tagURI) throws OperatorException{
+        TripleMatcher tf = new TripleMatcher();
+        tf.setSubject(Resource.uriRef(tagURI));
+        tf.setPredicate(DcTerms.HAS_PART);
+        beansession.getContext().perform(tf);
+        
+        for (Tuple<Resource> row : tf.getResult()) {
+                deleteDatasets(row.get(2).getString());                
+                //System.out.println(row.get(0).getString()+"--->"+row.get(1).getString()+"--->"+row.get(2).getString());
+        }
+        
+        SubjectRemover s = new SubjectRemover();
+        s.setSubject(Resource.uriRef(tagURI));
+        beansession.getContext().perform(s);
+        beansession.delete(Resource.uriRef(tagURI));
+        beansession.deregister(Resource.uriRef(tagURI));
     }
 
     private static void creator(Properties props) throws OperatorException {

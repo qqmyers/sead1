@@ -1,0 +1,32 @@
+=== medici-ingest ===
+Medici-ingest is a java application used to ingest the collection and datasets
+to medici. Its just a hack which can be used by user with admin access to medici
+to ingest the data in a fast manner
+
+=== usage ===
+There are in all four modes in which this applciation can be used which are:
+1) To do the fresh ingestion of the given dataset
+2) To ingest only missing or remaining collections/datsets within given dataset
+3) Count total number of datasets in the collection by passing the tagURI
+4) Deleting the collection from medici by passing the tagURI
+
+	=== Fresh Ingestion ===
+	Just pass the absolute path of the dataset as an argument
+	eg: java -jar medici-ingest.jar /home/scratch/nced_repo/angelo_reserve
+	
+	=== Ingest Missing datasets ===
+	Pass "missing" as second argument
+	eg: java -jar medici-ingest.jar /home/scratch/nced_repo/angelo_reserve missing
+	
+	=== Dataset count ===
+	Pass "count" as second argument & collection's tagURI as first argument
+	eg: java -jar medici-ingest.jar tag:cet.ncsa.uiuc.edu,2008:/bean/Collection/8fbbb675-a7e1-41ef-bb35-d5pp23ac7d81b count
+	
+	=== Delete dataset ===
+	Pass "delete" as second argument & collection's tagURI as first argument
+	eg: java -jar medici-ingest.jar tag:cet.ncsa.uiuc.edu,2008:/bean/Collection/8fbbb675-a7e1-41ef-bb35-d5pp23ac7d81b delete
+	
+
+
+Contributors: Rob Kooper, Saurabh Malviya
+SVN link: https://opensource.ncsa.illinois.edu/svn/mmdb/trunk/medici-ingest
