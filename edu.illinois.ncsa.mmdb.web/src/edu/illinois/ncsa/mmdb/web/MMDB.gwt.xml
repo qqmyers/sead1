@@ -40,7 +40,7 @@
 	<!-- Load the Google Maps GWT bindings from the gwt-google-apis project -->
 	<inherits name="com.google.gwt.maps.GoogleMaps" />
 	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
-
+	
 	<!-- Inherit the default GWT style sheet. You can change -->
 	<!-- the theme of your GWT application by uncommenting -->
 	<!-- any one of the following lines. -->

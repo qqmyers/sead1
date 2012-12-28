@@ -221,7 +221,7 @@ public class ListCollectionsPage extends Composite {
         view = new PagingCollectionTableView(dispatchasync);
         view.addStyleName("datasetTable");
         PagingCollectionTablePresenter presenter = new PagingCollectionTablePresenter(
-                        view, dispatchasync, eventBus);
+                view, dispatchasync, eventBus);
         presenter.bind();
 
         view.setNumberOfPages(0);

@@ -50,6 +50,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -128,14 +129,16 @@ public class CollectionPage extends Composite {
 
         mainContent.add(datasetTableView);
 
-        mainContent.add(createSocialAnnotationsPanel());
-
         retrieveCollection();
 
         final UserMetadataWidget um = new UserMetadataWidget(uri, dispatchasync, eventBus);
         um.setWidth("100%");
 
+        //mainContent.add(createSubcollectionsPanel(um));
+        mainContent.add(createCollectionContextPanel(um));
         mainContent.add(createMetadataPanel(um));
+
+        mainContent.add(createSocialAnnotationsPanel());
 
         rbac.doIfAllowed(Permission.EDIT_METADATA, uri, new PermissionCallback() {
             @Override
@@ -145,6 +148,47 @@ public class CollectionPage extends Composite {
 
             }
         });
+
+        try {
+            PropertiesReader.initializePropertiesFile();
+        } catch (Exception ex) {
+
+        }
+    }
+
+    private Widget createCollectionContextPanel(UserMetadataWidget um) {
+        DisclosurePanel userInformationPanel = new DisclosurePanel("Collection Context");
+        userInformationPanel.addStyleName("datasetDisclosurePanel");
+        userInformationPanel.setOpen(true);
+        userInformationPanel.setAnimationEnabled(true);
+
+        VerticalPanel userPanel = new VerticalPanel();
+        userPanel.addStyleName("userSpecifiedBody");
+        userInformationPanel.add(userPanel);
+        collectionContextLink = new Anchor();
+        userPanel.add(collectionContextLink);
+
+        userPanel.add(um);
+
+        return userInformationPanel;
+    }
+
+    Anchor        collectionContextLink = null;
+
+    Anchor        subCollectionLink     = null;
+    VerticalPanel subCollectionLinksPanel;
+
+    private Widget createSubcollectionsPanel(UserMetadataWidget um) {
+        DisclosurePanel userInformationPanel = new DisclosurePanel("Sub-Collections");
+        userInformationPanel.addStyleName("datasetDisclosurePanel");
+        userInformationPanel.setOpen(true);
+        userInformationPanel.setAnimationEnabled(true);
+
+        subCollectionLinksPanel = new VerticalPanel();
+        subCollectionLinksPanel.addStyleName("userSpecifiedBody");
+        userInformationPanel.add(subCollectionLinksPanel);
+
+        return userInformationPanel;
     }
 
     private Widget createMetadataPanel(UserMetadataWidget um) {
@@ -156,6 +200,7 @@ public class CollectionPage extends Composite {
         VerticalPanel userPanel = new VerticalPanel();
         userPanel.addStyleName("userSpecifiedBody");
         userInformationPanel.add(userPanel);
+
         userPanel.add(um);
 
         return userInformationPanel;
@@ -301,6 +346,21 @@ public class CollectionPage extends Composite {
             dateLabel.setText(formatter.format(collection.getCreationDate()));
         }
         numDatasetsLabel.setText(collectionSize + " dataset(s)");
+
+        try {
+            String ncedURL = PropertiesReader.getNCEDURL();
+            ncedURL = ncedURL.endsWith("/") ? ncedURL : ncedURL + "/";
+
+            String collectionContextURI = ncedURL + "contents.html?i=" + collection.getUri() + "&t=" + collection.getTitle();
+            String collectionContextText = "View Collection Context in NCED";
+            collectionContextLink.setHref(collectionContextURI);
+            collectionContextLink.setTarget("_blank");
+            collectionContextLink.setText(collectionContextText);
+        } catch (Exception ex) {
+            //Handle exception
+            String exc = ex.getMessage();
+            System.out.println(exc);
+        }
     }
 
     private void initializePreviewPanel(final GetCollectionResult result) {

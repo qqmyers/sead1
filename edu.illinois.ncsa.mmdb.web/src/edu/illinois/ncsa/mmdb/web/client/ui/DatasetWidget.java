@@ -38,6 +38,7 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -62,6 +63,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
@@ -71,6 +73,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionServiceResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
@@ -89,6 +93,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
@@ -229,6 +234,13 @@ public class DatasetWidget extends Composite {
                 });
             }
         });
+
+        try {
+            addCollectionContexts(result.getDataset().getUri());
+        } catch (Exception ex) {
+
+        }
+
         titlePanel.add(titleLabel);
         leftColumn.add(titlePanel);
 
@@ -279,6 +291,8 @@ public class DatasetWidget extends Composite {
         embedWidget.add(embedAnchor);
 
         leftColumn.add(embedBox);
+
+        leftColumn.add(createCollectionContextPanel());
 
         // metadata        
         final UserMetadataWidget um = new UserMetadataWidget(uri, service, eventBus);
@@ -387,6 +401,48 @@ public class DatasetWidget extends Composite {
         // FIXME allow owner to do stuff
     }
 
+    private void addCollectionContexts(String datasetURI) {
+        service.execute(new GetCollections(datasetURI),
+                new AsyncCallback<GetCollectionsResult>() {
+
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        GWT.log("Error loading collections the dataset is part of", arg0);
+                    }
+
+                    @Override
+                    public void onSuccess(GetCollectionsResult arg0) {
+                        ArrayList<CollectionBean> collections = arg0
+                                .getCollections();
+
+                        try {
+                            for (CollectionBean collection : collections ) {
+                                String ncedURL = PropertiesReader.getNCEDURL();
+                                ncedURL = ncedURL.endsWith("/") ? ncedURL : ncedURL + "/";
+
+                                String collectionContextURI = ncedURL + "contents.html?i=" + collection.getUri() + "&t=" + collection.getTitle();
+                                String collectionContextText = collection.getTitle();
+
+                                collectionContextText = collectionContextText.contains("/") ? collectionContextText.substring(collectionContextText.lastIndexOf("/") + 1) : collectionContextText;
+
+                                collectionContextLink = new Anchor();
+                                collectionContextLink.setHref(collectionContextURI);
+                                collectionContextLink.setTarget("_blank");
+                                collectionContextLink.setText(collectionContextText);
+
+                                collectionContextLinksPanel.add(collectionContextLink);
+                            }
+                        } catch (Exception ex) {
+                            //Handle exception
+                            String exc = ex.getMessage();
+                            System.out.println(exc);
+                        }
+
+                    }
+                });
+
+    }
+
     protected void showRerunExtraction() {
         ConfirmDialog dialog = new ConfirmDialog("Rerun Extraction", "Are you sure you want to rerun the extraction on this dataset? Results can take a few seconds to minutes to show up.");
 
@@ -441,6 +497,22 @@ public class DatasetWidget extends Composite {
         });
 
         dialog.show();
+    }
+
+    Anchor        collectionContextLink = null;
+    VerticalPanel collectionContextLinksPanel;
+
+    private Widget createCollectionContextPanel() {
+        DisclosurePanel userInformationPanel = new DisclosurePanel("Collection Context");
+        userInformationPanel.addStyleName("datasetDisclosurePanel");
+        userInformationPanel.setOpen(true);
+        userInformationPanel.setAnimationEnabled(true);
+
+        collectionContextLinksPanel = new VerticalPanel();
+        collectionContextLinksPanel.addStyleName("userSpecifiedBody");
+        userInformationPanel.add(collectionContextLinksPanel);
+
+        return userInformationPanel;
     }
 
     private Composite createUserViewPanel() {
