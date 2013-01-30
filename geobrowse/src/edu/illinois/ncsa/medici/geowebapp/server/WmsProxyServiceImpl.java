@@ -1,14 +1,8 @@
 package edu.illinois.ncsa.medici.geowebapp.server;
 
-import it.geosolutions.geoserver.rest.GeoServerRESTReader;
-import it.geosolutions.geoserver.rest.decoder.RESTDataStoreList;
-import it.geosolutions.geoserver.rest.decoder.utils.NameLinkElem;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -131,13 +125,10 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 		return layerInfo;
 	}
 
-	public static void main(String[] args) throws MalformedURLException {
-		GeoServerRESTReader reader = new GeoServerRESTReader("http://sead.ncsa.illinois.edu/geoserver/rest", "", "");
-		RESTDataStoreList datastores = reader.getDatastores("medici");
-		List<String> names = datastores.getNames();
-		for(int i=0;i< names.size();i++) {
-			System.out.println(names.get(i));
-		}
-		
+	@Override
+	public LayerInfo[] getLayers(String tag) {
+		// TODO Auto-generated method stub
+		return null;
 	}
+
 }
