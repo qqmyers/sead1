@@ -14,4 +14,6 @@ public interface WmsProxyServiceAsync {
 
 	void getCapabilities(AsyncCallback<LayerInfo[]> callback);
 
+	void getLayers(String tag, AsyncCallback<LayerInfo[]> callback);
+
 }
