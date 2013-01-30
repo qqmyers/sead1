@@ -54,6 +54,7 @@ public class Geo_webapp implements EntryPoint {
 	private static final String EPSG_900913 = "EPSG:900913";
 
 	public final static String URL = "http://sead.ncsa.illinois.edu/geoserver/wms?request=GetCapabilities";
+	public final static String REST_URL = "http://sead.ncsa.illinois.edu/geoserver/rest";
 
 	private final WmsProxyServiceAsync wmsProxySvc = (WmsProxyServiceAsync) GWT
 			.create(WmsProxyService.class);
