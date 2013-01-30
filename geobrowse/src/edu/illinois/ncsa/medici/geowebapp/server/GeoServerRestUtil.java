@@ -24,7 +24,7 @@ public class GeoServerRestUtil {
 		try {
 			httpclient.getCredentialsProvider().setCredentials(
 					new AuthScope("sead.ncsa.illinois.edu", 80),
-					new UsernamePasswordCredentials("admin", "NCSAsead"));
+					new UsernamePasswordCredentials("", ""));
 
 			HttpGet httpget = new HttpGet(URL + "/workspaces/" + workspaceName
 					+ "/datastores.json");
