@@ -87,23 +87,26 @@ public class SearchHandler implements ActionHandler<Search, SearchResult> {
             if (s.startsWith("tag:")) {
                 uf.addPattern("s", Tags.TAGGED_WITH_TAG, TagEventBeanUtil.createTagUri(s.substring(4)));
             } else {
-                rawtext += " " + s;
+                rawtext += " *" + s + "*";
             }
         }
+        rawtext = rawtext.trim();
 
         // search for ids using RDF matcher.
-        Set<String> idsfound = new HashSet<String>();
+        Set<String> idsfound = null;
         if (uf.getPatterns().size() > 0) {
             try {
+                idsfound = new HashSet<String>();
                 for (Tuple<Resource> r : TupeloStore.getInstance().unifyExcludeDeleted(uf, "s") ) {
                     idsfound.add(r.get(0).getString());
                 }
             } catch (OperatorException e) {
                 log.error("Could not search for tags.", e);
+                idsfound = null;
             }
         }
 
-        if (rawtext.trim().equals("")) {
+        if (rawtext.equals("")) {
             // only tag search
             for (String id : idsfound ) {
                 searchResult.addHit(id);
@@ -117,7 +120,7 @@ public class SearchHandler implements ActionHandler<Search, SearchResult> {
             Iterable<Hit> result = search.search(rawtext);
             // merge lucene with tags
             for (Hit hit : result ) {
-                if (!idsfound.contains(hit.getId())) {
+                if ((idsfound != null) && !idsfound.contains(hit.getId())) {
                     continue;
                 }
                 searchResult.addHit(hit.getId());
