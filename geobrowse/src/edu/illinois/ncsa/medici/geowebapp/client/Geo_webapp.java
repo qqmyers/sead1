@@ -8,7 +8,6 @@ import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
 import org.gwtopenmaps.openlayers.client.Projection;
-import org.gwtopenmaps.openlayers.client.control.LayerSwitcher;
 import org.gwtopenmaps.openlayers.client.control.MousePosition;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.gwtopenmaps.openlayers.client.layer.OSM;
@@ -23,16 +22,33 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -40,6 +56,8 @@ import edu.illinois.ncsa.medici.geowebapp.client.event.LayerOpacityChangeEvent;
 import edu.illinois.ncsa.medici.geowebapp.client.event.LayerOpacityChangeHandler;
 import edu.illinois.ncsa.medici.geowebapp.client.event.LayerVisibilityChangeEvent;
 import edu.illinois.ncsa.medici.geowebapp.client.event.LayerVisibilityChangeHandler;
+import edu.illinois.ncsa.medici.geowebapp.client.service.MediciProxyService;
+import edu.illinois.ncsa.medici.geowebapp.client.service.MediciProxyServiceAsync;
 import edu.illinois.ncsa.medici.geowebapp.client.service.WmsProxyService;
 import edu.illinois.ncsa.medici.geowebapp.client.service.WmsProxyServiceAsync;
 import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
@@ -53,11 +71,14 @@ import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
 public class Geo_webapp implements EntryPoint {
 	private static final String EPSG_900913 = "EPSG:900913";
 
-	public final static String URL = "http://sead.ncsa.illinois.edu/geoserver/wms?request=GetCapabilities";
+	public final static String WMS_URL = "http://sead.ncsa.illinois.edu/geoserver/wms?request=GetCapabilities";
 	public final static String REST_URL = "http://sead.ncsa.illinois.edu/geoserver/rest";
 
 	private final WmsProxyServiceAsync wmsProxySvc = (WmsProxyServiceAsync) GWT
 			.create(WmsProxyService.class);
+
+	private final MediciProxyServiceAsync mediciProxySvc = (MediciProxyServiceAsync) GWT
+			.create(MediciProxyService.class);
 
 	private MapWidget mapWidget;
 
@@ -89,21 +110,61 @@ public class Geo_webapp implements EntryPoint {
 					}
 				});
 
-		wmsProxySvc.getCapabilities(new AsyncCallback<LayerInfo[]>() {
+		mediciProxySvc.getTags(new AsyncCallback<String[]>() {
+			@Override
+			public void onSuccess(String[] result) {
+				DecoratorPanel tagPanel = null;
+				if (result != null) {
+					MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+					for (String s : result) {
+						oracle.add(s);
+					}
+					tagPanel = createTagPanel(oracle);
+				} else {
+					tagPanel = createTagPanel();
+				}
+				RootPanel.get("tag").add(tagPanel);
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
+				DecoratorPanel tagPanel = createTagPanel();
+				RootPanel.get("tag").add(tagPanel);
+			}
+		});
+
+		DecoratorPanel dp2 = createBgSwitchPanel();
+		RootPanel.get("bg").add(dp2);
+		buildMapUi(null);
+
+		Window.addResizeHandler(new ResizeHandler() {
+			@Override
+			public void onResize(ResizeEvent event) {
+				int newWidth = RootPanel.get("map").getOffsetWidth();
+				mapWidget.setWidth((newWidth - 2) + "px");
+			}
+		});
+	}
+
+	private void buildMapUi(String tag) {
+		System.out.println("** Clean up ***");
+		cleanApp();
+		String encodedTag = null;
+		if (tag != null)
+			encodedTag = URL.encode(tag);
+		wmsProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
 			@Override
 			public void onSuccess(LayerInfo[] result) {
 				if (result != null) {
 					// showMap(result);
-
+					System.out.println("** Building UI ***");
 					buildGwtmap(result);
+
 					DecoratorPanel dp = createLayerSwitcher(result);
 					RootPanel.get("layers").add(dp);
-					FlowPanel hp = createLegendPanel(result);
-					RootPanel.get("info").add(hp);
-					DecoratorPanel dp2 = createBgSwitchPanel();
-					RootPanel.get("bg").add(dp2);
+					// FlowPanel hp = createLegendPanel(result);
+					// RootPanel.get("info").add(hp);
 				}
-
 			}
 
 			@Override
@@ -112,14 +173,96 @@ public class Geo_webapp implements EntryPoint {
 
 			}
 		});
+	}
 
+	private void cleanApp() {
+		RootPanel.get("layers").clear();
+		RootPanel.get("info").clear();
+		RootPanel.get("map").clear();
+
+	}
+
+	protected DecoratorPanel createTagPanel(MultiWordSuggestOracle oracle) {
+		DecoratorPanel dp = new DecoratorPanel();
+
+		VerticalPanel vp = new VerticalPanel();
+		vp.setSpacing(10);
+
+		vp.add(new HTML("<h3>Filter by Tag</h3>"));
+		vp.add(new HTML("<hr>"));
+
+		HorizontalPanel hp = new HorizontalPanel();
+
+		final SuggestBox sb = new SuggestBox(oracle);
+//		sb.addKeyPressHandler(new KeyPressHandler() {
+//
+//			@Override
+//			public void onKeyPress(KeyPressEvent event) {
+//				if (event.getCharCode() == KeyCodes.KEY_ENTER) {
+//					buildMapUi(sb.getText());
+//				}
+//
+//			}
+//		});
+		Button bt = new Button("Filter");
+		bt.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				buildMapUi(sb.getText());
+			}
+		});
+		hp.add(sb);
+		hp.add(bt);
+
+		vp.add(hp);
+		dp.add(vp);
+		return dp;
+	}
+
+	protected DecoratorPanel createTagPanel() {
+		DecoratorPanel dp = new DecoratorPanel();
+
+		VerticalPanel vp = new VerticalPanel();
+		vp.setSpacing(10);
+
+		vp.add(new HTML("<h3>Filter by Tag</h3>"));
+		vp.add(new HTML("<hr>"));
+
+		HorizontalPanel hp = new HorizontalPanel();
+
+		final TextBox tb = new TextBox();
+		tb.addKeyPressHandler(new KeyPressHandler() {
+
+			@Override
+			public void onKeyPress(KeyPressEvent event) {
+				if (event.getCharCode() == KeyCodes.KEY_ENTER) {
+					buildMapUi(tb.getText());
+				}
+
+			}
+		});
+		Button bt = new Button("Filter");
+		bt.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				buildMapUi(tb.getText());
+			}
+		});
+		hp.add(tb);
+		hp.add(bt);
+
+		vp.add(hp);
+		dp.add(vp);
+		return dp;
 	}
 
 	protected DecoratorPanel createBgSwitchPanel() {
 		DecoratorPanel dp = new DecoratorPanel();
 
-		VerticalPanel vp = new VerticalPanel();
-		vp.setSpacing(10);
+		HorizontalPanel hp = new HorizontalPanel();
+		hp.setSpacing(10);
 
 		ListBox lb = new ListBox();
 		lb.addItem("Open Street Map", "osm");
@@ -137,33 +280,33 @@ public class Geo_webapp implements EntryPoint {
 			}
 		});
 
-		vp.add(new HTML("<h2>Background Layer</h2>"));
-		vp.add(new HTML("<hr>"));
-		vp.add(lb);
-		dp.add(vp);
+		hp.add(new HTML("<h3>Background:</h3>"));
+		hp.add(lb);
+		dp.add(hp);
 		return dp;
 	}
 
-	protected FlowPanel createLegendPanel(LayerInfo[] result) {
-		List<String> layerNames = getLayerNames(result);
-		FlowPanel hp = new FlowPanel();
-		for (String n : layerNames) {
-			VerticalPanel vp = new VerticalPanel();
-			HTML label = new HTML("<b><center>" + n + "</center></b>");
-
-			vp.add(label);
-
-			String url = "http://sead.ncsa.illinois.edu/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
-					+ n;
-			Image img = new Image(url);
-
-			vp.add(img);
-
-			hp.add(vp);
-
-		}
-		return hp;
-	}
+	// protected FlowPanel createLegendPanel(LayerInfo[] result) {
+	// List<String> layerNames = getLayerNames(result);
+	// FlowPanel hp = new FlowPanel();
+	// for (String n : layerNames) {
+	// VerticalPanel vp = new VerticalPanel();
+	// HTML label = new HTML("<b><center>" + n + "</center></b>");
+	//
+	// vp.add(label);
+	//
+	// String url =
+	// "http://sead.ncsa.illinois.edu/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
+	// + n;
+	// Image img = new Image(url);
+	//
+	// vp.add(img);
+	//
+	// hp.add(vp);
+	//
+	// }
+	// return hp;
+	// }
 
 	private List<String> getLayerNames(LayerInfo[] result) {
 		List<String> layerNames = new ArrayList<String>();
@@ -185,11 +328,12 @@ public class Geo_webapp implements EntryPoint {
 		FlexTable ft = new FlexTable();
 		ft.setWidget(0, 0, new HTML("<b><center>Show?</center></b>"));
 		ft.setWidget(0, 1, new HTML("<b><center>Opacity</center></b>"));
-		ft.setWidget(0, 2, new HTML("<b><center>Name</center></b>"));
+		ft.setWidget(0, 2, new HTML("<b><center>Name/Legend</center></b>"));
 		// VerticalPanel vp = new VerticalPanel();
 		// build layer switcher with reverse order
 		// since the top layer should be on top of the list
-		for (final String name : layerNames) {
+		for (int i = result.length - 1; i >= 0; i--) {
+			final String name = result[i].getName();
 			int currentRow = ft.getRowCount();
 			ToggleButton vizToggleButton = new ToggleButton("Off", "On");
 			vizToggleButton.setValue(true);
@@ -204,7 +348,9 @@ public class Geo_webapp implements EntryPoint {
 			});
 
 			ft.setWidget(currentRow, 0, vizToggleButton);
+			ft.getCellFormatter().setAlignment(currentRow, 0, HasHorizontalAlignment.ALIGN_CENTER, HasVerticalAlignment.ALIGN_TOP);
 
+			
 			ListBox opacityListBox = new ListBox();
 			opacityListBox.setWidth("50px");
 			opacityListBox.addItem("1.0");
@@ -225,12 +371,25 @@ public class Geo_webapp implements EntryPoint {
 			});
 
 			ft.setWidget(currentRow, 1, opacityListBox);
+			ft.getCellFormatter().setAlignment(currentRow, 1, HasHorizontalAlignment.ALIGN_CENTER, HasVerticalAlignment.ALIGN_TOP);
 
-			HTML nameLabel = new HTML(name);
+			
+			DisclosurePanel namePanel = new DisclosurePanel(name);
+			
+//			String href = "http://sead.ncsa.illinois.edu/#dataset?id="+result[i].getUri();
+//			namePanel.setHeader(new Anchor(name, href));
 
-			ft.setWidget(currentRow, 2, nameLabel);
+			VerticalPanel legendPanel = new VerticalPanel();
+			String url = "http://sead.ncsa.illinois.edu/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
+					+ name;
+			Image img = new Image(url);
+
+			legendPanel.add(img);
+			namePanel.add(legendPanel);
+			
+			ft.setWidget(currentRow, 2, namePanel);
 		}
-		vp.add(new HTML("<h2>Layer manager</h2>"));
+		vp.add(new HTML("<h3>Layer manager</h3>"));
 		vp.add(new HTML("<hr>"));
 		vp.add(ft);
 
@@ -317,7 +476,8 @@ public class Geo_webapp implements EntryPoint {
 		defaultMapOptions.setProjection(EPSG_900913);
 		// defaultMapOptions.setAllOverlays(true);
 
-		mapWidget = new MapWidget("100%", "100%", defaultMapOptions);
+		mapWidget = new MapWidget((RootPanel.get("map").getOffsetWidth() - 2)
+				+ "px", "500px", defaultMapOptions);
 		map = mapWidget.getMap();
 
 		baseLayer = new OSM();
@@ -330,11 +490,11 @@ public class Geo_webapp implements EntryPoint {
 			Bounds orgBnd = new Bounds(layerInfo.getMinx(),
 					layerInfo.getMiny(), layerInfo.getMaxx(),
 					layerInfo.getMaxy());
-			System.out.println("Original bounds: " + orgBnd);
+			// System.out.println("Original bounds: " + orgBnd);
 			Bounds newBnd = orgBnd.transform(
 					new Projection(layerInfo.getCrs()), new Projection(
 							EPSG_900913));
-			System.out.println("New bounds: " + newBnd);
+			// System.out.println("New bounds: " + newBnd);
 			System.out.println("adding layers: " + name + " " + newBnd);
 			WMSOptions options = new WMSOptions();
 			options.setProjection(EPSG_900913);
@@ -350,16 +510,23 @@ public class Geo_webapp implements EntryPoint {
 					options);
 			if (box == null)
 				box = newBnd;
+
 			box.extend(newBnd);
+			// System.out.println("box: " + box);
+
 			map.addLayer(wms);
 		}
-		System.out.println(box);
-		Bounds bbox = new Bounds(-14376519.92, 2908438.48, -7155972.48,
-				6528496.14);
+		// System.out.println(box);
+		// Bounds bbox = new Bounds(-14376519.92, 2908438.48, -7155972.48,
+		// 6528496.14);
 		// map.zoomToMaxExtent();
 		// map.addControl(new LayerSwitcher());
-		map.zoomToExtent(bbox);
+
 		RootPanel.get("map").add(mapWidget);
+		if (box == null)
+			map.zoomToMaxExtent();
+		else
+			map.zoomToExtent(box);
 
 	}
 
