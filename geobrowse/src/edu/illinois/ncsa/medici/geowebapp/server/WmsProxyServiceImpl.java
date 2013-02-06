@@ -41,7 +41,7 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public LayerInfo[] getCapabilities() {
-		String requestUrl = Geo_webapp.URL;
+		String requestUrl = Geo_webapp.WMS_URL;
 		HttpGet httpget = new HttpGet(requestUrl);
 
 		ResponseHandler<String> responseHandler = new BasicResponseHandler();
@@ -127,8 +127,13 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public LayerInfo[] getLayers(String tag) {
-		// TODO Auto-generated method stub
-		return null;
+		List<LayerInfo> layers = null;
+		if (tag == null || tag.trim().equals("")) {
+			layers = GeoServerRestUtil.getLayers();
+		} else {
+			layers = GeoServerRestUtil.getLayersByTag(tag);
+		}
+		return layers.toArray(new LayerInfo[layers.size()]);
 	}
 
 }
