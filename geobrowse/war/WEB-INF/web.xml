@@ -14,7 +14,14 @@
 		<servlet-name>wmsProxyImpl</servlet-name>
 		<url-pattern>/geo_webapp/wmsProxy</url-pattern>
 	</servlet-mapping>
-
+	<servlet>
+		<servlet-name>mediciProxyImpl</servlet-name>
+		<servlet-class>edu.illinois.ncsa.medici.geowebapp.server.MediciProxyServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>mediciProxyImpl</servlet-name>
+		<url-pattern>/geo_webapp/mediciProxy</url-pattern>
+	</servlet-mapping>
 
 	<!-- Default page to serve -->
 	<welcome-file-list>
