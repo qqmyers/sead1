@@ -5,6 +5,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class LayerInfo implements IsSerializable {
 	String name;
 	String crs;
+	String uri;
 	double minx;
 	double miny;
 	double maxx;
@@ -61,5 +62,13 @@ public class LayerInfo implements IsSerializable {
 	public String toString() {
 		return this.name + " (" + this.crs + "): " + minx + ", " + miny + " "
 				+ maxx + ", " + maxy;
+	}
+
+	public String getUri() {
+		return uri;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
 	}
 }
