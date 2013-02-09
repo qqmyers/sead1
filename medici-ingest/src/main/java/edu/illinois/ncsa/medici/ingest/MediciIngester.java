@@ -11,6 +11,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -69,7 +70,7 @@ public class MediciIngester {
     private static boolean     ingestOnlyMissing = false;
     private static boolean     deleteCollectionAndChilds = false;
     private static boolean     countDatasetWithinCollection = false;
-    private static Map<String, String> ingestedCollections = new HashMap<String, String>();
+    private static Map<String, ArrayList<String>> ingestedCollections = new HashMap<String, ArrayList<String>>();
     private static int dataSetCount = 0;
 
     public static void main(String[] args) throws Exception {
@@ -139,14 +140,25 @@ public class MediciIngester {
             //Enters into this only when the missing collection or dataset needs to be ingested
             Unifier uf = new Unifier();
             uf.addPattern("c", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/Collection"));
-            uf.addPattern("c", Dc.TITLE, "t");
+            uf.addPattern("c", FRBRCORE_ID, "t");
             uf.setColumnNames("c", "t");
             
             beansession.getContext().perform(uf);
             
             for (Tuple<Resource> row : uf.getResult()) {
-                    ingestedCollections.put(row.get(1).getString(), row.get(0).getString());
+                    if(ingestedCollections.get(row.get(1).getString())==null){
+                        ArrayList<String> a = new ArrayList<String>();
+                        a.add(row.get(0).getString());
+                        ingestedCollections.put(row.get(1).getString(), a);
+                    }else{
+                        ArrayList<String> a = ingestedCollections.get(row.get(1).getString());
+                        a.add(row.get(0).getString());
+                        ingestedCollections.put(row.get(1).getString(), a);
+
+                        System.out.println(row.get(1).getString());
+                    }
             }
+            System.out.println(ingestedCollections.size());
             
             for (String arg : args) {
                 File file = new File(arg);
@@ -227,7 +239,7 @@ public class MediciIngester {
     
     private static int uploadMissingCollection(File dir, String path, Resource parent) throws OperatorException, IOException {
         path += "/" + dir.getName();
-        
+        //String collectionPath = "/" + dir.getName();
         Resource collectionUri = null;
 
         CollectionBean collection = new CollectionBean();
@@ -236,14 +248,44 @@ public class MediciIngester {
         collection.setLastModifiedDate(new Date(dir.lastModified()));
         collection.setTitle(path);
         if(ingestedCollections.get(path)!=null) {
-            collectionUri = Resource.uriRef(ingestedCollections.get(path));
-            System.out.println("Already present");
+            ArrayList<String> a = ingestedCollections.get(path);
+            //collectionUri = Resource.uriRef(ingestedCollections.get(path).get(0));
+            if(parent!=null){
+                boolean isPresent = false;
+                for(String tagURI: a){
+                    
+                    TripleMatcher tf = new TripleMatcher();
+                    tf.setSubject(parent);
+                    tf.setPredicate(DcTerms.HAS_PART);
+                    tf.setObject(Resource.uriRef(tagURI));
+                    beansession.getContext().perform(tf);
+                    if(tf.getResult()!=null && tf.getResult().size()!=0){
+                        isPresent = true;
+                        collectionUri = Resource.uriRef(tagURI);
+                        //System.out.println("Already present");
+                        break;
+                    }
+                }
+                if(!isPresent){
+                    beansession.save(collection);
+                    if (parent != null) {
+                        beansession.getContext().addTriple(parent, DcTerms.HAS_PART, Resource.uriRef(collection.getUri()));
+                    }
+                    System.out.println(String.format("Will be added Collection : %s ", collection.getTitle()));
+                    System.out.println(collection.getUri());
+                }
+            }else{
+                collectionUri = Resource.uriRef(ingestedCollections.get(path).get(0));
+                System.out.println("Is it here");
+            }
+            
         }else{
             beansession.save(collection);
             if (parent != null) {
                 beansession.getContext().addTriple(parent, DcTerms.HAS_PART, Resource.uriRef(collection.getUri()));
             }
-            System.out.println(String.format("Collection : %s ", collection.getTitle()));
+            System.out.println(String.format("Will be added  23 Collection : %s ", collection.getTitle()));
+            System.out.println(collection.getUri());
         }        
 
         System.out.println(String.format("Collection : %s ", collection.getTitle()));
@@ -258,34 +300,38 @@ public class MediciIngester {
             }
             if (file.isDirectory()) {
                 if(collectionUri!=null)
-                    uploadCollection(file, path, collectionUri);
+                    uploadMissingCollection(file, path, collectionUri);
                 else
-                    uploadCollection(file, path, Resource.uriRef(collection.getUri()));
+                    uploadMissingCollection(file, path, Resource.uriRef(collection.getUri()));
                 
                 
             } else {
-                TripleMatcher tf = new TripleMatcher();
-                tf.setObject(Resource.literal(file.getName()));
-                tf.setPredicate(Dc.TITLE);
-                beansession.getContext().perform(tf);
-                
-                if(tf.getResult()!=null && tf.getResult().size()!=0){
-                    boolean isPresent = false;
-                    for (Tuple<Resource> row : tf.getResult()) {                            
-                            TripleMatcher tf1 = new TripleMatcher();
-                            tf1.setSubject(collectionUri);
-                            tf1.setPredicate(DcTerms.HAS_PART);
-                            tf1.setObject(Resource.uriRef(row.get(0).getString()));
-                            beansession.getContext().perform(tf1);
-                            
-                            if(tf1.getResult()!=null && tf1.getResult().size()!=0){
-                                isPresent = true;
-                                break;
-                            }                              
-                    }
-                    if(!isPresent){
+                if(collectionUri!=null){                
+                    TripleMatcher tf = new TripleMatcher();                
+                    tf.setPredicate(Dc.TITLE);
+                    tf.setObject(Resource.literal(file.getName()));
+                    beansession.getContext().perform(tf);
+                    
+                    if(tf.getResult()!=null && tf.getResult().size()!=0){
+                        boolean isPresent = false;
+                        for (Tuple<Resource> row : tf.getResult()) {                            
+                                TripleMatcher tf1 = new TripleMatcher();
+                                tf1.setSubject(collectionUri);
+                                tf1.setPredicate(DcTerms.HAS_PART);
+                                tf1.setObject(Resource.uriRef(row.get(0).getString()));
+                                beansession.getContext().perform(tf1);
+                                
+                                if(tf1.getResult()!=null && tf1.getResult().size()!=0){
+                                    isPresent = true;
+                                    break;
+                                }                              
+                        }
+                        if(!isPresent){
+                            beans.add(uploadFile(file, path));
+                        }  
+                    }else{
                         beans.add(uploadFile(file, path));
-                    }  
+                    }
                 }else{
                     beans.add(uploadFile(file, path));
                 }
@@ -298,7 +344,7 @@ public class MediciIngester {
             beansession.getContext().addTriple(Resource.uriRef(collection.getUri()), FRBRCORE_ID, path);
             log.info("Collection: " + path + " ---- Number of files:" + numberOfFiles);
         }else{
-            collection.setUri(ingestedCollections.get(path));
+            collection.setUri(collectionUri.getString());
             new CollectionBeanUtil(beansession).addBeansToCollection(collection, beans);
             beansession.getContext().addTriple(Resource.uriRef(collection.getUri()), FRBRCORE_ID, path);
             log.info("Collection: " + path + " ---- Number of files:" + numberOfFiles);
@@ -306,7 +352,6 @@ public class MediciIngester {
 
         return numberOfFiles;
     }
-
     private static DatasetBean uploadFile(File file, String path) throws OperatorException, IOException {
         final DatasetBean dataset = new DatasetBean();
         dataset.setCreator(creator);
