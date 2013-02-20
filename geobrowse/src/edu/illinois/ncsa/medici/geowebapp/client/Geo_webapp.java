@@ -27,20 +27,20 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -68,7 +68,7 @@ import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
  * 
  */
 
-public class Geo_webapp implements EntryPoint {
+public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	private static final String EPSG_900913 = "EPSG:900913";
 
 	public final static String WMS_URL = "http://sead.ncsa.illinois.edu/geoserver/wms?request=GetCapabilities";
@@ -85,6 +85,10 @@ public class Geo_webapp implements EntryPoint {
 	private Map map;
 
 	private Layer baseLayer;
+
+	private SuggestBox tagTextBox;
+
+	private String tag;
 
 	public static EventBus eventBus = GWT.create(SimpleEventBus.class);
 
@@ -109,6 +113,14 @@ public class Geo_webapp implements EntryPoint {
 
 					}
 				});
+
+		Window.addResizeHandler(new ResizeHandler() {
+			@Override
+			public void onResize(ResizeEvent event) {
+				int newWidth = RootPanel.get("map").getOffsetWidth();
+				mapWidget.setWidth((newWidth - 2) + "px");
+			}
+		});
 
 		mediciProxySvc.getTags(new AsyncCallback<String[]>() {
 			@Override
@@ -135,15 +147,10 @@ public class Geo_webapp implements EntryPoint {
 
 		DecoratorPanel dp2 = createBgSwitchPanel();
 		RootPanel.get("bg").add(dp2);
-		buildMapUi(null);
 
-		Window.addResizeHandler(new ResizeHandler() {
-			@Override
-			public void onResize(ResizeEvent event) {
-				int newWidth = RootPanel.get("map").getOffsetWidth();
-				mapWidget.setWidth((newWidth - 2) + "px");
-			}
-		});
+		History.addValueChangeHandler(this);
+		History.fireCurrentHistoryState();
+
 	}
 
 	private void buildMapUi(String tag) {
@@ -193,26 +200,21 @@ public class Geo_webapp implements EntryPoint {
 
 		HorizontalPanel hp = new HorizontalPanel();
 
-		final SuggestBox sb = new SuggestBox(oracle);
-//		sb.addKeyPressHandler(new KeyPressHandler() {
-//
-//			@Override
-//			public void onKeyPress(KeyPressEvent event) {
-//				if (event.getCharCode() == KeyCodes.KEY_ENTER) {
-//					buildMapUi(sb.getText());
-//				}
-//
-//			}
-//		});
+		tagTextBox = new SuggestBox(oracle);
+
+		if (this.tag != null)
+			tagTextBox.setText(this.tag);
+
 		Button bt = new Button("Filter");
 		bt.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				buildMapUi(sb.getText());
+				History.newItem(tagTextBox.getText());
+				// buildMapUi(sb.getText());
 			}
 		});
-		hp.add(sb);
+		hp.add(tagTextBox);
 		hp.add(bt);
 
 		vp.add(hp);
@@ -348,9 +350,10 @@ public class Geo_webapp implements EntryPoint {
 			});
 
 			ft.setWidget(currentRow, 0, vizToggleButton);
-			ft.getCellFormatter().setAlignment(currentRow, 0, HasHorizontalAlignment.ALIGN_CENTER, HasVerticalAlignment.ALIGN_TOP);
+			ft.getCellFormatter().setAlignment(currentRow, 0,
+					HasHorizontalAlignment.ALIGN_CENTER,
+					HasVerticalAlignment.ALIGN_TOP);
 
-			
 			ListBox opacityListBox = new ListBox();
 			opacityListBox.setWidth("50px");
 			opacityListBox.addItem("1.0");
@@ -371,13 +374,15 @@ public class Geo_webapp implements EntryPoint {
 			});
 
 			ft.setWidget(currentRow, 1, opacityListBox);
-			ft.getCellFormatter().setAlignment(currentRow, 1, HasHorizontalAlignment.ALIGN_CENTER, HasVerticalAlignment.ALIGN_TOP);
+			ft.getCellFormatter().setAlignment(currentRow, 1,
+					HasHorizontalAlignment.ALIGN_CENTER,
+					HasVerticalAlignment.ALIGN_TOP);
 
-			
 			DisclosurePanel namePanel = new DisclosurePanel(name);
-			
-//			String href = "http://sead.ncsa.illinois.edu/#dataset?id="+result[i].getUri();
-//			namePanel.setHeader(new Anchor(name, href));
+
+			// String href =
+			// "http://sead.ncsa.illinois.edu/#dataset?id="+result[i].getUri();
+			// namePanel.setHeader(new Anchor(name, href));
 
 			VerticalPanel legendPanel = new VerticalPanel();
 			String url = "http://sead.ncsa.illinois.edu/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
@@ -386,7 +391,7 @@ public class Geo_webapp implements EntryPoint {
 
 			legendPanel.add(img);
 			namePanel.add(legendPanel);
-			
+
 			ft.setWidget(currentRow, 2, namePanel);
 		}
 		vp.add(new HTML("<h3>Layer manager</h3>"));
@@ -527,6 +532,24 @@ public class Geo_webapp implements EntryPoint {
 			map.zoomToMaxExtent();
 		else
 			map.zoomToExtent(box);
+
+	}
+
+	@Override
+	public void onValueChange(ValueChangeEvent<String> event) {
+
+		String historyToken = event.getValue();
+
+		String[] tokens = historyToken.split("/");
+		tag = null;
+		if (tokens != null) {
+			tag = URL.decode(tokens[0]);
+		}
+		if(tagTextBox != null && tag != null) {
+			tagTextBox.setText(tag);
+		}
+		
+		buildMapUi(tag);
 
 	}
 
