@@ -119,4 +119,5 @@ public class DatasetInfoWidget extends Composite {
             return title;
         }
     }
+
 }
