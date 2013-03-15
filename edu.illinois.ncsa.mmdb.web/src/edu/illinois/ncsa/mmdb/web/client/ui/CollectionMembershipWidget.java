@@ -160,6 +160,7 @@ public class CollectionMembershipWidget extends Composite {
         String href = "collection?uri=" + uri;
 
         final Hyperlink link = new Hyperlink(collection.getTitle(), href);
+        link.setTitle(collection.getTitle());
 
         int row = collectionsPanel.getRowCount();
         final PreviewWidget badge = PreviewWidget.newCollectionBadge(uri, href, service);
