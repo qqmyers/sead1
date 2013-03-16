@@ -87,14 +87,13 @@ public class DatasetInfoWidget extends Composite {
         descriptionPanel.addStyleName("datasetInfoDescription");
         HorizontalPanel anchorPanel = new HorizontalPanel();
         Hyperlink hyperlink;
-        if (shortenTitle) {
+        if (!shortenTitle) {
             hyperlink = new Hyperlink(shortenTitle(dataset.getTitle()), "dataset?id=" + dataset.getUri());
-            hyperlink.addStyleName("tagLink");
-            hyperlink.setTitle(dataset.getTitle());
         } else {
             hyperlink = new Hyperlink(dataset.getTitle(), "dataset?id=" + dataset.getUri());
-            hyperlink.setTitle(dataset.getTitle());
         }
+        hyperlink.setStyleName("dataLink");
+        hyperlink.setTitle(dataset.getTitle());
         anchorPanel.add(hyperlink);
         //so whitespace next to title won't get hyperlinked
         anchorPanel.add(new Label(""));
@@ -116,8 +115,8 @@ public class DatasetInfoWidget extends Composite {
     }
 
     private String shortenTitle(String title) {
-        if (title != null && title.length() > 22) {
-            return title.substring(0, 20) + "...";
+        if (title != null && title.length() > 10) {
+            return title.substring(0, 10) + "...";
         } else {
             return title;
         }

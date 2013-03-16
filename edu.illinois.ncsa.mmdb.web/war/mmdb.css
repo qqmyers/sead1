@@ -1178,6 +1178,12 @@ a:hover {
 	*display: inline;
 }
 
+.dataLink{
+	zoom: 1;
+	display:inline;
+	*display:inline;	
+}
+
 .tagCount {
 	font-size: 0.9em;
 	vertical-align: super;

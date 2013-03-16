@@ -171,7 +171,7 @@ public class LoginPage extends Composite {
         // sign up
         table.setWidget(1, 3, new Hyperlink("Sign up", "signup"));
 
-        Label passwordLabel = new Label("PW:");
+        Label passwordLabel = new Label("Password:");
 
         table.setWidget(2, 0, passwordLabel);
 
