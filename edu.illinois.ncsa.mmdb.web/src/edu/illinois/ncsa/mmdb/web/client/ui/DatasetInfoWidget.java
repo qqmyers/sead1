@@ -89,8 +89,11 @@ public class DatasetInfoWidget extends Composite {
         Hyperlink hyperlink;
         if (shortenTitle) {
             hyperlink = new Hyperlink(shortenTitle(dataset.getTitle()), "dataset?id=" + dataset.getUri());
+            hyperlink.addStyleName("tagLink");
+            hyperlink.setTitle(dataset.getTitle());
         } else {
             hyperlink = new Hyperlink(dataset.getTitle(), "dataset?id=" + dataset.getUri());
+            hyperlink.setTitle(dataset.getTitle());
         }
         anchorPanel.add(hyperlink);
         //so whitespace next to title won't get hyperlinked
