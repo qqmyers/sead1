@@ -134,6 +134,8 @@ public class DynamicGridView extends FlexTable implements Display {
 
         // title
         Hyperlink hyperlink = new Hyperlink(shortenTitle(title), "dataset?id=" + id);
+        hyperlink.setStyleName("dataLink");
+        hyperlink.setTitle(title);
         hyperlink.addStyleName("smallText");
         hyperlink.addStyleName("inline");
         hyperlink.setWidth("100px");
@@ -176,6 +178,8 @@ public class DynamicGridView extends FlexTable implements Display {
 
         // title
         Hyperlink hyperlink = new Hyperlink(shortenTitle(name), "dataset?id=" + id);
+        hyperlink.setStyleName("dataLink");
+        hyperlink.setTitle(name);
         hyperlink.addStyleName("smallText");
         hyperlink.addStyleName("inline");
         hyperlink.setWidth("100px");

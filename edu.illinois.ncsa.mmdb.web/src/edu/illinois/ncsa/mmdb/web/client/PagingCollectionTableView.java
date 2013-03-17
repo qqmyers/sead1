@@ -128,8 +128,11 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
 
     void addGridItem(String uri, CollectionBean item, Panel previewPanel) {
         previewPanel.setWidth("120px");
-        Label t = new Label(shortenTitle(item.getTitle()));
-        t.addStyleName("smallText");
+        Hyperlink t = new Hyperlink(shortenTitle(item.getTitle()), "collection?uri=" + uri);
+        t.setTitle(item.getTitle());
+        //Label t = new Label(shortenTitle(item.getTitle()));
+        //t.addStyleName("smallText");
+        t.setStyleName("DataLink");
         t.setWidth("120px");
         int row = n / 5; // width of table
         int col = n % 5;
