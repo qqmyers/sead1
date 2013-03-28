@@ -19,6 +19,9 @@ public enum ConfigurationKey {
     // google map key
     GoogleMapKey("google.mapkey", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
+    // remote API key
+    RemoteAPIKey("remoteAPI", ""), //$NON-NLS-1$ //$NON-NLS-2$
+
     // extractor url
     ExtractorUrl("extractor.url", "http://localhost:9856/"); //$NON-NLS-1$ //$NON-NLS-2$
 
