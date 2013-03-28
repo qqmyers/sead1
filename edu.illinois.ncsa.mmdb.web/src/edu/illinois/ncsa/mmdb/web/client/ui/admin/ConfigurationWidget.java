@@ -3,6 +3,7 @@ package edu.illinois.ncsa.mmdb.web.client.ui.admin;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -42,7 +43,6 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 public class ConfigurationWidget extends Composite {
     private final DispatchAsync       dispatchAsync;
-    private TextBox                   key;
     private final HasPermissionResult permissions;
     private final VerticalPanel       mainPanel;
     private boolean                   deleteOld;
@@ -75,6 +75,9 @@ public class ConfigurationWidget extends Composite {
 
         // google map key
         mainPanel.add(createMapSection(configuration));
+
+        // secret api key
+        mainPanel.add(createRemoteAPISection(configuration));
 
         // server updates.
         mainPanel.add(createUpdateSection());
@@ -202,7 +205,7 @@ public class ConfigurationWidget extends Composite {
 
         hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         hp.add(new Label("Google Map Key"));
-        key = new TextBox();
+        final TextBox key = new TextBox();
         key.addStyleName("multiAnchor");
         key.setText(configuration.getConfiguration(ConfigurationKey.GoogleMapKey));
         key.setVisibleLength(80);
@@ -244,6 +247,92 @@ public class ConfigurationWidget extends Composite {
                     @Override
                     public void onSuccess(ConfigurationResult result) {
                         key.setText(result.getConfiguration(ConfigurationKey.GoogleMapKey));
+                    }
+                });
+            }
+        });
+        button.addStyleName("multiAnchor");
+        hp.add(button);
+
+        return dp;
+    }
+
+    private DisclosurePanel createRemoteAPISection(ConfigurationResult configuration) {
+        DisclosurePanel dp = new DisclosurePanel("API Key");
+        dp.addStyleName("datasetDisclosurePanel");
+        dp.setOpen(true);
+        VerticalPanel vp = new VerticalPanel();
+        vp.setWidth("100%");
+        dp.add(vp);
+
+        HorizontalPanel hp = new HorizontalPanel();
+        vp.add(hp);
+
+        hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        hp.add(new Label("Remote API Key"));
+        final TextBox key = new TextBox();
+        key.addStyleName("multiAnchor");
+        key.setText(configuration.getConfiguration(ConfigurationKey.RemoteAPIKey));
+        key.setVisibleLength(80);
+        hp.add(key);
+
+        // buttons
+        hp = new HorizontalPanel();
+        vp.add(hp);
+
+        Button button = new Button("Generate", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                query.setConfiguration(ConfigurationKey.RemoteAPIKey, UUID.randomUUID().toString());
+                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        key.setText(result.getConfiguration(ConfigurationKey.RemoteAPIKey));
+                    }
+                });
+            }
+        });
+        button.addStyleName("multiAnchor");
+        hp.add(button);
+
+        button = new Button("Submit", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                query.setConfiguration(ConfigurationKey.RemoteAPIKey, key.getText());
+                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        key.setText(result.getConfiguration(ConfigurationKey.RemoteAPIKey));
+                    }
+                });
+            }
+        });
+        hp.add(button);
+
+        button = new Button("Reset", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.RemoteAPIKey), new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        key.setText(result.getConfiguration(ConfigurationKey.RemoteAPIKey));
                     }
                 });
             }
@@ -326,7 +415,7 @@ public class ConfigurationWidget extends Composite {
 
         hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         hp.add(new Label("URL"));
-        key = new TextBox();
+        final TextBox key = new TextBox();
         key.addStyleName("multiAnchor");
         key.setText(configuration.getConfiguration(ConfigurationKey.ExtractorUrl));
         key.setVisibleLength(80);

@@ -21,7 +21,9 @@ import org.jboss.resteasy.spi.interception.PreProcessInterceptor;
 import org.jboss.resteasy.util.Base64;
 import org.jboss.resteasy.util.HttpResponseCodes;
 
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
  * Intercept requests and check for basic authentication.
@@ -40,7 +42,12 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
     public ServerResponse preProcess(HttpRequest request, ResourceMethod method)
             throws UnauthorizedException {
 
-        if (request.getHttpHeaders().getCookies().containsKey("sid")) {
+        String mykey = TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey);
+        String theirkey = request.getFormParameters().getFirst(ConfigurationKey.RemoteAPIKey.getPropertyKey());
+        if (mykey.equals(theirkey)) {
+            log.debug("Found remote API Key  - Sucessfully authenticated");
+            return null;
+        } else if (request.getHttpHeaders().getCookies().containsKey("sid")) {
             log.debug("Found cookie - Sucessfully authenticated");
             return null;
         } else if (request.getHttpHeaders().getRequestHeader("Authorization") != null) {
