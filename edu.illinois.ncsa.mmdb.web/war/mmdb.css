@@ -148,20 +148,23 @@ a:hover {
 }
 
 .menuElementLeft {
+	
 	float:left;
 }
 
 .menuElementRight {
+	
 	float:right;
 }
 
 .logo {
     width: 150px;
     height: 40px;
-    padding: 0px;
+    padding:5px 0px  0px;
 }
 
 .navMenu {
+	/*background:#4F81BD;*/
 	color: black;
 	position: relative;
 	white-space: nowrap;
