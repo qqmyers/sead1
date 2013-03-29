@@ -44,8 +44,11 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
 
         String mykey = TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey);
         String theirkey = request.getFormParameters().getFirst(ConfigurationKey.RemoteAPIKey.getPropertyKey());
+        if (theirkey == null) {
+            theirkey = request.getUri().getQueryParameters().getFirst(ConfigurationKey.RemoteAPIKey.getPropertyKey());
+        }
         if (mykey.equals(theirkey)) {
-            log.debug("Found remote API Key  - Sucessfully authenticated");
+            //log.debug("Found remote API Key  - Sucessfully authenticated");
             return null;
         } else if (request.getHttpHeaders().getCookies().containsKey("sid")) {
             log.debug("Found cookie - Sucessfully authenticated");

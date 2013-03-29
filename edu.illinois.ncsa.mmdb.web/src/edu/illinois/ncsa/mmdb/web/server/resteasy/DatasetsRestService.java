@@ -4,11 +4,18 @@ package edu.illinois.ncsa.mmdb.web.server.resteasy;
  * @author Rattanachai Ramathitima
  */
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,12 +29,17 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.BlobFetcher;
+import org.tupeloproject.kernel.BlobWriter;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Rdf;
@@ -36,6 +48,7 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
@@ -47,8 +60,146 @@ import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 @Path("/datasets")
 public class DatasetsRestService {
 
+    private static String[] CopyIgnore  = new String[] {
+                                        "http://cet.ncsa.uiuc.edu/2007/mmdb/isViewedBy",
+                                        "http://cet.ncsa.uiuc.edu/2007/mmdb/isLikedDislikedBy",
+                                        "http://cet.ncsa.uiuc.edu/2007/role/hasRole",
+                                        };
+    private static String[] CopyTriples = new String[] {
+                                        "http://cet.ncsa.uiuc.edu/2007/hasPreview",
+                                        "http://www.holygoat.co.uk/owl/redwood/0.1/tags/tag",
+                                        "http://www.holygoat.co.uk/owl/redwood/0.1/tags/associatedTag",
+                                        "http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag",
+                                        "tag:tupeloproject.org,2006:/2.0/gis/hasGeoPoint",
+                                        "http://purl.org/dc/elements/1.1/creator",
+                                        "http://cet.ncsa.uiuc.edu/2007/pyramid/tiles",
+                                        };
+
+    private static String[] CopyBytes   = new String[] {
+                                        "http://cet.ncsa.uiuc.edu/2007/hasPreview",
+                                        "http://cet.ncsa.uiuc.edu/2007/pyramid/tiles",
+                                        };
+
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(DatasetsRestService.class);
+    private static Log      log         = LogFactory.getLog(DatasetsRestService.class);
+
+    @POST
+    @Path("/copy")
+    public Response copyDataset(@FormParam("url") String surl) {
+        try {
+            URL url = new URL(surl);
+
+            if (!url.getRef().startsWith("dataset?id=")) {
+                throw (new Exception("URL does not appear to be medici URL"));
+            }
+
+            String id = url.getRef().substring(11);
+            URL endpoint = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "resteasy/sparql");
+
+            TripleWriter tw = new TripleWriter();
+            Set<String> uris = copyTriples(endpoint, id, tw);
+            uris.add(id);
+
+            for (String s : uris ) {
+                endpoint = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "resteasy/datasets/" + URLEncoder.encode(s, "UTF8") + "/file?" + ConfigurationKey.RemoteAPIKey.getPropertyKey() + "=" + URLEncoder.encode(TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey), "UTF8"));
+                copyData(endpoint, s);
+            }
+            TupeloStore.getInstance().getContext().perform(tw);
+
+            return Response.status(200).entity("Copied " + tw.getToAdd().size() + " triples and " + uris.size() + " blobs").build();
+        } catch (Exception e) {
+            log.error("Error copying dataset from " + surl, e);
+            return Response.status(500).entity("Error copying dataset [" + e.getMessage() + "]").build();
+        }
+    }
+
+    private Set<String> copyTriples(URL endpoint, String uri, TripleWriter tw) throws IOException {
+        Set<String> datas = new HashSet<String>();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(URLEncoder.encode(ConfigurationKey.RemoteAPIKey.getPropertyKey(), "UTF8"));
+        sb.append("=");
+        sb.append(URLEncoder.encode(TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey), "UTF8"));
+        sb.append("&");
+        sb.append(URLEncoder.encode("query", "UTF8"));
+        sb.append("=");
+        sb.append(URLEncoder.encode("SELECT ?p ?o WHERE { <" + uri + "> ?p ?o . }", "UTF8"));
+
+        URLConnection conn = endpoint.openConnection();
+        conn.setRequestProperty("Accept", "text/csv");
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
+        conn.getOutputStream().write(sb.toString().getBytes("UTF8"));
+        conn.getOutputStream().close();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        Set<String> uris = new HashSet<String>();
+        if (br.readLine().equals("p\to")) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split("\t");
+                if (data.length != 2) {
+                    log.warn("ignoring : " + line);
+                    continue;
+                    //throw (new IOException("Invalid result : " + line));
+                }
+                if (Arrays.asList(CopyIgnore).contains(data[0])) {
+                    continue;
+                }
+                if (Arrays.asList(CopyTriples).contains(data[0])) {
+                    uris.add(data[1]);
+                }
+                if (Arrays.asList(CopyBytes).contains(data[0])) {
+                    if (data[1].contains("/bean/PreviewPyramid/")) {
+                        log.info("Ignoring blob for " + data[1]);
+                    } else {
+                        datas.add(data[1]);
+                    }
+                }
+
+                tw.add(Resource.uriRef(uri), Resource.uriRef(data[0]), Resource.resource(data[1]));
+            }
+        }
+        br.close();
+
+        for (String s : uris ) {
+            datas.addAll(copyTriples(endpoint, s, tw));
+        }
+
+        return datas;
+    }
+
+    private void copyData(URL endpoint, String uri) throws IOException, OperatorException {
+        try {
+            InputStream is = endpoint.openStream();
+            BlobWriter bw = new BlobWriter();
+            bw.setSubject(Resource.uriRef(uri));
+            bw.setInputStream(is);
+            TupeloStore.getInstance().getContext().perform(bw);
+            is.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @GET
+    @Path("/{id}/file")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response getDatasetBlob(@PathParam("id") String id) {
+
+        try {
+            id = URLDecoder.decode(id, "UTF-8");
+            BlobFetcher bf = new BlobFetcher();
+            bf.setSubject(Resource.uriRef(id));
+            TupeloStore.getInstance().getContext().perform(bf);
+
+            ResponseBuilder response = Response.ok(bf.getInputStream());
+            return response.build();
+        } catch (Exception e) {
+            log.error("Error copying blob from " + id, e);
+            return Response.status(500).entity("Error copying blob [" + e.getMessage() + "]").build();
+        }
+    }
 
     @GET
     @Path("/{id}")
