@@ -76,7 +76,7 @@ public class SparqlRestService {
                         if (row.get(i) == null) {
                             continue;
                         }
-                        sb.append(row.get(i).getString());
+                        sb.append(row.get(i).toNTriples());
                     }
                     sb.append("\n");
                 }

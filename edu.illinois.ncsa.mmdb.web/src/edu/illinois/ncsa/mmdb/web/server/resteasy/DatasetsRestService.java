@@ -6,14 +6,15 @@ package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +22,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -37,14 +40,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.BlobFetcher;
-import org.tupeloproject.kernel.BlobWriter;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
+import org.tupeloproject.util.UnicodeTranscoder;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
@@ -64,6 +68,7 @@ public class DatasetsRestService {
                                         "http://cet.ncsa.uiuc.edu/2007/mmdb/isViewedBy",
                                         "http://cet.ncsa.uiuc.edu/2007/mmdb/isLikedDislikedBy",
                                         "http://cet.ncsa.uiuc.edu/2007/role/hasRole",
+                                        "http://cet.ncsa.uiuc.edu/2007/foaf/context/password",
                                         };
     private static String[] CopyTriples = new String[] {
                                         "http://cet.ncsa.uiuc.edu/2007/hasPreview",
@@ -100,11 +105,17 @@ public class DatasetsRestService {
             Set<String> uris = copyTriples(endpoint, id, tw);
             uris.add(id);
 
+            PrintStream ps = new PrintStream("/tmp/triples.txt");
+            for (Triple t : tw.getToAdd() ) {
+                ps.println(t);
+            }
+            ps.close();
+
             for (String s : uris ) {
                 endpoint = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "resteasy/datasets/" + URLEncoder.encode(s, "UTF8") + "/file?" + ConfigurationKey.RemoteAPIKey.getPropertyKey() + "=" + URLEncoder.encode(TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey), "UTF8"));
                 copyData(endpoint, s);
             }
-            TupeloStore.getInstance().getContext().perform(tw);
+            //TupeloStore.getInstance().getContext().perform(tw);
 
             return Response.status(200).entity("Copied " + tw.getToAdd().size() + " triples and " + uris.size() + " blobs").build();
         } catch (Exception e) {
@@ -113,7 +124,7 @@ public class DatasetsRestService {
         }
     }
 
-    private Set<String> copyTriples(URL endpoint, String uri, TripleWriter tw) throws IOException {
+    private Set<String> copyTriples(URL endpoint, String uri, TripleWriter tw) throws IOException, ParseException {
         Set<String> datas = new HashSet<String>();
 
         StringBuilder sb = new StringBuilder();
@@ -136,6 +147,7 @@ public class DatasetsRestService {
         Set<String> uris = new HashSet<String>();
         if (br.readLine().equals("p\to")) {
             String line;
+            Resource sub = Resource.uriRef(uri);
             while ((line = br.readLine()) != null) {
                 String[] data = line.split("\t");
                 if (data.length != 2) {
@@ -143,21 +155,25 @@ public class DatasetsRestService {
                     continue;
                     //throw (new IOException("Invalid result : " + line));
                 }
-                if (Arrays.asList(CopyIgnore).contains(data[0])) {
+
+                Resource pre = parseNTriples(data[0]);
+                Resource obj = parseNTriples(data[1]);
+
+                if (Arrays.asList(CopyIgnore).contains(pre.getString())) {
                     continue;
                 }
-                if (Arrays.asList(CopyTriples).contains(data[0])) {
-                    uris.add(data[1]);
+                if (Arrays.asList(CopyTriples).contains(pre.getString())) {
+                    uris.add(obj.getString());
                 }
-                if (Arrays.asList(CopyBytes).contains(data[0])) {
-                    if (data[1].contains("/bean/PreviewPyramid/")) {
-                        log.info("Ignoring blob for " + data[1]);
+                if (Arrays.asList(CopyBytes).contains(pre.getString())) {
+                    if (obj.getString().contains("/bean/PreviewPyramid/")) {
+                        log.info("Ignoring blob for " + obj.getString());
                     } else {
-                        datas.add(data[1]);
+                        datas.add(obj.getString());
                     }
                 }
 
-                tw.add(Resource.uriRef(uri), Resource.uriRef(data[0]), Resource.resource(data[1]));
+                tw.add(sub, pre, obj);
             }
         }
         br.close();
@@ -169,17 +185,54 @@ public class DatasetsRestService {
         return datas;
     }
 
-    private void copyData(URL endpoint, String uri) throws IOException, OperatorException {
-        try {
-            InputStream is = endpoint.openStream();
-            BlobWriter bw = new BlobWriter();
-            bw.setSubject(Resource.uriRef(uri));
-            bw.setInputStream(is);
-            TupeloStore.getInstance().getContext().perform(bw);
-            is.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+    private Resource parseNTriples(String s) throws ParseException {
+        if (s.startsWith("<") && s.endsWith(">")) {
+            return Resource.uriRef(s.substring(1, s.length() - 1));
         }
+
+        if (s.startsWith("_:")) {
+            return Resource.blankNode(s.substring(2));
+        }
+
+        if (s.startsWith("\"")) {
+            Matcher m = Pattern.compile("^\"(.*)\"(.*)$").matcher(s);
+            if (!m.matches()) {
+                throw (new ParseException("invalid literal " + s, -1));
+            }
+            String str = UnicodeTranscoder.decode(m.group(1));
+            if (m.groupCount() != 2) {
+                return Resource.literal(str);
+            }
+            if (m.group(2).startsWith("^^<")) {
+                return Resource.literal(str, m.group(2).substring(3, m.group(2).length() - 1));
+            } else if (m.group(2).startsWith("@")) {
+                return Resource.plainLiteral(str, m.group(2).substring(2));
+            } else {
+                return Resource.literal(str);
+            }
+        }
+
+        //        public String visitLiteral(Literal literal) {
+        //    String escapedQuoted = "\"" + escape(literal.getString()) + "\"";
+        //    if (literal.isTypedLiteral()) {
+        //        return escapedQuoted + "^^<" + literal.getDatatype() + ">";
+        //    } else if(literal.hasLanguageTag()) {
+        //        return escapedQuoted + "@" + getLanguageTag();
+        //    } else {
+        //        return escapedQuoted;
+        //    }
+        //}
+
+        return Resource.literal(s);
+    }
+
+    private void copyData(URL endpoint, String uri) throws IOException, OperatorException {
+        //        InputStream is = endpoint.openStream();
+        //        BlobWriter bw = new BlobWriter();
+        //        bw.setSubject(Resource.uriRef(uri));
+        //        bw.setInputStream(is);
+        //        TupeloStore.getInstance().getContext().perform(bw);
+        //        is.close();
     }
 
     @GET
