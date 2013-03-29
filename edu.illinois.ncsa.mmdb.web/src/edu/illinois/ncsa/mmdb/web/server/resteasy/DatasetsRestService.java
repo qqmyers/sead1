@@ -6,8 +6,8 @@ package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -40,11 +40,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.BlobFetcher;
+import org.tupeloproject.kernel.BlobWriter;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
@@ -105,17 +105,11 @@ public class DatasetsRestService {
             Set<String> uris = copyTriples(endpoint, id, tw);
             uris.add(id);
 
-            PrintStream ps = new PrintStream("/tmp/triples.txt");
-            for (Triple t : tw.getToAdd() ) {
-                ps.println(t);
-            }
-            ps.close();
-
             for (String s : uris ) {
                 endpoint = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "resteasy/datasets/" + URLEncoder.encode(s, "UTF8") + "/file?" + ConfigurationKey.RemoteAPIKey.getPropertyKey() + "=" + URLEncoder.encode(TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey), "UTF8"));
                 copyData(endpoint, s);
             }
-            //TupeloStore.getInstance().getContext().perform(tw);
+            TupeloStore.getInstance().getContext().perform(tw);
 
             return Response.status(200).entity("Copied " + tw.getToAdd().size() + " triples and " + uris.size() + " blobs").build();
         } catch (Exception e) {
@@ -212,27 +206,16 @@ public class DatasetsRestService {
             }
         }
 
-        //        public String visitLiteral(Literal literal) {
-        //    String escapedQuoted = "\"" + escape(literal.getString()) + "\"";
-        //    if (literal.isTypedLiteral()) {
-        //        return escapedQuoted + "^^<" + literal.getDatatype() + ">";
-        //    } else if(literal.hasLanguageTag()) {
-        //        return escapedQuoted + "@" + getLanguageTag();
-        //    } else {
-        //        return escapedQuoted;
-        //    }
-        //}
-
         return Resource.literal(s);
     }
 
     private void copyData(URL endpoint, String uri) throws IOException, OperatorException {
-        //        InputStream is = endpoint.openStream();
-        //        BlobWriter bw = new BlobWriter();
-        //        bw.setSubject(Resource.uriRef(uri));
-        //        bw.setInputStream(is);
-        //        TupeloStore.getInstance().getContext().perform(bw);
-        //        is.close();
+        InputStream is = endpoint.openStream();
+        BlobWriter bw = new BlobWriter();
+        bw.setSubject(Resource.uriRef(uri));
+        bw.setInputStream(is);
+        TupeloStore.getInstance().getContext().perform(bw);
+        is.close();
     }
 
     @GET
