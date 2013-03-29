@@ -45,6 +45,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
@@ -159,8 +160,11 @@ public class DatasetsRestService {
                 if (Arrays.asList(CopyTriples).contains(pre.getString())) {
                     uris.add(obj.getString());
                 }
+                if (pre.getString().startsWith(Cet.cet("metadata/").getString())) {
+                    uris.add(pre.getString());
+                }
                 if (Arrays.asList(CopyBytes).contains(pre.getString())) {
-                    if (obj.getString().contains("/bean/PreviewPyramid/")) {
+                    if (obj.getString().startsWith("tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewPyramid/")) {
                         log.info("Ignoring blob for " + obj.getString());
                     } else {
                         datas.add(obj.getString());
