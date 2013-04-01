@@ -52,7 +52,7 @@
 	
 	<property name="deprecation" value="true" />
 		
-	<property name="version" value="v1.2.0#${env.BUILD_NUMBER}" />
+	<property name="version" value="v1.2.100#${env.BUILD_NUMBER}" />
 		
 	<condition property="deps" value=".." else="../plugins">
 		<available file="../edu.uiuc.ncsa.cet.bean/build.properties" />

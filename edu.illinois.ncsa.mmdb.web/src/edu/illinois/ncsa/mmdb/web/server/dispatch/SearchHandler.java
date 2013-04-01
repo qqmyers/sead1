@@ -41,18 +41,27 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Tags;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.Hit;
 import edu.illinois.ncsa.cet.search.SearchableTextIndex;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Search;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
  * Text base search of the repository.
@@ -66,15 +75,61 @@ public class SearchHandler implements ActionHandler<Search, SearchResult> {
     Log       log                = LogFactory.getLog(SearchHandler.class);
 
     @Override
-    public SearchResult execute(Search arg0, ExecutionContext arg1)
-            throws ActionException {
-        SearchResult searchResult = new SearchResult();
-        SearchableTextIndex<String> search = TupeloStore.getInstance().getSearch();
+    public SearchResult execute(Search arg0, ExecutionContext arg1) throws ActionException {
         long then = System.currentTimeMillis();
-        Iterable<Hit> result = search.search(arg0.getQuery(), RESULT_COUNT_LIMIT);
-        for (Hit hit : result ) {
-            searchResult.addHit(hit.getId());
+        SearchResult searchResult = new SearchResult();
+
+        String rawtext = "";
+        Unifier uf = new Unifier();
+        uf.setColumnNames("s");
+
+        for (String s : arg0.getQuery().split("\\s+") ) {
+            if (s.startsWith("tag:")) {
+                uf.addPattern("s", Tags.TAGGED_WITH_TAG, TagEventBeanUtil.createTagUri(s.substring(4)));
+            } else {
+                rawtext += " *" + s + "*";
+            }
         }
+        rawtext = rawtext.trim();
+
+        // search for ids using RDF matcher.
+        Set<String> idsfound = null;
+        if (uf.getPatterns().size() > 0) {
+            try {
+                idsfound = new HashSet<String>();
+                for (Tuple<Resource> r : TupeloStore.getInstance().unifyExcludeDeleted(uf, "s") ) {
+                    idsfound.add(r.get(0).getString());
+                }
+            } catch (OperatorException e) {
+                log.error("Could not search for tags.", e);
+                idsfound = null;
+            }
+        }
+
+        if (rawtext.equals("")) {
+            // only tag search
+            for (String id : idsfound ) {
+                searchResult.addHit(id);
+                if (searchResult.getHits().size() > RESULT_COUNT_LIMIT) {
+                    break;
+                }
+            }
+        } else {
+            // search for ids using lucene.
+            SearchableTextIndex<String> search = TupeloStore.getInstance().getSearch();
+            Iterable<Hit> result = search.search(rawtext);
+            // merge lucene with tags
+            for (Hit hit : result ) {
+                if ((idsfound != null) && !idsfound.contains(hit.getId())) {
+                    continue;
+                }
+                searchResult.addHit(hit.getId());
+                if (searchResult.getHits().size() > RESULT_COUNT_LIMIT) {
+                    break;
+                }
+            }
+        }
+
         long elapsed = System.currentTimeMillis() - then;
         log.debug("Search for '" + arg0.getQuery() + "' took " + elapsed + "ms");
         return searchResult;

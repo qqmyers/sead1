@@ -24,7 +24,9 @@ public class ListUserMetadataFieldsResult implements Result {
                 }
             }
         });
-        result.addAll(fields);
+        if (fields != null) {
+            result.addAll(fields);
+        }
         return result;
     }
 

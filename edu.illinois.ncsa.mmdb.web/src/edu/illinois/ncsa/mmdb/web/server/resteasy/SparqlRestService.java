@@ -32,6 +32,64 @@ public class SparqlRestService {
 
     @POST
     @Path("")
+    @Produces("text/csv")
+    public Response executeSparqlCSV(@FormParam("query") String query) {
+        try {
+            StringBuilder sb = new StringBuilder();
+
+            Operator o = SparqlOperatorFactory.newOperator(query);
+            TupeloStore.getInstance().getContext().perform(o);
+            Iterable<? extends Tuple<Resource>> rows = null;
+            String[] columns = null;
+            if (o instanceof TableProvider) {
+                TableProvider tp = (TableProvider) o;
+
+                // head
+                columns = tp.getResult().getColumnNames().toArray(new String[0]);
+
+                // results
+                rows = tp.getResult();
+            } else if (o instanceof TripleSetProvider) {
+                TripleSetProvider tp = (TripleSetProvider) o;
+
+                // head
+                columns = new String[] { "subject", "predicate", "object" };
+
+                // results
+                rows = tp.getResult();
+            }
+
+            if (rows != null) {
+                for (int i = 0; i < columns.length; i++ ) {
+                    if (i != 0) {
+                        sb.append("\t");
+                    }
+                    sb.append(columns[i]);
+                }
+                sb.append("\n");
+
+                for (Tuple<Resource> row : rows ) {
+                    for (int i = 0; i < row.size(); i++ ) {
+                        if (i != 0) {
+                            sb.append("\t");
+                        }
+                        if (row.get(i) == null) {
+                            continue;
+                        }
+                        sb.append(row.get(i).toNTriples());
+                    }
+                    sb.append("\n");
+                }
+            }
+            return Response.status(200).entity(sb.toString()).build();
+        } catch (Exception e) {
+            log.error("Error running sparql query [" + query + "]", e);
+            return Response.status(500).entity("Error running sparql query [" + e.getMessage() + "]").build();
+        }
+    }
+
+    @POST
+    @Path("")
     @Produces("text/xml")
     public Response executeSparqlXML(@FormParam("query") String query) {
         try {
