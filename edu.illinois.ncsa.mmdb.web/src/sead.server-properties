@@ -1,0 +1,159 @@
+###############################################################################
+# University of Illinois/NCSA
+# Open Source License
+#
+# Copyright (c) 2010 , NCSA.  All rights reserved.
+#
+# Developed by:
+# Cyberenvironments and Technologies (CET)
+# http://cet.ncsa.illinois.edu/
+#
+# National Center for Supercomputing Applications (NCSA)
+# http://www.ncsa.illinois.edu/
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal with the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# - Redistributions of source code must retain the above copyright
+#   notice, this list of conditions and the following disclaimers.
+# - Redistributions in binary form must reproduce the above copyright
+#   notice, this list of conditions and the following disclaimers in the
+#   documentation and/or other materials provided with the distribution.
+# - Neither the names of CET, University of Illinois/NCSA, nor the names
+#   of its contributors may be used to endorse or promote products
+#   derived from this Software without specific prior written permission.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+# ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
+###############################################################################
+
+#
+# context properties
+#
+context.type=mysql
+mysql.user=medici
+mysql.password=medici
+mysql.schema=medici
+mysql.host=localhost
+hfc.path=/home/medici/data
+
+#
+# lucene properties
+# 
+search.path=/home/medici/lucene
+
+#
+# taxonomy file
+#
+taxonomy.file=/taxonomy.owl
+
+#
+# Mail properties
+# see http://java.sun.com/products/javamail/javadocs/overview-summary.html
+# added
+# - mail.fullname to be the pretty name
+# - mail.subject what to prepend in front of the subject
+# - mail.servername the name/url of the medici server
+#
+mail.host=localhost
+mail.from=sead-acr@googlegroups.com
+mail.fullname=Medici
+mail.subject=[Medici]
+#mail.servername=
+
+#
+# Extraction server properties
+#
+extractor.url=http://localhost:9856/
+#extractor.contextUrl=http://localhost:8080/mmdb/tupelo
+#extractor.contextUser=admin
+#extractor.contextPassword=admin
+
+#
+# List of automatically created users
+#
+#user.0.username=
+user.0.fullname=Medici Admin
+user.0.password=NCSAsead
+user.0.email=medici@ncsa.illinois.edu
+user.0.roles=ADMIN
+#user.1.username=guest
+#user.1.fullname=guest
+#user.1.password=guest
+#user.1.email=
+#user.1.roles=VIEW_MEMBER_PAGES
+
+#
+# List of userfields
+#
+#userfield.0.predicate=http://purl.org/dc/terms/abstract
+#userfield.0.label=Abstract
+#userfield.1.predicate=http://purl.org/dc/terms/alternative
+#userfield.1.label=Alternative title
+#userfield.2.predicate=http://purl.org/dc/terms/audience
+#userfield.2.label=Audience
+#userfield.3.predicate=http://purl.org/dc/terms/bibliographicCitation
+#userfield.3.label=Bibliographic citation
+#userfield.4.predicate=http://purl.org/dc/terms/coverage
+#userfield.4.label=Coverage
+#userfield.5.predicate=http://purl.org/dc/terms/dateCopyrighted
+#userfield.5.label=Date copyrighted
+#userfield.6.predicate=http://purl.org/dc/terms/identifier
+#userfield.6.label=Identifier
+#userfield.7.predicate=http://purl.org/dc/terms/language
+#userfield.7.label=Language
+#userfield.9.predicate=http://purl.org/dc/terms/publisher
+#userfield.9.label=Publisher
+#userfield.12.predicate=http://purl.org/dc/terms/subject
+#userfield.12.label=Topic
+#userfield.13.predicate=http://purl.org/dc/terms/description
+#userfield.13.label=Description
+userfield.14.predicate=http://purl.org/dc/terms/isPartOf
+userfield.14.label=Published In
+userfield.15.predicate=http://example.com/ODM/characterizes
+userfield.15.label=ODM:characterizes
+userfield.16.predicate=http://example.com/ODM/fromSite
+userfield.16.label=ODM:site
+userfield.17.predicate=http://example.com/ODM/hasQualityLevel
+userfield.17.label=ODM:hasQualityLevel
+
+#
+# List of relationships
+#
+relationship.0.predicate=http://cet.ncsa.uiuc.edu/2007/mmdb/relatesTo
+relationship.0.label=relates to
+relationship.0.inverse=http://cet.ncsa.uiuc.edu/2007/mmdb/relatesTo
+relationship.1.predicate=http://purl.org/dc/terms/source
+relationship.1.label=is derived from
+relationship.1.inverse=http://cet.ncsa.uiuc.edu/2007/mmdb/hasSource
+relationship.2.predicate=http://cet.ncsa.uiuc.edu/2007/mmdb/hasSource
+relationship.2.label=has derivative
+relationship.2.inverse=http://purl.org/dc/terms/source
+relationship.3.predicate=http://cet.ncsa.uiuc.edu/2007/mmdb/duplicates
+relationship.3.label=duplicates
+relationship.3.inverse=http://cet.ncsa.uiuc.edu/2007/mmdb/duplicates
+relationship.4.predicate=http://purl.org/dc/terms/references
+relationship.4.label=references
+relationship.4.inverse=http://purl.org/dc/terms/isReferencedBy
+relationship.5.predicate=http://purl.org/dc/terms/isReferencedBy
+relationship.5.label=is referenced by
+relationship.5.inverse=http://purl.org/dc/terms/references
+relationship.6.predicate=http://cet.ncsa.uiuc.edu/2007/mmdb/describes
+relationship.6.label=describes
+relationship.6.inverse=http://cet.ncsa.uiuc.edu/2007/mmdb/isDescribedBy
+relationship.7.predicate=http://cet.ncsa.uiuc.edu/2007/mmdb/isDescribedBy
+relationship.7.label=is described by
+relationship.7.inverse=http://cet.ncsa.uiuc.edu/2007/mmdb/describes
+relationship.8.predicate=http://example.com/ODM/createdUsing
+relationship.8.label=ODM:hasMeasurementMethod
+relationship.8.inverse=http://example.com/ODM/isUsedToMeasure
