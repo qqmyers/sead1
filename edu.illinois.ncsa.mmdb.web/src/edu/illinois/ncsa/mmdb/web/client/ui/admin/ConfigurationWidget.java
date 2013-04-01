@@ -424,7 +424,7 @@ public class ConfigurationWidget extends Composite {
         FlexTable table = new FlexTable();
         table.setText(0, 0, "VIVO-Joseki End Point");
         /*hp.add(new Label("VIVO-Joseki End Point"));*/
-        key = new TextBox();
+        final TextBox key = new TextBox();
         key.addStyleName("multiAnchor");
         key.setText(configuration.getConfiguration(ConfigurationKey.VIVOJOSEKIURL));
         key.setVisibleLength(80);
