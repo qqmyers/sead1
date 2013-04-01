@@ -50,7 +50,7 @@ public class DataAccess {
 
 		outputStream.flush();
 		outputStream.close();
-		System.out.println("Going to fetch response");
+		//System.out.println("Going to fetch response");
 
 		// Ensure we got the HTTP 200 response code
 		int responseCode = conn.getResponseCode();
@@ -69,7 +69,7 @@ public class DataAccess {
 
 		Scanner responseScanner = new Scanner(_inputStream);
 		String responseText = responseScanner.useDelimiter("\\A").next();
-		System.out.println(responseText);
+		//System.out.println(responseText);
 		responseScanner.close();
 
 		_inputStream.close();

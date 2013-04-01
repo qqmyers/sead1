@@ -89,7 +89,7 @@ public class NCEDProxy {
 		}
 
 		JSONObject jsonObject = XML.toJSONObject(responseText);
-		System.out.println(jsonObject.toString());
+		//System.out.println(jsonObject.toString());
 		return jsonObject.toString();
 	}
 
