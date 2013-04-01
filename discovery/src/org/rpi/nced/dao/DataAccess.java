@@ -40,6 +40,7 @@ public class DataAccess {
 
 		conn.setRequestProperty("Content-Type",
 				"application/x-www-form-urlencoded");
+		conn.setRequestProperty("Accept", "text/xml");
 
 		OutputStream outputStream = conn.getOutputStream();
 
