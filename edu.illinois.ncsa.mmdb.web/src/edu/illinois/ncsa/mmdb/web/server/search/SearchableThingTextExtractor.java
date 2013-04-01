@@ -60,22 +60,19 @@ import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.TextExtractor;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 import edu.uiuc.ncsa.cet.bean.CETBean;
@@ -249,18 +246,27 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
     }
 
     String metadata(String uri) {
-        GetMetadata gm = new GetMetadata(uri);
-        GetMetadataResult gmr;
-        try {
-            gmr = (new GetMetadataHandler()).execute(gm, null);
-        } catch (ActionException e) {
-            e.printStackTrace();
-            return "";
-        }
+        Resource sub = Resource.resource(uri);
+
+        Unifier uf = new Unifier();
+        uf.addPattern(sub, "predicate", "value"); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addPattern("predicate", Rdf.TYPE, MMDB.METADATA_TYPE); //$NON-NLS-1$
+        uf.setColumnNames("value"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
         List<String> allValues = new LinkedList<String>();
-        for (Metadata m : gmr.getMetadata() ) {
-            allValues.add(m.getValue());
+
+        try {
+            TupeloStore.getInstance().getContext().perform(uf);
+
+            for (Tuple<Resource> row : uf.getResult() ) {
+                if (row.get(0) != null) {
+                    allValues.add(row.get(0).getString());
+                }
+            }
+        } catch (OperatorException e1) {
+            log.error("Error getting metadata for " + uri, e1);
         }
+
         return unsplit(allValues);
     }
 
