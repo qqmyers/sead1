@@ -248,7 +248,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         RootPanel.get("navMenu").clear();
         navMenu = new HorizontalPanel();
         navMenu.addStyleName("navMenu");
+
+        /*RootPanel.get("gradient").clear();
+        HorizontalPanel mainHeader = new HorizontalPanel();
+        mainHeader.addStyleName("colorHeader");
+        RootPanel.get("gradient").add(mainHeader);*/
+
         RootPanel.get("navMenu").add(navMenu);
+
         // datasets
         final Hyperlink homeLink = new Hyperlink("Home", "home");
         homeLink.addStyleName("navMenuLink");
