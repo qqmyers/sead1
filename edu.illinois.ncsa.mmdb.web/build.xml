@@ -97,9 +97,9 @@
 	</target>
 	
 	<target name="sead" depends="resources" description="setup for hudson build and deployment">
-		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" />
-		<copy tofile="war/WEB-INF/classes/public.properties" file="src/sead.public-properties" />
-		<copy tofile="war/WEB-INF/classes/server.properties" file="src/sead.server-properties" />
+		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" overwrite="true" />
+		<copy tofile="war/WEB-INF/classes/public.properties" file="src/sead.public-properties" overwrite="true" />
+		<copy tofile="war/WEB-INF/classes/server.properties" file="src/sead.server-properties" overwrite="true" />
 		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
