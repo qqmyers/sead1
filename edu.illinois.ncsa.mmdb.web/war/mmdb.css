@@ -140,23 +140,30 @@ a:hover {
 	border-bottom: #888888 solid 1px;
 }
 
-.menuElementLeft, .menuElementRight, .logo {
+.menuElementLeft, .menuElementRight{
 	height: 40px;
 	padding: 15px 5px 0px 225px;
 	position: relative;
 	vertical-align: center;
 }
 
-.gradient{
-	float: left;
+#logo{
+	float:left;
+	height:40px;
+	padding:1px 0px 0px;
 }
 
-.colorHeader{
-	height: 40px;
-	background-color: rgb(79, 129, 189);
-	position: relative;
-	white-space: nowrap;
-	width: 775px;
+
+#gradient{
+	float:right;
+	height:40px;
+	width:77.5%;
+	background-image:url('../images/Border.png');
+	text-align:right;
+}
+
+.headerTitle{
+
 }
 
 .menuElementLeft {
@@ -167,12 +174,6 @@ a:hover {
 .menuElementRight {
 	
 	float:right;
-}
-
-.logo {
-    /*width: 150px;
-    height: 40px;*/
-    padding:1px 0px  0px;
 }
 
 .navMenu {

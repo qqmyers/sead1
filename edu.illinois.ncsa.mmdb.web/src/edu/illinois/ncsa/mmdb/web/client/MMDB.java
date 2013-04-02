@@ -129,6 +129,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     public static ArrayList<String>    groups;
 
+    public static String               ProjectName                      = "Sustainable Environment Actionable Data";
+
     /**
      * Dispatch service. Should be the only service needed. All commands should
      * go through this endpoint. To learn more look up gwt-dispatch and the
@@ -249,10 +251,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         navMenu = new HorizontalPanel();
         navMenu.addStyleName("navMenu");
 
-        /*RootPanel.get("gradient").clear();
+        RootPanel.get("projectTitle").clear();
         HorizontalPanel mainHeader = new HorizontalPanel();
-        mainHeader.addStyleName("colorHeader");
-        RootPanel.get("gradient").add(mainHeader);*/
+        Label projectNameLabel = new Label(ProjectName);
+        mainHeader.add(projectNameLabel);
+        mainHeader.setStyleName("headerTitle");
+        RootPanel.get("projectTitle").add(mainHeader);
 
         RootPanel.get("navMenu").add(navMenu);
 
