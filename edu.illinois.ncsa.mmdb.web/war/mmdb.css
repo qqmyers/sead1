@@ -115,21 +115,13 @@ table td, select {
  * Links
  * ---------------------------------------------------------------------- */
 
-a.headerTitle, a.headerTitle:link, a:visited, a.headerTitle:hover, a.headerTitle:active {
-	color:#000000;
-	text-decoration: none;
-}
-
-a:link, a:visited, a:hover, a:active{
+a, a:link, a:hover,a:visited, a:active{
+   color:#110000;
    text-decoration:none;
 }
 
 a:hover {
 	text-decoration: underline;
-}
-
-a.headerTitle{
-	color:#000000;
 }
 
 .deadlink {
@@ -159,7 +151,7 @@ a.headerTitle{
 
 .menuElementRight{
 	height: 40px;
-	padding:15px 5px 0px 15px;
+	padding:15px 5px 0px 0px;
 	position: relative;
 	vertical-align:center;
 	margin:auto;
@@ -167,7 +159,7 @@ a.headerTitle{
 
 #logo{
 	float:left;
-	height:40px;
+	height:100%;
 	padding:1px 0px 0px;
 }
 
