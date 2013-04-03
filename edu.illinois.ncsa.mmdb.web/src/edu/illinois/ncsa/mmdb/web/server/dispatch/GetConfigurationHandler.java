@@ -42,6 +42,7 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
@@ -66,14 +67,33 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
  * 
  */
 public class GetConfigurationHandler implements ActionHandler<GetConfiguration, ConfigurationResult> {
+    private final static List<ConfigurationKey> WHITELIST = Arrays.asList(new ConfigurationKey[] {
+                                                          ConfigurationKey.GoogleMapKey,
+                                                          ConfigurationKey.ProjectName,
+                                                          ConfigurationKey.ProjectDescription,
+                                                          ConfigurationKey.ProjectURL,
+                                                          });
+
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(GetConfigurationHandler.class);
+    private static Log                          log       = LogFactory.getLog(GetConfigurationHandler.class);
 
     @Override
     public ConfigurationResult execute(GetConfiguration arg0, ExecutionContext arg1) throws ActionException {
-
         Set<ConfigurationKey> keys = arg0.getKeys();
         if (keys.size() == 0) {
+            keys.addAll(Arrays.asList(ConfigurationKey.values()));
+        }
+
+        // make sure keys are whitelisted
+        boolean checkadmin = false;
+        for (ConfigurationKey key : keys ) {
+            if (!WHITELIST.contains(key)) {
+                checkadmin = true;
+            }
+        }
+
+        // check admin status
+        if (checkadmin) {
             MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
             try {
                 if (!rbac.checkPermission(arg0.getUser(), Permission.VIEW_ADMIN_PAGES)) {
@@ -82,9 +102,9 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
             } catch (RBACException exc) {
                 throw (new ActionException("No admin permission.", exc));
             }
-            keys.addAll(Arrays.asList(ConfigurationKey.values()));
         }
-        //Don't require permission "View Admin Pages" to get single key value like Google Key
+
+        // return keys
         ConfigurationResult result = new ConfigurationResult();
         for (ConfigurationKey key : keys ) {
             result.setConfiguration(key, TupeloStore.getInstance().getConfiguration(key));

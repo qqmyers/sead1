@@ -12,6 +12,11 @@ public enum ConfigurationKey {
     VAURL("va.url", "http://bluespruce.pti.indiana.edu:8181/dcs-nced/query/?q=resourceValue:(%s)"), //$NON-NLS-1$ //$NON-NLS-2$
     // END SEAD SPECIFIC CODE
 
+    // project name and description
+    ProjectName("project.name", ""), //$NON-NLS-1$
+    ProjectDescription("project.description", ""), //$NON-NLS-1$
+    ProjectURL("project.url", ""), //$NON-NLS-1$
+
     // name of medici server
     MediciName("medici.name", null), //$NON-NLS-1$ 
 

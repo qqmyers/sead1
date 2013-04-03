@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -72,6 +73,9 @@ public class ConfigurationWidget extends Composite {
     private void createUI(ConfigurationResult configuration) {
         // mail configuration
         mainPanel.add(createMailSection(configuration));
+
+        // mail configuration
+        mainPanel.add(createProjectSection(configuration));
 
         // google map key
         mainPanel.add(createMapSection(configuration));
@@ -185,6 +189,92 @@ public class ConfigurationWidget extends Composite {
                         for (Entry<ConfigurationKey, TextBox> entry : inputs.entrySet() ) {
                             entry.getValue().setText(result.getConfiguration(entry.getKey()));
                         }
+                    }
+                });
+            }
+        });
+        button.addStyleName("multiAnchor");
+        hp.add(button);
+
+        return dp;
+    }
+
+    private DisclosurePanel createProjectSection(ConfigurationResult configuration) {
+        DisclosurePanel dp = new DisclosurePanel("Project");
+        dp.addStyleName("datasetDisclosurePanel");
+        dp.setOpen(true);
+        VerticalPanel vp = new VerticalPanel();
+        vp.setWidth("100%");
+        dp.add(vp);
+
+        FlexTable table = new FlexTable();
+        vp.add(table);
+
+        int idx = 0;
+
+        final TextBox name = new TextBox();
+        name.setVisibleLength(40);
+        name.setText(configuration.getConfiguration(ConfigurationKey.ProjectName));
+        table.setText(idx, 0, "Name");
+        table.setWidget(idx, 1, name);
+        idx++;
+
+        final TextBox url = new TextBox();
+        url.setVisibleLength(40);
+        url.setText(configuration.getConfiguration(ConfigurationKey.ProjectURL));
+        table.setText(idx, 0, "URL");
+        table.setWidget(idx, 1, url);
+        idx++;
+
+        final TextArea desc = new TextArea();
+        desc.setVisibleLines(5);
+        desc.setText(configuration.getConfiguration(ConfigurationKey.ProjectDescription));
+        table.setText(idx, 0, "Description");
+        table.setWidget(idx, 1, desc);
+        idx++;
+
+        // buttons
+        HorizontalPanel hp = new HorizontalPanel();
+        vp.add(hp);
+
+        Button button = new Button("Submit", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                query.setConfiguration(ConfigurationKey.ProjectName, name.getText());
+                query.setConfiguration(ConfigurationKey.ProjectURL, url.getText());
+                query.setConfiguration(ConfigurationKey.ProjectDescription, desc.getText());
+                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        name.setText(result.getConfiguration(ConfigurationKey.ProjectName));
+                        url.setText(result.getConfiguration(ConfigurationKey.ProjectURL));
+                        desc.setText(result.getConfiguration(ConfigurationKey.ProjectDescription));
+                    }
+                });
+            }
+        });
+        hp.add(button);
+
+        button = new Button("Reset", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername()), new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        name.setText(result.getConfiguration(ConfigurationKey.ProjectName));
+                        url.setText(result.getConfiguration(ConfigurationKey.ProjectURL));
+                        desc.setText(result.getConfiguration(ConfigurationKey.ProjectDescription));
                     }
                 });
             }
