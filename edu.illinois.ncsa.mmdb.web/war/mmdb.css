@@ -163,7 +163,12 @@ a:hover {
 }
 
 .headerTitle{
-
+	float:right;
+	margin:auto;
+	padding:5px;
+	font-size:110%;
+	font-family:"Times New Roman", Georiga, Serif;
+	font-style:italic;
 }
 
 .menuElementLeft {
