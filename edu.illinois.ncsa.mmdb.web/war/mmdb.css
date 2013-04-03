@@ -140,11 +140,20 @@ a:hover {
 	border-bottom: #888888 solid 1px;
 }
 
-.menuElementLeft, .menuElementRight{
+.menuElementLeft{
 	height: 40px;
-	padding: 15px 5px 0px 225px;
+	padding: 15px 5px 0px 15px;
 	position: relative;
 	vertical-align: center;
+	margin: 0px 0px 0px 225px;
+}
+
+.menuElementRight{
+	height: 40px;
+	padding:15px 5px 0px 15px;
+	position: relative;
+	vertical-align:center;
+	margin:auto;
 }
 
 #logo{

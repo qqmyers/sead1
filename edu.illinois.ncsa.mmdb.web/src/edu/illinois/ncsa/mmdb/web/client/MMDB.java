@@ -256,7 +256,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         final Anchor projectNameLabel = new Anchor(true);
         projectNameLabel.setText(ProjectName);
         projectNameLabel.setTitle(ProjectName);
-        projectNameLabel.setHref("http://www.google.com");
+        projectNameLabel.setHref("http://bitternut.cs.indiana.edu:7010/projectsummary");
         mainHeader.add(projectNameLabel);
         mainHeader.setStyleName("headerTitle");
         RootPanel.get("projectTitle").add(mainHeader);
