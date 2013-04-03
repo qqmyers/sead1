@@ -625,3 +625,44 @@ Validating units:
       [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
 Removing invalidated units
 Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2819 units from cache.
+Compiling...
+   0% complete (ETR: ?)
+   10% complete (ETR: 89 seconds)
+   20% complete (ETR: 47 seconds)
+   30% complete (ETR: 32 seconds)
+   40% complete (ETR: 23 seconds)
+   50% complete (ETR: 19 seconds)
+   60% complete (ETR: 13 seconds)
+   70% complete (ETR: 9 seconds)
+   80% complete (ETR: 6 seconds)
+   90% complete (ETR: 3 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 45.01 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/home/yudongzhang/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2819 cached/archived units.  Used 2819 / 2819 units from cache.
+Compiling...
+   Compilation completed in 0.02 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/home/yudongzhang/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2819 cached/archived units.  Used 2819 / 2819 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/home/yudongzhang/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
