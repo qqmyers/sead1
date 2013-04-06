@@ -16,7 +16,8 @@ import org.json.JSONObject;
 import sun.misc.BASE64Encoder;
 
 public class MediciRestUtil {
-	public static String tagRestUrl = "http://sead.ncsa.illinois.edu/resteasy/tags";
+//	public static String tagRestUrl = "http://sead.ncsa.illinois.edu/resteasy/tags";
+	public static String tagRestUrl;
 	public static String user;
 	public static String pw;
 

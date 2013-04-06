@@ -41,7 +41,8 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public LayerInfo[] getCapabilities() {
-		String requestUrl = Geo_webapp.WMS_URL;
+		String WMS_URL = "http://sead.ncsa.illinois.edu/geoserver/wms?request=GetCapabilities";
+		String requestUrl = WMS_URL;
 		HttpGet httpget = new HttpGet(requestUrl);
 
 		ResponseHandler<String> responseHandler = new BasicResponseHandler();
@@ -149,6 +150,11 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 			layers = GeoServerRestUtil.getLayersByTag(tag);
 		}
 		return layers.toArray(new LayerInfo[layers.size()]);
+	}
+
+	@Override
+	public String getWmsUrl() {
+		return getServletContext().getInitParameter("geoserver.wms.url");
 	}
 
 }

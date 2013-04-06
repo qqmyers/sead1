@@ -5,14 +5,19 @@
 	version="2.5" xmlns="http://java.sun.com/xml/ns/javaee">
 
 	<context-param>
+		<description>Geoserver Host</description>
+		<param-name>geoserver.host</param-name>
+		<param-value>localhost</param-value>
+	</context-param>
+	<context-param>
 		<description>Geoserver RESTful service url</description>
 		<param-name>geoserver.rest.url</param-name>
 		<param-value>http://localhost:9999</param-value>
 	</context-param>
 	<context-param>
-		<description>Geoserver Host</description>
-		<param-name>geoserver.host</param-name>
-		<param-value>localhost</param-value>
+		<description>Geoserver WMS url</description>
+		<param-name>geoserver.wms.url</param-name>
+		<param-value>http://localhost:9999/geoserver/wms</param-value>
 	</context-param>
 	<context-param>
 		<description>Geoserver RESTful service username</description>

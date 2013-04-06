@@ -71,8 +71,7 @@ import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
 public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	private static final String EPSG_900913 = "EPSG:900913";
 
-	public final static String WMS_URL = "http://sead.ncsa.illinois.edu/geoserver/wms?request=GetCapabilities";
-	public final static String REST_URL = "http://sead.ncsa.illinois.edu/geoserver/rest";
+	private static String wmsUrl = "http://localhost/geoserver/wms";
 
 	private final WmsProxyServiceAsync wmsProxySvc = (WmsProxyServiceAsync) GWT
 			.create(WmsProxyService.class);
@@ -385,7 +384,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			// namePanel.setHeader(new Anchor(name, href));
 
 			VerticalPanel legendPanel = new VerticalPanel();
-			String url = "http://sead.ncsa.illinois.edu/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
+			String url = wmsUrl
+					+ "?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
 					+ name;
 			Image img = new Image(url);
 
@@ -510,9 +510,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			WMSParams params = new WMSParams();
 			params.setTransparent(true);
 			params.setLayers(name);
-			WMS wms = new WMS(name,
-					"http://sead.ncsa.illinois.edu/geoserver/wms", params,
-					options);
+			WMS wms = new WMS(name, wmsUrl, params, options);
 			if (box == null)
 				box = newBnd;
 
@@ -545,11 +543,22 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		if (tokens != null) {
 			tag = URL.decode(tokens[0]);
 		}
-		if(tagTextBox != null && tag != null) {
+		if (tagTextBox != null && tag != null) {
 			tagTextBox.setText(tag);
 		}
-		
-		buildMapUi(tag);
+		wmsProxySvc.getWmsUrl(new AsyncCallback<String>() {
+
+			@Override
+			public void onSuccess(String result) {
+				wmsUrl = result;
+				buildMapUi(tag);
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
+				buildMapUi(tag);
+			}
+		});
 
 	}
 
