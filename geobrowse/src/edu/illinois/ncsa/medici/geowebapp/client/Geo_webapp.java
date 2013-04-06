@@ -70,6 +70,7 @@ import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
 
 public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	private static final String EPSG_900913 = "EPSG:900913";
+	private static final String EPSG_4326 = "EPSG:4326";
 
 	private static String wmsUrl = "http://localhost/geoserver/wms";
 
@@ -497,7 +498,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 					layerInfo.getMaxy());
 			// System.out.println("Original bounds: " + orgBnd);
 			Bounds newBnd = orgBnd.transform(
-					new Projection(layerInfo.getCrs()), new Projection(
+					new Projection(EPSG_4326), new Projection(
 							EPSG_900913));
 			// System.out.println("New bounds: " + newBnd);
 			System.out.println("adding layers: " + name + " " + newBnd);
