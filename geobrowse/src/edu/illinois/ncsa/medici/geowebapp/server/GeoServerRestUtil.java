@@ -22,20 +22,20 @@ import org.json.JSONObject;
 import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
 
 public class GeoServerRestUtil {
-	public static String URL = "http://sead.ncsa.illinois.edu/geoserver/rest";
-	private static String USER = "";
-	private static String PW = "";
-	
+	public static String geoserverRestUrl;
+	public static String server;
+	public static String user;
+	public static String pw;
 
 	public static String getStores(String workspaceName) {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		try {
 			httpclient.getCredentialsProvider().setCredentials(
-					new AuthScope("sead.ncsa.illinois.edu", 80),
-					new UsernamePasswordCredentials(USER, PW));
+					new AuthScope(server, 80),
+					new UsernamePasswordCredentials(user, pw));
 
-			HttpGet httpget = new HttpGet(URL + "/workspaces/" + workspaceName
-					+ "/datastores.json");
+			HttpGet httpget = new HttpGet(geoserverRestUrl + "/workspaces/"
+					+ workspaceName + "/datastores.json");
 
 			System.out.println("executing request" + httpget.getRequestLine());
 			// HttpResponse response = httpclient.execute(httpget);
@@ -84,10 +84,10 @@ public class GeoServerRestUtil {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		try {
 			httpclient.getCredentialsProvider().setCredentials(
-					new AuthScope("sead.ncsa.illinois.edu", 80),
-					new UsernamePasswordCredentials(USER, PW));
+					new AuthScope(server, 80),
+					new UsernamePasswordCredentials(user, pw));
 
-			HttpGet httpget = new HttpGet(URL + "/layers.json");
+			HttpGet httpget = new HttpGet(geoserverRestUrl + "/layers.json");
 
 			System.out.println("executing request" + httpget.getRequestLine());
 			// HttpResponse response = httpclient.execute(httpget);
@@ -132,10 +132,10 @@ public class GeoServerRestUtil {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		try {
 			httpclient.getCredentialsProvider().setCredentials(
-					new AuthScope("sead.ncsa.illinois.edu", 80),
-					new UsernamePasswordCredentials(USER, PW));
+					new AuthScope(server, 80),
+					new UsernamePasswordCredentials(user, pw));
 
-			HttpGet httpget = new HttpGet(URL + "/layers.json");
+			HttpGet httpget = new HttpGet(geoserverRestUrl + "/layers.json");
 
 			System.out.println("executing request" + httpget.getRequestLine());
 			// HttpResponse response = httpclient.execute(httpget);
@@ -180,10 +180,11 @@ public class GeoServerRestUtil {
 		LayerInfo layerInfo = null;
 		try {
 			httpclient.getCredentialsProvider().setCredentials(
-					new AuthScope("sead.ncsa.illinois.edu", 80),
-					new UsernamePasswordCredentials(USER, PW));
+					new AuthScope(server, 80),
+					new UsernamePasswordCredentials(user, pw));
 
-			HttpGet httpget = new HttpGet(URL + "/layers/" + name + ".json");
+			HttpGet httpget = new HttpGet(geoserverRestUrl + "/layers/" + name
+					+ ".json");
 
 			System.out.println("Getting layer [" + name + "]: "
 					+ httpget.getRequestLine());
@@ -195,6 +196,7 @@ public class GeoServerRestUtil {
 			JSONObject js = new JSONObject(responseBody);
 			JSONObject layer = js.getJSONObject("layer");
 			JSONObject resource = layer.getJSONObject("resource");
+			String type = layer.getString("type");
 			String href = resource.getString("href");
 
 			String uri = getURIfromHref(href);
@@ -206,13 +208,18 @@ public class GeoServerRestUtil {
 
 				// getting lat lon bounding box
 				httpget = new HttpGet(href);
-				System.out.println("Getting featureType [" + name + "]: "
-						+ httpget.getRequestLine());
+				System.out.println("Getting featureType/coverage [" + name
+						+ "]: " + httpget.getRequestLine());
 				responseBody = httpclient.execute(httpget, responseHandler);
 
 				js = new JSONObject(responseBody);
-				JSONObject featureType = js.getJSONObject("featureType");
-				JSONObject latLongBBox = featureType
+				JSONObject dataStore = null;
+				if (type.equals("RASTER")) {
+					dataStore = js.getJSONObject("coverage");
+				} else {
+					dataStore = js.getJSONObject("featureType");
+				}
+				JSONObject latLongBBox = dataStore
 						.getJSONObject("latLonBoundingBox");
 				layerInfo.setCrs(latLongBBox.getString("crs"));
 				layerInfo.setMinx(latLongBBox.getDouble("minx"));
@@ -241,7 +248,11 @@ public class GeoServerRestUtil {
 		String[] split = href.split("/");
 		for (int i = 0; i < split.length; i++) {
 			String s = split[i];
-			if ("datastores".equals(s)) {
+			if ("datastores".equals(s) || "coveragestores".equals(s)) { // support
+																		// both
+																		// vector
+																		// and
+																		// coverage
 				try {
 					if (split[i + 1] == null)
 						return null;

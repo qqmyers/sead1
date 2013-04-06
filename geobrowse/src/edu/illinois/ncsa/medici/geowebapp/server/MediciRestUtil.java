@@ -16,16 +16,16 @@ import org.json.JSONObject;
 import sun.misc.BASE64Encoder;
 
 public class MediciRestUtil {
-	public static String TAG_URL = "http://sead.ncsa.illinois.edu/resteasy/tags";
+	public static String tagRestUrl = "http://sead.ncsa.illinois.edu/resteasy/tags";
+	public static String user;
+	public static String pw;
 
 	public static List<String> getTags() {
 		List<String> tags = new ArrayList<String>();
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		try {
-			HttpGet httpget = new HttpGet(TAG_URL);
-			String u = "";
-			String p = "";
-			String userPassString = u + ":" + p;
+			HttpGet httpget = new HttpGet(tagRestUrl);
+			String userPassString = user + ":" + pw;
 			BASE64Encoder b = new BASE64Encoder();
 
 			httpget.addHeader("Authorization",
@@ -60,10 +60,8 @@ public class MediciRestUtil {
 		List<String> uris = new ArrayList<String>();
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		try {
-			HttpGet httpget = new HttpGet(TAG_URL + "/" + tag + "/datasets");
-			String u = "jonglee1@illinois.edu";
-			String p = "2late";
-			String userPassString = u + ":" + p;
+			HttpGet httpget = new HttpGet(tagRestUrl + "/" + tag + "/datasets");
+			String userPassString = user + ":" + pw;
 			BASE64Encoder b = new BASE64Encoder();
 
 			httpget.addHeader("Authorization",
@@ -96,7 +94,4 @@ public class MediciRestUtil {
 		return uris;
 	}
 
-	public static void main(String[] args) {
-		getTags();
-	}
 }

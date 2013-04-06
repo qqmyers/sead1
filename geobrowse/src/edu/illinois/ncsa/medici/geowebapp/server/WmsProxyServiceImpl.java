@@ -127,6 +127,21 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public LayerInfo[] getLayers(String tag) {
+		GeoServerRestUtil.server = getServletContext().getInitParameter(
+				"geoserver.host");
+		GeoServerRestUtil.geoserverRestUrl = getServletContext()
+				.getInitParameter("geoserver.rest.url");
+		GeoServerRestUtil.user = getServletContext().getInitParameter(
+				"geoserver.user");
+		GeoServerRestUtil.pw = getServletContext().getInitParameter(
+				"geoserver.pw");
+
+		MediciRestUtil.tagRestUrl = getServletContext().getInitParameter(
+				"medici.rest.url");
+		MediciRestUtil.user = getServletContext().getInitParameter(
+				"medici.user");
+		MediciRestUtil.pw = getServletContext().getInitParameter("medici.pw");
+
 		List<LayerInfo> layers = null;
 		if (tag == null || tag.trim().equals("")) {
 			layers = GeoServerRestUtil.getLayers();

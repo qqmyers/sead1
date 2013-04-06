@@ -17,6 +17,10 @@ public class MediciProxyServiceImpl extends RemoteServiceServlet implements
 		MediciProxyService {
 	@Override
 	public String[] getTags() {
+		MediciRestUtil.tagRestUrl = getServletContext().getInitParameter("medici.rest.url");
+		MediciRestUtil.user = getServletContext().getInitParameter("medici.user");
+		MediciRestUtil.pw = getServletContext().getInitParameter("medici.pw");
+		
 		List<String> tags = MediciRestUtil.getTags();
 		if (tags.isEmpty())
 			return null;
