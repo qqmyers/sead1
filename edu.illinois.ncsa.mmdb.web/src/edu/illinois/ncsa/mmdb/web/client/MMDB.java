@@ -66,6 +66,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
@@ -103,6 +104,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.TagsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.UploadPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.admin.AdminPage;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
@@ -128,8 +130,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                                                                                 + "connection and try again.";
 
     public static ArrayList<String>    groups;
-
-    public static String               ProjectName                      = "Sustainable Environment Actionable Data";
 
     /**
      * Dispatch service. Should be the only service needed. All commands should
@@ -252,11 +252,17 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         navMenu.addStyleName("navMenu");
 
         RootPanel.get("projectTitle").clear();
+        ConfigurationResult configuration = new ConfigurationResult();
+
+        //Get project name from Configuration 
+        String ProjectName = configuration.getConfiguration(ConfigurationKey.ProjectName);
+
         HorizontalPanel mainHeader = new HorizontalPanel();
         final Anchor projectNameLabel = new Anchor(true);
         projectNameLabel.setText(ProjectName);
         projectNameLabel.setTitle(ProjectName);
-        projectNameLabel.setHref("http://bitternut.cs.indiana.edu:7010/projectsummary");
+
+        projectNameLabel.setHref(configuration.getConfiguration(ConfigurationKey.ProjectURL));
         mainHeader.add(projectNameLabel);
         mainHeader.setStyleName("headerTitle");
         RootPanel.get("projectTitle").add(mainHeader);

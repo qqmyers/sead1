@@ -13,7 +13,7 @@ public enum ConfigurationKey {
     // END SEAD SPECIFIC CODE
 
     // project name and description
-    ProjectName("project.name", ""), //$NON-NLS-1$
+    ProjectName("project.name", "Name is Here"), //$NON-NLS-1$
     ProjectDescription("project.description", ""), //$NON-NLS-1$
     ProjectURL("project.url", ""), //$NON-NLS-1$
 
