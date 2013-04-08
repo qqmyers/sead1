@@ -104,7 +104,6 @@ import edu.illinois.ncsa.mmdb.web.client.ui.TagsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.UploadPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.admin.AdminPage;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
-import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
@@ -222,6 +221,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 }
             });
 
+            //initNavMenu();
+
             // TODO place support for history management
             // placeService = new PlaceService(eventBus);
 
@@ -237,6 +238,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 //FIXME: Handle exception
             }
 
+            //initNavMenu();
         }
     }
 
@@ -255,14 +257,16 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         ConfigurationResult configuration = new ConfigurationResult();
 
         //Get project name from Configuration 
-        String ProjectName = configuration.getConfiguration(ConfigurationKey.ProjectName);
+        String ProjectName = "Sustainable Environment Actionable Data";
+        /*configuration.getConfiguration(ConfigurationKey.ProjectName);*/
 
         HorizontalPanel mainHeader = new HorizontalPanel();
         final Anchor projectNameLabel = new Anchor(true);
         projectNameLabel.setText(ProjectName);
         projectNameLabel.setTitle(ProjectName);
 
-        projectNameLabel.setHref(configuration.getConfiguration(ConfigurationKey.ProjectURL));
+        projectNameLabel.setHref("http://bitternut.cs.indiana.edu:7010/projectsummary/"
+                /*configuration.getConfiguration(ConfigurationKey.ProjectURL)*/);
         mainHeader.add(projectNameLabel);
         mainHeader.setStyleName("headerTitle");
         RootPanel.get("projectTitle").add(mainHeader);
@@ -552,6 +556,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 }
                 Cookies.setCookie("sid", personBean.getUri(), expires);
                 checkPermissions(History.getToken());
+
                 callback.onSuccess(userId, sessionKey);
             }
         };
