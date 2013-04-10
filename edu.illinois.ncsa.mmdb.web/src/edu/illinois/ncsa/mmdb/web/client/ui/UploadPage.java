@@ -52,13 +52,19 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
@@ -235,14 +241,52 @@ public class UploadPage extends Page {
         or.addStyleName("uploadOrLabel");
         tableLayout.setWidget(0, 1, or);
 
+        final FormPanel form = new FormPanel();
+        form.setAction("./resteasy/datasets/copy");
+        form.setMethod(FormPanel.METHOD_POST);
+        final VerticalPanel panel = new VerticalPanel();
+        form.setWidget(panel);
+
+        panel.add(new Label("Enter URL of dataset to copy."));
+
+        // Create a TextBox, giving it a name so that it will be submitted.
+        final TextBox tb = new TextBox();
+        tb.addStyleName("uploadPageLargeCell");
+        tb.setName("url");
+        panel.add(tb);
+
+        // Add a 'submit' button.
+        panel.add(new Button("Copy Dataset", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (tb.getText().contains("dataset?id=")) {
+                    form.submit();
+                } else {
+                    Window.alert("Not a valid Medici URL");
+                }
+            }
+        }));
+
+        // Add an event handler to the form.
+        form.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+            @Override
+            public void onSubmitComplete(SubmitCompleteEvent event) {
+                String id = tb.getText().replaceAll(".*dataset\\?id=", "");
+                tb.setText("");
+                panel.add(new Hyperlink(id, "dataset?id=" + id));
+            }
+        });
+
         if (showhtml5) {
             tableLayout.setWidget(0, 0, html5Form);
             tableLayout.setWidget(0, 2, html5Panel);
             tableLayout.setWidget(1, 0, switchUploader);
+            tableLayout.setWidget(2, 0, form);
         } else {
             pageTitle.addEast(helpButton);
             tableLayout.setWidget(0, 0, singleUpload);
             tableLayout.setWidget(0, 2, dndPanel);
+            tableLayout.setWidget(2, 0, form);
         }
 
         tableLayout.getCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
@@ -251,6 +295,8 @@ public class UploadPage extends Page {
         tableLayout.getCellFormatter().addStyleName(1, 0, "uploadPageLargeCell");
         tableLayout.getCellFormatter().addStyleName(0, 2, "uploadPageLargeCell");
         tableLayout.getCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_CENTER);
+        tableLayout.getCellFormatter().setHorizontalAlignment(2, 0, HasAlignment.ALIGN_CENTER);
+        tableLayout.getCellFormatter().addStyleName(2, 0, "uploadPageLargeCell");
 
         // wake the applet up periodically, so it doesn't block on javascript calls
         safariWakeupTimer = new Timer() {
