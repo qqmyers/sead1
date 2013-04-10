@@ -245,6 +245,7 @@ public class UploadPage extends Page {
         form.setAction("./resteasy/datasets/copy");
         form.setMethod(FormPanel.METHOD_POST);
         final VerticalPanel panel = new VerticalPanel();
+        panel.setWidth("100%");
         form.setWidget(panel);
 
         panel.add(new Label("Enter URL of dataset to copy."));
