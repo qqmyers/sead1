@@ -630,7 +630,26 @@ public class DatasetWidget extends Composite {
                         }
                         int row = informationTable.getRowCount();
                         informationTable.setText(row, 0, tuple.getLabel());
-                        informationTable.setText(row, 1, tuple.getValue());
+                        if (tuple.getValue().startsWith("http")) {
+                            String text = "<a href=\"" + tuple.getValue() + "\">";
+                            if (tuple.getValue().length() > 20) {
+                                text += tuple.getValue().substring(0, 20);
+                            } else {
+                                text += tuple.getValue();
+                            }
+                            text += "</a>";
+                            informationTable.setHTML(row, 1, text);
+                            if (tuple.getValue().length() > 20) {
+                                informationTable.getFlexCellFormatter().getElement(row, 1).setAttribute("title", tuple.getValue());
+                            }
+                        } else {
+                            if (tuple.getValue().length() > 20) {
+                                informationTable.setText(row, 1, tuple.getValue().substring(0, 20));
+                                informationTable.getFlexCellFormatter().getElement(row, 1).setAttribute("title", tuple.getValue());
+                            } else {
+                                informationTable.setText(row, 1, tuple.getValue());
+                            }
+                        }
 
                         // formatting
                         informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
