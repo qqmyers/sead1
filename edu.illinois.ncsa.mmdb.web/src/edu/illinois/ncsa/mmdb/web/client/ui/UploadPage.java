@@ -252,8 +252,8 @@ public class UploadPage extends Page {
 
         // Create a TextBox, giving it a name so that it will be submitted.
         final TextBox tb = new TextBox();
-        tb.addStyleName("uploadPageLargeCell");
         tb.setName("url");
+        tb.setWidth("100%");
         panel.add(tb);
 
         // Add a 'submit' button.
@@ -296,8 +296,6 @@ public class UploadPage extends Page {
         tableLayout.getCellFormatter().addStyleName(1, 0, "uploadPageLargeCell");
         tableLayout.getCellFormatter().addStyleName(0, 2, "uploadPageLargeCell");
         tableLayout.getCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_CENTER);
-        tableLayout.getCellFormatter().setHorizontalAlignment(2, 0, HasAlignment.ALIGN_CENTER);
-        tableLayout.getCellFormatter().addStyleName(2, 0, "uploadPageLargeCell");
 
         // wake the applet up periodically, so it doesn't block on javascript calls
         safariWakeupTimer = new Timer() {
