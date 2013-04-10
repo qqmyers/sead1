@@ -635,7 +635,7 @@ public class DatasetWidget extends Composite {
                         if (tuple.getValue().startsWith("http")) {
                             String text = "<a href=\"" + tuple.getValue() + "\">";
                             if (tuple.getValue().length() > MAX_TEXT_SIZE) {
-                                text += tuple.getValue().substring(0, MAX_TEXT_SIZE);
+                                text += tuple.getValue().substring(0, MAX_TEXT_SIZE - 3) + "...";
                             } else {
                                 text += tuple.getValue();
                             }
@@ -646,7 +646,7 @@ public class DatasetWidget extends Composite {
                             }
                         } else {
                             if (tuple.getValue().length() > MAX_TEXT_SIZE) {
-                                informationTable.setText(row, 1, tuple.getValue().substring(0, MAX_TEXT_SIZE));
+                                informationTable.setText(row, 1, tuple.getValue().substring(0, MAX_TEXT_SIZE - 3) + "...");
                                 informationTable.getFlexCellFormatter().getElement(row, 1).setAttribute("title", tuple.getValue());
                             } else {
                                 informationTable.setText(row, 1, tuple.getValue());
