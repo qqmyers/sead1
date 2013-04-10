@@ -93,26 +93,35 @@ public class DatasetsRestService {
     @Path("/copy")
     public Response copyDataset(@FormParam("url") String surl) {
         try {
-            URL url = new URL(surl);
+            final URL url = new URL(surl);
 
             if (!url.getRef().startsWith("dataset?id=")) {
                 throw (new Exception("URL does not appear to be medici URL"));
             }
 
-            String id = url.getRef().substring(11);
-            URL endpoint = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "resteasy/sparql");
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        String id = url.getRef().substring(11);
+                        URL endpoint = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "resteasy/sparql");
 
-            TripleWriter tw = new TripleWriter();
-            Set<String> uris = copyTriples(endpoint, id, tw);
-            uris.add(id);
+                        TripleWriter tw = new TripleWriter();
 
-            for (String s : uris ) {
-                endpoint = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "resteasy/datasets/" + URLEncoder.encode(s, "UTF8") + "/file?" + ConfigurationKey.RemoteAPIKey.getPropertyKey() + "=" + URLEncoder.encode(TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey), "UTF8"));
-                copyData(endpoint, s);
-            }
-            TupeloStore.getInstance().getContext().perform(tw);
+                        Set<String> uris = copyTriples(endpoint, id, tw);
+                        uris.add(id);
+                        TupeloStore.getInstance().getContext().perform(tw);
 
-            return Response.status(200).entity("Copied " + tw.getToAdd().size() + " triples and " + uris.size() + " blobs").build();
+                        for (String s : uris ) {
+                            endpoint = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "resteasy/datasets/" + URLEncoder.encode(s, "UTF8") + "/file?" + ConfigurationKey.RemoteAPIKey.getPropertyKey() + "=" + URLEncoder.encode(TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey), "UTF8"));
+                            copyData(endpoint, s);
+                        }
+                    } catch (Exception e) {
+                        log.error("Error copying dataset from " + url.toExternalForm(), e);
+                    }
+                }
+            }).start();
+
+            return Response.status(200).entity("Object is being copied.").build();
         } catch (Exception e) {
             log.error("Error copying dataset from " + surl, e);
             return Response.status(500).entity("Error copying dataset [" + e.getMessage() + "]").build();
