@@ -106,7 +106,7 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 @SuppressWarnings("nls")
 public class DatasetWidget extends Composite {
 
-    private static final String     DOWNLOAD_URL = "./api/image/download/";
+    private static final String     DOWNLOAD_URL  = "./api/image/download/";
 
     private final DispatchAsync     service;
 
@@ -126,6 +126,8 @@ public class DatasetWidget extends Composite {
 
     /** eventbus that is used when a new section is selected */
     protected final HandlerManager  eventBus;
+
+    private static final int        MAX_TEXT_SIZE = 80;
 
     /**
      * 
@@ -632,19 +634,19 @@ public class DatasetWidget extends Composite {
                         informationTable.setText(row, 0, tuple.getLabel());
                         if (tuple.getValue().startsWith("http")) {
                             String text = "<a href=\"" + tuple.getValue() + "\">";
-                            if (tuple.getValue().length() > 20) {
-                                text += tuple.getValue().substring(0, 20);
+                            if (tuple.getValue().length() > MAX_TEXT_SIZE) {
+                                text += tuple.getValue().substring(0, MAX_TEXT_SIZE);
                             } else {
                                 text += tuple.getValue();
                             }
                             text += "</a>";
                             informationTable.setHTML(row, 1, text);
-                            if (tuple.getValue().length() > 20) {
+                            if (tuple.getValue().length() > MAX_TEXT_SIZE) {
                                 informationTable.getFlexCellFormatter().getElement(row, 1).setAttribute("title", tuple.getValue());
                             }
                         } else {
-                            if (tuple.getValue().length() > 20) {
-                                informationTable.setText(row, 1, tuple.getValue().substring(0, 20));
+                            if (tuple.getValue().length() > MAX_TEXT_SIZE) {
+                                informationTable.setText(row, 1, tuple.getValue().substring(0, MAX_TEXT_SIZE));
                                 informationTable.getFlexCellFormatter().getElement(row, 1).setAttribute("title", tuple.getValue());
                             } else {
                                 informationTable.setText(row, 1, tuple.getValue());

@@ -79,11 +79,17 @@ public class DatasetsRestService {
                                         "tag:tupeloproject.org,2006:/2.0/gis/hasGeoPoint",
                                         "http://purl.org/dc/elements/1.1/creator",
                                         "http://cet.ncsa.uiuc.edu/2007/pyramid/tiles",
+                                        "http://cet.ncsa.uiuc.edu/2007/hasExtent",
                                         };
 
     private static String[] CopyBytes   = new String[] {
                                         "http://cet.ncsa.uiuc.edu/2007/hasPreview",
                                         "http://cet.ncsa.uiuc.edu/2007/pyramid/tiles",
+                                        };
+
+    private static String[] CopyNoBytes = new String[] {
+                                        "http://cet.ncsa.uiuc.edu/2007/ImagePyramid",
+                                        "http://cet.ncsa.uiuc.edu/2007/PreviewGeoserver",
                                         };
 
     /** Commons logging **/
@@ -107,14 +113,22 @@ public class DatasetsRestService {
 
                         TripleWriter tw = new TripleWriter();
 
-                        Set<String> uris = copyTriples(endpoint, id, tw);
-                        uris.add(id);
+                        Resource p = createPredicate("Medici", "original", "Original Source", tw);
+                        tw.add(Resource.uriRef(id), p, Resource.uriRef(url.toURI()));
+
+                        Set<String> copyURI = new HashSet<String>();
+                        Set<String> ignoreURI = new HashSet<String>();
+                        copyURI.add(id);
+                        copyTriples(endpoint, id, tw, copyURI, ignoreURI);
+                        copyURI.removeAll(ignoreURI);
+
                         TupeloStore.getInstance().getContext().perform(tw);
 
-                        for (String s : uris ) {
+                        for (String s : copyURI ) {
                             endpoint = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "resteasy/datasets/" + URLEncoder.encode(s, "UTF8") + "/file?" + ConfigurationKey.RemoteAPIKey.getPropertyKey() + "=" + URLEncoder.encode(TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey), "UTF8"));
                             copyData(endpoint, s);
                         }
+                        log.info("Copied dataset [" + url.toExternalForm() + "], " + tw.getToAdd().size() + " triples and " + copyURI.size() + " blobs");
                     } catch (Exception e) {
                         log.error("Error copying dataset from " + url.toExternalForm(), e);
                     }
@@ -128,9 +142,46 @@ public class DatasetsRestService {
         }
     }
 
-    private Set<String> copyTriples(URL endpoint, String uri, TripleWriter tw) throws IOException, ParseException {
-        Set<String> datas = new HashSet<String>();
+    /**
+     * Simple function to create a predicate and store information about the
+     * predicate.
+     * 
+     * @param category
+     * @param id
+     * @param label
+     * @param tw
+     * @return
+     */
+    static public Resource createPredicate(String category, String id, String label, TripleWriter tw) {
+        String uType;
+        if (category.length() > 1) {
+            uType = category.substring(0, 1).toUpperCase() + category.substring(1);
+        } else {
+            uType = category.toUpperCase();
+        }
+        try {
+            uType = URLEncoder.encode(uType, "UTF8"); //$NON-NLS-1$ 
+        } catch (UnsupportedEncodingException e) {
+            log.warn("Could not encode type.", e); //$NON-NLS-1$
+            uType = uType.replace(" ", "%20"); //$NON-NLS-1$ //$NON-NLS-2$ 
+        }
 
+        Resource p;
+        try {
+            p = Cet.cet(String.format("metadata/%s/%s", URLEncoder.encode(category, "UTF8"), id)); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (UnsupportedEncodingException e) {
+            log.warn("Could not encode category.", e); //$NON-NLS-1$
+            p = Cet.cet(String.format("metadata/%s/%s", category.replace(" ", "%20"), id)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        }
+
+        tw.add(p, Rdf.TYPE, Cet.cet("metadata/" + uType)); //$NON-NLS-1$
+        tw.add(p, Rdf.TYPE, MMDB.METADATA_TYPE);
+        tw.add(p, MMDB.METADATA_CATEGORY, category);
+        tw.add(p, Rdfs.LABEL, label);
+        return p;
+    }
+
+    private void copyTriples(URL endpoint, String uri, TripleWriter tw, Set<String> copyURI, Set<String> ignoreURI) throws IOException, ParseException {
         StringBuilder sb = new StringBuilder();
         sb.append(URLEncoder.encode(ConfigurationKey.RemoteAPIKey.getPropertyKey(), "UTF8"));
         sb.append("=");
@@ -173,11 +224,11 @@ public class DatasetsRestService {
                     uris.add(pre.getString());
                 }
                 if (Arrays.asList(CopyBytes).contains(pre.getString())) {
-                    if (obj.getString().startsWith("tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewPyramid/")) {
-                        log.info("Ignoring blob for " + obj.getString());
-                    } else {
-                        datas.add(obj.getString());
-                    }
+                    copyURI.add(obj.getString());
+                }
+                if (Arrays.asList(CopyNoBytes).contains(obj.getString())) {
+                    log.info("Ignoring blob for " + obj.getString());
+                    ignoreURI.add(uri);
                 }
 
                 tw.add(sub, pre, obj);
@@ -186,10 +237,8 @@ public class DatasetsRestService {
         br.close();
 
         for (String s : uris ) {
-            datas.addAll(copyTriples(endpoint, s, tw));
+            copyTriples(endpoint, s, tw, copyURI, ignoreURI);
         }
-
-        return datas;
     }
 
     private Resource parseNTriples(String s) throws ParseException {
