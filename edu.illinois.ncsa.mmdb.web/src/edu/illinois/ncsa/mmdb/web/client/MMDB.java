@@ -67,6 +67,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
@@ -104,6 +105,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.TagsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.UploadPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.admin.AdminPage;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
@@ -256,20 +258,28 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         RootPanel.get("projectTitle").clear();
         ConfigurationResult configuration = new ConfigurationResult();
 
-        //Get project name from Configuration 
-        String ProjectName = "Sustainable Environment Actionable Data";
-        /*configuration.getConfiguration(ConfigurationKey.ProjectName);*/
-
         HorizontalPanel mainHeader = new HorizontalPanel();
         final Anchor projectNameLabel = new Anchor(true);
-        projectNameLabel.setText(ProjectName);
-        projectNameLabel.setTitle(ProjectName);
-
-        projectNameLabel.setHref("http://bitternut.cs.indiana.edu:7010/projectsummary/"
-                /*configuration.getConfiguration(ConfigurationKey.ProjectURL)*/);
+        projectNameLabel.setText("");
+        projectNameLabel.setTitle("");
+        projectNameLabel.setHref("");
         mainHeader.add(projectNameLabel);
         mainHeader.setStyleName("headerTitle");
         RootPanel.get("projectTitle").add(mainHeader);
+
+        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription), new AsyncCallback<ConfigurationResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Could not get Names", caught);
+            }
+
+            @Override
+            public void onSuccess(ConfigurationResult result) {
+                projectNameLabel.setText(result.getConfiguration(ConfigurationKey.ProjectName));
+                projectNameLabel.setTitle(result.getConfiguration(ConfigurationKey.ProjectDescription));
+                projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
+            }
+        });
 
         RootPanel.get("navMenu").add(navMenu);
 

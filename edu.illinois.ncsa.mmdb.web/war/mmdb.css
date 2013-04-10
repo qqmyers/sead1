@@ -182,6 +182,8 @@ a:hover {
 	font-style:italic;
 	font-weight:bold;
 	color: black;
+	width: 99%;
+	text-align: right;
 }
 
 .menuElementLeft {
