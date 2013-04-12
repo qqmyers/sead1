@@ -3,9 +3,12 @@
 	padding: 0;
 }
 
-header, nav, section, article, aside, footer {
+headr, nav, section, article, aside, footer {
 	display: block;
 }
+
+
+
 body {
 	font: 12px/18px Arial, Tahoma, Verdana, sans-serif;
 }
@@ -36,9 +39,9 @@ input {
 -----------------------------------------------------------------------------*/
 #header {
 	padding: 10px 10px 10px 10px;
-	color: white;
-	height: 30px;
-	background: black;
+	/*color: white;*/
+	height: 40px;
+	/*background: black;*/
 }
 
 
@@ -92,4 +95,21 @@ input {
     border: 1px solid #ccc;
 }
 
+/**
+* Top header with sead image
+*/
 
+#logo{
+	float:left;
+	height:40px;
+	padding:1px 0px 0px;	
+}
+
+#gradient{
+	float:right;
+	height:40 px;
+	width: 100%;
+	/*background-image:url("../openlayers/img/border.png");*/
+	background-color: black;
+	text-align:right;
+}
