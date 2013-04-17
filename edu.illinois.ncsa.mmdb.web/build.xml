@@ -96,7 +96,7 @@
 		<replace file="war/WEB-INF/classes/server.properties" token="#hfc.path=" value="hfc.path=/home/medici/medici/data" />
 	</target>
 	
-	<target name="sead" depends="resources" description="setup for hudson build and deployment">
+	<target name="sead" depends="gwtc, resources" description="setup for hudson build and deployment">
 		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" overwrite="true" />
 		<copy tofile="war/mmdb/public.properties" file="src/sead.public-properties" overwrite="true" />
 		<copy tofile="war/WEB-INF/classes/server.properties" file="src/sead.server-properties" overwrite="true" />
