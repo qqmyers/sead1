@@ -197,7 +197,7 @@ public class AuthenticatedServlet extends HttpServlet {
             return authorized(request);
         } else if (request.getRequestURI().contains("api/video")) {
             if (request.getHeader("User-Agent").startsWith("AppleCoreMedia") || request.getHeader("User-Agent").startsWith("QuickTime")) {
-                // special case for quicktime player.
+                // FIXME : special case for quicktime player.
                 validUser = PersonBeanUtil.getAnonymousURI().toString();
                 HttpSession session = request.getSession(true);
                 if (session.getAttribute(AUTHENTICATED_AS) == null) {
@@ -209,7 +209,7 @@ public class AuthenticatedServlet extends HttpServlet {
                 log.info("Video request from non authenticated user with User-Agent=" + request.getHeader("User-Agent"));
             }
         } else if (request.getRequestURI().contains("api/image/preview/")) {
-            // special image case for nced data
+            // FIXME : special image case for nced data
             validUser = PersonBeanUtil.getAnonymousURI().toString();
             HttpSession session = request.getSession(true);
             if (session.getAttribute(AUTHENTICATED_AS) == null) {
