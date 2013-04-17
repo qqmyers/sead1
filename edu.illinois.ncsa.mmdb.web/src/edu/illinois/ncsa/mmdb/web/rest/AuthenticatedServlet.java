@@ -208,6 +208,15 @@ public class AuthenticatedServlet extends HttpServlet {
             } else {
                 log.info("Video request from non authenticated user with User-Agent=" + request.getHeader("User-Agent"));
             }
+        } else if (request.getRequestURI().contains("api/image/preview/")) {
+            // special image case for nced data
+            validUser = PersonBeanUtil.getAnonymousURI().toString();
+            HttpSession session = request.getSession(true);
+            if (session.getAttribute(AUTHENTICATED_AS) == null) {
+                log.info("Special image case, validated as anonymous in HTTP session " + session.getId());
+                session.setAttribute(AUTHENTICATED_AS, validUser);
+            }
+            return authorized(request);
         }
         // no. reject
         log.info("Client provided no credentials, returning 403 Unauthorized");
