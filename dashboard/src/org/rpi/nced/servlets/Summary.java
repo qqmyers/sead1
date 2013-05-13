@@ -58,6 +58,7 @@ public class Summary extends HttpServlet {
 			JSONArray resultArray = obj.getJSONObject("sparql").getJSONObject("results").getJSONArray("result");
 			Map<String, Integer> map = new HashMap<String, Integer>();
 			for(int i=0; i< resultArray.length(); i++){
+				try{
 				if(resultArray.getJSONObject(i).getJSONObject("binding").getString("literal").split("\\.").length==2) {
 					String fileExt = resultArray.getJSONObject(i).getJSONObject("binding").getString("literal").split("\\.")[1];
 					String mimeType = org.rpi.nced.utilties.MimeMap.findCategory(fileExt);
@@ -66,6 +67,9 @@ public class Summary extends HttpServlet {
 					}else{
 						map.put(mimeType, 1);
 					}
+				}
+				}catch (Exception e) {
+					System.out.println(resultArray.getJSONObject(i).getJSONObject("binding"));
 				}
 			}
 			String datasetDistribution = map.toString();

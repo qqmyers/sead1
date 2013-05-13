@@ -52,27 +52,48 @@ public class NCEDProxy {
 	}
 
 	public String getAllCollections() throws Exception {
-		String query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-				+ " "
-				+ "PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/>"
-				+ " "
-				+ "Prefix tag: <http://www.holygoat.co.uk/owl/redwood/0.1/tags/>"
-				+ " "
-				+ "SELECT ?tagID ?title ?creator WHERE {"
-				+ " "
-				+ "?tagID <rdf:type> <cet:Collection> ."
-				+ " "
-				/*+ "?tagID <http://purl.org/dc/terms/issued> ?date ."
-				+ " "
-				+ "?tagID <http://purl.org/dc/terms/creator> ?creator ."*/
-				+ " "
-				+ "?tagID <dc:title> ?title ."
-				+ " "
-				+ "OPTIONAL { ?tagID <http://purl.org/dc/terms/abstract> ?abstract . } }";
-		
-		String responseText = DataAccess.getResponse(_userName, _password,
-				query);
-		String responseJSON = sortItems(convertToJson(responseText));
+		String responseJSON;
+		try{
+			String query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+					+ " "
+					+ "PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/>"
+					+ " "
+					+ "Prefix tag: <http://www.holygoat.co.uk/owl/redwood/0.1/tags/>"
+					+ " "
+					+ "SELECT ?tagID ?title ?creator ?deleted WHERE {"
+					+ " "
+					+ "?tagID <rdf:type> <cet:Collection> ."
+					+ " "
+					+ "?tagID <http://purl.org/dc/terms/creator> ?creator ."
+					+ " "
+					+ "?tagID <dc:title> ?title ."
+					+ " "
+					+ "OPTIONAL { ?tagID <http://purl.org/dc/terms/isReplacedBy> ?deleted . } }";
+			
+			String responseText = DataAccess.getResponse(_userName, _password,
+					query);
+			responseJSON = sortItems(convertToJson(responseText));
+		}catch (Exception e) {
+			String query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+					+ " "
+					+ "PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/>"
+					+ " "
+					+ "Prefix tag: <http://www.holygoat.co.uk/owl/redwood/0.1/tags/>"
+					+ " "
+					+ "SELECT ?tagID ?title ?creator ?deleted WHERE {"
+					+ " "
+					+ "?tagID <rdf:type> <cet:Collection> ."
+					/*+ " "
+					+ "?tagID <http://purl.org/dc/terms/creator> ?creator ."*/
+					+ " "
+					+ "?tagID <dc:title> ?title ."
+					+ " "
+					+ "OPTIONAL { ?tagID <http://purl.org/dc/terms/isReplacedBy> ?deleted . } }";
+			
+			String responseText = DataAccess.getResponse(_userName, _password,
+					query);
+			responseJSON = sortItems(convertToJson(responseText));
+		}
 		return responseJSON;
 	}
 	
@@ -163,9 +184,9 @@ public class NCEDProxy {
 		if (responseText.contains("&")) {
 			responseText = responseText.replace("&", "and");
 		}
-		System.out.println(responseText);
+		//System.out.println(responseText);
 		JSONObject jsonObject = XML.toJSONObject(responseText);
-		System.out.println(jsonObject.toString());
+		//System.out.println(jsonObject.toString());
 		return jsonObject.toString();
 	}
 

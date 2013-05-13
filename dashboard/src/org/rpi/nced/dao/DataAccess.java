@@ -69,7 +69,7 @@ public class DataAccess {
 
 		Scanner responseScanner = new Scanner(_inputStream);
 		String responseText = responseScanner.useDelimiter("\\A").next();
-		System.out.println(responseText);
+		//System.out.println(responseText);
 		responseScanner.close();
 
 		_inputStream.close();

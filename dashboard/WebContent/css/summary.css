@@ -113,3 +113,9 @@ body {
 	text-align: right;
 	padding-top:1%;
 }
+
+.imageThumbnail {
+    border: medium none;
+    height: 100px;
+    position: relative;
+}

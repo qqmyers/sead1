@@ -2,9 +2,9 @@ var projectPath = '';
 
 function initialize() {
 	var mapProp = {
-		center : new google.maps.LatLng(51.508742, -0.120850),
+		center : new google.maps.LatLng(29.1536, -89.2508),
 		zoom : 5,
-		mapTypeId : google.maps.MapTypeId.ROADMAP
+		mapTypeId : google.maps.MapTypeId.HYBRID  
 	};
 	var map = new google.maps.Map($("#summaryMap")[0], mapProp);
 }
@@ -21,16 +21,8 @@ function drawChart() {
 		var allDatasetDist = $('#hidden_datasetDistribution').html().trim().split(',');
 		for(var i=0; i<allDatasetDist.length; i++){
 			barArray[barArray.length] = [allDatasetDist[i].split('=')[0].substring(1), parseInt(allDatasetDist[i].split('=')[1])];
-			//barArray[barArray.length] = ['Other', 122];
 		}
 	}
-      /*var data = google.visualization.arrayToDataTable([
-        ['Categories', null],
-        ['Geo',  900],
-        ['Image',  1000],
-        ['Document',  1170],
-        ['TimeSeries',  660]
-      ]);*/
 	
 	var data = google.visualization.arrayToDataTable(barArray);
 
@@ -56,6 +48,7 @@ function loadTableContent() {
 	var title = '';
 	var uri = '';
 	var displayTitle = '';
+	var isDeleted = null;
 	
 	var tagURISet = {};
 	
@@ -75,13 +68,13 @@ function loadTableContent() {
 						displayTitle = title
 								.substring(title.lastIndexOf("/") + 1);
 					}
-				}/* else if (value == 'abstract') {
-					abs = jsonBinding[j]['literal'];
-				}*/
+				} else if (value == 'deleted') {
+					isDeleted = jsonBinding[j]['uri'];
+				}
 			});
 		}
 		
-		if(!tagURISet[uri]) { 
+		if(!tagURISet[uri] && isDeleted ==null) { 
 			tagURISet[uri] = true;
 	
 			div_html += '<tr data-tt-id="'+i+'">'
@@ -89,6 +82,8 @@ function loadTableContent() {
 						+ uri + '" target ="_blank">' + displayTitle + '</a></span></td><td>--</td>'
 						+'<tr data-tt-id="'+i+'-1" data-tt-parent-id="'+i+'">';
 		
+		}else if(isDeleted !=null){
+			isDeleted = null;
 		}
 	}
 
@@ -96,11 +91,6 @@ function loadTableContent() {
 	
 	
 }	
-
-
-/*{"sparql":{"results":{"result":
- * [{"binding":
- * [{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/anonymous"},{"name":"name","literal":"Anonymous"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/medici@ncsa.illinois.edu"},{"name":"name","literal":"Medici Admin"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/malviyas@indiana.edu"},{"name":"name","literal":"Saurabh Malviya"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/myersj4@rpi.edu"},{"name":"name","literal":"Jim Myers"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/liuy18@rpi.edu"},{"name":"name","literal":"Yue Liu"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/govinr2@rpi.edu"},{"name":"name","literal":"Ram  Krishnan"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/rhmcdona@indiana.edu"},{"name":"name","literal":"robert mcdonald"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/lmarini@illinois.edu"},{"name":"name","literal":"Luigi Marini"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/m.rahnemoonfar@gmail.com"},{"name":"name","literal":"Maryam Rahnemoonfar"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/inkouper@indiana.edu"},{"name":"name","literal":"Inna Kouper"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/mzaman@illinois.edu"},{"name":"name","literal":"Md Aktaruzzaman"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/ramprasanna.krishnan@gmail.com"},{"name":"name","literal":"ram krishnan"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/kavchand@indiana.edu"},{"name":"name","literal":"Kavitha Chandrasekar"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/malviyas@umail.iu.edu"},{"name":"name","literal":"Saurabh Malviya"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/kooper@illinois.edu"},{"name":"name","literal":"Rob Kooper"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/kumar1@illinois.edu"},{"name":"name","literal":"Praveen Kumar"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/lebot@rpi.edu"},{"name":"name","literal":"Tim Lebo"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/valentin@sdsc.edu"},{"name":"name","literal":"David Valentine"}]},{"binding":[{"name":"uri","uri":"http://cet.ncsa.uiuc.edu/2007/person/annszimmerman@gmail.com"},{"name":"name","literal":"Ann Zimmerman"}]}]},"xmlns":"http://www.w3.org/2005/sparql-results#","head":{"variable":[{"name":"uri"},{"name":"name"}]}}}*/
 
 var map = new Object();
 function parseCreators() {
@@ -110,11 +100,7 @@ function parseCreators() {
 	
 	var div_html ='<h3>Team Members</h3>';
 	var obj = $.parseJSON($("#hidden_creators").html());
-	/*{"name":"tagID","uri":"tag:cet.ncsa.uiuc.edu,2008:/bean/Dataset/8a48d7d7-b91a-4741-84be-116cd3eafd80"},
-	{"name":"title","literal":"R08_009.DAT"},
-	{"name":"creator","uri":"http://cet.ncsa.uiuc.edu/2007/person/medici@ncsa.illinois.edu"},
-	{"name":"date","literal":{"content":"2013-01-18T21:33:27.000Z","datatype":"http://www.w3.org/2001/XMLSchema#dateTime"}*/
-
+	
 	for ( var i = 0; i < obj.sparql.results.result.length; i++) {
 		var jsonBinding = obj.sparql.results.result[i].binding;
 		for ( var j = 0; j < jsonBinding.length; j++) {
@@ -143,10 +129,6 @@ function loadRecentUploads(){
 	var date = [];
 	
 	var obj = $.parseJSON($("#hidden_recentuploads").html());
-	/*{"name":"tagID","uri":"tag:cet.ncsa.uiuc.edu,2008:/bean/Dataset/8a48d7d7-b91a-4741-84be-116cd3eafd80"},
-	{"name":"title","literal":"R08_009.DAT"},
-	{"name":"creator","uri":"http://cet.ncsa.uiuc.edu/2007/person/medici@ncsa.illinois.edu"},
-	{"name":"date","literal":{"content":"2013-01-18T21:33:27.000Z","datatype":"http://www.w3.org/2001/XMLSchema#dateTime"}*/
 
 	for ( var i = 0; i < obj.sparql.results.result.length; i++) {
 		abs = '';
@@ -175,32 +157,17 @@ function loadRecentUploads(){
 			});
 		}
 		
-		/*<div class="media">
-		<a class="pull-left" href="#"> <img class="media-object" src="http://nced.ncsa.illinois.edu/acr/api/image/preview/small/tag:cet.ncsa.uiuc.edu,2008:/bean/Dataset/8a48d7d7-b91a-4741-84be-116cd3eafd80">
-		</a>
-		<div class="media-body">
-			<h4 class="media-heading">Media heading</h4>
-			dasdadadasdsada
-		</div>
-	</div>*/
 		displayTitleAfter = displayTitle.length>12?displayTitle.substring(0,11)+'...':displayTitle;
 		div_html += '<div class="media">'
-					+ '<a class="pull-left" href="'+projectPath+'/#dataset?id='+uri+'" target="_blank"> <img title="'+displayTitle+'" class="media-object" src="'+projectPath+'/api/image/preview/small/'
-					+ uri + '" </img> </a>'
+					+ '<a class="pull-left" href="'+projectPath+'/#dataset?id='+uri+'" target="_blank"> <img style="width: 100px; height: 100px;" title="'+displayTitle+'" class="media-object" src="'+projectPath+'/api/image/preview/small/'
+					+ uri + '" /> </a>'
 					+'<div class="media-body">'
 					+'<a href="'+projectPath+'/#dataset?id='+uri+'" target="_blank" title="'+displayTitle+'">'+displayTitleAfter
 					+'</a></br>'+map[creator]+'</br>'+date[0] +' '+ date[1]+' '+date[2] +' '+ date[3]+'</div></div>';
 		
-		/*div_html += '<div class="media">'
-			+ '<a class="pull-left" href="http://nced.ncsa.illinois.edu/acr/#dataset?id='+uri+'" target="_blank"> <img title="'+displayTitle+'" class="media-object" src="images/nopreview-100.gif"'
-			+ ' </img> </a>'
-			+'<div class="media-body">'
-			+'<a href="http://nced.ncsa.illinois.edu/acr/#dataset?id='+uri+'" target="_blank" title="'+displayTitle+'">'+displayTitleAfter
-			+'</a></br>'+map[creator]+'</br>'+date[0] +' '+ date[1]+' '+date[2] +' '+ date[3]+'</div></div>';
-*/		
+		//images/nopreview-100.gif	
 
 	}
-	//alert(displayTitle.replace(/_/g,'&#95;').replace(/\./g,'&#46;'));
 	$("#recentuploads").html(div_html);
 }
 
@@ -211,9 +178,7 @@ function roundNumber(num, dec) {
 
 function getTeamMembers() {
 	var div_html ='<h3>Team Members</h3>';
-
-
-	//var jsonString = JSON.stringify(json);
+	
 	var obj = $.parseJSON($("#hidden_collections").html());
 	if (obj.sparql.results.result != null) {
 		if (obj.sparql.results.result.length == null) {
@@ -229,10 +194,6 @@ function getTeamMembers() {
 
 	$('#teammembers').html(div_html);
 	
-	/*<h3>Team Members</h3></br>
-	Praveen Kumar</br>
-	Charles Nyugen</br>
-	James Myers</br></br></br></br>	*/
 
 }
 
@@ -245,51 +206,75 @@ function getAttributesForHomePage(jsonBinding) {
 			var url = temp.substring(temp.indexOf(':') + 1);
 
 			creator += "<a href='" + url + "' target=_blank>" + name + "</a> ";
-			 /*else if (value == 'contact') {
-				contact += "<a href='" + url + "' target=_blank>" + name + "</a>, ";
-			}*/
 		}
 	});
 	
-	return creator;
-
-		/*else if (value == 'keyword') {
-			var temp = jsonBinding['uri'];
-			temp = temp.substring(temp.indexOf("#") + 1);
-			temp = decodeURIComponent(temp);
-			
-			//replaceAll + from temp
-			while (temp.indexOf("+") != -1) {
-				temp = temp.replace('+', " ");
-			}
-			keyword += "<a href='" + instanceURL_Tag + temp + "' target=_blank>" + temp + "</a>, ";
-		}*/
+	return creator;	
 	
 }
-
-/*<a href="<%= request.getAttribute("projectPath") %>" target="_blank" >Lower Mississippi Flood Project</a></br></br>
-<p> An NSF funded effort to understand the recent Mississippi River flooding event.</p>*/
 
 function loadProjectInfo(){
 	var jsonObj = $.parseJSON($("#hidden_projectInfo").html());
 	var map = new Object();
-	for ( var i = 0; jsonObj.sparql.results.result && i < jsonObj.sparql.results.result.length; i=i+3) {
-		var jsonBinding = jsonObj.sparql.results.result;
+	var nameURI;
+	var descURI;
+	var urlURI;
+	for ( var i = 0; jsonObj.sparql.results.result && i < jsonObj.sparql.results.result.length; i++) {
 		
-		//for ( var j = 0; j < jsonBinding.length; j=j+3) {
-			var j = i;
-			if(jsonBinding[j+1]['binding'][2]['uri']!=undefined) {
-				if(jsonBinding[j+1]['binding'][2]['uri'].indexOf('ProjectURL')!=-1){
-					map['url']= jsonBinding[j+2]['binding'][2]['literal'];				
-				}else if(jsonBinding[j+1]['binding'][2]['uri'].indexOf('ProjectName')!=-1) {
-					map['name']= jsonBinding[j+2]['binding'][2]['literal'];	
-				}else if(jsonBinding[j+1]['binding'][2]['uri'].indexOf('ProjectDescription')!=-1) {
-					map['description']= jsonBinding[j+2]['binding'][2]['literal'];	
-				}	
-			}
+		//for(var j =0; j<jsonObj.sparql.results.result[i].binding.length; j=j+3) {
+			var jsonBinding = jsonObj.sparql.results.result[i].binding;
 			
-		//}		
+			if(jsonBinding[2]['uri']!=undefined) {
+				if(jsonBinding[2]['uri'].indexOf('ProjectURL')!=-1){
+					urlURI = jsonBinding[0]['uri'];						
+				}else if(jsonBinding[2]['uri'].indexOf('ProjectName')!=-1) {
+					nameURI = jsonBinding[0]['uri'];	
+				}else if(jsonBinding[2]['uri'].indexOf('ProjectDescription')!=-1) {
+					descURI = jsonBinding[0]['uri'];	
+				}
+			}
+		//}
+		
+		/*if(jsonBinding[j]['binding'][2]['uri']!=undefined) {
+			if(jsonBinding[j]['binding'][2]['uri'].indexOf('ProjectURL')!=-1){
+				map['url']= jsonBinding[j+1]['binding'][2]['literal'];				
+			}else if(jsonBinding[j]['binding'][2]['uri'].indexOf('ProjectName')!=-1) {
+				map['name']= jsonBinding[j+1]['binding'][2]['literal'];	
+			}else if(jsonBinding[j]['binding'][2]['uri'].indexOf('ProjectDescription')!=-1) {
+				map['description']= jsonBinding[j+1]['binding'][2]['literal'];	
+			}	
+		}	*/		
+		
   	}
+	
+	for ( var i = 0; jsonObj.sparql.results.result && i < jsonObj.sparql.results.result.length; i++) {
+		
+		//for(var j =0; j<jsonObj.sparql.results.result[i].binding.length; j=j+3)
+		var jsonBinding = jsonObj.sparql.results.result[i].binding;
+		//http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value
+		if(jsonBinding[0]['uri']!=undefined) {
+			if(jsonBinding[0]['uri'] == urlURI && jsonBinding[1]['uri'] == 'http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value'){
+				map['url'] = jsonBinding[2]['literal'];						
+			}else if(jsonBinding[0]['uri'] == nameURI && jsonBinding[1]['uri'] == 'http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value'){
+				map['name'] = jsonBinding[2]['literal'];	
+			}else if(jsonBinding[0]['uri'] == descURI && jsonBinding[1]['uri'] == 'http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value'){
+				map['description'] = jsonBinding[2]['literal'];	
+			}
+		}
+		
+		
+		/*if(jsonBinding[j]['binding'][2]['uri']!=undefined) {
+			if(jsonBinding[j]['binding'][2]['uri'].indexOf('ProjectURL')!=-1){
+				map['url']= jsonBinding[j+1]['binding'][2]['literal'];				
+			}else if(jsonBinding[j]['binding'][2]['uri'].indexOf('ProjectName')!=-1) {
+				map['name']= jsonBinding[j+1]['binding'][2]['literal'];	
+			}else if(jsonBinding[j]['binding'][2]['uri'].indexOf('ProjectDescription')!=-1) {
+				map['description']= jsonBinding[j+1]['binding'][2]['literal'];	
+			}	
+		}	*/		
+		
+  	}
+	
 	$('#projectName').html(map['name']);
 	$('#projectDesc').html(map['description']);
 	$('#projectTitle').html(map['name']);
@@ -340,8 +325,12 @@ function callOnLoad() {
 	    	  var displayTitle = '';
 	    	  var length = '';
 	    	  var div_html_datasets = '';
-	    	  for ( var i = 0; jsonObj.sparql.results.result && i < jsonObj.sparql.results.result.length; ++i) {
-					var jsonBinding = jsonObj.sparql.results.result[i].binding;
+	    	  for ( var i = 0; jsonObj.sparql.results.result && (i < jsonObj.sparql.results.result.length || jsonObj.sparql.results.result.binding); ++i) {
+	    		  var jsonBinding;
+	    		  if(jsonObj.sparql.results.result.length)
+					jsonBinding = jsonObj.sparql.results.result[i].binding;
+	    		  else
+	    			  jsonBinding = jsonObj.sparql.results.result.binding; 
 					
 					for ( var j = 0; j < jsonBinding.length; j++) {
 		    			$.each(jsonBinding[j], function(key, value) {
@@ -358,10 +347,13 @@ function callOnLoad() {
 		
 		    				} else if (value == 'length') {
 		    					length = jsonBinding[j]['literal']['content'];
+		    					if(length<0)
+		    						length = 0- length;
 		
 		    				}
 		    				
-		    			});
+		    			});		    		
+		    		
 		    		}
 
 		    		if (uri.indexOf("Collection") == -1) {
@@ -386,6 +378,8 @@ function callOnLoad() {
 						+'<tr data-tt-id="'+node.id+'-'+i+'-1" data-tt-parent-id="'+node.id+'-'+i+'">';
 		    			
 		    		}
+		    		if(jsonObj.sparql.results.result.binding)	
+		    			break;
 	    	  	}
 		        var rows = $(div_html_datasets).filter("tr");
 		
@@ -402,10 +396,3 @@ function callOnLoad() {
 
 	loadProjectInfo();
 }
-
-
-
-
-
-
-
