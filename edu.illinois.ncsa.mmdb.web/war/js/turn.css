@@ -1,0 +1,9 @@
+body {margin:0px;}
+#d_magazine {width:600px;height:600px;overflow:hidden;position:absolute;border:none;background-color:white;z-index:-100;}
+#magazine {overflow:visible !important;position:absolute;display:none;}
+#dOverlay #dBase {z-index:50}
+#log {position:fixed;bottom:0px;right:0px;}
+#loader {display:none;background-image:url('loader.gif');background-repeat:no-repeat;background-attachment:fixed;background-position:center;z-index:201;left:0px;right:0px;top:0px;bottom:0px;position:fixed;background-color:rgba(0,0,0,0.5);text-align:center;color:white;font-size:20px;}
+#controller {z-index:200;}
+#dOpacityController {position:absolute;}
+#opacityController {width:100%;margin:10px} 
