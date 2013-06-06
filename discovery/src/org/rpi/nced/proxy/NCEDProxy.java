@@ -9,11 +9,16 @@ import org.rpi.nced.utilties.json.JSONException;
 import org.rpi.nced.utilties.json.JSONObject;
 import org.rpi.nced.utilties.json.XML;
 
+//import org.apache.commons.logging.Log;
+//import org.apache.commons.logging.LogFactory;
+
 import com.google.gson.Gson;
 
 public class NCEDProxy {
 
 	static Object padlock = new Object();
+	
+	//private static Log  log   = LogFactory.getLog(NCEDProxy.class);
 
 	static NCEDProxy _instance;
 
@@ -46,8 +51,10 @@ public class NCEDProxy {
 				+ "> <http://purl.org/dc/terms/abstract> ?abstract . } }";
 		String responseText = DataAccess.getResponse(_userName, _password,
 				query);
-
-		return convertToJson(responseText);
+		
+		String responseJSON = sortItems(convertToJson(responseText));
+		
+		return responseJSON;
 
 	}
 
@@ -67,15 +74,18 @@ public class NCEDProxy {
 				+ "?tagID <dc:title> ?title ."
 				+ " "
 				+ "OPTIONAL { ?tagID <http://purl.org/dc/terms/abstract> ?abstract . } }";
-		String responseText = DataAccess.getResponse(_userName, _password,
-				query);
-		
+
+		String responseText = DataAccess.getResponse(_userName, _password,	query);
 		String responseJSON = sortItems(convertToJson(responseText));
+		
 		return responseJSON;
 	}
 
 	private String sortItems(String jsonResponse) {
 		Gson gson = new Gson();
+	    //Binding class (used at the lowest level of thehierarchy in MainCollection) assumes a simple name/literal pair
+		//which is broken by typed literals (e.g. length in the getContents query) unless it is stripped in 
+		// convertToJSON
 		MainCollection collectionsResult = gson.fromJson(jsonResponse, MainCollection.class); 
 		Collections.sort(collectionsResult.getSparql().getResults().getResult());
 		return gson.toJson(collectionsResult, MainCollection.class);
@@ -88,6 +98,10 @@ public class NCEDProxy {
 			responseText = responseText.replace("&", "and");
 		}
 
+		// Remove the long type associated with length values so that the JSON produced matches 
+		// the name=x, literal=y pattern expected in the sortItems Method
+		responseText = responseText.replaceAll(" datatype=\"http://www.w3.org/2001/XMLSchema#long\"","");
+		
 		JSONObject jsonObject = XML.toJSONObject(responseText);
 		//System.out.println(jsonObject.toString());
 		return jsonObject.toString();
