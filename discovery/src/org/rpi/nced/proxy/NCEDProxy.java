@@ -13,6 +13,7 @@ import org.rpi.nced.utilties.json.XML;
 //import org.apache.commons.logging.LogFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 
 public class NCEDProxy {
 
@@ -49,13 +50,7 @@ public class NCEDProxy {
 				+ "OPTIONAL { ?tagID <tag:tupeloproject.org,2006:/2.0/files/length> ?length .}"
 				+ " " + "OPTIONAL { <" + parentTagID
 				+ "> <http://purl.org/dc/terms/abstract> ?abstract . } }";
-		String responseText = DataAccess.getResponse(_userName, _password,
-				query);
-		
-		String responseJSON = sortItems(convertToJson(responseText));
-		
-		return responseJSON;
-
+		return getCollections(query);
 	}
 
 	public String getAllCollections() throws Exception {
@@ -74,25 +69,63 @@ public class NCEDProxy {
 				+ "?tagID <dc:title> ?title ."
 				+ " "
 				+ "OPTIONAL { ?tagID <http://purl.org/dc/terms/abstract> ?abstract . } }";
-
+		return getCollections(query);
+	}
+	
+	private String getCollections(String query) throws Exception {
 		String responseText = DataAccess.getResponse(_userName, _password,	query);
-		String responseJSON = sortItems(convertToJson(responseText));
-		
-		return responseJSON;
+
+		JSONObject responseJSONObject = convertToJsonObject(responseText);
+		responseText = responseJSONObject.toString();
+		if(!collectionListisEmpty(responseJSONObject)) {
+			if (!singleCollectionReturned(responseJSONObject)) {
+				responseText=sortCollections(responseText);
+			}
+		}
+	
+		return responseText;
 	}
 
-	private String sortItems(String jsonResponse) {
+	private boolean collectionListisEmpty(JSONObject jsonObject) throws JSONException {
+		
+		JSONObject sparqlObject = jsonObject.getJSONObject("sparql");
+		boolean response = false;
+		try {
+			//results is a JSONObject (not a String) if there are 1 or more result entries
+			sparqlObject.getString("results");
+			response = true;
+		} catch (JSONException jse) {
+		}
+		return response;
+	}
+	
+	private boolean singleCollectionReturned(JSONObject jsonObject) throws JSONException {
+		JSONObject sparqlObject = jsonObject.getJSONObject("sparql");
+		JSONObject resultsObject = sparqlObject.getJSONObject("results");
+		boolean response = false;
+		try {
+			JSONObject jso = resultsObject.getJSONObject("result");
+			response = true;
+		} catch (JSONException jse) {};
+		return response;
+	}
+	
+	private String sortCollections(String jsonResponse) {
 		Gson gson = new Gson();
-	    //Binding class (used at the lowest level of thehierarchy in MainCollection) assumes a simple name/literal pair
+	    		
+		//FYI: Binding class (used at the lowest level of the hierarchy in MainCollection) assumes a simple name/literal pair
 		//which is broken by typed literals (e.g. length in the getContents query) unless it is stripped in 
-		// convertToJSON
+		// convertToJSONObject
 		MainCollection collectionsResult = gson.fromJson(jsonResponse, MainCollection.class); 
 		Collections.sort(collectionsResult.getSparql().getResults().getResult());
 		return gson.toJson(collectionsResult, MainCollection.class);
 	}
 
-
 	private String convertToJson(String responseText) throws JSONException {
+		return convertToJsonObject(responseText).toString();
+	}
+	
+	private JSONObject convertToJsonObject(String responseText) throws JSONException {
 
 		if (responseText.contains("&")) {
 			responseText = responseText.replace("&", "and");
@@ -103,8 +136,8 @@ public class NCEDProxy {
 		responseText = responseText.replaceAll(" datatype=\"http://www.w3.org/2001/XMLSchema#long\"","");
 		
 		JSONObject jsonObject = XML.toJSONObject(responseText);
-		//System.out.println(jsonObject.toString());
-		return jsonObject.toString();
+
+		return jsonObject;
 	}
 
 	public void Authenticate(String userName, String password) throws Exception {
