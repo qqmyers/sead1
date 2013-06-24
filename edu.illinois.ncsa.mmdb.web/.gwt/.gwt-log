@@ -830,3 +830,720 @@ Validating units:
       [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
 Removing invalidated units
 Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 9.64 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.01 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 10.68 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 11.41 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.02 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 10.15 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2719 units from cache.
+Compiling...
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 9.56 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2719 units from cache.
+Compiling...
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   60% complete (ETR: 3 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 8.84 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2719 units from cache.
+Compiling...
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 9.24 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2719 units from cache.
+Compiling...
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   60% complete (ETR: 3 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 9.87 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\classes is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\workspace\edu.illinois.ncsa.mmdb.web\war\WEB-INF\classes is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.01 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   20% complete (ETR: 15 seconds)
+   20% complete (ETR: 15 seconds)
+   20% complete (ETR: 15 seconds)
+   30% complete (ETR: 13 seconds)
+   40% complete (ETR: 9 seconds)
+   50% complete (ETR: 7 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 3 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 28.65 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 23.41 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   70% complete (ETR: 2 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 9.19 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   70% complete (ETR: 2 seconds)
+   80% complete (ETR: 1 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 9.31 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 2 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 9.39 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   10% complete (ETR: 22 seconds)
+   10% complete (ETR: 22 seconds)
+   20% complete (ETR: 21 seconds)
+   30% complete (ETR: 17 seconds)
+   40% complete (ETR: 12 seconds)
+   50% complete (ETR: 10 seconds)
+   60% complete (ETR: 8 seconds)
+   70% complete (ETR: 5 seconds)
+   80% complete (ETR: 3 seconds)
+   90% complete (ETR: 2 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 19.45 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.01 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 2 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 10.89 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 30.31 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 23.94 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 2 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 26.82 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/workspace/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes

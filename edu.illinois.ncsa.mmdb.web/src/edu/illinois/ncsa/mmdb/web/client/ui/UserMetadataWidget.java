@@ -55,11 +55,13 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
@@ -93,10 +95,10 @@ public class UserMetadataWidget extends Composite {
         // table of user specified metadata fields
         fieldTable = new FlexTable();
         fieldTable.addStyleName("metadataTable");
-        fieldTable.getColumnFormatter().setWidth(0, "20%");
+        fieldTable.getColumnFormatter().setWidth(0, "15%");
         fieldTable.getColumnFormatter().setWidth(1, "40%");
-        fieldTable.getColumnFormatter().setWidth(2, "20%");
-        fieldTable.getColumnFormatter().setWidth(3, "20%");
+        fieldTable.getColumnFormatter().setWidth(2, "15%");
+        fieldTable.getColumnFormatter().setWidth(3, "30%");
 
         // header
         populateTableHeader();
@@ -125,7 +127,7 @@ public class UserMetadataWidget extends Composite {
         fieldTable.setText(0, 0, "Field");
         fieldTable.setText(0, 1, "Value");
         fieldTable.setText(0, 2, "Applies To");
-        fieldTable.setText(0, 3, "Action");
+        fieldTable.setText(0, 3, "Action           ");
         fieldTable.getRowFormatter().addStyleName(0, "metadataTableHeader");
     }
 
@@ -211,14 +213,30 @@ public class UserMetadataWidget extends Composite {
                 predicateLabel.addStyleName("hidden");
             }
             // field value
-            Hyperlink namelink = new Hyperlink();
+            Widget valueWidget = null;
+
+            //Create an appropriate widget based on the value:
+
             if (value.getUri() != null) {
-                namelink.setTargetHistoryToken("search?q=" + value.getUri() + "&f=" + predicate);
+                //It's a URI, so create a link
+                Hyperlink namelink = new Hyperlink();
+                namelink.setTargetHistoryToken(value.getUri());
+                namelink.setText(value.getName());
+                valueWidget = namelink;
             } else {
-                namelink.setTargetHistoryToken("search?q=" + value.getName() + "&f=" + predicate);
+                //It's text - decide if it is one or multi-line
+                String valueText = value.getName();
+                if (valueText.indexOf('\n') == -1) {
+                    //Single line - create a label
+                    valueWidget = new Label(valueText);
+                } else {
+                    //Multi-line 
+                    valueText = "<pre>" + valueText + "</pre>";
+                    valueWidget = new HTML(valueText);
+                }
             }
-            namelink.setText(value.getName());
-            fieldTable.setWidget(row, 1, namelink);
+
+            fieldTable.setWidget(row, 1, valueWidget);
 
             //placeholder for Applies To
             if (value.getSectionMarker() == null) {
@@ -236,8 +254,8 @@ public class UserMetadataWidget extends Composite {
                 fieldTable.setWidget(row, 2, anchor);
             }
 
+            FlowPanel links = new FlowPanel();
             if (canEdit) {
-                FlowPanel links = new FlowPanel();
                 // edit link
                 final Anchor editAnchor = new Anchor("Edit");
                 editAnchor.setTitle("Edit the value for this property");
@@ -258,8 +276,18 @@ public class UserMetadataWidget extends Composite {
                     }
                 });
                 links.add(removeAnchor);
-                fieldTable.setWidget(row, 3, links);
             }
+            //Add a search link
+            Hyperlink searchlink = new Hyperlink();
+            if (value.getUri() != null) {
+                searchlink.setTargetHistoryToken("search?q=" + value.getUri() + "&f=" + predicate);
+            } else {
+                searchlink.setTargetHistoryToken("search?q=" + value.getName() + "&f=" + predicate);
+            }
+            searchlink.setText("Search");
+            links.add(searchlink);
+
+            fieldTable.setWidget(row, 3, links);
             row++;
         }
         styleRows();

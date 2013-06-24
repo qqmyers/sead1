@@ -81,6 +81,7 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -113,7 +114,7 @@ public class AddMetadataWidget extends Composite {
     public final Collection<String>        resources;
     private final DispatchAsync            dispatch;
     ListBox                                fieldChoice;
-    TextBox                                valueText;
+    //    TextBox                                valueText;
     VerticalPanel                          thePanel;
     Label                                  noFields;
     FlexTable                              fieldTable;
@@ -242,7 +243,6 @@ public class AddMetadataWidget extends Composite {
                     newFieldPanel.add(inputField);
                     break;
 
-                //START - ADDED BY RAM
                 //Set handlers to be used by the inner classes for fetching JSON from VIVO
                 case UserMetadataField.VIVO_CREATOR:
                 case UserMetadataField.VIVO_CONTACT:
@@ -265,8 +265,11 @@ public class AddMetadataWidget extends Composite {
                             + "&callback=";
                     InitializeVIVOConnection(query);
                     break;
-                //END - ADDED BY RAM
 
+                case UserMetadataField.MULTILINE_TEXT:
+                    inputField = new MultiField(userMetadataField, addHandler, clearHandler);
+                    newFieldPanel.add(inputField);
+                    break;
                 default:
                     inputField = new PlainField(userMetadataField, addHandler, clearHandler);
                     newFieldPanel.add(inputField);
@@ -696,6 +699,39 @@ public class AddMetadataWidget extends Composite {
             textBox.addKeyUpHandler(pressEnter);
             textBox.setWidth("500px");
             return textBox;
+        }
+
+        @Override
+        String getUri() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    }
+
+    class MultiField extends InputField {
+
+        private TextArea textArea;
+
+        public MultiField(UserMetadataField userMetadataField, ClickHandler addHandler, ClickHandler clearHandler) {
+            super(userMetadataField, addHandler, clearHandler);
+        }
+
+        @Override
+        public String getValue() {
+            return textArea.getValue();
+        }
+
+        @Override
+        public void setValue(String value) {
+            textArea.setValue(value);
+            textArea.setFocus(true);
+        }
+
+        @Override
+        Widget createInputWidget() {
+            textArea = new TextArea();
+            textArea.setWidth("500px");
+            return textArea;
         }
 
         @Override
