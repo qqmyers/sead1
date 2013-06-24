@@ -82,7 +82,9 @@ function writeCollection(json, result) {
 			+ displayTitle
 			+ "</a></h4><div style='margin-top:-20px;'><p><b>Authors: </b> $author$</p><p><b>Contacts: </b> $contact$</p><p><b>Keywords: </b><i>$keyword$</i></p>"
 			+ "<b>Abstract: </b>"
+			+ "<pre>" 
 			+ abs.substring(0, 750)
+			+ "</pre>"
 			+ "... <a href='contents.html?i="
 			+ uri
 			+ "&t="
