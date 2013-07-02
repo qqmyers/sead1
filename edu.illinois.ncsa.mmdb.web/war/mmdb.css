@@ -4,7 +4,7 @@ html {
 
 body {
 	font-family: Arial, Helvetica, sans-serif;
-	font-size: 100%;
+	font-size: 0.9em;
 	margin: 0px;
 	padding: 0px;
 	text-align: center;
@@ -21,7 +21,7 @@ pre {
 }
 
 .mainMenu, .mainContainer, .bottomMenu {
-	font-size: 0.9em;
+/*	font-size: 0.9em; */
 	width: 1000px;
 }
 
@@ -30,7 +30,7 @@ pre {
  * ---------------------------------------------------------------------- */
 table td, select {
 	font-family: Arial, Helvetica, sans-serif;
-	font-size: 0.9em;
+	font-size: 1.0em;
 }
 
 .gwt-Button {
@@ -185,7 +185,7 @@ a:hover {
 	float:right;
 	margin:auto;
 	padding:4px;
-	font-size:110%;
+	font-size: 1.1em;
 	font-family:"Times New Roman", Georiga, Serif;
 	font-style:italic;
 	font-weight:bold;
@@ -235,7 +235,7 @@ a:hover {
 	text-align: center;
 	text-decoration:none;
 	color:#888888;
-	font-size: 0.8em;		
+	font-size: 0.9em;		
 }
 
 .bottomMenu a:link, .bottomMenu a:visited {
@@ -559,12 +559,12 @@ a:hover {
 
 
 .smallText {
-    font-size: 0.8em;
+    font-size: 0.9em;
 }
 
 .tooltip {
 	color: white;
-	font-size: 0.8em;
+	font-size: 0.9em;
 }
 
 .uploadMainPanel {
@@ -683,14 +683,14 @@ a:hover {
 	border: 1px dashed #002B55;
 	padding: 1px;
 	cursor: pointer;
-	font-size: 0.8em;
+	font-size: 0.9em;
 }
 
 .dndHTML5 {
 	width: 152px;
 	border: 2px dashed #002B55;
 	padding: 1px;
-	font-size: 0.8em;
+	font-size: 0.9em;
 }
 	
 .dndHTML5Container {
@@ -1263,14 +1263,14 @@ a:hover {
 .batchOperationCountLink { 
 
 	color: #2F4F4F;
-	font-size: 80%;
+	font-size: 0.9em;
 	margin-right: 10px;	
 	
 }
 
 .batchOperationCount {
 	color: gray;
-	font-size: 80%;
+	font-size: 0.9em;
 	margin: 5px;
 	display: inline-block;
 	*display: inline;
