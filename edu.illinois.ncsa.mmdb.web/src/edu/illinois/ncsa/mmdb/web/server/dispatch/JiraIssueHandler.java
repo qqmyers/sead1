@@ -49,6 +49,7 @@ import org.apache.commons.logging.LogFactory;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
@@ -65,10 +66,8 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
 
     @Override
     public EmptyResult execute(JiraIssue arg0, ExecutionContext arg1) throws ActionException {
-        String rcpt = TupeloStore.getInstance().getConfiguration(ConfigurationKey.MailFrom);
-
         try {
-            Mail.sendMessage(rcpt, arg0.getIssueType() + ":" + arg0.getSummary(), arg0.getDescription());
+            createJiraIssue(arg0.getIssueType(), arg0.getSummary(), arg0.getDescription());
         } catch (MessagingException e) {
             log.warn("Failed to update context.", e);
             throw (new ActionException("Could not update context.", e));
@@ -85,5 +84,10 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
     @Override
     public void rollback(JiraIssue arg0, EmptyResult arg1, ExecutionContext arg2) throws ActionException {
         throw new ActionException("Can not undo a jira issue creation.");
+    }
+
+    public static void createJiraIssue(JiraIssueType issueType, String summary, String description) throws MessagingException {
+        String rcpt = TupeloStore.getInstance().getConfiguration(ConfigurationKey.MailFrom);
+        Mail.sendMessage(rcpt, issueType + ":" + summary, description);
     }
 }
