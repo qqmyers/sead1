@@ -70,7 +70,11 @@ public class TagTablePresenter extends DynamicTablePresenter<DatasetBean> {
     protected void addItem(ShowItemEvent event, DatasetBean item) {
         event.setId(item.getUri());
         event.setTitle(item.getTitle());
-        event.setAuthor(item.getCreator().getName());
+        if (item.getCreator() == null) {
+            event.setAuthor("NO AUTHOR");
+        } else {
+            event.setAuthor(item.getCreator().getName());
+        }
         event.setDate(item.getDate());
         event.setSize(TextFormatter.humanBytes(item.getSize()));
         event.setType(ContentCategory.getCategory(item.getMimeType(), service));
