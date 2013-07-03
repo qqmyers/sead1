@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+              http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5" xmlns="http://java.sun.com/xml/ns/javaee">
+
+	<context-param>
+		<description>Geoserver Host</description>
+		<param-name>geoserver.host</param-name>
+		<param-value>localhost</param-value>
+	</context-param>
+	<context-param>
+		<description>Geoserver RESTful service url</description>
+		<param-name>geoserver.rest.url</param-name>
+		<param-value>http://localhost/geoserver/rest</param-value>
+	</context-param>
+	<context-param>
+		<description>Geoserver WMS url</description>
+		<param-name>geoserver.wms.url</param-name>
+		<param-value>http://localhost/geoserver/wms</param-value>
+	</context-param>
+	<context-param>
+		<description>Geoserver RESTful service username</description>
+		<param-name>geoserver.user</param-name>
+		<param-value>admin</param-value>
+	</context-param>
+	<context-param>
+		<description>Geoserver RESTful service pw</description>
+		<param-name>geoserver.pw</param-name>
+		<param-value>allsjd77</param-value>
+	</context-param>
+
+	<context-param>
+		<description>Medici RESTful service url</description>
+		<param-name>medici.rest.url</param-name>
+		<param-value>http://localhost/acr/resteasy/tags</param-value>
+	</context-param>
+	<context-param>
+		<description>Medici username</description>
+		<param-name>medici.user</param-name>
+		<param-value>sead-acr@googlegroups.com</param-value>
+	</context-param>
+	<context-param>
+		<description>Medici pw</description>
+		<param-name>medici.pw</param-name>
+		<param-value>tu5id6geaj7w</param-value>
+	</context-param>
+
+	
+	<!-- Servlets -->	
+	<servlet>
+		<servlet-name>wmsProxyImpl</servlet-name>
+		<servlet-class>edu.illinois.ncsa.medici.geowebapp.server.WmsProxyServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>wmsProxyImpl</servlet-name>
+		<url-pattern>/geo_webapp/wmsProxy</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>mediciProxyImpl</servlet-name>
+		<servlet-class>edu.illinois.ncsa.medici.geowebapp.server.MediciProxyServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>mediciProxyImpl</servlet-name>
+		<url-pattern>/geo_webapp/mediciProxy</url-pattern>
+	</servlet-mapping>
+
+	<!-- Default page to serve -->
+	<welcome-file-list>
+		<welcome-file>Geo_webapp.html</welcome-file>
+	</welcome-file-list>
+
+</web-app>
