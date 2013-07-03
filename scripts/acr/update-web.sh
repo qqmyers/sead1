@@ -4,7 +4,7 @@ cd /home/medici
 
 /etc/init.d/tomcat6 stop
 
-rm -rf war medici.war /var/lib/tomcat6/webapps/ROOT
+rm -rf war medici.war /var/lib/tomcat6/webapps/acr
 
 wget -O medici.war https://opensource.ncsa.illinois.edu/jenkins/job/Medici%20SEAD/lastSuccessfulBuild/artifact/mmdb/medici.war
 
