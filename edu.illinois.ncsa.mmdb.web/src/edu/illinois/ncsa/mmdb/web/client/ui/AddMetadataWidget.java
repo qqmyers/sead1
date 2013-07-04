@@ -292,37 +292,37 @@ public class AddMetadataWidget extends Composite {
      * Make call to remote server to get the required JSON object.
      */
     public native static void getJson(int requestId, String url, AddMetadataWidget handler) /*-{
-		var callback = "callback" + requestId;
+                                                                                            var callback = "callback" + requestId;
 
-		// [1] Create a script element.
-		var script = document.createElement("script");
-		script.setAttribute("src", url + callback);
-		script.setAttribute("type", "text/javascript");
+                                                                                            // [1] Create a script element.
+                                                                                            var script = document.createElement("script");
+                                                                                            script.setAttribute("src", url + callback);
+                                                                                            script.setAttribute("type", "text/javascript");
 
-		// [2] Define the callback function on the window object.
-		window[callback] = function(jsonObj) {
-			// [3]
-			handler.@edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataWidget::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(jsonObj);
-			window[callback + "done"] = true;
-		}
+                                                                                            // [2] Define the callback function on the window object.
+                                                                                            window[callback] = function(jsonObj) {
+                                                                                            // [3]
+                                                                                            handler.@edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataWidget::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(jsonObj);
+                                                                                            window[callback + "done"] = true;
+                                                                                            }
 
-		// [4] JSON download has 3-second timeout.
-		setTimeout(
-				function() {
-					if (!window[callback + "done"]) {
-						handler.@edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataWidget::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(null);
-					}
+                                                                                            // [4] JSON download has 3-second timeout.
+                                                                                            setTimeout(
+                                                                                            function() {
+                                                                                            if (!window[callback + "done"]) {
+                                                                                            handler.@edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataWidget::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(null);
+                                                                                            }
 
-					// [5] Cleanup. Remove script and callback elements.
-					document.body.removeChild(script);
-					delete window[callback];
-					delete window[callback + "done"];
-				}, 3000);
+                                                                                            // [5] Cleanup. Remove script and callback elements.
+                                                                                            document.body.removeChild(script);
+                                                                                            delete window[callback];
+                                                                                            delete window[callback + "done"];
+                                                                                            }, 3000);
 
-		// [6] Attach the script element to the document body.
-		document.body.appendChild(script);
+                                                                                            // [6] Attach the script element to the document body.
+                                                                                            document.body.appendChild(script);
 
-    }-*/;
+                                                                                            }-*/;
 
     //Called when the getJson method hits the server and a response is obtained
     public void handleJsonResponse(JavaScriptObject jso) {
@@ -361,8 +361,8 @@ public class AddMetadataWidget extends Composite {
     }
 
     private final native ParentJson getParentJson(JavaScriptObject jso) /*-{
-		return jso;
-    }-*/;
+                                                                        return jso;
+                                                                        }-*/;
 
     private void InitializeVIVOConnection(String query) {
 
@@ -574,7 +574,18 @@ public class AddMetadataWidget extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                removeValue(property, oldValue, false);
+                String text = inputField.getUri();
+                if (text == null) {
+                    text = inputField.getValue();
+                }
+                if (text == null) {
+                    removeValue(property, oldValue, false);
+                } else if (!text.equals(oldValue.getSectionValue())) {
+                    removeValue(property, oldValue, false);
+                    if (!text.trim().equals("")) {
+                        addValue();
+                    }
+                }
             }
         };
 
@@ -603,7 +614,7 @@ public class AddMetadataWidget extends Composite {
             addAnchor = new Anchor("Add");
             addAnchor.addClickHandler(addHandler);
             layout.setWidget(0, 1, addAnchor);
-            Anchor clearAnchor = new Anchor("Clear");
+            Anchor clearAnchor = new Anchor("Cancel");
             clearAnchor.addClickHandler(clearHandler);
             layout.setWidget(0, 2, clearAnchor);
 
