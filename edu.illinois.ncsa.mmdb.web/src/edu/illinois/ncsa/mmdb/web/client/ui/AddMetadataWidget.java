@@ -568,7 +568,7 @@ public class AddMetadataWidget extends Composite {
         fieldChoice.setSelectedIndex(indexLabel.get(property));
         changeHandler();
         inputField.setValue(oldValue.getName());
-        inputField.addAnchor.setText("Edit");
+        inputField.addAnchor.setText("Update");
 
         ClickHandler editHandler = new ClickHandler() {
 
