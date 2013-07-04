@@ -199,7 +199,7 @@ public class AddMetadataWidget extends Composite {
 
                 @Override
                 public void onClick(ClickEvent event) {
-                    addValue();
+                    addValue(true);
                 }
             };
 
@@ -217,7 +217,7 @@ public class AddMetadataWidget extends Composite {
                 @Override
                 public void onKeyUp(KeyUpEvent event) {
                     if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                        addValue();
+                        addValue(true);
                     }
 
                 }
@@ -433,7 +433,7 @@ public class AddMetadataWidget extends Composite {
     /**
      * RPC call to add a new entry.
      */
-    protected void addValue() {
+    protected void addValue(final boolean refresh) {
         final String text = inputField.getValue();
 
         if (text.isEmpty() || text.equals("Select...")) {
@@ -492,7 +492,9 @@ public class AddMetadataWidget extends Composite {
                                     eventBus.fireEvent(done);
                                 }
 
-                                refresh();
+                                if (refresh) {
+                                    refresh();
+                                }
                                 // FIXME this will refresh once per section!
                             }
                         });
@@ -579,11 +581,11 @@ public class AddMetadataWidget extends Composite {
                     text = inputField.getValue();
                 }
                 if (text == null) {
-                    removeValue(property, oldValue, true);
+                    removeValue(property, oldValue, false);
                 } else if (!text.equals(oldValue.getSectionValue())) {
-                    removeValue(property, oldValue, true);
+                    removeValue(property, oldValue, false);
                     if (!text.trim().equals("")) {
-                        addValue();
+                        addValue(false);
                     }
                 }
             }
