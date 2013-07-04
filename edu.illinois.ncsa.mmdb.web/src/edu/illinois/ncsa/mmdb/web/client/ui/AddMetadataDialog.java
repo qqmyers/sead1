@@ -87,7 +87,7 @@ public class AddMetadataDialog extends DialogBox {
                 thePanel.remove(pending);
                 AddMetadataWidget addMetadata = new AddMetadataWidget(batch, service, eventBus) {
                     protected void addValue() {
-                        super.addValue();
+                        super.addValue(true);
                         AddMetadataDialog.this.hide();
                     }
                 };
