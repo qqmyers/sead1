@@ -579,9 +579,9 @@ public class AddMetadataWidget extends Composite {
                     text = inputField.getValue();
                 }
                 if (text == null) {
-                    removeValue(property, oldValue, false);
+                    removeValue(property, oldValue, true);
                 } else if (!text.equals(oldValue.getSectionValue())) {
-                    removeValue(property, oldValue, false);
+                    removeValue(property, oldValue, true);
                     if (!text.trim().equals("")) {
                         addValue();
                     }
