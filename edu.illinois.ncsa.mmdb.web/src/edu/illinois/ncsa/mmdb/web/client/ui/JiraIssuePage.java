@@ -89,20 +89,20 @@ public class JiraIssuePage extends Page {
         txtEmail.setWidth("400px");
         table.setWidget(0, 1, txtEmail);
 
-        table.setText(0, 0, "Summary:");
+        table.setText(1, 0, "Summary:");
         table.getCellFormatter().addStyleName(0, 0, "homePageWidgetRow");
 
         final TextBox txtSummary = new TextBox();
         txtSummary.setWidth("400px");
-        table.setWidget(0, 1, txtSummary);
+        table.setWidget(1, 1, txtSummary);
 
-        table.setText(1, 0, "Description:");
+        table.setText(2, 0, "Description:");
         table.getCellFormatter().addStyleName(1, 0, "homePageWidgetRow");
 
         final TextArea txtDescription = new TextArea();
         txtDescription.setWidth("400px");
         txtDescription.setHeight("100px");
-        table.setWidget(1, 1, txtDescription);
+        table.setWidget(2, 1, txtDescription);
 
         final Button submit = new Button("Submit");
         submit.addClickHandler(new ClickHandler() {
