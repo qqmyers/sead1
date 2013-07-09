@@ -82,6 +82,13 @@ public class JiraIssuePage extends Page {
         FlexTable table = new FlexTable();
         mainLayoutPanel.add(table);
 
+        table.setText(0, 0, "Email:");
+        table.getCellFormatter().addStyleName(0, 0, "homePageWidgetRow");
+
+        final TextBox txtEmail = new TextBox();
+        txtEmail.setWidth("400px");
+        table.setWidget(0, 1, txtEmail);
+
         table.setText(0, 0, "Summary:");
         table.getCellFormatter().addStyleName(0, 0, "homePageWidgetRow");
 
@@ -102,6 +109,11 @@ public class JiraIssuePage extends Page {
             @Override
             public void onClick(ClickEvent event) {
                 submit.setEnabled(false);
+                if (txtEmail.getText().trim().length() == 0) {
+                    showFeedbackMessage("Please enter an email.");
+                    txtEmail.setFocus(true);
+                    return;
+                }
                 if (txtSummary.getText().trim().length() == 0) {
                     showFeedbackMessage("Please enter a summary.");
                     txtSummary.setFocus(true);
@@ -115,6 +127,7 @@ public class JiraIssuePage extends Page {
 
                 JiraIssue issue = new JiraIssue();
                 issue.setIssueType(type);
+                issue.setEmail(txtEmail.getText().trim());
                 issue.setSummary(txtSummary.getText().trim());
                 issue.setDescription(txtDescription.getText().trim());
                 dispatchAsync.execute(issue, new AsyncCallback<EmptyResult>() {

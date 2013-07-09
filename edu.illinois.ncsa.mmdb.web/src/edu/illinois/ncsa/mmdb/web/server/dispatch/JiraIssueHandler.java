@@ -67,7 +67,7 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
     @Override
     public EmptyResult execute(JiraIssue arg0, ExecutionContext arg1) throws ActionException {
         try {
-            createJiraIssue(arg0.getIssueType(), arg0.getSummary(), arg0.getDescription());
+            createJiraIssue(arg0.getIssueType(), arg0.getEmail(), arg0.getSummary(), arg0.getDescription());
         } catch (MessagingException e) {
             log.warn("Failed to update context.", e);
             throw (new ActionException("Could not update context.", e));
@@ -86,8 +86,16 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
         throw new ActionException("Can not undo a jira issue creation.");
     }
 
-    public static void createJiraIssue(JiraIssueType issueType, String summary, String description) throws MessagingException {
+    public static void createJiraIssue(JiraIssueType issueType, String email, String summary, String description) throws MessagingException {
         String rcpt = TupeloStore.getInstance().getConfiguration(ConfigurationKey.MailFrom);
-        Mail.sendMessage(rcpt, issueType + ":" + summary, description);
+        String host = TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName);
+
+        String subj = "User submitted " + issueType + " for " + host;
+        String body = "Following request was submiteted to : " + host + "\n\n" +
+                "From: " + email + "\n" +
+                "Subj: " + summary + "\n\n" +
+                description;
+
+        Mail.sendMessage(rcpt, subj, body);
     }
 }

@@ -635,9 +635,10 @@ public class RestServlet extends AuthenticatedServlet {
         JiraIssueType issueType = JiraIssueType.valueOf(request.getParameter("issueType"));
         String summary = request.getParameter("subject");
         String description = request.getParameter("body");
+        String email = request.getParameter("email");
 
         try {
-            JiraIssueHandler.createJiraIssue(issueType, summary, description);
+            JiraIssueHandler.createJiraIssue(issueType, email, summary, description);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (MessagingException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
