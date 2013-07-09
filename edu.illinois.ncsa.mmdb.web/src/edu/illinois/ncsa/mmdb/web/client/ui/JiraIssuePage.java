@@ -149,7 +149,7 @@ public class JiraIssuePage extends Page {
             }
         });
         table.getCellFormatter().setHorizontalAlignment(2, 1, HasHorizontalAlignment.ALIGN_CENTER);
-        table.setWidget(2, 1, submit);
+        table.setWidget(3, 1, submit);
     }
 
     @Override
