@@ -38,9 +38,16 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server;
 
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.util.Tuple;
 
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.Anonymous;
@@ -67,11 +74,24 @@ public class Authentication {
             ContextAuthentication ca = new ContextAuthentication(TupeloStore.getInstance().getContext());
             if (ca.checkPassword(person, password)) {
                 log.debug("LOGIN: authentication suceeded for " + username);
+                TripleWriter tw = new TripleWriter();
+                tw.add(person, Cet.cet("lastLogin"), new Date());
+                Unifier uf = new Unifier();
+                uf.addPattern(person, Cet.cet("lastLogin"), "date");
+                uf.setColumnNames("date");
+                TupeloStore.getInstance().getContext().perform(uf);
+                for (Tuple<Resource> row : uf.getResult() ) {
+                    tw.remove(person, Cet.cet("lastLogin"), row.get(0));
+                }
+                TupeloStore.getInstance().getContext().perform(tw);
                 return true;
             } else {
                 log.debug("LOGIN: authentication failed for " + username);
                 return false;
             }
+        } catch (OperatorException ex) {
+            log.debug("LOGIN: authentication FAILED for " + username, ex);
+            return false;
         } catch (AuthenticationException ex) {
             log.debug("LOGIN: authentication FAILED for " + username, ex);
             return false;
