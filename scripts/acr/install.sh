@@ -57,9 +57,12 @@ if [ ! -e /var/lib/tomcat6/webapps/geo-webapp ]; then
   mv geo-webapp /var/lib/tomcat6/webapps
 fi
 
-cp medici-extractor /etc/init.d
-chmod 755 /etc/init.d/medici-extractor
-update-rc.d medici-extractor defaults
+rm /etc/init.d/medici-extractor
+update-rc.d medici-extractor remove
+
+cp medici /etc/init.d
+chmod 755 /etc/init.d/medici
+update-rc.d medici defaults
 
 cp -f update-extractor.sh update-web.sh /home/medici
 if [ ! -e /home/medici/acr.log4j ]; then
