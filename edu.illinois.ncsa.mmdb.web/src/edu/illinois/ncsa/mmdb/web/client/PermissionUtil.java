@@ -1,8 +1,14 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -40,16 +46,35 @@ public class PermissionUtil {
     }
 
     /**
-     * Get all roles in the given permission setting, as a map of role uri ->
-     * name
+     * Get all roles in the given permission setting, as an ordered list
      * role name
      */
-    public static Map<String, String> getRoles(Collection<PermissionSetting> settings) {
-        Map<String, String> uriToName = new HashMap<String, String>();
-        for (PermissionSetting setting : settings ) {
-            uriToName.put(setting.getRoleUri(), setting.getRoleName());
+    public static List<PermissionSetting> getRoles(Collection<PermissionSetting> settings) {
+        List<PermissionSetting> roles = new ArrayList<PermissionSetting>();
+        Set<String> uris = new HashSet<String>();
+        for (PermissionSetting role : settings ) {
+            if (!uris.contains(role.getRoleUri())) {
+                uris.add(role.getRoleUri());
+                roles.add(role);
+            }
         }
-        return uriToName;
+        Collections.sort(roles, new Comparator<PermissionSetting>() {
+            @Override
+            public int compare(PermissionSetting o1, PermissionSetting o2) {
+                if (o1 == null) {
+                    return +1;
+                }
+                if (o2 == null) {
+                    return -1;
+                }
+                if (o1.getRoleName().equals(o2.getRoleName())) {
+                    return o1.getRoleUri().compareTo(o2.getRoleUri());
+                } else {
+                    return o1.getRoleName().compareTo(o2.getRoleName());
+                }
+            }
+        });
+        return roles;
     }
 
     void doIf(boolean condition, PermissionCallback callback) {

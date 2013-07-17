@@ -42,8 +42,6 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.admin;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,13 +72,11 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole.ActionType;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissions;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRoles;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRolesResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsers;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsersResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.TitlePanel;
-import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
 
 /**
@@ -143,13 +139,12 @@ public class UserManagementWidget extends Composite {
 
             @Override
             public void onSuccess(GetPermissionsResult result) {
-                int col = 2;
-                for (Map.Entry<String, String> entry : PermissionUtil.getRoles(result.getSettings()).entrySet() ) {
-                    String roleUri = entry.getKey();
+                int col = 3;
+                for (PermissionSetting role : PermissionUtil.getRoles(result.getSettings()) ) {
+                    String roleUri = role.getRoleUri();
                     // don't allow admin to add or remove from special owner and anonymous role
-                    if (!roleUri.equals(DefaultRole.OWNER.getUri()) &&
-                            !roleUri.equals(DefaultRole.ANONYMOUS.getUri())) {
-                        String roleName = entry.getValue();
+                    if (!roleUri.equals(DefaultRole.OWNER.getUri()) && !roleUri.equals(DefaultRole.ANONYMOUS.getUri())) {
+                        String roleName = role.getRoleName();
                         columnByRole.put(roleUri, col);
                         activeUsersTable.setText(0, col, roleName);
                         activeUsersTable.getColumnFormatter().addStyleName(col, "roleColumn");
@@ -202,26 +197,10 @@ public class UserManagementWidget extends Composite {
 
                     @Override
                     public void onSuccess(GetUsersResult result) {
-                        ArrayList<PersonBean> users = result.getUsers();
+                        ArrayList<GetUsersResult.User> users = result.getUsers();
                         if (users.size() == 0) {
                             activeUsersTable.setText(activeUsersTable.getRowCount() + 1, 0, "No users found.");
                         } else {
-                            // sort users by name
-                            Collections.sort(users, new Comparator<PersonBean>() {
-                                @Override
-                                public int compare(PersonBean o1, PersonBean o2) {
-                                    if (o1.getName() == null) {
-                                        return +1;
-                                    }
-                                    if (o2.getName() == null) {
-                                        return -1;
-                                    }
-                                    if (o1.getName().equals(o2.getName())) {
-                                        return o1.getEmail().compareToIgnoreCase(o2.getEmail());
-                                    }
-                                    return o1.getName().compareToIgnoreCase(o2.getName());
-                                }
-                            });
                             createRows(users);
                         }
                     }
@@ -234,53 +213,44 @@ public class UserManagementWidget extends Composite {
      * 
      * @param user
      */
-    protected void createRows(final List<PersonBean> users) {
+    protected void createRows(final List<GetUsersResult.User> users) {
         if (users.size() == 0) {
             return;
         }
-        final PersonBean user = users.get(0);
-        final List<PersonBean> rest = users.subList(1, users.size());
-        dispatchAsync.execute(new GetRoles(user.getUri()), new AsyncCallback<GetRolesResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
+        for (GetUsersResult.User user : users ) {
+            Set<String> roles = user.roles;
+            FlexTable usersTable = roles.size() == 0 ? inactiveUsersTable : activeUsersTable;
+
+            int row = usersTable.getRowCount();
+
+            usersTable.setText(row, 0, user.name);
+            usersTable.setText(row, 1, user.email);
+            usersTable.setText(row, 2, user.lastlogin);
+
+            if ((user.name == null) && (user.email == null)) {
+                usersTable.setText(row, 0, user.id);
             }
 
-            @Override
-            public void onSuccess(GetRolesResult result) {
-                Set<String> roles = result.getRoles();
-                FlexTable usersTable = roles.size() == 0 ? inactiveUsersTable : activeUsersTable;
-
-                int row = usersTable.getRowCount();
-
-                usersTable.setText(row, 0, user.getName());
-                usersTable.setText(row, 1, user.getEmail());
-
-                if ((user.getName() == null) && (user.getEmail() == null)) {
-                    usersTable.setText(row, 0, user.getUri());
-                }
-
-                GWT.log("user " + user.getUri() + " belongs to roles " + roles);
-                for (Map.Entry<String, Integer> entry : columnByRole.entrySet() ) {
-                    final String roleUri = entry.getKey();
-                    final Integer col = entry.getValue();
-                    final CheckBox box = new CheckBox();
-                    box.setValue(roles.contains(roleUri));
-                    box.addClickHandler(new ClickHandler() {
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            modifyPermissions(user.getUri(), roleUri, box);
-                        }
-                    });
-                    usersTable.setWidget(row, col, box);
-                }
-
-                // stripe it
-                String rowStyle = (row - 1) % 2 == 0 ? "metadataTableEvenRow" : "metadataTableOddRow";
-                usersTable.getRowFormatter().addStyleName(row, rowStyle);
-
-                createRows(rest);
+            GWT.log("user " + user.id + " belongs to roles " + roles);
+            for (Map.Entry<String, Integer> entry : columnByRole.entrySet() ) {
+                final String roleUri = entry.getKey();
+                final Integer col = entry.getValue();
+                final CheckBox box = new CheckBox();
+                final String userid = user.id;
+                box.setValue(roles.contains(roleUri));
+                box.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        modifyPermissions(userid, roleUri, box);
+                    }
+                });
+                usersTable.setWidget(row, col, box);
             }
-        });
+
+            // stripe it
+            String rowStyle = (row - 1) % 2 == 0 ? "metadataTableEvenRow" : "metadataTableOddRow";
+            usersTable.getRowFormatter().addStyleName(row, rowStyle);
+        }
     }
 
     /**
@@ -338,6 +308,8 @@ public class UserManagementWidget extends Composite {
         flexTable.getColumnFormatter().addStyleName(0, "usersTableNameColumn");
         flexTable.setText(0, 1, "Email");
         flexTable.getColumnFormatter().addStyleName(1, "usersTableEmailColumn");
+        flexTable.setText(0, 2, "Last Login");
+        flexTable.getColumnFormatter().addStyleName(2, "usersTableNameColumn");
         return flexTable;
     }
 
