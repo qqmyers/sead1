@@ -44,7 +44,7 @@ extractor.url=http://localhost:9856/
 # List of automatically created users
 #
 user.0.fullname=Medici Admin
-user.0.password=tu5id6geaj7w
+user.0.password=cookie123
 user.0.email=sead-acr@googlegroups.com
 user.0.roles=ADMIN
 

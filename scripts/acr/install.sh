@@ -25,6 +25,9 @@ fi
 if [ ! -e /usr/share/tomcat6/lib/mysql-connector-java-5.0.4.jar ]; then
   wget -O /usr/share/tomcat6/lib/mysql-connector-java-5.0.4.jar https://opensource.ncsa.illinois.edu/svn/mmdb/trunk/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/mysql-connector-java-5.0.4.jar
 fi
+if [ ! -e /usr/share/tomcat6/lib/xercesImpl-2.7.1.jar ]; then
+  wget -O /usr/share/tomcat6/lib/xercesImpl-2.7.1.jar https://opensource.ncsa.illinois.edu/svn/mmdb/trunk/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/xercesImpl-2.7.1.jar
+fi
 
 RET=$( /usr/bin/mysql --defaults-extra-file=/etc/mysql/debian.cnf -NBe "SELECT COUNT(SCHEMA_NAME) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='medici';" )
 if [ $? -eq 0 ]; then
@@ -53,7 +56,7 @@ fi
 if [ ! -e /var/lib/tomcat6/webapps/geo-webapp ]; then
   wget https://opensource.ncsa.illinois.edu/svn/mmdb/trunk/geo-webapp/war/geo-webapp.war
   unzip -q -d geo-webapp geo-webapp.war
-  cp geo-webapp.xml geo-webapp/WEB-INF/web.xml
+  sed "s#localhost#`hostname -f`#g" geo-webapp.xml > geo-webapp/WEB-INF/web.xml
   mv geo-webapp /var/lib/tomcat6/webapps
 fi
 
@@ -74,16 +77,24 @@ fi
 if [ ! -e /home/medici/acr.public_properties ]; then
   cp acr.public_properties /home/medici
 fi
+if [ ! -e /home/medici/extractor.properties ]; then
+  sed -e "s#^geoserver.server=.*\$#geoserver.server=http://`hostname -f`/geoserver#" \
+      -e "s#^geoserver.owsserver=.*\$#geoserver.owsserver=http://`hostname -f`/geoserver/wms#" /home/medici/extractor.properties > /home/medici/extractor.properties
+fi
 
 rm -rf /var/lib/tomcat6/webapps/ROOT
 mkdir /var/lib/tomcat6/webapps/ROOT
 cp -r static/* /var/lib/tomcat6/webapps/ROOT
 echo '<Context path="/" docBase="/var/lib/tomcat6/webapps/ROOT"/>' > /etc/tomcat6/Catalina/localhost/ROOT.xml
 
-rm -rf /var/lib/tomcat6/webapps/summary
-unzip -q -d /var/lib/tomcat6/webapps/summary summary.war
-echo "domain=http://`hostname -f`/acr/resteasy/sparql" > /var/lib/tomcat6/webapps/summary/WEB-INF/classes/nced.properties 
-echo "projectPath=http://`hostname -f`/acr" >> /var/lib/tomcat6/webapps/summary/WEB-INF/classes/nced.properties 
+rm -rf /var/lib/tomcat6/webapps/projectsummary
+unzip -q -d /var/lib/tomcat6/webapps/projectsummary projectsummary.war
+echo "domain=http://`hostname -f`/acr/resteasy/sparql" > /var/lib/tomcat6/webapps/projectsummary/WEB-INF/classes/nced.properties 
+echo "projectPath=http://`hostname -f`/acr" >> /var/lib/tomcat6/webapps/projectsummary/WEB-INF/classes/nced.properties 
+echo "username=sead-acr@googlegroups.com" >> /var/lib/tomcat6/webapps/projectsummary/WEB-INF/classes/nced.properties 
+echo "password=cookie123" >> /var/lib/tomcat6/webapps/projectsummary/WEB-INF/classes/nced.properties
+sed -i -e "s#nced.ncsa.illinois.edu#`hostname -f`#g" /var/lib/tomcat6/webapps/projectsummary/jsp/summary.jsp
+sed -i -e "s#nced.ncsa.illinois.edu#`hostname -f`#g" /var/lib/tomcat6/webapps/projectsummary/js/commons.js
 
 rm -rf /var/lib/tomcat6/webapps/nced
 unzip -q -d /var/lib/tomcat6/webapps/nced nced.war

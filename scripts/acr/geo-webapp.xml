@@ -27,7 +27,7 @@
 	<context-param>
 		<description>Geoserver RESTful service pw</description>
 		<param-name>geoserver.pw</param-name>
-		<param-value>allsjd77</param-value>
+		<param-value>cookie123</param-value>
 	</context-param>
 
 	<context-param>
@@ -43,7 +43,7 @@
 	<context-param>
 		<description>Medici pw</description>
 		<param-name>medici.pw</param-name>
-		<param-value>tu5id6geaj7w</param-value>
+		<param-value>cookie123</param-value>
 	</context-param>
 
 	
