@@ -99,7 +99,7 @@ public class DatasetInfoWidget extends Composite {
         anchorPanel.add(new Label(""));
 
         descriptionPanel.add(anchorPanel);
-        if ((dataset.getCreator() != null && (dataset.getCreator().getName() != null)) {
+        if ((dataset.getCreator() != null) && (dataset.getCreator().getName() != null)) {
             descriptionPanel.add(new Label(dataset.getCreator().getName()));
         } else {
             descriptionPanel.add(new Label("Contributor unknown"));
