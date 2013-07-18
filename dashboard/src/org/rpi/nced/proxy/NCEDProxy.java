@@ -172,10 +172,14 @@ public class NCEDProxy {
 	}
 
 	private String sortItems(String jsonResponse) {
-		Gson gson = new Gson();
-		MainCollection collectionsResult = gson.fromJson(jsonResponse, MainCollection.class); 
-		Collections.sort(collectionsResult.getSparql().getResults().getResult());
-		return gson.toJson(collectionsResult, MainCollection.class);
+		try {
+			Gson gson = new Gson();
+			MainCollection collectionsResult = gson.fromJson(jsonResponse, MainCollection.class); 
+			Collections.sort(collectionsResult.getSparql().getResults().getResult());
+			return gson.toJson(collectionsResult, MainCollection.class);
+		} catch (Exception e) {
+			return jsonResponse;
+		}
 	}
 
 
@@ -187,6 +191,7 @@ public class NCEDProxy {
 		//System.out.println(responseText);
 		JSONObject jsonObject = XML.toJSONObject(responseText);
 		//System.out.println(jsonObject.toString());
+System.out.println(jsonObject.toString());
 		return jsonObject.toString();
 	}
 

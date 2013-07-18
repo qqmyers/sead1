@@ -114,7 +114,9 @@ function parseCreators() {
 		}
 		url = '#'
 		map[creatorURI] = creatorName;
-		div_html += "<a href='" + url + "' target=_blank>" + creatorName + "</a> </br>";
+		if (creatorName != 'Anonymous') {
+			div_html += "<a href='" + url + "' target=_blank>" + creatorName + "</a> </br>";
+		}
 	}
 	$('#teammembers').html(div_html);
 }
@@ -278,6 +280,7 @@ function loadProjectInfo(){
 	$('#projectName').html(map['name']);
 	$('#projectDesc').html(map['description']);
 	$('#projectTitle').html(map['name']);
+	$('#projectLink').attr({ title: map['description'], href: map['url'] });
 	
 }
 

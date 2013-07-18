@@ -37,8 +37,8 @@ public class Summary extends HttpServlet {
 
 		try {
 			
-			String userName = "malviyas@indiana.edu";
-			String password = "nothing123";
+			String userName = PropertiesLoader.getProperties().getProperty("username");
+			String password = PropertiesLoader.getProperties().getProperty("password");
 			
 			NCEDProxy.getInstance().Authenticate(userName, password);			
 			
@@ -55,8 +55,9 @@ public class Summary extends HttpServlet {
 			String datasets = NCEDProxy.getInstance().getAllDatasets();
 			
 			JSONObject obj = new JSONObject(datasets);
-			JSONArray resultArray = obj.getJSONObject("sparql").getJSONObject("results").getJSONArray("result");
 			Map<String, Integer> map = new HashMap<String, Integer>();
+			try {
+			JSONArray resultArray = obj.getJSONObject("sparql").getJSONObject("results").getJSONArray("result");
 			for(int i=0; i< resultArray.length(); i++){
 				try{
 				if(resultArray.getJSONObject(i).getJSONObject("binding").getString("literal").split("\\.").length==2) {
@@ -71,6 +72,9 @@ public class Summary extends HttpServlet {
 				}catch (Exception e) {
 					System.out.println(resultArray.getJSONObject(i).getJSONObject("binding"));
 				}
+			}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			String datasetDistribution = map.toString();
 			/*String collections = "";

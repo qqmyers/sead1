@@ -60,8 +60,8 @@
 							</a>
 						</div>
 						<div class="gradient">
-							<div><a class="projectTitle"  href=""title="An NSF funded effort to understand the recent Mississippi River flooding event.">
-												<div id="projectTitle"> Lower Mississippi Flood Project </div>
+							<div><a id="projectLink" class="projectTitle"  href="" title="This system will enable researchers to actively and socially curate and share their own data.">
+												<div id="projectTitle">SEAD ACR Instance</div>
 											</a></div>
 						</div>
 
@@ -71,8 +71,8 @@
 								<tbody>
 									<tr>
 										<td align="right" style="vertical-align: top;">
-											<a class="gwt-Anchor" href=""title="An NSF funded effort to understand the recent Mississippi River flooding event.">
-												Lower Mississippi Flood Project
+											<a class="gwt-Anchor" href=""title="This system will enable researchers to actively and socially curate and share their own data.">
+												SEAD ACR Instance
 											</a>
 										</td>
 									</tr>
