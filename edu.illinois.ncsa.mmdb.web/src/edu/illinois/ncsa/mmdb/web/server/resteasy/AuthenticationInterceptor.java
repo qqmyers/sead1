@@ -24,6 +24,7 @@ import org.jboss.resteasy.util.HttpResponseCodes;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Intercept requests and check for basic authentication.
@@ -49,14 +50,18 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
         }
         if (mykey.equals(theirkey)) {
             //log.debug("Found remote API Key  - Sucessfully authenticated");
+            request.setAttribute("userid", PersonBeanUtil.getAnonymousURI().toString());
             return null;
         } else if (request.getHttpHeaders().getCookies().containsKey("sid")) {
+            request.setAttribute("userid", request.getHttpHeaders().getCookies().get("sid").getValue());
             log.debug("Found cookie - Sucessfully authenticated");
             return null;
         } else if (request.getHttpHeaders().getRequestHeader("Authorization") != null) {
             String token = request.getHttpHeaders().getRequestHeader("Authorization").get(0);
 
-            if (token != null && checkLoggedIn(token)) {
+            String userid = null;
+            if (token != null && ((userid = checkLoggedIn(token)) != null)) {
+                request.setAttribute("userid", userid);
                 log.debug("Authorization header found - Sucessfully authenticated");
                 return null;
             } else {
@@ -89,9 +94,9 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
      * Decode token and check against local user database.
      * 
      * @param token
-     * @return
+     * @return the id of the user, or null if it failed
      */
-    private boolean checkLoggedIn(String token) {
+    private String checkLoggedIn(String token) {
         try {
             String decoded = new String(Base64.decode(token.substring(6)));
             StringTokenizer tokenizer = new StringTokenizer(decoded, ":");
@@ -100,18 +105,18 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
                 String password = tokenizer.nextToken();
                 if ((new Authentication()).authenticate(user, password)) {
                     log.debug("REST Authentication successful");
-                    return true;
+                    return PersonBeanUtil.getPersonID(user);
                 } else {
                     log.debug("REST Authentication failed");
-                    return false;
+                    return null;
                 }
             } else {
                 log.error("Authentication token not complete");
-                return false;
+                return null;
             }
         } catch (IOException e) {
             log.error("Error decoding token");
         }
-        return false;
+        return null;
     }
 }
