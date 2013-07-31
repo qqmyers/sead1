@@ -282,45 +282,47 @@ public class ListQueryDatasetsHandler implements
                 throw x;
             }
             long between = System.currentTimeMillis();
-            try {
-                final List<DatasetBean> result = dbu.get(uris, true); // we know they're not deleted already, hence getDeleted=true
-                long now = System.currentTimeMillis();
-                log.debug("listed " + result.size() + " dataset(s) in "
-                        + (now - then) + "ms (" + (between - then) + "/"
-                        + (now - between) + " u/b)");
-                if (prefetch) {
-                    final Timer t = new Timer(true);
-                    t.schedule(new TimerTask() {
-                        public void run() {
-                            // prefetch the previews on this page
-                            for (DatasetBean ds : result ) {
-                                TupeloStore.getInstance().getPreview(ds.getUri(), GetPreviews.SMALL);
+            final List<DatasetBean> result = new ArrayList<DatasetBean>();
+            for (String uri : uris ) {
+                try {
+                    result.add(dbu.get(uri, true)); // we know they're not deleted already, hence getDeleted=true
+                } catch (Exception e) {
+                    log.error("unable to list dataset " + uri);
+                }
+            }
+            long now = System.currentTimeMillis();
+            log.debug("listed " + result.size() + " dataset(s) in "
+                    + (now - then) + "ms (" + (between - then) + "/"
+                    + (now - between) + " u/b)");
+            if (prefetch) {
+                final Timer t = new Timer(true);
+                t.schedule(new TimerTask() {
+                    public void run() {
+                        // prefetch the previews on this page
+                        for (DatasetBean ds : result ) {
+                            TupeloStore.getInstance().getPreview(ds.getUri(), GetPreviews.SMALL);
+                        }
+                        List<String> previewsToFetch = new LinkedList<String>();
+                        // prefetch 1 more pages in each direction
+                        for (int i = 1; i <= 1; i++ ) {
+                            for (String ds : listDatasetUris(orderBy, desc, limit, offset + (limit * i), inCollection, withTag, dbu) ) {
+                                previewsToFetch.add(ds);
                             }
-                            List<String> previewsToFetch = new LinkedList<String>();
-                            // prefetch 1 more pages in each direction
-                            for (int i = 1; i <= 1; i++ ) {
-                                for (String ds : listDatasetUris(orderBy, desc, limit, offset + (limit * i), inCollection, withTag, dbu) ) {
+                            if (offset - (limit * i) > 0) {
+                                for (String ds : listDatasetUris(orderBy, desc, limit, offset - (limit * i), inCollection, withTag, dbu) ) {
                                     previewsToFetch.add(ds);
                                 }
-                                if (offset - (limit * i) > 0) {
-                                    for (String ds : listDatasetUris(orderBy, desc, limit, offset - (limit * i), inCollection, withTag, dbu) ) {
-                                        previewsToFetch.add(ds);
-                                    }
-                                }
                             }
-                            // now fetch their previews, so they'll be cached
-                            for (String ds : previewsToFetch ) {
-                                TupeloStore.getInstance().getPreview(ds, GetPreviews.SMALL);
-                            }
-                            t.cancel();
                         }
-                    }, 1000);
-                }
-                return result;
-            } catch (OperatorException x) {
-                log.error("unable to list datasets " + uris);
-                throw x;
+                        // now fetch their previews, so they'll be cached
+                        for (String ds : previewsToFetch ) {
+                            TupeloStore.getInstance().getPreview(ds, GetPreviews.SMALL);
+                        }
+                        t.cancel();
+                    }
+                }, 1000);
             }
+            return result;
         } catch (Exception x) {
             log.error("Error listing datasets", x);
             return new LinkedList<DatasetBean>();

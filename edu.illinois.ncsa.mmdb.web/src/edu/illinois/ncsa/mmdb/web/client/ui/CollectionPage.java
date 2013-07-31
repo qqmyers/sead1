@@ -227,7 +227,7 @@ public class CollectionPage extends Composite {
         // batch operations and logic to unbind
         BatchOperationView batchOperationView = new BatchOperationView();
         final BatchOperationPresenter batchOperationPresenter =
-                new BatchOperationPresenter(dispatchasync, eventBus, batchOperationView);
+                new BatchOperationPresenter(dispatchasync, eventBus, batchOperationView, true);
 
         HorizontalPanel horizontalPanel = new HorizontalPanel() {
             @Override

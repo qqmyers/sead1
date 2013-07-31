@@ -41,33 +41,18 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.ArrayList;
-
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
-import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.PagingCollectionTablePresenter;
-import edu.illinois.ncsa.mmdb.web.client.PagingCollectionTableView;
-import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
-import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
-import edu.uiuc.ncsa.cet.bean.CollectionBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
+import edu.illinois.ncsa.mmdb.web.client.presenter.CollectionTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
+import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
 /**
  * List all collections in system.
@@ -75,158 +60,53 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
  * @author Luigi Marini
  * 
  */
-public class ListCollectionsPage extends Composite {
+public class ListCollectionsPage extends Page {
 
-    private final DispatchAsync       dispatchasync;
-    private final HandlerManager      eventBus;
-    private final FlowPanel           mainContainer;
-    private final Label               statusLabel;
-    private final FlowPanel           addCollectionWidget;
-    private TitlePanel                pageTitle;
-    private PagingCollectionTableView view;
+    private final DispatchAsync  dispatch;
+    private final HandlerManager eventbus;
 
-    public ListCollectionsPage(DispatchAsync dispatchasync,
-            HandlerManager eventBus) {
-        this.dispatchasync = dispatchasync;
-        this.eventBus = eventBus;
-        mainContainer = new FlowPanel();
-        mainContainer.addStyleName("page");
-        initWidget(mainContainer);
+    public ListCollectionsPage(DispatchAsync dispatch, HandlerManager eventBus) {
+        super("Collections", dispatch);
+        this.dispatch = dispatch;
+        this.eventbus = eventBus;
 
-        mainContainer.add(createPageTitle());
+        HorizontalPanel rightHeader = new HorizontalPanel();
+        pageTitle.addEast(rightHeader);
 
-        // add collection widget
-        addCollectionWidget = createAddCollectionWidget();
-        mainContainer.add(addCollectionWidget);
+        // batch operations
+        BatchOperationView batchOperationView = new BatchOperationView();
+        batchOperationView.addStyleName("titlePanelRightElement");
+        BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatch, eventBus, batchOperationView, true);
+        batchOperationPresenter.bind();
+        rightHeader.add(batchOperationView);
 
-        statusLabel = new Label("Loading...");
-        mainContainer.add(statusLabel);
+        // rss feed
+        Anchor rss = new Anchor();
+        rss.setHref("rss.xml");
+        rss.addStyleName("rssIcon");
+        DOM.setElementAttribute(rss.getElement(), "type", "application/rss+xml");
+        rss.setHTML("<img src='./images/rss_icon.gif' border='0px' id='rssIcon' class='navMenuLink'>"); // FIXME hack
+        rightHeader.add(rss);
 
-        retrieveCollections();
-    }
+        DynamicTableView dynamicTableView = new DynamicTableView();
+        final CollectionTablePresenter dynamicTablePresenter = new CollectionTablePresenter(dispatch, eventBus, dynamicTableView);
+        dynamicTablePresenter.bind();
 
-    /**
-     * 
-     * @return
-     */
-    private Widget createPageTitle() {
-        pageTitle = new TitlePanel("Collections");
-        return pageTitle;
-    }
-
-    /**
-     * Widget to create a new collection.
-     * 
-     * @return
-     */
-    private FlowPanel createAddCollectionWidget() {
-        final FlowPanel addCollectionPanel = new FlowPanel();
-
-        PermissionUtil rbac = new PermissionUtil(dispatchasync);
-        rbac.doIfAllowed(Permission.ADD_COLLECTION, new PermissionCallback() {
+        VerticalPanel vp = new VerticalPanel() {
             @Override
-            public void onAllowed() {
-                Label createLabel = new Label("Create new collection: ");
-                createLabel.addStyleName("inline");
-                addCollectionPanel.add(createLabel);
-                final WatermarkTextBox addCollectionBox = new WatermarkTextBox("",
-                        "Collection name");
-                addCollectionBox.addStyleName("inline");
-                addCollectionPanel.add(addCollectionBox);
-                Button addButton = new Button("Add", new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent arg0) {
-                        createNewCollection(addCollectionBox.getText());
-                    }
-                });
-                addButton.addStyleName("inline");
-                addCollectionPanel.add(addButton);
-                SimplePanel clearBoth = new SimplePanel();
-                clearBoth.addStyleName("clearBoth");
-                addCollectionPanel.add(clearBoth);
+            protected void onDetach() {
+                dynamicTablePresenter.unbind();
             }
-
-            @Override
-            public void onDenied() {
-                //Label notAllowed = new Label("You do not have permission to create collections");
-            }
-        });
-
-        return addCollectionPanel;
+        };
+        vp.add(dynamicTableView.asWidget());
+        vp.addStyleName("tableCenter");
+        mainLayoutPanel.add(vp);
     }
 
-    /**
-     * Create new collection on the server.
-     * 
-     * @param text
-     *            name of collection
-     */
-    protected void createNewCollection(String text) {
+    @Override
+    public void layout() {
+        // TODO Auto-generated method stub
 
-        CollectionBean collection = new CollectionBean();
-        collection.setTitle(text);
-
-        dispatchasync.execute(new AddCollection(collection, MMDB.getUsername()),
-                new AsyncCallback<AddCollectionResult>() {
-
-                    @Override
-                    public void onFailure(Throwable arg0) {
-                        statusLabel.setText("Error: could not load collections");
-                        GWT.log("Failed creating new collection", arg0);
-                    }
-
-                    @Override
-                    public void onSuccess(AddCollectionResult arg0) {
-                        retrieveCollections();
-                    }
-                });
-    }
-
-    /**
-     * Retrieve collections from server.
-     */
-    private void retrieveCollections() {
-        dispatchasync.execute(new GetCollections(),
-                new AsyncCallback<GetCollectionsResult>() {
-
-                    @Override
-                    public void onFailure(Throwable arg0) {
-                        GWT.log("Error getting collections", arg0);
-
-                    }
-
-                    @Override
-                    public void onSuccess(GetCollectionsResult arg0) {
-                        if (arg0.getCount() > 0) {
-                            statusLabel.addStyleName("hidden");
-                            showCollections(arg0.getCollections());
-                        } else {
-                            statusLabel.setText("No collections found.");
-                        }
-                    }
-                });
-    }
-
-    /**
-     * Draw table with list of collections.
-     * 
-     * @param collections
-     */
-    protected void showCollections(ArrayList<CollectionBean> collections) {
-        if (view != null) {
-            mainContainer.remove(view);
-        }
-
-        view = new PagingCollectionTableView(dispatchasync);
-        view.addStyleName("datasetTable");
-        PagingCollectionTablePresenter presenter = new PagingCollectionTablePresenter(
-                view, dispatchasync, eventBus);
-        presenter.bind();
-
-        view.setNumberOfPages(0);
-
-        mainContainer.add(view.asWidget());
     }
 
 }

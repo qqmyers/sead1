@@ -74,7 +74,7 @@ public class ListDatasetsPage extends Page {
         // batch operations
         BatchOperationView batchOperationView = new BatchOperationView();
         batchOperationView.addStyleName("titlePanelRightElement");
-        BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatch, eventBus, batchOperationView);
+        BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatch, eventBus, batchOperationView, false);
         batchOperationPresenter.bind();
         rightHeader.add(batchOperationView);
 
