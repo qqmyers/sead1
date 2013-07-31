@@ -514,18 +514,24 @@ public class TupeloStore {
             try {
                 StringBuilder sb = new StringBuilder();
 
-                // is there a blob to extract
-                BlobChecker bc = new BlobChecker();
-                bc.setSubject(Resource.uriRef(uri));
-                getBeanSession().getContext().perform(bc);
-                if (!bc.exists()) {
-                    CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
-                    try {
-                        cbu.get(uri);
-                    } catch (OperatorException e) {
-                        log.debug("BlobChecker does not exist, and there is no collection with uri = " + uri);
-                        return null;
+                Collection<Resource> types = getBeanSession().getRDFTypes(Resource.uriRef(uri));
+                boolean createpreview = false;
+                for (Resource type : types ) {
+                    if (CollectionBeanUtil.COLLECTION_TYPE.equals(type)) {
+                        createpreview = true;
+                        break;
+                    } else if (Cet.DATASET.equals(type)) {
+                        BlobChecker bc = new BlobChecker();
+                        bc.setSubject(Resource.uriRef(uri));
+                        getBeanSession().getContext().perform(bc);
+                        if (bc.exists()) {
+                            createpreview = true;
+                            break;
+                        }
                     }
+                }
+                if (!createpreview) {
+                    return null;
                 }
 
                 String stringContext = URLEncoder.encode(CETBeans.contextToNTriples(getBeanSession().getContext()), "UTF-8"); //$NON-NLS-1$
