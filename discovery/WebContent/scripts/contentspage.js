@@ -82,7 +82,9 @@ function contentsPageJsonParser(jsonObj) {
 	}
 	if (abs != "") {
 		main_html = "<div class='well'><h3 style='margin-top:-5px;' class='page-header'>Abstract</h3><p style='margin-top:-25px;'><b>Authors: </b>$author$</p><p><b>Contacts: </b>$contact$</p><p><b>Keywords: </b><i>$keyword$</i></p><p>"
+				+ "<pre>" 
 				+ abs
+				+ "</pre>"
 				+ "</p><p><b>Descriptors:</b> $descriptor$</p></div><br/>";
 	}
 
