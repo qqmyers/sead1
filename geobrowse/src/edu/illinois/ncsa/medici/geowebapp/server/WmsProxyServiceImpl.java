@@ -24,7 +24,6 @@ import org.xml.sax.SAXException;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
-import edu.illinois.ncsa.medici.geowebapp.client.Geo_webapp;
 import edu.illinois.ncsa.medici.geowebapp.client.service.WmsProxyService;
 import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
 
@@ -153,8 +152,12 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public String getWmsUrl() {
-		return getServletContext().getInitParameter("geoserver.wms.url");
+	public String[] getUrls() {
+		String[] urls = new String[2];
+		urls[0] = getServletContext().getInitParameter("geoserver.wms.url");
+		urls[1] = getServletContext().getInitParameter("medici.dataset.url");
+		
+		return urls;
 	}
 
 }

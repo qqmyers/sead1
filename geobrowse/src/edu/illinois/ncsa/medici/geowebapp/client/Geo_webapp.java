@@ -39,6 +39,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -73,6 +74,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	private static final String EPSG_4326 = "EPSG:4326";
 
 	private static String wmsUrl = "http://localhost/geoserver/wms";
+	private static String mediciUrl = "http://localhost/#dataset?id=";
 
 	private final WmsProxyServiceAsync wmsProxySvc = (WmsProxyServiceAsync) GWT
 			.create(WmsProxyService.class);
@@ -125,7 +127,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		mediciProxySvc.getTags(new AsyncCallback<String[]>() {
 			@Override
 			public void onSuccess(String[] result) {
-				DecoratorPanel tagPanel = null;
+				FlowPanel tagPanel = null;
 				if (result != null) {
 					MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
 					for (String s : result) {
@@ -140,12 +142,12 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				DecoratorPanel tagPanel = createTagPanel();
+				FlowPanel tagPanel = createTagPanel();
 				RootPanel.get("tag").add(tagPanel);
 			}
 		});
 
-		DecoratorPanel dp2 = createBgSwitchPanel();
+		FlowPanel dp2 = createBgSwitchPanel();
 		RootPanel.get("bg").add(dp2);
 
 		History.addValueChangeHandler(this);
@@ -167,7 +169,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 					System.out.println("** Building UI ***");
 					buildGwtmap(result);
 
-					DecoratorPanel dp = createLayerSwitcher(result);
+					FlowPanel dp = createLayerSwitcher(result);
 					RootPanel.get("layers").add(dp);
 					// FlowPanel hp = createLegendPanel(result);
 					// RootPanel.get("info").add(hp);
@@ -189,8 +191,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 	}
 
-	protected DecoratorPanel createTagPanel(MultiWordSuggestOracle oracle) {
-		DecoratorPanel dp = new DecoratorPanel();
+	protected FlowPanel createTagPanel(MultiWordSuggestOracle oracle) {
+		FlowPanel dp = new FlowPanel();
 
 		VerticalPanel vp = new VerticalPanel();
 		vp.setSpacing(10);
@@ -222,8 +224,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		return dp;
 	}
 
-	protected DecoratorPanel createTagPanel() {
-		DecoratorPanel dp = new DecoratorPanel();
+	protected FlowPanel createTagPanel() {
+		FlowPanel dp = new FlowPanel();
 
 		VerticalPanel vp = new VerticalPanel();
 		vp.setSpacing(10);
@@ -260,12 +262,16 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		return dp;
 	}
 
-	protected DecoratorPanel createBgSwitchPanel() {
-		DecoratorPanel dp = new DecoratorPanel();
+	protected FlowPanel createBgSwitchPanel() {
+		FlowPanel dp = new FlowPanel();
 
-		HorizontalPanel hp = new HorizontalPanel();
-		hp.setSpacing(10);
+		VerticalPanel vp = new VerticalPanel();
+		vp.setSpacing(10);
 
+		vp.add(new HTML("<h3>Background map:</h3>"));
+		vp.add(new HTML("<hr>"));
+
+		
 		ListBox lb = new ListBox();
 		lb.addItem("Open Street Map", "osm");
 		lb.addItem("Toner Style", "toner");
@@ -282,9 +288,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			}
 		});
 
-		hp.add(new HTML("<h3>Background:</h3>"));
-		hp.add(lb);
-		dp.add(hp);
+		vp.add(lb);
+		dp.add(vp);
 		return dp;
 	}
 
@@ -318,9 +323,12 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		return layerNames;
 	}
 
-	protected DecoratorPanel createLayerSwitcher(LayerInfo[] result) {
+	protected FlowPanel createLayerSwitcher(LayerInfo[] result) {
 		List<String> layerNames = getLayerNames(result);
-		DecoratorPanel dp = new DecoratorPanel();
+		FlowPanel dp = new FlowPanel();
+		
+//		DecoratorPanel dp = new DecoratorPanel();
+		
 		dp.setWidth("100%");
 		dp.setHeight("100%");
 
@@ -378,29 +386,89 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 					HasHorizontalAlignment.ALIGN_CENTER,
 					HasVerticalAlignment.ALIGN_TOP);
 
-			DisclosurePanel namePanel = new DisclosurePanel(name);
+			VerticalPanel titlePanel = createLayerTitle(result[i]);
+			
+//			DisclosurePanel namePanel = new DisclosurePanel(name);
+//
+//			// String href =
+//			// "http://sead.ncsa.illinois.edu/#dataset?id="+result[i].getUri();
+//			// namePanel.setHeader(new Anchor(name, href));
+//
+//			VerticalPanel legendPanel = new VerticalPanel();
+//			String url = wmsUrl
+//					+ "?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
+//					+ name;
+//			Image img = new Image(url);
+//
+//			legendPanel.add(img);
+//			namePanel.add(legendPanel);
 
-			// String href =
-			// "http://sead.ncsa.illinois.edu/#dataset?id="+result[i].getUri();
-			// namePanel.setHeader(new Anchor(name, href));
-
-			VerticalPanel legendPanel = new VerticalPanel();
-			String url = wmsUrl
-					+ "?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
-					+ name;
-			Image img = new Image(url);
-
-			legendPanel.add(img);
-			namePanel.add(legendPanel);
-
-			ft.setWidget(currentRow, 2, namePanel);
+			ft.setWidget(currentRow, 2, titlePanel);
 		}
-		vp.add(new HTML("<h3>Layer manager</h3>"));
+		vp.add(new HTML("<h3>Geospatial Datasets</h3>"));
 		vp.add(new HTML("<hr>"));
 		vp.add(ft);
 
 		dp.add(vp);
 		return dp;
+	}
+
+	private VerticalPanel createLayerTitle(LayerInfo layer) {
+		VerticalPanel content = new VerticalPanel();
+
+		HorizontalPanel hp = new HorizontalPanel();
+		hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+
+		final Image close = new Image("images/rightarrow.png");
+		close.setVisible(true);
+		final Image open = new Image("images/downarrow.png");
+		open.setVisible(false);
+
+		String htmlString = "<a href='" + mediciUrl + layer.getUri()
+				+ "' target='new'>" + layer.getName() + "</a>";
+		HTML title = new HTML(htmlString);
+
+		hp.add(close);
+		hp.add(open);
+		hp.add(title);
+
+		final DisclosurePanel dp = new DisclosurePanel();
+		dp.setOpen(false);
+
+		VerticalPanel legendPanel = new VerticalPanel();
+		String url = wmsUrl
+				+ "?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
+				+ layer.getName();
+		Image img = new Image(url);
+
+		legendPanel.add(img);
+
+		dp.add(legendPanel);
+
+		content.add(hp);
+		content.add(dp);
+
+		close.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				dp.setOpen(true);
+				close.setVisible(false);
+				open.setVisible(true);
+			}
+		});
+
+		open.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				dp.setOpen(false);
+				close.setVisible(true);
+				open.setVisible(false);
+			}
+		});
+
+		return content;
 	}
 
 	// public List<String> getLayerList(String namespace, String xml) {
@@ -497,9 +565,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 					layerInfo.getMiny(), layerInfo.getMaxx(),
 					layerInfo.getMaxy());
 			// System.out.println("Original bounds: " + orgBnd);
-			Bounds newBnd = orgBnd.transform(
-					new Projection(EPSG_4326), new Projection(
-							EPSG_900913));
+			Bounds newBnd = orgBnd.transform(new Projection(EPSG_4326),
+					new Projection(EPSG_900913));
 			// System.out.println("New bounds: " + newBnd);
 			System.out.println("adding layers: " + name + " " + newBnd);
 			WMSOptions options = new WMSOptions();
@@ -547,11 +614,12 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		if (tagTextBox != null && tag != null) {
 			tagTextBox.setText(tag);
 		}
-		wmsProxySvc.getWmsUrl(new AsyncCallback<String>() {
+		wmsProxySvc.getUrls(new AsyncCallback<String[]>() {
 
 			@Override
-			public void onSuccess(String result) {
-				wmsUrl = result;
+			public void onSuccess(String[] result) {
+				wmsUrl = result[0];
+				mediciUrl = result[1];
 				buildMapUi(tag);
 			}
 
