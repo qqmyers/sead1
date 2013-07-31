@@ -12,12 +12,12 @@
 	<context-param>
 		<description>Geoserver RESTful service url</description>
 		<param-name>geoserver.rest.url</param-name>
-		<param-value>http://localhost:9999</param-value>
+		<param-value>http://localhost/geoserver/rest</param-value>
 	</context-param>
 	<context-param>
 		<description>Geoserver WMS url</description>
 		<param-name>geoserver.wms.url</param-name>
-		<param-value>http://localhost:9999/geoserver/wms</param-value>
+		<param-value>http://localhost/geoserver/wms</param-value>
 	</context-param>
 	<context-param>
 		<description>Geoserver RESTful service username</description>
@@ -27,24 +27,31 @@
 	<context-param>
 		<description>Geoserver RESTful service pw</description>
 		<param-name>geoserver.pw</param-name>
-		<param-value>pw</param-value>
+		<param-value>cookie123</param-value>
 	</context-param>
 
 	<context-param>
 		<description>Medici RESTful service url</description>
 		<param-name>medici.rest.url</param-name>
-		<param-value>http://localhost:9999</param-value>
+		<param-value>http://localhost/acr/resteasy/tags</param-value>
 	</context-param>
 	<context-param>
 		<description>Medici username</description>
 		<param-name>medici.user</param-name>
-		<param-value>user</param-value>
+		<param-value>sead-acr@googlegroups.com</param-value>
 	</context-param>
 	<context-param>
 		<description>Medici pw</description>
 		<param-name>medici.pw</param-name>
-		<param-value>pw</param-value>
+		<param-value>cookie123</param-value>
 	</context-param>
+	
+	<context-param>
+		<description>Medici Dataset url</description>
+		<param-name>medici.dataset.url</param-name>
+		<param-value>http://localhost/acr/#dataset?id=</param-value>
+	</context-param>
+	
 
 	
 	<!-- Servlets -->	
