@@ -139,7 +139,7 @@ public class DatasetTableOneColumnView extends DatasetTableView {
         });
 
         UserSessionState sessionState = MMDB.getSessionState();
-        if (sessionState.getSelectedDatasets().contains(id)) {
+        if (sessionState.getSelectedItems().contains(id)) {
             checkBox.setValue(true);
         } else {
             checkBox.setValue(false);

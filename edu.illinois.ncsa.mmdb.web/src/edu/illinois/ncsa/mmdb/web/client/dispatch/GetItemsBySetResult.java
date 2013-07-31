@@ -42,30 +42,37 @@
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import java.util.HashSet;
-import java.util.Set;
 
-import net.customware.gwt.dispatch.shared.Action;
+import net.customware.gwt.dispatch.shared.Result;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
- * Get datasets from repository from a set of URIs.
+ * Datasets retrieved.
  * 
  * @author Luis Mendez
+ * 
  */
 @SuppressWarnings("serial")
-public class GetDatasetsBySet implements Action<GetDatasetsBySetResult> {
+public class GetItemsBySetResult implements Result {
 
-    private HashSet<String> datasets;
+    private HashSet<DatasetBean>    datasets    = new HashSet<DatasetBean>();
+    private HashSet<CollectionBean> collections = new HashSet<CollectionBean>();
 
-    public GetDatasetsBySet() {
+    /** For serialization only. */
+    public GetItemsBySetResult() {
     }
 
-    public GetDatasetsBySet(HashSet<String> datasets) {
-
+    public GetItemsBySetResult(HashSet<DatasetBean> datasets, HashSet<CollectionBean> collections) {
         this.datasets = datasets;
+        this.collections = collections;
     }
 
-    public Set<String> getDatasets() {
-        return this.datasets;
+    public HashSet<DatasetBean> getDatasets() {
+        return datasets;
     }
 
+    public HashSet<CollectionBean> getCollections() {
+        return collections;
+    }
 }

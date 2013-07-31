@@ -70,7 +70,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetConfigurationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsBySetHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetItemsBySetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsInCollectionHandler;
@@ -101,6 +101,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.InitializeRolesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryCollectionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
@@ -206,9 +207,10 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetConfigurationHandler());
         DispatchUtil.registerHandler(new SetConfigurationHandler());
         DispatchUtil.registerHandler(new SearchWithFilterHandler());
-        DispatchUtil.registerHandler(new GetDatasetsBySetHandler());
+        DispatchUtil.registerHandler(new GetItemsBySetHandler());
         DispatchUtil.registerHandler(new GetDatasetsInCollectionHandler());
         DispatchUtil.registerHandler(new DefaultRoleHandler());
+        DispatchUtil.registerHandler(new ListQueryCollectionsHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

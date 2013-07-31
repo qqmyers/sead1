@@ -70,7 +70,7 @@ public class BatchOperationView extends Composite implements BatchOperationPrese
         actionsBar.addStyleName("batchOperationMenu");
         actionsMenu = new MenuBar(true);
         actionsBar.addItem("Actions", actionsMenu);
-        numSelectedLabel = new Hyperlink("0 selected datasets", "noneSelected");
+        numSelectedLabel = new Hyperlink("0 selected items", "noneSelected");
         numSelectedLabel.addStyleName("batchOperationCount");
         mainLayout.add(numSelectedLabel);
         mainLayout.add(actionsBar);
@@ -83,7 +83,7 @@ public class BatchOperationView extends Composite implements BatchOperationPrese
 
     @Override
     public void setNumSelected(int num) {
-        numSelectedLabel.setText(num + " selected datasets");
+        numSelectedLabel.setText(num + " selected items");
         if (num > 0) {
             numSelectedLabel.setTargetHistoryToken("viewSelected");
         } else {

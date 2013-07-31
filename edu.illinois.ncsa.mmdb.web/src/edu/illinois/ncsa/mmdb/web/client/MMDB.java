@@ -98,7 +98,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PropertiesReader;
 import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchBox;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchResultsPage;
-import edu.illinois.ncsa.mmdb.web.client.ui.SelectedDatasetsPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.SelectedItemsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagsPage;
@@ -198,7 +198,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 @Override
                 public void onDatasetSelected(DatasetSelectedEvent event) {
                     GWT.log("Dataset selected " + event.getUri());
-                    MMDB.getSessionState().datasetSelected(event.getUri());
+                    MMDB.getSessionState().itemSelected(event.getUri());
                 }
             });
 
@@ -206,7 +206,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 @Override
                 public void onDatasetUnselected(DatasetUnselectedEvent event) {
                     GWT.log("Dataset unselected " + event.getUri());
-                    MMDB.getSessionState().datasetUnselected(event.getUri());
+                    MMDB.getSessionState().itemUnselected(event.getUri());
                 }
             });
 
@@ -214,7 +214,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 @Override
                 public void onAllDatasetsUnselected(AllDatasetsUnselectedEvent event) {
                     GWT.log("All datasets unselected");
-                    Set<String> toDeselect = new HashSet<String>(MMDB.getSessionState().getSelectedDatasets());
+                    Set<String> toDeselect = new HashSet<String>(MMDB.getSessionState().getSelectedItems());
                     for (String datasetUri : toDeselect ) {
                         DatasetUnselectedEvent ue = new DatasetUnselectedEvent();
                         ue.setUri(datasetUri);
@@ -441,7 +441,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         if (show == true) {
             mainContainer.clear();
-            mainContainer.add(new SelectedDatasetsPage(dispatchAsync));
+            mainContainer.add(new SelectedItemsPage(dispatchAsync));
 
         } else {
             ConfirmDialog d = new ConfirmDialog("View Selected", "You must select at least one dataset to view the selected.", false);

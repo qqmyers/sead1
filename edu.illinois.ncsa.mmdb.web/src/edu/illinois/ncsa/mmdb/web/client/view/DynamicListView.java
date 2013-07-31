@@ -55,7 +55,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicListPresenter.Display;
@@ -69,7 +68,6 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
  * 
  */
 public class DynamicListView extends FlexTable implements Display {
-
     private final static DateTimeFormat DATE_TIME_FORMAT  = DateTimeFormat.getShortDateTimeFormat();
     public static final String          UNKNOWN_TYPE      = "Unknown";
     public static final int             DEFAULT_PAGE_SIZE = 5;
@@ -81,49 +79,6 @@ public class DynamicListView extends FlexTable implements Display {
         super();
         this.dispatchAsync = dispatchAsync;
         addStyleName("dynamicTableList");
-    }
-
-    @Override
-    @Deprecated
-    public int insertItem(final String id, String name, String type, Date date, String preview, String size, String authorId) {
-
-        final int row = this.getRowCount();
-
-        // selection checkbox
-        CheckBox checkBox = new CheckBox();
-        setWidget(row, 0, checkBox);
-
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
-        pre.setMaxWidth(100);
-        setWidget(row, 1, pre);
-
-        VerticalPanel verticalPanel = new VerticalPanel();
-
-        verticalPanel.setSpacing(5);
-
-        setWidget(row, 2, verticalPanel);
-
-        // title
-        Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
-        verticalPanel.add(hyperlink);
-
-        // date
-        verticalPanel.add(new Label(DATE_TIME_FORMAT.format(date)));
-
-        // size
-        verticalPanel.add(new Label(size));
-
-        // author
-        verticalPanel.add(new Label(authorId));
-
-        // type
-        verticalPanel.add(new Label(type));
-
-        getFlexCellFormatter().addStyleName(row, 0, "dynamicTableListCheckbox");
-        getFlexCellFormatter().addStyleName(row, 1, "dynamicTableListPreview");
-        getFlexCellFormatter().addStyleName(row, 2, "dynamicTableListCell");
-
-        return row;
     }
 
     public String getCheckboxId(CheckBox checkbox) {
@@ -142,7 +97,7 @@ public class DynamicListView extends FlexTable implements Display {
     }
 
     @Override
-    public int insertItem(final String id, String type) {
+    public int insertItem(final String id, String title, String author, Date date, String size, String type) {
 
         final int row = this.getRowCount();
 
@@ -154,28 +109,49 @@ public class DynamicListView extends FlexTable implements Display {
         FlowPanel images = new FlowPanel();
         images.setStyleName("imageOverlayPanel");
 
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
-        pre.setMaxWidth(100);
-        images.add(pre);
+        if ("Collection".equals(type)) {
+            PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "collection?uri=" + id, type, dispatchAsync);
+            pre.setMaxWidth(100);
+            images.add(pre);
+        } else {
+            PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
+            pre.setMaxWidth(100);
+            images.add(pre);
 
-        //badge type overlay
-        if (type != null && !UNKNOWN_TYPE.equals(type)) {
-            Image overlay = new Image("images/icons/" + type + ".png");
-            overlay.addStyleName("imageOverlayList");
-            overlay.addClickHandler(new ClickHandler() {
-                public void onClick(ClickEvent event) {
-                    History.newItem("dataset?id=" + id);
-                }
-            });
+            //badge type overlay
+            if (type != null && !UNKNOWN_TYPE.equals(type)) {
+                Image overlay = new Image("images/icons/" + type + ".png");
+                overlay.addStyleName("imageOverlayList");
+                overlay.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        History.newItem("dataset?id=" + id);
+                    }
+                });
 
-            images.add(overlay);
+                images.add(overlay);
+            }
         }
 
         setWidget(row, 1, images);
 
+        HorizontalPanel anchorPanel = new HorizontalPanel();
+        Hyperlink hyperlink;
+        if ("Collection".equals(type)) {
+            hyperlink = new Hyperlink(title, "collection?uri=" + id);
+        } else {
+            hyperlink = new Hyperlink(title, "dataset?id=" + id);
+        }
+        anchorPanel.add(hyperlink);
+        anchorPanel.add(new Label("")); //FIXME hack so entire row won't be linked
+
         FlexTable informationPanel = new FlexTable();
         informationPanel.addStyleName("dynamicTableListInformation");
         informationPanel.getFlexCellFormatter().setColSpan(0, 0, 2);
+        informationPanel.setWidget(0, 0, anchorPanel);
+        informationPanel.setWidget(1, 0, new Label(author));
+        informationPanel.setWidget(2, 0, new Label(DateTimeFormat.getMediumDateTimeFormat().format(date)));
+        informationPanel.setWidget(1, 1, new Label(size));
+        informationPanel.setWidget(2, 1, new Label(type));
         setWidget(row, 2, informationPanel);
 
         getFlexCellFormatter().addStyleName(row, 0, "dynamicTableListCheckbox");
@@ -186,37 +162,6 @@ public class DynamicListView extends FlexTable implements Display {
     }
 
     @Override
-    public void setTitle(int id, String title, String uri) {
-        FlexTable panel = (FlexTable) getWidget(id, 2);
-        HorizontalPanel anchorPanel = new HorizontalPanel();
-        Hyperlink hyperlink = new Hyperlink(title, "dataset?id=" + uri);
-        anchorPanel.add(hyperlink);
-        anchorPanel.add(new Label("")); //FIXME hack so entire row won't be linked
-        panel.setWidget(0, 0, anchorPanel);
-
-    }
-
-    @Override
-    public void setAuthor(int row, String author) {
-        FlexTable panel = (FlexTable) getWidget(row, 2);
-        panel.setWidget(1, 0, new Label(author));
-    }
-
-    @Override
-    public void setDate(int row, Date date) {
-        FlexTable panel = (FlexTable) getWidget(row, 2);
-        panel.setWidget(2, 0, new Label(DateTimeFormat.getMediumDateTimeFormat().format(date)));
-    }
-
-    @Override
-    public void setSize(int row, String size) {
-        FlexTable panel = (FlexTable) getWidget(row, 2);
-        panel.setWidget(1, 1, new Label(size));
-    }
-
-    @Override
-    public void setType(int row, String type) {
-        FlexTable panel = (FlexTable) getWidget(row, 2);
-        panel.setWidget(2, 1, new Label(type));
+    public void showSelected(boolean checked, int location) {
     }
 }

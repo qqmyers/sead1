@@ -50,7 +50,6 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -133,7 +132,7 @@ public class DatasetTableGridView extends DatasetTableView {
         });
 
         UserSessionState sessionState = MMDB.getSessionState();
-        if (sessionState.getSelectedDatasets().contains(id)) {
+        if (sessionState.getSelectedItems().contains(id)) {
             checkBox.setValue(true);
         } else {
             checkBox.setValue(false);

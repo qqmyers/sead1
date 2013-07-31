@@ -41,6 +41,7 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.Collection;
 import java.util.HashSet;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
@@ -50,11 +51,14 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.rdf.Resource;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsBySet;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetsBySetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetItemsBySet;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetItemsBySetResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
 /**
@@ -63,28 +67,41 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
  * @author Luis Mendez
  * 
  */
-public class GetDatasetsBySetHandler implements ActionHandler<GetDatasetsBySet, GetDatasetsBySetResult> {
+public class GetItemsBySetHandler implements ActionHandler<GetItemsBySet, GetItemsBySetResult> {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(GetDatasetsBySetHandler.class);
+    private static Log log = LogFactory.getLog(GetItemsBySetHandler.class);
 
     @Override
-    public GetDatasetsBySetResult execute(GetDatasetsBySet action, ExecutionContext arg1) throws ActionException {
+    public GetItemsBySetResult execute(GetItemsBySet action, ExecutionContext arg1) throws ActionException {
 
-        log.info("Retrieving selected datasets for display");
+        log.info("Retrieving selected items for display");
 
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
         DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
+        CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
 
         HashSet<DatasetBean> datasets = new HashSet<DatasetBean>();
+        HashSet<CollectionBean> collections = new HashSet<CollectionBean>();
 
         try {
 
-            for (String uri : action.getDatasets() ) {
-                DatasetBean datasetBean = dbu.get(uri);
-                datasetBean = dbu.update(datasetBean);
-
-                datasets.add(datasetBean);
+            for (String uri : action.getItems() ) {
+                Collection<Resource> types = beanSession.getRDFTypes(Resource.uriRef(uri));
+                for (Resource type : types ) {
+                    if (type.equals(cbu.getType())) {
+                        CollectionBean bean = cbu.get(uri);
+                        bean = cbu.update(bean);
+                        collections.add(bean);
+                        break;
+                    }
+                    if (type.equals(dbu.getType())) {
+                        DatasetBean bean = dbu.get(uri);
+                        bean = dbu.update(bean);
+                        datasets.add(bean);
+                        break;
+                    }
+                }
             }
 
             // return dataset and preview
@@ -94,19 +111,17 @@ public class GetDatasetsBySetHandler implements ActionHandler<GetDatasetsBySet, 
             throw new ActionException(e);
         }
 
-        HashSet<DatasetBean> last = new HashSet<DatasetBean>(datasets);
-
-        return new GetDatasetsBySetResult(last);
+        return new GetItemsBySetResult(datasets, collections);
 
     }
 
     @Override
-    public Class<GetDatasetsBySet> getActionType() {
-        return GetDatasetsBySet.class;
+    public Class<GetItemsBySet> getActionType() {
+        return GetItemsBySet.class;
     }
 
     @Override
-    public void rollback(GetDatasetsBySet arg0, GetDatasetsBySetResult arg1, ExecutionContext arg2) throws ActionException {
+    public void rollback(GetItemsBySet arg0, GetItemsBySetResult arg1, ExecutionContext arg2) throws ActionException {
         // TODO Auto-generated method stub
 
     }
