@@ -308,7 +308,7 @@ public class UploadPage extends Page {
         // batch actions
         batchOperationView = new BatchOperationView();
         batchOperationView.addStyleName("hidden");
-        batchOperationPresenter = new BatchOperationPresenter(dispatchAsync, MMDB.eventBus, batchOperationView);
+        batchOperationPresenter = new BatchOperationPresenter(dispatchAsync, MMDB.eventBus, batchOperationView, false);
         batchOperationPresenter.bind();
         mainLayoutPanel.add(batchOperationView);
 
