@@ -79,7 +79,7 @@ if [ ! -e /home/medici/acr.public_properties ]; then
 fi
 if [ ! -e /home/medici/extractor.properties ]; then
   sed -e "s#^geoserver.server=.*\$#geoserver.server=http://`hostname -f`/geoserver#" \
-      -e "s#^geoserver.owsserver=.*\$#geoserver.owsserver=http://`hostname -f`/geoserver/wms#" /home/medici/extractor.properties > /home/medici/extractor.properties
+      -e "s#^geoserver.owsserver=.*\$#geoserver.owsserver=http://`hostname -f`/geoserver/wms#" extractor.properties > /home/medici/extractor.properties
 fi
 
 rm -rf /var/lib/tomcat6/webapps/ROOT
