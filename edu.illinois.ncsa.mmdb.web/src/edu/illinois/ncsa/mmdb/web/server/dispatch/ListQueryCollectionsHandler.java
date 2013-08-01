@@ -113,7 +113,7 @@ public class ListQueryCollectionsHandler implements
      */
     private static Table<Resource> list(String orderBy, boolean desc, int limit, int offset, String withTag) throws OperatorException {
         Unifier u = new Unifier();
-        u.setColumnNames("s", "p");
+        u.addColumnName("s");
         if (withTag != null) {
             u.addPattern("s", Tags.TAGGED_WITH_TAG, TagEventBeanUtil.createTagUri(withTag));
         } else {
@@ -123,6 +123,7 @@ public class ListQueryCollectionsHandler implements
             u.setOffset(offset);
         }
         u.addPattern("s", DcTerms.HAS_PART, "p");
+        u.addColumnName("p");
         u.addPattern("s", Rdf.TYPE, Cet.cet("Collection"));
 
         // translate orderBy to the right sort
