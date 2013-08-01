@@ -85,7 +85,7 @@ function writeCollection(json, result) {
 			+ "<pre>" 
 			+ abs.substring(0, 750)
 			+ "... </pre>" 
-			+ ""<a href='contents.html?i="
+			+ "<a href='contents.html?i="
 			+ uri
 			+ "&t="
 			+ displayTitle
