@@ -40,9 +40,6 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -122,8 +119,6 @@ public class ListQueryCollectionsHandler implements
             }
             u.setOffset(offset);
         }
-        u.addPattern("s", DcTerms.HAS_PART, "p");
-        u.addColumnName("p");
         u.addPattern("s", Rdf.TYPE, Cet.cet("Collection"));
 
         // translate orderBy to the right sort
@@ -166,41 +161,32 @@ public class ListQueryCollectionsHandler implements
      * @param dbu
      * @return
      */
-    public static Map<String, Integer> listCollectionUris(String orderBy, boolean desc, int limit, int offset, String withTag) {
+    public static List<String> listCollectionUris(String orderBy, boolean desc, int limit, int offset, String withTag) {
         try {
-            Map<String, Integer> result = new HashMap<String, Integer>();
-            List<String> list = new ArrayList<String>();
+            List<String> result = new LinkedList<String>();
             for (Resource r : Tables.getColumn(list(orderBy, desc, limit, offset, withTag), 0) ) {
-                if (!result.containsKey(r.getString())) {
-                    result.put(r.getString(), new Integer(1));
-                    list.add(r.getString());
-                } else {
-                    result.put(r.getString(), new Integer(result.get(r.getString()) + 1));
+                if (!result.contains(r.getString())) {
+                    result.add(r.getString());
                 }
             }
             if (withTag != null) {
-                if (offset > list.size()) {
+                if (offset > result.size()) {
                     result.clear();
                 } else {
-                    list = list.subList(offset, Math.min(offset + limit, result.size()));
-                    Map<String, Integer> temp = result;
-                    result = new HashMap<String, Integer>();
-                    for(String x : list) {
-                        result.put(x, temp.get(x));
-                    }
+                    result = result.subList(offset, Math.min(offset + limit, result.size()));
                 }
             }
             log.info(result.size() + " elements retured");
             return result;
         } catch (OperatorException x) {
             log.error("Error listing collection URIs", x);
-            return new HashMap<String, Integer>();
+            return new LinkedList<String>();
         }
     }
 
     public static List<CollectionBean> listCollections(final String orderBy, final boolean desc, final int limit, final int offset, final String withTag) {
         try {
-            Map<String, Integer> uris;
+            List<String> uris;
             long then = System.currentTimeMillis(); //
             try {
                 uris = listCollectionUris(orderBy, desc, limit, offset, withTag);
@@ -211,10 +197,10 @@ public class ListQueryCollectionsHandler implements
             long between = System.currentTimeMillis();
             try {
                 CollectionBeanUtil cbu = new CollectionBeanUtil(TupeloStore.getInstance().getBeanSession());
-                List<CollectionBean> result = new ArrayList<CollectionBean>();
-                for(Map.Entry<String, Integer> entry : uris.entrySet()) {
-                    CollectionBean cb = cbu.get(entry.getKey(), true); // we know they're not deleted already, hence getDeleted=true
-                    cb.setMemberCount(entry.getValue());
+                final List<CollectionBean> result = new LinkedList<CollectionBean>();
+                for (String uri : uris ) {
+                    CollectionBean cb = cbu.get(uri, true); // we know they're not deleted already, hence getDeleted=true
+                    cb.setMemberCount(cbu.getBeanSession().getContext().match(Resource.uriRef(uri), DcTerms.HAS_PART, null).size());
                     result.add(cb);
                 }
                 long now = System.currentTimeMillis();
