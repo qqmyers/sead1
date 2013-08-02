@@ -12,12 +12,18 @@ public class PropertiesLoader {
 	 * @return the _properties
 	 */
 	public static Properties getProperties() {
+		if (_properties == null) {
+			try {
+				new PropertiesLoader().loadProperties();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		return _properties;
 	}
 
 	public void loadProperties() throws IOException {
-		InputStream inputStream = this.getClass().getClassLoader()
-				.getResourceAsStream("nced.properties");
+		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("nced.properties");
 
 		_properties = new Properties();
 
