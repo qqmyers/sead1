@@ -19,7 +19,7 @@ public class Result implements Comparable<Result> {
 			String currentTitle = getTitleFromBinding(binding);
 			
 			String previousTitle = getTitleFromBinding(result.getBinding());
-			return currentTitle.compareTo(previousTitle);
+			return currentTitle.compareToIgnoreCase(previousTitle);
 		}
 		return -1;
 	}
