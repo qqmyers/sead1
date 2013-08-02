@@ -145,10 +145,6 @@ public class NCEDProxy {
 	
 	private JSONObject convertToJsonObject(String responseText) throws JSONException {
 
-		if (responseText.contains("&")) {
-			responseText = responseText.replace("&", "and");
-		}
-
 		// Remove the long type associated with length values so that the JSON produced matches 
 		// the name=x, literal=y pattern expected in the sortItems Method
 		responseText = responseText.replaceAll(" datatype=\"http://www.w3.org/2001/XMLSchema#long\"","");
