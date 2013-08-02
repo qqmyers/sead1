@@ -50,6 +50,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
@@ -224,14 +225,14 @@ public class UserMetadataWidget extends Composite {
                 namelink.setText(value.getName());
                 valueWidget = namelink;
             } else {
-                //It's text - decide if it is one or multi-line
+                //It's text - decide if it is one or multi-line/has special characters
                 String valueText = value.getName();
-                if (valueText.indexOf('\n') == -1) {
+                if ((valueText.indexOf('\n') == -1) && (!valueText.contains("&"))) {
                     //Single line - create a label
                     valueWidget = new Label(valueText);
                 } else {
                     //Multi-line 
-                    valueText = "<pre>" + valueText + "</pre>";
+                    valueText = "<pre>" + SimpleHtmlSanitizer.sanitizeHtml(valueText).asString() + "</pre>";
                     valueWidget = new HTML(valueText);
                 }
             }

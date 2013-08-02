@@ -134,7 +134,7 @@ public class SparqlRestService {
                             continue;
                         }
                         sb.append("      <binding name=\"").append(columns[i]).append("\">").append("\n");
-                        String enc = row.get(i).getString().replace("<", "&lt;").replace(">", "&gt;");
+                        String enc = row.get(i).getString().replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
                         if (row.get(i).isUri()) {
                             sb.append("        <uri>").append(row.get(i).getString()).append("</uri>").append("\n");
                         } else if (row.get(i).isLiteral()) {

@@ -64,6 +64,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -292,37 +293,37 @@ public class AddMetadataWidget extends Composite {
      * Make call to remote server to get the required JSON object.
      */
     public native static void getJson(int requestId, String url, AddMetadataWidget handler) /*-{
-                                                                                            var callback = "callback" + requestId;
+		var callback = "callback" + requestId;
 
-                                                                                            // [1] Create a script element.
-                                                                                            var script = document.createElement("script");
-                                                                                            script.setAttribute("src", url + callback);
-                                                                                            script.setAttribute("type", "text/javascript");
+		// [1] Create a script element.
+		var script = document.createElement("script");
+		script.setAttribute("src", url + callback);
+		script.setAttribute("type", "text/javascript");
 
-                                                                                            // [2] Define the callback function on the window object.
-                                                                                            window[callback] = function(jsonObj) {
-                                                                                            // [3]
-                                                                                            handler.@edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataWidget::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(jsonObj);
-                                                                                            window[callback + "done"] = true;
-                                                                                            }
+		// [2] Define the callback function on the window object.
+		window[callback] = function(jsonObj) {
+			// [3]
+			handler.@edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataWidget::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(jsonObj);
+			window[callback + "done"] = true;
+		}
 
-                                                                                            // [4] JSON download has 3-second timeout.
-                                                                                            setTimeout(
-                                                                                            function() {
-                                                                                            if (!window[callback + "done"]) {
-                                                                                            handler.@edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataWidget::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(null);
-                                                                                            }
+		// [4] JSON download has 3-second timeout.
+		setTimeout(
+				function() {
+					if (!window[callback + "done"]) {
+						handler.@edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataWidget::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(null);
+					}
 
-                                                                                            // [5] Cleanup. Remove script and callback elements.
-                                                                                            document.body.removeChild(script);
-                                                                                            delete window[callback];
-                                                                                            delete window[callback + "done"];
-                                                                                            }, 3000);
+					// [5] Cleanup. Remove script and callback elements.
+					document.body.removeChild(script);
+					delete window[callback];
+					delete window[callback + "done"];
+				}, 3000);
 
-                                                                                            // [6] Attach the script element to the document body.
-                                                                                            document.body.appendChild(script);
+		// [6] Attach the script element to the document body.
+		document.body.appendChild(script);
 
-                                                                                            }-*/;
+    }-*/;
 
     //Called when the getJson method hits the server and a response is obtained
     public void handleJsonResponse(JavaScriptObject jso) {
@@ -361,8 +362,8 @@ public class AddMetadataWidget extends Composite {
     }
 
     private final native ParentJson getParentJson(JavaScriptObject jso) /*-{
-                                                                        return jso;
-                                                                        }-*/;
+		return jso;
+    }-*/;
 
     private void InitializeVIVOConnection(String query) {
 
@@ -434,13 +435,22 @@ public class AddMetadataWidget extends Composite {
      * RPC call to add a new entry.
      */
     protected void addValue(final boolean refresh) {
-        final String text = inputField.getValue();
+        String theValue = inputField.getValue();
+        // Only MultiField inputs will display as HTML right now (in the MEdiciinterface to the data), 
+        // but should avoid storing problematic values that may be displayed as HTML in other javascript apps 
+        final String text = SimpleHtmlSanitizer.sanitizeHtml(theValue).asString();
 
         if (text.isEmpty() || text.equals("Select...")) {
             PopupPanel popupPanel = new PopupPanel(true);
             popupPanel.add(new Label("Please enter a value"));
             popupPanel.showRelativeTo(inputField);
             return;
+        }
+
+        if (!theValue.equals(text)) {
+            PopupPanel popupPanel = new PopupPanel(true);
+            popupPanel.add(new Label("Note: Your text has been modified to properly display special characters\r and/or disable unallowed HTML constructs."));
+            popupPanel.showRelativeTo(inputField);
         }
 
         final String metadataUri = inputField.getUri();
