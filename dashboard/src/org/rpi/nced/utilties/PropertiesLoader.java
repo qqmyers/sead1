@@ -23,7 +23,7 @@ public class PropertiesLoader {
 	}
 
 	public void loadProperties() throws IOException {
-		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("/nced.properties");
+		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("nced.properties");
 
 		_properties = new Properties();
 
