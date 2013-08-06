@@ -149,9 +149,13 @@ public class DynamicListView extends FlexTable implements Display {
         informationPanel.getFlexCellFormatter().setColSpan(0, 0, 2);
         informationPanel.setWidget(0, 0, anchorPanel);
         informationPanel.setWidget(1, 0, new Label(author));
+        informationPanel.getWidget(1, 0).addStyleName("dynamicTableListCol0");
         informationPanel.setWidget(2, 0, new Label(DateTimeFormat.getMediumDateTimeFormat().format(date)));
+        informationPanel.getWidget(2, 0).addStyleName("dynamicTableListCol0");
         informationPanel.setWidget(1, 1, new Label(size));
+        informationPanel.getWidget(1, 1).addStyleName("dynamicTableListCol1");
         informationPanel.setWidget(2, 1, new Label(type));
+        informationPanel.getWidget(2, 1).addStyleName("dynamicTableListCol1");
         setWidget(row, 2, informationPanel);
 
         getFlexCellFormatter().addStyleName(row, 0, "dynamicTableListCheckbox");
