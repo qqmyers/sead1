@@ -87,7 +87,6 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
     }
 
     public static void createJiraIssue(JiraIssueType issueType, String email, String summary, String description) throws MessagingException {
-        String rcpt = TupeloStore.getInstance().getConfiguration(ConfigurationKey.MailFrom);
         String host = TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName);
 
         String subj = "User submitted " + issueType + " for " + host;
@@ -96,6 +95,6 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
                 "Subj: " + summary + "\n\n" +
                 description;
 
-        Mail.sendMessage(rcpt, subj, body);
+        Mail.sendMessage(Mail.getAdminEmail(), subj, body);
     }
 }
