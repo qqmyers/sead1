@@ -45,6 +45,11 @@
 		<param-name>medici.pw</param-name>
 		<param-value>cookie123</param-value>
 	</context-param>
+	<context-param>
+		<description>Medici Dataset url</description>
+		<param-name>medici.dataset.url</param-name>
+		<param-value>http://localhost/acr/#dataset?id=</param-value>
+	</context-param>
 
 	
 	<!-- Servlets -->	
