@@ -55,6 +55,7 @@ import com.google.gwt.user.client.ui.Widget;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult.ListQueryItem;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.NoMoreItemsEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.RefreshEvent;
@@ -73,7 +74,7 @@ import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
  * @param <B>
  *            Server side bean to be shown in the table
  */
-public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTablePresenter.Display> {
+public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePresenter.Display> {
 
     private int                pageSize    = DynamicListView.DEFAULT_PAGE_SIZE;
     protected String           sortKey     = "date-desc";
@@ -160,9 +161,9 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
      * display using {@link addItem}.
      */
     private void getContent() {
-        ListQuery<B> query = getQuery();
+        ListQuery query = getQuery();
         service.execute(query,
-                new AsyncCallback<ListQueryResult<B>>() {
+                new AsyncCallback<ListQueryResult>() {
 
                     public void onFailure(Throwable caught) {
                         GWT.log("Error retrieving items to show in table", caught);
@@ -175,10 +176,10 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
                     }
 
                     @Override
-                    public void onSuccess(final ListQueryResult<B> result) {
+                    public void onSuccess(final ListQueryResult result) {
                         eventBus.fireEvent(new ClearDatasetsEvent());
                         int index = 0;
-                        for (B item : result.getResults() ) {
+                        for (ListQueryItem item : result.getResults() ) {
                             ShowItemEvent event = new ShowItemEvent();
                             event.setPosition(index);
                             addItem(event, item);
@@ -197,17 +198,38 @@ public abstract class DynamicTablePresenter<B> extends BasePresenter<DynamicTabl
      * 
      * @return query sent to server to retrieve items
      */
-    protected abstract ListQuery<B> getQuery();
+    protected abstract ListQuery getQuery();
 
     /**
-     * Add item to interface. Implement based on the specific type of item.
+     * Add item to interface.
      * 
      * @param event
      *            event to fire to add item to interface
      * @param index
      *            item retrieved from server side
      */
-    protected abstract void addItem(ShowItemEvent event, B item);
+    protected void addItem(ShowItemEvent event, ListQueryItem item) {
+        event.setId(item.getUri());
+        if (item.getTitle() != null) {
+            event.setTitle(item.getTitle());
+        } else {
+            event.setTitle(item.getUri());
+        }
+        if (item.getAuthor() != null) {
+            event.setAuthor(item.getAuthor());
+        } else {
+            event.setAuthor("Unknown Author");
+        }
+        event.setDate(item.getDate());
+        event.setSize(item.getSize());
+        event.setType(item.getCategory());
+
+        if ("Collection".equals(item.getCategory())) {
+            event.setURL("collection?uri=" + item.getUri());
+        } else {
+            event.setURL("dataset?id=" + item.getUri());
+        }
+    }
 
     /**
      * Set the total number of pages.

@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
+import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import net.customware.gwt.dispatch.shared.Result;
@@ -50,22 +52,22 @@ import net.customware.gwt.dispatch.shared.Result;
  * 
  */
 @SuppressWarnings("serial")
-public class ListQueryResult<T> implements Result {
-    private List<T> results;
-    private int     totalCount;
+public class ListQueryResult implements Result {
+    private List<ListQueryItem> results;
+    private int                 totalCount;
 
     public ListQueryResult() {
     }
 
-    public ListQueryResult(List<T> result) {
+    public ListQueryResult(List<ListQueryItem> result) {
         setResults(result);
     }
 
-    public void setResults(List<T> results) {
+    public void setResults(List<ListQueryItem> results) {
         this.results = results;
     }
 
-    public List<T> getResults() {
+    public List<ListQueryItem> getResults() {
         return results;
     }
 
@@ -77,4 +79,60 @@ public class ListQueryResult<T> implements Result {
         return totalCount;
     }
 
+    static public class ListQueryItem implements Serializable {
+        private String uri;
+        private String title;
+        private String author;
+        private Date   date;
+        private String size;
+        private String category;
+
+        public String getUri() {
+            return uri;
+        }
+
+        public void setUri(String uri) {
+            this.uri = uri;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getAuthor() {
+            return author;
+        }
+
+        public void setAuthor(String author) {
+            this.author = author;
+        }
+
+        public Date getDate() {
+            return date;
+        }
+
+        public void setDate(Date date) {
+            this.date = date;
+        }
+
+        public String getSize() {
+            return size;
+        }
+
+        public void setSize(String size) {
+            this.size = size;
+        }
+
+        public String getCategory() {
+            return category;
+        }
+
+        public void setCategory(String category) {
+            this.category = category;
+        }
+    }
 }

@@ -70,13 +70,13 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetConfigurationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.GetItemsBySetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsInCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDerivedFromHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDownloadCountHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoPointHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetItemsBySetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLikeDislikeHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
@@ -101,8 +101,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.InitializeRolesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryCollectionsHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryDatasetsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.MintHandler;
@@ -175,7 +174,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new SetLicenseHandler());
         DispatchUtil.registerHandler(new GetViewCountHandler());
         DispatchUtil.registerHandler(new GetLikeDislikeHandler());
-        DispatchUtil.registerHandler(new ListQueryDatasetsHandler());
+        DispatchUtil.registerHandler(new ListQueryHandler());
         DispatchUtil.registerHandler(new JiraIssueHandler());
         DispatchUtil.registerHandler(new ListUserMetadataFieldsHandler());
         DispatchUtil.registerHandler(new DeleteDatasetsHandler());
@@ -210,7 +209,6 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetItemsBySetHandler());
         DispatchUtil.registerHandler(new GetDatasetsInCollectionHandler());
         DispatchUtil.registerHandler(new DefaultRoleHandler());
-        DispatchUtil.registerHandler(new ListQueryCollectionsHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {
