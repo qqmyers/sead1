@@ -61,6 +61,7 @@ public class ShowItemEvent extends GwtEvent<ShowItemEventHandler> {
     private String                                          author;
     private String                                          size;
     private String                                          type;
+    private String                                          url;
 
     @Override
     protected void dispatch(ShowItemEventHandler handler) {
@@ -126,5 +127,13 @@ public class ShowItemEvent extends GwtEvent<ShowItemEventHandler> {
 
     public String getType() {
         return type;
+    }
+
+    public String getURL() {
+        return url;
+    }
+
+    public void setURL(String url) {
+        this.url = url;
     }
 }

@@ -46,14 +46,8 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 
-import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryDatasets;
-import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
-import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
  * Dynamic table presenter for datasets.
@@ -61,7 +55,7 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  * @author Luigi Marini
  * 
  */
-public class DatasetTablePresenter extends DynamicTablePresenter<DatasetBean> {
+public class DatasetTablePresenter extends DynamicTablePresenter {
 
     public DatasetTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
         super(dispatch, eventBus, display, DynamicTableView.GRID_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
@@ -72,31 +66,15 @@ public class DatasetTablePresenter extends DynamicTablePresenter<DatasetBean> {
      * @see edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter#getQuery()
      */
     @Override
-    protected ListQuery<DatasetBean> getQuery() {
+    protected ListQuery getQuery() {
         int offset = (currentPage - 1) * getPageSize();
         GWT.log("Getting datasets " + offset + " to " + (offset + getPageSize()));
-        ListQueryDatasets query = new ListQueryDatasets();
+        ListQuery query = new ListQuery();
         query.setOrderBy(sortKey);
         query.setLimit(getPageSize());
         query.setOffset(offset);
+        query.setBean("http://cet.ncsa.uiuc.edu/2007/Dataset");
         return query;
-    }
-
-    @Override
-    protected void addItem(ShowItemEvent event, DatasetBean item) {
-        event.setId(item.getUri());
-        if (item.getTitle() != null) {
-            event.setTitle(item.getTitle());
-        } else {
-            event.setTitle(item.getUri());
-        }
-        PersonBean creator = item.getCreator();
-        if (creator != null) {
-            event.setAuthor(item.getCreator().getName());
-        }
-        event.setDate(item.getDate());
-        event.setSize(TextFormatter.humanBytes(item.getSize()));
-        event.setType(ContentCategory.getCategory(item.getMimeType(), service));
     }
 
     @Override
