@@ -21,6 +21,10 @@ cd extractor
 	-i edu.illinois.ncsa.mmdb.extractor.image.feature.feature.group,edu.illinois.ncsa.mmdb.extractor.csv.feature.feature.group,edu.illinois.ncsa.mmdb.extractor.excel.feature.feature.group,edu.illinois.ncsa.mmdb.extractor.pdf.feature.feature.group,edu.illinois.ncsa.medici.extractor.geoserver.feature.feature.group
 cd ..
 
+if [ -e extractor.properties ]; then
+  mv extractor.properties extractor/server.properties
+fi
+
 chown -R tomcat6.users extractor
 rm Extractor.gtk.linux.x86_64.zip
 
