@@ -111,15 +111,15 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
 
             String query = "SELECT * FROM `dataset` ";
 
-            if (listquery.getOrderBy().equals("date")) {
+            if (listquery.getOrderBy().equals("date-desc")) {
                 query += " ORDER BY date DESC";
             } else if (listquery.getOrderBy().equals("date-asc")) {
                 query += " ORDER BY date ASC";
-            } else if (listquery.getOrderBy().equals("title")) {
+            } else if (listquery.getOrderBy().equals("title-desc")) {
                 query += " ORDER BY title DESC";
             } else if (listquery.getOrderBy().equals("title-asc")) {
                 query += " ORDER BY title ASC";
-            } else if (listquery.getOrderBy().equals("category")) {
+            } else if (listquery.getOrderBy().equals("category-desc")) {
                 query += " ORDER BY category DESC";
             } else if (listquery.getOrderBy().equals("category-asc")) {
                 query += " ORDER BY category ASC";
@@ -253,6 +253,10 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
             }
 
             List<String> uris = new ArrayList<String>(map.keySet());
+            for (String uri : uris ) {
+                System.out.println(uri + " " + map.get(uri).getDate());
+            }
+            System.out.println("Sorting : " + listquery.getOrderBy());
             Collections.sort(uris, new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
@@ -266,7 +270,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                     }
 
                     // translate orderBy to the right sort
-                    if (listquery.getOrderBy().equals("date")) {
+                    if (listquery.getOrderBy().equals("date-asc")) {
                         if (item1.getDate() == null) {
                             return -1;
                         }
@@ -274,7 +278,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                             return +1;
                         }
                         return item1.getDate().compareTo(item2.getDate());
-                    } else if (listquery.getOrderBy().equals("date-asc")) {
+                    } else if (listquery.getOrderBy().equals("date-desc")) {
                         if (item1.getDate() == null) {
                             return -1;
                         }
@@ -282,24 +286,6 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                             return +1;
                         }
                         return -item1.getDate().compareTo(item2.getDate());
-                    } else if (listquery.getOrderBy().equals("title")) {
-                        if (item1.getTitle() == null) {
-                            return -1;
-                        }
-                        if (item2.getTitle() == null) {
-                            return +1;
-                        }
-                        if (item1.getTitle().equals(item2.getTitle())) {
-                            if (item1.getDate() == null) {
-                                return -1;
-                            }
-                            if (item2.getDate() == null) {
-                                return +1;
-                            }
-                            return -item1.getDate().compareTo(item2.getDate());
-                        } else {
-                            return item1.getTitle().compareTo(item2.getTitle());
-                        }
                     } else if (listquery.getOrderBy().equals("title-asc")) {
                         if (item1.getTitle() == null) {
                             return -1;
@@ -307,7 +293,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                         if (item2.getTitle() == null) {
                             return +1;
                         }
-                        if (item1.getTitle().equals(item2.getTitle())) {
+                        if (item1.getTitle().equalsIgnoreCase(item2.getTitle())) {
                             if (item1.getDate() == null) {
                                 return -1;
                             }
@@ -316,9 +302,27 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                             }
                             return -item1.getDate().compareTo(item2.getDate());
                         } else {
-                            return -item1.getTitle().compareTo(item2.getTitle());
+                            return item1.getTitle().compareToIgnoreCase(item2.getTitle());
                         }
-                    } else if (listquery.getOrderBy().equals("category")) {
+                    } else if (listquery.getOrderBy().equals("title-desc")) {
+                        if (item1.getTitle() == null) {
+                            return -1;
+                        }
+                        if (item2.getTitle() == null) {
+                            return +1;
+                        }
+                        if (item1.getTitle().equalsIgnoreCase(item2.getTitle())) {
+                            if (item1.getDate() == null) {
+                                return -1;
+                            }
+                            if (item2.getDate() == null) {
+                                return +1;
+                            }
+                            return -item1.getDate().compareTo(item2.getDate());
+                        } else {
+                            return -item1.getTitle().compareToIgnoreCase(item2.getTitle());
+                        }
+                    } else if (listquery.getOrderBy().equals("category-asc")) {
                         if (item1.getCategory() == null) {
                             return -1;
                         }
@@ -336,7 +340,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                         } else {
                             return item1.getCategory().compareTo(item2.getCategory());
                         }
-                    } else if (listquery.getOrderBy().equals("category-asc")) {
+                    } else if (listquery.getOrderBy().equals("category-desc")) {
                         if (item1.getCategory() == null) {
                             return -1;
                         }
@@ -365,6 +369,10 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                     }
                 }
             });
+            System.out.println("AFTER");
+            for (String uri : uris ) {
+                System.out.println(uri + " " + map.get(uri).getDate());
+            }
             queryResult.setTotalCount(uris.size());
             uris = uris.subList(listquery.getOffset(), Math.min(uris.size(), listquery.getOffset() + listquery.getLimit()));
             List<ListQueryItem> items = new ArrayList<ListQueryItem>();
