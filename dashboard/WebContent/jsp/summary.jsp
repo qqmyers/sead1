@@ -124,6 +124,7 @@
 						
 						<h3>Project Description </h3>
 						<div id="projectInfo" style="overflow:auto">	
+							<!-- Link will be changed from projectPath to the URL defined in the project configuration -->
 							<a href="<%= request.getAttribute("projectPath") %>" target="_blank" id="projectName" ></a></br></br>
 							<p id="projectDesc" > </p>
 						</div>

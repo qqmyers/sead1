@@ -12,13 +12,12 @@ import javax.xml.ws.http.HTTPException;
 import org.rpi.nced.proxy.NCEDProxy;
 import org.rpi.nced.utilties.Queries;
 
-
-public class GetKeywords extends HttpServlet {
+public class Home extends HttpServlet {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2211240881166296790L;
+	private static final long serialVersionUID = -2553450304238410849L;
 
 	/*
 	 * (non-Javadoc)
@@ -32,12 +31,10 @@ public class GetKeywords extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 
 		try {
-			String tagID = request.getParameter("tagID");
-			String responseXML = NCEDProxy.getInstance().getJSONResponse(Queries.getItemKeywords(tagID));
-
+			String responseJSON = NCEDProxy.getInstance().getJSONResponse(Queries.ALL_TOPLEVEL_COLLECTIONS);
 			PrintWriter pw = response.getWriter();
 			response.setContentType("application/json");
-			pw.write(responseXML);
+			pw.write(responseJSON);
 			pw.flush();
 			pw.close();
 		} catch (HTTPException e) {
@@ -53,5 +50,4 @@ public class GetKeywords extends HttpServlet {
 			response.flushBuffer();
 		}
 	}
-
 }

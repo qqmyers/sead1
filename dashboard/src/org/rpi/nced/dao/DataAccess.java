@@ -14,13 +14,13 @@ import org.rpi.nced.utilties.PropertiesLoader;
 
 public class DataAccess {
 
-	public static String getResponse(String userName, String password,
+	public static String getResponse(String userName, String password, String server,
 			String query) throws Exception {
 		HttpURLConnection conn = null;
 
-		String strURL = PropertiesLoader.getProperties().getProperty("domain");
+		//String strURL = PropertiesLoader.getProperties().getProperty("domain");
 		// Make a connect to the server
-		URL url = new URL(strURL);
+		URL url = new URL(server);
 
 		conn = (HttpURLConnection) url.openConnection();
 

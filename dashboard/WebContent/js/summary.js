@@ -49,6 +49,7 @@ function loadTableContent() {
 	var uri = '';
 	var displayTitle = '';
 	var isDeleted = null;
+	var hasParent = null;
 	
 	var tagURISet = {};
 	
@@ -70,11 +71,13 @@ function loadTableContent() {
 					}
 				} else if (value == 'deleted') {
 					isDeleted = jsonBinding[j]['uri'];
+				} else if (value == 'parent') {
+					hasParent = jsonBinding[j]['uri'];
 				}
 			});
 		}
 		
-		if(!tagURISet[uri] && isDeleted ==null) { 
+		if(!tagURISet[uri] && isDeleted == null && hasParent == null) { 
 			tagURISet[uri] = true;
 	
 			div_html += '<tr data-tt-id="'+i+'">'
@@ -82,17 +85,16 @@ function loadTableContent() {
 						+ uri + '" target ="_blank">' + displayTitle + '</a></span></td><td>--</td>'
 						+'<tr data-tt-id="'+i+'-1" data-tt-parent-id="'+i+'">';
 		
-		}else if(isDeleted !=null){
-			isDeleted = null;
 		}
+		isDeleted = null;
+		hasParent = null;
 	}
 
 	$("#table tbody").html(div_html);
 	
 	
 }	
-
-var map = new Object();
+var map=new Object();
 function parseCreators() {
 	
 	var creatorURI = '';
@@ -102,21 +104,21 @@ function parseCreators() {
 	var obj = $.parseJSON($("#hidden_creators").html());
 	
 	for ( var i = 0; i < obj.sparql.results.result.length; i++) {
+		creatorURI="#";
 		var jsonBinding = obj.sparql.results.result[i].binding;
 		for ( var j = 0; j < jsonBinding.length; j++) {
 			$.each(jsonBinding[j], function(key, value) {
 				if (value == 'uri') {
 					creatorURI = jsonBinding[j]['uri'];
+					creatorURI=creatorURI.substring(creatorURI.lastIndexOf("/")+1);
+					
 				} else if (value == 'name') {
 					creatorName = jsonBinding[j]['literal'];
 				} 
 			});
 		}
-		url = '#'
 		map[creatorURI] = creatorName;
-		if (creatorName != 'Anonymous') {
-			div_html += "<a href='" + url + "' target=_blank>" + creatorName + "</a> </br>";
-		}
+		div_html += "<a href='mailto:" + creatorURI + "' target=_blank>" + creatorName + "</a> </br>";
 	}
 	$('#teammembers').html(div_html);
 }
@@ -280,7 +282,7 @@ function loadProjectInfo(){
 	$('#projectName').html(map['name']);
 	$('#projectDesc').html(map['description']);
 	$('#projectTitle').html(map['name']);
-	$('#projectLink').attr({ title: map['description'], href: map['url'] });
+	$('#projectName').attr("href", (map['url']));
 	
 }
 
