@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.http.HTTPException;
 
 import org.rpi.nced.proxy.NCEDProxy;
+import org.rpi.nced.utilties.Queries;
 
 public class GetContacts extends HttpServlet {
 
@@ -32,7 +33,7 @@ public class GetContacts extends HttpServlet {
 		String redirectionFile = "";
 		try {
 			String tagID = request.getParameter("tagID");
-			String responseXML = NCEDProxy.getInstance().getContacts(tagID);
+			String responseXML = NCEDProxy.getInstance().getJSONResponse(Queries.getItemContacts(tagID));
 			PrintWriter pw = response.getWriter();
 			response.setContentType("application/json");
 			pw.write(responseXML);

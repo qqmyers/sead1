@@ -39,14 +39,11 @@ public class Login extends HttpServlet {
 			String userName = request.getParameter("userName");
 			String password = request.getParameter("password");
 			
-			NCEDProxy.getInstance().Authenticate(userName, password);			
+			NCEDProxy.getInstance().setCredentials(userName, password);			
 			
 			/*Cookie cookie = new Cookie(userName, password);
 			response.addCookie(cookie);*/
-			
-			NCEDProxy.getInstance().setUserName(userName);
-			NCEDProxy.getInstance().setPassword(password);
-			
+				
 		} catch (HTTPException e) {
 			if (e.getStatusCode() == HttpServletResponse.SC_UNAUTHORIZED) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

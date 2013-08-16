@@ -27,12 +27,8 @@ import org.rpi.nced.objects.MainCollection;
 import org.rpi.nced.utilties.PropertiesLoader;
 import org.rpi.nced.utilties.json.JSONException;
 import org.rpi.nced.utilties.json.JSONObject;
+import org.rpi.nced.utilties.Queries;
 import org.rpi.nced.utilties.json.XML;
-
-//import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.LogFactory;
-
-import com.google.gson.Gson;
 
 public class NCEDProxy {
 
@@ -41,6 +37,10 @@ public class NCEDProxy {
 	//private static Log  log   = LogFactory.getLog(NCEDProxy.class);
 
 	static NCEDProxy _instance;
+
+	private String _username = "";
+	private String _password = "";
+	private String _server = "";
 
 	public static NCEDProxy getInstance() {
 		if (_instance == null) {
@@ -53,58 +53,47 @@ public class NCEDProxy {
 	private NCEDProxy() {
 		try {
 			new PropertiesLoader().loadProperties();
+			_server = PropertiesLoader.getProperties().getProperty("domain");
 		} catch (Exception ex) {
 
 		}
 	}
-
-	public String getContents(String parentTagID) throws Exception {
-		String query = "SELECT ?tagID ?title ?length ?abstract WHERE { <"
-				+ parentTagID
-				+ "> <http://purl.org/dc/terms/hasPart> ?tagID ."
-				+ " "
-				+ "?tagID <http://purl.org/dc/elements/1.1/title> ?title ."
-				+ " "
-				+ "OPTIONAL { ?tagID <tag:tupeloproject.org,2006:/2.0/files/length> ?length .}"
-				+ " " + "OPTIONAL { <" + parentTagID
-				+ "> <http://purl.org/dc/terms/abstract> ?abstract . } }";
-		return getCollections(query);
-	}
-
-	public String getAllCollections() throws Exception {
-		String query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-				+ " "
-				+ "PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/>"
-				+ " "
-				+ "Prefix tag: <http://www.holygoat.co.uk/owl/redwood/0.1/tags/>"
-				+ " "
-				+ "SELECT ?tagID ?title ?abstract ?keywords WHERE {"
-				+ " "
-				+ "?tagID <rdf:type> <cet:Collection> ."
-				+ " "
-				+ "?tagID <http://purl.org/dc/terms/issued> ?date ."
-				+ " "
-				+ "?tagID <dc:title> ?title ."
-				+ " "
-				+ "OPTIONAL { ?tagID <http://purl.org/dc/terms/abstract> ?abstract . } }";
-		return getCollections(query);
-	}
 	
-	private String getCollections(String query) throws Exception {
-		String responseText = DataAccess.getResponse(_userName, _password,	query);
+	public void setCredentials(String username, String password) throws Exception {
+		// A dummy query to check if user is authenticated - there is no token
+		// based authentication yet.
+		String query = "SELECT ?p ?o WHERE { <s> ?p ?o . }";
+		// String query =
+		// "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/> SELECT ?c ?t WHERE { ?c <rdf:type> <cet:Collection> . ?c <dc:title> ?t . }";
+		DataAccess.getResponse(username, password, _server, query);
+		_username = username;
+		_password = password;
+	}
+	/*
+	public String getContents(String parentID) throws Exception {
+		return getJSONResponse(Queries.getCollectionContents(parentID));
+	}
 
-		JSONObject responseJSONObject = convertToJsonObject(responseText);
-		responseText = responseJSONObject.toString();
-		if(!collectionListisEmpty(responseJSONObject)) {
+	public String getAllPublishedCollections() throws Exception {
+		return getJSONResponse(Queries.ALL_PUBLISHED_COLLECTIONS);
+	}
+	*/
+	public String getJSONResponse(String query) throws Exception {
+		String responseText = DataAccess.getResponse(_username, _password, _server,	query);
+
+		//JSONObject responseJSONObject = convertToJsonObject(responseText);
+		//responseText = responseJSONObject.toString();
+		responseText = XML.toJSONObject(responseText).toString();
+		/*if(!collectionListisEmpty(responseJSONObject)) {
 			if (!singleCollectionReturned(responseJSONObject)) {
 				responseText=sortCollections(responseText);
 			}
 		}
-	
+		*/
 		return responseText;
 	}
-
-	private boolean collectionListisEmpty(JSONObject jsonObject) throws JSONException {
+/*
+private boolean collectionListisEmpty(JSONObject jsonObject) throws JSONException {
 		
 		JSONObject sparqlObject = jsonObject.getJSONObject("sparql");
 		boolean response = false;
@@ -138,73 +127,35 @@ public class NCEDProxy {
 		Collections.sort(collectionsResult.getSparql().getResults().getResult());
 		return gson.toJson(collectionsResult, MainCollection.class);
 	}
-
-	private String convertToJson(String responseText) throws JSONException {
-		return convertToJsonObject(responseText).toString();
-	}
-	
-	private JSONObject convertToJsonObject(String responseText) throws JSONException {
+*/
+	//private String convertToJson(String responseText) throws JSONException {
 
 		// Remove the long type associated with length values so that the JSON produced matches 
 		// the name=x, literal=y pattern expected in the sortItems Method
-		responseText = responseText.replaceAll(" datatype=\"http://www.w3.org/2001/XMLSchema#long\"","");
+		//responseText = responseText.replaceAll(" datatype=\"http://www.w3.org/2001/XMLSchema#long\"","");
 		
-		JSONObject jsonObject = XML.toJSONObject(responseText);
 
-		return jsonObject;
-	}
+	//}
 
-	public void Authenticate(String userName, String password) throws Exception {
-		// A dummy query to check if user is authenticated - there is no token
-		// based authentication yet.
-		String query = "SELECT ?p ?o WHERE { <s> ?p ?o . }";
-		// String query =
-		// "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/> SELECT ?c ?t WHERE { ?c <rdf:type> <cet:Collection> . ?c <dc:title> ?t . }";
-		DataAccess.getResponse(userName, password, query);
-	}
 
-	String _userName = "";
-	String _password = "";
 
-	public void setUserName(String userName) {
-		_userName = userName;
-	}
 
-	public void setPassword(String password) {
-		_password = password;
-	}
-
+/*
 	public String getCreators(String tagID) throws Exception {
-		String query = "SELECT ?creator WHERE { <" + tagID
-				+ "> <http://purl.org/dc/terms/creator> ?creator . }";
-		String responseText = DataAccess.getResponse(_userName, _password,
-				query);
-		return convertToJson(responseText);
+		return getJSONResponse(Queries.getItemCreators(tagID));
 	}
 	
 	public String getContacts(String tagID) throws Exception {
-		String query = "SELECT ?contact WHERE { <" + tagID
-				+ "> <http://sead-data.net/terms/contact> ?contact . }";
-		String responseText = DataAccess.getResponse(_userName, _password,
-				query);
-		return convertToJson(responseText);
+		return getJSONResponse(Queries.getItemContacts(tagID));
 	}
 	
 
 	public String getDescriptors(String tagID) throws Exception {
-		String query = "SELECT ?name ?descriptor WHERE { <" + tagID
-				+ "> <http://purl.org/dc/terms/description> ?descriptor . }";
-		String responseText = DataAccess.getResponse(_userName, _password,
-				query);
-		return convertToJson(responseText);
+		return getJSONResponse(Queries.getItemDescriptors(tagID));
 	}
 	
 	public String getKeywords(String tagID) throws Exception {
-		String query = "SELECT ?name ?keyword WHERE { <" + tagID
-				+ "> <http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag> ?keyword . }";
-		String responseText = DataAccess.getResponse(_userName, _password,
-				query);
-		return convertToJson(responseText);
+		return getJSONResponse(Queries.getItemKeywords(tagID));
 	}
-	
+	*/
 }

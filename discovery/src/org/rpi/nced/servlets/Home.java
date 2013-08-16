@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.http.HTTPException;
 
 import org.rpi.nced.proxy.NCEDProxy;
+import org.rpi.nced.utilties.Queries;
 
 public class Home extends HttpServlet {
 
@@ -30,7 +31,7 @@ public class Home extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 
 		try {
-			String responseJSON = NCEDProxy.getInstance().getAllCollections();
+			String responseJSON = NCEDProxy.getInstance().getJSONResponse(Queries.ALL_PUBLISHED_COLLECTIONS);
 			PrintWriter pw = response.getWriter();
 			response.setContentType("application/json");
 			pw.write(responseJSON);

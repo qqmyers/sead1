@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.http.HTTPException;
 
 import org.rpi.nced.proxy.NCEDProxy;
+import org.rpi.nced.utilties.Queries;
 
 public class GetDescriptors extends HttpServlet {
 
@@ -31,7 +32,7 @@ public class GetDescriptors extends HttpServlet {
 		
 		try {
 			String tagID = request.getParameter("tagID");
-			String responseXML = NCEDProxy.getInstance().getDescriptors(tagID);
+			String responseXML = NCEDProxy.getInstance().getJSONResponse(Queries.getItemDescriptors(tagID));
 
 			PrintWriter pw = response.getWriter();
 			response.setContentType("application/json");
