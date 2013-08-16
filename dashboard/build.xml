@@ -67,7 +67,8 @@
 		<mkdir dir="WebContent/WEB-INF/classes" />
 		<copy todir="WebContent/WEB-INF/classes">
 			<fileset dir="src">
-				<include name="nced.properties" />
+				<include name="*.properties" />
+				<include name="*.xml" />
 			</fileset>
 		</copy>
 	</target>

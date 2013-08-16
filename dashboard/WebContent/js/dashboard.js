@@ -172,7 +172,7 @@ function loadRecentUploads(){
 					+'<a href="'+projectPath+'/#dataset?id='+uri+'" target="_blank" title="'+displayTitle+'">'+displayTitleAfter
 					+'</a></br>'+map[creator]+'</br>'+date[0] +' '+ date[1]+' '+date[2] +' '+ date[3]+'</div></div>';
 	    }
-	    isdeleted = null;
+	    isDeleted = null;
 		//images/nopreview-100.gif	
 
 	}

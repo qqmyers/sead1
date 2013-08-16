@@ -1,18 +1,16 @@
 === projectsummary ===
-It is a web application to summarize and display the important features of a SEAD project. Each SEAD instance will 
-have its own summary page so it needs to be installed and deployed separately.
+It is a web dashboard application to summarize and display an overview of the contents and activity within a SEAD ACR instance. Each SEAD instance will 
+have its own dashboard page so it needs to be installed and deployed separately.
 
 === deployment instructions ===
---Change the domain and project path properties in nced.properties file
+--Change the domain and project path properties in dashboard.properties file
 --Run the ant script to create the war file 
 --Run deploy.sh script to deploy the project in tomcat.
 --Project can be accessed at {server-name}/summary
 	
 ===future work ===
 -- Link google map with collection grid
--- Change logic to fetch root collections, currently it looks for <tagURI dcterms:creator creator name:vivolink> triple
--- Create the vivo links for sead users not just authors
 
 
-Contributors: Saurabh Malviya
+Contributors: Saurabh Malviya, Jim Myers
 SVN link: https://opensource.ncsa.illinois.edu/svn/mmdb/branches/sead-1.2/projectsummary

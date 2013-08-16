@@ -4,20 +4,36 @@
   <welcome-file-list>
     <welcome-file>Summary</welcome-file>
   </welcome-file-list>
+
+  <filter>
+    <filter-name>AuthFilter</filter-name>
+    <filter-class>
+       org.sead.acr.common.auth.AuthFilter
+    </filter-class>
+    <init-param>
+      <param-name>PropertiesFileName</param-name>
+      <param-value>/dashboard.properties</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>AuthFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
   
   <servlet>
-    <servlet-name>Summary</servlet-name>
-    <servlet-class>org.rpi.nced.servlets.Summary</servlet-class>
+    <servlet-name>Dashboard</servlet-name>
+    <servlet-class>org.sead.acr.dashboard.Dashboard</servlet-class>
     <load-on-startup>2</load-on-startup>
   </servlet>
   <servlet-mapping>
-    <servlet-name>Summary</servlet-name>
-    <url-pattern>/Summary</url-pattern>
+    <servlet-name>Dashboard</servlet-name>
+    <url-pattern>/Summary</url-pattern> <!--  legacy  -->
+    <url-pattern>/home</url-pattern>
+    <url-pattern>/dashboard</url-pattern>
   </servlet-mapping>
-  
   <servlet>
     <servlet-name>Contents</servlet-name>
-    <servlet-class>org.rpi.nced.servlets.Contents</servlet-class>
+    <servlet-class>org.sead.acr.dashboard.CollectionContents</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>Contents</servlet-name>
