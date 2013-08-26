@@ -47,7 +47,7 @@ function homePageJsonParser(json) {
 		}
 	}
 	$("#home-loading").hide();
-	//$("#xmlBody").append(($("<div/>")).html(div_html));
+	// $("#xmlBody").append(($("<div/>")).html(div_html));
 }
 
 function writeCollection(id, json, result) {
@@ -77,26 +77,21 @@ function writeCollection(id, json, result) {
 	if (isDeleted == false) {
 
 		createBlock(id, "#xmlBody");
-		$("#collectionTitle"+id).append($("<a/>").html(displayTitle).attr("href", "contents?i="
-				+ uri
-//				+ "&t="
-//				+ displayTitle
-				));
-		var acrLink = medici_URL+ collection_Path + uri;
-		$("#acrlink"+id).attr("href", acrLink);
+		$("#collectionTitle" + id).append(
+				$("<a/>").html(displayTitle).attr("href", "contents?i=" + uri));
+		var acrLink = medici_URL + collection_Path + uri;
+		$("#acrlink" + id).attr("href", acrLink);
 
-		if(abs) {
-			var summary = abs.substring(0,750);
-alert(summary);
-			if(abs.length > 750) {
- 				summary += "...";
+		if (abs) {
+			var summary = abs.substring(0, 750);
+
+			if (abs.length > 750) {
+				summary += "...";
 			}
-			$("#abstract"+ id+ ">pre").html(summary);
-			$("#abstract"+ id+ ">a").attr("href", "contents?i=" + uri
-//				+ "&t="
-//				+ displayTitle
-).html("more ...");
-			$("#abstract"+ id).css("visibility", "visible");
+			$("#abstract" + id + ">pre").html(summary);
+			$("#abstract" + id + ">a").attr("href", "contents?i=" + uri).html(
+					"more ...");
+			$("#abstract" + id).css("visibility", "visible");
 		}
 
 		$.ajax({
@@ -111,5 +106,3 @@ alert(summary);
 		});
 	}
 }
-
-

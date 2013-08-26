@@ -116,6 +116,9 @@ abstract='';
 			}
 		}
 	}
+	if (title.indexOf("/") != -1) {
+		title = title.substring(title.lastIndexOf("/") + 1);
+	}	
 	if(!($("#collectionTitle" + id + ">a").length)) {
 		$("#collectionTitle" + id).html(title);
 	}
@@ -183,7 +186,6 @@ abstract='';
 
 function getBiblioBindingsForPage(jsonBinding) {
 		if (jsonBinding.length == null) {
-			var jsonBinding = obj.sparql.results.result.binding;
 			getBiblioAttributesForPage(jsonBinding);
 		} else {
 			for ( var i = 0; i < jsonBinding.length; i++) {

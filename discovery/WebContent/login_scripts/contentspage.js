@@ -54,7 +54,7 @@ function populateEntries(jsonBinding) {
 					+ "</a></td><td width='100'>"
 					+ roundNumber((length / 1024), 2) + " KB</td></tr>";
 		} else if (type == "http://cet.ncsa.uiuc.edu/2007/Collection") {
-			urlToLoad = "contents?i=" + uri + "&t=" + displayTitle;
+			urlToLoad = "contents?i=" + uri;
 			div_html_collections += "<tr><td width='10' align='center'><i class='icon-folder-close'></i></td><td>"
 					+ "<a href='"
 					+ urlToLoad
@@ -72,8 +72,7 @@ function contentsPageJsonParser(jsonObj) {
 	title = '';
 	length = '';
 	uri = '';
-//	displayTitle = '';
-//	abs = '';
+
 
 	if (jsonObj.sparql.results.result != null) {
 		if (jsonObj.sparql.results.result.length == null) {
