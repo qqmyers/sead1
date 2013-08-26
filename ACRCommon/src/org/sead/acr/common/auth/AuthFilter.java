@@ -27,7 +27,10 @@ import org.apache.commons.logging.LogFactory;
 
 public class AuthFilter implements Filter {
 	
-	private String _propFile;
+	private static String _propFile;
+	private static String _loginpage;
+	static String _sparql_path = "/resteasy/sparql";
+	private static String _server;
 	
 	private static Log  log   = LogFactory.getLog(AuthFilter.class);
 	
@@ -60,12 +63,11 @@ public class AuthFilter implements Filter {
 				session = request.getSession();
 
 				//Setup MediciProxy to handle future remote requests
-				//Find Properties file and retrieve the domain/sparql endpoint of the remote Medici instance
-				String server = PropertiesLoader.getProperties(_propFile).getProperty("domain");
+
     			MediciProxy mp = new MediciProxy();
 
     			//Try to use/store credentials
-    			mp.setCredentials(username, password, server);
+    			mp.setCredentials(username, password, _server);
     			
     			//See if the credentials worked and were stored
     			if (!mp.hasValidCredentials()) {
@@ -86,7 +88,7 @@ public class AuthFilter implements Filter {
     			if (session!=null && !session.isNew()) {
     				session.invalidate();
     			}
-    			response.sendRedirect(appPath + "/login.html");
+    			response.sendRedirect(appPath + _loginpage);
 				return;
     		} else { //Request is for something other than Login (some other servlet that will also use the code below to retrieve existing credentials)
     			boolean goodCredentials = false;
@@ -102,7 +104,7 @@ public class AuthFilter implements Filter {
     			//Redirect to the login form if no credentials
     			if(!goodCredentials) {
     				log.debug("No Credentials for: " + uri);
-    				response.sendRedirect(appPath + "/login.html?" + uri.substring(appPath.length()+1));  
+    				response.sendRedirect(appPath + _loginpage +"?" + uri.substring(appPath.length()+1));  
     				return;
     			}
     		}
@@ -114,6 +116,13 @@ public class AuthFilter implements Filter {
          
         //Get Property file parameter
         _propFile = config.getInitParameter("PropertiesFileName");
+		//Find Properties file and retrieve the domain/sparql endpoint of the remote Medici instance
+		_server = PropertiesLoader.getProperties(_propFile).getProperty("domain") + _sparql_path;
+        _loginpage = config.getInitParameter("LoginPage");
+        if(_loginpage==null) {
+        	_loginpage="/login.html";
+        	
+        }
          
     }
 	

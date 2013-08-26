@@ -6,9 +6,11 @@
  *  The filter protects everything that doesn't start with "/login" and captures calls to "/DoLogin" and "/DoLogout"
  *  You must create a login.html page that has a login form with an AJAX call to DoLogin. That page must also handle errors (unauthorized and bad request).
  *  If that page uses images, css, or other resources, they can only be accessed from directories starting with "/login".
- *  A call to DoLogout will invalidate the current session, thereby make the stored credentials inaccessible, and send the user back to login.html
+ *  A call to DoLogout will invalidate the current session, thereby make the stored credentials inaccessible, and send the user back to your LoginPage (defaults to login.html)
  *  All other calls to servlets or other resources will get redirected to login.html unless valid credentials have been created.  
  *  
+ *  Note: The properties file is loaded at init time and is available to other classes.
+ *    
  *  The filter is invoked by putting the following in web.xml:
  *  
  *  <filter>
@@ -19,6 +21,10 @@
  *   <init-param>
  *      <param-name>PropertiesFileName</param-name>
  *      <param-value>/myparams.properties</param-value>
+ *   </init-param>
+ *   <init-param>
+ *      <param-name>LoginPage</param-name>
+ *      <param-value>/login.html</param-value>
  *   </init-param>
  *  </filter>
  *  <filter-mapping>
