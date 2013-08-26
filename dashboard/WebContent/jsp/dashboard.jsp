@@ -38,9 +38,6 @@
 		<div id="hidden_projectPath" style="display:none">
 			<%= request.getAttribute("projectPath") %>
 		</div>
-		<div id="hidden_projectInfo" style="display:none">
-			<%= request.getAttribute("projectInfo") %>
-		</div>
 		<div id="hidden_datasetDistribution" style="display:none">
 			<%= request.getAttribute("datasetDistribution") %>
 		</div>
@@ -105,10 +102,10 @@
 	
 		<div class="container" style="height: 95%; padding-top:16px;">
 			<div class="row" style="height: 50%; padding-bottom: 10px">
-				<div class="span4" style="width: 20%; height: 100%; background:#EEEEEE; ">			
+				<div class="span4" style="width: 20%; height: 100%; background:#EEEEEE; overflow:auto; ">			
 						
 						<h3>Project Description </h3>
-						<div id="projectInfo" style="overflow:auto">	
+						<div id="projectInfo" >	
 							<!-- Link will be changed from projectPath to the URL defined in the project configuration -->
 							<a href="<%= request.getAttribute("projectPath") %>" target="_blank" id="projectName" ></a></br></br>
 							<p id="projectDesc" > </p>
@@ -207,6 +204,7 @@
 	</div>
 </body>
 <script>
+	var projInfo = '<%= request.getAttribute("projectInfo") %>';
 	callOnLoad();
 	//$("#table").treetable({ expandable: true });
 </script>
