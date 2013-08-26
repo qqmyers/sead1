@@ -3,9 +3,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Login</title>
-<link href="css/bootstrap.css" rel="stylesheet">
-<link href="css/common.css" rel="stylesheet">
+<title id="home-title">Login</title>
+<link href="login_css/bootstrap.css" rel="stylesheet">
+<link href="login_css/common.css" rel="stylesheet">
 <style type="text/css">
 
 /* Override some defaults */
@@ -66,12 +66,22 @@ legend {
 <script src="http://code.jquery.com/jquery-1.8.1.min.js"
 	type="text/javascript"></script>
 <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+<script src="login_scripts/commons.js"></script>
 	
+<%
+String project_info = (String)request.getAttribute("projectInfo"); 
+System.out.println(project_info);
+%>
+
 <script type="text/javascript">
+    var projInfo = '<%=project_info%>';
+
 	var query = '';
 	$(function() {
+	    loadProjectInfo(projInfo);
 		$("#btnLogin").click(
 				function() {
+
 					$('#errorpanel').hide();
 					//$("#loginForm").submit();
 					var url = window.location.href;
@@ -83,7 +93,7 @@ legend {
 
 					$.ajax({
 						type : "POST",
-						url : "Login",
+						url : "DoLogin",
 						dataType : "json",
 						data : "userName=" + userName + "&password=" + password
 								+ "&remainingQuery=" + query,
@@ -95,7 +105,7 @@ legend {
 
 	function showNCEDCollection(json) {
 		if (query == '') {
-			window.location.replace("home.html");
+			window.location.replace("home");
 		} else {
 			window.location.replace("contents.html?" + query);
 		}
@@ -115,20 +125,18 @@ legend {
 
 	<div id="banner">
 		<map name="bannermap" id="bannermap">
-			<area href="http://www.nced.umn.edu" target="_blank"
-				coords="0,0,595,0,568,40,100,40,80,65,0,65" shape="polygon">
-			<area href="login.html" coords="0,75,500,134" shape="rect">
+			<area id="projectURL" href="http://sead-data.net" target="_blank" coords="0,0,600,134" shape="rect">
 		</map>
-		<img usemap="#bannermap" src="img/header-image.png"
+		<img id="projectLogo" usemap="#bannermap" src="login_img/header-image.png"
 			style="border: none;">
 	</div>
-	<!-- <img class="img-rounded" src='img/header-image.png'
+	<!-- <img class="img-rounded" src='login_img/header-image.png'
 		style='width: 4000px; margin-top: -3%;'></img> -->
 	<div style='margin-top: 10%; margin-left: 2%; margin-right: 2%;'>
 		<table>
 			<tbody>
 				<tr>
-					<td><h4>The NCED Mission</h4>
+					<td id="projectDesc"><h4>The NCED Mission</h4>
 						<p align="justify">
 							<b>Understanding Landscape and Ecosystem Co-evolution</b>
 						</p>
@@ -151,7 +159,7 @@ legend {
 								order to transform management and restoration of the
 								Earth-surface environment.</strong>
 						</p>
-						<p align="justify">We pursue this misson by&nbsp;creating
+						<p align="justify">We pursue this mission by&nbsp;creating
 							partnerships&nbsp;&amp;&nbsp;integrating researchers and
 							practitioners&nbsp;from the physical, biological, and social
 							sciences.&nbsp;</p>
