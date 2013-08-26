@@ -178,7 +178,7 @@ public class Queries {
 			throws Exception {
 		return ("PREFIX dcterms: <http://purl.org/dc/terms/>"
 				+ " "
-				+ "SELECT ?title ?creator ?contact ?desciptor ?keyword ?abstract"
+				+ "SELECT ?title ?creator ?contact ?descriptor ?keyword ?abstract"
 				+ " " + "WHERE { " + " " + "<"
 				+ tagID
 				+ "> <http://purl.org/dc/elements/1.1/title> ?title . "
