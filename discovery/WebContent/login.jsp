@@ -70,7 +70,6 @@ legend {
 	
 <%
 String project_info = (String)request.getAttribute("projectInfo"); 
-System.out.println(project_info);
 %>
 
 <script type="text/javascript">

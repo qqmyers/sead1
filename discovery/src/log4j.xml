@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd"> 
  
-<log4j:configuration debug="true" xmlns:log4j='http://jakarta.apache.org/log4j/'> 
+<log4j:configuration info="true" xmlns:log4j='http://jakarta.apache.org/log4j/'> 
 
  
    <appender name="consoleAppender"
       class="org.apache.log4j.ConsoleAppender">
-      <param name="Threshold" value="DEBUG" />
+      <param name="Threshold" value="INFO" />
       <layout class="org.apache.log4j.PatternLayout">
          <param name="ConversionPattern" value="%d
              %-5p  [%c{1}] %m %n" />
@@ -15,7 +15,7 @@
  
    <appender name="fileAppender"
            class="org.apache.log4j.RollingFileAppender">
-      <param name="Threshold" value="DEBUG" />
+      <param name="Threshold" value="INFO" />
       <param name="File" value="sample.log"/>
       <layout class="org.apache.log4j.PatternLayout">
          <param name="ConversionPattern" value="%d
@@ -24,11 +24,11 @@
    </appender>
  
    <logger name="org.sead.acr.common.auth.AuthFilter" additivity="false" >
-      <level value="DEBUG" />
+      <level value="INFO" />
       <appender-ref ref="consoleAppender"/>
    </logger>
     <logger name="org.sead.acr.common.MediciProxy" additivity="false" >
-      <level value="DEBUG" />
+      <level value="INFO" />
       <appender-ref ref="consoleAppender"/>
    </logger>
  
