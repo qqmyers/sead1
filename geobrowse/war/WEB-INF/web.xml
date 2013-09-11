@@ -52,7 +52,20 @@
 		<param-value>http://localhost/acr/#dataset?id=</param-value>
 	</context-param>
 	
-
+	<filter>
+    	<filter-name>AuthFilter</filter-name>
+    	<filter-class>
+       		org.sead.acr.common.auth.AuthFilter
+    	</filter-class>
+    	<init-param>
+      		<param-name>PropertiesFileName</param-name>
+      		<param-value>/geo-webapp.properties</param-value>
+    	</init-param>
+	</filter>
+	<filter-mapping>
+    	<filter-name>AuthFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 	
 	<!-- Servlets -->	
 	<servlet>
