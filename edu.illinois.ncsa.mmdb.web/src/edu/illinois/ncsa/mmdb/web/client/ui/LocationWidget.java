@@ -76,8 +76,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * Retrieve all geopointBeans associated with the URI and show them on a Map.

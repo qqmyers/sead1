@@ -68,27 +68,30 @@ public class Authentication {
         try {
             Resource person = Resource.uriRef(PersonBeanUtil.getPersonID(username));
             if (person.getString().equals(Anonymous.USER)) {
+                // Which should be equivalent to:
+                // if (username.equals(Anonymous.USER)) {
                 log.debug("LOGIN: anonymous login successful");
-                return true;
-            }
-            ContextAuthentication ca = new ContextAuthentication(TupeloStore.getInstance().getContext());
-            if (ca.checkPassword(person, password)) {
-                log.debug("LOGIN: authentication suceeded for " + username);
-                TripleWriter tw = new TripleWriter();
-                tw.add(person, Cet.cet("lastLogin"), new Date());
-                Unifier uf = new Unifier();
-                uf.addPattern(person, Cet.cet("lastLogin"), "date");
-                uf.setColumnNames("date");
-                TupeloStore.getInstance().getContext().perform(uf);
-                for (Tuple<Resource> row : uf.getResult() ) {
-                    tw.remove(person, Cet.cet("lastLogin"), row.get(0));
-                }
-                TupeloStore.getInstance().getContext().perform(tw);
-                return true;
             } else {
-                log.debug("LOGIN: authentication failed for " + username);
-                return false;
+                ContextAuthentication ca = new ContextAuthentication(TupeloStore.getInstance().getContext());
+                if (ca.checkPassword(person, password)) {
+                    log.debug("LOGIN: authentication suceeded for " + username);
+                } else {
+                    log.debug("LOGIN: authentication failed for " + username);
+                    return false;
+                }
             }
+            TripleWriter tw = new TripleWriter();
+            tw.add(person, Cet.cet("lastLogin"), new Date());
+            Unifier uf = new Unifier();
+            uf.addPattern(person, Cet.cet("lastLogin"), "date");
+            uf.setColumnNames("date");
+            TupeloStore.getInstance().getContext().perform(uf);
+            for (Tuple<Resource> row : uf.getResult() ) {
+                tw.remove(person, Cet.cet("lastLogin"), row.get(0));
+            }
+            TupeloStore.getInstance().getContext().perform(tw);
+            return true;
+
         } catch (OperatorException ex) {
             log.debug("LOGIN: authentication FAILED for " + username, ex);
             return false;

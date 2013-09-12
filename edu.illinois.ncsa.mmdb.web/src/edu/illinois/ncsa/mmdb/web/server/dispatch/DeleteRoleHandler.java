@@ -16,11 +16,11 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 public class DeleteRoleHandler implements ActionHandler<DeleteRole, EmptyResult> {
     Log log = LogFactory.getLog(DeleteRoleHandler.class);
@@ -54,7 +54,7 @@ public class DeleteRoleHandler implements ActionHandler<DeleteRole, EmptyResult>
     // would deleting this role make it impossible for the user to administer roles?
     // FIXME this is a tile from edit role handler
     boolean lockout(Resource user, Resource role) throws RBACException {
-        MediciRbac rbac = TupeloStore.getInstance().getRbac();
+        SEADRbac rbac = TupeloStore.getInstance().getRbac();
         Collection<Resource> roles = rbac.getRoles(user); // roles the user belongs to
         Set<Resource> neededPermissions = new HashSet<Resource>(); // set of permissions needed to administer roles
         neededPermissions.add(Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri())); // get to the home page

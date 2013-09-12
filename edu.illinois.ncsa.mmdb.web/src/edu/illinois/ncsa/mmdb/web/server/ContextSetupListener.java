@@ -77,11 +77,11 @@ import org.tupeloproject.rdf.xml.RdfXml;
 
 import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
@@ -89,7 +89,6 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
@@ -418,7 +417,7 @@ public class ContextSetupListener implements ServletContextListener {
     private void createAccounts(Properties props) throws OperatorException, AuthenticationException, RBACException {
         Context context = TupeloStore.getInstance().getContext();
         ContextAuthentication auth = new ContextAuthentication(context);
-        MediciRbac rbac = new MediciRbac(context);
+        SEADRbac rbac = new SEADRbac(context);
 
         // ensure base RBAC ontology exists
         log.debug("Initializing Medici permission set...");
@@ -498,7 +497,7 @@ public class ContextSetupListener implements ServletContextListener {
         }
     }
 
-    void ensureRoleExists(DefaultRole role, MediciRbac rbac) throws OperatorException, RBACException {
+    void ensureRoleExists(DefaultRole role, SEADRbac rbac) throws OperatorException, RBACException {
         Resource roleUri = Resource.uriRef(role.getUri());
         if (!rbac.getRoles().contains(roleUri)) {
             log.warn("WARNING: " + role.getName() + " role does not exist, creating it");

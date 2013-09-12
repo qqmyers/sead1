@@ -42,7 +42,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 
 /**

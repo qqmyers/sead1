@@ -75,9 +75,9 @@ import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoPointBean;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * A widget showing a collection.

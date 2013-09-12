@@ -77,7 +77,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsersResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.TitlePanel;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
+import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
 
 /**
  * A page to manage users. Currently only the ability to enable/disable users is

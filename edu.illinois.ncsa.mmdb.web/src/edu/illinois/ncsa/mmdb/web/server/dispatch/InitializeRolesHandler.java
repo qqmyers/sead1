@@ -11,17 +11,17 @@ import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.InitializeRoles;
+import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 public class InitializeRolesHandler implements ActionHandler<InitializeRoles, EmptyResult> {
     Log log = LogFactory.getLog(InitializeRolesHandler.class);
 
     @Override
     public EmptyResult execute(InitializeRoles arg0, ExecutionContext arg1) throws ActionException {
-        MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         if (TupeloStore.getInstance().isAllowed(arg0, Permission.EDIT_ROLES)) {
             try {
                 log.info("Initializing role-based access control");

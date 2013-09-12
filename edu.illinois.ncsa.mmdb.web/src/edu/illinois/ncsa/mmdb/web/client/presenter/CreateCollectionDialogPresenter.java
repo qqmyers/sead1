@@ -61,8 +61,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 public class CreateCollectionDialogPresenter extends TextDialogPresenter {
     private final DispatchAsync  dispatch;         // FIXME duplicated in multiple presenters, can we generalize?

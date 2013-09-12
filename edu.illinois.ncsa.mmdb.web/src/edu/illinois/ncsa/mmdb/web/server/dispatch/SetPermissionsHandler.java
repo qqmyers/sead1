@@ -17,18 +17,18 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPermissions;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetPermissionsResult;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 public class SetPermissionsHandler implements ActionHandler<SetPermissions, SetPermissionsResult> {
     private static Log log = LogFactory.getLog(SetPermissionsHandler.class);
 
     public SetPermissionsResult execute(SetPermissions action, ExecutionContext arg1) throws ActionException {
-        MediciRbac rbac = TupeloStore.getInstance().getRbac();
+        SEADRbac rbac = TupeloStore.getInstance().getRbac();
 
         // for now, iterate over the settings
         for (PermissionSetting s : action.getSettings() ) {
@@ -72,7 +72,7 @@ public class SetPermissionsHandler implements ActionHandler<SetPermissions, SetP
     }
 
     // would changing this session lock the authenticated user out of rbac admin?
-    boolean lockout(MediciRbac rbac, String u, PermissionSetting setting) throws RBACException {
+    boolean lockout(RBAC rbac, String u, PermissionSetting setting) throws RBACException {
         if (setting.getValue() == PermissionValue.ALLOW) { // we're allowing, so no prob
             return false;
         }

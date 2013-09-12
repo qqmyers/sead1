@@ -57,10 +57,10 @@ import org.tupeloproject.kernel.OperatorException;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetConfiguration;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * Get license attached to a specific resource.
@@ -74,7 +74,7 @@ public class SetConfigurationHandler implements ActionHandler<SetConfiguration, 
 
     @Override
     public ConfigurationResult execute(SetConfiguration arg0, ExecutionContext arg1) throws ActionException {
-        MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         try {
             if (!rbac.checkPermission(arg0.getUser(), Permission.VIEW_ADMIN_PAGES)) {
                 throw (new ActionException("No admin permission."));

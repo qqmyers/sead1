@@ -66,6 +66,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
  * @author Luigi Marini
  * 
  */
+
 public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
 
     /** Commons logging **/
@@ -79,13 +80,15 @@ public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
 
         PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance()
                 .getBeanSession());
-
         try {
             String email = action.getEmailAddress();
-            if (PersonBeanUtil.getAnonymous().getEmail().equals(email) ||
-                    PersonBeanUtil.getAnonymousURI().getString().equals(action.getUserId())) {
+            log.debug("GetUser: email: " + email);
+            log.debug("GetUser: id: " + action.getUserId());
+
+            if (PersonBeanUtil.getAnonymous().getEmail().equals(email) || PersonBeanUtil.getAnonymousURI().getString().equals(action.getUserId())) {
                 GetUserResult anonymous = new GetUserResult(PersonBeanUtil.getAnonymous());
                 anonymous.setAnonymous(true);
+                log.debug("GetUser: Returning anonymous user");
                 return anonymous;
             }
             if (email != null) {

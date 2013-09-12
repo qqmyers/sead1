@@ -2,7 +2,7 @@
  * University of Illinois/NCSA
  * Open Source License
  *
- * Copyright (c) 2010, NCSA.  All rights reserved.
+ * Copyright (c) 2010, NCSA 2013 U. Michigan.  All rights reserved.
  *
  * Developed by:
  * Cyberenvironments and Technologies (CET)
@@ -57,7 +57,6 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -222,8 +221,12 @@ public class LoginPage extends Composite {
     }
 
     /**
-     * Authenticate against the REST endpoint to make sure user is
-     * authenticated on the server side. If successful, login local.
+     * Authenticate against the GWT and REST endpoint to make sure user is
+     * authenticated on the server side. If successful, login local and start
+     * processing of the next
+     * History token.
+     * 
+     * Called to process logout/login as anonymous from MMDB
      */
     public static void authenticate(final DispatchAsync dispatch, final MMDB mainWindow, final String username, final String password, final AuthenticationCallback callback) {
         logout(new Command() { // ensure we're logged out before authenticating
@@ -244,6 +247,7 @@ public class LoginPage extends Composite {
                                     RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
                                     builder.setUser(TextFormatter.escapeEmailAddress(username));
                                     builder.setPassword(password);
+
                                     try {
                                         GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
                                         builder.sendRequest("", new RequestCallback() {
@@ -254,6 +258,7 @@ public class LoginPage extends Composite {
                                             public void onResponseReceived(Request request, Response response) {
                                                 // success!
                                                 String sessionKey = response.getText();
+
                                                 GWT.log("REST auth status code = " + response.getStatusCode(), null);
                                                 if (response.getStatusCode() > 300) {
                                                     GWT.log("authentication failed: " + sessionKey, null);
@@ -261,6 +266,7 @@ public class LoginPage extends Composite {
                                                 }
                                                 GWT.log("user " + username + " associated with session key " + sessionKey, null);
                                                 // login local
+
                                                 mainWindow.login(arg0.getSessionId(), sessionKey, callback);
                                             }
                                         });
@@ -277,7 +283,9 @@ public class LoginPage extends Composite {
         });
     }
 
-    protected void authenticate(final String username, final String password) {
+    /* Called to process credentials from login form */
+
+    public void authenticate(final String username, final String password) {
         authenticate(dispatchasync, mainWindow, username, password, new AuthenticationCallback() {
             @Override
             public void onFailure() {
@@ -287,7 +295,6 @@ public class LoginPage extends Composite {
             @Override
             public void onSuccess(String userUri, String sessionKey) {
                 GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
-                redirect();
             }
         });
     }
@@ -302,57 +309,10 @@ public class LoginPage extends Composite {
         progressLabel.setText("");
     }
 
-    /**
-     * Reload page after being logged in.
-     * 
-     * FIXME remove hardcoded paths
-     */
-    protected void redirect() {
-        if (History.getToken().startsWith("login")) {
-            History.newItem("listDatasets", true);
-            mainWindow.showListDatasetsPage();
-        } else {
-            History.fireCurrentHistoryState();
-        }
-    }
-
-    //	/**
-    //	 * Set the session id, add a cookie and add history token.
-    //	 * 
-    //	 * @param sessionId
-    //	 * 
-    //	 */
-    //	public static void login(final String userId, final String sessionKey) {
-    //		final UserSessionState state = MMDB.getSessionState();
-    ////		state.setUsername(userId);
-    //		state.setSessionKey(sessionKey);
-    //		// set cookie
-    //		// TODO move to more prominent place... MMDB? A class with static properties?
-    //		final long DURATION = 1000 * 60 * 60; // 60 minutes
-    //		Date expires = new Date(System.currentTimeMillis() + DURATION);
-    //		Cookies.setCookie("sid", userId, expires);
-    //		Cookies.setCookie("sessionKey", sessionKey, expires);
-    //		
-    //		MMDB.dispatchAsync.execute(new GetUser(userId), new AsyncCallback<GetUserResult>() {
-    //
-    //			@Override
-    //			public void onFailure(Throwable caught) {
-    //				GWT.log("Error retrieving user with id " + userId);
-    //			}
-    //
-    //			@Override
-    //			public void onSuccess(GetUserResult result) {
-    //				PersonBean personBean = result.getPersonBean();
-    //				state.setCurrentUser(personBean);
-    //				MMDB.loginStatusWidget.login(personBean.getName());
-    //				GWT.log("Current user set to " + personBean.getUri());
-    //			}
-    //		});
-    //
-    //	}
-
     public static void clearBrowserCreds(final Command onSuccess) {
-        // now hit the REST authentication endpoint with bad creds
+        // now hit the REST authentication endpoint
+        //bad creds are sent but not used (server just invalidates session)
+
         String restUrl = "./api/logout";
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
         builder.setUser("_badCreds_");
@@ -361,75 +321,60 @@ public class LoginPage extends Composite {
             builder.sendRequest("", new RequestCallback() {
                 public void onError(Request request, Throwable exception) {
                     // do something
+
+                    clearLocalSession();
                     Window.alert("error logging out " + exception.getMessage());
                 }
 
                 public void onResponseReceived(Request request, Response response) {
+
                     if (onSuccess != null) {
+                        clearLocalSession();
+
                         onSuccess.execute();
                     }
                 }
             });
         } catch (RequestException x) {
             // another error condition, do something
+            clearLocalSession();
             Window.alert("error logging out: " + x.getMessage());
         }
     }
 
-    public static void logout() {
-        logout(new Command() {
-            public void execute() {
-                History.newItem("login");
-            }
-        });
-    }
-
     /**
-     * Set sessionID to null, remove cookie, and log out of REST servlets
+     * logout from server, Set sessionID and local cache of user info to null,
+     * and log out of REST servlets
      */
     public static void logout(Command onSuccess) {
         UserSessionState state = MMDB.getSessionState();
+
         if (state.getCurrentUser() != null && state.getCurrentUser().getUri() != null) {
+
             GWT.log("user " + state.getCurrentUser().getUri() + " logging out", null);
             MMDB.clearSessionState();
         }
+
         // in case anyone is holding refs to the state, zero out the auth information in it
         state.setCurrentUser(null);
         state.setSessionKey(null);
+
         state.setAnonymous(false); // not logged in as anonymous, or anyone
-        Cookies.removeCookie("sid");
-        Cookies.removeCookie("sessionKey");
+        MMDB.loginStatusWidget.loggedOut();
+
         clearBrowserCreds(onSuccess);
-        MMDB.loginStatusWidget.logout();
     }
 
-    public static void checkRestAuth(final Command onSuccess, final Command onFailure) {
-        String restUrl = "./api/checkLogin";
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-        try {
-            GWT.log("checking login status @ " + restUrl, null);
-            // we need to block.
-            builder.sendRequest("", new RequestCallback() {
-                public void onError(Request request, Throwable exception) {
-                    logout(null);
-                    onFailure.execute();
-                }
-
-                public void onResponseReceived(Request request, Response response) {
-                    // success!
-                    GWT.log("REST auth status code = " + response.getStatusCode(), null);
-                    if (response.getStatusCode() > 300) {
-                        GWT.log("not authenticated to REST services", null);
-                        logout(null);
-                        onFailure.execute();
-                    } else {
-                        onSuccess.execute();
-                    }
-                }
-            });
-        } catch (RequestException x) {
-            logout(null);
-            onFailure.execute();
+    /* Remove session cookie - clearBrowserCreds has caused the server to invalidate it
+     * 
+     */
+    static protected void clearLocalSession() {
+        String path = Window.Location.getPath();
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
         }
+        Cookies.removeCookie(MMDB._sessionCookieName, path);
+
     }
+
 }

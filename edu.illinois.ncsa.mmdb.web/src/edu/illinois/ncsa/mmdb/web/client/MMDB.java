@@ -2,7 +2,7 @@
  * University of Illinois/NCSA
  * Open Source License
  *
- * Copyright (c) 2010, NCSA.  All rights reserved.
+ * Copyright (c) 2010, NCSA, 2013 U. Michigan.  All rights reserved.
  *
  * Developed by:
  * Cyberenvironments and Technologies (CET)
@@ -39,7 +39,6 @@
 package edu.illinois.ncsa.mmdb.web.client;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,10 +51,16 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -106,14 +111,15 @@ import edu.illinois.ncsa.mmdb.web.client.ui.UploadPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.admin.AdminPage;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 /**
  * MMDB entry point.
  * 
  * @author Luigi Marini
  * @author Rob Kooper
+ * @author Jim Myers
  */
 public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     // FIXME move these into UserSessionState?
@@ -167,87 +173,95 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private HTML                       adminBbullet;
     private Hyperlink                  adminLink;
 
+    public static String               _sessionCookieName               = "JSESSIONID";
+
     /**
      * This is the entry point method.
      */
     public void onModuleLoad() {
-        // get mapping of mime-type -> category from server
-        ContentCategory.initialize(dispatchAsync);
+        try {
+            // get mapping of mime-type -> category from server
 
-        RootPanel rootPanel = RootPanel.get("mmdb-mainContainer");
+            ContentCategory.initialize(dispatchAsync);
 
-        if (rootPanel != null) {
+            RootPanel rootPanel = RootPanel.get("mmdb-mainContainer");
+            if (rootPanel != null) {
+                // navigation menu
+                initNavMenu();
 
-            // navigation menu
-            initNavMenu();
+                // breadcrumb
+                breadcrumb = new Label("breadcrumb > bread > crumb");
+                breadcrumb.addStyleName("breadcrumb");
+                RootPanel.get("breadcrumb").add(breadcrumb);
 
-            // breadcrumb
-            breadcrumb = new Label("breadcrumb > bread > crumb");
-            breadcrumb.addStyleName("breadcrumb");
-            RootPanel.get("breadcrumb").add(breadcrumb);
+                // main content
+                mainContainer.addStyleName("relativePosition");
+                RootPanel.get("mmdb-mainContainer").add(mainContainer);
 
-            // main content
-            mainContainer.addStyleName("relativePosition");
-            RootPanel.get("mmdb-mainContainer").add(mainContainer);
+                // log events
+                //            logEvent(eventBus);
 
-            // log events
-            //            logEvent(eventBus);
+                eventBus.addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
 
-            eventBus.addHandler(DatasetSelectedEvent.TYPE, new DatasetSelectedHandler() {
-
-                @Override
-                public void onDatasetSelected(DatasetSelectedEvent event) {
-                    GWT.log("Dataset selected " + event.getUri());
-                    MMDB.getSessionState().itemSelected(event.getUri());
-                }
-            });
-
-            eventBus.addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
-                @Override
-                public void onDatasetUnselected(DatasetUnselectedEvent event) {
-                    GWT.log("Dataset unselected " + event.getUri());
-                    MMDB.getSessionState().itemUnselected(event.getUri());
-                }
-            });
-
-            eventBus.addHandler(AllDatasetsUnselectedEvent.TYPE, new AllDatasetsUnselectedHandler() {
-                @Override
-                public void onAllDatasetsUnselected(AllDatasetsUnselectedEvent event) {
-                    GWT.log("All datasets unselected");
-                    Set<String> toDeselect = new HashSet<String>(MMDB.getSessionState().getSelectedItems());
-                    for (String datasetUri : toDeselect ) {
-                        DatasetUnselectedEvent ue = new DatasetUnselectedEvent();
-                        ue.setUri(datasetUri);
-                        eventBus.fireEvent(ue);
+                    @Override
+                    public void onDatasetSelected(DatasetSelectedEvent event) {
+                        GWT.log("Dataset selected " + event.getUri());
+                        MMDB.getSessionState().itemSelected(event.getUri());
                     }
+                });
+
+                eventBus.addHandler(DatasetUnselectedEvent.TYPE, new DatasetUnselectedHandler() {
+                    @Override
+                    public void onDatasetUnselected(DatasetUnselectedEvent event) {
+                        GWT.log("Dataset unselected " + event.getUri());
+                        MMDB.getSessionState().itemUnselected(event.getUri());
+                    }
+                });
+
+                eventBus.addHandler(AllDatasetsUnselectedEvent.TYPE, new AllDatasetsUnselectedHandler() {
+                    @Override
+                    public void onAllDatasetsUnselected(AllDatasetsUnselectedEvent event) {
+                        GWT.log("All datasets unselected");
+                        Set<String> toDeselect = new HashSet<String>(MMDB.getSessionState().getSelectedItems());
+                        for (String datasetUri : toDeselect ) {
+                            DatasetUnselectedEvent ue = new DatasetUnselectedEvent();
+                            ue.setUri(datasetUri);
+                            eventBus.fireEvent(ue);
+                        }
+                    }
+                });
+
+                //initNavMenu();
+
+                // TODO place support for history management
+                // placeService = new PlaceService(eventBus);
+
+                // history support
+                History.addValueChangeHandler(this);
+
+                //Load public properties file
+                try {
+                    PropertiesReader.initializePropertiesFile();
+                } catch (Exception ex) {
+                    //FIXME: Handle exception
                 }
-            });
 
-            //initNavMenu();
+                History.fireCurrentHistoryState();
 
-            // TODO place support for history management
-            // placeService = new PlaceService(eventBus);
-
-            // history support
-            History.addValueChangeHandler(this);
-
-            History.fireCurrentHistoryState();
-
-            //Load public properties file
-            try {
-                PropertiesReader.initializePropertiesFile();
-            } catch (Exception ex) {
-                //FIXME: Handle exception
+                //initNavMenu();
             }
+        } catch (Exception e) {
+            Window.alert("Initialization error: " + e.getMessage());
 
-            //initNavMenu();
         }
+
     }
 
     /**
      * Navigation menu at the top of the page.
      */
     void initNavMenu() {
+
         if (RootPanel.get("navMenu") == null) {
             GWT.log("failed to get rootpanel", null);
         }
@@ -266,6 +280,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         mainHeader.add(projectNameLabel);
         mainHeader.setStyleName("headerTitle");
         RootPanel.get("projectTitle").add(mainHeader);
+        loginStatusWidget = new LoginStatusWidget();
+        RootPanel.get("loginMenu").add(loginStatusWidget);
 
         dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription), new AsyncCallback<ConfigurationResult>() {
             @Override
@@ -280,7 +296,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
             }
         });
-
         RootPanel.get("navMenu").add(navMenu);
 
         // datasets
@@ -346,10 +361,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         debugLabel = new Label();
         debugLabel.addStyleName("navMenuText");
         navMenu.add(debugLabel);
-
-        // login menu
-        loginStatusWidget = new LoginStatusWidget();
-        RootPanel.get("loginMenu").add(loginStatusWidget);
 
         // search box
         SearchBox searchBox = new SearchBox("Search");
@@ -457,12 +468,29 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     public void onValueChange(ValueChangeEvent<String> event) {
 
         final String token = event.getValue();
-
         GWT.log("History changed: " + event.getValue(), null);
 
         if (token.startsWith("logout")) {
-            LoginPage.logout();
+            /* logout triggers an implicit attempt to login as anonymous
+             *  (as does checkLogin() if there are no existing credentials). 
+             *  It's the success or failure of that login that determines whether the
+             *  user sees the login screen or (if anonymous has view member age privileges),
+             *  the default content screen (currently listDatasets) 
+             */
+            LoginPage.authenticate(dispatchAsync, this, "anonymous", "none", new AuthenticationCallback() {
+                @Override
+                public void onFailure() {
+                }
+
+                @Override
+                public void onSuccess(String userUri, String sessionKey) {
+                }
+            });
+
         } else if (token.startsWith("login")) {
+            /*Once the loginpage is shown, it's internal logic determines what happens next.
+            * Right now, if the user succeeds, doWithPermissions("login") gets called
+            */
             showLoginPage();
         } else if (token.startsWith("signup")) {
             showSignupPage();
@@ -475,16 +503,27 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         } else if (token.startsWith("jiraFeature")) {
             showJiraFeaturePage();
         } else {
+            // Everything except the events above has to have an authenticated and authorized
+            // user. checkLogin starts that process and handles further processing of the event
+            // (via doWithPermissions()
             checkLogin();
         }
     }
 
     /**
-     * Check if user has permission ot view member pages.
+     * Run the action for the given token, subject to a permission check to see
+     * if user has permission to view member pages. The pages themselves must
+     * check further if additional permissions are needed to see their content.
+     * 
+     * Right now, doWithPermissions gets called via the checkLogin() method, as
+     * well as by the login() method (on success, login and logout tokens only).
+     * Login/logout trigger viewing the default member page (listDatasets), so
+     * the user's permissions need to be checked.
      * 
      * @param token
      */
-    private void checkPermissions(final String token) {
+    private void doWithPermission(final String token) {
+
         rbac().doIfAllowed(Permission.VIEW_MEMBER_PAGES, new PermissionCallback() {
             @Override
             public void onAllowed() {
@@ -518,7 +557,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     /**
-     * Set the session id, add a cookie and add history token.
+     * login retrieves an already authenticated users details (PersonBean) from
+     * the server,
+     * stores it in a local cache of session information, and, if successful,
+     * triggers execution
+     * of the action for the History token that triggered the call.
      * 
      * @param sessionId
      * 
@@ -537,12 +580,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     public void login(final String userId, final String sessionKey, final AuthenticationCallback callback) {
         final UserSessionState state = MMDB.getSessionState();
+
         state.setSessionKey(sessionKey);
-        // set cookie
-        // TODO move to more prominent place... MMDB? A class with static properties?
-        final long DURATION = 1000 * 60 * 60; // 60 minutes
-        final Date expires = new Date(System.currentTimeMillis() + DURATION);
-        Cookies.setCookie("sessionKey", sessionKey, expires);
 
         AsyncCallback<GetUserResult> handler = new AsyncCallback<GetUserResult>() {
             @Override
@@ -556,28 +595,33 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 PersonBean personBean = result.getPersonBean();
                 state.setCurrentUser(personBean);
                 if (result.isAnonymous()) {
-                    MMDB.loginStatusWidget.logout();
+                    MMDB.loginStatusWidget.loggedOut();
                     getSessionState().setAnonymous(true);
                     GWT.log("Current user is anonymous");
                 } else {
-                    MMDB.loginStatusWidget.login(personBean.getName());
+                    MMDB.loginStatusWidget.loggedIn(personBean.getName());
                     getSessionState().setAnonymous(false);
+
                     GWT.log("Current user set to " + personBean.getUri());
                 }
-                Cookies.setCookie("sid", personBean.getUri(), expires);
-                checkPermissions(History.getToken());
+
+                doWithPermission(History.getToken());
 
                 callback.onSuccess(userId, sessionKey);
             }
         };
 
         GetUser getUser = new GetUser();
+
         getUser.setUserId(userId);
         dispatchAsync.execute(getUser, handler);
     }
 
     /**
-     * Parse history token and show the proper widgets.
+     * Parse history token and show the proper widgets/
+     * trigger the appropriate actions.
+     * 
+     * parseHistory should only be called by doWithPermissions!
      * 
      * @param token
      *            history token (everything after the #)
@@ -615,7 +659,18 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showSelected(false);
         } else if (token.startsWith("administration")) {
             showAdminPage();
+        } else if (token.startsWith("login") || token.startsWith("logout")) {
+            //login and logout flow here
+            showListDatasetsPage();
+            token = "listDatasets";
+            History.newItem("listDatasets", false);
+            /* Could check previous token and try to go there if it is a 
+            * member page - login/logout would let you stay on the 
+            * collection/tag/etc. page rather than returning to 
+            * listDatasets if this were done here
+            */
         } else if (!previousHistoryToken.startsWith("listDatasets")) {
+            //Default page
             showListDatasetsPage();
         }
         previousHistoryToken = token;
@@ -736,31 +791,38 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private void showLoginPage() {
         adminBbullet.addStyleName("hidden");
         adminLink.addStyleName("hidden");
-        loginStatusWidget.logout();
+        loginStatusWidget.loggedOut();
         mainContainer.clear();
         mainContainer.add(new LoginPage(dispatchAsync, this));
     }
 
     /**
-     * If user not logged in redirect to the required login page.
+     * This method verifies that a user is logged in and then triggers the
+     * widget change/action (History token) that triggered this call. If no
+     * one is logged in, this method tries to log the anonymous user in. If
+     * a server session cookie exists but no local user info exists (e.g. user
+     * just hit the
+     * browser refresh button and restarted the app, this method will
+     * try to re-establish the local cache and continue.
      * 
      */
     public void checkLogin() {
-        boolean loggedIn = true;
-        final String cookieSID = Cookies.getCookie("sid");
-        if (cookieSID != null) {
-            GWT.log("Sid: " + cookieSID, null);
-        } else {
-            loggedIn = false;
-        }
-        final String cookieSessionKey = Cookies.getCookie("sessionKey");
+        boolean loggedIn = false;
+
+        UserSessionState state = MMDB.getSessionState();
+        GWT.log("User state SessionKey: " + state.getSessionKey());
+        GWT.log("User state name: " + state.getCurrentUser().getName());
+
+        //The existence of a session cookie means the server believes we're logged in
+        final String cookieSessionKey = Cookies.getCookie(_sessionCookieName);
         if (cookieSessionKey != null) {
             GWT.log("Session key: " + cookieSessionKey, null);
-        } else {
-            loggedIn = false;
+
+            loggedIn = true;
         }
+
         if (!loggedIn) {
-            //showLoginPage();
+            //try to log in as anonymous
             GWT.log("not logged in, attempting to login as anonymous");
             LoginPage.authenticate(dispatchAsync, MMDB.this,
                     "anonymous", "none", new
@@ -778,18 +840,72 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                         }
                     });
         } else {
-            // now check REST auth
-            Command onLoggedIn = new Command() {
-                public void execute() {
-                    login(cookieSID, cookieSessionKey); // do we need to do this?
+            String localKey = state.getSessionKey();
+            if ((localKey != null) && cookieSessionKey.equals(localKey)) {
+                //Assume state.getCurrentUser is correct
+                //localKey should only be null or equal to the cookieSessionKey
+                doWithPermission(History.getToken());
+            } else {
+                // Check REST auth and get the userID so we can then go retrieve the PersonBean (in login())
+                // Having a sessionKey and no local key will occur when the user has hit a browser 
+                // refresh and restarts the app
+
+                checkRestAuth(cookieSessionKey, new
+                        AuthenticationCallback() {
+
+                            @Override
+                            public void onFailure() {
+                                //Start fresh
+                                LoginPage.logout(new Command() {
+                                    @Override
+                                    public void execute() {
+                                        showLoginPage();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onSuccess(String userUri, String
+                                    sessionKey) {
+
+                                // login menu
+                                //Get the user's info (PersonBean) and store in UserSessionState
+                                login(userUri, sessionKey);
+                            }
+                        });
+
+            }
+        }
+    }
+
+    /*Call the REST checkLogin endpoint to verify the user is logged in (session cookie is valid)
+     * and return the user's ID for local use. 
+     */
+    public void checkRestAuth(final String sessionID, final AuthenticationCallback callback) {
+        String restUrl = "./api/checkLogin";
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+        try {
+            GWT.log("checking login status @ " + restUrl, null);
+            // we need to block.
+            builder.sendRequest("", new RequestCallback() {
+                public void onError(Request request, Throwable exception) {
+                    callback.onFailure();
                 }
-            };
-            Command onNotLoggedIn = new Command() {
-                public void execute() {
-                    showLoginPage();
+
+                public void onResponseReceived(Request request, Response response) {
+                    // success!
+                    GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                    if (response.getStatusCode() > 300) {
+                        GWT.log("not authenticated to REST services", null);
+                        callback.onFailure();
+                    } else {
+                        String userid = response.getText();
+                        callback.onSuccess(userid, sessionID);
+                    }
                 }
-            };
-            LoginPage.checkRestAuth(onLoggedIn, onNotLoggedIn);
+            });
+        } catch (RequestException x) {
+            callback.onFailure();
         }
     }
 

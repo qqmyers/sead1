@@ -63,6 +63,7 @@ import javax.mail.MessagingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.fileupload.FileItem;
@@ -93,18 +94,18 @@ import org.xml.sax.SAXException;
 import edu.illinois.ncsa.cet.search.Hit;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewVideoBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * RestServlet
@@ -317,7 +318,7 @@ public class RestServlet extends AuthenticatedServlet {
     }
 
     protected boolean isAllowed(HttpServletRequest req, String objectUri, Permission permission) {
-        MediciRbac rbac = new MediciRbac(getContext());
+        SEADRbac rbac = new SEADRbac(getContext());
         Resource userUri = Resource.uriRef(AuthenticatedServlet.getUserUri(req));
         Resource permissionUri = Resource.uriRef(permission.getUri());
         Resource oUri = objectUri != null ? Resource.uriRef(objectUri) : null; // how I long for implicit type conversion
@@ -364,25 +365,38 @@ public class RestServlet extends AuthenticatedServlet {
 
     protected void doDoGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
-        //dumpHeaders(request); // FIXME debug
+        dumpHeaders(request); // FIXME debug
+        log.debug("Calling: " + request.getRequestURL().toString());
+        HttpSession sess = request.getSession(false);
+        if (sess != null) {
+            log.debug("SessionID: " + request.getSession(false).getId());
+        }
+        //FIXME - Get calls with side effects should be posts to avoid caching...
+
         if (request.getRequestURL().toString().endsWith("checkLogin")) {
-            String httpSessionUser = getHttpSessionUser(request);
-            if (httpSessionUser != null) {
-                log.debug("REST /checkLogin: HTTP session " + request.getSession().getId() + " is authenticated as " + httpSessionUser);
+            String sessionUserID = getUserUri(request);
+            dontCache(response);
+            if (sessionUserID != null) {
+                response.getWriter().print(sessionUserID);
+                response.flushBuffer();
+                log.debug("REST /checkLogin: HTTP session " + request.getSession(false).getId() + " is authenticated as " + sessionUserID);
                 return;
             } else {
-                log.debug("REST /checkLogin: HTTP session " + request.getSession().getId() + " is unauthenticated");
+                log.debug("REST /checkLogin: unauthenticated");
                 response.setStatus(404); // not "unauthorized"--that will cause the browser to pop up an auth dialog
                 return; // do not proceed with authentication!
             }
         }
         if (request.getRequestURL().toString().endsWith("logout")) {
+            log.debug("REST /logout");
+            dontCache(response);
             logout(request, response);
             return;
         }
 
         // JIRA Issue creator
         if (hasPrefix(JIRA_ISSUE, request)) {
+            dontCache(response);
             createJiraIssue(request, response);
             return;
         }
@@ -610,7 +624,18 @@ public class RestServlet extends AuthenticatedServlet {
         } else if (request.getRequestURL().toString().endsWith("authenticate")) {
             // we're just authenticating, and that has already been handled. do not report an error.
             // for convenience, produce the session key as a string
-            response.getWriter().print(lookupSessionKey(getHttpSessionUser(request)));
+            String sKey = null;
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                sKey = session.getId();
+                log.debug("authenticate session sKey = " + sKey);
+            }
+            if (sKey != null) {
+                response.getWriter().print(sKey);
+            } else {
+                response.getWriter().print("");
+            }
+            dontCache(response);
             response.flushBuffer();
         } else if (hasPrefix(SEARCH_INFIX, request) && isAllowed(request, Permission.VIEW_MEMBER_PAGES)) {
             doSearch(request, response);

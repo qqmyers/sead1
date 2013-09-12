@@ -70,7 +70,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 
 /**
  * Embedded Widget.
@@ -83,13 +83,13 @@ public class Embed implements EntryPoint {
      * go through this endpoint. To learn more look up gwt-dispatch and the
      * command pattern.
      */
-    public final DispatchAsync         dispatchAsync = new MyDispatchAsync();
+    public final DispatchAsync         dispatchAsync      = new MyDispatchAsync();
 
     /** Event bus for propagating events in the interface **/
-    public static final HandlerManager eventBus      = new HandlerManager(null);
+    public static final HandlerManager eventBus           = new HandlerManager(null);
 
-    public static final String         ANONYMOUS     = "http://cet.ncsa.uiuc.edu/2007/person/anonymous";
-
+    public static final String         ANONYMOUS          = "http://cet.ncsa.uiuc.edu/2007/person/anonymous";
+    public static final String         _sessionCookieName = "JSESSIONID";
     private RootPanel                  rootPanel;
     private String                     uri;
     private int                        width;
@@ -201,13 +201,8 @@ public class Embed implements EntryPoint {
      */
     private void checkLogin() {
         boolean loggedIn = true;
-        final String cookieSID = Cookies.getCookie("sid");
-        if (cookieSID != null) {
-            GWT.log("Sid: " + cookieSID, null);
-        } else {
-            loggedIn = false;
-        }
-        final String cookieSessionKey = Cookies.getCookie("sessionKey");
+        loggedIn = false;
+        final String cookieSessionKey = Cookies.getCookie(_sessionCookieName);
         if (cookieSessionKey != null) {
             GWT.log("Session key: " + cookieSessionKey, null);
         } else {

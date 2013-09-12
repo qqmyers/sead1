@@ -51,10 +51,10 @@ import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * TODO Add comments
@@ -71,7 +71,7 @@ public class SetUserMetadataHandler implements ActionHandler<SetUserMetadata, Em
     public EmptyResult execute(SetUserMetadata action, ExecutionContext arg1)
             throws ActionException {
         // only allow user to edit user metadata fields
-        MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         try {
             if (!rbac.checkPermission(action.getUser(), action.getUri(), Permission.EDIT_USER_METADATA)) {
                 throw new ActionException("Unauthorized");

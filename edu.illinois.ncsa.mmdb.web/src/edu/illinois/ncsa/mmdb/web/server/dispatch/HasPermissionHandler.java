@@ -51,11 +51,11 @@ import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermission;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * Check if a user has a specific permission.
@@ -73,7 +73,7 @@ public class HasPermissionHandler implements
     public HasPermissionResult execute(HasPermission action,
             ExecutionContext arg1) throws ActionException {
 
-        MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
 
         Resource userUri = createUserURI(action.getUser());
         Resource objectUri = action.getObject() != null ? Resource.uriRef(action.getObject()) : null;

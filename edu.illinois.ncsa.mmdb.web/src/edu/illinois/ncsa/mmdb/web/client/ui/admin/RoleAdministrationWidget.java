@@ -37,8 +37,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectResult;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 
 public class RoleAdministrationWidget extends Composite {

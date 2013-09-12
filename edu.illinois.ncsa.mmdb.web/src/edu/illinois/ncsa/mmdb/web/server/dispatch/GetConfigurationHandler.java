@@ -55,10 +55,10 @@ import org.apache.commons.logging.LogFactory;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * Get license attached to a specific resource.
@@ -91,10 +91,10 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
                 checkadmin = true;
             }
         }
-
+        log.debug("Config u: " + arg0.getUser());
         // check admin status
         if (checkadmin) {
-            MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
+            SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
             try {
                 if (!rbac.checkPermission(arg0.getUser(), Permission.VIEW_ADMIN_PAGES)) {
                     throw (new ActionException("No admin permission."));

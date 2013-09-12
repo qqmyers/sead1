@@ -29,7 +29,7 @@
 
 	<!-- Inherit the CET Beans -->
 	<inherits name='edu.uiuc.ncsa.cet.bean.Bean' />
-	<inherits name='edu.uiuc.ncsa.cet.bean.rbac.medici.RBAC' />
+	<!-- <inherits name='edu.uiuc.ncsa.cet.bean.rbac.medici.RBAC' />-->
 
 	<inherits name='net.customware.gwt.dispatch.Dispatch' />
 	<inherits name="com.google.gwt.json.JSON" />
@@ -41,6 +41,7 @@
 	<inherits name="com.google.gwt.maps.GoogleMaps" />
 	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
 	
+
 	<!-- Inherit the default GWT style sheet. You can change -->
 	<!-- the theme of your GWT application by uncommenting -->
 	<!-- any one of the following lines. -->

@@ -253,10 +253,12 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
             }
 
             List<String> uris = new ArrayList<String>(map.keySet());
-            for (String uri : uris ) {
-                System.out.println(uri + " " + map.get(uri).getDate());
+            if (log.isDebugEnabled()) {
+                for (String uri : uris ) {
+                    log.debug(uri + " " + map.get(uri).getDate());
+                }
+                log.debug("Sorting : " + listquery.getOrderBy());
             }
-            System.out.println("Sorting : " + listquery.getOrderBy());
             Collections.sort(uris, new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
@@ -369,9 +371,11 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                     }
                 }
             });
-            System.out.println("AFTER");
-            for (String uri : uris ) {
-                System.out.println(uri + " " + map.get(uri).getDate());
+            if (log.isDebugEnabled()) {
+                log.debug("AFTER");
+                for (String uri : uris ) {
+                    log.debug(uri + " " + map.get(uri).getDate());
+                }
             }
             queryResult.setTotalCount(uris.size());
             uris = uris.subList(listquery.getOffset(), Math.min(uris.size(), listquery.getOffset() + listquery.getLimit()));

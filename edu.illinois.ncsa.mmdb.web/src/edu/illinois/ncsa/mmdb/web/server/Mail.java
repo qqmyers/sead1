@@ -59,8 +59,8 @@ import org.tupeloproject.rdf.terms.Foaf;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 
 /**

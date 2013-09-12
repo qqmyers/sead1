@@ -56,11 +56,11 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResourceResult;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * Retrieve tags for a specific resource.
@@ -77,7 +77,7 @@ public class TagResourceHandler implements ActionHandler<TagResource, TagResourc
     public TagResourceResult execute(TagResource arg0, ExecutionContext arg1)
             throws ActionException {
 
-        MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
         TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);

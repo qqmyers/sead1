@@ -64,6 +64,7 @@ import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import net.customware.gwt.dispatch.shared.Result;
 
@@ -96,11 +97,11 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthorizedAction;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectAction;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
@@ -108,7 +109,6 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
@@ -248,7 +248,7 @@ public class TupeloStore {
                 getBeanSession().deregister(beanUri);
             } catch (OperatorException x) {
                 log.error("ERROR: could not expire bean " + beanUri + ": " + x.getMessage());
-                x.printStackTrace();
+                log.debug(x.getStackTrace().toString());
             }
         }
     }
@@ -280,8 +280,8 @@ public class TupeloStore {
      * 
      * @return
      */
-    public MediciRbac getRbac() {
-        return new MediciRbac(getContext());
+    public SEADRbac getRbac() {
+        return new SEADRbac(getContext());
     }
 
     public boolean isAllowed(AuthorizedAction<? extends Result> action, Permission p) {
@@ -456,7 +456,12 @@ public class TupeloStore {
     static final String CANONICALIZER_SESSION_ATTRIBUTE = "edu.illinois.ncsa.mmdb.web.UriCanonicalizer";
 
     public UriCanonicalizer getUriCanonicalizer(HttpServletRequest request) throws ServletException {
-        UriCanonicalizer canon = (UriCanonicalizer) request.getSession().getAttribute(CANONICALIZER_SESSION_ATTRIBUTE);
+        UriCanonicalizer canon = null;
+        //Don't create a session if one doesn't exist
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            canon = (UriCanonicalizer) session.getAttribute(CANONICALIZER_SESSION_ATTRIBUTE);
+        }
         if (canon == null) {
             canon = new UriCanonicalizer();
             String prefix = getWebappPrefix(request);
@@ -466,8 +471,11 @@ public class TupeloStore {
             }
             // now handle GWT dataset and collection stuff stuff, hardcoding the HTML path
             canon.setCanonicalUrlPrefix("dataset", prefix + request.getContextPath() + MMDB_WEBAPP_PATH + "#dataset?id=");
-            request.getSession().setAttribute(CANONICALIZER_SESSION_ATTRIBUTE, canon);
+            if (session != null) {
+                session.setAttribute(CANONICALIZER_SESSION_ATTRIBUTE, canon);
+            }
         }
+
         return canon;
     }
 
