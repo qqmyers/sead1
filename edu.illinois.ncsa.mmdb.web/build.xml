@@ -51,7 +51,7 @@
 	
 	<property name="deprecation" value="true" />
 		
-	<property name="version" value="v1.2.100#${bamboo.buildNumber}" />
+	<property name="version" value="v1.2.100#${env.bamboo.buildNumber}" />
 		
 	<condition property="deps" value=".." else="../plugins">
 		<available file="../edu.uiuc.ncsa.cet.bean/build.properties" />
