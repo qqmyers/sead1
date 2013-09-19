@@ -5,4 +5,4 @@
  * @author Jim
  *
  */
-package org.sead.acr.brandedrepository;
+package org.sead.acr.discovery;

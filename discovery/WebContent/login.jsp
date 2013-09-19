@@ -67,17 +67,24 @@ legend {
 	type="text/javascript"></script>
 <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
 <script src="login_scripts/commons.js"></script>
-	
+
 <%
-String project_info = (String)request.getAttribute("projectInfo"); 
+	String project_info = (String) request.getAttribute("projectInfo");
+	String status_code = (String) request.getAttribute("statusCode");
+	Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 %>
 
 <script type="text/javascript">
-    var projInfo = '<%=project_info%>';
+    var projInfo   = '<%=project_info%>';
+    var authStatus = '<%=status_code%>';
+    var anon = '<%=isAnonymous%>';
 
 	var query = '';
 	$(function() {
-	    loadProjectInfo(projInfo);
+		loadProjectInfo(projInfo);
+		if((authStatus == '403')&&(anon=='true')) {
+			$("#forbiddenpanel").show();
+		}	
 		$("#btnLogin").click(
 				function() {
 
@@ -96,38 +103,42 @@ String project_info = (String)request.getAttribute("projectInfo");
 						dataType : "json",
 						data : "userName=" + userName + "&password=" + password
 								+ "&remainingQuery=" + query,
-						success : showNCEDCollection,
+						success : showCollection,
 						error : redirectToErrorPage
 					});
 				});
+		
 	});
 
-	function showNCEDCollection(json) {
+	function showCollection(json) {
 		if (query == '') {
 			window.location.replace("home");
 		} else {
-			window.location.replace("contents.html?" + query);
-		}
-	}
-	
-	function redirectToErrorPage(jqXHR, textStatus, errorThrown) {
-		if (jqXHR.responseText == 'Unauthorized') {
-			$('#errorpanel').show();
-		} else {
-			window.location.replace("error.html");
+			window.location.reload();
 		}
 	}
 
-	
+	function redirectToErrorPage(jqXHR, textStatus, errorThrown) {
+		if (jqXHR.responseText == 'Unauthorized') {
+
+			$('#errorpanel').show();
+			$('#forbiddenpanel').hide();
+			
+		} else if (jqXHR.responseText == 'Forbidden') {
+			$('#forbiddenpanel').show();
+			$('#errorpanel').hide();
+		}
+	}
 </script>
 <body>
 
 	<div id="banner">
 		<map name="bannermap" id="bannermap">
-			<area id="projectURL" href="http://sead-data.net" target="_blank" coords="0,0,600,134" shape="rect">
+			<area id="projectURL" href="http://sead-data.net" target="_blank"
+				coords="0,0,600,134" shape="rect">
 		</map>
-		<img id="projectLogo" usemap="#bannermap" src="login_img/header-image.png"
-			style="border: none;">
+		<img id="projectLogo" usemap="#bannermap"
+			src="login_img/header-image.png" style="border: none;">
 	</div>
 	<!-- <img class="img-rounded" src='login_img/header-image.png'
 		style='width: 4000px; margin-top: -3%;'></img> -->
@@ -172,8 +183,7 @@ String project_info = (String)request.getAttribute("projectInfo");
 								geochemical, and human processes that shape the surface of the
 								Earth respond to changes in climate, land use, environmental
 								management, and other forcings?"</em>
-						</p>
-					</td>
+						</p></td>
 					<td width='400px'>
 						<div class="container">
 							<div class="content">
@@ -190,9 +200,13 @@ String project_info = (String)request.getAttribute("projectInfo");
 											<input type="password" placeholder="Password" name="password"
 												id="txtPassword">
 										</div>
-										<div id='errorpanel' style='display:none'>
+										<div id='errorpanel' style='display: none'>
 											<font color='red'>The user name or password is
 												incorrect.</font>
+										</div>
+										<div id='forbiddenpanel' style='display: none'>
+											<font color='green'>You must be 
+											authorized to view these collections.</font>
 										</div>
 										<button class="btn primary" id="btnLogin">Sign in</button>
 										<!-- </fieldset>
@@ -200,7 +214,8 @@ String project_info = (String)request.getAttribute("projectInfo");
 									</div>
 								</div>
 							</div>
-						</div> <!-- /container --></td>
+						</div> <!-- /container -->
+					</td>
 				</tr>
 			</tbody>
 		</table>

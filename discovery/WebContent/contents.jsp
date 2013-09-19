@@ -8,7 +8,7 @@
 <link href="login_css/common.css" rel="stylesheet">
 <style type="text/css">
 p {
-margin-bottom: 0px;
+	margin-bottom: 0px;
 }
 </style>
 
@@ -21,7 +21,8 @@ margin-bottom: 0px;
 <script src="login_scripts/contentspage.js"></script>
 
 <%
-String project_info = (String)request.getAttribute("projectInfo"); 
+	String project_info = (String) request.getAttribute("projectInfo");
+	String status_code = (String) request.getAttribute("statusCode");
 %>
 
 <script type="text/javascript">
@@ -30,26 +31,31 @@ String project_info = (String)request.getAttribute("projectInfo");
 
 	$(function() {
 		loadProjectInfo(projInfo);
-		medici_URL = "<%= request.getAttribute("medici") %>";
+		medici_URL = "<%=request.getAttribute("medici")%>";
 		var url = window.location.href;
 		tagID = url.substring(url.indexOf("?") + 3, url.length);
-		
+
 		$("#contents-loading").show();
 
-		createBlock(0,"#xmlBody");
-		var acrLink = medici_URL+ collection_Path + tagID;
+		createBlock(0, "#xmlBody");
+		var acrLink = medici_URL + collection_Path + tagID;
 		$("#acrlink0").attr("href", acrLink);
-		
 
 		$.ajax({
 			type : "GET",
 			url : "GetContents",
 			dataType : "json",
+			cache : false,
 			data : "tagID=" + tagID + "&title=" + title,
 			success : contentsPageJsonParser,
 			error : contentsPageErrorParser
 		});
-
+		if('<%=request.getAttribute("isAnonymous")%>'=='true') {
+			$("#btnLogout").css('visibility','hidden');
+		}
+		$("#btnLogout").click(function() {
+			window.location.replace("DoLogout");
+		});
 
 	});
 
@@ -70,17 +76,20 @@ String project_info = (String)request.getAttribute("projectInfo");
 			<area id="projectURL" href="http://sead-data.net" target="_blank"
 				coords="0,0,600,134" shape="rect">
 		</map>
-		<img id="projectLogo" usemap="#bannermap" src="login_img/header-image.png"
-			style="border: none;"  height="135px">
+		<img id="projectLogo" usemap="#bannermap"
+			src="login_img/header-image.png" style="border: none;" height="135px">
+	</div>
+	</div>
+	<div style='height: 150px;'></div>
+	<div style='float: right;'>
+		<button class="btn primary" id="btnLogout" style='margin-right: 10px;'>Logout</button>
 	</div>
 	<div id="contents-loading"
 		style="width: 300px; margin-left: auto; margin-right: auto; margin-top: 200px; display: none">
 		<img src="login_img/loading.gif"></img>
 	</div>
 	<div
-		style="width: auto; margin-top: 150px; margin-left: 100px; margin-right: 100px; visibility:hidden;"
-		id="xmlBody" >
-		
-	</div>
+		style="width: auto; margin-top: 30px; margin-left: 100px; margin-right: 100px; visibility: hidden;"
+		id="xmlBody"></div>
 </body>
 </html>

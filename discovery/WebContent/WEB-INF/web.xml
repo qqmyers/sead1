@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
-  <display-name></display-name>
+  <display-name>ACR Public Repository View</display-name>
   <welcome-file-list>
     <welcome-file>home</welcome-file>
   </welcome-file-list>
@@ -12,7 +12,7 @@
     </filter-class>
     <init-param>
       <param-name>PropertiesFileName</param-name>
-      <param-value>/brandedrepository.properties</param-value>
+      <param-value>/discovery.properties</param-value>
     </init-param>
     <init-param>
       <param-name>LoginPage</param-name>
@@ -26,7 +26,7 @@
   
   <servlet>
     <servlet-name>Login</servlet-name>
-    <servlet-class>org.sead.acr.brandedrepository.Login</servlet-class>
+    <servlet-class>org.sead.acr.discovery.Login</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>Login</servlet-name>
@@ -35,7 +35,7 @@
   
   <servlet>
     <servlet-name>Home</servlet-name>
-    <servlet-class>org.sead.acr.brandedrepository.Home</servlet-class>
+    <servlet-class>org.sead.acr.discovery.Home</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>Home</servlet-name>
@@ -44,7 +44,7 @@
   
   <servlet>
     <servlet-name>ContentPage</servlet-name>
-    <servlet-class>org.sead.acr.brandedrepository.Content</servlet-class>
+    <servlet-class>org.sead.acr.discovery.Content</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>ContentPage</servlet-name>
@@ -53,7 +53,7 @@
   
   <servlet>
     <servlet-name>GetPublishedCollections</servlet-name>
-    <servlet-class>org.sead.acr.brandedrepository.GetPublishedCollections</servlet-class>
+    <servlet-class>org.sead.acr.discovery.GetPublishedCollections</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>GetPublishedCollections</servlet-name>
@@ -62,7 +62,7 @@
   
   <servlet>
     <servlet-name>CollectionContents</servlet-name>
-    <servlet-class>org.sead.acr.brandedrepository.CollectionContents</servlet-class>
+    <servlet-class>org.sead.acr.discovery.CollectionContents</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>CollectionContents</servlet-name>
@@ -70,7 +70,7 @@
   </servlet-mapping>
   <servlet>
     <servlet-name>GetBibliographicInfo</servlet-name>
-    <servlet-class>org.sead.acr.brandedrepository.GetBibliographicInfo</servlet-class>
+    <servlet-class>org.sead.acr.discovery.GetBibliographicInfo</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>GetBibliographicInfo</servlet-name>
