@@ -137,7 +137,6 @@ public class AddMetadataWidget extends Composite {
         this(new HashSet<String>(), dispatch, events);
         this.resources.add(uri);
         this.uri = uri;
-        PropertiesReader.initializePropertiesFile();
     }
 
     public AddMetadataWidget(Collection<String> batch, final DispatchAsync dispatch, HandlerManager eventBus) {

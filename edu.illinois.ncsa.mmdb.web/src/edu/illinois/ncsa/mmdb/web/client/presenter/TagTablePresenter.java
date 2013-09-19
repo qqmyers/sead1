@@ -46,6 +46,7 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 
 /**
@@ -71,6 +72,7 @@ public class TagTablePresenter extends DynamicTablePresenter {
         query.setOffset(offset);
         query.setTag(tagName);
         query.setBean(null);
+        query.setUser(MMDB.getUsername());
         return query;
     }
 

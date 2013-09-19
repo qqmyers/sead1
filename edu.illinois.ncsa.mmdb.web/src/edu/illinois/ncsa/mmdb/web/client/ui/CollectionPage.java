@@ -148,12 +148,6 @@ public class CollectionPage extends Composite {
 
             }
         });
-
-        try {
-            PropertiesReader.initializePropertiesFile();
-        } catch (Exception ex) {
-
-        }
     }
 
     private Widget createCollectionContextPanel(UserMetadataWidget um) {
