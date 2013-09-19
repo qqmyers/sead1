@@ -419,10 +419,10 @@ public class DatasetWidget extends Composite {
 
                         try {
                             for (CollectionBean collection : collections ) {
-                                String ncedURL = PropertiesReader.getNCEDURL();
-                                ncedURL = ncedURL.endsWith("/") ? ncedURL : ncedURL + "/";
+                                String discoveryURL = PropertiesReader.getDiscoveryURL();
+                                discoveryURL = discoveryURL.endsWith("/") ? discoveryURL : discoveryURL + "/";
 
-                                String collectionContextURI = ncedURL + "contents.html?i=" + collection.getUri() + "&t=" + collection.getTitle();
+                                String collectionContextURI = discoveryURL + "contents?i=" + collection.getUri() + "&t=" + collection.getTitle();
                                 String collectionContextText = collection.getTitle();
 
                                 collectionContextText = collectionContextText.contains("/") ? collectionContextText.substring(collectionContextText.lastIndexOf("/") + 1) : collectionContextText;

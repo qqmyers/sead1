@@ -275,7 +275,7 @@ public class AuthenticatedServlet extends HttpServlet {
                 log.info("Video request from non authenticated user with User-Agent=" + request.getHeader("User-Agent"));
             }
         } else if (request.getRequestURI().contains("api/image/preview/")) {
-            // FIXME : special image case for nced data
+            // FIXME : special image case for Discovery interface data
             validUser = PersonBeanUtil.getAnonymous().getName().toLowerCase();
             HttpSession session = request.getSession(true);
             if (session.getAttribute(AUTHENTICATED_AS) == null) {

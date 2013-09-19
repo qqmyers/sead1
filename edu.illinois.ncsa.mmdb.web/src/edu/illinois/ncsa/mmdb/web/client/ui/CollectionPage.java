@@ -348,11 +348,11 @@ public class CollectionPage extends Composite {
         numDatasetsLabel.setText(collectionSize + " dataset(s)");
 
         try {
-            String ncedURL = PropertiesReader.getNCEDURL();
-            ncedURL = ncedURL.endsWith("/") ? ncedURL : ncedURL + "/";
+            String discoveryURL = PropertiesReader.getDiscoveryURL();
+            discoveryURL = discoveryURL.endsWith("/") ? discoveryURL : discoveryURL + "/";
 
-            String collectionContextURI = ncedURL + "contents.html?i=" + collection.getUri() + "&t=" + collection.getTitle();
-            String collectionContextText = "View Collection Context in NCED";
+            String collectionContextURI = discoveryURL + "contents?i=" + collection.getUri() + "&t=" + collection.getTitle();
+            String collectionContextText = "View Collection Context in Discovery interface";
             collectionContextLink.setHref(collectionContextURI);
             collectionContextLink.setTarget("_blank");
             collectionContextLink.setText(collectionContextText);

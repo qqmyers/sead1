@@ -9,8 +9,8 @@ import com.google.gwt.http.client.Response;
 public class PropertiesReader {
     static RequestCallback requestCallback;
     static RequestBuilder  builder;
-    static String          vivoURL = "";
-    private static String  ncedURL = "";
+    static String          vivoURL      = "";
+    private static String  discoveryURL = "";
 
     public static String getVIVOURL() {
         if (vivoURL == "") {
@@ -20,14 +20,15 @@ public class PropertiesReader {
         //return vivoURL;
     }
 
-    public static String getNCEDURL() {
-        if (ncedURL == "") {
+    public static String getDiscoveryURL() {
+        if (discoveryURL == "") {
             initializePropertiesFile();
         }
-        return ncedURL;
+        return discoveryURL;
         //return vivoURL;
     }
 
+    //FIXME - read this as a real properties file rather than parsing the strings!
     public static void initializePropertiesFile() {
         String url_host = GWT.getModuleBaseURL() + "public.properties";
 
@@ -42,8 +43,8 @@ public class PropertiesReader {
                     if (vivoURL == "") {
                         vivoURL = responseText.substring(responseText.indexOf("vivourl=") + "vivourl".length() + 1, responseText.indexOf('\n'));
                     }
-                    if (ncedURL == "") {
-                        ncedURL = responseText.substring(responseText.indexOf("ncedurl=") + "ncedurl".length() + 1);
+                    if (discoveryURL == "") {
+                        discoveryURL = responseText.substring(responseText.indexOf("discoveryurl=") + "discoveryurl".length() + 1);
                     }
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
