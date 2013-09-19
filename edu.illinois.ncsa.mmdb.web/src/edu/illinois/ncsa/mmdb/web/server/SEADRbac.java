@@ -5,9 +5,12 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Dc;
@@ -22,9 +25,36 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 public class SEADRbac extends RBAC {
+    private static Log log = LogFactory.getLog(SEADRbac.class);
 
     public SEADRbac(Context c) {
         super(c);
+    }
+
+    public int getUserAccessLevel(Resource user) {
+        int accesslevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelMax));
+        String accesspredicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+        if (accesspredicate == null) {
+            return accesslevel;
+        }
+
+        // check role permission
+        Unifier uf = new Unifier();
+        uf.addPattern(user, HAS_ROLE, "role");
+        uf.addPattern("role", Resource.uriRef(accesspredicate), "access");
+        uf.addColumnName("access");
+        try {
+            getContext().perform(uf);
+        } catch (OperatorException e) {
+            log.warn("Could not get roles and access levels.", e);
+        }
+        for (Tuple<Resource> row : uf.getResult() ) {
+            int x = Integer.parseInt(row.get(0).toString());
+            if (x < accesslevel) {
+                accesslevel = x;
+            }
+        }
+        return accesslevel;
     }
 
     public boolean isOwner(Resource user, Resource object) throws RBACException {

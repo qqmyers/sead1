@@ -119,6 +119,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.SetInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetPermissionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandlerNew;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRoleAccessLevelHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetTitleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
@@ -213,6 +214,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new DefaultRoleHandler());
         DispatchUtil.registerHandler(new GetAccessLevelHandler());
         DispatchUtil.registerHandler(new SetAccessLevelHandler());
+        DispatchUtil.registerHandler(new SetRoleAccessLevelHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

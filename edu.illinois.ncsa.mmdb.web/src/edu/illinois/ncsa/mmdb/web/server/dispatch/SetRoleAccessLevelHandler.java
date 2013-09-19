@@ -47,62 +47,56 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.Context;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.Triple;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAccessLevel;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAccessLevelResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRoleAccessLevel;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
- * Get annotations attached to a specific resource sorted by date.
+ * Set access level for dataset
  * 
- * @author Luigi Marini
+ * @author Rob Kooper
  * 
  */
-public class GetAccessLevelHandler implements ActionHandler<GetAccessLevel, GetAccessLevelResult> {
+public class SetRoleAccessLevelHandler implements ActionHandler<SetRoleAccessLevel, EmptyResult> {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(GetAccessLevelHandler.class);
+    private static Log log = LogFactory.getLog(SetRoleAccessLevelHandler.class);
 
     @Override
-    public GetAccessLevelResult execute(GetAccessLevel arg0, ExecutionContext arg1) throws ActionException {
-        return getResult(arg0.getUri());
+    public EmptyResult execute(SetRoleAccessLevel arg0, ExecutionContext arg1) throws ActionException {
+        String pred = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+        if (pred == null) {
+            throw (new ActionException("No access level predicate set."));
+        }
+        Context context = TupeloStore.getInstance().getContext();
+        SEADRbac rbac = new SEADRbac(context);
+        try {
+            if (rbac.checkPermission(arg0.getUser(), Permission.EDIT_ROLES)) {
+                rbac.setAccessLevel(Resource.uriRef(arg0.getRole()), Resource.uriRef(pred), arg0.getAccesslevel());
+            } else {
+                log.debug("no permission to set access level on " + arg0.getRole());
+                throw new ActionException("no permission");
+            }
+        } catch (Exception x) {
+            throw new ActionException("failed to check set edit_roles permission", x);
+        }
+        return new EmptyResult();
     }
 
     @Override
-    public Class<GetAccessLevel> getActionType() {
-        return GetAccessLevel.class;
+    public Class<SetRoleAccessLevel> getActionType() {
+        return SetRoleAccessLevel.class;
     }
 
     @Override
-    public void rollback(GetAccessLevel arg0, GetAccessLevelResult arg1, ExecutionContext arg2) throws ActionException {
+    public void rollback(SetRoleAccessLevel arg0, EmptyResult arg1, ExecutionContext arg2) throws ActionException {
         // TODO Auto-generated method stub
     }
 
-    public static GetAccessLevelResult getResult(String uri) throws ActionException {
-        GetAccessLevelResult result = new GetAccessLevelResult();
-
-        result.setDefaultLevel(Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault)));
-        result.setMinLevel(Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelMin)));
-        result.setMaxLevel(Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelMax)));
-        result.setPredicate(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate));
-        result.setLabel(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelLabel));
-
-        if (uri != null) {
-            result.setDatasetLevel(result.getDefaultLevel());
-
-            try {
-                if ((result.getPredicate() != null) && (result.getPredicate().trim().length() > 0)) {
-                    for (Triple t : TupeloStore.getInstance().getContext().match(Resource.uriRef(uri), Resource.uriRef(result.getPredicate()), null) ) {
-                        result.setDatasetLevel(Integer.parseInt(t.getObject().toString()));
-                    }
-                }
-            } catch (Exception exc) {
-                log.warn("Could not get access level of dataset.", exc);
-            }
-        }
-        return result;
-    }
 }
