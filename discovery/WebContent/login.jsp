@@ -77,14 +77,15 @@ legend {
 <script type="text/javascript">
     var projInfo   = '<%=project_info%>';
     var authStatus = '<%=status_code%>';
-    var anon = '<%=isAnonymous%>';
+    var anon = '<%=isAnonymous%>
+	';
 
 	var query = '';
 	$(function() {
 		loadProjectInfo(projInfo);
-		if((authStatus == '403')&&(anon=='true')) {
+		if ((authStatus == '403') && (anon == 'true')) {
 			$("#forbiddenpanel").show();
-		}	
+		}
 		$("#btnLogin").click(
 				function() {
 
@@ -107,7 +108,7 @@ legend {
 						error : redirectToErrorPage
 					});
 				});
-		
+
 	});
 
 	function showCollection(json) {
@@ -123,7 +124,7 @@ legend {
 
 			$('#errorpanel').show();
 			$('#forbiddenpanel').hide();
-			
+
 		} else if (jqXHR.responseText == 'Forbidden') {
 			$('#forbiddenpanel').show();
 			$('#errorpanel').hide();
@@ -146,44 +147,25 @@ legend {
 		<table>
 			<tbody>
 				<tr>
-					<td id="projectDesc"><h4>The NCED Mission</h4>
+					<td id="projectDesc"><h4>SEAD ACR Discovery</h4>
 						<p align="justify">
-							<b>Understanding Landscape and Ecosystem Co-evolution</b>
+							<b>A brandable interface your project can use to provide data
+								collections to the public.</b>
 						</p>
-						<p align="justify">
-							<strong>NCED</strong>&nbsp;(the National Center for Earth-surface
-							Dynamics)&nbsp;is a <a
-								style="color: rgb(39, 99, 140); text-decoration: none;"
-								href="http://nsf.gov">National Science Foundation</a>&nbsp;(NSF)&nbsp;<a
-								style="color: rgb(39, 99, 140); text-decoration: none;"
-								href="http://www.nsf.gov/od/oia/programs/stc/">Science and
-								Technology Center</a>&nbsp;(STC).&nbsp;We began operation&nbsp;in
-							August 2002 and are headquartered at the&nbsp;<a
-								style="color: rgb(39, 99, 140); text-decoration: none;"
-								href="http://www.safl.umn.edu/">St. Anthony Falls
-								Laboratory&nbsp;</a>(SAFL) at the University&nbsp;of Minnesota.
-						</p>
-						<p align="justify">
-							<strong>NCED's mission is to predict the coupled
-								dynamics and co-evolution of landscapes and their ecosystems in
-								order to transform management and restoration of the
-								Earth-surface environment.</strong>
-						</p>
-						<p align="justify">We pursue this mission by&nbsp;creating
-							partnerships&nbsp;&amp;&nbsp;integrating researchers and
-							practitioners&nbsp;from the physical, biological, and social
-							sciences.&nbsp;</p>
-						<p align="justify">
-							<strong>Our research focuses on channel networks and
-								their surroundings.</strong>&nbsp;We strive to answer one <strong>overarching
-								question</strong>:
-						</p>
-						<p align="justify">
-							<em>"How will the coupled system of physical, biological,
-								geochemical, and human processes that shape the surface of the
-								Earth respond to changes in climate, land use, environmental
-								management, and other forcings?"</em>
-						</p></td>
+						<p align="justify">Simply configure your project title and
+							description in the main ACR interface/Admin page, and mark the
+							collections you want to appear as 'published' (by adding a
+							publication date as user metadata for that collection). The logo 
+							at the top of the page can be replaced by changing the relevant image 
+							files on the server.</p>
+						<p align="justify">This interface will show the
+							titles/abstract/tags/creators/and related metadata along with a
+							list of sub-collections and files. Users can click on these and
+							go to the data and collection pages in the ACR for these items.</p>
+						<p align="justify">This interface provides a top-down view and
+							includes only the data you're ready to share outside your team.</p>
+						<p>You can require users to login to use this interface or
+							allow anonymous access.</p></td>
 					<td width='400px'>
 						<div class="container">
 							<div class="content">
@@ -205,8 +187,8 @@ legend {
 												incorrect.</font>
 										</div>
 										<div id='forbiddenpanel' style='display: none'>
-											<font color='green'>You must be 
-											authorized to view these collections.</font>
+											<font color='green'>You must be authorized to view
+												these collections.</font>
 										</div>
 										<button class="btn primary" id="btnLogin">Sign in</button>
 										<!-- </fieldset>
