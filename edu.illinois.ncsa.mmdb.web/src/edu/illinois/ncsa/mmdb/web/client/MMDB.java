@@ -48,6 +48,7 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -179,6 +180,17 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * This is the entry point method.
      */
     public void onModuleLoad() {
+        GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+            @Override
+            public void onUncaughtException(Throwable e) {
+                Window.alert("uncaught: " + e.getMessage());
+                String s = "RuntimeExceotion:\n" + e.getMessage();
+                Window.alert(s);
+                e.printStackTrace();
+                GWT.log("uncaught exception", e);
+            }
+        });
+
         try {
             // get mapping of mime-type -> category from server
 
@@ -252,7 +264,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             }
         } catch (Exception e) {
             Window.alert("Initialization error: " + e.getMessage());
-
+            GWT.log("initialization error", e);
         }
 
     }
@@ -810,8 +822,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         boolean loggedIn = false;
 
         UserSessionState state = MMDB.getSessionState();
-        GWT.log("User state SessionKey: " + state.getSessionKey());
-        GWT.log("User state name: " + state.getCurrentUser().getName());
+        //GWT.log("User state SessionKey: " + state.getSessionKey());
+        //GWT.log("User state name: " + state.getCurrentUser().getName());
 
         //The existence of a session cookie means the server believes we're logged in
         final String cookieSessionKey = Cookies.getCookie(_sessionCookieName);
