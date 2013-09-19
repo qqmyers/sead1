@@ -316,6 +316,9 @@ public class DatasetWidget extends Composite {
         infoPanel = new InfoWidget(result.getDataset(), service);
         rightColumn.add(infoPanel);
 
+        // acccess level widget
+        rightColumn.add(new AccessLevelWidget(uri, service));
+
         // license widget
         final LicenseWidget license = new LicenseWidget(uri, service, true, false, false);
         rightColumn.add(license);

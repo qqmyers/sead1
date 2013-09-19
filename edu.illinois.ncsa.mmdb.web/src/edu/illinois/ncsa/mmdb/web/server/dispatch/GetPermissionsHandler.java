@@ -27,8 +27,7 @@ public class GetPermissionsHandler implements ActionHandler<GetPermissions, GetP
 
         try {
             GetPermissionsResult result = new GetPermissionsResult();
-
-            for (Tuple<Resource> row : rbac.getGlobalPermissions() ) {
+            for (Tuple<Resource> row : rbac.getGlobalPermissions(null) ) {
                 Resource role = row.get(0); // the uri of a role
                 Resource permission = row.get(1); // the uri of a permission
                 Resource valueType = row.get(2); // the value type (e.g., ALLOW, DENY, DO_NOT_ALLOW)
