@@ -3,6 +3,8 @@
  * 1) validates the users credentials against a remote Medici instance, and 
  * 2) stores the user's name/password in a MediciProxy object associated with the session.
  * 
+ * If 'enableAnonymous' is true (in the properties file), the filter will attempt to login as anonymous whenever other valid credentials are not available
+ * 
  *  The filter protects everything that doesn't start with "/login" and captures calls to "/DoLogin" and "/DoLogout"
  *  You must create a login.html page that has a login form with an AJAX call to DoLogin. That page must also handle errors (unauthorized and bad request).
  *  If that page uses images, css, or other resources, they can only be accessed from directories starting with "/login".
@@ -34,6 +36,15 @@
  *  
  *  The myparams.properties file should have a line in it:
  *  domain=<URL of medici rest endpoint you want to connect to>
+ *  
+ *  If 
+ *  remoteAPIKey=<remoteAPIKey from ACR Instance at domain>
+ *  is set, the app will end the api ley with each response
+ *  If medici has a remoteAPIKey set, this one must match or authentication will fail
+ *  
+ *  If 
+ *  enableAnonymous=true
+ *  is set, the filter will attempt tp login as anonymous whenever other credentials are unavailable
  */
 /**
  * @author Jim

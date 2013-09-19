@@ -22,12 +22,13 @@ package org.sead.acr.common;
 
 import java.util.Collections;
 
-//import org.rpi.nced.objects.MainCollection;
 import org.sead.acr.common.utilities.PropertiesLoader;
 import org.sead.acr.common.utilities.Queries;
 import org.sead.acr.common.utilities.json.JSONException;
 import org.sead.acr.common.utilities.json.JSONObject;
 import org.sead.acr.common.utilities.json.XML;
+
+import javax.xml.ws.http.HTTPException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,13 +36,14 @@ import org.apache.commons.logging.LogFactory;
 public class MediciProxy {
 
 	static Object padlock = new Object();
-	
-	private static Log  log   = LogFactory.getLog(MediciProxy.class);
+
+	private static Log log = LogFactory.getLog(MediciProxy.class);
 
 	private String _username = null;
 	private String _password = null;
 	private String _server = null;
-	private boolean _validCredentials=false;
+	private String _remoteAPIKey = null;
+	private boolean _validCredentials = false;
 
 	public MediciProxy() {
 		try {
@@ -50,46 +52,75 @@ public class MediciProxy {
 			ex.printStackTrace();
 		}
 	}
-	
+
 	public void setCredentials(String username, String password, String server) {
+		setCredentials(username, password, server, null);
+	}
+
+	public void setCredentials(String username, String password, String server,
+			String remoteAPIKey) throws HTTPException {
 		try {
-		// A dummy query to check if user is authenticated - there is no token
-		// based authentication yet.
-		String query = "SELECT ?p ?o WHERE { <s> ?p ?o . }";
-		DataAccess.getResponse(username, password, server, query);
-		_username = username;
-		_password = password;
-		_server   = server;	
-		_validCredentials=true;
+			// A dummy query to check if user is authenticated - there is no
+			// token based authentication yet.
+
+			String query = "SELECT ?p ?o WHERE { <s> ?p ?o . }";
+			DataAccess.getResponse(username, password, server, remoteAPIKey,
+					query);
+			// If no exception - it worked and all the params should be stored
+			// as valid login info
+			_username = username;
+			_password = password;
+			_server = server;
+			_remoteAPIKey = remoteAPIKey;
+			_validCredentials = true;
+		} catch (HTTPException he) {
+			// Unauthorized or forbidden repsonses should be forwarded so users
+			// can be informed
+			_username = null;
+			_password = null;
+			_server = null;
+			_validCredentials = false;
+			throw (he);
 		} catch (Exception e) {
+			// Some form of IO issue
 			e.printStackTrace();
-			_username=null;
-			_password=null;
-			_server=null;
-			_validCredentials=false;
+			_username = null;
+			_password = null;
+			_server = null;
+			_validCredentials = false;
 		}
 	}
-	
+
 	public boolean hasValidCredentials() {
 		return _validCredentials;
 	}
 
-	public String getJSONResponse(String query) throws Exception {
-		String responseText = DataAccess.getResponse(_username, _password, _server,	query);
-
-		//JSONObject responseJSONObject = convertToJsonObject(responseText);
-		//responseText = responseJSONObject.toString();
-		responseText = XML.toJSONObject(responseText).toString();
-		/*if(!collectionListisEmpty(responseJSONObject)) {
-			if (!singleCollectionReturned(responseJSONObject)) {
-				responseText=sortCollections(responseText);
+	public boolean isAnonymous() {
+		boolean is = false;
+		if (_username != null) {
+			if (_username.equals("anonymous")) {
+				is = true;
 			}
 		}
-		*/
+		return is;
+	}
+
+	public String getJSONResponse(String query) throws Exception {
+		String responseText = DataAccess.getResponse(_username, _password,
+				_server, _remoteAPIKey, query);
+
+		// JSONObject responseJSONObject = convertToJsonObject(responseText);
+		// responseText = responseJSONObject.toString();
+		responseText = XML.toJSONObject(responseText).toString();
+		/*
+		 * if(!collectionListisEmpty(responseJSONObject)) { if
+		 * (!singleCollectionReturned(responseJSONObject)) {
+		 * responseText=sortCollections(responseText); } }
+		 */
 		if (log.isDebugEnabled()) {
-		  log.debug("Query: " + query);
-          log.debug("Response: " + responseText);
-		}  
+			log.debug("Query: " + query);
+			log.debug("Response: " + responseText);
+		}
 		return responseText;
 	}
 }

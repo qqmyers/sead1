@@ -174,8 +174,7 @@ public class Queries {
 		// FILTER to get only type for DataSet or Collection
 	}
 
-	public static String getItemBibliographicInfo(String tagID)
-			throws Exception {
+	public static String getItemBibliographicInfo(String tagID) {
 		return ("PREFIX dcterms: <http://purl.org/dc/terms/>"
 				+ " "
 				+ "SELECT ?title ?creator ?contact ?descriptor ?keyword ?abstract"

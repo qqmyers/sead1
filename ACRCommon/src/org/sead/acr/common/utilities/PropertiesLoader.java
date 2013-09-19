@@ -7,7 +7,7 @@ import java.util.Properties;
 public class PropertiesLoader {
 
 	static Properties _properties = null;
-	static String _propfile = "nced.properties";
+	static String _propfile = "discovery.properties";
 
 	/**
 	 * @return the _properties

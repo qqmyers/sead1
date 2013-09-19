@@ -14,24 +14,32 @@ import org.sead.acr.common.utilities.PropertiesLoader;
 
 public class DataAccess {
 
-	public static String getResponse(String userName, String password, String server,
-			String query) throws Exception {
+	public static String getResponse(String userName, String password,
+			String server, String remoteAPIKey, String query) throws Exception {
 		HttpURLConnection conn = null;
-
-		//String strURL = PropertiesLoader.getProperties().getProperty("domain");
 		// Make a connect to the server
 		URL url = new URL(server);
 
 		conn = (HttpURLConnection) url.openConnection();
 
 		// Put the authentication details in the request
-		String userCredentials = userName + ":" + password;
-		String encodedUsernamePassword = Base64.encodeToString(userCredentials.getBytes(),
-				Base64.NO_WRAP);
+		String userCredentials = "";
+		if ((userName.length() != 0) && (password.length() != 0)) {
+			userCredentials = userName + ":" + password;
+		} else {
+			// edu.uiuc.ncsa.cet.bean.tupelo.rbac.Anonymous.USER =
+			// "http://cet.ncsa.uiuc.edu/2007/person/anonymous", id =
+			// "anonymous"
+			// using the constant requires 3 extra jar files, so just using
+			// value
+			userCredentials = "anonymous:none";
+		}
 
-		conn = (HttpURLConnection) url.openConnection();
+		String encodedUsernamePassword = Base64.encodeToString(
+				userCredentials.getBytes(), Base64.NO_WRAP);
 		conn.setRequestProperty("Authorization", "Basic "
 				+ encodedUsernamePassword);
+
 		// make it a post request
 		conn.setDoOutput(true);
 		conn.setDoInput(true);
@@ -41,16 +49,21 @@ public class DataAccess {
 		conn.setRequestProperty("Content-Type",
 				"application/x-www-form-urlencoded");
 		conn.setRequestProperty("Accept", "text/xml");
+		String prepend = "";
+		
+		if((remoteAPIKey != null)&&(remoteAPIKey.length()!=0)) {
+			prepend="remoteAPI=" + remoteAPIKey + "&";
+		}
 
 		OutputStream outputStream = conn.getOutputStream();
-
 		// write a query to contact the server
-		query = "query=" + query;
+		prepend = 	prepend + "query=";
+		query = prepend + query;
 		outputStream.write(query.getBytes());
 
 		outputStream.flush();
 		outputStream.close();
-		//System.out.println("Going to fetch response");
+		// System.out.println("Going to fetch response");
 
 		// Ensure we got the HTTP 200 response code
 		int responseCode = conn.getResponseCode();
@@ -58,6 +71,8 @@ public class DataAccess {
 		case HttpServletResponse.SC_OK:
 			break;
 		case HttpServletResponse.SC_UNAUTHORIZED:
+			throw new HTTPException(responseCode);
+		case HttpServletResponse.SC_FORBIDDEN:
 			throw new HTTPException(responseCode);
 		default:
 			break;
@@ -69,7 +84,7 @@ public class DataAccess {
 
 		Scanner responseScanner = new Scanner(_inputStream);
 		String responseText = responseScanner.useDelimiter("\\A").next();
-		//System.out.println(responseText);
+		// System.out.println(responseText);
 		responseScanner.close();
 
 		_inputStream.close();
