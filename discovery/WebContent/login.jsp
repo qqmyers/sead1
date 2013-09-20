@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title id="home-title">Login</title>
+<title id="home-title">ACR Discovery Login</title>
 <link href="login_css/bootstrap.css" rel="stylesheet">
 <link href="login_css/common.css" rel="stylesheet">
 <style type="text/css">
@@ -77,8 +77,7 @@ legend {
 <script type="text/javascript">
     var projInfo   = '<%=project_info%>';
     var authStatus = '<%=status_code%>';
-    var anon = '<%=isAnonymous%>
-	';
+    var anon = '<%=isAnonymous%>';
 
 	var query = '';
 	$(function() {
@@ -171,6 +170,7 @@ legend {
 							<div class="content">
 								<div class="row">
 									<div class="login-form">
+										<h3>ACR Data Discovery</h3>
 										<h2>Login</h2>
 										<!-- <FORM action="Login" method="post" id='loginForm'>
 											<fieldset> -->
