@@ -30,7 +30,7 @@ public abstract class SparqlQueryServlet extends HttpServlet {
 
 	private String redirectResource = "";
 	private String returnCode = "";
-	private MediciProxy mp = null;
+	private MediciProxy _mp = null;
 
 	protected static Log log = LogFactory.getLog(SparqlQueryServlet.class);
 
@@ -46,22 +46,14 @@ public abstract class SparqlQueryServlet extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		log.debug("Doing Get");
 
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			_mp = (MediciProxy) session.getAttribute("proxy");
+		}
+
 		redirectResource = "";
 		try {
-			HttpSession session = request.getSession(false);
-			mp = (MediciProxy) session.getAttribute("proxy");
-
-			// Get Query from derived class - provide tagID parameter if it
-			// exists
-			String query = getQuery(getTagID(request));
-
-			// Process Query
-			String responseJson = mp.getJSONResponse(query);
-			if (responseJson == null) {
-
-				throw new HTTPException(HttpServletResponse.SC_FORBIDDEN);
-			}
-			handleResult(responseJson, request, response);
+			handleQuery(request, response);
 
 		} catch (HTTPException he) {
 			handleHTTPException(he, response);
@@ -82,6 +74,23 @@ public abstract class SparqlQueryServlet extends HttpServlet {
 		} else {
 			response.flushBuffer();
 		}
+	}
+
+	protected void handleQuery(HttpServletRequest request,
+			HttpServletResponse response) throws HTTPException, Exception {
+
+		MediciProxy mp = getProxy();
+		// Get Query from derived class - provide tagID parameter if it
+		// exists
+		String query = getQuery(getTagID(request));
+
+		// Process Query
+		String responseJson = mp.getJSONResponse(query);
+		if (responseJson == null) {
+
+			throw new HTTPException(HttpServletResponse.SC_FORBIDDEN);
+		}
+		handleResult(responseJson, request, response);
 	}
 
 	protected String getTagID(HttpServletRequest request) {
@@ -123,7 +132,16 @@ public abstract class SparqlQueryServlet extends HttpServlet {
 		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 		response.getWriter().write("error");
 		returnCode = Integer.toString(HttpServletResponse.SC_BAD_REQUEST);
-		
+
+	}
+
+	protected MediciProxy getProxy() throws HTTPException {
+		if(_mp == null) {
+			// _mp is null when we haven't been able to login as anyone (anonymous included) 
+			// to establish a session
+			throw new HTTPException(HttpServletResponse.SC_UNAUTHORIZED);
+		} 
+		return _mp;
 	}
 
 	protected void setRedirectResource(String redirect) {
@@ -131,8 +149,8 @@ public abstract class SparqlQueryServlet extends HttpServlet {
 	}
 
 	protected boolean isAnonymous() {
-		if (mp != null) {
-			return mp.isAnonymous();
+		if (_mp != null) {
+			return _mp.isAnonymous();
 		} else {
 			return (false);
 		}

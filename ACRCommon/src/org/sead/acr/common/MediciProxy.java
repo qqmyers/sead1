@@ -59,7 +59,12 @@ public class MediciProxy {
 
 	public void setCredentials(String username, String password, String server,
 			String remoteAPIKey) throws HTTPException {
+		_username = username;
+		_password = password;
+		_server = server;
+		_remoteAPIKey = remoteAPIKey;
 		try {
+
 			// A dummy query to check if user is authenticated - there is no
 			// token based authentication yet.
 
@@ -68,25 +73,15 @@ public class MediciProxy {
 					query);
 			// If no exception - it worked and all the params should be stored
 			// as valid login info
-			_username = username;
-			_password = password;
-			_server = server;
-			_remoteAPIKey = remoteAPIKey;
 			_validCredentials = true;
 		} catch (HTTPException he) {
 			// Unauthorized or forbidden repsonses should be forwarded so users
 			// can be informed
-			_username = null;
-			_password = null;
-			_server = null;
 			_validCredentials = false;
 			throw (he);
 		} catch (Exception e) {
 			// Some form of IO issue
 			e.printStackTrace();
-			_username = null;
-			_password = null;
-			_server = null;
 			_validCredentials = false;
 		}
 	}
@@ -97,7 +92,9 @@ public class MediciProxy {
 
 	public boolean isAnonymous() {
 		boolean is = false;
+		log.debug("Checking anon");
 		if (_username != null) {
+			log.debug("Uname: " + _username);
 			if (_username.equals("anonymous")) {
 				is = true;
 			}
