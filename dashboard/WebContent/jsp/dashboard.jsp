@@ -22,24 +22,33 @@
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 		<script type="text/javascript" src="js/mimeutil.js"></script>
 		<script type="text/javascript" src="js/dashboard.js"></script>
-		
+
+
+<% 
+String collections = (String) request.getAttribute("collections"); 
+String recentUploads = (String) request.getAttribute("recentUploads");
+String creators = (String) request.getAttribute("creators");
+String projectPath = (String) request.getAttribute("projectPath");
+String datasetDistribution = (String) request.getAttribute("datasetDistribution");
+Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
+%>	
 		
 	</head>
 	<body style="height: 80%; padding-top: 60px;">
 		<div id="hidden_collections" style="display:none">
-			<%= request.getAttribute("collections") %>
+			<%= collections %>
 		</div>
 		<div id="hidden_recentuploads" style="display:none">
-			<%= request.getAttribute("recentUploads") %>
+			<%= recentUploads %>
 		</div>
 		<div id="hidden_creators" style="display:none">
-			<%= request.getAttribute("creators") %>
+			<%= creators %>
 		</div>
 		<div id="hidden_projectPath" style="display:none">
-			<%= request.getAttribute("projectPath") %>
+			<%= projectPath %>
 		</div>
 		<div id="hidden_datasetDistribution" style="display:none">
-			<%= request.getAttribute("datasetDistribution") %>
+			<%= datasetDistribution %>
 		</div>
 		<div class="navbar navbar-inverse navbar-fixed-top" style="border-bottom: 1px solid #888888;">
 			<!-- <div class="navbar-inner"> -->
@@ -58,7 +67,7 @@
 						</div>
 						<div class="gradient">
 							<div><a id="projectLink" class="projectTitle"  href="" title="This system will enable researchers to actively and socially curate and share their own data.">
-												<div id="projectTitle">SEAD ACR Instance</div>
+												<span id="projectTitle">SEAD ACR Instance</span>
 											</a></div>
 						</div>
 
@@ -81,17 +90,17 @@
 					
 					<div class="nav-collapse collapse">
 						<ul class="nav">
-							<li><a href="<%= request.getAttribute("projectPath") %>/#"  target="_blank">Home</a></li>
-							<li><a href="<%= request.getAttribute("projectPath") %>/#listDatasets" target="_blank">Data</a></li>
-							<li><a href="<%= request.getAttribute("projectPath") %>/#listCollections" target="_blank">Collections</a></li>
-							<li><a href="<%= request.getAttribute("projectPath") %>/#tags" target="_blank">Tags</a></li>
-							<li><a href="<%= request.getAttribute("projectPath") %>/#map" target="_blank">Map</a></li>
-							<li><a href="<%= request.getAttribute("projectPath") %>/#upload" target="_blank">Upload</a></li>
-							<li><a href="<%= request.getAttribute("projectPath") %>/#administration" target="_blank">Administration</a></li>
+							<li><a href="<%= projectPath %>/#"  target="_blank">Home</a></li>
+							<li><a href="<%= projectPath %>/#listDatasets" target="_blank">Data</a></li>
+							<li><a href="<%= projectPath %>/#listCollections" target="_blank">Collections</a></li>
+							<li><a href="<%= projectPath %>/#tags" target="_blank">Tags</a></li>
+							<li><a href="<%= projectPath %>/#map" target="_blank">Map</a></li>
+							<li><a href="<%= projectPath %>/#upload" target="_blank">Upload</a></li>
+							<li><a href="<%= projectPath %>/#administration" target="_blank">Administration</a></li>
 							
 						</ul>
 						<ul class="menuElementRight">
-							<li><a href="DoLogout" >Logout</a></li>
+							<li><a href="DoLogout" id='loginout' >Logout</a></li>
 						</ul>	
 					</div>
 						<!--/.nav-collapse -->
@@ -107,12 +116,12 @@
 						<h3>Project Description </h3>
 						<div id="projectInfo" >	
 							<!-- Link will be changed from projectPath to the URL defined in the project configuration -->
-							<a href="<%= request.getAttribute("projectPath") %>" target="_blank" id="projectName" ></a></br></br>
+							<a href="<%= projectPath %>" target="_blank" id="projectName" ></a><br/><br/>
 							<p id="projectDesc" > </p>
 						</div>
 						<!-- <a href="http://usgs.gov" target="_blank">http://usgs.gov</a></br>
 						<a href="http://cuahsi.org" target="_blank">http://cuahsi.org</a></br>
-						<a href="http://wsc-wiki.illinois.edu" target="_blank">http://wsc-wiki.illinois.edu</a> --></br></br></br></br></br>			
+						<a href="http://wsc-wiki.illinois.edu" target="_blank">http://wsc-wiki.illinois.edu</a> --><br/><br/>			
 				</div>
 				<div class="span4" style="width: 50%; height: 100%">
 					<!-- <strong>Select a dataset location at Watershed: LeSeur</strong> -->
@@ -122,10 +131,10 @@
 					</div>
 				</div>
 				<div id="teammembers" class="span4" style="width: 20%; height: 100%; background:#EEEEEE; overflow:auto; padding:0px 10px">				
-						<h3>Team Members</h3></br>
-						Praveen Kumar</br>
-						Charles Nyugen</br>
-						James Myers</br></br></br></br>				
+						<h3>Team Members</h3><br/>
+						Praveen Kumar<br/>
+						Charles Nyugen<br/>
+						James Myers<br/><br/>				
 				</div>
 			</div>
 			<div class="row" style="height: 50%; padding-top: 10px">
@@ -205,6 +214,7 @@
 </body>
 <script>
 	var projInfo = '<%= request.getAttribute("projectInfo") %>';
+	var isAnonymous = '<%= isAnonymous %>';
 	callOnLoad();
 	//$("#table").treetable({ expandable: true });
 </script>

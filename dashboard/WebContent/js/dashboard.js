@@ -293,6 +293,12 @@ function loadProjectInfo(pI) {
 var datasetDistribution;
 
 function callOnLoad() {
+	
+	if(isAnonymous=='true') {
+		//Let user login as someone else
+		$('#loginout').html("Login");
+		$('#loginout').attr("href","");
+	}
 	google.maps.event.addDomListener(window, 'load', initialize);
 
 	google.load("visualization", "1", {
