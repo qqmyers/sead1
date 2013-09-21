@@ -70,7 +70,9 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult.ListQueryItem;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.DatasourceBeanPreprocessor;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
@@ -92,11 +94,11 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
         ListQueryResult queryResult = new ListQueryResult();
 
         long l = System.currentTimeMillis();
-        if (TupeloStore.getInstance().useDatasetTable() && (listquery.getCollection() == null) && (listquery.getTag() == null) && (Cet.DATASET.getString().equals(listquery.getBean()))) {
-            getDatasetUsingTable(listquery, queryResult);
-        } else {
-            getItemsTupelo(listquery, queryResult);
-        }
+        //        if (TupeloStore.getInstance().useDatasetTable() && (listquery.getCollection() == null) && (listquery.getTag() == null) && (Cet.DATASET.getString().equals(listquery.getBean()))) {
+        //            getDatasetUsingTable(listquery, queryResult);
+        //        } else {
+        getItemsTupelo(listquery, queryResult);
+        //        }
         log.info("Items fetch results : " + (System.currentTimeMillis() - l));
 
         return queryResult;
@@ -170,6 +172,10 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
     private void getItemsTupelo(final ListQuery listquery, ListQueryResult queryResult) throws ActionException {
         Unifier u = new Unifier();
 
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        int userlevel = rbac.getUserAccessLevel(Resource.uriRef(listquery.getUser()));
+        int defaultlevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
+
         if (listquery.getCollection() != null) {
             u.addPattern(Resource.uriRef(listquery.getCollection()), DcTerms.HAS_PART, "s");
         }
@@ -196,6 +202,9 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
         u.addColumnName("l");
         u.addPattern("s", Dc.FORMAT, "f", true);
         u.addColumnName("f");
+        String pred = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+        u.addPattern("s", Resource.uriRef(pred), "r", true);
+        u.addColumnName("r");
 
         // limit results
         // TODO this does not work for categories
@@ -204,7 +213,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
         //        }
         //        u.setOffset(listquery.getOffset());
 
-        // s t d1 d2 n a l f
+        // s t d1 d2 n a l f r
 
         // fetch results
         final Map<String, ListQueryItem> map = new HashMap<String, ListQueryItem>();
@@ -217,6 +226,12 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                 if (map.containsKey(row.get(0).getString())) {
                     log.warn("Already contain item for " + row);
                     continue;
+                }
+                if (Cet.DATASET.equals(row.get(1))) {
+                    int datasetlevel = (row.get(8) != null) ? Integer.parseInt(row.get(8).getString()) : defaultlevel;
+                    if (datasetlevel < userlevel) {
+                        continue;
+                    }
                 }
                 ListQueryItem item = new ListQueryItem();
                 map.put(row.get(0).getString(), item);
@@ -253,12 +268,6 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
             }
 
             List<String> uris = new ArrayList<String>(map.keySet());
-            if (log.isDebugEnabled()) {
-                for (String uri : uris ) {
-                    log.debug(uri + " " + map.get(uri).getDate());
-                }
-                log.debug("Sorting : " + listquery.getOrderBy());
-            }
             Collections.sort(uris, new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
@@ -371,12 +380,6 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                     }
                 }
             });
-            if (log.isDebugEnabled()) {
-                log.debug("AFTER");
-                for (String uri : uris ) {
-                    log.debug(uri + " " + map.get(uri).getDate());
-                }
-            }
             queryResult.setTotalCount(uris.size());
             uris = uris.subList(listquery.getOffset(), Math.min(uris.size(), listquery.getOffset() + listquery.getLimit()));
             List<ListQueryItem> items = new ArrayList<ListQueryItem>();

@@ -12,6 +12,13 @@ public enum ConfigurationKey {
     VAURL("va.url", "http://bluespruce.pti.indiana.edu:8181/dcs-nced/query/?q=resourceValue:(%s)"), //$NON-NLS-1$ //$NON-NLS-2$
     // END SEAD SPECIFIC CODE
 
+    // access level
+    AccessLevelLabel("acccess.level.label", "Processing Level"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelPredicate("acccess.level.predicate", "http://www.linkedearth.org/RSIV/ns#hasLevelOfProcessing"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelMin("acccess.level.min", "0"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelMax("acccess.level.max", "4"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelDefault("acccess.level.default", "0"), //$NON-NLS-1$ //$NON-NLS-2$
+
     // project name and description
     ProjectName("project.name", ""), //$NON-NLS-1$
     ProjectDescription("project.description", ""), //$NON-NLS-1$

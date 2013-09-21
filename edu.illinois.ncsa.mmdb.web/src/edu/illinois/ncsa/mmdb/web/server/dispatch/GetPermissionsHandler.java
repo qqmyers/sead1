@@ -12,6 +12,7 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissions;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
@@ -27,8 +28,9 @@ public class GetPermissionsHandler implements ActionHandler<GetPermissions, GetP
 
         try {
             GetPermissionsResult result = new GetPermissionsResult();
-
-            for (Tuple<Resource> row : rbac.getGlobalPermissions() ) {
+            String accessPredicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+            int accessLevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelMax));
+            for (Tuple<Resource> row : rbac.getGlobalPermissions(accessPredicate) ) {
                 Resource role = row.get(0); // the uri of a role
                 Resource permission = row.get(1); // the uri of a permission
                 Resource valueType = row.get(2); // the value type (e.g., ALLOW, DENY, DO_NOT_ALLOW)
@@ -39,6 +41,11 @@ public class GetPermissionsHandler implements ActionHandler<GetPermissions, GetP
                     v = PermissionValue.ALLOW;
                 } else if (valueType.equals(RBAC.DENY)) {
                     v = PermissionValue.DENY;
+                }
+
+                if (!result.getAccessLevel().containsKey(row.get(0).toString())) {
+                    int val = (row.get(5) != null) ? Integer.parseInt(row.get(5).toString()) : accessLevel;
+                    result.getAccessLevel().put(row.get(0).toString(), val);
                 }
 
                 Permission p = null;

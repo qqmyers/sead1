@@ -46,6 +46,7 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
@@ -74,6 +75,7 @@ public class DatasetTablePresenter extends DynamicTablePresenter {
         query.setLimit(getPageSize());
         query.setOffset(offset);
         query.setBean("http://cet.ncsa.uiuc.edu/2007/Dataset");
+        query.setUser(MMDB.getUsername());
         return query;
     }
 

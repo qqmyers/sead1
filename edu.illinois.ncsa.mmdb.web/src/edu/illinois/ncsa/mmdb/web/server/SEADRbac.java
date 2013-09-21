@@ -5,13 +5,19 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
 
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
@@ -19,9 +25,36 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 public class SEADRbac extends RBAC {
+    private static Log log = LogFactory.getLog(SEADRbac.class);
 
     public SEADRbac(Context c) {
         super(c);
+    }
+
+    public int getUserAccessLevel(Resource user) {
+        int accesslevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelMax));
+        String accesspredicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+        if (accesspredicate == null) {
+            return accesslevel;
+        }
+
+        // check role permission
+        Unifier uf = new Unifier();
+        uf.addPattern(user, HAS_ROLE, "role");
+        uf.addPattern("role", Resource.uriRef(accesspredicate), "access");
+        uf.addColumnName("access");
+        try {
+            getContext().perform(uf);
+        } catch (OperatorException e) {
+            log.warn("Could not get roles and access levels.", e);
+        }
+        for (Tuple<Resource> row : uf.getResult() ) {
+            int x = Integer.parseInt(row.get(0).toString());
+            if (x < accesslevel) {
+                accesslevel = x;
+            }
+        }
+        return accesslevel;
     }
 
     public boolean isOwner(Resource user, Resource object) throws RBACException {
@@ -94,6 +127,12 @@ public class SEADRbac extends RBAC {
     }
 
     public void createRole(Resource roleUri, String label, EnumSet<Permission> allows) throws OperatorException {
+        int accesslevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
+        String accesspredicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+        createRole(roleUri, label, allows, accesspredicate, accesslevel);
+    }
+
+    public void createRole(Resource roleUri, String label, EnumSet<Permission> allows, String accesspredicate, int accesslevel) throws OperatorException {
         createRole(roleUri, label);
         for (Permission p : allows ) {
             Resource pu = Resource.uriRef(p.getUri());
@@ -103,6 +142,24 @@ public class SEADRbac extends RBAC {
             Resource pu = Resource.uriRef(p.getUri());
             setPermissionValue(roleUri, pu, RBAC.DO_NOT_ALLOW);
         }
+        if ((accesspredicate != null) && (accesspredicate.trim().length() != 0)) {
+            setAccessLevel(roleUri, Resource.uriRef(accesspredicate), accesslevel);
+        }
+    }
+
+    public void setAccessLevel(Resource uri, Resource accessPredicate, int accesslevel) throws OperatorException {
+        TripleWriter tw = new TripleWriter();
+
+        // remove all levels
+        for (Triple t : TupeloStore.getInstance().getContext().match(uri, accessPredicate, null) ) {
+            tw.remove(t);
+        }
+
+        // add missing level
+        tw.add(new Triple(uri, accessPredicate, Resource.literal(accesslevel)));
+
+        // perform
+        TupeloStore.getInstance().getContext().perform(tw);
     }
 
     /**
@@ -123,8 +180,8 @@ public class SEADRbac extends RBAC {
         }
     }
 
-    public void associatePermissionsWithRoles() throws RBACException, OperatorException {
-        ListTable<Resource> globalPermissions = new ListTable<Resource>(getGlobalPermissions());
+    public void associatePermissionsWithRoles(String accesspredicate, int defaultlevel) throws RBACException, OperatorException {
+        ListTable<Resource> globalPermissions = new ListTable<Resource>(getGlobalPermissions(accesspredicate));
         for (Permission p : Permission.values() ) {
             Set<Resource> missingFrom = new HashSet<Resource>();
             for (Tuple<Resource> row : globalPermissions ) {
@@ -140,6 +197,17 @@ public class SEADRbac extends RBAC {
             }
             for (Resource role : missingFrom ) {
                 setPermissionValue(role, Resource.uriRef(p.getUri()), DO_NOT_ALLOW);
+            }
+        }
+        if ((accesspredicate != null) && (accesspredicate.trim().length() != 0)) {
+            Set<Resource> missingAccessLevel = new HashSet<Resource>();
+            for (Tuple<Resource> row : globalPermissions ) {
+                if (row.get(5) == null) {
+                    missingAccessLevel.add(row.get(0));
+                }
+            }
+            for (Resource role : missingAccessLevel ) {
+                getContext().addTriple(role, Resource.uriRef(accesspredicate), defaultlevel);
             }
         }
     }

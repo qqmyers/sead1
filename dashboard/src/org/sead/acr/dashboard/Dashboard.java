@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -96,15 +93,22 @@ public class Dashboard extends SparqlQueryServlet {
 		request.setAttribute("isAnonymous", super.isAnonymous());
 
 		setRedirectResource("/jsp/dashboard.jsp");
-		
-        response.addHeader("cache-control", "no-store, no-cache, must-revalidate, max-age=-1"); // don't cache
-        response.addHeader("cache-control", "post-check=0, pre-check=0, false"); // really don't cache
-        response.addHeader("pragma", "no-cache, no-store"); // no, we mean it, really don't cache
-        response.addHeader("expires", "-1"); // if you cache, we're going to be very, very angry
+
+		response.addHeader("cache-control",
+				"no-store, no-cache, must-revalidate, max-age=-1"); // don't
+																	// cache
+		response.addHeader("cache-control", "post-check=0, pre-check=0, false"); // really
+																					// don't
+																					// cache
+		response.addHeader("pragma", "no-cache, no-store"); // no, we mean it,
+															// really don't
+															// cache
+		response.addHeader("expires", "-1"); // if you cache, we're going to be
+												// very, very angry
 	}
 
 	protected void handleHTTPException(HTTPException he,
-			HttpServletResponse response)  throws IOException {
+			HttpServletResponse response) throws IOException {
 		super.handleHTTPException(he, response);
 		setRedirectResource("/login");
 	}

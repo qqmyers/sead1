@@ -63,6 +63,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.EditRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ExtractionServiceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GeoSearchHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAccessLevelHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAllTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAllowedValuesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAnnotationsHandler;
@@ -112,11 +113,13 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchWithFilterHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SetAccessLevelHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetConfigurationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetPermissionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandlerNew;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRoleAccessLevelHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetTitleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
@@ -209,6 +212,9 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetItemsBySetHandler());
         DispatchUtil.registerHandler(new GetDatasetsInCollectionHandler());
         DispatchUtil.registerHandler(new DefaultRoleHandler());
+        DispatchUtil.registerHandler(new GetAccessLevelHandler());
+        DispatchUtil.registerHandler(new SetAccessLevelHandler());
+        DispatchUtil.registerHandler(new SetRoleAccessLevelHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

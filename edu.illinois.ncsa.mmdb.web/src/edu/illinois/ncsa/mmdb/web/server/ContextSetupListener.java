@@ -425,7 +425,9 @@ public class ContextSetupListener implements ServletContextListener {
 
         // ensure Medici permissions exist
         rbac.intializePermissions();
-        rbac.associatePermissionsWithRoles();
+        String predicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+        int level = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelMax));
+        rbac.associatePermissionsWithRoles(predicate, level);
 
         //ensure default roles exist
         for (DefaultRole role : DefaultRole.values() ) {

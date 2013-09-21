@@ -38,10 +38,9 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
 
 @SuppressWarnings("serial")
-public class ListQuery implements Action<ListQueryResult> {
+public class ListQuery extends AuthorizedAction<ListQueryResult> {
     private String orderBy;
     private int    limit;
     private int    offset;
