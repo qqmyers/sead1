@@ -43,7 +43,7 @@ import java.util.Map;
 
 import org.tupeloproject.rdf.Resource;
 
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
@@ -56,15 +56,15 @@ import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
  */
 public class PermissionResourceMap {
 
-	private static Map<Permission, Resource> map;
+    private static Map<Permission, Resource> map;
 
-	static {
-		map = new HashMap<Permission, Resource>();
-		map.put(Permission.VIEW_ADMIN_PAGES, MMDB.VIEW_ADMIN_PAGES);
-		map.put(Permission.VIEW_MEMBER_PAGES, MMDB.VIEW_MEMBER_PAGES);
-	}
+    static {
+        map = new HashMap<Permission, Resource>();
+        map.put(Permission.VIEW_ADMIN_PAGES, MMDB.VIEW_ADMIN_PAGES);
+        map.put(Permission.VIEW_MEMBER_PAGES, MMDB.VIEW_MEMBER_PAGES);
+    }
 
-	public static final Resource getResource(Permission permission) {
-		return map.get(permission);
-	}
+    public static final Resource getResource(Permission permission) {
+        return map.get(permission);
+    }
 }

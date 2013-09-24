@@ -81,30 +81,30 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
         //request.setAttribute("userid", PersonBeanUtil.getAnonymousURI().toString());
         //            return null;
         //    }
-        String userid = null;
+        String username = null;
         //Retrieve userid from session if it exists
         HttpSession session = servletRequest.getSession(false);
         if (session != null) {
-            userid = (String) session.getAttribute(AuthenticatedServlet.AUTHENTICATED_AS);
-            log.debug("Found session - Sucessfully authenticated as " + userid);
+            username = (String) session.getAttribute(AuthenticatedServlet.AUTHENTICATED_AS);
+            log.debug("Found session - Sucessfully authenticated as " + username);
         } else if (request.getHttpHeaders().getRequestHeader("Authorization") != null) {
             String token = request.getHttpHeaders().getRequestHeader("Authorization").get(0);
-            if (token != null && ((userid = checkLoggedIn(token)) != null)) {
-                log.debug("Authorization header found - Sucessfully authenticated as " + userid);
+            if (token != null && ((username = checkLoggedIn(token)) != null)) {
+                log.debug("Authorization header found - Sucessfully authenticated as " + username);
             }
         }
-        if (userid == null) {
+        if (username == null) {
             return unauthorizedResponse(request.getPreprocessedPath());
         } else {
-            request.setAttribute("userid", userid);
+            request.setAttribute("userid", username);
 
         }
         //Now determine whether userid is authorized to use the remoteAPI...
 
         SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         try {
-            if (!rbac.checkPermission(userid, Permission.USE_REMOTEAPI)) {
-                log.debug("user: " + userid + "  forbidden");
+            if (!rbac.checkPermission(PersonBeanUtil.getPersonID(username), Permission.USE_REMOTEAPI)) {
+                log.debug("user: " + username + "  forbidden");
                 return forbiddenResponse(request.getPreprocessedPath());
             }
         } catch (RBACException e) {
@@ -112,7 +112,7 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
             return forbiddenResponse(request.getPreprocessedPath());
         }
         //Authenticated user with necessary remoteAPI permission...
-        log.debug("User: " + userid + " successfully authenticated and authorized");
+        log.debug("User: " + username + " successfully authenticated and authorized");
         return (null);
     }
 

@@ -53,125 +53,15 @@ import edu.illinois.ncsa.mmdb.web.server.Authentication;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 public class AuthenticatedServlet extends HttpServlet {
+    /**
+     * 
+     */
+    private static final long  serialVersionUID = -4256332408054511050L;
+
     static Log                 log              = LogFactory.getLog(AuthenticatedServlet.class);
 
     public static final String AUTHENTICATED_AS = "edu.illinois.ncsa.mmdb.web.server.auth.authenticatedAs";
     public static final String SESSION_KEYS     = "edu.illinois.ncsa.mmdb.web.server.auth.sessionKeys";
-
-    /***********************************************
-     * // look up the user's session key.
-     * protected String lookupSessionKey(String userId) {
-     * for (Map.Entry<String, String> entry :
-     * getSessionKeys(getServletContext()).entrySet() ) {
-     * if (userId.equals(entry.getValue())) {
-     * return entry.getKey();
-     * }
-     * }
-     * log.info("LOGIN: no session key found for user " + userId);
-     * return null;
-     * }
-     * 
-     * @SuppressWarnings("unchecked")
-     *                                public static Map<String, String>
-     *                                getSessionKeys(ServletContext context) {
-     *                                // FIXME need a way for session keys to
-     *                                expire so this map doesn't take up more
-     *                                and more memory
-     *                                Map<String, String> sessionKeys =
-     *                                (Map<String, String>)
-     *                                context.getAttribute(SESSION_KEYS);
-     *                                if (sessionKeys == null) {
-     *                                sessionKeys = new HashMap<String,
-     *                                String>();
-     *                                context.setAttribute(SESSION_KEYS,
-     *                                sessionKeys);
-     *                                }
-     *                                return sessionKeys;
-     *                                }
-     * 
-     *                                public static String
-     *                                setSessionKey(ServletContext context,
-     *                                String userId) {
-     *                                String sessionKey =
-     *                                SecureHashMinter.getMinter().mint();
-     *                                log.info("Generated new session key " +
-     *                                sessionKey + " for user " + userId);
-     *                                getSessionKeys(context).put(sessionKey,
-     *                                userId);
-     *                                return sessionKey;
-     *                                }
-     * 
-     *                                public static String
-     *                                getUserId(ServletContext context, String
-     *                                sessionKey) {
-     *                                return
-     *                                getSessionKeys(context).get(sessionKey);
-     *                                }
-     * 
-     *                                public static void
-     *                                clearSessionKey(ServletContext context,
-     *                                String sessionKey) {
-     *                                Map<String, String> sk =
-     *                                getSessionKeys(context);
-     *                                if (sk.containsKey(sessionKey)) {
-     *                                log.debug("Destroying session key " +
-     *                                sessionKey);
-     *                                getSessionKeys(context).remove(sessionKey)
-     *                                ;
-     *                                }
-     *                                }
-     * 
-     *                                public static String
-     *                                getSessionKey(HttpServletRequest request)
-     *                                {
-     *                                if (request.getCookies() == null) {
-     *                                return null;
-     *                                }
-     *                                for (Cookie cookie : request.getCookies()
-     *                                ) {
-     *                                if (cookie.getName().equals("sessionKey"))
-     *                                {
-     *                                return cookie.getValue();
-     *                                }
-     *                                }
-     *                                return null;
-     *                                }
-     * 
-     *                                public void doLogout(HttpServletRequest
-     *                                request, HttpServletResponse response) {
-     *                                log.debug("Logout Path: " +
-     *                                request.getPathInfo());
-     *                                HttpSession session =
-     *                                request.getSession(false);
-     *                                if (session != null) {
-     *                                String userId = (String)
-     *                                session.getAttribute(AUTHENTICATED_AS);
-     *                                session.setAttribute(AUTHENTICATED_AS,
-     *                                null);
-     *                                log.info(userId + " logged out");
-     *                                }
-     * 
-     *                                String sessionKey =
-     *                                getSessionKey(request);
-     *                                if (sessionKey != null) {
-     *                                clearSessionKey(getServletContext(),
-     *                                sessionKey);
-     *                                }
-     *                                //Get rid of sessionKey cookie(s)
-     *                                if (request.getCookies() != null) {
-     *                                for (Cookie cookie : request.getCookies()
-     *                                ) {
-     *                                if (cookie.getName().equals("sessionKey"))
-     *                                {
-     *                                cookie.setValue("");
-     *                                cookie.setPath(request.getContextPath());
-     *                                cookie.setMaxAge(0);
-     *                                response.addCookie(cookie);
-     *                                }
-     *                                }
-     *                                }
-     *                                }
-     *****************************************/
 
     public void doLogout(HttpServletRequest request, HttpServletResponse response) {
         log.debug("Logout Path: " + request.getPathInfo());
