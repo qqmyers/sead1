@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.xml.ws.http.HTTPException;
 
 import org.sead.acr.common.MediciProxy;
@@ -35,7 +34,6 @@ public class Dashboard extends SparqlQueryServlet {
 	protected void handleQuery(HttpServletRequest request,
 			HttpServletResponse response) throws HTTPException, Exception {
 
-		HttpSession session = request.getSession(false);
 		MediciProxy mp = getProxy();
 		String collections = mp
 				.getJSONResponse(Queries.ALL_TOPLEVEL_COLLECTIONS);

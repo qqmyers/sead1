@@ -7,18 +7,14 @@ package org.sead.acr.dashboard;
  * @author Jim
  *
  */
-import org.sead.acr.common.MediciProxy;
 import org.sead.acr.common.SparqlQueryServlet;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.xml.ws.http.HTTPException;
 
 import org.apache.commons.io.IOUtils;
@@ -74,7 +70,7 @@ public class Login extends SparqlQueryServlet {
 		String anonymous = PropertiesLoader.getProperties().getProperty(
 				"enableAnonymous");
 		if ((anonymous != null) && (anonymous.equalsIgnoreCase("true"))) {
-			Boolean anon = super.isAnonymous();
+			boolean anon = super.isAnonymous();
 			request.setAttribute("isAnonymous", anon);
 		}
 
