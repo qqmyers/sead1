@@ -73,6 +73,7 @@ public enum DefaultRole {
                 Permission.DELETE_COLLECTION,
                 Permission.DELETE_RELATIONSHIP,
                 Permission.DELETE_TAG,
+                Permission.DOWNLOAD,
                 Permission.EDIT_COMMENT,
                 Permission.EDIT_COLLECTION,
                 Permission.EDIT_METADATA,
