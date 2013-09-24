@@ -1,0 +1,106 @@
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the     -->
+<!-- browser's rendering engine into                -->
+<!-- "Standards Mode". Replacing this declaration   -->
+<!-- with a "Quirks Mode" doctype is not supported. -->
+
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+<!-- Main CSS for GWT -->
+<link type="text/css" rel="stylesheet" href="Geo_webapp.css">
+
+<!-- OpenLayers CSS -->
+<link rel="stylesheet" href="openlayers/theme/default/style.css"
+	type="text/css">
+
+<title>SEAD Geospatial Visualization</title>
+
+<!-- OpenLayers JS -->
+<script type="text/javascript" language="javascript"
+	src="openlayers/OpenLayers.js"></script>
+<!-- proj4js JS for projection transformation -->
+<script type="text/javascript" language="javascript"
+	src="proj4js/proj4js-compressed.js"></script>
+<!-- stamen layer -->
+<script type="text/javascript"
+	src="http://maps.stamen.com/js/tile.stamen.js?v1.1.1"></script>
+
+<script type="text/javascript" language="javascript"
+	src="geo_webapp/geo_webapp.nocache.js"></script>
+
+</head>
+
+<!--                                           -->
+<!-- The body can have arbitrary html, or      -->
+<!-- you can leave the body empty if you want  -->
+<!-- to create a completely dynamic UI.        -->
+<!--                                           -->
+<body>
+
+	<!-- OPTIONAL: include this if you want history support -->
+	<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1'
+		style="position: absolute; width: 0; height: 0; border: 0"></iframe>
+
+	<!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+	<noscript>
+		<div
+			style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+			Your web browser must have JavaScript enabled in order for this
+			application to display correctly.</div>
+	</noscript>
+
+	<div id="wrapper">
+		<header id="header">
+			<!--<h2>SEAD</h2>
+			Visualizing Geospatial Data from Medici (by using OpenLayers)-->
+			<div id="contentwrapper">
+    			<div id="contentcolumn">
+        			<div id="gradient"><h2>Visualizing Geospatial Data from Medici</h2></div>
+    		</div>
+		</div>
+			<div id="leftcolumn">
+    			<img class="logo" height="40px" border="0" alt="Medici" src="openlayers/img/logo.png">
+			</div>			
+		</header>
+		<!-- #header-->
+
+		<section id="middle">
+			<div id="container">
+					<div id="map" class="smallmap"></div>
+					<div id="info"></div>
+
+			</div>
+			<!-- #container-->
+
+		</section>
+		<!-- #middle-->
+		<section id="middle">
+			<div id="container">
+				<table>
+					<tr>
+						<td valign="top">
+							<div id="tag"></div>
+							<div id="bg"></div>
+						</td>
+						<td>
+							<div id="layers"></div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</section>
+
+		<footer id="footer">
+			<hr>
+			Developed by CET, NCSA
+		</footer>
+		<!-- #footer -->
+
+	</div>
+	<!-- #wrapper -->
+
+
+</body>
+</html>
