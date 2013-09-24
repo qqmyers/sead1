@@ -78,11 +78,8 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
         //remoteAPIKey matches or is not required...
         //Now identify the user
 
-        //request.setAttribute("userid", PersonBeanUtil.getAnonymousURI().toString());
-        //            return null;
-        //    }
         String username = null;
-        //Retrieve userid from session if it exists
+        //Retrieve username from session if it exists
         HttpSession session = servletRequest.getSession(false);
         if (session != null) {
             username = (String) session.getAttribute(AuthenticatedServlet.AUTHENTICATED_AS);
@@ -154,7 +151,7 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
      * Decode token and check against local user database.
      * 
      * @param token
-     * @return the id of the user, or null if it failed
+     * @return the name of the user, or null if it failed
      */
     private String checkLoggedIn(String token) {
         try {
@@ -167,7 +164,7 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
 
                 if ((new Authentication()).authenticate(user, password)) {
                     log.debug("REST Authentication successful");
-                    return PersonBeanUtil.getPersonID(user);
+                    return user;
                 } else {
                     log.debug("REST Authentication failed");
                     return null;
