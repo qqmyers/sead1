@@ -27,7 +27,7 @@ public class AuthFilter implements Filter {
 
 	private static String _propFile;
 	private static String _loginpage;
-	static String _sparql_path = "/resteasy/sparql";
+	
 	private static String _server;
 	private static String _remoteAPIKey;
 
@@ -186,8 +186,7 @@ public class AuthFilter implements Filter {
 		// Find Properties file and retrieve the domain/sparql endpoint of the
 		// remote Medici instance
 		_server = PropertiesLoader.getProperties(_propFile).getProperty(
-				"domain")
-				+ _sparql_path;
+				"domain");
 		log.debug("Server: " + _server);
 		_remoteAPIKey = PropertiesLoader.getProperties(_propFile).getProperty(
 				"remoteAPIKey");

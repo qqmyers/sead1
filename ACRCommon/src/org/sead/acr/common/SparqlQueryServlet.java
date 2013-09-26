@@ -31,7 +31,7 @@ public abstract class SparqlQueryServlet extends HttpServlet {
 	private String redirectResource = "";
 	private String returnCode = "";
 	private MediciProxy _mp = null;
-
+	
 	protected static Log log = LogFactory.getLog(SparqlQueryServlet.class);
 
 	/*
@@ -85,7 +85,7 @@ public abstract class SparqlQueryServlet extends HttpServlet {
 		String query = getQuery(getTagID(request));
 
 		// Process Query
-		String responseJson = mp.getJSONResponse(query);
+		String responseJson = mp.getSparqlJSONResponse("query=" + query);
 		if (responseJson == null) {
 
 			throw new HTTPException(HttpServletResponse.SC_FORBIDDEN);

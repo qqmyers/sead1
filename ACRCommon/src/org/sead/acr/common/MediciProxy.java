@@ -22,11 +22,16 @@ package org.sead.acr.common;
 
 import java.util.Collections;
 
-import org.sead.acr.common.utilities.PropertiesLoader;
-import org.sead.acr.common.utilities.Queries;
 import org.sead.acr.common.utilities.json.JSONException;
 import org.sead.acr.common.utilities.json.JSONObject;
 import org.sead.acr.common.utilities.json.XML;
+import org.sead.acr.common.utilities.PropertiesLoader;
+import org.sead.acr.common.utilities.Queries;
+
+import java.util.Properties;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 import javax.xml.ws.http.HTTPException;
 
@@ -45,16 +50,33 @@ public class MediciProxy {
 	private String _remoteAPIKey = null;
 	private boolean _validCredentials = false;
 
+	private String _geouser = null;
+	private String _geopassword = null;
+	private String _geoserver = null;
+
+	static String _sparql_path = "/resteasy/sparql";
+
 	public MediciProxy() {
-		try {
-			_server = PropertiesLoader.getProperties().getProperty("domain");
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
 	}
 
 	public void setCredentials(String username, String password, String server) {
 		setCredentials(username, password, server, null);
+	}
+
+	/*
+	 * Stub for testing: setCredentials will read the geo credentials from
+	 * properties. This method allows you to set them for testing, but needs to
+	 * do more to test the credentials before it is ready for general use (and
+	 * nominally we'll have sso so a separate username/password won't be needed)
+	 * 
+	 * @deprecated
+	 */
+
+	public void setGeoCredentials(String username, String password,
+			String server) {
+		_geouser = username;
+		_geopassword = password;
+		_geoserver = server;
 	}
 
 	public void setCredentials(String username, String password, String server,
@@ -63,14 +85,26 @@ public class MediciProxy {
 		_password = password;
 		_server = server;
 		_remoteAPIKey = remoteAPIKey;
+
+		// FIXME - should be sso with supplied credentials, and externally
+		// supplied geoserver address, but
+		// hardcoded for now
+		// Optional Geoserver info - may or may not be supplied/required by app
+		if (_geoserver == null) {
+			Properties p = PropertiesLoader.getProperties();
+
+			_geoserver = p.getProperty("geoserver");
+			_geouser = p.getProperty("geouser");
+			_geopassword = p.getProperty("geopassword");
+		}
 		try {
 
 			// A dummy query to check if user is authenticated - there is no
 			// token based authentication yet.
 
-			String query = "SELECT ?p ?o WHERE { <s> ?p ?o . }";
-			DataAccess.getResponse(username, password, server, remoteAPIKey,
-					query);
+			String query = "query=SELECT ?p ?o WHERE { <s> ?p ?o . }";
+			DataAccess.getXMLPostResponse(username, password, server
+					+ _sparql_path, remoteAPIKey, query);
 			// If no exception - it worked and all the params should be stored
 			// as valid login info
 			_validCredentials = true;
@@ -102,9 +136,10 @@ public class MediciProxy {
 		return is;
 	}
 
-	public String getJSONResponse(String query) throws Exception {
-		String responseText = DataAccess.getResponse(_username, _password,
-				_server, _remoteAPIKey, query);
+	public String getSparqlJSONResponse(String query) throws IOException,
+			MalformedURLException, JSONException {
+		String responseText = DataAccess.getXMLPostResponse(_username,
+				_password, _server + _sparql_path, _remoteAPIKey, query);
 
 		// JSONObject responseJSONObject = convertToJsonObject(responseText);
 		// responseText = responseJSONObject.toString();
@@ -119,5 +154,25 @@ public class MediciProxy {
 			log.debug("Response: " + responseText);
 		}
 		return responseText;
+	}
+
+	public String executeAuthenticatedGet(String urlPath, String query)
+			throws IOException, MalformedURLException {
+		String url = _server;
+		if (urlPath != null) {
+			url = url + urlPath;
+		}
+		return DataAccess.getJsonGetResponse(_username, _password, url,
+				_remoteAPIKey, query);
+	}
+
+	public String executeAuthenticatedGeoGet(String urlPath, String query)
+			throws IOException, MalformedURLException {
+		String url = _geoserver;
+		if (urlPath != null) {
+			url = url + urlPath;
+		}
+		return DataAccess.getJsonGetResponse(_geouser, _geopassword, url,
+				_remoteAPIKey, query);
 	}
 }
