@@ -35,12 +35,11 @@ public class Dashboard extends SparqlQueryServlet {
 			HttpServletResponse response) throws HTTPException, Exception {
 
 		MediciProxy mp = getProxy();
-		String collections = mp
-				.getJSONResponse(Queries.ALL_TOPLEVEL_COLLECTIONS);
-		String recentUploads = mp.getJSONResponse(Queries.RECENT_UPLOADS);
-		String creators = mp.getJSONResponse(Queries.TEAM_MEMBERS);
-		String projectInfo = mp.getJSONResponse(Queries.PROJECT_INFO);
-		String datasets = mp.getJSONResponse(Queries.ALL_DATASETS);
+		String collections = mp.getSparqlJSONResponse("query=" +Queries.ALL_TOPLEVEL_COLLECTIONS);
+		String recentUploads = mp.getSparqlJSONResponse("query=" +Queries.RECENT_UPLOADS);
+		String creators = mp.getSparqlJSONResponse("query=" +Queries.TEAM_MEMBERS);
+		String projectInfo = mp.getSparqlJSONResponse("query=" +Queries.PROJECT_INFO);
+		String datasets = mp.getSparqlJSONResponse("query=" +Queries.ALL_DATASETS);
 
 		JSONObject obj = new JSONObject(datasets);
 		Map<String, Integer> map = new HashMap<String, Integer>();
