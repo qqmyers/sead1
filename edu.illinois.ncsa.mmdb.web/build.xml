@@ -43,7 +43,6 @@
 	<property environment="env" />
 
 	<property name="webxml" value="web.xml" />
-		<property name="tupelo" value="/var/lib/hudson/jobs/tupelo/lastSuccessful" />	<available file="${tupelo}" type="dir" property="tupelo.present"/>
 	<property name="deploy" value="/var/lib/tomcat6/webapps" />
 
 	<property name="war" value="${ant.project.name}.war" />
@@ -52,7 +51,7 @@
 	
 	<property name="deprecation" value="true" />
 		
-	<property name="version" value="v1.2.100#${env.BUILD_NUMBER}" />
+	<property name="version" value="v1.2.100#${bamboo.buildNumber}" />
 		
 	<condition property="deps" value=".." else="../plugins">
 		<available file="../edu.uiuc.ncsa.cet.bean/build.properties" />
@@ -77,9 +76,9 @@
 		<delete dir="${war}" />
 	</target>
 
-	<target name="hudson" depends="clean, cetbean, prepare-hudson, mmdb-dev, war" />
+	<target name="bamboo" depends="clean, cetbean-git, prepare-bamboo, sead, war" />
 
-	<target name="prepare-hudson" depends="resources, copy_mmdb_html" description="setup for hudson build and deployment">
+	<target name="prepare-bamboo" depends="resources, copy_mmdb_html" description="setup for bamboo build and deployment">
 		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
 			<filterset>
 				<filter token="VERSION" value="${version}" />
@@ -87,7 +86,7 @@
 		</copy>
 	</target>
 
-	<target name="mmdb-dev" depends="resources" description="setup for hudson build and deployment">
+	<target name="mmdb-dev" depends="resources" description="setup for bamboo build and deployment">
 		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" />
 		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
@@ -96,25 +95,13 @@
 		<replace file="war/WEB-INF/classes/server.properties" token="#hfc.path=" value="hfc.path=/home/medici/medici/data" />
 	</target>
 	
-	<!-- copy the tupelo jar files -->
-	<target name="tupelo" description="Copy the latest tupelo jars" if="tupelo.present">
-		<delete>
-			<fileset dir="war/WEB-INF/lib" includes="**/tupelo*.jar"/>
-		</delete>
-		<copy todir="war/WEB-INF/lib" preservelastmodified="true" overwrite="true" verbose="true" flatten="true">
-			<fileset dir="${tupelo}">
-				<include name="**/tupelo-client-*.jar" />
-				<include name="**/tupelo-jena-*.jar" />
-				<include name="**/tupelo-kernel-*.jar" />
-				<include name="**/tupelo-mysql-*.jar" />
-				<include name="**/tupelo-rdf-ntriples-*.jar" />
-				<include name="**/tupelo-server-*.jar" />
-				<include name="**/tupelo-sparql-*.jar" />
-				<include name="**/tupelo-sql-*.jar" />
-				<include name="**/tupelo-util-*.jar" />
-				<exclude name="**/tupelo*-tests.jar" />
-			</fileset>
-		</copy>
+	<target name="sead" depends="gwtc, resources" description="setup for bamboo build and deployment">
+		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" overwrite="true" />
+		<copy tofile="war/mmdb/public.properties" file="src/sead.public-properties" overwrite="true" />
+		<copy tofile="war/WEB-INF/classes/server.properties" file="src/sead.server-properties" overwrite="true" />
+		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
+		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
+		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
 	</target>
 		
 	<!-- make sure we have the latest beans -->
@@ -153,6 +140,43 @@
 		<!-- remove the temp folder -->
 		<delete dir="beanclass" />
 	</target>
+
+        <!-- make sure we have the latest beans -->
+        <target name="cetbean-git" description="Compile CET beans.">
+                <delete>
+                        <fileset dir="war/WEB-INF/lib" includes="**/cet-bean*.jar"/>
+                </delete>
+
+                <!-- compile the CET beans -->
+                <delete dir="beanclass" />
+                <mkdir dir="beanclass" />
+                <javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
+                        <src path="../../cet/edu.uiuc.ncsa.cet.bean/src" />
+                        <exclude name="**/sdl/**/*.java" />
+                        <exclude name="**/jre/**/*.java" />
+                </javac>
+                <jar jarfile="war/WEB-INF/lib/cet-bean.jar">
+                        <fileset dir="beanclass" />
+                        <fileset dir="../../cet/edu.uiuc.ncsa.cet.bean/src/main/java">
+                                <exclude name="**/sdl/**/*.java" />
+                        </fileset>
+                </jar>
+
+                <!-- compile the CET beans tupelo -->
+                <delete dir="beanclass" />
+                <mkdir dir="beanclass" />
+                <javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
+                        <src path="../../cet/edu.uiuc.ncsa.cet.bean.tupelo/src" />
+                        <classpath>
+                                <fileset dir="war/WEB-INF/lib" includes="*.jar" />
+                        </classpath>
+                        <exclude name="**/sdl/**/*.java" />
+                </javac>
+                <jar jarfile="war/WEB-INF/lib/cet-bean-tupelo.jar" basedir="beanclass" />
+
+                <!-- remove the temp folder -->
+                <delete dir="beanclass" />
+        </target>
 
 	<target name="copy_mmdb_html" unless="mmdb_tmp_exists">
 		<copy file="war/mmdb.html" tofile="war/mmdb.tmp" />
