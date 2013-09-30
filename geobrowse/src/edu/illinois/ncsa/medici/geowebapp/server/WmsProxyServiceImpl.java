@@ -9,20 +9,16 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.sead.acr.common.MediciProxy;
+import org.sead.acr.common.utilities.PropertiesLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import edu.illinois.ncsa.medici.geowebapp.client.service.WmsProxyService;
 import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
@@ -34,38 +30,31 @@ import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
  */
 
 @SuppressWarnings("serial")
-public class WmsProxyServiceImpl extends RemoteServiceServlet implements
+public class WmsProxyServiceImpl extends ProxiedRemoteServiceServlet implements
 		WmsProxyService {
-	private HttpClient httpclient = new DefaultHttpClient();
+	
+	protected static Log log = LogFactory.getLog(WmsProxyServiceImpl.class);
 
+	
 	@Override
 	public LayerInfo[] getCapabilities() {
-		String WMS_URL = "http://sead.ncsa.illinois.edu/geoserver/wms?request=GetCapabilities";
-		String requestUrl = WMS_URL;
-		HttpGet httpget = new HttpGet(requestUrl);
-
-		ResponseHandler<String> responseHandler = new BasicResponseHandler();
-
+		dontCache();
+		
 		try {
-			String responseStr = httpclient.execute(httpget, responseHandler);
-			// System.out.println(responseStr);
+		MediciProxy mp = getProxy();
+		String responseStr = mp.executeAuthenticatedGeoGet("/wms", "request=GetCapabilities");
 			return getLayerInfos(responseStr);
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			invalidateSession();
+			log.warn("Error getting capabilities: " + e);
 		}
 		return null;
 	}
 
 	public LayerInfo[] getLayerInfos(String xml)
 			throws ParserConfigurationException, SAXException, IOException {
+		dontCache();
+		
 		List<LayerInfo> infoList = new ArrayList<LayerInfo>();
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -88,6 +77,9 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 	}
 
 	public LayerInfo getLayerInfo(Node layer) {
+		
+		dontCache();
+		
 		LayerInfo layerInfo = new LayerInfo();
 		NodeList childNodes = layer.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
@@ -121,43 +113,30 @@ public class WmsProxyServiceImpl extends RemoteServiceServlet implements
 				}
 			}
 		}
-		System.out.println("getLayerInfo: " + layerInfo);
+		log.debug("getLayerInfo: " + layerInfo);
 		return layerInfo;
 	}
 
 	@Override
 	public LayerInfo[] getLayers(String tag) {
-		GeoServerRestUtil.server = getServletContext().getInitParameter(
-				"geoserver.host");
-		GeoServerRestUtil.geoserverRestUrl = getServletContext()
-				.getInitParameter("geoserver.rest.url");
-		GeoServerRestUtil.user = getServletContext().getInitParameter(
-				"geoserver.user");
-		GeoServerRestUtil.pw = getServletContext().getInitParameter(
-				"geoserver.pw");
 
-		MediciRestUtil.tagRestUrl = getServletContext().getInitParameter(
-				"medici.rest.url");
-		MediciRestUtil.user = getServletContext().getInitParameter(
-				"medici.user");
-		MediciRestUtil.pw = getServletContext().getInitParameter("medici.pw");
-
+		dontCache();
+		
 		List<LayerInfo> layers = null;
+		
+		try {
 		if (tag == null || tag.trim().equals("")) {
-			layers = GeoServerRestUtil.getLayers();
+			layers = GeoServerRestUtil.getLayers(getProxy());
 		} else {
-			layers = GeoServerRestUtil.getLayersByTag(tag);
+			layers = GeoServerRestUtil.getLayersByTag(tag, getProxy());
 		}
 		return layers.toArray(new LayerInfo[layers.size()]);
+		} catch (Exception e) {
+			invalidateSession();
+			log.warn("Error getting layers: " + e);
+		}
+		return null;
 	}
 
-	@Override
-	public String[] getUrls() {
-		String[] urls = new String[2];
-		urls[0] = getServletContext().getInitParameter("geoserver.wms.url");
-		urls[1] = getServletContext().getInitParameter("medici.dataset.url");
-		
-		return urls;
-	}
 
 }

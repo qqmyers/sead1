@@ -2,99 +2,35 @@ package edu.illinois.ncsa.medici.geowebapp.server;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sead.acr.common.MediciProxy;
+import org.sead.acr.common.utilities.PropertiesLoader;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
 
 public class GeoServerRestUtil {
-	public static String geoserverRestUrl;
-	public static String server;
-	public static String user;
-	public static String pw;
 
-	public static String getStores(String workspaceName) {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		try {
-			httpclient.getCredentialsProvider().setCredentials(
-					new AuthScope(server, 80),
-					new UsernamePasswordCredentials(user, pw));
+	protected static Log log = LogFactory.getLog(GeoServerRestUtil.class);
 
-			HttpGet httpget = new HttpGet(geoserverRestUrl + "/workspaces/"
-					+ workspaceName + "/datastores.json");
 
-			System.out.println("executing request" + httpget.getRequestLine());
-			// HttpResponse response = httpclient.execute(httpget);
-
-			ResponseHandler<String> responseHandler = new BasicResponseHandler();
-			String responseBody = httpclient.execute(httpget, responseHandler);
-			System.out.println(responseBody);
-
-			JSONObject js = new JSONObject(responseBody);
-			JSONObject dataStores = js.getJSONObject("dataStores");
-			JSONArray dataStore = dataStores.getJSONArray("dataStore");
-			System.out.println(dataStore.length());
-			for (int i = 0; i < dataStore.length(); i++) {
-				JSONObject ds = dataStore.getJSONObject(i);
-				System.out.println(ds.getString("name"));
-			}
-
-			// HttpEntity entity = response.getEntity();
-			//
-			// System.out.println("----------------------------------------");
-			// System.out.println(response.getStatusLine());
-			// if (entity != null) {
-			// System.out.println("Response content length: "
-			// + entity.getContentLength());
-			// System.out.println(entity.getc);
-			// }
-			// EntityUtils.consume(entity);
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} finally {
-			// When HttpClient instance is no longer needed,
-			// shut down the connection manager to ensure
-			// immediate deallocation of all system resources
-			httpclient.getConnectionManager().shutdown();
-		}
-
-		return null;
-	}
-
-	public static List<LayerInfo> getLayers() {
+	public static List<LayerInfo> getLayers(MediciProxy mp) throws IOException, JSONException {
 		List<LayerInfo> layerList = new ArrayList<LayerInfo>();
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		try {
-			httpclient.getCredentialsProvider().setCredentials(
-					new AuthScope(server, 80),
-					new UsernamePasswordCredentials(user, pw));
 
-			HttpGet httpget = new HttpGet(geoserverRestUrl + "/layers.json");
-
-			System.out.println("executing request" + httpget.getRequestLine());
-			// HttpResponse response = httpclient.execute(httpget);
-
-			ResponseHandler<String> responseHandler = new BasicResponseHandler();
-			String responseBody = httpclient.execute(httpget, responseHandler);
-			System.out.println(responseBody);
+			String responseBody = mp.executeAuthenticatedGeoGet(
+					"/rest/layers.json", null);
 
 			JSONObject js = new JSONObject(responseBody);
 			JSONObject layers = js.getJSONObject("layers");
@@ -103,95 +39,47 @@ public class GeoServerRestUtil {
 				JSONObject ds = layer.getJSONObject(i);
 				String name = ds.getString("name");
 				if (name != null) {
-					LayerInfo layerInfo = getLayer(name);
+					LayerInfo layerInfo = getLayer(name, mp);
 					if (layerInfo != null) {
 						layerList.add(layerInfo);
 					}
 				}
 			}
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			// When HttpClient instance is no longer needed,
-			// shut down the connection manager to ensure
-			// immediate deallocation of all system resources
-			httpclient.getConnectionManager().shutdown();
-		}
+
 
 		return layerList;
 	}
 
-	public static Map<String, LayerInfo> getLayerUriMap() {
+	public static Map<String, LayerInfo> getLayerUriMap(MediciProxy mp)  throws IOException, JSONException{
 		// uri, name
 		Map<String, LayerInfo> uriToNameMap = new HashMap<String, LayerInfo>();
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		try {
-			httpclient.getCredentialsProvider().setCredentials(
-					new AuthScope(server, 80),
-					new UsernamePasswordCredentials(user, pw));
 
-			HttpGet httpget = new HttpGet(geoserverRestUrl + "/layers.json");
 
-			System.out.println("executing request" + httpget.getRequestLine());
-			// HttpResponse response = httpclient.execute(httpget);
-
-			ResponseHandler<String> responseHandler = new BasicResponseHandler();
-			String responseBody = httpclient.execute(httpget, responseHandler);
-			// System.out.println(responseBody);
+			String responseBody = mp.executeAuthenticatedGeoGet(
+					"/rest/layers.json", null);
 
 			JSONObject js = new JSONObject(responseBody);
 			JSONObject layers = js.getJSONObject("layers");
 			JSONArray layer = layers.getJSONArray("layer");
-			System.out.println(layer.length());
+			log.debug(layer.length());
 			for (int i = 0; i < layer.length(); i++) {
 				JSONObject ds = layer.getJSONObject(i);
 				String name = ds.getString("name");
 				if (name != null) {
-					LayerInfo layerInfo = getLayer(name);
+					LayerInfo layerInfo = getLayer(name, mp);
 					if (layerInfo != null) {
 						uriToNameMap.put(layerInfo.getUri(), layerInfo);
 					}
 				}
 			}
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			// When HttpClient instance is no longer needed,
-			// shut down the connection manager to ensure
-			// immediate deallocation of all system resources
-			httpclient.getConnectionManager().shutdown();
-		}
-
 		return uriToNameMap;
 	}
 
-	public static LayerInfo getLayer(String name) {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+	public static LayerInfo getLayer(String name, MediciProxy mp)  throws IOException, JSONException {
 		LayerInfo layerInfo = null;
-		try {
-			httpclient.getCredentialsProvider().setCredentials(
-					new AuthScope(server, 80),
-					new UsernamePasswordCredentials(user, pw));
-
-			HttpGet httpget = new HttpGet(geoserverRestUrl + "/layers/" + name
-					+ ".json");
-
-			System.out.println("Getting layer [" + name + "]: "
-					+ httpget.getRequestLine());
-			// HttpResponse response = httpclient.execute(httpget);
-
-			ResponseHandler<String> responseHandler = new BasicResponseHandler();
-			String responseBody = httpclient.execute(httpget, responseHandler);
+	
+			String responseBody = mp.executeAuthenticatedGeoGet("/rest/layers/"
+					+ name + ".json", null);
 
 			JSONObject js = new JSONObject(responseBody);
 			JSONObject layer = js.getJSONObject("layer");
@@ -199,6 +87,7 @@ public class GeoServerRestUtil {
 			String type = layer.getString("type");
 			String href = resource.getString("href");
 
+			String relHref = getRelativeFromHref(href);
 			String uri = getURIfromHref(href);
 
 			if (uri != null) {
@@ -207,10 +96,10 @@ public class GeoServerRestUtil {
 				layerInfo.setUri(uri);
 
 				// getting lat lon bounding box
-				httpget = new HttpGet(href);
-				System.out.println("Getting featureType/coverage [" + name
-						+ "]: " + httpget.getRequestLine());
-				responseBody = httpclient.execute(httpget, responseHandler);
+				log.debug("Getting featureType/coverage [" + name + "]: "
+						+ relHref);
+
+				responseBody = mp.executeAuthenticatedGeoGet(relHref, null);
 
 				js = new JSONObject(responseBody);
 				JSONObject dataStore = null;
@@ -226,22 +115,23 @@ public class GeoServerRestUtil {
 				layerInfo.setMaxx(latLongBBox.getDouble("maxx"));
 				layerInfo.setMiny(latLongBBox.getDouble("miny"));
 				layerInfo.setMaxy(latLongBBox.getDouble("maxy"));
-				System.out.println(name + ", " + uri);
+				log.debug(name + ", " + uri);
 			}
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} finally {
-			// When HttpClient instance is no longer needed,
-			// shut down the connection manager to ensure
-			// immediate deallocation of all system resources
-			httpclient.getConnectionManager().shutdown();
-		}
-
 		return layerInfo;
+	}
+
+	private static String getRelativeFromHref(String href) {
+		String rel = null;
+		String server = PropertiesLoader.getProperties().getProperty(
+				"geoserver");
+		if (href.indexOf(server) == 0) {
+			rel = href.substring(server.length());
+		} else {
+			log.warn("href of layer does not match geoserver URL");
+			log.warn("href:" +  href);
+			log.warn("geoserver URL: " + server);
+		}
+		return rel;
 	}
 
 	public static String getURIfromHref(String href) {
@@ -267,16 +157,16 @@ public class GeoServerRestUtil {
 		return null;
 	}
 
-	public static List<LayerInfo> getLayersByTag(String tag) {
+	public static List<LayerInfo> getLayersByTag(String tag, MediciProxy mp)   throws IOException, JSONException {
 		List<LayerInfo> layers = new ArrayList<LayerInfo>();
 
 		// getting URIs by tag
-		List<String> urisByTag = MediciRestUtil.getUrisByTag(tag);
+		List<String> urisByTag = MediciRestUtil.getUrisByTag(tag, mp);
 		if (urisByTag.isEmpty())
 			return layers;
 
 		// getting layers with uri
-		Map<String, LayerInfo> layerMap = getLayerUriMap();
+		Map<String, LayerInfo> layerMap = getLayerUriMap(mp);
 		if (layerMap.isEmpty())
 			return layers;
 
@@ -288,63 +178,14 @@ public class GeoServerRestUtil {
 		return layers;
 	}
 
-	// public static String getLayers() {
-	// String responseStr = null;
-	//
-	// String requestUrl = URL + "/layers.json";
-	//
-	// DefaultHttpClient httpclient = new DefaultHttpClient();
-	//
-	// String encoding = (String) Base64.encode("test1:test1");
-	// HttpPost httppost = new HttpPost("http://host:post/test/login");
-	// httppost.setHeader("Authorization", "Basic " + encoding);
-	//
-	// System.out.println("executing request " + httppost.getRequestLine());
-	// HttpResponse response = httpclient.execute(httppost);
-	// HttpGet httpget = new HttpGet(requestUrl);
-	//
-	// ResponseHandler<String> responseHandler = new BasicResponseHandler();
-	// try {
-	//
-	// // httpclient.getCredentialsProvider().setCredentials(
-	// // new AuthScope(targetHost.getHostName(),
-	// // targetHost.getPort()),
-	// // new UsernamePasswordCredentials("admin", "NCSAsead"));
-	//
-	// // Create AuthCache instance
-	// // AuthCache authCache = new BasicAuthCache();
-	// // Generate BASIC scheme object and add it to the local auth cache
-	// // BasicScheme basicAuth = new BasicScheme();
-	// // authCache.put(targetHost, basicAuth);
-	//
-	// // Add AuthCache to the execution context
-	// BasicHttpContext localcontext = new BasicHttpContext();
-	// // localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-	//
-	// HttpResponse response = httpclient.execute(targetHost, httpget,
-	// localcontext);
-	// return responseStr;
-	// } catch (ClientProtocolException e) {
-	// e.printStackTrace();
-	// } catch (IOException e) {
-	// e.printStackTrace();
-	// } finally {
-	// try {
-	// httpclient.getConnectionManager().shutdown();
-	// return responseStr;
-	// } catch (Exception ignore) {
-	// }
-	// }
-	// return null;
-	// }
-	//
-	// public static void main(String[] args) {
-	// System.out.println(getLayers());
-	// }
 	public static void main(String[] args) throws Exception {
-		List<LayerInfo> layersByTag = getLayersByTag("angelo");
+		MediciProxy mp = new MediciProxy();
+		mp.setGeoCredentials("admin", "password",
+				"http://sead.ncsa.illinois.edu/geoserver");
+
+		List<LayerInfo> layersByTag = getLayersByTag("angelo", mp);
 		for (LayerInfo l : layersByTag) {
-			System.out.println(l.getName());
+			log.debug(l.getName());
 		}
 	}
 }

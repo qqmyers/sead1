@@ -23,7 +23,7 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH 
 	THE SOFTWARE. -->
 
-<project name="GeoDash" default="war" basedir=".">
+<project name="geobrowse" default="war" basedir=".">
 
 	<property environment="env" />
 
@@ -48,6 +48,7 @@
 
 	<target name="clean" description="deletes all generated files">
 		<delete dir="war/WEB-INF/classes" />
+				<delete dir="war/geobrowse" />
 		<delete file="${war}" />
 	</target>
 
@@ -77,6 +78,7 @@
 			fork="true" failonerror="true">
 			<jvmarg value="-Xms256m" />
 			<jvmarg value="-Xmx512m" />
+			<!-- <arg line="-strict" /> -->
 			<!-- <arg line="-style OBFUSCATE" /> -->
 			<arg value="edu.illinois.ncsa.medici.geowebapp.Geo_webapp" />
 		</java>

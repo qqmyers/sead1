@@ -57,15 +57,19 @@ import edu.illinois.ncsa.medici.geowebapp.client.event.LayerOpacityChangeEvent;
 import edu.illinois.ncsa.medici.geowebapp.client.event.LayerOpacityChangeHandler;
 import edu.illinois.ncsa.medici.geowebapp.client.event.LayerVisibilityChangeEvent;
 import edu.illinois.ncsa.medici.geowebapp.client.event.LayerVisibilityChangeHandler;
+import edu.illinois.ncsa.medici.geowebapp.client.service.AuthenticationService;
+import edu.illinois.ncsa.medici.geowebapp.client.service.AuthenticationServiceAsync;
 import edu.illinois.ncsa.medici.geowebapp.client.service.MediciProxyService;
 import edu.illinois.ncsa.medici.geowebapp.client.service.MediciProxyServiceAsync;
 import edu.illinois.ncsa.medici.geowebapp.client.service.WmsProxyService;
 import edu.illinois.ncsa.medici.geowebapp.client.service.WmsProxyServiceAsync;
 import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
+import edu.illinois.ncsa.medici.geowebapp.client.LoginPage;
 
 /**
  * 
  * @author Jong Lee <jonglee1@illinois.edu>
+ * @author Jim Myers <myersjd@umich.edu>
  * 
  */
 
@@ -82,6 +86,9 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	private final MediciProxyServiceAsync mediciProxySvc = (MediciProxyServiceAsync) GWT
 			.create(MediciProxyService.class);
 
+	private final AuthenticationServiceAsync authSvc = (AuthenticationServiceAsync) GWT
+			.create(AuthenticationService.class);
+
 	private MapWidget mapWidget;
 
 	private Map map;
@@ -91,6 +98,10 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	private SuggestBox tagTextBox;
 
 	private String tag;
+
+	private LoginStatusWidget lsw = null;
+
+	private LoginPage lp = null;
 
 	public static EventBus eventBus = GWT.create(SimpleEventBus.class);
 
@@ -120,10 +131,65 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			@Override
 			public void onResize(ResizeEvent event) {
 				int newWidth = RootPanel.get("map").getOffsetWidth();
-				mapWidget.setWidth((newWidth - 2) + "px");
+				if (mapWidget != null) {
+					mapWidget.setWidth((newWidth - 2) + "px");
+				}
 			}
 		});
 
+		History.addValueChangeHandler(this);
+
+		authSvc.getUsername(new AsyncCallback<String>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// Could not contact server
+				fail();
+			}
+
+			@Override
+			public void onSuccess(String result) {
+				final String name = result;
+				authSvc.getUrls(new AsyncCallback<String[]>() {
+
+					@Override
+					public void onSuccess(String[] result) {
+						wmsUrl = result[0];
+						mediciUrl = result[1];
+						lsw = new LoginStatusWidget();
+						RootPanel.get("loginMenu").add(lsw);
+						setLoginState(name, null);
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
+						fail();
+					}
+				});
+
+			}
+		});
+	}
+
+	void setLoginState(String name, String status) {
+		if (name == null) {
+			// No valid user, can't be anonymous, or anonymous is
+			// forbidden
+			lsw.loggedOut();
+			showLoginPage(status);
+		} else {
+			if (name.equals("anonymous")) {
+				lsw.loggedOut();
+			} else {
+				lsw.loggedIn(name);
+			}
+			cleanApp();
+			buildTagPanel();
+
+		}
+	}
+
+	private void buildTagPanel() {
 		mediciProxySvc.getTags(new AsyncCallback<String[]>() {
 			@Override
 			public void onSuccess(String[] result) {
@@ -138,26 +204,23 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 					tagPanel = createTagPanel();
 				}
 				RootPanel.get("tag").add(tagPanel);
+				FlowPanel dp2 = createBgSwitchPanel();
+				RootPanel.get("bg").add(dp2);
+				History.fireCurrentHistoryState();
 			}
 
 			@Override
 			public void onFailure(Throwable caught) {
-				FlowPanel tagPanel = createTagPanel();
-				RootPanel.get("tag").add(tagPanel);
+				fail();
 			}
 		});
-
-		FlowPanel dp2 = createBgSwitchPanel();
-		RootPanel.get("bg").add(dp2);
-
-		History.addValueChangeHandler(this);
-		History.fireCurrentHistoryState();
 
 	}
 
 	private void buildMapUi(String tag) {
-		System.out.println("** Clean up ***");
+		GWT.log("** Clean up ***");
 		cleanApp();
+		RootPanel.get("map").setVisible(true);
 		String encodedTag = null;
 		if (tag != null)
 			encodedTag = URL.encode(tag);
@@ -166,7 +229,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			public void onSuccess(LayerInfo[] result) {
 				if (result != null) {
 					// showMap(result);
-					System.out.println("** Building UI ***");
+					GWT.log("** Building UI ***");
 					buildGwtmap(result);
 
 					FlowPanel dp = createLayerSwitcher(result);
@@ -178,8 +241,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				System.out.println("ERROR");
-
+				fail();
 			}
 		});
 	}
@@ -188,7 +250,29 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		RootPanel.get("layers").clear();
 		RootPanel.get("info").clear();
 		RootPanel.get("map").clear();
+		if (lp != null) {
+			lp.removeFromParent();
+		}
+	}
 
+	private void showLoginPage(String status) {
+		// loginStatusWidget.loggedOut();
+		cleanApp();
+		RootPanel.get("map").setVisible(false);
+		RootPanel.get("tag").clear();
+		RootPanel.get("bg").clear();
+		if (lp == null) {
+			lp = new LoginPage(this, status);
+		}
+		RootPanel.get("middle").add(lp);
+	}
+
+	public AuthenticationServiceAsync getAuthSvc() {
+		return authSvc;
+	}
+
+	public LoginStatusWidget getLoginStatusWidget() {
+		return lsw;
 	}
 
 	protected FlowPanel createTagPanel(MultiWordSuggestOracle oracle) {
@@ -212,7 +296,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(tagTextBox.getText());
+				History.newItem("tag_" + tagTextBox.getText());
 				// buildMapUi(sb.getText());
 			}
 		});
@@ -271,7 +355,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		vp.add(new HTML("<h3>Background map:</h3>"));
 		vp.add(new HTML("<hr>"));
 
-		
 		ListBox lb = new ListBox();
 		lb.addItem("Open Street Map", "osm");
 		lb.addItem("Toner Style", "toner");
@@ -326,9 +409,9 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	protected FlowPanel createLayerSwitcher(LayerInfo[] result) {
 		List<String> layerNames = getLayerNames(result);
 		FlowPanel dp = new FlowPanel();
-		
-//		DecoratorPanel dp = new DecoratorPanel();
-		
+
+		// DecoratorPanel dp = new DecoratorPanel();
+
 		dp.setWidth("100%");
 		dp.setHeight("100%");
 
@@ -387,21 +470,23 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 					HasVerticalAlignment.ALIGN_TOP);
 
 			VerticalPanel titlePanel = createLayerTitle(result[i]);
-			
-//			DisclosurePanel namePanel = new DisclosurePanel(name);
-//
-//			// String href =
-//			// "http://sead.ncsa.illinois.edu/#dataset?id="+result[i].getUri();
-//			// namePanel.setHeader(new Anchor(name, href));
-//
-//			VerticalPanel legendPanel = new VerticalPanel();
-//			String url = wmsUrl
-//					+ "?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
-//					+ name;
-//			Image img = new Image(url);
-//
-//			legendPanel.add(img);
-//			namePanel.add(legendPanel);
+
+			// DisclosurePanel namePanel = new DisclosurePanel(name);
+			//
+			// // String href =
+			// //
+			// "http://sead.ncsa.illinois.edu/#dataset?id="+result[i].getUri();
+			// // namePanel.setHeader(new Anchor(name, href));
+			//
+			// VerticalPanel legendPanel = new VerticalPanel();
+			// String url = wmsUrl
+			// +
+			// "?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
+			// + name;
+			// Image img = new Image(url);
+			//
+			// legendPanel.add(img);
+			// namePanel.add(legendPanel);
 
 			ft.setWidget(currentRow, 2, titlePanel);
 		}
@@ -424,8 +509,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		final Image open = new Image("images/downarrow.png");
 		open.setVisible(false);
 
-		String htmlString = "<a href='" + mediciUrl + layer.getUri()
-				+ "' target='new'>" + layer.getName() + "</a>";
+		String htmlString = "<a href='" + getMediciUrl() + "/#dataset?id="
+				+ layer.getUri() + "' target='new'>" + layer.getName() + "</a>";
 		HTML title = new HTML(htmlString);
 
 		hp.add(close);
@@ -525,7 +610,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		map.addLayer(baseLayer);
 		map.setBaseLayer(baseLayer);
 		Layer bl = map.getBaseLayer();
-		System.out.println(bl.getName());
+		GWT.log(bl.getName());
 
 		baseLayer.redraw();
 	}
@@ -551,7 +636,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		// defaultMapOptions.setAllOverlays(true);
 
 		mapWidget = new MapWidget((RootPanel.get("map").getOffsetWidth() - 2)
-				+ "px", "500px", defaultMapOptions);
+				+ "px", "400px", defaultMapOptions);
 		map = mapWidget.getMap();
 
 		baseLayer = new OSM();
@@ -564,11 +649,10 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			Bounds orgBnd = new Bounds(layerInfo.getMinx(),
 					layerInfo.getMiny(), layerInfo.getMaxx(),
 					layerInfo.getMaxy());
-			// System.out.println("Original bounds: " + orgBnd);
+
 			Bounds newBnd = orgBnd.transform(new Projection(EPSG_4326),
 					new Projection(EPSG_900913));
-			// System.out.println("New bounds: " + newBnd);
-			System.out.println("adding layers: " + name + " " + newBnd);
+			GWT.log("adding layers: " + name + " " + newBnd);
 			WMSOptions options = new WMSOptions();
 			options.setProjection(EPSG_900913);
 			options.setLayerOpacity(0.8);
@@ -583,15 +667,9 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 				box = newBnd;
 
 			box.extend(newBnd);
-			// System.out.println("box: " + box);
 
 			map.addLayer(wms);
 		}
-		// System.out.println(box);
-		// Bounds bbox = new Bounds(-14376519.92, 2908438.48, -7155972.48,
-		// 6528496.14);
-		// map.zoomToMaxExtent();
-		// map.addControl(new LayerSwitcher());
 
 		RootPanel.get("map").add(mapWidget);
 		if (box == null)
@@ -605,77 +683,73 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	public void onValueChange(ValueChangeEvent<String> event) {
 
 		String historyToken = event.getValue();
+		if (historyToken.startsWith("login")) {
+			History.newItem("", false);
+			showLoginPage(null);
 
-		String[] tokens = historyToken.split("/");
-		tag = null;
-		if (tokens != null) {
-			tag = URL.decode(tokens[0]);
-		}
-		if (tagTextBox != null && tag != null) {
-			tagTextBox.setText(tag);
-		}
-		wmsProxySvc.getUrls(new AsyncCallback<String[]>() {
-
-			@Override
-			public void onSuccess(String[] result) {
-				wmsUrl = result[0];
-				mediciUrl = result[1];
-				buildMapUi(tag);
+		} else if (historyToken.startsWith("logout")) {
+			// push history...
+			History.newItem("", false);
+			tag=null;
+			if (tagTextBox != null) {
+				tagTextBox.setText("");
 			}
+			authSvc.logout(new AsyncCallback<Void>() {
 
-			@Override
-			public void onFailure(Throwable caught) {
-				buildMapUi(tag);
+				@Override
+				public void onFailure(Throwable caught) {
+					fail();
+				}
+
+				@Override
+				public void onSuccess(Void result) {
+
+					authSvc.getUsername(new AsyncCallback<String>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+							fail();
+						}
+
+						@Override
+						public void onSuccess(String result) {
+							RootPanel.get("tag").clear();
+							RootPanel.get("bg").clear();
+							setLoginState(result, null);
+						}
+
+					});
+				}
+
+			});
+		} else {
+			tag = null;
+
+			if (historyToken.startsWith("tag_")) {
+				String[] tokens = historyToken.substring("tag_".length())
+						.split("/");
+				if (tokens != null) {
+					tag = URL.decode(tokens[0]);
+				}
+				if (tagTextBox != null && tag != null) {
+					tagTextBox.setText(tag);
+				}
 			}
-		});
+			buildMapUi(tag);
+		}
 
 	}
 
-	// public Bounds getLayerExtent(Layer layer) {
-	// return Bounds.narrowToBounds(getLayerExtentImpl(layer.getJSObject()));
-	// }
-	//
-	// public native JSObject getLayerExtentImpl(JSObject layer) /*-{
-	// $wnd.alert("hello " + layer.getDataExtent());
-	// return layer.getDataExtent();
-	// }-*/;
-	//
-	// public native void showMap(String layerNamesStr) /*-{
-	// var wms;
-	// layers = new Array();
-	// $wnd.map = new $wnd.OpenLayers.Map({
-	// div : 'map',
-	// projection : new $wnd.OpenLayers.Projection("EPSG:900913")
-	// });
-	//
-	// $wnd.map.addControl(new $wnd.OpenLayers.Control.MousePosition());
-	// //$wnd.map.addControl(new $wnd.OpenLayers.Control.LayerSwitcher());
-	// // $wnd.bg = new $wnd.OpenLayers.Layer.OSM("Open Street Map");
-	// $wnd.bg = new $wnd.OpenLayers.Layer.Stamen("terrain");
-	//
-	// $wnd.map.addLayer($wnd.bg);
-	//
-	// var layerNames = layerNamesStr.split(",");
-	// var infoControls = new Array();
-	//
-	// var defaultLayer = layerNames[layerNames.length - 1];
-	//
-	// for ( var i = 0; i < layerNames.length; i++) {
-	// var n = layerNames[i];
-	// layers[n] = new $wnd.OpenLayers.Layer.WMS(n,
-	// "http://sead.ncsa.illinois.edu/geoserver/wms", {
-	// layers : n,
-	// transparent : true
-	// }, {
-	// opacity : 1.0
-	// });
-	// $wnd.map.addLayer(layers[n]);
-	//
-	// }
-	//
-	// var bbox = new $wnd.OpenLayers.Bounds(-14376519.92, 2908438.48,
-	// -7155972.48, 6528496.14);
-	// $wnd.map.zoomToExtent(bbox);
-	// }-*/;
+
+	private void fail() {
+		Window.alert("Could not retrieve data from repository - try later or contact your administrator.");
+		GWT.log("Service call failure");
+		History.newItem("logout", true);
+
+	}
+
+	public static String getMediciUrl() {
+		return mediciUrl;
+	}
 
 }

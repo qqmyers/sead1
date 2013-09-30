@@ -7,7 +7,7 @@ import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
 /**
  * 
  * @author Jong Lee <jonglee1@illinois.edu>
- *
+ * 
  */
 
 public interface WmsProxyServiceAsync {
@@ -15,7 +15,5 @@ public interface WmsProxyServiceAsync {
 	void getCapabilities(AsyncCallback<LayerInfo[]> callback);
 
 	void getLayers(String tag, AsyncCallback<LayerInfo[]> callback);
-
-	void getUrls(AsyncCallback<String[]> callback);
 
 }
