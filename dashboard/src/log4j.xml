@@ -23,11 +23,11 @@
       </layout>
    </appender>
  
-   <logger name="org.sead.acr.common.auth.AuthFilter" additivity="false" >
+   <logger name="org.sead.acr.common" additivity="false" >
       <level value="INFO" />
       <appender-ref ref="consoleAppender"/>
    </logger>
-    <logger name="org.sead.acr.common.MediciProxy" additivity="false" >
+    <logger name="org.sead.acr.dashboard" additivity="false" >
       <level value="INFO" />
       <appender-ref ref="consoleAppender"/>
    </logger>

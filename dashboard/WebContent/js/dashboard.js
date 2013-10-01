@@ -74,10 +74,10 @@ function loadTableContent() {
 					uri = jsonBinding[j]['uri'];
 				} else if (value == 'title') {
 					title = jsonBinding[j]['literal'];
-					displayTitle = title;
-					if (title.indexOf("/") != -1) {
-						displayTitle = title
-								.substring(title.lastIndexOf("/") + 1);
+					displayTitle = String(title);
+					if (displayTitle.indexOf("/") != -1) {
+						displayTitle = displayTitle
+								.substring(displayTitle.lastIndexOf("/") + 1);
 					}
 				} else if (value == 'deleted') {
 					isDeleted = jsonBinding[j]['uri'];
@@ -161,10 +161,11 @@ function loadRecentUploads() {
 					uri = jsonBinding[j]['uri'];
 				} else if (value == 'title') {
 					title = jsonBinding[j]['literal'];
-					displayTitle = title;
-					if (title.indexOf("/") != -1) {
-						displayTitle = title
-								.substring(title.lastIndexOf("/") + 1);
+					//Medici can return numbers, booleans,etc. as well as strings if the titles are, e.g. "42", "true", etc.
+					displayTitle = String(title);
+					if (displayTitle.indexOf("/") != -1) {
+						displayTitle = displayTitle
+								.substring(displayTitle.lastIndexOf("/") + 1);
 					}
 				} else if (value == 'creator') {
 					creator = jsonBinding[j]['uri'];
@@ -299,12 +300,6 @@ function callOnLoad() {
 		$('#loginout').html("Login");
 		$('#loginout').attr("href","");
 	}
-	google.maps.event.addDomListener(window, 'load', initialize);
-
-	google.load("visualization", "1", {
-		packages : [ "corechart" ]
-	});
-	google.setOnLoadCallback(drawChart);
 	projectPath = $('#hidden_projectPath').html().trim();
 	getTeamMembers();
 	loadRecentUploads();
@@ -366,12 +361,12 @@ function callOnLoad() {
 
 																	} else if (value == 'title') {
 																		title = jsonBinding[j]['literal'];
-																		displayTitle = title;
+																		displayTitle = String(title);
 
-																		if (title
+																		if (displayTitle
 																				.indexOf("/") != -1) {
-																			displayTitle = title
-																					.substring(title
+																			displayTitle = displayTitle
+																					.substring(displayTitle
 																							.lastIndexOf("/") + 1);
 																		}
 
@@ -476,10 +471,22 @@ function callOnLoad() {
 
 										table.treetable("loadBranch", node,
 												rows);
-										drawChart();
+										try {
+											drawChart();
+										} catch (err) {
+											//Google chart isn't working...
+										}	
 									});
 				}
 			});
 
 	loadProjectInfo(projInfo);
+	//Put at the end - if this fails to load, app still ~works (yes google went down and broke our app one day)
+	google.maps.event.addDomListener(window, 'load', initialize);
+
+	google.load("visualization", "1", {
+		packages : [ "corechart" ]
+	});
+	google.setOnLoadCallback(drawChart);
+
 }
