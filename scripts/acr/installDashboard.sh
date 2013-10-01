@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#SEAD Dashboard installer - remote mode not yet tested
 
 usage()
 {
@@ -30,7 +31,7 @@ if [ $UID != 0 ]; then
   echo "Please run this script as root."
   echo
   usage
-echo exit 1
+  exit 1
 fi
 
 server=
@@ -101,9 +102,9 @@ if [ "$verbose" ]; then
 fi	
 
 if [ "$server" ]; then
-	echo ssh $server '/etc/init.d/tomcat6 stop'
+	ssh $server '/etc/init.d/tomcat6 stop'
 else	
-	echo /etc/init.d/tomcat6 stop
+	/etc/init.d/tomcat6 stop
 fi	
 
 	
@@ -115,11 +116,12 @@ if [ "$verbose" ]; then
 fi	
 
 if [ "$server" ]; then
-	echo  ssh $server 'rm -rf /var/lib/tomcat6/webapps/{dashboard,projectsummary,summary}'
+	ssh $server 'rm -rf /var/lib/tomcat6/webapps/{dashboard,projectsummary,summary}'
 else
 	rm -rf dashboard
 fi
 
+echo 
 if [ -e "dashboard.war" ]; then
 	if [ "$verbose" ]; then
 		echo 'Found local dashboard.war...'
@@ -128,7 +130,7 @@ else
 	if [ "$verbose" ]; then
 		echo 'Retrieving dashboard.war from Stash ...'
 	fi	
-	echo wget -q -O dashboard.war https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/mmdb-gwt/browse/scripts/acr/dashboard.war?at=refs%2Fheads%2Fsead-1.2
+	wget -q -O dashboard.war https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/mmdb-gwt/browse/scripts/acr/dashboard.war?at=refs%2Fheads%2Fsead-1.2
 fi
 
 if [ "$verbose" ]; then
@@ -151,7 +153,15 @@ fi
 echo "remoteAPIKey=$apiKey" >> dashboard/WEB-INF/classes/dashboard.properties
 echo "#mapKey=$mapKey" >> dashboard/WEB-INF/classes/dashboard.properties
 
-echo cp dashboard.log4j  dashboard/WEB-INF/classes/log4j.properties
+if [ "$verbose" ]; then
+	echo
+	echo 'Configuring logging...'
+fi	
+
+#Dashboard is configured to use log4j.xml by default - change that for consistency
+rm -f dashboard/WEB-INF/classes/log4j.xml
+echo "org.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger" > dashboard/WEB-INF/classes/commons-logging.properties
+cp dashboard.log4j  dashboard/WEB-INF/classes/log4j.properties
 
 
 if [ "$verbose" ]; then
@@ -160,9 +170,9 @@ if [ "$verbose" ]; then
 fi	
 
 if [ "$server" ]; then
-	echo   scp -q -r dashboard $server:/var/lib/tomcat6/webapps/
+	scp -q -r dashboard $server:/var/lib/tomcat6/webapps/
 else
-echo	mv dashboard /var/lib/tomcat6/webapps
+	mv dashboard /var/lib/tomcat6/webapps
 fi
 
 if [ "$verbose" ]; then
@@ -171,9 +181,9 @@ if [ "$verbose" ]; then
 fi	
 
 if [ "$server" ]; then
-	echo ssh $server 'chown -R tomcat6.tomcat6 /var/lib/tomcat6/webapps/dashboard'
+	ssh $server 'chown -R tomcat6.tomcat6 /var/lib/tomcat6/webapps/dashboard'
 else	
-	echo chown -R tomcat6.tomcat6 /var/lib/tomcat6/webapps/dashboard
+	chown -R tomcat6.tomcat6 /var/lib/tomcat6/webapps/dashboard
 fi	
 
 if [ "$verbose" ]; then
@@ -182,17 +192,18 @@ if [ "$verbose" ]; then
 fi	
 
 if [ "$server" ]; then
-	echo ssh $server '/etc/init.d/tomcat6 restart'
+	ssh $server '/etc/init.d/tomcat6 restart'
 else	
-	echo /etc/init.d/tomcat6 restart
+	/etc/init.d/tomcat6 restart
 fi	
 
-
-if [ "$verbose" ]; then
-	echo
-	echo 'Cleaning up...'
-fi	
-
+if [ "$server" ]; then
+	if [ "$verbose" ]; then
+		echo
+		echo 'Cleaning up...'
+	fi	
+	rm -rf dashboard
+fi
 
 if [ "$verbose" ]; then
 	echo
