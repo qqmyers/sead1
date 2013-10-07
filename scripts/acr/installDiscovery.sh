@@ -113,8 +113,8 @@ fi
 if [ "$server" ]; then
 	ssh $server 'rm -rf /var/lib/tomcat6/webapps/{discovery,nced}'
 else
-		rm -rf /var/lib/tomcat6/webapp/discovery
-		rm -rf /var/lib/tomcat6/webapp/nced
+		rm -rf /var/lib/tomcat6/webapps/discovery
+		rm -rf /var/lib/tomcat6/webapps/nced
 fi
 
 echo 

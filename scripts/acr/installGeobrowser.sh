@@ -139,8 +139,8 @@ fi
 if [ "$server" ]; then
 	ssh $server 'rm -rf /var/lib/tomcat6/webapps/{geobrowse,geo-webapp}'
 else
-		rm -rf /var/lib/tomcat6/webapp/geobrowse
-		rm -rf /var/lib/tomcat6/webapp/geo-webapp
+		rm -rf /var/lib/tomcat6/webapps/geobrowse
+		rm -rf /var/lib/tomcat6/webapps/geo-webapp
 fi
 
 echo 
