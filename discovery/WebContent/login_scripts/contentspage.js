@@ -23,10 +23,10 @@ function populateEntries(jsonBinding) {
 
 			} else if (value == 'title') {
 				title = jsonBinding[j]['literal'];
-				displayTitle = title;
+				displayTitle = String(title);
 
-				if (title.indexOf("/") != -1) {
-					displayTitle = title.substring(title.lastIndexOf("/") + 1);
+				if (display.Title.indexOf("/") != -1) {
+					displayTitle = displayTitle.substring(displayTitle.lastIndexOf("/") + 1);
 				}
 
 			} else if (value == 'length') {
