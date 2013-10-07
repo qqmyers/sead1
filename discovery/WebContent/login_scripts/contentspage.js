@@ -45,7 +45,7 @@ function populateEntries(jsonBinding) {
 	}
 	if (!isDeleted) {
 		if (type == "http://cet.ncsa.uiuc.edu/2007/Dataset") {
-			urlToLoad = medici_URL + dataset_Path + uri;
+			urlToLoad = medici + dataset_Path + uri;
 			div_html_datasets += "<tr><td width='10' align='center'><i class='icon-file'></i></td><td>"
 					+ "<a href='"
 					+ urlToLoad

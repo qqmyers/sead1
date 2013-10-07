@@ -27,18 +27,18 @@ p {
 
 <script type="text/javascript">
   var projInfo = '<%=project_info%>';
-  var medici_URL = null;
+  var medici = null;
 
 	$(function() {
 		loadProjectInfo(projInfo);
-		medici_URL = "<%=request.getAttribute("medici")%>";
+		medici = "<%=request.getAttribute("medici")%>";
 		var url = window.location.href;
 		tagID = url.substring(url.indexOf("?") + 3, url.length);
 
 		$("#contents-loading").show();
 
 		createBlock(0, "#xmlBody");
-		var acrLink = medici_URL + collection_Path + tagID;
+		var acrLink = medici + collection_Path + tagID;
 		$("#acrlink0").attr("href", acrLink);
 
 		$.ajax({
@@ -54,6 +54,7 @@ p {
 			$("#btnLogout").css('visibility','hidden');
 		}
 		$("#btnLogout").click(function() {
+			SSOLogout(); 
 			window.location.replace("DoLogout");
 		});
 

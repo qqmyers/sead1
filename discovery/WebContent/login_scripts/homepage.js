@@ -79,7 +79,7 @@ function writeCollection(id, json, result) {
 		createBlock(id, "#xmlBody");
 		$("#collectionTitle" + id).append(
 				$("<a/>").html(displayTitle).attr("href", "contents?i=" + uri));
-		var acrLink = medici_URL + collection_Path + uri;
+		var acrLink = medici + collection_Path + uri;
 		$("#acrlink" + id).attr("href", acrLink);
 
 		if (abs) {

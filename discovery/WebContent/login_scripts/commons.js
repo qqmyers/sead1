@@ -1,5 +1,6 @@
 var sparql_Service_Path = 'resteasy/sparql';
 var dataset_Path = '/#dataset?id=';
+var image_Path = '/api/image/';
 var collection_Path = '/#collection?uri=';
 var tag_Path = '/#tag?title=';
 
@@ -155,10 +156,10 @@ abstract='';
 		$("#contacts" + id).css("visibility", "visible");
 	} 
 	if (keywords.length != 0) {
-		var keywordString = "<i><a href='" + medici_URL + tag_Path + keywords[0]
+		var keywordString = "<i><a href='" + medici + tag_Path + keywords[0]
 					+ "' target=_blank>" + keywords[0] + "</a></i>";
 		for(var i=1; i<keywords.length; i++) {
-			keywordString += ", <i><a href='" + medici_URL + tag_Path + keywords[i]
+			keywordString += ", <i><a href='" + medici + tag_Path + keywords[i]
 					+ "' target=_blank>" + keywords[i] + "</a></i>";
 		}
 
@@ -168,12 +169,14 @@ abstract='';
 		$("#keywords" + id).css("visibility", "visible");
 	}
 	if (descriptors.length != 0) {
-		var descriptorString = "<a href='" + medici_URL + dataset_Path
-					+ descriptors[0] + "' target=_blank>image_0"
+		var descriptorString = "<a href='" + medici + dataset_Path
+					+ descriptors[0] + "' target=_blank><img src='"+ medici + image_Path
+					+ descriptors[0] + "'/>"
 					+ "</a> ";
 		for(var i=1; i<descriptors.length; i++) {
-			descriptorString += ", <a href='" + medici_URL + dataset_Path
-					+ descriptors[i] + "' target=_blank>image_" + i
+			descriptorString += ", <a href='" + medici + dataset_Path
+					+ descriptors[i] + "' target=_blank><img src='"+ medici + image_Path
+					+ descriptors[i] + "'/>"
 					+ "</a> ";
 		}
 
@@ -294,4 +297,16 @@ function createBlock(id, element) {
 	$("#div" + id).append(
 			($("<p/>")).attr("id", "description" + id).css("visibility",
 					"hidden"));
+}
+
+function SSOLogout() {
+	
+
+	var remoteURL = medici + "/api/logout";
+	$.ajax({
+		async: false,
+		type : "GET",
+		url : remoteURL,
+		dataType : "text"
+	});	
 }
