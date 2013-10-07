@@ -227,10 +227,8 @@ public class LoginPage extends Composite {
     public static void authenticate(final DispatchAsync dispatch, final MMDB mainWindow, final String username, final String password, final AuthenticationCallback callback) {
         logout(new Command() { // ensure we're logged out before authenticating
             public void execute() {
-                // Hit the REST authentication endpoint
-                //CHANGE TO POST
 
-                //FIXME - deal with RemoteAPIKey!!!!!!!!!!!!!!!!!!!!
+                // Hit the REST authentication endpoint
 
                 String restUrl = "./api/authenticate";
                 RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
@@ -302,8 +300,6 @@ public class LoginPage extends Composite {
      * and log out of REST servlets
      */
     public static void logout(final Command onSuccess) {
-        // now hit the REST authentication endpoint
-        //bad creds are sent but not used (server just invalidates session)
 
         String restUrl = "./api/logout";
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
