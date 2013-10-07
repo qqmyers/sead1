@@ -293,13 +293,32 @@ function loadProjectInfo(pI) {
 
 var datasetDistribution;
 
+function SSOLogout() {
+	
+	var remoteURL = projectPath + "/api/logout";
+	$.ajax({
+		async: false,
+		type : "GET",
+		url : remoteURL,
+		dataType : "text"
+	});	
+}
+
+
 function callOnLoad() {
 	
 	if(isAnonymous=='true') {
 		//Let user login as someone else
 		$('#loginout').html("Login");
 		$('#loginout').attr("href","");
+	} else {
+		$('#loginout').click(function() { 
+			SSOLogout(); 
+			return true; 
+		});
 	}
+	
+	
 	projectPath = $('#hidden_projectPath').html().trim();
 	getTeamMembers();
 	loadRecentUploads();

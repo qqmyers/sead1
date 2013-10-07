@@ -44,7 +44,7 @@ body {
 	padding-top:20px;
 }
 .gradient {
-    background-image: url("../images/Border.png");
+    background-image: url("../login_images/Border.png");
     float: right;
     height: 40px;
     text-align: right;
