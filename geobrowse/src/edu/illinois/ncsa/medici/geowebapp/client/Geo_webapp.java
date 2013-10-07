@@ -31,7 +31,13 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -690,7 +696,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		} else if (historyToken.startsWith("logout")) {
 			// push history...
 			History.newItem("", false);
-			tag=null;
+			tag = null;
 			if (tagTextBox != null) {
 				tagTextBox.setText("");
 			}
@@ -716,6 +722,24 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 							RootPanel.get("tag").clear();
 							RootPanel.get("bg").clear();
 							setLoginState(result, null);
+							remoteLogout(new RequestCallback() {
+
+								@Override
+								public void onResponseReceived(Request request,
+										Response response) {
+									// TODO Auto-generated method stub
+									GWT.log("RemoteLogout Success");
+								}
+
+								@Override
+								public void onError(Request request,
+										Throwable exception) {
+									// TODO Auto-generated method stub
+									GWT.log("RemoteLogout Error");
+									Window.alert("Could not log out from data server.");
+								}
+
+							});
 						}
 
 					});
@@ -740,7 +764,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 	}
 
-
 	private void fail() {
 		Window.alert("Could not retrieve data from repository - try later or contact your administrator.");
 		GWT.log("Service call failure");
@@ -750,6 +773,23 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 	public static String getMediciUrl() {
 		return mediciUrl;
+	}
+
+	/**
+	 * logout from remote server, Set sessionID and local cache of user info to
+	 * null, and log out of REST servlets
+	 */
+	public static void remoteLogout(RequestCallback callback) {
+
+		String restUrl = "./api/logout";
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+		Request request = null;
+		try {
+			request = builder.sendRequest("", callback);
+		} catch (RequestException x) {
+			// another error condition, do something
+			callback.onError(request, x);
+		}
 	}
 
 }

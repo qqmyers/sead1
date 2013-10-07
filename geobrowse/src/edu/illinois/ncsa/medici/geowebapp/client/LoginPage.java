@@ -1,11 +1,22 @@
 package edu.illinois.ncsa.medici.geowebapp.client;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.ws.http.HTTPException;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -185,7 +196,7 @@ public class LoginPage extends Composite {
 	}
 
 	protected void authenticate() {
-		String password = passwordBox.getText().length() > 0 ? passwordBox
+		final String password = passwordBox.getText().length() > 0 ? passwordBox
 				.getText() : "(none)";
 		mainWindow.getAuthSvc().login(usernameBox.getText(), password,
 				new AsyncCallback<String>() {
@@ -198,9 +209,30 @@ public class LoginPage extends Composite {
 									@Override
 									public void onSuccess(String name) {
 										setProgressText(loginStatus);
-										resetPassword();
-										mainWindow.setLoginState(name,
-												loginStatus);
+										remoteLogin(name, password,
+												new AsyncCallback<String>() {
+													@Override
+													public void onSuccess(
+															String name) {
+														resetPassword();
+														mainWindow
+																.setLoginState(
+																		name,
+																		loginStatus);
+													}
+
+													@Override
+													public void onFailure(
+															Throwable caught) {
+														mainWindow.getAuthSvc()
+																.logout(null);
+														mainWindow
+																.getLoginStatusWidget()
+																.loggedOut();
+														resetPassword();
+													}
+												});
+
 									}
 
 									@Override
@@ -220,4 +252,45 @@ public class LoginPage extends Composite {
 				});
 	}
 
+	private void remoteLogin(final String username, String password,
+			final AsyncCallback<String> callback) {
+		String restUrl = "./api/authenticate";
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
+				restUrl);
+		builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+		StringBuilder sb = new StringBuilder();
+		sb.append("username=" + username);
+		sb.append("&password=" + password);
+		builder.setRequestData(sb.toString());
+		builder.setCallback(new RequestCallback() {
+			public void onError(Request request, Throwable exception) {
+				callback.onFailure(exception);
+			}
+
+			public void onResponseReceived(Request request, Response response) {
+				// success!
+				String sessionKey = response.getText();
+
+				GWT.log("REST auth status code = " + response.getStatusCode(),
+						null);
+				if (response.getStatusCode() > 300) {
+					GWT.log("authentication failed: " + sessionKey, null);
+					callback.onFailure(new IOException());
+				}
+				GWT.log("user " + username + " associated with session key "
+						+ sessionKey, null);
+				// login local
+				callback.onSuccess(username);
+			}
+		});
+
+		try {
+			GWT.log("attempting to authenticate " + username + " against "
+					+ restUrl, null);
+			builder.send();
+		} catch (RequestException x) {
+			// another error condition
+			callback.onFailure(x);
+		}
+	}
 }
