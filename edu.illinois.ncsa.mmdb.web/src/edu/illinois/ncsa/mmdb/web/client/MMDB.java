@@ -579,7 +579,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * 
      */
     public void login(final String userId, final String sessionKey) {
-        login(userId, sessionKey, new AuthenticationCallback() {
+        login(null, userId, sessionKey, new AuthenticationCallback() {
             @Override
             public void onFailure() {
             }
@@ -590,7 +590,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         });
     }
 
-    public void login(final String userId, final String sessionKey, final AuthenticationCallback callback) {
+    public void loginByName(final String username, final String sessionKey, final AuthenticationCallback callback) {
+        login(username, null, sessionKey, callback);
+    }
+
+    //username or userId needs to be non-null, userId will be used if both are provided
+    private void login(final String username, final String userId, final String sessionKey, final AuthenticationCallback callback) {
         final UserSessionState state = MMDB.getSessionState();
 
         state.setSessionKey(sessionKey);
@@ -598,7 +603,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         AsyncCallback<GetUserResult> handler = new AsyncCallback<GetUserResult>() {
             @Override
             public void onFailure(Throwable caught) {
-                GWT.log("Error retrieving user with id " + userId);
+                GWT.log("Error retrieving user with id " + username);
                 callback.onFailure();
             }
 
@@ -619,13 +624,16 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                 doWithPermission(History.getToken());
 
-                callback.onSuccess(userId, sessionKey);
+                callback.onSuccess(username, sessionKey);
             }
         };
 
         GetUser getUser = new GetUser();
-
-        getUser.setUserId(userId);
+        if (userId != null) {
+            getUser.setUserId(userId);
+        } else {
+            getUser.setUsername(username);
+        }
         dispatchAsync.execute(getUser, handler);
     }
 

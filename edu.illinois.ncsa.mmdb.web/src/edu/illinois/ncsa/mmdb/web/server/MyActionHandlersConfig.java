@@ -49,7 +49,6 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.AddGeoLocationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ContextConvertHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.Create3DImageHandler;
@@ -125,6 +124,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.SetUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
+//import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
 
 /**
  * Setup registry of action handlers when the servlet context is initialized.
@@ -142,7 +142,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetAnnotationsHandler());
         DispatchUtil.registerHandler(new GetDatasetsByTagHandler());
         DispatchUtil.registerHandler(new ListDatasetsHandler());
-        DispatchUtil.registerHandler(new AuthenticateHandler());
+        //       DispatchUtil.registerHandler(new AuthenticateHandler());
         DispatchUtil.registerHandler(new GetMetadataHandler());
         DispatchUtil.registerHandler(new GetGeoPointHandler());
         DispatchUtil.registerHandler(new GetCollectionsHandler());

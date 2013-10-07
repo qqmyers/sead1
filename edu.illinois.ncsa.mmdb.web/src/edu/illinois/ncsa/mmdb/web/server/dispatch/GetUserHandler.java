@@ -82,10 +82,15 @@ public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
                 .getBeanSession());
         try {
             String email = action.getEmailAddress();
+            String userId = action.getUserId();
+            String username = action.getUsername();
+            if ((userId == null) && (username != null)) {
+                userId = PersonBeanUtil.getPersonID(username);
+            }
             log.debug("GetUser: email: " + email);
-            log.debug("GetUser: id: " + action.getUserId());
+            log.debug("GetUser: id: " + userId);
 
-            if (PersonBeanUtil.getAnonymous().getEmail().equals(email) || PersonBeanUtil.getAnonymousURI().getString().equals(action.getUserId())) {
+            if (PersonBeanUtil.getAnonymous().getEmail().equals(email) || PersonBeanUtil.getAnonymousURI().getString().equals(userId)) {
                 GetUserResult anonymous = new GetUserResult(PersonBeanUtil.getAnonymous());
                 anonymous.setAnonymous(true);
                 log.debug("GetUser: Returning anonymous user");
@@ -109,7 +114,6 @@ public class GetUserHandler implements ActionHandler<GetUser, GetUserResult> {
                     return new GetUserResult();
                 }
             }
-            String userId = action.getUserId();
             if (userId != null) {
                 log.debug("User in the system " + userId);
                 PersonBean personBean = pbu.get(userId);

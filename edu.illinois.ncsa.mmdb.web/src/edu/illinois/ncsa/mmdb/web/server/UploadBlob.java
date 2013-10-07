@@ -79,6 +79,7 @@ import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.SecureHashMinter;
 
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
@@ -263,7 +264,11 @@ public class UploadBlob extends AuthenticatedServlet {
     @Override
     public void doPost(HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
-        if (!authenticate(request, response)) {
+        String userId = getUserUri(request);
+        if (userId == null) {
+            return;
+        }
+        if (!isAllowed(userId, Permission.UPLOAD_DATA)) {
             return;
         }
         Context c = TupeloStore.getInstance().getContext();
@@ -627,7 +632,11 @@ public class UploadBlob extends AuthenticatedServlet {
         }
         if (!request.getParameterMap().containsKey("session")) { // no session?
             // then you'd better authenticate to get one
-            if (!authenticate(request, response)) {
+            String userId = getUserUri(request);
+            if (userId == null) {
+                return;
+            }
+            if (!isAllowed(userId, Permission.UPLOAD_DATA)) {
                 return;
             }
             String sessionKey = SecureHashMinter.getMinter().mint(); // mint a session key

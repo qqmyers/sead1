@@ -60,25 +60,39 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
     public ServerResponse preProcess(HttpRequest request, ResourceMethod method)
             throws UnauthorizedException {
 
-        String mykey = TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey);
-        if ((mykey != null) && (mykey.length() != 0)) {
-            log.debug("Medici RemoteAPIKey = " + mykey);
-            String keyName = ConfigurationKey.RemoteAPIKey.getPropertyKey();
-            String theirkey = request.getFormParameters().getFirst(keyName);
-            log.debug("Key from form: " + keyName + " : " + theirkey);
-            if (theirkey == null) {
-                theirkey = request.getUri().getQueryParameters().getFirst(keyName);
-                log.debug("Key from query: " + keyName + " : " + theirkey);
+        String username = null;
+        boolean defaultToAnonymous = false;
+
+        String path = request.getUri().getPath();
+        log.debug("AuthInterceptor path: " + path);
+        if (path.startsWith("/datasets/") && (!path.startsWith("/datasets/copy")) || (path.startsWith("/sparql"))) {
+            log.debug("Should test remoteAPIKey for: " + path);
+
+            String mykey = TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey);
+            if ((mykey != null) && (mykey.length() != 0)) {
+                log.debug("Medici RemoteAPIKey = " + mykey);
+                String keyName = ConfigurationKey.RemoteAPIKey.getPropertyKey();
+                String theirkey = request.getFormParameters().getFirst(keyName);
+                log.debug("Key from form: " + keyName + " : " + theirkey);
+                if (theirkey == null) {
+                    theirkey = request.getUri().getQueryParameters().getFirst(keyName);
+                    log.debug("Key from query: " + keyName + " : " + theirkey);
+
+                }
+                if ((theirkey == null) || (!(mykey.equals(theirkey)))) {
+                    log.debug("RemoteAPIKey does not match - Access Forbidden");
+                    return forbiddenResponse(request.getPreprocessedPath());
+                }
             }
-            if ((theirkey == null) || (!(mykey.equals(theirkey)))) {
-                log.debug("RemoteAPIKey does not match - Access Forbidden");
-                return forbiddenResponse(request.getPreprocessedPath());
-            }
+            //Either no remoteAPIKey is required or we've matched and, given that these methods
+            //are supposed to be programmatic (called by an app rather than the browser via user-entered URL/link.
+            // we should use anonymous rather than returning 401 if no other credentials are provided.
+            defaultToAnonymous = true;
+
         }
         //remoteAPIKey matches or is not required...
         //Now identify the user
 
-        String username = null;
         //Retrieve username from session if it exists
         HttpSession session = servletRequest.getSession(false);
         if (session != null) {
@@ -91,9 +105,17 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
             }
         }
         if (username == null) {
-            return unauthorizedResponse(request.getPreprocessedPath());
+            if (!defaultToAnonymous) {
+                return unauthorizedResponse(request.getPreprocessedPath());
+            } else {
+                username = "anonymous";
+            }
         } else {
-            request.setAttribute("userid", username);
+            //All we do for RestEasy calls is validate the user for the current request -
+            // FIXME: we do not (currently) establish a session for future requests (should we? is it different than an mmdb login?) 
+            // We do support existing sessions, so apps can use POST /api/authenticate and /api/logout
+            // rather than sending Basic Auth info with each call
+            request.setAttribute("userid", PersonBeanUtil.getPersonID(username));
 
         }
         //Now determine whether userid is authorized to use the remoteAPI...

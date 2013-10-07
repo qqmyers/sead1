@@ -120,12 +120,14 @@ user.0.roles=ADMIN
 #userfield.13.label=Description
 userfield.14.predicate=http://purl.org/dc/terms/isPartOf
 userfield.14.label=Published In
-userfield.15.predicate=http://example.com/ODM/characterizes
-userfield.15.label=ODM:characterizes
-userfield.16.predicate=http://example.com/ODM/fromSite
-userfield.16.label=ODM:site
-userfield.17.predicate=http://example.com/ODM/hasQualityLevel
-userfield.17.label=ODM:hasQualityLevel
+userfield.15.predicate=http://purl.org/dc/terms/issued
+userfield.15.label=Publication Date
+userfield.16.predicate=http://example.com/ODM/characterizes
+userfield.16.label=ODM:characterizes
+userfield.17.predicate=http://example.com/ODM/fromSite
+userfield.17.label=ODM:site
+userfield.18.predicate=http://example.com/ODM/hasQualityLevel
+userfield.18.label=ODM:hasQualityLevel
 
 #
 # List of relationships

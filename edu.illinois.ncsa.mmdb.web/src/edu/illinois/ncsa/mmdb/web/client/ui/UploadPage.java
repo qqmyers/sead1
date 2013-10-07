@@ -248,13 +248,19 @@ public class UploadPage extends Page {
         panel.setWidth("100%");
         form.setWidget(panel);
 
-        panel.add(new Label("Enter URL of dataset to copy."));
+        panel.add(new Label("")); //Spacer
+        Label importLabel = new Label("Import Open Data from another project:");
+        importLabel.addStyleName("importTitle");
+        panel.add(importLabel);
 
         // Create a TextBox, giving it a name so that it will be submitted.
         final TextBox tb = new TextBox();
         tb.setName("url");
         tb.setWidth("100%");
         panel.add(tb);
+        Label details = new Label("[To import - copy the URL of the datapage in the box above. (Data must be publicly visible at this URL.)]");
+        details.addStyleName("smallText");
+        panel.add(details);
 
         // Add a 'submit' button.
         panel.add(new Button("Copy Dataset", new ClickHandler() {

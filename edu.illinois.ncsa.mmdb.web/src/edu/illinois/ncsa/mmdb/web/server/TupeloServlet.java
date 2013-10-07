@@ -216,11 +216,12 @@ public class TupeloServlet extends HttpTupeloServlet {
 
     boolean isAllowed(HttpServletRequest req, HttpServletResponse resp) {
         ServletContext sc = getServletContext();
-        if (!AuthenticatedServlet.doAuthenticate(req, resp, sc)) {
+        String userId = AuthenticatedServlet.getUserUri(req);
+        if (userId == null) {
             return false;
         }
         SEADRbac rbac = new SEADRbac(getContext());
-        Resource userUri = Resource.uriRef(AuthenticatedServlet.getUserUri(req));
+        Resource userUri = Resource.uriRef(userId);
         Resource permissionUri = Resource.uriRef(Permission.USE_DESKTOP.getUri());
         try {
             if (!rbac.checkPermission(userUri, permissionUri)) {
