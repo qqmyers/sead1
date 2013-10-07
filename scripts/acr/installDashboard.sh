@@ -40,7 +40,7 @@ verbose=
 anon=
 apiKey=
 mapKey=
-while getopts “hs:m:var:g:” OPTION
+while getopts  hs:m:var:g: OPTION
 do
      case $OPTION in
          h)
@@ -118,7 +118,7 @@ fi
 if [ "$server" ]; then
 	ssh $server 'rm -rf /var/lib/tomcat6/webapps/{dashboard,projectsummary,summary}'
 else
-	rm -rf dashboard
+		rm -rf /var/lib/tomcat6/webapp/dashboard
 fi
 
 echo 
