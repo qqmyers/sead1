@@ -119,6 +119,8 @@ if [ "$server" ]; then
 	ssh $server 'rm -rf /var/lib/tomcat6/webapps/{dashboard,projectsummary,summary}'
 else
 		rm -rf /var/lib/tomcat6/webapp/dashboard
+		rm -rf /var/lib/tomcat6/webapp/projectsummary
+		rm -rf /var/lib/tomcat6/webapp/summary
 fi
 
 echo 
