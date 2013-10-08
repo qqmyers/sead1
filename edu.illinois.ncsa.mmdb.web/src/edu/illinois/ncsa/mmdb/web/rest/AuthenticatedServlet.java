@@ -103,6 +103,9 @@ public class AuthenticatedServlet extends HttpServlet {
                     log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
                     session.setAttribute(AUTHENTICATED_AS, validUser);
                     response.getWriter().print(session.getId());
+                    response.addHeader("Access-Control-Allow-Origin", "*");
+                    response.addHeader("Access-Control-Allow-Methods", "PUT, POST");
+
                 }
             }
             if (validUser == null) {
@@ -110,8 +113,6 @@ public class AuthenticatedServlet extends HttpServlet {
                 //Set 404 - we don't want to invoke the browser authentication attempt we'd get from sending 401...
 
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                response.addHeader("Access-Control-Allow-Origin", "*");
-                response.addHeader("Access-Control-Allow-Methods", "PUT, POST");
 
             }
             dontCache(response);
