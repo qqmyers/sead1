@@ -49,7 +49,7 @@ gUser=
 gPassword=
 gServer=
 
-while getopts  hs:m:var:g: OPTION
+while getopts  hs:m:var:g:u:p:q: OPTION
 do
      case $OPTION in
          h)
@@ -96,7 +96,7 @@ if [ "$verbose" ]; then
 	echo remoteAPIKey: $apiKey
 	echo Google Map Key: $mapKey
 	echo enableAnonymous $anon
-	echo geoserver user $anon
+	echo geoserver user $gUser
 	echo geoserver password  $gPassword
 	echo geoserver URL $gServer
 fi
