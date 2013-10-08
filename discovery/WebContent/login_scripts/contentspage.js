@@ -25,7 +25,7 @@ function populateEntries(jsonBinding) {
 				title = jsonBinding[j]['literal'];
 				displayTitle = String(title);
 
-				if (display.Title.indexOf("/") != -1) {
+				if (displayTitle.indexOf("/") != -1) {
 					displayTitle = displayTitle.substring(displayTitle.lastIndexOf("/") + 1);
 				}
 
