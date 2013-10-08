@@ -89,6 +89,9 @@ public class ConfigurationWidget extends Composite {
         // vivo configuration.
         mainPanel.add(createVIVOConfigurationSection(configuration));
 
+        // va configuration.
+        mainPanel.add(createVAConfigurationSection(configuration));
+
         // extractor configuration
         mainPanel.add(createExtractorSection(configuration));
     }
@@ -557,6 +560,74 @@ public class ConfigurationWidget extends Composite {
                     @Override
                     public void onSuccess(ConfigurationResult result) {
                         key.setText(result.getConfiguration(ConfigurationKey.VIVOJOSEKIURL));
+                    }
+                });
+            }
+        });
+        button.addStyleName("multiAnchor");
+        hp.add(button);
+
+        return dp;
+
+    }
+
+    private DisclosurePanel createVAConfigurationSection(ConfigurationResult configuration) {
+        DisclosurePanel dp = new DisclosurePanel("VA Configuration");
+        dp.addStyleName("datasetDisclosurePanel");
+        dp.setOpen(false);
+        VerticalPanel vp = new VerticalPanel();
+        vp.setWidth("100%");
+        dp.add(vp);
+
+        /*HorizontalPanel hp = new HorizontalPanel();
+        vp.add(hp);*/
+
+        FlexTable table = new FlexTable();
+        table.setText(0, 0, "VA End Point");
+        /*hp.add(new Label("VIVO-Joseki End Point"));*/
+        final TextBox key = new TextBox();
+        key.addStyleName("multiAnchor");
+        key.setText(configuration.getConfiguration(ConfigurationKey.VAURL));
+        key.setVisibleLength(80);
+        table.setWidget(0, 1, key);
+        /*hp.add(key);*/
+        vp.add(table);
+        // buttons
+        HorizontalPanel hp = new HorizontalPanel();
+        vp.add(hp);
+
+        Button button = new Button("Submit", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                query.setConfiguration(ConfigurationKey.VAURL, key.getText());
+                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        key.setText(result.getConfiguration(ConfigurationKey.VAURL));
+                    }
+                });
+            }
+        });
+        hp.add(button);
+
+        button = new Button("Reset", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.VAURL), new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        key.setText(result.getConfiguration(ConfigurationKey.VAURL));
                     }
                 });
             }

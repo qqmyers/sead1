@@ -7,17 +7,17 @@ public enum ConfigurationKey {
     MailFrom("mail.from", "noreply@localhost"), //$NON-NLS-1$ //$NON-NLS-2$
     MailFullName("mail.fullname", "Medici Server"), //$NON-NLS-1$ //$NON-NLS-2$
 
-    // SEAD SPECIFIC CODE
+    // sead enhancements
     VIVOJOSEKIURL("vivo-joseki.url", "http://sead-dev.ccni.rpi.edu/joseki/sparql?query="), //$NON-NLS-1$ //$NON-NLS-2$
     VAURL("va.url", "http://bluespruce.pti.indiana.edu:8181/dcs-nced/query/?q=resourceValue:(%s)"), //$NON-NLS-1$ //$NON-NLS-2$
-    // END SEAD SPECIFIC CODE
+    NCEDURL("nced.url", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
     // access level
-    AccessLevelLabel("acccess.level.label", "Processing Level"), //$NON-NLS-1$ //$NON-NLS-2$
-    AccessLevelPredicate("acccess.level.predicate", "http://www.linkedearth.org/RSIV/ns#hasLevelOfProcessing"), //$NON-NLS-1$ //$NON-NLS-2$
-    AccessLevelMin("acccess.level.min", "0"), //$NON-NLS-1$ //$NON-NLS-2$
-    AccessLevelMax("acccess.level.max", "4"), //$NON-NLS-1$ //$NON-NLS-2$
-    AccessLevelDefault("acccess.level.default", "0"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelLabel("access.level.label", "Access Level"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelPredicate("access.level.predicate", "http://cet.ncsa.uiuc.edu/2007/accessLevel"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelMin("access.level.min", "0"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelMax("access.level.max", "0"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelDefault("access.level.default", "0"), //$NON-NLS-1$ //$NON-NLS-2$
 
     // project name and description
     ProjectName("project.name", ""), //$NON-NLS-1$

@@ -58,6 +58,15 @@ search.path=/home/medici/lucene
 taxonomy.file=/taxonomy.owl
 
 #
+# Access Level/Processing Level
+#
+access.level.label=Processing Level
+access.level.predicate=http://www.linkedearth.org/RSIV/ns#hasLevelOfProcessing
+access.level.min=0
+access.level.max=4
+access.level.default=1
+
+#
 # Mail properties
 # see http://java.sun.com/products/javamail/javadocs/overview-summary.html
 # added

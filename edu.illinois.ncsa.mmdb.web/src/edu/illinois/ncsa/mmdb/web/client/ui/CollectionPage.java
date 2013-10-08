@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.Map.Entry;
+
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
@@ -341,20 +343,39 @@ public class CollectionPage extends Composite {
         }
         numDatasetsLabel.setText(collectionSize + " dataset(s)");
 
-        try {
-            String discoveryURL = PropertiesReader.getDiscoveryURL();
-            discoveryURL = discoveryURL.endsWith("/") ? discoveryURL : discoveryURL + "/";
+        dispatchasync.execute(new GetConfiguration(null, ConfigurationKey.VAURL), new AsyncCallback<ConfigurationResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
 
-            String collectionContextURI = discoveryURL + "contents?i=" + collection.getUri() + "&t=" + collection.getTitle();
-            String collectionContextText = "View Collection Context in Discovery interface";
-            collectionContextLink.setHref(collectionContextURI);
-            collectionContextLink.setTarget("_blank");
-            collectionContextLink.setText(collectionContextText);
-        } catch (Exception ex) {
-            //Handle exception
-            String exc = ex.getMessage();
-            System.out.println(exc);
-        }
+            @Override
+            public void onSuccess(ConfigurationResult configresult) {
+                String discoveryURL = null;
+                for (Entry<ConfigurationKey, String> entry : configresult.getConfiguration().entrySet() ) {
+                    switch (entry.getKey()) {
+                        case VAURL:
+                            discoveryURL = entry.getValue();
+                            if (!discoveryURL.equals("")) {
+                                discoveryURL = discoveryURL.endsWith("/") ? discoveryURL : discoveryURL + "/";
+
+                                try {
+                                    String collectionContextURI = discoveryURL + "contents?i=" + collection.getUri() + "&t=" + collection.getTitle();
+                                    String collectionContextText = "View Collection Context in Discovery interface";
+                                    collectionContextLink.setHref(collectionContextURI);
+                                    collectionContextLink.setTarget("_blank");
+                                    collectionContextLink.setText(collectionContextText);
+                                } catch (Exception ex) {
+                                    //Handle exception
+                                    String exc = ex.getMessage();
+                                    System.out.println(exc);
+                                }
+                            }
+                            break;
+                        default:
+                    }
+                }
+            }
+        });
     }
 
     private void initializePreviewPanel(final GetCollectionResult result) {

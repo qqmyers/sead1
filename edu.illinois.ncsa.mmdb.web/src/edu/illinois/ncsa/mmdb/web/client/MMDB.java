@@ -100,7 +100,6 @@ import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.MapPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.NotEnabledPage;
-import edu.illinois.ncsa.mmdb.web.client.ui.PropertiesReader;
 import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchBox;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchResultsPage;
@@ -250,14 +249,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                 // history support
                 History.addValueChangeHandler(this);
-
-                //Load public properties file
-                try {
-                    PropertiesReader.initializePropertiesFile();
-                } catch (Exception ex) {
-                    //FIXME: Handle exception
-                }
-
                 History.fireCurrentHistoryState();
 
                 //initNavMenu();
