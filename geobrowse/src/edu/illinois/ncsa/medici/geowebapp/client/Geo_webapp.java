@@ -781,7 +781,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	 */
 	public static void remoteLogout(RequestCallback callback) {
 
-		String restUrl = "./api/logout";
+		String restUrl = getMediciUrl() + "/api/logout";
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
 		Request request = null;
 		try {

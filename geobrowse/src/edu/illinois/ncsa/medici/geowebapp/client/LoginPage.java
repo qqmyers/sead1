@@ -1,6 +1,7 @@
 package edu.illinois.ncsa.medici.geowebapp.client;
 
 import java.io.IOException;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.http.HTTPException;
@@ -18,6 +19,7 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -184,7 +186,7 @@ public class LoginPage extends Composite {
 			if (status.equals("unauthorized")) {
 				message = "Incorrect username or password";
 			} else if (status.equals("forbidden")) {
-				message = "You do not have permission to use this interface.";
+				message = "Login failure or you do not have permission to use this interface.";
 			}
 		}
 		progressLabel.setText(message);
@@ -204,11 +206,18 @@ public class LoginPage extends Composite {
 					public void onSuccess(String result) {
 
 						final String loginStatus = result;
+						setProgressText(loginStatus);
+
+						if(loginStatus.equals("forbidden")||loginStatus.equals("unauthorized")) {
+							mainWindow.getLoginStatusWidget().loggedOut();
+							resetPassword();
+							
+						} else {
 						mainWindow.getAuthSvc().getUsername(
 								new AsyncCallback<String>() {
 									@Override
-									public void onSuccess(String name) {
-										setProgressText(loginStatus);
+									public void onSuccess(final String name) {
+										
 										remoteLogin(name, password,
 												new AsyncCallback<String>() {
 													@Override
@@ -224,11 +233,11 @@ public class LoginPage extends Composite {
 													@Override
 													public void onFailure(
 															Throwable caught) {
-														mainWindow.getAuthSvc()
-																.logout(null);
+														//Non-fatal - currently happens if app and mmdb are not on the same server
 														mainWindow
-																.getLoginStatusWidget()
-																.loggedOut();
+														.setLoginState(
+																name,
+																loginStatus);
 														resetPassword();
 													}
 												});
@@ -242,6 +251,7 @@ public class LoginPage extends Composite {
 										resetPassword();
 									}
 								});
+						}
 					}
 
 					@Override
@@ -254,7 +264,7 @@ public class LoginPage extends Composite {
 
 	private void remoteLogin(final String username, String password,
 			final AsyncCallback<String> callback) {
-		String restUrl = "./api/authenticate";
+		String restUrl =  Geo_webapp.getMediciUrl() + "/api/authenticate";
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
 				restUrl);
 		builder.setHeader("Content-type", "application/x-www-form-urlencoded");
@@ -270,7 +280,6 @@ public class LoginPage extends Composite {
 			public void onResponseReceived(Request request, Response response) {
 				// success!
 				String sessionKey = response.getText();
-
 				GWT.log("REST auth status code = " + response.getStatusCode(),
 						null);
 				if (response.getStatusCode() > 300) {
@@ -288,6 +297,7 @@ public class LoginPage extends Composite {
 			GWT.log("attempting to authenticate " + username + " against "
 					+ restUrl, null);
 			builder.send();
+			
 		} catch (RequestException x) {
 			// another error condition
 			callback.onFailure(x);
