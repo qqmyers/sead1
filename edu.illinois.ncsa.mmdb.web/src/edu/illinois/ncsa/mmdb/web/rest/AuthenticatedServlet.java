@@ -111,6 +111,8 @@ public class AuthenticatedServlet extends HttpServlet {
 
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.addHeader("Access-Control-Allow-Origin", "*");
+                response.addHeader("Access-Control-Allow-Methods", "PUT, POST");
+
             }
             dontCache(response);
             response.flushBuffer();
