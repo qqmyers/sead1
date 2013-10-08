@@ -103,8 +103,22 @@ public class AuthenticatedServlet extends HttpServlet {
                     log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
                     session.setAttribute(AUTHENTICATED_AS, validUser);
                     response.getWriter().print(session.getId());
-                    response.addHeader("Access-Control-Allow-Origin", "*");
-                    response.addHeader("Access-Control-Allow-Methods", "PUT, POST");
+                    /*To allow webapps such as ACR Dashboard, Discovery, and Geobrowse to start a session/
+                     * set a cookie for mmdb in the user's browser when they are not hosted on the same server as medici/mmdb, 
+                     * it looks like two steps would work:
+                     * 1) add the headers below allowing the webapp to make a client-side request to the mmdb domain
+                     *    (w/o headers, the call can be made, but the response can't be read. I've verified that the headers
+                     *    work to let the app see the response(i.e. the sessionKey). They do not allow the set cookie request to succeed
+                     *    (request.getSession(true))
+                     * 2) launch an iframe that, on load, makes a request to set the mmdb cookie - 
+                     *    i.e. from calling this method, the app can get the seesionKey - the iframe could make a request
+                     *    (for post on load) to mediciURL/joinsession/sessionKey which could then respond with a valid session.
+                     *    I have not tried step 2, but the web says it works...
+                     *    
+                     *    For v1, we'll turn this off. After that, we can consider adding it if other forms of sso don't obviate the need.
+                     */
+                    //response.addHeader("Access-Control-Allow-Origin", "*");
+                    //response.addHeader("Access-Control-Allow-Methods", "PUT, POST");
 
                 }
             }
