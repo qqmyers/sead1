@@ -169,6 +169,7 @@ function loadRecentUploads() {
 					}
 				} else if (value == 'creator') {
 					creator = jsonBinding[j]['uri'];
+					creator = creator.substring(creator.lastIndexOf("/") + 1);
 				} else if (value == 'date') {
 					timestamp = jsonBinding[j]['literal']['content'];
 					date[0] = $.format.date(timestamp, 'yyyy');
