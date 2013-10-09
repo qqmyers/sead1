@@ -103,6 +103,10 @@
 		} else if (jqXHR.responseText == 'Forbidden') {
 			$('#forbiddenpanel').show();
 			$('#errorpanel').hide();
+		} else {
+			<!--cross-site issue preventing remote login - just allow this (user will have to login to--> 
+			<!--medici manually if anonymous doesn't provide access -->
+			showRequestedResource(null);
 		}
 	}
 </script>
