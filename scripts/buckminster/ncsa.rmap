@@ -5,28 +5,39 @@
     xmlns:bc="http://www.eclipse.org/buckminster/Common-1.0">
 
     <searchPath name="ncsa">
-        <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
-            <uri format="https://opensource.ncsa.illinois.edu/svn/cet/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+	  <provider readerType="local" componentTypes="osgi.bundle,eclipse.feature" mutable="true" source="true">
+	    <uri format="file:///{0}/{1}/">
+		<bc:propertyRef key="workspace.root" />
+		<bc:propertyRef key="buckminster.component" />
+	    </uri>
+	</provider>
+
+        <provider readerType="local" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
+            <uri format="file://{0}/CET/{1}">
+		<bc:propertyRef key="workspace.root" />
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>
 
-        <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
-            <uri format="https://opensource.ncsa.illinois.edu/svn/mmdb/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+        <provider readerType="local" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
+            <uri format="file://{0}/mmdb/{1}">
+		<bc:propertyRef key="workspace.root" />
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>
 
-        <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
-            <uri format="https://opensource.ncsa.illinois.edu/svn/cyberintegrator/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+        <provider readerType="local" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
+            <uri format="file://{0}/cyberintegrator/{1}">
+		<bc:propertyRef key="workspace.root" />
                 <bc:propertyRef key="buckminster.component" />
             </uri>
         </provider>
     </searchPath>
 
     <searchPath name="tupelo">
-        <provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
-            <uri format="https://opensource.ncsa.illinois.edu/svn/tupelo/trunk/tupelo-all/{0}?moduleAfterTag&amp;moduleAfterBranch">
+        <provider readerType="local" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
+            <uri format="file://{0}/tupelo/tupelo-all/{0}">
+		<bc:propertyRef key="workspace.root" />
                 <bc:replace>
                     <bc:propertyRef key="buckminster.component" />
                     <bc:match pattern="^org\.tupeloproject\.((?:.\w+)*)$" replacement="tupelo-$1" />
@@ -36,11 +47,12 @@
     </searchPath>
 
     <searchPath name="ncsa-orbit">
-        <provider readerType="svn" componentTypes="eclipse.feature,osgi.bundle,buckminster" source="true" mutable="true">
-            <uri format="https://opensource.ncsa.illinois.edu/svn/ncsa-orbit/trunk/{0}?moduleAfterTag&amp;moduleAfterBranch">
+        <provider readerType="local" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="true" source="true">
+            <uri format="file://{0}/orbit/{1}">
+		<bc:propertyRef key="workspace.root" />
                 <bc:propertyRef key="buckminster.component" />
             </uri>
-        </provider>        
+        </provider>
     </searchPath>
 
     <searchPath name="eclipse">
