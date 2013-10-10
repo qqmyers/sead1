@@ -1,0 +1,5 @@
+import org.eclipse.equinox.executable.mspec
+import org.eclipse.platform.mspec
+import org.eclipse.zest.mspec
+import org.eclipse.equinox.p2.extras.mspec
+import org.eclipse.ecf.discovery.mspec
