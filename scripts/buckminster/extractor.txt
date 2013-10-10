@@ -1,4 +1,3 @@
-setpref targetPlatformPath="targetPlatform"
 resolve scripts/buckminster/edu.illinois.ncsa.medici.extractor.site.cquery
 
 build
