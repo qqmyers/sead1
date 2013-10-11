@@ -27,7 +27,10 @@ public class AuthFilter implements Filter {
 
 	private static String _propFile;
 	private static String _loginpage;
-	
+
+	private static String _openpath;
+	private static String _webauthpath;
+
 	private static String _server;
 	private static String _remoteAPIKey;
 
@@ -53,7 +56,8 @@ public class AuthFilter implements Filter {
 
 		// Let the login form page and requests for it's images, css files, etc.
 		// through...
-		if (!uri.startsWith(appPath + "/login")) {
+		if (!uri.startsWith(appPath + _openpath)) {
+
 			// if logging in
 			if (uri.startsWith(appPath + "/DoLogin")) {
 				log.debug("Attempting to authenticate");
@@ -109,8 +113,26 @@ public class AuthFilter implements Filter {
 						// mp.hasValidCredientials() should only be true
 						goodCredentials = mp.hasValidCredentials();
 					}
-					log.debug("Authenticated as: " + session.getAttribute("authenticatedAs"));
+					log.debug("Authenticated as: "
+							+ session.getAttribute("authenticatedAs"));
 				}
+
+				// Protected resources
+
+				// For any resources in the _webauthpath, we want to send web
+				// status codes
+				// and not redirect to the login resource for auth errors
+				// i.e. we expect these resources to be accessed via
+				// hyperlinks/user input
+				// and don't consider them to be 'part of' the application
+
+				boolean webAuth = false;
+				if (_webauthpath != null) {
+					if (uri.startsWith(appPath + _webauthpath)) {
+						webAuth = true;
+					}
+				}
+
 				// Redirect to the login form if no credentials
 				if (!goodCredentials) {
 					// Try anonymous creds
@@ -138,11 +160,16 @@ public class AuthFilter implements Filter {
 						}
 					}
 				}
+
 				if (!goodCredentials) {
-					// For all cases, we just want to force a login
-					log.debug("Redirecting to login URL");
-					request.getRequestDispatcher(_loginpage).forward(request,
-							response);
+					if (webAuth) {
+						response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+					} else {
+						// For all resources, we just want to force a login
+						log.debug("Redirecting to login URL");
+						request.getRequestDispatcher(_loginpage).forward(
+								request, response);
+					}
 					return;
 				}
 
@@ -207,6 +234,20 @@ public class AuthFilter implements Filter {
 
 		}
 		log.debug("Login Page: " + _loginpage);
+
+		_openpath = config.getInitParameter("OpenPath");
+		if (_openpath == null) {
+			_openpath = "/login";
+
+		}
+		log.debug("Open Path: " + _openpath);
+
+		_webauthpath = config.getInitParameter("WebAuthPath");
+		if (_webauthpath == null) {
+			_webauthpath = null;
+
+		}
+		log.debug("Web Auth Path: " + _webauthpath);
 
 	}
 

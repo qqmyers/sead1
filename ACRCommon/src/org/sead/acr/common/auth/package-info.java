@@ -5,7 +5,10 @@
  * 
  * If 'enableAnonymous' is true (in the properties file), the filter will attempt to login as anonymous whenever other valid credentials are not available
  * 
- *  The filter protects everything that doesn't start with "/login" and captures calls to "/DoLogin" and "/DoLogout"
+ *  The filter protects everything that doesn't start with OpenPath ("/login" by default) and captures calls to "/DoLogin" and "/DoLogout"
+ *  It also allows for a subarea (WebAuthPath - null/not set by default) to return 403 (forbidden) errors rather than redirecting to the login page
+ *  if good credentials are not available
+ *  
  *  You must create a login.html page that has a login form with an AJAX call to DoLogin. That page must also handle errors (unauthorized and bad request).
  *  If that page uses images, css, or other resources, they can only be accessed from directories starting with "/login".
  *  A call to DoLogout will invalidate the current session, thereby make the stored credentials inaccessible, and send the user back to your LoginPage (defaults to login.html)
@@ -27,6 +30,14 @@
  *   <init-param>
  *      <param-name>LoginPage</param-name>
  *      <param-value>/login.html</param-value>
+ *   </init-param>
+ *   <init-param>
+ *      <param-name>OpenPath</param-name>
+ *      <param-value>/login</param-value>
+ *   </init-param>
+ *   <init-param>
+ *      <param-name>WebAuthPath</param-name>
+ *      <param-value>/geoproxy</param-value>
  *   </init-param>
  *  </filter>
  *  <filter-mapping>
