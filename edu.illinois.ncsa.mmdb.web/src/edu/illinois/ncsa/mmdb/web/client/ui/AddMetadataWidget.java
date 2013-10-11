@@ -46,6 +46,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
@@ -89,7 +90,6 @@ import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.ParentJson;
 import edu.illinois.ncsa.mmdb.web.client.Results;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
@@ -130,8 +130,8 @@ public class AddMetadataWidget extends Composite {
     UserMetadataField                      _creatorMetadataField;
     ClickHandler                           _addCreatorHandler;
     ClickHandler                           _clearCreatorHandler;
-    ConfigurationResult                    _configValues;
     UserMetadataField                      userMetadataField;
+    private String                         vivoURL;
 
     public AddMetadataWidget(String uri, final DispatchAsync dispatch, HandlerManager events) {
         this(new HashSet<String>(), dispatch, events);
@@ -140,16 +140,22 @@ public class AddMetadataWidget extends Composite {
     }
 
     public AddMetadataWidget(Collection<String> batch, final DispatchAsync dispatch, HandlerManager eventBus) {
+        dispatch.execute(new GetConfiguration(null, ConfigurationKey.VIVOJOSEKIURL), new AsyncCallback<ConfigurationResult>() {
 
-        dispatch.execute(new GetConfiguration(MMDB.getUsername()), new AsyncCallback<ConfigurationResult>() {
             @Override
             public void onFailure(Throwable caught) {
-                GWT.log("Could not get configuration values.", caught);
             }
 
             @Override
             public void onSuccess(ConfigurationResult result) {
-                _configValues = result;
+                for (Entry<ConfigurationKey, String> entry : result.getConfiguration().entrySet() ) {
+                    switch (entry.getKey()) {
+                        case VIVOJOSEKIURL:
+                            vivoURL = entry.getValue();
+                            break;
+                        default:
+                    }
+                }
             }
         });
 
@@ -365,21 +371,10 @@ public class AddMetadataWidget extends Composite {
     }-*/;
 
     private void InitializeVIVOConnection(String query) {
-
-        String url = PropertiesReader.getVIVOURL() + query;
-
-        //        if (_configValues == null) {
-        //            displayMessage("Unable to load vivo configuration. Admin privileges are currently required.");
-        //            refresh();
-        //            return;
-        //        }
-
-        if (url == "") {
-            url = _configValues.getConfiguration(ConfigurationKey.VIVOJOSEKIURL) + query;
-        }
         // Send request to server to get the json object.
-        getJson(1, url, this);
-
+        if (!vivoURL.equals("")) {
+            getJson(1, vivoURL + query, this);
+        }
     }
 
     //END - ADDED BY RAM

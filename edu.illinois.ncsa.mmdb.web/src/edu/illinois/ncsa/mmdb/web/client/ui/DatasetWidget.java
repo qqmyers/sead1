@@ -41,6 +41,7 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -68,6 +69,7 @@ import com.google.gwt.user.client.ui.Widget;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
@@ -75,6 +77,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionServiceResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
@@ -93,6 +96,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
@@ -237,11 +241,28 @@ public class DatasetWidget extends Composite {
             }
         });
 
-        try {
-            addCollectionContexts(result.getDataset().getUri());
-        } catch (Exception ex) {
+        service.execute(new GetConfiguration(null, ConfigurationKey.VAURL), new AsyncCallback<ConfigurationResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
 
-        }
+            @Override
+            public void onSuccess(ConfigurationResult configresult) {
+                String discoveryURL = null;
+                for (Entry<ConfigurationKey, String> entry : configresult.getConfiguration().entrySet() ) {
+                    switch (entry.getKey()) {
+                        case VAURL:
+                            discoveryURL = entry.getValue();
+                            if (!discoveryURL.equals("")) {
+                                discoveryURL = discoveryURL.endsWith("/") ? discoveryURL : discoveryURL + "/";
+                                addCollectionContexts(result.getDataset().getUri(), discoveryURL);
+                            }
+                            break;
+                        default:
+                    }
+                }
+            }
+        });
 
         titlePanel.add(titleLabel);
         leftColumn.add(titlePanel);
@@ -406,7 +427,7 @@ public class DatasetWidget extends Composite {
         // FIXME allow owner to do stuff
     }
 
-    private void addCollectionContexts(String datasetURI) {
+    private void addCollectionContexts(String datasetURI, final String discoveryURL) {
         service.execute(new GetCollections(datasetURI),
                 new AsyncCallback<GetCollectionsResult>() {
 
@@ -422,20 +443,17 @@ public class DatasetWidget extends Composite {
 
                         try {
                             for (CollectionBean collection : collections ) {
-                                String discoveryURL = PropertiesReader.getDiscoveryURL();
-                                discoveryURL = discoveryURL.endsWith("/") ? discoveryURL : discoveryURL + "/";
-
-                                String collectionContextURI = discoveryURL + "contents?i=" + collection.getUri() + "&t=" + collection.getTitle();
                                 String collectionContextText = collection.getTitle();
 
                                 collectionContextText = collectionContextText.contains("/") ? collectionContextText.substring(collectionContextText.lastIndexOf("/") + 1) : collectionContextText;
 
                                 collectionContextLink = new Anchor();
+                                String collectionContextURI = discoveryURL + "contents?i=" + collection.getUri() + "&t=" + collection.getTitle();
                                 collectionContextLink.setHref(collectionContextURI);
                                 collectionContextLink.setTarget("_blank");
                                 collectionContextLink.setText(collectionContextText);
-
                                 collectionContextLinksPanel.add(collectionContextLink);
+
                             }
                         } catch (Exception ex) {
                             //Handle exception

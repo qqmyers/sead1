@@ -114,13 +114,15 @@ public class GetMetadataHandler implements
         // SEAD SPECIFIC CODE
         try {
             String vaurl = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VAURL);
-            URL url = new URL(String.format(vaurl, URLEncoder.encode(uri.getString(), "UTF-8")));
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openStream());
-            Element root = doc.getDocumentElement();
-            NodeList nl = root.getElementsByTagName("idValue");
-            for (int i = 0; i < nl.getLength(); i++ ) {
-                Node node = nl.item(i);
-                result.add("VA", "DOI", node.getNodeValue());
+            if (!vaurl.equals("")) {
+                URL url = new URL(String.format(vaurl, URLEncoder.encode(uri.getString(), "UTF-8")));
+                Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openStream());
+                Element root = doc.getDocumentElement();
+                NodeList nl = root.getElementsByTagName("idValue");
+                for (int i = 0; i < nl.getLength(); i++ ) {
+                    Node node = nl.item(i);
+                    result.add("VA", "DOI", node.getNodeValue());
+                }
             }
         } catch (Throwable thr) {
             log.error("Error getting DOI", thr);
