@@ -18,6 +18,14 @@
       <param-name>LoginPage</param-name>
       <param-value>/login</param-value>
     </init-param>
+      <init-param>
+      <param-name>OpenPath</param-name>
+      <param-value>/login</param-value>
+    </init-param>     
+    <init-param>
+      <param-name>WebAuthPath</param-name>
+      <param-value>/geoproxy</param-value>
+    </init-param>
   </filter>
   <filter-mapping>
     <filter-name>AuthFilter</filter-name>
