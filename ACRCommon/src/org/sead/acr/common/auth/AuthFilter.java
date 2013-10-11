@@ -109,6 +109,7 @@ public class AuthFilter implements Filter {
 						// mp.hasValidCredientials() should only be true
 						goodCredentials = mp.hasValidCredentials();
 					}
+					log.debug("Authenticated as: " + session.getAttribute("authenticatedAs"));
 				}
 				// Redirect to the login form if no credentials
 				if (!goodCredentials) {
@@ -139,7 +140,7 @@ public class AuthFilter implements Filter {
 				}
 				if (!goodCredentials) {
 					// For all cases, we just want to force a login
-
+					log.debug("Redirecting to login URL");
 					request.getRequestDispatcher(_loginpage).forward(request,
 							response);
 					return;
