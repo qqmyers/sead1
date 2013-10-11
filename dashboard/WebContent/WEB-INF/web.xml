@@ -25,6 +25,19 @@
   </filter-mapping>
   
   <servlet>
+    <servlet-name>geoproxy</servlet-name>
+    <servlet-class>org.mitre.dsmiley.httpproxy.GeoProxyServlet</servlet-class>
+    <init-param>
+      <param-name>log</param-name>
+      <param-value>true</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>geoproxy</servlet-name>
+    <url-pattern>/geoproxy/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
     <servlet-name>Dashboard</servlet-name>
     <servlet-class>org.sead.acr.dashboard.Dashboard</servlet-class>
   </servlet>
