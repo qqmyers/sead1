@@ -18,12 +18,33 @@
       <param-name>LoginPage</param-name>
       <param-value>/login</param-value>
     </init-param>
+      <init-param>
+      <param-name>OpenPath</param-name>
+      <param-value>/login</param-value>
+    </init-param>     
+    <init-param>
+      <param-name>WebAuthPath</param-name>
+      <param-value>/geoproxy</param-value>
+    </init-param>
   </filter>
   <filter-mapping>
     <filter-name>AuthFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
   
+  <servlet>
+    <servlet-name>geoproxy</servlet-name>
+    <servlet-class>org.mitre.dsmiley.httpproxy.GeoProxyServlet</servlet-class>
+    <init-param>
+      <param-name>log</param-name>
+      <param-value>true</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>geoproxy</servlet-name>
+    <url-pattern>/geoproxy/*</url-pattern>
+  </servlet-mapping>
+
   <servlet>
     <servlet-name>Dashboard</servlet-name>
     <servlet-class>org.sead.acr.dashboard.Dashboard</servlet-class>
