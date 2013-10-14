@@ -20,7 +20,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/arq-2.8.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.1-20110314.041314-1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-beanutils-1.8.2.jar"/>
@@ -36,6 +36,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-2.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-dispatch-1.0.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-servlet-2.4.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-servlet.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-user-2.4.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/iri-0.7.jar"/>
@@ -74,5 +75,10 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-postgresql-2.7.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-maps-1.1.1-rc1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-openlayers-client-0.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/google-api-client-1.16.0-rc.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/google-http-client-1.16.0-rc.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/google-oauth-client-1.16.0-rc.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-oauth2-0.2-alpha.jar" sourcepath="/Users/lmarini/.m2/repository/com/google/api/gwt-oauth2/0.2/gwt-oauth2-0.2-sources.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/google-http-client-jackson-1.16.0-rc.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

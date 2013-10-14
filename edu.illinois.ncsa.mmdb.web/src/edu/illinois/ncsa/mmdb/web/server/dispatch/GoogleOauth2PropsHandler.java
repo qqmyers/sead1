@@ -39,19 +39,52 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.client.dispatch;
+package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import net.customware.gwt.dispatch.shared.Result;
+import java.util.Properties;
+
+import net.customware.gwt.dispatch.server.ActionHandler;
+import net.customware.gwt.dispatch.server.ExecutionContext;
+import net.customware.gwt.dispatch.shared.ActionException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2PropsResult;
+import edu.illinois.ncsa.mmdb.web.server.ServerProperties;
 
 /**
- * Create new collection.
+ * Retrieve Google OAuth2 properties from server.properties.
  * 
  * @author Luigi Marini
  * 
  */
-@SuppressWarnings("serial")
-public class AddCollectionResult implements Result {
+public class GoogleOauth2PropsHandler implements ActionHandler<GoogleOAuth2Props, GoogleOAuth2PropsResult> {
 
-    public AddCollectionResult() {
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog(GoogleOauth2PropsHandler.class);
+
+    @Override
+    public GoogleOAuth2PropsResult execute(GoogleOAuth2Props action, ExecutionContext arg1)
+            throws ActionException {
+
+        Properties properties = ServerProperties.getInstance().getProperties();
+        String clientId = (String) properties.get("google.client_id");
+        log.debug("Google OAuth2 Client Id " + clientId);
+        return new GoogleOAuth2PropsResult(clientId);
     }
+
+    @Override
+    public Class<GoogleOAuth2Props> getActionType() {
+        return GoogleOAuth2Props.class;
+    }
+
+    @Override
+    public void rollback(GoogleOAuth2Props arg0, GoogleOAuth2PropsResult arg1,
+            ExecutionContext arg2) throws ActionException {
+        // TODO Auto-generated method stub
+
+    }
+
 }

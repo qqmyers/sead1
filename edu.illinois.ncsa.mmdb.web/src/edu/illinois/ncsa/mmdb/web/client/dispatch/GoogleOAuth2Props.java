@@ -41,17 +41,17 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Result;
+import net.customware.gwt.dispatch.shared.Action;
 
 /**
- * Create new collection.
+ * Get Google OAuth2 client id stored in server.properties.
  * 
  * @author Luigi Marini
  * 
  */
 @SuppressWarnings("serial")
-public class AddCollectionResult implements Result {
+public class GoogleOAuth2Props implements Action<GoogleOAuth2PropsResult> {
 
-    public AddCollectionResult() {
+    public GoogleOAuth2Props() {
     }
 }

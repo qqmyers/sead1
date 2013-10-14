@@ -44,14 +44,25 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 import net.customware.gwt.dispatch.shared.Result;
 
 /**
- * Create new collection.
+ * Get Google user information. Initial authentication is done in the
+ * client side.
  * 
  * @author Luigi Marini
  * 
  */
 @SuppressWarnings("serial")
-public class AddCollectionResult implements Result {
+public class GoogleUserInfoResult implements Result {
 
-    public AddCollectionResult() {
+    private String jsonIdentity;
+
+    public GoogleUserInfoResult() {
+    }
+
+    public GoogleUserInfoResult(String jsonIdentity) {
+        this.jsonIdentity = jsonIdentity;
+    }
+
+    public String getJsonIdentity() {
+        return jsonIdentity;
     }
 }

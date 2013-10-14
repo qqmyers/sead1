@@ -44,14 +44,28 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 import net.customware.gwt.dispatch.shared.Result;
 
 /**
- * Create new collection.
+ * Return if a user was created or not.
  * 
  * @author Luigi Marini
  * 
  */
 @SuppressWarnings("serial")
-public class AddCollectionResult implements Result {
+public class CheckUserExistsResult implements Result {
 
-    public AddCollectionResult() {
+    private boolean created;
+
+    public CheckUserExistsResult() {
+    }
+
+    public CheckUserExistsResult(boolean created) {
+        this.setCreated(created);
+    }
+
+    public boolean isCreated() {
+        return created;
+    }
+
+    public void setCreated(boolean created) {
+        this.created = created;
     }
 }

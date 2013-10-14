@@ -26,7 +26,6 @@
 <module rename-to='embed'>
 	<!-- Inherit the core Web Toolkit stuff. -->
 	<inherits name='com.google.gwt.user.User' />
-	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
 	<!-- Inherit the CET Beans -->
 	<inherits name='edu.uiuc.ncsa.cet.bean.Bean' />
 	<!--<inherits name='edu.uiuc.ncsa.cet.bean.rbac.medici.RBAC' />-->
@@ -36,6 +35,7 @@
 	<inherits name="com.google.gwt.http.HTTP" />
 	<inherits name="com.google.gwt.xml.XML" />
 	<inherits name='com.google.gwt.inject.Inject' />
+	<inherits name="com.google.api.gwt.oauth2.OAuth2" />
 
 	<!-- Load the Google Maps GWT bindings from the gwt-google-apis project -->
 	<inherits name="com.google.gwt.maps.GoogleMaps" />

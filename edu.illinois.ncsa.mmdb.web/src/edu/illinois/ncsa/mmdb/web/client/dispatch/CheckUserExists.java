@@ -41,17 +41,41 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Result;
+import net.customware.gwt.dispatch.shared.Action;
 
 /**
- * Create new collection.
+ * Check if a user exists, if not create a new account.
  * 
  * @author Luigi Marini
  * 
  */
 @SuppressWarnings("serial")
-public class AddCollectionResult implements Result {
+public class CheckUserExists implements Action<CheckUserExistsResult> {
 
-    public AddCollectionResult() {
+    private String email;
+    private String name;
+
+    public CheckUserExists() {
+    }
+
+    public CheckUserExists(String email, String name) {
+        this.setEmail(email);
+        this.setName(name);
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

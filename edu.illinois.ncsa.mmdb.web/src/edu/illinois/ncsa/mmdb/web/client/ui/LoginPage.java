@@ -43,7 +43,11 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
+import com.google.api.gwt.oauth2.client.Auth;
+import com.google.api.gwt.oauth2.client.AuthRequest;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -54,10 +58,13 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.jsonp.client.JsonpRequestBuilder;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -72,7 +79,12 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.CheckUserExists;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.CheckUserExistsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2PropsResult;
 
 /**
  * @author Luigi Marini
@@ -88,6 +100,11 @@ public class LoginPage extends Composite {
     private Label               progressLabel;
     private final DispatchAsync dispatchasync;
     private final MMDB          mainWindow;
+
+    // Google Oauth2
+    private final String        AUTH_URL      = "https://accounts.google.com/o/oauth2/auth";
+    private final String        EMAIL_SCOPE   = "https://www.googleapis.com/auth/userinfo.email";
+    private final String        PROFILE_SCOPE = "https://www.googleapis.com/auth/userinfo.profile";
 
     /**
      * @param dispatchasync
@@ -208,7 +225,84 @@ public class LoginPage extends Composite {
         table.getFlexCellFormatter().setColSpan(4, 0, 2);
         table.getFlexCellFormatter().setHorizontalAlignment(4, 0, HasAlignment.ALIGN_CENTER);
 
+        // Google Oauth2 link
+        Anchor googleLogin = new Anchor("Login using Google credentials");
+        googleLogin.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                googleAuthLogin();
+            }
+        });
+
+        table.setWidget(5, 0, googleLogin);
+        table.getFlexCellFormatter().setColSpan(5, 0, 2);
+        table.getFlexCellFormatter().setHorizontalAlignment(5, 0, HasAlignment.ALIGN_CENTER);
+
         return table;
+    }
+
+    /**
+     * Login using google oauth2.
+     */
+    private void googleAuthLogin() {
+        dispatchasync.execute(new GoogleOAuth2Props(), new AsyncCallback<GoogleOAuth2PropsResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error retrieving Google OAuth2 properties", caught);
+            }
+
+            @Override
+            public void onSuccess(GoogleOAuth2PropsResult props) {
+                AuthRequest req = new AuthRequest(AUTH_URL, props.getClientId()).withScopes(EMAIL_SCOPE, PROFILE_SCOPE);
+                Auth AUTH = Auth.get();
+                AUTH.clearAllTokens();
+                AUTH.login(req, new Callback<String, Throwable>() {
+                    @Override
+                    public void onSuccess(String token) {
+                        GWT.log("Successful login " + token);
+
+                        JsonpRequestBuilder builder = new JsonpRequestBuilder();
+                        builder.requestObject("https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + token, new AsyncCallback<Entry>() {
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Couldn't retrieve JSON");
+                            }
+
+                            public void onSuccess(Entry data) {
+                                GWT.log(data.getEmail() + " " + data.getName());
+
+                                dispatchasync.execute(new CheckUserExists(data.getEmail(), data.getName()),
+                                        new AsyncCallback<CheckUserExistsResult>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                GWT.log("Error looking up user" + caught);
+                                                Window.alert("Error looking up user");
+                                            }
+
+                                            @Override
+                                            public void onSuccess(CheckUserExistsResult result) {
+                                                if (result.isCreated()) {
+                                                    GWT.log("Created new user");
+                                                } else {
+                                                    GWT.log("Found existing user");
+                                                }
+                                            }
+
+                                        });
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("Login failed " + caught.toString());
+                    }
+                });
+
+            }
+        });
+
     }
 
     protected void authenticate() {
@@ -269,8 +363,45 @@ public class LoginPage extends Composite {
         });
     }
 
-    /* Called to process credentials from login form */
+    private void authenticateOnServer(final String username, final String password, final String sessionId, final AuthenticationCallback callback) {
+        // now hit the REST authentication endpoint
+        String restUrl = "./api/authenticate";
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+        builder.setUser(TextFormatter.escapeEmailAddress(username));
+        builder.setPassword(password);
 
+        try {
+            GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
+            builder.sendRequest("", new RequestCallback() {
+                public void onError(Request request, Throwable exception) {
+                    fail();
+                }
+
+                public void onResponseReceived(Request request, Response response) {
+                    // success!
+                    String sessionKey = response.getText();
+
+                    GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                    if (response.getStatusCode() > 300) {
+                        GWT.log("authentication failed: " + sessionKey, null);
+                        fail();
+                    }
+                    GWT.log("user " + username + " associated with session key " + sessionKey, null);
+                    // login local
+
+                    mainWindow.loginByName(username, sessionKey, callback);
+                }
+            });
+        } catch (RequestException x) {
+            // another error condition
+            callback.onFailure();
+        }
+    }
+
+    /**
+     * Called to process credentials from login form
+     * 
+     */
     public void authenticate(final String username, final String password) {
         authenticate(dispatchasync, mainWindow, username, password, new AuthenticationCallback() {
             @Override
@@ -363,4 +494,17 @@ public class LoginPage extends Composite {
         Cookies.removeCookie(MMDB._sessionCookieName, path);
     }
 
+}
+
+class Entry extends JavaScriptObject {
+    protected Entry() {
+    }
+
+    public final native String getEmail() /*-{
+		return this.email;
+    }-*/;
+
+    public final native String getName() /*-{
+		return this.name;
+    }-*/;
 }

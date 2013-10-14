@@ -50,6 +50,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.CheckUserExistsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ContextConvertHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.Create3DImageHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.CreateRoleHandler;
@@ -96,6 +97,8 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUsersHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetViewCountHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleAuthHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleOauth2PropsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.InitializeRolesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
@@ -124,7 +127,6 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.SetUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
-//import edu.illinois.ncsa.mmdb.web.server.dispatch.AuthenticateHandler;
 
 /**
  * Setup registry of action handlers when the servlet context is initialized.
@@ -215,6 +217,9 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetAccessLevelHandler());
         DispatchUtil.registerHandler(new SetAccessLevelHandler());
         DispatchUtil.registerHandler(new SetRoleAccessLevelHandler());
+        DispatchUtil.registerHandler(new GoogleAuthHandler());
+        DispatchUtil.registerHandler(new CheckUserExistsHandler());
+        DispatchUtil.registerHandler(new GoogleOauth2PropsHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

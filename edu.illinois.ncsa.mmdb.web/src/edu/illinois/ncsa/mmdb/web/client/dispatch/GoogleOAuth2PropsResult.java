@@ -44,14 +44,24 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 import net.customware.gwt.dispatch.shared.Result;
 
 /**
- * Create new collection.
+ * Get Google OAuth2 client id stored in server.properties.
  * 
  * @author Luigi Marini
  * 
  */
 @SuppressWarnings("serial")
-public class AddCollectionResult implements Result {
+public class GoogleOAuth2PropsResult implements Result {
 
-    public AddCollectionResult() {
+    private String clientId;
+
+    public GoogleOAuth2PropsResult() {
+    }
+
+    public GoogleOAuth2PropsResult(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientId() {
+        return clientId;
     }
 }
