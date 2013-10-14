@@ -97,13 +97,12 @@
 	
 	<target name="sead" depends="gwtc, resources" description="setup for bamboo build and deployment">
 		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" overwrite="true" />
-		<copy tofile="war/mmdb/public.properties" file="src/sead.public-properties" overwrite="true" />
 		<copy tofile="war/WEB-INF/classes/server.properties" file="src/sead.server-properties" overwrite="true" />
 		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
 	</target>
-		
+	
 	<!-- make sure we have the latest beans -->
 	<target name="cetbean" description="Compile CET beans.">
 		<delete>
