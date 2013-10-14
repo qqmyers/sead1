@@ -87,7 +87,7 @@ public class SetPermissionsHandler implements ActionHandler<SetPermissions, SetP
         Resource user = Resource.uriRef(u);
         Resource role = Resource.uriRef(setting.getRoleUri());
         Collection<Resource> userRoles = rbac.getRoles(user); // roles the user belongs to
-        for (Tuple<Resource> row : rbac.getGlobalPermissions() ) { // in all permissions
+        for (Tuple<Resource> row : rbac.getGlobalPermissions(null) ) { // in all permissions
             int i = 0;
             Resource r = row.get(i++);
             Resource p = row.get(i++);

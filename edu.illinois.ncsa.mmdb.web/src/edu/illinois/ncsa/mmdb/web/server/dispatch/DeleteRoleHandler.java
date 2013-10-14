@@ -60,7 +60,7 @@ public class DeleteRoleHandler implements ActionHandler<DeleteRole, EmptyResult>
         neededPermissions.add(Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri())); // get to the home page
         neededPermissions.add(Resource.uriRef(Permission.VIEW_ADMIN_PAGES.getUri())); // get to the admin tab
         neededPermissions.add(Resource.uriRef(Permission.EDIT_ROLES.getUri())); // edit roles
-        for (Tuple<Resource> row : rbac.getGlobalPermissions() ) { // in all permissions
+        for (Tuple<Resource> row : rbac.getGlobalPermissions(null) ) { // in all permissions
             int i = 0;
             Resource r = row.get(i++);
             Resource permission = row.get(i++);

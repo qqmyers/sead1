@@ -426,7 +426,7 @@ public class ContextSetupListener implements ServletContextListener {
 
         // ensure Medici permissions exist
         rbac.intializePermissions();
-        rbac.associatePermissionsWithRoles();
+        rbac.associatePermissionsWithRoles(null, 0);
 
         //ensure default roles exist
         for (DefaultRole role : DefaultRole.values() ) {
