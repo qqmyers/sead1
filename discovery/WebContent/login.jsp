@@ -72,34 +72,15 @@ legend {
 	String project_info = (String) request.getAttribute("projectInfo");
 	String status_code = (String) request.getAttribute("statusCode");
 	Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
-	String medici = (String) request.getAttribute("medici");
 %>
 
 <script type="text/javascript">
     var projInfo   = '<%=project_info%>';
     var authStatus = '<%=status_code%>';
     var anon = '<%=isAnonymous%>';
-    var medici = '<%=medici%>';
-   	var userName = "";
-	var password="";
 
 	var query = '';
 	$(function() {
-
-		$( "#txtUserName" ).focus();
-		
-		$( "#txtUserName" ).keyup(function(event) {
-			if( event.which == 13) {
-				$( "#txtPassword" ).focus();
-			}
-		});
-
-		$( "#txtPassword" ).keyup(function(event) {
-			if( event.which == 13) {
-				$("#btnLogin").click();
-			}
-		});
-
 		loadProjectInfo(projInfo);
 		if ((authStatus == '403') && (anon == 'true')) {
 			$("#forbiddenpanel").show();
@@ -113,8 +94,8 @@ legend {
 
 					query = url.indexOf("?") == -1 ? '' : url.substring(url
 							.indexOf("?") + 1);
-					userName = $('#txtUserName').val();
-					password = $('#txtPassword').val();
+					var userName = $('#txtUserName').val();
+					var password = $('#txtPassword').val();
 
 					$.ajax({
 						type : "POST",
@@ -122,26 +103,12 @@ legend {
 						dataType : "json",
 						data : "userName=" + userName + "&password=" + password
 								+ "&remainingQuery=" + query,
-						success : loginToRemoteServer,
+						success : showCollection,
 						error : redirectToErrorPage
 					});
 				});
 
 	});
-	
-	function loginToRemoteServer(json) {
-					
-	var remoteURL = medici + "/api/authenticate";
-
-					$.ajax({
-						type : "POST",
-						url : remoteURL,
-						dataType : "text",
-						data : "username=" + userName + "&password=" + password,
-						success : showCollection,
-						error : redirectToErrorPage
-					});
-	}
 
 	function showCollection(json) {
 		if (query == '') {
