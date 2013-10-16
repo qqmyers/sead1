@@ -2,8 +2,6 @@ body {
 	padding-top: 60px;
 }
 
-
-
 .navbar-inner {
 		  background-color: white; /* background color will be black for all browsers */
 		  background-image: none;
@@ -39,10 +37,12 @@ body {
 }
 
 /* Jag changes */
+
 .container .row
 {
-	padding-top:20px;
+	padding-top:30px;
 }
+
 .gradient {
     background-image: url("../login_images/Border.png");
     float: right;
@@ -75,9 +75,11 @@ body {
     text-decoration: none;
     text-shadow: 0 1px 0 #FFFFFF;
 }
-.container {
+/*
+ .container {
 	width:82%;
-}
+ }
+ */
 .menuElementRight {
     font-size: 0.9em;
     padding: 10px 8px;

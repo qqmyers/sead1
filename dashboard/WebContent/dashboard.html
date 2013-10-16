@@ -9,6 +9,9 @@
 		<link href="css/jquery.treetable.css" rel="stylesheet" type="text/css" />
 		<link rel="stylesheet" href="css/jquery.treetable.theme.default.css">
 		
+		<!--  ol3 styles -->
+		<!-- <link rel="stylesheet" href="http://ol3js.org/en/master/build/ol.css" type="text/css"> -->
+		
 		<!--  ol2 styles -->
 		<link rel="stylesheet" href="http://openlayers.org/api/theme/default/style.css" type="text/css">
     	<style>
@@ -19,34 +22,27 @@
       	.olControlAttribution {
     		bottom: 5px;
 		}
-		</style>
+    	</style>
 		<link href="css/dashboard.css" rel="stylesheet">		
-<% 
-String collections = (String) request.getAttribute("collections"); 
-String recentUploads = (String) request.getAttribute("recentUploads");
-String creators = (String) request.getAttribute("creators");
-String projectPath = (String) request.getAttribute("projectPath");
-String datasetDistribution = (String) request.getAttribute("datasetDistribution");
-Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
-%>	
 	</head>
 	<body>
 		<div id="hidden_collections" style="display:none">
-			<%= collections %>
+			{"sparql":{"results":{"result":[]}}}
 		</div>
 		<div id="hidden_recentuploads" style="display:none">
-			<%= recentUploads %>
+			{"sparql":{"results":{"result":[]}}}
 		</div>
 		<div id="hidden_creators" style="display:none">
-			<%= creators %>
+			{"sparql":{"results":{"result":[]}}}
 		</div>
 		<div id="hidden_projectPath" style="display:none">
-			<%= projectPath %>
+			/sead
 		</div>
 		<div id="hidden_datasetDistribution" style="display:none">
-			<%= datasetDistribution %>
+			hello
 		</div>
 		<div class="navbar navbar-inverse navbar-fixed-top" style="border-bottom: 1px solid #888888;">
+			<!-- <div class="navbar-inner"> -->
 			<div class="container">
 				<div class ="banner">
 					<div id="logo">
@@ -75,6 +71,7 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 						<li><a href="DoLogout" id='loginout' >Logout</a></li>
 					</ul>	
 				</div>
+					<!--/.nav-collapse -->
 			</div>
 		</div>
 	
@@ -84,12 +81,12 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 					<h3>Project Description </h3>
 					<div id="projectInfo" >	
 						<!-- Link will be changed from projectPath to the URL defined in the project configuration -->
-						<a href="<%= projectPath %>" target="_blank" id="projectName" ></a><br/><br/>
-						<p id="projectDesc"> </p>
+						<a href="<%= projectPath %>" target="_blank" id="projectName" ></a><br/>
+						<p id="projectDesc"></p>
 					</div>
 					<!-- <a href="http://usgs.gov" target="_blank">http://usgs.gov</a></br>
 					<a href="http://cuahsi.org" target="_blank">http://cuahsi.org</a></br>
-					<a href="http://wsc-wiki.illinois.edu" target="_blank">http://wsc-wiki.illinois.edu</a> -->			
+					<a href="http://wsc-wiki.illinois.edu" target="_blank">http://wsc-wiki.illinois.edu</a> -->		
 				</div>
 				<div class="span4">
 					<div id="summaryMap" class="map"></div>
@@ -98,11 +95,9 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 				<div class="span4" style="background:#EEEEEE;">				
 					<h3>Team Members</h3>
 					<div id="teammembers">
-					<!-- 
 					Praveen Kumar<br/>
 					Charles Nyugen<br/>
 					James Myers<br/><br/>
-					 -->
 					</div>				
 				</div>
 			</div>
@@ -181,21 +176,24 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 			<a href="#feedback">Feedback</a>
 		</div>
 		<script type="text/javascript">
-			var projInfo = '<%= request.getAttribute("projectInfo") %>';
+			var projInfo = '{"sparql":{"results":{"result":[]}}}';
 			var isAnonymous = '<%= isAnonymous %>';
 		</script>
 		<script src="http://code.jquery.com/jquery-1.8.1.min.js" type="text/javascript"></script>
 		<script src="http://code.jquery.com/jquery-latest.js"></script>		
 	  	<script src="js/jquery.dateFormat-1.0.js" type="text/javascript"></script>
+			
 		<script src="js/jquery.treetable.js"></script>
 	
+	    <!-- ol3  -->
+	    <!-- <script src="http://ol3js.org/en/master/build/ol.js" type="text/javascript"></script> -->
 	    <!-- ol2 -->
 		<script src="http://openlayers.org/api/OpenLayers.js" type="text/javascript"></script>
-			
 		<!--  google map -->
 		<!-- <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyARkc86gaOrSG8C_MFgtJ5lHyoXLYi7N9Q&sensor=false"></script> -->
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 		<script type="text/javascript" src="js/mimeutil.js"></script>
 		<script type="text/javascript" src="js/dashboard.js"></script>
+		
 	</body>
 </html>
