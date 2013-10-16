@@ -104,6 +104,18 @@
 			<param-value>edu.illinois.ncsa.mmdb.web.server.resteasy.ResteasyApplication</param-value>
 		</init-param>
     </servlet>
+    
+	<servlet>
+	    <servlet-name>GeoProxy</servlet-name>
+	    <servlet-class>
+	        org.mitre.dsmiley.httpproxy.GeoProxyServlet
+	    </servlet-class>
+	    <init-param>
+			<param-name>PropertiesFileName</param-name>
+			<param-value>geoproxy.properties</param-value>
+		</init-param>
+	    
+	</servlet>
 
 	<!-- servlet mapping -->
 	<servlet-mapping>
@@ -171,6 +183,11 @@
 		<servlet-name>BatchDownload</servlet-name>
 		<url-pattern>/BatchDownload</url-pattern>
 	</servlet-mapping>
+	
+	<servlet-mapping>
+	    <servlet-name>GeoProxy</servlet-name>
+	    <url-pattern>/geoproxy/*</url-pattern>
+	</servlet-mapping>
 
 	<!-- Servlet context listener -->
 	<listener>
@@ -198,6 +215,51 @@
  		<filter-name>CacheFilter</filter-name>
  		<url-pattern>*.png</url-pattern>
 	</filter-mapping>
+	
+	<!--  Cross-site -->
+	<filter>
+	    <filter-name>CORS</filter-name>
+	    <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
+        <init-param>
+           <param-name>cors.allowOrigin</param-name>
+           <param-value>*</param-value>
+        </init-param>
+        <init-param>
+           <param-name>cors.supportedMethods</param-name>
+           <param-value>POST, HEAD, OPTIONS</param-value>
+        </init-param>
+    </filter>
+	<filter-mapping>
+        <filter-name>CORS</filter-name>
+        <url-pattern>/api/authenticate</url-pattern>
+    </filter-mapping>
+  	<filter-mapping>
+        <filter-name>CORS</filter-name>
+        <servlet-name>GeoProxy</servlet-name> 
+    </filter-mapping>
+	<filter>
+    <filter-name>AuthFilter</filter-name>
+    <filter-class>
+       org.sead.acr.common.auth.AuthFilter
+    </filter-class>
+    <init-param>
+      <param-name>PropertiesFileName</param-name>
+      <param-value>/geoproxy.properties</param-value>
+    </init-param>
+    <init-param>
+      <param-name>OpenPath</param-name>
+      <param-value>/notused</param-value>
+    </init-param>     
+      <init-param>
+      <param-name>WebAuthPath</param-name>
+      <param-value>/geoproxy</param-value>
+    </init-param>     
+  </filter>
+  <filter-mapping>
+    <filter-name>AuthFilter</filter-name>
+    <url-pattern>/geoproxy/*</url-pattern>
+  </filter-mapping>
+	
 
 	<!-- Default page to serve -->
 	<welcome-file-list>

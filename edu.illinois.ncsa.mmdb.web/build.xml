@@ -101,6 +101,8 @@
 		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
+		<copy tofile="war/WEB-INF/classes/geoproxy.properties" file="src/geoproxy.properties"/>
+		
 	</target>
 	
 	<!-- make sure we have the latest beans -->
