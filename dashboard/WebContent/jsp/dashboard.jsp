@@ -11,15 +11,6 @@
 		
 		<!--  ol2 styles -->
 		<link rel="stylesheet" href="http://openlayers.org/api/theme/default/style.css" type="text/css">
-    	<style>
-      	.map {
-        	height: 300px;
-        	border: 1px solid black;
-      	}
-      	.olControlAttribution {
-    		bottom: 5px;
-		}
-		</style>
 		<link href="css/dashboard.css" rel="stylesheet">		
 <% 
 String collections = (String) request.getAttribute("collections"); 
@@ -80,8 +71,8 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 	
 		<div class="container">
 			<div class="row">
-				<div class="span4" style="background:#EEEEEE">			
-					<h3>Project Description </h3>
+				<div class="span3 fixed-height-col" style="background:#EEEEEE">			
+					<h4>Project Description </h4>
 					<div id="projectInfo" >	
 						<!-- Link will be changed from projectPath to the URL defined in the project configuration -->
 						<a href="<%= projectPath %>" target="_blank" id="projectName" ></a><br/><br/>
@@ -91,12 +82,12 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 					<a href="http://cuahsi.org" target="_blank">http://cuahsi.org</a></br>
 					<a href="http://wsc-wiki.illinois.edu" target="_blank">http://wsc-wiki.illinois.edu</a> -->			
 				</div>
-				<div class="span4">
+				<div class="span6 fixed-height-col">
 					<div id="summaryMap" class="map"></div>
 					<div><center><a href="http://sead.ncsa.illinois.edu/geo-webapp" target="_blank">Go to GeoDashBoard</a></center></div>
 				</div>
-				<div class="span4" style="background:#EEEEEE;">				
-					<h3>Team Members</h3>
+				<div class="span3 fixed-height-col" style="background:#EEEEEE">				
+					<h4>Team Members</h4>
 					<div id="teammembers">
 					<!-- 
 					Praveen Kumar<br/>
@@ -107,20 +98,10 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 				</div>
 			</div>
 			<div class="row">
-				<div class="span4">
+				<div class="span3 fixed-height-col">
 					<div id="container1"></div>
 				</div>
-				<div class="span4">				
-					<!-- <table id="table" class="table table-bordered" style="width: 100%; height: 100%">
-						<thead>
-							<tr>
-								<th width="5%"></th>
-								<th width="85%">Collections</th>
-								<th width="10%">Size</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table> -->
+				<div class="span6 fixed-height-col">				
 					<table id="table">
 						<thead>
 							<tr>
@@ -129,49 +110,12 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 							</tr>
 						</thead>
 						<tbody>
-							
 						</tbody>
 					</table>
 				</div>
-				<div class="span4" style="background:#EEEEEE">		
-					<h3>Recent Uploads</h3>		
-					<!-- <h3>Recent Uploads</h3>
-					<p> Praveen Kumar</p><hr>
-					<p> Charles Nyugen</p><hr>
-					<p> James Myers</p><hr> -->
+				<div class="span3 fixed-height-col" style="background:#EEEEEE">		
+					<h4>Recent Uploads</h4>		
 					<div id="recentuploads">
-						<!-- <div class="media">
-							<a class="pull-left" href="#"> <img class="media-object" src="http://nced.ncsa.illinois.edu/acr/api/image/preview/small/tag:cet.ncsa.uiuc.edu,2008:/bean/Dataset/8a48d7d7-b91a-4741-84be-116cd3eafd80">
-							</a>
-							<div class="media-body">
-								<h4 class="media-heading">Media heading</h4>
-								dasdadadasdsada
-							</div>
-						</div>
-						<div class="media">
-							<a class="pull-left" href="#"> <img class="media-object" src="http://sead.ncsa.illinois.edu/api/image/preview/small/tag:medici@uiuc.edu,2009:data_JcTJq6ZpEZ_Rm3hmOVqXgg">
-							</a>
-							<div class="media-body">
-								<h4 class="media-heading">Media heading</h4>
-								dasdadadasdsada
-							</div>
-						</div>
-						<div class="media">
-							<a class="pull-left" href="#"> <img class="media-object" src="http://sead.ncsa.illinois.edu/api/image/preview/small/tag:medici@uiuc.edu,2009:data_JcTJq6ZpEZ_Rm3hmOVqXgg">
-							</a>
-							<div class="media-body">
-								<h4 class="media-heading">Media heading</h4>
-								dasdadadasdsada
-							</div>
-						</div>
-						<div class="media">
-							<a class="pull-left" href="#"> <img class="media-object" src="http://sead.ncsa.illinois.edu/api/image/preview/small/tag:medici@uiuc.edu,2009:data_JcTJq6ZpEZ_Rm3hmOVqXgg">
-							</a>
-							<div class="media-body">
-								<h4 class="media-heading">Media heading</h4>
-								dasdadadasdsada
-							</div>
-						</div> -->
 					</div>
 				</div>
 			</div>

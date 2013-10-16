@@ -1,6 +1,7 @@
 var projectPath = '';
-var map;
+var olmap;
 var wmsResult;
+var map = new Object();
 
 callOnLoad();
 //$("#table").treetable({ expandable: true });
@@ -22,12 +23,12 @@ function initMap() {
 	var geographic = new OpenLayers.Projection("EPSG:4326");
     var mercator = new OpenLayers.Projection("EPSG:900913");
 	
-    map = new OpenLayers.Map( 'summaryMap', {projection: mercator} );
+    olmap = new OpenLayers.Map( 'summaryMap', {projection: mercator} );
     //map.addControl(new OpenLayers.Control.MousePosition());
     
     
     var osm = new OpenLayers.Layer.OSM();
-    map.addLayer(osm);
+    olmap.addLayer(osm);
     
 	layerList = getWmsLayers();
 	console.log(layerList);
@@ -37,12 +38,12 @@ function initMap() {
 	    var layer = new OpenLayers.Layer.WMS("WMS", "http://sead.ncsa.illinois.edu/geoserver/wms",
 	            {layers: l, transparent: true},
 	            {isBaseLayer: false, opacity:0.8}); 
-	    map.addLayer(layer);
+	    olmap.addLayer(layer);
 	}
 	console.log("layers are added");
 	
 	// map center or map extent needs to be calculated 
-	map.setCenter(new OpenLayers.LonLat(-13762945.56, 4822412.11), 10);
+	olmap.setCenter(new OpenLayers.LonLat(-13762945.56, 4822412.11), 10);
 }
 
 function getWmsLayers() {
@@ -147,7 +148,6 @@ function loadTableContent() {
 	$("#table tbody").html(div_html);
 
 }
-var map = new Object();
 function getTeamMembers() {
 
 	var creatorURI = '';
