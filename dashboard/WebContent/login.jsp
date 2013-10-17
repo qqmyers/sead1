@@ -80,6 +80,10 @@
 						type : "POST",
 						url : remoteURL,
 						dataType : "text",
+						xhrFields: {
+						       withCredentials: true
+						},
+						crossDomain: true,
 						data : "username=" + userName + "&password=" + password,
 						success : showRequestedResource,
 						error : redirectToErrorPage
