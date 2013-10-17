@@ -18,6 +18,7 @@
 	String project_info = (String) request.getAttribute("projectInfo");
 	String status_code = (String) request.getAttribute("statusCode");
 	Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
+	String medici = (String) request.getAttribute("medici");
 %>
 
 
@@ -27,8 +28,27 @@
     var projInfo   = '<%=project_info%>';
     var authStatus = '<%=status_code%>';
     var anon = '<%=isAnonymous%>';
+    var medici = '<%=medici%>';
+	var userName = "";
+	var password="";
 
 	$(function() {
+	
+		$( "#txtUserName" ).focus();
+	
+		$( "#txtUserName" ).keyup(function(event) {
+			if( event.which == 13) {
+				$( "#txtPassword" ).focus();
+			}
+		});
+
+		$( "#txtPassword" ).keyup(function(event) {
+			if( event.which == 13) {
+				$("#btnLogin").click();
+			}
+		});
+	
+	
 		$("#btnLogin").click(
 				function() {
 					$('#errorpanel').hide();
@@ -37,8 +57,8 @@
 
 					query = url.indexOf("?") == -1 ? '' : url.substring(url
 							.indexOf("?") + 1);
-					var userName = $('#txtUserName').val();
-					var password = $('#txtPassword').val();
+					userName = $('#txtUserName').val();
+					password = $('#txtPassword').val();
 
 					$.ajax({
 						type : "POST",
@@ -46,12 +66,26 @@
 						dataType : "json",
 						data : "userName=" + userName + "&password=" + password
 								+ "&remainingQuery=" + query,
-						success : showRequestedResource,
+						success : loginToRemoteServer,
 						error : redirectToErrorPage
 					});
 				});
 	});
 
+	function loginToRemoteServer(json) {
+					
+	var remoteURL = medici + "/api/authenticate";
+
+					$.ajax({
+						type : "POST",
+						url : remoteURL,
+						dataType : "text",
+						data : "username=" + userName + "&password=" + password,
+						success : showRequestedResource,
+						error : redirectToErrorPage
+					});
+
+}
 	function showRequestedResource(json) {
 		if (query == '') {
 			window.location.replace("home");
@@ -69,6 +103,10 @@
 		} else if (jqXHR.responseText == 'Forbidden') {
 			$('#forbiddenpanel').show();
 			$('#errorpanel').hide();
+		} else {
+			<!--cross-site issue preventing remote login - just allow this (user will have to login to--> 
+			<!--medici manually if anonymous doesn't provide access -->
+			showRequestedResource(null);
 		}
 	}
 </script>
