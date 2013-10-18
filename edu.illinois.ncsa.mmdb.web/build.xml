@@ -212,6 +212,7 @@
 				<include name="commons-logging.properties" />
 				<include name="server.properties" />
 				<include name="taxonomy.owl" />
+				<include name="geoproxy.properties" />
 			</fileset>
 		</copy>
 		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>

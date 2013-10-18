@@ -182,8 +182,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
             @Override
             public void onUncaughtException(Throwable e) {
-                Window.alert("uncaught: " + e.getMessage());
-                String s = "RuntimeExceotion:\n" + e.getMessage();
+                String s = "SEAD ACR Error:\n An unexpected error (such as a temporary communications issue or server error) has occurred.\n Please refresh your browser page to continue.\n If the issue persists, please report it to SEAD, including the following message:\n" + e.getMessage();
                 Window.alert(s);
                 e.printStackTrace();
                 GWT.log("uncaught exception", e);
