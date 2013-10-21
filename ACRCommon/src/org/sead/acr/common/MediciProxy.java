@@ -227,7 +227,7 @@ public class MediciProxy {
 	 * 
 	 * @deprecated
 	 */
-	public String getSparqlJsonResponse(String query) throws IOException,
+	public String getSparqlJSONResponse(String query) throws IOException,
 	MalformedURLException, JSONException {
 		return getSparqlXMLResponse(query);
 	}	
