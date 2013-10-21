@@ -49,6 +49,7 @@ import javax.xml.ws.http.HTTPException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sead.acr.common.utilities.PropertiesLoader;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.util.Base64;
@@ -87,8 +88,12 @@ public class AuthenticatedServlet extends HttpServlet {
 
             String username = request.getParameter("username");
             String password = request.getParameter("password");
+            String googleAccessToken = request.getParameter("googleAccessToken");
+
             log.debug("u: " + username);
             log.debug("p: " + password);
+            log.debug("gAT: " + googleAccessToken);
+
             if ((username != null) && (!username.equals("")) && (password != null) && (!password.equals(""))) {
                 if (new Authentication().authenticate(username, password)) {
                     // set the session attribute indicating that we're authenticated
@@ -103,25 +108,31 @@ public class AuthenticatedServlet extends HttpServlet {
                     log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
                     session.setAttribute(AUTHENTICATED_AS, validUser);
                     response.getWriter().print(session.getId());
-                    /*To allow webapps such as ACR Dashboard, Discovery, and Geobrowse to start a session/
-                     * set a cookie for mmdb in the user's browser when they are not hosted on the same server as medici/mmdb, 
-                     * it looks like two steps would work:
-                     * 1) add the headers below allowing the webapp to make a client-side request to the mmdb domain
-                     *    (w/o headers, the call can be made, but the response can't be read. I've verified that the headers
-                     *    work to let the app see the response(i.e. the sessionKey). They do not allow the set cookie request to succeed
-                     *    (request.getSession(true))
-                     * 2) launch an iframe that, on load, makes a request to set the mmdb cookie - 
-                     *    i.e. from calling this method, the app can get the seesionKey - the iframe could make a request
-                     *    (for post on load) to mediciURL/joinsession/sessionKey which could then respond with a valid session.
-                     *    I have not tried step 2, but the web says it works...
-                     *    
-                     *    For v1, we'll turn this off. After that, we can consider adding it if other forms of sso don't obviate the need.
-                     */
-                    //response.addHeader("Access-Control-Allow-Origin", "*");
-                    //response.addHeader("Access-Control-Allow-Methods", "PUT, POST");
+                }
+            } else if (googleAccessToken != null) {
+                String client_id = PropertiesLoader.getProperties().getProperty(
+                        "googleClientId");
+                if (client_id == null) {
+                    client_id = "972225704837.apps.googleusercontent.com";// Jim's test Id
+                }
+                validUser = Authentication.googleAuthenticate(client_id, googleAccessToken); // testID
+                if (validUser != null) {
+                    // set the session attribute indicating that we're authenticated
+
+                    // we're authenticating, so we need to create a session and put it in the context
+                    HttpSession session = request.getSession(false);
+                    if (session != null) {
+                        log.debug("Invalidating: " + session.getId());
+                        session.invalidate();
+                    }
+                    session = request.getSession(true);
+                    log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
+                    session.setAttribute(AUTHENTICATED_AS, validUser);
+                    response.getWriter().print(session.getId());
 
                 }
             }
+
             if (validUser == null) {
                 response.getWriter().print("");
                 //Set 404 - we don't want to invoke the browser authentication attempt we'd get from sending 401...

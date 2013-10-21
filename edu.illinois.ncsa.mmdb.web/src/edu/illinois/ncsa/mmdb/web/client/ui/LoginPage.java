@@ -79,7 +79,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.CheckUserExists;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.CheckUserExistsResult;
@@ -235,9 +234,9 @@ public class LoginPage extends Composite {
             }
         });
 
-        table.setWidget(5, 0, googleLogin);
-        table.getFlexCellFormatter().setColSpan(5, 0, 2);
-        table.getFlexCellFormatter().setHorizontalAlignment(5, 0, HasAlignment.ALIGN_CENTER);
+        //        table.setWidget(5, 0, googleLogin);
+        //        table.getFlexCellFormatter().setColSpan(5, 0, 2);
+        //        table.getFlexCellFormatter().setHorizontalAlignment(5, 0, HasAlignment.ALIGN_CENTER);
 
         return table;
     }
@@ -344,11 +343,12 @@ public class LoginPage extends Composite {
                         if (response.getStatusCode() > 300) {
                             GWT.log("authentication failed: " + sessionKey, null);
                             callback.onFailure();
-                        }
-                        GWT.log("user " + username + " associated with session key " + sessionKey, null);
-                        // login local
+                        } else {
+                            GWT.log("user " + username + " associated with session key " + sessionKey, null);
+                            // login local
 
-                        mainWindow.loginByName(username, sessionKey, callback);
+                            mainWindow.loginByName(username, sessionKey, callback);
+                        }
                     }
                 });
 
@@ -363,6 +363,7 @@ public class LoginPage extends Composite {
         });
     }
 
+    /*
     private void authenticateOnServer(final String username, final String password, final String sessionId, final AuthenticationCallback callback) {
         // now hit the REST authentication endpoint
         String restUrl = "./api/authenticate";
@@ -385,11 +386,12 @@ public class LoginPage extends Composite {
                     if (response.getStatusCode() > 300) {
                         GWT.log("authentication failed: " + sessionKey, null);
                         fail();
-                    }
-                    GWT.log("user " + username + " associated with session key " + sessionKey, null);
-                    // login local
+                    } else {
+                        GWT.log("user " + username + " associated with session key " + sessionKey, null);
+                        // login local
 
-                    mainWindow.loginByName(username, sessionKey, callback);
+                        mainWindow.loginByName(username, sessionKey, callback);
+                    }
                 }
             });
         } catch (RequestException x) {
@@ -397,6 +399,7 @@ public class LoginPage extends Composite {
             callback.onFailure();
         }
     }
+    */
 
     /**
      * Called to process credentials from login form
