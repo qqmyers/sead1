@@ -1,3 +1,5 @@
+package org.mitre.dsmiley.httpproxy;
+
 /*
  * These two classes implement a proxy we use for geoserver calls. The proxy is normally protected by the Auth filter 
  * (thus only accessible to valid users with remoteAPI permissions). When accessed, it uses a separate set of 

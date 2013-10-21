@@ -20,23 +20,18 @@ package org.sead.acr.common;
  *
  */
 
-import java.util.Collections;
-
-import org.sead.acr.common.utilities.json.JSONException;
-import org.sead.acr.common.utilities.json.JSONObject;
-import org.sead.acr.common.utilities.json.XML;
-import org.sead.acr.common.utilities.PropertiesLoader;
-import org.sead.acr.common.utilities.Queries;
-
-import java.util.Properties;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Properties;
 
 import javax.xml.ws.http.HTTPException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sead.acr.common.utilities.PropertiesLoader;
+import org.sead.acr.common.utilities.json.JSONException;
+import org.sead.acr.common.utilities.json.JSONObject;
+import org.sead.acr.common.utilities.json.XML;
 
 public class MediciProxy {
 
@@ -50,11 +45,17 @@ public class MediciProxy {
 	private String _remoteAPIKey = null;
 	private boolean _validCredentials = false;
 
+	// private String _googleAccessToken = null;
+	private String _sessionId = null;
+
 	private String _geouser = null;
 	private String _geopassword = null;
 	private String _geoserver = null;
 
 	static String _sparql_path = "/resteasy/sparql";
+
+	static final String USER_INFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=";
+	static final String TOKEN_INFO_URL = "https://www.googleapis.com/oauth2/v1/tokeninfo";
 
 	public MediciProxy() {
 	}
@@ -81,6 +82,7 @@ public class MediciProxy {
 
 	public void setCredentials(String username, String password, String server,
 			String remoteAPIKey) throws HTTPException {
+		log.debug("Setting credentials");
 		_username = username;
 		_password = password;
 		_server = server;
@@ -99,17 +101,22 @@ public class MediciProxy {
 		}
 		try {
 
-			// A dummy query to check if user is authenticated - there is no
-			// token based authentication yet.
+			DataAccess authPostDA = new DataAccess();
+			authPostDA.setServer(server + "/api/authenticate");
+			authPostDA.setRemoteAPIKey(remoteAPIKey);
+			authPostDA.setMethod(DataAccess.POST);
+			authPostDA.setReturnType(DataAccess.JSON);
+			authPostDA.setRemoteAPIKey(remoteAPIKey);
+			String sessionId = authPostDA.getResponse("username=" + username
+					+ "&password=" + password);
 
-			String query = "query=SELECT ?p ?o WHERE { <s> ?p ?o . }";
-			DataAccess.getXMLPostResponse(username, password, server
-					+ _sparql_path, remoteAPIKey, query);
+			postTestQuery(sessionId, server, remoteAPIKey);
 			// If no exception - it worked and all the params should be stored
 			// as valid login info
 			_validCredentials = true;
+			_sessionId = sessionId;
 		} catch (HTTPException he) {
-			// Unauthorized or forbidden repsonses should be forwarded so users
+			// Unauthorized or forbidden responses should be forwarded so users
 			// can be informed
 			_validCredentials = false;
 			throw (he);
@@ -118,6 +125,85 @@ public class MediciProxy {
 			e.printStackTrace();
 			_validCredentials = false;
 		}
+	}
+
+	public String setGoogleCredentials(String googleAccessToken, String server,
+			String remoteAPIKey) {
+
+		String username = null;
+		// Store credential
+		// Validate and get userinfo @ Google
+
+		String client_id = PropertiesLoader.getProperties().getProperty(
+				"googleClientId");
+		if (client_id == null) {
+			client_id = "972225704837.apps.googleusercontent.com";// Jim's
+																	// testID
+		}
+
+		try {
+			username = isValidGoogleToken(client_id, googleAccessToken);
+			if (username != null) {
+				// FIXME Ping medici with test query to determine permissions
+				DataAccess authenticateDA = new DataAccess();
+				authenticateDA.setUseBasicAuth(false);
+				authenticateDA.setMethod(DataAccess.POST);
+				authenticateDA.setRemoteAPIKey(remoteAPIKey);
+				authenticateDA.setReturnType(DataAccess.XML);
+				authenticateDA.setServer(server + "/api/authenticate");
+
+				String sessionId = authenticateDA
+						.getResponse("googleAccessToken=" + googleAccessToken);
+
+				log.debug("started session" + sessionId);
+				// FIXME: Make medici accept googleaccesstoken on resteasy calls
+				// (versus via api/authenticate only)
+
+				postTestQuery(sessionId, server, remoteAPIKey);
+
+				// If no exception - it worked and all the params should be
+				// stored
+				// as valid login info
+				_validCredentials = true;
+				_server = server;
+				_remoteAPIKey = remoteAPIKey;
+				_sessionId = sessionId;
+
+			}
+		} catch (HTTPException he) {
+			// Unauthorized or forbidden responses should be forwarded
+			// so users
+			// can be informed
+			_validCredentials = false;
+			throw (he);
+		} catch (Exception e) {
+			// Some form of IO issue
+			e.printStackTrace();
+			_validCredentials = false;
+		}
+		if (!_validCredentials) {
+			// reset username to null in the case the google auth worked, but
+			// user is forbidden to sparqlquery/use the remoteAPI
+			username = null;
+		}
+
+		// Test Query @ medici
+		// set validCredentials
+		return username;
+	}
+
+	private void postTestQuery(String sessionId, String server,
+			String remoteAPIKey) throws Exception {
+		// A dummy query to check if user is authenticated - there is no
+		// token based authentication yet.
+
+		String query = "query=SELECT ?p ?o WHERE { <s> ?p ?o . }";
+		DataAccess xmlPostDA = DataAccess
+				.buildSessionXMLPostResponseDataAccess(sessionId, server
+						+ _sparql_path, remoteAPIKey);
+		xmlPostDA.setSessionId(sessionId);
+		xmlPostDA.getResponse(query);
+
 	}
 
 	public boolean hasValidCredentials() {
@@ -136,10 +222,27 @@ public class MediciProxy {
 		return is;
 	}
 
-	public String getSparqlJSONResponse(String query) throws IOException,
+	/* 
+	 * An XML encioded JSON response, so use the newer method
+	 * 
+	 * @deprecated
+	 */
+	public String getSparqlJsonResponse(String query) throws IOException,
+	MalformedURLException, JSONException {
+		return getSparqlXMLResponse(query);
+	}	
+	
+	public String getSparqlXMLResponse(String query) throws IOException,
 			MalformedURLException, JSONException {
-		String responseText = DataAccess.getXMLPostResponse(_username,
-				_password, _server + _sparql_path, _remoteAPIKey, query);
+
+		DataAccess sparqlQueryDA = new DataAccess();
+		sparqlQueryDA.setServer(_server + _sparql_path);
+		sparqlQueryDA.setMethod(DataAccess.POST);
+		sparqlQueryDA.setReturnType(DataAccess.XML);
+		sparqlQueryDA.setRemoteAPIKey(_remoteAPIKey);
+		sparqlQueryDA.setSessionId(_sessionId);
+
+		String responseText = sparqlQueryDA.getResponse(query);
 
 		// JSONObject responseJSONObject = convertToJsonObject(responseText);
 		// responseText = responseJSONObject.toString();
@@ -162,8 +265,13 @@ public class MediciProxy {
 		if (urlPath != null) {
 			url = url + urlPath;
 		}
-		return DataAccess.getJsonGetResponse(_username, _password, url,
-				_remoteAPIKey, query);
+		DataAccess authGetDA = DataAccess
+				.buildUnauthenticatedJsonGETResponseDataAccess(url);
+		// authGetDA.setBasicCreds(_username, _password);
+		authGetDA.setUseBasicAuth(false);
+		authGetDA.setRemoteAPIKey(_remoteAPIKey);
+		authGetDA.setSessionId(_sessionId);
+		return authGetDA.getResponse(query);
 	}
 
 	public String executeAuthenticatedGeoGet(String urlPath, String query)
@@ -172,7 +280,67 @@ public class MediciProxy {
 		if (urlPath != null) {
 			url = url + urlPath;
 		}
-		return DataAccess.getJsonGetResponse(_geouser, _geopassword, url,
-				_remoteAPIKey, query);
+		DataAccess authGetDA = DataAccess
+				.buildUnauthenticatedJsonGETResponseDataAccess(url);
+		if (_geouser != null) {
+			authGetDA.setBasicCreds(_geouser, _geopassword);
+			authGetDA.setUseBasicAuth(true);
+		} else {
+			authGetDA.setSessionId(_sessionId);
+			authGetDA.setRemoteAPIKey(_remoteAPIKey);
+		}
+
+		return authGetDA.getResponse(query);
+
 	}
+
+	public void logout() {
+		DataAccess logoutDA = DataAccess
+				.buildUnauthenticatedJsonGETResponseDataAccess(_server
+						+ "/api/logout");
+		logoutDA.setSessionId(_sessionId);
+		try {
+			logoutDA.getResponse(null);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			_sessionId = null;
+		}
+
+	}
+
+	public static String isValidGoogleToken(String client_id,
+			String googleAccessToken) {
+
+		try {
+			DataAccess jsonGETDA = DataAccess
+					.buildUnauthenticatedJsonGETResponseDataAccess(TOKEN_INFO_URL);
+
+			String result = jsonGETDA.getResponse("access_token="
+					+ googleAccessToken);
+			log.debug("TokenInfo retrieved from Google: " + result);
+
+			JSONObject tokeninfo = new JSONObject(result);
+
+			String audience = tokeninfo.getString("audience");
+			boolean verified = tokeninfo.getBoolean("verified_email");
+			int i = audience.indexOf("<");
+			if (i > 0) {
+				log.debug("Audience includes < :" + audience);
+				audience = audience.substring(0, i);
+			}
+			if ((audience.equals(client_id)) && verified) {
+				return tokeninfo.getString("email");
+			}
+		} catch (Exception e) {
+			log.debug("Google validation exception: " + e.getMessage());
+		}
+
+		return null;
+	}
+
 }
