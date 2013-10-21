@@ -122,8 +122,7 @@ public class GeoServerRestUtil {
 
 	private static String getRelativeFromHref(String href) {
 		String rel = null;
-		String server = PropertiesLoader.getProperties().getProperty(
-				"geoserver");
+		String server = AuthenticationServiceImpl.getProxiedGeoServer();
 		if (href.indexOf(server) == 0) {
 			rel = href.substring(server.length());
 		} else {
@@ -181,7 +180,7 @@ public class GeoServerRestUtil {
 	public static void main(String[] args) throws Exception {
 		MediciProxy mp = new MediciProxy();
 		mp.setGeoCredentials("admin", "password",
-				"http://sead.ncsa.illinois.edu/geoserver");
+				"http://sead.ncsa.illinois.edu/medici/geoproxy");
 
 		List<LayerInfo> layersByTag = getLayersByTag("angelo", mp);
 		for (LayerInfo l : layersByTag) {

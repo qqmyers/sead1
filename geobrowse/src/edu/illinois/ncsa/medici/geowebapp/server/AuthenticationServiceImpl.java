@@ -25,19 +25,31 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 	/**
 	 * 
 	 */
-	private static String _authenticatedAs = "authenticatedAs";
+	// == edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet.AUTHENTICATED_AS
+	private static String AUTHENTICATED_AS = "edu.illinois.ncsa.mmdb.web.server.auth.authenticatedAs";
 
 	private static String _server;
+	private static String _geoserver;
+	private static String _proxiedgeoserver;
+
 	private static String _remoteAPIKey;
 	private static boolean _tryAnonymous = false;
 
 	private static Log log = LogFactory.getLog(AuthenticationServiceImpl.class);
 
-	@Override
 	public String login(String username, String password) {
-		
+		return login(username, password, null);
+	}
+
+	public String login(String googleAccessToken) {
+		return login(null, null, googleAccessToken);
+	}
+
+	protected String login(String username, String password,
+			String googleAccessToken) {
+
 		dontCache();
-		
+
 		// Destroy any existing credentials
 		logout();
 		// Verify credentials
@@ -47,14 +59,27 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 		try {
 			// Try to use/store credentials
 			getRemoteServerProperties();
-			mp.setCredentials(username, password, _server, _remoteAPIKey);
+			if (username != null) {
+				mp.setCredentials(username, password, _server, _remoteAPIKey);
+			} else if (googleAccessToken != null) {
+				username = mp.setGoogleCredentials(googleAccessToken, _server,
+						_remoteAPIKey);
+			} else {
+				log.debug("No credentials available");
+			}
+
+			//These are null when using the geoproxy
+			String geouser = PropertiesLoader.getProperties().getProperty("geouser");
+			String geopassword = PropertiesLoader.getProperties().getProperty("geopassword");
+			//In that case, rely on the proxy in medici - _geoserver is already set correctly
+			mp.setGeoCredentials(geouser, geopassword, _geoserver);
 
 			// Create session
 			HttpSession session = getThreadLocalRequest().getSession(true);
 			// Store MediciProxy
 			session.setAttribute(_proxy, mp);
 			// Set _authenticatedAs
-			session.setAttribute(_authenticatedAs, username);
+			session.setAttribute(AUTHENTICATED_AS, username);
 		} catch (HTTPException he) {
 			if (he.getStatusCode() == HttpServletResponse.SC_UNAUTHORIZED) {
 				result = "unauthorized";
@@ -71,7 +96,6 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 		return result;
 	}
 
-	@Override
 	public void logout() {
 		// Destroy session
 		HttpSession session = getThreadLocalRequest().getSession(false);
@@ -81,17 +105,16 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 		}
 	}
 
-	@Override
 	public String getUsername() {
-		
+
 		dontCache();
-		
+
 		getRemoteServerProperties();
 		String name = null;
 		HttpSession session = getThreadLocalRequest().getSession(false);
 
 		if (session != null) {
-			name = (String) session.getAttribute(_authenticatedAs);
+			name = (String) session.getAttribute(AUTHENTICATED_AS);
 		}
 		// If null and enableAnonymous==true, try logging in as anonymous
 		if ((name == null) && (_tryAnonymous == true)) {
@@ -99,11 +122,20 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 				session = getThreadLocalRequest().getSession(false);
 
 				if (session != null) {
-					name = (String) session.getAttribute(_authenticatedAs);
+					name = (String) session.getAttribute(AUTHENTICATED_AS);
 				}
 			}
 		}
 		return name;
+	}
+
+	public String getGoogleClientId() {
+		String id = PropertiesLoader.getProperties().getProperty(
+				"google.client_id");
+		if (id == null) {
+			id = "972225704837.apps.googleusercontent.com"; // Jim's test app id
+		}
+		return id;
 	}
 
 	private void getRemoteServerProperties() {
@@ -113,14 +145,15 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 			// Find Properties file and retrieve the domain/sparql endpoint of
 			// the
 			// remote Medici instance
-			_server = PropertiesLoader.getProperties().getProperty(
-					"domain");
+			_server = PropertiesLoader.getProperties().getProperty("domain");
+			_proxiedgeoserver = PropertiesLoader.getProperties().getProperty("proxiedgeoserver");
+			_geoserver = PropertiesLoader.getProperties().getProperty("geoserver");
 			log.debug("Server: " + _server);
-			_remoteAPIKey = PropertiesLoader.getProperties()
-					.getProperty("remoteAPIKey");
+			_remoteAPIKey = PropertiesLoader.getProperties().getProperty(
+					"remoteAPIKey");
 			log.debug("RemoteAPIKey: " + _remoteAPIKey);
-			String anonymous = PropertiesLoader.getProperties()
-					.getProperty("enableAnonymous");
+			String anonymous = PropertiesLoader.getProperties().getProperty(
+					"enableAnonymous");
 			if ((anonymous == null) || (!anonymous.equalsIgnoreCase("true"))) {
 				_tryAnonymous = false;
 			} else {
@@ -130,15 +163,22 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 		}
 	}
 
-	@Override
 	public String[] getUrls() {
 		dontCache();
-		
+		getRemoteServerProperties();
 		String[] urls = new String[2];
-		urls[0] = PropertiesLoader.getProperties().getProperty("geoserver") + "/wms";
-		urls[1] = PropertiesLoader.getProperties().getProperty("domain");
-		
+		urls[1] = _server;
+		urls[0] = _geoserver;
+		urls[0] = urls[0] + "/wms";
+
 		return urls;
 	}
 
+	public static String getProxiedGeoServer() {
+		String server = _proxiedgeoserver;
+		if(server == null) {
+			server = _geoserver;
+		}
+		return server;
+	}
 }
