@@ -111,10 +111,7 @@ public class AuthenticatedServlet extends HttpServlet {
                 }
             } else if (googleAccessToken != null) {
                 String client_id = PropertiesLoader.getProperties().getProperty(
-                        "googleClientId");
-                if (client_id == null) {
-                    client_id = "972225704837.apps.googleusercontent.com";// Jim's test Id
-                }
+                        "google.client_id");
                 validUser = Authentication.googleAuthenticate(client_id, googleAccessToken); // testID
                 if (validUser != null) {
                     // set the session attribute indicating that we're authenticated
