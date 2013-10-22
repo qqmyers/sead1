@@ -22,6 +22,7 @@ OPTIONS:
    -a 	enableAnonymous (try to login as anonymous before showing login prompt)
    -r   RemoetAPIKey (must match setting in ACR/Medici
    -g	Google map key (not yet used / hardcoded in geobrowse.jsp)
+   -c   Google client ID (optional)
    		The Geobrowser can use hardcoded credentials for direct accesses to a remote geoserver or a proxy 
    		The following four parameters set that up:
    -u   Username on the geoserver (only needed for direct access)
@@ -46,12 +47,13 @@ verbose=
 anon=
 apiKey=
 mapKey=
+clientid=
 gUser=
 gPassword=
 gServer=
 gProxy=
 
-while getopts  hs:m:var:g:u:p:q:x: OPTION
+while getopts  hs:m:var:g:u:p:q:x:c: OPTION
 do
      case $OPTION in
          h)
@@ -69,6 +71,9 @@ do
              ;;
          g)
              mapKey=$OPTARG
+             ;;
+         c)
+             clientid=$OPTARG
              ;;
          u)
              gUser=$OPTARG
@@ -101,6 +106,7 @@ if [ "$verbose" ]; then
 	echo remoteAPIKey: $apiKey
 	echo Google Map Key: $mapKey
 	echo enableAnonymous $anon
+	echo Google Client ID: $clientid
 	echo geoserver user $gUser
 	echo geoserver password  $gPassword
 	echo geoserver URL $gServer
@@ -183,11 +189,11 @@ else
 fi
 echo "remoteAPIKey=$apiKey" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "#mapKey=$mapKey" >> geobrowse/WEB-INF/classes/geobrowse.properties
+echo "google.client_id=$clientid" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "geoserver=$gServer" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "geouser=$gUser" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "geopassword=$gPassword" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "proxiedgeoserver=$gProxy"  >> geobrowse/WEB-INF/classes/geobrowse.properties
-echo "google.client_id=$clientid" >> geobrowse/WEB-INF/classes/geobrowse.properties
 
 if [ "$verbose" ]; then
 	echo
