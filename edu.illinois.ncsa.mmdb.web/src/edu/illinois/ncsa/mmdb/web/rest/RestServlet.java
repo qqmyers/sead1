@@ -574,7 +574,7 @@ public class RestServlet extends AuthenticatedServlet {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             }
         } else if (hasPrefix(VIDEO_INFIX, request)) {
-            if (isAllowed(userId, uri, Permission.DOWNLOAD)) {
+            if (isAllowed(userId, "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri, Permission.DOWNLOAD)) {
                 int idx = uri.lastIndexOf(".");
                 String ext = null;
                 if (idx > 0) {
