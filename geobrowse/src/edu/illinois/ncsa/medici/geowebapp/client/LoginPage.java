@@ -56,6 +56,7 @@ public class LoginPage extends Composite {
 	private SimplePanel feedbackPanel;
 	private Label progressLabel;
 	private final Geo_webapp mainWindow;
+	private String googleClientId = null;
 
 	// Google Oauth2
 	private final String AUTH_URL = "https://accounts.google.com/o/oauth2/auth";
@@ -78,9 +79,22 @@ public class LoginPage extends Composite {
 
 		// page title
 		mainPanel.add(createPageTitle());
+		final String finalStatus = status;
+		mainWindow.getAuthSvc().getGoogleClientId(new AsyncCallback<String>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				GWT.log("Error retrieving Google OAuth2 properties", caught);
+				mainPanel.add(createLoginForm(finalStatus));
+			}
 
+			@Override
+			public void onSuccess(String result) {
+				googleClientId = result;
+				mainPanel.add(createLoginForm(finalStatus));
+			}
+		});
 		// login form
-		mainPanel.add(createLoginForm(status));
+		
 	}
 
 	/**
@@ -188,18 +202,21 @@ public class LoginPage extends Composite {
 		table.getFlexCellFormatter().setHorizontalAlignment(4, 0,
 				HasAlignment.ALIGN_CENTER);
 
-		// Google Oauth2 link
-		Anchor googleLogin = new Anchor("Login using Google credentials");
-		googleLogin.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				googleAuthLogin();
-			}
-		});
-		table.setWidget(5, 0, googleLogin);
-		table.getFlexCellFormatter().setColSpan(5, 0, 2);
-		table.getFlexCellFormatter().setHorizontalAlignment(5, 0,
-				HasAlignment.ALIGN_CENTER);
+
+		if (googleClientId != null) {
+			// Google Oauth2 link
+			Anchor googleLogin = new Anchor("Login using Google");
+			googleLogin.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					googleAuthLogin();
+				}
+			});
+			table.setWidget(5, 0, googleLogin);
+			table.getFlexCellFormatter().setColSpan(5, 0, 2);
+			table.getFlexCellFormatter().setHorizontalAlignment(5, 0,
+					HasAlignment.ALIGN_CENTER);
+		}
 
 		return table;
 	}
@@ -208,95 +225,114 @@ public class LoginPage extends Composite {
 	 * Login using google oauth2.
 	 */
 	private void googleAuthLogin() {
-    	
-    		mainWindow.getAuthSvc().getGoogleClientId(new AsyncCallback<String>() {
-    	    @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Error retrieving Google OAuth2 properties", caught);
-            }
-            @Override
-            public void onSuccess(String result) {
-            	final String googleClientId=result;
-            	
-//            	URL authrequestUrl = = new URL( "https://accounts.google.com/o/oauth2/auth?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&state=%2Fprofile&redirect_uri="
-//            		+ getMediciUrl() + "%2Foauth2callback&response_type=token&client_id=" + googleClientId);
 
-        
-    	AuthRequest req = new AuthRequest(AUTH_URL, googleClientId).withScopes(EMAIL_SCOPE, PROFILE_SCOPE);
-                Auth AUTH = Auth.get();
-                AUTH.clearAllTokens();
-                AUTH.login(req, new Callback<String, Throwable>() {
-                    @Override
-                    public void onSuccess(String token) {
-                        GWT.log("Successful login " + token);
-                        final String googleAccessToken = token;
-                        mainWindow.getAuthSvc().login(token, new AsyncCallback<String>() {
-                        	 @Override
-                             public void onSuccess(String result) {
-                        		 Window.alert("Login Result: " + result);
-         						final String loginStatus = result;
-        						setProgressText(loginStatus);
+		mainWindow.getAuthSvc().getGoogleClientId(new AsyncCallback<String>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				GWT.log("Error retrieving Google OAuth2 properties", caught);
+			}
 
-        						if(loginStatus.equals("forbidden")||loginStatus.equals("unauthorized")) {
-        							mainWindow.getLoginStatusWidget().loggedOut();
-        							resetPassword();
-        							
-        						} else {
-        						mainWindow.getAuthSvc().getUsername(
-        								new AsyncCallback<String>() {
-        									@Override
-        									public void onSuccess(final String name) {
-        										Window.alert("Name: " + name);
-        										googleRemoteLogin(name, googleAccessToken,
-        												new AsyncCallback<String>() {
-        													@Override
-        													public void onSuccess(String name) {
-        														Window.alert("RLName: " + name);
-        														if(name.length()==0) {
-        															name = null;
-        														}
-        														mainWindow
-        																.setLoginState(
-        																		name,
-        																		loginStatus);
-        													}
+			@Override
+			public void onSuccess(String result) {
+				final String googleClientId = result;
 
-        													@Override
-        													public void onFailure(
-        															Throwable caught) {
-        														//Non-fatal 
-        														mainWindow
-        														.setLoginState(
-        																name,
-        																loginStatus);
-        													}
-        												});
+				// URL authrequestUrl = = new URL(
+				// "https://accounts.google.com/o/oauth2/auth?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&state=%2Fprofile&redirect_uri="
+				// + getMediciUrl() +
+				// "%2Foauth2callback&response_type=token&client_id=" +
+				// googleClientId);
 
-        									}
+				AuthRequest req = new AuthRequest(AUTH_URL, googleClientId)
+						.withScopes(EMAIL_SCOPE, PROFILE_SCOPE);
+				Auth AUTH = Auth.get();
+				AUTH.clearAllTokens();
+				AUTH.login(req, new Callback<String, Throwable>() {
+					@Override
+					public void onSuccess(String token) {
+						GWT.log("Successful login " + token);
+						final String googleAccessToken = token;
+						mainWindow.getAuthSvc().login(token,
+								new AsyncCallback<String>() {
+									@Override
+									public void onSuccess(String result) {
 
-        									@Override
-        									public void onFailure(Throwable caught) {
-        										mainWindow.getLoginStatusWidget()
-        												.loggedOut();
-        										resetPassword();
-        									}
-        								});
+										final String loginStatus = result;
+										setProgressText(loginStatus);
 
-        						} 
-                        	 }
-                             public void onFailure(Throwable caught) {
-                                 Window.alert("Login failed " + caught.toString());
-                             }
-                        });
-                    }
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Login failed " + caught.toString());
-                    }
-                });
-            }
-        });
-    }
+										if (loginStatus.equals("forbidden")
+												|| loginStatus
+														.equals("unauthorized")) {
+											mainWindow.getLoginStatusWidget()
+													.loggedOut();
+											resetPassword();
+
+										} else {
+											mainWindow
+													.getAuthSvc()
+													.getUsername(
+															new AsyncCallback<String>() {
+																@Override
+																public void onSuccess(
+																		final String name) {
+
+																	googleRemoteLogin(
+																			name,
+																			googleAccessToken,
+																			new AsyncCallback<String>() {
+																				@Override
+																				public void onSuccess(
+																						String name) {
+
+																					if (name.length() == 0) {
+																						name = null;
+																					}
+																					mainWindow
+																							.setLoginState(
+																									name,
+																									loginStatus);
+																				}
+
+																				@Override
+																				public void onFailure(
+																						Throwable caught) {
+																					// Non-fatal
+																					mainWindow
+																							.setLoginState(
+																									name,
+																									loginStatus);
+																				}
+																			});
+
+																}
+
+																@Override
+																public void onFailure(
+																		Throwable caught) {
+																	mainWindow
+																			.getLoginStatusWidget()
+																			.loggedOut();
+																	resetPassword();
+																}
+															});
+
+										}
+									}
+
+									public void onFailure(Throwable caught) {
+										Window.alert("Login failed "
+												+ caught.toString());
+									}
+								});
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
+						Window.alert("Login failed " + caught.toString());
+					}
+				});
+			}
+		});
+	}
 
 	private void setProgressText(String status) {
 		String message = "";
@@ -433,9 +469,9 @@ public class LoginPage extends Composite {
 			callback.onFailure(x);
 		}
 	}
-	
-	private void googleRemoteLogin(final String username, String googleAccessToken,
-			final AsyncCallback<String> callback) {
+
+	private void googleRemoteLogin(final String username,
+			String googleAccessToken, final AsyncCallback<String> callback) {
 		String restUrl = Geo_webapp.getMediciUrl() + "/api/authenticate";
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
 				restUrl);

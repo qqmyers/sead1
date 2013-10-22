@@ -132,9 +132,7 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 	public String getGoogleClientId() {
 		String id = PropertiesLoader.getProperties().getProperty(
 				"google.client_id");
-		if (id == null) {
-			id = "972225704837.apps.googleusercontent.com"; // Jim's test app id
-		}
+
 		return id;
 	}
 
