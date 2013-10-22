@@ -49,11 +49,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import net.customware.gwt.dispatch.server.service.DispatchServiceServlet;
+import net.customware.gwt.dispatch.shared.Action;
+import net.customware.gwt.dispatch.shared.ActionException;
+import net.customware.gwt.dispatch.shared.Result;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleUserInfoHandler;
 
 /**
  * Default dispatch servlet.
@@ -88,5 +93,20 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
 
         TupeloStore.getInstance().getUriCanonicalizer(arg0);
         super.service(arg0, arg1);
+    }
+
+    @Override
+    public Result execute(Action<?> action) throws ActionException {
+        // HACK required to login user on the server side
+        if (action instanceof GoogleUserInfo) {
+            log.debug("GoogleUserInfo is being called");
+            GoogleUserInfoHandler.setSession(getThreadLocalRequest().getSession());
+        }
+        log.debug("Executing dispatch");
+        Result execute = super.execute(action);
+        if (action instanceof GoogleUserInfo) {
+            GoogleUserInfoHandler.setSession(null);
+        }
+        return execute;
     }
 }

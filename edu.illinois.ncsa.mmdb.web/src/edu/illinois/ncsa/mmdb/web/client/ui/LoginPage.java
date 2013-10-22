@@ -58,7 +58,6 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.jsonp.client.JsonpRequestBuilder;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DeferredCommand;
@@ -81,10 +80,10 @@ import com.google.gwt.user.client.ui.Widget;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.CheckUserExists;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.CheckUserExistsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2PropsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
 
 /**
  * @author Luigi Marini
@@ -263,33 +262,32 @@ public class LoginPage extends Composite {
                     public void onSuccess(String token) {
                         GWT.log("Successful login " + token);
 
-                        JsonpRequestBuilder builder = new JsonpRequestBuilder();
-                        builder.requestObject("https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + token, new AsyncCallback<Entry>() {
+                        dispatchasync.execute(new GoogleUserInfo(token), new AsyncCallback<GoogleUserInfoResult>() {
+
+                            @Override
                             public void onFailure(Throwable caught) {
-                                GWT.log("Couldn't retrieve JSON");
+                                GWT.log("Error getting user info", caught);
                             }
 
-                            public void onSuccess(Entry data) {
-                                GWT.log(data.getEmail() + " " + data.getName());
-
-                                dispatchasync.execute(new CheckUserExists(data.getEmail(), data.getName()),
-                                        new AsyncCallback<CheckUserExistsResult>() {
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                GWT.log("Error looking up user" + caught);
-                                                Window.alert("Error looking up user");
-                                            }
-
-                                            @Override
-                                            public void onSuccess(CheckUserExistsResult result) {
-                                                if (result.isCreated()) {
-                                                    GWT.log("Created new user");
-                                                } else {
-                                                    GWT.log("Found existing user");
-                                                }
-                                            }
-
-                                        });
+                            @Override
+                            public void onSuccess(GoogleUserInfoResult result) {
+                                if (result.isCreated()) {
+                                    GWT.log("Created new user");
+                                } else {
+                                    GWT.log("Found existing user");
+                                }
+                                GWT.log("Users found " + result.getUserName() + " " + result.getEmail());
+                                //                                mainWindow.loginByName(result.getUserName(), result.getServletSessionId(), new AuthenticationCallback() {
+                                //                                    @Override
+                                //                                    public void onFailure() {
+                                //                                        fail();
+                                //                                    }
+                                //
+                                //                                    @Override
+                                //                                    public void onSuccess(String userUri, String sessionKey) {
+                                //                                        GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
+                                //                                    }
+                                //                                });
                             }
                         });
                     }
@@ -501,10 +499,10 @@ class Entry extends JavaScriptObject {
     }
 
     public final native String getEmail() /*-{
-		return this.email;
-    }-*/;
+                                          return this.email;
+                                          }-*/;
 
     public final native String getName() /*-{
-		return this.name;
-    }-*/;
+                                         return this.name;
+                                         }-*/;
 }
