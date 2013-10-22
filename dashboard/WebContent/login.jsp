@@ -19,6 +19,7 @@
 	String status_code = (String) request.getAttribute("statusCode");
 	Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 	String medici = (String) request.getAttribute("medici");
+	String googleClientId=(String)request.getAttribute("googleClientId");
 %>
 
 
@@ -29,8 +30,10 @@
     var authStatus = '<%=status_code%>';
     var anon = '<%=isAnonymous%>';
     var medici = '<%=medici%>';
+   	var googleClientId = '<%=googleClientId%>';
 	var userName = "";
 	var password="";
+	var googleAccessToken="";
 
 	$(function() {
 	
@@ -48,48 +51,83 @@
 			}
 		});
 	
-	
-		$("#btnLogin").click(
-				function() {
-					$('#errorpanel').hide();
-					//$("#loginForm").submit();
-					var url = window.location.href;
-
-					query = url.indexOf("?") == -1 ? '' : url.substring(url
-							.indexOf("?") + 1);
-					userName = $('#txtUserName').val();
-					password = $('#txtPassword').val();
-
-					$.ajax({
-						type : "POST",
-						url : "DoLogin",
-						dataType : "json",
-						data : "userName=" + userName + "&password=" + password
-								+ "&remainingQuery=" + query,
-						success : loginToRemoteServer,
-						error : redirectToErrorPage
-					});
+		$("#btnLogin").click( function() {
+			localLogin(false);
+		});
+		$("#btnGoogle").click(function() {
+			
+			gapi.auth.authorize({
+				client_id: googleClientId,
+				scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+			 	access_type: 'online',
+   				immediate: 'false'
+				}, function(authResult) {
+					if(authResult && ! authResult.error) {
+						googleAccessToken = authResult.access_token;
+						localLogin(true);
+					} 
 				});
+		});
 	});
+	
+
+	
+
+	function OnLoadCallback() { 
+		gapi.auth.init(null);
+		//Could see if the user is authenticated with google already here...
+	}	
+
+	function localLogin(usingGoogle) {
+		$('#errorpanel').hide();
+		var url = window.location.href;
+
+		query = url.indexOf("?") == -1 ? '' : url.substring(url.indexOf("?") + 1);
+		var data='';
+		if(!usingGoogle) {
+			userName = $('#txtUserName').val();
+			password = $('#txtPassword').val();
+			data = "userName=" + userName + "&password=" + password + "&remainingQuery=" + query;
+		} else {
+			data="googleAccessToken=" + googleAccessToken + "&remainingQuery=" + query;
+		}
+
+		$.ajax({
+			type : "POST",
+			url : "DoLogin",
+			dataType : "json",
+			data : data,
+			success : loginToRemoteServer,
+			error : redirectToErrorPage
+		});
+	}
 
 	function loginToRemoteServer(json) {
 					
-	var remoteURL = medici + "/api/authenticate";
+		var remoteURL = medici + "/api/authenticate";
+		var data = '';
+		if(googleAccessToken == "") {
+			data="username=" + userName + "&password=" + password;
+		}
+ 		else {
+			data = "googleAccessToken=" + googleAccessToken;
+		}
 
-					$.ajax({
-						type : "POST",
-						url : remoteURL,
-						dataType : "text",
-						xhrFields: {
-						       withCredentials: true
-						},
-						crossDomain: true,
-						data : "username=" + userName + "&password=" + password,
-						success : showRequestedResource,
-						error : redirectToErrorPage
-					});
+		$.ajax({
+			type : "POST",
+			url : remoteURL,
+			dataType : "text",
+			xhrFields: {
+			       withCredentials: true
+			},
+			crossDomain: true,
+			data : data,
+			success : showRequestedResource,
+			error : redirectToErrorPage
+		});
 
-}
+	}
+
 	function showRequestedResource(json) {
 		if (query == '') {
 			window.location.replace("home");
@@ -114,6 +152,7 @@
 		}
 	}
 </script>
+<script src="https://apis.google.com/js/client.js?onload=OnLoadCallback"></script>
 <body>
 	<div id="banner">
 		<a href="http://sead-data.net/"><img id="logo" alt="SEAD Logo"
@@ -153,7 +192,8 @@
 											<font color='green'>You must be authorized to view
 												these collections.</font>
 										</div>
-										<button class="btn primary" id="btnLogin">Sign in</button>
+										<button class="btn primary" id="btnLogin">Login</button>
+										<button class="btn primary" id="btnGoogle">Login using Google</button>
 										<!-- </fieldset>
 										</form> -->
 									</div>
