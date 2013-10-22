@@ -163,9 +163,23 @@ public class DataAccess {
 
 		HttpURLConnection conn = null;
 
-		URL url = buildRequestUrl(query);
+		query = buildQuery(query);
+		URL requestURL;
+		if (method.equals(GET)) {
+			if (!query.equals("")) {
+				requestURL = new URL(server + "?" + query);
+			} else {
+				requestURL = new URL(server);
+			}
+		} else {
+			requestURL = new URL(server);
+		}
 
-		conn = (HttpURLConnection) url.openConnection();
+		// Make a connect to the server
+		log.debug("Connecting to: " + requestURL.toString());
+
+
+		conn = (HttpURLConnection) requestURL.openConnection();
 
 		if (useBasicAuth) {
 			if (basicCreds == null) {// Put the authentication details in the
@@ -239,9 +253,7 @@ public class DataAccess {
 
 	}
 
-	protected URL buildRequestUrl(String query) throws MalformedURLException {
-
-		String request = server;
+	protected String buildQuery(String query) throws MalformedURLException {
 
 		// Add remoteAPIKey to query if set
 		String prepend = "";
@@ -260,17 +272,7 @@ public class DataAccess {
 			query = prepend;
 		}
 		log.debug("Final Query = " + query);
-
-		if (method.equals(GET)) {
-			if (!query.equals("")) {
-				request = server + "?" + query;
-			}
-		}
-
-		// Make a connect to the server
-		log.debug("Connecting to: " + request);
-		return new URL(request);
-
+		return query;
 	}
 
 	private void logRequest(String query) {
