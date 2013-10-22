@@ -22,6 +22,7 @@ OPTIONS:
    -a 	enableAnonymous (try to login as anonymous before showing login prompt)
    -r   RemoetAPIKey (must match setting in ACR/Medici
    -g	Google map key (not yet used / hardcoded in dashboard.jsp)
+   -c	Google Client ID (Required)
    -v   Verbose
 EOF
 }
@@ -40,7 +41,8 @@ verbose=
 anon=
 apiKey=
 mapKey=
-while getopts  hs:m:var:g: OPTION
+clientid=
+while getopts  hs:m:var:g:c: OPTION
 do
      case $OPTION in
          h)
@@ -58,6 +60,9 @@ do
              ;;
          g)
              mapKey=$OPTARG
+             ;;
+         c)
+             clientid=$OPTARG
              ;;
          v)
              verbose=1
@@ -78,9 +83,10 @@ if [ "$verbose" ]; then
 	echo remoteAPIKey: $apiKey
 	echo Google Map Key: $mapKey
 	echo enableAnonymous $anon
+	echo Google client id $clientid
 fi
 
-if [[ -z $medici ]]  
+if [[ -z $medici ]] || [[ -z clientid ]]  
 then
 	echo Required argument\(s\) missing
   	if [ "$verbose" ]; then
@@ -132,7 +138,7 @@ else
 	if [ "$verbose" ]; then
 		echo 'Retrieving dashboard.war from Stash ...'
 	fi	
-	wget -q -O dashboard.war 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/mmdb-gwt/browse/scripts/acr/dashboard.war?at=sead-1.2&raw'
+	wget -q -O dashboard.war 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/medici-gwt-web/browse/scripts/acr/dashboard.war?at=sead-1.2&raw'
 fi
 	
 if [ "$verbose" ]; then
@@ -154,6 +160,7 @@ else
 fi
 echo "remoteAPIKey=$apiKey" >> dashboard/WEB-INF/classes/dashboard.properties
 echo "#mapKey=$mapKey" >> dashboard/WEB-INF/classes/dashboard.properties
+echo "google.client_id=$clientid" >> dashboard/WEB-INF/classes/dashboard.properties
 
 if [ "$verbose" ]; then
 	echo
@@ -172,7 +179,7 @@ else
 	if [ "$verbose" ]; then
 		echo 'Retrieving dashboard.log4j from Stash ...'
 	fi	
-	wget -q -O dashboard.log4j 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/mmdb-gwt/browse/scripts/acr/dashboard.log4j?at=sead-1.2&raw'
+	wget -q -O dashboard.log4j 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/medici-gwt-web/browse/scripts/acr/dashboard.log4j?at=sead-1.2&raw'
 fi
 
 cp dashboard.log4j  dashboard/WEB-INF/classes/log4j.properties

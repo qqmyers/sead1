@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import java.net.MalformedURLException;
@@ -27,24 +28,232 @@ public class DataAccess {
 
 	private static Log log = LogFactory.getLog(DataAccess.class);
 
-	public static String getXMLPostResponse(String userName, String password,
-			String server, String remoteAPIKey, String query)
-			throws MalformedURLException, IOException {
-		return getResponse(userName, password, server, remoteAPIKey, query,
-				POST, XML);
+	private String sessionId = null;
+	private String basicCreds = null;
+	private String method = null;
+	private String remoteAPIKey = null;
+	private String returnType = null;
+	private String server = null;
+	private boolean useBasicAuth = false;
+
+	public static DataAccess buildXMLPostResponseDataAccess(String username,
+			String password, String server, String remoteAPIKey) {
+		DataAccess da = new DataAccess();
+		da.setUseBasicAuth(true);
+		da.setBasicCreds(username, password);
+		da.setServer(server);
+		da.setRemoteAPIKey(remoteAPIKey);
+		da.setMethod(POST);
+		da.setReturnType(XML);
+		return da;
 	}
 
-	public static String getJsonGetResponse(String userName, String password,
-			String server, String remoteAPIKey, String query)
-			throws MalformedURLException, IOException {
-		return getResponse(userName, password, server, remoteAPIKey, query,
-				GET, JSON);
+	public static DataAccess buildSessionXMLPostResponseDataAccess(
+			String sessionId, String server, String remoteAPIKey) {
+		DataAccess da = new DataAccess();
+		da.setUseBasicAuth(false);
+		da.setSessionId(sessionId);
+		da.setServer(server);
+		da.setRemoteAPIKey(remoteAPIKey);
+		da.setMethod(POST);
+		da.setReturnType(XML);
+		return da;
 	}
 
-	public static String getResponse(String userName, String password,
-			String server, String remoteAPIKey, String query, String method,
-			String returnType) throws MalformedURLException, IOException {
+	public static DataAccess buildJsonGETResponseDataAccess(String username,
+			String password, String server, String remoteAPIKey) {
+		DataAccess da = new DataAccess();
+		da.setUseBasicAuth(true);
+		da.setBasicCreds(username, password);
+		da.setServer(server);
+		da.setRemoteAPIKey(remoteAPIKey);
+		da.setMethod(GET);
+		da.setReturnType(JSON);
+		return da;
+	}
+
+	public static DataAccess buildCustomDataAccess(String username,
+			String password, String server, String remoteAPIKey, String method,
+			String returnType) {
+		DataAccess da = new DataAccess();
+		da.setUseBasicAuth(true);
+		da.setBasicCreds(username, password);
+		da.setServer(server);
+		da.setRemoteAPIKey(remoteAPIKey);
+		da.setMethod(method);
+		da.setReturnType(returnType);
+		return da;
+	}
+
+	public static DataAccess buildUnauthenticatedJsonGETResponseDataAccess(
+			String server) {
+		DataAccess da = new DataAccess();
+		da.setUseBasicAuth(false);
+		da.setServer(server);
+		da.setMethod(GET);
+		da.setReturnType(JSON);
+		return da;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+
+	public String getBasicCreds() {
+		return basicCreds;
+	}
+
+	public void setBasicCreds(String username, String password) {
+		String userCredentials = username + ":" + password;
+
+		this.basicCreds = Base64.encodeToString(userCredentials.getBytes(),
+				Base64.NO_WRAP);
+	}
+
+	public String getMethod() {
+		return method;
+	}
+
+	public void setMethod(String method) {
+		this.method = method;
+	}
+
+	public String getRemoteAPIKey() {
+		return remoteAPIKey;
+	}
+
+	public void setRemoteAPIKey(String remoteAPIKey) {
+		this.remoteAPIKey = remoteAPIKey;
+	}
+
+	public String getReturnType() {
+		return returnType;
+	}
+
+	public void setReturnType(String returnType) {
+		this.returnType = returnType;
+	}
+
+	public String getServer() {
+		return server;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
+	}
+
+	public boolean getUseBasicAuth() {
+		return useBasicAuth;
+	}
+
+	public void setUseBasicAuth(boolean useBasicAuth) {
+		this.useBasicAuth = useBasicAuth;
+	}
+
+	public String getResponse(String query) throws MalformedURLException,
+			IOException {
+
+		if (log.isDebugEnabled()) {
+			logRequest(query);
+		}
+
 		HttpURLConnection conn = null;
+
+		query = buildQuery(query);
+		URL requestURL;
+		if (method.equals(GET)) {
+			if (!query.equals("")) {
+				requestURL = new URL(server + "?" + query);
+			} else {
+				requestURL = new URL(server);
+			}
+		} else {
+			requestURL = new URL(server);
+		}
+
+		// Make a connect to the server
+		log.debug("Connecting to: " + requestURL.toString());
+
+
+		conn = (HttpURLConnection) requestURL.openConnection();
+
+		if (useBasicAuth) {
+			if (basicCreds == null) {// Put the authentication details in the
+										// request
+				// edu.uiuc.ncsa.cet.bean.tupelo.rbac.Anonymous.USER =
+				// "http://cet.ncsa.uiuc.edu/2007/person/anonymous", id =
+				// "anonymous"
+				// using the constant requires 3 extra jar files, so just using
+				// value
+				String userCredentials = "anonymous:none";
+
+				basicCreds = Base64.encodeToString(userCredentials.getBytes(),
+						Base64.NO_WRAP);
+			}
+			conn.setRequestProperty("Authorization", "Basic " + basicCreds);
+		}
+		if (sessionId != null) {
+			conn.setRequestProperty("Cookie", "JSESSIONID=" + sessionId);
+		}
+		conn.setDoInput(true);
+		conn.setUseCaches(false);
+		// set method
+		conn.setRequestMethod(method);
+
+		conn.setRequestProperty("Accept", returnType);
+
+		if (method.equals(POST)) {
+			conn.setRequestProperty("Content-Type",
+					"application/x-www-form-urlencoded");
+			conn.setDoOutput(true);
+			OutputStream outputStream = conn.getOutputStream();
+			outputStream.write(query.getBytes());
+
+			outputStream.flush();
+			outputStream.close();
+		}
+
+		// Ensure we got the HTTP 200 response code
+		int responseCode = conn.getResponseCode();
+		log.debug("Response code: " + responseCode);
+		switch (responseCode) {
+		case HttpServletResponse.SC_OK:
+			break;
+		case HttpServletResponse.SC_UNAUTHORIZED:
+			throw new HTTPException(responseCode);
+		case HttpServletResponse.SC_FORBIDDEN:
+			throw new HTTPException(responseCode);
+		default:
+			break;
+		}
+
+		String responseText = null;
+		InputStream _inputStream = null;
+
+		try {
+			// Read the response
+			_inputStream = conn.getInputStream();
+
+			Scanner responseScanner = new Scanner(_inputStream);
+			responseText = responseScanner.useDelimiter("\\A").next();
+
+			responseScanner.close();
+		} catch (NoSuchElementException nse) {
+			responseText = "";
+		} finally {
+			_inputStream.close();
+		}
+		conn.disconnect();
+
+		return responseText;
+
+	}
+
+	protected String buildQuery(String query) throws MalformedURLException {
 
 		// Add remoteAPIKey to query if set
 		String prepend = "";
@@ -63,81 +272,18 @@ public class DataAccess {
 			query = prepend;
 		}
 		log.debug("Final Query = " + query);
+		return query;
+	}
 
-		if (method.equals(GET)) {
-			if (!query.equals("")) {
-				server = server + "?" + query;
-			}
-		}
-
-		// Make a connect to the server
-		log.debug("Connecting to: " + server);
-		URL url = new URL(server);
-
-		conn = (HttpURLConnection) url.openConnection();
-
-		// Put the authentication details in the request
-		String userCredentials = "";
-		if ((userName.length() != 0) && (password.length() != 0)) {
-			userCredentials = userName + ":" + password;
-		} else {
-			// edu.uiuc.ncsa.cet.bean.tupelo.rbac.Anonymous.USER =
-			// "http://cet.ncsa.uiuc.edu/2007/person/anonymous", id =
-			// "anonymous"
-			// using the constant requires 3 extra jar files, so just using
-			// value
-			userCredentials = "anonymous:none";
-		}
-
-		String encodedUsernamePassword = Base64.encodeToString(
-				userCredentials.getBytes(), Base64.NO_WRAP);
-		conn.setRequestProperty("Authorization", "Basic "
-				+ encodedUsernamePassword);
-		
-		conn.setDoInput(true);
-		conn.setUseCaches(false);
-		// set method
-		conn.setRequestMethod(method);
-
-				conn.setRequestProperty("Accept", returnType);
-
-		if (method.equals(POST)) {
-			conn.setRequestProperty("Content-Type",
-					"application/x-www-form-urlencoded");
-			conn.setDoOutput(true);
-			OutputStream outputStream = conn.getOutputStream();
-			outputStream.write(query.getBytes());
-
-			outputStream.flush();
-			outputStream.close();
-		}
-
-		// Ensure we got the HTTP 200 response code
-		int responseCode = conn.getResponseCode();
-		switch (responseCode) {
-		case HttpServletResponse.SC_OK:
-			break;
-		case HttpServletResponse.SC_UNAUTHORIZED:
-			throw new HTTPException(responseCode);
-		case HttpServletResponse.SC_FORBIDDEN:
-			throw new HTTPException(responseCode);
-		default:
-			break;
-		}
-
-		InputStream _inputStream;
-		// Read the response
-		_inputStream = conn.getInputStream();
-
-		Scanner responseScanner = new Scanner(_inputStream);
-		String responseText = responseScanner.useDelimiter("\\A").next();
-		// System.out.println(responseText);
-		responseScanner.close();
-
-		_inputStream.close();
-		conn.disconnect();
-
-		return responseText;
+	private void logRequest(String query) {
+		log.debug("DA Request To: " + server);
+		log.debug("DA Request UsingBasicAuth: " + useBasicAuth);
+		log.debug("DA Request basicCreds: " + basicCreds);
+		log.debug("DA Request session: " + sessionId);
+		log.debug("DA Request method: " + method);
+		log.debug("DA Request returnType: " + returnType);
+		log.debug("DA Request remoteAPIKey: " + remoteAPIKey);
 
 	}
+
 }

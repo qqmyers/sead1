@@ -48,6 +48,7 @@ import net.customware.gwt.dispatch.shared.Action;
 import net.customware.gwt.dispatch.shared.Result;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
@@ -78,7 +79,12 @@ public class MyDispatchAsync implements DispatchAsync {
         realService.execute(action, new AsyncCallback<Result>() {
 
             public void onFailure(Throwable caught) {
-                callback.onFailure(caught);
+
+                if (caught.getMessage().contains("User has no server credentials")) {
+                    History.newItem("logout", true);
+                } else {
+                    callback.onFailure(caught);
+                }
             }
 
             @SuppressWarnings("unchecked")

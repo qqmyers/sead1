@@ -36,6 +36,8 @@ public class AuthFilter implements Filter {
 
 	private static boolean _tryAnonymous = false;
 
+	// == edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet.AUTHENTICATED_AS
+	private static String AUTHENTICATED_AS = "edu.illinois.ncsa.mmdb.web.server.auth.authenticatedAs";
 	private static Log log = LogFactory.getLog(AuthFilter.class);
 
 	public void doFilter(ServletRequest req, ServletResponse res,
@@ -46,8 +48,9 @@ public class AuthFilter implements Filter {
 		String appPath = request.getContextPath();
 		String uri = request.getRequestURI();
 		String query = request.getQueryString();
-		String username = "";
+		String username = null;
 		String password = "";
+		String googleAccessToken = null;
 		if (query != null) {
 			log.debug("URI: " + uri + "?" + query);
 		} else {
@@ -64,10 +67,18 @@ public class AuthFilter implements Filter {
 				// Retrieve form info
 				username = request.getParameter("userName");
 				password = request.getParameter("password");
+				googleAccessToken = request.getParameter("googleAccessToken");
+
 				try {
-					MediciProxy mp = login(username, password, request);
+					MediciProxy mp = login(username, password,
+							googleAccessToken, request);
+					if(googleAccessToken != null) {
+						username = MediciProxy.isValidGoogleToken("972225704837.apps.googleusercontent.com", googleAccessToken);
+					}
 					// If we have proxy credentials, store them in the session
 					request.getSession().setAttribute("proxy", mp);
+					request.getSession().setAttribute(AUTHENTICATED_AS,
+							username);
 					log.debug("Authenticated: " + username);
 					return;
 				} catch (HTTPException he) {
@@ -87,7 +98,11 @@ public class AuthFilter implements Filter {
 			} else if (uri.startsWith(appPath + "/DoLogout")) {
 				log.debug("Logging out");
 				HttpSession session = request.getSession(false);
+
 				if (session != null && !session.isNew()) {
+					MediciProxy mp = (MediciProxy) session
+							.getAttribute("proxy");
+					mp.logout();
 					session.invalidate();
 				}
 				if (_tryAnonymous) {
@@ -104,17 +119,21 @@ public class AuthFilter implements Filter {
 				HttpSession session = request.getSession(false);
 				boolean goodCredentials = false;
 				if (session != null) {
+					username = (String) session.getAttribute(AUTHENTICATED_AS);
 					MediciProxy mp = (MediciProxy) session
 							.getAttribute("proxy");
-					if (mp != null) {
-						// Could test the credentials here, but it's an extra
-						// http call off to the server - if they don't work when
-						// the servlets use them, we'll know.
-						// mp.hasValidCredientials() should only be true
-						goodCredentials = mp.hasValidCredentials();
+					/*
+					 * if login is being handled by other code (e.g. by a GWT
+					 * app like mmdb) AUTHENTICATED_AS will be set, but
+					 * MediciProxy won't, so we test for the username
+					 */
+					if (username != null) {
+						goodCredentials = true;
 					}
-					log.debug("Authenticated as: "
-							+ session.getAttribute("authenticatedAs"));
+					if (mp == null) {
+						log.debug("No MediciProxy found in session-->Not using AuthFilter for DoLogin");
+					}
+					log.debug("Authenticated as: " + username);
 				}
 
 				// Protected resources
@@ -138,10 +157,12 @@ public class AuthFilter implements Filter {
 					// Try anonymous creds
 					if (_tryAnonymous) {
 						try {
-							MediciProxy mp = login("anonymous", "none", request);
+							MediciProxy mp = login("anonymous", "none", null, request);
 							// If we have proxy credentials, store them in the
 							// session
 							request.getSession().setAttribute("proxy", mp);
+							request.getSession().setAttribute(AUTHENTICATED_AS,
+									"anonymous");
 							log.debug("Authenticated as 'anonymous'");
 							goodCredentials = true;
 							// Proceed to chain.doFilter
@@ -180,7 +201,8 @@ public class AuthFilter implements Filter {
 	}
 
 	private MediciProxy login(String username, String password,
-			HttpServletRequest request) throws HTTPException {
+			String googleAccessToken, HttpServletRequest request)
+			throws HTTPException {
 		HttpSession session = request.getSession(false);
 
 		// Get new session upon login (avoiding session fixation
@@ -196,7 +218,12 @@ public class AuthFilter implements Filter {
 
 		// Try to use/store credentials
 
-		mp.setCredentials(username, password, _server, _remoteAPIKey);
+		if (googleAccessToken != null) {
+			mp.setGoogleCredentials(googleAccessToken, _server, _remoteAPIKey);
+		} else {
+
+			mp.setCredentials(username, password, _server, _remoteAPIKey);
+		}
 		if (!mp.hasValidCredentials()) {
 			// See if the credentials worked and were stored
 			// Should always have valid credentials here

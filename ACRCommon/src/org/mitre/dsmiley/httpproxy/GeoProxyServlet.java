@@ -45,7 +45,13 @@ public class GeoProxyServlet extends org.mitre.dsmiley.httpproxy.ProxyServlet {
 		}
 if (doLog) {log("Doing log");}
 		try {
-			_server = PropertiesLoader.getProperties().getProperty("geoserver");
+			
+			// Get Property file parameter
+			String _propFile = getInitParameter("PropertiesFileName");
+			
+			//_propFile is only used if the PropertiesLoader is not already configured
+			_server = PropertiesLoader.getProperties(_propFile).getProperty("geoserver");
+			//now the prop file is set for sure
 			_user = PropertiesLoader.getProperties().getProperty("geouser");
 			_password = PropertiesLoader.getProperties().getProperty(
 					"geopassword");

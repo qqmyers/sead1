@@ -21,6 +21,7 @@ OPTIONS:
    -m   Medici base URL for Discovery to connect to (Required)
    -a 	enableAnonymous (try to login as anonymous before showing login prompt)
    -r   RemoetAPIKey (must match setting in ACR/Medici
+   -c   Google client ID (Required)
    -v   Verbose
 EOF
 }
@@ -38,8 +39,9 @@ medici=
 verbose=
 anon=
 apiKey=
+clientid=
 
-while getopts  hs:m:var:g: OPTION
+while getopts  hs:m:var:g:c: OPTION
 do
      case $OPTION in
          h)
@@ -54,6 +56,9 @@ do
              ;;
          r)
              apiKey=$OPTARG
+             ;;
+         c)
+             clientid=$OPTARG
              ;;
          v)
              verbose=1
@@ -73,9 +78,10 @@ if [ "$verbose" ]; then
 	echo Medici: $medici
 	echo remoteAPIKey: $apiKey
 	echo enableAnonymous $anon
+	echo Google Client ID: $clientid
 fi
 
-if [[ -z $medici ]]  
+if [[ -z $medici ]] || [[ -z clientid ]]  
 then
 	echo Required argument\(s\) missing
   	if [ "$verbose" ]; then
@@ -126,7 +132,7 @@ else
 	if [ "$verbose" ]; then
 		echo 'Retrieving discovery.war from Stash ...'
 	fi	
-	wget -q -O discovery.war 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/mmdb-gwt/browse/scripts/acr/discovery.war?at=sead-1.2&raw'
+	wget -q -O discovery.war 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/medici-gwt-web/browse/scripts/acr/discovery.war?at=sead-1.2&raw'
 fi
 	
 if [ "$verbose" ]; then
@@ -148,6 +154,7 @@ else
 fi
 echo "remoteAPIKey=$apiKey" >> discovery/WEB-INF/classes/discovery.properties
 echo "#mapKey=$mapKey" >> discovery/WEB-INF/classes/discovery.properties
+echo "google.client_id=$clientid" >> discovery/WEB-INF/classes/discovery.properties
 
 if [ "$verbose" ]; then
 	echo
@@ -166,7 +173,7 @@ else
 	if [ "$verbose" ]; then
 		echo 'Retrieving discovery.log4j from Stash ...'
 	fi	
-	wget -q -O discovery.log4j 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/mmdb-gwt/browse/scripts/acr/discovery.log4j?at=sead-1.2&raw'
+	wget -q -O discovery.log4j 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/medici-gwt=web/browse/scripts/acr/discovery.log4j?at=sead-1.2&raw'
 fi
 
 cp discovery.log4j  discovery/WEB-INF/classes/log4j.properties

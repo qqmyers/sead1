@@ -117,7 +117,6 @@ public class WmsProxyServiceImpl extends ProxiedRemoteServiceServlet implements
 		return layerInfo;
 	}
 
-	@Override
 	public LayerInfo[] getLayers(String tag) {
 
 		dontCache();

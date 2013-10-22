@@ -101,7 +101,7 @@
 		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
 		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
-		<copy tofile="war/WEB-INF/classes/geoproxy.properties" file="src/geoproxy.properties"/>
+		<copy tofile="war/WEB-INF/classes/acr_commons.properties" file="src/acr_commons.properties"/>
 		
 	</target>
 	
@@ -212,6 +212,7 @@
 				<include name="commons-logging.properties" />
 				<include name="server.properties" />
 				<include name="taxonomy.owl" />
+				<include name="acr_commons.properties" />
 			</fileset>
 		</copy>
 		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>

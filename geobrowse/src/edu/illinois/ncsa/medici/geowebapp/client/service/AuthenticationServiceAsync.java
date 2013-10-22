@@ -12,4 +12,8 @@ public interface AuthenticationServiceAsync {
 
 	void getUrls(AsyncCallback<String[]> callback);
 
+	void login(String googleAccessToken, AsyncCallback<String> callback);
+
+	void getGoogleClientId(AsyncCallback<String> callback);
+
 }

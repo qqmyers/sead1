@@ -85,7 +85,7 @@ public abstract class SparqlQueryServlet extends HttpServlet {
 		String query = getQuery(getTagID(request));
 
 		// Process Query
-		String responseJson = mp.getSparqlJSONResponse("query=" + query);
+		String responseJson = mp.getSparqlXMLResponse("query=" + query);
 		if (responseJson == null) {
 
 			throw new HTTPException(HttpServletResponse.SC_FORBIDDEN);

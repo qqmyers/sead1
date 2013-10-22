@@ -84,7 +84,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	private static final String EPSG_4326 = "EPSG:4326";
 
 	private static String wmsUrl = "http://localhost/geoserver/wms";
-	private static String mediciUrl = "http://localhost/#dataset?id=";
+	private static String mediciUrl = "http://localhost/acr";
 
 	private final WmsProxyServiceAsync wmsProxySvc = (WmsProxyServiceAsync) GWT
 			.create(WmsProxyService.class);
@@ -115,7 +115,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		eventBus.addHandler(LayerOpacityChangeEvent.TYPE,
 				new LayerOpacityChangeHandler() {
 
-					@Override
 					public void onLayerOpacityChanged(
 							LayerOpacityChangeEvent event) {
 						updateOpacity(event.getLayerName(), event.getOpacity());
@@ -124,7 +123,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		eventBus.addHandler(LayerVisibilityChangeEvent.TYPE,
 				new LayerVisibilityChangeHandler() {
 
-					@Override
 					public void onLayerVisibilityChanged(
 							LayerVisibilityChangeEvent event) {
 						updateVisibility(event.getLayerName(),
@@ -134,7 +132,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 				});
 
 		Window.addResizeHandler(new ResizeHandler() {
-			@Override
 			public void onResize(ResizeEvent event) {
 				int newWidth = RootPanel.get("map").getOffsetWidth();
 				if (mapWidget != null) {
@@ -147,18 +144,15 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 		authSvc.getUsername(new AsyncCallback<String>() {
 
-			@Override
 			public void onFailure(Throwable caught) {
 				// Could not contact server
 				fail();
 			}
 
-			@Override
 			public void onSuccess(String result) {
 				final String name = result;
 				authSvc.getUrls(new AsyncCallback<String[]>() {
 
-					@Override
 					public void onSuccess(String[] result) {
 						wmsUrl = result[0];
 						mediciUrl = result[1];
@@ -167,7 +161,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 						setLoginState(name, null);
 					}
 
-					@Override
 					public void onFailure(Throwable caught) {
 						fail();
 					}
@@ -197,7 +190,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 	private void buildTagPanel() {
 		mediciProxySvc.getTags(new AsyncCallback<String[]>() {
-			@Override
 			public void onSuccess(String[] result) {
 				FlowPanel tagPanel = null;
 				if (result != null) {
@@ -215,7 +207,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 				History.fireCurrentHistoryState();
 			}
 
-			@Override
 			public void onFailure(Throwable caught) {
 				fail();
 			}
@@ -231,7 +222,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		if (tag != null)
 			encodedTag = URL.encode(tag);
 		wmsProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
-			@Override
 			public void onSuccess(LayerInfo[] result) {
 				if (result != null) {
 					// showMap(result);
@@ -245,7 +235,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 				}
 			}
 
-			@Override
 			public void onFailure(Throwable caught) {
 				fail();
 			}

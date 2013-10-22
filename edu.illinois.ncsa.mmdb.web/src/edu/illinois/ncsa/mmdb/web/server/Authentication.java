@@ -42,6 +42,7 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sead.acr.common.MediciProxy;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
@@ -99,5 +100,10 @@ public class Authentication {
             log.debug("LOGIN: authentication FAILED for " + username, ex);
             return false;
         }
+    }
+
+    public static String googleAuthenticate(String client_id, String googleAccessToken) {
+        return MediciProxy.isValidGoogleToken(client_id, googleAccessToken);
+
     }
 }

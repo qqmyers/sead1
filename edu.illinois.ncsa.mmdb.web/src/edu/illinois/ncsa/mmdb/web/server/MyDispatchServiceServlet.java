@@ -64,6 +64,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleUserInfoHandler;
  * Default dispatch servlet.
  * 
  * @author Luigi Marini
+ * @author Jim Myers
  * 
  */
 
@@ -92,7 +93,17 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
         // here we capture the URL prefix of the request, for use in canonicalization later
 
         TupeloStore.getInstance().getUriCanonicalizer(arg0);
-        super.service(arg0, arg1);
+        //If you're not authenticated to the server, don't do the dispatch
+        if (getUser(arg0) != null) {
+            //FIXME - should not trust that client has sent the current user's name in the actions
+
+            super.service(arg0, arg1);
+        } else {
+            log.debug("Refusing a dispatch request due to lack of credentials");
+
+            //FIXME: Is there a lighter-weight option, e.g. to send an ActionException from here?
+            throw new ServletException("User has no server credentials");
+        }
     }
 
     @Override
