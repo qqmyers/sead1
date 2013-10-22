@@ -22,11 +22,12 @@ OPTIONS:
    -a 	enableAnonymous (try to login as anonymous before showing login prompt)
    -r   RemoetAPIKey (must match setting in ACR/Medici
    -g	Google map key (not yet used / hardcoded in geobrowse.jsp)
-   		The Geobrowser currently uses hardcoded credentials for direct accesses to a remote geoserver
-   		The following three parameters set that up:
-   -u   Username on the geoserver
-   -p	Password on the geoserver
-   -q	URL for the geoserver
+   		The Geobrowser can use hardcoded credentials for direct accesses to a remote geoserver or a proxy 
+   		The following four parameters set that up:
+   -u   Username on the geoserver (only needed for direct access)
+   -p	Password on the geoserver (only needed for direct access)
+   -x   URL for the proxied geoserver (the original geoserver URL in the proxied case)
+   -q	URL for the geoserver endpoint to use  (the geoserver in the direct case, the proxy URL in the proxies case)
    -v   Verbose
 EOF
 }
@@ -48,8 +49,9 @@ mapKey=
 gUser=
 gPassword=
 gServer=
+gProxy=
 
-while getopts  hs:m:var:g:u:p:q: OPTION
+while getopts  hs:m:var:g:u:p:q:x: OPTION
 do
      case $OPTION in
          h)
@@ -77,6 +79,9 @@ do
          q)
              gServer=$OPTARG
              ;;
+         x)
+             gProxy=$OPTARG
+             ;;             
          v)
              verbose=1
              ;;
@@ -99,15 +104,19 @@ if [ "$verbose" ]; then
 	echo geoserver user $gUser
 	echo geoserver password  $gPassword
 	echo geoserver URL $gServer
+	echo geoproxy URL  $gProxy
 fi
 
-if [[ -z $medici ]] || [[ -z $gUser ]] || [[ -z $gPassword ]] || [[ -z $gServer ]] 
+if [[ -z $medici ]] || [[ -z $gServer ]] 
 then
-	echo Required argument\(s\) missing
-  	if [ "$verbose" ]; then
-		usage
-	fi
-    exit 1
+	if [[[-z $gUser] || [-z $gPassword]] && [-z gProxy]]
+	then 
+		echo Required argument\(s\) missing
+  		if [ "$verbose" ]; then
+			usage
+		fi
+    	exit 1
+    fi	
 fi
 
 
@@ -152,7 +161,7 @@ else
 	if [ "$verbose" ]; then
 		echo 'Retrieving geobrowse.war from Stash ...'
 	fi	
-	wget -q -O geobrowse.war 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/mmdb-gwt/browse/scripts/acr/geobrowse.war?at=sead-1.2&raw'
+	wget -q -O geobrowse.war 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/medici-gwt=web/browse/scripts/acr/geobrowse.war?at=sead-1.2&raw'
 fi
 	
 if [ "$verbose" ]; then
@@ -177,6 +186,8 @@ echo "#mapKey=$mapKey" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "geoserver=$gServer" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "geouser=$gUser" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "geopassword=$gPassword" >> geobrowse/WEB-INF/classes/geobrowse.properties
+echo "proxiedgeoserver=$gProxy"  >> geobrowse/WEB-INF/classes/geobrowse.properties
+echo "google.client_id=$clientid" >> geobrowse/WEB-INF/classes/geobrowse.properties
 
 if [ "$verbose" ]; then
 	echo
@@ -195,7 +206,7 @@ else
 	if [ "$verbose" ]; then
 		echo 'Retrieving geobrowse.log4j from Stash ...'
 	fi	
-	wget -q -O geobrowse.log4j 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/mmdb-gwt/browse/scripts/acr/geobrowse.log4j?at=sead-1.2&raw'
+	wget -q -O geobrowse.log4j 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/medici-gwt-web/browse/scripts/acr/geobrowse.log4j?at=sead-1.2&raw'
 fi
 
 cp geobrowse.log4j  geobrowse/WEB-INF/classes/log4j.properties
