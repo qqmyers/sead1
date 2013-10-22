@@ -73,6 +73,11 @@ public class Login extends SparqlQueryServlet {
 			Boolean anon = super.isAnonymous();
 			request.setAttribute("isAnonymous", anon);
 		}
+		String googleClientId = PropertiesLoader.getProperties().getProperty(
+				"google.client_id");
+		if (googleClientId != null) {
+			request.setAttribute("googleClientId", googleClientId);
+		}
 
 		setRedirectResource("/login.jsp");
 	}

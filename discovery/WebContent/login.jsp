@@ -73,6 +73,7 @@ legend {
 	String status_code = (String) request.getAttribute("statusCode");
 	Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 	String medici = (String) request.getAttribute("medici");
+	String googleClientId=(String)request.getAttribute("googleClientId");
 %>
 
 
@@ -81,10 +82,12 @@ legend {
     var authStatus = '<%=status_code%>';
     var anon = '<%=isAnonymous%>';
     var medici = '<%=medici%>';
+   	var googleClientId = '<%=googleClientId%>';
    	var userName = "";
 	var password="";
 	var googleAccessToken = "";
 	var query = '';
+	
 
 	$(function() {
 
@@ -112,7 +115,7 @@ legend {
 		$("#btnGoogle").click(function() {
 			
 			gapi.auth.authorize({
-				client_id: '972225704837.apps.googleusercontent.com',
+				client_id: googleClientId,
 				scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
 			 	access_type: 'online',
    				immediate: 'false'
@@ -122,8 +125,8 @@ legend {
 						localLogin(true);
 					} 
 				});
-			});
 		});
+	});
 	
 	
 
