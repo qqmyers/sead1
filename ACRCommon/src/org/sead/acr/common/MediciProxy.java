@@ -282,7 +282,7 @@ public class MediciProxy {
 		}
 		DataAccess authGetDA = DataAccess
 				.buildUnauthenticatedJsonGETResponseDataAccess(url);
-		if (_geouser != null) {
+		if ((_geouser != null)&&(_geouser.length()!=0)) {
 			authGetDA.setBasicCreds(_geouser, _geopassword);
 			authGetDA.setUseBasicAuth(true);
 		} else {
