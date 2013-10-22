@@ -109,7 +109,7 @@ fi
 
 if [[ -z $medici ]] || [[ -z $gServer ]] 
 then
-	if [[[-z $gUser] || [-z $gPassword]] && [-z gProxy]]
+	if ([[-z $gUser]] || [[ -z $gPassword ]]) && [[-z gProxy ]]
 	then 
 		echo Required argument\(s\) missing
   		if [ "$verbose" ]; then

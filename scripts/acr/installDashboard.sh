@@ -86,7 +86,7 @@ if [ "$verbose" ]; then
 	echo Google client id $clientid
 fi
 
-if [[ -z $medici ] || [-z clientid]]  
+if [[ -z $medici ]] || [[ -z clientid ]]  
 then
 	echo Required argument\(s\) missing
   	if [ "$verbose" ]; then
