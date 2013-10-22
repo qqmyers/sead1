@@ -167,7 +167,7 @@ else
 	if [ "$verbose" ]; then
 		echo 'Retrieving geobrowse.war from Stash ...'
 	fi	
-	wget -q -O geobrowse.war 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/medici-gwt=web/browse/scripts/acr/geobrowse.war?at=sead-1.2&raw'
+	wget -q -O geobrowse.war 'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/medici-gwt-web/browse/scripts/acr/geobrowse.war?at=sead-1.2&raw'
 fi
 	
 if [ "$verbose" ]; then
