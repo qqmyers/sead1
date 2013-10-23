@@ -229,13 +229,23 @@ public class LoginPage extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                googleAuthLogin();
+                googleAuthLogin(new AuthenticationCallback() {
+                    @Override
+                    public void onFailure() {
+                        fail();
+                    }
+
+                    @Override
+                    public void onSuccess(String userUri, String sessionKey) {
+                        GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
+                    }
+                });
             }
         });
 
-        //        table.setWidget(5, 0, googleLogin);
-        //        table.getFlexCellFormatter().setColSpan(5, 0, 2);
-        //        table.getFlexCellFormatter().setHorizontalAlignment(5, 0, HasAlignment.ALIGN_CENTER);
+        table.setWidget(5, 0, googleLogin);
+        table.getFlexCellFormatter().setColSpan(5, 0, 2);
+        table.getFlexCellFormatter().setHorizontalAlignment(5, 0, HasAlignment.ALIGN_CENTER);
 
         return table;
     }
@@ -243,7 +253,7 @@ public class LoginPage extends Composite {
     /**
      * Login using google oauth2.
      */
-    private void googleAuthLogin() {
+    private void googleAuthLogin(final AuthenticationCallback callback) {
         dispatchasync.execute(new GoogleOAuth2Props(), new AsyncCallback<GoogleOAuth2PropsResult>() {
 
             @Override
@@ -258,42 +268,64 @@ public class LoginPage extends Composite {
                 AUTH.clearAllTokens();
                 AUTH.login(req, new Callback<String, Throwable>() {
                     @Override
-                    public void onSuccess(String token) {
-                        GWT.log("Successful login " + token);
+                    public void onSuccess(final String token) {
+                        GWT.log("Successful login with Google OAuth2 " + token);
 
                         dispatchasync.execute(new GoogleUserInfo(token), new AsyncCallback<GoogleUserInfoResult>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
-                                GWT.log("Error getting user info", caught);
+                                callback.onFailure();
                             }
 
                             @Override
-                            public void onSuccess(GoogleUserInfoResult result) {
+                            public void onSuccess(final GoogleUserInfoResult result) {
                                 if (result.isCreated()) {
-                                    GWT.log("Created new user");
+                                    GWT.log("Created new user " + result.getUserName() + " " + result.getEmail());
                                 } else {
-                                    GWT.log("Found existing user");
+                                    GWT.log("User found " + result.getUserName() + " " + result.getEmail());
                                 }
-                                GWT.log("Users found " + result.getUserName() + " " + result.getEmail());
-                                //                                mainWindow.loginByName(result.getUserName(), result.getServletSessionId(), new AuthenticationCallback() {
-                                //                                    @Override
-                                //                                    public void onFailure() {
-                                //                                        fail();
-                                //                                    }
-                                //
-                                //                                    @Override
-                                //                                    public void onSuccess(String userUri, String sessionKey) {
-                                //                                        GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
-                                //                                    }
-                                //                                });
+
+                                // authenticate on the server side
+                                String restUrl = "./api/authenticate";
+                                RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
+                                builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+                                StringBuilder sb = new StringBuilder();
+                                sb.append("googleAccessToken=" + token);
+                                builder.setRequestData(sb.toString());
+                                builder.setCallback(new RequestCallback() {
+                                    public void onError(Request request, Throwable exception) {
+                                        GWT.log("Error authenticating on the server side");
+                                    }
+
+                                    public void onResponseReceived(Request request, Response response) {
+                                        // success!
+                                        String sessionKey = response.getText();
+
+                                        GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                                        if (response.getStatusCode() > 300) {
+                                            GWT.log("Authentication failed: " + sessionKey, null);
+                                        } else {
+                                            GWT.log("User " + result.getEmail() + " associated with session key " + sessionKey, null);
+                                            // login local
+                                            mainWindow.loginByName(result.getEmail(), sessionKey, callback);
+                                        }
+                                    }
+                                });
+
+                                try {
+                                    GWT.log("attempting to authenticate " + result.getEmail() + " against " + restUrl, null);
+                                    builder.send();
+                                } catch (RequestException x) {
+                                    callback.onFailure();
+                                }
                             }
                         });
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert("Login failed " + caught.toString());
+                        callback.onFailure();
                     }
                 });
 
@@ -502,10 +534,10 @@ class Entry extends JavaScriptObject {
     }
 
     public final native String getEmail() /*-{
-                                          return this.email;
-                                          }-*/;
+		return this.email;
+    }-*/;
 
     public final native String getName() /*-{
-                                         return this.name;
-                                         }-*/;
+		return this.name;
+    }-*/;
 }
