@@ -54,10 +54,10 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.util.Base64;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
-import edu.illinois.ncsa.mmdb.web.server.ServerProperties;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
@@ -110,11 +110,9 @@ public class AuthenticatedServlet extends HttpServlet {
                     response.getWriter().print(session.getId());
                 }
             } else if (googleAccessToken != null) {
-                //                String client_id = PropertiesLoader.getProperties().getProperty(
-                //                        "google.client_id");
-                String client_id = (String) ServerProperties.getInstance().getProperties().get("google.client_id");
-                validUser = Authentication.googleAuthenticate(client_id, googleAccessToken); // testID
-                log.info("Retrieved user from google " + validUser + " " + client_id + " " + googleAccessToken);
+                String clientId = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleClientId);
+                validUser = Authentication.googleAuthenticate(clientId, googleAccessToken); // testID
+                log.info("Retrieved user from google " + validUser + " " + clientId + " " + googleAccessToken);
                 if (validUser != null) {
                     // set the session attribute indicating that we're authenticated
 
