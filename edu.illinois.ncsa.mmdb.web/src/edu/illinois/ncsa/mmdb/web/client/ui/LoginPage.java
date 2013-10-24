@@ -58,7 +58,6 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.jsonp.client.JsonpRequestBuilder;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DeferredCommand;
@@ -80,10 +79,10 @@ import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.CheckUserExists;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.CheckUserExistsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2PropsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
 
 /**
  * @author Luigi Marini
@@ -230,13 +229,23 @@ public class LoginPage extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                googleAuthLogin();
+                googleAuthLogin(new AuthenticationCallback() {
+                    @Override
+                    public void onFailure() {
+                        fail();
+                    }
+
+                    @Override
+                    public void onSuccess(String userUri, String sessionKey) {
+                        GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
+                    }
+                });
             }
         });
 
-        //        table.setWidget(5, 0, googleLogin);
-        //        table.getFlexCellFormatter().setColSpan(5, 0, 2);
-        //        table.getFlexCellFormatter().setHorizontalAlignment(5, 0, HasAlignment.ALIGN_CENTER);
+        table.setWidget(5, 0, googleLogin);
+        table.getFlexCellFormatter().setColSpan(5, 0, 2);
+        table.getFlexCellFormatter().setHorizontalAlignment(5, 0, HasAlignment.ALIGN_CENTER);
 
         return table;
     }
@@ -244,7 +253,7 @@ public class LoginPage extends Composite {
     /**
      * Login using google oauth2.
      */
-    private void googleAuthLogin() {
+    private void googleAuthLogin(final AuthenticationCallback callback) {
         dispatchasync.execute(new GoogleOAuth2Props(), new AsyncCallback<GoogleOAuth2PropsResult>() {
 
             @Override
@@ -259,43 +268,64 @@ public class LoginPage extends Composite {
                 AUTH.clearAllTokens();
                 AUTH.login(req, new Callback<String, Throwable>() {
                     @Override
-                    public void onSuccess(String token) {
-                        GWT.log("Successful login " + token);
+                    public void onSuccess(final String token) {
+                        GWT.log("Successful login with Google OAuth2 " + token);
 
-                        JsonpRequestBuilder builder = new JsonpRequestBuilder();
-                        builder.requestObject("https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + token, new AsyncCallback<Entry>() {
+                        dispatchasync.execute(new GoogleUserInfo(token), new AsyncCallback<GoogleUserInfoResult>() {
+
+                            @Override
                             public void onFailure(Throwable caught) {
-                                GWT.log("Couldn't retrieve JSON");
+                                callback.onFailure();
                             }
 
-                            public void onSuccess(Entry data) {
-                                GWT.log(data.getEmail() + " " + data.getName());
+                            @Override
+                            public void onSuccess(final GoogleUserInfoResult result) {
+                                if (result.isCreated()) {
+                                    GWT.log("Created new user " + result.getUserName() + " " + result.getEmail());
+                                } else {
+                                    GWT.log("User found " + result.getUserName() + " " + result.getEmail());
+                                }
 
-                                dispatchasync.execute(new CheckUserExists(data.getEmail(), data.getName()),
-                                        new AsyncCallback<CheckUserExistsResult>() {
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                GWT.log("Error looking up user" + caught);
-                                                Window.alert("Error looking up user");
-                                            }
+                                // authenticate on the server side
+                                String restUrl = "./api/authenticate";
+                                RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
+                                builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+                                StringBuilder sb = new StringBuilder();
+                                sb.append("googleAccessToken=" + token);
+                                builder.setRequestData(sb.toString());
+                                builder.setCallback(new RequestCallback() {
+                                    public void onError(Request request, Throwable exception) {
+                                        GWT.log("Error authenticating on the server side");
+                                    }
 
-                                            @Override
-                                            public void onSuccess(CheckUserExistsResult result) {
-                                                if (result.isCreated()) {
-                                                    GWT.log("Created new user");
-                                                } else {
-                                                    GWT.log("Found existing user");
-                                                }
-                                            }
+                                    public void onResponseReceived(Request request, Response response) {
+                                        // success!
+                                        String sessionKey = response.getText();
 
-                                        });
+                                        GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                                        if (response.getStatusCode() > 300) {
+                                            GWT.log("Authentication failed: " + sessionKey, null);
+                                        } else {
+                                            GWT.log("User " + result.getEmail() + " associated with session key " + sessionKey, null);
+                                            // login local
+                                            mainWindow.loginByName(result.getEmail(), sessionKey, callback);
+                                        }
+                                    }
+                                });
+
+                                try {
+                                    GWT.log("attempting to authenticate " + result.getEmail() + " against " + restUrl, null);
+                                    builder.send();
+                                } catch (RequestException x) {
+                                    callback.onFailure();
+                                }
                             }
                         });
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert("Login failed " + caught.toString());
+                        callback.onFailure();
                     }
                 });
 

@@ -53,16 +53,33 @@ import net.customware.gwt.dispatch.shared.Result;
 @SuppressWarnings("serial")
 public class GoogleUserInfoResult implements Result {
 
-    private String jsonIdentity;
+    private boolean created;
+    private String  userName;
+    private String  email;
 
     public GoogleUserInfoResult() {
     }
 
-    public GoogleUserInfoResult(String jsonIdentity) {
-        this.jsonIdentity = jsonIdentity;
+    public GoogleUserInfoResult(boolean created, String userName, String email) {
+        this.created = created;
+        this.userName = userName;
+        this.setEmail(email);
     }
 
-    public String getJsonIdentity() {
-        return jsonIdentity;
+    public boolean isCreated() {
+        return created;
     }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
 }

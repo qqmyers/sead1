@@ -41,8 +41,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.Properties;
-
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -52,7 +50,8 @@ import org.apache.commons.logging.LogFactory;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2PropsResult;
-import edu.illinois.ncsa.mmdb.web.server.ServerProperties;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
  * Retrieve Google OAuth2 properties from server.properties.
@@ -69,8 +68,7 @@ public class GoogleOauth2PropsHandler implements ActionHandler<GoogleOAuth2Props
     public GoogleOAuth2PropsResult execute(GoogleOAuth2Props action, ExecutionContext arg1)
             throws ActionException {
 
-        Properties properties = ServerProperties.getInstance().getProperties();
-        String clientId = (String) properties.get("google.client_id");
+        String clientId = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleClientId);
         log.debug("Google OAuth2 Client Id " + clientId);
         return new GoogleOAuth2PropsResult(clientId);
     }

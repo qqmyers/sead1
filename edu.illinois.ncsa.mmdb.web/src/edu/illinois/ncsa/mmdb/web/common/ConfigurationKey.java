@@ -40,7 +40,9 @@ public enum ConfigurationKey {
     RemoteAPIKey("remoteAPI", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
     // extractor url
-    ExtractorUrl("extractor.url", "http://localhost:9856/"); //$NON-NLS-1$ //$NON-NLS-2$
+    ExtractorUrl("extractor.url", "http://localhost:9856/"), //$NON-NLS-1$ //$NON-NLS-2$
+
+    GoogleClientId("google.client_id", "");
 
     private final String propertyKey;
     private final String defaultValue;

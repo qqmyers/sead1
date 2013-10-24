@@ -97,8 +97,8 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUsersHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetViewCountHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleAuthHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleOauth2PropsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleUserInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.InitializeRolesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
@@ -144,7 +144,6 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetAnnotationsHandler());
         DispatchUtil.registerHandler(new GetDatasetsByTagHandler());
         DispatchUtil.registerHandler(new ListDatasetsHandler());
-        //       DispatchUtil.registerHandler(new AuthenticateHandler());
         DispatchUtil.registerHandler(new GetMetadataHandler());
         DispatchUtil.registerHandler(new GetGeoPointHandler());
         DispatchUtil.registerHandler(new GetCollectionsHandler());
@@ -217,7 +216,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetAccessLevelHandler());
         DispatchUtil.registerHandler(new SetAccessLevelHandler());
         DispatchUtil.registerHandler(new SetRoleAccessLevelHandler());
-        DispatchUtil.registerHandler(new GoogleAuthHandler());
+        DispatchUtil.registerHandler(new GoogleUserInfoHandler());
         DispatchUtil.registerHandler(new CheckUserExistsHandler());
         DispatchUtil.registerHandler(new GoogleOauth2PropsHandler());
     }
