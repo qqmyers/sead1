@@ -33,6 +33,8 @@ public class AuthFilter implements Filter {
 
 	private static String _server;
 	private static String _remoteAPIKey;
+	
+	private static String _googleClientId;
 
 	private static boolean _tryAnonymous = false;
 
@@ -73,7 +75,7 @@ public class AuthFilter implements Filter {
 					MediciProxy mp = login(username, password,
 							googleAccessToken, request);
 					if(googleAccessToken != null) {
-						username = MediciProxy.isValidGoogleToken("972225704837.apps.googleusercontent.com", googleAccessToken);
+						username = MediciProxy.isValidGoogleToken(_googleClientId, googleAccessToken);
 					}
 					// If we have proxy credentials, store them in the session
 					request.getSession().setAttribute("proxy", mp);
@@ -254,6 +256,10 @@ public class AuthFilter implements Filter {
 			_tryAnonymous = true;
 		}
 		log.debug("Enable Anonymous: " + _tryAnonymous);
+		
+		_googleClientId = PropertiesLoader.getProperties().getProperty(
+				"google.client_id");
+		log.debug("googleClient ID: " + _googleClientId);
 
 		_loginpage = config.getInitParameter("LoginPage");
 		if (_loginpage == null) {

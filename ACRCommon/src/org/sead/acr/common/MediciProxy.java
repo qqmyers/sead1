@@ -135,10 +135,9 @@ public class MediciProxy {
 		// Validate and get userinfo @ Google
 
 		String client_id = PropertiesLoader.getProperties().getProperty(
-				"googleClientId");
+				"google.client_id");
 		if (client_id == null) {
-			client_id = "972225704837.apps.googleusercontent.com";// Jim's
-																	// testID
+			log.debug("No google Client ID found");
 		}
 
 		try {
