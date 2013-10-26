@@ -241,7 +241,7 @@ public class DatasetWidget extends Composite {
             }
         });
 
-        service.execute(new GetConfiguration(null, ConfigurationKey.VAURL), new AsyncCallback<ConfigurationResult>() {
+        service.execute(new GetConfiguration(null, ConfigurationKey.DiscoveryURL), new AsyncCallback<ConfigurationResult>() {
             @Override
             public void onFailure(Throwable caught) {
             }
@@ -251,7 +251,7 @@ public class DatasetWidget extends Composite {
                 String discoveryURL = null;
                 for (Entry<ConfigurationKey, String> entry : configresult.getConfiguration().entrySet() ) {
                     switch (entry.getKey()) {
-                        case VAURL:
+                        case DiscoveryURL:
                             discoveryURL = entry.getValue();
                             if (!discoveryURL.equals("")) {
                                 discoveryURL = discoveryURL.endsWith("/") ? discoveryURL : discoveryURL + "/";

@@ -92,6 +92,9 @@ public class ConfigurationWidget extends Composite {
         // va configuration.
         mainPanel.add(createVAConfigurationSection(configuration));
 
+        //Pointer to ACR discovery app
+        mainPanel.add(createDiscoveryConfigurationSection(configuration));
+
         // extractor configuration
         mainPanel.add(createExtractorSection(configuration));
     }
@@ -289,74 +292,7 @@ public class ConfigurationWidget extends Composite {
     }
 
     private DisclosurePanel createMapSection(ConfigurationResult configuration) {
-        DisclosurePanel dp = new DisclosurePanel("Map");
-        dp.addStyleName("datasetDisclosurePanel");
-        dp.setOpen(true);
-        VerticalPanel vp = new VerticalPanel();
-        vp.setWidth("100%");
-        dp.add(vp);
-
-        HorizontalPanel hp = new HorizontalPanel();
-        /*vp.add(hp);
-
-        hp.add(new Label("Google Map Key"));*/
-        FlexTable table = new FlexTable();
-
-        hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        hp.add(new Label("Google Map Key"));
-        final TextBox key = new TextBox();
-        key.addStyleName("multiAnchor");
-        key.setText(configuration.getConfiguration(ConfigurationKey.GoogleMapKey));
-        key.setVisibleLength(80);
-        table.setText(0, 0, "Google Map Key");
-        table.setWidget(0, 1, key);
-        vp.add(table);
-        /*hp.add(key);*/
-
-        // buttons
-        //HorizontalPanel hp = new HorizontalPanel();
-        vp.add(hp);
-
-        Button button = new Button("Submit", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
-                query.setConfiguration(ConfigurationKey.GoogleMapKey, key.getText());
-                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Could not get configuration values.", caught);
-                    }
-
-                    @Override
-                    public void onSuccess(ConfigurationResult result) {
-                        key.setText(result.getConfiguration(ConfigurationKey.GoogleMapKey));
-                    }
-                });
-            }
-        });
-        hp.add(button);
-
-        button = new Button("Reset", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.GoogleMapKey), new AsyncCallback<ConfigurationResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Could not get configuration values.", caught);
-                    }
-
-                    @Override
-                    public void onSuccess(ConfigurationResult result) {
-                        key.setText(result.getConfiguration(ConfigurationKey.GoogleMapKey));
-                    }
-                });
-            }
-        });
-        button.addStyleName("multiAnchor");
-        hp.add(button);
-
-        return dp;
+        return createSimpleConfigurationSection(configuration, "Map", "GoogleMapKey", ConfigurationKey.GoogleMapKey, true);
     }
 
     private DisclosurePanel createRemoteAPISection(ConfigurationResult configuration) {
@@ -504,9 +440,14 @@ public class ConfigurationWidget extends Composite {
     }
 
     private DisclosurePanel createVIVOConfigurationSection(ConfigurationResult configuration) {
-        DisclosurePanel dp = new DisclosurePanel("VIVO Configuration");
+        return createSimpleConfigurationSection(configuration, "VIVO Configuration", "VIVO Query Endpoint", ConfigurationKey.VIVOJOSEKIURL, false);
+    }
+
+    private DisclosurePanel createSimpleConfigurationSection(ConfigurationResult configuration, String sectionLabel, String keyLabel, final ConfigurationKey configKey, boolean startOpen) {
+
+        DisclosurePanel dp = new DisclosurePanel(sectionLabel);
         dp.addStyleName("datasetDisclosurePanel");
-        dp.setOpen(false);
+        dp.setOpen(startOpen);
         VerticalPanel vp = new VerticalPanel();
         vp.setWidth("100%");
         dp.add(vp);
@@ -515,11 +456,10 @@ public class ConfigurationWidget extends Composite {
         vp.add(hp);*/
 
         FlexTable table = new FlexTable();
-        table.setText(0, 0, "VIVO-Joseki End Point");
-        /*hp.add(new Label("VIVO-Joseki End Point"));*/
+        table.setText(0, 0, keyLabel);
         final TextBox key = new TextBox();
         key.addStyleName("multiAnchor");
-        key.setText(configuration.getConfiguration(ConfigurationKey.VIVOJOSEKIURL));
+        key.setText(configuration.getConfiguration(configKey));
         key.setVisibleLength(80);
         table.setWidget(0, 1, key);
         /*hp.add(key);*/
@@ -532,7 +472,7 @@ public class ConfigurationWidget extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 SetConfiguration query = new SetConfiguration(MMDB.getUsername());
-                query.setConfiguration(ConfigurationKey.VIVOJOSEKIURL, key.getText());
+                query.setConfiguration(configKey, key.getText());
                 dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -541,7 +481,7 @@ public class ConfigurationWidget extends Composite {
 
                     @Override
                     public void onSuccess(ConfigurationResult result) {
-                        key.setText(result.getConfiguration(ConfigurationKey.VIVOJOSEKIURL));
+                        key.setText(result.getConfiguration(configKey));
                     }
                 });
             }
@@ -551,7 +491,7 @@ public class ConfigurationWidget extends Composite {
         button = new Button("Reset", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.VIVOJOSEKIURL), new AsyncCallback<ConfigurationResult>() {
+                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), configKey), new AsyncCallback<ConfigurationResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Could not get configuration values.", caught);
@@ -559,7 +499,7 @@ public class ConfigurationWidget extends Composite {
 
                     @Override
                     public void onSuccess(ConfigurationResult result) {
-                        key.setText(result.getConfiguration(ConfigurationKey.VIVOJOSEKIURL));
+                        key.setText(result.getConfiguration(configKey));
                     }
                 });
             }
@@ -572,71 +512,11 @@ public class ConfigurationWidget extends Composite {
     }
 
     private DisclosurePanel createVAConfigurationSection(ConfigurationResult configuration) {
-        DisclosurePanel dp = new DisclosurePanel("VA Configuration");
-        dp.addStyleName("datasetDisclosurePanel");
-        dp.setOpen(false);
-        VerticalPanel vp = new VerticalPanel();
-        vp.setWidth("100%");
-        dp.add(vp);
+        return createSimpleConfigurationSection(configuration, "VA Configuration", "VA End Point", ConfigurationKey.VAURL, false);
+    }
 
-        /*HorizontalPanel hp = new HorizontalPanel();
-        vp.add(hp);*/
-
-        FlexTable table = new FlexTable();
-        table.setText(0, 0, "VA End Point");
-        /*hp.add(new Label("VIVO-Joseki End Point"));*/
-        final TextBox key = new TextBox();
-        key.addStyleName("multiAnchor");
-        key.setText(configuration.getConfiguration(ConfigurationKey.VAURL));
-        key.setVisibleLength(80);
-        table.setWidget(0, 1, key);
-        /*hp.add(key);*/
-        vp.add(table);
-        // buttons
-        HorizontalPanel hp = new HorizontalPanel();
-        vp.add(hp);
-
-        Button button = new Button("Submit", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
-                query.setConfiguration(ConfigurationKey.VAURL, key.getText());
-                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Could not get configuration values.", caught);
-                    }
-
-                    @Override
-                    public void onSuccess(ConfigurationResult result) {
-                        key.setText(result.getConfiguration(ConfigurationKey.VAURL));
-                    }
-                });
-            }
-        });
-        hp.add(button);
-
-        button = new Button("Reset", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.VAURL), new AsyncCallback<ConfigurationResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Could not get configuration values.", caught);
-                    }
-
-                    @Override
-                    public void onSuccess(ConfigurationResult result) {
-                        key.setText(result.getConfiguration(ConfigurationKey.VAURL));
-                    }
-                });
-            }
-        });
-        button.addStyleName("multiAnchor");
-        hp.add(button);
-
-        return dp;
-
+    private DisclosurePanel createDiscoveryConfigurationSection(ConfigurationResult configuration) {
+        return createSimpleConfigurationSection(configuration, "ACR Discovery Configuration", "Discovery App URL", ConfigurationKey.DiscoveryURL, false);
     }
 
     private DisclosurePanel createExtractorSection(ConfigurationResult configuration) {

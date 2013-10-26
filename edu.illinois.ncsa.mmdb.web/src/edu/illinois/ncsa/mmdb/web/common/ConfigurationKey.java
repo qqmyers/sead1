@@ -10,7 +10,7 @@ public enum ConfigurationKey {
     // sead enhancements
     VIVOJOSEKIURL("vivo-joseki.url", "http://sead-dev.ccni.rpi.edu/joseki/sparql?query="), //$NON-NLS-1$ //$NON-NLS-2$
     VAURL("va.url", "http://bluespruce.pti.indiana.edu:8181/dcs-nced/query/?q=resourceValue:(%s)"), //$NON-NLS-1$ //$NON-NLS-2$
-    NCEDURL("nced.url", ""), //$NON-NLS-1$ //$NON-NLS-2$
+    DiscoveryURL("discovery.url", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
     // access level
     AccessLevelLabel("access.level.label", "Access Level"), //$NON-NLS-1$ //$NON-NLS-2$

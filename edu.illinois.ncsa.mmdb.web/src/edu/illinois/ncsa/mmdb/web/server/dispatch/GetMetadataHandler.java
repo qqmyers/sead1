@@ -116,11 +116,13 @@ public class GetMetadataHandler implements
             String vaurl = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VAURL);
             if (!vaurl.equals("")) {
                 URL url = new URL(String.format(vaurl, URLEncoder.encode(uri.getString(), "UTF-8")));
+                log.debug("DOI Querying " + url.toString());
                 Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openStream());
                 Element root = doc.getDocumentElement();
                 NodeList nl = root.getElementsByTagName("idValue");
                 for (int i = 0; i < nl.getLength(); i++ ) {
                     Node node = nl.item(i);
+                    log.debug("Adding DOI metadata: " + node.getNodeValue());
                     result.add("VA", "DOI", node.getNodeValue());
                 }
             }

@@ -70,7 +70,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleUserInfoHandler;
 
 public class MyDispatchServiceServlet extends DispatchServiceServlet {
 
-    static Log                log              = LogFactory.getLog(AuthenticatedServlet.class);
+    static Log                log              = LogFactory.getLog(MyDispatchServiceServlet.class);
 
     private static final long serialVersionUID = 2464722364321662618L;
 
@@ -113,7 +113,7 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
             log.debug("GoogleUserInfo is being called");
             GoogleUserInfoHandler.setSession(getThreadLocalRequest().getSession());
         }
-        log.debug("Executing dispatch");
+
         Result execute = super.execute(action);
         if (action instanceof GoogleUserInfo) {
             GoogleUserInfoHandler.setSession(null);

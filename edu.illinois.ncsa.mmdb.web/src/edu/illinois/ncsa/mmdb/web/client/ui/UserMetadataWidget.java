@@ -205,91 +205,101 @@ public class UserMetadataWidget extends Composite {
 
         int i = 0;
         for (final UserMetadataValue value : values ) {
-            fieldTable.insertRow(row);
-            // field name
-            Label predicateLabel = new Label(label);
-            predicateLabel.setTitle(predicate);
-            fieldTable.setWidget(row, 0, predicateLabel);
-            if (i++ != 0) {
-                predicateLabel.addStyleName("hidden");
-            }
-            // field value
-            Widget valueWidget = null;
 
-            //Create an appropriate widget based on the value:
+            //FixMe - probably better/more general way to not show data that duplicates metadata shown elsewhere in display 
+            //Special case - don't show datasets as subcollections (both use dc:hasPart and datasets are shown elsewhere on collection page)
 
-            if (value.getUri() != null) {
-                //It's a URI, so create a link
-                Hyperlink namelink = new Hyperlink();
-                namelink.setTargetHistoryToken(value.getUri());
-                namelink.setText(value.getName());
-                valueWidget = namelink;
+            if ((predicate.equals("http://purl.org/dc/terms/hasPart") && (value.getUri() != null) && value.getUri().startsWith("dataset?id="))) {
+                //Don't show it
             } else {
-                //It's text - decide if it is one or multi-line/has special characters
-                String valueText = value.getName();
-                if ((valueText.indexOf('\n') == -1) && (!valueText.contains("&"))) {
-                    //Single line - create a label
-                    valueWidget = new Label(valueText);
-                } else {
-                    //Multi-line 
-                    valueText = "<pre>" + SimpleHtmlSanitizer.sanitizeHtml(valueText).asString() + "</pre>";
-                    valueWidget = new HTML(valueText);
+
+                fieldTable.insertRow(row);
+                // field name
+                Label predicateLabel = new Label(label);
+                predicateLabel.setTitle(predicate);
+                fieldTable.setWidget(row, 0, predicateLabel);
+                if (i++ != 0) {
+                    predicateLabel.addStyleName("hidden");
                 }
-            }
+                // field value
+                Widget valueWidget = null;
 
-            fieldTable.setWidget(row, 1, valueWidget);
+                //Create an appropriate widget based on the value:
 
-            //placeholder for Applies To
-            if (value.getSectionMarker() == null) {
-                fieldTable.setWidget(row, 2, new Label("Document"));
-            } else {
-                final Anchor anchor = new Anchor(value.getSectionMarker());
-                anchor.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        PreviewSectionShowEvent show = new PreviewSectionShowEvent();
-                        show.setSection(anchor.getText());
-                        eventBus.fireEvent(show);
+                if (value.getUri() != null) {
+                    //It's a URI, so create a link
+                    Hyperlink namelink = new Hyperlink();
+
+                    namelink.setTargetHistoryToken(value.getUri());
+                    namelink.setText(value.getName());
+                    valueWidget = namelink;
+                } else {
+                    //It's text - decide if it is one or multi-line/has special characters
+                    String valueText = value.getName();
+                    if ((valueText.indexOf('\n') == -1) && (!valueText.contains("&"))) {
+                        //Single line - create a label
+                        valueWidget = new Label(valueText);
+                    } else {
+                        //Multi-line 
+                        valueText = "<pre>" + SimpleHtmlSanitizer.sanitizeHtml(valueText).asString() + "</pre>";
+                        valueWidget = new HTML(valueText);
                     }
-                });
-                fieldTable.setWidget(row, 2, anchor);
-            }
+                }
 
-            FlowPanel links = new FlowPanel();
-            if (canEdit) {
-                // edit link
-                final Anchor editAnchor = new Anchor("Edit");
-                editAnchor.setTitle("Edit the value for this property");
-                editAnchor.addStyleName("metadataTableAction");
-                editAnchor.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        addMetadata.editValue(predicate, value);
-                    }
-                });
-                links.add(editAnchor);
-                // remove link
-                Anchor removeAnchor = new Anchor("Remove");
-                removeAnchor.setTitle("Remove this property from your dataset");
-                removeAnchor.addStyleName("metadataTableAction");
-                removeAnchor.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        addMetadata.removeValue(predicate, value, true);
-                    }
-                });
-                links.add(removeAnchor);
-            }
-            //Add a search link
-            Hyperlink searchlink = new Hyperlink();
-            if (value.getUri() != null) {
-                searchlink.setTargetHistoryToken("search?q=" + value.getUri() + "&f=" + predicate);
-            } else {
-                searchlink.setTargetHistoryToken("search?q=" + value.getName() + "&f=" + predicate);
-            }
-            searchlink.setText("Search");
-            links.add(searchlink);
+                fieldTable.setWidget(row, 1, valueWidget);
 
-            fieldTable.setWidget(row, 3, links);
-            row++;
+                //placeholder for Applies To
+                if (value.getSectionMarker() == null) {
+                    fieldTable.setWidget(row, 2, new Label("Document"));
+                } else {
+                    final Anchor anchor = new Anchor(value.getSectionMarker());
+                    anchor.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            PreviewSectionShowEvent show = new PreviewSectionShowEvent();
+                            show.setSection(anchor.getText());
+                            eventBus.fireEvent(show);
+                        }
+                    });
+                    fieldTable.setWidget(row, 2, anchor);
+                }
+
+                FlowPanel links = new FlowPanel();
+                if (canEdit) {
+                    // edit link
+                    final Anchor editAnchor = new Anchor("Edit");
+                    editAnchor.setTitle("Edit the value for this property");
+                    editAnchor.addStyleName("metadataTableAction");
+                    editAnchor.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            addMetadata.editValue(predicate, value);
+                        }
+                    });
+                    links.add(editAnchor);
+                    // remove link
+                    Anchor removeAnchor = new Anchor("Remove");
+                    removeAnchor.setTitle("Remove this property from your dataset");
+                    removeAnchor.addStyleName("metadataTableAction");
+                    removeAnchor.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            addMetadata.removeValue(predicate, value, true);
+                        }
+                    });
+                    links.add(removeAnchor);
+                }
+                //Add a search link
+                Hyperlink searchlink = new Hyperlink();
+                if (value.getUri() != null) {
+                    searchlink.setTargetHistoryToken("search?q=" + value.getUri() + "&f=" + predicate);
+                } else {
+                    searchlink.setTargetHistoryToken("search?q=" + value.getName() + "&f=" + predicate);
+                }
+                searchlink.setText("Search");
+                links.add(searchlink);
+
+                fieldTable.setWidget(row, 3, links);
+                row++;
+            }
         }
         styleRows();
 
