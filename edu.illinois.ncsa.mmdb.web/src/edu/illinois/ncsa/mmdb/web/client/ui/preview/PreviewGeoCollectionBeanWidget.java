@@ -105,7 +105,6 @@ public class PreviewGeoCollectionBeanWidget extends PreviewBeanWidget<PreviewGeo
         PreviewGeoPointBean geoPointBean = geoCollectionBean.getPreviewGeoPointBean();
 
         map.removeOverlayLayers();
-
         Bounds bbox = null;
         if (geoserverCollectionBean != null) {
             for (PreviewGeoserverBean geoBean : geoserverCollectionBean.getPreviewGeoservers() ) {
@@ -123,7 +122,6 @@ public class PreviewGeoCollectionBeanWidget extends PreviewBeanWidget<PreviewGeo
                 map.addLayer(wms);
                 Double[] extent = geoBean.getExtent();
                 Bounds tmpbbox = new Bounds(extent[0], extent[1], extent[2], extent[3]);
-
                 if (bbox == null) {
                     bbox = tmpbbox;
                 } else {
@@ -191,7 +189,21 @@ public class PreviewGeoCollectionBeanWidget extends PreviewBeanWidget<PreviewGeo
                 //                    }
                 //                });
                 markerLayer.addFeature(feature);
-                bbox.extend(center);
+
+                //Non-null bounding box required
+                double maxval= 20037508.34; //max value in GOOGLE coords
+                double latmin = Math.max(center.lat() - 5000, -maxval); 
+                        double latmax = Math.min(center.lat() + 5000, maxval);
+                        
+                                double lonmin = Math.max (center.lon() - 5000, -maxval); 
+                                        double lonmax = Math.min(center.lon() + 5000, maxval);
+                Bounds tmpbbox = new Bounds(lonmin, latmin, lonmax, latmax );
+                if (bbox == null) {
+                    bbox = tmpbbox;
+                } else {
+                    bbox.extend(tmpbbox);
+                }
+
             }
             map.addControl(sf);
             sf.activate();
@@ -200,6 +212,7 @@ public class PreviewGeoCollectionBeanWidget extends PreviewBeanWidget<PreviewGeo
         map.addControl(new MousePosition());
         map.addControl(new LayerSwitcher());
         map.zoomToExtent(bbox);
+
     }
 
     public FramedCloud createPopup(LonLat loc, DatasetBean dataset, final VectorFeature feature) {
