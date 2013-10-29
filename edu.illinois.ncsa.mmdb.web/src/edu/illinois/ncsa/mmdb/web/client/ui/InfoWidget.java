@@ -111,16 +111,6 @@ public class InfoWidget extends Composite {
         lbl.addStyleName("datasetRightColHeading");
         panel.add(lbl);
 
-        lbl = new Label("Contributor: ");
-        lbl.addStyleName("datasetRightColText");
-        PersonBean creator = data.getCreator();
-        if (creator != null) {
-            lbl.setTitle(creator.getEmail());
-            lbl.setText("Contributor: " + creator.getName());
-            /*editableLbl.setText(creator.getName());*/
-        }
-        panel.add(lbl);
-
         HorizontalPanel creatorPanel = new HorizontalPanel();
         VerticalPanel creatorDetailsPanel = new VerticalPanel();
         Label creatorLabel = new Label("Creator: ");
@@ -153,6 +143,17 @@ public class InfoWidget extends Composite {
 
         String type = data.getMimeType();
         addInfo("MIME\u00a0Type", type, panel, true, Type.MIMETYPE);
+
+        // uploaded by
+        lbl = new Label("Uploaded By: ");
+        lbl.addStyleName("datasetRightColText");
+        PersonBean creator = data.getCreator();
+        if (creator != null) {
+            lbl.setTitle(creator.getEmail());
+            lbl.setText("Uploaded By: " + creator.getName());
+            /*editableLbl.setText(creator.getName());*/
+        }
+        panel.add(lbl);
 
         String date = "";
         if (data.getDate() != null) {
