@@ -57,7 +57,7 @@ public class UserMetadataField implements Serializable {
         } else if (label.toLowerCase().contains(abstractLabel)) {
             setType(MULTILINE_TEXT);
         } else if (label.toLowerCase().contains(descriptionLabel)) {
-            setType(MULTILINE_TEXT);
+            setType(PLAIN);
         } else {
             setType(PLAIN);
         }

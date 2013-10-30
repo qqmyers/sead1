@@ -228,11 +228,22 @@ public class UserMetadataWidget extends Composite {
 
                 if (value.getUri() != null) {
                     //It's a URI, so create a link
+                    String val=value.getUri();
+                    
+                    if((val.startsWith("dataset?id="))||(val.startsWith("collection?uri="))) {
+                     //Internal link - use history mechanism     
+                    
                     Hyperlink namelink = new Hyperlink();
 
-                    namelink.setTargetHistoryToken(value.getUri());
+                    namelink.setTargetHistoryToken(val);
                     namelink.setText(value.getName());
                     valueWidget = namelink;
+                    } else {
+                        //External link - use Anchor
+                        //FixMe - external uris may have a name someday like the internal datasets/collections, which would change the first argument below
+                        Anchor link = new Anchor(val, val, "_blank");
+                       valueWidget = link;
+                    }
                 } else {
                     //It's text - decide if it is one or multi-line/has special characters
                     String valueText = value.getName();
@@ -282,7 +293,7 @@ public class UserMetadataWidget extends Composite {
                     removeAnchor.addStyleName("metadataTableAction");
                     removeAnchor.addClickHandler(new ClickHandler() {
                         public void onClick(ClickEvent event) {
-                            addMetadata.removeValue(predicate, value, true);
+                            addMetadata.removeValue(predicate, value, false);
                         }
                     });
                     links.add(removeAnchor);

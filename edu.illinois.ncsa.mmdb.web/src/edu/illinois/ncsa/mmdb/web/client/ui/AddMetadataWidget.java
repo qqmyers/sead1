@@ -49,6 +49,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 
+import org.mortbay.log.Log;
+
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
@@ -59,6 +61,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.HasKeyUpHandlers;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -119,12 +122,12 @@ public class AddMetadataWidget extends Composite {
     VerticalPanel                          thePanel;
     Label                                  noFields;
     FlexTable                              fieldTable;
-    KeyUpHandler                           pressEnter;
     Map<String, String>                    labels     = new HashMap<String, String>();
     Map<String, Integer>                   indexLabel = new HashMap<String, Integer>();
     Map<String, Integer>                   listLabel  = new HashMap<String, Integer>();
     private final SimplePanel              newFieldPanel;
     protected InputField                   inputField;
+    protected KeyUpHandler                 pressEnter;
     protected SortedSet<UserMetadataField> availableFields;
     private final HandlerManager           eventBus;
     UserMetadataField                      _creatorMetadataField;
@@ -217,7 +220,6 @@ public class AddMetadataWidget extends Composite {
                     fieldChoice.setSelectedIndex(0);
                 }
             };
-
             pressEnter = new KeyUpHandler() {
 
                 @Override
@@ -500,6 +502,9 @@ public class AddMetadataWidget extends Composite {
                                     refresh();
                                 }
                                 // FIXME this will refresh once per section!
+                                //Since this is an add and we're sending in one section name (if it isn't the main value),
+                                //won't this always be one section, i.e. no fix required even if there are annotations on 
+                                //multiple sections?
                             }
                         });
                     }
@@ -520,8 +525,11 @@ public class AddMetadataWidget extends Composite {
      * RPC call to remove an entry.
      * 
      * @param property
+     * @param isEdit
+     *            - in an edit, the removal of the old property should trigger
+     *            the add of the new property before refresh occurs.
      */
-    public void removeValue(final String property, final UserMetadataValue value, final boolean refresh) {
+    public void removeValue(final String property, final UserMetadataValue value, final boolean isEdit) {
 
         final GetSection gs = new GetSection();
         gs.setUri(uri);
@@ -542,7 +550,7 @@ public class AddMetadataWidget extends Composite {
                         remove = new RemoveUserMetadata(uri, property, value.getName());
                     } else {
                         GWT.log("removing URI value '" + value.getUri() + "'");
-                        remove = new RemoveUserMetadata(uri, property, value.getUri(), true);
+                        remove = new RemoveUserMetadata(uri, property, stripPrefix(value.getUri()), true);
                     }
 
                     GWT.log("section URI = " + value.getSectionUri());
@@ -554,7 +562,9 @@ public class AddMetadataWidget extends Composite {
                         }
 
                         public void onSuccess(EmptyResult result) {
-                            if (refresh) {
+                            if (isEdit == true) {
+                                addValue(true);
+                            } else {
                                 refresh();
                             }
                         }
@@ -573,30 +583,73 @@ public class AddMetadataWidget extends Composite {
 
         fieldChoice.setSelectedIndex(indexLabel.get(property));
         changeHandler();
-        inputField.setValue(oldValue.getName());
+        String currentVal = oldValue.getUri();
+        if (currentVal == null) {
+            currentVal = oldValue.getName();
+        } else {
+            currentVal=stripPrefix(currentVal);
+        }
+        inputField.setValue(currentVal);
+
         inputField.addAnchor.setText("Update");
 
         ClickHandler editHandler = new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                String text = inputField.getUri();
-                if (text == null) {
-                    text = inputField.getValue();
-                }
-                if (text == null) {
-                    removeValue(property, oldValue, false);
-                } else if (!text.equals(oldValue.getSectionValue())) {
-                    removeValue(property, oldValue, false);
-                    if (!text.trim().equals("")) {
-                        addValue(false);
-                    }
-                }
-            }
+                doEditEvent(property, oldValue);            }
         };
 
-        inputField.addAnchor.addClickHandler(editHandler);
+        KeyUpHandler editPressEnter = new KeyUpHandler() {
 
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    doEditEvent(property, oldValue);
+                }
+
+            }
+        };
+        if (inputField.pressEnterHandler != null) {
+            //This is the type of field that has an enter key handler - not all do
+            inputField.pressEnterHandler.removeHandler();
+            ((HasKeyUpHandlers)inputField.inputWidget).addKeyUpHandler(editPressEnter);
+        }
+        inputField.addClickHandler.removeHandler();
+        inputField.addClickHandler = inputField.addAnchor.addClickHandler(editHandler);
+
+    }
+    
+    protected void doEditEvent (final String property, final UserMetadataValue oldValue) {
+        String text = inputField.getUri();
+        if (text == null) {
+            text = inputField.getValue();
+        }
+        text = text.trim();
+        if ((text == null) || text.equals("")) {
+            //Don't bother to write, just remove and refresh
+            removeValue(property, oldValue, false);
+        } else {
+            //Fixme? Unless I'm missing something, to determine whether we can avoid having to remove and 
+            // then write just to keep the same value, we have to check whether the uris match 
+            // (if present), the values (if present), or whether the section and section value match,
+            // ... complex enough to skip since remove and then write the new value should always work, 
+            // just be less efficient.
+            //
+            //add the new value after removing the old and before refreshing
+            removeValue(property, oldValue, true);
+        }        
+    }
+    
+    protected String stripPrefix(String val) {
+        //remove added prefix used with datasets and collections
+        if(val.startsWith("dataset?id=")) {
+            val=val.substring(11); // "dataset?id=".length();
+        }
+        if(val.startsWith("collection?uri=")) {
+            val=val.substring(15); // "collection?uri=".length();
+        }
+        return val;
     }
 
     abstract class InputField extends Composite implements HasValue<String> {
@@ -606,7 +659,10 @@ public class AddMetadataWidget extends Composite {
         private final RadioButton         sectionButton;
         private final RadioButton         documentButton;
         public Anchor                     addAnchor;
+        public Widget                inputWidget;
         FlowPanel                         appliedToPanel;
+        protected HandlerRegistration     addClickHandler;
+        protected HandlerRegistration     pressEnterHandler = null;
 
         public InputField(UserMetadataField userMetadataField, ClickHandler addHandler, ClickHandler clearHandler) {
             this.userMetadataField = userMetadataField;
@@ -614,11 +670,12 @@ public class AddMetadataWidget extends Composite {
             // first div
             FlexTable layout = new FlexTable();
             layout.addStyleName("metadataPlainField");
+            inputWidget = createInputWidget();
 
-            layout.setWidget(0, 0, createInputWidget());
+            layout.setWidget(0, 0, inputWidget);
 
             addAnchor = new Anchor("Add");
-            addAnchor.addClickHandler(addHandler);
+            addClickHandler = addAnchor.addClickHandler(addHandler);
             layout.setWidget(0, 1, addAnchor);
             Anchor clearAnchor = new Anchor("Cancel");
             clearAnchor.addClickHandler(clearHandler);
@@ -713,15 +770,20 @@ public class AddMetadataWidget extends Composite {
         @Override
         Widget createInputWidget() {
             textBox = new TextBox();
-            textBox.addKeyUpHandler(pressEnter);
+            pressEnterHandler = textBox.addKeyUpHandler(pressEnter);
             textBox.setWidth("500px");
             return textBox;
         }
 
         @Override
         String getUri() {
-            // TODO Auto-generated method stub
-            return null;
+            String val = getValue();
+            boolean isUri = false;
+            if (val.startsWith("tag:") || val.startsWith("http:") || val.startsWith("https:") || val.startsWith("ftp:")) {
+                return val;
+            } else {
+                return null;
+            }
         }
     }
 
@@ -786,7 +848,7 @@ public class AddMetadataWidget extends Composite {
 
             vivoCreatorSuggestBox = new SuggestBox(oracle);
 
-            vivoCreatorSuggestBox.addKeyUpHandler(pressEnter);
+            pressEnterHandler = vivoCreatorSuggestBox.addKeyUpHandler(pressEnter);
             vivoCreatorSuggestBox.setWidth("500px");
             return vivoCreatorSuggestBox;
         }
@@ -824,7 +886,7 @@ public class AddMetadataWidget extends Composite {
 
             partOfSuggestBox = new SuggestBox(oracle);
 
-            partOfSuggestBox.addKeyUpHandler(pressEnter);
+            pressEnterHandler = partOfSuggestBox.addKeyUpHandler(pressEnter);
             partOfSuggestBox.setWidth("500px");
             return partOfSuggestBox;
         }
@@ -862,7 +924,7 @@ public class AddMetadataWidget extends Composite {
             listBox = new ListBox();
             listBox.setWidth("500px");
             listBox.addItem("Select...", "");
-            listBox.addKeyUpHandler(pressEnter);
+            pressEnterHandler = listBox.addKeyUpHandler(pressEnter);
             int count = 1;
             List<NamedThing> range = new ArrayList<NamedThing>();
             range.addAll(NamedThing.orderByName(userMetadataField.getRange()));

@@ -125,6 +125,12 @@ public class GetUserMetadataFieldsHandler implements
                 }
             }
         }
+        if(uri.getString().startsWith("tag:")) {
+            //if it starts with tag and is an ACR identifier but isn't a dataset or collection
+            // return null so that it is not treated as a URL (just a text value)
+            return null;
+        }
+        //external http/https/ftp URLs should be returned intact
         return uri.getString();
     }
 
