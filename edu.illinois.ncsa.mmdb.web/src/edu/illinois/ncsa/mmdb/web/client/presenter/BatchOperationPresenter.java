@@ -64,8 +64,10 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasets;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollectionResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
@@ -101,7 +103,7 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
     }
 
     String title(String fmt, int n) {
-        return fmt.replaceFirst("%s", n + " items" + (n > 1 ? "s" : ""));
+        return fmt.replaceFirst("%s", n + " item" + (n > 1 ? "s" : ""));
     }
 
     boolean selectionEmpty() {
@@ -361,6 +363,56 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                                 @Override
                                 public void onDenied() {
                                     ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to remove datasets from a collection", false);
+                                    okay.getOkText().setText("OK");
+                                }
+                            });
+
+                        }
+                    });
+                }
+            });
+
+            display.addMenuAction("Describes Collection", new Command() {
+                @Override
+                public void execute() {
+                    if (selectionEmpty()) {
+                        return;
+                    }
+                    final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Set %s as collection description/preview dataset(s)"));
+                    atc.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+
+                            PermissionUtil rbac = new PermissionUtil(service);
+                            rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
+                                @Override
+                                public void onAllowed() {
+                                    final String collectionUri = atc.getSelectedValue();
+                                    final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedItems());
+                                    SetUserMetadata sum = new SetUserMetadata(collectionUri, "http://purl.org/dc/terms/description", selectedDatasets, true);
+                                    final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "set");
+                                    service.execute(sum,
+                                            new AsyncCallback<EmptyResult>() {
+
+                                                @Override
+                                                public void onFailure(Throwable arg0) {
+                                                    GWT.log("Error setting dataset(s) as collection desciptions", arg0);
+                                                    done.setFailure(selectedDatasets, arg0);
+                                                    eventBus.fireEvent(done);
+                                                }
+
+                                                @Override
+                                                public void onSuccess(EmptyResult arg0) {
+                                                    GWT.log("Dataset(s) successfully set as collection descriptions", null);
+                                                    done.addSuccesses(selectedDatasets);
+                                                    eventBus.fireEvent(done);
+                                                    atc.hide();
+                                                }
+                                            });
+                                }
+
+                                @Override
+                                public void onDenied() {
+                                    ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to set datasets as collection descriptions", false);
                                     okay.getOkText().setText("OK");
                                 }
                             });
