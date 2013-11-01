@@ -38,7 +38,7 @@ public class UserMetadataField implements Serializable {
 
     //Type of input should be configurable = for now detect a few special ones...
     String creatorLabel     = "creator";
-    String contactLabel     = "contact name";
+    String contactLabel     = "contact";
     String partOfLabel      = "published in";
     String abstractLabel    = "abstract";
     String descriptionLabel = "description";

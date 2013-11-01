@@ -121,7 +121,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  */
 public class TupeloStore {
 
-    public static String HASBADGE = "http://purl.org/dc/terms/description";
+    public static String                                         HASBADGE              = "http://purl.org/dc/terms/description";
     /** Commons logging **/
     private static Log                                           log                   = LogFactory.getLog(TupeloStore.class);
 
@@ -667,7 +667,7 @@ public class TupeloStore {
         if (badgeCache == null) {
             badgeCache = new HashMap<String, Memoized<String>>();
         }
-        Memoized<String> mBadge = null; //badgeCache.get(collectionUri);
+        Memoized<String> mBadge = badgeCache.get(collectionUri);
         if (mBadge == null) {
             mBadge = new Memoized<String>() {
                 public String computeValue() {
@@ -675,13 +675,12 @@ public class TupeloStore {
                         Unifier u = new Unifier();
                         u.setColumnNames("descriptor", "date");
                         u.addPattern(Resource.uriRef(collectionUri), Resource.uriRef(HASBADGE), "descriptor");
-                        u.addPattern("descriptor",Dc.DATE, "date", true);
+                        u.addPattern("descriptor", Dc.DATE, "date", true);
                         u.addOrderBy("date");
                         u.addOrderBy("descriptor");
                         u.setLimit(25);
                         //getContext().perform(u);
                         for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "descriptor") ) {
-                            log.debug("Row is: " + row.toString());
                             String datasetUri = row.get(0).getString();
                             log.debug("Found Badge: " + datasetUri + " for: " + collectionUri);
                             String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
@@ -692,15 +691,11 @@ public class TupeloStore {
                     } catch (Exception x) {
                         x.printStackTrace();
                     }
-                    log.debug("Trying hasPart");
                     try {
                         Unifier u = new Unifier();
                         u.setColumnNames("member", "date");
                         u.addPattern(Resource.uriRef(collectionUri), DcTerms.HAS_PART, "member");
-                        //Fixme Datasets use dc/elements/1.1/date, not Dc.Date (dc/terms/created) as collections do...
-                        // u.addPattern("member", Dc.DATE, "date", true);
-                        
-                        u.addPattern("member", Resource.uriRef("http://purl.org/dc/elements/1.1/date"), "date", true);
+                        u.addPattern("member", Dc.DATE, "date", true);
                         u.addOrderBy("date");
                         u.addOrderBy("member");
                         u.setLimit(25);
@@ -841,17 +836,12 @@ public class TupeloStore {
         List<String> newColumnNames = new LinkedList<String>(u.getColumnNames());
         newColumnNames.add("_ued");
         u.setColumnNames(newColumnNames);
-        
-        for(String bob: newColumnNames) {
-            log.debug("Column: " + bob);
-            
-        }
-        
+        /*
         LinkedList<org.tupeloproject.rdf.query.Pattern> pats = u.getPatterns();
-        for (org.tupeloproject.rdf.query.Pattern pat : pats) {
+        for (org.tupeloproject.rdf.query.Pattern pat : pats ) {
             log.debug(pat.toString());
         }
-        
+        */
         u.addPattern(subjectVar, Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "_ued", true);
         if (u.getOffset() != 0 || u.getLimit() != Unifier.UNLIMITED) {
             List<OrderBy> newOrderBy = new LinkedList<OrderBy>();
@@ -868,9 +858,7 @@ public class TupeloStore {
         int cix = u.getColumnNames().size() - 1;
         ListTable<Resource> result = new ListTable<Resource>();
         for (Tuple<Resource> row : u.getResult() ) {
-            log.debug("ued row: " + row.toString());
             if (row.get(cix) == null) {
-                log.debug("Added");
                 result.addRow(row);
             }
         }

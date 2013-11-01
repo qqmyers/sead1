@@ -49,8 +49,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 
-import org.mortbay.log.Log;
-
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
@@ -130,9 +128,6 @@ public class AddMetadataWidget extends Composite {
     protected KeyUpHandler                 pressEnter;
     protected SortedSet<UserMetadataField> availableFields;
     private final HandlerManager           eventBus;
-    UserMetadataField                      _creatorMetadataField;
-    ClickHandler                           _addCreatorHandler;
-    ClickHandler                           _clearCreatorHandler;
     UserMetadataField                      userMetadataField;
     private String                         vivoURL;
 
@@ -254,9 +249,8 @@ public class AddMetadataWidget extends Composite {
                 //Set handlers to be used by the inner classes for fetching JSON from VIVO
                 case UserMetadataField.VIVO_CREATOR:
                 case UserMetadataField.VIVO_CONTACT:
-                    _creatorMetadataField = userMetadataField;
-                    _clearCreatorHandler = clearHandler;
-                    _addCreatorHandler = addHandler;
+                    inputField = new CreatorField(userMetadataField, addHandler, clearHandler);
+                    newFieldPanel.add(inputField);
                     //Initialize the connection to VIVO
 
                     //FIXME : Change this hard coded URL using some ORM-like implementation available for SPARQL in Jena
@@ -265,9 +259,8 @@ public class AddMetadataWidget extends Composite {
                     InitializeVIVOConnection(query);
                     break;
                 case UserMetadataField.VIVO_PART_OF:
-                    _creatorMetadataField = userMetadataField;
-                    _clearCreatorHandler = clearHandler;
-                    _addCreatorHandler = addHandler;
+                    inputField = new PartOfField(userMetadataField, addHandler, clearHandler);
+                    newFieldPanel.add(inputField);
                     //Initialize the connection to VIVO
                     query = "PREFIX+bibo%3A+<http%3A%2F%2Fpurl.org%2Fontology%2Fbibo%2F>%0D%0APREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0APREFIX+rdfs%3A+<http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23>%0D%0A%0D%0A%0D%0ASELECT+distinct+%3FURL+%3FLabel%0D%0AWHERE{%0D%0A%3FURL+rdf%3Atype+bibo%3AAcademicArticle+.%0D%0A%3FURL+rdfs%3Alabel+%3FLabel+.%0D%0A}%0D%0A&output=json"
                             + "&callback=";
@@ -347,17 +340,15 @@ public class AddMetadataWidget extends Composite {
             ParentJson pJsons = getParentJson(jso);
             results = pJsons.getResults();
             if (results != null) {
-                oracle = new MultiWordSuggestOracle();
+
+                oracle = (MultiWordSuggestOracle) ((SuggestBox) inputField.inputWidget).getSuggestOracle();
             }
             for (int i = 0; i < results.getBindings().length(); i++ ) {
                 String name = results.getBindings().get(i).getLabel().getValue();
-                String vivoURL = results.getBindings().get(i).getURL().getValue();
+                String userVivoURL = results.getBindings().get(i).getURL().getValue();
 
-                oracle.add(name + " : " + vivoURL);
+                oracle.add(name + " : " + userVivoURL);
             }
-            //FIXME: Naming conventions
-            inputField = new CreatorField(_creatorMetadataField, _addCreatorHandler, _clearCreatorHandler);
-            newFieldPanel.add(inputField);
         } catch (Exception e) {
 
         }
@@ -425,6 +416,7 @@ public class AddMetadataWidget extends Composite {
     protected void refresh() {
         newFieldPanel.clear();
         fieldChoice.setSelectedIndex(0);
+        inputField = null;
     }
 
     /**
@@ -550,7 +542,16 @@ public class AddMetadataWidget extends Composite {
                         remove = new RemoveUserMetadata(uri, property, value.getName());
                     } else {
                         GWT.log("removing URI value '" + value.getUri() + "'");
-                        remove = new RemoveUserMetadata(uri, property, stripPrefix(value.getUri()), true);
+                        String valUri = value.getUri();
+                        //FixMe : VIVO ID special case - storing name and Uri in one triple until we have the list of vivo ids cached on the server
+                        if (valUri.startsWith(vivoURL.substring(0, vivoURL.indexOf("/joseki")))) {
+                            valUri = value.getName() + " : " + valUri;
+                            remove = new RemoveUserMetadata(uri, property, valUri);
+                        } else {
+                            valUri = stripPrefix(valUri);
+                            remove = new RemoveUserMetadata(uri, property, valUri, true);
+                        }
+
                     }
 
                     GWT.log("section URI = " + value.getSectionUri());
@@ -583,21 +584,20 @@ public class AddMetadataWidget extends Composite {
 
         fieldChoice.setSelectedIndex(indexLabel.get(property));
         changeHandler();
+
         String currentVal = oldValue.getUri();
         if (currentVal == null) {
             currentVal = oldValue.getName();
         } else {
-            currentVal=stripPrefix(currentVal);
+            currentVal = stripPrefix(currentVal);
         }
-        inputField.setValue(currentVal);
-
-        inputField.addAnchor.setText("Update");
 
         ClickHandler editHandler = new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                doEditEvent(property, oldValue);            }
+                doEditEvent(property, oldValue);
+            }
         };
 
         KeyUpHandler editPressEnter = new KeyUpHandler() {
@@ -610,17 +610,22 @@ public class AddMetadataWidget extends Composite {
 
             }
         };
+
+        inputField.setValue(currentVal);
+
+        inputField.addAnchor.setText("Update");
+
         if (inputField.pressEnterHandler != null) {
             //This is the type of field that has an enter key handler - not all do
             inputField.pressEnterHandler.removeHandler();
-            ((HasKeyUpHandlers)inputField.inputWidget).addKeyUpHandler(editPressEnter);
+            ((HasKeyUpHandlers) inputField.inputWidget).addKeyUpHandler(editPressEnter);
         }
         inputField.addClickHandler.removeHandler();
         inputField.addClickHandler = inputField.addAnchor.addClickHandler(editHandler);
 
     }
-    
-    protected void doEditEvent (final String property, final UserMetadataValue oldValue) {
+
+    protected void doEditEvent(final String property, final UserMetadataValue oldValue) {
         String text = inputField.getUri();
         if (text == null) {
             text = inputField.getValue();
@@ -638,16 +643,16 @@ public class AddMetadataWidget extends Composite {
             //
             //add the new value after removing the old and before refreshing
             removeValue(property, oldValue, true);
-        }        
+        }
     }
-    
+
     protected String stripPrefix(String val) {
         //remove added prefix used with datasets and collections
-        if(val.startsWith("dataset?id=")) {
-            val=val.substring(11); // "dataset?id=".length();
+        if (val.startsWith("dataset?id=")) {
+            val = val.substring(11); // "dataset?id=".length();
         }
-        if(val.startsWith("collection?uri=")) {
-            val=val.substring(15); // "collection?uri=".length();
+        if (val.startsWith("collection?uri=")) {
+            val = val.substring(15); // "collection?uri=".length();
         }
         return val;
     }
@@ -659,7 +664,7 @@ public class AddMetadataWidget extends Composite {
         private final RadioButton         sectionButton;
         private final RadioButton         documentButton;
         public Anchor                     addAnchor;
-        public Widget                inputWidget;
+        public Widget                     inputWidget;
         FlowPanel                         appliedToPanel;
         protected HandlerRegistration     addClickHandler;
         protected HandlerRegistration     pressEnterHandler = null;
@@ -839,14 +844,14 @@ public class AddMetadataWidget extends Composite {
 
         @Override
         public void setValue(String value) {
-            vivoCreatorSuggestBox.setValue(value);
+            vivoCreatorSuggestBox.setText(value);
             vivoCreatorSuggestBox.setFocus(true);
         }
 
         @Override
         Widget createInputWidget() {
 
-            vivoCreatorSuggestBox = new SuggestBox(oracle);
+            vivoCreatorSuggestBox = new SuggestBox();
 
             pressEnterHandler = vivoCreatorSuggestBox.addKeyUpHandler(pressEnter);
             vivoCreatorSuggestBox.setWidth("500px");
@@ -884,7 +889,7 @@ public class AddMetadataWidget extends Composite {
         @Override
         Widget createInputWidget() {
 
-            partOfSuggestBox = new SuggestBox(oracle);
+            partOfSuggestBox = new SuggestBox();
 
             pressEnterHandler = partOfSuggestBox.addKeyUpHandler(pressEnter);
             partOfSuggestBox.setWidth("500px");

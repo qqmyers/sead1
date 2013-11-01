@@ -113,6 +113,8 @@ public class GetRecentActivityHandler implements ActionHandler<GetRecentActivity
                 //First time home page is loaded
                 if (getRecentActivity.getFirst()) {
                     if (showIndex < getRecentActivity.getMaxNum() && row.get(0) != null) {
+                        DatasetBean dsb = dbu.get(row.get(0));
+                        log.debug("Found: " + dsb.toString());
                         datasets.add(dbu.get(row.get(0)));
                         showIndex++;
                     }

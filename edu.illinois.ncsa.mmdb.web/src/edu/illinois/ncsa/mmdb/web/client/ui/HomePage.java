@@ -95,16 +95,18 @@ public class HomePage extends Page {
         createTabs();
         viewButton = new Button("View More");
         viewButton.addStyleName("homeButton");
+        latestNum = new Label(); //used asynchronously in createRecentActivityTab
         createRecentActivityTab();
         if (!MMDB.getSessionState().isAnonymous()) {
             createProfileTab();
             //      createPreferencesTab();
         }
         tabPanel.selectTab(0);
+
         latestDate = null;
         pending = new Image("./images/loading-small-white.gif");
         pending.addStyleName("homePending");
-        latestNum = new Label();
+
     }
 
     /**
@@ -114,6 +116,7 @@ public class HomePage extends Page {
         recentActivityPanel = new FlowPanel();
         tabPanel.add(recentActivityPanel, "Recent Activity");
         getRecentActivity();
+
         viewButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 getMoreActivity(latestDate);
@@ -143,6 +146,7 @@ public class HomePage extends Page {
             public void onSuccess(GetRecentActivityResult result) {
                 //recentActivityPanel.clear();
                 List<DatasetBean> datasets = result.getDatasets();
+
                 if (datasets.size() == 0) {
                     recentActivityPanel.add(new HTML("No recent activity to report."));
                 } else {

@@ -66,6 +66,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
@@ -125,7 +126,7 @@ public class GetUserMetadataFieldsHandler implements
                 }
             }
         }
-        if(uri.getString().startsWith("tag:")) {
+        if (uri.getString().startsWith("tag:")) {
             //if it starts with tag and is an ACR identifier but isn't a dataset or collection
             // return null so that it is not treated as a URL (just a text value)
             return null;
@@ -151,7 +152,28 @@ public class GetUserMetadataFieldsHandler implements
                     umv = new UserMetadataValue(null, v.getString());
                 }
             } else {
-                umv = new UserMetadataValue(null, value.toString());
+                //FixMe : parsing the '<name> : <url>' format that has been used to record people looked up in Vivo
+                //We should move to caching the list of vivo people on the server, storing just the URI and looking up the
+                //names as needed.
+                String vivoUrl = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VIVOJOSEKIURL);
+                //Fixme - stripping down to host part on the assumption that the joseki query interface and the Vivo profile pages 
+                //are on the same server  
+                vivoUrl = vivoUrl.substring(0, vivoUrl.indexOf("joseki"));
+                String val = value.toString();
+                log.debug("Val: " + val + " : Vivo: " + vivoUrl);
+                if (val.contains(vivoUrl)) {
+                    String name = val;
+                    int separator = val.indexOf(" : ");
+                    if (separator != -1) {
+                        name = val.substring(0, separator);
+                        val = val.substring(separator + 3, val.length());
+                    }
+                    umv = new UserMetadataValue(val, name);
+                } else {
+
+                    umv = new UserMetadataValue(null, value.toString());
+                }
+
             }
             if (marker != null) {
                 umv.setSectionMarker(marker);

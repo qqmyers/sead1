@@ -105,7 +105,7 @@ public class SetUserMetadataHandler implements ActionHandler<SetUserMetadata, Em
             } catch (Exception x) {
                 x.printStackTrace();
             }
-
+            //FixMe - changed calls refetch again, along with reindexing - is the above a duplicate refetch?
             TupeloStore.getInstance().changed(action.getUri());
 
             return new EmptyResult();

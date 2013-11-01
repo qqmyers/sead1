@@ -228,21 +228,25 @@ public class UserMetadataWidget extends Composite {
 
                 if (value.getUri() != null) {
                     //It's a URI, so create a link
-                    String val=value.getUri();
-                    
-                    if((val.startsWith("dataset?id="))||(val.startsWith("collection?uri="))) {
-                     //Internal link - use history mechanism     
-                    
-                    Hyperlink namelink = new Hyperlink();
+                    String val = value.getUri();
 
-                    namelink.setTargetHistoryToken(val);
-                    namelink.setText(value.getName());
-                    valueWidget = namelink;
+                    if ((val.startsWith("dataset?id=")) || (val.startsWith("collection?uri="))) {
+                        //Internal link - use history mechanism     
+
+                        Hyperlink namelink = new Hyperlink();
+
+                        namelink.setTargetHistoryToken(val);
+                        namelink.setText(value.getName());
+                        valueWidget = namelink;
                     } else {
                         //External link - use Anchor
+                        String name = value.getName();
+                        if (name == null) {
+                            name = val;
+                        }
                         //FixMe - external uris may have a name someday like the internal datasets/collections, which would change the first argument below
-                        Anchor link = new Anchor(val, val, "_blank");
-                       valueWidget = link;
+                        Anchor link = new Anchor(name, val, "_blank");
+                        valueWidget = link;
                     }
                 } else {
                     //It's text - decide if it is one or multi-line/has special characters

@@ -50,6 +50,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserPIDHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.CheckUserExistsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ContextConvertHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.Create3DImageHandler;
@@ -95,6 +96,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUploadDestinationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserActionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserPIDHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUsersHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetViewCountHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleOauth2PropsHandler;
@@ -219,6 +221,9 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GoogleUserInfoHandler());
         DispatchUtil.registerHandler(new CheckUserExistsHandler());
         DispatchUtil.registerHandler(new GoogleOauth2PropsHandler());
+        DispatchUtil.registerHandler(new GetUserPIDHandler());
+        DispatchUtil.registerHandler(new ChangeUserPIDHandler());
+
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

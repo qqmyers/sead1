@@ -66,6 +66,8 @@ import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserPID;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserPIDResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
@@ -84,13 +86,15 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
  */
 public class InfoWidget extends Composite {
 
+    private static String        creatorPredicate = "http://purl.org/dc/terms/creator";
     private final FlowPanel      panel;
     private final DispatchAsync  service;
     private final String         uri;
     private final PermissionUtil rbac;
     String                       creatorName;
-    Anchor                       creatorLink;
-    String                       httpString = "http://";
+    VerticalPanel                creatorsListPanel;
+    HorizontalPanel              upByPanel;
+    String                       httpString       = "http://";
     Label                        creatorNameLabel;
     Label                        remainderLabel;
 
@@ -111,26 +115,20 @@ public class InfoWidget extends Composite {
         lbl.addStyleName("datasetRightColHeading");
         panel.add(lbl);
 
-        HorizontalPanel creatorPanel = new HorizontalPanel();
-        VerticalPanel creatorDetailsPanel = new VerticalPanel();
-        Label creatorLabel = new Label("Creator: ");
+        HorizontalPanel creatorsPanel = new HorizontalPanel();
+        //creatorsPanel.addStyleName("datasetRightColSection");
+        Label creatorLabel = new Label("Creator(s): ");
         creatorLabel.addStyleName("datasetRightColText");
 
-        creatorNameLabel = new Label();
-        creatorDetailsPanel.add(creatorNameLabel);
+        creatorsPanel.add(creatorLabel);
 
-        creatorLink = new Anchor();
-        creatorDetailsPanel.add(creatorLink);
+        creatorsListPanel = new VerticalPanel();
+        creatorsPanel.add(creatorsListPanel);
 
-        remainderLabel = new Label();
-        creatorDetailsPanel.add(remainderLabel);
+        panel.add(creatorsPanel);
 
-        creatorPanel.add(creatorLabel);
-        creatorPanel.add(creatorDetailsPanel);
-
-        /*ownerPanel.add(editableLbl);*/
-
-        panel.add(creatorPanel);
+        //Fills creatorsListPanel
+        getCreators(uri);
 
         String filename = data.getFilename();
         addInfo("Filename", filename, panel, true, Type.FILENAME);
@@ -145,15 +143,22 @@ public class InfoWidget extends Composite {
         addInfo("MIME\u00a0Type", type, panel, true, Type.MIMETYPE);
 
         // uploaded by
+        upByPanel = new HorizontalPanel();
+        //upByPanel.addStyleName("datasetRightColSection");
         lbl = new Label("Uploaded By: ");
+
         lbl.addStyleName("datasetRightColText");
+        upByPanel.add(lbl);
         PersonBean creator = data.getCreator();
         if (creator != null) {
-            lbl.setTitle(creator.getEmail());
-            lbl.setText("Uploaded By: " + creator.getName());
-            /*editableLbl.setText(creator.getName());*/
+            Label upLabel = new Label();
+            upLabel.setTitle(creator.getEmail());
+            upLabel.setText(creator.getName());
+            upLabel.addStyleName("datasetRightColText");
+            upByPanel.add(upLabel);
+            getPID(creator.getUri(), upLabel);
         }
-        panel.add(lbl);
+        panel.add(upByPanel);
 
         String date = "";
         if (data.getDate() != null) {
@@ -177,9 +182,12 @@ public class InfoWidget extends Composite {
         }, Permission.EDIT_METADATA);
 
         initWidget(panel);
+    }
 
+    protected void getCreators(final String uri) {
         //START - Added by Ram on Nov.21, 2011
         //FIXME : Need to refresh automatically on adding creator metadata
+        //FIXME - just get creators, not all user metadata for efficiency
         if (uri != null) {
             service.execute(new ListUserMetadataFields(), new AsyncCallback<ListUserMetadataFieldsResult>() {
                 public void onFailure(Throwable caught) {
@@ -198,30 +206,20 @@ public class InfoWidget extends Composite {
                             if (predicates.size() == 0) {
 
                             } else {
-                                for (String predicate : predicates ) {
-                                    if (predicate.toLowerCase().contains("creator")) {
+                                if (predicates.contains(creatorPredicate)) {
 
-                                        SortedSet<UserMetadataValue> values = NamedThing.orderByName(result.getValues().get(predicate));
-                                        if (!values.isEmpty()) {
+                                    SortedSet<UserMetadataValue> values = NamedThing.orderByName(result.getValues().get(creatorPredicate));
+                                    if (!values.isEmpty()) {
+                                        for (UserMetadataValue value : values ) {
                                             try {
-                                                String creator = values.first().getName();
-                                                String link = (creator != null && creator.contains(httpString)) ? creator.substring(creator.indexOf(httpString)) : "";
-                                                creatorLink.setHref(link);
-                                                creatorLink.setText(link);
-
-                                                String remainder = link.contains(" ") ? link.substring(creatorLink.getText().indexOf(" ") + 1) : "";
-                                                remainderLabel.setText(remainder);
-                                                //creatorLink = creatorLink.substring(creatorLink.indexOf(" "));
-                                                creatorName = creator.replace(link, "");
-
-                                                creatorNameLabel.setText(creatorName);
-
+                                                Anchor creator = new Anchor(value.getName(), value.getUri());
+                                                creator.addStyleName("datasetRightColText");
+                                                creatorsListPanel.add(creator);
                                             }
                                             catch (Exception ex) {
                                                 GWT.log(ex.getMessage());
                                             }
                                         }
-                                        break;
                                     }
 
                                 }
@@ -233,28 +231,27 @@ public class InfoWidget extends Composite {
 
             });
         }
+    }
 
-        /*        Label ownerLabel = new Label("Owner: ");
-                final EditableLabelSuggestBox editableLbl = new EditableLabelSuggestBox("", true);
-                editableLbl.addValueChangeHandler(new ValueChangeHandler<String>() {
-                    public void onValueChange(final ValueChangeEvent<String> event) {
-                        SetOwner change = new SetOwner(_uri, event.getValue());
-                        _service.execute(change, new AsyncCallback<EmptyResult>() {
-                            public void onFailure(Throwable caught) {
-                                editableLbl.cancel();
+    void getPID(final String uri, final Label tempLabel) {
+        if (uri != null) {
+            service.execute(new GetUserPID(uri), new AsyncCallback<GetUserPIDResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Error getting PID.", caught);
+                }
 
-                            }
-
-                            public void onSuccess(EmptyResult result) {
-                                String text = event.getValue();
-
-                                editableLbl.setText(text);
-                            }
-                        });
+                @Override
+                public void onSuccess(GetUserPIDResult gup) {
+                    if (gup.getUserPID() != null) {
+                        Anchor uploader = new Anchor(tempLabel.getText(), gup.getUserPID());
+                        uploader.addStyleName("datasetRightColText");
+                        upByPanel.remove(tempLabel);
+                        upByPanel.add(uploader);
                     }
-                });*/
-        //END - Added by Ram on Nov.21, 2011
-
+                }
+            });
+        }
     }
 
     void addInfo(String name, String value, Panel panel, boolean editable, final Type t) {
