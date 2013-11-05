@@ -376,8 +376,9 @@ public class RestServlet extends AuthenticatedServlet {
         /**** END SESSION MANAGEMENT ****/
 
         //If user is not identified by session, check for BasicAuth credentials and authenticate or assign as anonymous
-        if (userId == null) {
+        if ((userId == null) || (userId.equals(PersonBeanUtil.getAnonymous().getUri()))) {
             try {
+                //doBasic will set the id based on basic auth credentials if set, otherwise will return anonymous 
                 userId = doBasicAuthenticate(request, response);
             } catch (HTTPException he) {
                 //If the client sent an auth header and did not succeed in establishing a valid ID, 
@@ -409,7 +410,7 @@ public class RestServlet extends AuthenticatedServlet {
         // JIRA Issue creator
         if (hasPrefix(JIRA_ISSUE, request)) {
             //We don't have a separate permission for this - using COMMENT as something conceptually close
-            if (isAllowed(userId, uri, Permission.ADD_COMMENT)) {
+            if (isAllowed(userId, Permission.ADD_COMMENT)) {
 
                 dontCache(response);
                 createJiraIssue(request, response);
@@ -419,7 +420,6 @@ public class RestServlet extends AuthenticatedServlet {
             return;
         } else if (hasPrefix(IMAGE_DOWNLOAD_INFIX, request)) {
             if (isAllowed(userId, uri, Permission.DOWNLOAD)) {
-
                 log.trace("DOWNLOAD IMAGE " + uri);
                 // keep track who downloads the file
                 TripleWriter tw = new TripleWriter();

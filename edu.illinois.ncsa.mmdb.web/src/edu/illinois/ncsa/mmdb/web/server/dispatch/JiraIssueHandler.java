@@ -90,7 +90,7 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
         String host = TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName);
 
         String subj = "User submitted " + issueType + " for " + host;
-        String body = "Following request was submiteted to : " + host + "\n\n" +
+        String body = "Following request was submitted to : " + host + "\n\n" +
                 "From: " + email + "\n" +
                 "Subj: " + summary + "\n\n" +
                 description;

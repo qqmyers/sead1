@@ -134,7 +134,7 @@ public class JiraIssuePage extends Page {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Error submitting feedback.", caught);
-                        showFeedbackMessage("Error sending your feedback, please mail medici@ncsa.illinois.edu directly.");
+                        showFeedbackMessage("Error sending your feedback, please mail SEADdatanet@umich.edu directly.");
                         submit.setEnabled(true);
                     }
 

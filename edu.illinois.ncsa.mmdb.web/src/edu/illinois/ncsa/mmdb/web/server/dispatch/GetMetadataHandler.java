@@ -126,6 +126,8 @@ public class GetMetadataHandler implements
                     result.add("VA", "DOI", node.getNodeValue());
                 }
             }
+        } catch (java.io.FileNotFoundException fnfe) {
+            log.debug("No DOI for " + uri.getString());
         } catch (Throwable thr) {
             log.error("Error getting DOI", thr);
         }

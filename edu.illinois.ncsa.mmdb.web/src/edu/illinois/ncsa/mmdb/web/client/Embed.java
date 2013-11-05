@@ -199,7 +199,7 @@ public class Embed implements EntryPoint {
      */
     private void checkLogin() {
         boolean loggedIn = true;
-        loggedIn = false;
+
         final String cookieSessionKey = Cookies.getCookie(_sessionCookieName);
         if (cookieSessionKey != null) {
             GWT.log("Session key: " + cookieSessionKey, null);

@@ -101,7 +101,7 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
         } else {
             log.debug("Refusing a dispatch request due to lack of credentials");
             log.debug("For call: " + arg0.getRequestURI());
-            log.debug("Params: " + arg0.getParameterMap().toString());
+            log.debug("Val: " + arg0.getInputStream().toString());
 
             //FIXME: Is there a lighter-weight option, e.g. to send an ActionException from here?
             throw new ServletException("User has no server credentials");
