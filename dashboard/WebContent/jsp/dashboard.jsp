@@ -19,6 +19,7 @@ String creators = (String) request.getAttribute("creators");
 String projectPath = (String) request.getAttribute("projectPath");
 String datasetDistribution = (String) request.getAttribute("datasetDistribution");
 String layersInfo = (String) request.getAttribute("layersInfo");
+String geoProxyUrl = (String) request.getAttribute("geoProxyUrl");
 Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 %>	
 	</head>
@@ -130,6 +131,7 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 			<a href="#feedback">Feedback</a>
 		</div>
 		<script type="text/javascript">
+			var geoProxyUrl = '<%= geoProxyUrl %>';
 			var projInfo = '<%= request.getAttribute("projectInfo") %>';
 			var isAnonymous = '<%= isAnonymous %>';
 		</script>
