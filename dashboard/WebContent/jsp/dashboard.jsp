@@ -18,6 +18,7 @@ String recentUploads = (String) request.getAttribute("recentUploads");
 String creators = (String) request.getAttribute("creators");
 String projectPath = (String) request.getAttribute("projectPath");
 String datasetDistribution = (String) request.getAttribute("datasetDistribution");
+String layersInfo = (String) request.getAttribute("layersInfo");
 Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 %>	
 	</head>
@@ -37,6 +38,10 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 		<div id="hidden_datasetDistribution" style="display:none">
 			<%= datasetDistribution %>
 		</div>
+		<div id="hidden_layersInfo" style="display:none">
+			<%= layersInfo %>
+		</div>
+		
 		<div class="navbar navbar-inverse navbar-fixed-top" style="border-bottom: 1px solid #888888;">
 			<div class="container">
 				<div class ="banner">
