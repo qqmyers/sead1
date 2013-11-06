@@ -2,6 +2,7 @@ var projectPath = '';
 var olmap;
 var wmsResult;
 var map = new Object();
+var layers = new Array();
 
 callOnLoad();
 //$("#table").treetable({ expandable: true });
@@ -32,24 +33,31 @@ function initMap() {
     
 	layerList = getWmsLayers();
 	console.log(layerList);
+	var bounds = new OpenLayers.Bounds();
 	for(var i=0;i < layerList.length;i++) {
 		var l = layerList[i];
 		console.log(l);
-	    var layer = new OpenLayers.Layer.WMS("WMS", "http://sead.ncsa.illinois.edu/geoserver/wms",
-	            {layers: l, transparent: true},
+	    var layer = new OpenLayers.Layer.WMS("WMS", geoProxyUrl,
+	            {layers: l.layerName, transparent: true},
 	            {isBaseLayer: false, opacity:0.8}); 
 	    olmap.addLayer(layer);
+	    
+	    // calculating bounding box to include all datasets
+	    var e = l.extents.split(',');
+	    bounds.extend(new OpenLayers.LonLat(parseFloat(e[0]), parseFloat(e[1])));
+	    bounds.extend(new OpenLayers.LonLat(parseFloat(e[2]), parseFloat(e[3])));
 	}
-	console.log("layers are added");
-	
-	// map center or map extent needs to be calculated 
-	olmap.setCenter(new OpenLayers.LonLat(-13762945.56, 4822412.11), 10);
+
+	// zoom to the bounding box to include all datasets
+	olmap.zoomToExtent(bounds);
+	//olmap.setCenter(new OpenLayers.LonLat(-13762945.56, 4822412.11), 10);
 }
 
 function getWmsLayers() {
-	// the list can be extracted via "WMS Layer Name"
-	var layers = ["medici:angelo_basins", "medici:angelo_roads_trails"];
-	return layers;
+// return all available wms layers
+//	var layers = ["medici:angelo_basins", "medici:angelo_roads_trails"];
+
+	return $.parseJSON($("#hidden_layersInfo").html());
 }
 
 function drawChart() {
@@ -338,6 +346,8 @@ function loadProjectInfo(pI) {
 	$('#projectName').attr("href", (map['url']));
 
 }
+
+
 
 var datasetDistribution;
 
