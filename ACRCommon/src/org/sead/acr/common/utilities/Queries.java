@@ -154,6 +154,20 @@ public class Queries {
 			+ " ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cet.ncsa.uiuc.edu/2007/mmdb/Configuration> ."
 			+ "?s ?p ?o" + "} ";
 
+	/*
+	 * Query string to retrieve the layer names and extent of the map dataset_id
+	 * (uri), WmsLayerName (layername), WmsLayerUrl (layerurl)
+	 */
+	public static String ALL_WMS_LAYERS_INFO = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+			+ "PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/> "
+			+ "SELECT ?uri ?layername ?layerurl ?deleted "
+			+ "WHERE { "
+			+ "?uri <rdf:type> <cet:Dataset> . "
+			+ "?uri <cet:metadata/Extractor/WmsLayerName> ?layername . "
+			+ "?uri <cet:metadata/Extractor/WmsLayerUrl> ?layerurl . "
+			+ "OPTIONAL { ?uri <http://purl.org/dc/terms/isReplacedBy> ?deleted . } "
+			+ "}";
+
 	public static String getCollectionContents(String parentID) {
 		return ("PREFIX dcterms: <http://purl.org/dc/terms/>"
 				+ " "
