@@ -66,6 +66,10 @@ public class Dashboard extends SparqlQueryServlet {
 		 */
 		String projectPath = PropertiesLoader.getProperties().getProperty(
 				"domain");
+		
+		// build the geoproxy url
+		String geoProxyUrl = projectPath+"/geoproxy/wms";
+		
 		request.setAttribute("projectPath", projectPath);
 		request.setAttribute("collections", collections);
 		request.setAttribute("recentUploads", recentUploads);
@@ -76,6 +80,9 @@ public class Dashboard extends SparqlQueryServlet {
 		// adding info about layers
 		request.setAttribute("layersInfo", layersInfo);
 
+		// adding geoproxy url
+		request.setAttribute("geoProxyUrl", geoProxyUrl);
+		
 		log.debug("Is Anon:  " + super.isAnonymous());
 		request.setAttribute("isAnonymous", super.isAnonymous());
 
