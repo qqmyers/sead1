@@ -44,12 +44,14 @@ public class NamedThing implements Serializable {
         SortedSet<T> sorted = new TreeSet<T>(new Comparator<T>() {
             @Override
             public int compare(T k1, T k2) {
-                int c = k1.getName().compareTo(k2.getName());
-                if (c == 0) {
-                    return k1.getUri().compareTo(k2.getUri());
-                } else {
-                    return c;
+                int c = 0;
+                if ((k1.getName() != null) && (k2.getName() != null)) {
+                    c = k1.getName().compareTo(k2.getName());
                 }
+                if ((c == 0) && (k1.getUri() != null) && (k2.getUri() != null)) {
+                    c = k1.getUri().compareTo(k2.getUri());
+                }
+                return c;
             }
         });
         sorted.addAll(things);
