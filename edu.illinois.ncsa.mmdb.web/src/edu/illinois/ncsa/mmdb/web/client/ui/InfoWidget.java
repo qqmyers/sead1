@@ -41,7 +41,7 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.Set;
+import java.util.Collection;
 import java.util.SortedSet;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
@@ -69,8 +69,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserPID;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserPIDResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetInfo.Type;
@@ -94,7 +92,6 @@ public class InfoWidget extends Composite {
     String                       creatorName;
     VerticalPanel                creatorsListPanel;
     HorizontalPanel              upByPanel;
-    String                       httpString       = "http://";
     Label                        creatorNameLabel;
     Label                        remainderLabel;
 
@@ -189,47 +186,31 @@ public class InfoWidget extends Composite {
         //FIXME : Need to refresh automatically on adding creator metadata
         //FIXME - just get creators, not all user metadata for efficiency
         if (uri != null) {
-            service.execute(new ListUserMetadataFields(), new AsyncCallback<ListUserMetadataFieldsResult>() {
+            service.execute(new GetUserMetadataFields(uri), new AsyncCallback<GetUserMetadataFieldsResult>() {
                 public void onFailure(Throwable caught) {
-                    GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
+                    GWT.log("Error retrieving User Specified Information", caught);
                 }
 
-                public void onSuccess(ListUserMetadataFieldsResult result) {
-
-                    service.execute(new GetUserMetadataFields(uri), new AsyncCallback<GetUserMetadataFieldsResult>() {
-                        public void onFailure(Throwable caught) {
-                            GWT.log("Error retrieving User Specified Information", caught);
-                        }
-
-                        public void onSuccess(GetUserMetadataFieldsResult result) {
-                            Set<String> predicates = result.getThingsOrderedByName().keySet();
-                            if (predicates.size() == 0) {
-
-                            } else {
-                                if (predicates.contains(creatorPredicate)) {
-
-                                    SortedSet<UserMetadataValue> values = NamedThing.orderByName(result.getValues().get(creatorPredicate));
-                                    if (!values.isEmpty()) {
-                                        for (UserMetadataValue value : values ) {
-                                            try {
-                                                Anchor creator = new Anchor(value.getName(), value.getUri());
-                                                creator.addStyleName("datasetRightColText");
-                                                creatorsListPanel.add(creator);
-                                            }
-                                            catch (Exception ex) {
-                                                GWT.log(ex.getMessage());
-                                            }
-                                        }
-                                    }
-
+                public void onSuccess(GetUserMetadataFieldsResult result) {
+                    Collection<UserMetadataValue> creators = result.getValues().get(creatorPredicate);
+                    if ((creators != null) && (creators.size() > 0)) {
+                        SortedSet<UserMetadataValue> values = NamedThing.orderByName(creators);
+                        if (!values.isEmpty()) {
+                            for (UserMetadataValue value : values ) {
+                                try {
+                                    Anchor creator = new Anchor(value.getName(), value.getUri());
+                                    creator.addStyleName("datasetRightColText");
+                                    creatorsListPanel.add(creator);
+                                }
+                                catch (Exception ex) {
+                                    GWT.log(ex.getMessage());
                                 }
                             }
                         }
-                    });
-
+                    }
                 }
-
             });
+
         }
     }
 
