@@ -1,12 +1,63 @@
 var projectPath = '';
+var olmap;
+var wmsResult;
+var map = new Object();
+var layers = new Array();
 
-function initialize() {
-	var mapProp = {
-		center : new google.maps.LatLng(29.1536, -89.2508),
-		zoom : 5,
-		mapTypeId : google.maps.MapTypeId.HYBRID
-	};
-	var map = new google.maps.Map($("#summaryMap")[0], mapProp);
+callOnLoad();
+//$("#table").treetable({ expandable: true });
+
+
+function initMap() {
+	/**
+	 * Google map initialize
+	 */
+	// var mapProp = {
+	// center : new google.maps.LatLng(29.1536, -89.2508),
+	// zoom : 5,
+	// mapTypeId : google.maps.MapTypeId.HYBRID
+	// };
+	// var map = new google.maps.Map($("#summaryMap")[0], mapProp);
+	/**
+	 * OpenLayers v2 initialize
+	 */
+	var geographic = new OpenLayers.Projection("EPSG:4326");
+    var mercator = new OpenLayers.Projection("EPSG:900913");
+	
+    olmap = new OpenLayers.Map( 'summaryMap', {projection: mercator} );
+    //map.addControl(new OpenLayers.Control.MousePosition());
+    
+    
+    var osm = new OpenLayers.Layer.OSM();
+    olmap.addLayer(osm);
+    
+	layerList = getWmsLayers();
+	console.log(layerList);
+	var bounds = new OpenLayers.Bounds();
+	for(var i=0;i < layerList.length;i++) {
+		var l = layerList[i];
+		console.log(l);
+	    var layer = new OpenLayers.Layer.WMS("WMS", geoProxyUrl,
+	            {layers: l.layerName, transparent: true},
+	            {isBaseLayer: false, opacity:0.8}); 
+	    olmap.addLayer(layer);
+	    
+	    // calculating bounding box to include all datasets
+	    var e = l.extents.split(',');
+	    bounds.extend(new OpenLayers.LonLat(parseFloat(e[0]), parseFloat(e[1])));
+	    bounds.extend(new OpenLayers.LonLat(parseFloat(e[2]), parseFloat(e[3])));
+	}
+
+	// zoom to the bounding box to include all datasets
+	olmap.zoomToExtent(bounds);
+	//olmap.setCenter(new OpenLayers.LonLat(-13762945.56, 4822412.11), 10);
+}
+
+function getWmsLayers() {
+// return all available wms layers
+//	var layers = ["medici:angelo_basins", "medici:angelo_roads_trails"];
+
+	return $.parseJSON($("#hidden_layersInfo").html());
 }
 
 function drawChart() {
@@ -20,7 +71,7 @@ function drawChart() {
 	} else {
 		var allDatasetDist = $('#hidden_datasetDistribution').html().trim()
 				.split(',');
-		for ( var i = 0; i < allDatasetDist.length; i++) {
+		for (var i = 0; i < allDatasetDist.length; i++) {
 			barArray[barArray.length] = [
 					allDatasetDist[i].split('=')[0].substring(1),
 					parseInt(allDatasetDist[i].split('=')[1]) ];
@@ -65,10 +116,10 @@ function loadTableContent() {
 
 	var obj = $.parseJSON($("#hidden_collections").html());
 
-	for ( var i = 0; i < obj.sparql.results.result.length; i++) {
+	for (var i = 0; i < obj.sparql.results.result.length; i++) {
 		abs = '';
 		var jsonBinding = obj.sparql.results.result[i].binding;
-		for ( var j = 0; j < jsonBinding.length; j++) {
+		for (var j = 0; j < jsonBinding.length; j++) {
 			$.each(jsonBinding[j], function(key, value) {
 				if (value == 'tagID') {
 					uri = jsonBinding[j]['uri'];
@@ -76,8 +127,8 @@ function loadTableContent() {
 					title = jsonBinding[j]['literal'];
 					displayTitle = String(title);
 					if (displayTitle.indexOf("/") != -1) {
-						displayTitle = displayTitle
-								.substring(displayTitle.lastIndexOf("/") + 1);
+						displayTitle = displayTitle.substring(displayTitle
+								.lastIndexOf("/") + 1);
 					}
 				} else if (value == 'deleted') {
 					isDeleted = jsonBinding[j]['uri'];
@@ -105,19 +156,18 @@ function loadTableContent() {
 	$("#table tbody").html(div_html);
 
 }
-var map = new Object();
 function getTeamMembers() {
 
 	var creatorURI = '';
 	var creatorName = '';
 
-	var div_html = '<h3>Team Members</h3>';
+	var div_html = '';
 	var obj = $.parseJSON($("#hidden_creators").html());
 
-	for ( var i = 0; i < obj.sparql.results.result.length; i++) {
+	for (var i = 0; i < obj.sparql.results.result.length; i++) {
 		creatorURI = "#";
 		var jsonBinding = obj.sparql.results.result[i].binding;
-		for ( var j = 0; j < jsonBinding.length; j++) {
+		for (var j = 0; j < jsonBinding.length; j++) {
 			$.each(jsonBinding[j], function(key, value) {
 				if (value == 'uri') {
 					creatorURI = jsonBinding[j]['uri'];
@@ -130,11 +180,13 @@ function getTeamMembers() {
 			});
 		}
 		map[creatorURI] = creatorName;
-		//FIXME - check to see if Anonymous can do anything rather than just remove it
-		//Strip Anonymous, which always has a role 'anonymous' even when it has no permissions in the project
-		if(creatorName != "Anonymous") {
+		// FIXME - check to see if Anonymous can do anything rather than just
+		// remove it
+		// Strip Anonymous, which always has a role 'anonymous' even when it has
+		// no permissions in the project
+		if (creatorName != "Anonymous") {
 			div_html += "<a href='mailto:" + creatorURI + "' target=_blank>"
-				+ creatorName + "</a> </br>";
+					+ creatorName + "</a> </br>";
 		}
 	}
 	$('#teammembers').html(div_html);
@@ -152,20 +204,21 @@ function loadRecentUploads() {
 
 	var obj = $.parseJSON($("#hidden_recentuploads").html());
 
-	for ( var i = 0; i < obj.sparql.results.result.length; i++) {
+	for (var i = 0; i < obj.sparql.results.result.length; i++) {
 		abs = '';
 		var jsonBinding = obj.sparql.results.result[i].binding;
-		for ( var j = 0; j < jsonBinding.length; j++) {
+		for (var j = 0; j < jsonBinding.length; j++) {
 			$.each(jsonBinding[j], function(key, value) {
 				if (value == 'tagID') {
 					uri = jsonBinding[j]['uri'];
 				} else if (value == 'title') {
 					title = jsonBinding[j]['literal'];
-					//Medici can return numbers, booleans,etc. as well as strings if the titles are, e.g. "42", "true", etc.
+					// Medici can return numbers, booleans,etc. as well as
+					// strings if the titles are, e.g. "42", "true", etc.
 					displayTitle = String(title);
 					if (displayTitle.indexOf("/") != -1) {
-						displayTitle = displayTitle
-								.substring(displayTitle.lastIndexOf("/") + 1);
+						displayTitle = displayTitle.substring(displayTitle
+								.lastIndexOf("/") + 1);
 					}
 				} else if (value == 'creator') {
 					creator = jsonBinding[j]['uri'];
@@ -214,16 +267,18 @@ function roundNumber(num, dec) {
 
 function loadProjectInfo(pI) {
 	// FIXME: Handle non-JSON compliant text strings from Medici
-	//escaping '\n' chars but other chars, i.e. single/double quotes, /, etc., which are used in the JSON structure are also a problem
-	//Should eventually be dealt with when generating JSON responses in Medici versus on the receiving end
-	var response = pI.replace(/\n/g,"\\n");
+	// escaping '\n' chars but other chars, i.e. single/double quotes, /, etc.,
+	// which are used in the JSON structure are also a problem
+	// Should eventually be dealt with when generating JSON responses in Medici
+	// versus on the receiving end
+	var response = pI.replace(/\n/g, "\\n");
 
 	var jsonObj = $.parseJSON(response);
 	var map = new Object();
 	var nameURI;
 	var descURI;
 	var urlURI;
-	for ( var i = 0; jsonObj.sparql.results.result
+	for (var i = 0; jsonObj.sparql.results.result
 			&& i < jsonObj.sparql.results.result.length; i++) {
 
 		// for(var j =0; j<jsonObj.sparql.results.result[i].binding.length;
@@ -253,7 +308,7 @@ function loadProjectInfo(pI) {
 
 	}
 
-	for ( var i = 0; jsonObj.sparql.results.result
+	for (var i = 0; jsonObj.sparql.results.result
 			&& i < jsonObj.sparql.results.result.length; i++) {
 
 		// for(var j =0; j<jsonObj.sparql.results.result[i].binding.length;
@@ -292,34 +347,34 @@ function loadProjectInfo(pI) {
 
 }
 
+
+
 var datasetDistribution;
 
 function SSOLogout() {
-	
+
 	var remoteURL = projectPath + "/api/logout";
 	$.ajax({
-		async: false,
+		async : false,
 		type : "GET",
 		url : remoteURL,
 		dataType : "text"
-	});	
+	});
 }
 
-
 function callOnLoad() {
-	
-	if(isAnonymous=='true') {
-		//Let user login as someone else
+
+	if (isAnonymous == 'true') {
+		// Let user login as someone else
 		$('#loginout').html("Login");
-		$('#loginout').attr("href","");
+		$('#loginout').attr("href", "");
 	} else {
-		$('#loginout').click(function() { 
-			SSOLogout(); 
-			return true; 
+		$('#loginout').click(function() {
+			SSOLogout();
+			return true;
 		});
 	}
-	
-	
+
 	projectPath = $('#hidden_projectPath').html().trim();
 	getTeamMembers();
 	loadRecentUploads();
@@ -345,7 +400,7 @@ function callOnLoad() {
 					$
 							.ajax({
 								async : false, // Must be false, otherwise
-												// loadBranch happens after
+								// loadBranch happens after
 								// showChildren?
 								type : "GET",
 								url : "Contents",
@@ -362,7 +417,7 @@ function callOnLoad() {
 										var div_html_datasets = '';
 										var type = '';
 										var isDeleted = false;
-										for ( var i = 0; jsonObj.sparql.results.result
+										for (var i = 0; jsonObj.sparql.results.result
 												&& (i < jsonObj.sparql.results.result.length || jsonObj.sparql.results.result.binding); ++i) {
 											var jsonBinding;
 											if (jsonObj.sparql.results.result.length)
@@ -370,7 +425,7 @@ function callOnLoad() {
 											else
 												jsonBinding = jsonObj.sparql.results.result.binding;
 
-											for ( var j = 0; j < jsonBinding.length; j++) {
+											for (var j = 0; j < jsonBinding.length; j++) {
 												$
 														.each(
 																jsonBinding[j],
@@ -397,7 +452,7 @@ function callOnLoad() {
 
 																	} else if (value == 'deleted') {
 																		isDeleted = jsonBinding[j]['uri'];
-																		
+
 																	} else if (value == 'type') {
 																		type = jsonBinding[j]['uri'];
 																	}
@@ -407,7 +462,11 @@ function callOnLoad() {
 											}
 
 											if (isDeleted == null) {
-												//Without filters, we'll get rows where the type is neither DataSet or Collection, so check for both with if/else if
+												// Without filters, we'll get
+												// rows where the type is
+												// neither DataSet or
+												// Collection, so check for both
+												// with if/else if
 												if (type == "http://cet.ncsa.uiuc.edu/2007/Dataset") {
 
 													div_html_datasets += '<tr data-tt-id="'
@@ -439,7 +498,7 @@ function callOnLoad() {
 														datasetDistribution[mimeType] = 1;
 													}
 
-												} else if (type == "http://cet.ncsa.uiuc.edu/2007/Collection"){
+												} else if (type == "http://cet.ncsa.uiuc.edu/2007/Collection") {
 													div_html_datasets += '<tr data-tt-id="'
 															+ node.id
 															+ '-'
@@ -494,15 +553,17 @@ function callOnLoad() {
 										try {
 											drawChart();
 										} catch (err) {
-											//Google chart isn't working...
-										}	
+											// Google chart isn't working...
+										}
 									});
 				}
 			});
 
 	loadProjectInfo(projInfo);
-	//Put at the end - if this fails to load, app still ~works (yes google went down and broke our app one day)
-	google.maps.event.addDomListener(window, 'load', initialize);
+	// Put at the end - if this fails to load, app still ~works (yes google went
+	// down and broke our app one day)
+	initMap();
+//	google.maps.event.addDomListener(window, 'load', initialize);
 
 	google.load("visualization", "1", {
 		packages : [ "corechart" ]
