@@ -179,7 +179,7 @@ public class DatasetWidget extends Composite {
         leftColumn.clear();
         rightColumn.clear();
 
-        service.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
+        service.execute(new GetDataset(uri, MMDB.getUsername()), new AsyncCallback<GetDatasetResult>() {
 
             @Override
             public void onFailure(Throwable caught) {

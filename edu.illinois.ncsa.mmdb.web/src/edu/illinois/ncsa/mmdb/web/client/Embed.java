@@ -138,7 +138,7 @@ public class Embed implements EntryPoint {
             logo.addStyleName("bottomLogo");
             link.getElement().appendChild(logo.getElement());
 
-            dispatchAsync.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
+            dispatchAsync.execute(new GetDataset(uri, MMDB.getUsername()), new AsyncCallback<GetDatasetResult>() {
 
                 @Override
                 public void onFailure(Throwable caught) {

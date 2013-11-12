@@ -111,7 +111,7 @@ public class MapPage extends Page {
     private void listResults(GeoSearchResult result) {
         for (final String hit : result.getHits() ) {
             // get dataset bean
-            dispatchAsync.execute(new GetDataset(hit), new AsyncCallback<GetDatasetResult>() {
+            dispatchAsync.execute(new GetDataset(hit, MMDB.getUsername()), new AsyncCallback<GetDatasetResult>() {
 
                 @Override
                 public void onFailure(Throwable caught) {

@@ -15,9 +15,8 @@ public enum ConfigurationKey {
     // access level
     AccessLevelLabel("access.level.label", "Access Level"), //$NON-NLS-1$ //$NON-NLS-2$
     AccessLevelPredicate("access.level.predicate", "http://cet.ncsa.uiuc.edu/2007/accessLevel"), //$NON-NLS-1$ //$NON-NLS-2$
-    AccessLevelMin("access.level.min", "0"), //$NON-NLS-1$ //$NON-NLS-2$
-    AccessLevelMax("access.level.max", "0"), //$NON-NLS-1$ //$NON-NLS-2$
     AccessLevelDefault("access.level.default", "0"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelValues("access.level.values", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
     // project name and description
     ProjectName("project.name", ""), //$NON-NLS-1$

@@ -212,7 +212,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
         download.setText("Download");
         download.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                dispatchAsync.execute(new GetDatasetsInCollection(collectionURI), new AsyncCallback<GetDatasetsInCollectionResult>() {
+                dispatchAsync.execute(new GetDatasetsInCollection(collectionURI, MMDB.getUsername()), new AsyncCallback<GetDatasetsInCollectionResult>() {
                     public void onFailure(Throwable caught) {
                         GWT.log("Failed retrieving datasets in collection");
                     }

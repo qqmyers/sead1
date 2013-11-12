@@ -32,7 +32,7 @@ public class SEADRbac extends RBAC {
     }
 
     public int getUserAccessLevel(Resource user) {
-        int accesslevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelMax));
+        int accesslevel = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelValues).split("[ ]*,[ ]*").length;
         String accesspredicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
         if (accesspredicate == null) {
             return accesslevel;
@@ -55,6 +55,26 @@ public class SEADRbac extends RBAC {
             }
         }
         return accesslevel;
+    }
+
+    public boolean checkAccessLevel(Resource user, Resource item) {
+        int userLevel = getUserAccessLevel(user);
+        int accesslevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
+        String accesspredicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+        if (accesspredicate != null) {
+            Unifier uf = new Unifier();
+            uf.addPattern(item, Resource.uriRef(accesspredicate), "access");
+            uf.addColumnName("access");
+            try {
+                getContext().perform(uf);
+            } catch (OperatorException e) {
+                log.warn("Could not get roles and access levels.", e);
+            }
+            for (Tuple<Resource> row : uf.getResult() ) {
+                accesslevel = Integer.parseInt(row.get(0).toString());
+            }
+        }
+        return userLevel <= accesslevel;
     }
 
     public boolean isOwner(Resource user, Resource object) throws RBACException {

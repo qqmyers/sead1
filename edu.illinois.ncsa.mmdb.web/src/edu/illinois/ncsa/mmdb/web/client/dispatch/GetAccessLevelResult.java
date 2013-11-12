@@ -56,8 +56,7 @@ public class GetAccessLevelResult implements Result {
     private int               datasetLevel;
 
     private int               defaultLevel;
-    private int               minLevel;
-    private int               maxLevel;
+    private String[]          levels;
     private String            label;
     private String            predicate;
 
@@ -83,22 +82,6 @@ public class GetAccessLevelResult implements Result {
         this.defaultLevel = defaultLevel;
     }
 
-    public int getMinLevel() {
-        return minLevel;
-    }
-
-    public void setMinLevel(int minLevel) {
-        this.minLevel = minLevel;
-    }
-
-    public int getMaxLevel() {
-        return maxLevel;
-    }
-
-    public void setMaxLevel(int maxLevel) {
-        this.maxLevel = maxLevel;
-    }
-
     public String getLabel() {
         return label;
     }
@@ -113,5 +96,13 @@ public class GetAccessLevelResult implements Result {
 
     public void setPredicate(String predicate) {
         this.predicate = predicate;
+    }
+
+    public String[] getLevels() {
+        return levels;
+    }
+
+    public void setLevels(String[] levels) {
+        this.levels = levels;
     }
 }

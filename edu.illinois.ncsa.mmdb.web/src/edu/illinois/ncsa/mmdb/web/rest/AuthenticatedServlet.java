@@ -238,13 +238,16 @@ public class AuthenticatedServlet extends HttpServlet {
         return TupeloStore.getInstance().getContext();
     }
 
-    protected boolean isAllowed(String userId, String objectUri, Permission permission) {
+    protected boolean isAllowed(String userId, String objectUri, Permission permission, boolean dataset) {
         SEADRbac rbac = new SEADRbac(getContext());
         Resource userUri = Resource.uriRef(userId);
         Resource permissionUri = Resource.uriRef(permission.getUri());
         Resource oUri = objectUri != null ? Resource.uriRef(objectUri) : null; // how I long for implicit type conversion
         try {
             if (!rbac.checkPermission(userUri, oUri, permissionUri)) {
+                return false;
+            }
+            if (dataset && !rbac.checkAccessLevel(userUri, oUri)) {
                 return false;
             }
         } catch (RBACException e) {
@@ -255,7 +258,7 @@ public class AuthenticatedServlet extends HttpServlet {
     }
 
     protected boolean isAllowed(String userId, Permission permission) {
-        return isAllowed(userId, null, permission);
+        return isAllowed(userId, null, permission, false);
     }
 
     static void unauthorized(HttpServletRequest request, HttpServletResponse response) {

@@ -73,7 +73,6 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetConfigurationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsInCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDerivedFromHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDownloadCountHandler;
@@ -138,7 +137,6 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
  */
 public class MyActionHandlersConfig implements ServletContextListener {
     public void contextInitialized(ServletContextEvent evt) {
-        DispatchUtil.registerHandler(new GetDatasetsHandler());
         DispatchUtil.registerHandler(new GetDatasetHandler());
         DispatchUtil.registerHandler(new AnnotateResourceHandler());
         DispatchUtil.registerHandler(new TagResourceHandler());

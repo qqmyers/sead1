@@ -125,24 +125,23 @@ public class RoleAdministrationWidget extends Composite {
         }
     }
 
-    void showAccessLevel(final String role, int level, int min, int max) {
+    void showAccessLevel(final String role, String[] values, int level) {
         Integer c = columnByRole.get(role);
         if (c == null) {
             GWT.log("Did not find role " + role);
             return;
         }
         final ListBox box = new ListBox();
-        for (int i = min; i <= max; i++ ) {
-            box.addItem(Integer.toString(i));
+        for (String x : values ) {
+            box.addItem(x);
         }
-        box.setSelectedIndex(level - min);
+        box.setSelectedIndex(level);
         permissionsTable.setWidget(1, c, box);
 
         box.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                int level = Integer.parseInt(box.getItemText(box.getSelectedIndex()));
-                dispatch.execute(new SetRoleAccessLevel(role, level), new AsyncCallback<EmptyResult>() {
+                dispatch.execute(new SetRoleAccessLevel(role, box.getSelectedIndex()), new AsyncCallback<EmptyResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         box.setEnabled(false);
@@ -195,7 +194,7 @@ public class RoleAdministrationWidget extends Composite {
                             showPermissionSetting(s);
                         }
                         for (Entry<String, Integer> entry : result.getAccessLevel().entrySet() ) {
-                            showAccessLevel(entry.getKey(), entry.getValue(), accessresult.getMinLevel(), accessresult.getMaxLevel());
+                            showAccessLevel(entry.getKey(), accessresult.getLevels(), entry.getValue());
                         }
                         for (Map.Entry<String, Integer> entry : columnByRole.entrySet() ) {
                             final String roleUri = entry.getKey();

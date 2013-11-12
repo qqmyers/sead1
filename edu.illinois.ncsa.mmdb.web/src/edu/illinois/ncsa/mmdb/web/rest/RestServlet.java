@@ -419,7 +419,7 @@ public class RestServlet extends AuthenticatedServlet {
             }
             return;
         } else if (hasPrefix(IMAGE_DOWNLOAD_INFIX, request)) {
-            if (isAllowed(userId, uri, Permission.DOWNLOAD)) {
+            if (isAllowed(userId, uri, Permission.DOWNLOAD, true)) {
                 log.trace("DOWNLOAD IMAGE " + uri);
                 // keep track who downloads the file
                 TripleWriter tw = new TripleWriter();
@@ -479,7 +479,7 @@ public class RestServlet extends AuthenticatedServlet {
         } else if (hasPrefix(DATASET, request)) {
             //FixME: Same as IMAGE_DOWNLOAD_INFIX in terms of processing?
             //FixMe: Is this still used anywhere? (stripping the extension seems obsolete)
-            if (isAllowed(userId, uri, Permission.DOWNLOAD)) {
+            if (isAllowed(userId, uri, Permission.DOWNLOAD, true)) {
                 log.debug("Downloading Dataset " + uri);
                 // TODO check that file ends in extension instead of assuming it does
                 uri = uri.substring(0, uri.length() - 4);
@@ -521,7 +521,7 @@ public class RestServlet extends AuthenticatedServlet {
             return;
 
         } else if (hasPrefix(PREVIEW_ANY, request)) {
-            if (isAllowed(userId, uri, Permission.VIEW_MEMBER_PAGES)) {
+            if (isAllowed(userId, uri, Permission.VIEW_MEMBER_PAGES, false)) {
 
                 log.debug("Getting preview: " + request.getRequestURL().toString());
                 response.flushBuffer(); // MMDB-620
@@ -564,7 +564,7 @@ public class RestServlet extends AuthenticatedServlet {
             }
             return;
         } else if (hasPrefix(COLLECTION_PREVIEW, request)) {
-            if (isAllowed(userId, uri, Permission.VIEW_MEMBER_PAGES)) {
+            if (isAllowed(userId, uri, Permission.VIEW_MEMBER_PAGES, false)) {
 
                 log.debug("GET PREVIEW (collection) " + uri);
                 String badge = TupeloStore.getInstance().getBadge(uri);
@@ -574,7 +574,7 @@ public class RestServlet extends AuthenticatedServlet {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             }
         } else if (hasPrefix(VIDEO_INFIX, request)) {
-            if (isAllowed(userId, "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri, Permission.DOWNLOAD)) {
+            if (isAllowed(userId, "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri, Permission.DOWNLOAD, false)) {
                 int idx = uri.lastIndexOf(".");
                 String ext = null;
                 if (idx > 0) {
@@ -644,7 +644,7 @@ public class RestServlet extends AuthenticatedServlet {
             }
             return;
         } else if (hasPrefix(IMAGE_INFIX, request)) {
-            if (isAllowed(userId, uri, Permission.DOWNLOAD)) {
+            if (isAllowed(userId, uri, Permission.DOWNLOAD, true)) {
                 if (hasPrefix(PREVIEW_ANY, request)) {
                     //Preview images should not fall through to this block
                     log.warn("Preview request being handled as image request!");
@@ -668,7 +668,7 @@ public class RestServlet extends AuthenticatedServlet {
             }
             return;
         } else if (hasPrefix(COLLECTION_INFIX, request)) {
-            if (isAllowed(userId, uri, Permission.VIEW_MEMBER_PAGES)) {
+            if (isAllowed(userId, uri, Permission.VIEW_MEMBER_PAGES, false)) {
 
                 log.trace("LIST COLLECTION" + uri);
                 try {
