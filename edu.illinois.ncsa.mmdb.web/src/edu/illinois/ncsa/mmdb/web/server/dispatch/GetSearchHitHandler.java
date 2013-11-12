@@ -60,6 +60,7 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHit;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHitResult;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
@@ -121,6 +122,9 @@ public class GetSearchHitHandler implements ActionHandler<GetSearchHit, GetSearc
         }
 
         if (datasetURI != null) {
+            if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(Resource.uriRef(action.getUser()), Resource.uriRef(datasetURI))) {
+                throw new ActionException("No access to dataset.");
+            }
             BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
             DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
             try {

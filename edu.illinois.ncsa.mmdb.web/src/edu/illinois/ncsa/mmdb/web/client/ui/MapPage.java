@@ -93,7 +93,9 @@ public class MapPage extends Page {
                 map.setUIToDefault();
                 mainLayoutPanel.add(map);
 
-                dispatchAsync.execute(new GeoSearch(), new AsyncCallback<GeoSearchResult>() {
+                GeoSearch search = new GeoSearch();
+                search.setUser(MMDB.getUsername());
+                dispatchAsync.execute(search, new AsyncCallback<GeoSearchResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Error geosearching in map page", caught);

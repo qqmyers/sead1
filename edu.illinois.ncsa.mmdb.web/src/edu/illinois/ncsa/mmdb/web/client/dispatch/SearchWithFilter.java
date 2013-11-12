@@ -41,8 +41,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
-
 /**
  * Search for datasets that fall within the filter
  * 
@@ -50,7 +48,7 @@ import net.customware.gwt.dispatch.shared.Action;
  * 
  */
 @SuppressWarnings("serial")
-public class SearchWithFilter implements Action<SearchResult> {
+public class SearchWithFilter extends AuthorizedAction<SearchResult> {
 
     private String query;
     private String filter;
@@ -58,9 +56,10 @@ public class SearchWithFilter implements Action<SearchResult> {
     public SearchWithFilter() {
     }
 
-    public SearchWithFilter(String query, String filter) {
+    public SearchWithFilter(String query, String filter, String user) {
         this.query = query;
         this.filter = filter;
+        setUser(user);
     }
 
     public String getQuery() {

@@ -50,7 +50,7 @@ public class GetRelationship extends SubjectAction<GetRelationshipResult> {
     public GetRelationship() {
     }
 
-    public GetRelationship(String uri) {
+    public GetRelationship(String uri, String user) {
         super(uri);
     }
 

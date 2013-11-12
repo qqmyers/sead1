@@ -164,6 +164,7 @@ public class PagingDatasetTableView extends PagingDcThingView<DatasetBean> {
         query.setLimit(adjustedPageSize);
         query.setOffset(pageOffset);
         query.setInCollection(inCollection);
+        query.setUser(MMDB.getUsername());
         dispatchAsync.execute(query,
                 new AsyncCallback<ListDatasetsResult>() {
 

@@ -181,7 +181,7 @@ public class PagingCollectionTableView extends PagingDcThingView<CollectionBean>
                 Anchor deleteAnchor = new Anchor("Delete");
                 deleteAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        dispatchAsync.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
+                        dispatchAsync.execute(new DeleteDataset(uri, MMDB.getUsername()), new AsyncCallback<DeleteDatasetResult>() {
                             public void onFailure(Throwable caught) {
                             }
 

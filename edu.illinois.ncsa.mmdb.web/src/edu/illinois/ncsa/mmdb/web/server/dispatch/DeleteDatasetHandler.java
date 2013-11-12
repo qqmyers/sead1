@@ -52,6 +52,7 @@ import org.tupeloproject.rdf.terms.Rdf;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.server.AccessControl;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
@@ -72,6 +73,9 @@ public class DeleteDatasetHandler implements
             throws ActionException {
         String datasetUri = arg0.getUri();
         // check for authorization
+        if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(Resource.uriRef(arg0.getUser()), Resource.uriRef(arg0.getUri()))) {
+            throw new ActionException("No access to dataset");
+        }
         if (!AccessControl.isAdmin(arg0.getUser()) && !AccessControl.isCreator(arg0.getUser(), datasetUri)) {
             throw new ActionException("Unauthorized");
         }

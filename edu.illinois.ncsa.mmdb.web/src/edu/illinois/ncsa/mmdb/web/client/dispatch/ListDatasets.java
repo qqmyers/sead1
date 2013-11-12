@@ -38,9 +38,7 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
-
-public class ListDatasets implements Action<ListDatasetsResult> {
+public class ListDatasets extends AuthorizedAction<ListDatasetsResult> {
     /**
 	 * 
 	 */
@@ -56,7 +54,7 @@ public class ListDatasets implements Action<ListDatasetsResult> {
     private String  inCollection;
     private String  withTag;
 
-    public ListDatasets(String orderBy, boolean desc, int limit, int offset, String inCollection) {
+    public ListDatasets(String orderBy, boolean desc, int limit, int offset, String inCollection, String user) {
         this.orderBy = orderBy;
         this.desc = desc;
         this.limit = limit;
@@ -64,13 +62,14 @@ public class ListDatasets implements Action<ListDatasetsResult> {
         this.inCollection = inCollection;
     }
 
-    public ListDatasets(String orderBy, boolean desc, int limit, int offset, String inCollection, String withTag) {
+    public ListDatasets(String orderBy, boolean desc, int limit, int offset, String inCollection, String withTag, String user) {
         this.orderBy = orderBy;
         this.desc = desc;
         this.limit = limit;
         this.offset = offset;
         this.inCollection = inCollection;
         this.withTag = withTag;
+        setUser(user);
     }
 
     public void setOrderBy(String s) {

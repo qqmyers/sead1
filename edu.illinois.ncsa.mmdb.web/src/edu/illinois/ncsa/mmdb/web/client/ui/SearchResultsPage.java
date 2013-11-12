@@ -139,7 +139,7 @@ public class SearchResultsPage extends Page {
      * or filter=MIME Type query=image/jpeg
      */
     private void queryWithFilter(final String query, final String filter) {
-        dispatchAsync.execute(new SearchWithFilter(query, filter), new AsyncCallback<SearchResult>() {
+        dispatchAsync.execute(new SearchWithFilter(query, filter, MMDB.getUsername()), new AsyncCallback<SearchResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -193,7 +193,7 @@ public class SearchResultsPage extends Page {
 
         final List<String> hits = result.getHits();
         for (final String hit : hits ) {
-            dispatchAsync.execute(new GetSearchHit(hit),
+            dispatchAsync.execute(new GetSearchHit(hit, MMDB.getUsername()),
                     new AsyncCallback<GetSearchHitResult>() {
 
                         @Override

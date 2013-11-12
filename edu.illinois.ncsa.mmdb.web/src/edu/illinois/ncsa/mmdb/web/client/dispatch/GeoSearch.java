@@ -41,8 +41,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
-
 /**
  * Text based search of the repository.
  * 
@@ -50,15 +48,16 @@ import net.customware.gwt.dispatch.shared.Action;
  * 
  */
 @SuppressWarnings("serial")
-public class GeoSearch implements Action<GeoSearchResult> {
+public class GeoSearch extends AuthorizedAction<GeoSearchResult> {
 
     private String query;
 
     public GeoSearch() {
     }
 
-    public GeoSearch(String query) {
+    public GeoSearch(String query, String user) {
         this.query = query;
+        setUser(user);
     }
 
     public String getQuery() {

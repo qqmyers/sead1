@@ -68,7 +68,9 @@ public class DeleteDatasetsHandler implements ActionHandler<DeleteDatasets, Batc
         for (String datasetUri : arg0.getResources() ) {
             // check for authorization
             try {
-                if (!rbac.checkPermission(arg0.getUser(), datasetUri, Permission.DELETE_DATA)) {
+                if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(Resource.uriRef(arg0.getUser()), Resource.uriRef(datasetUri))) {
+                    result.setFailure(datasetUri, "no access to dataset");
+                } else if (!rbac.checkPermission(arg0.getUser(), datasetUri, Permission.DELETE_DATA)) {
                     result.setFailure(datasetUri, "Unauthorized");
                 } else {
                     mod.add(Triple.create(Resource.uriRef(datasetUri), DcTerms.IS_REPLACED_BY, Rdf.NIL));
