@@ -644,7 +644,7 @@ public class RestServlet extends AuthenticatedServlet {
             }
             return;
         } else if (hasPrefix(IMAGE_INFIX, request)) {
-            if (isAllowed(userId, uri, Permission.DOWNLOAD, true)) {
+            if (isAllowed(userId, uri, Permission.DOWNLOAD, false)) {
                 if (hasPrefix(PREVIEW_ANY, request)) {
                     //Preview images should not fall through to this block
                     log.warn("Preview request being handled as image request!");
