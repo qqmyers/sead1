@@ -37,12 +37,10 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -70,7 +68,6 @@ import edu.illinois.ncsa.medici.geowebapp.client.service.MediciProxyServiceAsync
 import edu.illinois.ncsa.medici.geowebapp.client.service.WmsProxyService;
 import edu.illinois.ncsa.medici.geowebapp.client.service.WmsProxyServiceAsync;
 import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
-import edu.illinois.ncsa.medici.geowebapp.client.LoginPage;
 
 /**
  * 
@@ -402,7 +399,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	}
 
 	protected FlowPanel createLayerSwitcher(LayerInfo[] result) {
-		List<String> layerNames = getLayerNames(result);
+//		List<String> layerNames = getLayerNames(result);
 		FlowPanel dp = new FlowPanel();
 
 		// DecoratorPanel dp = new DecoratorPanel();
@@ -413,81 +410,72 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		VerticalPanel vp = new VerticalPanel();
 		vp.setSpacing(10);
 
-		FlexTable ft = new FlexTable();
-		ft.setWidget(0, 0, new HTML("<b><center>Show?</center></b>"));
-		ft.setWidget(0, 1, new HTML("<b><center>Opacity</center></b>"));
-		ft.setWidget(0, 2, new HTML("<b><center>Name/Legend</center></b>"));
-		// VerticalPanel vp = new VerticalPanel();
-		// build layer switcher with reverse order
-		// since the top layer should be on top of the list
-		for (int i = result.length - 1; i >= 0; i--) {
-			final String name = result[i].getName();
-			int currentRow = ft.getRowCount();
-			ToggleButton vizToggleButton = new ToggleButton("Off", "On");
-			vizToggleButton.setValue(true);
-			vizToggleButton.addClickHandler(new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					ToggleButton tb = (ToggleButton) event.getSource();
-					boolean visibility = tb.getValue();
-					eventBus.fireEvent(new LayerVisibilityChangeEvent(name,
-							visibility));
-				}
-			});
-
-			ft.setWidget(currentRow, 0, vizToggleButton);
-			ft.getCellFormatter().setAlignment(currentRow, 0,
-					HasHorizontalAlignment.ALIGN_CENTER,
-					HasVerticalAlignment.ALIGN_TOP);
-
-			ListBox opacityListBox = new ListBox();
-			opacityListBox.setWidth("50px");
-			opacityListBox.addItem("1.0");
-			opacityListBox.addItem("0.9");
-			opacityListBox.addItem("0.8");
-			opacityListBox.addItem("0.7");
-			opacityListBox.addItem("0.6");
-			opacityListBox.addItem("0.5");
-			opacityListBox.setSelectedIndex(0);
-			opacityListBox.addChangeHandler(new ChangeHandler() {
-				@Override
-				public void onChange(ChangeEvent event) {
-					ListBox lb = (ListBox) event.getSource();
-					int idx = lb.getSelectedIndex();
-					float op = Float.parseFloat(lb.getItemText(idx));
-					eventBus.fireEvent(new LayerOpacityChangeEvent(name, op));
-				}
-			});
-
-			ft.setWidget(currentRow, 1, opacityListBox);
-			ft.getCellFormatter().setAlignment(currentRow, 1,
-					HasHorizontalAlignment.ALIGN_CENTER,
-					HasVerticalAlignment.ALIGN_TOP);
-
-			VerticalPanel titlePanel = createLayerTitle(result[i]);
-
-			// DisclosurePanel namePanel = new DisclosurePanel(name);
-			//
-			// // String href =
-			// //
-			// "http://sead.ncsa.illinois.edu/#dataset?id="+result[i].getUri();
-			// // namePanel.setHeader(new Anchor(name, href));
-			//
-			// VerticalPanel legendPanel = new VerticalPanel();
-			// String url = wmsUrl
-			// +
-			// "?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
-			// + name;
-			// Image img = new Image(url);
-			//
-			// legendPanel.add(img);
-			// namePanel.add(legendPanel);
-
-			ft.setWidget(currentRow, 2, titlePanel);
-		}
 		vp.add(new HTML("<h3>Geospatial Datasets</h3>"));
 		vp.add(new HTML("<hr>"));
-		vp.add(ft);
+
+		// if there is geospatial dataset, add the table,
+		// if not, add the message
+		if (result.length > 0) {
+			FlexTable ft = new FlexTable();
+			ft.setWidget(0, 0, new HTML("<b><center>Show?</center></b>"));
+			ft.setWidget(0, 1, new HTML("<b><center>Opacity</center></b>"));
+			ft.setWidget(0, 2, new HTML("<b><center>Name/Legend</center></b>"));
+			// VerticalPanel vp = new VerticalPanel();
+			// build layer switcher with reverse order
+			// since the top layer should be on top of the list
+			for (int i = result.length - 1; i >= 0; i--) {
+				final String name = result[i].getName();
+				int currentRow = ft.getRowCount();
+				ToggleButton vizToggleButton = new ToggleButton("Off", "On");
+				vizToggleButton.setValue(true);
+				vizToggleButton.addClickHandler(new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						ToggleButton tb = (ToggleButton) event.getSource();
+						boolean visibility = tb.getValue();
+						eventBus.fireEvent(new LayerVisibilityChangeEvent(name,
+								visibility));
+					}
+				});
+
+				ft.setWidget(currentRow, 0, vizToggleButton);
+				ft.getCellFormatter().setAlignment(currentRow, 0,
+						HasHorizontalAlignment.ALIGN_CENTER,
+						HasVerticalAlignment.ALIGN_TOP);
+
+				ListBox opacityListBox = new ListBox();
+				opacityListBox.setWidth("50px");
+				opacityListBox.addItem("1.0");
+				opacityListBox.addItem("0.9");
+				opacityListBox.addItem("0.8");
+				opacityListBox.addItem("0.7");
+				opacityListBox.addItem("0.6");
+				opacityListBox.addItem("0.5");
+				opacityListBox.setSelectedIndex(0);
+				opacityListBox.addChangeHandler(new ChangeHandler() {
+					@Override
+					public void onChange(ChangeEvent event) {
+						ListBox lb = (ListBox) event.getSource();
+						int idx = lb.getSelectedIndex();
+						float op = Float.parseFloat(lb.getItemText(idx));
+						eventBus.fireEvent(new LayerOpacityChangeEvent(name, op));
+					}
+				});
+
+				ft.setWidget(currentRow, 1, opacityListBox);
+				ft.getCellFormatter().setAlignment(currentRow, 1,
+						HasHorizontalAlignment.ALIGN_CENTER,
+						HasVerticalAlignment.ALIGN_TOP);
+
+				VerticalPanel titlePanel = createLayerTitle(result[i]);
+
+				ft.setWidget(currentRow, 2, titlePanel);
+			}
+
+			vp.add(ft);
+		} else {
+			vp.add(new HTML("<h4><i>No geospatial datasets</i></h4>"));
+		}
 
 		dp.add(vp);
 		return dp;
