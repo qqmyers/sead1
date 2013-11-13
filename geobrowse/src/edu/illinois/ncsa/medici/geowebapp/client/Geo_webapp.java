@@ -399,7 +399,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	}
 
 	protected FlowPanel createLayerSwitcher(LayerInfo[] result) {
-//		List<String> layerNames = getLayerNames(result);
+		// List<String> layerNames = getLayerNames(result);
 		FlowPanel dp = new FlowPanel();
 
 		// DecoratorPanel dp = new DecoratorPanel();
@@ -623,10 +623,13 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		map = mapWidget.getMap();
 
 		baseLayer = new OSM();
+		baseLayer.setIsBaseLayer(true);
 		// map.setBaseLayer(osm);
 		map.addLayer(baseLayer);
 		map.addControl(new MousePosition());
+
 		Bounds box = null;
+
 		for (LayerInfo layerInfo : layerInfos) {
 			String name = layerInfo.getName();
 			Bounds orgBnd = new Bounds(layerInfo.getMinx(),
@@ -648,17 +651,21 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			WMS wms = new WMS(name, wmsUrl, params, options);
 			if (box == null)
 				box = newBnd;
-
 			box.extend(newBnd);
 
 			map.addLayer(wms);
 		}
 
 		RootPanel.get("map").add(mapWidget);
-		if (box == null)
-			map.zoomToMaxExtent();
-		else
-			map.zoomToExtent(box);
+
+		if (box == null) {
+			// bounding box to cover entire map
+			Bounds allbox = new Bounds(-175.97900, -54.04724, 174.17725,
+					83.76526);
+			box = allbox.transform(new Projection(EPSG_4326), new Projection(
+					EPSG_900913));
+		}
+		map.zoomToExtent(box);
 
 	}
 
