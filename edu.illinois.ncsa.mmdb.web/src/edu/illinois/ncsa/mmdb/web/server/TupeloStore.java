@@ -669,6 +669,7 @@ public class TupeloStore {
         }
         Memoized<String> mBadge = badgeCache.get(collectionUri);
         if (mBadge == null) {
+            log.debug("No cached badge for: " + collectionUri);
             mBadge = new Memoized<String>() {
                 public String computeValue() {
                     try {
@@ -682,9 +683,10 @@ public class TupeloStore {
                         //getContext().perform(u);
                         for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "descriptor") ) {
                             String datasetUri = row.get(0).getString();
-                            log.debug("Found Badge: " + datasetUri + " for: " + collectionUri);
+                            log.debug("Found Potential Badge: " + datasetUri + " for: " + collectionUri);
                             String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
                             if (preview != null) {
+                                log.debug("Badge OK - has preview: " + preview);
                                 return datasetUri;
                             }
                         }
@@ -716,6 +718,7 @@ public class TupeloStore {
             mBadge.setForceOnNull(true);
             badgeCache.put(collectionUri, mBadge);
         }
+        log.debug("Badge for: " + collectionUri + " is " + mBadge.getValue());
         return mBadge.getValue();
     }
 
