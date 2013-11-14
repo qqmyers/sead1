@@ -41,27 +41,26 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-
-import net.customware.gwt.dispatch.shared.Action;
-
 /**
  * Text based search of the repository.
  * 
  * @author Luigi Marini
- *
+ * 
  */
 @SuppressWarnings("serial")
-public class Search implements Action<SearchResult> {
+public class Search extends AuthorizedAction<SearchResult> {
 
-	private String query;
+    private String query;
 
-	public Search() {}
-	
-	public Search(String query) {
-		this.query = query;
-	}
+    public Search() {
+    }
 
-	public String getQuery() {
-		return query;
-	}
+    public Search(String query, String user) {
+        this.query = query;
+        setUser(user);
+    }
+
+    public String getQuery() {
+        return query;
+    }
 }

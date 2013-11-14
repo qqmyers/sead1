@@ -141,7 +141,7 @@ public class GetUserMetadataFieldsHandler implements
 
     private Collection<UserMetadataValue> getUserMetadataValues(Thing t, Resource predicate, String marker, String sectionValue) throws OperatorException {
         Collection<UserMetadataValue> values = new LinkedList<UserMetadataValue>();
-        log.debug("Getting Metadata: " + t.toString() + " : " + predicate.toString() + " : " + marker + " : " + sectionValue);
+        //        log.debug("Getting Metadata: " + t.toString() + " : " + predicate.toString() + " : " + marker + " : " + sectionValue);
         for (Object value : t.getValues(predicate) ) {
             UserMetadataValue umv = null;
             if (value instanceof Resource) {
@@ -160,7 +160,7 @@ public class GetUserMetadataFieldsHandler implements
                 //are on the same server  
                 vivoUrl = vivoUrl.substring(0, vivoUrl.indexOf("joseki"));
                 String val = value.toString();
-                log.debug("Val: " + val + " : Vivo: " + vivoUrl);
+                //log.debug("Val: " + val + " : Vivo: " + vivoUrl);
                 if (val.contains(vivoUrl)) {
                     String name = val;
                     int separator = val.indexOf(" : ");

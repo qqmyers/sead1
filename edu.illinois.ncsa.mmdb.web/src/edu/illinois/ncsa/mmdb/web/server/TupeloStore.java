@@ -977,7 +977,7 @@ public class TupeloStore {
         int batchSize = 100;
         while (true) {
             Unifier u = new Unifier();
-            u.setColumnNames("d", "replaced");
+            u.setColumnNames("d", "replaced", "date");
             u.addPattern("d", Rdf.TYPE, Cet.DATASET);
             u.addPattern("d", Dc.DATE, "date");
             u.addPattern("d", DcTerms.IS_REPLACED_BY, "replaced", true);
@@ -988,6 +988,8 @@ public class TupeloStore {
                 getContext().perform(u);
                 int n = 0;
                 for (Tuple<Resource> row : u.getResult() ) {
+                    n++;
+                    i++;
                     String d = row.get(0).getString();
                     Resource r = row.get(1);
                     if (Rdf.NIL.equals(r)) { // deleted
@@ -995,19 +997,50 @@ public class TupeloStore {
                     } else {
                         indexFullText(d);
                     }
-                    n++;
                 }
                 if (n < batchSize) {
-                    log.info("queued " + (i + n) + " datasets for full-text reindexing @ " + new Date());
-                    return i + n;
+                    log.info("queued " + i + " datasets for full-text reindexing @ " + new Date());
+                    break;
                 }
             } catch (OperatorException x) {
                 x.printStackTrace();
                 // FIXME deal with busy state
             }
-            //
-            i += batchSize;
         }
+        int j = 0;
+        while (true) {
+            Unifier u = new Unifier();
+            u.setColumnNames("d", "replaced", "date");
+            u.addPattern("d", Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
+            u.addPattern("d", DcTerms.DATE_CREATED, "date");
+            u.addPattern("d", DcTerms.IS_REPLACED_BY, "replaced", true);
+            u.setLimit(batchSize);
+            u.setOffset(j);
+            u.addOrderByDesc("date");
+            try {
+                getContext().perform(u);
+                int n = 0;
+                for (Tuple<Resource> row : u.getResult() ) {
+                    n++;
+                    j++;
+                    String d = row.get(0).getString();
+                    Resource r = row.get(1);
+                    if (Rdf.NIL.equals(r)) { // deleted
+                        deindexFullText(d);
+                    } else {
+                        indexFullText(d);
+                    }
+                }
+                if (n < batchSize) {
+                    log.info("queued " + j + " collections for full-text reindexing @ " + new Date());
+                    break;
+                }
+            } catch (OperatorException x) {
+                x.printStackTrace();
+                // FIXME deal with busy state
+            }
+        }
+        return i + j;
     }
 
     // consume ft index queue

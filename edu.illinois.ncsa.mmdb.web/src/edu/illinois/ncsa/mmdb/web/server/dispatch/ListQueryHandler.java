@@ -92,6 +92,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
     @Override
     public ListQueryResult execute(ListQuery listquery, ExecutionContext context) throws ActionException {
         ListQueryResult queryResult = new ListQueryResult();
+        queryResult.setResults(new ArrayList<ListQueryItem>());
 
         long l = System.currentTimeMillis();
         //        if (TupeloStore.getInstance().useDatasetTable() && (listquery.getCollection() == null) && (listquery.getTag() == null) && (Cet.DATASET.getString().equals(listquery.getBean()))) {
@@ -171,11 +172,6 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
 
     private void getItemsTupelo(final ListQuery listquery, ListQueryResult queryResult) throws ActionException {
         Unifier u = new Unifier();
-
-        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
-        int userlevel = rbac.getUserAccessLevel(Resource.uriRef(listquery.getUser()));
-        int defaultlevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
-
         if (listquery.getCollection() != null) {
             u.addPattern(Resource.uriRef(listquery.getCollection()), DcTerms.HAS_PART, "s");
         }
@@ -185,9 +181,13 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
         if (listquery.getBean() != null) {
             u.addPattern("s", Rdf.TYPE, Resource.uriRef(listquery.getBean()));
         }
-        u.addColumnName("s");
 
+        sortMap(createMap(u, listquery), listquery, queryResult);
+    }
+
+    private Map<String, ListQueryItem> createMap(Unifier u, ListQuery listquery) throws ActionException {
         // add all items we might need
+        u.addColumnName("s");
         u.addPattern("s", Rdf.TYPE, "t");
         u.addColumnName("t");
         u.addPattern("s", Dc.DATE, "d1", true);
@@ -216,8 +216,11 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
         // s t d1 d2 n a l f r
 
         // fetch results
-        final Map<String, ListQueryItem> map = new HashMap<String, ListQueryItem>();
+        Map<String, ListQueryItem> map = new HashMap<String, ListQueryItem>();
         PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        int userlevel = rbac.getUserAccessLevel(Resource.uriRef(listquery.getUser()));
+        int defaultlevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
         try {
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "s") ) {
                 if ("tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry".equals(row.get(1).getString())) {
@@ -227,7 +230,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                     log.warn("Already contain item for " + row);
                     continue;
                 }
-                if (Cet.DATASET.equals(row.get(1))) {
+                if (Cet.DATASET.equals(row.get(1)) && !row.get(5).getString().equals(listquery.getUser())) {
                     int datasetlevel = (row.get(8) != null) ? Integer.parseInt(row.get(8).getString()) : defaultlevel;
                     if (datasetlevel < userlevel) {
                         continue;
@@ -267,129 +270,132 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                 }
             }
 
-            List<String> uris = new ArrayList<String>(map.keySet());
-            Collections.sort(uris, new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    ListQueryItem item1 = map.get(o1);
-                    if (item1 == null) {
-                        return -1;
-                    }
-                    ListQueryItem item2 = map.get(o2);
-                    if (item2 == null) {
-                        return +1;
-                    }
-
-                    // translate orderBy to the right sort
-                    if (listquery.getOrderBy().equals("date-asc")) {
-                        if (item1.getDate() == null) {
-                            return -1;
-                        }
-                        if (item2.getDate() == null) {
-                            return +1;
-                        }
-                        return item1.getDate().compareTo(item2.getDate());
-                    } else if (listquery.getOrderBy().equals("date-desc")) {
-                        if (item1.getDate() == null) {
-                            return -1;
-                        }
-                        if (item2.getDate() == null) {
-                            return +1;
-                        }
-                        return -item1.getDate().compareTo(item2.getDate());
-                    } else if (listquery.getOrderBy().equals("title-asc")) {
-                        if (item1.getTitle() == null) {
-                            return -1;
-                        }
-                        if (item2.getTitle() == null) {
-                            return +1;
-                        }
-                        if (item1.getTitle().equalsIgnoreCase(item2.getTitle())) {
-                            if (item1.getDate() == null) {
-                                return -1;
-                            }
-                            if (item2.getDate() == null) {
-                                return +1;
-                            }
-                            return -item1.getDate().compareTo(item2.getDate());
-                        } else {
-                            return item1.getTitle().compareToIgnoreCase(item2.getTitle());
-                        }
-                    } else if (listquery.getOrderBy().equals("title-desc")) {
-                        if (item1.getTitle() == null) {
-                            return -1;
-                        }
-                        if (item2.getTitle() == null) {
-                            return +1;
-                        }
-                        if (item1.getTitle().equalsIgnoreCase(item2.getTitle())) {
-                            if (item1.getDate() == null) {
-                                return -1;
-                            }
-                            if (item2.getDate() == null) {
-                                return +1;
-                            }
-                            return -item1.getDate().compareTo(item2.getDate());
-                        } else {
-                            return -item1.getTitle().compareToIgnoreCase(item2.getTitle());
-                        }
-                    } else if (listquery.getOrderBy().equals("category-asc")) {
-                        if (item1.getCategory() == null) {
-                            return -1;
-                        }
-                        if (item2.getCategory() == null) {
-                            return +1;
-                        }
-                        if (item1.getCategory().equals(item2.getCategory())) {
-                            if (item1.getDate() == null) {
-                                return -1;
-                            }
-                            if (item2.getDate() == null) {
-                                return +1;
-                            }
-                            return -item1.getDate().compareTo(item2.getDate());
-                        } else {
-                            return item1.getCategory().compareTo(item2.getCategory());
-                        }
-                    } else if (listquery.getOrderBy().equals("category-desc")) {
-                        if (item1.getCategory() == null) {
-                            return -1;
-                        }
-                        if (item2.getCategory() == null) {
-                            return +1;
-                        }
-                        if (item1.getCategory().equals(item2.getCategory())) {
-                            if (item1.getDate() == null) {
-                                return -1;
-                            }
-                            if (item2.getDate() == null) {
-                                return +1;
-                            }
-                            return -item1.getDate().compareTo(item2.getDate());
-                        } else {
-                            return -item1.getCategory().compareTo(item2.getCategory());
-                        }
-                    } else {
-                        if (item1.getDate() == null) {
-                            return -1;
-                        }
-                        if (item2.getDate() == null) {
-                            return +1;
-                        }
-                        return -item1.getDate().compareTo(item2.getDate());
-                    }
-                }
-            });
-            queryResult.setTotalCount(uris.size());
-            uris = uris.subList(listquery.getOffset(), Math.min(uris.size(), listquery.getOffset() + listquery.getLimit()));
-            List<ListQueryItem> items = new ArrayList<ListQueryItem>();
-            queryResult.setResults(items);
-            for (String uri : uris ) {
-                items.add(map.get(uri));
-            }
+            return map;
         } catch (OperatorException exc) {
             log.error("Could not fetch items.", exc);
             throw new ActionException("Could not get items from tupelo.", exc);
+        }
+
+    }
+
+    private void sortMap(final Map<String, ListQueryItem> map, final ListQuery listquery, ListQueryResult queryResult) {
+        List<String> uris = new ArrayList<String>(map.keySet());
+        Collections.sort(uris, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                ListQueryItem item1 = map.get(o1);
+                if (item1 == null) {
+                    return -1;
+                }
+                ListQueryItem item2 = map.get(o2);
+                if (item2 == null) {
+                    return +1;
+                }
+
+                // translate orderBy to the right sort
+                if (listquery.getOrderBy().equals("date-asc")) {
+                    if (item1.getDate() == null) {
+                        return -1;
+                    }
+                    if (item2.getDate() == null) {
+                        return +1;
+                    }
+                    return item1.getDate().compareTo(item2.getDate());
+                } else if (listquery.getOrderBy().equals("date-desc")) {
+                    if (item1.getDate() == null) {
+                        return -1;
+                    }
+                    if (item2.getDate() == null) {
+                        return +1;
+                    }
+                    return -item1.getDate().compareTo(item2.getDate());
+                } else if (listquery.getOrderBy().equals("title-asc")) {
+                    if (item1.getTitle() == null) {
+                        return -1;
+                    }
+                    if (item2.getTitle() == null) {
+                        return +1;
+                    }
+                    if (item1.getTitle().equalsIgnoreCase(item2.getTitle())) {
+                        if (item1.getDate() == null) {
+                            return -1;
+                        }
+                        if (item2.getDate() == null) {
+                            return +1;
+                        }
+                        return -item1.getDate().compareTo(item2.getDate());
+                    } else {
+                        return item1.getTitle().compareToIgnoreCase(item2.getTitle());
+                    }
+                } else if (listquery.getOrderBy().equals("title-desc")) {
+                    if (item1.getTitle() == null) {
+                        return -1;
+                    }
+                    if (item2.getTitle() == null) {
+                        return +1;
+                    }
+                    if (item1.getTitle().equalsIgnoreCase(item2.getTitle())) {
+                        if (item1.getDate() == null) {
+                            return -1;
+                        }
+                        if (item2.getDate() == null) {
+                            return +1;
+                        }
+                        return -item1.getDate().compareTo(item2.getDate());
+                    } else {
+                        return -item1.getTitle().compareToIgnoreCase(item2.getTitle());
+                    }
+                } else if (listquery.getOrderBy().equals("category-asc")) {
+                    if (item1.getCategory() == null) {
+                        return -1;
+                    }
+                    if (item2.getCategory() == null) {
+                        return +1;
+                    }
+                    if (item1.getCategory().equals(item2.getCategory())) {
+                        if (item1.getDate() == null) {
+                            return -1;
+                        }
+                        if (item2.getDate() == null) {
+                            return +1;
+                        }
+                        return -item1.getDate().compareTo(item2.getDate());
+                    } else {
+                        return item1.getCategory().compareTo(item2.getCategory());
+                    }
+                } else if (listquery.getOrderBy().equals("category-desc")) {
+                    if (item1.getCategory() == null) {
+                        return -1;
+                    }
+                    if (item2.getCategory() == null) {
+                        return +1;
+                    }
+                    if (item1.getCategory().equals(item2.getCategory())) {
+                        if (item1.getDate() == null) {
+                            return -1;
+                        }
+                        if (item2.getDate() == null) {
+                            return +1;
+                        }
+                        return -item1.getDate().compareTo(item2.getDate());
+                    } else {
+                        return -item1.getCategory().compareTo(item2.getCategory());
+                    }
+                } else {
+                    if (item1.getDate() == null) {
+                        return -1;
+                    }
+                    if (item2.getDate() == null) {
+                        return +1;
+                    }
+                    return -item1.getDate().compareTo(item2.getDate());
+                }
+            }
+        });
+        queryResult.setTotalCount(uris.size());
+        uris = uris.subList(listquery.getOffset(), Math.min(uris.size(), listquery.getOffset() + listquery.getLimit()));
+        for (String uri : uris ) {
+            queryResult.getResults().add(map.get(uri));
         }
     }
 
