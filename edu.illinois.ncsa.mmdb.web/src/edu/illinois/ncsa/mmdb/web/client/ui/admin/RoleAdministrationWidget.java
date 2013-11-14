@@ -1,5 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.admin;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -190,6 +192,18 @@ public class RoleAdministrationWidget extends Composite {
 
                     @Override
                     public void onSuccess(GetPermissionsResult result) {
+                        Collections.sort(result.getSettings(), new Comparator<PermissionSetting>() {
+                            @Override
+                            public int compare(PermissionSetting arg0, PermissionSetting arg1) {
+                                if (arg0 == null) {
+                                    return -1;
+                                }
+                                if (arg1 == null) {
+                                    return +1;
+                                }
+                                return arg0.getRoleName().compareTo(arg1.getRoleName());
+                            }
+                        });
                         for (PermissionSetting s : result.getSettings() ) {
                             showPermissionSetting(s);
                         }
