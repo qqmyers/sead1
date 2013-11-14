@@ -44,24 +44,22 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.customware.gwt.dispatch.shared.Action;
-
 /**
  * Get datasets from repository from a set of URIs.
  * 
  * @author Luis Mendez
  */
 @SuppressWarnings("serial")
-public class GetItemsBySet implements Action<GetItemsBySetResult> {
+public class GetItemsBySet extends AuthorizedAction<GetItemsBySetResult> {
 
     private HashSet<String> items;
 
     public GetItemsBySet() {
     }
 
-    public GetItemsBySet(HashSet<String> items) {
-
+    public GetItemsBySet(HashSet<String> items, String user) {
         this.items = items;
+        setUser(user);
     }
 
     public Set<String> getItems() {

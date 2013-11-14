@@ -64,7 +64,7 @@ access.level.label=Processing Level
 access.level.predicate=http://www.linkedearth.org/RSIV/ns#hasLevelOfProcessing
 access.level.min=0
 access.level.max=4
-access.level.default=1
+access.level.values=Raw, Preliminary Results, Provisional Product, Validated Product, Group Product
 
 #
 # Mail properties

@@ -90,7 +90,7 @@ public class ShowRelationshipsWidget extends Composite {
             mainContainer.add(titleLabel);
         }
 
-        service.execute(new GetRelationship(uri), new AsyncCallback<GetRelationshipResult>() {
+        service.execute(new GetRelationship(uri, MMDB.getUsername()), new AsyncCallback<GetRelationshipResult>() {
             @Override
             public void onFailure(Throwable arg0) {
                 GWT.log("Error Retrieving Relationships of a Dataset");

@@ -1,5 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.admin;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -125,24 +127,23 @@ public class RoleAdministrationWidget extends Composite {
         }
     }
 
-    void showAccessLevel(final String role, int level, int min, int max) {
+    void showAccessLevel(final String role, String[] values, int level) {
         Integer c = columnByRole.get(role);
         if (c == null) {
             GWT.log("Did not find role " + role);
             return;
         }
         final ListBox box = new ListBox();
-        for (int i = min; i <= max; i++ ) {
-            box.addItem(Integer.toString(i));
+        for (String x : values ) {
+            box.addItem(x);
         }
-        box.setSelectedIndex(level - min);
+        box.setSelectedIndex(level);
         permissionsTable.setWidget(1, c, box);
 
         box.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                int level = Integer.parseInt(box.getItemText(box.getSelectedIndex()));
-                dispatch.execute(new SetRoleAccessLevel(role, level), new AsyncCallback<EmptyResult>() {
+                dispatch.execute(new SetRoleAccessLevel(role, box.getSelectedIndex()), new AsyncCallback<EmptyResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         box.setEnabled(false);
@@ -191,11 +192,23 @@ public class RoleAdministrationWidget extends Composite {
 
                     @Override
                     public void onSuccess(GetPermissionsResult result) {
+                        Collections.sort(result.getSettings(), new Comparator<PermissionSetting>() {
+                            @Override
+                            public int compare(PermissionSetting arg0, PermissionSetting arg1) {
+                                if (arg0 == null) {
+                                    return -1;
+                                }
+                                if (arg1 == null) {
+                                    return +1;
+                                }
+                                return arg0.getRoleName().compareTo(arg1.getRoleName());
+                            }
+                        });
                         for (PermissionSetting s : result.getSettings() ) {
                             showPermissionSetting(s);
                         }
                         for (Entry<String, Integer> entry : result.getAccessLevel().entrySet() ) {
-                            showAccessLevel(entry.getKey(), entry.getValue(), accessresult.getMinLevel(), accessresult.getMaxLevel());
+                            showAccessLevel(entry.getKey(), accessresult.getLevels(), entry.getValue());
                         }
                         for (Map.Entry<String, Integer> entry : columnByRole.entrySet() ) {
                             final String roleUri = entry.getKey();

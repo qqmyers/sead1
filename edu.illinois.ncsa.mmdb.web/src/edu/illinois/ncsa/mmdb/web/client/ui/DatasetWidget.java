@@ -179,7 +179,7 @@ public class DatasetWidget extends Composite {
         leftColumn.clear();
         rightColumn.clear();
 
-        service.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
+        service.execute(new GetDataset(uri, MMDB.getUsername()), new AsyncCallback<GetDatasetResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -505,7 +505,7 @@ public class DatasetWidget extends Composite {
 
         dialog.addConfirmHandler(new ConfirmHandler() {
             public void onConfirm(ConfirmEvent event) {
-                service.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
+                service.execute(new DeleteDataset(uri, MMDB.getUsername()), new AsyncCallback<DeleteDatasetResult>() {
                     public void onFailure(Throwable caught) {
                         GWT.log("Error deleting dataset", caught);
                     }

@@ -43,16 +43,31 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.CollectionTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**
  * List all collections in system.
@@ -62,8 +77,11 @@ import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
  */
 public class ListCollectionsPage extends Page {
 
-    private final DispatchAsync  dispatch;
-    private final HandlerManager eventbus;
+    private final DispatchAsync            dispatch;
+    private final HandlerManager           eventbus;
+    private final FlowPanel                addCollectionWidget;
+    private final Label                    statusLabel;
+    private final CollectionTablePresenter dynamicTablePresenter;
 
     public ListCollectionsPage(DispatchAsync dispatch, HandlerManager eventBus) {
         super("Collections", dispatch);
@@ -89,7 +107,7 @@ public class ListCollectionsPage extends Page {
         rightHeader.add(rss);
 
         DynamicTableView dynamicTableView = new DynamicTableView();
-        final CollectionTablePresenter dynamicTablePresenter = new CollectionTablePresenter(dispatch, eventBus, dynamicTableView);
+        dynamicTablePresenter = new CollectionTablePresenter(dispatch, eventBus, dynamicTableView);
         dynamicTablePresenter.bind();
 
         VerticalPanel vp = new VerticalPanel() {
@@ -98,9 +116,89 @@ public class ListCollectionsPage extends Page {
                 dynamicTablePresenter.unbind();
             }
         };
+
+        // add collection widget
+        addCollectionWidget = createAddCollectionWidget();
+        mainLayoutPanel.add(addCollectionWidget);
+
+        statusLabel = new Label("");
+        mainLayoutPanel.add(statusLabel);
+
         vp.add(dynamicTableView.asWidget());
         vp.addStyleName("tableCenter");
         mainLayoutPanel.add(vp);
+    }
+
+    /**
+     * Widget to create a new collection.
+     * 
+     * @return
+     */
+    private FlowPanel createAddCollectionWidget() {
+        final FlowPanel addCollectionPanel = new FlowPanel();
+        PermissionUtil rbac = new PermissionUtil(dispatch);
+        rbac.doIfAllowed(Permission.ADD_COLLECTION, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                Label createLabel = new Label("Create new collection: ");
+                createLabel.addStyleName("inline");
+                addCollectionPanel.add(createLabel);
+                final WatermarkTextBox addCollectionBox = new WatermarkTextBox("",
+                        "Collection name");
+                addCollectionBox.addStyleName("inline");
+                addCollectionPanel.add(addCollectionBox);
+                Button addButton = new Button("Add", new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent arg0) {
+                        createNewCollection(addCollectionBox.getText());
+                        addCollectionBox.setText("");
+                        addCollectionBox.showWatermark();
+                    }
+                });
+                addButton.addStyleName("inline");
+                addCollectionPanel.add(addButton);
+                SimplePanel clearBoth = new SimplePanel();
+                clearBoth.addStyleName("clearBoth");
+                addCollectionPanel.add(clearBoth);
+            }
+
+            @Override
+            public void onDenied() {
+                String msg = "You do not have permission to create collections";
+                GWT.log(msg);
+                statusLabel.setText(msg);
+            }
+        });
+
+        return addCollectionPanel;
+    }
+
+    /**
+     * Create new collection on the server.
+     * 
+     * @param text
+     *            name of collection
+     */
+    protected void createNewCollection(String text) {
+
+        CollectionBean collection = new CollectionBean();
+        collection.setTitle(text);
+
+        dispatch.execute(new AddCollection(collection, MMDB.getUsername()),
+                new AsyncCallback<AddCollectionResult>() {
+
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        statusLabel.setText("Error: could not load collections");
+                        GWT.log("Failed creating new collection", arg0);
+                    }
+
+                    @Override
+                    public void onSuccess(AddCollectionResult arg0) {
+                        dynamicTablePresenter.refresh();
+                    }
+                });
     }
 
     @Override

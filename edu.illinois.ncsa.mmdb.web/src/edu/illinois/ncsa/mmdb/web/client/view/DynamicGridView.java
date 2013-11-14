@@ -110,6 +110,14 @@ public class DynamicGridView extends FlexTable implements Display {
             pre.setWidth("120px");
             pre.setMaxWidth(100);
             images.add(pre);
+            Image overlay = new Image("images/icons/Folder.png");
+            overlay.addStyleName("imageOverlay");
+            overlay.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                    History.newItem("collection?uri=" + id);
+                }
+            });
+            images.add(overlay);
         } else {
             PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
             pre.setWidth("120px");

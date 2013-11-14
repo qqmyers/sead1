@@ -154,7 +154,7 @@ public class SelectedItemsPage extends Page {
 
     private void fetchData(HashSet<String> uris) {
 
-        dispatchAsync.execute(new GetItemsBySet(uris), new AsyncCallback<GetItemsBySetResult>() {
+        dispatchAsync.execute(new GetItemsBySet(uris, MMDB.getUsername()), new AsyncCallback<GetItemsBySetResult>() {
 
             @Override
             public void onFailure(Throwable caught) {

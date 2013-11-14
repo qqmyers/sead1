@@ -282,7 +282,7 @@ public class CreateRelationshipsWidget extends Composite {
 
     private void addDatashipRelationShip() {
         //check if relationship already exists
-        service.execute(new GetRelationship(item1.getSelected().substring(1)), new AsyncCallback<GetRelationshipResult>() {
+        service.execute(new GetRelationship(item1.getSelected().substring(1), MMDB.getUsername()), new AsyncCallback<GetRelationshipResult>() {
             @Override
             public void onFailure(Throwable arg0) {
                 GWT.log("Error Retrieving Relationships of a Dataset", arg0);

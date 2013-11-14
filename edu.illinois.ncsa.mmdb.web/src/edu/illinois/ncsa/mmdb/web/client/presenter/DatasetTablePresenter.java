@@ -58,9 +58,17 @@ import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
  */
 public class DatasetTablePresenter extends DynamicTablePresenter {
 
+    private String collectionURI = null;
+
     public DatasetTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
         super(dispatch, eventBus, display, DynamicTableView.GRID_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
         // TODO Auto-generated constructor stub
+    }
+
+    public DatasetTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display, String collectionURI) {
+        super(dispatch, eventBus, display, DynamicTableView.GRID_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
+
+        this.collectionURI = collectionURI;
     }
 
     /* (non-Javadoc)
@@ -74,7 +82,11 @@ public class DatasetTablePresenter extends DynamicTablePresenter {
         query.setOrderBy(sortKey);
         query.setLimit(getPageSize());
         query.setOffset(offset);
-        query.setBean("http://cet.ncsa.uiuc.edu/2007/Dataset");
+        if (collectionURI != null) {
+            query.setCollection(collectionURI);
+        } else {
+            query.setBean("http://cet.ncsa.uiuc.edu/2007/Dataset");
+        }
         query.setUser(MMDB.getUsername());
         return query;
     }

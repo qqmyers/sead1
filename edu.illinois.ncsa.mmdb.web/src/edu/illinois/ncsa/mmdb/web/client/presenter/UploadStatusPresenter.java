@@ -51,6 +51,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasValue;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
@@ -153,7 +154,7 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
     void fetchDataset(final int ix, final String uri) {
         //Scheduler.get().scheduleDeferred(new ScheduledCommand() {
         //public void execute() {
-        dispatch.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
+        dispatch.execute(new GetDataset(uri, MMDB.getUsername()), new AsyncCallback<GetDatasetResult>() {
             public void onFailure(Throwable caught) {
                 Window.alert("GetDataset failed for " + uri); // FIXME debug
             }

@@ -73,7 +73,6 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetConfigurationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsInCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDerivedFromHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDownloadCountHandler;
@@ -105,7 +104,6 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.InitializeRolesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.ListDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
@@ -138,14 +136,12 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
  */
 public class MyActionHandlersConfig implements ServletContextListener {
     public void contextInitialized(ServletContextEvent evt) {
-        DispatchUtil.registerHandler(new GetDatasetsHandler());
         DispatchUtil.registerHandler(new GetDatasetHandler());
         DispatchUtil.registerHandler(new AnnotateResourceHandler());
         DispatchUtil.registerHandler(new TagResourceHandler());
         DispatchUtil.registerHandler(new GetTagsHandler());
         DispatchUtil.registerHandler(new GetAnnotationsHandler());
         DispatchUtil.registerHandler(new GetDatasetsByTagHandler());
-        DispatchUtil.registerHandler(new ListDatasetsHandler());
         DispatchUtil.registerHandler(new GetMetadataHandler());
         DispatchUtil.registerHandler(new GetGeoPointHandler());
         DispatchUtil.registerHandler(new GetCollectionsHandler());

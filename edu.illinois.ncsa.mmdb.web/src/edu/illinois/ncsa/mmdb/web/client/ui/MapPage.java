@@ -93,7 +93,9 @@ public class MapPage extends Page {
                 map.setUIToDefault();
                 mainLayoutPanel.add(map);
 
-                dispatchAsync.execute(new GeoSearch(), new AsyncCallback<GeoSearchResult>() {
+                GeoSearch search = new GeoSearch();
+                search.setUser(MMDB.getUsername());
+                dispatchAsync.execute(search, new AsyncCallback<GeoSearchResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Error geosearching in map page", caught);
@@ -111,7 +113,7 @@ public class MapPage extends Page {
     private void listResults(GeoSearchResult result) {
         for (final String hit : result.getHits() ) {
             // get dataset bean
-            dispatchAsync.execute(new GetDataset(hit), new AsyncCallback<GetDatasetResult>() {
+            dispatchAsync.execute(new GetDataset(hit, MMDB.getUsername()), new AsyncCallback<GetDatasetResult>() {
 
                 @Override
                 public void onFailure(Throwable caught) {

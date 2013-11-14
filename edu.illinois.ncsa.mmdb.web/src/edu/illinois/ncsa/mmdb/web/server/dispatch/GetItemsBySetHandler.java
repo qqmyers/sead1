@@ -55,6 +55,7 @@ import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetItemsBySet;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetItemsBySetResult;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -85,7 +86,7 @@ public class GetItemsBySetHandler implements ActionHandler<GetItemsBySet, GetIte
         HashSet<CollectionBean> collections = new HashSet<CollectionBean>();
 
         try {
-
+            SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
             for (String uri : action.getItems() ) {
                 Collection<Resource> types = beanSession.getRDFTypes(Resource.uriRef(uri));
                 for (Resource type : types ) {
@@ -96,6 +97,9 @@ public class GetItemsBySetHandler implements ActionHandler<GetItemsBySet, GetIte
                         break;
                     }
                     if (type.equals(dbu.getType())) {
+                        if (!rbac.checkAccessLevel(Resource.uriRef(action.getUser()), Resource.uriRef(uri))) {
+                            break;
+                        }
                         DatasetBean bean = dbu.get(uri);
                         bean = dbu.update(bean);
                         datasets.add(bean);

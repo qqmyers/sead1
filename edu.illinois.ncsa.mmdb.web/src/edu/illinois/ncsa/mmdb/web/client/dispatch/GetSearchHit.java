@@ -49,13 +49,12 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
  */
 @SuppressWarnings("serial")
 public class GetSearchHit extends SubjectAction<GetSearchHitResult> {
-
     @SuppressWarnings("unused")
     private GetSearchHit() {
     }
 
-    public GetSearchHit(String uri) {
+    public GetSearchHit(String uri, String user) {
         super(uri);
+        setUser(user);
     }
-
 }

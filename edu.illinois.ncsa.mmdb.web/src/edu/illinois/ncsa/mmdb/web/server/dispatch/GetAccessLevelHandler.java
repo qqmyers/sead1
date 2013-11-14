@@ -85,9 +85,8 @@ public class GetAccessLevelHandler implements ActionHandler<GetAccessLevel, GetA
         GetAccessLevelResult result = new GetAccessLevelResult();
 
         result.setDefaultLevel(Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault)));
-        result.setMinLevel(Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelMin)));
-        result.setMaxLevel(Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelMax)));
         result.setPredicate(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate));
+        result.setLevels(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelValues).split("[ ]*,[ ]*"));
         result.setLabel(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelLabel));
 
         if (uri != null) {

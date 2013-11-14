@@ -38,22 +38,16 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
-
-public class GetDatasetsInCollection implements Action<GetDatasetsInCollectionResult> {
-
-    /**
-     * 
-     */
+public class GetDatasetsInCollection extends AuthorizedAction<GetDatasetsInCollectionResult> {
     private static final long serialVersionUID = -1295291084685216563L;
+    private String            inCollection;
 
     public GetDatasetsInCollection() {
     }
 
-    private String inCollection;
-
-    public GetDatasetsInCollection(String inCollection) {
+    public GetDatasetsInCollection(String inCollection, String user) {
         this.inCollection = inCollection;
+        setUser(user);
     }
 
     public void setInCollection(String s) {

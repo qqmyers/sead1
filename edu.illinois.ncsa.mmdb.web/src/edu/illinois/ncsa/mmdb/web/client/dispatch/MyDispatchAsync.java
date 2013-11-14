@@ -79,8 +79,7 @@ public class MyDispatchAsync implements DispatchAsync {
         realService.execute(action, new AsyncCallback<Result>() {
 
             public void onFailure(Throwable caught) {
-
-                if (caught.getMessage().contains("User has no server credentials")) {
+                if ((caught.getMessage() != null) && caught.getMessage().contains("User has no server credentials")) {
                     History.newItem("logout", true);
                 } else {
                     callback.onFailure(caught);

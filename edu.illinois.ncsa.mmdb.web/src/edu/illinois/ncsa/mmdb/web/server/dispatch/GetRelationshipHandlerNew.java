@@ -17,9 +17,11 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.client.ui.Relationship;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship, GetRelationshipResult> {
 
@@ -37,8 +39,16 @@ public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship,
 
             Map<String, Relationship> dataset = new HashMap<String, Relationship>();
 
+            SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "dataset") ) {
-
+                try {
+                    if (!rbac.checkPermission(Resource.uriRef(action.getUser()), row.get(1))) {
+                        continue;
+                    }
+                } catch (RBACException e) {
+                    e.printStackTrace();
+                    continue;
+                }
                 DatasetBean db = TupeloStore.fetchDataset(row.get(1)); // dbu's only take strings
                 String label = row.get(0).getString();
                 String type = row.get(2).getString();

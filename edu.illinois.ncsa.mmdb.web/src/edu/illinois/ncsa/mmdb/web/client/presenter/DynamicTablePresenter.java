@@ -249,7 +249,7 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
         return this.getClass().getName();
     }
 
-    void setPage(int page) {
+    private void setPage(int page) {
         currentPage = page;
         display.setPage(page);
         if (rememberPageNumber()) {

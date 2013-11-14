@@ -128,17 +128,16 @@ public class AccessLevelWidget extends Composite {
             public void onSuccess(GetAccessLevelResult result) {
                 accessLabel.setText(result.getLabel());
                 accessLevel.clear();
-                for (int i = result.getMinLevel(); i <= result.getMaxLevel(); i++ ) {
-                    accessLevel.addItem(Integer.toString(i));
+                for (String x : result.getLevels() ) {
+                    accessLevel.addItem(x);
                 }
-                accessLevel.setSelectedIndex(result.getDatasetLevel() - result.getMinLevel());
+                accessLevel.setSelectedIndex(result.getDatasetLevel());
             }
         });
     }
 
     private void setAccessLevel() {
-        int level = Integer.parseInt(accessLevel.getItemText(accessLevel.getSelectedIndex()));
-        service.execute(new SetAccessLevel(uri, level), new AsyncCallback<GetAccessLevelResult>() {
+        service.execute(new SetAccessLevel(uri, accessLevel.getSelectedIndex()), new AsyncCallback<GetAccessLevelResult>() {
             public void onFailure(Throwable caught) {
                 accessLevel.setEnabled(false);
                 GWT.log("Could not get/set accesslevel information", caught);
@@ -147,10 +146,10 @@ public class AccessLevelWidget extends Composite {
             public void onSuccess(GetAccessLevelResult result) {
                 accessLabel.setText(result.getLabel());
                 accessLevel.clear();
-                for (int i = result.getMinLevel(); i <= result.getMaxLevel(); i++ ) {
-                    accessLevel.addItem(Integer.toString(i));
+                for (String x : result.getLevels() ) {
+                    accessLevel.addItem(x);
                 }
-                accessLevel.setSelectedIndex(result.getDatasetLevel() - result.getMinLevel());
+                accessLevel.setSelectedIndex(result.getDatasetLevel());
             }
         });
     }
