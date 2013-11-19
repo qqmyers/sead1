@@ -388,12 +388,8 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                                 public void onAllowed() {
                                     final String collectionUri = atc.getSelectedValue();
                                     final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedItems());
-<<<<<<< HEAD
                                     //DCTERMS:description is being overloaded - the user message is 'describes collection' but we will also be using this to select a collection preview image 
                                     SetUserMetadata sum = new SetUserMetadata(collectionUri, "http://purl.org/dc/terms/description", selectedDatasets, true);
-=======
-                                    SetUserMetadata sum = new SetUserMetadata(collectionUri, "http://cet.ncsa.uiuc.edu/2007/hasBadge", selectedDatasets, true);
->>>>>>> refs/remotes/origin/sead-1.2
                                     final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "set");
                                     service.execute(sum,
                                             new AsyncCallback<EmptyResult>() {
