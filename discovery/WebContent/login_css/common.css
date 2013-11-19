@@ -8,3 +8,8 @@ div#banner {
 	left: 0px;
 	top: 0px;
 }
+
+.discoveryPreview {
+	border:1px solid gray; 
+	padding:3px; 
+}

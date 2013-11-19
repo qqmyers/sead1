@@ -1,6 +1,6 @@
 var sparql_Service_Path = 'resteasy/sparql';
 var dataset_Path = '/#dataset?id=';
-var image_Path = '/api/image/';
+var image_Path = '/api/image/preview/small/';
 var collection_Path = '/#collection?uri=';
 var tag_Path = '/#tag?title=';
 
@@ -169,19 +169,17 @@ abstract='';
 		$("#keywords" + id).css("visibility", "visible");
 	}
 	if (descriptors.length != 0) {
-		var descriptorString = "<a href='" + medici + dataset_Path
-					+ descriptors[0] + "' target=_blank><img src='"+ medici + image_Path
-					+ descriptors[0] + "'/>"
+		descriptorString="";
+		for(var i=0; i<descriptors.length; i++) {
+			descriptorString += " <a href='" + medici + dataset_Path
+					+ descriptors[i] + "' target=_blank><img class='discoveryPreview' src='"+ medici + image_Path
+					+ descriptors[i] + "' alt = 'Click to view' />"
 					+ "</a> ";
-		for(var i=1; i<descriptors.length; i++) {
-			descriptorString += ", <a href='" + medici + dataset_Path
-					+ descriptors[i] + "' target=_blank><img src='"+ medici + image_Path
-					+ descriptors[i] + "'/>"
-					+ "</a> ";
+			
 		}
 
 		$("#description" + id).html(
-				"<b>Images: </b>"
+				"<b>Descriptive Data: </b>"
 						+ descriptorString);
 		$("#description" + id).css("visibility", "visible");
 	}
@@ -229,8 +227,12 @@ function getBiblioAttributesForPage(jsonBinding) {
 		}
 
 		else if (value == 'descriptor') {
-			var tempDescriptor = jsonBinding['literal'];
-			if(descriptors.indexOf(tempDescriptor) == -1) descriptors.push(tempDescriptor);
+			var tempDescriptor = jsonBinding['uri'];
+		 	if(tempDescriptor!="undefined") {
+			  if(descriptors.indexOf(tempDescriptor) == -1)  { 
+			    descriptors.push(tempDescriptor);
+  			  }
+  			}  
 		}
 
 		else if (value == 'keyword') {
