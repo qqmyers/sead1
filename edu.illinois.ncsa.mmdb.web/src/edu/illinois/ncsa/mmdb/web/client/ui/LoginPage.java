@@ -74,6 +74,7 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -447,6 +448,40 @@ public class LoginPage extends Composite {
                 GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
             }
         });
+    }
+
+    /**
+     * TODO Placehoder: Show terms of service.
+     * 
+     */
+    private void showTermsOfService() {
+
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/tos.txt");
+        try {
+            builder.sendRequest("", new RequestCallback()
+            {
+                public void onError(Request request, Throwable e)
+                {
+                    Window.alert(e.getMessage());
+                }
+
+                public void onResponseReceived(Request request, Response response)
+                {
+                    if (200 == response.getStatusCode())
+                    {
+                        Window.alert(response.getText());
+                        TextArea ta = new TextArea();
+                        ta.setCharacterWidth(80);
+                        ta.setVisibleLines(50);
+                    } else {
+                        Window.alert("Received HTTP status code other than 200 : " + response.getStatusText());
+                    }
+                }
+            });
+        } catch (RequestException e) {
+            // Couldn't connect to server
+            Window.alert(e.getMessage());
+        }
     }
 
     void fail() {
