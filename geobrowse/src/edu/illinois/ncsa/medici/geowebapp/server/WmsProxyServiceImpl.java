@@ -12,7 +12,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sead.acr.common.MediciProxy;
-import org.sead.acr.common.utilities.PropertiesLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -94,7 +93,7 @@ public class WmsProxyServiceImpl extends ProxiedRemoteServiceServlet implements
 				Node namedItem = attributes.getNamedItem("CRS");
 				String crsText = namedItem.getTextContent();
 				if (crsText.startsWith("EPSG:")) {
-					layerInfo.setCrs(crsText);
+					layerInfo.setSrs(crsText);
 					Node minx = attributes.getNamedItem("minx");
 					layerInfo
 							.setMinx(Double.parseDouble(minx.getTextContent()));
