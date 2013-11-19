@@ -218,7 +218,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		String encodedTag = null;
 		if (tag != null)
 			encodedTag = URL.encode(tag);
-		wmsProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
+		mediciProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
 			public void onSuccess(LayerInfo[] result) {
 				if (result != null) {
 					// showMap(result);
@@ -493,7 +493,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		open.setVisible(false);
 
 		String htmlString = "<a href='" + getMediciUrl() + "/#dataset?id="
-				+ layer.getUri() + "' target='new'>" + layer.getName() + "</a>";
+				+ layer.getUri() + "' target='new'>" + layer.getTitle() + "</a>";
 		HTML title = new HTML(htmlString);
 
 		hp.add(close);
