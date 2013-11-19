@@ -121,7 +121,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  */
 public class TupeloStore {
 
-    public static String                                         HASBADGE              = "http://purl.org/dc/terms/description";
+    public static Resource                                       HASBADGE              = Cet.cet("hasBadge");
     /** Commons logging **/
     private static Log                                           log                   = LogFactory.getLog(TupeloStore.class);
 
@@ -178,6 +178,7 @@ public class TupeloStore {
      * @return singleton TupeloStore
      */
     public static synchronized void createInstance(Context context) {
+        log.info(HASBADGE.getString());
         if (instance != null) {
             log.error("Called createInstance() again.", new Exception());
         } else {
@@ -676,6 +677,7 @@ public class TupeloStore {
                 public String computeValue() {
                     try {
                         Unifier u = new Unifier();
+<<<<<<< HEAD
                         u.setColumnNames("descriptor", "date");
                         //Make sure it's a collection - some callers send datasets
                         u.addPattern(Resource.uriRef(collectionUri), Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
@@ -683,11 +685,16 @@ public class TupeloStore {
                         u.addPattern(Resource.uriRef(collectionUri), Resource.uriRef(HASBADGE), "descriptor");
                         u.addPattern("descriptor", Dc.DATE, "date", true);
                         u.addPattern("descriptor", Rdf.TYPE, Cet.DATASET);
+=======
+                        u.setColumnNames("badge", "date");
+                        u.addPattern(Resource.uriRef(collectionUri), HASBADGE, "badge");
+                        u.addPattern("badge", Dc.DATE, "date", true);
+>>>>>>> refs/remotes/origin/sead-1.2
                         u.addOrderBy("date");
-                        u.addOrderBy("descriptor");
+                        u.addOrderBy("badge");
                         u.setLimit(25);
                         //getContext().perform(u);
-                        for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "descriptor") ) {
+                        for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "badge") ) {
                             String datasetUri = row.get(0).getString();
                             log.debug("Found Potential Badge (descriptor): " + datasetUri + " for: " + collectionUri);
                             String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
