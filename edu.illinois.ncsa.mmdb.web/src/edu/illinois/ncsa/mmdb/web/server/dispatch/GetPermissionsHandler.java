@@ -29,7 +29,7 @@ public class GetPermissionsHandler implements ActionHandler<GetPermissions, GetP
         try {
             GetPermissionsResult result = new GetPermissionsResult();
             String accessPredicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
-            int accessLevel = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelValues).split("[ ]*,[ ]*").length;
+            int accessLevel = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelValues).split("[ ]*,[ ]*").length - 1;
             for (Tuple<Resource> row : rbac.getGlobalPermissions(accessPredicate) ) {
                 Resource role = row.get(0); // the uri of a role
                 Resource permission = row.get(1); // the uri of a permission
@@ -45,6 +45,9 @@ public class GetPermissionsHandler implements ActionHandler<GetPermissions, GetP
 
                 if (!result.getAccessLevel().containsKey(row.get(0).toString())) {
                     int val = (row.get(5) != null) ? Integer.parseInt(row.get(5).toString()) : accessLevel;
+                    if (val > accessLevel) {
+                        val = accessLevel;
+                    }
                     result.getAccessLevel().put(row.get(0).toString(), val);
                 }
 

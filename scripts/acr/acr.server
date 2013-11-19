@@ -40,6 +40,21 @@ extractor.url=http://localhost:9856/
 #extractor.contextUser=admin
 #extractor.contextPassword=admin
 
+
+#
+# Access Level/Processing Level
+#
+access.level.label=Data Maturity
+access.level.predicate=http://sead-data.net/terms/hasDataMaturityLevel
+#access.level.predicate=http://www.linkedearth.org/RSIV/ns#hasLevelOfProcessing
+access.level.default=0
+access.level.values=Raw, Preliminary Results, Provisional Product, Validated Product, Group Product
+
+
+#Google Ouath2
+#google.client_id=
+
+
 #
 # List of automatically created users
 #

@@ -7,7 +7,7 @@ cd /home/medici
 rm -rf war medici.war /var/lib/tomcat6/webapps/acr
 
 
-wget -q -O medici.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI0-90/artifact/JOB1/medici.war/medici.war
+wget -q -O medici.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI0/latest/artifact/JOB1/medici.war/medici.war
 #Or get the war from stash:
 #wget -q -O medici.war  'https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/medici-gwt-web/browse/scripts/acr/medici.war?at=sead-1.2&raw'
 

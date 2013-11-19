@@ -83,15 +83,12 @@ public class SearchResultsPage extends Page {
         this.eventbus = eventbus;
         query = PlaceService.getParams().get("q");
 
-        //START - Added by Ram
-        String link = (query != null && query.contains(httpString)) ? query.substring(query.indexOf(httpString)) : "";
-        String remainderQuery = link.contains(" ") ? link.substring(link.indexOf(" ") + 1) : "";
-        link = link.contains(" ") ? link.substring(link.indexOf(" ")) : link;
-        //End - Added by Ram
-
         String filter = PlaceService.getParams().get("f");
         if (filter != null) {
-            //START - Modified by Ram
+            String link = (query != null && query.contains(httpString)) ? query.substring(query.indexOf(httpString)) : "";
+            String remainderQuery = link.contains(" ") ? link.substring(link.indexOf(" ") + 1) : "";
+            link = link.contains(" ") ? link.substring(link.indexOf(" ")) : link;
+
             //Need to accommodate for (VIVO) URLs obtained from metadata - if any
             if (link == "") {
                 queryText = new HTML("Your search for datasets with metadata <b>" + query
@@ -115,7 +112,7 @@ public class SearchResultsPage extends Page {
     }
 
     private void queryServer(final String query) {
-        dispatchAsync.execute(new Search(query), new AsyncCallback<SearchResult>() {
+        dispatchAsync.execute(new Search(query, MMDB.getUsername()), new AsyncCallback<SearchResult>() {
 
             @Override
             public void onFailure(Throwable caught) {

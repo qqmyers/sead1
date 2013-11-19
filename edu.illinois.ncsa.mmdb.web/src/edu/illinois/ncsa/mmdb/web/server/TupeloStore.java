@@ -664,27 +664,35 @@ public class TupeloStore {
     Map<String, Memoized<String>> badgeCache = null;
 
     public String getBadge(final String collectionUri) {
+
         if (badgeCache == null) {
             badgeCache = new HashMap<String, Memoized<String>>();
         }
         Memoized<String> mBadge = badgeCache.get(collectionUri);
         if (mBadge == null) {
+
+            log.debug("No cached badge for: " + collectionUri);
             mBadge = new Memoized<String>() {
                 public String computeValue() {
                     try {
                         Unifier u = new Unifier();
                         u.setColumnNames("descriptor", "date");
+                        //Make sure it's a collection - some callers send datasets
+                        u.addPattern(Resource.uriRef(collectionUri), Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
+
                         u.addPattern(Resource.uriRef(collectionUri), Resource.uriRef(HASBADGE), "descriptor");
                         u.addPattern("descriptor", Dc.DATE, "date", true);
+                        u.addPattern("descriptor", Rdf.TYPE, Cet.DATASET);
                         u.addOrderBy("date");
                         u.addOrderBy("descriptor");
                         u.setLimit(25);
                         //getContext().perform(u);
                         for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "descriptor") ) {
                             String datasetUri = row.get(0).getString();
-                            log.debug("Found Badge: " + datasetUri + " for: " + collectionUri);
+                            log.debug("Found Potential Badge (descriptor): " + datasetUri + " for: " + collectionUri);
                             String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
                             if (preview != null) {
+                                log.debug("Badge OK - has preview: " + preview);
                                 return datasetUri;
                             }
                         }
@@ -694,13 +702,17 @@ public class TupeloStore {
                     try {
                         Unifier u = new Unifier();
                         u.setColumnNames("member", "date");
+                        //Make sure it's a collection - some callers send datasets
+                        u.addPattern(Resource.uriRef(collectionUri), Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
                         u.addPattern(Resource.uriRef(collectionUri), DcTerms.HAS_PART, "member");
                         u.addPattern("member", Dc.DATE, "date", true);
+                        u.addPattern("member", Rdf.TYPE, Cet.DATASET);
                         u.addOrderBy("date");
                         u.addOrderBy("member");
                         u.setLimit(25);
                         for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member") ) {
                             String datasetUri = row.get(0).getString();
+                            log.debug("Found Potential Badge (member): " + datasetUri + " for: " + collectionUri);
                             String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
                             if (preview != null) {
                                 return datasetUri;
@@ -716,6 +728,8 @@ public class TupeloStore {
             mBadge.setForceOnNull(true);
             badgeCache.put(collectionUri, mBadge);
         }
+
+        log.debug("Badge for: " + collectionUri + " is " + mBadge.getValue());
         return mBadge.getValue();
     }
 
@@ -744,6 +758,7 @@ public class TupeloStore {
 
     public PreviewImageBean getPreview(final String uri, final String size) {
         // lazily initialize cache
+        log.debug("TupeloStore.getPreview(" + uri + ", " + size);
         if (previewCache == null) {
             previewCache = new HashMap<String, Map<String, Memoized<PreviewImageBean>>>();
         }
@@ -977,7 +992,7 @@ public class TupeloStore {
         int batchSize = 100;
         while (true) {
             Unifier u = new Unifier();
-            u.setColumnNames("d", "replaced");
+            u.setColumnNames("d", "replaced", "date");
             u.addPattern("d", Rdf.TYPE, Cet.DATASET);
             u.addPattern("d", Dc.DATE, "date");
             u.addPattern("d", DcTerms.IS_REPLACED_BY, "replaced", true);
@@ -988,6 +1003,8 @@ public class TupeloStore {
                 getContext().perform(u);
                 int n = 0;
                 for (Tuple<Resource> row : u.getResult() ) {
+                    n++;
+                    i++;
                     String d = row.get(0).getString();
                     Resource r = row.get(1);
                     if (Rdf.NIL.equals(r)) { // deleted
@@ -995,19 +1012,50 @@ public class TupeloStore {
                     } else {
                         indexFullText(d);
                     }
-                    n++;
                 }
                 if (n < batchSize) {
-                    log.info("queued " + (i + n) + " datasets for full-text reindexing @ " + new Date());
-                    return i + n;
+                    log.info("queued " + i + " datasets for full-text reindexing @ " + new Date());
+                    break;
                 }
             } catch (OperatorException x) {
                 x.printStackTrace();
                 // FIXME deal with busy state
             }
-            //
-            i += batchSize;
         }
+        int j = 0;
+        while (true) {
+            Unifier u = new Unifier();
+            u.setColumnNames("d", "replaced", "date");
+            u.addPattern("d", Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
+            u.addPattern("d", DcTerms.DATE_CREATED, "date");
+            u.addPattern("d", DcTerms.IS_REPLACED_BY, "replaced", true);
+            u.setLimit(batchSize);
+            u.setOffset(j);
+            u.addOrderByDesc("date");
+            try {
+                getContext().perform(u);
+                int n = 0;
+                for (Tuple<Resource> row : u.getResult() ) {
+                    n++;
+                    j++;
+                    String d = row.get(0).getString();
+                    Resource r = row.get(1);
+                    if (Rdf.NIL.equals(r)) { // deleted
+                        deindexFullText(d);
+                    } else {
+                        indexFullText(d);
+                    }
+                }
+                if (n < batchSize) {
+                    log.info("queued " + j + " collections for full-text reindexing @ " + new Date());
+                    break;
+                }
+            } catch (OperatorException x) {
+                x.printStackTrace();
+                // FIXME deal with busy state
+            }
+        }
+        return i + j;
     }
 
     // consume ft index queue

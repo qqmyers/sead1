@@ -109,7 +109,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
  * RestServlet
  */
 public class RestServlet extends AuthenticatedServlet {
-    Log                        log                          = LogFactory.getLog(RestServlet.class);
+    static Log                 log                          = LogFactory.getLog(RestServlet.class);
 
     public static final String COLLECTION_REMOVE_INFIX      = "/collection/remove/";
 
@@ -242,15 +242,26 @@ public class RestServlet extends AuthenticatedServlet {
         return pib == null ? null : pib.getUri();
     }
 
-    public static PreviewImageBean getPreview(final String uri, String size) {
+    public static PreviewImageBean getPreview(String uri, String size) {
+        final String realuri;
         if (uri == null) {
             return null;
         }
+        log.debug("RestServlet.getPreview(" + uri + ", " + size);
+        String badgeUri = TupeloStore.getInstance().getBadge(uri);
+        if (badgeUri != null) {
+            realuri = badgeUri;
+        } else {
+            realuri = uri;
+        }
+
+        log.debug("Real uri is now: " + realuri);
+
         try {
             Collection<PreviewImageBean> previews = new LinkedList<PreviewImageBean>();
             Unifier u = new Unifier();
             u.setColumnNames("preview", "height", "width", "mimeType");
-            u.addPattern(Resource.uriRef(uri), PreviewImageBeanUtil.HAS_PREVIEW, "preview");
+            u.addPattern(Resource.uriRef(realuri), PreviewImageBeanUtil.HAS_PREVIEW, "preview");
             u.addPattern("preview", Rdf.TYPE, PreviewImageBeanUtil.PREVIEW_TYPE);
             u.addPattern("preview", PreviewImageBeanUtil.IMAGE_HEIGHT, "height");
             u.addPattern("preview", PreviewImageBeanUtil.IMAGE_WIDTH, "width");
@@ -273,7 +284,7 @@ public class RestServlet extends AuthenticatedServlet {
                 // do not block on this operation
                 (new Thread() {
                     public void run() {
-                        TupeloStore.getInstance().extractPreviews(uri);
+                        TupeloStore.getInstance().extractPreviews(realuri);
                     }
                 }).start();
                 return null;

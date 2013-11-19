@@ -62,8 +62,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
-import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTableView;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
@@ -73,9 +71,11 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
+import edu.illinois.ncsa.mmdb.web.client.presenter.DatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoPointBean;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
+import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
@@ -89,22 +89,21 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
  */
 public class CollectionPage extends Composite {
 
-    private final String                 uri;
-    private final DispatchAsync          dispatchasync;
-    private final PermissionUtil         rbac;
-    private final HandlerManager         eventBus;
-    private final FlowPanel              mainContent;
-    private final String                 PREVIEW_URL = "./api/image/preview/small/";
-    private TitlePanel                   pageTitle;
-    private Label                        descriptionLabel;
-    private Label                        dateLabel;
-    private FlowPanel                    infoPanel;
-    private FlowPanel                    previewFlowPanel;
-    private Label                        numDatasetsLabel;
-    private Label                        authorLabel;
-    private final PagingDatasetTableView datasetTableView;
+    private final String         uri;
+    private final DispatchAsync  dispatchasync;
+    private final PermissionUtil rbac;
+    private final HandlerManager eventBus;
+    private final FlowPanel      mainContent;
+    private final String         PREVIEW_URL = "./api/image/preview/small/";
+    private TitlePanel           pageTitle;
+    private Label                descriptionLabel;
+    private Label                dateLabel;
+    private FlowPanel            infoPanel;
+    private FlowPanel            previewFlowPanel;
+    private Label                numDatasetsLabel;
+    private Label                authorLabel;
 
-    private PreviewPanel                 previewPanel;
+    private PreviewPanel         previewPanel;
 
     public CollectionPage(String uri, DispatchAsync dispatchasync,
             HandlerManager eventBus) {
@@ -122,14 +121,19 @@ public class CollectionPage extends Composite {
 
         mainContent.add(createPreviewPanel());
 
-        datasetTableView = new PagingDatasetTableView(uri, dispatchasync);
-        datasetTableView.addStyleName("datasetTable");
+        DynamicTableView dynamicTableView = new DynamicTableView();
+        final DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatchasync, eventBus, dynamicTableView, uri);
+        dynamicTablePresenter.bind();
 
-        PagingDatasetTablePresenter datasetTablePresenter =
-                new PagingDatasetTablePresenter(datasetTableView, dispatchasync, eventBus);
-        datasetTablePresenter.bind();
-
-        mainContent.add(datasetTableView);
+        VerticalPanel vp = new VerticalPanel() {
+            @Override
+            protected void onDetach() {
+                dynamicTablePresenter.unbind();
+            }
+        };
+        vp.add(dynamicTableView.asWidget());
+        vp.addStyleName("tableCenter");
+        mainContent.add(vp);
 
         retrieveCollection();
 
@@ -277,7 +281,7 @@ public class CollectionPage extends Composite {
     private void retrieveCollection() {
         GWT.log("The collection uri is " + uri);
 
-        dispatchasync.execute(new GetCollection(uri), new AsyncCallback<GetCollectionResult>() {
+        dispatchasync.execute(new GetCollection(uri, MMDB.getUsername()), new AsyncCallback<GetCollectionResult>() {
 
             @Override
             public void onFailure(Throwable arg0) {

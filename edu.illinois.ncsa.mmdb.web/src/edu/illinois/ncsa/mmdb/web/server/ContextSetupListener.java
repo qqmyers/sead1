@@ -328,6 +328,7 @@ public class ContextSetupListener implements ServletContextListener {
 
     private void setUpSearch() throws IOException {
         File folder = new File(TupeloStore.getInstance().getConfiguration(ConfigurationKey.SearchPath));
+        folder.mkdirs();
 
         log.info("Lucene search index directory = " + folder.getAbsolutePath());
         FSDirectory dir = FSDirectory.getDirectory(folder);
@@ -426,7 +427,7 @@ public class ContextSetupListener implements ServletContextListener {
         // ensure Medici permissions exist
         rbac.intializePermissions();
         String predicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
-        int level = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelValues).split("[ ]*,[ ]*").length;
+        int level = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelValues).split("[ ]*,[ ]*").length - 1;
         rbac.associatePermissionsWithRoles(predicate, level);
 
         //ensure default roles exist
