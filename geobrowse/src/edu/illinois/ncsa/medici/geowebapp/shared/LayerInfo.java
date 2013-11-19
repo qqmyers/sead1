@@ -3,8 +3,9 @@ package edu.illinois.ncsa.medici.geowebapp.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class LayerInfo implements IsSerializable {
+	String title;
 	String name;
-	String crs;
+	String srs;
 	String uri;
 	double minx;
 	double miny;
@@ -19,12 +20,12 @@ public class LayerInfo implements IsSerializable {
 		this.name = name;
 	}
 
-	public String getCrs() {
-		return crs;
+	public String getSrs() {
+		return srs;
 	}
 
-	public void setCrs(String crs) {
-		this.crs = crs;
+	public void setSrs(String srs) {
+		this.srs = srs;
 	}
 
 	public double getMinx() {
@@ -60,7 +61,7 @@ public class LayerInfo implements IsSerializable {
 	}
 
 	public String toString() {
-		return this.name + " (" + this.crs + "): " + minx + ", " + miny + " "
+		return this.name + " (" + this.srs + "): " + minx + ", " + miny + " "
 				+ maxx + ", " + maxy;
 	}
 
@@ -70,5 +71,13 @@ public class LayerInfo implements IsSerializable {
 
 	public void setUri(String uri) {
 		this.uri = uri;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 }
