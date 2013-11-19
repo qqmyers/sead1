@@ -3,10 +3,19 @@ package edu.illinois.ncsa.medici.geowebapp.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class LayerInfo implements IsSerializable {
+	// title: friendly name of the dataset
 	String title;
+	
+	// name: layer name used in geoserver
 	String name;
+	
+	// srs: spatial reference system (e.g. EPSG:4326)
 	String srs;
+	
+	// uri: dataset uri of the dataset
 	String uri;
+	
+	// bounding box (minx, miny), (maxx, maxy)
 	double minx;
 	double miny;
 	double maxx;
