@@ -57,16 +57,22 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AdminAddUser;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AdminAddUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole.ActionType;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
@@ -76,6 +82,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsers;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsersResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
+import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TitlePanel;
 import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
 
@@ -116,6 +123,7 @@ public class UserManagementWidget extends Composite {
         // users table
         activeUsersTable = createUsersTable();
         inactiveUsersTable = createUsersTable();
+        usersPanel.add(discloseAs(createUserPanel(), "Add user", "Add user", true));
         usersPanel.add(discloseAs(inactiveUsersTable, "Inactive users", "Inactive users", true));
         usersPanel.add(discloseAs(activeUsersTable, "Active users", false));
         mainPanel.add(usersPanel);
@@ -128,6 +136,66 @@ public class UserManagementWidget extends Composite {
         // load users and roles from server side
         columnByRole = new HashMap<String, Integer>();
         loadRolesAndUsers();
+    }
+
+    /**
+     * Create a new user and send a notification email to that user.
+     * 
+     * @return
+     */
+    private Panel createUserPanel() {
+        FlexTable table = new FlexTable();
+        table.getColumnFormatter().setWidth(0, "100px");
+        final Label status = new Label("");
+        table.setWidget(0, 1, status);
+        table.addStyleName("usersTable");
+        table.setText(1, 0, "Email");
+        final TextBox email = new TextBox();
+        table.setWidget(1, 1, email);
+        table.setText(2, 0, "First name");
+        final TextBox firstName = new TextBox();
+        table.setWidget(2, 1, firstName);
+        table.setText(3, 0, "Last name");
+        final TextBox lastName = new TextBox();
+        table.setWidget(3, 1, lastName);
+        Button sendInvite = new Button("Invite", new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (email.getValue().isEmpty() || firstName.getValue().isEmpty() || lastName.getValue().isEmpty()) {
+                    status.setText("All fields must be specified");
+                } else if (!email.getValue().matches(SignupPage.EMAIL_REGEX)) {
+                    status.setText("Please specify a valid email address");
+                } else {
+                    dispatchAsync.execute(new AdminAddUser(firstName.getValue(), lastName.getValue(), email.getValue()), new AsyncCallback<AdminAddUserResult>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log("Error creating new user", caught);
+                            status.setText("Error creating new user");
+                        }
+
+                        @Override
+                        public void onSuccess(AdminAddUserResult result) {
+                            if (result.getError() == null) {
+                                GWT.log("Successfully created a new user");
+                                status.setText("User successfully created and invited by email.");
+                                email.setText("");
+                                firstName.setText("");
+                                lastName.setText("");
+                                loadRolesAndUsers();
+                            } else {
+                                GWT.log("Error creating new user");
+                                status.setText(result.getError());
+                            }
+                        }
+
+                    });
+                }
+            }
+        });
+        table.setWidget(4, 1, sendInvite);
+        return table;
     }
 
     private void loadRolesAndUsers() {

@@ -77,7 +77,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
  */
 public class SignupPage extends Composite {
 
-    private static final String EMAIL_REGEX = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
+    public static final String  EMAIL_REGEX = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
     private final DispatchAsync dispatchAsync;
     private final FlowPanel     mainPanel;
     private final Widget        pageTitle;
@@ -222,7 +222,7 @@ public class SignupPage extends Composite {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Error checking if email is already in the system",
-                                        caught);
+                                caught);
                     }
 
                     @Override
