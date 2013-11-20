@@ -218,7 +218,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		String encodedTag = null;
 		if (tag != null)
 			encodedTag = URL.encode(tag);
-		wmsProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
+		mediciProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
 			public void onSuccess(LayerInfo[] result) {
 				if (result != null) {
 					// showMap(result);
@@ -493,7 +493,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		open.setVisible(false);
 
 		String htmlString = "<a href='" + getMediciUrl() + "/#dataset?id="
-				+ layer.getUri() + "' target='new'>" + layer.getName() + "</a>";
+				+ layer.getUri() + "' target='new'>" + layer.getTitle()
+				+ "</a>";
 		HTML title = new HTML(htmlString);
 
 		hp.add(close);
@@ -635,9 +636,11 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			Bounds orgBnd = new Bounds(layerInfo.getMinx(),
 					layerInfo.getMiny(), layerInfo.getMaxx(),
 					layerInfo.getMaxy());
-
-			Bounds newBnd = orgBnd.transform(new Projection(EPSG_4326),
-					new Projection(EPSG_900913));
+			Bounds newBnd = orgBnd;
+			if (layerInfo.getSrs().startsWith("EPSG:")) {
+				newBnd = orgBnd.transform(new Projection(layerInfo.getSrs()),
+						new Projection(EPSG_900913));
+			}
 			GWT.log("adding layers: " + name + " " + newBnd);
 			WMSOptions options = new WMSOptions();
 			options.setProjection(EPSG_900913);

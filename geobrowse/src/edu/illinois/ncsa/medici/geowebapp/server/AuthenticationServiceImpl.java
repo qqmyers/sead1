@@ -1,14 +1,11 @@
 package edu.illinois.ncsa.medici.geowebapp.server;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.ws.http.HTTPException;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
-
+import org.apache.commons.logging.LogFactory;
 import org.sead.acr.common.MediciProxy;
 import org.sead.acr.common.utilities.PropertiesLoader;
 
