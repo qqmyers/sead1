@@ -48,6 +48,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.AddCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddGeoLocationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddUserHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AdminAddUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AnnotateResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ChangeUserPIDHandler;
@@ -219,7 +220,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GoogleOauth2PropsHandler());
         DispatchUtil.registerHandler(new GetUserPIDHandler());
         DispatchUtil.registerHandler(new ChangeUserPIDHandler());
-
+        DispatchUtil.registerHandler(new AdminAddUserHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

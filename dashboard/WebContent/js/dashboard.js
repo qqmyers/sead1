@@ -113,12 +113,16 @@ function loadTableContent() {
 	var hasParent = null;
 
 	var tagURISet = {};
-
 	var obj = $.parseJSON($("#hidden_collections").html());
-
-	for (var i = 0; i < obj.sparql.results.result.length; i++) {
-		abs = '';
-		var jsonBinding = obj.sparql.results.result[i].binding;
+	var resultLength;
+	if (jQuery.isArray(obj.sparql.results.result) == true) {
+		resultLength = obj.sparql.results.result.length;
+	} else {
+		resultLength = obj.sparql.results.result == undefined ? 0 : 1;
+	}
+	
+	for (var i = 0; i < resultLength; i++) {
+		var jsonBinding = resultLength > 1 ? obj.sparql.results.result[i].binding : obj.sparql.results.result.binding;
 		for (var j = 0; j < jsonBinding.length; j++) {
 			$.each(jsonBinding[j], function(key, value) {
 				if (value == 'tagID') {
@@ -163,7 +167,6 @@ function getTeamMembers() {
 
 	var div_html = '';
 	var obj = $.parseJSON($("#hidden_creators").html());
-
 	for (var i = 0; i < obj.sparql.results.result.length; i++) {
 		creatorURI = "#";
 		var jsonBinding = obj.sparql.results.result[i].binding;
@@ -203,10 +206,15 @@ function loadRecentUploads() {
 	var isDeleted = null;
 
 	var obj = $.parseJSON($("#hidden_recentuploads").html());
-
-	for (var i = 0; i < obj.sparql.results.result.length; i++) {
-		abs = '';
-		var jsonBinding = obj.sparql.results.result[i].binding;
+	var resultLength;
+	if (jQuery.isArray(obj.sparql.results.result) == true) {
+		resultLength = obj.sparql.results.result.length;
+	} else {
+		resultLength = obj.sparql.results.result == undefined ? 0 : 1;
+	}
+	
+	for (var i = 0; i < resultLength; i++) {
+		var jsonBinding = resultLength > 1 ? obj.sparql.results.result[i].binding : obj.sparql.results.result.binding;
 		for (var j = 0; j < jsonBinding.length; j++) {
 			$.each(jsonBinding[j], function(key, value) {
 				if (value == 'tagID') {

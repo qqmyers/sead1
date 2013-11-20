@@ -39,71 +39,50 @@
 /**
  * 
  */
-package edu.illinois.ncsa.medici.geowebapp.client;
+package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Label;
+import net.customware.gwt.dispatch.shared.Action;
 
 /**
- * A widget showing links to login and logout and a name if the user is logged
- * in. Currently used in the main menu.
+ * Register a user with the system from admin pages.
  * 
  * @author Luigi Marini
- * @author Rob Kooper
  * 
  */
-public class LoginStatusWidget extends Composite {
+@SuppressWarnings("serial")
+public class AdminAddUser implements Action<AdminAddUserResult> {
 
-	private final HorizontalPanel mainPanel;
-	private final String signupURL;
+    private String firstName;
+    private String lastName;
+    private String email;
 
-	/**
-	 * Create a main panel and show the appropriate link depending on what the
-	 * sessionID is.
-	 */
-	public LoginStatusWidget() {
-		mainPanel = new HorizontalPanel();
-		mainPanel.addStyleName("navMenu");
-		initWidget(mainPanel);
-		signupURL = Geo_webapp.getMediciUrl() + "/#signup";
-	}
+    public AdminAddUser() {
+    }
 
-	Hyperlink hyperlink(String name, String link) {
-		Hyperlink hlink = new Hyperlink(name, link);
-		hlink.addStyleName("navMenuLink");
-		return hlink;
-	}
+    public AdminAddUser(String firstName, String lastName, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+    }
 
-	Anchor anchor(String name, String link) {
-		Anchor anchor = new Anchor(name, link);
-		anchor.addStyleName("navMenuLink");
-		return anchor;
-	}
+    /**
+     * @return the firstName
+     */
+    public String getFirstName() {
+        return firstName;
+    }
 
-	
-	/**
-	 * Add the name of the user logged in and a link to log out.
-	 * 
-	 * @param name
-	 *            user logged in
-	 */
-	public void loggedIn(String name) {
-		mainPanel.clear();
-		Label label = new Label(name);
-		label.setStyleName("navMenuText");
-		mainPanel.add(label);
-		mainPanel.add(hyperlink("(Logout)", "logout"));
-	}
+    /**
+     * @return the lastName
+     */
+    public String getLastName() {
+        return lastName;
+    }
 
-	/**
-	 * Display a login link.
-	 */
-	public void loggedOut() {
-		mainPanel.clear();
-		mainPanel.add(hyperlink("Login", "login"));
-		mainPanel.add(anchor("Sign up", signupURL));
-	}
+    /**
+     * @return the email
+     */
+    public String getEmail() {
+        return email;
+    }
 }

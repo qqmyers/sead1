@@ -148,6 +148,23 @@ public class Mail {
     }
 
     /**
+     * Notified a user that an account was created for them.
+     */
+    public static void createdNewUser(PersonBean user, String password) {
+        TupeloStore ts = TupeloStore.getInstance();
+        String server = ts.getConfiguration(ConfigurationKey.MediciName);
+        String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
+        String subject = presubj + " Account Activated";
+        String body = String.format("A user account on the server %s using this email address. Your default password is %s " +
+                "You can change your account information by logging in and going to Home > Profile.", server, password);
+        try {
+            sendMessage(new String[] { user.getEmail() }, subject, body);
+        } catch (MessagingException e) {
+            log.error(String.format("Could not send email to '%s' about '%s'.", user.getEmail(), subject), e);
+        }
+    }
+
+    /**
      * Send the message
      * 
      * @param url

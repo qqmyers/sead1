@@ -36,74 +36,29 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
-/**
- * 
- */
-package edu.illinois.ncsa.medici.geowebapp.client;
+package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Label;
+import net.customware.gwt.dispatch.shared.Result;
 
 /**
- * A widget showing links to login and logout and a name if the user is logged
- * in. Currently used in the main menu.
+ * User has been successfully created from admin pages..
  * 
  * @author Luigi Marini
- * @author Rob Kooper
  * 
  */
-public class LoginStatusWidget extends Composite {
+@SuppressWarnings("serial")
+public class AdminAddUserResult implements Result {
 
-	private final HorizontalPanel mainPanel;
-	private final String signupURL;
+    private String error = null;
 
-	/**
-	 * Create a main panel and show the appropriate link depending on what the
-	 * sessionID is.
-	 */
-	public LoginStatusWidget() {
-		mainPanel = new HorizontalPanel();
-		mainPanel.addStyleName("navMenu");
-		initWidget(mainPanel);
-		signupURL = Geo_webapp.getMediciUrl() + "/#signup";
-	}
+    public AdminAddUserResult() {
+    }
 
-	Hyperlink hyperlink(String name, String link) {
-		Hyperlink hlink = new Hyperlink(name, link);
-		hlink.addStyleName("navMenuLink");
-		return hlink;
-	}
+    public AdminAddUserResult(String error) {
+        this.error = error;
+    }
 
-	Anchor anchor(String name, String link) {
-		Anchor anchor = new Anchor(name, link);
-		anchor.addStyleName("navMenuLink");
-		return anchor;
-	}
-
-	
-	/**
-	 * Add the name of the user logged in and a link to log out.
-	 * 
-	 * @param name
-	 *            user logged in
-	 */
-	public void loggedIn(String name) {
-		mainPanel.clear();
-		Label label = new Label(name);
-		label.setStyleName("navMenuText");
-		mainPanel.add(label);
-		mainPanel.add(hyperlink("(Logout)", "logout"));
-	}
-
-	/**
-	 * Display a login link.
-	 */
-	public void loggedOut() {
-		mainPanel.clear();
-		mainPanel.add(hyperlink("Login", "login"));
-		mainPanel.add(anchor("Sign up", signupURL));
-	}
+    public String getError() {
+        return error;
+    }
 }
