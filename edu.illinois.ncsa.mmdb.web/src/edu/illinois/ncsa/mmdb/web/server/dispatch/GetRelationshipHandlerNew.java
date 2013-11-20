@@ -7,6 +7,8 @@ import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
@@ -21,9 +23,10 @@ import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship, GetRelationshipResult> {
+
+    static Log log = LogFactory.getLog(GetRelationshipHandlerNew.class);
 
     @Override
     public GetRelationshipResult execute(GetRelationship action, ExecutionContext arg1) throws ActionException {
@@ -41,12 +44,7 @@ public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship,
 
             SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "dataset") ) {
-                try {
-                    if (!rbac.checkPermission(Resource.uriRef(action.getUser()), row.get(1))) {
-                        continue;
-                    }
-                } catch (RBACException e) {
-                    e.printStackTrace();
+                if (!rbac.checkAccessLevel(Resource.uriRef(action.getUser()), row.get(1))) {
                     continue;
                 }
                 DatasetBean db = TupeloStore.fetchDataset(row.get(1)); // dbu's only take strings
