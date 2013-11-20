@@ -41,7 +41,6 @@
  */
 package edu.illinois.ncsa.medici.geowebapp.client;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
