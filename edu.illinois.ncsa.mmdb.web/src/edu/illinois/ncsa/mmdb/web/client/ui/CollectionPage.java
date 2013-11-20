@@ -46,6 +46,8 @@ import java.util.Map.Entry;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -58,6 +60,8 @@ import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -70,6 +74,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoPointBean;
@@ -89,26 +94,27 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
  */
 public class CollectionPage extends Composite {
 
-    private final String         uri;
-    private final DispatchAsync  dispatchasync;
-    private final PermissionUtil rbac;
-    private final HandlerManager eventBus;
-    private final FlowPanel      mainContent;
-    private final String         PREVIEW_URL = "./api/image/preview/small/";
-    private TitlePanel           pageTitle;
-    private Label                descriptionLabel;
-    private Label                dateLabel;
-    private FlowPanel            infoPanel;
-    private FlowPanel            previewFlowPanel;
-    private Label                numDatasetsLabel;
-    private Label                authorLabel;
-
-    private PreviewPanel         previewPanel;
+    private final String                uri;
+    private final DispatchAsync         service;
+    private final PermissionUtil        rbac;
+    private final HandlerManager        eventBus;
+    private final FlowPanel             mainContent;
+    private final String                PREVIEW_URL = "./api/image/preview/small/";
+    private TitlePanel                  pageTitle;
+    private Label                       descriptionLabel;
+    private Label                       dateLabel;
+    private FlowPanel                   infoPanel;
+    private FlowPanel                   previewFlowPanel;
+    private Label                       numDatasetsLabel;
+    private Label                       authorLabel;
+    private AddToCollectionDialog       addToCollectionDialog;
+    private PreviewPanel                previewPanel;
+    private final DatasetTablePresenter dynamicTablePresenter;
 
     public CollectionPage(String uri, DispatchAsync dispatchasync,
             HandlerManager eventBus) {
         this.uri = uri;
-        this.dispatchasync = dispatchasync;
+        this.service = dispatchasync;
         rbac = new PermissionUtil(dispatchasync);
         this.eventBus = eventBus;
         mainContent = new FlowPanel();
@@ -122,7 +128,7 @@ public class CollectionPage extends Composite {
         mainContent.add(createPreviewPanel());
 
         DynamicTableView dynamicTableView = new DynamicTableView();
-        final DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatchasync, eventBus, dynamicTableView, uri);
+        dynamicTablePresenter = new DatasetTablePresenter(dispatchasync, eventBus, dynamicTableView, uri);
         dynamicTablePresenter.bind();
 
         VerticalPanel vp = new VerticalPanel() {
@@ -173,10 +179,11 @@ public class CollectionPage extends Composite {
         return userInformationPanel;
     }
 
-    Anchor        collectionContextLink = null;
+    Anchor               collectionContextLink  = null;
 
-    Anchor        subCollectionLink     = null;
-    VerticalPanel subCollectionLinksPanel;
+    Anchor               subCollectionLink      = null;
+    VerticalPanel        subCollectionLinksPanel;
+    private final String subcollectionPredicate = "http://purl.org/dc/terms/hasPart";
 
     private Widget createSubcollectionsPanel(UserMetadataWidget um) {
         DisclosurePanel userInformationPanel = new DisclosurePanel("Sub-Collections");
@@ -212,8 +219,8 @@ public class CollectionPage extends Composite {
      * @return the panel
      */
     private Widget createSocialAnnotationsPanel() {
-        CommentsView commentsView = new CommentsView(uri, dispatchasync);
-        TagsWidget tagsWidget = new TagsWidget(uri, dispatchasync);
+        CommentsView commentsView = new CommentsView(uri, service);
+        TagsWidget tagsWidget = new TagsWidget(uri, service);
         TwoColumnLayout layout = new TwoColumnLayout(commentsView, tagsWidget);
         return layout;
     }
@@ -227,7 +234,7 @@ public class CollectionPage extends Composite {
         // batch operations and logic to unbind
         BatchOperationView batchOperationView = new BatchOperationView();
         final BatchOperationPresenter batchOperationPresenter =
-                new BatchOperationPresenter(dispatchasync, eventBus, batchOperationView, false);
+                new BatchOperationPresenter(service, eventBus, batchOperationView, false);
 
         HorizontalPanel horizontalPanel = new HorizontalPanel() {
             @Override
@@ -248,6 +255,17 @@ public class CollectionPage extends Composite {
         infoPanel.add(dateLabel);
         numDatasetsLabel = new Label("Number of datasets");
         infoPanel.add(numDatasetsLabel);
+
+        // add subcollection link
+        PermissionUtil rbac = new PermissionUtil(service);
+        rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                Panel createSubcollectionPanel = createSubcollectionPanel();
+                infoPanel.add(createSubcollectionPanel);
+            }
+        });
+
         horizontalPanel.add(infoPanel);
 
         // batch operations
@@ -256,6 +274,28 @@ public class CollectionPage extends Composite {
         horizontalPanel.add(batchOperationView);
 
         return horizontalPanel;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    private Panel createSubcollectionPanel() {
+        SimplePanel panel = new SimplePanel();
+        Anchor link = new Anchor("Add subcollection");
+        panel.add(link);
+        link.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                addToCollectionDialog = new AddToCollectionDialog(service,
+                        new AddToCollectionHandler());
+                addToCollectionDialog.center();
+
+            }
+        });
+
+        return panel;
     }
 
     /**
@@ -269,7 +309,7 @@ public class CollectionPage extends Composite {
     }
 
     private Widget createPreviewPanel() {
-        previewPanel = new PreviewPanel(dispatchasync, eventBus, true);
+        previewPanel = new PreviewPanel(service, eventBus, true);
         previewFlowPanel = new FlowPanel();
 
         return previewFlowPanel;
@@ -281,7 +321,7 @@ public class CollectionPage extends Composite {
     private void retrieveCollection() {
         GWT.log("The collection uri is " + uri);
 
-        dispatchasync.execute(new GetCollection(uri, MMDB.getUsername()), new AsyncCallback<GetCollectionResult>() {
+        service.execute(new GetCollection(uri, MMDB.getUsername()), new AsyncCallback<GetCollectionResult>() {
 
             @Override
             public void onFailure(Throwable arg0) {
@@ -320,7 +360,7 @@ public class CollectionPage extends Composite {
                 // collection title is editable
                 pageTitle.addValueChangeHandler(new ValueChangeHandler<String>() {
                     public void onValueChange(final ValueChangeEvent<String> event) {
-                        dispatchasync.execute(new SetTitle(collection.getUri(), event.getValue()),
+                        service.execute(new SetTitle(collection.getUri(), event.getValue()),
                                 new AsyncCallback<EmptyResult>() {
                                     public void onFailure(Throwable caught) {
                                         pageTitle.getEditableLabel().cancel();
@@ -347,7 +387,7 @@ public class CollectionPage extends Composite {
         }
         numDatasetsLabel.setText(collectionSize + " dataset(s)");
 
-        dispatchasync.execute(new GetConfiguration(null, ConfigurationKey.DiscoveryURL), new AsyncCallback<ConfigurationResult>() {
+        service.execute(new GetConfiguration(null, ConfigurationKey.DiscoveryURL), new AsyncCallback<ConfigurationResult>() {
             @Override
             public void onFailure(Throwable caught) {
             }
@@ -387,7 +427,7 @@ public class CollectionPage extends Composite {
 
             @Override
             public void onAllowed() {
-                dispatchasync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.GoogleMapKey), new AsyncCallback<ConfigurationResult>() {
+                service.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.GoogleMapKey), new AsyncCallback<ConfigurationResult>() {
 
                     @Override
                     public void onFailure(Throwable arg0) {
@@ -413,5 +453,29 @@ public class CollectionPage extends Composite {
             }
 
         });
+    }
+
+    class AddToCollectionHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent arg0) {
+            String value = addToCollectionDialog.getSelectedValue();
+            if (value != null && !value.equals(uri)) {
+                GWT.log("Adding collection " + value + " to " + uri);
+                service.execute(new SetUserMetadata(uri, subcollectionPredicate, value, true), new AsyncCallback<EmptyResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error adding collection relationship.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(EmptyResult result) {
+                        GWT.log("Successfully added subcollection.");
+                        addToCollectionDialog.hide();
+                        dynamicTablePresenter.refresh();
+                    }
+                });
+            }
+        }
     }
 }
