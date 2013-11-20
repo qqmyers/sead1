@@ -671,7 +671,7 @@ public class TupeloStore {
         Memoized<String> mBadge = badgeCache.get(collectionUri);
         if (mBadge == null) {
 
-            log.debug("No cached badge for: " + collectionUri);
+            log.trace("No cached badge for: " + collectionUri);
             mBadge = new Memoized<String>() {
                 public String computeValue() {
                     try {
@@ -689,10 +689,10 @@ public class TupeloStore {
                         //getContext().perform(u);
                         for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "descriptor") ) {
                             String datasetUri = row.get(0).getString();
-                            log.debug("Found Potential Badge (descriptor): " + datasetUri + " for: " + collectionUri);
+                            log.trace("Found Potential Badge (descriptor): " + datasetUri + " for: " + collectionUri);
                             String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
                             if (preview != null) {
-                                log.debug("Badge OK - has preview: " + preview);
+                                log.trace("Badge OK - has preview: " + preview);
                                 return datasetUri;
                             }
                         }
@@ -712,7 +712,7 @@ public class TupeloStore {
                         u.setLimit(25);
                         for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member") ) {
                             String datasetUri = row.get(0).getString();
-                            log.debug("Found Potential Badge (member): " + datasetUri + " for: " + collectionUri);
+                            log.trace("Found Potential Badge (member): " + datasetUri + " for: " + collectionUri);
                             String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
                             if (preview != null) {
                                 return datasetUri;
@@ -729,7 +729,7 @@ public class TupeloStore {
             badgeCache.put(collectionUri, mBadge);
         }
 
-        log.debug("Badge for: " + collectionUri + " is " + mBadge.getValue());
+        log.trace("Badge for: " + collectionUri + " is " + mBadge.getValue());
         return mBadge.getValue();
     }
 
