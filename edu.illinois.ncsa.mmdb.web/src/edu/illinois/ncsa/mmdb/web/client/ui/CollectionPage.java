@@ -102,6 +102,7 @@ public class CollectionPage extends Composite {
     private FlowPanel            previewFlowPanel;
     private Label                numDatasetsLabel;
     private Label                authorLabel;
+    private Anchor               doiAnchor;
 
     private PreviewPanel         previewPanel;
 
@@ -242,6 +243,8 @@ public class CollectionPage extends Composite {
         infoPanel.addStyleName("collectionInfo");
         authorLabel = new Label("Author");
         infoPanel.add(authorLabel);
+        doiAnchor = new Anchor("DOI");
+        infoPanel.add(doiAnchor);
         descriptionLabel = new Label("Description");
         infoPanel.add(descriptionLabel);
         dateLabel = new Label("Creation date unavailable");
@@ -299,6 +302,16 @@ public class CollectionPage extends Composite {
                 }
 
                 previewPanel.drawPreview(result, previewFlowPanel, result.getCollection().getUri());
+
+                //DOI
+                String doi = result.getDOI();
+                if (doi == null) {
+                    doi = "";
+                }
+                doiAnchor.setText(doi);
+                doiAnchor.setHref(doi);
+                doiAnchor.setTarget("_blank");
+
             }
         });
     }

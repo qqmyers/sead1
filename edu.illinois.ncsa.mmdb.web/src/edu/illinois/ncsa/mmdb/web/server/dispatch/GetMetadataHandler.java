@@ -41,11 +41,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.net.URL;
-import java.net.URLEncoder;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -58,14 +53,9 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMetadataResult;
-import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
@@ -110,28 +100,6 @@ public class GetMetadataHandler implements
             log.error("Error getting metadata for " + action.getUri(), e1);
             e1.printStackTrace();
         }
-
-        // SEAD SPECIFIC CODE
-        try {
-            String vaurl = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VAURL);
-            if (!vaurl.equals("")) {
-                URL url = new URL(String.format(vaurl, URLEncoder.encode(uri.getString(), "UTF-8")));
-                log.debug("DOI Querying " + url.toString());
-                Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openStream());
-                Element root = doc.getDocumentElement();
-                NodeList nl = root.getElementsByTagName("idValue");
-                for (int i = 0; i < nl.getLength(); i++ ) {
-                    Node node = nl.item(i);
-                    log.debug("Adding DOI metadata: " + node.getNodeValue());
-                    result.add("VA", "DOI", node.getNodeValue());
-                }
-            }
-        } catch (java.io.FileNotFoundException fnfe) {
-            log.debug("No DOI for " + uri.getString());
-        } catch (Throwable thr) {
-            log.error("Error getting DOI", thr);
-        }
-        // END SEAD SPECIFIC CODE
 
         return result;
     }
