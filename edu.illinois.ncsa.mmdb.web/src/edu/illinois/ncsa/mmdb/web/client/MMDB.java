@@ -182,7 +182,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
             @Override
             public void onUncaughtException(Throwable e) {
-                String s = "SEAD ACR Error:\n An unexpected error (such as a temporary communications issue or server error) has occurred.\n Please refresh your browser page to continue.\n If the issue persists, please report it to SEAD, including the following message:\n" + e.getMessage();
+                String s = "SEAD ACR Error:\n An unexpected error (such as a temporary communications issue or server error) has occurred.\n Please refresh your browser page to continue.\n If the issue persists, please report it to SEAD"; //, including the following message:\n" + e.getMessage();
                 Window.alert(s);
                 GWT.log("uncaught exception", e);
             }
@@ -710,12 +710,19 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     private void showUploadPage() {
+        Map<String, String> params = getParams();
+        final String datasetUri = params.get("id");
+
         rbac().doIfAllowed(Permission.UPLOAD_DATA, new AccessOrMessageCallback() {
             @Override
             public void onAllowed() {
                 GWT.log("Loading Upload Page", null);
                 mainContainer.clear();
-                mainContainer.add(new UploadPage(dispatchAsync));
+                UploadPage up = new UploadPage(dispatchAsync);
+                mainContainer.add(up);
+                if (datasetUri != null) {
+                    up.deriveFromDataset(dispatchAsync, datasetUri);
+                }
             }
         });
     }

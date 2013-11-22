@@ -115,8 +115,9 @@ public class DatasetInfoWidget extends Composite {
     }
 
     private String shortenTitle(String title) {
-        if (title != null && title.length() > 10) {
-            return title.substring(0, 10) + "...";
+        //Dates are up to ~18 chars, so 15+ ellipses works
+        if (title != null && title.length() > 15) {
+            return title.substring(0, 15) + "...";
         } else {
             return title;
         }
