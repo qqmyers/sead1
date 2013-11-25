@@ -64,50 +64,91 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implements ActionHandler<ListUserMetadataFields, ListUserMetadataFieldsResult> {
-    static Log                                     log = LogFactory.getLog(ListUserMetadataFieldsHandler.class);
+    static Log                                     log             = LogFactory.getLog(ListUserMetadataFieldsHandler.class);
 
-    private Memoized<ListUserMetadataFieldsResult> resultCache;
+    private Memoized<ListUserMetadataFieldsResult> editResultCache = null;
+    private Memoized<ListUserMetadataFieldsResult> viewResultCache = null;
 
-    public ListUserMetadataFieldsResult listUserMetadataFields() {
-        if (resultCache == null) {
-            resultCache = new Memoized<ListUserMetadataFieldsResult>() {
-                public ListUserMetadataFieldsResult computeValue() {
-                    ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
-                    ListNamedThingsResult r = listNamedThings(MMDB.USER_METADATA_FIELD, Rdfs.LABEL);
-                    if (r == null) {
-                        log.error("can't list plain metadata fields");
+    public ListUserMetadataFieldsResult listUserMetadataFields(boolean isForEdit) {
+        ListUserMetadataFieldsResult lumfr = null;
+        if (isForEdit) {
+            if (editResultCache == null) {
+                editResultCache = new Memoized<ListUserMetadataFieldsResult>() {
+                    public ListUserMetadataFieldsResult computeValue() {
+                        ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
+                        ListNamedThingsResult r = listNamedThings(MMDB.USER_METADATA_FIELD, Rdfs.LABEL);
+                        if (r == null) {
+                            log.error("can't list plain metadata fields");
+                        }
+                        for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
+                            //log.debug("Found plain umf " + entry.getValue());
+                            result.addField(new UserMetadataField(entry.getKey(), entry.getValue()));
+                        }
+                        // now run more queries to get user metadata fields of various other types
+                        try {
+                            addDatatypeProperties(result);
+                        } catch (OperatorException e) {
+                            log.error(e);
+                        }
+                        try {
+                            addEnumeratedProperties(result);
+                        } catch (OperatorException e) {
+                            log.error(e);
+                        }
+                        try {
+                            addNonEnumeratedProperties(result);
+                        } catch (OperatorException e) {
+                            log.error(e);
+                        }
+                        return result;
                     }
-                    for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
-                        //log.debug("Found plain umf " + entry.getValue());
-                        result.addField(new UserMetadataField(entry.getKey(), entry.getValue()));
-                    }
-                    // now run more queries to get user metadata fields of various other types
-                    try {
-                        addDatatypeProperties(result);
-                    } catch (OperatorException e) {
-                        log.error(e);
-                    }
-                    try {
-                        addEnumeratedProperties(result);
-                    } catch (OperatorException e) {
-                        log.error(e);
-                    }
-                    try {
-                        addNonEnumeratedProperties(result);
-                    } catch (OperatorException e) {
-                        log.error(e);
-                    }
-                    return result;
-                }
-            };
-            resultCache.setTtl(60 * 60 * 1000); // 1hr
+                };
+                editResultCache.setTtl(60 * 60 * 1000); // 1hr
+            }
+            lumfr = editResultCache.getValue();
         }
-        return resultCache.getValue();
+        else {
+            if (viewResultCache == null) {
+                viewResultCache = new Memoized<ListUserMetadataFieldsResult>() {
+                    public ListUserMetadataFieldsResult computeValue() {
+                        ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
+                        ListNamedThingsResult r = listNamedThings(GetUserMetadataFieldsHandler.VIEW_METADATA, Rdfs.LABEL);
+                        if (r == null) {
+                            log.error("can't list plain metadata fields");
+                        }
+                        for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
+                            //log.debug("Found plain umf " + entry.getValue());
+                            result.addField(new UserMetadataField(entry.getKey(), entry.getValue()));
+                        }
+                        // now run more queries to get user metadata fields of various other types
+                        try {
+                            addDatatypeProperties(result);
+                        } catch (OperatorException e) {
+                            log.error(e);
+                        }
+                        try {
+                            addEnumeratedProperties(result);
+                        } catch (OperatorException e) {
+                            log.error(e);
+                        }
+                        try {
+                            addNonEnumeratedProperties(result);
+                        } catch (OperatorException e) {
+                            log.error(e);
+                        }
+                        return result;
+                    }
+                };
+                viewResultCache.setTtl(60 * 60 * 1000); // 1hr
+            }
+            lumfr = viewResultCache.getValue();
+        }
+        return lumfr;
     }
 
     @Override
     public ListUserMetadataFieldsResult execute(ListUserMetadataFields arg0, ExecutionContext arg1) throws ActionException {
-        return listUserMetadataFields();
+        return listUserMetadataFields(arg0.isForEdit());
     }
 
     private static void addNonEnumeratedProperties(ListUserMetadataFieldsResult result) throws OperatorException {

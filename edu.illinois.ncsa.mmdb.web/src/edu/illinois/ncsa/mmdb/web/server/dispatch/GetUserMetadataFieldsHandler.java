@@ -80,10 +80,12 @@ public class GetUserMetadataFieldsHandler implements
         ActionHandler<GetUserMetadataFields, GetUserMetadataFieldsResult> {
 
     /** Commons logging **/
-    private static Log            log       = LogFactory
-                                                    .getLog(GetUserMetadataFieldsHandler.class);
+    private static Log            log           = LogFactory
+                                                        .getLog(GetUserMetadataFieldsHandler.class);
 
-    ListUserMetadataFieldsHandler umfHelper = new ListUserMetadataFieldsHandler();
+    public static final Resource  VIEW_METADATA = Resource.uriRef("http://sead-data.net/terms/acr/Viewable_Metadata");
+
+    ListUserMetadataFieldsHandler umfHelper     = new ListUserMetadataFieldsHandler();
 
     private String nameOf(Resource uri) throws OperatorException {
         log.debug("Name of: " + uri.toString());
@@ -195,7 +197,7 @@ public class GetUserMetadataFieldsHandler implements
                     .getContext());
             Resource subject = Resource.uriRef(action.getUri());
             Thing t = ts.fetchThing(subject);
-            for (UserMetadataField field : umfHelper.listUserMetadataFields().getFieldsSortedByName() ) {
+            for (UserMetadataField field : umfHelper.listUserMetadataFields(false).getFieldsSortedByName() ) {
                 Resource predicate = Resource.uriRef(field.getUri());
                 Collection<UserMetadataValue> values = getUserMetadataValues(t, predicate);
                 // now look for sections with this field set; this is gonna produce lots of traffic
@@ -237,7 +239,7 @@ public class GetUserMetadataFieldsHandler implements
             throws OperatorException {
         Unifier u = new Unifier();
         u.setColumnNames("field", "label");
-        u.addPattern("field", Rdf.TYPE, MMDB.USER_METADATA_FIELD);
+        u.addPattern("field", Rdf.TYPE, VIEW_METADATA); //Current and past user metadata
         u.addPattern("field", Rdfs.LABEL, "label");
         Map<String, String> result = new HashMap<String, String>();
         for (Tuple<Resource> row : TupeloStore.getInstance()

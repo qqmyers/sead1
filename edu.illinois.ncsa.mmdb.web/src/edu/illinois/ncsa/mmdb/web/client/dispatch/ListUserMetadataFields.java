@@ -42,4 +42,21 @@ import net.customware.gwt.dispatch.shared.Action;
 
 @SuppressWarnings("serial")
 public class ListUserMetadataFields implements Action<ListUserMetadataFieldsResult> {
+
+    private boolean forEdit = true;
+
+    public ListUserMetadataFields() {
+    }
+
+    public ListUserMetadataFields(boolean forEdit) {
+        setForEdit(forEdit);
+    }
+
+    public boolean isForEdit() {
+        return forEdit;
+    }
+
+    public void setForEdit(boolean forEdit) {
+        this.forEdit = forEdit;
+    }
 }

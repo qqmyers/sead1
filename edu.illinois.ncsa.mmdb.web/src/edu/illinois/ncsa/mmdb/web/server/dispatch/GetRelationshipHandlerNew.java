@@ -22,11 +22,12 @@ import edu.illinois.ncsa.mmdb.web.client.ui.Relationship;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship, GetRelationshipResult> {
 
-    static Log log = LogFactory.getLog(GetRelationshipHandlerNew.class);
+    public static final Resource VIEW_RELATIONSHIP = Resource.uriRef("http://sead-data.net/terms/acr/Viewable_Relationship");
+
+    static Log                   log               = LogFactory.getLog(GetRelationshipHandlerNew.class);
 
     @Override
     public GetRelationshipResult execute(GetRelationship action, ExecutionContext arg1) throws ActionException {
@@ -35,7 +36,7 @@ public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship,
 
             Unifier u = new Unifier();
             u.setColumnNames("label", "dataset", "type");
-            u.addPattern("type", Rdf.TYPE, MMDB.USER_RELATIONSHIP); // only fetch user relationship triples
+            u.addPattern("type", Rdf.TYPE, VIEW_RELATIONSHIP); // only fetch current/past user relationship triples
             u.addPattern(subject, "type", "dataset"); // determine the target dataset uri from the relationship triple
             u.addPattern("type", Rdfs.LABEL, "label");
             // don't fetch the reified stuff (the date and creator of the relationship) because these are not returned by this dispatch
