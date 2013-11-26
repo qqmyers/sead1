@@ -17,6 +17,7 @@ String collections = (String) request.getAttribute("collections");
 String recentUploads = (String) request.getAttribute("recentUploads");
 String creators = (String) request.getAttribute("creators");
 String projectPath = (String) request.getAttribute("projectPath");
+String geobrowserUrl = (String) request.getAttribute("geobrowserUrl");
 String datasetDistribution = (String) request.getAttribute("datasetDistribution");
 String layersInfo = (String) request.getAttribute("layersInfo");
 String geoProxyUrl = (String) request.getAttribute("geoProxyUrl");
@@ -90,7 +91,7 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 				</div>
 				<div class="span6 fixed-height-col">
 					<div id="summaryMap" class="map"></div>
-					<div><center><a href="http://sead.ncsa.illinois.edu/geo-webapp" target="_blank">Go to GeoDashBoard</a></center></div>
+					<div><center><a href="<%= geobrowserUrl %>" id="geobrowseUrl" target="_blank">Go to GeoBrowser</a></center></div>
 				</div>
 				<div class="span3 fixed-height-col" style="background:#EEEEEE">				
 					<h4>Team Members</h4>
