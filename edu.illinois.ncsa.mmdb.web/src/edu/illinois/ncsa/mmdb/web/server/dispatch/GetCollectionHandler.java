@@ -379,7 +379,9 @@ public class GetCollectionHandler implements
         try {
             String vaurl = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VAURL);
             if (!vaurl.equals("")) {
-                URL url = new URL(String.format(vaurl, URLEncoder.encode(collectionUri, "UTF-8")));
+                //Fixme - currently required by VA - seems like this would be better handled on that end
+                String escapedUri = collectionUri.replace(":", "\\:");
+                URL url = new URL(String.format(vaurl, URLEncoder.encode(escapedUri, "UTF-8")));
                 URLConnection urlCon = url.openConnection();
                 //Returns json by default - could parse that way instead
                 urlCon.setRequestProperty("Accept", "application/xml");
