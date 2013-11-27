@@ -67,10 +67,17 @@ public class Dashboard extends SparqlQueryServlet {
 		String projectPath = PropertiesLoader.getProperties().getProperty(
 				"domain");
 		
+		String geobrowserUrl = PropertiesLoader.getProperties().getProperty(
+				"geobrowserUrl"); 
+		if((geobrowserUrl==null)||(geobrowserUrl.length()==0)) {
+			geobrowserUrl= projectPath.substring(0, projectPath.lastIndexOf('/')) + "/geobrowse";
+		}
+		
 		// build the geoproxy url
 		String geoProxyUrl = projectPath+"/geoproxy/wms";
 		
 		request.setAttribute("projectPath", projectPath);
+		request.setAttribute("geobrowserUrl", geobrowserUrl);
 		request.setAttribute("collections", collections);
 		request.setAttribute("recentUploads", recentUploads);
 		request.setAttribute("creators", creators);

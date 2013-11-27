@@ -86,7 +86,8 @@ public class HasPermissionHandler implements
                 boolean hasPermission = false;
                 hasPermission = rbac.checkPermission(userUri, objectUri, permissionUri);
                 result.setIsPermitted(permission, hasPermission);
-                log.debug("User " + userUri + " " + (hasPermission ? "has" : "does not have") + " permission " + permission.getLabel());
+                log.debug("User " + userUri + " " + (hasPermission ? "has" : "does not have") + " permission " +
+                        permission.getLabel() + " " + permission.getUri());
             } catch (RBACException e) {
                 log.error("Error checking user permissions", e);
                 result.setIsPermitted(permission, false);

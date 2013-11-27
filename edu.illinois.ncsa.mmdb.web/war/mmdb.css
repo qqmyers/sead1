@@ -1620,3 +1620,27 @@ background-image: url('images/desc.gif');
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
 background-color: #8dbdd8;
 }
+
+/*Upload page - derived data callout*/
+.callout {
+background-color: #EEEEEE;
+text-align: left;
+border-radius: 6px;
+padding: 5px;
+}
+
+.derivechoice  .gwt-Label {
+padding-top: 10px;
+padding-left: 10px;
+padding-bottom: 10px;
+padding-right: 100px;
+}
+
+.callout .gwt-RadioButton {
+padding-left: 20px;
+}
+
+.callout .datasetInfoDescription div{
+padding: 0px;
+	margin: 0px auto 0px auto;
+}

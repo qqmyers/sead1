@@ -60,6 +60,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -298,6 +299,11 @@ public class DatasetWidget extends Composite {
         actionsPanel.add(embedWidget);
         final FlowPanel embedBox = new FlowPanel();
 
+        // upload derived action
+        final FlowPanel uploadWidget = new FlowPanel();
+        uploadWidget.addStyleName("inlineBlock");
+        actionsPanel.add(uploadWidget);
+
         Anchor embedAnchor = new Anchor("Embed");
         embedAnchor.addStyleName("datasetActionLink");
         embedAnchor.addClickHandler(new ClickHandler() {
@@ -392,6 +398,13 @@ public class DatasetWidget extends Composite {
                     });
                     deleteWidget.add(deleteAnchor);
                 }
+                if (p.isPermitted(Permission.UPLOAD_DATA)) {
+                    Hyperlink up = new Hyperlink();
+                    up.addStyleName("datasetActionLink");
+                    up.setText("Upload Derived Data");
+                    up.setTargetHistoryToken("upload?id=" + uri);
+                    uploadWidget.add(up);
+                }
                 um.showTableFields(p.isPermitted(Permission.EDIT_USER_METADATA));
                 //
                 // add download link, set editability of license widget
@@ -423,7 +436,8 @@ public class DatasetWidget extends Composite {
                 Permission.RERUN_EXTRACTION,
                 Permission.DELETE_DATA,
                 Permission.EDIT_USER_METADATA,
-                Permission.DOWNLOAD);
+                Permission.DOWNLOAD,
+                Permission.UPLOAD_DATA);
         // FIXME allow owner to do stuff
     }
 

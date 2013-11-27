@@ -126,7 +126,7 @@ public enum DefaultRole {
                 Permission.EDIT_COMMENT,
                 Permission.EDIT_METADATA,
                 Permission.EDIT_USER_METADATA,
-                Permission.UPLOAD_DATA,
+                //Permission.UPLOAD_DATA,
                 Permission.USE_REMOTEAPI,
                 Permission.VIEW_DATA,
                 Permission.VIEW_MEMBER_PAGES);

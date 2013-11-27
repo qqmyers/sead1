@@ -41,6 +41,9 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,6 +53,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -67,6 +72,10 @@ import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
@@ -121,6 +130,8 @@ public class GetCollectionHandler implements
             GetCollectionResult result = new GetCollectionResult(collectionBean, 0);
 
             getCollectionPreviews(arg0.getUser(), arg0.getUri(), result);
+
+            getDOI(arg0.getUri(), result);
 
             return result;
         } catch (Exception e) {
@@ -361,6 +372,48 @@ public class GetCollectionHandler implements
         } catch (OperatorException exc) {
             log.error("Could not fetch items.", exc);
             return new ArrayList<String>();
+        }
+    }
+
+    private void getDOI(String collectionUri, GetCollectionResult result) {
+        try {
+            String vaurl = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VAURL);
+            if (!vaurl.equals("")) {
+                //Fixme - currently required by VA - seems like this would be better handled on that end
+                String escapedUri = collectionUri.replace(":", "\\:");
+                URL url = new URL(String.format(vaurl, URLEncoder.encode(escapedUri, "UTF-8")));
+                URLConnection urlCon = url.openConnection();
+                //Returns json by default - could parse that way instead
+                urlCon.setRequestProperty("Accept", "application/xml");
+
+                Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(urlCon.getInputStream());
+                Element root = doc.getDocumentElement();
+                NodeList nl = root.getElementsByTagName("alternateIdentifier");
+                for (int i = 0; i < nl.getLength(); i++ ) {
+                    Node node = nl.item(i);
+                    NodeList subList = node.getChildNodes();
+                    boolean isDOI = false;
+                    String possibleDOI = null;
+                    for (int j = 0; j < subList.getLength(); j++ ) {
+                        if (((Element) subList.item(j)).getTagName() != null) {
+                            if ((((Element) subList.item(j)).getTagName().equals("typeId")) && (((Element) subList.item(j)).getFirstChild().getNodeValue().equals("doi"))) {
+                                isDOI = true;
+                            }
+                            if (((Element) subList.item(j)).getTagName().equals("idValue")) {
+                                possibleDOI = subList.item(j).getFirstChild().getNodeValue();
+                            }
+                        }
+                    }
+                    if (isDOI) {
+                        result.setDOI(possibleDOI);
+                        log.debug("Found DOI: " + possibleDOI + " for Collection: " + collectionUri);
+                    }
+                }
+            }
+        } catch (java.io.FileNotFoundException fnfe) {
+            log.debug("No DOI for " + collectionUri);
+        } catch (Throwable thr) {
+            log.debug("Error getting DOI", thr);
         }
     }
 

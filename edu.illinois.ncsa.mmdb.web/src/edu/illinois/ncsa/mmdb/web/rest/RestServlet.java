@@ -247,15 +247,14 @@ public class RestServlet extends AuthenticatedServlet {
         if (uri == null) {
             return null;
         }
-        log.debug("RestServlet.getPreview(" + uri + ", " + size);
+        log.trace("RestServlet.getPreview(" + uri + ", " + size);
         String badgeUri = TupeloStore.getInstance().getBadge(uri);
         if (badgeUri != null) {
+            log.trace("Preview uri deom badge: " + badgeUri);
             realuri = badgeUri;
         } else {
             realuri = uri;
         }
-
-        log.debug("Real uri is now: " + realuri);
 
         try {
             Collection<PreviewImageBean> previews = new LinkedList<PreviewImageBean>();
@@ -534,21 +533,21 @@ public class RestServlet extends AuthenticatedServlet {
         } else if (hasPrefix(PREVIEW_ANY, request)) {
             if (isAllowed(userId, uri, Permission.VIEW_MEMBER_PAGES, false)) {
 
-                log.debug("Getting preview: " + request.getRequestURL().toString());
+                log.trace("Getting preview: " + request.getRequestURL().toString());
                 response.flushBuffer(); // MMDB-620
                 long then = System.currentTimeMillis(); // FIXME debug
                 PreviewImageBean preview = null;
                 String image404 = null;
                 if (hasPrefix(PREVIEW_SMALL, request)) {
-                    log.debug("GET PREVIEW (small) " + uri);
+                    log.trace("GET PREVIEW (small) " + uri);
                     preview = TupeloStore.getInstance().getPreview(uri, GetPreviews.SMALL);
                     image404 = SMALL_404;
                 } else if (hasPrefix(PREVIEW_LARGE, request)) {
-                    log.debug("GET PREVIEW (large) " + uri);
+                    log.trace("GET PREVIEW (large) " + uri);
                     preview = TupeloStore.getInstance().getPreview(uri, GetPreviews.LARGE);
                     image404 = LARGE_404;
                 } else {
-                    log.debug("GET PREVIEW (any) " + uri);
+                    log.trace("GET PREVIEW (any) " + uri);
                     preview = getPreview(uri, PREVIEW_ANY);
                     image404 = SMALL_404;
                 }

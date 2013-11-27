@@ -671,7 +671,7 @@ public class TupeloStore {
         Memoized<String> mBadge = badgeCache.get(collectionUri);
         if (mBadge == null) {
 
-            log.debug("No cached badge for: " + collectionUri);
+            log.trace("No cached badge for: " + collectionUri);
             mBadge = new Memoized<String>() {
                 public String computeValue() {
                     try {
@@ -689,10 +689,10 @@ public class TupeloStore {
                         //getContext().perform(u);
                         for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "descriptor") ) {
                             String datasetUri = row.get(0).getString();
-                            log.debug("Found Potential Badge (descriptor): " + datasetUri + " for: " + collectionUri);
+                            log.trace("Found Potential Badge (descriptor): " + datasetUri + " for: " + collectionUri);
                             String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
                             if (preview != null) {
-                                log.debug("Badge OK - has preview: " + preview);
+                                log.trace("Badge OK - has preview: " + preview);
                                 return datasetUri;
                             }
                         }
@@ -712,7 +712,7 @@ public class TupeloStore {
                         u.setLimit(25);
                         for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member") ) {
                             String datasetUri = row.get(0).getString();
-                            log.debug("Found Potential Badge (member): " + datasetUri + " for: " + collectionUri);
+                            log.trace("Found Potential Badge (member): " + datasetUri + " for: " + collectionUri);
                             String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
                             if (preview != null) {
                                 return datasetUri;
@@ -729,7 +729,7 @@ public class TupeloStore {
             badgeCache.put(collectionUri, mBadge);
         }
 
-        log.debug("Badge for: " + collectionUri + " is " + mBadge.getValue());
+        log.trace("Badge for: " + collectionUri + " is " + mBadge.getValue());
         return mBadge.getValue();
     }
 
@@ -758,7 +758,7 @@ public class TupeloStore {
 
     public PreviewImageBean getPreview(final String uri, final String size) {
         // lazily initialize cache
-        log.debug("TupeloStore.getPreview(" + uri + ", " + size);
+        log.trace("TupeloStore.getPreview(" + uri + ", " + size);
         if (previewCache == null) {
             previewCache = new HashMap<String, Map<String, Memoized<PreviewImageBean>>>();
         }
@@ -1275,6 +1275,24 @@ public class TupeloStore {
         getContext().perform(uf);
         for (Tuple<Resource> row : uf.getResult() ) {
             configuration.put(row.get(0), row.get(1).getString());
+        }
+    }
+
+    /* Do something lightweight to assure database connection stays up - used by COntextSetupListener, more info there
+     * HACK
+     */
+    public void pingContext() {
+        log.debug("Performing pingContext()");
+        Unifier uf = new Unifier();
+        uf.addPattern("configuration", Rdf.TYPE, MMDB.CONFIGURATION);
+        uf.addPattern("configuration", MMDB.CONFIGURATION_KEY, "key");
+        uf.addPattern("configuration", MMDB.CONFIGURATION_VALUE, "value");
+        uf.setColumnNames("key", "value");
+        try {
+            getContext().perform(uf);
+        } catch (OperatorException e) {
+            log.warn("pingContext Failed!");
+            e.printStackTrace();
         }
     }
 }

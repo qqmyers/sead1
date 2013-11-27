@@ -46,11 +46,14 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -64,11 +67,16 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UploadWidget;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationship;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
@@ -97,15 +105,26 @@ public class UploadPage extends Page {
     Timer                                  safariWakeupTimer;
     private boolean                        showhtml5;
 
+    private static String                  ancestor;
+    private static String                  derivationPredicate;
+    private final static String            versionPredicate       = "http://www.w3.org/ns/prov#wasRevisionOf";
+    private final static String            derivedFromPredicate   = "http://www.w3.org/ns/prov#wasDerivedFrom";
+    private static UploadPage              activeUploadPage;
+
     public static final String             DND_ENABLED_PREFERENCE = "dndAppletEnabled";
 
+    /* DispatchAysnc required? UploadPage() appears unused
     public UploadPage() {
         super();
         setPageTitle(TITLE);
+        ancestor = null;
     }
+    */
 
     public UploadPage(DispatchAsync dispatchasync) {
         super(TITLE, dispatchasync);
+        ancestor = null;
+        activeUploadPage = this;
     }
 
     @Override
@@ -367,6 +386,7 @@ public class UploadPage extends Page {
     public static void fileUploaded(String uriUploaded, String offset) {
         String uri = uriUploaded + ""; // identity transform required, do not remove
         GWT.log("applet says " + uri + " uploaded");
+        addDerviationRelationshipIfNeeded(uri);
         uploadStatusPresenter.onComplete(uri, Integer.parseInt(offset + "")); // identity transform required, do not remove
     }
 
@@ -447,4 +467,93 @@ public class UploadPage extends Page {
     public static native String getUserAgent() /*-{
 		return navigator.userAgent.toLowerCase();
     }-*/;
+
+    public void deriveFromDataset(DispatchAsync service, String datasetUri) {
+        setPageTitle(TITLE + " Derived Data");
+
+        ancestor = datasetUri;
+
+        RadioButton version = new RadioButton("relationGroup", "A New Version");
+        RadioButton derived = new RadioButton("relationGroup", "Derived Data Product(s)");
+
+        // Check 'version' by default.
+        version.setValue(true);
+        derivationPredicate = versionPredicate;
+
+        version.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> e) {
+                if (e.getValue() == true) {
+                    derivationPredicate = versionPredicate;
+                }
+            }
+
+        });
+
+        version.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> e) {
+                if (e.getValue() == true) {
+                    derivationPredicate = derivedFromPredicate;
+                }
+            }
+
+        });
+
+        Label rel = new Label("The new data being uploaded is");
+        Label target = new Label(" of Dataset: ");
+
+        FlowPanel fp = new FlowPanel();
+        fp.setStyleName("callout");
+
+        final HorizontalPanel dp = new HorizontalPanel();
+
+        VerticalPanel relPanel = new VerticalPanel();
+        relPanel.setStyleName("derivechoice");
+        relPanel.add(rel);
+        relPanel.add(version);
+        relPanel.add(derived);
+        relPanel.add(target);
+
+        dp.add(relPanel);
+        fp.add(dp);
+
+        mainLayoutPanel.insert(fp, 1);
+        service.execute(new GetDataset(datasetUri, MMDB.getUsername()), new AsyncCallback<GetDatasetResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error getting dataset", null);
+            }
+
+            @Override
+            public void onSuccess(GetDatasetResult result) {
+                //FixMe - use DynamicTableView with 1 row?
+                dp.add(new DatasetInfoWidget(result.getDataset(), dispatchAsync));
+            }
+        });
+
+    }
+
+    //Adds a derivation relationship for the newly uploaded data if there's an ancestor 
+    //(i.e. called from dataset page  with a #upload?id=<ancestor> history tag)
+    private static void addDerviationRelationshipIfNeeded(final String uri) {
+        if (ancestor != null) {
+            getDispatchAsync().execute(new SetRelationship(uri, derivationPredicate, ancestor, MMDB.getUsername()),
+                    new AsyncCallback<SetRelationshipResult>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log("Error creating relationship", caught);
+                            Window.alert("Data uploaded but could not write derivation relationship: " + uri + " " + derivationPredicate + " " + ancestor);
+                        }
+
+                        public void onSuccess(SetRelationshipResult result) {
+                        }
+                    });
+        }
+    }
+
+    private static DispatchAsync getDispatchAsync() {
+        return activeUploadPage.dispatchAsync;
+    }
 }

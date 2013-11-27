@@ -191,8 +191,11 @@ echo "remoteAPIKey=$apiKey" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "#mapKey=$mapKey" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "google.client_id=$clientid" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "geoserver=$gServer" >> geobrowse/WEB-INF/classes/geobrowse.properties
+if [ "$gUser" ]; then
 echo "geouser=$gUser" >> geobrowse/WEB-INF/classes/geobrowse.properties
 echo "geopassword=$gPassword" >> geobrowse/WEB-INF/classes/geobrowse.properties
+fi
+
 echo "proxiedgeoserver=$gProxy"  >> geobrowse/WEB-INF/classes/geobrowse.properties
 
 if [ "$verbose" ]; then

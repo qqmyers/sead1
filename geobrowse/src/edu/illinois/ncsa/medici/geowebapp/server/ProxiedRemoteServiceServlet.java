@@ -1,11 +1,11 @@
 package edu.illinois.ncsa.medici.geowebapp.server;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.sead.acr.common.MediciProxy;
+
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
 
