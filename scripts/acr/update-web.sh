@@ -11,7 +11,7 @@ wget -q -O medici.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-ME
 unzip -q -d war medici.war
 cp acr.log4j  war/WEB-INF/classes/log4j.properties
 cp acr.server war/WEB-INF/classes/server.properties
-cp acr.commons war/WEB-INF/classes/acr_commons.properties
+cp acr.common war/WEB-INF/classes/acr_commons.properties
 
 chown -R tomcat6.tomcat6 war
 mv war /var/lib/tomcat6/webapps/acr
