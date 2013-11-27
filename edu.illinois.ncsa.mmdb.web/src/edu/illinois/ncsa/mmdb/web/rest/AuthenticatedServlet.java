@@ -71,6 +71,7 @@ public class AuthenticatedServlet extends HttpServlet {
     static Log                 log              = LogFactory.getLog(AuthenticatedServlet.class);
 
     public static final String AUTHENTICATED_AS = "edu.illinois.ncsa.mmdb.web.server.auth.authenticatedAs";
+    public static final String REMOTE_ALLOWED   = "edu.illinois.ncsa.mmdb.web.server.auth.RemoteAllowed";
     public static final String _anonymousId     = PersonBeanUtil.getAnonymous().getUri();                   ;
 
     @Override
@@ -107,6 +108,14 @@ public class AuthenticatedServlet extends HttpServlet {
                     session = request.getSession(true);
                     log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
                     session.setAttribute(AUTHENTICATED_AS, validUser);
+                    SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+                    try {
+                        if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
+                            session.setAttribute(REMOTE_ALLOWED, "true");
+                        }
+                    } catch (RBACException re) {
+                        log.warn("Error determining remote api permission");
+                    }
                     response.getWriter().print(session.getId());
                 }
             } else if (googleAccessToken != null) {
@@ -125,6 +134,14 @@ public class AuthenticatedServlet extends HttpServlet {
                     session = request.getSession(true);
                     log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
                     session.setAttribute(AUTHENTICATED_AS, validUser);
+                    SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+                    try {
+                        if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
+                            session.setAttribute(REMOTE_ALLOWED, "true");
+                        }
+                    } catch (RBACException re) {
+                        log.warn("Error determining remote api permission");
+                    }
                     response.getWriter().print(session.getId());
 
                 }
