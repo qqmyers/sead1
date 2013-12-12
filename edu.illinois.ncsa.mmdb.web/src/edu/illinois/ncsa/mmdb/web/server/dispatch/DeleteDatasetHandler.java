@@ -54,6 +54,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.server.AccessControl;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Delete dataset. Marks dataset as deleted but content still remains in the
@@ -72,8 +73,9 @@ public class DeleteDatasetHandler implements
     public DeleteDatasetResult execute(DeleteDataset arg0, ExecutionContext arg1)
             throws ActionException {
         String datasetUri = arg0.getUri();
+        Resource userUri = arg0.getUser() == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(arg0.getUser());
         // check for authorization
-        if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(Resource.uriRef(arg0.getUser()), Resource.uriRef(arg0.getUri()))) {
+        if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(userUri, Resource.uriRef(arg0.getUri()))) {
             throw new ActionException("No access to dataset");
         }
         if (!AccessControl.isAdmin(arg0.getUser()) && !AccessControl.isCreator(arg0.getUser(), datasetUri)) {

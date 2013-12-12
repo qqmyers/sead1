@@ -22,6 +22,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.Relationship;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship, GetRelationshipResult> {
 
@@ -44,8 +45,9 @@ public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship,
             Map<String, Relationship> dataset = new HashMap<String, Relationship>();
 
             SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+            Resource user = action.getUser() == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(action.getUser());
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "dataset") ) {
-                if (!rbac.checkAccessLevel(Resource.uriRef(action.getUser()), row.get(1))) {
+                if (!rbac.checkAccessLevel(user, row.get(1))) {
                     continue;
                 }
                 DatasetBean db = TupeloStore.fetchDataset(row.get(1)); // dbu's only take strings

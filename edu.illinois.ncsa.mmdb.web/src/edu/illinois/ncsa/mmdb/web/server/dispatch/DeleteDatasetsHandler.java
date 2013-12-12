@@ -55,6 +55,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasets;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 public class DeleteDatasetsHandler implements ActionHandler<DeleteDatasets, BatchResult> {
@@ -65,10 +66,11 @@ public class DeleteDatasetsHandler implements ActionHandler<DeleteDatasets, Batc
         TripleWriter mod = new TripleWriter();
         Context context = TupeloStore.getInstance().getContext();
         SEADRbac rbac = new SEADRbac(context);
+        Resource userUri = arg0.getUser() == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(arg0.getUser());
         for (String datasetUri : arg0.getResources() ) {
             // check for authorization
             try {
-                if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(Resource.uriRef(arg0.getUser()), Resource.uriRef(datasetUri))) {
+                if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(userUri, Resource.uriRef(datasetUri))) {
                     result.setFailure(datasetUri, "no access to dataset");
                 } else if (!rbac.checkPermission(arg0.getUser(), datasetUri, Permission.DELETE_DATA)) {
                     result.setFailure(datasetUri, "Unauthorized");

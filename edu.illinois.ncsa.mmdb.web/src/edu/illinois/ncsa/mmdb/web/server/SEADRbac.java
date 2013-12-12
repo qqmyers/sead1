@@ -58,6 +58,9 @@ public class SEADRbac extends RBAC {
     }
 
     public boolean checkAccessLevel(Resource user, Resource item) {
+        if (user == null) {
+            user = PersonBeanUtil.getAnonymousURI();
+        }
         int userLevel = getUserAccessLevel(user);
         int accesslevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
         String accesspredicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);

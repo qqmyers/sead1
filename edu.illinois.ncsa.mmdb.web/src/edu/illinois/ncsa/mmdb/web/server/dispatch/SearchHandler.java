@@ -62,6 +62,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.Search;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchResult;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
@@ -95,12 +96,13 @@ public class SearchHandler implements ActionHandler<Search, SearchResult> {
 
         // search for ids using RDF matcher.
         SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        Resource userUri = arg0.getUser() == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(arg0.getUser());
         Set<String> idsfound = null;
         if (uf.getPatterns().size() > 0) {
             try {
                 idsfound = new HashSet<String>();
                 for (Tuple<Resource> r : TupeloStore.getInstance().unifyExcludeDeleted(uf, "s") ) {
-                    if (rbac.checkAccessLevel(Resource.uriRef(arg0.getUser()), r.get(0))) {
+                    if (rbac.checkAccessLevel(userUri, r.get(0))) {
                         idsfound.add(r.get(0).getString());
                     }
                 }

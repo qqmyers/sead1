@@ -60,6 +60,7 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewDocumentBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewGeoserverBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
@@ -87,7 +88,8 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
     @Override
     public GetDatasetResult execute(GetDataset action, ExecutionContext arg1) throws ActionException {
         SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
-        if (!rbac.checkAccessLevel(Resource.uriRef(action.getUser()), Resource.uriRef(action.getUri()))) {
+        Resource userUri = action.getUser() == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(action.getUser());
+        if (!rbac.checkAccessLevel(userUri, Resource.uriRef(action.getUri()))) {
             throw new ActionException("Accesslevel does not allow access to dataset.");
         }
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();

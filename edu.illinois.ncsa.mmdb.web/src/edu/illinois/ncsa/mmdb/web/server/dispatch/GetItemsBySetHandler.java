@@ -61,6 +61,7 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Retrieve datasets from a set of datasets
@@ -87,6 +88,7 @@ public class GetItemsBySetHandler implements ActionHandler<GetItemsBySet, GetIte
 
         try {
             SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+            Resource userUri = action.getUser() == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(action.getUser());
             for (String uri : action.getItems() ) {
                 Collection<Resource> types = beanSession.getRDFTypes(Resource.uriRef(uri));
                 for (Resource type : types ) {
@@ -97,7 +99,7 @@ public class GetItemsBySetHandler implements ActionHandler<GetItemsBySet, GetIte
                         break;
                     }
                     if (type.equals(dbu.getType())) {
-                        if (!rbac.checkAccessLevel(Resource.uriRef(action.getUser()), Resource.uriRef(uri))) {
+                        if (!rbac.checkAccessLevel(userUri, Resource.uriRef(uri))) {
                             break;
                         }
                         DatasetBean bean = dbu.get(uri);
