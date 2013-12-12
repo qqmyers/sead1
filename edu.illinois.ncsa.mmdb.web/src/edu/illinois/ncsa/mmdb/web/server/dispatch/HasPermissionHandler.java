@@ -107,7 +107,9 @@ public class HasPermissionHandler implements
      * @return
      */
     private Resource createUserURI(String user) {
-        if (user.startsWith("http://cet.ncsa.uiuc.edu/")) {
+        if (user == null) {
+            return PersonBeanUtil.getAnonymousURI();
+        } else if (user.startsWith("http://cet.ncsa.uiuc.edu/")) {
             Resource userURI = Resource.uriRef(user);
             return userURI;
         } else {
