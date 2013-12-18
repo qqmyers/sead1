@@ -11,15 +11,6 @@ callOnLoad();
 
 function initMap() {
 	/**
-	 * Google map initialize
-	 */
-	// var mapProp = {
-	// center : new google.maps.LatLng(29.1536, -89.2508),
-	// zoom : 5,
-	// mapTypeId : google.maps.MapTypeId.HYBRID
-	// };
-	// var map = new google.maps.Map($("#summaryMap")[0], mapProp);
-	/**
 	 * OpenLayers v2 initialize
 	 */
 	var geographic = new OpenLayers.Projection("EPSG:4326");
@@ -35,7 +26,9 @@ function initMap() {
 	layerList = getWmsLayers();
 	console.log(layerList);
 	var bounds = new OpenLayers.Bounds();
+
 	if(layerList.length > 0 ) {
+		// if layerList has more than 1 layer
 		for(var i=0;i < layerList.length;i++) {
 			var l = layerList[i];
 			console.log(l);
@@ -50,6 +43,7 @@ function initMap() {
 		    bounds.extend(new OpenLayers.LonLat(parseFloat(e[2]), parseFloat(e[3])));
 		}
 	} else {
+		// if layerList had no layer, then use the default bounding box
 		bounds = defaultBox.transform(new OpenLayers.Projection("EPSG:4326"),
 				new OpenLayers.Projection("EPSG:900913"));
 	}
