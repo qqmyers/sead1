@@ -531,7 +531,7 @@ public class RestServlet extends AuthenticatedServlet {
             return;
 
         } else if (hasPrefix(PREVIEW_ANY, request)) {
-            if (isAllowed(userId, uri, Permission.VIEW_MEMBER_PAGES, false)) {
+            if (isAllowed(userId, uri, Permission.VIEW_DATA, false)) {
 
                 log.trace("Getting preview: " + request.getRequestURL().toString());
                 response.flushBuffer(); // MMDB-620
@@ -584,7 +584,7 @@ public class RestServlet extends AuthenticatedServlet {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             }
         } else if (hasPrefix(VIDEO_INFIX, request)) {
-            if (isAllowed(userId, "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri, Permission.DOWNLOAD, false)) {
+            if (isAllowed(userId, "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri, Permission.VIEW_DATA, false)) {
                 int idx = uri.lastIndexOf(".");
                 String ext = null;
                 if (idx > 0) {
