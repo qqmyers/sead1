@@ -50,8 +50,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
@@ -65,6 +66,7 @@ public class AddToCollectionDialog extends DialogBox {
 
     private final ListBox list;
     private final Button  submitButton;
+    final TextBox         newCollectionBox;
 
     public AddToCollectionDialog(DispatchAsync service) {
         this(service, "Add to collection");
@@ -79,33 +81,39 @@ public class AddToCollectionDialog extends DialogBox {
 
         FlowPanel mainContainer = new FlowPanel();
         mainContainer.addStyleName("addToCollectionDialog");
-        mainContainer.setSize("400px", "200px");
+        mainContainer.setSize("400px", "300px");
         setWidget(mainContainer);
 
-        mainContainer.add(new Label("Select collection"));
+        mainContainer.add(new HTML("<b>Select collection</b>"));
 
         list = new ListBox();
         list.setVisibleItemCount(5);
-        list.setWidth("300px");
+        list.setWidth("350px");
         mainContainer.add(list);
 
         // retrieve collections
         service.execute(new GetCollections(),
                 new AsyncCallback<GetCollectionsResult>() {
 
-            @Override
-            public void onFailure(Throwable arg0) {
-                GWT.log("Error retrieving collections", arg0);
-            }
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        GWT.log("Error retrieving collections", arg0);
+                    }
 
-            @Override
-            public void onSuccess(GetCollectionsResult arg0) {
-                for (CollectionBean collection : arg0.getCollections() ) {
-                    list.addItem(collection.getTitle(), collection
-                            .getUri());
-                }
-            }
-        });
+                    @Override
+                    public void onSuccess(GetCollectionsResult arg0) {
+                        for (CollectionBean collection : arg0.getCollections() ) {
+                            list.addItem(collection.getTitle(), collection
+                                    .getUri());
+                        }
+                    }
+                });
+
+        // new collection
+        mainContainer.add(new HTML("<b>Create new collection</b>"));
+        newCollectionBox = new TextBox();
+        newCollectionBox.setWidth("350px");
+        mainContainer.add(newCollectionBox);
 
         // buttons
         FlowPanel buttonsPanels = new FlowPanel();
@@ -124,6 +132,25 @@ public class AddToCollectionDialog extends DialogBox {
             }
         });
         buttonsPanels.add(closeButton);
+
+        // selection listeners
+        list.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                newCollectionBox.setText("");
+            }
+        });
+        newCollectionBox.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (list.getSelectedIndex() != -1) {
+                    list.setItemSelected(list.getSelectedIndex(), false);
+                }
+            }
+        });
+
         center();
     }
 
@@ -133,7 +160,15 @@ public class AddToCollectionDialog extends DialogBox {
     }
 
     public String getSelectedValue() {
-        return list.getValue(list.getSelectedIndex());
+        if (list.getSelectedIndex() == -1) {
+            return null;
+        } else {
+            return list.getValue(list.getSelectedIndex());
+        }
+    }
+
+    public String getNewCollectionValue() {
+        return newCollectionBox.getValue();
     }
 
     public void addClickHandler(ClickHandler ch) {

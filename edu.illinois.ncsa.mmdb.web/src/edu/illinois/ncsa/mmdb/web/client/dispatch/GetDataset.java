@@ -47,8 +47,6 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
  */
 @SuppressWarnings("serial")
 public class GetDataset extends SubjectAction<GetDatasetResult> {
-    private String user;
-
     @SuppressWarnings("unused")
     private GetDataset() {
     }
@@ -68,13 +66,5 @@ public class GetDataset extends SubjectAction<GetDatasetResult> {
     @Deprecated
     public String getId() {
         return getUri();
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
     }
 }

@@ -68,6 +68,8 @@ import com.google.gwt.user.client.ui.Widget;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
@@ -107,7 +109,7 @@ public class CollectionPage extends Composite {
     private FlowPanel                   previewFlowPanel;
     private Label                       numDatasetsLabel;
     private Label                       authorLabel;
-    private Anchor               		doiAnchor;
+    private Anchor                      doiAnchor;
     private AddToCollectionDialog       addToCollectionDialog;
     private PreviewPanel                previewPanel;
     private final DatasetTablePresenter dynamicTablePresenter;
@@ -472,10 +474,41 @@ public class CollectionPage extends Composite {
 
         @Override
         public void onClick(ClickEvent arg0) {
-            String value = addToCollectionDialog.getSelectedValue();
-            if (value != null && !value.equals(uri)) {
-                GWT.log("Adding collection " + value + " to " + uri);
-                service.execute(new SetUserMetadata(uri, subcollectionPredicate, value, true), new AsyncCallback<EmptyResult>() {
+            String existingCollection = addToCollectionDialog.getSelectedValue();
+            String newCollection = addToCollectionDialog.getNewCollectionValue();
+            if (!newCollection.isEmpty()) {
+                // create new collection
+                final CollectionBean collection = new CollectionBean();
+                collection.setTitle(newCollection);
+                service.execute(new AddCollection(collection, MMDB.getUsername()),
+                        new AsyncCallback<AddCollectionResult>() {
+
+                            @Override
+                            public void onFailure(Throwable arg0) {
+                                GWT.log("Failed creating new collection", arg0);
+                            }
+
+                            @Override
+                            public void onSuccess(AddCollectionResult arg0) {
+                                service.execute(new SetUserMetadata(uri, subcollectionPredicate, collection.getUri(), true), new AsyncCallback<EmptyResult>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        GWT.log("Error adding collection relationship.", caught);
+                                    }
+
+                                    @Override
+                                    public void onSuccess(EmptyResult result) {
+                                        GWT.log("Successfully added subcollection.");
+                                        addToCollectionDialog.hide();
+                                        dynamicTablePresenter.refresh();
+                                    }
+                                });
+
+                            }
+                        });
+            } else if (existingCollection != null && !existingCollection.equals(uri)) {
+                GWT.log("Adding collection " + existingCollection + " to " + uri);
+                service.execute(new SetUserMetadata(uri, subcollectionPredicate, existingCollection, true), new AsyncCallback<EmptyResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Error adding collection relationship.", caught);

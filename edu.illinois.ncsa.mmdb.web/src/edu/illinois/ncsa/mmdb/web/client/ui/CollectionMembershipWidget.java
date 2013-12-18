@@ -58,8 +58,11 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
@@ -234,12 +237,48 @@ public class CollectionMembershipWidget extends Composite {
 
         @Override
         public void onClick(ClickEvent arg0) {
-            String value = addToCollectionDialog.getSelectedValue();
-            if (value != null) {
-                GWT.log("Adding " + datasetURI + " to collection " + value, null);
+
+            String existingCollection = addToCollectionDialog.getSelectedValue();
+            String newCollection = addToCollectionDialog.getNewCollectionValue();
+            if (!newCollection.isEmpty()) {
+                // create new collection
+                final CollectionBean collection = new CollectionBean();
+                collection.setTitle(newCollection);
+                service.execute(new AddCollection(collection, MMDB.getUsername()),
+                        new AsyncCallback<AddCollectionResult>() {
+
+                            @Override
+                            public void onFailure(Throwable arg0) {
+                                GWT.log("Failed creating new collection", arg0);
+                            }
+
+                            @Override
+                            public void onSuccess(AddCollectionResult arg0) {
+                                GWT.log("Adding " + datasetURI + " to collection " + collection.getUri(), null);
+                                Collection<String> datasets = new HashSet<String>();
+                                datasets.add(datasetURI);
+                                service.execute(new AddToCollection(collection.getUri(), datasets),
+                                        new AsyncCallback<AddToCollectionResult>() {
+
+                                            @Override
+                                            public void onFailure(Throwable arg0) {
+                                                GWT.log("Error adding dataset to collection", arg0);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(AddToCollectionResult arg0) {
+                                                GWT.log("Data successfully added to collection");
+                                                addToCollectionDialog.hide();
+                                                loadCollections();
+                                            }
+                                        });
+                            }
+                        });
+            } else if (existingCollection != null) {
+                GWT.log("Adding " + datasetURI + " to collection " + existingCollection, null);
                 Collection<String> datasets = new HashSet<String>();
                 datasets.add(datasetURI);
-                service.execute(new AddToCollection(value, datasets),
+                service.execute(new AddToCollection(existingCollection, datasets),
                         new AsyncCallback<AddToCollectionResult>() {
 
                             @Override
@@ -255,6 +294,7 @@ public class CollectionMembershipWidget extends Composite {
                             }
                         });
             }
+
         }
     }
 }
