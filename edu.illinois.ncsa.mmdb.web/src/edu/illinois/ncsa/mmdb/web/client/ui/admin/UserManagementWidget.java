@@ -70,6 +70,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AdminAddUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AdminAddUserResult;
@@ -167,7 +168,7 @@ public class UserManagementWidget extends Composite {
                 } else if (!email.getValue().matches(SignupPage.EMAIL_REGEX)) {
                     status.setText("Please specify a valid email address");
                 } else {
-                    dispatchAsync.execute(new AdminAddUser(firstName.getValue(), lastName.getValue(), email.getValue()), new AsyncCallback<AdminAddUserResult>() {
+                    dispatchAsync.execute(new AdminAddUser(firstName.getValue(), lastName.getValue(), email.getValue(), MMDB.getSessionState().getCurrentUser().getUri()), new AsyncCallback<AdminAddUserResult>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -179,7 +180,7 @@ public class UserManagementWidget extends Composite {
                         public void onSuccess(AdminAddUserResult result) {
                             if (result.getError() == null) {
                                 GWT.log("Successfully created a new user");
-                                status.setText("User successfully created and invited by email.");
+                                status.setText("User successfully created and invited by email. The new user's role has been set to: " + result.getRole() + ". Refresh user list to change their role.");
                                 email.setText("");
                                 firstName.setText("");
                                 lastName.setText("");

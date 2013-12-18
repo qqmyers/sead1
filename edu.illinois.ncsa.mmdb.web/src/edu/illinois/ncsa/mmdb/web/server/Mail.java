@@ -85,7 +85,7 @@ public class Mail {
         String subject = presubj + " Account Activated";
         String body = String.format("Your account for use on server %s has been activated.", server);
         try {
-            sendMessage(new String[] { user.getEmail() }, subject, body);
+            sendMessage(new String[] { user.getEmail() }, null, subject, body);
         } catch (MessagingException e) {
             log.error(String.format("Could not send email to '%s' about '%s'.", user.getEmail(), subject), e);
         }
@@ -98,7 +98,7 @@ public class Mail {
         String subject = presubj + " New Password";
         String body = String.format("Your new password for use on server %s is : %s", server, newPassword);
         try {
-            sendMessage(new String[] { user.getEmail() }, subject, body);
+            sendMessage(new String[] { user.getEmail() }, null, subject, body);
         } catch (MessagingException e) {
             log.error(String.format("Could not send email to '%s' about '%s'.", user.getEmail(), subject), e);
         }
@@ -141,7 +141,7 @@ public class Mail {
         body.append(String.format("NAME  : %s\n", user.getName()));
         body.append(String.format("EMAIL : %s\n", user.getEmail()));
         try {
-            sendMessage(getAdminEmail(), subject, body.toString()); //$NON-NLS-1$
+            sendMessage(getAdminEmail(), null, subject, body.toString()); //$NON-NLS-1$
         } catch (MessagingException e) {
             log.error(String.format("Could not send email to admins about '%s'.", subject), e);
         }
@@ -150,15 +150,29 @@ public class Mail {
     /**
      * Notified a user that an account was created for them.
      */
-    public static void createdNewUser(PersonBean user, String password) {
+    public static void createdNewUser(PersonBean user, PersonBean admin, String password) {
         TupeloStore ts = TupeloStore.getInstance();
         String server = ts.getConfiguration(ConfigurationKey.MediciName);
         String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
-        String subject = presubj + " Account Activated";
-        String body = String.format("A user account on the server %s using this email address. Your default password is %s " +
-                "You can change your account information by logging in and going to Home > Profile.", server, password);
+        String subject = presubj + " Invitation to access data";
+        String body = String.format("Welcome to SEAD! - a new way for projects to manage, curate and preserve data.\n\n" +
+                "You have been invited by an administrator (cc'd) to access and contribute to the data collection(s) being " +
+                "developed by the project using a SEAD Active Content Repository.\n\n" +
+                "A user account on the server %s has been created using this email address. You can login using your Google password" +
+                " if this email is associated with a google account (recommended). Or, you can use the temporary password %s " +
+                "to login via a local account. (You can then change your password information by logging in and going to Home > Profile.)" +
+                "\n\nYou have initially been given full read/write access to this repository (an admin may subsequently add/remove privileges)." +
+                " Getting Started information is available at http://sead-data.net. Questions can be sent to seaddatanet@umich.edu.", server, password);
         try {
-            sendMessage(new String[] { user.getEmail() }, subject, body);
+            String adminEmail = null;
+            if (admin != null) {
+                adminEmail = admin.getEmail();
+            }
+            if (adminEmail != null) {
+                sendMessage(new String[] { user.getEmail() }, new String[] { admin.getEmail() }, subject, body);
+            } else {
+                sendMessage(new String[] { user.getEmail() }, null, subject, body);
+            }
         } catch (MessagingException e) {
             log.error(String.format("Could not send email to '%s' about '%s'.", user.getEmail(), subject), e);
         }
@@ -173,7 +187,7 @@ public class Mail {
      * @param body
      * @throws MessagingException
      */
-    public static void sendMessage(String[] rpts, String subject, String body) throws MessagingException {
+    public static void sendMessage(String[] rpts, String[] ccList, String subject, String body) throws MessagingException {
         TupeloStore ts = TupeloStore.getInstance();
         String from = ts.getConfiguration(ConfigurationKey.MailFrom);
         String fullname = ts.getConfiguration(ConfigurationKey.MailFullName);
@@ -189,6 +203,11 @@ public class Mail {
         }
         for (String rcpt : rpts ) {
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(rcpt));
+        }
+        if (ccList != null) {
+            for (String cc : ccList ) {
+                message.addRecipient(MimeMessage.RecipientType.CC, new InternetAddress(cc));
+            }
         }
         message.setSubject(subject); //$NON-NLS-1$
         message.setText(body);

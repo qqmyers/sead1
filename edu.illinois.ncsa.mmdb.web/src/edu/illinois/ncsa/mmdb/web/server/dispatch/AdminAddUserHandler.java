@@ -76,19 +76,28 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 public class AdminAddUserHandler implements ActionHandler<AdminAddUser, AdminAddUserResult> {
 
     /** Commons logging **/
-    private static Log    log            = LogFactory.getLog(AdminAddUserHandler.class);
+    private static Log         log         = LogFactory.getLog(AdminAddUserHandler.class);
 
-    private static String defaultRoleURI = DefaultRole.AUTHOR.getUri();
+    private static DefaultRole defaultRole = DefaultRole.AUTHOR;
 
     @Override
     public AdminAddUserResult execute(AdminAddUser arg0, ExecutionContext arg1) throws ActionException {
         SEADRbac rbac = TupeloStore.getInstance().getRbac();
         String personId = PersonBeanUtil.getPersonID(arg0.getEmail());
-        Resource defaultRole = Resource.uriRef(defaultRoleURI);
+        Resource defaultRoleResource = Resource.uriRef(defaultRole.getUri());
+
+        PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
+        PersonBean adminBean = null;
+        try {
+            pbu.get(arg0.getAdminId());
+        } catch (Exception e) {
+            log.warn("Could not get inviting admin. No one will be cc'd on invite");
+            log.debug(e.getMessage());
+        }
 
         if (userExists(arg0.getEmail())) {
-            log.error("Tyring to create a user that already exists with email address " + arg0.getEmail());
-            return new AdminAddUserResult("Error inviting user. User already exists.");
+            log.error("Trying to create a user that already exists with email address " + arg0.getEmail());
+            return new AdminAddUserResult(defaultRole.getName(), "Error inviting user. User already exists.");
         } else {
             PersonBean pb = new PersonBean();
             pb.setUri(personId);
@@ -99,17 +108,17 @@ public class AdminAddUserHandler implements ActionHandler<AdminAddUser, AdminAdd
             try {
                 ContextAuthentication auth = new ContextAuthentication(TupeloStore.getInstance().getContext());
                 auth.addUser(pb.getEmail(), pb.getName(), password);
-                rbac.addRole(pb, defaultRole);
-                Mail.createdNewUser(pb, password);
+                rbac.addRole(pb, defaultRoleResource);
+                Mail.createdNewUser(pb, adminBean, password);
             } catch (AuthenticationException e) {
                 log.error(String.format("Error adding user %s with email %s.", pb.getName(), pb.getEmail()), e);
-                return new AdminAddUserResult("Error inviting user. User already exists.");
+                return new AdminAddUserResult(defaultRole.getName(), "Error inviting user. User already exists.");
             } catch (OperatorException e) {
-                log.error(String.format("Error setting role %s for user %s with email %s.", defaultRoleURI, pb.getName(), pb.getEmail()), e);
-                return new AdminAddUserResult("Error setting default role for user.");
+                log.error(String.format("Error setting role %s for user %s with email %s.", defaultRole.getUri(), pb.getName(), pb.getEmail()), e);
+                return new AdminAddUserResult(defaultRole.getName(), "Error setting default role for user.");
             }
         }
-        return new AdminAddUserResult();
+        return new AdminAddUserResult(defaultRole.getName(), null);
     }
 
     private boolean userExists(String email) {

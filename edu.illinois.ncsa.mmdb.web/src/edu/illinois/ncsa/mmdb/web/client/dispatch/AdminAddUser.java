@@ -55,14 +55,16 @@ public class AdminAddUser implements Action<AdminAddUserResult> {
     private String firstName;
     private String lastName;
     private String email;
+    private String adminId;
 
     public AdminAddUser() {
     }
 
-    public AdminAddUser(String firstName, String lastName, String email) {
+    public AdminAddUser(String firstName, String lastName, String email, String adminId) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.adminId = adminId;
     }
 
     /**
@@ -84,5 +86,13 @@ public class AdminAddUser implements Action<AdminAddUserResult> {
      */
     public String getEmail() {
         return email;
+    }
+
+    public String getAdminId() {
+        return adminId;
+    }
+
+    public void setAdminId(String adminId) {
+        this.adminId = adminId;
     }
 }

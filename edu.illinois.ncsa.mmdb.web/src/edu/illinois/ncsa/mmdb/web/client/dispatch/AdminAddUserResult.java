@@ -50,15 +50,22 @@ import net.customware.gwt.dispatch.shared.Result;
 public class AdminAddUserResult implements Result {
 
     private String error = null;
+    private String role  = null;
 
     public AdminAddUserResult() {
     }
 
-    public AdminAddUserResult(String error) {
+    public AdminAddUserResult(String role, String error) {
+        this.role = role;
         this.error = error;
     }
 
     public String getError() {
         return error;
     }
+
+    public String getRole() {
+        return role;
+    }
+
 }

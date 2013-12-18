@@ -95,6 +95,6 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
                 "Subj: " + summary + "\n\n" +
                 description;
 
-        Mail.sendMessage(Mail.getAdminEmail(), subj, body);
+        Mail.sendMessage(Mail.getAdminEmail(), null, subj, body);
     }
 }
