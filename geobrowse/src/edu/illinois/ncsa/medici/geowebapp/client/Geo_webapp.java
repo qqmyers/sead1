@@ -83,6 +83,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	private static String wmsUrl = "http://localhost/geoserver/wms";
 	private static String mediciUrl = "http://localhost/acr";
 
+	private static Bounds defaultBox = new Bounds(-137.42, 19.28, -61.30, 51.62);
+
 	private final WmsProxyServiceAsync wmsProxySvc = (WmsProxyServiceAsync) GWT
 			.create(WmsProxyService.class);
 
@@ -669,11 +671,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		RootPanel.get("map").add(mapWidget);
 
 		if (box == null) {
-			// bounding box to cover entire map
-			Bounds allbox = new Bounds(-175.97900, -54.04724, 174.17725,
-					83.76526);
-			box = allbox.transform(new Projection(EPSG_4326), new Projection(
-					EPSG_900913));
+			box = defaultBox.transform(new Projection(EPSG_4326),
+					new Projection(EPSG_900913));
 		}
 		map.zoomToExtent(box);
 
