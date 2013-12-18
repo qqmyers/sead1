@@ -63,7 +63,7 @@ public class MediciProxyServiceImpl extends ProxiedRemoteServiceServlet
 			}
 		} catch (Exception e) {
 			invalidateSession();
-			log.warn("Error contacting medici: " + e);
+			log.warn("Error contacting medici or JSON has the error: " + e);
 		}
 		if ((layers == null) || (layers.isEmpty())) {
 			return null;

@@ -220,16 +220,14 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			encodedTag = URL.encode(tag);
 		mediciProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
 			public void onSuccess(LayerInfo[] result) {
-				if (result != null) {
-					// showMap(result);
-					GWT.log("** Building UI ***");
-					buildGwtmap(result);
+				// showMap(result);
+				GWT.log("** Building UI ***");
+				buildGwtmap(result);
 
-					FlowPanel dp = createLayerSwitcher(result);
-					RootPanel.get("layers").add(dp);
-					// FlowPanel hp = createLegendPanel(result);
-					// RootPanel.get("info").add(hp);
-				}
+				FlowPanel dp = createLayerSwitcher(result);
+				RootPanel.get("layers").add(dp);
+				// FlowPanel hp = createLegendPanel(result);
+				// RootPanel.get("info").add(hp);
 			}
 
 			public void onFailure(Throwable caught) {
@@ -415,64 +413,70 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 		// if there is geospatial dataset, add the table,
 		// if not, add the message
-		if (result.length > 0) {
-			FlexTable ft = new FlexTable();
-			ft.setWidget(0, 0, new HTML("<b><center>Show?</center></b>"));
-			ft.setWidget(0, 1, new HTML("<b><center>Opacity</center></b>"));
-			ft.setWidget(0, 2, new HTML("<b><center>Name/Legend</center></b>"));
-			// VerticalPanel vp = new VerticalPanel();
-			// build layer switcher with reverse order
-			// since the top layer should be on top of the list
-			for (int i = result.length - 1; i >= 0; i--) {
-				final String name = result[i].getName();
-				int currentRow = ft.getRowCount();
-				ToggleButton vizToggleButton = new ToggleButton("Off", "On");
-				vizToggleButton.setValue(true);
-				vizToggleButton.addClickHandler(new ClickHandler() {
-					@Override
-					public void onClick(ClickEvent event) {
-						ToggleButton tb = (ToggleButton) event.getSource();
-						boolean visibility = tb.getValue();
-						eventBus.fireEvent(new LayerVisibilityChangeEvent(name,
-								visibility));
-					}
-				});
+		if (result != null) {
+			if (result.length > 0) {
+				FlexTable ft = new FlexTable();
+				ft.setWidget(0, 0, new HTML("<b><center>Show?</center></b>"));
+				ft.setWidget(0, 1, new HTML("<b><center>Opacity</center></b>"));
+				ft.setWidget(0, 2, new HTML(
+						"<b><center>Name/Legend</center></b>"));
+				// VerticalPanel vp = new VerticalPanel();
+				// build layer switcher with reverse order
+				// since the top layer should be on top of the list
+				for (int i = result.length - 1; i >= 0; i--) {
+					final String name = result[i].getName();
+					int currentRow = ft.getRowCount();
+					ToggleButton vizToggleButton = new ToggleButton("Off", "On");
+					vizToggleButton.setValue(true);
+					vizToggleButton.addClickHandler(new ClickHandler() {
+						@Override
+						public void onClick(ClickEvent event) {
+							ToggleButton tb = (ToggleButton) event.getSource();
+							boolean visibility = tb.getValue();
+							eventBus.fireEvent(new LayerVisibilityChangeEvent(
+									name, visibility));
+						}
+					});
 
-				ft.setWidget(currentRow, 0, vizToggleButton);
-				ft.getCellFormatter().setAlignment(currentRow, 0,
-						HasHorizontalAlignment.ALIGN_CENTER,
-						HasVerticalAlignment.ALIGN_TOP);
+					ft.setWidget(currentRow, 0, vizToggleButton);
+					ft.getCellFormatter().setAlignment(currentRow, 0,
+							HasHorizontalAlignment.ALIGN_CENTER,
+							HasVerticalAlignment.ALIGN_TOP);
 
-				ListBox opacityListBox = new ListBox();
-				opacityListBox.setWidth("50px");
-				opacityListBox.addItem("1.0");
-				opacityListBox.addItem("0.9");
-				opacityListBox.addItem("0.8");
-				opacityListBox.addItem("0.7");
-				opacityListBox.addItem("0.6");
-				opacityListBox.addItem("0.5");
-				opacityListBox.setSelectedIndex(0);
-				opacityListBox.addChangeHandler(new ChangeHandler() {
-					@Override
-					public void onChange(ChangeEvent event) {
-						ListBox lb = (ListBox) event.getSource();
-						int idx = lb.getSelectedIndex();
-						float op = Float.parseFloat(lb.getItemText(idx));
-						eventBus.fireEvent(new LayerOpacityChangeEvent(name, op));
-					}
-				});
+					ListBox opacityListBox = new ListBox();
+					opacityListBox.setWidth("50px");
+					opacityListBox.addItem("1.0");
+					opacityListBox.addItem("0.9");
+					opacityListBox.addItem("0.8");
+					opacityListBox.addItem("0.7");
+					opacityListBox.addItem("0.6");
+					opacityListBox.addItem("0.5");
+					opacityListBox.setSelectedIndex(0);
+					opacityListBox.addChangeHandler(new ChangeHandler() {
+						@Override
+						public void onChange(ChangeEvent event) {
+							ListBox lb = (ListBox) event.getSource();
+							int idx = lb.getSelectedIndex();
+							float op = Float.parseFloat(lb.getItemText(idx));
+							eventBus.fireEvent(new LayerOpacityChangeEvent(
+									name, op));
+						}
+					});
 
-				ft.setWidget(currentRow, 1, opacityListBox);
-				ft.getCellFormatter().setAlignment(currentRow, 1,
-						HasHorizontalAlignment.ALIGN_CENTER,
-						HasVerticalAlignment.ALIGN_TOP);
+					ft.setWidget(currentRow, 1, opacityListBox);
+					ft.getCellFormatter().setAlignment(currentRow, 1,
+							HasHorizontalAlignment.ALIGN_CENTER,
+							HasVerticalAlignment.ALIGN_TOP);
 
-				VerticalPanel titlePanel = createLayerTitle(result[i]);
+					VerticalPanel titlePanel = createLayerTitle(result[i]);
 
-				ft.setWidget(currentRow, 2, titlePanel);
+					ft.setWidget(currentRow, 2, titlePanel);
+				}
+
+				vp.add(ft);
+			} else {
+				vp.add(new HTML("<h4><i>No geospatial datasets</i></h4>"));
 			}
-
-			vp.add(ft);
 		} else {
 			vp.add(new HTML("<h4><i>No geospatial datasets</i></h4>"));
 		}
@@ -631,32 +635,35 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 		Bounds box = null;
 
-		for (LayerInfo layerInfo : layerInfos) {
-			String name = layerInfo.getName();
-			Bounds orgBnd = new Bounds(layerInfo.getMinx(),
-					layerInfo.getMiny(), layerInfo.getMaxx(),
-					layerInfo.getMaxy());
-			Bounds newBnd = orgBnd;
-			if (layerInfo.getSrs().startsWith("EPSG:")) {
-				newBnd = orgBnd.transform(new Projection(layerInfo.getSrs()),
-						new Projection(EPSG_900913));
+		if (layerInfos != null) {
+			for (LayerInfo layerInfo : layerInfos) {
+				String name = layerInfo.getName();
+				Bounds orgBnd = new Bounds(layerInfo.getMinx(),
+						layerInfo.getMiny(), layerInfo.getMaxx(),
+						layerInfo.getMaxy());
+				Bounds newBnd = orgBnd;
+				if (layerInfo.getSrs().startsWith("EPSG:")) {
+					newBnd = orgBnd.transform(
+							new Projection(layerInfo.getSrs()), new Projection(
+									EPSG_900913));
+				}
+				GWT.log("adding layers: " + name + " " + newBnd);
+				WMSOptions options = new WMSOptions();
+				options.setProjection(EPSG_900913);
+				options.setLayerOpacity(0.8);
+
+				// options.setMaxExtent(newBnd);
+
+				WMSParams params = new WMSParams();
+				params.setTransparent(true);
+				params.setLayers(name);
+				WMS wms = new WMS(name, wmsUrl, params, options);
+				if (box == null)
+					box = newBnd;
+				box.extend(newBnd);
+
+				map.addLayer(wms);
 			}
-			GWT.log("adding layers: " + name + " " + newBnd);
-			WMSOptions options = new WMSOptions();
-			options.setProjection(EPSG_900913);
-			options.setLayerOpacity(0.8);
-
-			// options.setMaxExtent(newBnd);
-
-			WMSParams params = new WMSParams();
-			params.setTransparent(true);
-			params.setLayers(name);
-			WMS wms = new WMS(name, wmsUrl, params, options);
-			if (box == null)
-				box = newBnd;
-			box.extend(newBnd);
-
-			map.addLayer(wms);
 		}
 
 		RootPanel.get("map").add(mapWidget);
