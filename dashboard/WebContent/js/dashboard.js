@@ -3,6 +3,7 @@ var olmap;
 var wmsResult;
 var map = new Object();
 var layers = new Array();
+var defaultBox = new OpenLayers.Bounds(-137.42, 19.28, -61.30, 51.62);
 
 callOnLoad();
 //$("#table").treetable({ expandable: true });
@@ -34,23 +35,26 @@ function initMap() {
 	layerList = getWmsLayers();
 	console.log(layerList);
 	var bounds = new OpenLayers.Bounds();
-	for(var i=0;i < layerList.length;i++) {
-		var l = layerList[i];
-		console.log(l);
-	    var layer = new OpenLayers.Layer.WMS("WMS", geoProxyUrl,
-	            {layers: l.layerName, transparent: true},
-	            {isBaseLayer: false, opacity:0.8}); 
-	    olmap.addLayer(layer);
-	    
-	    // calculating bounding box to include all datasets
-	    var e = l.extents.split(',');
-	    bounds.extend(new OpenLayers.LonLat(parseFloat(e[0]), parseFloat(e[1])));
-	    bounds.extend(new OpenLayers.LonLat(parseFloat(e[2]), parseFloat(e[3])));
+	if(layerList.length > 0 ) {
+		for(var i=0;i < layerList.length;i++) {
+			var l = layerList[i];
+			console.log(l);
+		    var layer = new OpenLayers.Layer.WMS("WMS", geoProxyUrl,
+		            {layers: l.layerName, transparent: true},
+		            {isBaseLayer: false, opacity:0.8}); 
+		    olmap.addLayer(layer);
+		    
+		    // calculating bounding box to include all datasets
+		    var e = l.extents.split(',');
+		    bounds.extend(new OpenLayers.LonLat(parseFloat(e[0]), parseFloat(e[1])));
+		    bounds.extend(new OpenLayers.LonLat(parseFloat(e[2]), parseFloat(e[3])));
+		}
+	} else {
+		bounds = defaultBox.transform(new OpenLayers.Projection("EPSG:4326"),
+				new OpenLayers.Projection("EPSG:900913"));
 	}
-
 	// zoom to the bounding box to include all datasets
 	olmap.zoomToExtent(bounds);
-	//olmap.setCenter(new OpenLayers.LonLat(-13762945.56, 4822412.11), 10);
 }
 
 function getWmsLayers() {
