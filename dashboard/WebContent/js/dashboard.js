@@ -42,10 +42,13 @@ function initMap() {
 		    bounds.extend(new OpenLayers.LonLat(parseFloat(e[0]), parseFloat(e[1])));
 		    bounds.extend(new OpenLayers.LonLat(parseFloat(e[2]), parseFloat(e[3])));
 		}
+		
+		$("#mapMsg").html("<center><a href=\"" + geobrowserUrl + "\" id=\"geobrowseUrl\" target=\"_blank\">Go to GeoBrowser</a></center>");
 	} else {
 		// if layerList had no layer, then use the default bounding box
 		bounds = defaultBox.transform(new OpenLayers.Projection("EPSG:4326"),
 				new OpenLayers.Projection("EPSG:900913"));
+		$("#mapMsg").html("<center>No GeoSpatial Data</center>");
 	}
 	// zoom to the bounding box to include all datasets
 	olmap.zoomToExtent(bounds);

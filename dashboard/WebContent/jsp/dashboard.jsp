@@ -91,7 +91,7 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 				</div>
 				<div class="span6 fixed-height-col">
 					<div id="summaryMap" class="map"></div>
-					<div><center><a href="<%= geobrowserUrl %>" id="geobrowseUrl" target="_blank">Go to GeoBrowser</a></center></div>
+					<div id="mapMsg"></div>
 				</div>
 				<div class="span3 fixed-height-col" style="background:#EEEEEE">				
 					<h4>Team Members</h4>
@@ -135,6 +135,7 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 			var geoProxyUrl = '<%= geoProxyUrl %>';
 			var projInfo = '<%= request.getAttribute("projectInfo") %>';
 			var isAnonymous = '<%= isAnonymous %>';
+			var geobrowserUrl = '<%= geobrowserUrl %>';
 		</script>
 		<script src="http://code.jquery.com/jquery-1.8.1.min.js" type="text/javascript"></script>
 		<script src="http://code.jquery.com/jquery-latest.js"></script>		
