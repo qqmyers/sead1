@@ -490,7 +490,7 @@ public class UploadPage extends Page {
 
         });
 
-        version.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+        derived.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> e) {
                 if (e.getValue() == true) {
