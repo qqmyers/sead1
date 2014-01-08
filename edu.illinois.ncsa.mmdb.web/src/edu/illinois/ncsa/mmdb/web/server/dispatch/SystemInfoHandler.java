@@ -54,6 +54,7 @@ import org.tupeloproject.rdf.terms.Beans;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
@@ -117,6 +118,48 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
         info.add("Bytes from uploaded dataset", TextFormatter.humanBytes(datasetSize));
         info.add("Bytes from derived data", TextFormatter.humanBytes(derivedSize));
         info.add("Total number of bytes", TextFormatter.humanBytes(datasetSize + derivedSize));
+
+        Unifier uf2 = new Unifier();
+        log.debug("Counting Collections");
+        uf2.addPattern("cl", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/Collection"));
+        uf2.addPattern("parent", Resource.uriRef("http://purl.org/dc/terms/hasPart"), "cl", true);
+        uf2.addPattern("cl", Resource.uriRef("http://purl.org/dc/terms/issued"), "date", true);
+        uf2.setColumnNames("cl", "parent", "date");
+        long collCount = 0;
+        long preprintCollCount = 0;
+        int publishedCollCount = 0;
+        try {
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf2, "cl") ) {
+                collCount++;
+                if (row.get(1) == null) {
+                    //check permissions
+                    preprintCollCount++;
+                }
+                if (row.get(2) != null) {
+                    publishedCollCount++;
+                }
+            }
+        } catch (OperatorException e) {
+            log.debug(e.getMessage());
+            throw (new ActionException("Could not count collections."));
+        }
+        info.add("Collections ", "" + collCount);
+        info.add("Public Preprint Collections", "" + preprintCollCount);
+        info.add("Published Collections", "" + publishedCollCount);
+
+        Unifier uf3 = new Unifier();
+        log.debug("Counting Views");
+
+        uf3.addPattern("thing1", Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/mmdb/isViewedBy"), "thing2");
+        uf3.setColumnNames("thing1");
+        try {
+            TupeloStore.getInstance().getContext().perform(uf3);
+
+            info.add("Total Views", "" + ((ListTable<Resource>) uf3.getResult()).getRows().size());
+        } catch (OperatorException e) {
+            log.debug("Views: " + e.getMessage());
+            throw (new ActionException("Could not count collections."));
+        }
 
         // done
         result = info;
