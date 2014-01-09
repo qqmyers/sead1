@@ -125,6 +125,7 @@
 	</target>
 
 	<target name="compile" description="compiles Java source files to bytecode">
+		<mkdir dir="war/WEB-INF/classes"/>
 		<javac srcdir="src" includes="**" encoding="utf-8" destdir="war/WEB-INF/classes" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
 			<classpath refid="classpath" />
 		</javac>
