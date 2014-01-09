@@ -60,7 +60,11 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfoResult;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
  * Get license attached to a specific resource.
@@ -128,19 +132,31 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
         long collCount = 0;
         long preprintCollCount = 0;
         int publishedCollCount = 0;
+
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        Resource anon = PersonBeanUtil.getAnonymousURI();
+
         try {
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf2, "cl") ) {
                 collCount++;
                 if (row.get(1) == null) {
                     //check permissions
-                    preprintCollCount++;
-                }
-                if (row.get(2) != null) {
-                    publishedCollCount++;
+                    if (rbac.checkPermission(anon, row.get(1), Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri()))) {
+                        if (rbac.checkAccessLevel(anon, row.get(1))) {
+                            preprintCollCount++;
+
+                            if (row.get(2) != null) {
+                                publishedCollCount++;
+                            }
+                        }
+                    }
                 }
             }
         } catch (OperatorException e) {
             log.debug(e.getMessage());
+            throw (new ActionException("Could not count collections."));
+        } catch (RBACException re) {
+            log.debug(re.getMessage());
             throw (new ActionException("Could not count collections."));
         }
         info.add("Collections ", "" + collCount);
