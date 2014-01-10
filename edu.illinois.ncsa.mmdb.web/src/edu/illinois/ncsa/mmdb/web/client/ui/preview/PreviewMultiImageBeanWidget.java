@@ -58,7 +58,6 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         prevImage.addStyleName("previewActionLink"); //$NON-NLS-1$
         prevImage.setTitle("Previous");
         prevImage.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 current--;
@@ -69,13 +68,13 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
         hp.setCellVerticalAlignment(prevImage, HasVerticalAlignment.ALIGN_MIDDLE);
 
         image = new Image();
+        image.setWidth("600px");
         hp.add(image);
 
         nextImage = new Image("images/go-next-gray.png"); //$NON-NLS-1$
         nextImage.addStyleName("previewActionLink"); //$NON-NLS-1$
         nextImage.setTitle("Next");
         nextImage.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 current++;
@@ -173,17 +172,17 @@ public class PreviewMultiImageBeanWidget extends PreviewBeanWidget<PreviewMultiI
             current = maximage;
         }
 
-        if (current == 0) {
-            prevImage.addStyleName("hidden"); //$NON-NLS-1$
-        } else if (maximage != 0) {
-            prevImage.removeStyleName("hidden"); //$NON-NLS-1$
-        }
+        //        if (current == 0) {
+        //            prevImage.addStyleName("hidden"); //$NON-NLS-1$
+        //        } else if (maximage != 0) {
+        //            prevImage.removeStyleName("hidden"); //$NON-NLS-1$
+        //        }
 
-        if (current == maximage) {
-            nextImage.addStyleName("hidden"); //$NON-NLS-1$
-        } else if (maximage != 0) {
-            nextImage.removeStyleName("hidden"); //$NON-NLS-1$
-        }
+        //        if (current == maximage) {
+        //            nextImage.addStyleName("hidden"); //$NON-NLS-1$
+        //        } else if (maximage != 0) {
+        //            nextImage.removeStyleName("hidden"); //$NON-NLS-1$
+        //        }
 
         PreviewImageBean pib = getPreviewBean().getImages().get(current);
         long w = pib.getWidth();

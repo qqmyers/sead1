@@ -50,13 +50,11 @@
 	<property name="debug" value="true" />
 	
 	<property name="deprecation" value="true" />
-		
-	<property name="version" value="v1.2.100#${bamboo.buildNumber}" />
-		
-	<condition property="deps" value=".." else="../plugins">
-		<available file="../edu.uiuc.ncsa.cet.bean/build.properties" />
-	</condition>		
 	
+	<property name="cet" value="../../cet" />
+		
+	<property name="version" value="v1.2.200#${bamboo.buildNumber}" />
+		
 	<available file="war/mmdb.tmp" property="mmdb_tmp_exists" />
 
 	<path id="classpath">
@@ -70,39 +68,11 @@
 		</fileset>
 	</path>
 
-	<target name="clean" description="deletes all generated files">
-		<delete dir="war/mmdb" />
-		<delete dir="war/WEB-INF/classes" />
-		<delete dir="${war}" />
-	</target>
-
-	<target name="bamboo" depends="clean, cetbean-git, prepare-bamboo, sead, war" />
-
-	<target name="prepare-bamboo" depends="resources, copy_mmdb_html" description="setup for bamboo build and deployment">
-		<copy file="war/mmdb.tmp" tofile="war/mmdb.html" overwrite="true">
-			<filterset>
-				<filter token="VERSION" value="${version}" />
-			</filterset>
-		</copy>
-	</target>
+	<target name="bamboo" depends="cetbean, war" />
 
 	<target name="mmdb-dev" depends="resources" description="setup for bamboo build and deployment">
-		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" />
-		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
-		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
-		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
 		<replace file="war/WEB-INF/classes/server.properties" token="#search.path=" value="search.path=/home/medici/medici/lucene" />
 		<replace file="war/WEB-INF/classes/server.properties" token="#hfc.path=" value="hfc.path=/home/medici/medici/data" />
-	</target>
-	
-	<target name="sead" depends="gwtc, resources" description="setup for bamboo build and deployment">
-		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" overwrite="true" />
-		<copy tofile="war/WEB-INF/classes/server.properties" file="src/sead.server-properties" overwrite="true" />
-		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
-		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
-		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
-		<copy tofile="war/WEB-INF/classes/acr_commons.properties" file="src/acr_commons.properties"/>
-		
 	</target>
 	
 	<!-- make sure we have the latest beans -->
@@ -115,13 +85,13 @@
 		<delete dir="beanclass" />
 		<mkdir dir="beanclass" />
 		<javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-			<src path="${deps}/edu.uiuc.ncsa.cet.bean/src" />
+			<src path="${cet}/edu.uiuc.ncsa.cet.bean/src" />
 			<exclude name="**/sdl/**/*.java" />
 			<exclude name="**/jre/**/*.java" />
 		</javac>
 		<jar jarfile="war/WEB-INF/lib/cet-bean.jar">
 			<fileset dir="beanclass" />
-			<fileset dir="${deps}/edu.uiuc.ncsa.cet.bean/src/main/java">
+			<fileset dir="${cet}/edu.uiuc.ncsa.cet.bean/src/main/java">
 				<exclude name="**/sdl/**/*.java" />
 			</fileset>
 		</jar>
@@ -130,7 +100,7 @@
 		<delete dir="beanclass" />
 		<mkdir dir="beanclass" />
 		<javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-			<src path="${deps}/edu.uiuc.ncsa.cet.bean.tupelo/src" />
+			<src path="${cet}/edu.uiuc.ncsa.cet.bean.tupelo/src" />
 			<classpath>
 				<fileset dir="war/WEB-INF/lib" includes="*.jar" />
 			</classpath>
@@ -142,48 +112,20 @@
 		<delete dir="beanclass" />
 	</target>
 
-        <!-- make sure we have the latest beans -->
-        <target name="cetbean-git" description="Compile CET beans.">
-                <delete>
-                        <fileset dir="war/WEB-INF/lib" includes="**/cet-bean*.jar"/>
-                </delete>
-
-                <!-- compile the CET beans -->
-                <delete dir="beanclass" />
-                <mkdir dir="beanclass" />
-                <javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-                        <src path="../../cet/edu.uiuc.ncsa.cet.bean/src" />
-                        <exclude name="**/sdl/**/*.java" />
-                        <exclude name="**/jre/**/*.java" />
-                </javac>
-                <jar jarfile="war/WEB-INF/lib/cet-bean.jar">
-                        <fileset dir="beanclass" />
-                        <fileset dir="../../cet/edu.uiuc.ncsa.cet.bean/src/main/java">
-                                <exclude name="**/sdl/**/*.java" />
-                        </fileset>
-                </jar>
-
-                <!-- compile the CET beans tupelo -->
-                <delete dir="beanclass" />
-                <mkdir dir="beanclass" />
-                <javac destdir="beanclass" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
-                        <src path="../../cet/edu.uiuc.ncsa.cet.bean.tupelo/src" />
-                        <classpath>
-                                <fileset dir="war/WEB-INF/lib" includes="*.jar" />
-                        </classpath>
-                        <exclude name="**/sdl/**/*.java" />
-                </javac>
-                <jar jarfile="war/WEB-INF/lib/cet-bean-tupelo.jar" basedir="beanclass" />
-
-                <!-- remove the temp folder -->
-                <delete dir="beanclass" />
-        </target>
-
-	<target name="copy_mmdb_html" unless="mmdb_tmp_exists">
-		<copy file="war/mmdb.html" tofile="war/mmdb.tmp" />
+	<target name="war" depends="clean, compile, gwtc, resources, updateversion" description="builds the war file">
+		<zip destfile="${war}" basedir="war" >
+			<exclude name="WEB-INF/deploy/**" />
+			<exclude name="WEB-INF/lib/gwt-user*.jar" />
+			<exclude name="WEB-INF/lib/gwt-dev-*.jar" />
+			<exclude name="WEB-INF/lib/gwt-servlet.jar" />
+			<exclude name="WEB-INF/lib/commons-logging-*.jar" />
+			<exclude name="WEB-INF/lib/mysql-connector-java-*.jar" />
+			<exclude name="WEB-INF/lib/xercesImpl-*.jar" />
+		</zip>
 	</target>
 
-	<target name="compile" depends="resources" description="compiles Java source files to bytecode">
+	<target name="compile" description="compiles Java source files to bytecode">
+		<mkdir dir="war/WEB-INF/classes"/>
 		<javac srcdir="src" includes="**" encoding="utf-8" destdir="war/WEB-INF/classes" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
 			<classpath refid="classpath" />
 		</javac>
@@ -205,35 +147,34 @@
 		</java>
 	</target>
 
+	<target name="updateversion" description="update version number in html file">
+		<replaceregexp file="war/mmdb.html" flags="m" match="NCSA Medici.*$"  replace="NCSA Medici&lt;/a&gt;: ${version}"/> 
+	</target>
+
 	<target name="resources" description="Copy all resources to output folder.">
 		<mkdir dir="war/WEB-INF/classes" />
 		<copy todir="war/WEB-INF/classes">
 			<fileset dir="src">
+				<include name="nopreview-100.gif" />
+				<include name="preview-100.gif" />
+				<include name="preview-500.gif" />
 				<include name="commons-logging.properties" />
 				<include name="server.properties" />
 				<include name="taxonomy.owl" />
 				<include name="acr_commons.properties" />
 			</fileset>
 		</copy>
-		<copy tofile="war/WEB-INF/classes/nopreview-100.gif" file="src/nopreview-100.gif"/>
-		<copy tofile="war/WEB-INF/classes/preview-100.gif" file="src/preview-100.gif"/>
-		<copy tofile="war/WEB-INF/classes/preview-500.gif" file="src/preview-500.gif"/>
+		<copy tofile="war/WEB-INF/classes/log4j.properties" file="src/log4j_tomcat.properties" overwrite="true" />
 	</target>
 
 	<target name="deploy" depends="war" description="deploys the war file to Tomcat">
 		<copy file="${war}" todir="${deploy}" />
 	</target>
 
-	<target name="war" depends="clean, compile, gwtc, resources" description="builds the war file">
-		<zip destfile="${war}" basedir="war" >
-			<exclude name="WEB-INF/deploy/**" />
-			<exclude name="WEB-INF/lib/gwt-user*.jar" />
-			<exclude name="WEB-INF/lib/gwt-dev-*.jar" />
-			<exclude name="WEB-INF/lib/gwt-servlet.jar" />
-			<exclude name="WEB-INF/lib/commons-logging-*.jar" />
-			<exclude name="WEB-INF/lib/mysql-connector-java-*.jar" />
-			<exclude name="WEB-INF/lib/xercesImpl-*.jar" />
-		</zip>
+	<target name="clean" description="deletes all generated files">
+		<delete dir="war/mmdb" />
+		<delete dir="war/WEB-INF/classes" />
+		<delete dir="${war}" />
 	</target>
 </project>
 
