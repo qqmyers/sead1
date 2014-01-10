@@ -81,7 +81,8 @@ public enum DefaultRole {
                 Permission.UPLOAD_DATA,
                 Permission.USE_REMOTEAPI,
                 Permission.VIEW_DATA,
-                Permission.VIEW_MEMBER_PAGES
+                Permission.VIEW_MEMBER_PAGES,
+                Permission.VIEW_SYSTEM
                 );
     }
 
@@ -99,12 +100,14 @@ public enum DefaultRole {
                 Permission.EDIT_USER_METADATA,
                 Permission.UPLOAD_DATA,
                 Permission.VIEW_DATA,
-                Permission.VIEW_MEMBER_PAGES);
+                Permission.VIEW_MEMBER_PAGES,
+                Permission.VIEW_SYSTEM);
     }
 
     static EnumSet<Permission> viewer() {
         return EnumSet.of(Permission.ADD_TAG, Permission.DELETE_TAG,
-                Permission.VIEW_DATA, Permission.VIEW_MEMBER_PAGES);
+                Permission.VIEW_DATA, Permission.VIEW_MEMBER_PAGES,
+                Permission.VIEW_SYSTEM);
     }
 
     static EnumSet<Permission> anonymous() {
@@ -129,7 +132,8 @@ public enum DefaultRole {
                 //Permission.UPLOAD_DATA,
                 Permission.USE_REMOTEAPI,
                 Permission.VIEW_DATA,
-                Permission.VIEW_MEMBER_PAGES);
+                Permission.VIEW_MEMBER_PAGES,
+                Permission.VIEW_SYSTEM);
     }
 
     // these are special roles where membership is not controlled by

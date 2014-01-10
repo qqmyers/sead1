@@ -60,7 +60,11 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfoResult;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
  * Get license attached to a specific resource.
@@ -128,19 +132,38 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
         long collCount = 0;
         long preprintCollCount = 0;
         int publishedCollCount = 0;
+
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        Resource anon = PersonBeanUtil.getAnonymousURI();
+
         try {
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf2, "cl") ) {
                 collCount++;
-                if (row.get(1) == null) {
+                // row.get(1) is null if there's no parent, i.e. a top level collection that should be counted if anon can see it
+                // row.get(2) is not null if the collection has been published, i.e. should be added to the published count
+                // for now, the logic requires that a published collection be visible in the ACR to be counted but this could be improved
+                // once we have our lifecycle worked out (would be odd if a collection were published and not visible to anon. 
+                // Eventually we may need to query the VA to find published collections if all record of them is flushed from an ACR.)
+                if ((row.get(1) == null) || (row.get(2) != null)) {
                     //check permissions
-                    preprintCollCount++;
-                }
-                if (row.get(2) != null) {
-                    publishedCollCount++;
+                    if (rbac.checkPermission(anon, row.get(1), Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri()))) {
+                        if (rbac.checkAccessLevel(anon, row.get(0))) {
+                            if (row.get(1) == null) {
+                                preprintCollCount++;
+                            }
+
+                            if (row.get(2) != null) {
+                                publishedCollCount++;
+                            }
+                        }
+                    }
                 }
             }
         } catch (OperatorException e) {
             log.debug(e.getMessage());
+            throw (new ActionException("Could not count collections."));
+        } catch (RBACException re) {
+            log.debug(re.getMessage());
             throw (new ActionException("Could not count collections."));
         }
         info.add("Collections ", "" + collCount);
@@ -158,7 +181,23 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
             info.add("Total Views", "" + ((ListTable<Resource>) uf3.getResult()).getRows().size());
         } catch (OperatorException e) {
             log.debug("Views: " + e.getMessage());
-            throw (new ActionException("Could not count collections."));
+            throw (new ActionException("Could not count views."));
+        }
+
+        Unifier uf4 = new Unifier();
+        log.debug("Counting People");
+
+        uf4.addPattern("person", Resource.uriRef("http://xmlns.com/foaf/0.1/name"), "name");
+        uf4.addPattern("person", Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/role/hasRole"), "role");
+
+        uf4.setColumnNames("person");
+        try {
+            TupeloStore.getInstance().getContext().perform(uf4);
+
+            info.add("Number of Users", "" + ((ListTable<Resource>) uf4.getResult()).getRows().size());
+        } catch (OperatorException e) {
+            log.debug("Users: " + e.getMessage());
+            throw (new ActionException("Could not count users."));
         }
 
         // done

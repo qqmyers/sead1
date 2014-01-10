@@ -64,7 +64,15 @@ public enum Permission {
      * Access the RestEasy services (needed for remote apps such as dashboard
      * and public repo interfaces)
      */
-    USE_REMOTEAPI("Use remote api", "Remote");
+    USE_REMOTEAPI("Use remote api", "Remote"),
+    /**
+     * Access the /sys RestEasy service to retrieve system-level
+     * overview/summary/stats info:
+     * Config info
+     * System info (stats - #preprint/published collections, #datasets, size,
+     * etc.)
+     */
+    VIEW_SYSTEM("view system information", "System");
 
     private final String label;
     private final String uri;

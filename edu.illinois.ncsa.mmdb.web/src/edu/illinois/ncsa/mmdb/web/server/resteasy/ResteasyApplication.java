@@ -24,6 +24,7 @@ public class ResteasyApplication extends Application {
         singletons.add(new AuthenticationInterceptor());
         singletons.add(new UpdateLuceneRestService());
         singletons.add(new ImagePyramidRestService());
+        singletons.add(new SysInfoRestService());
     }
 
     @Override
