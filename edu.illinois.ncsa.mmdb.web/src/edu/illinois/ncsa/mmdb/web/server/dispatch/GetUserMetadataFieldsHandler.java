@@ -157,19 +157,14 @@ public class GetUserMetadataFieldsHandler implements
                 //FixMe : parsing the '<name> : <url>' format that has been used to record people looked up in Vivo
                 //We should move to caching the list of vivo people on the server, storing just the URI and looking up the
                 //names as needed.
-                String vivoUrl = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VIVOJOSEKIURL);
-                //Fixme - stripping down to host part on the assumption that the joseki query interface and the Vivo profile pages 
-                //are on the same server  
-                vivoUrl = vivoUrl.substring(0, vivoUrl.indexOf("joseki"));
+                String vivoUrl = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VIVOIDENTIFIERURL);
                 String val = value.toString();
                 //log.debug("Val: " + val + " : Vivo: " + vivoUrl);
-                if (val.contains(vivoUrl)) {
-                    String name = val;
-                    int separator = val.indexOf(" : ");
-                    if (separator != -1) {
-                        name = val.substring(0, separator);
-                        val = val.substring(separator + 3, val.length());
-                    }
+                int separator = val.indexOf(" : " + vivoUrl);
+                String name = val;
+                if (separator != -1) {
+                    name = val.substring(0, separator);
+                    val = val.substring(separator + 3, val.length());
                     umv = new UserMetadataValue(val, name);
                 } else {
 

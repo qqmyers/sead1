@@ -8,7 +8,8 @@ public enum ConfigurationKey {
     MailFullName("mail.fullname", "Medici Server"), //$NON-NLS-1$ //$NON-NLS-2$
 
     // sead enhancements
-    VIVOJOSEKIURL("vivo-joseki.url", "http://sead-dev.ccni.rpi.edu/joseki/sparql?query="), //$NON-NLS-1$ //$NON-NLS-2$
+    VIVOQUERYURL("vivo-query.url", "http://sead-vivo.d2i.indiana.edu:3030/SEAD-VIVO/sparql?query="), //$NON-NLS-1$ //$NON-NLS-2$
+    VIVOIDENTIFIERURL("vivo-identifier.url", "http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/"),
     VAURL("va.url", "http://bluespruce.pti.indiana.edu:8181/dcs-nced/query/?q=resourceValue:(%s)"), //$NON-NLS-1$ //$NON-NLS-2$
     DiscoveryURL("discovery.url", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -41,7 +42,10 @@ public enum ConfigurationKey {
     // extractor url
     ExtractorUrl("extractor.url", "http://localhost:9856/"), //$NON-NLS-1$ //$NON-NLS-2$
 
-    GoogleClientId("google.client_id", "");
+    GoogleClientId("google.client_id", ""),
+
+    //optimizations for big data (many files)
+    BigData("bigdata", "false");
 
     private final String propertyKey;
     private final String defaultValue;

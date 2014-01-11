@@ -129,7 +129,8 @@ public class AddMetadataWidget extends Composite {
     protected SortedSet<UserMetadataField> availableFields;
     private final HandlerManager           eventBus;
     UserMetadataField                      userMetadataField;
-    private String                         vivoURL;
+    private String                         vivoQueryURL;
+    private String                         vivoIDPrefixURL;
 
     public AddMetadataWidget(String uri, final DispatchAsync dispatch, HandlerManager events) {
         this(new HashSet<String>(), dispatch, events);
@@ -138,7 +139,7 @@ public class AddMetadataWidget extends Composite {
     }
 
     public AddMetadataWidget(Collection<String> batch, final DispatchAsync dispatch, HandlerManager eventBus) {
-        dispatch.execute(new GetConfiguration(null, ConfigurationKey.VIVOJOSEKIURL), new AsyncCallback<ConfigurationResult>() {
+        dispatch.execute(new GetConfiguration(null, ConfigurationKey.VIVOQUERYURL, ConfigurationKey.VIVOIDENTIFIERURL), new AsyncCallback<ConfigurationResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -148,9 +149,13 @@ public class AddMetadataWidget extends Composite {
             public void onSuccess(ConfigurationResult result) {
                 for (Entry<ConfigurationKey, String> entry : result.getConfiguration().entrySet() ) {
                     switch (entry.getKey()) {
-                        case VIVOJOSEKIURL:
-                            vivoURL = entry.getValue();
+                        case VIVOQUERYURL:
+                            vivoQueryURL = entry.getValue();
                             break;
+                        case VIVOIDENTIFIERURL:
+                            vivoIDPrefixURL = entry.getValue();
+                            break;
+
                         default:
                     }
                 }
@@ -365,8 +370,8 @@ public class AddMetadataWidget extends Composite {
 
     private void InitializeVIVOConnection(String query) {
         // Send request to server to get the json object.
-        if (!vivoURL.equals("")) {
-            getJson(1, vivoURL + query, this);
+        if (!vivoQueryURL.equals("")) {
+            getJson(1, vivoQueryURL + query, this);
         }
     }
 
@@ -544,7 +549,7 @@ public class AddMetadataWidget extends Composite {
                         GWT.log("removing URI value '" + value.getUri() + "'");
                         String valUri = value.getUri();
                         //FixMe : VIVO ID special case - storing name and Uri in one triple until we have the list of vivo ids cached on the server
-                        if (valUri.startsWith(vivoURL.substring(0, vivoURL.indexOf("/joseki")))) {
+                        if (valUri.startsWith(vivoIDPrefixURL)) {
                             valUri = value.getName() + " : " + valUri;
                             remove = new RemoveUserMetadata(uri, property, valUri);
                         } else {

@@ -73,7 +73,8 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
                                                           ConfigurationKey.ProjectDescription,
                                                           ConfigurationKey.ProjectURL,
                                                           ConfigurationKey.VAURL,
-                                                          ConfigurationKey.VIVOJOSEKIURL,
+                                                          ConfigurationKey.VIVOQUERYURL,
+                                                          ConfigurationKey.VIVOIDENTIFIERURL,
                                                           ConfigurationKey.DiscoveryURL,
                                                           });
 

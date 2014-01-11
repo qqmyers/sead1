@@ -100,6 +100,7 @@ public class ConfigurationWidget extends Composite {
     }
 
     private DisclosurePanel createMailSection(ConfigurationResult configuration) {
+        //FixMe - use createSimpleConfigurationSection with arrays
         DisclosurePanel dp = new DisclosurePanel("Mail");
         dp.addStyleName("datasetDisclosurePanel");
         dp.setOpen(true);
@@ -440,10 +441,14 @@ public class ConfigurationWidget extends Composite {
     }
 
     private DisclosurePanel createVIVOConfigurationSection(ConfigurationResult configuration) {
-        return createSimpleConfigurationSection(configuration, "VIVO Configuration", "VIVO Query Endpoint", ConfigurationKey.VIVOJOSEKIURL, false);
+        return createSimpleConfigurationSection(configuration, "VIVO Configuration", new String[] { "VIVO Query Endpoint", "VIVO Identifier Prefix" }, new ConfigurationKey[] { ConfigurationKey.VIVOQUERYURL, ConfigurationKey.VIVOIDENTIFIERURL }, false);
     }
 
     private DisclosurePanel createSimpleConfigurationSection(ConfigurationResult configuration, String sectionLabel, String keyLabel, final ConfigurationKey configKey, boolean startOpen) {
+        return createSimpleConfigurationSection(configuration, sectionLabel, new String[] { keyLabel }, new ConfigurationKey[] { configKey }, startOpen);
+    }
+
+    private DisclosurePanel createSimpleConfigurationSection(ConfigurationResult configuration, String sectionLabel, final String keyLabels[], final ConfigurationKey[] configKeys, boolean startOpen) {
 
         DisclosurePanel dp = new DisclosurePanel(sectionLabel);
         dp.addStyleName("datasetDisclosurePanel");
@@ -455,13 +460,15 @@ public class ConfigurationWidget extends Composite {
         /*HorizontalPanel hp = new HorizontalPanel();
         vp.add(hp);*/
 
-        FlexTable table = new FlexTable();
-        table.setText(0, 0, keyLabel);
-        final TextBox key = new TextBox();
-        key.addStyleName("multiAnchor");
-        key.setText(configuration.getConfiguration(configKey));
-        key.setVisibleLength(80);
-        table.setWidget(0, 1, key);
+        final FlexTable table = new FlexTable();
+        for (int i = 0; i < keyLabels.length; i++ ) {
+            table.setText(i, 0, keyLabels[i]);
+            final TextBox key = new TextBox();
+            key.addStyleName("multiAnchor");
+            key.setText(configuration.getConfiguration(configKeys[i]));
+            key.setVisibleLength(80);
+            table.setWidget(i, 1, key);
+        }
         /*hp.add(key);*/
         vp.add(table);
         // buttons
@@ -471,19 +478,25 @@ public class ConfigurationWidget extends Composite {
         Button button = new Button("Submit", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
-                query.setConfiguration(configKey, key.getText());
-                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Could not get configuration values.", caught);
-                    }
 
-                    @Override
-                    public void onSuccess(ConfigurationResult result) {
-                        key.setText(result.getConfiguration(configKey));
-                    }
-                });
+                //FixMe - put both vals in the same query - see mail section above
+                for (int i = 0; i < keyLabels.length; i++ ) {
+                    final int j = i;
+                    SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                    query.setConfiguration(configKeys[j], ((TextBox) table.getWidget(j, 1)).getText());
+
+                    dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log("Could not set configuration value for " + configKeys[j], caught);
+                        }
+
+                        @Override
+                        public void onSuccess(ConfigurationResult result) {
+                            ((TextBox) table.getWidget(j, 1)).setText(result.getConfiguration(configKeys[j]));
+                        }
+                    });
+                }
             }
         });
         hp.add(button);
@@ -491,17 +504,22 @@ public class ConfigurationWidget extends Composite {
         button = new Button("Reset", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), configKey), new AsyncCallback<ConfigurationResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Could not get configuration values.", caught);
-                    }
+                //FixMe - put both vals in the same query - see mail section above
+                for (int i = 0; i < keyLabels.length; i++ ) {
+                    final int j = i;
 
-                    @Override
-                    public void onSuccess(ConfigurationResult result) {
-                        key.setText(result.getConfiguration(configKey));
-                    }
-                });
+                    dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), configKeys[j]), new AsyncCallback<ConfigurationResult>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log("Could not get configuration value for" + configKeys[j], caught);
+                        }
+
+                        @Override
+                        public void onSuccess(ConfigurationResult result) {
+                            ((TextBox) table.getWidget(j, 1)).setText(result.getConfiguration(configKeys[j]));
+                        }
+                    });
+                }
             }
         });
         button.addStyleName("multiAnchor");
