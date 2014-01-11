@@ -103,7 +103,24 @@ public class Authentication {
     }
 
     public static String googleAuthenticate(String client_id, String googleAccessToken) {
-        return MediciProxy.isValidGoogleToken(client_id, googleAccessToken);
-
+        String user = MediciProxy.isValidGoogleToken(client_id, googleAccessToken);
+        if (user != null) {
+            try {
+                TripleWriter tw = new TripleWriter();
+                Resource person = Resource.uriRef(PersonBeanUtil.getPersonID(user));
+                tw.add(person, Cet.cet("lastLogin"), new Date());
+                Unifier uf = new Unifier();
+                uf.addPattern(person, Cet.cet("lastLogin"), "date");
+                uf.setColumnNames("date");
+                TupeloStore.getInstance().getContext().perform(uf);
+                for (Tuple<Resource> row : uf.getResult() ) {
+                    tw.remove(person, Cet.cet("lastLogin"), row.get(0));
+                }
+                TupeloStore.getInstance().getContext().perform(tw);
+            } catch (OperatorException exc) {
+                log.debug("LOGIN: could not write last login for " + user, exc);
+            }
+        }
+        return user;
     }
 }
