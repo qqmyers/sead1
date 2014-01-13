@@ -53,6 +53,8 @@ import java.util.TimerTask;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import net.customware.gwt.dispatch.shared.ActionException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.index.IndexWriter;
@@ -82,6 +84,7 @@ import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRelationshipHandlerNew;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
@@ -103,10 +106,13 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  * 
  */
 public class ContextSetupListener implements ServletContextListener {
-    private static Log  log   = LogFactory.getLog(ContextSetupListener.class);
+    private static Log                  log   = LogFactory.getLog(ContextSetupListener.class);
+
+    /** Singleton instance **/
+    private static ContextSetupListener instance;
 
     /** Timer to schedule re-occurring jobs */
-    private final Timer timer = new Timer(true);
+    private final Timer                 timer = new Timer(true);
 
     /* (non-Javadoc)
      * @see javax.servlet.ServletContextListener#contextDestroyed(javax.servlet.ServletContextEvent)
@@ -277,6 +283,8 @@ public class ContextSetupListener implements ServletContextListener {
 
         // start the timers
         startTimers(bigdata);
+
+        instance = this;
     }
 
     private void createOntology() {
@@ -364,6 +372,20 @@ public class ContextSetupListener implements ServletContextListener {
                 TupeloStore.getInstance().expireBeans();
             }
         }, 2 * 1000, 10 * 1000);
+    }
+
+    public static void updateSysInfoInBackground() {
+        getIstance().timer.schedule(new TimerTask() {
+            public void run() {
+                try {
+                    log.debug("Scheduling sys info update task");
+                    SystemInfoHandler.updateInfo();
+                } catch (ActionException e) {
+                    log.debug("unable to asynchronously update sys info" + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }, 1L);
     }
 
     private void setUpSearch() throws IOException {
@@ -605,4 +627,9 @@ public class ContextSetupListener implements ServletContextListener {
             rbac.createRole(roleUri, role.getName(), role.getPermissions());
         }
     }
+
+    private static ContextSetupListener getIstance() {
+        return instance;
+    }
+
 }

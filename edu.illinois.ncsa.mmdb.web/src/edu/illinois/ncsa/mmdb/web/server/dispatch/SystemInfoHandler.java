@@ -60,7 +60,9 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfoResult;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.ContextSetupListener;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
@@ -77,6 +79,7 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
 
     static private long             last         = 0;
     static private SystemInfoResult result       = null;
+    static private boolean          pending      = false;
     static private long             HISTORESIS   = 60 * 1000;                                 // 1 minute
 
     /** Commons logging **/
@@ -84,10 +87,28 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
 
     @Override
     public SystemInfoResult execute(SystemInfo arg0, ExecutionContext arg1) throws ActionException {
-        if (last + HISTORESIS > System.currentTimeMillis()) {
+        long historesis = HISTORESIS;
+        String bigdata = TupeloStore.getInstance().getConfiguration(ConfigurationKey.BigData);
+        if (bigdata.equals("true")) {
+            historesis *= 1440; //once per day
+        }
+        if (last + historesis > System.currentTimeMillis()) {
             return result;
         }
+        //if bigdata, return old info and calc new if over time
+        // First time, pending is false and we set a bacground task and return current result
+        //Another request before it completes and we skip both the asynch and sync updates and again return the current result
+        //Fixme - alert receiver that updates are pending?
+        if (bigdata.equals("true") && (result != null) && (!pending)) {
+            pending = true;
+            ContextSetupListener.updateSysInfoInBackground();
+        } else if (!pending) {
+            updateInfo();
+        }
+        return result;
+    }
 
+    public static void updateInfo() throws ActionException {
         SystemInfoResult info = new SystemInfoResult();
 
         Unifier uf = new Unifier();
@@ -201,9 +222,9 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
         }
 
         // done
+        pending = false;
         result = info;
         last = System.currentTimeMillis();
-        return info;
     }
 
     @Override
