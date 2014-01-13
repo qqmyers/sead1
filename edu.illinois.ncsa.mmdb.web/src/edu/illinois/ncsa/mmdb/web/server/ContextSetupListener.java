@@ -433,10 +433,12 @@ public class ContextSetupListener implements ServletContextListener {
         // 1) Find all predicates with rdf:type editPredicate
 
         TripleMatcher tm = new TripleMatcher();
+        TripleMatcher tm2 = new TripleMatcher();
         TripleWriter tw = new TripleWriter();
 
         tm.setPredicate(Rdf.TYPE);
         tm.setObject(editPredicate);
+        tm2.setPredicate(Resource.uriRef("http://www.w3.org/2002/07/owl#inverseOf"));
 
         try {
             context.perform(tm);
@@ -444,6 +446,9 @@ public class ContextSetupListener implements ServletContextListener {
 
             // 2) Remove the triples returned in step 1
             tw.removeAll(tm.getResult());
+
+            context.perform(tm2);
+            tw.removeAll(tm2.getResult());
 
             //3) Add triples for this whole list to have rdf:type viewPredicate
 

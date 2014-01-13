@@ -71,17 +71,19 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
 
     public ListUserMetadataFieldsResult listUserMetadataFields(boolean isForEdit) {
         ListUserMetadataFieldsResult lumfr = null;
+        log.debug("Listing fields, editable = : " + isForEdit);
         if (isForEdit) {
             if (editResultCache == null) {
                 editResultCache = new Memoized<ListUserMetadataFieldsResult>() {
                     public ListUserMetadataFieldsResult computeValue() {
                         ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
+                        cache = null; //Don't use base-class cache
                         ListNamedThingsResult r = listNamedThings(MMDB.USER_METADATA_FIELD, Rdfs.LABEL);
                         if (r == null) {
                             log.error("can't list plain metadata fields");
                         }
                         for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
-                            //log.debug("Found plain umf " + entry.getValue());
+                            log.debug("Found plain editable umf :" + entry.getKey() + " : " + entry.getValue());
                             result.addField(new UserMetadataField(entry.getKey(), entry.getValue()));
                         }
                         // now run more queries to get user metadata fields of various other types
@@ -112,12 +114,13 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
                 viewResultCache = new Memoized<ListUserMetadataFieldsResult>() {
                     public ListUserMetadataFieldsResult computeValue() {
                         ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
+                        cache = null; //Don't use base-class cache
                         ListNamedThingsResult r = listNamedThings(GetUserMetadataFieldsHandler.VIEW_METADATA, Rdfs.LABEL);
                         if (r == null) {
                             log.error("can't list plain metadata fields");
                         }
                         for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
-                            //log.debug("Found plain umf " + entry.getValue());
+                            log.debug("Found plain viewable umf :" + entry.getKey() + " : " + entry.getValue());
                             result.addField(new UserMetadataField(entry.getKey(), entry.getValue()));
                         }
                         // now run more queries to get user metadata fields of various other types

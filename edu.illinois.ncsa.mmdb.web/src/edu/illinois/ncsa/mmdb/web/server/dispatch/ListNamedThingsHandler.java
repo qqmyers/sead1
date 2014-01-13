@@ -10,12 +10,12 @@ import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 public abstract class ListNamedThingsHandler {
-    private final Log                       log     = LogFactory.getLog(ListNamedThingsHandler.class);
+    private final Log                         log     = LogFactory.getLog(ListNamedThingsHandler.class);
 
-    protected boolean                       memoize = true;                                           // should we memoize?
-    protected long                          ttl     = 60 * 1000;                                      // what ttl in ms
+    protected boolean                         memoize = true;                                           // should we memoize?
+    protected long                            ttl     = 60 * 1000;                                      // what ttl in ms
 
-    private Memoized<ListNamedThingsResult> cache;
+    protected Memoized<ListNamedThingsResult> cache;
 
     protected ListNamedThingsResult listNamedThings(final Resource typeUri, final Resource labelPredicate) {
         if (cache == null) {
