@@ -292,6 +292,7 @@ a:focus {
 }
 .span3 {
   width: 220px;
+  margin-top: 10px;
 }
 .span2 {
   width: 140px;
@@ -3620,6 +3621,7 @@ input[type="submit"].btn.btn-mini {
 }
 .navbar-fixed-top {
   top: 0;
+  background-color: #ffffff;
 }
 .navbar-fixed-top .navbar-inner,
 .navbar-static-top .navbar-inner {
@@ -6158,6 +6160,7 @@ button.close {
   }
   .navbar-fixed-top {
     margin-bottom: 20px;
+    background-color: #ffffff;
   }
   .navbar-fixed-bottom {
     margin-top: 20px;
