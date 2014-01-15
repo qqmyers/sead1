@@ -245,7 +245,9 @@ public class DataAccess {
 		} catch (NoSuchElementException nse) {
 			responseText = "";
 		} finally {
-			_inputStream.close();
+			if(_inputStream!=null) {
+			  _inputStream.close();
+			}  
 		}
 		conn.disconnect();
 
