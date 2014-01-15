@@ -76,6 +76,7 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
                                                           ConfigurationKey.VIVOQUERYURL,
                                                           ConfigurationKey.VIVOIDENTIFIERURL,
                                                           ConfigurationKey.DiscoveryURL,
+                                                          ConfigurationKey.BigData
                                                           });
 
     /** Commons logging **/
@@ -114,6 +115,10 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
             result.setConfiguration(key, TupeloStore.getInstance().getConfiguration(key));
         }
         return result;
+    }
+
+    public static List<ConfigurationKey> getWhitelist() {
+        return WHITELIST;
     }
 
     @Override

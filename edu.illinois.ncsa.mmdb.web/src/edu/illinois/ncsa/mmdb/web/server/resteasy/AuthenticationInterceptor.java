@@ -118,13 +118,15 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
             request.setAttribute("userid", PersonBeanUtil.getPersonID(username));
 
         }
-        //Now determine whether userid is authorized to use the remoteAPI...
+        //Now determine whether userid is authorized to use the remoteAPI or is trying to get system info and has that permission ...
 
         SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         try {
             if (!rbac.checkPermission(PersonBeanUtil.getPersonID(username), Permission.USE_REMOTEAPI)) {
-                log.debug("user: " + username + "  forbidden");
-                return forbiddenResponse(request.getPreprocessedPath());
+                if (!((path.startsWith("/sys/") && rbac.checkPermission(PersonBeanUtil.getPersonID(username), Permission.VIEW_SYSTEM)))) {
+                    log.debug("user: " + username + "  forbidden");
+                    return forbiddenResponse(request.getPreprocessedPath());
+                }
             }
         } catch (RBACException e) {
             e.printStackTrace();
