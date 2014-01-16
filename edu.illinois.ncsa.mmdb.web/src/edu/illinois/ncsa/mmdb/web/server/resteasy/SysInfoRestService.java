@@ -78,8 +78,8 @@ public class SysInfoRestService {
                 return Response.status(401).entity("Access to this endpoint is access controlled.").build();
             }
         } catch (RBACException e1) {
-            log.error("Error running sys info: ", e1);
-            return Response.status(500).entity("Error running sys info [" + e1.getMessage() + "]").build();
+            log.error("Error running sys config: ", e1);
+            return Response.status(500).entity("Error running sys config [" + e1.getMessage() + "]").build();
         }
 
         List<ConfigurationKey> keyList = GetConfigurationHandler.getWhitelist();

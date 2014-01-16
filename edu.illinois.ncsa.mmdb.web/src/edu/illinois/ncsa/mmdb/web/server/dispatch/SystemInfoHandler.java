@@ -167,13 +167,15 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
                 // Eventually we may need to query the VA to find published collections if all record of them is flushed from an ACR.)
                 if ((row.get(1) == null) || (row.get(2) != null)) {
                     //check permissions
-                    if (rbac.checkPermission(anon, row.get(1), Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri()))) {
+                    if (rbac.checkPermission(anon, row.get(0), Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri()))) {
                         if (rbac.checkAccessLevel(anon, row.get(0))) {
                             if (row.get(1) == null) {
+                                log.debug("Adding preprint: " + row.get(0));
                                 preprintCollCount++;
                             }
 
                             if (row.get(2) != null) {
+                                log.debug("Adding published: " + row.get(0));
                                 publishedCollCount++;
                             }
                         }
