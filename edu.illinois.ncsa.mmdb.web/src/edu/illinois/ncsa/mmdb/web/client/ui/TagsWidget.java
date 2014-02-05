@@ -190,7 +190,9 @@ public class TagsWidget extends Composite {
                     delete.addClickHandler(new ClickHandler() {
                         public void onClick(ClickEvent event) {
                             deleteTag(tag, row);
-                            tagWidget.getTagBox().setFocus(true);
+                            if (tagWidget != null) {
+                                tagWidget.getTagBox().setFocus(true);
+                            }
                         }
                     });
                     tagsPanel.setWidget(row, 1, delete);

@@ -94,6 +94,7 @@ public class PreviewTabularDataBeanWidget extends PreviewBeanWidget<PreviewTabul
                             //                            ((HTML) getWidget()).setSize("600" + "px", "500" + "px");
                         }
                         html.setHTML(html_text);
+
                         addSort();
 
                     } else {

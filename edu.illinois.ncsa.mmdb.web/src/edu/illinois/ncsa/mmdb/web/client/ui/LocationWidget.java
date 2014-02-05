@@ -70,6 +70,7 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddGeoLocation;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ClearGeoLocation;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
@@ -218,6 +219,7 @@ public class LocationWidget extends Composite {
         initialize();
 
         LatLngBounds bounds = LatLngBounds.newInstance();
+        map.clearOverlays();
         for (GeoPointBean bean : beans ) {
             MarkerOptions options = MarkerOptions.newInstance();
             options.setTitle("lat=" + bean.getLatitude() + " lon=" + bean.getLongitude() + " alt=" + bean.getAltitude());
@@ -233,6 +235,28 @@ public class LocationWidget extends Composite {
             map.setCenter(LatLng.newInstance(point.getLatitude(), point.getLongitude()));
             map.setZoomLevel(5);
         }
+
+        final Anchor clearLocationAnchor = new Anchor("Clear location(s)");
+        clearLocationAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                service.execute(new ClearGeoLocation(uri), new AsyncCallback<EmptyResult>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error removing location for " + uri, caught);
+                    }
+
+                    @Override
+                    public void onSuccess(EmptyResult result) {
+                        mainPanel.remove(clearLocationAnchor);
+                        mainPanel.remove(map);
+                        getGeoPoint();
+                    }
+                });
+            }
+        });
+        mainPanel.add(clearLocationAnchor);
     }
 
     private void initialize() {
