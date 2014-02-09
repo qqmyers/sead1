@@ -123,8 +123,14 @@ public class MediciRestUtil {
 		// new json arry to store the extracted info
 		List<LayerInfo> layerInfoList = new ArrayList<LayerInfo>();
 
-		JSONArray resultArray = layerObj.getJSONObject("sparql")
-				.getJSONObject("results").getJSONArray("result");
+		Object resultObject = layerObj.getJSONObject("sparql").getJSONObject("results").get("result");
+		JSONArray resultArray = null;
+		if (resultObject instanceof JSONArray) {
+			resultArray = (JSONArray)resultObject;
+		} else {
+			resultArray = new JSONArray();
+			resultArray.put(resultObject);
+		}
 		for (int i = 0; i < resultArray.length(); i++) {
 
 			// getting wmsURL to parse out extents
