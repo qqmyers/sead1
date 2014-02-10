@@ -13,7 +13,7 @@ sudo rm -rf /root/.ssh
 sudo rm /root/.bash_history
 sudo touch /root/.bash_history
 
-sudo rm -rf /var/log
+sudo rm -rf /var/log /var/lib/tomcat6/webapps/geoserver/data/logs/geoserver.log
 sudo mkdir -p /var/log/{apparmor,apt,dist-upgrade,fsck,installer,landscape,mysql,news,unattended-upgrades,tomcat6}
 sudo chown landscape /var/log/landscape
 sudo chown tomcat6 /var/log/tomcat6
