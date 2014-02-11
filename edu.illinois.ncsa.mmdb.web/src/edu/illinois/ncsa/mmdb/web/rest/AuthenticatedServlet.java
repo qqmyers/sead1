@@ -241,9 +241,6 @@ public class AuthenticatedServlet extends HttpServlet {
             //There was no auth header, try anonymous and let derived classes decide what to return
             return PersonBeanUtil.getAnonymous().getUri();
         }
-        // no. reject
-        log.info("Client provided no credentials, returning 403 Unauthorized");
-        return unauthorized(request, response);
     }
 
     void dontCache(HttpServletResponse response) {
