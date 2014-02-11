@@ -125,6 +125,7 @@ public class PreviewMultiTabularDataBeanWidget extends PreviewBeanWidget<Preview
                                 //                            ((HTML) getWidget()).setSize("600" + "px", "500" + "px");
                             }
                             html.setHTML(current_html);
+                            PreviewTabularDataBeanWidget.addSort();
                         } else {
                             html.setText("Error\n" + response.getStatusText());
                         }

@@ -51,13 +51,16 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewDocumentBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewGeoserverBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
@@ -84,7 +87,11 @@ public class GetDatasetHandler implements ActionHandler<GetDataset, GetDatasetRe
 
     @Override
     public GetDatasetResult execute(GetDataset action, ExecutionContext arg1) throws ActionException {
-
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        Resource userUri = action.getUser() == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(action.getUser());
+        if (!rbac.checkAccessLevel(userUri, Resource.uriRef(action.getUri()))) {
+            throw new ActionException("Accesslevel does not allow access to dataset.");
+        }
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
         DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);

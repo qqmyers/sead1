@@ -54,8 +54,6 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Cet;
-import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Tags;
 import org.tupeloproject.util.Bag;
 import org.tupeloproject.util.HashBag;
@@ -87,7 +85,7 @@ public class GetAllTagsHandler implements ActionHandler<GetAllTags, GetTagsResul
                     Unifier u = new Unifier();
                     u.setColumnNames("label", "resource");
                     u.addPattern("resource", Tags.TAGGED_WITH_TAG, "tag");
-                    u.addPattern("resource", Rdf.TYPE, Cet.DATASET);
+                    ///*u.addPattern("resource", Rdf.TYPE, Cet.DATASET);
                     u.addPattern("tag", Tags.HAS_TAG_TITLE, "label");
 
                     // only count one tag per label per non-deleted resource

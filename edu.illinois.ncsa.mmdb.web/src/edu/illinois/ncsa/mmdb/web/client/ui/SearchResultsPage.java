@@ -70,21 +70,37 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  */
 public class SearchResultsPage extends Page {
 
-    private static final String          TITLE = "Search Results";
+    private static final String          TITLE      = "Search Results";
     private PagingSearchResultsTableView datasetTableView;
     private final HandlerManager         eventbus;
     private HTML                         queryText;
     private final String                 query;
     private PagingDatasetTablePresenter  datasetTablePresenter;
+    final String                         httpString = "http://";
 
     public SearchResultsPage(DispatchAsync dispatchasync, HandlerManager eventbus) {
         super(TITLE, dispatchasync);
         this.eventbus = eventbus;
         query = PlaceService.getParams().get("q");
+
         String filter = PlaceService.getParams().get("f");
         if (filter != null) {
-            queryText = new HTML("Your search for datasets with metadata <b>" + query
-                    + "</b> returned the following results:");
+            String link = (query != null && query.contains(httpString)) ? query.substring(query.indexOf(httpString)) : "";
+            String remainderQuery = link.contains(" ") ? link.substring(link.indexOf(" ") + 1) : "";
+            link = link.contains(" ") ? link.substring(link.indexOf(" ")) : link;
+
+            //Need to accommodate for (VIVO) URLs obtained from metadata - if any
+            if (link == "") {
+                queryText = new HTML("Your search for datasets with metadata <b>" + query
+                        + "</b> returned the following results:");
+            }
+            else {
+                String newQuery = query.replace(link, "");
+                queryText = new HTML("Your search for datasets with metadata <b>" + newQuery + "<a href=\"" + link + "\">" + link + "</a>"
+                        + remainderQuery + "</b> returned the following results:");
+            }
+            //END - Modified by Ram
+
             mainLayoutPanel.add(queryText);
             queryWithFilter(query, filter);
         } else if (query != null) {
@@ -96,7 +112,7 @@ public class SearchResultsPage extends Page {
     }
 
     private void queryServer(final String query) {
-        dispatchAsync.execute(new Search(query), new AsyncCallback<SearchResult>() {
+        dispatchAsync.execute(new Search(query, MMDB.getUsername()), new AsyncCallback<SearchResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -120,7 +136,7 @@ public class SearchResultsPage extends Page {
      * or filter=MIME Type query=image/jpeg
      */
     private void queryWithFilter(final String query, final String filter) {
-        dispatchAsync.execute(new SearchWithFilter(query, filter), new AsyncCallback<SearchResult>() {
+        dispatchAsync.execute(new SearchWithFilter(query, filter, MMDB.getUsername()), new AsyncCallback<SearchResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -174,7 +190,7 @@ public class SearchResultsPage extends Page {
 
         final List<String> hits = result.getHits();
         for (final String hit : hits ) {
-            dispatchAsync.execute(new GetSearchHit(hit),
+            dispatchAsync.execute(new GetSearchHit(hit, MMDB.getUsername()),
                     new AsyncCallback<GetSearchHitResult>() {
 
                         @Override

@@ -41,9 +41,9 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -55,16 +55,16 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationshipResult;
@@ -72,7 +72,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListRelationshipTypes;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 
 /**
  * Widget used in selected datasets page to manually create relationships
@@ -82,21 +82,23 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  */
 public class CreateRelationshipsWidget extends Composite {
 
-    public static final String RELATES  = "relates";
-    public static final String DESCENDS = "descends";
+    public static final String  RELATES  = "relates";
+    public static final String  DESCENDS = "descends";
 
-    private final FlowPanel    mainPanel;
-    LabeledListBox             dataset1;
-    LabeledListBox             dataset2;
-    String                     title1;
-    String                     title2;
-    LabeledListBox             relationships;
-    PreviewWidget              thumb1;
-    PreviewWidget              thumb2;
-    HorizontalPanel            thumbs;
+    private final FlowPanel     mainPanel;
+    LabeledListBox              item1;
+    LabeledListBox              item2;
+    String                      title1;
+    String                      title2;
+    LabeledListBox              relationshipsList;
+    PreviewWidget               thumb1;
+    PreviewWidget               thumb2;
+    FlexTable                   relationshipsWidget;
 
-    DispatchAsync              service;
-    Set<String>                selected;
+    DispatchAsync               service;
+    Set<String>                 items    = new HashSet<String>();
+    private final Button        submit;
+    private Map<String, String> relationshipOptions;
 
     /**
      * A widget to manually create relationships between data
@@ -105,10 +107,8 @@ public class CreateRelationshipsWidget extends Composite {
      * @param service
      */
 
-    public CreateRelationshipsWidget(final Set<DatasetBean> datasets, final Set<String> selected, final DispatchAsync service) {
-
+    public CreateRelationshipsWidget(final Set<String> selected, final DispatchAsync service) {
         this.service = service;
-        this.selected = selected;
 
         mainPanel = new FlowPanel();
         //commented out for now, until selected
@@ -120,151 +120,199 @@ public class CreateRelationshipsWidget extends Composite {
         mainPanel.add(createRelationships);
 
         //user interface: thumbnails & relationship Type
-        thumbs = new HorizontalPanel();
-        thumbs.setStyleName("createRelationshipThumbs");
+        relationshipsWidget = new FlexTable();
+        relationshipsWidget.setStyleName("createRelationshipThumbs");
+        mainPanel.add(relationshipsWidget);
+
         thumb1 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false, service);
         thumb1.setWidth("110px");
         thumb1.setHeight("110px");
-        thumbs.add(thumb1);
+        thumb1.setStyleName("relationshipTumbnail");
+        relationshipsWidget.setWidget(0, 0, thumb1);
 
-        relationships = createRelationshipOptions();
-        thumbs.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        thumbs.add(relationships);
+        relationshipsList = new LabeledListBox("");
+        relationshipsList.choice.setStyleName("relationshipsList");
+        relationshipsWidget.setWidget(0, 1, relationshipsList);
 
         thumb2 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false, service);
         thumb2.setWidth("110px");
         thumb2.setHeight("110px");
-        thumbs.add(thumb2);
-
-        mainPanel.add(thumbs);
+        thumb2.setStyleName("relationshipTumbnail");
+        relationshipsWidget.setWidget(0, 2, thumb2);
 
         //user interface: Filename dropdown forms
-        HorizontalPanel forms = new HorizontalPanel();
-        forms.addStyleName("relationshipForms");
-        dataset1 = createDatasetOptions();
-        forms.add(dataset1);
+        item1 = createItemOptions();
+        relationshipsWidget.setWidget(1, 0, item1);
 
-        dataset1.addValueChangeHandler(new ValueChangeHandler<String>() {
-
+        item1.addValueChangeHandler(new ValueChangeHandler<String>() {
             public void onValueChange(ValueChangeEvent<String> event) {
-                fetchDataset(event.getValue(), thumb1);
+                fetchItem(event.getValue(), thumb1);
+                updateRelationShipOptions();
             }
         });
 
-        dataset2 = createDatasetOptions();
-        dataset2.addStyleName("relationshipDatasets");
-        forms.add(dataset2);
+        item2 = createItemOptions();
+        relationshipsWidget.setWidget(1, 2, item2);
 
-        dataset2.addValueChangeHandler(new ValueChangeHandler<String>() {
-
+        item2.addValueChangeHandler(new ValueChangeHandler<String>() {
             public void onValueChange(ValueChangeEvent<String> event) {
-                fetchDataset(event.getValue(), thumb2);
+                fetchItem(event.getValue(), thumb2);
+                updateRelationShipOptions();
             }
         });
-
-        mainPanel.add(forms);
 
         //user interface: submit button
-        HorizontalPanel finalize = new HorizontalPanel();
-        finalize.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        finalize.setStyleName("relationshipSubmit");
-        Button submit = new Button("Submit");
+        submit = new Button("Submit");
+        submit.setEnabled(false);
+        submit.addStyleName("relationshipSubmit");
+        relationshipsWidget.setWidget(2, 1, submit);
 
         submit.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                tryCreateRelationship();
+                if (item1.getSelected().startsWith("D") && item2.getSelected().startsWith("D")) {
+                    addDatashipRelationShip();
+                } else if (item1.getSelected().startsWith("C") && item2.getSelected().startsWith("C")) {
+                    addCollectionRelationShip();
+                } else if (item1.getSelected().startsWith("C") && item2.getSelected().startsWith("D")) {
+                    addToCollection();
+                } else if (item1.getSelected().startsWith("D") && item2.getSelected().startsWith("C")) {
+                    addToCollection();
+                }
             }
         });
-
-        finalize.add(submit);
-        mainPanel.add(finalize);
-
-    }
-
-    private LabeledListBox createRelationshipOptions() {
-
-        final LabeledListBox relationshipOptions = new LabeledListBox("");
 
         service.execute(new ListRelationshipTypes(), new AsyncCallback<ListNamedThingsResult>() {
             public void onFailure(Throwable caught) {
             }
 
             public void onSuccess(ListNamedThingsResult result) {
-                SortedMap<String, String> availableFields = result.getThingsOrderedByName();
-
-                for (Map.Entry<String, String> entry : availableFields.entrySet() ) {
-                    String label = entry.getValue();
-                    String predicate = entry.getKey();
-                    relationshipOptions.addItem(label, predicate);
-                }
-            }
-        });
-
-        return relationshipOptions;
-    }
-
-    private LabeledListBox createDatasetOptions() {
-        LabeledListBox datasetOptions = new LabeledListBox("");
-        datasetOptions.choice.addStyleName("relationshipDatasetPulldown");
-        return datasetOptions;
-    }
-
-    private void fetchDataset(String uri, final PreviewWidget pw) {
-
-        service.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Error getting recent activity");
-            }
-
-            @Override
-            public void onSuccess(GetDatasetResult result) {
-                pw.changeImage(result.getDataset().getUri(), result.getDataset().getMimeType());
+                relationshipOptions = result.getThingsOrderedByName();
             }
         });
     }
 
-    private void tryCreateRelationship() {
-        //error handling - dataset cannot be related to itself
-        if (dataset1.getSelected().equals(dataset2.getSelected())) {
-            ConfirmDialog okay = new ConfirmDialog("Error", "Please select two different datasets", false);
-            okay.getOkText().setText("OK");
+    private void updateRelationShipOptions() {
+        // remove old relation shipts
+        String selected = relationshipsList.getSelected();
+        for (String item : items ) {
+            relationshipsList.removeItem(item);
+        }
+        items.clear();
 
-        } else {
-            //check if relationship already exists
-            service.execute(new GetRelationship(dataset1.getSelected()), new AsyncCallback<GetRelationshipResult>() {
-                @Override
-                public void onFailure(Throwable arg0) {
-                    GWT.log("Error Retrieving Relationships of a Dataset");
+        // make sure 2 items are not the same
+        submit.setEnabled(false);
+        if (!item1.getSelected().equals(item2.getSelected())) {
+
+            if (item1.getSelected().startsWith("C") && item2.getSelected().startsWith("C")) {
+                // in case of 2 collections show hasPart
+                relationshipsList.addItem("Part of", "http://purl.org/dc/terms/hasPart");
+                items.add("http://purl.org/dc/terms/hasPart");
+
+            } else if (item1.getSelected().startsWith("D") && item2.getSelected().startsWith("D")) {
+                // in case of 2 datasets show standard relationships
+                for (Map.Entry<String, String> entry : relationshipOptions.entrySet() ) {
+                    items.add(entry.getKey());
+                    relationshipsList.addItem(entry.getValue(), entry.getKey());
                 }
 
-                @Override
-                public void onSuccess(GetRelationshipResult arg0) {
-                    //Check if relationship exists
-                    Map<String, Relationship> relationship = arg0.getRelationship();
+            } else if (item1.getSelected().startsWith("D") && item2.getSelected().startsWith("C")) {
+                relationshipsList.addItem("Member of", "http://purl.org/dc/terms/hasPart");
+                items.add("http://purl.org/dc/terms/hasPart");
 
-                    if (relationship.containsKey(relationships.getSelected())) {
-                        Relationship check = relationship.get(relationships.getSelected());
-                        if (check.uris.contains(dataset2.getSelected())) {
-                            ConfirmDialog okay = new ConfirmDialog("Error", "That relationship already exists", false);
-                            okay.getOkText().setText("OK");
-                        } else {
-                            createRelationship();
-                        }
-                    }
-                    //try creating relationship
-                    else {
-                        createRelationship();
-                    }
+            } else if (item1.getSelected().startsWith("C") && item2.getSelected().startsWith("D")) {
+                relationshipsList.addItem("Has member", "http://purl.org/dc/terms/hasPart");
+                items.add("http://purl.org/dc/terms/hasPart");
+            }
 
-                }
-            });
+            submit.setEnabled(true);
+        }
+        if (selected != null) {
+            relationshipsList.setSelected(selected);
         }
     }
 
+    private LabeledListBox createItemOptions() {
+        LabeledListBox itemOptions = new LabeledListBox("");
+        itemOptions.choice.addStyleName("relationshipDatasetPulldown");
+        return itemOptions;
+    }
+
+    private void fetchItem(String uri, final PreviewWidget pw) {
+        pw.changeImage(uri, null, null, null, false, true);
+    }
+
+    private void addToCollection() {
+        String collection;
+        Set<String> dataset = new HashSet<String>();
+
+        if (item1.getSelected().startsWith("D")) {
+            collection = item2.getSelected().substring(1);
+            dataset.add(item1.getSelected().substring(1));
+        } else {
+            collection = item1.getSelected().substring(1);
+            dataset.add(item2.getSelected().substring(1));
+        }
+
+        service.execute(new AddToCollection(collection, dataset), new AsyncCallback<AddToCollectionResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error adding collection relationship.", caught);
+            }
+
+            @Override
+            public void onSuccess(AddToCollectionResult result) {
+                showFeedback();
+            }
+        });
+    }
+
+    private void addCollectionRelationShip() {
+        service.execute(new SetUserMetadata(item1.getSelected().substring(1), relationshipsList.getSelected(), item2.getSelected().substring(1), true), new AsyncCallback<EmptyResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error adding collection relationship.", caught);
+            }
+
+            @Override
+            public void onSuccess(EmptyResult result) {
+                showFeedback();
+            }
+        });
+    }
+
+    private void addDatashipRelationShip() {
+        //check if relationship already exists
+        service.execute(new GetRelationship(item1.getSelected().substring(1), MMDB.getUsername()), new AsyncCallback<GetRelationshipResult>() {
+            @Override
+            public void onFailure(Throwable arg0) {
+                GWT.log("Error Retrieving Relationships of a Dataset", arg0);
+            }
+
+            @Override
+            public void onSuccess(GetRelationshipResult arg0) {
+                //Check if relationship exists
+                Map<String, Relationship> relationship = arg0.getRelationship();
+
+                if (relationship.containsKey(relationshipsList.getSelected())) {
+                    Relationship check = relationship.get(relationshipsList.getSelected());
+                    if (check.uris.contains(item2.getSelected().substring(1))) {
+                        ConfirmDialog okay = new ConfirmDialog("Error", "That relationship already exists", false);
+                        okay.getOkText().setText("OK");
+                    } else {
+                        createRelationship();
+                    }
+                }
+                //try creating relationship
+                else {
+                    createRelationship();
+                }
+
+            }
+        });
+    }
+
     private void createRelationship() {
-        service.execute(new SetRelationship(dataset1.getSelected(), relationships.getSelected(), dataset2.getSelected(), MMDB.getUsername()),
+        service.execute(new SetRelationship(item1.getSelected().substring(1), relationshipsList.getSelected(), item2.getSelected().substring(1), MMDB.getUsername()),
                 new AsyncCallback<SetRelationshipResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -272,37 +320,51 @@ public class CreateRelationshipsWidget extends Composite {
                     }
 
                     public void onSuccess(SetRelationshipResult result) {
-                        createFeedback(dataset1.getSelected(), relationships.getTitle(), dataset2.getSelected());
+                        showFeedback();
                     }
                 });
     }
 
-    //relationship created feedback
-    private void createFeedback(String uri1, String type, String uri2) {
-
+    private void showFeedback() {
         HorizontalPanel submitted = new HorizontalPanel();
         submitted.addStyleName("relationshipCreated");
 
         Label newRelationship1 = new Label("Created:");
         submitted.add(newRelationship1);
 
-        Hyperlink hyperlink1 = new Hyperlink(dataset1.getTitle(), "dataset?id=" + uri1);
+        Hyperlink hyperlink1;
+        if (item1.getSelected().startsWith("C")) {
+            hyperlink1 = new Hyperlink(item1.getTitle(), "collection?uri=" + item1.getSelected().substring(1));
+        } else {
+            hyperlink1 = new Hyperlink(item1.getTitle(), "dataset?id=" + item1.getSelected().substring(1));
+        }
         hyperlink1.addStyleName("relationshipHyperlink");
         submitted.add(hyperlink1);
 
-        Label newRelationship2 = new Label(type);
+        Label newRelationship2 = new Label(relationshipsList.getTitle());
         submitted.add(newRelationship2);
 
-        Hyperlink hyperlink2 = new Hyperlink(dataset2.getTitle(), "dataset?id=" + uri2);
+        Hyperlink hyperlink2;
+        if (item2.getSelected().startsWith("C")) {
+            hyperlink2 = new Hyperlink(item2.getTitle(), "collection?uri=" + item2.getSelected().substring(1));
+        } else {
+            hyperlink2 = new Hyperlink(item2.getTitle(), "dataset?id=" + item2.getSelected().substring(1));
+        }
         hyperlink2.addStyleName("relationshipHyperlink");
         submitted.add(hyperlink2);
 
         mainPanel.add(submitted);
     }
 
-    public void addToList(String name, String value) {
-        dataset1.addItem(name, value);
-        dataset2.addItem(name, value);
+    public void addToList(String name, String value, boolean collection) {
+        if (collection) {
+            item1.addItem(name, "C" + value);
+            item2.addItem(name, "C" + value);
+        } else {
+            item1.addItem(name, "D" + value);
+            item2.addItem(name, "D" + value);
+        }
+        updateRelationShipOptions();
     }
 
 }

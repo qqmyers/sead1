@@ -81,7 +81,7 @@ public class DatasetPresenter extends BasePresenter<DatasetPresenter.DatasetPres
 
     public void showDataset(String id) {
 
-        dispatchAsync.execute(new GetDataset(id), new AsyncCallback<GetDatasetResult>() {
+        dispatchAsync.execute(new GetDataset(id, MMDB.getUsername()), new AsyncCallback<GetDatasetResult>() {
 
             @Override
             public void onFailure(Throwable caught) {

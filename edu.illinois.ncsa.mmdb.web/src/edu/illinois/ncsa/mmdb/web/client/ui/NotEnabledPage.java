@@ -62,9 +62,12 @@ public class NotEnabledPage extends Composite {
         initWidget(mainPanel);
 
         // page title
-        mainPanel.add(new TitlePanel("Account Not Enabled"));
+        mainPanel.add(new TitlePanel("Account Created, Admin(s) Notified."));
 
-        HTML message = new HTML("Your account has not yet been authorized by an administrator.");
+        HTML message = new HTML("<b>Welcome!</b> Your account has been successfully created!<br/>" +
+                "Since this SEAD Active Content Repository is access controlled, " +
+                "the group administrator(s) have been notified. You will receive an email" +
+                " when your access to this space is approved.");
         // TODO change to more appropriate style
         message.addStyleName("loginForm");
         mainPanel.add(message);

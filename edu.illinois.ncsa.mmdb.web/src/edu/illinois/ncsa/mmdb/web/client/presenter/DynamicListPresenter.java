@@ -84,21 +84,11 @@ public class DynamicListPresenter extends BasePresenter<DynamicListPresenter.Dis
 
         Set<HasValue<Boolean>> getCheckBoxes();
 
-        int insertItem(String id, String name, String type, Date date, String preview, String size, String authorId);
-
-        int insertItem(String id, String type);
-
-        void setTitle(int row, String title, String uri);
-
-        void setDate(int row, Date date);
-
-        void setAuthor(int row, String author);
-
-        void setSize(int row, String size);
-
-        void setType(int row, String type);
-
         void removeAllRows();
+
+        int insertItem(String id, String title, String author, Date date, String size, String type);
+
+        void showSelected(boolean checked, int location);
     }
 
     public DynamicListPresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
@@ -147,20 +137,7 @@ public class DynamicListPresenter extends BasePresenter<DynamicListPresenter.Dis
 
             @Override
             public void onShowItem(ShowItemEvent showItemEvent) {
-                int row = addItem(showItemEvent.getId(), showItemEvent.getType());
-                display.setTitle(row, showItemEvent.getTitle(), showItemEvent.getId());
-                if (showItemEvent.getAuthor() != null) {
-                    display.setAuthor(row, showItemEvent.getAuthor());
-                }
-                if (showItemEvent.getDate() != null) {
-                    display.setDate(row, showItemEvent.getDate());
-                }
-                if (showItemEvent.getType() != null) {
-                    display.setType(row, showItemEvent.getType());
-                }
-                if (showItemEvent.getSize() != null) {
-                    display.setSize(row, showItemEvent.getSize());
-                }
+                addItem(showItemEvent);
             }
 
         });
@@ -196,13 +173,19 @@ public class DynamicListPresenter extends BasePresenter<DynamicListPresenter.Dis
         });
     }
 
-    public int addItem(final String id, String type) {
-        int location = display.insertItem(id, type);
+    public int addItem(ShowItemEvent showItemEvent) {
+        String id = showItemEvent.getId();
+        String title = showItemEvent.getTitle() == null ? "Unknown Title" : showItemEvent.getTitle();
+        String author = showItemEvent.getAuthor() == null ? "Unknown Author" : showItemEvent.getAuthor();
+        Date date = showItemEvent.getDate() == null ? new Date(0) : showItemEvent.getDate();
+        String size = showItemEvent.getSize() == null ? "Unknown Size" : showItemEvent.getSize();
+        String type = showItemEvent.getType() == null ? "Unknown Type" : showItemEvent.getType();
+        int location = display.insertItem(id, title, author, date, size, type);
         items.put(id, location);
         final HasValue<Boolean> selected = display.getSelected(location);
         selected.addValueChangeHandler(new DatasetSelectionCheckboxHandler(id, eventBus));
         UserSessionState sessionState = MMDB.getSessionState();
-        if (sessionState.getSelectedDatasets().contains(id)) {
+        if (sessionState.getSelectedItems().contains(id)) {
             selected.setValue(true);
         } else {
             selected.setValue(false);

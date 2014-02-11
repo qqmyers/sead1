@@ -54,14 +54,14 @@ import com.bradmcevoy.http.SecurityManager;
 import com.bradmcevoy.http.http11.auth.DigestResponse;
 
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * Simple implementation of SecurityManger for medici. This will use the medici
@@ -74,12 +74,12 @@ public class MediciSecurityManager implements SecurityManager {
     private static Log                log      = LogFactory.getLog(MediciSecurityManager.class);
 
     private final Map<String, String> accepted = new HashMap<String, String>();
-    private final MediciRbac          rbac;
+    private final SEADRbac            rbac;
     private final boolean             allowDelete;
     private PersonBean                user;
 
     public MediciSecurityManager(Context context, boolean allowDelete) {
-        this.rbac = new MediciRbac(context);
+        this.rbac = new SEADRbac(context);
         this.allowDelete = allowDelete;
     }
 

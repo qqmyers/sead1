@@ -38,193 +38,253 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.rest;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.ws.http.HTTPException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tupeloproject.kernel.Context;
+import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.util.Base64;
-import org.tupeloproject.util.SecureHashMinter;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 public class AuthenticatedServlet extends HttpServlet {
+    /**
+     * 
+     */
+    private static final long  serialVersionUID = -4256332408054511050L;
+
     static Log                 log              = LogFactory.getLog(AuthenticatedServlet.class);
 
     public static final String AUTHENTICATED_AS = "edu.illinois.ncsa.mmdb.web.server.auth.authenticatedAs";
-    public static final String SESSION_KEYS     = "edu.illinois.ncsa.mmdb.web.server.auth.sessionKeys";
+    public static final String REMOTE_ALLOWED   = "edu.illinois.ncsa.mmdb.web.server.auth.RemoteAllowed";
+    public static final String _anonymousId     = PersonBeanUtil.getAnonymous().getUri();                   ;
 
-    /** look up the user's session key. */
-    protected String lookupSessionKey(String userId) {
-        for (Map.Entry<String, String> entry : getSessionKeys(getServletContext()).entrySet() ) {
-            if (userId.equals(entry.getValue())) {
-                return entry.getKey();
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        postAuthenticate(request, response);
+    }
+
+    public void postAuthenticate(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        //FIXME .equals("/authenticate") ?
+        log.debug("POST Authenticate");
+        String validUser = null;
+        if (request.getRequestURL().toString().endsWith("authenticate")) {
+
+            //Expect two application/x-www-form-urlencoded parameters
+
+            String username = request.getParameter("username");
+            String password = request.getParameter("password");
+            String googleAccessToken = request.getParameter("googleAccessToken");
+
+            log.debug("u: " + username);
+            log.debug("p: " + password);
+            log.debug("gAT: " + googleAccessToken);
+
+            if ((username != null) && (!username.equals("")) && (password != null) && (!password.equals(""))) {
+                if (new Authentication().authenticate(username, password)) {
+                    // set the session attribute indicating that we're authenticated
+                    validUser = username;
+                    // we're authenticating, so we need to create a session and put it in the context
+                    HttpSession session = request.getSession(false);
+                    if (session != null) {
+                        log.debug("Invalidating: " + session.getId());
+                        session.invalidate();
+                    }
+                    session = request.getSession(true);
+                    log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
+                    session.setAttribute(AUTHENTICATED_AS, validUser);
+                    SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+                    try {
+                        if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
+                            session.setAttribute(REMOTE_ALLOWED, "true");
+                        }
+                    } catch (RBACException re) {
+                        log.warn("Error determining remote api permission");
+                    }
+                    response.getWriter().print(session.getId());
+                }
+            } else if (googleAccessToken != null) {
+                String clientId = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleClientId);
+                validUser = Authentication.googleAuthenticate(clientId, googleAccessToken); // testID
+                log.info("Retrieved user from google " + validUser + " " + clientId + " " + googleAccessToken);
+                if (validUser != null) {
+                    // set the session attribute indicating that we're authenticated
+
+                    // we're authenticating, so we need to create a session and put it in the context
+                    HttpSession session = request.getSession(false);
+                    if (session != null) {
+                        log.debug("Invalidating: " + session.getId());
+                        session.invalidate();
+                    }
+                    session = request.getSession(true);
+                    log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
+                    session.setAttribute(AUTHENTICATED_AS, validUser);
+                    SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+                    try {
+                        if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
+                            session.setAttribute(REMOTE_ALLOWED, "true");
+                        }
+                    } catch (RBACException re) {
+                        log.warn("Error determining remote api permission");
+                    }
+                    response.getWriter().print(session.getId());
+
+                }
             }
-        }
-        log.info("LOGIN: no session key found for user " + userId);
-        return null;
-    }
 
-    @SuppressWarnings("unchecked")
-    public static Map<String, String> getSessionKeys(ServletContext context) {
-        // FIXME need a way for session keys to expire so this map doesn't take up more and more memory
-        Map<String, String> sessionKeys = (Map<String, String>) context.getAttribute(SESSION_KEYS);
-        if (sessionKeys == null) {
-            sessionKeys = new HashMap<String, String>();
-            context.setAttribute(SESSION_KEYS, sessionKeys);
-        }
-        return sessionKeys;
-    }
+            if (validUser == null) {
+                response.getWriter().print("");
+                //Set 404 - we don't want to invoke the browser authentication attempt we'd get from sending 401...
 
-    public static String setSessionKey(ServletContext context, String userId) {
-        String sessionKey = SecureHashMinter.getMinter().mint();
-        log.info("Generated new session key " + sessionKey + " for user " + userId);
-        getSessionKeys(context).put(sessionKey, userId);
-        return sessionKey;
-    }
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 
-    public static String getUserId(ServletContext context, String sessionKey) {
-        return getSessionKeys(context).get(sessionKey);
-    }
-
-    public static void clearSessionKey(ServletContext context, String sessionKey) {
-        Map<String, String> sk = getSessionKeys(context);
-        if (sk.containsKey(sessionKey)) {
-            log.debug("Destroying session key " + sessionKey);
-            getSessionKeys(context).remove(sessionKey);
-        }
-    }
-
-    public static String getSessionKey(HttpServletRequest request) {
-        if (request.getCookies() == null) {
-            return null;
-        }
-        for (Cookie cookie : request.getCookies() ) {
-            if (cookie.getName().equals("sessionKey")) {
-                return cookie.getValue();
             }
+            dontCache(response);
+            response.flushBuffer();
+
         }
-        return null;
+        //else - pass through to derived classes w/o handling anything
     }
 
     public void doLogout(HttpServletRequest request, HttpServletResponse response) {
+        log.debug("Logout Path: " + request.getPathInfo());
         HttpSession session = request.getSession(false);
         if (session != null) {
             String userId = (String) session.getAttribute(AUTHENTICATED_AS);
-            session.setAttribute(AUTHENTICATED_AS, null);
+            session.invalidate();
+            //  response.setHeader("Connection", "close");
             log.info(userId + " logged out");
-        }
-
-        String sessionKey = getSessionKey(request);
-        if (sessionKey != null) {
-            clearSessionKey(getServletContext(), sessionKey);
         }
     }
 
+    /*******************************************************/
     protected void logout(HttpServletRequest request, HttpServletResponse response) {
         doLogout(request, response);
     }
 
     protected static String getHttpSessionUser(HttpServletRequest request) {
-        return (String) request.getSession(true).getAttribute(AUTHENTICATED_AS);
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            return (String) session.getAttribute(AUTHENTICATED_AS);
+        } else {
+            return null;
+        }
     }
 
     public static String getUserUri(HttpServletRequest req) {
-        return PersonBeanUtil.getPersonID(getHttpSessionUser(req));
+        String username = getHttpSessionUser(req);
+        if (username != null) {
+            return PersonBeanUtil.getPersonID(username);
+        } else {
+            return null;
+        }
     }
 
-    public static boolean doAuthenticate(HttpServletRequest request, HttpServletResponse response, ServletContext context) {
-        // first, see if this HTTP session is already authenticated // FIXME need expiration mechanism!
-        String validUser = getHttpSessionUser(request);
-        // to authenticate we need either 1) a "sessionKey" cookie, or 2) credentials
-        if (validUser == null) {
-            String sessionKey = getSessionKey(request);
-            if (sessionKey != null) {
-                validUser = getUserId(context, sessionKey);
-                if (validUser == null) {
-                    log.info("Session key cookie " + sessionKey + " not found, authentication required");
-                } else {
-                    //log.debug("LOGIN: user "+validUser+" logged in with session key "+sessionKey);
-                }
+    /* This method checks credentials and returns the users identity - 'anonymous' if no other credentials are presented
+     * It does not change state by storing the credentials in the session (which requires a call to /api/authenticate
+     * It's primary use is to retrieve the ID from the session, but it also supports the case where a URL is requested outside
+     * an app/session context - i.e. when the browser sends a Basic auth header in response to a 401 
+     * 
+     */
+    public static String doBasicAuthenticate(HttpServletRequest request, HttpServletResponse response) throws HTTPException {
+
+        log.debug("In doBasicAuthenticate()");
+        log.debug("Path: " + request.getPathInfo());
+        String validUser = null;
+
+        String auth = request.getHeader("Authorization");
+        if (auth != null) {
+            // attempt to authenticate provided u/p credentials
+            //log.info("raw basic creds = " + auth); // FIXME debug
+            String ap[] = auth.split(" ");
+            if (ap.length != 2 && !ap[0].equalsIgnoreCase("basic")) {
+                log.warn("can't parse basic creds " + auth);
+                throw (new HTTPException(HttpServletResponse.SC_UNAUTHORIZED));
+            }
+            log.debug("authorization credentials = " + Base64.decodeToString(ap[1])); // FIXME debug
+            String up[] = Base64.decodeToString(ap[1]).split(":");
+            if (up.length != 2) {
+                throw (new HTTPException(HttpServletResponse.SC_UNAUTHORIZED));
+            }
+            String username = TextFormatter.unescapeEmailAddress(up[0]);
+            String password = up[1];
+            log.debug("Authing u: " + username + " p: " + password);
+            if (new Authentication().authenticate(username, password)) {
+                // set the session attribute indicating that we're authenticated
+                validUser = username;
+            }
+            else {
+                throw (new HTTPException(HttpServletResponse.SC_UNAUTHORIZED));
             }
         }
-        if (validUser == null) {
-            String auth = request.getHeader("Authorization");
-            if (auth != null) {
-                // attempt to authenticate provided u/p credentials
-                //log.info("raw basic creds = " + auth); // FIXME debug
-                String ap[] = auth.split(" ");
-                if (ap.length != 2 && !ap[0].equalsIgnoreCase("basic")) {
-                    log.warn("can't parse basic creds " + auth); // FIXME debug
-                    return unauthorized(request, response);
-                }
-                //log.info("authorization credentials = " + Base64.decodeToString(ap[1])); // FIXME debug
-                String up[] = Base64.decodeToString(ap[1]).split(":");
-                if (up.length != 2) {
-                    return unauthorized(request, response);
-                }
-                String username = TextFormatter.unescapeEmailAddress(up[0]);
-                String password = up[1];
-                if (new Authentication().authenticate(username, password)) {
-                    // set the session attribute indicating that we're authenticated
-                    validUser = username;
-                    // we're authenticating, so we need to generate a session key and put it in the context
-                    String sessionKey = setSessionKey(context, validUser);
-                    log.info("User " + username + " logged in with valid u/p, sessionKey=" + sessionKey);
-                    Cookie cookie = new Cookie("sessionKey", sessionKey);
-                    cookie.setPath(request.getContextPath());
-                    response.addCookie(cookie);
-                }
-            }
-        }
+
         // now are we authenticated?
         if (validUser != null) {
-            // yes. record the user id in the http session
-            HttpSession session = request.getSession(true);
-            if (session.getAttribute(AUTHENTICATED_AS) == null) {
-                log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
-                session.setAttribute(AUTHENTICATED_AS, validUser);
-            }
-            return authorized(request);
-        } else if (request.getRequestURI().contains("api/video")) {
-            if (request.getHeader("User-Agent").startsWith("AppleCoreMedia") || request.getHeader("User-Agent").startsWith("QuickTime")) {
-                // special case for quicktime player.
-                validUser = PersonBeanUtil.getAnonymousURI().toString();
-                HttpSession session = request.getSession(true);
-                if (session.getAttribute(AUTHENTICATED_AS) == null) {
-                    log.info("Special Apple case, validated as anonymous in HTTP session " + session.getId());
-                    session.setAttribute(AUTHENTICATED_AS, validUser);
-                }
-                return authorized(request);
-            } else {
-                log.info("Video request from non authenticated user with User-Agent=" + request.getHeader("User-Agent"));
-            }
+            log.debug("Returning with valid user: " + validUser);
+            return PersonBeanUtil.getPersonID(validUser);
+        } else {
+            //There was no auth header, try anonymous and let derived classes decide what to return
+            return PersonBeanUtil.getAnonymous().getUri();
         }
         // no. reject
         log.info("Client provided no credentials, returning 403 Unauthorized");
         return unauthorized(request, response);
     }
 
-    static boolean unauthorized(HttpServletRequest request, HttpServletResponse response) {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setHeader("WWW-Authenticate", "BASIC realm=\"Medici REST service @ " + request.getContextPath() + "\""); // FIXME need webapp-specific realm
-        return false;
+    void dontCache(HttpServletResponse response) {
+        // OK, we REALLY don't want the browser to cache this. For reals
+        response.addHeader("cache-control", "no-store, no-cache, must-revalidate, max-age=-1"); // don't cache
+        response.addHeader("cache-control", "post-check=0, pre-check=0, false"); // really don't cache
+        response.addHeader("pragma", "no-cache, no-store"); // no, we mean it, really don't cache
+        response.addHeader("expires", "-1"); // if you cache, we're going to be very, very angry
     }
 
-    static boolean authorized(HttpServletRequest request) {
+    Context getContext() {
+        return TupeloStore.getInstance().getContext();
+    }
+
+    protected boolean isAllowed(String userId, String objectUri, Permission permission, boolean dataset) {
+        SEADRbac rbac = new SEADRbac(getContext());
+        Resource userUri = userId == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(userId);
+        Resource permissionUri = Resource.uriRef(permission.getUri());
+        Resource oUri = objectUri != null ? Resource.uriRef(objectUri) : null; // how I long for implicit type conversion
+        try {
+            if (!rbac.checkPermission(userUri, oUri, permissionUri)) {
+                return false;
+            }
+            if (dataset && !rbac.checkAccessLevel(userUri, oUri)) {
+                return false;
+            }
+        } catch (RBACException e) {
+            e.printStackTrace();
+            return false;
+        }
         return true;
     }
 
-    protected boolean authenticate(HttpServletRequest request, HttpServletResponse response) {
-        return doAuthenticate(request, response, getServletContext());
+    protected boolean isAllowed(String userId, Permission permission) {
+        return isAllowed(userId, null, permission, false);
     }
+
+    static void unauthorized(HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        log.debug("Setting WWW-Authenticate header");
+        response.setHeader("WWW-Authenticate", "BASIC realm=\"SEAD ACR Services @ " + request.getContextPath() + "\"");
+    }
+
 }

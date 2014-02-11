@@ -52,7 +52,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 
 public class SetLicenseDialog extends DialogBox {
 

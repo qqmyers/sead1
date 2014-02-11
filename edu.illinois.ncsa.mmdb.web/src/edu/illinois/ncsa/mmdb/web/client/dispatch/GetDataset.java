@@ -41,29 +41,30 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-
 /**
  * @author lmarini
- *
+ * 
  */
 @SuppressWarnings("serial")
-public class GetDataset extends SubjectAction<GetDatasetResult>{
-	
-	@SuppressWarnings("unused")
-	private GetDataset() {}
-	
-	public GetDataset(String id) {
-		super(id);
-	}
+public class GetDataset extends SubjectAction<GetDatasetResult> {
+    @SuppressWarnings("unused")
+    private GetDataset() {
+    }
 
-	/** @deprecated use setUri */
-	public void setId(String id) {
-		setUri(id);
-	}
+    public GetDataset(String id, String user) {
+        super(id);
+        setUser(user);
+    }
 
-	/** @deprecated use getUri */
-	public String getId() {
-		return getUri();
-	}
+    /** @deprecated use setUri */
+    @Deprecated
+    public void setId(String id) {
+        setUri(id);
+    }
 
+    /** @deprecated use getUri */
+    @Deprecated
+    public String getId() {
+        return getUri();
+    }
 }

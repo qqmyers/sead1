@@ -7,6 +7,23 @@ public enum ConfigurationKey {
     MailFrom("mail.from", "noreply@localhost"), //$NON-NLS-1$ //$NON-NLS-2$
     MailFullName("mail.fullname", "Medici Server"), //$NON-NLS-1$ //$NON-NLS-2$
 
+    // sead enhancements
+    VIVOQUERYURL("vivo-query.url", "http://sead-vivo.d2i.indiana.edu:3030/SEAD-VIVO/sparql?query="), //$NON-NLS-1$ //$NON-NLS-2$
+    VIVOIDENTIFIERURL("vivo-identifier.url", "http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/"),
+    VAURL("va.url", "http://bluespruce.pti.indiana.edu:8181/dcs-nced/query/?q=resourceValue:(%s)"), //$NON-NLS-1$ //$NON-NLS-2$
+    DiscoveryURL("discovery.url", ""), //$NON-NLS-1$ //$NON-NLS-2$
+
+    // access level
+    AccessLevelLabel("access.level.label", "Access Level"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelPredicate("access.level.predicate", "http://sead-data.net/terms/hasDataMaturityLevel"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelDefault("access.level.default", "0"), //$NON-NLS-1$ //$NON-NLS-2$
+    AccessLevelValues("access.level.values", "Raw, Preliminary Results, Provisional Product, Validated Product, Group Product"), //$NON-NLS-1$ //$NON-NLS-2$
+
+    // project name and description
+    ProjectName("project.name", ""), //$NON-NLS-1$
+    ProjectDescription("project.description", ""), //$NON-NLS-1$
+    ProjectURL("project.url", ""), //$NON-NLS-1$
+
     // name of medici server
     MediciName("medici.name", null), //$NON-NLS-1$ 
 
@@ -23,7 +40,12 @@ public enum ConfigurationKey {
     RemoteAPIKey("remoteAPI", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
     // extractor url
-    ExtractorUrl("extractor.url", "http://localhost:9856/"); //$NON-NLS-1$ //$NON-NLS-2$
+    ExtractorUrl("extractor.url", "http://localhost:9856/"), //$NON-NLS-1$ //$NON-NLS-2$
+
+    GoogleClientId("google.client_id", ""),
+
+    //optimizations for big data (many files)
+    BigData("bigdata", "false");
 
     private final String propertyKey;
     private final String defaultValue;

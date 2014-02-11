@@ -63,6 +63,8 @@ import javax.mail.MessagingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.xml.ws.http.HTTPException;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.fileupload.FileItem;
@@ -72,7 +74,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
@@ -93,24 +94,22 @@ import org.xml.sax.SAXException;
 import edu.illinois.ncsa.cet.search.Hit;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 import edu.uiuc.ncsa.cet.bean.PreviewVideoBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewVideoBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * RestServlet
  */
 public class RestServlet extends AuthenticatedServlet {
-    Log                        log                          = LogFactory.getLog(RestServlet.class);
+    static Log                 log                          = LogFactory.getLog(RestServlet.class);
 
     public static final String COLLECTION_REMOVE_INFIX      = "/collection/remove/";
 
@@ -219,10 +218,6 @@ public class RestServlet extends AuthenticatedServlet {
         }
     }
 
-    Context getContext() {
-        return TupeloStore.getInstance().getContext();
-    }
-
     Thing getImageThing(String uri) {
         return getContext().getThingSession().fetchThing(Resource.uriRef(uri));
     }
@@ -247,15 +242,25 @@ public class RestServlet extends AuthenticatedServlet {
         return pib == null ? null : pib.getUri();
     }
 
-    public static PreviewImageBean getPreview(final String uri, String size) {
+    public static PreviewImageBean getPreview(String uri, String size) {
+        final String realuri;
         if (uri == null) {
             return null;
         }
+        log.trace("RestServlet.getPreview(" + uri + ", " + size);
+        String badgeUri = TupeloStore.getInstance().getBadge(uri);
+        if (badgeUri != null) {
+            log.trace("Preview uri deom badge: " + badgeUri);
+            realuri = badgeUri;
+        } else {
+            realuri = uri;
+        }
+
         try {
             Collection<PreviewImageBean> previews = new LinkedList<PreviewImageBean>();
             Unifier u = new Unifier();
             u.setColumnNames("preview", "height", "width", "mimeType");
-            u.addPattern(Resource.uriRef(uri), PreviewImageBeanUtil.HAS_PREVIEW, "preview");
+            u.addPattern(Resource.uriRef(realuri), PreviewImageBeanUtil.HAS_PREVIEW, "preview");
             u.addPattern("preview", Rdf.TYPE, PreviewImageBeanUtil.PREVIEW_TYPE);
             u.addPattern("preview", PreviewImageBeanUtil.IMAGE_HEIGHT, "height");
             u.addPattern("preview", PreviewImageBeanUtil.IMAGE_WIDTH, "width");
@@ -278,7 +283,7 @@ public class RestServlet extends AuthenticatedServlet {
                 // do not block on this operation
                 (new Thread() {
                     public void run() {
-                        TupeloStore.getInstance().extractPreviews(uri);
+                        TupeloStore.getInstance().extractPreviews(realuri);
                     }
                 }).start();
                 return null;
@@ -316,26 +321,6 @@ public class RestServlet extends AuthenticatedServlet {
         }
     }
 
-    protected boolean isAllowed(HttpServletRequest req, String objectUri, Permission permission) {
-        MediciRbac rbac = new MediciRbac(getContext());
-        Resource userUri = Resource.uriRef(AuthenticatedServlet.getUserUri(req));
-        Resource permissionUri = Resource.uriRef(permission.getUri());
-        Resource oUri = objectUri != null ? Resource.uriRef(objectUri) : null; // how I long for implicit type conversion
-        try {
-            if (!rbac.checkPermission(userUri, oUri, permissionUri)) {
-                return false;
-            }
-        } catch (RBACException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    protected boolean isAllowed(HttpServletRequest req, Permission permission) {
-        return isAllowed(req, null, permission);
-    }
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         long then = System.currentTimeMillis();
@@ -354,266 +339,378 @@ public class RestServlet extends AuthenticatedServlet {
         }
     }
 
-    void dontCache(HttpServletResponse response) {
-        // OK, we REALLY don't want the browser to cache this. For reals
-        response.addHeader("cache-control", "no-store, no-cache, must-revalidate, max-age=-1"); // don't cache
-        response.addHeader("cache-control", "post-check=0, pre-check=0, false"); // really don't cache
-        response.addHeader("pragma", "no-cache, no-store"); // no, we mean it, really don't cache
-        response.addHeader("expires", "-1"); // if you cache, we're going to be very, very angry
-    }
-
     protected void doDoGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
-        //dumpHeaders(request); // FIXME debug
-        if (request.getRequestURL().toString().endsWith("checkLogin")) {
-            String httpSessionUser = getHttpSessionUser(request);
-            if (httpSessionUser != null) {
-                log.debug("REST /checkLogin: HTTP session " + request.getSession().getId() + " is authenticated as " + httpSessionUser);
-                return;
-            } else {
-                log.debug("REST /checkLogin: HTTP session " + request.getSession().getId() + " is unauthenticated");
-                response.setStatus(404); // not "unauthorized"--that will cause the browser to pop up an auth dialog
-                return; // do not proceed with authentication!
-            }
+        dumpHeaders(request); // FIXME debug
+        log.debug("Calling: " + request.getRequestURL().toString());
+        HttpSession sess = request.getSession(false);
+        if (sess != null) {
+            log.debug("SessionID: " + request.getSession(false).getId());
         }
+
+        /*********
+         * APP SESSION MANAGEMENT ************
+         * 
+         * /authenticate is handles as a POST
+         * /logout invalidates the current session
+         * /checklogin returns the user associated with the session
+         */
+
         if (request.getRequestURL().toString().endsWith("logout")) {
+            log.debug("REST /logout");
+            dontCache(response);
             logout(request, response);
             return;
         }
 
+        //Get ID from session - could be null at this point
+        String userId = getUserUri(request);
+
+        //Called when the app has a session cookie but has lost info about who the user is (i.e. at browser refresh)
+        if (request.getRequestURL().toString().endsWith("checkLogin")) {
+            log.debug("Check Login: " + userId);
+            dontCache(response);
+            if (userId != null) {
+                response.getWriter().print(userId);
+                response.flushBuffer();
+                log.debug("REST /checkLogin: HTTP session " + request.getSession(false).getId() + " is authenticated as " + userId);
+                return;
+            } else {
+                log.debug("REST /checkLogin: unauthenticated");
+                //Only the app should call this, so return forbidden if there's no session/userId
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return; // do not proceed with authentication!
+            }
+        }
+
+        /**** END SESSION MANAGEMENT ****/
+
+        //If user is not identified by session, check for BasicAuth credentials and authenticate or assign as anonymous
+        if ((userId == null) || (userId.equals(PersonBeanUtil.getAnonymous().getUri()))) {
+            try {
+                //doBasic will set the id based on basic auth credentials if set, otherwise will return anonymous 
+                userId = doBasicAuthenticate(request, response);
+            } catch (HTTPException he) {
+                //If the client sent an auth header and did not succeed in establishing a valid ID, 
+                //send an SC_UNAUTHORIZED response with a WWW_Authenticate Header
+                // and stop processing
+                unauthorized(request, response);
+                return;
+            }
+        }
+
+        /* At this point validUser is a valid user Id or anonymous if no creds available
+         * Following sections need to decide, when access is not allowed,
+         * whether to return SC_FORBIDDEN (the truth) or SC_UNAUTHORIZED
+         * SC_UNAUTHORIZED makes sense for URLs that will be accessed outside the app/standalone
+         * and having the browser request credentials directly makes sense
+         * SC_FORBIDDEN lets the app know that 'anonymous' /the current user
+         * doesn't have enough permissions, and lets our login page provide a relevant
+         * message related to permissions (versus bad user/pass)
+         * 
+         */
+
+        /*Begin large switch - for each class of uri, 
+         * 1) check appropriate permission for userId and the resource
+         * 2) handle processing
+         * 3) decide how to handle permission failure (401 0r 403)
+         */
+
+        String uri = decanonicalizeUrl(request);
         // JIRA Issue creator
         if (hasPrefix(JIRA_ISSUE, request)) {
-            createJiraIssue(request, response);
-            return;
-        }
+            //We don't have a separate permission for this - using COMMENT as something conceptually close
+            if (isAllowed(userId, Permission.ADD_COMMENT)) {
 
-        if (!authenticate(request, response)) {
-            return;
-        }
-        String uri = decanonicalizeUrl(request);
-        if (hasPrefix(IMAGE_DOWNLOAD_INFIX, request) && isAllowed(request, uri, Permission.DOWNLOAD)) {
-            log.trace("DOWNLOAD IMAGE " + uri);
-            // keep track who downloads the file
-            TripleWriter tw = new TripleWriter();
-            Resource personuri = Resource.uriRef(PersonBeanUtil.getPersonID(getHttpSessionUser(request)));
-            Resource downloaduri = Resource.uriRef();
-            tw.add(Resource.uriRef(uri), MMDB.DOWNLOADED_BY, downloaduri);
-            tw.add(downloaduri, Dc.CREATOR, personuri);
-            tw.add(downloaduri, Dc.DATE, new Date());
-            try {
-                getContext().perform(tw);
-            } catch (OperatorException e1) {
-                throw new ServletException("failed to count download for " + request.getRequestURI(), e1);
-            }
-            Unifier uf = new Unifier();
-            uf.addPattern(Resource.uriRef(uri), MMDB.DOWNLOADED_BY, "download");
-            uf.addPattern("download", Dc.CREATOR, "downloader");
-            uf.setColumnNames("download", "downloader");
-            try {
-                getContext().perform(uf);
-            } catch (OperatorException e) {
-                log.warn("Could not get download count for dataset.", e);
-            }
-            for (Tuple<Resource> row : uf.getResult() ) {
-                log.debug(row.get(0) + " " + row.get(1));
-            }
-
-            try {
-                Thing imageThing = getImageThing(uri);
-                String contentType = imageThing.getString(Dc.FORMAT);
-                String label = imageThing.getString(RestService.LABEL_PROPERTY);
-                String filename = getImageThing(uri).getString(RestService.FILENAME_PROPERTY);
-                String name = filename;
-                if (name == null) {
-                    name = label;
-                }
-                if (contentType != null) {
-                    response.setContentType(contentType);
-                }
-                response.setHeader("content-disposition", "attachment; filename=\"" + name + "\"");
-                response.flushBuffer();
-                CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
-            } catch (RestServiceException e) {
-                throw new ServletException("failed to retrieve " + request.getRequestURI());
-            } catch (OperatorException e) {
-                throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
-            }
-        } else if (hasPrefix(DATASET, request) && isAllowed(request, uri, Permission.DOWNLOAD)) {
-            log.debug("Downloading Dataset " + uri);
-            // TODO check that file ends in extension instead of assuming it does
-            uri = uri.substring(0, uri.length() - 4);
-            // keep track who downloads the file
-            TripleWriter tw = new TripleWriter();
-            Resource personuri = Resource.uriRef(PersonBeanUtil.getPersonID(getHttpSessionUser(request)));
-            Resource downloaduri = Resource.uriRef();
-            tw.add(Resource.uriRef(uri), MMDB.DOWNLOADED_BY, downloaduri);
-            tw.add(downloaduri, Dc.CREATOR, personuri);
-            tw.add(downloaduri, Dc.DATE, new Date());
-            try {
-                getContext().perform(tw);
-            } catch (OperatorException e1) {
-                throw new ServletException("failed to count download for " + request.getRequestURI(), e1);
-            }
-            try {
-                Thing imageThing = getImageThing(uri);
-                String contentType = imageThing.getString(Dc.FORMAT);
-                String label = imageThing.getString(RestService.LABEL_PROPERTY);
-                String filename = getImageThing(uri).getString(RestService.FILENAME_PROPERTY);
-                String name = filename;
-                if (name == null) {
-                    name = label;
-                }
-                if (contentType != null) {
-                    response.setContentType(contentType);
-                }
-                response.setHeader("content-disposition", "attachment; filename=\"" + name + "\"");
-                response.flushBuffer();
-                CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
-            } catch (RestServiceException e) {
-                throw new ServletException("failed to retrieve " + request.getRequestURI());
-            } catch (OperatorException e) {
-                throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
-            }
-        } else if (hasPrefix(PREVIEW_ANY, request) && isAllowed(request, uri, Permission.VIEW_MEMBER_PAGES)) {
-            response.flushBuffer(); // MMDB-620
-            long then = System.currentTimeMillis(); // FIXME debug
-            PreviewImageBean preview = null;
-            String image404 = null;
-            if (hasPrefix(PREVIEW_SMALL, request)) {
-                log.debug("GET PREVIEW (small) " + uri);
-                preview = TupeloStore.getInstance().getPreview(uri, GetPreviews.SMALL);
-                image404 = SMALL_404;
-            } else if (hasPrefix(PREVIEW_LARGE, request)) {
-                log.debug("GET PREVIEW (large) " + uri);
-                preview = TupeloStore.getInstance().getPreview(uri, GetPreviews.LARGE);
-                image404 = LARGE_404;
-            } else {
-                log.debug("GET PREVIEW (any) " + uri);
-                preview = getPreview(uri, PREVIEW_ANY);
-                image404 = SMALL_404;
-            }
-            if (preview == null) {
-                log.info(uri + " has NO PREVIEW");
-            } else {
-                long now = System.currentTimeMillis();
-                if (now - then > 100) {
-                    log.warn("preview lookup took " + (now - then) + "ms");
-                }
-                String contentType = preview.getMimeType();
-                if (contentType != null) {
-                    response.setContentType(contentType);
-                    response.flushBuffer(); // MMDB-620
-                }
-            }
-            String previewUri = preview != null ? preview.getUri() : null;
-            returnImage(request, response, previewUri, image404, shouldCache404(uri));
-        } else if (hasPrefix(COLLECTION_PREVIEW, request) && isAllowed(request, uri, Permission.VIEW_MEMBER_PAGES)) {
-            log.debug("GET PREVIEW (collection) " + uri);
-            String badge = TupeloStore.getInstance().getBadge(uri);
-            String previewUri = TupeloStore.getInstance().getPreviewUri(badge, GetPreviews.SMALL); // should accept and propogate null
-            returnImage(request, response, previewUri, SMALL_404, shouldCache404(badge)); // should accept and propagate null
-        } else if (hasPrefix(VIDEO_INFIX, request)) {
-            int idx = uri.lastIndexOf(".");
-            String ext = null;
-            if (idx > 0) {
-                ext = uri.substring(idx + 1);
-                uri = uri.substring(0, idx);
-            }
-            uri = "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri;
-            try {
-                PreviewVideoBean pvb = new PreviewVideoBeanUtil(TupeloStore.getInstance().getBeanSession()).get(uri);
-
-                if (request.getHeader("If-Modified-Since") != null) {
-                    Date d = new Date(request.getHeader("If-Modified-Since"));
-                    if ((pvb.getDate().getTime() - d.getTime()) < 1000) {
-                        response.setStatus(304);
-                        return;
-                    }
-                }
-                long start = 0;
-                long len = pvb.getSize();
-                if (request.getHeader("Range") != null) {
-                    Pattern p = Pattern.compile("bytes=(\\d+)-(\\d+)?");
-                    Matcher m = p.matcher(request.getHeader("Range"));
-                    if (m.find()) {
-                        start = Long.parseLong(m.group(1));
-                        long end = pvb.getSize() - 1;
-                        if (m.group(2) != null) {
-                            end = Long.parseLong(m.group(2));
-                        }
-                        len = (end - start) + 1;
-                        response.setStatus(206);
-                        response.setHeader("Content-Range", "bytes " + start + "-" + end + "/" + pvb.getSize());
-                    }
-                }
-                response.setHeader("Accept-Ranges", "bytes");
-                response.setContentType(pvb.getMimeType());
-                response.setContentLength((int) len);
-                response.setDateHeader("Last-Modified", pvb.getDate().getTime());
-                response.setHeader("Expires", null);
-                response.flushBuffer();
-                InputStream is = restService.retrieveImage(uri);
-                if (start > 0) {
-                    is.skip(start);
-                }
-                OutputStream os = response.getOutputStream();
-                try {
-                    byte[] buf = new byte[10240];
-                    int x = 0;
-                    while ((len > 0) && (x = is.read(buf, 0, (int) Math.min(buf.length, len))) > 0) {
-                        len -= x;
-                        os.write(buf, 0, x);
-                    }
-                } finally {
-                    is.close();
-                    os.close();
-                }
-            } catch (Exception e) {
-                throw new ServletException("failed to retrieve " + request.getRequestURI(), e);
-            }
-        } else if (hasPrefix(IMAGE_INFIX, request)) {
-            log.trace("GET IMAGE " + uri);
-            try {
-                Thing imageThing = getImageThing(uri);
-                String contentType = imageThing.getString(Dc.FORMAT);
-                if (contentType != null) {
-                    response.setContentType(contentType);
-                }
-                response.flushBuffer();
-                CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
-            } catch (RestServiceException e) {
-                throw new ServletException("failed to retrieve " + request.getRequestURI(), e);
-            } catch (OperatorException e) {
-                throw new ServletException("failed to retrieve metadata for " + request.getRequestURI(), e);
-            }
-        } else if (hasPrefix(COLLECTION_INFIX, request) && isAllowed(request, uri, Permission.VIEW_MEMBER_PAGES)) {
-            log.trace("LIST COLLECTION" + uri);
-            try {
-                // TODO currently assumes that everything in a collection is an image
-                // TODO if that assumption is not correct, will need a way to track canonical URL's per-resource
-                // TODO if the collection is huge, this will bloat memory, may need different API to stage
-                List<String> canonicalMembers = new LinkedList<String>();
-                for (String member : restService.retrieveCollection(uri) ) {
-                    canonicalMembers.add(canonicalizeUri(member, IMAGE_INFIX, request));
-                }
                 dontCache(response);
-                response.setContentType("text/html");
-                response.getWriter().write(formatList(canonicalMembers));
-            } catch (RestServiceException e) {
-                if (e.isNotFound()) {
-                    dontCache(response);
-                    response.setStatus(404);
-                } else {
-                    throw new ServletException("failed to retrieve " + request.getRequestURI());
-                }
+                createJiraIssue(request, response);
+            } else {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             }
-        } else if (request.getRequestURL().toString().endsWith("authenticate")) {
-            // we're just authenticating, and that has already been handled. do not report an error.
-            // for convenience, produce the session key as a string
-            response.getWriter().print(lookupSessionKey(getHttpSessionUser(request)));
-            response.flushBuffer();
-        } else if (hasPrefix(SEARCH_INFIX, request) && isAllowed(request, Permission.VIEW_MEMBER_PAGES)) {
-            doSearch(request, response);
+            return;
+        } else if (hasPrefix(IMAGE_DOWNLOAD_INFIX, request)) {
+            if (isAllowed(userId, uri, Permission.DOWNLOAD, true)) {
+                log.trace("DOWNLOAD IMAGE " + uri);
+                // keep track who downloads the file
+                TripleWriter tw = new TripleWriter();
+                Resource personuri = Resource.uriRef(PersonBeanUtil.getPersonID(getHttpSessionUser(request)));
+                Resource downloaduri = Resource.uriRef();
+                tw.add(Resource.uriRef(uri), MMDB.DOWNLOADED_BY, downloaduri);
+                tw.add(downloaduri, Dc.CREATOR, personuri);
+                tw.add(downloaduri, Dc.DATE, new Date());
+                try {
+                    getContext().perform(tw);
+                } catch (OperatorException e1) {
+                    throw new ServletException("failed to count download for " + request.getRequestURI(), e1);
+                }
+                Unifier uf = new Unifier();
+                uf.addPattern(Resource.uriRef(uri), MMDB.DOWNLOADED_BY, "download");
+                uf.addPattern("download", Dc.CREATOR, "downloader");
+                uf.setColumnNames("download", "downloader");
+                try {
+                    getContext().perform(uf);
+                } catch (OperatorException e) {
+                    log.warn("Could not get download count for dataset.", e);
+                }
+                for (Tuple<Resource> row : uf.getResult() ) {
+                    log.debug(row.get(0) + " " + row.get(1));
+                }
+
+                try {
+                    Thing imageThing = getImageThing(uri);
+                    String contentType = imageThing.getString(Dc.FORMAT);
+                    String label = imageThing.getString(RestService.LABEL_PROPERTY);
+                    String filename = getImageThing(uri).getString(RestService.FILENAME_PROPERTY);
+                    String name = filename;
+                    if (name == null) {
+                        name = label;
+                    }
+                    if (contentType != null) {
+                        response.setContentType(contentType);
+                    }
+                    response.setHeader("content-disposition", "attachment; filename=\"" + name + "\"");
+                    response.flushBuffer();
+                    CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
+                } catch (RestServiceException e) {
+                    throw new ServletException("failed to retrieve " + request.getRequestURI());
+                } catch (OperatorException e) {
+                    throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
+                }
+            } else {
+                if (userId.equals(_anonymousId)) {
+                    //Download URLs may be used external to the app...
+                    unauthorized(request, response);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                }
+                return;
+            }
+
+        } else if (hasPrefix(DATASET, request)) {
+            //FixME: Same as IMAGE_DOWNLOAD_INFIX in terms of processing?
+            //FixMe: Is this still used anywhere? (stripping the extension seems obsolete)
+            if (isAllowed(userId, uri, Permission.DOWNLOAD, true)) {
+                log.debug("Downloading Dataset " + uri);
+                // TODO check that file ends in extension instead of assuming it does
+                uri = uri.substring(0, uri.length() - 4);
+                // keep track who downloads the file
+                TripleWriter tw = new TripleWriter();
+                Resource personuri = Resource.uriRef(PersonBeanUtil.getPersonID(getHttpSessionUser(request)));
+                Resource downloaduri = Resource.uriRef();
+                tw.add(Resource.uriRef(uri), MMDB.DOWNLOADED_BY, downloaduri);
+                tw.add(downloaduri, Dc.CREATOR, personuri);
+                tw.add(downloaduri, Dc.DATE, new Date());
+                try {
+                    getContext().perform(tw);
+                } catch (OperatorException e1) {
+                    throw new ServletException("failed to count download for " + request.getRequestURI(), e1);
+                }
+                try {
+                    Thing imageThing = getImageThing(uri);
+                    String contentType = imageThing.getString(Dc.FORMAT);
+                    String label = imageThing.getString(RestService.LABEL_PROPERTY);
+                    String filename = getImageThing(uri).getString(RestService.FILENAME_PROPERTY);
+                    String name = filename;
+                    if (name == null) {
+                        name = label;
+                    }
+                    if (contentType != null) {
+                        response.setContentType(contentType);
+                    }
+                    response.setHeader("content-disposition", "attachment; filename=\"" + name + "\"");
+                    response.flushBuffer();
+                    CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
+                } catch (RestServiceException e) {
+                    throw new ServletException("failed to retrieve " + request.getRequestURI());
+                } catch (OperatorException e) {
+                    throw new ServletException("failed to retrieve metadata for " + request.getRequestURI());
+                }
+            } else {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            }
+            return;
+
+        } else if (hasPrefix(PREVIEW_ANY, request)) {
+            if (isAllowed(userId, uri, Permission.VIEW_DATA, false)) {
+
+                log.trace("Getting preview: " + request.getRequestURL().toString());
+                response.flushBuffer(); // MMDB-620
+                long then = System.currentTimeMillis(); // FIXME debug
+                PreviewImageBean preview = null;
+                String image404 = null;
+                if (hasPrefix(PREVIEW_SMALL, request)) {
+                    log.trace("GET PREVIEW (small) " + uri);
+                    preview = TupeloStore.getInstance().getPreview(uri, GetPreviews.SMALL);
+                    image404 = SMALL_404;
+                } else if (hasPrefix(PREVIEW_LARGE, request)) {
+                    log.trace("GET PREVIEW (large) " + uri);
+                    preview = TupeloStore.getInstance().getPreview(uri, GetPreviews.LARGE);
+                    image404 = LARGE_404;
+                } else {
+                    log.trace("GET PREVIEW (any) " + uri);
+                    preview = getPreview(uri, PREVIEW_ANY);
+                    image404 = SMALL_404;
+                }
+                if (preview == null) {
+                    log.info(uri + " has NO PREVIEW");
+                } else {
+                    long now = System.currentTimeMillis();
+                    if (now - then > 100) {
+                        log.warn("preview lookup took " + (now - then) + "ms");
+                    }
+                    String contentType = preview.getMimeType();
+                    if (contentType != null) {
+                        response.setContentType(contentType);
+                        response.flushBuffer(); // MMDB-620
+                    }
+                }
+                String previewUri = preview != null ? preview.getUri() : null;
+                //FixMe: is 404 w/o any image the right thing to send when a preview is not available?
+                //(e.g. if, for example, extractor is down, should we send the 404 image and no-cache headers?)
+                //Does this break logic anywhere?
+                returnImage(request, response, previewUri, image404, shouldCache404(uri));
+            } else {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            }
+            return;
+        } else if (hasPrefix(COLLECTION_PREVIEW, request)) {
+            if (isAllowed(userId, uri, Permission.VIEW_MEMBER_PAGES, false)) {
+
+                log.debug("GET PREVIEW (collection) " + uri);
+                String badge = TupeloStore.getInstance().getBadge(uri);
+                String previewUri = TupeloStore.getInstance().getPreviewUri(badge, GetPreviews.SMALL); // should accept and propogate null
+                returnImage(request, response, previewUri, SMALL_404, shouldCache404(badge)); // should accept and propagate null
+            } else {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            }
+        } else if (hasPrefix(VIDEO_INFIX, request)) {
+            if (isAllowed(userId, "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri, Permission.VIEW_DATA, false)) {
+                int idx = uri.lastIndexOf(".");
+                String ext = null;
+                if (idx > 0) {
+                    ext = uri.substring(idx + 1);
+                    uri = uri.substring(0, idx);
+                }
+                uri = "tag:cet.ncsa.uiuc.edu,2008:/bean/PreviewVideo/" + uri;
+                try {
+                    PreviewVideoBean pvb = new PreviewVideoBeanUtil(TupeloStore.getInstance().getBeanSession()).get(uri);
+
+                    if (request.getHeader("If-Modified-Since") != null) {
+                        Date d = new Date(request.getHeader("If-Modified-Since"));
+                        if ((pvb.getDate().getTime() - d.getTime()) < 1000) {
+                            response.setStatus(304);
+                            return;
+                        }
+                    }
+                    long start = 0;
+                    long len = pvb.getSize();
+                    if (request.getHeader("Range") != null) {
+                        Pattern p = Pattern.compile("bytes=(\\d+)-(\\d+)?");
+                        Matcher m = p.matcher(request.getHeader("Range"));
+                        if (m.find()) {
+                            start = Long.parseLong(m.group(1));
+                            long end = pvb.getSize() - 1;
+                            if (m.group(2) != null) {
+                                end = Long.parseLong(m.group(2));
+                            }
+                            len = (end - start) + 1;
+                            response.setStatus(206);
+                            response.setHeader("Content-Range", "bytes " + start + "-" + end + "/" + pvb.getSize());
+                        }
+                    }
+                    response.setHeader("Accept-Ranges", "bytes");
+                    response.setContentType(pvb.getMimeType());
+                    response.setContentLength((int) len);
+                    response.setDateHeader("Last-Modified", pvb.getDate().getTime());
+                    response.setHeader("Expires", null);
+                    response.flushBuffer();
+                    InputStream is = restService.retrieveImage(uri);
+                    if (start > 0) {
+                        is.skip(start);
+                    }
+                    OutputStream os = response.getOutputStream();
+                    try {
+                        byte[] buf = new byte[10240];
+                        int x = 0;
+                        while ((len > 0) && (x = is.read(buf, 0, (int) Math.min(buf.length, len))) > 0) {
+                            len -= x;
+                            os.write(buf, 0, x);
+                        }
+                    } finally {
+                        is.close();
+                        os.close();
+                    }
+                } catch (Exception e) {
+                    throw new ServletException("failed to retrieve " + request.getRequestURI(), e);
+                }
+            } else {
+                if (userId.equals(_anonymousId)) {
+                    //Video URLs may be used external to the app...
+                    unauthorized(request, response);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                }
+
+            }
+            return;
+        } else if (hasPrefix(IMAGE_INFIX, request)) {
+            if (isAllowed(userId, uri, Permission.DOWNLOAD, false)) {
+                if (hasPrefix(PREVIEW_ANY, request)) {
+                    //Preview images should not fall through to this block
+                    log.warn("Preview request being handled as image request!");
+                }
+                log.debug("GET IMAGE " + uri);
+                try {
+                    Thing imageThing = getImageThing(uri);
+                    String contentType = imageThing.getString(Dc.FORMAT);
+                    if (contentType != null) {
+                        response.setContentType(contentType);
+                    }
+                    response.flushBuffer();
+                    CopyFile.copy(restService.retrieveImage(uri), response.getOutputStream());
+                } catch (RestServiceException e) {
+                    throw new ServletException("failed to retrieve " + request.getRequestURI(), e);
+                } catch (OperatorException e) {
+                    throw new ServletException("failed to retrieve metadata for " + request.getRequestURI(), e);
+                }
+            } else {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            }
+            return;
+        } else if (hasPrefix(COLLECTION_INFIX, request)) {
+            if (isAllowed(userId, uri, Permission.VIEW_MEMBER_PAGES, false)) {
+
+                log.trace("LIST COLLECTION" + uri);
+                try {
+                    // TODO currently assumes that everything in a collection is an image
+                    // TODO if that assumption is not correct, will need a way to track canonical URL's per-resource
+                    // TODO if the collection is huge, this will bloat memory, may need different API to stage
+                    List<String> canonicalMembers = new LinkedList<String>();
+                    for (String member : restService.retrieveCollection(uri) ) {
+                        canonicalMembers.add(canonicalizeUri(member, IMAGE_INFIX, request));
+                    }
+                    dontCache(response);
+                    response.setContentType("text/html");
+                    response.getWriter().write(formatList(canonicalMembers));
+                } catch (RestServiceException e) {
+                    if (e.isNotFound()) {
+                        dontCache(response);
+                        response.setStatus(404);
+                    } else {
+                        throw new ServletException("failed to retrieve " + request.getRequestURI());
+                    }
+                }
+            } else {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            }
+            return;
+        } else if (hasPrefix(SEARCH_INFIX, request)) {
+            if (isAllowed(userId, Permission.VIEW_MEMBER_PAGES)) {
+
+                doSearch(request, response);
+            } else {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            }
         } else {
             throw new ServletException("unrecognized API call " + request.getRequestURI());
         }
@@ -635,9 +732,10 @@ public class RestServlet extends AuthenticatedServlet {
         JiraIssueType issueType = JiraIssueType.valueOf(request.getParameter("issueType"));
         String summary = request.getParameter("subject");
         String description = request.getParameter("body");
+        String email = request.getParameter("email");
 
         try {
-            JiraIssueHandler.createJiraIssue(issueType, summary, description);
+            JiraIssueHandler.createJiraIssue(issueType, email, summary, description);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (MessagingException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -661,6 +759,7 @@ public class RestServlet extends AuthenticatedServlet {
         }
         if (imageUri != null) {
             try {
+                log.debug("Retrieving Image: " + imageUri);
                 long then = System.currentTimeMillis(); // FIXME debug
                 InputStream imageData = restService.retrieveImage(imageUri);
                 long now = System.currentTimeMillis(); // FIXME debug
@@ -719,10 +818,14 @@ public class RestServlet extends AuthenticatedServlet {
         }
     }
 
-    void doPostImage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void doPostImage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         InputStream imageData = null;
         //
-        if (isAllowed(request, Permission.UPLOAD_DATA)) {
+        //Get ID from session - could be null at this point
+        String userId = getUserUri(request);
+        if (userId != null) {
+            //            duplicates what's in doPost()            
+            //            if (isAllowed(userId, Permission.UPLOAD_DATA)) {
             Map<Resource, Object> md = new HashMap<Resource, Object>();
             md.put(RestService.DATE_PROPERTY, new Date());
             //
@@ -777,55 +880,64 @@ public class RestServlet extends AuthenticatedServlet {
                 throw new ServletException("server error: impossible case in image upload");
             }
         }
+        //        }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //dumpCrap(request); // FIXME debug
         //dumpHeaders(request); // FIXME debug
-        if (!authenticate(request, response) || !isAllowed(request, Permission.UPLOAD_DATA)) {
-            return;
-        }
-        if (hasPrefix(ANY_IMAGE_INFIX, request)) {
-            doPostImage(request, response);
-        } else if (hasPrefix(ANY_COLLECTION_INFIX, request)) {
-            // TODO accept multipart uploads
-            // TODO currently assumes that everything in a collection is an image
-            // TODO if that assumption is not correct, will need a way to track canonical URL's per-resource
-            List<String> members = new LinkedList<String>();
-            try {
-                for (String member : parseList(request.getInputStream()) ) {
-                    String uri = decanonicalizeUrl(member, request);
-                    members.add(uri);
+
+        //Handle "/authenticate" post
+        super.doPost(request, response);
+
+        //Get ID from session - could be null at this point
+        String userId = getUserUri(request);
+        if (userId != null) {
+            if (isAllowed(userId, Permission.UPLOAD_DATA)) {
+
+                if (hasPrefix(ANY_IMAGE_INFIX, request)) {
+                    doPostImage(request, response);
+                } else if (hasPrefix(ANY_COLLECTION_INFIX, request)) {
+                    // TODO accept multipart uploads
+                    // TODO currently assumes that everything in a collection is an image
+                    // TODO if that assumption is not correct, will need a way to track canonical URL's per-resource
+                    List<String> members = new LinkedList<String>();
+                    try {
+                        for (String member : parseList(request.getInputStream()) ) {
+                            String uri = decanonicalizeUrl(member, request);
+                            members.add(uri);
+                        }
+                    } catch (XPathExpressionException e) {
+                        throw new ServletException("could not parse collection parameter", e);
+                    } catch (SAXException e) {
+                        throw new ServletException("could not parse collection parameter", e);
+                    }
+                    try {
+                        if (hasPrefix(COLLECTION_ADD_INFIX, request)) {
+                            String uri = decanonicalizeUrl(request);
+                            log.trace("COLLECTION ADD " + uri);
+                            restService.addToCollection(uri, members);
+                        } else if (hasPrefix(COLLECTION_REMOVE_INFIX, request)) {
+                            String uri = decanonicalizeUrl(request);
+                            log.trace("COLLECTION REMOVE " + uri);
+                            restService.removeFromCollection(uri, members);
+                        } else if (hasPrefix(COLLECTION_INFIX, request)) { // Update
+                            String uri = decanonicalizeUrl(request);
+                            log.trace("COLLECTION UPDATE " + uri);
+                            restService.updateCollection(uri, members);
+                        } else { // mint a new URI
+                            log.trace("COLLECTION CREATE (anonymous)");
+                            String uri = restService.createCollection(members);
+                            response.getWriter().write(canonicalizeUri(uri, COLLECTION_INFIX, request) + "\n");
+                        }
+                    } catch (RestServiceException e) {
+                        throw new ServletException("could not modify collection", e);
+                    }
                 }
-            } catch (XPathExpressionException e) {
-                throw new ServletException("could not parse collection parameter", e);
-            } catch (SAXException e) {
-                throw new ServletException("could not parse collection parameter", e);
+            } else if (hasPrefix(SEARCH_INFIX, request) && isAllowed(userId, Permission.VIEW_MEMBER_PAGES)) { // FIXME check permissions
+                doSearch(request, response);
             }
-            try {
-                if (hasPrefix(COLLECTION_ADD_INFIX, request)) {
-                    String uri = decanonicalizeUrl(request);
-                    log.trace("COLLECTION ADD " + uri);
-                    restService.addToCollection(uri, members);
-                } else if (hasPrefix(COLLECTION_REMOVE_INFIX, request)) {
-                    String uri = decanonicalizeUrl(request);
-                    log.trace("COLLECTION REMOVE " + uri);
-                    restService.removeFromCollection(uri, members);
-                } else if (hasPrefix(COLLECTION_INFIX, request)) { // Update
-                    String uri = decanonicalizeUrl(request);
-                    log.trace("COLLECTION UPDATE " + uri);
-                    restService.updateCollection(uri, members);
-                } else { // mint a new URI
-                    log.trace("COLLECTION CREATE (anonymous)");
-                    String uri = restService.createCollection(members);
-                    response.getWriter().write(canonicalizeUri(uri, COLLECTION_INFIX, request) + "\n");
-                }
-            } catch (RestServiceException e) {
-                throw new ServletException("could not modify collection", e);
-            }
-        } else if (hasPrefix(SEARCH_INFIX, request) && isAllowed(request, Permission.VIEW_MEMBER_PAGES)) { // FIXME check permissions
-            doSearch(request, response);
         }
     }
 

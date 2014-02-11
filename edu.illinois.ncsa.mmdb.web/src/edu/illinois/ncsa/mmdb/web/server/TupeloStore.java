@@ -64,6 +64,7 @@ import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import net.customware.gwt.dispatch.shared.Result;
 
@@ -96,11 +97,11 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthorizedAction;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectAction;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
@@ -108,7 +109,6 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
@@ -120,6 +120,8 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  * 
  */
 public class TupeloStore {
+
+    public static String                                         HASBADGE              = "http://purl.org/dc/terms/description";
     /** Commons logging **/
     private static Log                                           log                   = LogFactory.getLog(TupeloStore.class);
 
@@ -248,7 +250,7 @@ public class TupeloStore {
                 getBeanSession().deregister(beanUri);
             } catch (OperatorException x) {
                 log.error("ERROR: could not expire bean " + beanUri + ": " + x.getMessage());
-                x.printStackTrace();
+                log.debug(x.getStackTrace().toString());
             }
         }
     }
@@ -280,8 +282,8 @@ public class TupeloStore {
      * 
      * @return
      */
-    public MediciRbac getRbac() {
-        return new MediciRbac(getContext());
+    public SEADRbac getRbac() {
+        return new SEADRbac(getContext());
     }
 
     public boolean isAllowed(AuthorizedAction<? extends Result> action, Permission p) {
@@ -456,7 +458,12 @@ public class TupeloStore {
     static final String CANONICALIZER_SESSION_ATTRIBUTE = "edu.illinois.ncsa.mmdb.web.UriCanonicalizer";
 
     public UriCanonicalizer getUriCanonicalizer(HttpServletRequest request) throws ServletException {
-        UriCanonicalizer canon = (UriCanonicalizer) request.getSession().getAttribute(CANONICALIZER_SESSION_ATTRIBUTE);
+        UriCanonicalizer canon = null;
+        //Don't create a session if one doesn't exist
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            canon = (UriCanonicalizer) session.getAttribute(CANONICALIZER_SESSION_ATTRIBUTE);
+        }
         if (canon == null) {
             canon = new UriCanonicalizer();
             String prefix = getWebappPrefix(request);
@@ -466,8 +473,11 @@ public class TupeloStore {
             }
             // now handle GWT dataset and collection stuff stuff, hardcoding the HTML path
             canon.setCanonicalUrlPrefix("dataset", prefix + request.getContextPath() + MMDB_WEBAPP_PATH + "#dataset?id=");
-            request.getSession().setAttribute(CANONICALIZER_SESSION_ATTRIBUTE, canon);
+            if (session != null) {
+                session.setAttribute(CANONICALIZER_SESSION_ATTRIBUTE, canon);
+            }
         }
+
         return canon;
     }
 
@@ -514,18 +524,24 @@ public class TupeloStore {
             try {
                 StringBuilder sb = new StringBuilder();
 
-                // is there a blob to extract
-                BlobChecker bc = new BlobChecker();
-                bc.setSubject(Resource.uriRef(uri));
-                getBeanSession().getContext().perform(bc);
-                if (!bc.exists()) {
-                    CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
-                    try {
-                        cbu.get(uri);
-                    } catch (OperatorException e) {
-                        log.debug("BlobChecker does not exist, and there is no collection with uri = " + uri);
-                        return null;
+                Collection<Resource> types = getBeanSession().getRDFTypes(Resource.uriRef(uri));
+                boolean createpreview = false;
+                for (Resource type : types ) {
+                    if (CollectionBeanUtil.COLLECTION_TYPE.equals(type)) {
+                        createpreview = true;
+                        break;
+                    } else if (Cet.DATASET.equals(type)) {
+                        BlobChecker bc = new BlobChecker();
+                        bc.setSubject(Resource.uriRef(uri));
+                        getBeanSession().getContext().perform(bc);
+                        if (bc.exists()) {
+                            createpreview = true;
+                            break;
+                        }
                     }
+                }
+                if (!createpreview) {
+                    return null;
                 }
 
                 String stringContext = URLEncoder.encode(CETBeans.contextToNTriples(getBeanSession().getContext()), "UTF-8"); //$NON-NLS-1$
@@ -648,23 +664,55 @@ public class TupeloStore {
     Map<String, Memoized<String>> badgeCache = null;
 
     public String getBadge(final String collectionUri) {
+
         if (badgeCache == null) {
             badgeCache = new HashMap<String, Memoized<String>>();
         }
         Memoized<String> mBadge = badgeCache.get(collectionUri);
         if (mBadge == null) {
+
+            log.trace("No cached badge for: " + collectionUri);
             mBadge = new Memoized<String>() {
                 public String computeValue() {
                     try {
                         Unifier u = new Unifier();
+                        u.setColumnNames("descriptor", "date");
+                        //Make sure it's a collection - some callers send datasets
+                        u.addPattern(Resource.uriRef(collectionUri), Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
+
+                        u.addPattern(Resource.uriRef(collectionUri), Resource.uriRef(HASBADGE), "descriptor");
+                        u.addPattern("descriptor", Dc.DATE, "date", true);
+                        u.addPattern("descriptor", Rdf.TYPE, Cet.DATASET);
+                        u.addOrderBy("date");
+                        u.addOrderBy("descriptor");
+                        u.setLimit(25);
+                        //getContext().perform(u);
+                        for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "descriptor") ) {
+                            String datasetUri = row.get(0).getString();
+                            log.trace("Found Potential Badge (descriptor): " + datasetUri + " for: " + collectionUri);
+                            String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
+                            if (preview != null) {
+                                log.trace("Badge OK - has preview: " + preview);
+                                return datasetUri;
+                            }
+                        }
+                    } catch (Exception x) {
+                        x.printStackTrace();
+                    }
+                    try {
+                        Unifier u = new Unifier();
                         u.setColumnNames("member", "date");
+                        //Make sure it's a collection - some callers send datasets
+                        u.addPattern(Resource.uriRef(collectionUri), Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
                         u.addPattern(Resource.uriRef(collectionUri), DcTerms.HAS_PART, "member");
                         u.addPattern("member", Dc.DATE, "date", true);
+                        u.addPattern("member", Rdf.TYPE, Cet.DATASET);
                         u.addOrderBy("date");
                         u.addOrderBy("member");
                         u.setLimit(25);
                         for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "member") ) {
                             String datasetUri = row.get(0).getString();
+                            log.trace("Found Potential Badge (member): " + datasetUri + " for: " + collectionUri);
                             String preview = getPreviewUri(datasetUri, GetPreviews.SMALL);
                             if (preview != null) {
                                 return datasetUri;
@@ -680,6 +728,8 @@ public class TupeloStore {
             mBadge.setForceOnNull(true);
             badgeCache.put(collectionUri, mBadge);
         }
+
+        log.trace("Badge for: " + collectionUri + " is " + mBadge.getValue());
         return mBadge.getValue();
     }
 
@@ -708,6 +758,7 @@ public class TupeloStore {
 
     public PreviewImageBean getPreview(final String uri, final String size) {
         // lazily initialize cache
+        log.trace("TupeloStore.getPreview(" + uri + ", " + size);
         if (previewCache == null) {
             previewCache = new HashMap<String, Map<String, Memoized<PreviewImageBean>>>();
         }
@@ -800,6 +851,12 @@ public class TupeloStore {
         List<String> newColumnNames = new LinkedList<String>(u.getColumnNames());
         newColumnNames.add("_ued");
         u.setColumnNames(newColumnNames);
+        /*
+        LinkedList<org.tupeloproject.rdf.query.Pattern> pats = u.getPatterns();
+        for (org.tupeloproject.rdf.query.Pattern pat : pats ) {
+            log.debug(pat.toString());
+        }
+        */
         u.addPattern(subjectVar, Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "_ued", true);
         if (u.getOffset() != 0 || u.getLimit() != Unifier.UNLIMITED) {
             List<OrderBy> newOrderBy = new LinkedList<OrderBy>();
@@ -935,7 +992,7 @@ public class TupeloStore {
         int batchSize = 100;
         while (true) {
             Unifier u = new Unifier();
-            u.setColumnNames("d", "replaced");
+            u.setColumnNames("d", "replaced", "date");
             u.addPattern("d", Rdf.TYPE, Cet.DATASET);
             u.addPattern("d", Dc.DATE, "date");
             u.addPattern("d", DcTerms.IS_REPLACED_BY, "replaced", true);
@@ -946,6 +1003,8 @@ public class TupeloStore {
                 getContext().perform(u);
                 int n = 0;
                 for (Tuple<Resource> row : u.getResult() ) {
+                    n++;
+                    i++;
                     String d = row.get(0).getString();
                     Resource r = row.get(1);
                     if (Rdf.NIL.equals(r)) { // deleted
@@ -953,19 +1012,50 @@ public class TupeloStore {
                     } else {
                         indexFullText(d);
                     }
-                    n++;
                 }
                 if (n < batchSize) {
-                    log.info("queued " + (i + n) + " datasets for full-text reindexing @ " + new Date());
-                    return i + n;
+                    log.info("queued " + i + " datasets for full-text reindexing @ " + new Date());
+                    break;
                 }
             } catch (OperatorException x) {
                 x.printStackTrace();
                 // FIXME deal with busy state
             }
-            //
-            i += batchSize;
         }
+        int j = 0;
+        while (true) {
+            Unifier u = new Unifier();
+            u.setColumnNames("d", "replaced", "date");
+            u.addPattern("d", Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
+            u.addPattern("d", DcTerms.DATE_CREATED, "date");
+            u.addPattern("d", DcTerms.IS_REPLACED_BY, "replaced", true);
+            u.setLimit(batchSize);
+            u.setOffset(j);
+            u.addOrderByDesc("date");
+            try {
+                getContext().perform(u);
+                int n = 0;
+                for (Tuple<Resource> row : u.getResult() ) {
+                    n++;
+                    j++;
+                    String d = row.get(0).getString();
+                    Resource r = row.get(1);
+                    if (Rdf.NIL.equals(r)) { // deleted
+                        deindexFullText(d);
+                    } else {
+                        indexFullText(d);
+                    }
+                }
+                if (n < batchSize) {
+                    log.info("queued " + j + " collections for full-text reindexing @ " + new Date());
+                    break;
+                }
+            } catch (OperatorException x) {
+                x.printStackTrace();
+                // FIXME deal with busy state
+            }
+        }
+        return i + j;
     }
 
     // consume ft index queue
@@ -1185,6 +1275,24 @@ public class TupeloStore {
         getContext().perform(uf);
         for (Tuple<Resource> row : uf.getResult() ) {
             configuration.put(row.get(0), row.get(1).getString());
+        }
+    }
+
+    /* Do something lightweight to assure database connection stays up - used by COntextSetupListener, more info there
+     * HACK
+     */
+    public void pingContext() {
+        log.debug("Performing pingContext()");
+        Unifier uf = new Unifier();
+        uf.addPattern("configuration", Rdf.TYPE, MMDB.CONFIGURATION);
+        uf.addPattern("configuration", MMDB.CONFIGURATION_KEY, "key");
+        uf.addPattern("configuration", MMDB.CONFIGURATION_VALUE, "value");
+        uf.setColumnNames("key", "value");
+        try {
+            getContext().perform(uf);
+        } catch (OperatorException e) {
+            log.warn("pingContext Failed!");
+            e.printStackTrace();
         }
     }
 }

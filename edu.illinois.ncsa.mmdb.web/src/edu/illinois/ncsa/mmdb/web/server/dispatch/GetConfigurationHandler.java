@@ -42,6 +42,7 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
@@ -54,10 +55,10 @@ import org.apache.commons.logging.LogFactory;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * Get license attached to a specific resource.
@@ -66,15 +67,39 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
  * 
  */
 public class GetConfigurationHandler implements ActionHandler<GetConfiguration, ConfigurationResult> {
+    private final static List<ConfigurationKey> WHITELIST = Arrays.asList(new ConfigurationKey[] {
+                                                          ConfigurationKey.GoogleMapKey,
+                                                          ConfigurationKey.ProjectName,
+                                                          ConfigurationKey.ProjectDescription,
+                                                          ConfigurationKey.ProjectURL,
+                                                          ConfigurationKey.VAURL,
+                                                          ConfigurationKey.VIVOQUERYURL,
+                                                          ConfigurationKey.VIVOIDENTIFIERURL,
+                                                          ConfigurationKey.DiscoveryURL,
+                                                          ConfigurationKey.BigData
+                                                          });
+
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(GetConfigurationHandler.class);
+    private static Log                          log       = LogFactory.getLog(GetConfigurationHandler.class);
 
     @Override
     public ConfigurationResult execute(GetConfiguration arg0, ExecutionContext arg1) throws ActionException {
-
         Set<ConfigurationKey> keys = arg0.getKeys();
         if (keys.size() == 0) {
-            MediciRbac rbac = new MediciRbac(TupeloStore.getInstance().getContext());
+            keys.addAll(Arrays.asList(ConfigurationKey.values()));
+        }
+
+        // make sure keys are whitelisted
+        boolean checkadmin = false;
+        for (ConfigurationKey key : keys ) {
+            if (!WHITELIST.contains(key)) {
+                checkadmin = true;
+            }
+        }
+        log.debug("Config u: " + arg0.getUser());
+        // check admin status
+        if (checkadmin) {
+            SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
             try {
                 if (!rbac.checkPermission(arg0.getUser(), Permission.VIEW_ADMIN_PAGES)) {
                     throw (new ActionException("No admin permission."));
@@ -82,14 +107,18 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
             } catch (RBACException exc) {
                 throw (new ActionException("No admin permission.", exc));
             }
-            keys.addAll(Arrays.asList(ConfigurationKey.values()));
         }
-        //Don't require permission "View Admin Pages" to get single key value like Google Key
+
+        // return keys
         ConfigurationResult result = new ConfigurationResult();
         for (ConfigurationKey key : keys ) {
             result.setConfiguration(key, TupeloStore.getInstance().getConfiguration(key));
         }
         return result;
+    }
+
+    public static List<ConfigurationKey> getWhitelist() {
+        return WHITELIST;
     }
 
     @Override

@@ -76,7 +76,8 @@ public class BatchDownload extends AuthenticatedServlet {
     public void doPost(HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
 
-        if (!authenticate(request, response)) {
+        String userId = AuthenticatedServlet.getUserUri(request);
+        if (userId == null) {
             return;
         }
 

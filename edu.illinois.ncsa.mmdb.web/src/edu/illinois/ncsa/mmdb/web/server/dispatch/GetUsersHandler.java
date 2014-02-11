@@ -41,8 +41,11 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -51,48 +54,99 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
+import org.tupeloproject.rdf.terms.Cet;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsers;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsersResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
  * Get users in the system.
  * 
  * @author Luigi marini
- *
+ * 
  */
-public class GetUsersHandler implements ActionHandler<GetUsers, GetUsersResult>{
+public class GetUsersHandler implements ActionHandler<GetUsers, GetUsersResult> {
 
-	/** Commons logging **/
-	private static Log log = LogFactory.getLog(GetUsersHandler.class);
-	
-	@Override
-	public GetUsersResult execute(GetUsers arg0, ExecutionContext arg1)
-			throws ActionException {
-		BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-		PersonBeanUtil personBeanUtil = new PersonBeanUtil(beanSession);
-		try {
-			Collection<PersonBean> all = personBeanUtil.getAll();
-			return new GetUsersResult(new ArrayList<PersonBean>(all));
-		} catch (Exception e) {
-			log.error("Error getting user list", e);
-		}
-		return new GetUsersResult();
-	}
+    /** Commons logging **/
+    private static Log log = LogFactory.getLog(GetUsersHandler.class);
 
-	@Override
-	public Class<GetUsers> getActionType() {
-		return GetUsers.class;
-	}
+    @Override
+    public GetUsersResult execute(GetUsers arg0, ExecutionContext arg1) throws ActionException {
+        RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
+        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+        PersonBeanUtil personBeanUtil = new PersonBeanUtil(beanSession);
+        try {
+            GetUsersResult result = new GetUsersResult();
+            for (PersonBean pb : personBeanUtil.getAll() ) {
+                GetUsersResult.User user = new GetUsersResult.User();
+                user.id = pb.getUri();
+                user.name = pb.getName();
+                user.email = pb.getEmail();
+                user.roles = new HashSet<String>();
+                try {
+                    for (Resource role : rbac.getRoles(Resource.uriRef(pb.getUri())) ) {
+                        user.roles.add(role.getString());
+                    }
+                    result.addUser(user);
+                } catch (RBACException exc) {
+                    log.error("Could not get roles for user " + user.id + " " + user.name);
+                    throw (new ActionException("Could not get roles for user " + user.id, exc));
+                }
+                try {
+                    Set<Triple> logins = TupeloStore.getInstance().getContext().match(Resource.uriRef(pb.getUri()), Cet.cet("lastLogin"), null);
+                    if (logins.size() == 0) {
+                        user.lastlogin = "never";
+                    } else {
+                        String date = logins.iterator().next().getObject().getString();
+                        Calendar cal = org.tupeloproject.util.Iso8601.string2Date(date);
+                        user.lastlogin = cal.getTime().toLocaleString();
+                    }
+                } catch (OperatorException e) {
+                    user.lastlogin = "error";
+                }
+            }
+            // sort users by name
+            Collections.sort(result.getUsers(), new Comparator<GetUsersResult.User>() {
+                @Override
+                public int compare(GetUsersResult.User o1, GetUsersResult.User o2) {
+                    if (o1.name == null) {
+                        return +1;
+                    }
+                    if (o2.name == null) {
+                        return -1;
+                    }
+                    if (o1.name.equals(o2.name)) {
+                        return o1.email.compareToIgnoreCase(o2.email);
+                    }
+                    return o1.name.compareToIgnoreCase(o2.name);
+                }
+            });
 
-	@Override
-	public void rollback(GetUsers arg0, GetUsersResult arg1,
-			ExecutionContext arg2) throws ActionException {
-		// TODO Auto-generated method stub
-		
-	}
+            return result;
+        } catch (Exception e) {
+            log.error("Error getting user list", e);
+        }
+        return new GetUsersResult();
+    }
+
+    @Override
+    public Class<GetUsers> getActionType() {
+        return GetUsers.class;
+    }
+
+    @Override
+    public void rollback(GetUsers arg0, GetUsersResult arg1,
+            ExecutionContext arg2) throws ActionException {
+        // TODO Auto-generated method stub
+
+    }
 
 }

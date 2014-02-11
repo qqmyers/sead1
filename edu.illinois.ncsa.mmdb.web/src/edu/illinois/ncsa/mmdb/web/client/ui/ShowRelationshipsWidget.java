@@ -60,8 +60,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetRelationshipResult;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 public class ShowRelationshipsWidget extends Composite {
     private final FlowPanel      mainContainer;
@@ -90,7 +90,7 @@ public class ShowRelationshipsWidget extends Composite {
             mainContainer.add(titleLabel);
         }
 
-        service.execute(new GetRelationship(uri), new AsyncCallback<GetRelationshipResult>() {
+        service.execute(new GetRelationship(uri, MMDB.getUsername()), new AsyncCallback<GetRelationshipResult>() {
             @Override
             public void onFailure(Throwable arg0) {
                 GWT.log("Error Retrieving Relationships of a Dataset");

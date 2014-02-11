@@ -4,7 +4,7 @@ html {
 
 body {
 	font-family: Arial, Helvetica, sans-serif;
-	font-size: 100%;
+	font-size: 0.9em;
 	margin: 0px;
 	padding: 0px;
 	text-align: center;
@@ -12,8 +12,16 @@ body {
 	
 }
 
+pre {
+   font-family: "courier new", courier, monospace;
+   font-size: 0.9em;
+   white-space: pre-wrap; /* CSS2.1 compliant */
+   white-space: -moz-pre-wrap; /* Mozilla-based browsers */
+   white-space: o-pre-wrap; /* Opera 7+ */
+}
+
 .mainMenu, .mainContainer, .bottomMenu {
-	font-size: 0.9em;
+/*	font-size: 0.9em; */
 	width: 1000px;
 }
 
@@ -22,7 +30,7 @@ body {
  * ---------------------------------------------------------------------- */
 table td, select {
 	font-family: Arial, Helvetica, sans-serif;
-	font-size: 0.9em;
+	font-size: 1.0em;
 }
 
 .gwt-Button {
@@ -114,10 +122,12 @@ table td, select {
 /* ----------------------------------------------------------------------
  * Links
  * ---------------------------------------------------------------------- */
-a, a:link, a:visited, a:hover, a:active {
-	color: #1111CC;
-	text-decoration: none;
+
+a, a:link, a:hover,a:visited, a:active{
+   color:#1111CC;
+   text-decoration:none;
 }
+
 
 a:hover {
 	text-decoration: underline;
@@ -140,25 +150,58 @@ a:hover {
 	border-bottom: #888888 solid 1px;
 }
 
-.menuElementLeft, .menuElementRight, .logo {
+.menuElementLeft{
 	height: 40px;
-	padding: 15px 5px 0px 15px;
+	padding: 15px 5px 0px 0px;
 	position: relative;
 	vertical-align: center;
+	margin: 0px 0px 0px 225px;
+}
+
+.menuElementRight{
+	height: 40px;
+	padding:15px 5px 0px 0px;
+	position: relative;
+	vertical-align:center;
+	margin:auto;
+}
+
+#logo{
+	float:left;
+	height:40px;
+	padding:1px 0px 0px;
+}
+
+
+#gradient{
+	float:right;
+	height:40px;
+	width:77%;
+	background-image:url('images/Border.png');
+	text-align:right;
+}
+
+.headerTitle, .headerTitle a:link, .headerTitle a:visited{
+	float:right;
+	margin:auto;
+	padding:4px;
+	font-size: 1.1em;
+	font-family:"Times New Roman", Georiga, Serif;
+	font-style:italic;
+	font-weight:bold;
+	color: black;
+	width: 99%;
+	text-align: right;
 }
 
 .menuElementLeft {
+	
 	float:left;
 }
 
 .menuElementRight {
+	
 	float:right;
-}
-
-.logo {
-    width: 100px;
-    height: 40px;
-    padding: 0px;
 }
 
 .navMenu {
@@ -192,7 +235,7 @@ a:hover {
 	text-align: center;
 	text-decoration:none;
 	color:#888888;
-	font-size: 0.8em;		
+	font-size: 0.9em;		
 }
 
 .bottomMenu a:link, .bottomMenu a:visited {
@@ -336,6 +379,10 @@ a:hover {
 .datasetRightColText {
 	vertical-align: middle;
 	padding-bottom: 5px;
+}
+
+.datasetRightColListbox {
+	font-size: 0.9em;
 }
 
 /* ----------------------------------------------------------------------
@@ -516,12 +563,12 @@ a:hover {
 
 
 .smallText {
-    font-size: 0.8em;
+    font-size: 0.9em;
 }
 
 .tooltip {
 	color: white;
-	font-size: 0.8em;
+	font-size: 0.9em;
 }
 
 .uploadMainPanel {
@@ -640,14 +687,14 @@ a:hover {
 	border: 1px dashed #002B55;
 	padding: 1px;
 	cursor: pointer;
-	font-size: 0.8em;
+	font-size: 0.9em;
 }
 
 .dndHTML5 {
 	width: 152px;
 	border: 2px dashed #002B55;
 	padding: 1px;
-	font-size: 0.8em;
+	font-size: 0.9em;
 }
 	
 .dndHTML5Container {
@@ -1178,6 +1225,12 @@ a:hover {
 	*display: inline;
 }
 
+.dataLink{
+	zoom: 1;
+	display:inline;
+	*display:inline;	
+}
+
 .tagCount {
 	font-size: 0.9em;
 	vertical-align: super;
@@ -1214,14 +1267,14 @@ a:hover {
 .batchOperationCountLink { 
 
 	color: #2F4F4F;
-	font-size: 80%;
+	font-size: 0.9em;
 	margin-right: 10px;	
 	
 }
 
 .batchOperationCount {
 	color: gray;
-	font-size: 80%;
+	font-size: 0.9em;
 	margin: 5px;
 	display: inline-block;
 	*display: inline;
@@ -1296,7 +1349,7 @@ a:hover {
 	margin: 0px;
 	padding: 10px;
 	border-top: #CCC solid 1px;
-	text-align: center;
+	text-align: left;
 	vertical-align: top;
 }
 
@@ -1320,6 +1373,14 @@ a:hover {
 
 .dynamicTableListInformation {
 	width: 350px;
+}
+
+.dynamicTableListCol0 {
+	width: 250px;
+}
+
+.dynamicTableListCol1 {
+	width: 250px;
 }
 
 .dynamicGrid {
@@ -1496,4 +1557,89 @@ a:hover {
 .embedBoxSpacer {
 	margin-right: 20px;	
 	margin-bottom: 15px;
+}
+
+.importTitle {
+	font-weight:bold;
+	margin-top: 40px;
+}
+
+/* Sorted table for spreadsheet preview */
+table.tablesorter {
+	font-family:arial;
+	background-color: #CDCDCD;
+	margin:10px 0pt 15px;
+	font-size: 8pt;
+	width: 100%;
+	text-align: left;
+}
+
+
+table.tablesorter tbody tr:nth-child(odd) td {
+	background-color:#F0F0F6;
+}
+
+table.tablesorter tbody tr:nth-child(even) td {
+	background-color:#FFFFFF;
+}
+
+
+table.tablesorter thead tr th, 
+
+table.tablesorter tfoot tr th {
+	background-color: #e6EEEE;
+	border: 1px solid #FFF;
+	font-size: 8pt;
+	padding: 4px;
+	padding-right: 15px;
+}
+table.tablesorter thead tr .header {
+	background-image: url('images/bg.gif');
+	background-repeat: no-repeat;
+	background-position: center right;
+	cursor: pointer;
+}
+table.tablesorter tbody td {
+	color: #3D3D3D;
+	padding: 4px;
+	background-color: #FFF;
+	vertical-align: 
+
+top;
+}
+
+table.tablesorter thead tr .headerSortUp {
+	background-image: url('images/asc.gif');
+}
+table.tablesorter thead tr .headerSortDown {
+	
+
+background-image: url('images/desc.gif');
+}
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+background-color: #8dbdd8;
+}
+
+/*Upload page - derived data callout*/
+.callout {
+background-color: #EEEEEE;
+text-align: left;
+border-radius: 6px;
+padding: 5px;
+}
+
+.derivechoice  .gwt-Label {
+padding-top: 10px;
+padding-left: 10px;
+padding-bottom: 10px;
+padding-right: 100px;
+}
+
+.callout .gwt-RadioButton {
+padding-left: 20px;
+}
+
+.callout .datasetInfoDescription div{
+padding: 0px;
+	margin: 0px auto 0px auto;
 }

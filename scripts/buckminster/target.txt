@@ -1,5 +1,0 @@
-import scripts/buckminster/org.eclipse.equinox.executable.mspec
-import scripts/buckminster/org.eclipse.platform.mspec
-import scripts/buckminster/org.eclipse.zest.mspec
-import scripts/buckminster/org.eclipse.equinox.p2.extras.mspec
-import scripts/buckminster/org.eclipse.ecf.discovery.mspec

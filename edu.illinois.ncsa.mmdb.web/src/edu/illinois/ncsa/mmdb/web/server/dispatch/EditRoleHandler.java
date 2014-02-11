@@ -57,14 +57,14 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * Add/remove user permissions.
@@ -82,7 +82,7 @@ public class EditRoleHandler implements ActionHandler<EditRole, EmptyResult> {
         Resource admin = Resource.uriRef(action.getUser());
         Resource user = Resource.uriRef(action.getTargetUser());
         Resource role = Resource.uriRef(action.getRole());
-        MediciRbac rbac = TupeloStore.getInstance().getRbac();
+        SEADRbac rbac = TupeloStore.getInstance().getRbac();
 
         log.debug("user = " + user + ", admin = " + admin);
 
@@ -121,7 +121,7 @@ public class EditRoleHandler implements ActionHandler<EditRole, EmptyResult> {
     }
 
     // would removing this user from this role make it impossible for them to administer roles?
-    boolean lockout(MediciRbac rbac, Resource user, Resource role) throws RBACException {
+    boolean lockout(RBAC rbac, Resource user, Resource role) throws RBACException {
         Collection<Resource> roles = rbac.getRoles(user); // roles the user belongs to
         Set<Resource> neededPermissions = new HashSet<Resource>(); // set of permissions needed to administer roles
         neededPermissions.add(Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri())); // get to the home page

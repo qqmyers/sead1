@@ -2,7 +2,7 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import java.io.Serializable;
 
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 
 @SuppressWarnings("serial")

@@ -41,26 +41,39 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.Collection;
+import java.util.SortedSet;
+
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserPID;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserPIDResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetInfo.Type;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
@@ -72,16 +85,24 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
  */
 public class InfoWidget extends Composite {
 
+    private static String        creatorPredicate = "http://purl.org/dc/terms/creator";
     private final FlowPanel      panel;
     private final DispatchAsync  service;
     private final String         uri;
     private final PermissionUtil rbac;
+    String                       creatorName;
+    VerticalPanel                creatorsListPanel;
+    HorizontalPanel              upByPanel;
+    Label                        creatorNameLabel;
+    Label                        remainderLabel;
+
+    /*public InfoWidget(DataSetBean data, DispatchAsync service) {*/
 
     private EditableLabel        fileNameLabel;
     private EditableLabel        mimeTypeLabel;
     private Label                categoryLabel;
 
-    public InfoWidget(DatasetBean data, DispatchAsync service) {
+    public InfoWidget(DatasetBean data, final DispatchAsync service) {
         this.service = service;
         this.uri = data.getUri();
         rbac = new PermissionUtil(service);
@@ -92,14 +113,20 @@ public class InfoWidget extends Composite {
         lbl.addStyleName("datasetRightColHeading");
         panel.add(lbl);
 
-        lbl = new Label("Contributor: ");
-        lbl.addStyleName("datasetRightColText");
-        PersonBean creator = data.getCreator();
-        if (creator != null) {
-            lbl.setTitle(creator.getEmail());
-            lbl.setText("Contributor: " + creator.getName());
-        }
-        panel.add(lbl);
+        HorizontalPanel creatorsPanel = new HorizontalPanel();
+        //creatorsPanel.addStyleName("datasetRightColSection");
+        Label creatorLabel = new Label("Creator(s): ");
+        creatorLabel.addStyleName("datasetRightColText");
+
+        creatorsPanel.add(creatorLabel);
+
+        creatorsListPanel = new VerticalPanel();
+        creatorsPanel.add(creatorsListPanel);
+
+        panel.add(creatorsPanel);
+
+        //Fills creatorsListPanel
+        getCreators(uri);
 
         String filename = data.getFilename();
         addInfo("Filename", filename, panel, true, Type.FILENAME);
@@ -112,6 +139,24 @@ public class InfoWidget extends Composite {
 
         String type = data.getMimeType();
         addInfo("MIME\u00a0Type", type, panel, true, Type.MIMETYPE);
+
+        // uploaded by
+        upByPanel = new HorizontalPanel();
+        //upByPanel.addStyleName("datasetRightColSection");
+        lbl = new Label("Uploaded By: ");
+
+        lbl.addStyleName("datasetRightColText");
+        upByPanel.add(lbl);
+        PersonBean creator = data.getCreator();
+        if (creator != null) {
+            Label upLabel = new Label();
+            upLabel.setTitle(creator.getEmail());
+            upLabel.setText(creator.getName());
+            upLabel.addStyleName("datasetRightColText");
+            upByPanel.add(upLabel);
+            getPID(creator.getUri(), upLabel);
+        }
+        panel.add(upByPanel);
 
         String date = "";
         if (data.getDate() != null) {
@@ -135,7 +180,60 @@ public class InfoWidget extends Composite {
         }, Permission.EDIT_METADATA);
 
         initWidget(panel);
+    }
 
+    protected void getCreators(final String uri) {
+        //START - Added by Ram on Nov.21, 2011
+        //FIXME : Need to refresh automatically on adding creator metadata
+        //FIXME - just get creators, not all user metadata for efficiency
+        if (uri != null) {
+            service.execute(new GetUserMetadataFields(uri), new AsyncCallback<GetUserMetadataFieldsResult>() {
+                public void onFailure(Throwable caught) {
+                    GWT.log("Error retrieving User Specified Information", caught);
+                }
+
+                public void onSuccess(GetUserMetadataFieldsResult result) {
+                    Collection<UserMetadataValue> creators = result.getValues().get(creatorPredicate);
+                    if ((creators != null) && (creators.size() > 0)) {
+                        SortedSet<UserMetadataValue> values = NamedThing.orderByName(creators);
+                        if (!values.isEmpty()) {
+                            for (UserMetadataValue value : values ) {
+                                try {
+                                    Anchor creator = new Anchor(value.getName(), value.getUri());
+                                    creator.addStyleName("datasetRightColText");
+                                    creatorsListPanel.add(creator);
+                                }
+                                catch (Exception ex) {
+                                    GWT.log(ex.getMessage());
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+        }
+    }
+
+    void getPID(final String uri, final Label tempLabel) {
+        if (uri != null) {
+            service.execute(new GetUserPID(uri), new AsyncCallback<GetUserPIDResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Error getting PID.", caught);
+                }
+
+                @Override
+                public void onSuccess(GetUserPIDResult gup) {
+                    if (gup.getUserPID() != null) {
+                        Anchor uploader = new Anchor(tempLabel.getText(), gup.getUserPID());
+                        uploader.addStyleName("datasetRightColText");
+                        upByPanel.remove(tempLabel);
+                        upByPanel.add(uploader);
+                    }
+                }
+            });
+        }
     }
 
     void addInfo(String name, String value, Panel panel, boolean editable, final Type t) {

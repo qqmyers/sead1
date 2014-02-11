@@ -64,13 +64,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.Authenticate;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthenticateResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 
 /**
  * Embedded Widget.
@@ -83,13 +81,13 @@ public class Embed implements EntryPoint {
      * go through this endpoint. To learn more look up gwt-dispatch and the
      * command pattern.
      */
-    public final DispatchAsync         dispatchAsync = new MyDispatchAsync();
+    public final DispatchAsync         dispatchAsync      = new MyDispatchAsync();
 
     /** Event bus for propagating events in the interface **/
-    public static final HandlerManager eventBus      = new HandlerManager(null);
+    public static final HandlerManager eventBus           = new HandlerManager(null);
 
-    public static final String         ANONYMOUS     = "http://cet.ncsa.uiuc.edu/2007/person/anonymous";
-
+    public static final String         ANONYMOUS          = "http://cet.ncsa.uiuc.edu/2007/person/anonymous";
+    public static final String         _sessionCookieName = "JSESSIONID";
     private RootPanel                  rootPanel;
     private String                     uri;
     private int                        width;
@@ -140,7 +138,7 @@ public class Embed implements EntryPoint {
             logo.addStyleName("bottomLogo");
             link.getElement().appendChild(logo.getElement());
 
-            dispatchAsync.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
+            dispatchAsync.execute(new GetDataset(uri, MMDB.getUsername()), new AsyncCallback<GetDatasetResult>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -201,13 +199,8 @@ public class Embed implements EntryPoint {
      */
     private void checkLogin() {
         boolean loggedIn = true;
-        final String cookieSID = Cookies.getCookie("sid");
-        if (cookieSID != null) {
-            GWT.log("Sid: " + cookieSID, null);
-        } else {
-            loggedIn = false;
-        }
-        final String cookieSessionKey = Cookies.getCookie("sessionKey");
+
+        final String cookieSessionKey = Cookies.getCookie(_sessionCookieName);
         if (cookieSessionKey != null) {
             GWT.log("Session key: " + cookieSessionKey, null);
         } else {
@@ -215,29 +208,7 @@ public class Embed implements EntryPoint {
         }
         if (!loggedIn) {
             GWT.log("Not logged in, attempting to login as anonymous");
-
-            dispatchAsync.execute(new Authenticate("anonymous", "none"), new AsyncCallback<AuthenticateResult>() {
-
-                @Override
-                public void onFailure(Throwable arg0) {
-                    //callback.onFailure();
-                    GWT.log("Failed authenticating anonymous for embed");
-                    loginFail();
-                }
-
-                @Override
-                public void onSuccess(final AuthenticateResult arg0) {
-                    if (arg0.getAuthenticated()) {
-
-                        //Now hit the REST endpoint
-                        loginREST();
-
-                    } else {
-                        GWT.log("Login: Authentication Failed");
-                        loginFail();
-                    }
-                }
-            });
+            loginREST();
         }
         //Already logged in so check permissions now
         else {
@@ -250,32 +221,36 @@ public class Embed implements EntryPoint {
      */
     private void loginREST() {
         String restUrl = "./api/authenticate";
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-        builder.setUser(TextFormatter.escapeEmailAddress("anonymous"));
-        builder.setPassword("none");
-        try {
-            builder.sendRequest("", new RequestCallback() {
-                public void onError(Request request, Throwable exception) {
-                    GWT.log("REST Login: Failed Authenticating Anonymous");
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
+        builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+        builder.setRequestData("username=anonymous&password=none");
+        builder.setCallback(new RequestCallback() {
+            public void onError(Request request, Throwable exception) {
+                GWT.log("REST Login: Failed Authenticating Anonymous");
+                loginFail();
+            }
+
+            public void onResponseReceived(Request request, Response response) {
+
+                //Log Information
+                String sessionKey = response.getText();
+                GWT.log("REST Auth Status Code = " + response.getStatusCode(), null);
+                GWT.log("User Anonymous associated with Session key " + sessionKey, null);
+                if (response.getStatusCode() > 300) {
+                    GWT.log("Authentication failed: " + sessionKey, null);
                     loginFail();
                 }
 
-                public void onResponseReceived(Request request, Response response) {
+                // Check permissions to see if anonymous user can view embedded dataset
+                checkPermissions();
 
-                    //Log Information
-                    String sessionKey = response.getText();
-                    GWT.log("REST Auth Status Code = " + response.getStatusCode(), null);
-                    GWT.log("User Anonymous associated with Session key " + sessionKey, null);
-                    if (response.getStatusCode() > 300) {
-                        GWT.log("Authentication failed: " + sessionKey, null);
-                        loginFail();
-                    }
+            }
 
-                    // Check permissions to see if anonymous user can view embedded dataset
-                    checkPermissions();
+        });
 
-                }
-            });
+        try {
+            GWT.log("attempting to authenticate anonymous in Embed", null);
+            builder.send();
         } catch (RequestException x) {
             GWT.log("Embed Login: Request Builder Exception");
             loginFail();

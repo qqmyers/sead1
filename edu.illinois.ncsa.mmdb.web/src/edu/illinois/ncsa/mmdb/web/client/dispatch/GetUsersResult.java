@@ -41,33 +41,47 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Set;
 
 import net.customware.gwt.dispatch.shared.Result;
-import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
  * List of users in the system.
  * 
  * @author Luigi Marini
- *
+ * 
  */
 @SuppressWarnings("serial")
 public class GetUsersResult implements Result {
-	
-	private ArrayList<PersonBean> users;
-	
-	public GetUsersResult() {
-	}
-	
-	public GetUsersResult(ArrayList<PersonBean> users) {
-		this.users = users;
-	}
 
-	/**
-	 * @return the users
-	 */
-	public ArrayList<PersonBean> getUsers() {
-		return users;
-	}
+    private ArrayList<User> users;
+
+    public GetUsersResult() {
+        users = new ArrayList<User>();
+    }
+
+    /**
+     * @return the users
+     */
+    public ArrayList<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(ArrayList<User> users) {
+        this.users = users;
+    }
+
+    public void addUser(User user) {
+        users.add(user);
+    }
+
+    public static class User implements Serializable {
+        public String      id;
+        public String      name;
+        public String      email;
+        public String      lastlogin;
+        public Set<String> roles;
+    }
 }

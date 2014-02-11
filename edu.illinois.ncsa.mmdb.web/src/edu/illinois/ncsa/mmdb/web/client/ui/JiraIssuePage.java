@@ -82,26 +82,38 @@ public class JiraIssuePage extends Page {
         FlexTable table = new FlexTable();
         mainLayoutPanel.add(table);
 
-        table.setText(0, 0, "Summary:");
+        table.setText(0, 0, "Email:");
+        table.getCellFormatter().addStyleName(0, 0, "homePageWidgetRow");
+
+        final TextBox txtEmail = new TextBox();
+        txtEmail.setWidth("400px");
+        table.setWidget(0, 1, txtEmail);
+
+        table.setText(1, 0, "Summary:");
         table.getCellFormatter().addStyleName(0, 0, "homePageWidgetRow");
 
         final TextBox txtSummary = new TextBox();
         txtSummary.setWidth("400px");
-        table.setWidget(0, 1, txtSummary);
+        table.setWidget(1, 1, txtSummary);
 
-        table.setText(1, 0, "Description:");
+        table.setText(2, 0, "Description:");
         table.getCellFormatter().addStyleName(1, 0, "homePageWidgetRow");
 
         final TextArea txtDescription = new TextArea();
         txtDescription.setWidth("400px");
         txtDescription.setHeight("100px");
-        table.setWidget(1, 1, txtDescription);
+        table.setWidget(2, 1, txtDescription);
 
         final Button submit = new Button("Submit");
         submit.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 submit.setEnabled(false);
+                if (txtEmail.getText().trim().length() == 0) {
+                    showFeedbackMessage("Please enter an email.");
+                    txtEmail.setFocus(true);
+                    return;
+                }
                 if (txtSummary.getText().trim().length() == 0) {
                     showFeedbackMessage("Please enter a summary.");
                     txtSummary.setFocus(true);
@@ -115,13 +127,14 @@ public class JiraIssuePage extends Page {
 
                 JiraIssue issue = new JiraIssue();
                 issue.setIssueType(type);
+                issue.setEmail(txtEmail.getText().trim());
                 issue.setSummary(txtSummary.getText().trim());
                 issue.setDescription(txtDescription.getText().trim());
                 dispatchAsync.execute(issue, new AsyncCallback<EmptyResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Error submitting feedback.", caught);
-                        showFeedbackMessage("Error sending your feedback, please mail medici@ncsa.illinois.edu directly.");
+                        showFeedbackMessage("Error sending your feedback, please mail SEADdatanet@umich.edu directly.");
                         submit.setEnabled(true);
                     }
 
@@ -136,7 +149,7 @@ public class JiraIssuePage extends Page {
             }
         });
         table.getCellFormatter().setHorizontalAlignment(2, 1, HasHorizontalAlignment.ALIGN_CENTER);
-        table.setWidget(2, 1, submit);
+        table.setWidget(3, 1, submit);
     }
 
     @Override

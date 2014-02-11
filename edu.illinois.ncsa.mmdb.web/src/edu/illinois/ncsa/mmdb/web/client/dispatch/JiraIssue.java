@@ -56,6 +56,7 @@ public class JiraIssue implements Action<EmptyResult> {
     }
 
     private JiraIssueType issueType;
+    private String        email;
     private String        summary;
     private String        description;
 
@@ -75,6 +76,21 @@ public class JiraIssue implements Action<EmptyResult> {
      */
     public void setIssueType(JiraIssueType issueType) {
         this.issueType = issueType;
+    }
+
+    /**
+     * @return the email
+     */
+    public String getEmail() {
+        return email;
+    }
+
+    /**
+     * @param email
+     *            the email to set
+     */
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     /**

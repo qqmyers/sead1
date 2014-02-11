@@ -53,6 +53,8 @@ import java.util.TimerTask;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import net.customware.gwt.dispatch.shared.ActionException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.index.IndexWriter;
@@ -60,6 +62,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.tupeloproject.kernel.ContentStoreContext;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.impl.HashFileContext;
 import org.tupeloproject.kernel.impl.MemoryContext;
@@ -77,11 +80,14 @@ import org.tupeloproject.rdf.xml.RdfXml;
 
 import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRelationshipHandlerNew;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
@@ -89,7 +95,6 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
@@ -101,10 +106,13 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  * 
  */
 public class ContextSetupListener implements ServletContextListener {
-    private static Log  log   = LogFactory.getLog(ContextSetupListener.class);
+    private static Log                  log   = LogFactory.getLog(ContextSetupListener.class);
+
+    /** Singleton instance **/
+    private static ContextSetupListener instance;
 
     /** Timer to schedule re-occurring jobs */
-    private final Timer timer = new Timer(true);
+    private final Timer                 timer = new Timer(true);
 
     /* (non-Javadoc)
      * @see javax.servlet.ServletContextListener#contextDestroyed(javax.servlet.ServletContextEvent)
@@ -265,8 +273,18 @@ public class ContextSetupListener implements ServletContextListener {
         createRelationships(props);
         createOntology();
 
+        boolean bigdata = false;
+        if (props.containsKey("bigdata")) {
+            if (props.getProperty("bigdata").equalsIgnoreCase("true")) {
+                bigdata = true;
+            }
+
+        }
+
         // start the timers
-        startTimers();
+        startTimers(bigdata);
+
+        instance = this;
     }
 
     private void createOntology() {
@@ -297,28 +315,57 @@ public class ContextSetupListener implements ServletContextListener {
         }
     }
 
-    private void startTimers() {
-        // count datasets every hour
+    private void startTimers(boolean bigdata) {
+
         // FIXME hack to force read of context every hour to solve MMDB-491
-        log.info("Starting dataset count timer");
+        log.info("Starting hourly db ping timer");
         timer.schedule(new TimerTask() {
             @Override
             public void run()
             {
-                TupeloStore.getInstance().countDatasets(null, true);
+                TupeloStore.getInstance().pingContext();
             }
-
         }, 0, 60 * 60 * 1000);
 
-        log.info("Starting full-text indexing timers");
-        // do a full-text index sweep every hour
-        // FIXME do less often
-        timer.schedule(new TimerTask() {
-            public void run() {
-                TupeloStore.getInstance().indexFullTextAll();
-            }
-        }, 30 * 60 * 1000, 60 * 60 * 1000);
+        //Resource intensive for large contexts - every hour or week
+        log.info("Starting dataset count timer");
+        if (bigdata) {
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run()
+                {
+                    TupeloStore.getInstance().countDatasets(null, true);
+                }
 
+            }, 0, 7 * 24 * 60 * 60 * 1000);
+        } else {
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run()
+                {
+                    TupeloStore.getInstance().countDatasets(null, true);
+                }
+
+            }, 0, 60 * 60 * 1000);
+        }
+
+        log.info("Starting full-text indexing timers");
+        // do a full-text index sweep every hour/week
+        if (bigdata) {
+
+            timer.schedule(new TimerTask() {
+                public void run() {
+                    TupeloStore.getInstance().indexFullTextAll();
+                }
+            }, 30 * 60 * 1000, 7 * 24 * 60 * 60 * 1000);
+        } else {
+
+            timer.schedule(new TimerTask() {
+                public void run() {
+                    TupeloStore.getInstance().indexFullTextAll();
+                }
+            }, 30 * 60 * 1000, 60 * 60 * 1000);
+        }
         timer.schedule(new TimerTask() {
             public void run() {
                 TupeloStore.getInstance().consumeFullTextIndexQueue();
@@ -327,8 +374,23 @@ public class ContextSetupListener implements ServletContextListener {
         }, 2 * 1000, 10 * 1000);
     }
 
+    public static void updateSysInfoInBackground() {
+        getIstance().timer.schedule(new TimerTask() {
+            public void run() {
+                try {
+                    log.debug("Scheduling sys info update task");
+                    SystemInfoHandler.updateInfo();
+                } catch (ActionException e) {
+                    log.debug("unable to asynchronously update sys info" + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }, 1L);
+    }
+
     private void setUpSearch() throws IOException {
         File folder = new File(TupeloStore.getInstance().getConfiguration(ConfigurationKey.SearchPath));
+        folder.mkdirs();
 
         log.info("Lucene search index directory = " + folder.getAbsolutePath());
         FSDirectory dir = FSDirectory.getDirectory(folder);
@@ -341,6 +403,9 @@ public class ContextSetupListener implements ServletContextListener {
 
     private void createRelationships(Properties props) {
         Context context = TupeloStore.getInstance().getContext();
+
+        reset(context, MMDB.USER_RELATIONSHIP, GetRelationshipHandlerNew.VIEW_RELATIONSHIP);
+
         try {
             TripleWriter tw = new TripleWriter();
 
@@ -356,8 +421,10 @@ public class ContextSetupListener implements ServletContextListener {
                         Resource r = Resource.uriRef(props.getProperty(key));
                         String l = props.getProperty(pre + ".label");
                         tw.add(r, Rdf.TYPE, MMDB.USER_RELATIONSHIP); //$NON-NLS-1$
+                        tw.add(r, Rdf.TYPE, GetRelationshipHandlerNew.VIEW_RELATIONSHIP); //$NON-NLS-1$
                         // remove existing label
                         context.removeTriples(context.match(r, Rdfs.LABEL, null));
+
                         tw.add(r, Rdfs.LABEL, l);
                         if (i != null) {
                             tw.add(r, Resource.uriRef(Namespaces.owl("inverseOf")), i);
@@ -374,8 +441,56 @@ public class ContextSetupListener implements ServletContextListener {
         }
     }
 
+    /* Reset the usermetadata or relationship sets:
+     * remove all triples that indicate predicates have an rdf:type of editPredicate
+     * (legacy) assure that all predicates that had an rdf:type editPredicate have an rdf:type viewPredicate
+     * 
+     * editPredicate - used to decide which predicates users can add
+     * viewPredicate - used to show the larger list of predicates that should be viewable (currently includes just 
+     *                  the current and past sets of editPredicates
+     *                  
+     */
+    private void reset(Context context, Resource editPredicate, Resource viewPredicate) {
+
+        // 1) Find all predicates with rdf:type editPredicate
+
+        TripleMatcher tm = new TripleMatcher();
+        TripleMatcher tm2 = new TripleMatcher();
+        TripleWriter tw = new TripleWriter();
+
+        tm.setPredicate(Rdf.TYPE);
+        tm.setObject(editPredicate);
+        tm2.setPredicate(Resource.uriRef("http://www.w3.org/2002/07/owl#inverseOf"));
+
+        try {
+            context.perform(tm);
+            log.debug("Resetting " + tm.getResult().size() + " " + editPredicate.getString() + " triples");
+
+            // 2) Remove the triples returned in step 1
+            tw.removeAll(tm.getResult());
+
+            context.perform(tm2);
+            tw.removeAll(tm2.getResult());
+
+            //3) Add triples for this whole list to have rdf:type viewPredicate
+
+            for (Triple triple : tm.getResult() ) {
+                Triple newT = new Triple(triple.getSubject(), Rdf.TYPE, viewPredicate);
+                tw.add(newT);
+            }
+            context.perform(tw);
+
+        } catch (OperatorException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     private void createUserFields(Properties props) {
+
         Context context = TupeloStore.getInstance().getContext();
+
+        reset(context, MMDB.USER_METADATA_FIELD, GetUserMetadataFieldsHandler.VIEW_METADATA);
         TripleWriter tw = new TripleWriter();
 
         Set<Resource> blacklistedPredicates = new HashSet<Resource>();
@@ -389,26 +504,31 @@ public class ContextSetupListener implements ServletContextListener {
         blacklistedPredicates.add(Rdfs.LABEL);
         // there's an even longer list, but these are some of the ones I expect we'd have the most problems with
 
-        // add all the userfields
-        for (String key : props.stringPropertyNames() ) {
-            if (key.startsWith("userfield.") && key.endsWith(".predicate")) { //$NON-NLS-1$ //$NON-NLS-2$
-                String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
-                if (props.containsKey(pre + ".label")) { //$NON-NLS-1$
-                    Resource r = Resource.uriRef(props.getProperty(key));
-                    String l = props.getProperty(pre + ".label");
-                    tw.add(r, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
-                    tw.add(r, Rdfs.LABEL, l);
-                    log.debug("Adding user metadata field '" + l + "' (" + r + ")");
+        try {
+            // add all the userfields
+            for (String key : props.stringPropertyNames() ) {
+                if (key.startsWith("userfield.") && key.endsWith(".predicate")) { //$NON-NLS-1$ //$NON-NLS-2$
+                    String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
+                    if (props.containsKey(pre + ".label")) { //$NON-NLS-1$
+                        Resource r = Resource.uriRef(props.getProperty(key));
+                        String l = props.getProperty(pre + ".label");
+                        tw.add(r, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
+                        tw.add(r, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
+                        // remove existing label
+                        context.removeTriples(context.match(r, Rdfs.LABEL, null));
+
+                        tw.add(r, Rdfs.LABEL, l);
+                        log.debug("Adding user metadata field '" + l + "' (" + r + ")");
+                    }
                 }
             }
-        }
 
-        // remove blacklisted predicates
-        for (Resource blacklisted : blacklistedPredicates ) {
-            tw.remove(blacklisted, Rdf.TYPE, MMDB.USER_METADATA_FIELD);
-        }
+            // remove blacklisted predicates
+            for (Resource blacklisted : blacklistedPredicates ) {
+                tw.remove(blacklisted, Rdf.TYPE, MMDB.USER_METADATA_FIELD);
+                tw.remove(blacklisted, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA);
+            }
 
-        try {
             context.perform(tw);
         } catch (OperatorException exc) {
             log.warn("Could not add userfields.", exc);
@@ -418,7 +538,7 @@ public class ContextSetupListener implements ServletContextListener {
     private void createAccounts(Properties props) throws OperatorException, AuthenticationException, RBACException {
         Context context = TupeloStore.getInstance().getContext();
         ContextAuthentication auth = new ContextAuthentication(context);
-        MediciRbac rbac = new MediciRbac(context);
+        SEADRbac rbac = new SEADRbac(context);
 
         // ensure base RBAC ontology exists
         log.debug("Initializing Medici permission set...");
@@ -426,7 +546,9 @@ public class ContextSetupListener implements ServletContextListener {
 
         // ensure Medici permissions exist
         rbac.intializePermissions();
-        rbac.associatePermissionsWithRoles(null, 0);
+        String predicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+        int level = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelValues).split("[ ]*,[ ]*").length - 1;
+        rbac.associatePermissionsWithRoles(predicate, level);
 
         //ensure default roles exist
         for (DefaultRole role : DefaultRole.values() ) {
@@ -498,11 +620,16 @@ public class ContextSetupListener implements ServletContextListener {
         }
     }
 
-    void ensureRoleExists(DefaultRole role, MediciRbac rbac) throws OperatorException, RBACException {
+    void ensureRoleExists(DefaultRole role, SEADRbac rbac) throws OperatorException, RBACException {
         Resource roleUri = Resource.uriRef(role.getUri());
         if (!rbac.getRoles().contains(roleUri)) {
             log.warn("WARNING: " + role.getName() + " role does not exist, creating it");
             rbac.createRole(roleUri, role.getName(), role.getPermissions());
         }
     }
+
+    private static ContextSetupListener getIstance() {
+        return instance;
+    }
+
 }

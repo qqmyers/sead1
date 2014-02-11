@@ -38,7 +38,6 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.view;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -49,7 +48,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -107,22 +105,37 @@ public class DynamicGridView extends FlexTable implements Display {
         images.setStyleName("imageOverlayPanel");
 
         // preview
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
-        pre.setWidth("120px");
-        pre.setMaxWidth(100);
-        images.add(pre);
-
-        //badge type overlay
-        if (type != null && !UNKNOWN_TYPE.equals(type)) {
-            Image overlay = new Image("images/icons/" + type + ".png");
+        if ("Collection".equals(type)) {
+            PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "collection?uri=" + id, type, dispatchAsync);
+            pre.setWidth("120px");
+            pre.setMaxWidth(100);
+            images.add(pre);
+            Image overlay = new Image("images/icons/Folder.png");
             overlay.addStyleName("imageOverlay");
             overlay.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
-                    History.newItem("dataset?id=" + id);
+                    History.newItem("collection?uri=" + id);
                 }
             });
-
             images.add(overlay);
+        } else {
+            PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
+            pre.setWidth("120px");
+            pre.setMaxWidth(100);
+            images.add(pre);
+
+            //badge type overlay
+            if (type != null && !UNKNOWN_TYPE.equals(type)) {
+                Image overlay = new Image("images/icons/" + type + ".png");
+                overlay.addStyleName("imageOverlay");
+                overlay.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+                        History.newItem("dataset?id=" + id);
+                    }
+                });
+
+                images.add(overlay);
+            }
         }
 
         layoutPanel.add(images);
@@ -133,7 +146,14 @@ public class DynamicGridView extends FlexTable implements Display {
         titlePanel.add(checkBox);
 
         // title
-        Hyperlink hyperlink = new Hyperlink(shortenTitle(title), "dataset?id=" + id);
+        Hyperlink hyperlink;
+        if ("Collection".equals(type)) {
+            hyperlink = new Hyperlink(shortenTitle(title), "collection?uri=" + id);
+        } else {
+            hyperlink = new Hyperlink(shortenTitle(title), "dataset?id=" + id);
+        }
+        hyperlink.setStyleName("dataLink");
+        hyperlink.setTitle(title);
         hyperlink.addStyleName("smallText");
         hyperlink.addStyleName("inline");
         hyperlink.setWidth("100px");
@@ -146,52 +166,6 @@ public class DynamicGridView extends FlexTable implements Display {
 
         setWidget(numItems / ROW_WIDTH, numItems % ROW_WIDTH, layoutPanel);
 
-        numItems++;
-
-        return numItems - 1;
-    }
-
-    @Override
-    @Deprecated
-    public int insertItem(final String id, String name, String type, Date date, String preview, String size, String authorId) {
-
-        final VerticalPanel layoutPanel = new VerticalPanel();
-        layoutPanel.addStyleName("dynamicGridElement");
-        layoutPanel.setHeight("130px");
-        layoutPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-
-        HorizontalPanel titlePanel = new HorizontalPanel();
-        titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-
-        // preview
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
-        pre.setWidth("120px");
-        pre.setMaxWidth(100);
-        layoutPanel.add(pre);
-
-        // selection checkbox
-        CheckBox checkBox = new CheckBox();
-        checkBoxes.put(numItems, checkBox);
-        titlePanel.add(checkBox);
-
-        // title
-        Hyperlink hyperlink = new Hyperlink(shortenTitle(name), "dataset?id=" + id);
-        hyperlink.addStyleName("smallText");
-        hyperlink.addStyleName("inline");
-        hyperlink.setWidth("100px");
-        titlePanel.add(hyperlink);
-
-        layoutPanel.add(titlePanel);
-        layoutPanel.setCellHeight(titlePanel, "20px");
-
-        final int row = this.getRowCount();
-
-        Timer t = new Timer() {
-            public void run() {
-                setWidget(numItems / ROW_WIDTH, numItems % ROW_WIDTH, layoutPanel);
-            }
-        };
-        t.schedule(1500);
         numItems++;
 
         return numItems - 1;

@@ -15,10 +15,10 @@ import org.tupeloproject.rdf.terms.Files;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetInfo;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 public class SetInfoHandler implements ActionHandler<SetInfo, EmptyResult> {
     Log log = LogFactory.getLog(SetInfoHandler.class);
@@ -26,7 +26,7 @@ public class SetInfoHandler implements ActionHandler<SetInfo, EmptyResult> {
     @Override
     public EmptyResult execute(SetInfo arg0, ExecutionContext arg1) throws ActionException {
         Context context = TupeloStore.getInstance().getContext();
-        MediciRbac rbac = new MediciRbac(context);
+        SEADRbac rbac = new SEADRbac(context);
         try {
             if (rbac.checkPermission(arg0.getUser(), arg0.getUri(), Permission.EDIT_METADATA)) {
                 try {

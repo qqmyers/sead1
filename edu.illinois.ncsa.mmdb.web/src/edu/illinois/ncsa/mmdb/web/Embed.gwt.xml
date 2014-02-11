@@ -29,18 +29,17 @@
 
 	<!-- Inherit the CET Beans -->
 	<inherits name='edu.uiuc.ncsa.cet.bean.Bean' />
-	<inherits name='edu.uiuc.ncsa.cet.bean.rbac.medici.RBAC' />
 
 	<inherits name='net.customware.gwt.dispatch.Dispatch' />
 	<inherits name="com.google.gwt.json.JSON" />
 	<inherits name="com.google.gwt.http.HTTP" />
 	<inherits name="com.google.gwt.xml.XML" />
 	<inherits name='com.google.gwt.inject.Inject' />
+	<inherits name="com.google.api.gwt.oauth2.OAuth2" />
 
 	<!-- Load the Google Maps GWT bindings from the gwt-google-apis project -->
 	<inherits name="com.google.gwt.maps.GoogleMaps" />
 	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
-
 
 	<!-- Inherit the default GWT style sheet. -->
 	<inherits name='com.google.gwt.user.theme.standard.Standard' />
@@ -53,5 +52,8 @@
 	<!-- Specify the paths for translatable code -->
 	<source path='common' />
 	<source path='client' />
+	
+	 <script src="./js/jquery-latest.js"></script>
+	 <script src="./js/jquery.tablesorter.min.js"></script>
 
 </module>

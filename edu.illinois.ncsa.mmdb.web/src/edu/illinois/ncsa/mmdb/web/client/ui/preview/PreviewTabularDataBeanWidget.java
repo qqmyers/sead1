@@ -27,12 +27,12 @@ public class PreviewTabularDataBeanWidget extends PreviewBeanWidget<PreviewTabul
 
     public PreviewTabularDataBeanWidget(HandlerManager eventBus) {
         super(eventBus);
+
         VerticalPanel vp = new VerticalPanel();
         vp.addStyleName("centered"); //$NON-NLS-1$
         vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         html.addStyleName("tablePreview");
         vp.add(html);
-
         setWidget(vp);
     }
 
@@ -94,6 +94,9 @@ public class PreviewTabularDataBeanWidget extends PreviewBeanWidget<PreviewTabul
                             //                            ((HTML) getWidget()).setSize("600" + "px", "500" + "px");
                         }
                         html.setHTML(html_text);
+
+                        addSort();
+
                     } else {
                         html.setText("Error\n" + response.getStatusText());
                     }
@@ -104,30 +107,52 @@ public class PreviewTabularDataBeanWidget extends PreviewBeanWidget<PreviewTabul
         }
     }
 
+    public static native void addSort() /*-{
+		$wnd.jQuery("#sortedtable").tablesorter();
+    }-*/;
+
     public static String toHTML(String text) {
         // parse the saved csv String cell by cell and encode it into html table
         String html = new String();
         String code = new String();
-        code = "<table border=\"1\" cellspacing=\"0\" style=\"text-align:center;\">";
+        code = "<table id=\"sortedtable\" class=\"tablesorter\">";
         html = html + code + "\n";
         String[] line = text.split("\n");
         String[] col = line[0].substring(1, line[0].length() - 1).split(
                 regex);
         int num_row = Integer.parseInt(col[0]);
         int num_col = Integer.parseInt(col[1]);
-
+        int linelength = line.length;
+        if (linelength > 1) {
+            html += "<thead>\n";
+        } else {
+            html += "<tbody>\n";
+        }
+        String item = "td";
         for (int i = 1; i < line.length; i++ ) {
-            code = "\t<tr>";
+            if (i % 2 == 0) {
+                code = "\t<tr>";
+            } else {
+                code = "\t<tr>";
+            }
             html = html + code + "\n";
+            if ((i == 1) && (linelength > 1)) {
+                item = "th";
+            } else {
+                item = "td";
+            }
             col = line[i].substring(1, line[i].length() - 1).split(regex);
             for (int j = 0; j < col.length; j++ ) {
-                code = "\t\t<td>" + col[j].replace("\\\"", "\"").replace("\\\\", "\\") + "</td>";
+                code = "\t\t<" + item + ">" + col[j].replace("\\\"", "\"").replace("\\\\", "\\") + "</" + item + ">";
                 html = html + code + "\n";
             }
             code = "\t</tr>";
             html = html + code + "\n";
+            if ((i == 1) && (linelength > 1)) {
+                html += "</thead>\n<tbody>\n";
+            }
         }
-        code = "</table>";
+        code = "</tbody>\n</table>";
         html = html + code + "\n";
         if (num_col > MAX_COLS) {
             html = "<table> <tr> <td>" + html + "</td> <td> More... </td> </tr> </table>";

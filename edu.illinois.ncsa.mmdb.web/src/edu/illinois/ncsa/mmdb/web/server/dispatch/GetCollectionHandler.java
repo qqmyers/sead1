@@ -41,11 +41,20 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -58,17 +67,25 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult.ListQueryItem;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoCollectionBean;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoPointBean;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoserverCollectionBean;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -108,10 +125,13 @@ public class GetCollectionHandler implements
             CollectionBean collectionBean = fastGetCollection(cbu, arg0.getUri());
 
             // FIXME this might be slow for large collections, although its result is memoized per collection
-            int collectionSize = TupeloStore.getInstance().countDatasets(arg0.getUri(), false);
+            //int collectionSize = TupeloStore.getInstance().countDatasets(arg0.getUri(), false);
 
-            GetCollectionResult result = new GetCollectionResult(collectionBean, collectionSize);
-            result.setPreviews(getCollectionPreviews(arg0.getUri()));
+            GetCollectionResult result = new GetCollectionResult(collectionBean, 0);
+
+            getCollectionPreviews(arg0.getUser(), arg0.getUri(), result);
+
+            getDOI(arg0.getUri(), result);
 
             return result;
         } catch (Exception e) {
@@ -162,8 +182,9 @@ public class GetCollectionHandler implements
         return null;
     }
 
-    private Collection<PreviewBean> getCollectionPreviews(String collectionUri) {
+    private void getCollectionPreviews(String user, String collectionUri, GetCollectionResult result) {
         ArrayList<PreviewBean> previews = new ArrayList<PreviewBean>();
+        result.setPreviews(previews);
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
         try {
@@ -179,7 +200,8 @@ public class GetCollectionHandler implements
         GeoPointBeanUtil gpbu = new GeoPointBeanUtil(beanSession);
 
         // Get a list of URI's for the datasets associated with the collection from GetPreviews
-        List<String> datasetUris = ListDatasetsHandler.listDatasetUris(Dc.DATE.getString(), false, 0, 0, collectionUri, null, dbu);
+        List<String> datasetUris = getDatasets(user, collectionUri);
+        result.setCollectionSize(datasetUris.size());
 
         ArrayList<PreviewImageBean> previewImages = new ArrayList<PreviewImageBean>();
 
@@ -253,9 +275,146 @@ public class GetCollectionHandler implements
         if (addPreviewGeo) {
             previews.add(previewGeoCollecitonBean);
         }
+    }
 
-        return previews;
+    public static List<String> getDatasets(String user, String collection) {
+        Unifier u = new Unifier();
 
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        int userlevel = rbac.getUserAccessLevel(Resource.uriRef(user));
+        int defaultlevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
+
+        u.addPattern(Resource.uriRef(collection), DcTerms.HAS_PART, "s");
+        u.addPattern("s", Rdf.TYPE, Cet.DATASET);
+        u.addColumnName("s");
+
+        // add all items we might need
+        u.addPattern("s", Rdf.TYPE, "t");
+        u.addColumnName("t");
+        u.addPattern("s", Dc.DATE, "d1", true);
+        u.addColumnName("d1");
+        u.addPattern("s", DcTerms.DATE_CREATED, "d2", true);
+        u.addColumnName("d2");
+        u.addColumnName("n");
+        u.addPattern("s", Dc.CREATOR, "a");
+        u.addColumnName("a");
+        u.addColumnName("l");
+        u.addColumnName("f");
+        String pred = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+        u.addPattern("s", Resource.uriRef(pred), "r", true);
+        u.addColumnName("r");
+
+        // limit results
+        // TODO this does not work for categories
+        //        if (listquery.getLimit() > 0) {
+        //            u.setLimit(listquery.getLimit());
+        //        }
+        //        u.setOffset(listquery.getOffset());
+
+        // s t d1 d2 n a l f r
+
+        // fetch results
+        final Map<String, ListQueryItem> map = new HashMap<String, ListQueryItem>();
+        PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
+        try {
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "s") ) {
+                if ("tag:tupeloproject.org,2006:/2.0/beans/2.0/storageTypeBeanEntry".equals(row.get(1).getString())) {
+                    continue;
+                }
+                if (map.containsKey(row.get(0).getString())) {
+                    log.warn("Already contain item for " + row);
+                    continue;
+                }
+                if (Cet.DATASET.equals(row.get(1)) && !row.get(5).getString().equals(user)) {
+                    int datasetlevel = (row.get(8) != null) ? Integer.parseInt(row.get(8).getString()) : defaultlevel;
+                    if (datasetlevel < userlevel) {
+                        continue;
+                    }
+                }
+                ListQueryItem item = new ListQueryItem();
+                map.put(row.get(0).getString(), item);
+
+                item.setUri(row.get(0).getString());
+                item.setAuthor(pbu.get(row.get(5)).getName());
+                if (row.get(2) != null) {
+                    if (row.get(2).asObject() instanceof Date) {
+                        item.setDate((Date) row.get(2).asObject());
+                    }
+                } else {
+                    if (row.get(3).asObject() instanceof Date) {
+                        item.setDate((Date) row.get(3).asObject());
+                    }
+                }
+            }
+
+            List<String> uris = new ArrayList<String>(map.keySet());
+            Collections.sort(uris, new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    ListQueryItem item1 = map.get(o1);
+                    if (item1 == null) {
+                        return -1;
+                    }
+                    ListQueryItem item2 = map.get(o2);
+                    if (item2 == null) {
+                        return +1;
+                    }
+                    if (item1.getDate() == null) {
+                        return -1;
+                    }
+                    if (item2.getDate() == null) {
+                        return +1;
+                    }
+                    return item1.getDate().compareTo(item2.getDate());
+                }
+            });
+            return uris;
+        } catch (OperatorException exc) {
+            log.error("Could not fetch items.", exc);
+            return new ArrayList<String>();
+        }
+    }
+
+    private void getDOI(String collectionUri, GetCollectionResult result) {
+        try {
+            String vaurl = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VAURL);
+            if (!vaurl.equals("")) {
+                //Fixme - currently required by VA - seems like this would be better handled on that end
+                String escapedUri = collectionUri.replace(":", "\\:");
+                URL url = new URL(String.format(vaurl, URLEncoder.encode(escapedUri, "UTF-8")));
+                URLConnection urlCon = url.openConnection();
+                //Returns json by default - could parse that way instead
+                urlCon.setRequestProperty("Accept", "application/xml");
+
+                Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(urlCon.getInputStream());
+                Element root = doc.getDocumentElement();
+                NodeList nl = root.getElementsByTagName("alternateIdentifier");
+                for (int i = 0; i < nl.getLength(); i++ ) {
+                    Node node = nl.item(i);
+                    NodeList subList = node.getChildNodes();
+                    boolean isDOI = false;
+                    String possibleDOI = null;
+                    for (int j = 0; j < subList.getLength(); j++ ) {
+                        if (((Element) subList.item(j)).getTagName() != null) {
+                            if ((((Element) subList.item(j)).getTagName().equals("typeId")) && (((Element) subList.item(j)).getFirstChild().getNodeValue().equals("doi"))) {
+                                isDOI = true;
+                            }
+                            if (((Element) subList.item(j)).getTagName().equals("idValue")) {
+                                possibleDOI = subList.item(j).getFirstChild().getNodeValue();
+                            }
+                        }
+                    }
+                    if (isDOI) {
+                        result.setDOI(possibleDOI);
+                        log.debug("Found DOI: " + possibleDOI + " for Collection: " + collectionUri);
+                    }
+                }
+            }
+        } catch (java.io.FileNotFoundException fnfe) {
+            log.debug("No DOI for " + collectionUri);
+        } catch (Throwable thr) {
+            log.debug("Error getting DOI", thr);
+        }
     }
 
     @Override

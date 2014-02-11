@@ -86,4 +86,8 @@ public class SystemInfoResult implements Result {
     public String getValue(String key) {
         return values.get(key);
     }
+
+    public Map<String, String> getMap() {
+        return values;
+    }
 }

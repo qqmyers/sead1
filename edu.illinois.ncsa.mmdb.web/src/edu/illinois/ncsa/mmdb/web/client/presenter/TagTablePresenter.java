@@ -46,18 +46,14 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 
-import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryDatasets;
-import edu.illinois.ncsa.mmdb.web.client.event.ShowItemEvent;
-import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
  * @author lmarini
  * 
  */
-public class TagTablePresenter extends DynamicTablePresenter<DatasetBean> {
+public class TagTablePresenter extends DynamicTablePresenter {
 
     private String tagName;
 
@@ -67,24 +63,16 @@ public class TagTablePresenter extends DynamicTablePresenter<DatasetBean> {
     }
 
     @Override
-    protected void addItem(ShowItemEvent event, DatasetBean item) {
-        event.setId(item.getUri());
-        event.setTitle(item.getTitle());
-        event.setAuthor(item.getCreator().getName());
-        event.setDate(item.getDate());
-        event.setSize(TextFormatter.humanBytes(item.getSize()));
-        event.setType(ContentCategory.getCategory(item.getMimeType(), service));
-    }
-
-    @Override
-    protected ListQuery<DatasetBean> getQuery() {
+    protected ListQuery getQuery() {
         int offset = (currentPage - 1) * getPageSize();
-        GWT.log("Getting datasets " + offset + " to " + (offset + getPageSize()) + " with tag " + tagName);
-        ListQueryDatasets query = new ListQueryDatasets();
+        GWT.log("Getting items " + offset + " to " + (offset + getPageSize()) + " with tag " + tagName);
+        ListQuery query = new ListQuery();
         query.setOrderBy(sortKey);
         query.setLimit(getPageSize());
         query.setOffset(offset);
-        query.setWithTag(tagName);
+        query.setTag(tagName);
+        query.setBean(null);
+        query.setUser(MMDB.getUsername());
         return query;
     }
 

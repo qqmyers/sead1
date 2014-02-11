@@ -69,11 +69,10 @@ public class LoginStatusWidget extends Composite {
         mainPanel = new HorizontalPanel();
         mainPanel.addStyleName("navMenu");
         initWidget(mainPanel);
-
-        if (MMDB.getUsername() == null) {
-            login(MMDB.getUsername());
+        if (MMDB.getUsername() != null) {
+            loggedIn(MMDB.getUsername());
         } else {
-            logout();
+            loggedOut();
         }
     }
 
@@ -90,7 +89,7 @@ public class LoginStatusWidget extends Composite {
      * @param name
      *            user logged in
      */
-    public void login(String name) {
+    public void loggedIn(String name) {
         mainPanel.clear();
         Label label = new Label(name);
         label.setStyleName("navMenuText");
@@ -101,7 +100,7 @@ public class LoginStatusWidget extends Composite {
     /**
      * Display a login link.
      */
-    public void logout() {
+    public void loggedOut() {
         mainPanel.clear();
         mainPanel.add(anchor("Login", "login"));
         mainPanel.add(anchor("Sign up", "signup"));

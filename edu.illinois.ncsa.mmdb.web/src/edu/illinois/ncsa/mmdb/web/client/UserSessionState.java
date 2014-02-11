@@ -54,7 +54,7 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 public class UserSessionState {
     private Map<String, String>  preferences;
     private String               sessionKey;
-    private Set<String>          selectedDatasets;
+    private Set<String>          selectedItems;
     private PersonBean           currentUser;
     private Map<String, Integer> currentPage;
     boolean                      isAnonymous;
@@ -65,7 +65,7 @@ public class UserSessionState {
 
     public void initialize() {
         preferences = new HashMap<String, String>();
-        selectedDatasets = new HashSet<String>();
+        selectedItems = new HashSet<String>();
         currentPage = new HashMap<String, Integer>();
     }
 
@@ -97,20 +97,20 @@ public class UserSessionState {
         this.isAnonymous = isAnonymous;
     }
 
-    public void datasetSelected(String uri) {
-        selectedDatasets.add(uri);
+    public void itemSelected(String uri) {
+        selectedItems.add(uri);
     }
 
-    public void datasetUnselected(String uri) {
-        selectedDatasets.remove(uri);
+    public void itemUnselected(String uri) {
+        selectedItems.remove(uri);
     }
 
-    public Set<String> getSelectedDatasets() {
-        return selectedDatasets;
+    public Set<String> getSelectedItems() {
+        return selectedItems;
     }
 
-    public void allDatasetsUnselected() {
-        selectedDatasets.clear();
+    public void allItemsUnselected() {
+        selectedItems.clear();
     }
 
     public int getPage(String key) {

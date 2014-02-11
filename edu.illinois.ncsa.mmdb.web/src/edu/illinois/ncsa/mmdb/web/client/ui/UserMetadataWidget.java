@@ -50,16 +50,19 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
@@ -93,10 +96,10 @@ public class UserMetadataWidget extends Composite {
         // table of user specified metadata fields
         fieldTable = new FlexTable();
         fieldTable.addStyleName("metadataTable");
-        fieldTable.getColumnFormatter().setWidth(0, "20%");
+        fieldTable.getColumnFormatter().setWidth(0, "15%");
         fieldTable.getColumnFormatter().setWidth(1, "40%");
-        fieldTable.getColumnFormatter().setWidth(2, "20%");
-        fieldTable.getColumnFormatter().setWidth(3, "20%");
+        fieldTable.getColumnFormatter().setWidth(2, "15%");
+        fieldTable.getColumnFormatter().setWidth(3, "30%");
 
         // header
         populateTableHeader();
@@ -125,7 +128,7 @@ public class UserMetadataWidget extends Composite {
         fieldTable.setText(0, 0, "Field");
         fieldTable.setText(0, 1, "Value");
         fieldTable.setText(0, 2, "Applies To");
-        fieldTable.setText(0, 3, "Action");
+        fieldTable.setText(0, 3, "Action           ");
         fieldTable.getRowFormatter().addStyleName(0, "metadataTableHeader");
     }
 
@@ -133,7 +136,7 @@ public class UserMetadataWidget extends Composite {
         // FIXME single get to get fields and values
         addMetadata.showFields(canEdit);
         addMetadata.setVisible(canEdit);
-        dispatch.execute(new ListUserMetadataFields(), new AsyncCallback<ListUserMetadataFieldsResult>() {
+        dispatch.execute(new ListUserMetadataFields(false), new AsyncCallback<ListUserMetadataFieldsResult>() {
             public void onFailure(Throwable caught) {
                 GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
             }
@@ -202,65 +205,116 @@ public class UserMetadataWidget extends Composite {
 
         int i = 0;
         for (final UserMetadataValue value : values ) {
-            fieldTable.insertRow(row);
-            // field name
-            Label predicateLabel = new Label(label);
-            predicateLabel.setTitle(predicate);
-            fieldTable.setWidget(row, 0, predicateLabel);
-            if (i++ != 0) {
-                predicateLabel.addStyleName("hidden");
-            }
-            // field value
-            Hyperlink namelink = new Hyperlink();
-            if (value.getUri() != null) {
-                namelink.setTargetHistoryToken("search?q=" + value.getUri() + "&f=" + predicate);
-            } else {
-                namelink.setTargetHistoryToken("search?q=" + value.getName() + "&f=" + predicate);
-            }
-            namelink.setText(value.getName());
-            fieldTable.setWidget(row, 1, namelink);
 
-            //placeholder for Applies To
-            if (value.getSectionMarker() == null) {
-                fieldTable.setWidget(row, 2, new Label("Document"));
+            //FixMe - probably better/more general way to not show data that duplicates metadata shown elsewhere in display 
+            //Special case - don't show datasets as subcollections (both use dc:hasPart and datasets are shown elsewhere on collection page)
+
+            if ((predicate.equals("http://purl.org/dc/terms/hasPart") && (value.getUri() != null) && value.getUri().startsWith("dataset?id="))) {
+                //Don't show it
             } else {
-                final Anchor anchor = new Anchor(value.getSectionMarker());
-                anchor.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        PreviewSectionShowEvent show = new PreviewSectionShowEvent();
-                        show.setSection(anchor.getText());
-                        eventBus.fireEvent(show);
+
+                fieldTable.insertRow(row);
+                // field name
+                Label predicateLabel = new Label(label);
+                predicateLabel.setTitle(predicate);
+                fieldTable.setWidget(row, 0, predicateLabel);
+                if (i++ != 0) {
+                    predicateLabel.addStyleName("hidden");
+                }
+                // field value
+                Widget valueWidget = null;
+
+                //Create an appropriate widget based on the value:
+
+                if (value.getUri() != null) {
+                    //It's a URI, so create a link
+                    String val = value.getUri();
+
+                    if ((val.startsWith("dataset?id=")) || (val.startsWith("collection?uri="))) {
+                        //Internal link - use history mechanism     
+
+                        Hyperlink namelink = new Hyperlink();
+
+                        namelink.setTargetHistoryToken(val);
+                        namelink.setText(value.getName());
+                        valueWidget = namelink;
+                    } else {
+                        //External link - use Anchor
+                        String name = value.getName();
+                        if (name == null) {
+                            name = val;
+                        }
+                        //FixMe - external uris may have a name someday like the internal datasets/collections, which would change the first argument below
+                        Anchor link = new Anchor(name, val, "_blank");
+                        valueWidget = link;
                     }
-                });
-                fieldTable.setWidget(row, 2, anchor);
-            }
+                } else {
+                    //It's text - decide if it is one or multi-line/has special characters
+                    String valueText = value.getName();
+                    if ((valueText.indexOf('\n') == -1) && (!valueText.contains("&"))) {
+                        //Single line - create a label
+                        valueWidget = new Label(valueText);
+                    } else {
+                        //Multi-line 
+                        valueText = "<pre>" + SimpleHtmlSanitizer.sanitizeHtml(valueText).asString() + "</pre>";
+                        valueWidget = new HTML(valueText);
+                    }
+                }
 
-            if (canEdit) {
+                fieldTable.setWidget(row, 1, valueWidget);
+
+                //placeholder for Applies To
+                if (value.getSectionMarker() == null) {
+                    fieldTable.setWidget(row, 2, new Label("Document"));
+                } else {
+                    final Anchor anchor = new Anchor(value.getSectionMarker());
+                    anchor.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            PreviewSectionShowEvent show = new PreviewSectionShowEvent();
+                            show.setSection(anchor.getText());
+                            eventBus.fireEvent(show);
+                        }
+                    });
+                    fieldTable.setWidget(row, 2, anchor);
+                }
+
                 FlowPanel links = new FlowPanel();
-                // edit link
-                final Anchor editAnchor = new Anchor("Edit");
-                editAnchor.setTitle("Edit the value for this property");
-                editAnchor.addStyleName("metadataTableAction");
-                editAnchor.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        addMetadata.editValue(predicate, value);
-                    }
-                });
-                links.add(editAnchor);
-                // remove link
-                Anchor removeAnchor = new Anchor("Remove");
-                removeAnchor.setTitle("Remove this property from your dataset");
-                removeAnchor.addStyleName("metadataTableAction");
-                removeAnchor.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        addMetadata.removeValue(predicate, value, true);
-                    }
-                });
-                links.add(removeAnchor);
+                if (canEdit) {
+                    // edit link
+                    final Anchor editAnchor = new Anchor("Edit");
+                    editAnchor.setTitle("Edit the value for this property");
+                    editAnchor.addStyleName("metadataTableAction");
+                    editAnchor.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            addMetadata.editValue(predicate, value);
+                        }
+                    });
+                    links.add(editAnchor);
+                    // remove link
+                    Anchor removeAnchor = new Anchor("Remove");
+                    removeAnchor.setTitle("Remove this property from your dataset");
+                    removeAnchor.addStyleName("metadataTableAction");
+                    removeAnchor.addClickHandler(new ClickHandler() {
+                        public void onClick(ClickEvent event) {
+                            addMetadata.removeValue(predicate, value, false);
+                        }
+                    });
+                    links.add(removeAnchor);
+                }
+                //Add a search link
+                Hyperlink searchlink = new Hyperlink();
+                if (value.getUri() != null) {
+                    searchlink.setTargetHistoryToken("search?q=" + value.getUri() + "&f=" + predicate);
+                } else {
+                    searchlink.setTargetHistoryToken("search?q=" + value.getName() + "&f=" + predicate);
+                }
+                searchlink.setText("Search");
+                links.add(searchlink);
+
                 fieldTable.setWidget(row, 3, links);
+                row++;
             }
-            row++;
         }
         styleRows();
 

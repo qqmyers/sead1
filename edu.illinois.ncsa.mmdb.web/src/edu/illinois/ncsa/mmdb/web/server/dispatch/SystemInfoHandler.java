@@ -54,12 +54,19 @@ import org.tupeloproject.rdf.terms.Beans;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfoResult;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.ContextSetupListener;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
  * Get license attached to a specific resource.
@@ -72,6 +79,7 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
 
     static private long             last         = 0;
     static private SystemInfoResult result       = null;
+    static private boolean          pending      = false;
     static private long             HISTORESIS   = 60 * 1000;                                 // 1 minute
 
     /** Commons logging **/
@@ -79,10 +87,28 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
 
     @Override
     public SystemInfoResult execute(SystemInfo arg0, ExecutionContext arg1) throws ActionException {
-        if (last + HISTORESIS > System.currentTimeMillis()) {
+        long historesis = HISTORESIS;
+        String bigdata = TupeloStore.getInstance().getConfiguration(ConfigurationKey.BigData);
+        if (bigdata.equals("true")) {
+            historesis *= 1440; //once per day
+        }
+        if (last + historesis > System.currentTimeMillis()) {
             return result;
         }
+        //if bigdata, return old info and calc new if over time
+        // First time, pending is false and we set a bacground task and return current result
+        //Another request before it completes and we skip both the asynch and sync updates and again return the current result
+        //Fixme - alert receiver that updates are pending?
+        if (bigdata.equals("true") && (result != null) && (!pending)) {
+            pending = true;
+            ContextSetupListener.updateSysInfoInBackground();
+        } else if (!pending) {
+            updateInfo();
+        }
+        return result;
+    }
 
+    public static void updateInfo() throws ActionException {
         SystemInfoResult info = new SystemInfoResult();
 
         Unifier uf = new Unifier();
@@ -118,10 +144,89 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
         info.add("Bytes from derived data", TextFormatter.humanBytes(derivedSize));
         info.add("Total number of bytes", TextFormatter.humanBytes(datasetSize + derivedSize));
 
+        Unifier uf2 = new Unifier();
+        log.debug("Counting Collections");
+        uf2.addPattern("cl", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/Collection"));
+        uf2.addPattern("parent", Resource.uriRef("http://purl.org/dc/terms/hasPart"), "cl", true);
+        uf2.addPattern("cl", Resource.uriRef("http://purl.org/dc/terms/issued"), "date", true);
+        uf2.setColumnNames("cl", "parent", "date");
+        long collCount = 0;
+        long preprintCollCount = 0;
+        int publishedCollCount = 0;
+
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        Resource anon = PersonBeanUtil.getAnonymousURI();
+
+        try {
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf2, "cl") ) {
+                collCount++;
+                // row.get(1) is null if there's no parent, i.e. a top level collection that should be counted if anon can see it
+                // row.get(2) is not null if the collection has been published, i.e. should be added to the published count
+                // for now, the logic requires that a published collection be visible in the ACR to be counted but this could be improved
+                // once we have our lifecycle worked out (would be odd if a collection were published and not visible to anon. 
+                // Eventually we may need to query the VA to find published collections if all record of them is flushed from an ACR.)
+                if ((row.get(1) == null) || (row.get(2) != null)) {
+                    //check permissions
+                    if (rbac.checkPermission(anon, row.get(0), Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri()))) {
+                        if (rbac.checkAccessLevel(anon, row.get(0))) {
+                            if (row.get(1) == null) {
+                                log.debug("Adding preprint: " + row.get(0));
+                                preprintCollCount++;
+                            }
+
+                            if (row.get(2) != null) {
+                                log.debug("Adding published: " + row.get(0));
+                                publishedCollCount++;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (OperatorException e) {
+            log.debug(e.getMessage());
+            throw (new ActionException("Could not count collections."));
+        } catch (RBACException re) {
+            log.debug(re.getMessage());
+            throw (new ActionException("Could not count collections."));
+        }
+        info.add("Collections ", "" + collCount);
+        info.add("Public Preprint Collections", "" + preprintCollCount);
+        info.add("Published Collections", "" + publishedCollCount);
+
+        Unifier uf3 = new Unifier();
+        log.debug("Counting Views");
+
+        uf3.addPattern("thing1", Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/mmdb/isViewedBy"), "thing2");
+        uf3.setColumnNames("thing1");
+        try {
+            TupeloStore.getInstance().getContext().perform(uf3);
+
+            info.add("Total Views", "" + ((ListTable<Resource>) uf3.getResult()).getRows().size());
+        } catch (OperatorException e) {
+            log.debug("Views: " + e.getMessage());
+            throw (new ActionException("Could not count views."));
+        }
+
+        Unifier uf4 = new Unifier();
+        log.debug("Counting People");
+
+        uf4.addPattern("person", Resource.uriRef("http://xmlns.com/foaf/0.1/name"), "name");
+        uf4.addPattern("person", Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/role/hasRole"), "role");
+
+        uf4.setColumnNames("person");
+        try {
+            TupeloStore.getInstance().getContext().perform(uf4);
+
+            info.add("Number of Users", "" + ((ListTable<Resource>) uf4.getResult()).getRows().size());
+        } catch (OperatorException e) {
+            log.debug("Users: " + e.getMessage());
+            throw (new ActionException("Could not count users."));
+        }
+
         // done
+        pending = false;
         result = info;
         last = System.currentTimeMillis();
-        return info;
     }
 
     @Override

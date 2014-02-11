@@ -57,6 +57,7 @@ public class GetCollectionResult implements Result {
     private CollectionBean          collection;
     private int                     collectionSize;
     private Collection<PreviewBean> previews;
+    private String                  doi;
 
     public GetCollectionResult() {
     }
@@ -87,5 +88,13 @@ public class GetCollectionResult implements Result {
 
     public void setPreviews(Collection<PreviewBean> previews) {
         this.previews = previews;
+    }
+
+    public String getDOI() {
+        return doi;
+    }
+
+    public void setDOI(String doi) {
+        this.doi = doi;
     }
 }

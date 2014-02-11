@@ -125,6 +125,9 @@ public class PreviewPanel extends Composite {
 
         if (!collectionPreviewer) {
             //register dataset specific previewers here.
+            if (!isEmbedded) {
+                addWidget(new PreviewMultiImageBeanWidget(eventBus));
+            }
             addWidget(new PreviewMultiVideoBeanWidget(eventBus));
             addWidget(new PreviewVideoBeanWidget(eventBus));
             addWidget(new PreviewAudioBeanWidget(eventBus));
@@ -139,7 +142,6 @@ public class PreviewPanel extends Composite {
             addWidget(new PreviewGeoserverBeanWidget(eventBus));
             //The following previews currently not supported in embedded previewer
             if (!isEmbedded) {
-                addWidget(new PreviewMultiImageBeanWidget(eventBus));
                 addWidget(new PreviewMultiTabularDataBeanWidget(eventBus));
             }
         } else {
@@ -336,11 +338,16 @@ public class PreviewPanel extends Composite {
      */
     private List<PreviewBeanWidget> getOrderedBeans(GetDatasetResult result, int maxwidth) {
         boolean hasMultiVideo = false;
+        boolean hasMultiImage = false;
 
         List<PreviewBeanWidget> list = new ArrayList<PreviewBeanWidget>();
 
         for (PreviewBeanWidget widget : registeredWidgets ) {
             if ((widget instanceof PreviewVideoBeanWidget) && hasMultiVideo) {
+                GWT.log("Skipping " + widget.getClass());
+                continue;
+            }
+            if ((widget instanceof PreviewImageBeanWidget) && hasMultiImage) {
                 GWT.log("Skipping " + widget.getClass());
                 continue;
             }
@@ -361,6 +368,9 @@ public class PreviewPanel extends Composite {
             if (best != null) {
                 if (widget instanceof PreviewMultiVideoBeanWidget) {
                     hasMultiVideo = true;
+                }
+                if (widget instanceof PreviewMultiImageBeanWidget) {
+                    hasMultiImage = true;
                 }
                 PreviewBeanWidget pbw = widget.newWidget();
                 pbw.setPreviewBean(best);

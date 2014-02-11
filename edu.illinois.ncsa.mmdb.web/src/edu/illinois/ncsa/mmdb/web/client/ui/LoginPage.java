@@ -2,7 +2,7 @@
  * University of Illinois/NCSA
  * Open Source License
  *
- * Copyright (c) 2010, NCSA.  All rights reserved.
+ * Copyright (c) 2010, NCSA 2013 U. Michigan.  All rights reserved.
  *
  * Developed by:
  * Cyberenvironments and Technologies (CET)
@@ -43,7 +43,11 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
+import com.google.api.gwt.oauth2.client.Auth;
+import com.google.api.gwt.oauth2.client.AuthRequest;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -57,9 +61,9 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -70,14 +74,16 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.Authenticate;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthenticateResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2PropsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
 
 /**
  * @author Luigi Marini
@@ -93,6 +99,11 @@ public class LoginPage extends Composite {
     private Label               progressLabel;
     private final DispatchAsync dispatchasync;
     private final MMDB          mainWindow;
+
+    // Google Oauth2
+    private final String        AUTH_URL      = "https://accounts.google.com/o/oauth2/auth";
+    private final String        EMAIL_SCOPE   = "https://www.googleapis.com/auth/userinfo.email";
+    private final String        PROFILE_SCOPE = "https://www.googleapis.com/auth/userinfo.profile";
 
     /**
      * @param dispatchasync
@@ -213,7 +224,115 @@ public class LoginPage extends Composite {
         table.getFlexCellFormatter().setColSpan(4, 0, 2);
         table.getFlexCellFormatter().setHorizontalAlignment(4, 0, HasAlignment.ALIGN_CENTER);
 
+        // Google Oauth2 link
+        Anchor googleLogin = new Anchor("Login using Google credentials");
+        googleLogin.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                googleAuthLogin(new AuthenticationCallback() {
+                    @Override
+                    public void onFailure() {
+                        fail();
+                    }
+
+                    @Override
+                    public void onSuccess(String userUri, String sessionKey) {
+                        GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
+                    }
+                });
+            }
+        });
+
+        table.setWidget(5, 0, googleLogin);
+        table.getFlexCellFormatter().setColSpan(5, 0, 2);
+        table.getFlexCellFormatter().setHorizontalAlignment(5, 0, HasAlignment.ALIGN_CENTER);
+
         return table;
+    }
+
+    /**
+     * Login using google oauth2.
+     */
+    private void googleAuthLogin(final AuthenticationCallback callback) {
+        dispatchasync.execute(new GoogleOAuth2Props(), new AsyncCallback<GoogleOAuth2PropsResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error retrieving Google OAuth2 properties", caught);
+            }
+
+            @Override
+            public void onSuccess(GoogleOAuth2PropsResult props) {
+                AuthRequest req = new AuthRequest(AUTH_URL, props.getClientId()).withScopes(EMAIL_SCOPE, PROFILE_SCOPE);
+                Auth AUTH = Auth.get();
+                AUTH.clearAllTokens();
+                AUTH.login(req, new Callback<String, Throwable>() {
+                    @Override
+                    public void onSuccess(final String token) {
+                        GWT.log("Successful login with Google OAuth2 " + token);
+
+                        dispatchasync.execute(new GoogleUserInfo(token), new AsyncCallback<GoogleUserInfoResult>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                callback.onFailure();
+                            }
+
+                            @Override
+                            public void onSuccess(final GoogleUserInfoResult result) {
+                                if (result.isCreated()) {
+                                    GWT.log("Created new user " + result.getUserName() + " " + result.getEmail());
+                                } else {
+                                    GWT.log("User found " + result.getUserName() + " " + result.getEmail());
+                                }
+
+                                // authenticate on the server side
+                                String restUrl = "./api/authenticate";
+                                RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
+                                builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+                                StringBuilder sb = new StringBuilder();
+                                sb.append("googleAccessToken=" + token);
+                                builder.setRequestData(sb.toString());
+                                builder.setCallback(new RequestCallback() {
+                                    public void onError(Request request, Throwable exception) {
+                                        GWT.log("Error authenticating on the server side");
+                                    }
+
+                                    public void onResponseReceived(Request request, Response response) {
+                                        // success!
+                                        String sessionKey = response.getText();
+
+                                        GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                                        if (response.getStatusCode() > 300) {
+                                            GWT.log("Authentication failed: " + sessionKey, null);
+                                        } else {
+                                            GWT.log("User " + result.getEmail() + " associated with session key " + sessionKey, null);
+                                            // login local
+                                            mainWindow.loginByName(result.getEmail(), sessionKey, callback);
+                                        }
+                                    }
+                                });
+
+                                try {
+                                    GWT.log("attempting to authenticate " + result.getEmail() + " against " + restUrl, null);
+                                    builder.send();
+                                } catch (RequestException x) {
+                                    callback.onFailure();
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        callback.onFailure();
+                    }
+                });
+
+            }
+        });
+
     }
 
     protected void authenticate() {
@@ -222,62 +341,102 @@ public class LoginPage extends Composite {
     }
 
     /**
-     * Authenticate against the REST endpoint to make sure user is
-     * authenticated on the server side. If successful, login local.
+     * Authenticate against the REST endpoint. If successful, login local and
+     * start
+     * processing of the next
+     * History token.
+     * 
+     * Called to process logout/login as anonymous from MMDB
      */
     public static void authenticate(final DispatchAsync dispatch, final MMDB mainWindow, final String username, final String password, final AuthenticationCallback callback) {
         logout(new Command() { // ensure we're logged out before authenticating
             public void execute() {
-                dispatch.execute(new Authenticate(username, password),
-                        new AsyncCallback<AuthenticateResult>() {
 
-                            @Override
-                            public void onFailure(Throwable arg0) {
-                                callback.onFailure();
-                            }
+                // Hit the REST authentication endpoint
 
-                            @Override
-                            public void onSuccess(final AuthenticateResult arg0) {
-                                if (arg0.getAuthenticated()) {
-                                    // now hit the REST authentication endpoint
-                                    String restUrl = "./api/authenticate";
-                                    RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-                                    builder.setUser(TextFormatter.escapeEmailAddress(username));
-                                    builder.setPassword(password);
-                                    try {
-                                        GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
-                                        builder.sendRequest("", new RequestCallback() {
-                                            public void onError(Request request, Throwable exception) {
-                                                callback.onFailure();
-                                            }
+                String restUrl = "./api/authenticate";
+                RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
+                builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+                StringBuilder sb = new StringBuilder();
+                sb.append("username=" + username);
+                sb.append("&password=" + password);
+                builder.setRequestData(sb.toString());
+                builder.setCallback(new RequestCallback() {
+                    public void onError(Request request, Throwable exception) {
+                        callback.onFailure();
+                    }
 
-                                            public void onResponseReceived(Request request, Response response) {
-                                                // success!
-                                                String sessionKey = response.getText();
-                                                GWT.log("REST auth status code = " + response.getStatusCode(), null);
-                                                if (response.getStatusCode() > 300) {
-                                                    GWT.log("authentication failed: " + sessionKey, null);
-                                                    callback.onFailure();
-                                                }
-                                                GWT.log("user " + username + " associated with session key " + sessionKey, null);
-                                                // login local
-                                                mainWindow.login(arg0.getSessionId(), sessionKey, callback);
-                                            }
-                                        });
-                                    } catch (RequestException x) {
-                                        // another error condition
-                                        callback.onFailure();
-                                    }
-                                } else {
-                                    callback.onFailure();
-                                }
-                            }
-                        });
+                    public void onResponseReceived(Request request, Response response) {
+                        // success!
+                        String sessionKey = response.getText();
+
+                        GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                        if (response.getStatusCode() > 300) {
+                            GWT.log("authentication failed: " + sessionKey, null);
+                            callback.onFailure();
+                        } else {
+                            GWT.log("user " + username + " associated with session key " + sessionKey, null);
+                            // login local
+
+                            mainWindow.loginByName(username, sessionKey, callback);
+                        }
+                    }
+                });
+
+                try {
+                    GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
+                    builder.send();
+                } catch (RequestException x) {
+                    // another error condition
+                    callback.onFailure();
+                }
             }
         });
     }
 
-    protected void authenticate(final String username, final String password) {
+    /*
+    private void authenticateOnServer(final String username, final String password, final String sessionId, final AuthenticationCallback callback) {
+        // now hit the REST authentication endpoint
+        String restUrl = "./api/authenticate";
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
+        builder.setUser(TextFormatter.escapeEmailAddress(username));
+        builder.setPassword(password);
+
+        try {
+            GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
+            builder.sendRequest("", new RequestCallback() {
+                public void onError(Request request, Throwable exception) {
+                    fail();
+                }
+
+                public void onResponseReceived(Request request, Response response) {
+                    // success!
+                    String sessionKey = response.getText();
+
+                    GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                    if (response.getStatusCode() > 300) {
+                        GWT.log("authentication failed: " + sessionKey, null);
+                        fail();
+                    } else {
+                        GWT.log("user " + username + " associated with session key " + sessionKey, null);
+                        // login local
+
+                        mainWindow.loginByName(username, sessionKey, callback);
+                    }
+                }
+            });
+        } catch (RequestException x) {
+            // another error condition
+            callback.onFailure();
+        }
+    }
+    */
+
+    /**
+     * Called to process credentials from login form
+     * 
+     */
+    public void authenticate(final String username, final String password) {
         authenticate(dispatchasync, mainWindow, username, password, new AuthenticationCallback() {
             @Override
             public void onFailure() {
@@ -287,9 +446,42 @@ public class LoginPage extends Composite {
             @Override
             public void onSuccess(String userUri, String sessionKey) {
                 GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
-                redirect();
             }
         });
+    }
+
+    /**
+     * TODO Placehoder: Show terms of service.
+     * 
+     */
+    private void showTermsOfService() {
+
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/tos.txt");
+        try {
+            builder.sendRequest("", new RequestCallback()
+            {
+                public void onError(Request request, Throwable e)
+                {
+                    Window.alert(e.getMessage());
+                }
+
+                public void onResponseReceived(Request request, Response response)
+                {
+                    if (200 == response.getStatusCode())
+                    {
+                        Window.alert(response.getText());
+                        TextArea ta = new TextArea();
+                        ta.setCharacterWidth(80);
+                        ta.setVisibleLines(50);
+                    } else {
+                        Window.alert("Received HTTP status code other than 200 : " + response.getStatusText());
+                    }
+                }
+            });
+        } catch (RequestException e) {
+            // Couldn't connect to server
+            Window.alert(e.getMessage());
+        }
     }
 
     void fail() {
@@ -303,133 +495,84 @@ public class LoginPage extends Composite {
     }
 
     /**
-     * Reload page after being logged in.
-     * 
-     * FIXME remove hardcoded paths
+     * logout from server, Set sessionID and local cache of user info to null,
+     * and log out of REST servlets
      */
-    protected void redirect() {
-        if (History.getToken().startsWith("login")) {
-            History.newItem("listDatasets", true);
-            mainWindow.showListDatasetsPage();
-        } else {
-            History.fireCurrentHistoryState();
-        }
-    }
+    public static void logout(final Command onSuccess) {
 
-    //	/**
-    //	 * Set the session id, add a cookie and add history token.
-    //	 * 
-    //	 * @param sessionId
-    //	 * 
-    //	 */
-    //	public static void login(final String userId, final String sessionKey) {
-    //		final UserSessionState state = MMDB.getSessionState();
-    ////		state.setUsername(userId);
-    //		state.setSessionKey(sessionKey);
-    //		// set cookie
-    //		// TODO move to more prominent place... MMDB? A class with static properties?
-    //		final long DURATION = 1000 * 60 * 60; // 60 minutes
-    //		Date expires = new Date(System.currentTimeMillis() + DURATION);
-    //		Cookies.setCookie("sid", userId, expires);
-    //		Cookies.setCookie("sessionKey", sessionKey, expires);
-    //		
-    //		MMDB.dispatchAsync.execute(new GetUser(userId), new AsyncCallback<GetUserResult>() {
-    //
-    //			@Override
-    //			public void onFailure(Throwable caught) {
-    //				GWT.log("Error retrieving user with id " + userId);
-    //			}
-    //
-    //			@Override
-    //			public void onSuccess(GetUserResult result) {
-    //				PersonBean personBean = result.getPersonBean();
-    //				state.setCurrentUser(personBean);
-    //				MMDB.loginStatusWidget.login(personBean.getName());
-    //				GWT.log("Current user set to " + personBean.getUri());
-    //			}
-    //		});
-    //
-    //	}
-
-    public static void clearBrowserCreds(final Command onSuccess) {
-        // now hit the REST authentication endpoint with bad creds
         String restUrl = "./api/logout";
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-        builder.setUser("_badCreds_");
-        builder.setPassword("_reallyReallyBadCreds_");
+
+        /* Since we don't use Basic AUth for the app/session, therefore we don't need to reset credentials here 
+         * If the user has separately used a download URL in their browser, these two lines would remove it
+         * but that is separate from the app, so - at this point - we leave normal browser behavior in place.
+         */
+        //       builder.setUser("_badCreds_");
+        //       builder.setPassword("_reallyReallyBadCreds_");
         try {
             builder.sendRequest("", new RequestCallback() {
                 public void onError(Request request, Throwable exception) {
                     // do something
+
+                    clearLocalSession();
                     Window.alert("error logging out " + exception.getMessage());
                 }
 
                 public void onResponseReceived(Request request, Response response) {
+
                     if (onSuccess != null) {
+                        clearLocalSession();
+
                         onSuccess.execute();
                     }
                 }
             });
         } catch (RequestException x) {
             // another error condition, do something
+            clearLocalSession();
             Window.alert("error logging out: " + x.getMessage());
         }
     }
 
-    public static void logout() {
-        logout(new Command() {
-            public void execute() {
-                History.newItem("login");
-            }
-        });
-    }
+    static protected void clearLocalSession() {
 
-    /**
-     * Set sessionID to null, remove cookie, and log out of REST servlets
-     */
-    public static void logout(Command onSuccess) {
         UserSessionState state = MMDB.getSessionState();
+
         if (state.getCurrentUser() != null && state.getCurrentUser().getUri() != null) {
+
             GWT.log("user " + state.getCurrentUser().getUri() + " logging out", null);
             MMDB.clearSessionState();
         }
+
         // in case anyone is holding refs to the state, zero out the auth information in it
         state.setCurrentUser(null);
         state.setSessionKey(null);
+
         state.setAnonymous(false); // not logged in as anonymous, or anyone
-        Cookies.removeCookie("sid");
-        Cookies.removeCookie("sessionKey");
-        clearBrowserCreds(onSuccess);
-        MMDB.loginStatusWidget.logout();
-    }
+        MMDB.loginStatusWidget.loggedOut();
+        /* Remove session cookie - clearBrowserCreds has caused the server to invalidate it
+         * so this isn't strictly necessary
+         * 
+         */
 
-    public static void checkRestAuth(final Command onSuccess, final Command onFailure) {
-        String restUrl = "./api/checkLogin";
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-        try {
-            GWT.log("checking login status @ " + restUrl, null);
-            // we need to block.
-            builder.sendRequest("", new RequestCallback() {
-                public void onError(Request request, Throwable exception) {
-                    logout(null);
-                    onFailure.execute();
-                }
-
-                public void onResponseReceived(Request request, Response response) {
-                    // success!
-                    GWT.log("REST auth status code = " + response.getStatusCode(), null);
-                    if (response.getStatusCode() > 300) {
-                        GWT.log("not authenticated to REST services", null);
-                        logout(null);
-                        onFailure.execute();
-                    } else {
-                        onSuccess.execute();
-                    }
-                }
-            });
-        } catch (RequestException x) {
-            logout(null);
-            onFailure.execute();
+        String path = Window.Location.getPath();
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
         }
+        Cookies.removeCookie(MMDB._sessionCookieName, path);
     }
+
+}
+
+class Entry extends JavaScriptObject {
+    protected Entry() {
+    }
+
+    public final native String getEmail() /*-{
+		return this.email;
+    }-*/;
+
+    public final native String getName() /*-{
+		return this.name;
+    }-*/;
 }

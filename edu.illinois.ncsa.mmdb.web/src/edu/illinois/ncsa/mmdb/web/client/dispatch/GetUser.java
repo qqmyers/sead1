@@ -54,6 +54,8 @@ public class GetUser implements Action<GetUserResult> {
 
     private String userId;
 
+    private String username;
+
     public GetUser() {
     }
 
@@ -71,6 +73,10 @@ public class GetUser implements Action<GetUserResult> {
         return userId;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
     }
@@ -78,4 +84,9 @@ public class GetUser implements Action<GetUserResult> {
     public void setUserId(String userId) {
         this.userId = userId;
     }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
 }

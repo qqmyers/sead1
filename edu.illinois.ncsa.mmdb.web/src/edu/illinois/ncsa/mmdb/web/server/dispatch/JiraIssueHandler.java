@@ -50,7 +50,9 @@ import org.apache.commons.logging.LogFactory;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
+import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
  * Send email to jira to enter a new jira issue.
@@ -59,16 +61,13 @@ import edu.illinois.ncsa.mmdb.web.server.Mail;
  * 
  */
 public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
-    public static final String JIRA_EMAIL_BUG     = "jira+mmdb.bug@ncsa.illinois.edu";
-    public static final String JIRA_EMAIL_FEATURE = "jira+mmdb.feature@ncsa.illinois.edu";
-
     /** Commons logging **/
-    private static Log         log                = LogFactory.getLog(JiraIssueHandler.class);
+    private static Log log = LogFactory.getLog(JiraIssueHandler.class);
 
     @Override
     public EmptyResult execute(JiraIssue arg0, ExecutionContext arg1) throws ActionException {
         try {
-            createJiraIssue(arg0.getIssueType(), arg0.getSummary(), arg0.getDescription());
+            createJiraIssue(arg0.getIssueType(), arg0.getEmail(), arg0.getSummary(), arg0.getDescription());
         } catch (MessagingException e) {
             log.warn("Failed to update context.", e);
             throw (new ActionException("Could not update context.", e));
@@ -87,19 +86,15 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
         throw new ActionException("Can not undo a jira issue creation.");
     }
 
-    /**
-     * Create a jira issue by sending email.
-     */
-    public static void createJiraIssue(JiraIssueType type, String summary, String description) throws MessagingException {
-        switch (type) {
-            case BUG:
-                Mail.sendMessage(JIRA_EMAIL_BUG, summary, description);
-                break;
-            case FEATURE:
-                Mail.sendMessage(JIRA_EMAIL_FEATURE, summary, description);
-                break;
-            default:
-                throw (new MessagingException(String.format("Unknown issue type '%s'.", type)));
-        }
+    public static void createJiraIssue(JiraIssueType issueType, String email, String summary, String description) throws MessagingException {
+        String host = TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName);
+
+        String subj = "User submitted " + issueType + " for " + host;
+        String body = "Following request was submitted to : " + host + "\n\n" +
+                "From: " + email + "\n" +
+                "Subj: " + summary + "\n\n" +
+                description;
+
+        Mail.sendMessage(Mail.getAdminEmail(), null, subj, body);
     }
 }

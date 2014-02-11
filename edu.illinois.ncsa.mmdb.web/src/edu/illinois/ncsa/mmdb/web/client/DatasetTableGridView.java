@@ -49,7 +49,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -132,7 +132,7 @@ public class DatasetTableGridView extends DatasetTableView {
         });
 
         UserSessionState sessionState = MMDB.getSessionState();
-        if (sessionState.getSelectedDatasets().contains(id)) {
+        if (sessionState.getSelectedItems().contains(id)) {
             checkBox.setValue(true);
         } else {
             checkBox.setValue(false);
@@ -163,10 +163,11 @@ public class DatasetTableGridView extends DatasetTableView {
         });
 
         // title label
-        Label titleLabel = new Label(shortenTitle(title));
-        titleLabel.addStyleName("smallText");
-        titleLabel.addStyleName("inline");
-        titleLabel.setWidth("120px");
+        Hyperlink titleLink = new Hyperlink(shortenTitle(title), "dataset?id=" + id);
+        titleLink.setTitle(title);
+        titleLink.addStyleName("smallText");
+        titleLink.addStyleName("inline");
+        titleLink.setWidth("120px");
         int row = n / WIDTH;
         int col = n % WIDTH;
         setWidget(row * 2, col, pw);
@@ -175,7 +176,7 @@ public class DatasetTableGridView extends DatasetTableView {
         FlowPanel titlePanel = new FlowPanel();
         titlePanel.addStyleName("dynamicGridElementTitle");
         titlePanel.add(checkBox);
-        titlePanel.add(titleLabel);
+        titlePanel.add(titleLink);
         // clear both for IE
         SimplePanel clear = new SimplePanel();
         clear.addStyleName("clearFloat");

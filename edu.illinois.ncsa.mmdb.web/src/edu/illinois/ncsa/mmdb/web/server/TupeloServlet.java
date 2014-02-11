@@ -70,10 +70,9 @@ import org.tupeloproject.util.Tuple;
 import org.tupeloproject.util.UnicodeTranscoder;
 import org.tupeloproject.util.Variable;
 
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.medici.MediciRbac;
 
 /**
  * TupeloServlet
@@ -217,11 +216,12 @@ public class TupeloServlet extends HttpTupeloServlet {
 
     boolean isAllowed(HttpServletRequest req, HttpServletResponse resp) {
         ServletContext sc = getServletContext();
-        if (!AuthenticatedServlet.doAuthenticate(req, resp, sc)) {
+        String userId = AuthenticatedServlet.getUserUri(req);
+        if (userId == null) {
             return false;
         }
-        MediciRbac rbac = new MediciRbac(getContext());
-        Resource userUri = Resource.uriRef(AuthenticatedServlet.getUserUri(req));
+        SEADRbac rbac = new SEADRbac(getContext());
+        Resource userUri = Resource.uriRef(userId);
         Resource permissionUri = Resource.uriRef(Permission.USE_DESKTOP.getUri());
         try {
             if (!rbac.checkPermission(userUri, permissionUri)) {

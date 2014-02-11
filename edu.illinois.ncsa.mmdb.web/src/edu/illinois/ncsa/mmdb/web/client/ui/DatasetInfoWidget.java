@@ -87,17 +87,19 @@ public class DatasetInfoWidget extends Composite {
         descriptionPanel.addStyleName("datasetInfoDescription");
         HorizontalPanel anchorPanel = new HorizontalPanel();
         Hyperlink hyperlink;
-        if (shortenTitle) {
+        if (!shortenTitle) {
             hyperlink = new Hyperlink(shortenTitle(dataset.getTitle()), "dataset?id=" + dataset.getUri());
         } else {
             hyperlink = new Hyperlink(dataset.getTitle(), "dataset?id=" + dataset.getUri());
         }
+        hyperlink.setStyleName("dataLink");
+        hyperlink.setTitle(dataset.getTitle());
         anchorPanel.add(hyperlink);
         //so whitespace next to title won't get hyperlinked
         anchorPanel.add(new Label(""));
 
         descriptionPanel.add(anchorPanel);
-        if (dataset.getCreator().getName() != null) {
+        if ((dataset.getCreator() != null) && (dataset.getCreator().getName() != null)) {
             descriptionPanel.add(new Label(dataset.getCreator().getName()));
         } else {
             descriptionPanel.add(new Label("Contributor unknown"));
@@ -113,10 +115,12 @@ public class DatasetInfoWidget extends Composite {
     }
 
     private String shortenTitle(String title) {
-        if (title != null && title.length() > 22) {
-            return title.substring(0, 20) + "...";
+        //Dates are up to ~18 chars, so 15+ ellipses works
+        if (title != null && title.length() > 15) {
+            return title.substring(0, 15) + "...";
         } else {
             return title;
         }
     }
+
 }

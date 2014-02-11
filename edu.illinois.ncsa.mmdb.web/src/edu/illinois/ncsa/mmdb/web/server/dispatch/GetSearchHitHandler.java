@@ -60,10 +60,12 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHit;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHitResult;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
@@ -83,6 +85,7 @@ public class GetSearchHitHandler implements ActionHandler<GetSearchHit, GetSearc
 
         String datasetURI = null;
         GetSearchHitResult result = new GetSearchHitResult();
+        Resource userUri = action.getUser() == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(action.getUser());
 
         // get the type of the hit
         Unifier u = new Unifier();
@@ -121,6 +124,9 @@ public class GetSearchHitHandler implements ActionHandler<GetSearchHit, GetSearc
         }
 
         if (datasetURI != null) {
+            if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(userUri, Resource.uriRef(datasetURI))) {
+                throw new ActionException("No access to dataset.");
+            }
             BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
             DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
             try {

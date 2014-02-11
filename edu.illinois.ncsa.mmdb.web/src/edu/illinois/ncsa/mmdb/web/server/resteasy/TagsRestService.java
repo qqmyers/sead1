@@ -9,13 +9,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
@@ -43,6 +49,34 @@ public class TagsRestService {
 
     /** Commons logging **/
     private static Log log = LogFactory.getLog(TagsRestService.class);
+
+    @POST
+    @Path("/object/{id}")
+    public Response tagDataset(@PathParam("id") String id, @Context HttpServletRequest request, @FormParam("tags") String tags) {
+        TagEventBeanUtil teb = new TagEventBeanUtil(TupeloStore.getInstance().getBeanSession());
+
+        String userid = request.getAttribute("userid").toString();
+        try {
+            teb.addTags(id, userid, tags);
+            return Response.status(200).entity("OK").build();
+        } catch (OperatorException e) {
+            log.error("Error adding tags to " + id, e);
+            return Response.status(500).entity("Error adding tags : " + e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Path("/object/{id}")
+    public Response getTags(@PathParam("id") String id) {
+        TagEventBeanUtil teb = new TagEventBeanUtil(TupeloStore.getInstance().getBeanSession());
+        try {
+            Set<String> tags = teb.getTags(id);
+            return Response.status(200).entity(StringUtils.join(tags, ",")).build();
+        } catch (OperatorException e) {
+            log.error("Error getting tags for " + id, e);
+            return Response.status(500).entity("Error getting tags for : " + e.getMessage()).build();
+        }
+    }
 
     @GET
     @Path("")

@@ -54,7 +54,10 @@ import com.google.gwt.user.client.ui.TextBox;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ChangeUser;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ChangeUserPID;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserPID;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserPIDResult;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 public class ProfileWidget extends Composite {
@@ -80,6 +83,20 @@ public class ProfileWidget extends Composite {
         addNameRow(table, pb);
         addEmailRow(table, pb);
         addPasswordRow(table, pb);
+
+        final String userUri = pb.getUri();
+        service.execute(new GetUserPID(userUri), new AsyncCallback<GetUserPIDResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error getting PID.", caught);
+                showFeedbackMessage("Oops! There was an error retreiving your external persistent identifier");
+            }
+
+            @Override
+            public void onSuccess(GetUserPIDResult gup) {
+                addIdentifierRow(gup.getUserPID(), table, userUri);
+            }
+        });
     }
 
     private void addNameRow(final FlexTable table, final PersonBean user) {
@@ -129,7 +146,7 @@ public class ProfileWidget extends Composite {
                         showFeedbackMessage("Name successfully changed");
                         user.setName(newname);
                         table.setText(row, 1, newname);
-                        MMDB.loginStatusWidget.login(newname);
+                        MMDB.loginStatusWidget.loggedIn(newname);
                     }
                 });
 
@@ -261,6 +278,76 @@ public class ProfileWidget extends Composite {
                 table.getRowFormatter().setVisible(row + 1, false);
                 table.getRowFormatter().setVisible(row + 2, false);
                 table.getRowFormatter().setVisible(row + 3, false);
+            }
+        });
+        buttons.add(cancel);
+    }
+
+    /* Allow an external persistent identifier to be associated with profile, i.e. a VIVO URI
+     * 
+     */
+
+    private void addIdentifierRow(final String userPID, final FlexTable table, final String userUri) {
+        final FlowPanel buttons = new FlowPanel();
+
+        final TextBox txtPID = new TextBox();
+
+        final int row = table.getRowCount();
+        table.setText(row, 0, "External Persistent Identifier:");
+        table.getCellFormatter().addStyleName(row, 0, "homePageWidgetRow");
+        final String thePID = ((userPID == null) ? "" : userPID);
+        table.setText(row, 1, thePID);
+
+        final Anchor edit = new Anchor("Change");
+        edit.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                txtPID.setText(thePID);
+                table.setWidget(row, 1, txtPID);
+                table.setWidget(row, 2, buttons);
+            }
+        });
+        table.setWidget(row, 2, edit);
+
+        Anchor ok = new Anchor("OK");
+        ok.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                final String newPID = txtPID.getText();
+                if (newPID.equals(thePID)) {
+                    showFeedbackMessage("Persistent Identifier is the same as the original.");
+                    return;
+                }
+
+                service.execute(new ChangeUserPID(userUri, userPID, txtPID.getText()), new AsyncCallback<EmptyResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error changing pid.", caught);
+                        showFeedbackMessage("Oops! There was an error changing the pid");
+                    }
+
+                    @Override
+                    public void onSuccess(EmptyResult result) {
+                        showFeedbackMessage("Persistent Identifier successfully changed");
+                        table.setText(row, 1, newPID);
+                    }
+                });
+
+                showFeedbackMessage("");
+                table.setText(row, 1, newPID);
+                table.setWidget(row, 2, edit);
+            }
+        });
+        buttons.add(ok);
+
+        Anchor cancel = new Anchor("Cancel");
+        cancel.addStyleName("multiAnchor");
+        cancel.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showFeedbackMessage("");
+                table.setText(row, 1, thePID);
+                table.setWidget(row, 2, edit);
             }
         });
         buttons.add(cancel);

@@ -38,8 +38,10 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -58,19 +60,25 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionServiceResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
@@ -89,7 +97,9 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**
  * Show one datasets and related information about it.
@@ -101,7 +111,7 @@ import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 @SuppressWarnings("nls")
 public class DatasetWidget extends Composite {
 
-    private static final String     DOWNLOAD_URL = "./api/image/download/";
+    private static final String     DOWNLOAD_URL  = "./api/image/download/";
 
     private final DispatchAsync     service;
 
@@ -121,6 +131,8 @@ public class DatasetWidget extends Composite {
 
     /** eventbus that is used when a new section is selected */
     protected final HandlerManager  eventBus;
+
+    private static final int        MAX_TEXT_SIZE = 80;
 
     /**
      * 
@@ -168,7 +180,7 @@ public class DatasetWidget extends Composite {
         leftColumn.clear();
         rightColumn.clear();
 
-        service.execute(new GetDataset(uri), new AsyncCallback<GetDatasetResult>() {
+        service.execute(new GetDataset(uri, MMDB.getUsername()), new AsyncCallback<GetDatasetResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -229,6 +241,30 @@ public class DatasetWidget extends Composite {
                 });
             }
         });
+
+        service.execute(new GetConfiguration(null, ConfigurationKey.DiscoveryURL), new AsyncCallback<ConfigurationResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(ConfigurationResult configresult) {
+                String discoveryURL = null;
+                for (Entry<ConfigurationKey, String> entry : configresult.getConfiguration().entrySet() ) {
+                    switch (entry.getKey()) {
+                        case DiscoveryURL:
+                            discoveryURL = entry.getValue();
+                            if (!discoveryURL.equals("")) {
+                                discoveryURL = discoveryURL.endsWith("/") ? discoveryURL : discoveryURL + "/";
+                                addCollectionContexts(result.getDataset().getUri(), discoveryURL);
+                            }
+                            break;
+                        default:
+                    }
+                }
+            }
+        });
+
         titlePanel.add(titleLabel);
         leftColumn.add(titlePanel);
 
@@ -263,6 +299,11 @@ public class DatasetWidget extends Composite {
         actionsPanel.add(embedWidget);
         final FlowPanel embedBox = new FlowPanel();
 
+        // upload derived action
+        final FlowPanel uploadWidget = new FlowPanel();
+        uploadWidget.addStyleName("inlineBlock");
+        actionsPanel.add(uploadWidget);
+
         Anchor embedAnchor = new Anchor("Embed");
         embedAnchor.addStyleName("datasetActionLink");
         embedAnchor.addClickHandler(new ClickHandler() {
@@ -279,6 +320,8 @@ public class DatasetWidget extends Composite {
         embedWidget.add(embedAnchor);
 
         leftColumn.add(embedBox);
+
+        leftColumn.add(createCollectionContextPanel());
 
         // metadata        
         final UserMetadataWidget um = new UserMetadataWidget(uri, service, eventBus);
@@ -299,6 +342,9 @@ public class DatasetWidget extends Composite {
         // dataset information
         infoPanel = new InfoWidget(result.getDataset(), service);
         rightColumn.add(infoPanel);
+
+        // acccess level widget
+        rightColumn.add(new AccessLevelWidget(uri, service));
 
         // license widget
         final LicenseWidget license = new LicenseWidget(uri, service, true, false, false);
@@ -352,6 +398,13 @@ public class DatasetWidget extends Composite {
                     });
                     deleteWidget.add(deleteAnchor);
                 }
+                if (p.isPermitted(Permission.UPLOAD_DATA)) {
+                    Hyperlink up = new Hyperlink();
+                    up.addStyleName("datasetActionLink");
+                    up.setText("Upload Derived Data");
+                    up.setTargetHistoryToken("upload?id=" + uri);
+                    uploadWidget.add(up);
+                }
                 um.showTableFields(p.isPermitted(Permission.EDIT_USER_METADATA));
                 //
                 // add download link, set editability of license widget
@@ -383,8 +436,48 @@ public class DatasetWidget extends Composite {
                 Permission.RERUN_EXTRACTION,
                 Permission.DELETE_DATA,
                 Permission.EDIT_USER_METADATA,
-                Permission.DOWNLOAD);
+                Permission.DOWNLOAD,
+                Permission.UPLOAD_DATA);
         // FIXME allow owner to do stuff
+    }
+
+    private void addCollectionContexts(String datasetURI, final String discoveryURL) {
+        service.execute(new GetCollections(datasetURI),
+                new AsyncCallback<GetCollectionsResult>() {
+
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        GWT.log("Error loading collections the dataset is part of", arg0);
+                    }
+
+                    @Override
+                    public void onSuccess(GetCollectionsResult arg0) {
+                        ArrayList<CollectionBean> collections = arg0
+                                .getCollections();
+
+                        try {
+                            for (CollectionBean collection : collections ) {
+                                String collectionContextText = collection.getTitle();
+
+                                collectionContextText = collectionContextText.contains("/") ? collectionContextText.substring(collectionContextText.lastIndexOf("/") + 1) : collectionContextText;
+
+                                collectionContextLink = new Anchor();
+                                String collectionContextURI = discoveryURL + "contents?i=" + collection.getUri() + "&t=" + collection.getTitle();
+                                collectionContextLink.setHref(collectionContextURI);
+                                collectionContextLink.setTarget("_blank");
+                                collectionContextLink.setText(collectionContextText);
+                                collectionContextLinksPanel.add(collectionContextLink);
+
+                            }
+                        } catch (Exception ex) {
+                            //Handle exception
+                            String exc = ex.getMessage();
+                            System.out.println(exc);
+                        }
+
+                    }
+                });
+
     }
 
     protected void showRerunExtraction() {
@@ -426,7 +519,7 @@ public class DatasetWidget extends Composite {
 
         dialog.addConfirmHandler(new ConfirmHandler() {
             public void onConfirm(ConfirmEvent event) {
-                service.execute(new DeleteDataset(uri), new AsyncCallback<DeleteDatasetResult>() {
+                service.execute(new DeleteDataset(uri, MMDB.getUsername()), new AsyncCallback<DeleteDatasetResult>() {
                     public void onFailure(Throwable caught) {
                         GWT.log("Error deleting dataset", caught);
                     }
@@ -441,6 +534,22 @@ public class DatasetWidget extends Composite {
         });
 
         dialog.show();
+    }
+
+    Anchor        collectionContextLink = null;
+    VerticalPanel collectionContextLinksPanel;
+
+    private Widget createCollectionContextPanel() {
+        DisclosurePanel userInformationPanel = new DisclosurePanel("Collection Context");
+        userInformationPanel.addStyleName("datasetDisclosurePanel");
+        userInformationPanel.setOpen(true);
+        userInformationPanel.setAnimationEnabled(true);
+
+        collectionContextLinksPanel = new VerticalPanel();
+        collectionContextLinksPanel.addStyleName("userSpecifiedBody");
+        userInformationPanel.add(collectionContextLinksPanel);
+
+        return userInformationPanel;
     }
 
     private Composite createUserViewPanel() {
@@ -558,7 +667,26 @@ public class DatasetWidget extends Composite {
                         }
                         int row = informationTable.getRowCount();
                         informationTable.setText(row, 0, tuple.getLabel());
-                        informationTable.setText(row, 1, tuple.getValue());
+                        if (tuple.getValue().startsWith("http")) {
+                            String text = "<a href=\"" + tuple.getValue() + "\">";
+                            if (tuple.getValue().length() > MAX_TEXT_SIZE) {
+                                text += tuple.getValue().substring(0, MAX_TEXT_SIZE - 3) + "...";
+                            } else {
+                                text += tuple.getValue();
+                            }
+                            text += "</a>";
+                            informationTable.setHTML(row, 1, text);
+                            if (tuple.getValue().length() > MAX_TEXT_SIZE) {
+                                informationTable.getFlexCellFormatter().getElement(row, 1).setAttribute("title", tuple.getValue());
+                            }
+                        } else {
+                            if (tuple.getValue().length() > MAX_TEXT_SIZE) {
+                                informationTable.setText(row, 1, tuple.getValue().substring(0, MAX_TEXT_SIZE - 3) + "...");
+                                informationTable.getFlexCellFormatter().getElement(row, 1).setAttribute("title", tuple.getValue());
+                            } else {
+                                informationTable.setText(row, 1, tuple.getValue());
+                            }
+                        }
 
                         // formatting
                         informationTable.getFlexCellFormatter().addStyleName(row, 0, "metadataTableCell");
@@ -586,6 +714,11 @@ public class DatasetWidget extends Composite {
                             infoPanel.add(lbl);
                         }
                         if ("FFMPEG".equals(tuple.getCategory()) && "Video Size".equals(tuple.getLabel())) {
+                            Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
+                            lbl.addStyleName("datasetRightColText");
+                            infoPanel.add(lbl);
+                        }
+                        if ("VA".equals(tuple.getCategory()) && "DOI".equals(tuple.getLabel())) {
                             Label lbl = new Label(tuple.getLabel() + " : " + tuple.getValue());
                             lbl.addStyleName("datasetRightColText");
                             infoPanel.add(lbl);

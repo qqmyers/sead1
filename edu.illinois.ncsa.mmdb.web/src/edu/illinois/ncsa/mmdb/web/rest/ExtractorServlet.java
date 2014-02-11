@@ -53,14 +53,16 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  * @author Rob Kooper
  * 
  */
-@SuppressWarnings( { "serial" })
+@SuppressWarnings({ "serial" })
 public class ExtractorServlet extends AuthenticatedServlet {
     public ExtractorServlet() {
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!authenticate(req, resp)) {
+
+        String userId = AuthenticatedServlet.getUserUri(req);
+        if (userId == null) {
             return;
         }
         String uri = req.getParameter("uri");

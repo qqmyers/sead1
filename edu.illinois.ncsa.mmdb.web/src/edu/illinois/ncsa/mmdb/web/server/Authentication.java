@@ -38,9 +38,17 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server;
 
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sead.acr.common.MediciProxy;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.util.Tuple;
 
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.Anonymous;
@@ -61,20 +69,58 @@ public class Authentication {
         try {
             Resource person = Resource.uriRef(PersonBeanUtil.getPersonID(username));
             if (person.getString().equals(Anonymous.USER)) {
+                // Which should be equivalent to:
+                // if (username.equals(Anonymous.USER)) {
                 log.debug("LOGIN: anonymous login successful");
-                return true;
-            }
-            ContextAuthentication ca = new ContextAuthentication(TupeloStore.getInstance().getContext());
-            if (ca.checkPassword(person, password)) {
-                log.debug("LOGIN: authentication suceeded for " + username);
-                return true;
             } else {
-                log.debug("LOGIN: authentication failed for " + username);
-                return false;
+                ContextAuthentication ca = new ContextAuthentication(TupeloStore.getInstance().getContext());
+                if (ca.checkPassword(person, password)) {
+                    log.debug("LOGIN: authentication suceeded for " + username);
+                } else {
+                    log.debug("LOGIN: authentication failed for " + username);
+                    return false;
+                }
             }
+            TripleWriter tw = new TripleWriter();
+            tw.add(person, Cet.cet("lastLogin"), new Date());
+            Unifier uf = new Unifier();
+            uf.addPattern(person, Cet.cet("lastLogin"), "date");
+            uf.setColumnNames("date");
+            TupeloStore.getInstance().getContext().perform(uf);
+            for (Tuple<Resource> row : uf.getResult() ) {
+                tw.remove(person, Cet.cet("lastLogin"), row.get(0));
+            }
+            TupeloStore.getInstance().getContext().perform(tw);
+            return true;
+
+        } catch (OperatorException ex) {
+            log.debug("LOGIN: authentication FAILED for " + username, ex);
+            return false;
         } catch (AuthenticationException ex) {
             log.debug("LOGIN: authentication FAILED for " + username, ex);
             return false;
         }
+    }
+
+    public static String googleAuthenticate(String client_id, String googleAccessToken) {
+        String user = MediciProxy.isValidGoogleToken(client_id, googleAccessToken);
+        if (user != null) {
+            try {
+                TripleWriter tw = new TripleWriter();
+                Resource person = Resource.uriRef(PersonBeanUtil.getPersonID(user));
+                tw.add(person, Cet.cet("lastLogin"), new Date());
+                Unifier uf = new Unifier();
+                uf.addPattern(person, Cet.cet("lastLogin"), "date");
+                uf.setColumnNames("date");
+                TupeloStore.getInstance().getContext().perform(uf);
+                for (Tuple<Resource> row : uf.getResult() ) {
+                    tw.remove(person, Cet.cet("lastLogin"), row.get(0));
+                }
+                TupeloStore.getInstance().getContext().perform(tw);
+            } catch (OperatorException exc) {
+                log.debug("LOGIN: could not write last login for " + user, exc);
+            }
+        }
+        return user;
     }
 }

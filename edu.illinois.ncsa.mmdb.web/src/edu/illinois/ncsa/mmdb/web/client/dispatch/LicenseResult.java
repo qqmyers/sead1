@@ -55,7 +55,7 @@ public class LicenseResult implements Result {
     private String  rightsHolderUri;
     private String  rightsHolder;
     private String  license;
-    private boolean allowDownload = true;
+    private boolean allowDownload = false;
 
     public LicenseResult() {
     }

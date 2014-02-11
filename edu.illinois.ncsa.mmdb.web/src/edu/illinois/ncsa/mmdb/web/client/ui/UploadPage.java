@@ -46,23 +46,37 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UploadWidget;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationship;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
@@ -91,15 +105,26 @@ public class UploadPage extends Page {
     Timer                                  safariWakeupTimer;
     private boolean                        showhtml5;
 
+    private static String                  ancestor;
+    private static String                  derivationPredicate;
+    private final static String            versionPredicate       = "http://www.w3.org/ns/prov#wasRevisionOf";
+    private final static String            derivedFromPredicate   = "http://www.w3.org/ns/prov#wasDerivedFrom";
+    private static UploadPage              activeUploadPage;
+
     public static final String             DND_ENABLED_PREFERENCE = "dndAppletEnabled";
 
+    /* DispatchAysnc required? UploadPage() appears unused
     public UploadPage() {
         super();
         setPageTitle(TITLE);
+        ancestor = null;
     }
+    */
 
     public UploadPage(DispatchAsync dispatchasync) {
         super(TITLE, dispatchasync);
+        ancestor = null;
+        activeUploadPage = this;
     }
 
     @Override
@@ -235,14 +260,59 @@ public class UploadPage extends Page {
         or.addStyleName("uploadOrLabel");
         tableLayout.setWidget(0, 1, or);
 
+        final FormPanel form = new FormPanel();
+        form.setAction("./resteasy/datasets/copy");
+        form.setMethod(FormPanel.METHOD_POST);
+        final VerticalPanel panel = new VerticalPanel();
+        panel.setWidth("100%");
+        form.setWidget(panel);
+
+        panel.add(new Label("")); //Spacer
+        Label importLabel = new Label("Import Open Data from another project:");
+        importLabel.addStyleName("importTitle");
+        panel.add(importLabel);
+
+        // Create a TextBox, giving it a name so that it will be submitted.
+        final TextBox tb = new TextBox();
+        tb.setName("url");
+        tb.setWidth("100%");
+        panel.add(tb);
+        Label details = new Label("[To import - copy the URL of the datapage in the box above. (Data must be publicly visible at this URL.)]");
+        details.addStyleName("smallText");
+        panel.add(details);
+
+        // Add a 'submit' button.
+        panel.add(new Button("Copy Dataset", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (tb.getText().contains("dataset?id=")) {
+                    form.submit();
+                } else {
+                    Window.alert("Not a valid Medici URL");
+                }
+            }
+        }));
+
+        // Add an event handler to the form.
+        form.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+            @Override
+            public void onSubmitComplete(SubmitCompleteEvent event) {
+                String id = tb.getText().replaceAll(".*dataset\\?id=", "");
+                tb.setText("");
+                panel.add(new Hyperlink(id, "dataset?id=" + id));
+            }
+        });
+
         if (showhtml5) {
             tableLayout.setWidget(0, 0, html5Form);
             tableLayout.setWidget(0, 2, html5Panel);
             tableLayout.setWidget(1, 0, switchUploader);
+            tableLayout.setWidget(2, 0, form);
         } else {
             pageTitle.addEast(helpButton);
             tableLayout.setWidget(0, 0, singleUpload);
             tableLayout.setWidget(0, 2, dndPanel);
+            tableLayout.setWidget(2, 0, form);
         }
 
         tableLayout.getCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
@@ -263,7 +333,7 @@ public class UploadPage extends Page {
         // batch actions
         batchOperationView = new BatchOperationView();
         batchOperationView.addStyleName("hidden");
-        batchOperationPresenter = new BatchOperationPresenter(dispatchAsync, MMDB.eventBus, batchOperationView);
+        batchOperationPresenter = new BatchOperationPresenter(dispatchAsync, MMDB.eventBus, batchOperationView, false);
         batchOperationPresenter.bind();
         mainLayoutPanel.add(batchOperationView);
 
@@ -316,6 +386,7 @@ public class UploadPage extends Page {
     public static void fileUploaded(String uriUploaded, String offset) {
         String uri = uriUploaded + ""; // identity transform required, do not remove
         GWT.log("applet says " + uri + " uploaded");
+        addDerviationRelationshipIfNeeded(uri);
         uploadStatusPresenter.onComplete(uri, Integer.parseInt(offset + "")); // identity transform required, do not remove
     }
 
@@ -396,4 +467,93 @@ public class UploadPage extends Page {
     public static native String getUserAgent() /*-{
 		return navigator.userAgent.toLowerCase();
     }-*/;
+
+    public void deriveFromDataset(DispatchAsync service, String datasetUri) {
+        setPageTitle(TITLE + " Derived Data");
+
+        ancestor = datasetUri;
+
+        RadioButton version = new RadioButton("relationGroup", "A New Version");
+        RadioButton derived = new RadioButton("relationGroup", "Derived Data Product(s)");
+
+        // Check 'version' by default.
+        version.setValue(true);
+        derivationPredicate = versionPredicate;
+
+        version.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> e) {
+                if (e.getValue() == true) {
+                    derivationPredicate = versionPredicate;
+                }
+            }
+
+        });
+
+        derived.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> e) {
+                if (e.getValue() == true) {
+                    derivationPredicate = derivedFromPredicate;
+                }
+            }
+
+        });
+
+        Label rel = new Label("The new data being uploaded is");
+        Label target = new Label(" of Dataset: ");
+
+        FlowPanel fp = new FlowPanel();
+        fp.setStyleName("callout");
+
+        final HorizontalPanel dp = new HorizontalPanel();
+
+        VerticalPanel relPanel = new VerticalPanel();
+        relPanel.setStyleName("derivechoice");
+        relPanel.add(rel);
+        relPanel.add(version);
+        relPanel.add(derived);
+        relPanel.add(target);
+
+        dp.add(relPanel);
+        fp.add(dp);
+
+        mainLayoutPanel.insert(fp, 1);
+        service.execute(new GetDataset(datasetUri, MMDB.getUsername()), new AsyncCallback<GetDatasetResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error getting dataset", null);
+            }
+
+            @Override
+            public void onSuccess(GetDatasetResult result) {
+                //FixMe - use DynamicTableView with 1 row?
+                dp.add(new DatasetInfoWidget(result.getDataset(), dispatchAsync));
+            }
+        });
+
+    }
+
+    //Adds a derivation relationship for the newly uploaded data if there's an ancestor 
+    //(i.e. called from dataset page  with a #upload?id=<ancestor> history tag)
+    private static void addDerviationRelationshipIfNeeded(final String uri) {
+        if (ancestor != null) {
+            getDispatchAsync().execute(new SetRelationship(uri, derivationPredicate, ancestor, MMDB.getUsername()),
+                    new AsyncCallback<SetRelationshipResult>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log("Error creating relationship", caught);
+                            Window.alert("Data uploaded but could not write derivation relationship: " + uri + " " + derivationPredicate + " " + ancestor);
+                        }
+
+                        public void onSuccess(SetRelationshipResult result) {
+                        }
+                    });
+        }
+    }
+
+    private static DispatchAsync getDispatchAsync() {
+        return activeUploadPage.dispatchAsync;
+    }
 }

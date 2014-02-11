@@ -52,8 +52,10 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
+import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
@@ -64,6 +66,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
@@ -77,17 +80,20 @@ public class GetUserMetadataFieldsHandler implements
         ActionHandler<GetUserMetadataFields, GetUserMetadataFieldsResult> {
 
     /** Commons logging **/
-    private static Log            log       = LogFactory
-                                                    .getLog(GetUserMetadataFieldsHandler.class);
+    private static Log            log           = LogFactory
+                                                        .getLog(GetUserMetadataFieldsHandler.class);
 
-    ListUserMetadataFieldsHandler umfHelper = new ListUserMetadataFieldsHandler();
+    public static final Resource  VIEW_METADATA = Resource.uriRef("http://sead-data.net/terms/acr/Viewable_Metadata");
+
+    ListUserMetadataFieldsHandler umfHelper     = new ListUserMetadataFieldsHandler();
 
     private String nameOf(Resource uri) throws OperatorException {
+        log.debug("Name of: " + uri.toString());
         Unifier u = new Unifier();
-        u.setColumnNames("label", "title");
+        u.setColumnNames("label", "title" /*, "type" */);
         u.addPattern(uri, Rdfs.LABEL, "label", true);
         u.addPattern(uri, Dc.TITLE, "title", true);
-        TupeloStore.getInstance().getOntologyContext().perform(u); // FIXME memorize
+        TupeloStore.getInstance().getContext().perform(u); // FIXME memorize
         for (Tuple<Resource> row : u.getResult() ) {
             if (row.get(0) != null) {
                 return row.get(0).getString();
@@ -99,23 +105,72 @@ public class GetUserMetadataFieldsHandler implements
         return uri.getString();
     }
 
+    /* For URIs, if the URI is really a tagId of some ACR resource, modify it to be the full 
+     * relative URL required to access the resource.
+     */
+    private String rewrite(Resource uri) throws OperatorException {
+        log.debug("Rewriting: " + uri.toString());
+        TripleMatcher tm = new TripleMatcher();
+        tm.setSubject(uri);
+        tm.setPredicate(Rdf.TYPE);
+        TupeloStore.getInstance().getContext().perform(tm); // FIXME memorize
+        log.debug("Found " + tm.getResult().size() + " triples");
+        for (Triple triple : tm.getResult() ) {
+            if (triple.getObject() != null) {
+                String obj = triple.getObject().getString();
+                log.debug(obj);
+                if (obj.equals("http://cet.ncsa.uiuc.edu/2007/Dataset")) {
+                    log.debug(uri.getString() + "is a DataSet");
+                    return ("dataset?id=" + uri.getString());
+                } else if (obj.equals("http://cet.ncsa.uiuc.edu/2007/Collection")) {
+                    log.debug(uri.getString() + "is a Collection");
+                    return ("collection?uri=" + uri.getString());
+                }
+            }
+        }
+        if (uri.getString().startsWith("tag:")) {
+            //if it starts with tag and is an ACR identifier but isn't a dataset or collection
+            // return null so that it is not treated as a URL (just a text value)
+            return null;
+        }
+        //external http/https/ftp URLs should be returned intact
+        return uri.getString();
+    }
+
     private Collection<UserMetadataValue> getUserMetadataValues(Thing t, Resource predicate) throws OperatorException {
         return getUserMetadataValues(t, predicate, null, null);
     }
 
     private Collection<UserMetadataValue> getUserMetadataValues(Thing t, Resource predicate, String marker, String sectionValue) throws OperatorException {
         Collection<UserMetadataValue> values = new LinkedList<UserMetadataValue>();
+        //        log.debug("Getting Metadata: " + t.toString() + " : " + predicate.toString() + " : " + marker + " : " + sectionValue);
         for (Object value : t.getValues(predicate) ) {
             UserMetadataValue umv = null;
             if (value instanceof Resource) {
                 Resource v = (Resource) value;
                 if (v instanceof UriRef) {
-                    umv = new UserMetadataValue(v.getString(), nameOf(v));
+                    umv = new UserMetadataValue(rewrite(v), nameOf(v));
                 } else {
                     umv = new UserMetadataValue(null, v.getString());
                 }
             } else {
-                umv = new UserMetadataValue(null, value.toString());
+                //FixMe : parsing the '<name> : <url>' format that has been used to record people looked up in Vivo
+                //We should move to caching the list of vivo people on the server, storing just the URI and looking up the
+                //names as needed.
+                String vivoUrl = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VIVOIDENTIFIERURL);
+                String val = value.toString();
+                //log.debug("Val: " + val + " : Vivo: " + vivoUrl);
+                int separator = val.indexOf(" : " + vivoUrl);
+                String name = val;
+                if (separator != -1) {
+                    name = val.substring(0, separator);
+                    val = val.substring(separator + 3, val.length());
+                    umv = new UserMetadataValue(val, name);
+                } else {
+
+                    umv = new UserMetadataValue(null, value.toString());
+                }
+
             }
             if (marker != null) {
                 umv.setSectionMarker(marker);
@@ -137,7 +192,7 @@ public class GetUserMetadataFieldsHandler implements
                     .getContext());
             Resource subject = Resource.uriRef(action.getUri());
             Thing t = ts.fetchThing(subject);
-            for (UserMetadataField field : umfHelper.listUserMetadataFields().getFieldsSortedByName() ) {
+            for (UserMetadataField field : umfHelper.listUserMetadataFields(false).getFieldsSortedByName() ) {
                 Resource predicate = Resource.uriRef(field.getUri());
                 Collection<UserMetadataValue> values = getUserMetadataValues(t, predicate);
                 // now look for sections with this field set; this is gonna produce lots of traffic
@@ -179,7 +234,7 @@ public class GetUserMetadataFieldsHandler implements
             throws OperatorException {
         Unifier u = new Unifier();
         u.setColumnNames("field", "label");
-        u.addPattern("field", Rdf.TYPE, MMDB.USER_METADATA_FIELD);
+        u.addPattern("field", Rdf.TYPE, VIEW_METADATA); //Current and past user metadata
         u.addPattern("field", Rdfs.LABEL, "label");
         Map<String, String> result = new HashMap<String, String>();
         for (Tuple<Resource> row : TupeloStore.getInstance()

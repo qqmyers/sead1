@@ -54,7 +54,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 
 public class AddMetadataDialog extends DialogBox {
 
@@ -87,7 +87,7 @@ public class AddMetadataDialog extends DialogBox {
                 thePanel.remove(pending);
                 AddMetadataWidget addMetadata = new AddMetadataWidget(batch, service, eventBus) {
                     protected void addValue() {
-                        super.addValue();
+                        super.addValue(true);
                         AddMetadataDialog.this.hide();
                     }
                 };

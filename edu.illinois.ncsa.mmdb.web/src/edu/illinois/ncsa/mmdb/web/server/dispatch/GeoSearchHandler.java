@@ -57,6 +57,8 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GeoSearch;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GeoSearchResult;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
@@ -76,12 +78,22 @@ public class GeoSearchHandler implements ActionHandler<GeoSearch, GeoSearchResul
         GeoSearchResult searchResult = new GeoSearchResult();
         long then = System.currentTimeMillis();
 
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        int userlevel = rbac.getUserAccessLevel(Resource.uriRef(arg0.getUser()));
+        int defaultlevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
+        String pred = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+
         Unifier u = new Unifier();
         u.setColumnNames("d");
         u.addPattern("d", Gis.HAS_GEO_POINT, "p");
         u.addPattern("d", Rdf.TYPE, Cet.DATASET);
+        u.addPattern("d", Resource.uriRef(pred), "access", true);
         try {
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "d") ) {
+                int datasetlevel = (row.get(1) != null) ? Integer.parseInt(row.get(1).getString()) : defaultlevel;
+                if (datasetlevel < userlevel) {
+                    continue;
+                }
                 searchResult.addHit(row.get(0).getString());
             }
         } catch (OperatorException e) {

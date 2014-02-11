@@ -38,7 +38,6 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -84,8 +83,6 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
         HasValue<Boolean> getSelected(int location);
 
         Set<HasValue<Boolean>> getCheckBoxes();
-
-        int insertItem(String id, String name, String type, Date date, String preview, String size, String authorId);
 
         void removeAllRows();
 
@@ -188,7 +185,7 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
         final HasValue<Boolean> selected = display.getSelected(location);
         selected.addValueChangeHandler(new DatasetSelectionCheckboxHandler(id, eventBus));
         UserSessionState sessionState = MMDB.getSessionState();
-        if (sessionState.getSelectedDatasets().contains(showItemEvent.getId())) {
+        if (sessionState.getSelectedItems().contains(showItemEvent.getId())) {
             selected.setValue(true);
             display.showSelected(true, location);
         } else {

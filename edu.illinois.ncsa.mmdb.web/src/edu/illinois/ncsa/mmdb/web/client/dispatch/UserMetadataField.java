@@ -15,6 +15,13 @@ public class UserMetadataField implements Serializable {
     public static final int   ENUMERATED       = 2;
     public static final int   CLASS            = 3;
 
+    //A metadata field to set/ identify "Creator" of a dataset
+    public static final int   VIVO_CREATOR     = 4;
+    public static final int   VIVO_PART_OF     = 5;
+    public static final int   VIVO_CONTACT     = 6;
+
+    public static final int   MULTILINE_TEXT   = 7;
+
     /** For maxCardinality, indicates no upper bound */
     public static final int   UNBOUNDED        = -1;
 
@@ -29,9 +36,32 @@ public class UserMetadataField implements Serializable {
     public UserMetadataField() {
     }
 
+    //Type of input should be configurable = for now detect a few special ones...
+    String creatorLabel     = "creator";
+    String contactLabel     = "contact";
+    String partOfLabel      = "published in";
+    String abstractLabel    = "abstract";
+    String descriptionLabel = "description";
+
     public UserMetadataField(String uri, String label) {
         setUri(uri);
         setLabel(label);
+
+        //Make provision to get the type metadata field type as VIVO if the label is creator
+        if (label.toLowerCase().contains(creatorLabel)) {
+            setType(VIVO_CREATOR);
+        } else if (label.toLowerCase().contains(contactLabel)) {
+            setType(VIVO_CONTACT);
+        } else if (label.toLowerCase().contains(partOfLabel)) {
+            setType(VIVO_PART_OF);
+        } else if (label.toLowerCase().contains(abstractLabel)) {
+            setType(MULTILINE_TEXT);
+        } else if (label.toLowerCase().contains(descriptionLabel)) {
+            setType(PLAIN);
+        } else {
+            setType(PLAIN);
+        }
+
     }
 
     public String getUri() {

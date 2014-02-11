@@ -44,11 +44,14 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 import net.customware.gwt.dispatch.shared.Result;
 
 /**
- * @author lmarini
- *
+ * Create new collection.
+ * 
+ * @author Luigi Marini
+ * 
  */
 @SuppressWarnings("serial")
 public class AddCollectionResult implements Result {
 
-	public AddCollectionResult() {}
+    public AddCollectionResult() {
+    }
 }

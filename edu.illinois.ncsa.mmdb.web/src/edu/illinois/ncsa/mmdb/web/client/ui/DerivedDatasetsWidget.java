@@ -117,6 +117,8 @@ public class DerivedDatasetsWidget extends Composite {
         String title = ds.getTitle();
         title = title.length() > 15 ? title.substring(0, 15) + "..." : title;
         Hyperlink link = new Hyperlink(title, url);
+        link.setStyleName("dataLink");
+        link.setTitle(ds.getTitle());
         int n = previews.getRowCount();
         if (n > 0) {
             previews.setWidget(n++, 0, new Label("which was derived from:"));

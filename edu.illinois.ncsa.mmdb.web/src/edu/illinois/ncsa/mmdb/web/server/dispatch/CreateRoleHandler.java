@@ -13,8 +13,8 @@ import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.CreateRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectResult;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 public class CreateRoleHandler implements ActionHandler<CreateRole, SubjectResult> {
     Log log = LogFactory.getLog(CreateRoleHandler.class);

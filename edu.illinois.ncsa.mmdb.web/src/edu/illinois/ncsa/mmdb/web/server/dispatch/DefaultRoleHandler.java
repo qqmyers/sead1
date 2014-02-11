@@ -11,9 +11,9 @@ import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DefaultTheRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.DefaultRole;
-import edu.uiuc.ncsa.cet.bean.rbac.medici.Permission;
 
 public class DefaultRoleHandler implements ActionHandler<DefaultTheRole, EmptyResult> {
     Log log = LogFactory.getLog(DefaultRoleHandler.class);

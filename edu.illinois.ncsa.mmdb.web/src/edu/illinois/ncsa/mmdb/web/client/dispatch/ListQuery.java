@@ -38,13 +38,15 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import net.customware.gwt.dispatch.shared.Action;
 
 @SuppressWarnings("serial")
-public class ListQuery<B> implements Action<ListQueryResult<B>> {
+public class ListQuery extends AuthorizedAction<ListQueryResult> {
     private String orderBy;
     private int    limit;
     private int    offset;
+    private String tag;
+    private String collection;
+    private String bean;
 
     public ListQuery() {
     }
@@ -77,5 +79,29 @@ public class ListQuery<B> implements Action<ListQueryResult<B>> {
 
     public int getOffset() {
         return offset;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public String getCollection() {
+        return collection;
+    }
+
+    public void setCollection(String collection) {
+        this.collection = collection;
+    }
+
+    public String getBean() {
+        return bean;
+    }
+
+    public void setBean(String bean) {
+        this.bean = bean;
     }
 }
