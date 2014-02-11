@@ -55,8 +55,6 @@
 		
 	<property name="version" value="v1.3.0#${bamboo.buildNumber}" />
 		
-	<available file="war/mmdb.tmp" property="mmdb_tmp_exists" />
-
 	<path id="classpath">
 		<pathelement path="build" />
 		<pathelement path="src" />
