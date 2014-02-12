@@ -86,6 +86,23 @@ if [ ! -e /var/lib/tomcat6/webapps/geoserver ]; then
   mv geoserver /var/lib/tomcat6/webapps/
 fi
 
+# install jai to speed up geoserver
+if [ ! -e /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/libclib_jiio.so ]; then
+  wget http://download.java.net/media/jai-imageio/builds/release/1.1/jai_imageio-1_1-lib-linux-amd64.tar.gz
+  tar zxvf jai_imageio-1_1-lib-linux-amd64.tar.gz
+  cp jai_imageio-1_1/lib/*.jar /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/ext
+  cp jai_imageio-1_1/lib/libclib_jiio.so /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/
+  rm -rf jai_imageio-1_1-lib-linux-amd64.tar.gz jai_imageio-1_1
+
+  wget http://download.java.net/media/jai/builds/release/1_1_3/jai-1_1_3-lib-linux-amd64.tar.gz
+  tar zxvf jai-1_1_3-lib-linux-amd64.tar.gz
+  cp jai-1_1_3/lib/*.jar /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/ext
+  cp jai-1_1_3/lib/libmlib_jai.so /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/
+  rm -rf jai-1_1_3-lib-linux-amd64.tar.gz jai-1_1_3
+
+  rm -f /var/lib/tomcat6/webapps/geoserver/WEB-INF/lib/jai_*
+fi
+
 # instal web pages
 echo "Installing SEAD webpages"
 rm -rf /var/lib/tomcat6/webapps/ROOT
