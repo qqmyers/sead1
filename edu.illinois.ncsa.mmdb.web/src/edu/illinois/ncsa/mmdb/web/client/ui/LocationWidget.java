@@ -62,11 +62,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextBox;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
@@ -282,7 +282,7 @@ public class LocationWidget extends Composite {
             setAnimationEnabled(true);
             FlowPanel mainPanel = new FlowPanel();
             // directions
-            mainPanel.add(new Label("Pick location by clicking on the map below"));
+            mainPanel.add(new Label("Pick location by clicking on the map or endtering lat/lon"));
             // map
             map = new MapWidget();
             map.setSize("500px", "500px");
@@ -317,15 +317,15 @@ public class LocationWidget extends Composite {
 
             // lat lable and textbox
             Label latLabel = new Label("Latitude:");
-            TextBox latText = new TextBox();
+            final DoubleBox latBox = new DoubleBox();
             hpLatLon.add(latLabel);
-            hpLatLon.add(latText);
+            hpLatLon.add(latBox);
 
             // lon label and textbox
             Label lonLabel = new Label("Longitude:");
-            TextBox lonText = new TextBox();
+            final DoubleBox lonBox = new DoubleBox();
             hpLatLon.add(lonLabel);
-            hpLatLon.add(lonText);
+            hpLatLon.add(lonBox);
 
             // button to show the marker on the map
             Button showButton = new Button("Show on Map");
@@ -333,8 +333,16 @@ public class LocationWidget extends Composite {
                 @Override
                 public void onClick(ClickEvent event) {
 
+                    if (latBox.getValue() != null && lonBox.getValue() != null) {
+                        LatLng point = LatLng.newInstance(latBox.getValue(), lonBox.getValue());
+                        map.clearOverlays();
+                        marker = new Marker(point);
+                        map.addOverlay(marker);
+                        map.panTo(point);
+                    }
                 }
             });
+
             hpLatLon.add(showButton);
 
             // add the container to the main panel
@@ -355,5 +363,6 @@ public class LocationWidget extends Composite {
         public Marker getLocation() {
             return marker;
         }
+
     }
 }
