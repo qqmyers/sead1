@@ -64,7 +64,7 @@ function getWmsLayers() {
 function drawChart() {
 	var barArray = new Array();
 
-	barArray[barArray.length] = [ 'Categories', null ];
+	barArray[barArray.length] = [ '', 'Count' ];
 	if (datasetDistribution != undefined) {
 		for (key in datasetDistribution) {
 			barArray[barArray.length] = [ key, datasetDistribution[key] ];
@@ -78,15 +78,19 @@ function drawChart() {
 					parseInt(allDatasetDist[i].split('=')[1]) ];
 		}
 	}
+	if (barArray.length < 2) {
+		barArray[1]=['No Files In Collection',0];
+	}
+
 
 	var data = google.visualization.arrayToDataTable(barArray);
 
 	var options = {
 		title : 'Dataset Distribution',
 		hAxis : {
-			title : 'Category',
+			title : 'File Type',
 			titleTextStyle : {
-				color : 'red'
+				color : 'blue'
 			}
 		},
 		legend : {
@@ -96,11 +100,7 @@ function drawChart() {
 
 	var chart = new google.visualization.ColumnChart($('#container1')[0]);
 
-	if (barArray.length > 1) {
-		chart.draw(data, options);
-	} else {
-		alert('No dataset in this collection');
-	}
+	chart.draw(data, options);
 
 }
 
