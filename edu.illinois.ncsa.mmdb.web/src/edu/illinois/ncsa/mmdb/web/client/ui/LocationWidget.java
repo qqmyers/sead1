@@ -63,8 +63,10 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.TextBox;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
@@ -308,6 +310,36 @@ public class LocationWidget extends Composite {
                 }
 
             });
+
+            // container for lat lon input text box
+            HorizontalPanel hpLatLon = new HorizontalPanel();
+            hpLatLon.setSpacing(5);
+
+            // lat lable and textbox
+            Label latLabel = new Label("Latitude:");
+            TextBox latText = new TextBox();
+            hpLatLon.add(latLabel);
+            hpLatLon.add(latText);
+
+            // lon label and textbox
+            Label lonLabel = new Label("Longitude:");
+            TextBox lonText = new TextBox();
+            hpLatLon.add(lonLabel);
+            hpLatLon.add(lonText);
+
+            // button to show the marker on the map
+            Button showButton = new Button("Show on Map");
+            showButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+
+                }
+            });
+            hpLatLon.add(showButton);
+
+            // add the container to the main panel
+            mainPanel.add(hpLatLon);
+
             // close button
             Button closeButton = new Button("Close", new ClickHandler() {
 
