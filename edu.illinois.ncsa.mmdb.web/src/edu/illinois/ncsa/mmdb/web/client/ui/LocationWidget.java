@@ -318,12 +318,14 @@ public class LocationWidget extends Composite {
             // lat lable and textbox
             Label latLabel = new Label("Latitude:");
             final DoubleBox latBox = new DoubleBox();
+            latBox.setWidth("80px");
             hpLatLon.add(latLabel);
             hpLatLon.add(latBox);
 
             // lon label and textbox
             Label lonLabel = new Label("Longitude:");
             final DoubleBox lonBox = new DoubleBox();
+            lonBox.setWidth("80px");
             hpLatLon.add(lonLabel);
             hpLatLon.add(lonBox);
 
@@ -334,7 +336,9 @@ public class LocationWidget extends Composite {
                 public void onClick(ClickEvent event) {
 
                     if (latBox.getValue() != null && lonBox.getValue() != null) {
+                        // creating lat/lng point
                         LatLng point = LatLng.newInstance(latBox.getValue(), lonBox.getValue());
+
                         map.clearOverlays();
                         marker = new Marker(point);
                         map.addOverlay(marker);
@@ -342,7 +346,6 @@ public class LocationWidget extends Composite {
                     }
                 }
             });
-
             hpLatLon.add(showButton);
 
             // add the container to the main panel
