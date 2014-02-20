@@ -19,6 +19,7 @@ import org.sead.acr.common.MediciProxy;
 import org.sead.acr.common.utilities.Queries;
 
 import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
+import edu.illinois.ncsa.medici.geowebapp.shared.LocationInfo;
 
 public class MediciRestUtil {
 
@@ -66,15 +67,17 @@ public class MediciRestUtil {
 		return parseLayerInfo(layers);
 	}
 
-	public static LinkedHashMap<String, LayerInfo> getLayerInfoMap(MediciProxy mp) throws MalformedURLException, IOException, org.sead.acr.common.utilities.json.JSONException, JSONException {
+	public static LinkedHashMap<String, LayerInfo> getLayerInfoMap(
+			MediciProxy mp) throws MalformedURLException, IOException,
+			org.sead.acr.common.utilities.json.JSONException, JSONException {
 		LinkedHashMap<String, LayerInfo> map = new LinkedHashMap<String, LayerInfo>();
 		List<LayerInfo> allLayers = getLayers(mp);
-		for (LayerInfo li: allLayers) {
+		for (LayerInfo li : allLayers) {
 			map.put(li.getUri(), li);
 		}
 		return map;
 	}
-	
+
 	/**
 	 * get the layers filtered by tag
 	 * 
@@ -89,19 +92,19 @@ public class MediciRestUtil {
 	public static List<LayerInfo> getLayersByTag(String tag, MediciProxy mp)
 			throws MalformedURLException, IOException,
 			org.sead.acr.common.utilities.json.JSONException, JSONException {
-		
+
 		List<LayerInfo> layers = new ArrayList<LayerInfo>();
 		LinkedHashMap<String, LayerInfo> map = getLayerInfoMap(mp);
 		List<String> urisByTag = getUrisByTag(tag, mp);
-		
-		for(String uri: map.keySet()) {
-			if(urisByTag.contains(uri) ) {
+
+		for (String uri : map.keySet()) {
+			if (urisByTag.contains(uri)) {
 				layers.add(map.get(uri));
 			}
 		}
-		
+
 		return layers;
-		
+
 	}
 
 	/**
@@ -123,10 +126,11 @@ public class MediciRestUtil {
 		// new json arry to store the extracted info
 		List<LayerInfo> layerInfoList = new ArrayList<LayerInfo>();
 
-		Object resultObject = layerObj.getJSONObject("sparql").getJSONObject("results").get("result");
+		Object resultObject = layerObj.getJSONObject("sparql")
+				.getJSONObject("results").get("result");
 		JSONArray resultArray = null;
 		if (resultObject instanceof JSONArray) {
-			resultArray = (JSONArray)resultObject;
+			resultArray = (JSONArray) resultObject;
 		} else {
 			resultArray = new JSONArray();
 			resultArray.put(resultObject);
@@ -203,6 +207,141 @@ public class MediciRestUtil {
 					URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
 		}
 		return query_pairs;
+	}
+
+	/**
+	 * Get all locations of dataset via sparql query
+	 * @param mp
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws org.sead.acr.common.utilities.json.JSONException
+	 * @throws JSONException
+	 */
+	public static List<LocationInfo> getLocations(MediciProxy mp)
+			throws MalformedURLException, IOException,
+			org.sead.acr.common.utilities.json.JSONException, JSONException {
+		String locations = mp.getSparqlJSONResponse("query="
+				+ Queries.ALL_DATASET_LOCATION);
+		return parseLocationInfo(locations);
+	}
+
+	/**
+	 * Parse the sparql result 
+	 * @param locations
+	 * @return
+	 * @throws JSONException
+	 * @throws MalformedURLException
+	 * @throws UnsupportedEncodingException
+	 */
+	private static List<LocationInfo> parseLocationInfo(String locations)
+			throws JSONException, MalformedURLException,
+			UnsupportedEncodingException {
+
+		JSONObject locationObj = new JSONObject(locations);
+
+		// new json arry to store the extracted info
+		List<LocationInfo> locationInfoList = new ArrayList<LocationInfo>();
+
+		Object resultObject = locationObj.getJSONObject("sparql")
+				.getJSONObject("results").get("result");
+		JSONArray resultArray = null;
+		if (resultObject instanceof JSONArray) {
+			resultArray = (JSONArray) resultObject;
+		} else {
+			resultArray = new JSONArray();
+			resultArray.put(resultObject);
+		}
+		for (int i = 0; i < resultArray.length(); i++) {
+
+			// getting wmsURL to parse out extents
+			JSONArray jsonArray = resultArray.getJSONObject(i).getJSONArray(
+					"binding");
+
+			LocationInfo li = new LocationInfo();
+
+			String uri = "";
+			String deleted = "";
+			String title = "";
+			Double lat = null;
+			Double lon = null;
+			for (int j = 0; j < jsonArray.length(); j++) {
+				JSONObject entry = jsonArray.getJSONObject(j);
+				if (entry.getString("name").equals("uri")) {
+					uri = entry.getString("uri");
+				} else if (entry.getString("name").equals("title")) {
+					title = entry.getString("literal");
+				} else if (entry.getString("name").equals("lat")) {
+					lat = entry.getDouble("lat");
+				} else if (entry.getString("name").equals("lon")) {
+					lon = entry.getDouble("lon");
+				} else if (entry.getString("name").equals("deleted")) {
+					deleted = entry.getString("uri");
+				}
+			}
+
+			// if the dataset is deleted, skip
+			if (deleted
+					.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"))
+				continue;
+			li.setTitle(title);
+			li.setUri(uri);
+			li.setLat(lat);
+			li.setLon(lon);
+
+			locationInfoList.add(li);
+
+		}
+
+		return locationInfoList;
+	}
+
+	/**
+	 * Get locations of datasets filtered by tag
+	 * @param tag
+	 * @param mp
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws org.sead.acr.common.utilities.json.JSONException
+	 * @throws JSONException
+	 */
+	public static List<LocationInfo> getLocationsByTag(String tag,
+			MediciProxy mp) throws MalformedURLException, IOException,
+			org.sead.acr.common.utilities.json.JSONException, JSONException {
+
+		List<LocationInfo> locations = new ArrayList<LocationInfo>();
+		LinkedHashMap<String, LocationInfo> map = getLocationInfoMap(mp);
+		List<String> urisByTag = getUrisByTag(tag, mp);
+
+		for (String uri : map.keySet()) {
+			if (urisByTag.contains(uri)) {
+				locations.add(map.get(uri));
+			}
+		}
+
+		return locations;
+	}
+
+	/**
+	 * 
+	 * Get locations map by uri of dataset
+	 * @param mp
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws org.sead.acr.common.utilities.json.JSONException
+	 * @throws JSONException
+	 */
+	public static LinkedHashMap<String, LocationInfo> getLocationInfoMap(
+			MediciProxy mp) throws MalformedURLException, IOException,
+			org.sead.acr.common.utilities.json.JSONException, JSONException {
+		LinkedHashMap<String, LocationInfo> map = new LinkedHashMap<String, LocationInfo>();
+		List<LocationInfo> allLocations = getLocations(mp);
+		for (LocationInfo li : allLocations) {
+			map.put(li.getUri(), li);
+		}
+		return map;
 	}
 
 }

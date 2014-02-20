@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
+import edu.illinois.ncsa.medici.geowebapp.shared.LocationInfo;
 
 /**
  * 
@@ -13,6 +14,11 @@ import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
 
 @RemoteServiceRelativePath("mediciProxy")
 public interface MediciProxyService extends RemoteService {
+
+	/**
+	 * get tags
+	 * @return
+	 */
 	String[] getTags();
 
 	/**
@@ -21,4 +27,11 @@ public interface MediciProxyService extends RemoteService {
 	 * @return array of LayerInfo
 	 */
 	LayerInfo[] getLayers(String tag);
+	
+	/**
+	 * get dataset locations filtered by tag. if tag is null or "", then it will return all locations
+	 * @param tag
+	 * @return
+	 */
+	LocationInfo[] getLocations(String tag);
 }

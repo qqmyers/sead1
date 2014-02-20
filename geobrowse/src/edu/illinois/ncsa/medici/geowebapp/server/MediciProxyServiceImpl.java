@@ -4,6 +4,7 @@ import java.util.List;
 
 import edu.illinois.ncsa.medici.geowebapp.client.service.MediciProxyService;
 import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
+import edu.illinois.ncsa.medici.geowebapp.shared.LocationInfo;
 
 import org.sead.acr.common.MediciProxy;
 import org.apache.commons.logging.Log;
@@ -46,7 +47,7 @@ public class MediciProxyServiceImpl extends ProxiedRemoteServiceServlet
 	 * 
 	 * @see
 	 * edu.illinois.ncsa.medici.geowebapp.client.service.MediciProxyService#
-	 * getLayersByTag(java.lang.String)
+	 * getLayers(java.lang.String)
 	 */
 	@Override
 	public LayerInfo[] getLayers(String tag) {
@@ -69,6 +70,37 @@ public class MediciProxyServiceImpl extends ProxiedRemoteServiceServlet
 			return null;
 		} else {
 			return layers.toArray(new LayerInfo[layers.size()]);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * edu.illinois.ncsa.medici.geowebapp.client.service.MediciProxyService#
+	 * getLocations(java.lang.String)
+	 */
+	@Override
+	public LocationInfo[] getLocations(String tag) {
+		dontCache();
+
+		List<LocationInfo> locations = null;
+
+		try {
+			MediciProxy mp = getProxy();
+			if (tag == null || "".equals(tag)) {
+				locations = MediciRestUtil.getLocations(mp);
+			} else {
+				locations = MediciRestUtil.getLocationsByTag(tag, mp);
+			}
+		} catch (Exception e) {
+			invalidateSession();
+			log.warn("Error contacting medici or JSON has the error: " + e);
+		}
+		if ((locations == null) || (locations.isEmpty())) {
+			return null;
+		} else {
+			return locations.toArray(new LocationInfo[locations.size()]);
 		}
 	}
 
