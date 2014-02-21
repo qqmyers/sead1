@@ -2,6 +2,7 @@ package edu.illinois.ncsa.medici.geowebapp.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.Map;
@@ -9,11 +10,16 @@ import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
 import org.gwtopenmaps.openlayers.client.Projection;
 import org.gwtopenmaps.openlayers.client.control.MousePosition;
+import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
+import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.gwtopenmaps.openlayers.client.layer.OSM;
+import org.gwtopenmaps.openlayers.client.layer.Vector;
+import org.gwtopenmaps.openlayers.client.layer.VectorOptions;
 import org.gwtopenmaps.openlayers.client.layer.WMS;
 import org.gwtopenmaps.openlayers.client.layer.WMSOptions;
 import org.gwtopenmaps.openlayers.client.layer.WMSParams;
+import org.gwtopenmaps.openlayers.client.util.Attributes;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -68,6 +74,7 @@ import edu.illinois.ncsa.medici.geowebapp.client.service.MediciProxyServiceAsync
 import edu.illinois.ncsa.medici.geowebapp.client.service.WmsProxyService;
 import edu.illinois.ncsa.medici.geowebapp.client.service.WmsProxyServiceAsync;
 import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
+import edu.illinois.ncsa.medici.geowebapp.shared.LocationInfo;
 
 /**
  * 
@@ -107,6 +114,9 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	private LoginStatusWidget lsw = null;
 
 	private LoginPage lp = null;
+	protected FlowPanel layerSwitcher;
+	private String encodedTag;
+	private Bounds mapExtent;
 
 	public static EventBus eventBus = GWT.create(SimpleEventBus.class);
 
@@ -217,19 +227,32 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		GWT.log("** Clean up ***");
 		cleanApp();
 		RootPanel.get("map").setVisible(true);
-		String encodedTag = null;
+		encodedTag = null;
 		if (tag != null)
 			encodedTag = URL.encode(tag);
 		mediciProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
-			public void onSuccess(LayerInfo[] result) {
+			public void onSuccess(LayerInfo[] layers) {
 				// showMap(result);
 				GWT.log("** Building UI ***");
-				buildGwtmap(result);
+				buildGwtmap(layers);
 
-				FlowPanel dp = createLayerSwitcher(result);
-				RootPanel.get("layers").add(dp);
-				// FlowPanel hp = createLegendPanel(result);
-				// RootPanel.get("info").add(hp);
+				layerSwitcher = createLayerSwitcher(layers);
+				RootPanel.get("layers").add(layerSwitcher);
+
+				mediciProxySvc.getLocations(encodedTag,
+						new AsyncCallback<LocationInfo[]>() {
+							@Override
+							public void onSuccess(LocationInfo[] locations) {
+								GWT.log("** adding location **");
+								addLocationLayer(locations);
+							}
+
+							@Override
+							public void onFailure(Throwable caught) {
+								fail();
+							}
+						});
+
 			}
 
 			public void onFailure(Throwable caught) {
@@ -425,6 +448,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 				// VerticalPanel vp = new VerticalPanel();
 				// build layer switcher with reverse order
 				// since the top layer should be on top of the list
+
 				for (int i = result.length - 1; i >= 0; i--) {
 					final String name = result[i].getName();
 					int currentRow = ft.getRowCount();
@@ -635,7 +659,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		map.addLayer(baseLayer);
 		map.addControl(new MousePosition());
 
-		Bounds box = null;
+		mapExtent = null;
 
 		if (layerInfos != null) {
 			for (LayerInfo layerInfo : layerInfos) {
@@ -660,9 +684,9 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 				params.setTransparent(true);
 				params.setLayers(name);
 				WMS wms = new WMS(name, wmsUrl, params, options);
-				if (box == null)
-					box = newBnd;
-				box.extend(newBnd);
+				if (mapExtent == null)
+					mapExtent = newBnd;
+				mapExtent.extend(newBnd);
 
 				map.addLayer(wms);
 			}
@@ -670,12 +694,36 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 		RootPanel.get("map").add(mapWidget);
 
-		if (box == null) {
-			box = defaultBox.transform(new Projection(EPSG_4326),
+		if (mapExtent == null) {
+			mapExtent = defaultBox.transform(new Projection(EPSG_4326),
 					new Projection(EPSG_900913));
 		}
-		map.zoomToExtent(box);
+		map.zoomToExtent(mapExtent);
 
+	}
+
+	public void addLocationLayer(LocationInfo[] locations) {
+		VectorOptions vectorOptions = new VectorOptions();
+		Vector locationLayer = new Vector("Location of Datasets", vectorOptions);
+
+		for (int i = 0; i < locations.length; i++) {
+			Point point = new Point(locations[i].getLon(),
+					locations[i].getLat());
+			point.transform(new Projection(EPSG_4326), new Projection(
+					EPSG_900913));
+
+			VectorFeature feature = new VectorFeature(point);
+			Attributes attributes = new Attributes();
+			attributes.setAttribute("title", locations[i].getTitle());
+			attributes.setAttribute("uri", locations[i].getUri());
+			feature.setAttributes(attributes);
+
+			locationLayer.addFeature(feature);
+			mapExtent.extend(point);
+		}
+
+		map.addLayer(locationLayer);
+		map.zoomToExtent(mapExtent);
 	}
 
 	@Override
