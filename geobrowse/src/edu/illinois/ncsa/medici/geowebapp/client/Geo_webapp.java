@@ -2,7 +2,6 @@ package edu.illinois.ncsa.medici.geowebapp.client;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.Map;
@@ -10,6 +9,8 @@ import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
 import org.gwtopenmaps.openlayers.client.Projection;
 import org.gwtopenmaps.openlayers.client.control.MousePosition;
+import org.gwtopenmaps.openlayers.client.control.SelectFeature;
+import org.gwtopenmaps.openlayers.client.event.VectorFeatureSelectedListener;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
@@ -19,6 +20,8 @@ import org.gwtopenmaps.openlayers.client.layer.VectorOptions;
 import org.gwtopenmaps.openlayers.client.layer.WMS;
 import org.gwtopenmaps.openlayers.client.layer.WMSOptions;
 import org.gwtopenmaps.openlayers.client.layer.WMSParams;
+import org.gwtopenmaps.openlayers.client.popup.FramedCloud;
+import org.gwtopenmaps.openlayers.client.popup.Popup;
 import org.gwtopenmaps.openlayers.client.util.Attributes;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 
@@ -84,6 +87,7 @@ import edu.illinois.ncsa.medici.geowebapp.shared.LocationInfo;
  */
 
 public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
+	private static final String LOCATION_OF_DATASETS = "Location of Datasets";
 	private static final String EPSG_900913 = "EPSG:900913";
 	private static final String EPSG_4326 = "EPSG:4326";
 
@@ -445,58 +449,21 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 				ft.setWidget(0, 1, new HTML("<b><center>Opacity</center></b>"));
 				ft.setWidget(0, 2, new HTML(
 						"<b><center>Name/Legend</center></b>"));
+
+				// add location layer row
+				VerticalPanel locationTitlePanel = createLocationLayerTitle();
+				addLayerRow(ft, LOCATION_OF_DATASETS, locationTitlePanel);
+
 				// VerticalPanel vp = new VerticalPanel();
 				// build layer switcher with reverse order
 				// since the top layer should be on top of the list
 
 				for (int i = result.length - 1; i >= 0; i--) {
-					final String name = result[i].getName();
-					int currentRow = ft.getRowCount();
-					ToggleButton vizToggleButton = new ToggleButton("Off", "On");
-					vizToggleButton.setValue(true);
-					vizToggleButton.addClickHandler(new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) {
-							ToggleButton tb = (ToggleButton) event.getSource();
-							boolean visibility = tb.getValue();
-							eventBus.fireEvent(new LayerVisibilityChangeEvent(
-									name, visibility));
-						}
-					});
-
-					ft.setWidget(currentRow, 0, vizToggleButton);
-					ft.getCellFormatter().setAlignment(currentRow, 0,
-							HasHorizontalAlignment.ALIGN_CENTER,
-							HasVerticalAlignment.ALIGN_TOP);
-
-					ListBox opacityListBox = new ListBox();
-					opacityListBox.setWidth("50px");
-					opacityListBox.addItem("1.0");
-					opacityListBox.addItem("0.9");
-					opacityListBox.addItem("0.8");
-					opacityListBox.addItem("0.7");
-					opacityListBox.addItem("0.6");
-					opacityListBox.addItem("0.5");
-					opacityListBox.setSelectedIndex(0);
-					opacityListBox.addChangeHandler(new ChangeHandler() {
-						@Override
-						public void onChange(ChangeEvent event) {
-							ListBox lb = (ListBox) event.getSource();
-							int idx = lb.getSelectedIndex();
-							float op = Float.parseFloat(lb.getItemText(idx));
-							eventBus.fireEvent(new LayerOpacityChangeEvent(
-									name, op));
-						}
-					});
-
-					ft.setWidget(currentRow, 1, opacityListBox);
-					ft.getCellFormatter().setAlignment(currentRow, 1,
-							HasHorizontalAlignment.ALIGN_CENTER,
-							HasVerticalAlignment.ALIGN_TOP);
-
-					VerticalPanel titlePanel = createLayerTitle(result[i]);
-
-					ft.setWidget(currentRow, 2, titlePanel);
+					LayerInfo layerInfo = result[i];
+					VerticalPanel titlePanel = createLayerTitle(
+							layerInfo.getUri(), layerInfo.getTitle(),
+							layerInfo.getName());
+					addLayerRow(ft, layerInfo.getName(), titlePanel);
 				}
 
 				vp.add(ft);
@@ -511,7 +478,54 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		return dp;
 	}
 
-	private VerticalPanel createLayerTitle(LayerInfo layer) {
+	private void addLayerRow(FlexTable ft, final String name,
+			VerticalPanel titlePanel) {
+		int currentRow = ft.getRowCount();
+		ToggleButton vizToggleButton = new ToggleButton("Off", "On");
+		vizToggleButton.setValue(true);
+		vizToggleButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				ToggleButton tb = (ToggleButton) event.getSource();
+				boolean visibility = tb.getValue();
+				eventBus.fireEvent(new LayerVisibilityChangeEvent(name,
+						visibility));
+			}
+		});
+
+		ft.setWidget(currentRow, 0, vizToggleButton);
+		ft.getCellFormatter().setAlignment(currentRow, 0,
+				HasHorizontalAlignment.ALIGN_CENTER,
+				HasVerticalAlignment.ALIGN_TOP);
+
+		ListBox opacityListBox = new ListBox();
+		opacityListBox.setWidth("50px");
+		opacityListBox.addItem("1.0");
+		opacityListBox.addItem("0.9");
+		opacityListBox.addItem("0.8");
+		opacityListBox.addItem("0.7");
+		opacityListBox.addItem("0.6");
+		opacityListBox.addItem("0.5");
+		opacityListBox.setSelectedIndex(0);
+		opacityListBox.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				ListBox lb = (ListBox) event.getSource();
+				int idx = lb.getSelectedIndex();
+				float op = Float.parseFloat(lb.getItemText(idx));
+				eventBus.fireEvent(new LayerOpacityChangeEvent(name, op));
+			}
+		});
+
+		ft.setWidget(currentRow, 1, opacityListBox);
+		ft.getCellFormatter().setAlignment(currentRow, 1,
+				HasHorizontalAlignment.ALIGN_CENTER,
+				HasVerticalAlignment.ALIGN_TOP);
+
+		ft.setWidget(currentRow, 2, titlePanel);
+	}
+
+	private VerticalPanel createLayerTitle(String uri, String title, String name) {
 		VerticalPanel content = new VerticalPanel();
 
 		HorizontalPanel hp = new HorizontalPanel();
@@ -523,13 +537,12 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		open.setVisible(false);
 
 		String htmlString = "<a href='" + getMediciUrl() + "/#dataset?id="
-				+ layer.getUri() + "' target='new'>" + layer.getTitle()
-				+ "</a>";
-		HTML title = new HTML(htmlString);
+				+ uri + "' target='new'>" + title + "</a>";
+		HTML htmltitle = new HTML(htmlString);
 
 		hp.add(close);
 		hp.add(open);
-		hp.add(title);
+		hp.add(htmltitle);
 
 		final DisclosurePanel dp = new DisclosurePanel();
 		dp.setOpen(false);
@@ -537,8 +550,63 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		VerticalPanel legendPanel = new VerticalPanel();
 		String url = wmsUrl
 				+ "?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
-				+ layer.getName();
+				+ name;
 		Image img = new Image(url);
+
+		legendPanel.add(img);
+
+		dp.add(legendPanel);
+
+		content.add(hp);
+		content.add(dp);
+
+		close.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				dp.setOpen(true);
+				close.setVisible(false);
+				open.setVisible(true);
+			}
+		});
+
+		open.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				dp.setOpen(false);
+				close.setVisible(true);
+				open.setVisible(false);
+			}
+		});
+
+		return content;
+	}
+
+	private VerticalPanel createLocationLayerTitle() {
+		VerticalPanel content = new VerticalPanel();
+
+		HorizontalPanel hp = new HorizontalPanel();
+		hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+
+		final Image close = new Image("images/rightarrow.png");
+		close.setVisible(true);
+		final Image open = new Image("images/downarrow.png");
+		open.setVisible(false);
+
+		String htmlString = "<a href='" + getMediciUrl()
+				+ "/#map' target='new'>" + LOCATION_OF_DATASETS + "</a>";
+		HTML htmltitle = new HTML(htmlString);
+
+		hp.add(close);
+		hp.add(open);
+		hp.add(htmltitle);
+
+		final DisclosurePanel dp = new DisclosurePanel();
+		dp.setOpen(false);
+
+		VerticalPanel legendPanel = new VerticalPanel();
+		Image img = new Image("images/marker.png");
 
 		legendPanel.add(img);
 
@@ -704,7 +772,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 	public void addLocationLayer(LocationInfo[] locations) {
 		VectorOptions vectorOptions = new VectorOptions();
-		Vector locationLayer = new Vector("Location of Datasets", vectorOptions);
+		Vector locationLayer = new Vector(LOCATION_OF_DATASETS, vectorOptions);
 
 		for (int i = 0; i < locations.length; i++) {
 			Point point = new Point(locations[i].getLon(),
@@ -723,7 +791,40 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		}
 
 		map.addLayer(locationLayer);
-		map.zoomToExtent(mapExtent);
+		
+		
+		// now we want a popup to appear when user clicks
+        // First create a select control and make sure it is actived
+        SelectFeature selectFeature = new SelectFeature(locationLayer);
+        selectFeature.setAutoActivate(true);
+        map.addControl(selectFeature);
+ 
+        // Secondly add a VectorFeatureSelectedListener to the feature
+        locationLayer.addVectorFeatureSelectedListener(new VectorFeatureSelectedListener()
+        {
+            @Override
+            public void onFeatureSelected(FeatureSelectedEvent eventObject)
+            {
+                GWT.log("onFeatureSelected");
+ 
+                VectorFeature feature = eventObject.getVectorFeature();
+
+				String title = feature.getAttributes().getAttributeAsString("title");
+				String uri = feature.getAttributes().getAttributeAsString("uri");
+				String content = "<h2><a href='" + getMediciUrl() + "/#dataset?id="
+						+ uri + "' target='new'>" + title + "</a></H2>";
+				Popup popup = new FramedCloud(feature.getFID(), feature.getCenterLonLat(), null, content, null, true);
+                popup.setPanMapIfOutOfView(true); // this set the popup in a
+                                                  // strategic way, and pans the
+                                                  // map if needed.
+                popup.setAutoSize(true);
+                feature.setPopup(popup);
+ 
+                // And attach the popup to the map
+                map.addPopup(feature.getPopup());
+            }
+        });
+        map.zoomToExtent(mapExtent);
 	}
 
 	@Override
