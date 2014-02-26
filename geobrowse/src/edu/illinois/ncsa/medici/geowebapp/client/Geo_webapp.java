@@ -793,6 +793,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		VectorOptions vectorOptions = new VectorOptions();
 		Vector locationLayer = new Vector(LOCATION_OF_DATASETS, vectorOptions);
 
+		// build a style (marker) for the layer
 		Style pointStyle = new Style();
         pointStyle.setExternalGraphic("images/red-marker.png");
         pointStyle.setGraphicSize(32, 37);
@@ -800,6 +801,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
         pointStyle.setFillOpacity(1.0);
         
 		for (int i = 0; i < locations.length; i++) {
+			// add the location to the vector layer
 			Point point = new Point(locations[i].getLon(),
 					locations[i].getLat());
 			point.transform(new Projection(EPSG_4326), new Projection(
@@ -812,9 +814,12 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			feature.setAttributes(attributes);
 
 			locationLayer.addFeature(feature);
+			
+			// change the map extent by the point
 			mapExtent.extend(point);
 		}
 
+		// add the vector (maker) layer to the map
 		map.addLayer(locationLayer);
 
 		// now we want a popup to appear when user clicks
@@ -823,7 +828,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		selectFeature.setAutoActivate(true);
 		map.addControl(selectFeature);
 
-		// Secondly add a VectorFeatureSelectedListener to the feature
+		// add a VectorFeatureSelectedListener to the feature to show the popup
 		locationLayer
 				.addVectorFeatureSelectedListener(new VectorFeatureSelectedListener() {
 					@Override
@@ -833,6 +838,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 						VectorFeature feature = eventObject.getVectorFeature();
 
+						// creating popup
 						String title = feature.getAttributes()
 								.getAttributeAsString("title");
 						String uri = feature.getAttributes()
@@ -840,6 +846,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 						String content = "<b><a href='" + getMediciUrl()
 								+ "/#dataset?id=" + uri + "' target='new'>"
 								+ title + "</a></b>";
+						
+						// close button has a bug; so turn off "close" button
 						Popup popup = new FramedCloud(feature.getFID(), feature
 								.getCenterLonLat(), null, content, null, false);
 						popup.setPanMapIfOutOfView(true); 
@@ -850,7 +858,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 						map.addPopup(feature.getPopup());
 					}
 				});
-		//And add a VectorFeatureUnselectedListener which removes the popup.
+		//add a VectorFeatureUnselectedListener which removes the popup.
         locationLayer.addVectorFeatureUnselectedListener(new VectorFeatureUnselectedListener()
         {
             public void onFeatureUnselected(FeatureUnselectedEvent eventObject)
