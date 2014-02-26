@@ -234,6 +234,7 @@ public class MediciRestUtil {
 			org.sead.acr.common.utilities.json.JSONException, JSONException {
 		String locations = mp.getSparqlJSONResponse("query="
 				+ Queries.ALL_DATASET_LOCATION);
+		System.out.println(locations);
 		return parseLocationInfo(locations);
 	}
 
@@ -289,9 +290,11 @@ public class MediciRestUtil {
 					} else if (entry.getString("name").equals("title")) {
 						title = entry.getString("literal");
 					} else if (entry.getString("name").equals("lat")) {
-						lat = entry.getDouble("lat");
+						JSONObject jo = entry.getJSONObject("literal");
+						lat = jo.getDouble("content");
 					} else if (entry.getString("name").equals("lon")) {
-						lon = entry.getDouble("lon");
+						JSONObject jo = entry.getJSONObject("literal");
+						lon = jo.getDouble("content");
 					} else if (entry.getString("name").equals("deleted")) {
 						deleted = entry.getString("uri");
 					}
