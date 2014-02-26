@@ -31,7 +31,6 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.SubjectRemover;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.Unifier;
-import org.tupeloproject.kernel.beans.reflect.BeanMapping;
 import org.tupeloproject.kernel.impl.HashFileContext;
 import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.mysql.MysqlContext;
@@ -41,8 +40,6 @@ import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
-
-import com.hp.hpl.jena.vocabulary.DC;
 
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
