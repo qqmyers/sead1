@@ -118,72 +118,82 @@ public class MediciRestUtil {
 	 * @throws UnsupportedEncodingException
 	 */
 	public static List<LayerInfo> parseLayerInfo(String layers)
-			throws JSONException, MalformedURLException,
-			UnsupportedEncodingException {
+			throws MalformedURLException, UnsupportedEncodingException,
+			JSONException {
 
-		JSONObject layerObj = new JSONObject(layers);
-
-		// new json arry to store the extracted info
 		List<LayerInfo> layerInfoList = new ArrayList<LayerInfo>();
 
-		Object resultObject = layerObj.getJSONObject("sparql")
-				.getJSONObject("results").get("result");
-		JSONArray resultArray = null;
-		if (resultObject instanceof JSONArray) {
-			resultArray = (JSONArray) resultObject;
-		} else {
-			resultArray = new JSONArray();
-			resultArray.put(resultObject);
-		}
-		for (int i = 0; i < resultArray.length(); i++) {
+		// unexpected json error; should throw JSONException to invalidate the
+		// session
+		JSONObject layerObj = new JSONObject(layers);
+		JSONObject sparqlJson = layerObj.getJSONObject("sparql");
 
-			// getting wmsURL to parse out extents
-			JSONArray jsonArray = resultArray.getJSONObject(i).getJSONArray(
-					"binding");
-
-			LayerInfo li = new LayerInfo();
-
-			String uri = "";
-			String layerName = "";
-			String layerUrl = "";
-			String extents = "";
-			String deleted = "";
-			String title = "";
-			String srs = "";
-			for (int j = 0; j < jsonArray.length(); j++) {
-				JSONObject entry = jsonArray.getJSONObject(j);
-				if (entry.getString("name").equals("uri")) {
-					uri = entry.getString("uri");
-				} else if (entry.getString("name").equals("layername")) {
-					layerName = entry.getString("literal");
-				} else if (entry.getString("name").equals("title")) {
-					title = entry.getString("literal");
-				} else if (entry.getString("name").equals("layerurl")) {
-					layerUrl = entry.getString("literal");
-					Map<String, String> params = splitQuery(new URL(layerUrl));
-					extents = params.get("bbox");
-					srs = params.get("srs");
-				} else if (entry.getString("name").equals("deleted")) {
-					deleted = entry.getString("uri");
-				}
+		// expect json error; should return null instead of invalidating the
+		// session
+		try {
+			Object resultObject = sparqlJson.getJSONObject("results").get(
+					"result");
+			JSONArray resultArray = null;
+			if (resultObject instanceof JSONArray) {
+				resultArray = (JSONArray) resultObject;
+			} else {
+				resultArray = new JSONArray();
+				resultArray.put(resultObject);
 			}
+			for (int i = 0; i < resultArray.length(); i++) {
 
-			// if the dataset is deleted, skip
-			if (deleted
-					.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"))
-				continue;
-			li.setSrs(srs);
-			li.setName(layerName);
-			li.setTitle(title);
-			li.setUri(uri);
-			String[] split = extents.split(",");
-			li.setMinx(Double.parseDouble(split[0]));
-			li.setMiny(Double.parseDouble(split[1]));
-			li.setMaxx(Double.parseDouble(split[2]));
-			li.setMaxy(Double.parseDouble(split[3]));
+				// getting wmsURL to parse out extents
+				JSONArray jsonArray = resultArray.getJSONObject(i)
+						.getJSONArray("binding");
 
-			layerInfoList.add(li);
+				LayerInfo li = new LayerInfo();
 
+				String uri = "";
+				String layerName = "";
+				String layerUrl = "";
+				String extents = "";
+				String deleted = "";
+				String title = "";
+				String srs = "";
+				for (int j = 0; j < jsonArray.length(); j++) {
+					JSONObject entry = jsonArray.getJSONObject(j);
+					if (entry.getString("name").equals("uri")) {
+						uri = entry.getString("uri");
+					} else if (entry.getString("name").equals("layername")) {
+						layerName = entry.getString("literal");
+					} else if (entry.getString("name").equals("title")) {
+						title = entry.getString("literal");
+					} else if (entry.getString("name").equals("layerurl")) {
+						layerUrl = entry.getString("literal");
+						Map<String, String> params = splitQuery(new URL(
+								layerUrl));
+						extents = params.get("bbox");
+						srs = params.get("srs");
+					} else if (entry.getString("name").equals("deleted")) {
+						deleted = entry.getString("uri");
+					}
+				}
+
+				// if the dataset is deleted, skip
+				if (deleted
+						.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"))
+					continue;
+				li.setSrs(srs);
+				li.setName(layerName);
+				li.setTitle(title);
+				li.setUri(uri);
+				String[] split = extents.split(",");
+				li.setMinx(Double.parseDouble(split[0]));
+				li.setMiny(Double.parseDouble(split[1]));
+				li.setMaxx(Double.parseDouble(split[2]));
+				li.setMaxy(Double.parseDouble(split[3]));
+
+				layerInfoList.add(li);
+
+			}
+		} catch (JSONException e) {
+			log.warn("parseLayerInfo - JSON error", e);
+			return null;
 		}
 
 		return layerInfoList;
@@ -211,6 +221,7 @@ public class MediciRestUtil {
 
 	/**
 	 * Get all locations of dataset via sparql query
+	 * 
 	 * @param mp
 	 * @return
 	 * @throws MalformedURLException
@@ -227,7 +238,8 @@ public class MediciRestUtil {
 	}
 
 	/**
-	 * Parse the sparql result 
+	 * Parse the sparql result
+	 * 
 	 * @param locations
 	 * @return
 	 * @throws JSONException
@@ -235,62 +247,72 @@ public class MediciRestUtil {
 	 * @throws UnsupportedEncodingException
 	 */
 	private static List<LocationInfo> parseLocationInfo(String locations)
-			throws JSONException, MalformedURLException,
-			UnsupportedEncodingException {
+			throws MalformedURLException, UnsupportedEncodingException,
+			JSONException {
 
-		JSONObject locationObj = new JSONObject(locations);
-
-		// new json arry to store the extracted info
 		List<LocationInfo> locationInfoList = new ArrayList<LocationInfo>();
 
-		Object resultObject = locationObj.getJSONObject("sparql")
-				.getJSONObject("results").get("result");
-		JSONArray resultArray = null;
-		if (resultObject instanceof JSONArray) {
-			resultArray = (JSONArray) resultObject;
-		} else {
-			resultArray = new JSONArray();
-			resultArray.put(resultObject);
-		}
-		for (int i = 0; i < resultArray.length(); i++) {
+		// unexpected json error; should throw JSONException to invalidate the
+		// session
+		JSONObject locationObj = new JSONObject(locations);
+		JSONObject sparqlJson = locationObj.getJSONObject("sparql");
 
-			// getting wmsURL to parse out extents
-			JSONArray jsonArray = resultArray.getJSONObject(i).getJSONArray(
-					"binding");
+		// expect json error; should return null instead of invalidating the
+		// session
+		try {
+			Object resultObject = sparqlJson.getJSONObject("results").get(
+					"result");
+			JSONArray resultArray = null;
+			if (resultObject instanceof JSONArray) {
+				resultArray = (JSONArray) resultObject;
+			} else {
+				resultArray = new JSONArray();
+				resultArray.put(resultObject);
+			}
+			for (int i = 0; i < resultArray.length(); i++) {
 
-			LocationInfo li = new LocationInfo();
+				// getting wmsURL to parse out extents
+				JSONArray jsonArray = resultArray.getJSONObject(i)
+						.getJSONArray("binding");
 
-			String uri = "";
-			String deleted = "";
-			String title = "";
-			Double lat = null;
-			Double lon = null;
-			for (int j = 0; j < jsonArray.length(); j++) {
-				JSONObject entry = jsonArray.getJSONObject(j);
-				if (entry.getString("name").equals("uri")) {
-					uri = entry.getString("uri");
-				} else if (entry.getString("name").equals("title")) {
-					title = entry.getString("literal");
-				} else if (entry.getString("name").equals("lat")) {
-					lat = entry.getDouble("lat");
-				} else if (entry.getString("name").equals("lon")) {
-					lon = entry.getDouble("lon");
-				} else if (entry.getString("name").equals("deleted")) {
-					deleted = entry.getString("uri");
+				LocationInfo li = new LocationInfo();
+
+				String uri = "";
+				String deleted = "";
+				String title = "";
+				Double lat = null;
+				Double lon = null;
+				for (int j = 0; j < jsonArray.length(); j++) {
+					JSONObject entry = jsonArray.getJSONObject(j);
+					if (entry.getString("name").equals("uri")) {
+						uri = entry.getString("uri");
+					} else if (entry.getString("name").equals("title")) {
+						title = entry.getString("literal");
+					} else if (entry.getString("name").equals("lat")) {
+						lat = entry.getDouble("lat");
+					} else if (entry.getString("name").equals("lon")) {
+						lon = entry.getDouble("lon");
+					} else if (entry.getString("name").equals("deleted")) {
+						deleted = entry.getString("uri");
+					}
 				}
+
+				// if the dataset is deleted, skip
+				if (deleted
+						.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"))
+					continue;
+				li.setTitle(title);
+				li.setUri(uri);
+				li.setLat(lat);
+				li.setLon(lon);
+
+				locationInfoList.add(li);
+
 			}
 
-			// if the dataset is deleted, skip
-			if (deleted
-					.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"))
-				continue;
-			li.setTitle(title);
-			li.setUri(uri);
-			li.setLat(lat);
-			li.setLon(lon);
-
-			locationInfoList.add(li);
-
+		} catch (JSONException e) {
+			log.warn("parseLocationInfo - JSON error", e);
+			return null;
 		}
 
 		return locationInfoList;
@@ -298,6 +320,7 @@ public class MediciRestUtil {
 
 	/**
 	 * Get locations of datasets filtered by tag
+	 * 
 	 * @param tag
 	 * @param mp
 	 * @return
@@ -326,6 +349,7 @@ public class MediciRestUtil {
 	/**
 	 * 
 	 * Get locations map by uri of dataset
+	 * 
 	 * @param mp
 	 * @return
 	 * @throws MalformedURLException
