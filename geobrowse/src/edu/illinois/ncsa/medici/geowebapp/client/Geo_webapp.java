@@ -8,6 +8,7 @@ import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
 import org.gwtopenmaps.openlayers.client.Projection;
+import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.control.MousePosition;
 import org.gwtopenmaps.openlayers.client.control.SelectFeature;
 import org.gwtopenmaps.openlayers.client.event.VectorFeatureSelectedListener;
@@ -235,23 +236,25 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		if (tag != null)
 			encodedTag = URL.encode(tag);
 		mediciProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
-			public void onSuccess(LayerInfo[] layers) {
+			public void onSuccess(final LayerInfo[] layers) {
 				// showMap(result);
 				GWT.log("** Building UI ***");
 				buildGwtmap(layers);
 
-				layerSwitcher = createLayerSwitcher(layers);
-				RootPanel.get("layers").add(layerSwitcher);
-
+				// add the layer of dataset locations
 				mediciProxySvc.getLocations(encodedTag,
 						new AsyncCallback<LocationInfo[]>() {
-							@Override
 							public void onSuccess(LocationInfo[] locations) {
-								GWT.log("** adding location **");
-								addLocationLayer(locations);
+								GWT.log("** adding dataset location **");
+								if (locations != null) {
+									addLocationLayer(locations);
+								}
+
+								layerSwitcher = createLayerSwitcher(layers,
+										locations);
+								RootPanel.get("layers").add(layerSwitcher);
 							}
 
-							@Override
 							public void onFailure(Throwable caught) {
 								fail();
 							}
@@ -425,7 +428,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		return layerNames;
 	}
 
-	protected FlowPanel createLayerSwitcher(LayerInfo[] result) {
+	protected FlowPanel createLayerSwitcher(LayerInfo[] layers,
+			LocationInfo[] locations) {
 		// List<String> layerNames = getLayerNames(result);
 		FlowPanel dp = new FlowPanel();
 
@@ -440,40 +444,46 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		vp.add(new HTML("<h3>Geospatial Datasets</h3>"));
 		vp.add(new HTML("<hr>"));
 
-		// if there is geospatial dataset, add the table,
-		// if not, add the message
-		if (result != null) {
-			if (result.length > 0) {
-				FlexTable ft = new FlexTable();
-				ft.setWidget(0, 0, new HTML("<b><center>Show?</center></b>"));
-				ft.setWidget(0, 1, new HTML("<b><center>Opacity</center></b>"));
-				ft.setWidget(0, 2, new HTML(
-						"<b><center>Name/Legend</center></b>"));
 
-				// add location layer row
-				VerticalPanel locationTitlePanel = createLocationLayerTitle();
-				addLayerRow(ft, LOCATION_OF_DATASETS, locationTitlePanel);
+		FlexTable ft = new FlexTable();
+		
+		// if there is geospatial dataset, OR locations, then add the table
+		if (locations != null || layers != null) {
+			ft.setWidget(0, 0, new HTML("<b><center>Show?</center></b>"));
+			ft.setWidget(0, 1, new HTML("<b><center>Opacity</center></b>"));
+			ft.setWidget(0, 2, new HTML("<b><center>Name/Legend</center></b>"));
+		} else {
+			// if no locations, layers, then display message
+			vp.add(new HTML("<h4><i>No geospatial datasets</i></h4>"));
+			dp.add(vp);
+			return dp;
+		}
+		
+		if (locations != null) {
+			// add location layer row
+			VerticalPanel locationTitlePanel = createLocationLayerTitle();
+			addLayerRow(ft, LOCATION_OF_DATASETS, locationTitlePanel);
+		}
+
+		// if not, add the message
+		if (layers != null) {
+			if (layers.length > 0) {
 
 				// VerticalPanel vp = new VerticalPanel();
 				// build layer switcher with reverse order
 				// since the top layer should be on top of the list
 
-				for (int i = result.length - 1; i >= 0; i--) {
-					LayerInfo layerInfo = result[i];
+				for (int i = layers.length - 1; i >= 0; i--) {
+					LayerInfo layerInfo = layers[i];
 					VerticalPanel titlePanel = createLayerTitle(
 							layerInfo.getUri(), layerInfo.getTitle(),
 							layerInfo.getName());
 					addLayerRow(ft, layerInfo.getName(), titlePanel);
 				}
-
-				vp.add(ft);
-			} else {
-				vp.add(new HTML("<h4><i>No geospatial datasets</i></h4>"));
 			}
-		} else {
-			vp.add(new HTML("<h4><i>No geospatial datasets</i></h4>"));
-		}
+		} 
 
+		vp.add(ft);
 		dp.add(vp);
 		return dp;
 	}
@@ -606,7 +616,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		dp.setOpen(false);
 
 		VerticalPanel legendPanel = new VerticalPanel();
-		Image img = new Image("images/marker.png");
+		Image img = new Image("images/red-marker.png");
 
 		legendPanel.add(img);
 
@@ -770,17 +780,29 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 	}
 
+	/**
+	 * add the layer of dataset location
+	 * 
+	 * @param locations
+	 */
 	public void addLocationLayer(LocationInfo[] locations) {
+		// construct a vector layer from
 		VectorOptions vectorOptions = new VectorOptions();
 		Vector locationLayer = new Vector(LOCATION_OF_DATASETS, vectorOptions);
 
+		Style pointStyle = new Style();
+        pointStyle.setExternalGraphic("images/red-marker.png");
+        pointStyle.setGraphicSize(32, 37);
+        pointStyle.setGraphicOffset(-16, -37); //anchor on bottom center
+        pointStyle.setFillOpacity(1.0);
+        
 		for (int i = 0; i < locations.length; i++) {
 			Point point = new Point(locations[i].getLon(),
 					locations[i].getLat());
 			point.transform(new Projection(EPSG_4326), new Projection(
 					EPSG_900913));
 
-			VectorFeature feature = new VectorFeature(point);
+			VectorFeature feature = new VectorFeature(point, pointStyle);
 			Attributes attributes = new Attributes();
 			attributes.setAttribute("title", locations[i].getTitle());
 			attributes.setAttribute("uri", locations[i].getUri());
@@ -791,40 +813,45 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		}
 
 		map.addLayer(locationLayer);
-		
-		
-		// now we want a popup to appear when user clicks
-        // First create a select control and make sure it is actived
-        SelectFeature selectFeature = new SelectFeature(locationLayer);
-        selectFeature.setAutoActivate(true);
-        map.addControl(selectFeature);
- 
-        // Secondly add a VectorFeatureSelectedListener to the feature
-        locationLayer.addVectorFeatureSelectedListener(new VectorFeatureSelectedListener()
-        {
-            @Override
-            public void onFeatureSelected(FeatureSelectedEvent eventObject)
-            {
-                GWT.log("onFeatureSelected");
- 
-                VectorFeature feature = eventObject.getVectorFeature();
 
-				String title = feature.getAttributes().getAttributeAsString("title");
-				String uri = feature.getAttributes().getAttributeAsString("uri");
-				String content = "<h2><a href='" + getMediciUrl() + "/#dataset?id="
-						+ uri + "' target='new'>" + title + "</a></H2>";
-				Popup popup = new FramedCloud(feature.getFID(), feature.getCenterLonLat(), null, content, null, true);
-                popup.setPanMapIfOutOfView(true); // this set the popup in a
-                                                  // strategic way, and pans the
-                                                  // map if needed.
-                popup.setAutoSize(true);
-                feature.setPopup(popup);
- 
-                // And attach the popup to the map
-                map.addPopup(feature.getPopup());
-            }
-        });
-        map.zoomToExtent(mapExtent);
+		// now we want a popup to appear when user clicks
+		// First create a select control and make sure it is actived
+		SelectFeature selectFeature = new SelectFeature(locationLayer);
+		selectFeature.setAutoActivate(true);
+		map.addControl(selectFeature);
+
+		// Secondly add a VectorFeatureSelectedListener to the feature
+		locationLayer
+				.addVectorFeatureSelectedListener(new VectorFeatureSelectedListener() {
+					@Override
+					public void onFeatureSelected(
+							FeatureSelectedEvent eventObject) {
+						GWT.log("onFeatureSelected");
+
+						VectorFeature feature = eventObject.getVectorFeature();
+
+						String title = feature.getAttributes()
+								.getAttributeAsString("title");
+						String uri = feature.getAttributes()
+								.getAttributeAsString("uri");
+						String content = "<h2><a href='" + getMediciUrl()
+								+ "/#dataset?id=" + uri + "' target='new'>"
+								+ title + "</a></H2>";
+						Popup popup = new FramedCloud(feature.getFID(), feature
+								.getCenterLonLat(), null, content, null, true);
+						popup.setPanMapIfOutOfView(true); // this set the popup
+															// in a
+															// strategic way,
+															// and pans the
+															// map if needed.
+						popup.setAutoSize(true);
+						feature.setPopup(popup);
+
+						// And attach the popup to the map
+						map.addPopup(feature.getPopup());
+					}
+				});
+		map.zoomToExtent(mapExtent);
 	}
 
 	@Override
