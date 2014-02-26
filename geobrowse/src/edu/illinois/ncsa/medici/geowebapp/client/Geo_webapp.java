@@ -12,6 +12,8 @@ import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.control.MousePosition;
 import org.gwtopenmaps.openlayers.client.control.SelectFeature;
 import org.gwtopenmaps.openlayers.client.event.VectorFeatureSelectedListener;
+import org.gwtopenmaps.openlayers.client.event.VectorFeatureUnselectedListener;
+import org.gwtopenmaps.openlayers.client.event.VectorFeatureUnselectedListener.FeatureUnselectedEvent;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
@@ -777,6 +779,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 					new Projection(EPSG_900913));
 		}
 		map.zoomToExtent(mapExtent);
+		mapWidget.getElement().getFirstChildElement().getStyle().setZIndex(0);
 
 	}
 
@@ -834,16 +837,12 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 								.getAttributeAsString("title");
 						String uri = feature.getAttributes()
 								.getAttributeAsString("uri");
-						String content = "<h2><a href='" + getMediciUrl()
+						String content = "<b><a href='" + getMediciUrl()
 								+ "/#dataset?id=" + uri + "' target='new'>"
-								+ title + "</a></H2>";
+								+ title + "</a></b>";
 						Popup popup = new FramedCloud(feature.getFID(), feature
-								.getCenterLonLat(), null, content, null, true);
-						popup.setPanMapIfOutOfView(true); // this set the popup
-															// in a
-															// strategic way,
-															// and pans the
-															// map if needed.
+								.getCenterLonLat(), null, content, null, false);
+						popup.setPanMapIfOutOfView(true); 
 						popup.setAutoSize(true);
 						feature.setPopup(popup);
 
@@ -851,7 +850,19 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 						map.addPopup(feature.getPopup());
 					}
 				});
+		//And add a VectorFeatureUnselectedListener which removes the popup.
+        locationLayer.addVectorFeatureUnselectedListener(new VectorFeatureUnselectedListener()
+        {
+            public void onFeatureUnselected(FeatureUnselectedEvent eventObject)
+            {
+                GWT.log("onFeatureUnselected");
+                VectorFeature pointFeature = eventObject.getVectorFeature();
+				map.removePopup(pointFeature.getPopup());
+                pointFeature.resetPopup();
+            }
+        });
 		map.zoomToExtent(mapExtent);
+		mapWidget.getElement().getFirstChildElement().getStyle().setZIndex(0);
 	}
 
 	@Override
