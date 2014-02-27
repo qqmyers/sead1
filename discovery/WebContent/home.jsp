@@ -13,6 +13,8 @@
 <script src="login_scripts/json2.js"></script>
 <script src="login_scripts/homepage.js"></script>
 <script src="login_scripts/jquery-cookie.js"></script>
+<script src="login_scripts/filtrify.sead.min.js"></script>
+<link rel="stylesheet" href="login_css/filtrify.sead.css">
 
 <%
 	String project_info = (String) request.getAttribute("projectInfo");
@@ -26,6 +28,7 @@
 		$("#home-loading").show();
 		loadProjectInfo(projInfo);
 		medici = '<%=request.getAttribute("medici")%>';
+
 		$.ajax({
 			type : "GET",
 			url : "GetPublishedCollections",
@@ -39,6 +42,10 @@
 		$("#btnLogout").click(function() {
 			SSOLogout(); 
 			window.location.replace("DoLogout");
+		});
+
+		$("div#reset span").click(function() {
+			filterreset();
 		});
 	});
 
@@ -67,13 +74,27 @@
 	</div>
 	<div style='margin-top: 0px;' class="page-header">
 		<h1 style="margin-left: 20px;" id="projectCollections">Collections</h1>
-	</div>
 	<div id="home-loading"
-		style="width: 300px; margin-left: auto; margin-right: auto; margin-top: 0px; display: none">
+		style="float:right; width: 120px; margin-left: auto; margin-right: 10px; margin-top: -20px; display: none">
 		<img src="login_img/loading.gif"></img>
+	</div></div>
+	
+	<div class="row-fluid">
+	<div class="span3">
+	<div class="well" style="margin-left:20px;background-color:#DFDFDF;">
+	<h3>Search By</h3>
+	<div id="facetedSearch" class="well" style="margin-left:20px"></div>
+<div id="reset" style="display:none;float:right;color:blue;margin-right:10px;margin-top:10px;"><span>Reset Filters</span></div>
+	<div id="legend" class="well" style="margin-left:20px"><i>Viewing all collections.</i></div>
+</div>
+<div class="well" style="margin-left:20px;background-color:#DFDFDF;">
+<h4>About:</h4>
+<div id="projectDesc"></div>
 	</div>
+</div>
 	<div
-		style="width: auto; margin-top: 50px; margin-left: 100px; margin-right: 100px;"
-		id="xmlBody"></div>
+
+		id="xmlBody" class="span8"></div>
+	</div>
 </body>
 </html>
