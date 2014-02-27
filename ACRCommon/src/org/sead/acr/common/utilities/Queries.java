@@ -191,7 +191,7 @@ public class Queries {
 	public static String getItemBibliographicInfo(String tagID) {
 		return ("PREFIX dcterms: <http://purl.org/dc/terms/>"
 				+ " "
-				+ "SELECT ?title ?creator ?contact ?descriptor ?keyword ?abstract"
+				+ "SELECT ?title ?creator ?contact ?descriptor ?keyword ?location ?abstract"
 				+ " " + "WHERE { " + " " + "<"
 				+ tagID
 				+ "> <http://purl.org/dc/elements/1.1/title> ?title . "
@@ -211,6 +211,10 @@ public class Queries {
 				+ "OPTIONAL {<"
 				+ tagID
 				+ "> <http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag> ?keyword } . "
+				+ " "
+				+ "OPTIONAL {<"
+				+ tagID
+				+ "> <http://sead-data.net/terms/generatedAt> ?location } . "
 				+ " "
 				+ "OPTIONAL { <"
 				+ tagID
