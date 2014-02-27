@@ -167,6 +167,24 @@ public class Queries {
 			+ "?uri <http://purl.org/dc/elements/1.1/title> ?title . "
 			+ "OPTIONAL { ?uri <http://purl.org/dc/terms/isReplacedBy> ?deleted . } "
 			+ "}";
+
+	/*
+	 * Query string to retrieve the location info (lat/lon) of dataset who has the location info 
+	 */
+	public static String ALL_DATASET_LOCATION = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+		+ "PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> "
+		+ "PREFIX dc: <http://purl.org/dc/elements/1.1/> "
+		+ "PREFIX dcterms: <http://purl.org/dc/terms/> "
+		+ "PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/> "
+		+ "SELECT ?uri ?title ?lat ?lon ?deleted "
+		+ "WHERE { "
+		+ "?uri <rdf:type> <cet:Dataset> . "
+		+ "?uri <dc:title> ?title . "
+		+ "?uri <tag:tupeloproject.org,2006:/2.0/gis/hasGeoPoint> ?x . "
+		+ "?x <geo:lat> ?lat . "
+		+ "?x <geo:long> ?lon . "
+		+ "OPTIONAL { ?uri <dcterms:isReplacedBy> ?deleted } . "
+		+ "}";	
 	
 	public static String getCollectionContents(String parentID) {
 		return ("PREFIX dcterms: <http://purl.org/dc/terms/>"
