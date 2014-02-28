@@ -45,14 +45,20 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 
 /**
  * @author lmarini
@@ -71,13 +77,6 @@ public class ListDatasetsPage extends Page {
         HorizontalPanel rightHeader = new HorizontalPanel();
         pageTitle.addEast(rightHeader);
 
-        // batch operations
-        BatchOperationView batchOperationView = new BatchOperationView();
-        batchOperationView.addStyleName("titlePanelRightElement");
-        BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatch, eventBus, batchOperationView, false);
-        batchOperationPresenter.bind();
-        rightHeader.add(batchOperationView);
-
         // rss feed
         Anchor rss = new Anchor();
         rss.setHref("rss.xml");
@@ -86,19 +85,52 @@ public class ListDatasetsPage extends Page {
         rss.setHTML("<img src='./images/rss_icon.gif' border='0px' id='rssIcon' class='navMenuLink'>"); // FIXME hack
         rightHeader.add(rss);
 
-        DynamicTableView dynamicTableView = new DynamicTableView();
-        final DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatch, eventBus, dynamicTableView);
-        dynamicTablePresenter.bind();
+        if (MMDB.bigData) {
 
-        VerticalPanel vp = new VerticalPanel() {
-            @Override
-            protected void onDetach() {
-                dynamicTablePresenter.unbind();
-            }
-        };
-        vp.add(dynamicTableView.asWidget());
-        vp.addStyleName("tableCenter");
-        mainLayoutPanel.add(vp);
+            dispatch.execute(new GetConfiguration(null, ConfigurationKey.DiscoveryURL), new AsyncCallback<ConfigurationResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+
+                @Override
+                public void onSuccess(ConfigurationResult configresult) {
+                    String discoveryURL = configresult.getConfiguration(ConfigurationKey.DiscoveryURL);
+                    if (!discoveryURL.equals("")) {
+                        discoveryURL = discoveryURL.endsWith("/") ? discoveryURL : discoveryURL + "/";
+
+                        HorizontalPanel hp = new HorizontalPanel();
+                        HTML ht = new HTML();
+                        ht.setHTML("<p style=\"font-size:large\">For large repositories such as this one, we recommend browsing via the <a href=\"" + discoveryURL + "\">SEAD ACR Discovery Interface</a>," +
+                                " which presents a hierarchical view of data in collections.</p>" +
+                                "<p style=\"font-size:small;\">(This 'flat' browsing view, which shows all data sets in a series of pages, has been turned off by an adminstrator due to collection size.)</p>");
+                        hp.add(ht);
+                        mainLayoutPanel.add(hp);
+                    }
+                }
+            });
+
+        } else {
+            // batch operations
+            BatchOperationView batchOperationView = new BatchOperationView();
+            batchOperationView.addStyleName("titlePanelRightElement");
+            BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatch, eventBus, batchOperationView, false);
+            batchOperationPresenter.bind();
+            rightHeader.add(batchOperationView);
+
+            DynamicTableView dynamicTableView = new DynamicTableView();
+            final DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatch, eventBus, dynamicTableView);
+            dynamicTablePresenter.bind();
+
+            VerticalPanel vp = new VerticalPanel() {
+                @Override
+                protected void onDetach() {
+                    dynamicTablePresenter.unbind();
+                }
+            };
+            vp.add(dynamicTableView.asWidget());
+            vp.addStyleName("tableCenter");
+            mainLayoutPanel.add(vp);
+        }
     }
 
     @Override

@@ -175,6 +175,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     public static String               _sessionCookieName               = "JSESSIONID";
 
+    public static boolean              bigData                          = false;                              //Server's bigData flag
+
     /**
      * This is the entry point method.
      */
@@ -284,7 +286,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
 
-        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription), new AsyncCallback<ConfigurationResult>() {
+        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData), new AsyncCallback<ConfigurationResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Could not get Names", caught);
@@ -292,6 +294,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
             @Override
             public void onSuccess(ConfigurationResult result) {
+                bigData = result.getConfiguration(ConfigurationKey.BigData).equalsIgnoreCase("true");
                 projectNameLabel.setText(result.getConfiguration(ConfigurationKey.ProjectName));
                 projectNameLabel.setTitle(result.getConfiguration(ConfigurationKey.ProjectDescription));
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
