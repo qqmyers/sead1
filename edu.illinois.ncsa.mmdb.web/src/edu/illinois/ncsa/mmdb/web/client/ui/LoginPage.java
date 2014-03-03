@@ -562,6 +562,14 @@ public class LoginPage extends Composite {
         Cookies.removeCookie(MMDB._sessionCookieName, path);
     }
 
+    public void setFeedback(String messageString) {
+        Label message = new Label(
+                messageString);
+        message.addStyleName("loginError");
+        feedbackPanel.clear();
+        feedbackPanel.add(message);
+    }
+
 }
 
 class Entry extends JavaScriptObject {

@@ -537,7 +537,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             @Override
             public void onDenied() {
                 if (getSessionState().isAnonymous()) {
-                    showLoginPage();
+                    if (token.startsWith("logout_st")) {
+                        showLoginPage(true);
+                    } else {
+                        showLoginPage();
+                    }
                 } else {
                     showNotEnabledPage();
                 }
@@ -639,6 +643,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      *            history token (everything after the #)
      */
     private void parseHistoryToken(String token) {
+
         if (token.startsWith("dataset")) {
             showDataset();
         } else if (token.startsWith("listDatasets") && !previousHistoryToken.startsWith("listDatasets")) {
@@ -671,17 +676,17 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showSelected(false);
         } else if (token.startsWith("administration")) {
             showAdminPage();
+        } else if (token.startsWith("logout_st")) {
+            //logout due to timeout/session issues - go back to their previous page after login ...
+            History.back();
         } else if (token.startsWith("login") || token.startsWith("logout")) {
-            //login and logout flow here
+            //just logged in, or user logged out manually (and is now logged in as anonymous)
             showListDatasetsPage();
             token = "listDatasets";
             History.newItem("listDatasets", false);
-            /* Could check previous token and try to go there if it is a 
-            * member page - login/logout would let you stay on the 
-            * collection/tag/etc. page rather than returning to 
-            * listDatasets if this were done here
-            */
+
         } else if (!previousHistoryToken.startsWith("listDatasets")) {
+
             //Default page
             showListDatasetsPage();
         }
@@ -808,11 +813,19 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * Show a set of widgets to authenticate with the server.
      */
     private void showLoginPage() {
+        showLoginPage(false);
+    }
+
+    private void showLoginPage(boolean interrupted) {
         adminBbullet.addStyleName("hidden");
         adminLink.addStyleName("hidden");
         loginStatusWidget.loggedOut();
         mainContainer.clear();
-        mainContainer.add(new LoginPage(dispatchAsync, this));
+        LoginPage lp = new LoginPage(dispatchAsync, this);
+        if (interrupted) {
+            lp.setFeedback("Session Interrupted/Timed Out. Login again to continue.");
+        }
+        mainContainer.add(lp);
     }
 
     /**
@@ -849,7 +862,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                         @Override
                         public void onFailure() {
-                            showLoginPage();
+                            showLoginPage(true);
                         }
 
                         @Override
@@ -878,7 +891,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                                 LoginPage.logout(new Command() {
                                     @Override
                                     public void execute() {
-                                        showLoginPage();
+                                        showLoginPage(true);
                                     }
                                 });
                             }
