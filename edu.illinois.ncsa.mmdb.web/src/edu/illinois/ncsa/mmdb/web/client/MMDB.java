@@ -76,6 +76,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2PropsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
@@ -174,6 +176,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private Hyperlink                  adminLink;
 
     public static String               _sessionCookieName               = "JSESSIONID";
+    public static String               _googleClientId                  = null;
 
     public static boolean              bigData                          = false;                              //Server's bigData flag
 
@@ -300,6 +303,21 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
             }
         });
+
+        dispatchAsync.execute(new GoogleOAuth2Props(), new AsyncCallback<GoogleOAuth2PropsResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error retrieving Google OAuth2 properties", caught);
+                Window.alert("Bad: " + caught);
+            }
+
+            @Override
+            public void onSuccess(GoogleOAuth2PropsResult props) {
+                _googleClientId = props.getClientId();
+            }
+        });
+
         RootPanel.get("navMenu").add(navMenu);
 
         // datasets
@@ -481,6 +499,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
              *  user sees the login screen or (if anonymous has view member age privileges),
              *  the default content screen (currently listDatasets) 
              */
+            if (!token.startsWith("logout_st")) {
+                History.newItem("listDatasets", false);
+            }
             LoginPage.authenticate(dispatchAsync, this, "anonymous", "none", new AuthenticationCallback() {
                 @Override
                 public void onFailure() {
@@ -676,17 +697,18 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showSelected(false);
         } else if (token.startsWith("administration")) {
             showAdminPage();
+
         } else if (token.startsWith("logout_st")) {
-            //logout due to timeout/session issues - go back to their previous page after login ...
+            //Successfully logged in after logout due to timeout/session issue - just go back to where the user was
             History.back();
-        } else if (token.startsWith("login") || token.startsWith("logout")) {
-            //just logged in, or user logged out manually (and is now logged in as anonymous)
+        }
+        else if (token.startsWith("login")) {
+            //just logged in
             showListDatasetsPage();
             token = "listDatasets";
             History.newItem("listDatasets", false);
 
         } else if (!previousHistoryToken.startsWith("listDatasets")) {
-
             //Default page
             showListDatasetsPage();
         }
