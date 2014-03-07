@@ -169,8 +169,10 @@ public class Mail {
                 adminEmail = admin.getEmail();
             }
             if (adminEmail != null) {
+                log.debug("Sending invite email to " + user.getEmail() + " cc'd to: " + admin.getEmail());
                 sendMessage(new String[] { user.getEmail() }, new String[] { admin.getEmail() }, subject, body);
             } else {
+                log.debug("Sending invite email to " + user.getEmail());
                 sendMessage(new String[] { user.getEmail() }, null, subject, body);
             }
         } catch (MessagingException e) {
