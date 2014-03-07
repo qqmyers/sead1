@@ -58,7 +58,6 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -910,12 +909,21 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                             @Override
                             public void onFailure() {
                                 //Start fresh
-                                LoginPage.logout(new Command() {
-                                    @Override
-                                    public void execute() {
-                                        showLoginPage(true);
-                                    }
-                                });
+                                LoginPage.authenticate(dispatchAsync, MMDB.this,
+                                        "anonymous", "none", new
+                                        AuthenticationCallback() {
+
+                                            @Override
+                                            public void onFailure() {
+                                                showLoginPage(true);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(String userUri, String
+                                                    sessionKey) {
+                                                GWT.log("logged in as anonymous");
+                                            }
+                                        });
                             }
 
                             @Override
