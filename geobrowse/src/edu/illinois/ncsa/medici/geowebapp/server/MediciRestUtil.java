@@ -25,6 +25,15 @@ public class MediciRestUtil {
 
 	protected static Log log = LogFactory.getLog(MediciRestUtil.class);
 
+	
+	/**
+	 * get all tags
+	 * 
+	 * @param mp
+	 * @return
+	 * @throws IOException
+	 * @throws JSONException
+	 */
 	public static List<String> getTags(MediciProxy mp) throws IOException,
 			JSONException {
 		List<String> tags = new ArrayList<String>();
@@ -40,6 +49,15 @@ public class MediciRestUtil {
 		return tags;
 	}
 
+	/**
+	 * Construct the List of uris by given tag
+	 * 
+	 * @param tag
+	 * @param mp
+	 * @return
+	 * @throws IOException
+	 * @throws JSONException
+	 */
 	public static List<String> getUrisByTag(String tag, MediciProxy mp)
 			throws IOException, JSONException {
 
@@ -59,6 +77,16 @@ public class MediciRestUtil {
 		return uris;
 	}
 
+	/**
+	 * get all layers 
+	 * 
+	 * @param mp
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws org.sead.acr.common.utilities.json.JSONException
+	 * @throws JSONException
+	 */
 	public static List<LayerInfo> getLayers(MediciProxy mp)
 			throws MalformedURLException, IOException,
 			org.sead.acr.common.utilities.json.JSONException, JSONException {
@@ -67,6 +95,16 @@ public class MediciRestUtil {
 		return parseLayerInfo(layers);
 	}
 
+	/**
+	 * Construct the map of uris and layerInfo as a lookup table
+	 * 
+	 * @param mp
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws org.sead.acr.common.utilities.json.JSONException
+	 * @throws JSONException
+	 */
 	public static LinkedHashMap<String, LayerInfo> getLayerInfoMap(
 			MediciProxy mp) throws MalformedURLException, IOException,
 			org.sead.acr.common.utilities.json.JSONException, JSONException {
@@ -97,14 +135,17 @@ public class MediciRestUtil {
 		LinkedHashMap<String, LayerInfo> map = getLayerInfoMap(mp);
 		List<String> urisByTag = getUrisByTag(tag, mp);
 
-		for (String uri : map.keySet()) {
-			if (urisByTag.contains(uri)) {
-				layers.add(map.get(uri));
+		// if there is no uris with the given tag, don't do anything
+		// if there is uris with the given tag, find the corresponding layers with the uri
+		if (!urisByTag.isEmpty()) {
+			for (String uri : map.keySet()) {
+				if (urisByTag.contains(uri)) {
+					layers.add(map.get(uri));
+				}
 			}
 		}
 
 		return layers;
-
 	}
 
 	/**
@@ -340,9 +381,13 @@ public class MediciRestUtil {
 		LinkedHashMap<String, LocationInfo> map = getLocationInfoMap(mp);
 		List<String> urisByTag = getUrisByTag(tag, mp);
 
-		for (String uri : map.keySet()) {
-			if (urisByTag.contains(uri)) {
-				locations.add(map.get(uri));
+		// if there is no uris with the given tag, don't do anything
+		// if there is uris with the given tag, find the corresponding loctions with the uri
+		if (!urisByTag.isEmpty()) {
+			for (String uri : map.keySet()) {
+				if (urisByTag.contains(uri)) {
+					locations.add(map.get(uri));
+				}
 			}
 		}
 

@@ -13,7 +13,6 @@ import org.gwtopenmaps.openlayers.client.control.MousePosition;
 import org.gwtopenmaps.openlayers.client.control.SelectFeature;
 import org.gwtopenmaps.openlayers.client.event.VectorFeatureSelectedListener;
 import org.gwtopenmaps.openlayers.client.event.VectorFeatureUnselectedListener;
-import org.gwtopenmaps.openlayers.client.event.VectorFeatureUnselectedListener.FeatureUnselectedEvent;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
@@ -230,6 +229,11 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 	}
 
+	/**
+	 * Rebuild the map with give tag
+	 * 
+	 * @param tag
+	 */
 	private void buildMapUi(String tag) {
 		GWT.log("** Clean up ***");
 		cleanApp();
@@ -299,6 +303,12 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		return lsw;
 	}
 
+	/**
+	 * Create tag panel with the word suggestion
+	 * 
+	 * @param oracle
+	 * @return
+	 */
 	protected FlowPanel createTagPanel(MultiWordSuggestOracle oracle) {
 		FlowPanel dp = new FlowPanel();
 
@@ -332,6 +342,12 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		return dp;
 	}
 
+	/**
+	 * Create a tag panel without word suggestion (if the rest call has been
+	 * failed to get the list of tags or there is no tags)
+	 * 
+	 * @return
+	 */
 	protected FlowPanel createTagPanel() {
 		FlowPanel dp = new FlowPanel();
 
@@ -446,9 +462,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		vp.add(new HTML("<h3>Geospatial Datasets</h3>"));
 		vp.add(new HTML("<hr>"));
 
-
 		FlexTable ft = new FlexTable();
-		
+
 		// if there is geospatial dataset, OR locations, then add the table
 		if (locations != null || layers != null) {
 			ft.setWidget(0, 0, new HTML("<b><center>Show?</center></b>"));
@@ -460,7 +475,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			dp.add(vp);
 			return dp;
 		}
-		
+
 		if (locations != null) {
 			// add location layer row
 			VerticalPanel locationTitlePanel = createLocationLayerTitle();
@@ -483,7 +498,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 					addLayerRow(ft, layerInfo.getName(), titlePanel);
 				}
 			}
-		} 
+		}
 
 		vp.add(ft);
 		dp.add(vp);
@@ -724,6 +739,11 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	// $wnd.map.zoomToExtent(bbox);
 	// }-*/;
 
+	/**
+	 * Build the map widget and initialize it
+	 * 
+	 * @param layerInfos
+	 */
 	public void buildGwtmap(LayerInfo[] layerInfos) {
 		MapOptions defaultMapOptions = new MapOptions();
 		defaultMapOptions.setProjection(EPSG_900913);
@@ -795,11 +815,11 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 		// build a style (marker) for the layer
 		Style pointStyle = new Style();
-        pointStyle.setExternalGraphic("images/red-marker.png");
-        pointStyle.setGraphicSize(32, 37);
-        pointStyle.setGraphicOffset(-16, -37); //anchor on bottom center
-        pointStyle.setFillOpacity(1.0);
-        
+		pointStyle.setExternalGraphic("images/red-marker.png");
+		pointStyle.setGraphicSize(32, 37);
+		pointStyle.setGraphicOffset(-16, -37); // anchor on bottom center
+		pointStyle.setFillOpacity(1.0);
+
 		for (int i = 0; i < locations.length; i++) {
 			// add the location to the vector layer
 			Point point = new Point(locations[i].getLon(),
@@ -814,7 +834,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			feature.setAttributes(attributes);
 
 			locationLayer.addFeature(feature);
-			
+
 			// change the map extent by the point
 			mapExtent.extend(point);
 		}
@@ -846,11 +866,11 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 						String content = "<b><a href='" + getMediciUrl()
 								+ "/#dataset?id=" + uri + "' target='new'>"
 								+ title + "</a></b>";
-						
+
 						// close button has a bug; so turn off "close" button
 						Popup popup = new FramedCloud(feature.getFID(), feature
 								.getCenterLonLat(), null, content, null, false);
-						popup.setPanMapIfOutOfView(true); 
+						popup.setPanMapIfOutOfView(true);
 						popup.setAutoSize(true);
 						feature.setPopup(popup);
 
@@ -858,17 +878,18 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 						map.addPopup(feature.getPopup());
 					}
 				});
-		//add a VectorFeatureUnselectedListener which removes the popup.
-        locationLayer.addVectorFeatureUnselectedListener(new VectorFeatureUnselectedListener()
-        {
-            public void onFeatureUnselected(FeatureUnselectedEvent eventObject)
-            {
-                GWT.log("onFeatureUnselected");
-                VectorFeature pointFeature = eventObject.getVectorFeature();
-				map.removePopup(pointFeature.getPopup());
-                pointFeature.resetPopup();
-            }
-        });
+		// add a VectorFeatureUnselectedListener which removes the popup.
+		locationLayer
+				.addVectorFeatureUnselectedListener(new VectorFeatureUnselectedListener() {
+					public void onFeatureUnselected(
+							FeatureUnselectedEvent eventObject) {
+						GWT.log("onFeatureUnselected");
+						VectorFeature pointFeature = eventObject
+								.getVectorFeature();
+						map.removePopup(pointFeature.getPopup());
+						pointFeature.resetPopup();
+					}
+				});
 		map.zoomToExtent(mapExtent);
 		mapWidget.getElement().getFirstChildElement().getStyle().setZIndex(0);
 	}
