@@ -2,6 +2,8 @@ package edu.illinois.ncsa.medici.geowebapp.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.Map;
@@ -33,9 +35,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -64,7 +63,6 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -89,6 +87,7 @@ import edu.illinois.ncsa.medici.geowebapp.shared.LocationInfo;
  */
 
 public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
+	Logger logger = Logger.getLogger(this.getClass().getName());
 	private static final String LOCATION_OF_DATASETS = "Location of Datasets";
 	private static final String EPSG_900913 = "EPSG:900913";
 	private static final String EPSG_4326 = "EPSG:4326";
@@ -96,7 +95,8 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	private static String wmsUrl = "http://localhost/geoserver/wms";
 	private static String mediciUrl = "http://localhost/acr";
 
-	private static Bounds defaultBox = new Bounds(-137.42, 19.28, -61.30, 51.62);
+	private static final Bounds defaultBox = new Bounds(-137.42, 19.28, -61.30,
+			51.62);
 
 	private final WmsProxyServiceAsync wmsProxySvc = (WmsProxyServiceAsync) GWT
 			.create(WmsProxyService.class);
@@ -123,6 +123,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	protected FlowPanel layerSwitcher;
 	private String encodedTag;
 	private Bounds mapExtent;
+	private Vector locationLayer;
 
 	public static EventBus eventBus = GWT.create(SimpleEventBus.class);
 
@@ -207,15 +208,15 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		mediciProxySvc.getTags(new AsyncCallback<String[]>() {
 			public void onSuccess(String[] result) {
 				FlowPanel tagPanel = null;
+				MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
 				if (result != null) {
-					MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
 					for (String s : result) {
 						oracle.add(s);
 					}
-					tagPanel = createTagPanel(oracle);
-				} else {
-					tagPanel = createTagPanel();
 				}
+
+				tagPanel = createTagPanel(oracle);
+
 				RootPanel.get("tag").add(tagPanel);
 				FlowPanel dp2 = createBgSwitchPanel();
 				RootPanel.get("bg").add(dp2);
@@ -235,7 +236,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	 * @param tag
 	 */
 	private void buildMapUi(String tag) {
-		GWT.log("** Clean up ***");
 		cleanApp();
 		RootPanel.get("map").setVisible(true);
 		encodedTag = null;
@@ -244,14 +244,13 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		mediciProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
 			public void onSuccess(final LayerInfo[] layers) {
 				// showMap(result);
-				GWT.log("** Building UI ***");
+				logger.log(Level.INFO, "** Building UI ***");
 				buildGwtmap(layers);
 
 				// add the layer of dataset locations
 				mediciProxySvc.getLocations(encodedTag,
 						new AsyncCallback<LocationInfo[]>() {
 							public void onSuccess(LocationInfo[] locations) {
-								GWT.log("** adding dataset location **");
 								if (locations != null) {
 									addLocationLayer(locations);
 								}
@@ -275,6 +274,9 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	}
 
 	private void cleanApp() {
+		logger.log(Level.INFO, "Cleaning up for refresh");
+		mapWidget = null;
+		map = null;
 		RootPanel.get("layers").clear();
 		RootPanel.get("info").clear();
 		RootPanel.get("map").clear();
@@ -331,54 +333,9 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 			@Override
 			public void onClick(ClickEvent event) {
 				History.newItem("tag_" + tagTextBox.getText());
-				// buildMapUi(sb.getText());
 			}
 		});
 		hp.add(tagTextBox);
-		hp.add(bt);
-
-		vp.add(hp);
-		dp.add(vp);
-		return dp;
-	}
-
-	/**
-	 * Create a tag panel without word suggestion (if the rest call has been
-	 * failed to get the list of tags or there is no tags)
-	 * 
-	 * @return
-	 */
-	protected FlowPanel createTagPanel() {
-		FlowPanel dp = new FlowPanel();
-
-		VerticalPanel vp = new VerticalPanel();
-		vp.setSpacing(10);
-
-		vp.add(new HTML("<h3>Filter by Tag</h3>"));
-		vp.add(new HTML("<hr>"));
-
-		HorizontalPanel hp = new HorizontalPanel();
-
-		final TextBox tb = new TextBox();
-		tb.addKeyPressHandler(new KeyPressHandler() {
-
-			@Override
-			public void onKeyPress(KeyPressEvent event) {
-				if (event.getCharCode() == KeyCodes.KEY_ENTER) {
-					buildMapUi(tb.getText());
-				}
-
-			}
-		});
-		Button bt = new Button("Filter");
-		bt.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				buildMapUi(tb.getText());
-			}
-		});
-		hp.add(tb);
 		hp.add(bt);
 
 		vp.add(hp);
@@ -719,7 +676,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		map.addLayer(baseLayer);
 		map.setBaseLayer(baseLayer);
 		Layer bl = map.getBaseLayer();
-		GWT.log(bl.getName());
 
 		baseLayer.redraw();
 	}
@@ -773,7 +729,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 							new Projection(layerInfo.getSrs()), new Projection(
 									EPSG_900913));
 				}
-				GWT.log("adding layers: " + name + " " + newBnd);
+				logger.log(Level.INFO, "adding layers: " + name + " " + newBnd);
 				WMSOptions options = new WMSOptions();
 				options.setProjection(EPSG_900913);
 				options.setLayerOpacity(0.8);
@@ -787,6 +743,12 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 				if (mapExtent == null)
 					mapExtent = newBnd;
 				mapExtent.extend(newBnd);
+				logger.log(
+						Level.INFO,
+						"[layer] new extent: " + mapExtent.getLowerLeftX()
+								+ "," + mapExtent.getLowerLeftY() + ","
+								+ mapExtent.getUpperRightX() + ","
+								+ mapExtent.getUpperRightY());
 
 				map.addLayer(wms);
 			}
@@ -795,9 +757,21 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		RootPanel.get("map").add(mapWidget);
 
 		if (mapExtent == null) {
-			mapExtent = defaultBox.transform(new Projection(EPSG_4326),
-					new Projection(EPSG_900913));
+			logger.log(Level.INFO,
+					"[layer] displaying default box because there is no layers");
+
+			// mapExtent = defaultBox.transform(new Projection(EPSG_4326), new
+			// Projection(EPSG_900913));
+			mapExtent = new Bounds(-15297524.424811654, 2187929.276048484,
+					-6823884.785627671, 6731706.073556644);
 		}
+		logger.log(
+				Level.INFO,
+				"[layer] final extent: " + mapExtent.getLowerLeftX() + ","
+						+ mapExtent.getLowerLeftY() + ","
+						+ mapExtent.getUpperRightX() + ","
+						+ mapExtent.getUpperRightY());
+
 		map.zoomToExtent(mapExtent);
 		mapWidget.getElement().getFirstChildElement().getStyle().setZIndex(0);
 
@@ -809,9 +783,15 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	 * @param locations
 	 */
 	public void addLocationLayer(LocationInfo[] locations) {
+		logger.log(Level.INFO, "** adding dataset location **");
+
+		if (locations == null) {
+			logger.log(Level.INFO, "** no dataset location **");
+			return;
+		}
 		// construct a vector layer from
 		VectorOptions vectorOptions = new VectorOptions();
-		Vector locationLayer = new Vector(LOCATION_OF_DATASETS, vectorOptions);
+		locationLayer = new Vector(LOCATION_OF_DATASETS, vectorOptions);
 
 		// build a style (marker) for the layer
 		Style pointStyle = new Style();
@@ -837,6 +817,12 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 
 			// change the map extent by the point
 			mapExtent.extend(point);
+			logger.log(
+					Level.INFO,
+					"[location] new extent: " + mapExtent.getLowerLeftX() + ","
+							+ mapExtent.getLowerLeftY() + ","
+							+ mapExtent.getUpperRightX() + ","
+							+ mapExtent.getUpperRightY());
 		}
 
 		// add the vector (maker) layer to the map
@@ -854,7 +840,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 					@Override
 					public void onFeatureSelected(
 							FeatureSelectedEvent eventObject) {
-						GWT.log("onFeatureSelected");
+						logger.log(Level.INFO, "onFeatureSelected");
 
 						VectorFeature feature = eventObject.getVectorFeature();
 
@@ -883,7 +869,7 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 				.addVectorFeatureUnselectedListener(new VectorFeatureUnselectedListener() {
 					public void onFeatureUnselected(
 							FeatureUnselectedEvent eventObject) {
-						GWT.log("onFeatureUnselected");
+						logger.log(Level.INFO, "onFeatureUnselected");
 						VectorFeature pointFeature = eventObject
 								.getVectorFeature();
 						map.removePopup(pointFeature.getPopup());
