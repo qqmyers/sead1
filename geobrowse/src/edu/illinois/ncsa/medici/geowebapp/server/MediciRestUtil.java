@@ -25,7 +25,6 @@ public class MediciRestUtil {
 
 	protected static Log log = LogFactory.getLog(MediciRestUtil.class);
 
-	
 	/**
 	 * get all tags
 	 * 
@@ -36,16 +35,30 @@ public class MediciRestUtil {
 	 */
 	public static List<String> getTags(MediciProxy mp) throws IOException,
 			JSONException {
+
+		String tagsJson = mp.executeAuthenticatedGet("/resteasy/tags", null);
+		log.warn("tags in json: " + tagsJson);
+
+		return parseTags(tagsJson);
+	}
+
+	/**
+	 * parse tag json and return list of string
+	 * 
+	 * @param tagsJson
+	 * @return
+	 * @throws JSONException
+	 */
+	public static List<String> parseTags(String tagsJson) throws JSONException {
 		List<String> tags = new ArrayList<String>();
 
-		String responseBody = mp
-				.executeAuthenticatedGet("/resteasy/tags", null);
+		JSONArray jsArray = new JSONArray(tagsJson);
 
-		JSONArray jsArray = new JSONArray(responseBody);
 		for (int i = 0; i < jsArray.length(); i++) {
 			String tag = jsArray.getString(i);
 			tags.add(tag);
 		}
+
 		return tags;
 	}
 
@@ -78,7 +91,7 @@ public class MediciRestUtil {
 	}
 
 	/**
-	 * get all layers 
+	 * get all layers
 	 * 
 	 * @param mp
 	 * @return
@@ -92,6 +105,8 @@ public class MediciRestUtil {
 			org.sead.acr.common.utilities.json.JSONException, JSONException {
 		String layers = mp.getSparqlJSONResponse("query="
 				+ Queries.ALL_WMS_LAYERS_INFO);
+		log.warn("layers in json: " + layers);
+
 		return parseLayerInfo(layers);
 	}
 
@@ -110,8 +125,11 @@ public class MediciRestUtil {
 			org.sead.acr.common.utilities.json.JSONException, JSONException {
 		LinkedHashMap<String, LayerInfo> map = new LinkedHashMap<String, LayerInfo>();
 		List<LayerInfo> allLayers = getLayers(mp);
-		for (LayerInfo li : allLayers) {
-			map.put(li.getUri(), li);
+
+		if (allLayers != null) {
+			for (LayerInfo li : allLayers) {
+				map.put(li.getUri(), li);
+			}
 		}
 		return map;
 	}
@@ -132,15 +150,18 @@ public class MediciRestUtil {
 			org.sead.acr.common.utilities.json.JSONException, JSONException {
 
 		List<LayerInfo> layers = new ArrayList<LayerInfo>();
-		LinkedHashMap<String, LayerInfo> map = getLayerInfoMap(mp);
 		List<String> urisByTag = getUrisByTag(tag, mp);
 
 		// if there is no uris with the given tag, don't do anything
-		// if there is uris with the given tag, find the corresponding layers with the uri
+		// if there is uris with the given tag, find the corresponding layers
+		// with the uri
 		if (!urisByTag.isEmpty()) {
-			for (String uri : map.keySet()) {
-				if (urisByTag.contains(uri)) {
-					layers.add(map.get(uri));
+			LinkedHashMap<String, LayerInfo> map = getLayerInfoMap(mp);
+			if (!map.isEmpty()) {
+				for (String uri : map.keySet()) {
+					if (urisByTag.contains(uri)) {
+						layers.add(map.get(uri));
+					}
 				}
 			}
 		}
@@ -275,7 +296,8 @@ public class MediciRestUtil {
 			org.sead.acr.common.utilities.json.JSONException, JSONException {
 		String locations = mp.getSparqlJSONResponse("query="
 				+ Queries.ALL_DATASET_LOCATION);
-		System.out.println(locations);
+		log.warn("locations in json: " + locations);
+
 		return parseLocationInfo(locations);
 	}
 
@@ -378,12 +400,14 @@ public class MediciRestUtil {
 			org.sead.acr.common.utilities.json.JSONException, JSONException {
 
 		List<LocationInfo> locations = new ArrayList<LocationInfo>();
-		LinkedHashMap<String, LocationInfo> map = getLocationInfoMap(mp);
 		List<String> urisByTag = getUrisByTag(tag, mp);
 
 		// if there is no uris with the given tag, don't do anything
-		// if there is uris with the given tag, find the corresponding loctions with the uri
+		// if there is uris with the given tag, find the corresponding loctions
+		// with the uri
 		if (!urisByTag.isEmpty()) {
+
+			LinkedHashMap<String, LocationInfo> map = getLocationInfoMap(mp);
 			for (String uri : map.keySet()) {
 				if (urisByTag.contains(uri)) {
 					locations.add(map.get(uri));
