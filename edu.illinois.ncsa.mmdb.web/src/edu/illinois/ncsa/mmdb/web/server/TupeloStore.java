@@ -160,6 +160,9 @@ public class TupeloStore {
 
     private boolean                                              useDatasetTable;
 
+    /** one time serialization of context. */
+    private String                                               stringContext;
+
     /**
      * Return singleton instance.
      * 
@@ -195,6 +198,11 @@ public class TupeloStore {
         // Tupelo store?
 
         this.context = context;
+        try {
+            stringContext = URLEncoder.encode(CETBeans.contextToNTriples(context), "UTF-8");
+        } catch (Exception e) {
+            log.error("Could not encode context as string.", e);
+        }
         createBeanSession();
     }
 
@@ -543,8 +551,6 @@ public class TupeloStore {
                 if (!createpreview) {
                     return null;
                 }
-
-                String stringContext = URLEncoder.encode(CETBeans.contextToNTriples(getBeanSession().getContext()), "UTF-8"); //$NON-NLS-1$
 
                 // create the body of the message
                 sb.append("context="); //$NON-NLS-1$
