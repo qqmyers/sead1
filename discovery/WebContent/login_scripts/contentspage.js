@@ -14,6 +14,9 @@ var index = 1;
 
 
 function populateEntries(jsonBinding) {
+//alert("len: " + JSON.stringify(jsonBinding, undefined, 4));
+
+	length=null;
 	var isDeleted = false;
 	var type = '';
 	for ( var j = 0; j < jsonBinding.length; j++) {

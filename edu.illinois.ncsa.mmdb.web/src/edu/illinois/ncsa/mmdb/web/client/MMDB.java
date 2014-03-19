@@ -58,7 +58,6 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -76,6 +75,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2PropsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
@@ -174,6 +175,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private Hyperlink                  adminLink;
 
     public static String               _sessionCookieName               = "JSESSIONID";
+    public static String               _googleClientId                  = null;
+
+    public static boolean              bigData                          = false;                              //Server's bigData flag
 
     /**
      * This is the entry point method.
@@ -284,7 +288,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
 
-        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription), new AsyncCallback<ConfigurationResult>() {
+        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData), new AsyncCallback<ConfigurationResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Could not get Names", caught);
@@ -292,11 +296,27 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
             @Override
             public void onSuccess(ConfigurationResult result) {
+                bigData = result.getConfiguration(ConfigurationKey.BigData).equalsIgnoreCase("true");
                 projectNameLabel.setText(result.getConfiguration(ConfigurationKey.ProjectName));
                 projectNameLabel.setTitle(result.getConfiguration(ConfigurationKey.ProjectDescription));
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
             }
         });
+
+        dispatchAsync.execute(new GoogleOAuth2Props(), new AsyncCallback<GoogleOAuth2PropsResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error retrieving Google OAuth2 properties", caught);
+                Window.alert("Bad: " + caught);
+            }
+
+            @Override
+            public void onSuccess(GoogleOAuth2PropsResult props) {
+                _googleClientId = props.getClientId();
+            }
+        });
+
         RootPanel.get("navMenu").add(navMenu);
 
         // datasets
@@ -478,6 +498,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
              *  user sees the login screen or (if anonymous has view member age privileges),
              *  the default content screen (currently listDatasets) 
              */
+            if (!token.startsWith("logout_st")) {
+                History.newItem("listDatasets", false);
+            }
             LoginPage.authenticate(dispatchAsync, this, "anonymous", "none", new AuthenticationCallback() {
                 @Override
                 public void onFailure() {
@@ -534,7 +557,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             @Override
             public void onDenied() {
                 if (getSessionState().isAnonymous()) {
-                    showLoginPage();
+                    if (token.startsWith("logout_st")) {
+                        showLoginPage(true);
+                    } else {
+                        showLoginPage();
+                    }
                 } else {
                     showNotEnabledPage();
                 }
@@ -636,6 +663,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      *            history token (everything after the #)
      */
     private void parseHistoryToken(String token) {
+
         if (token.startsWith("dataset")) {
             showDataset();
         } else if (token.startsWith("listDatasets") && !previousHistoryToken.startsWith("listDatasets")) {
@@ -668,16 +696,17 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showSelected(false);
         } else if (token.startsWith("administration")) {
             showAdminPage();
-        } else if (token.startsWith("login") || token.startsWith("logout")) {
-            //login and logout flow here
+
+        } else if (token.startsWith("logout_st")) {
+            //Successfully logged in after logout due to timeout/session issue - just go back to where the user was
+            History.back();
+        }
+        else if (token.startsWith("login")) {
+            //just logged in
             showListDatasetsPage();
             token = "listDatasets";
             History.newItem("listDatasets", false);
-            /* Could check previous token and try to go there if it is a 
-            * member page - login/logout would let you stay on the 
-            * collection/tag/etc. page rather than returning to 
-            * listDatasets if this were done here
-            */
+
         } else if (!previousHistoryToken.startsWith("listDatasets")) {
             //Default page
             showListDatasetsPage();
@@ -805,11 +834,19 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * Show a set of widgets to authenticate with the server.
      */
     private void showLoginPage() {
+        showLoginPage(false);
+    }
+
+    private void showLoginPage(boolean interrupted) {
         adminBbullet.addStyleName("hidden");
         adminLink.addStyleName("hidden");
         loginStatusWidget.loggedOut();
         mainContainer.clear();
-        mainContainer.add(new LoginPage(dispatchAsync, this));
+        LoginPage lp = new LoginPage(dispatchAsync, this);
+        if (interrupted) {
+            lp.setFeedback("Session Interrupted/Timed Out. Login again to continue.");
+        }
+        mainContainer.add(lp);
     }
 
     /**
@@ -846,7 +883,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                         @Override
                         public void onFailure() {
-                            showLoginPage();
+                            showLoginPage(true);
                         }
 
                         @Override
@@ -872,12 +909,21 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                             @Override
                             public void onFailure() {
                                 //Start fresh
-                                LoginPage.logout(new Command() {
-                                    @Override
-                                    public void execute() {
-                                        showLoginPage();
-                                    }
-                                });
+                                LoginPage.authenticate(dispatchAsync, MMDB.this,
+                                        "anonymous", "none", new
+                                        AuthenticationCallback() {
+
+                                            @Override
+                                            public void onFailure() {
+                                                showLoginPage(true);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(String userUri, String
+                                                    sessionKey) {
+                                                GWT.log("logged in as anonymous");
+                                            }
+                                        });
                             }
 
                             @Override

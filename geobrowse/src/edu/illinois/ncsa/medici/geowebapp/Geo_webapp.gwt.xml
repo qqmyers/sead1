@@ -16,6 +16,11 @@
 	<inherits name="com.google.gwt.http.HTTP" />
 	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
 	<inherits name="com.google.api.gwt.oauth2.OAuth2" />
+	<inherits name="com.google.gwt.logging.Logging"/>
+
+    <set-property name="gwt.logging.logLevel" value="INFO"/>
+    <set-property name="gwt.logging.enabled" value="FALSE"/>
+    <set-property name="gwt.logging.consoleHandler" value="DISABLED"/>
 
 	<!-- Specify the app entry point class. -->
 	<entry-point class='edu.illinois.ncsa.medici.geowebapp.client.Geo_webapp' />

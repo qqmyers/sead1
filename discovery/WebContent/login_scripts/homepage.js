@@ -4,6 +4,8 @@ var creator = '';
 var contact = '';
 var keyword = '';
 
+var ft; //Filtrify
+
 function homePageJsonParser(json) {
 
 	var uri = '';
@@ -38,7 +40,7 @@ function homePageJsonParser(json) {
 		singleCollection = false;
 	} catch (err) {
 	}
-
+ 
 	if (singleCollection) {
 		writeCollection('0', json, obj.sparql.results.result);
 	} else {
@@ -47,6 +49,33 @@ function homePageJsonParser(json) {
 		}
 	}
 	$("#home-loading").hide();
+	ft = $.filtrify("xmlBody", "facetedSearch", { close : true, 
+	callback : function(query, match, mismatch) {
+	
+	if(!mismatch.length) {
+		$("#legend").html("<i>Viewing all collections.</i>");
+		$("div#reset").hide();
+	} else {
+		$("div#reset").show();
+		var category, tags, i, tag, legend = "<h4>Viewing:</h4>";
+		for(category in query) {
+			tags=query[category];
+			if(tags.length) {
+				legend += "<p><span>" + category + ":</span>";
+				for(i=0; i<tags.length; i++) {
+					tag=tags[i];
+					legend+="<em>" + tag + "</em>";
+				}
+				legend += "</p>";
+			};
+		};
+		legend += "<p><i>" + match.length + " collection" + (match.length !== 1 ? "s" : "") + " found.</i></p>";
+	$("#legend").html(legend);
+	};
+	}
+});
+
+
 	// $("#xmlBody").append(($("<div/>")).html(div_html));
 }
 
@@ -105,4 +134,9 @@ function writeCollection(id, json, result) {
 			async : false
 		});
 	}
+}
+
+
+function filterreset() {
+	ft.reset();
 }

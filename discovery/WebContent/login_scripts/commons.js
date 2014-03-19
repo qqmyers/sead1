@@ -89,20 +89,28 @@ function loadProjectInfo(pI) {
 
 
 var creators = new Array();
+var creatornames = new Array();
 var contacts = new Array();
+var contactnames = new Array();
 var keywords = new Array();
 var descriptors = new Array();
+var coll_location = '';
 var abstract = '';
 var title='';
 
 function pageBiblioJsonParser(id, json) {
 
+
 creators = new Array();
 contacts = new Array();
 keywords = new Array();
+creatornames = new Array();
+contactnames=new Array();
+
 descriptors = new Array();
 title='';
 abstract='';
+coll_location = '';
 
 	var jsonString = JSON.stringify(json);
 	var obj = jQuery.parseJSON(jsonString);
@@ -117,6 +125,8 @@ abstract='';
 			}
 		}
 	}
+// FixMe: No longer needed? (since NCED coll names no longer
+// have path info).
 	if (title.indexOf("/") != -1) {
 		title = title.substring(title.lastIndexOf("/") + 1);
 	}	
@@ -124,6 +134,9 @@ abstract='';
 		$("#collectionTitle" + id).html(title);
 	}
 	if(document.title == "Contents: ") document.title = "Contents: " + title;
+
+	//Next line only used in Contents Page
+	$("#collname").html(title);
 
 	if (abstract != "") {
 		//Only set abstract if it isn't already set (homepage writes a short summary 
@@ -137,36 +150,51 @@ abstract='';
 
 	if(creators.length != 0) {
 		var creatorString = creators[0];
+		var datacreatorString = creatornames[0];
 		for(var i=1; i<creators.length; i++) {
 			creatorString+="," + creators[i];
+			datacreatorString+=", " + creatornames[i];
 		}
 		$("#authors" + id).html(
 				"<b>Authors: </b>"
 						+ creatorString);
 		$("#authors" + id).css("visibility", "visible");
+		$("#coll" + id).attr("data-authors", datacreatorString);
 	} 
 	if (contacts.length != 0) {
 		var contactString = contacts[0];
+		var datacontactString = contactnames[0];
 		for(var i=1; i<contacts.length; i++) {
 			contactString += "," + contacts[i];
+			datacontactString += ", " + contactnames[i];
 		}
 		$("#contacts" + id).html(
 				"<b>Contacts: </b>"
 						+ contactString);
 		$("#contacts" + id).css("visibility", "visible");
+		$("#coll" + id).attr("data-contacts", datacontactString);
 	} 
+	if(coll_location!="") {
+		$("#location" + id).html("<b>Location: </b>"
+						+ coll_location);
+		$("#location" + id).css("visibility", "visible");
+		$("#coll" + id).attr("data-location", coll_location);
+	}
 	if (keywords.length != 0) {
 		var keywordString = "<i><a href='" + medici + tag_Path + keywords[0]
 					+ "' target=_blank>" + keywords[0] + "</a></i>";
+		var datakeywordString = keywords[0];			
 		for(var i=1; i<keywords.length; i++) {
 			keywordString += ", <i><a href='" + medici + tag_Path + keywords[i]
 					+ "' target=_blank>" + keywords[i] + "</a></i>";
+			datakeywordString += ", " + keywords[i];	
 		}
 
 		$("#keywords" + id).html(
 				"<b>Keywords: </b>"
 						+ keywordString);
 		$("#keywords" + id).css("visibility", "visible");
+		$("#coll" + id).attr("data-Keywords", datakeywordString);
 	}
 	if (descriptors.length != 0) {
 		descriptorString="";
@@ -204,12 +232,21 @@ function getBiblioAttributesForPage(jsonBinding) {
 			var url = temp.substring(temp.indexOf(':') + 1);
 			var html="<a href='" + url + "' target=_blank>" + name
 						+ "</a> ";
+
 			if (value == 'creator') {
-				if(creators.indexOf(html) == -1) creators.push(html);
+				if(creators.indexOf(html) == -1) { 
+					creators.push(html);
+					name=name.replace(",","\\,\\");
+					creatornames.push(name);
+				}
 			} else if (value == 'contact') {
-				if(contacts.indexOf(html) == -1) contacts.push(html);
+				if(contacts.indexOf(html) == -1) {
+					contacts.push(html);
+					name=name.replace(",","\\,\\");
+					contactnames.push(name);
+				}
 			}
-		} else if ( value == 'abstract' || value == 'title') {
+		} else if ( value == 'abstract' || value == 'title' || value == 'location') {
 			var temp = jsonBinding['literal'];
 			if(value == 'abstract') {
 				if((abstract.length > 0) && (abstract != temp)) {
@@ -217,11 +254,17 @@ function getBiblioAttributesForPage(jsonBinding) {
 				} else {
 					abstract = temp;
 				}
-			} else {
+			} else if (value=="title") {
 				if((title.length > 0) && (title != temp)) {
 					alert("Multiple titles");
 				} else {
 					title = temp;
+				}
+			} else {
+				if((coll_location.length > 0) && (coll_location != temp)) {
+					alert("Multiple locations");
+				} else {
+					coll_location = temp;
 				}
 			}
 		}
@@ -253,8 +296,10 @@ function getBiblioAttributesForPage(jsonBinding) {
 }
 
 function createBlock(id, element) {
+	$(element).append($("<div/>").attr("id", "coll" + id));
+	$("#coll" + id).append($("<a/>").attr("name", id));
 
-	$(element).append(
+	$("#coll" + id).append(
 			$("<div/>").attr("id", "title" + id).css('background-color',
 					'#dfdfdf'));
 	$("#title" + id).append(
@@ -277,7 +322,7 @@ function createBlock(id, element) {
 									.attr("title", "View in ACR").attr("alt",
 											"View in ACR").attr("border", "0")
 									.css('margin-top', '-15px'))));
-	$(element).append($("<div/>").attr("class", "well").attr("id", "div" + id));
+	$("#coll" + id).append($("<div/>").attr("class", "well").attr("id", "div" + id));
 	$("#div" + id).append(
 			($("<p/>")).attr("id", "authors" + id).css("visibility", "hidden")
 					.css("margin-top", "-5px"));
@@ -289,6 +334,11 @@ function createBlock(id, element) {
 			.append(
 					($("<p/>")).attr("id", "keywords" + id).css("visibility",
 							"hidden"));
+$("#div" + id)
+			.append(
+					($("<p/>")).attr("id", "location" + id).css("visibility",
+							"hidden"));
+
 	$("#div" + id)
 			.append(
 					($("<p/>"))

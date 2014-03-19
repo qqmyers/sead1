@@ -56,6 +56,9 @@ import net.customware.gwt.dispatch.shared.Result;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMimeTypeCategories;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleUserInfoHandler;
@@ -93,27 +96,34 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
         // here we capture the URL prefix of the request, for use in canonicalization later
 
         TupeloStore.getInstance().getUriCanonicalizer(arg0);
-        //If you're not authenticated to the server, don't do the dispatch
-        if (getUser(arg0) != null) {
-            //FIXME - should not trust that client has sent the current user's name in the actions
-
-            super.service(arg0, arg1);
-        } else {
-            log.debug("Refusing a dispatch request due to lack of credentials");
-            log.debug("For call: " + arg0.getRequestURI());
-            log.debug("Val: " + arg0.getInputStream().toString());
-
-            //FIXME: Is there a lighter-weight option, e.g. to send an ActionException from here?
-            throw new ServletException("User has no server credentials");
-        }
+        super.service(arg0, arg1);
     }
 
     @Override
     public Result execute(Action<?> action) throws ActionException {
+
+        HttpServletRequest request = getThreadLocalRequest();
+        if (getUser(request) == null) {
+
+            //FIXME - should not trust that client has sent the current user's name in the actions
+
+            log.debug("executing action: " + action.getClass().getName());
+            //If you're not authenticated to the server, don't do the dispatch
+            //These are the only actions that should be allowed when there are no credentials 
+            if (!((action instanceof GoogleOAuth2Props) ||
+                    (action instanceof GetConfiguration) ||
+                    (action instanceof GoogleUserInfo) || (action instanceof GetMimeTypeCategories))) {
+                log.debug("Refusing a dispatch request due to lack of credentials: " + action.getClass().getName());
+
+                //FIXME: Is there a lighter-weight option, e.g. to send an ActionException from here?
+                throw new ActionException("User has no server credentials");
+            }
+        }
+
         // HACK required to login user on the server side
         if (action instanceof GoogleUserInfo) {
             log.debug("GoogleUserInfo is being called");
-            GoogleUserInfoHandler.setSession(getThreadLocalRequest().getSession());
+            GoogleUserInfoHandler.setSession(request.getSession(false));
         }
 
         Result execute = super.execute(action);

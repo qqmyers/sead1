@@ -89,7 +89,7 @@ public class AdminAddUserHandler implements ActionHandler<AdminAddUser, AdminAdd
         PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
         PersonBean adminBean = null;
         try {
-            pbu.get(arg0.getAdminId());
+            adminBean = pbu.get(arg0.getAdminId());
         } catch (Exception e) {
             log.warn("Could not get inviting admin. No one will be cc'd on invite");
             log.debug(e.getMessage());

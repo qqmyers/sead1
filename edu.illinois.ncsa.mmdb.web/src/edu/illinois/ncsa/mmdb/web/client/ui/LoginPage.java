@@ -80,8 +80,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2PropsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
 
@@ -255,81 +253,70 @@ public class LoginPage extends Composite {
      * Login using google oauth2.
      */
     private void googleAuthLogin(final AuthenticationCallback callback) {
-        dispatchasync.execute(new GoogleOAuth2Props(), new AsyncCallback<GoogleOAuth2PropsResult>() {
 
+        AuthRequest req = new AuthRequest(AUTH_URL, MMDB._googleClientId).withScopes(EMAIL_SCOPE, PROFILE_SCOPE);
+        Auth AUTH = Auth.get();
+        AUTH.clearAllTokens();
+        AUTH.login(req, new Callback<String, Throwable>() {
             @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Error retrieving Google OAuth2 properties", caught);
-            }
+            public void onSuccess(final String token) {
+                GWT.log("Successful login with Google OAuth2 " + token);
 
-            @Override
-            public void onSuccess(GoogleOAuth2PropsResult props) {
-                AuthRequest req = new AuthRequest(AUTH_URL, props.getClientId()).withScopes(EMAIL_SCOPE, PROFILE_SCOPE);
-                Auth AUTH = Auth.get();
-                AUTH.clearAllTokens();
-                AUTH.login(req, new Callback<String, Throwable>() {
-                    @Override
-                    public void onSuccess(final String token) {
-                        GWT.log("Successful login with Google OAuth2 " + token);
-
-                        dispatchasync.execute(new GoogleUserInfo(token), new AsyncCallback<GoogleUserInfoResult>() {
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                callback.onFailure();
-                            }
-
-                            @Override
-                            public void onSuccess(final GoogleUserInfoResult result) {
-                                if (result.isCreated()) {
-                                    GWT.log("Created new user " + result.getUserName() + " " + result.getEmail());
-                                } else {
-                                    GWT.log("User found " + result.getUserName() + " " + result.getEmail());
-                                }
-
-                                // authenticate on the server side
-                                String restUrl = "./api/authenticate";
-                                RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
-                                builder.setHeader("Content-type", "application/x-www-form-urlencoded");
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("googleAccessToken=" + token);
-                                builder.setRequestData(sb.toString());
-                                builder.setCallback(new RequestCallback() {
-                                    public void onError(Request request, Throwable exception) {
-                                        GWT.log("Error authenticating on the server side");
-                                    }
-
-                                    public void onResponseReceived(Request request, Response response) {
-                                        // success!
-                                        String sessionKey = response.getText();
-
-                                        GWT.log("REST auth status code = " + response.getStatusCode(), null);
-                                        if (response.getStatusCode() > 300) {
-                                            GWT.log("Authentication failed: " + sessionKey, null);
-                                        } else {
-                                            GWT.log("User " + result.getEmail() + " associated with session key " + sessionKey, null);
-                                            // login local
-                                            mainWindow.loginByName(result.getEmail(), sessionKey, callback);
-                                        }
-                                    }
-                                });
-
-                                try {
-                                    GWT.log("attempting to authenticate " + result.getEmail() + " against " + restUrl, null);
-                                    builder.send();
-                                } catch (RequestException x) {
-                                    callback.onFailure();
-                                }
-                            }
-                        });
-                    }
+                dispatchasync.execute(new GoogleUserInfo(token), new AsyncCallback<GoogleUserInfoResult>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure();
                     }
-                });
 
+                    @Override
+                    public void onSuccess(final GoogleUserInfoResult result) {
+                        if (result.isCreated()) {
+                            GWT.log("Created new user " + result.getUserName() + " " + result.getEmail());
+                        } else {
+                            GWT.log("User found " + result.getUserName() + " " + result.getEmail());
+                        }
+
+                        // authenticate on the server side
+                        String restUrl = "./api/authenticate";
+                        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
+                        builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("googleAccessToken=" + token);
+                        builder.setRequestData(sb.toString());
+                        builder.setCallback(new RequestCallback() {
+                            public void onError(Request request, Throwable exception) {
+                                GWT.log("Error authenticating on the server side");
+                            }
+
+                            public void onResponseReceived(Request request, Response response) {
+                                // success!
+                                String sessionKey = response.getText();
+
+                                GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                                if (response.getStatusCode() > 300) {
+                                    GWT.log("Authentication failed: " + sessionKey, null);
+                                } else {
+                                    GWT.log("User " + result.getEmail() + " associated with session key " + sessionKey, null);
+                                    // login local
+                                    mainWindow.loginByName(result.getEmail(), sessionKey, callback);
+                                }
+                            }
+                        });
+
+                        try {
+                            GWT.log("attempting to authenticate " + result.getEmail() + " against " + restUrl, null);
+                            builder.send();
+                        } catch (RequestException x) {
+                            callback.onFailure();
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure();
             }
         });
 
@@ -560,6 +547,14 @@ public class LoginPage extends Composite {
             path = path.substring(0, path.length() - 1);
         }
         Cookies.removeCookie(MMDB._sessionCookieName, path);
+    }
+
+    public void setFeedback(String messageString) {
+        Label message = new Label(
+                messageString);
+        message.addStyleName("loginError");
+        feedbackPanel.clear();
+        feedbackPanel.add(message);
     }
 
 }

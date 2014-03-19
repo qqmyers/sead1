@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>edu.illinois.ncsa.medici</groupId>
-	<artifactId>medici-ingest</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>Medici Ingester</name>
+	<groupId>org.sead.acr.tools</groupId>
+	<artifactId>acr-tools</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+	<name>ACR Tools</name>
 
 	<repositories>
 		<repository>
@@ -72,10 +72,10 @@
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.1</version>
 		</dependency>
-		<dependency>
-			<groupId>com.drewnoakes</groupId>
-			<artifactId>metadata-extractor</artifactId>
-			<version>2.4.0-beta-1</version>
-		</dependency>
 	</dependencies>
+	<description>Command-line Tools for working with Medici/ACR for bulk ingests, modifications, verfications, and statistical analyses.</description>
+	<organization>
+		<name>SEAD</name>
+		<url>http://sead-data.net/</url>
+	</organization>
 </project>

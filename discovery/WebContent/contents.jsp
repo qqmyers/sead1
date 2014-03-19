@@ -85,12 +85,26 @@ p {
 	<div style='float: right;'>
 		<button class="btn primary" id="btnLogout" style='margin-right: 10px;'>Logout</button>
 	</div>
+	<div style='margin-top: 0px;' class="page-header">
+		<h1 style="margin-left: 20px;" id="projectCollections">Collections</h1>
 	<div id="contents-loading"
-		style="width: 300px; margin-left: auto; margin-right: auto; margin-top: 200px; display: none">
+		style="float:right; width: 120px; margin-left: auto; margin-right: 10px; margin-top: -20px; display: none">
 		<img src="login_img/loading.gif"></img>
+	</div></div>
+
+<div class="row-fluid">
+	<div class="span3">
+	<div class="well" style="margin-left:20px;background-color:#DFDFDF;">
+	<h3>Viewing: <i><span id="collname"></span></i></h3>
+
+<div style="color:blue;margin-right:10px;margin-top:10px;"><a  id="returnanchor" href = "home">Return to Repository Home</a></div>
+
+</div>
+<div class="well" style="margin-left:20px;background-color:#DFDFDF;">
+<h4>About:</h4>
+<div id="projectDesc"></div>
 	</div>
-	<div
-		style="width: auto; margin-top: 30px; margin-left: 100px; margin-right: 100px; visibility: hidden;"
-		id="xmlBody"></div>
+</div>
+	<div class="span8" id="xmlBody"></div>
 </body>
 </html>
