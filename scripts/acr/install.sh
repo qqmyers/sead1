@@ -69,7 +69,7 @@ if ! grep -Fq "MMDB-1087" /etc/default/tomcat6; then
   echo "Installing fix for zoomable images in tomcat"
   echo "" >> /etc/default/tomcat6
   echo "# Fix for zoomable images (MMDB-1087)" >> /etc/default/tomcat6
-  echo "JAVA_OPTS=\"$JAVA_OPTS -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true\"" >> /etc/default/tomcat6
+  echo "JAVA_OPTS=\"\$JAVA_OPTS -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true\"" >> /etc/default/tomcat6
 fi
 
 # install geoserver
