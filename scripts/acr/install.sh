@@ -48,11 +48,11 @@ fi
 echo "Installing required jar files"
 if [ ! -e /usr/share/tomcat6/lib/mysql-connector-java-5.0.4.jar ]; then
   echo "Installing required mysql jar files"
-  wget -q -O /usr/share/tomcat6/lib/mysql-connector-java-5.0.4.jar "https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/medici-gwt-web/browse/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/mysql-connector-java-5.0.4.jar?at=sead-1.2&raw"
+  wget -q -O /usr/share/tomcat6/lib/mysql-connector-java-5.0.4.jar "https://opensource.ncsa.illinois.edu/stash/projects/MMDB/repos/medici-gwt-web/browse/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/mysql-connector-java-5.0.4.jar?at=sead-1.2&raw"
 fi
 if [ ! -e /usr/share/tomcat6/lib/xercesImpl-2.7.1.jar ]; then
   echo "Installing required xerces jar files"
-  wget -q -O /usr/share/tomcat6/lib/xercesImpl-2.7.1.jar "https://opensource.ncsa.illinois.edu/stash/projects/MED/repos/medici-gwt-web/browse/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/xercesImpl-2.7.1.jar?at=sead-1.2&raw"
+  wget -q -O /usr/share/tomcat6/lib/xercesImpl-2.7.1.jar "https://opensource.ncsa.illinois.edu/stash/projects/MMDB/repos/medici-gwt-web/browse/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/xercesImpl-2.7.1.jar?at=sead-1.2&raw"
 fi
 
 # create database
@@ -88,13 +88,17 @@ fi
 
 # install jai to speed up geoserver
 if [ ! -e /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/libclib_jiio.so ]; then
-  wget http://download.java.net/media/jai-imageio/builds/release/1.1/jai_imageio-1_1-lib-linux-amd64.tar.gz
+  if [ ! -e jai_imageio-1_1-lib-linux-amd64.tar.gz ]; then
+    wget -q -O jai_imageio-1_1-lib-linux-amd64.tar.gz http://download.java.net/media/jai-imageio/builds/release/1.1/jai_imageio-1_1-lib-linux-amd64.tar.gz
+  fi
   tar zxvf jai_imageio-1_1-lib-linux-amd64.tar.gz
   cp jai_imageio-1_1/lib/*.jar /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/ext
   cp jai_imageio-1_1/lib/libclib_jiio.so /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/
   rm -rf jai_imageio-1_1-lib-linux-amd64.tar.gz jai_imageio-1_1
 
-  wget http://download.java.net/media/jai/builds/release/1_1_3/jai-1_1_3-lib-linux-amd64.tar.gz
+  if [ ! -e jai-1_1_3-lib-linux-amd64.tar.gz ]; then
+    wget -q -O jai-1_1_3-lib-linux-amd64.tar.gz http://download.java.net/media/jai/builds/release/1_1_3/jai-1_1_3-lib-linux-amd64.tar.gz
+  fi
   tar zxvf jai-1_1_3-lib-linux-amd64.tar.gz
   cp jai-1_1_3/lib/*.jar /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/ext
   cp jai-1_1_3/lib/libmlib_jai.so /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/
@@ -112,7 +116,7 @@ echo '<Context path="/" docBase="/var/lib/tomcat6/webapps/ROOT"/>' > /etc/tomcat
 
 # install geobrowse
 echo "Installing geobrowse"
-wget -q -O geobrowse.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI0/latest/artifact/JOB1/geobrowse.war/geobrowse.war
+wget -q -O geobrowse.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI/latest/artifact/JOB1/geobrowse.war/geobrowse.war
 unzip -q -d geobrowse geobrowse.war
 echo "domain=http://${HOSTNAME}/acr" > geobrowse/WEB-INF/classes/geobrowse.properties 
 echo "enableAnonymous=${ANONYMOUS}" >> geobrowse/WEB-INF/classes/geobrowse.properties
@@ -129,7 +133,7 @@ mv geobrowse /var/lib/tomcat6/webapps
 
 # install discovery
 echo "Installing discovery"
-wget -q -O discovery.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI0/latest/artifact/JOB1/discovery.war/discovery.war
+wget -q -O discovery.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI/latest/artifact/JOB1/discovery.war/discovery.war
 unzip -q -d discovery discovery.war
 echo "domain=http://${HOSTNAME}/acr" > discovery/WEB-INF/classes/discovery.properties 
 echo "enableAnonymous=${ANONYMOUS}" >> discovery/WEB-INF/classes/discovery.properties
@@ -144,7 +148,7 @@ mv discovery /var/lib/tomcat6/webapps
 
 # install dashboard
 echo "Installing dashboard"
-wget -q -O dashboard.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI0/latest/artifact/JOB1/dashboard.war/dashboard.war
+wget -q -O dashboard.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI/latest/artifact/JOB1/dashboard.war/dashboard.war
 unzip -q -d dashboard dashboard.war
 echo "domain=http://${HOSTNAME}/acr" > dashboard/WEB-INF/classes/dashboard.properties 
 echo "enableAnonymous=${ANONYMOUS}" >> dashboard/WEB-INF/classes/dashboard.properties
