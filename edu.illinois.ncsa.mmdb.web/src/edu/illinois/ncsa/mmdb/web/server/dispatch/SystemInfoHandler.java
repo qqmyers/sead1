@@ -114,13 +114,23 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
         Unifier uf = new Unifier();
         uf.addPattern("ds", Rdf.TYPE, "type");
         uf.addPattern("ds", Files.LENGTH, "size");
-        uf.setColumnNames("ds", "type", "size");
+        uf.addPattern("ds", Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "replaced", true);
+        uf.setColumnNames("ds", "type", "size", "replaced");
         long datasetSize = 0;
         long derivedSize = 0;
         int datasetCount = 0;
         try {
-            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf, "ds") ) {
+            TupeloStore.getInstance().getContext().perform(uf);
+            for (Tuple<Resource> row : uf.getResult() ) {
                 long size = 0;
+                if (row.get(3) != null) {
+                    continue;
+                }
+                // don't count double
+                if (Beans.STORAGE_TYPE_BEAN_ENTRY.equals(row.get(1))) {
+                    continue;
+                }
+
                 if (row.get(2) != null) {
                     size = Long.parseLong(row.get(2).getString());
                     if (size < -3) {
@@ -130,8 +140,6 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
                 if (Cet.DATASET.equals(row.get(1))) {
                     datasetCount++;
                     datasetSize += size;
-                } else if (Beans.STORAGE_TYPE_BEAN_ENTRY.equals(row.get(1))) {
-                    // don't count double
                 } else {
                     derivedSize += size;
                 }
