@@ -5,18 +5,12 @@ var collection_Path = '/#collection?uri=';
 var tag_Path = '/#tag?title=';
 
 /*
-function toggleVisibility(elementID) {
-	var divElement = document.getElementById(elementID);
-	var buttonElement = document.getElementById("btn" + elementID);
-	if (divElement.style.display == "block") {
-		divElement.style.display = "none";
-		buttonElement.innerHTML = "+";
-	} else {
-		divElement.style.display = "block";
-		buttonElement.innerHTML = "-";
-	}
-}
-*/
+ * function toggleVisibility(elementID) { var divElement =
+ * document.getElementById(elementID); var buttonElement =
+ * document.getElementById("btn" + elementID); if (divElement.style.display ==
+ * "block") { divElement.style.display = "none"; buttonElement.innerHTML = "+"; }
+ * else { divElement.style.display = "block"; buttonElement.innerHTML = "-"; } }
+ */
 
 function roundNumber(num, dec) {
 	var result = Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
@@ -87,30 +81,28 @@ function loadProjectInfo(pI) {
 	}
 }
 
-
 var creators = new Array();
 var creatornames = new Array();
 var contacts = new Array();
 var contactnames = new Array();
 var keywords = new Array();
 var descriptors = new Array();
-var coll_location = '';
+var coll_location = new Array();
 var abstract = '';
-var title='';
+var title = '';
 
 function pageBiblioJsonParser(id, json) {
 
+	creators = new Array();
+	contacts = new Array();
+	keywords = new Array();
+	creatornames = new Array();
+	contactnames = new Array();
 
-creators = new Array();
-contacts = new Array();
-keywords = new Array();
-creatornames = new Array();
-contactnames=new Array();
-
-descriptors = new Array();
-title='';
-abstract='';
-coll_location = '';
+	descriptors = new Array();
+	title = '';
+	abstract = '';
+	coll_location = new Array();
 
 	var jsonString = JSON.stringify(json);
 	var obj = jQuery.parseJSON(jsonString);
@@ -125,102 +117,100 @@ coll_location = '';
 			}
 		}
 	}
-// FixMe: No longer needed? (since NCED coll names no longer
-// have path info).
+	// FixMe: No longer needed? (since NCED coll names no longer
+	// have path info).
 	if (title.indexOf("/") != -1) {
 		title = title.substring(title.lastIndexOf("/") + 1);
-	}	
-	if(!($("#collectionTitle" + id + ">a").length)) {
+	}
+	if (!($("#collectionTitle" + id + ">a").length)) {
 		$("#collectionTitle" + id).html(title);
 	}
-	if(document.title == "Contents: ") document.title = "Contents: " + title;
+	if (document.title == "Contents: ")
+		document.title = "Contents: " + title;
 
-	//Next line only used in Contents Page
+	// Next line only used in Contents Page
 	$("#collname").html(title);
 
 	if (abstract != "") {
-		//Only set abstract if it isn't already set (homepage writes a short summary 
-		//that should not be overwritten here)
-		if(!($("#abstract" + id + ">pre").html().length)) {
+		// Only set abstract if it isn't already set (homepage writes a short
+		// summary
+		// that should not be overwritten here)
+		if (!($("#abstract" + id + ">pre").html().length)) {
 			$("#abstract" + id + ">pre").html(abstract);
-			$("#abstract" + id).css("visibility","visible");
+			$("#abstract" + id).css("visibility", "visible");
 		}
 	}
-	
 
-	if(creators.length != 0) {
+	if (creators.length != 0) {
 		var creatorString = creators[0];
 		var datacreatorString = creatornames[0];
-		for(var i=1; i<creators.length; i++) {
-			creatorString+="," + creators[i];
-			datacreatorString+=", " + creatornames[i];
+		for ( var i = 1; i < creators.length; i++) {
+			creatorString += "," + creators[i];
+			datacreatorString += ", " + creatornames[i];
 		}
-		$("#authors" + id).html(
-				"<b>Authors: </b>"
-						+ creatorString);
+		$("#authors" + id).html("<b>Authors: </b>" + creatorString);
 		$("#authors" + id).css("visibility", "visible");
 		$("#coll" + id).attr("data-authors", datacreatorString);
-	} 
+	}
 	if (contacts.length != 0) {
 		var contactString = contacts[0];
 		var datacontactString = contactnames[0];
-		for(var i=1; i<contacts.length; i++) {
+		for ( var i = 1; i < contacts.length; i++) {
 			contactString += "," + contacts[i];
 			datacontactString += ", " + contactnames[i];
 		}
-		$("#contacts" + id).html(
-				"<b>Contacts: </b>"
-						+ contactString);
+		$("#contacts" + id).html("<b>Contacts: </b>" + contactString);
 		$("#contacts" + id).css("visibility", "visible");
 		$("#coll" + id).attr("data-contacts", datacontactString);
-	} 
-	if(coll_location!="") {
-		$("#location" + id).html("<b>Location: </b>"
-						+ coll_location);
+	}
+	if (coll_location.length != 0) {
+		var datalocationString = coll_location[0];
+		for ( var i = 1; i < coll_location.length; i++) {
+			datalocationString += ", " + coll_Location[i];
+		}
+		$("#location" + id).html("<b>Location: </b>" + datalocationString);
 		$("#location" + id).css("visibility", "visible");
-		$("#coll" + id).attr("data-location", coll_location);
+		$("#coll" + id).attr("data-location", datalocationString);
 	}
 	if (keywords.length != 0) {
 		var keywordString = "<i><a href='" + medici + tag_Path + keywords[0]
-					+ "' target=_blank>" + keywords[0] + "</a></i>";
-		var datakeywordString = keywords[0];			
-		for(var i=1; i<keywords.length; i++) {
+				+ "' target=_blank>" + keywords[0] + "</a></i>";
+		var datakeywordString = keywords[0];
+		for ( var i = 1; i < keywords.length; i++) {
 			keywordString += ", <i><a href='" + medici + tag_Path + keywords[i]
 					+ "' target=_blank>" + keywords[i] + "</a></i>";
-			datakeywordString += ", " + keywords[i];	
+			datakeywordString += ", " + keywords[i];
 		}
 
-		$("#keywords" + id).html(
-				"<b>Keywords: </b>"
-						+ keywordString);
+		$("#keywords" + id).html("<b>Keywords: </b>" + keywordString);
 		$("#keywords" + id).css("visibility", "visible");
 		$("#coll" + id).attr("data-Keywords", datakeywordString);
 	}
 	if (descriptors.length != 0) {
-		descriptorString="";
-		for(var i=0; i<descriptors.length; i++) {
+		descriptorString = "";
+		for ( var i = 0; i < descriptors.length; i++) {
 			descriptorString += " <a href='" + medici + dataset_Path
-					+ descriptors[i] + "' target=_blank><img class='discoveryPreview' src='"+ medici + image_Path
-					+ descriptors[i] + "' alt = 'Click to view' />"
-					+ "</a> ";
-			
+					+ descriptors[i]
+					+ "' target=_blank><img class='discoveryPreview' src='"
+					+ medici + image_Path + descriptors[i]
+					+ "' alt = 'Click to view' />" + "</a> ";
+
 		}
 
 		$("#description" + id).html(
-				"<b>Descriptive Data: </b>"
-						+ descriptorString);
+				"<b>Descriptive Data: </b>" + descriptorString);
 		$("#description" + id).css("visibility", "visible");
 	}
 }
 
 function getBiblioBindingsForPage(jsonBinding) {
-		if (jsonBinding.length == null) {
-			getBiblioAttributesForPage(jsonBinding);
-		} else {
-			for ( var i = 0; i < jsonBinding.length; i++) {
-				getBiblioAttributesForPage(jsonBinding[i]);
-			}
+	if (jsonBinding.length == null) {
+		getBiblioAttributesForPage(jsonBinding);
+	} else {
+		for ( var i = 0; i < jsonBinding.length; i++) {
+			getBiblioAttributesForPage(jsonBinding[i]);
 		}
+	}
 }
 
 function getBiblioAttributesForPage(jsonBinding) {
@@ -230,52 +220,50 @@ function getBiblioAttributesForPage(jsonBinding) {
 			var temp = jsonBinding['literal'];
 			var name = temp.substring(0, temp.indexOf(':') - 1);
 			var url = temp.substring(temp.indexOf(':') + 1);
-			var html="<a href='" + url + "' target=_blank>" + name
-						+ "</a> ";
+			var html = "<a href='" + url + "' target=_blank>" + name + "</a> ";
 
 			if (value == 'creator') {
-				if(creators.indexOf(html) == -1) { 
+				if (creators.indexOf(html) == -1) {
 					creators.push(html);
-					name=name.replace(",","\\,\\");
+					name = name.replace(",", "\\,\\");
 					creatornames.push(name);
 				}
 			} else if (value == 'contact') {
-				if(contacts.indexOf(html) == -1) {
+				if (contacts.indexOf(html) == -1) {
 					contacts.push(html);
-					name=name.replace(",","\\,\\");
+					name = name.replace(",", "\\,\\");
 					contactnames.push(name);
 				}
 			}
-		} else if ( value == 'abstract' || value == 'title' || value == 'location') {
+		} else if (value == 'abstract' || value == 'title'
+				|| value == 'location') {
 			var temp = jsonBinding['literal'];
-			if(value == 'abstract') {
-				if((abstract.length > 0) && (abstract != temp)) {
+			if (value == 'abstract') {
+				if ((abstract.length > 0) && (abstract != temp)) {
 					alert("Multiple abstracts");
 				} else {
 					abstract = temp;
 				}
-			} else if (value=="title") {
-				if((title.length > 0) && (title != temp)) {
+			} else if (value == "title") {
+				if ((title.length > 0) && (title != temp)) {
 					alert("Multiple titles");
 				} else {
 					title = temp;
 				}
 			} else {
-				if((coll_location.length > 0) && (coll_location != temp)) {
-					alert("Multiple locations");
-				} else {
-					coll_location = temp;
+				if (coll_location.indexOf(temp) == -1) {
+					coll_location.push(temp);
 				}
 			}
 		}
 
 		else if (value == 'descriptor') {
 			var tempDescriptor = jsonBinding['uri'];
-		 	if(tempDescriptor!="undefined") {
-			  if(descriptors.indexOf(tempDescriptor) == -1)  { 
-			    descriptors.push(tempDescriptor);
-  			  }
-  			}  
+			if (tempDescriptor != "undefined") {
+				if (descriptors.indexOf(tempDescriptor) == -1) {
+					descriptors.push(tempDescriptor);
+				}
+			}
 		}
 
 		else if (value == 'keyword') {
@@ -290,7 +278,8 @@ function getBiblioAttributesForPage(jsonBinding) {
 				temp = temp.replace('+', " ");
 			}
 
-			if(keywords.indexOf(temp) == -1) keywords.push(temp);
+			if (keywords.indexOf(temp) == -1)
+				keywords.push(temp);
 		}
 	});
 }
@@ -322,7 +311,8 @@ function createBlock(id, element) {
 									.attr("title", "View in ACR").attr("alt",
 											"View in ACR").attr("border", "0")
 									.css('margin-top', '-15px'))));
-	$("#coll" + id).append($("<div/>").attr("class", "well").attr("id", "div" + id));
+	$("#coll" + id).append(
+			$("<div/>").attr("class", "well").attr("id", "div" + id));
 	$("#div" + id).append(
 			($("<p/>")).attr("id", "authors" + id).css("visibility", "hidden")
 					.css("margin-top", "-5px"));
@@ -334,7 +324,7 @@ function createBlock(id, element) {
 			.append(
 					($("<p/>")).attr("id", "keywords" + id).css("visibility",
 							"hidden"));
-$("#div" + id)
+	$("#div" + id)
 			.append(
 					($("<p/>")).attr("id", "location" + id).css("visibility",
 							"hidden"));
@@ -352,13 +342,12 @@ $("#div" + id)
 }
 
 function SSOLogout() {
-	
 
 	var remoteURL = medici + "/api/logout";
 	$.ajax({
-		async: false,
+		async : false,
 		type : "GET",
 		url : remoteURL,
 		dataType : "text"
-	});	
+	});
 }
