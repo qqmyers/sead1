@@ -166,8 +166,9 @@ function pageBiblioJsonParser(id, json) {
 	if (coll_location.length != 0) {
 		var datalocationString = coll_location[0];
 		for ( var i = 1; i < coll_location.length; i++) {
-			datalocationString += ", " + coll_Location[i];
+			datalocationString += ", " + coll_location[i];
 		}
+
 		$("#location" + id).html("<b>Location: </b>" + datalocationString);
 		$("#location" + id).css("visibility", "visible");
 		$("#coll" + id).attr("data-location", datalocationString);
