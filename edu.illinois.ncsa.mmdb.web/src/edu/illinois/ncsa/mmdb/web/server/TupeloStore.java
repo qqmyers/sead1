@@ -88,7 +88,7 @@ import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.rdf.terms.Tags;
-import org.tupeloproject.util.ListTable;
+import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tables;
 import org.tupeloproject.util.Tuple;
 
@@ -853,7 +853,7 @@ public class TupeloStore {
      * @return the results, with deleted items excluded
      * @throws OperatorException
      */
-    public ListTable<Resource> unifyExcludeDeleted(Unifier u, String subjectVar) throws OperatorException {
+    public Table<Resource> unifyExcludeDeleted(Unifier u, String subjectVar) throws OperatorException {
         List<String> newColumnNames = new LinkedList<String>(u.getColumnNames());
         newColumnNames.add("_ued");
         u.setColumnNames(newColumnNames);
@@ -865,6 +865,8 @@ public class TupeloStore {
         */
         u.addPattern(subjectVar, Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "_ued", true);
         if (u.getOffset() != 0 || u.getLimit() != Unifier.UNLIMITED) {
+            //Ordering in all cases would simplify logic in FilteredIterator and avoid having to retrieve deleted items (after the first one)
+            // - is it worth the cost?
             List<OrderBy> newOrderBy = new LinkedList<OrderBy>();
             OrderBy ued = new OrderBy();
             ued.setAscending(true); // FIXME should be false when SQL contexts order correctly, i.e., when TUP-481 is fixed
@@ -877,13 +879,8 @@ public class TupeloStore {
         }
         getContext().perform(u);
         int cix = u.getColumnNames().size() - 1;
-        ListTable<Resource> result = new ListTable<Resource>();
-        for (Tuple<Resource> row : u.getResult() ) {
-            if (row.get(cix) == null) {
-                result.addRow(row);
-            }
-        }
-        return result;
+
+        return new FilteredTable<Resource>(u.getResult(), cix);
     }
 
     Map<String, String> uploadHistory = new HashMap<String, String>();
