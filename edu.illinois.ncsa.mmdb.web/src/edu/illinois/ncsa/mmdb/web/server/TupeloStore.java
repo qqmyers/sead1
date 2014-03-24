@@ -99,6 +99,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectAction;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestServlet;
+import edu.illinois.ncsa.mmdb.web.server.util.FilteredTable;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
