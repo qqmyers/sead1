@@ -6,7 +6,7 @@ cd /home/medici
 
 rm -rf war medici.war /var/lib/tomcat6/webapps/acr
 
-wget -q -O medici.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI2/latest/artifact/JOB1/medici.war/medici.war
+wget -q -O medici.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI/latest/artifact/JOB1/medici.war/medici.war
 
 unzip -q -d war medici.war
 cp acr.log4j  war/WEB-INF/classes/log4j.properties
