@@ -530,6 +530,8 @@ public class TupeloStore {
         if (rerun || lastRequest == null || lastRequest < System.currentTimeMillis() - 120000) {
             log.debug("EXTRACT PREVIEWS " + uri);
             lastExtractionRequest.put(uri, System.currentTimeMillis());
+            OutputStreamWriter wr = null;
+            BufferedReader rd = null;
             try {
                 StringBuilder sb = new StringBuilder();
 
@@ -580,6 +582,7 @@ public class TupeloStore {
 
                 URL url = new URL(server);
                 URLConnection conn = url.openConnection();
+
                 conn.setReadTimeout(1000);
                 if (conn.getReadTimeout() != 1000) {
                     log.info("Could not set read timeout! (set to " + conn.getReadTimeout() + ").");
@@ -587,13 +590,13 @@ public class TupeloStore {
 
                 // send post
                 conn.setDoOutput(true);
-                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                wr = new OutputStreamWriter(conn.getOutputStream());
                 wr.write(sb.toString());
                 wr.flush();
                 wr.close();
 
                 // Get the response
-                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 String line;
                 sb = new StringBuilder();
                 while ((line = rd.readLine()) != null) {
@@ -608,6 +611,23 @@ public class TupeloStore {
                 //result = extractorpbu.callExtractor(extractionServiceURL, uri, null, rerun);
             } catch (Exception e) {
                 log.error(String.format("Extraction service %s unavailable", server), e);
+            } finally {
+                if (rd != null) {
+                    try {
+                        rd.close();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                if (wr != null) {
+                    try {
+                        wr.close();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
             }
             log.debug("EXTRACT PREVIEWS " + uri + " DONE");
         }
