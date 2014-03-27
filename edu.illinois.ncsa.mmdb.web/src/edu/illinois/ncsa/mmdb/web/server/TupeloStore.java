@@ -226,8 +226,8 @@ public class TupeloStore {
             }
             try {
                 beanExp.put(beanSession.getSubject(bean), exp);
-            } catch (Exception x) {
-                x.printStackTrace();
+            } catch (OperatorException x) {
+                log.error("Could not expire bean" + bean, x);
             }
         }
     }
@@ -617,16 +617,14 @@ public class TupeloStore {
                     try {
                         rd.close();
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        log.error("Could not close readstream.", e);
                     }
                 }
                 if (wr != null) {
                     try {
                         wr.close();
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        log.error("Could not close writestream.", e);
                     }
                 }
             }
@@ -725,7 +723,7 @@ public class TupeloStore {
                             }
                         }
                     } catch (Exception x) {
-                        x.printStackTrace();
+                        log.error("Could not execute unifier.", x);
                     }
                     try {
                         Unifier u = new Unifier();
@@ -747,7 +745,7 @@ public class TupeloStore {
                             }
                         }
                     } catch (Exception x) {
-                        x.printStackTrace();
+                        log.error("Could not execute unifier.", x);
                     }
                     return null;
                 }
@@ -1043,7 +1041,7 @@ public class TupeloStore {
                     break;
                 }
             } catch (OperatorException x) {
-                x.printStackTrace();
+                log.error("Could not run unifier.", x);
                 // FIXME deal with busy state
             }
         }
@@ -1076,7 +1074,7 @@ public class TupeloStore {
                     break;
                 }
             } catch (OperatorException x) {
-                x.printStackTrace();
+                log.error("Could not run unifier.", x);
                 // FIXME deal with busy state
             }
         }
@@ -1134,21 +1132,6 @@ public class TupeloStore {
                 }
                 long then = System.currentTimeMillis();
                 log.info("indexing " + toIndex.size() + " dataset(s) @ " + new Date());
-                /*                for (String datasetUri : toIndex ) {
-                                    Unifier uf = new Unifier();
-                                    uf.addPattern(Resource.uriRef(datasetUri), MMDB.METADATA_HASSECTION, "section");
-                                    uf.setColumnNames("section");
-                                    try {
-                                        getContext().perform(uf);
-                                        Set<String> sections = new HashSet<String>();
-                                        for (Tuple<Resource> row : uf.getResult() ) {
-                                            sections.add(row.get(0).getString());
-                                        }
-                                        getSearch().deindex(sections);
-                                    } catch (OperatorException e) {
-                                        log.warn("Could not find/remove sections.", e);
-                                    }
-                    */
                 getSearch().indexAll(toIndex);
                 //           }
                 long elapsed = System.currentTimeMillis() - then;
@@ -1322,8 +1305,7 @@ public class TupeloStore {
         try {
             getContext().perform(uf);
         } catch (OperatorException e) {
-            log.warn("pingContext Failed!");
-            e.printStackTrace();
+            log.warn("pingContext Failed!", e);
         }
     }
 }

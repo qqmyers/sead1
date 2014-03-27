@@ -21,7 +21,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/arq-2.8.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.1-20110314.041314-1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-beanutils-1.8.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-dbcp-1.4.jar"/>
@@ -44,7 +43,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jdom-1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jena-2.6.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-1.2.14.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-2.4.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/mail-1.4.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/milton-api-1.6.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/milton-servlet-1.6.4.jar"/>
@@ -80,6 +78,9 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/google-http-client-jackson-1.16.0-rc.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/ACRCommon.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-4.7.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-4.7.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
