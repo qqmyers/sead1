@@ -93,6 +93,7 @@ import org.tupeloproject.util.Tables;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.SearchableTextIndex;
+import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthorizedAction;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectAction;
@@ -225,8 +226,8 @@ public class TupeloStore {
             }
             try {
                 beanExp.put(beanSession.getSubject(bean), exp);
-            } catch (Exception x) {
-                x.printStackTrace();
+            } catch (OperatorException x) {
+                log.error("Could not expire bean" + bean, x);
             }
         }
     }
@@ -530,6 +531,8 @@ public class TupeloStore {
         if (rerun || lastRequest == null || lastRequest < System.currentTimeMillis() - 120000) {
             log.debug("EXTRACT PREVIEWS " + uri);
             lastExtractionRequest.put(uri, System.currentTimeMillis());
+            OutputStreamWriter wr = null;
+            BufferedReader rd = null;
             try {
                 StringBuilder sb = new StringBuilder();
 
@@ -580,6 +583,7 @@ public class TupeloStore {
 
                 URL url = new URL(server);
                 URLConnection conn = url.openConnection();
+
                 conn.setReadTimeout(1000);
                 if (conn.getReadTimeout() != 1000) {
                     log.info("Could not set read timeout! (set to " + conn.getReadTimeout() + ").");
@@ -587,13 +591,13 @@ public class TupeloStore {
 
                 // send post
                 conn.setDoOutput(true);
-                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                wr = new OutputStreamWriter(conn.getOutputStream());
                 wr.write(sb.toString());
                 wr.flush();
                 wr.close();
 
                 // Get the response
-                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 String line;
                 sb = new StringBuilder();
                 while ((line = rd.readLine()) != null) {
@@ -608,6 +612,21 @@ public class TupeloStore {
                 //result = extractorpbu.callExtractor(extractionServiceURL, uri, null, rerun);
             } catch (Exception e) {
                 log.error(String.format("Extraction service %s unavailable", server), e);
+            } finally {
+                if (rd != null) {
+                    try {
+                        rd.close();
+                    } catch (IOException e) {
+                        log.error("Could not close readstream.", e);
+                    }
+                }
+                if (wr != null) {
+                    try {
+                        wr.close();
+                    } catch (IOException e) {
+                        log.error("Could not close writestream.", e);
+                    }
+                }
             }
             log.debug("EXTRACT PREVIEWS " + uri + " DONE");
         }
@@ -704,7 +723,7 @@ public class TupeloStore {
                             }
                         }
                     } catch (Exception x) {
-                        x.printStackTrace();
+                        log.error("Could not execute unifier.", x);
                     }
                     try {
                         Unifier u = new Unifier();
@@ -726,7 +745,7 @@ public class TupeloStore {
                             }
                         }
                     } catch (Exception x) {
-                        x.printStackTrace();
+                        log.error("Could not execute unifier.", x);
                     }
                     return null;
                 }
@@ -1022,7 +1041,7 @@ public class TupeloStore {
                     break;
                 }
             } catch (OperatorException x) {
-                x.printStackTrace();
+                log.error("Could not run unifier.", x);
                 // FIXME deal with busy state
             }
         }
@@ -1055,7 +1074,7 @@ public class TupeloStore {
                     break;
                 }
             } catch (OperatorException x) {
-                x.printStackTrace();
+                log.error("Could not run unifier.", x);
                 // FIXME deal with busy state
             }
         }
@@ -1069,10 +1088,13 @@ public class TupeloStore {
             // copy the queues, so we don't block
             List<String> toDeindex = new LinkedList<String>();
             List<String> toIndex = new LinkedList<String>();
+            List<String> moreToDeindex = new LinkedList<String>();
+
             synchronized (deindexQueue) {
                 synchronized (indexQueue) {
                     toIndex.addAll(indexQueue);
                     toDeindex.addAll(deindexQueue);
+                    toDeindex.addAll(indexQueue);
                     indexQueue.clear();
                     deindexQueue.clear();
                 }
@@ -1093,11 +1115,13 @@ public class TupeloStore {
                         for (Tuple<Resource> row : uf.getResult() ) {
                             sections.add(row.get(0).getString());
                         }
-                        getSearch().deindex(sections);
+                        moreToDeindex.addAll(sections);
+                        //getSearch().deindex(sections);
                     } catch (OperatorException e) {
                         log.warn("Could not find/remove sections.", e);
                     }
                 }
+                toDeindex.addAll(moreToDeindex);
                 getSearch().deindex(toDeindex);
                 log.info("deindexed " + toDeindex.size() + " deleted dataset(s) @ " + new Date());
             }
@@ -1108,28 +1132,14 @@ public class TupeloStore {
                 }
                 long then = System.currentTimeMillis();
                 log.info("indexing " + toIndex.size() + " dataset(s) @ " + new Date());
-                for (String datasetUri : toIndex ) {
-                    Unifier uf = new Unifier();
-                    uf.addPattern(Resource.uriRef(datasetUri), MMDB.METADATA_HASSECTION, "section");
-                    uf.setColumnNames("section");
-                    try {
-                        getContext().perform(uf);
-                        Set<String> sections = new HashSet<String>();
-                        for (Tuple<Resource> row : uf.getResult() ) {
-                            sections.add(row.get(0).getString());
-                        }
-                        getSearch().deindex(sections);
-                    } catch (OperatorException e) {
-                        log.warn("Could not find/remove sections.", e);
-                    }
-
-                    getSearch().reindex(datasetUri);
-                }
+                getSearch().indexAll(toIndex);
+                //           }
                 long elapsed = System.currentTimeMillis() - then;
                 double minutes = elapsed / 60000.0;
                 log.info("indexed " + toIndex.size() + " dataset(s) in " + minutes + " minutes");
             }
         }
+        ((LuceneTextIndex<String>) getSearch()).refreshIndexSearcher();
     }
 
     // ----------------------------------------------------------------------
@@ -1295,8 +1305,7 @@ public class TupeloStore {
         try {
             getContext().perform(uf);
         } catch (OperatorException e) {
-            log.warn("pingContext Failed!");
-            e.printStackTrace();
+            log.warn("pingContext Failed!", e);
         }
     }
 }
