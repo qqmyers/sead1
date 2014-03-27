@@ -58,6 +58,7 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.tupeloproject.kernel.ContentStoreContext;
 import org.tupeloproject.kernel.Context;
@@ -393,9 +394,9 @@ public class ContextSetupListener implements ServletContextListener {
         folder.mkdirs();
 
         log.info("Lucene search index directory = " + folder.getAbsolutePath());
-        FSDirectory dir = FSDirectory.getDirectory(folder);
+        Directory dir = FSDirectory.open(folder);
         IndexWriter.unlock(dir);
-        LuceneTextIndex<String> search = new LuceneTextIndex<String>(folder);
+        LuceneTextIndex<String> search = new LuceneTextIndex<String>(dir);
         search.setTextExtractor(new SearchableThingTextExtractor());
         search.setIdGetter(new SearchableThingIdGetter());
         TupeloStore.getInstance().setSearch(search);

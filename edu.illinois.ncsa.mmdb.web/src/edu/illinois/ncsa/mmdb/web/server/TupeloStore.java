@@ -93,6 +93,7 @@ import org.tupeloproject.util.Tables;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.SearchableTextIndex;
+import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthorizedAction;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectAction;
@@ -1069,10 +1070,13 @@ public class TupeloStore {
             // copy the queues, so we don't block
             List<String> toDeindex = new LinkedList<String>();
             List<String> toIndex = new LinkedList<String>();
+            List<String> moreToDeindex = new LinkedList<String>();
+
             synchronized (deindexQueue) {
                 synchronized (indexQueue) {
                     toIndex.addAll(indexQueue);
                     toDeindex.addAll(deindexQueue);
+                    toDeindex.addAll(indexQueue);
                     indexQueue.clear();
                     deindexQueue.clear();
                 }
@@ -1093,11 +1097,13 @@ public class TupeloStore {
                         for (Tuple<Resource> row : uf.getResult() ) {
                             sections.add(row.get(0).getString());
                         }
-                        getSearch().deindex(sections);
+                        moreToDeindex.addAll(sections);
+                        //getSearch().deindex(sections);
                     } catch (OperatorException e) {
                         log.warn("Could not find/remove sections.", e);
                     }
                 }
+                toDeindex.addAll(moreToDeindex);
                 getSearch().deindex(toDeindex);
                 log.info("deindexed " + toDeindex.size() + " deleted dataset(s) @ " + new Date());
             }
@@ -1108,28 +1114,29 @@ public class TupeloStore {
                 }
                 long then = System.currentTimeMillis();
                 log.info("indexing " + toIndex.size() + " dataset(s) @ " + new Date());
-                for (String datasetUri : toIndex ) {
-                    Unifier uf = new Unifier();
-                    uf.addPattern(Resource.uriRef(datasetUri), MMDB.METADATA_HASSECTION, "section");
-                    uf.setColumnNames("section");
-                    try {
-                        getContext().perform(uf);
-                        Set<String> sections = new HashSet<String>();
-                        for (Tuple<Resource> row : uf.getResult() ) {
-                            sections.add(row.get(0).getString());
-                        }
-                        getSearch().deindex(sections);
-                    } catch (OperatorException e) {
-                        log.warn("Could not find/remove sections.", e);
-                    }
-
-                    getSearch().reindex(datasetUri);
-                }
+                /*                for (String datasetUri : toIndex ) {
+                                    Unifier uf = new Unifier();
+                                    uf.addPattern(Resource.uriRef(datasetUri), MMDB.METADATA_HASSECTION, "section");
+                                    uf.setColumnNames("section");
+                                    try {
+                                        getContext().perform(uf);
+                                        Set<String> sections = new HashSet<String>();
+                                        for (Tuple<Resource> row : uf.getResult() ) {
+                                            sections.add(row.get(0).getString());
+                                        }
+                                        getSearch().deindex(sections);
+                                    } catch (OperatorException e) {
+                                        log.warn("Could not find/remove sections.", e);
+                                    }
+                    */
+                getSearch().indexAll(toIndex);
+                //           }
                 long elapsed = System.currentTimeMillis() - then;
                 double minutes = elapsed / 60000.0;
                 log.info("indexed " + toIndex.size() + " dataset(s) in " + minutes + " minutes");
             }
         }
+        ((LuceneTextIndex<String>) getSearch()).refreshIndexSearcher();
     }
 
     // ----------------------------------------------------------------------
