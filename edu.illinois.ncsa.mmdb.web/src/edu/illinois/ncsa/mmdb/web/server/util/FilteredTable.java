@@ -15,6 +15,7 @@ public class FilteredTable<T> implements Table<T> {
         filterOn = filterColumn;
     }
 
+    @SuppressWarnings("unchecked")
     public Iterator<Tuple<T>> iterator() {
         // TODO Auto-generated method stub
         Iterator<Tuple<T>> fi = (Iterator<Tuple<T>>) new FilteredIterator<T>(resultTable.iterator(), filterOn);

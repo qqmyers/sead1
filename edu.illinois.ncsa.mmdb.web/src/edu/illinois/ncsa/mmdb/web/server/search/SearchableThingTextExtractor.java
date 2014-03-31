@@ -39,24 +39,21 @@
 package edu.illinois.ncsa.mmdb.web.server.search;
 
 import java.io.StringWriter;
+import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeSet;
-
-import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.SubjectFacade;
-import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Dc;
@@ -65,272 +62,262 @@ import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.TextExtractor;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.NamedThing;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.GetCollectionsHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
-import edu.uiuc.ncsa.cet.bean.CETBean;
-import edu.uiuc.ncsa.cet.bean.CollectionBean;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.tupelo.AnnotationBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
-import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class SearchableThingTextExtractor implements TextExtractor<String> {
-    Log log = LogFactory.getLog(SearchableThingTextExtractor.class);
+    Log                        log        = LogFactory.getLog(SearchableThingTextExtractor.class);
 
-    BeanSession getBeanSession() throws OperatorException, ClassNotFoundException {
-        return CETBeans.createBeanSession(TupeloStore.getInstance().getContext());
+    private static BeanSession managedBS  = null;
+    private static int         reuseLimit = -1;
+    private static int         reuseCount = 0;
+
+    private BeanSession getBeanSession() throws ClassNotFoundException, OperatorException
+    {
+        BeanSession bs = managedBS;
+        if (bs != null) {
+            //Check to see if we've reached the reuse limit
+            reuseCount++;
+            if ((reuseLimit != -1) && (reuseCount >= reuseLimit)) {
+                //Hit the limit, so close the old beansession and create a new one
+                deleteSession();
+                createSession(reuseLimit);
+                bs = managedBS;
+            }
+        }
+        if (bs == null) {//Have no session or error creating it
+            bs = CETBeans.createBeanSession(TupeloStore.getInstance().getContext());
+        }
+        return bs;
     }
 
-    Object fetchBean(String uri) throws OperatorException, ClassNotFoundException {
-        BeanSession bs = getBeanSession();
-        try {
-            return bs.fetchBean(Resource.uriRef(uri));
-        } finally {
+    private void closeBeanSession(BeanSession bs) {
+        if ((managedBS == null) && (bs != null)) {
             bs.close();
+            reuseCount = 0;
         }
     }
 
+    Object fetchBean(Resource res) {
+        BeanSession bs = null;
+        try {
+            bs = getBeanSession();
+            return bs.fetchBean(res);
+        } catch (OperatorException e) {
+            log.error("Could not retrieve bean for uri: " + res.getString(), e);
+
+        } catch (ClassNotFoundException e) {
+            log.error("Could not retrieve bean for uri: " + res.getString(), e);
+
+        } finally {
+            closeBeanSession(bs);
+        }
+        return null;
+    }
+
+    /*When many objects will be indexed, the caller can create/delete a managed beansession to take advantage of bean caching 
+     * and reduce beansession initialization costs. The caller MUST call delete when done or the session will be held open...
+     *  
+     */
+    public void createSession(int limit) {
+        try {
+            managedBS = CETBeans.createBeanSession(TupeloStore.getInstance().getContext());
+            reuseLimit = limit;
+        } catch (ClassNotFoundException e) {
+            log.warn("Could not create bean session for indexing: ", e);
+        } catch (OperatorException e) {
+            log.warn("Could not create bean session for indexing: ", e);
+        }
+    }
+
+    public void deleteSession() {
+        if (managedBS != null) {
+
+            managedBS.close();
+            managedBS = null;
+        }
+    }
+
+    /**
+     * Extract a text representation of an mmdb thing (e.g., a dataset or
+     * collection)
+     * for full-text indexing purposes.
+     */
+
+    @SuppressWarnings("deprecation")
     @Override
     /**
-     * Extract a text representation of an mmdb thing (e.g., a dataset or collection)
-     * for full-text indexing purposes.
+     * This method extracts text from the item with id = uri. The method scans all triples
+     *  and makes no assumptions about what the uri represents, but the expectation is that it is
+     * a Dataset or Collection and a warning will be logged if that's not true.
+     * By default, literal triples are indexed. In some special cases, the value will be further processed.
+     * For non-literal values, the special cases where the type of object is known will also be processed, 
+     * in a type-specific way, to index additional text. 
      */
     public Map<String, String> extractText(String uri) {
         Map<String, String> result = new HashMap<String, String>();
         assert uri != null;
-        String text = "";
+        //List of user metadata fields - Memoized - cached for an hour
+        HashSet<String> userMetadataPredicates = ListUserMetadataFieldsHandler.listUserMetadataFields(false).getPredicates();
+        HashSet<String> extractorMetadataPredicates = getExtractorMetadataPredicates();
+        SubjectFacade s = TupeloStore.getInstance().getContext().getSubject(Resource.uriRef(uri));
+        List<String> resultStrings = new LinkedList<String>();
         try {
-            Object bean = fetchBean(uri);
-            if (bean instanceof CETBean) {
-                text = text((CETBean) bean);
-                bean = null;
-                /*log.debug("indexed text = " + text); // FIXME debug*/
-                result.put(uri, text);
+            for (Triple t : s.getTriples() ) {
+                Resource pred = t.getPredicate();
+                Resource obj = t.getObject();
+                String val = obj.getString();
+                if (obj.isLiteral()) {
+                    //DC.TITLE, Rdfs.LABEL are special cases where we split pieces... 
+                    if (pred.equals(Dc.TITLE) && val != null) {
+                        val = atomize(val);
+                    }
+                    if (pred.equals(Rdfs.LABEL) && val != null) {
+                        val = atomize(val);
+                    }
+                    if (val != null) {
+                        resultStrings.add(val);
+                    }
+                } else {
+                    if (pred.equals(MMDB.METADATA_HASSECTION)) {
+                        String sm = getSectionMetadata(obj);
+                        if (sm != null) {
+                            //Add text and associate with section ID/uri
+                            result.put(obj.getString(), sm);
+                        }
+                    } else if (userMetadataPredicates.contains(pred.getString())) {
+                        //Should this be  just literals instead?
+                        resultStrings.add(val);
+                    } else if (extractorMetadataPredicates.contains(pred.getString())) {
+                        //Should this be  just literals instead?
+                        resultStrings.add(val);
+                    } else if (pred.getString().equals("tag:cet.ncsa.uiuc.edu,2008:/tag#")) {
+                        resultStrings.add(URLDecoder.decode(val));
+                    } else if (pred.equals(Dc.CREATOR)) { //The uploader (PersonBean.getCreator())
+                        resultStrings.add(getUploaderText(obj));
+                    } else if (pred.equals(Namespaces.dcTerms("creator"))) {// Creators (PersonBean.getContributors())
+                        resultStrings.add(getCreatorsText(val));
+                    } else if (pred.getString().equals("http://cet.ncsa.uiuc.edu/2007/annotation/hasAnnotation")) {//annotations/comments
+                        resultStrings.add(getAnnotationText(obj));
+                    }
+                }
+
             }
-        } catch (Exception x) {
-            log.warn("unexpected bean session behavior: " + x.getMessage());
-            return result;
+
+            result.put(uri, unsplit(resultStrings));
+        } catch (OperatorException e) {
+            log.warn("Error retrieving triples during indexing:" + e);
+
         }
-        // it's either not a bean or not a CETBean
-        try {
-            /*log.debug("indexed text = " + text); // FIXME debug*/
-            result.put(uri, text(uri));
-        } catch (Exception x) { // something's wrong
-            x.printStackTrace();
-            return result;
-        }
-        result.putAll(getSectionMetadata(uri));
         return result;
     }
 
-    String text(String uri) throws OperatorException, ClassNotFoundException {
-        return unsplit(title(uri), tags(uri), authors(uri), annotations(uri), collections(uri), metadata(uri), userMetadata(uri), allLiterals(uri));
+    private String getCreatorsText(String creator) {
+        //Creators are either plain strings, or string with " : " + vivoURL + <usersVivoID> appended.
+        //For text indexing, strip the vivo part
+        String vivoURL = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VIVOIDENTIFIERURL);
+        int index = creator.indexOf(vivoURL);
+        if (index != -1) {
+            creator = creator.substring(0, index - 3);
+        }
+        return creator;
     }
 
-    String text(CETBean bean) throws OperatorException, ClassNotFoundException {
-        return unsplit(title(bean), tags(bean), authors(bean), annotations(bean), collections(bean), metadata(bean), userMetadata(bean), allLiterals(bean));
-    }
-
-    String authors(DatasetBean bean) {
-        List<PersonBean> contributors = new LinkedList<PersonBean>();
-        contributors.add(bean.getCreator());
-        contributors.addAll(bean.getContributors());
+    private String getUploaderText(Resource uri) {
+        PersonBean person = null;
         List<String> names = new LinkedList<String>();
-        for (PersonBean person : contributors ) {
-            if (person != null) {
-                String name = person.getName();
+
+        person = (PersonBean) fetchBean(uri);
+        if (person != null) {
+            String name = person.getName();
+            if (name != null) {
+                names.add(name);
+            }
+            String email = person.getEmail();
+            if (email != null) {
+                names.add(email);
+                names.add(atomize(email));
+            }
+        }
+        return unsplit(names);
+    }
+
+    String getAnnotationText(Resource aResource) {
+        AnnotationBean ann = null;
+        List<String> text = new LinkedList<String>();
+        BeanSession bs = null;
+        try {
+            bs = getBeanSession();
+            ann = (AnnotationBean) bs.fetchBean(aResource);
+        } catch (OperatorException e) {
+            log.error("Error retrieving annotation bean for indexing", e);
+        } catch (ClassNotFoundException e) {
+            log.error("Error retrieving annotation bean for indexing", e);
+        }
+        if (ann != null) {
+            String desc = ann.getDescription();
+            if (desc != null) {
+                text.add(desc);
+            }
+            PersonBean creator = ann.getCreator();
+            if (creator != null) {
+                String name = creator.getName();
                 if (name != null) {
-                    names.add(name);
+                    text.add(name);
                 }
-                String email = person.getEmail();
+                String email = creator.getEmail();
                 if (email != null) {
-                    names.add(email);
-                    names.add(atomize(email));
+                    text.add(email);
+                    text.add(atomize(email));
                 }
             }
         }
-        return unsplit(names);
+        closeBeanSession(bs);
+        return unsplit(text);
     }
 
-    // 
-    String authors(CETBean bean) {
-        if (bean instanceof DatasetBean) {
-            return authors((DatasetBean) bean);
-        } else {
-            log.warn("unexpected bean class " + bean.getClass());
-            return "";
-        }
-    }
-
-    // aaagh, unsafe casts
-    String authors(String uri) {
+    String getSectionMetadata(Resource uri) {
+        Unifier u = new Unifier();
+        u.setColumnNames("d", "t");
+        u.addPattern(uri, MMDB.SECTION_TEXT, "t");
+        u.addPattern(uri, Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "d");
         try {
-            Object bean = fetchBean(uri);
-            if (bean instanceof DatasetBean) {
-                String authors = authors((DatasetBean) bean);
-                bean = null;
-                return authors;
-            } else {
-                log.error(uri + " is not a bean, no authors extracted");
-            }
-        } catch (Exception x) {
-        }
-        return "";
-    }
-
-    String tags(CETBean bean) throws OperatorException, ClassNotFoundException {
-        return tags(bean.getUri());
-    }
-
-    String tags(String uri) throws OperatorException, ClassNotFoundException {
-        BeanSession bs = getBeanSession();
-        TagEventBeanUtil tebu = new TagEventBeanUtil(bs);
-        TreeSet<String> tags = new TreeSet<String>();
-        try {
-            tags.addAll(tebu.getTags(uri));
-            return unsplit(tags);
-        } catch (OperatorException e) {
-            e.printStackTrace();
-            return "";
-        } finally {
-            bs.close();
-        }
-    }
-
-    String annotations(CETBean bean) throws OperatorException, ClassNotFoundException {
-        return annotations(bean.getUri());
-    }
-
-    String annotations(String uri) throws OperatorException, ClassNotFoundException {
-        BeanSession bs = getBeanSession();
-        AnnotationBeanUtil abu = new AnnotationBeanUtil(bs);
-        List<String> annotations = new LinkedList<String>();
-        try {
-            for (AnnotationBean annotation : abu.getAssociationsFor(uri) ) {
-                annotations.add(annotation.getDescription());
+            TupeloStore.getInstance().getContext().perform(u);
+            for (Tuple<Resource> row : u.getResult() ) {
+                if (row.get(0) == null) {
+                    return row.get(1).getString();
+                }
             }
         } catch (OperatorException e) {
-            e.printStackTrace();
-            return "";
-        } finally {
-            bs.close();
+            log.warn("Exception indexing section text: " + e);
         }
-        return unsplit(annotations);
+        return null;
     }
 
-    String collections(CETBean bean) {
-        return collections(bean.getUri());
-    }
-
-    String collections(String uri) {
-        GetCollectionsResult r = GetCollectionsHandler.getCollections(new GetCollections(uri));
-        List<String> names = new LinkedList<String>();
-        for (CollectionBean c : r.getCollections() ) {
-            names.add(c.getTitle());
-        }
-        return unsplit(names);
-    }
-
-    String metadata(CETBean bean) {
-        return metadata(bean.getUri());
-    }
-
-    String metadata(String uri) {
-        Resource sub = Resource.resource(uri);
+    private HashSet<String> getExtractorMetadataPredicates() {
 
         Unifier uf = new Unifier();
-        uf.addPattern(sub, "predicate", "value"); //$NON-NLS-1$ //$NON-NLS-2$
         uf.addPattern("predicate", Rdf.TYPE, MMDB.METADATA_TYPE); //$NON-NLS-1$
-        uf.setColumnNames("value"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        uf.setColumnNames("predicate"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-        List<String> allValues = new LinkedList<String>();
+        HashSet<String> result = new HashSet<String>();
 
         try {
             TupeloStore.getInstance().getContext().perform(uf);
 
             for (Tuple<Resource> row : uf.getResult() ) {
-                if (row.get(0) != null) {
-                    allValues.add(row.get(0).getString());
-                }
+                result.add(row.get(0).getString());
             }
         } catch (OperatorException e1) {
-            log.error("Error getting metadata for " + uri, e1);
+            log.error("Error getting extractor metadata predicates for indexing: ", e1);
         }
 
-        return unsplit(allValues);
-    }
-
-    String userMetadata(CETBean bean) {
-        return userMetadata(bean.getUri());
-    }
-
-    String userMetadata(String uri) {
-        GetUserMetadataFields gumf = new GetUserMetadataFields(uri);
-        GetUserMetadataFieldsResult gumfr;
-        try {
-            gumfr = (new GetUserMetadataFieldsHandler()).execute(gumf, null);
-        } catch (ActionException e) {
-            e.printStackTrace();
-            return "";
-        }
-        List<String> allValues = new LinkedList<String>();
-        for (Entry<String, Collection<UserMetadataValue>> entry : gumfr.getValues().entrySet() ) {
-            //log.debug(entry.getKey()+"="+entry.getValue());
-            for (NamedThing v : entry.getValue() ) {
-                allValues.add(v.getName());
-            }
-        }
-        return unsplit(allValues);
-    }
-
-    Map<String, String> getSectionMetadata(String uri) {
-        Map<String, String> sm = new HashMap<String, String>();
-        Unifier u = new Unifier();
-        u.setColumnNames("s", "t");
-        u.addPattern(Resource.uriRef(uri), MMDB.METADATA_HASSECTION, "s");
-        u.addPattern("s", MMDB.SECTION_TEXT, "t");
-        try {
-            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "s") ) {
-                sm.put(row.get(0).getString(), row.get(1).getString());
-            }
-        } catch (OperatorException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return sm;
-    }
-
-    String allLiterals(CETBean bean) {
-        return allLiterals(bean.getUri());
-    }
-
-    String allLiterals(String uri) {
-        if (uri == null) {
-            return "";
-        }
-        SubjectFacade s = TupeloStore.getInstance().getContext().getSubject(Resource.uriRef(uri));
-        List<String> results = new LinkedList<String>();
-        try {
-            for (Triple t : s.getTriples() ) {
-                if (t.getObject().isLiteral()) {
-                    results.add(t.getObject().getString());
-                }
-            }
-        } catch (OperatorException e) {
-            return "";
-        }
-        /*System.out.println("all literals = " + results); // FIXME debug*/
-        return unsplit(results);
+        return result;
     }
 
     // split a string into words on non-whitespace boundaries
@@ -340,22 +327,6 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
         e = e.replaceAll("([0-9]+)", " $1 ");
         e = e.replaceAll("  +", " ");
         return title + " " + e;
-    }
-
-    String title(CETBean bean) throws OperatorException, ClassNotFoundException {
-        return title(bean.getUri());
-    }
-
-    String title(String uri) throws OperatorException, ClassNotFoundException {
-        BeanSession bs = getBeanSession();
-        try {
-            Thing thing = bs.getThingSession().fetchThing(Resource.uriRef(uri));
-            String dcTitle = thing.getString(Dc.TITLE);
-            String rdfsLabel = thing.getString(Rdfs.LABEL);
-            return atomize((dcTitle != null ? dcTitle : "") + (rdfsLabel != null ? " " + rdfsLabel : ""));
-        } finally {
-            bs.close();
-        }
     }
 
     // why am I writing this.
