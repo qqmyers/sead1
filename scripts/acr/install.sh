@@ -94,6 +94,7 @@ if [ ! -e /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/libclib_jiio.so ]; the
   tar zxvf jai_imageio-1_1-lib-linux-amd64.tar.gz
   cp jai_imageio-1_1/lib/*.jar /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/ext
   cp jai_imageio-1_1/lib/libclib_jiio.so /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/
+  chmod 644 /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/ext/jai_imageio.jar
   rm -rf jai_imageio-1_1-lib-linux-amd64.tar.gz jai_imageio-1_1
 
   if [ ! -e jai-1_1_3-lib-linux-amd64.tar.gz ]; then
