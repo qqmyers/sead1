@@ -79,8 +79,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2PropsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue.JiraIssueType;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
-import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
-import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetOrCollectionEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetOrCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AllDatasetsUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
@@ -113,6 +113,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.admin.AdminPage;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
@@ -396,13 +397,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * @param eventBus
      */
     private void logEvent(HandlerManager eventBus) {
-        eventBus.addHandler(AddNewDatasetEvent.TYPE,
-                new AddNewDatasetHandler() {
+        eventBus.addHandler(AddNewDatasetOrCollectionEvent.TYPE,
+                new AddNewDatasetOrCollectionHandler() {
 
                     @Override
-                    public void onAddNewDataset(AddNewDatasetEvent event) {
+                    public void onAddNewDatasetOrCollection(AddNewDatasetOrCollectionEvent event) {
                         GWT.log("Event Logging: Add new dataset event "
-                                + event.getDataset().getTitle(), null);
+                                + ((CETBean.TitledBean) event.getBean()).getTitle(), null);
 
                     }
                 });
