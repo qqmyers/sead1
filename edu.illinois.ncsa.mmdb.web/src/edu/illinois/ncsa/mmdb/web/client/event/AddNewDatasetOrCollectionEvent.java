@@ -39,44 +39,67 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.client.dispatch;
+package edu.illinois.ncsa.mmdb.web.client.event;
 
-import net.customware.gwt.dispatch.shared.Result;
+import com.google.gwt.event.shared.GwtEvent;
+
 import edu.uiuc.ncsa.cet.bean.CETBean;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
+import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
- * Return information about a hit from a search.
+ * Triggered when a new dataset is added to the interface.
  * 
- * @author Luigi Marini <lmarini@ncsa.illinois.edu>
+ * @author Luigi Marini
  * 
  */
-public class GetSearchHitResult implements Result {
+public class AddNewDatasetOrCollectionEvent extends GwtEvent<AddNewDatasetOrCollectionHandler> {
 
-    private static final long serialVersionUID = -86488013616325220L;
+    public static final GwtEvent.Type<AddNewDatasetOrCollectionHandler> TYPE          = new GwtEvent.Type<AddNewDatasetOrCollectionHandler>();
 
-    private CETBean           bean;
+    private CETBean                                                     bean          = new DatasetBean();
+    private boolean                                                     isDataset     = true;
+    private String                                                      previewUri    = null;
 
-    private String            previewUri       = null;
+    private int                                                         position      = -1;
+    /** Optional section information **/
+    private String                                                      sectionUri    = null;
+    /** Optional section information **/
+    private String                                                      sectionLabel  = null;
+    /** Optional section information **/
+    private String                                                      sectionMarker = null;
 
-    private String            sectionUri;
-
-    private String            sectionLabel;
-
-    private String            sectionMarker;
-
-    public GetSearchHitResult() {
+    @Override
+    protected void dispatch(AddNewDatasetOrCollectionHandler handler) {
+        handler.onAddNewDatasetOrCollection(this);
     }
 
-    public GetSearchHitResult(CETBean hitbean) {
-        setBean(hitbean);
+    @Override
+    public GwtEvent.Type<AddNewDatasetOrCollectionHandler> getAssociatedType() {
+        return TYPE;
     }
 
-    public void setBean(CETBean hitbean) {
-        this.bean = hitbean;
+    public void setDatasetOrCollection(CETBean bean) {
+        this.bean = bean;
+        if (bean instanceof CollectionBean) {
+            isDataset = false;
+        }
+    }
+
+    public boolean isDataset() {
+        return isDataset;
     }
 
     public CETBean getBean() {
         return bean;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    public int getPosition() {
+        return position;
     }
 
     public void setSectionUri(String sectionUri) {
@@ -110,4 +133,5 @@ public class GetSearchHitResult implements Result {
     public void setPreviewUri(String previewUri) {
         this.previewUri = previewUri;
     }
+
 }

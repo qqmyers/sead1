@@ -41,9 +41,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -62,11 +59,11 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHit;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHitResult;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PreviewBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.PreviewImageBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
@@ -80,10 +77,11 @@ public class GetSearchHitHandler implements ActionHandler<GetSearchHit, GetSearc
     /** Commons logging **/
     private static Log log = LogFactory.getLog(GetSearchHitHandler.class);
 
+    @SuppressWarnings("deprecation")
     @Override
     public GetSearchHitResult execute(GetSearchHit action, ExecutionContext arg1) throws ActionException {
 
-        String datasetURI = null;
+        String beanURI = null;
         GetSearchHitResult result = new GetSearchHitResult();
         Resource userUri = action.getUser() == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(action.getUser());
 
@@ -91,17 +89,20 @@ public class GetSearchHitHandler implements ActionHandler<GetSearchHit, GetSearc
         Unifier u = new Unifier();
         u.setColumnNames("type");
         u.addPattern(Resource.uriRef(action.getUri()), Rdf.TYPE, "type");
-        log.debug("Search hit: " + action.getUri());
         try {
             TupeloStore.getInstance().getContext().perform(u);
         } catch (OperatorException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            log.error("Operator exception getting search hit: ", e1);
         }
+        boolean isCollection = false;
+
         for (Tuple<Resource> row : u.getResult() ) {
             Resource type = row.get(0);
             if (Cet.DATASET.equals(type)) {
-                datasetURI = action.getUri();
+                beanURI = action.getUri();
+            } else if (CollectionBeanUtil.COLLECTION_TYPE.equals(type)) {
+                beanURI = action.getUri();
+                isCollection = true;
             } else if (MMDB.SECTION_TYPE.equals(type)) {
                 // get section info
                 Unifier us = new Unifier();
@@ -115,34 +116,50 @@ public class GetSearchHitHandler implements ActionHandler<GetSearchHit, GetSearc
                     log.error("Error querying for information about section of dataset " + action.getUri(), e);
                 }
                 for (Tuple<Resource> row2 : us.getResult() ) {
-                    datasetURI = row2.get(0).getString();
+                    beanURI = row2.get(0).getString();
                     result.setSectionUri(action.getUri());
                     result.setSectionLabel(row2.get(1).getString());
                     result.setSectionMarker(row2.get(2).getString());
                 }
             }
         }
-
-        if (datasetURI != null) {
-            if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(userUri, Resource.uriRef(datasetURI))) {
-                throw new ActionException("No access to dataset.");
+        if (beanURI != null) {
+            if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(userUri, Resource.uriRef(beanURI))) {
+                log.debug("No access to: " + beanURI);
+                throw new ActionException("No access to dataset or collection.");
             }
             BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-            DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-            try {
-                DatasetBean datasetBean = dbu.get(datasetURI);
-                datasetBean = dbu.update(datasetBean);
-                result.setDataset(datasetBean);
-                Collection<PreviewBean> previews = new HashSet<PreviewBean>();
+            if (!isCollection) {
+                try {
+                    DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
 
-                // image previews
-                previews.addAll(new PreviewImageBeanUtil(beanSession).getAssociationsFor(action.getUri()));
-                result.setPreviews(previews);
-            } catch (Exception e) {
-                log.error("Error retrieving dataset " + action.getUri(), e);
-                throw new ActionException(e);
+                    DatasetBean datasetBean = dbu.get(beanURI);
+                    datasetBean = dbu.update(datasetBean);
+                    result.setBean(datasetBean);
+                    result.setPreviewUri(beanURI);
+
+                } catch (Exception e) {
+                    log.error("Error retrieving dataset " + action.getUri(), e);
+                    throw new ActionException(e);
+                }
+            } else {
+                try {
+                    CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+                    CollectionBean collectionBean = cbu.get(beanURI);
+                    beanSession.update(collectionBean, true);
+                    collectionBean.setMemberCount(TupeloStore.getInstance().countDatasets(beanURI, false));
+                    result.setBean(collectionBean);
+
+                    String badgeUri = TupeloStore.getInstance().getBadge(beanURI);
+                    result.setPreviewUri(badgeUri);
+                } catch (Exception e) {
+                    log.error("Error retrieving collection " + action.getUri(), e);
+                    throw new ActionException(e);
+                }
+
             }
         }
+        log.debug("Returning hit: " + result.getBean().getUri());
         return result;
     }
 

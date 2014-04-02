@@ -44,13 +44,14 @@ import com.google.gwt.event.shared.HandlerManager;
 
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetOrCollectionEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetOrCollectionHandler;
+import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
 import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
-public class PagingSearchResultsTablePresenter extends PagingTablePresenter<CETBean> {
+public class PagingBeanTablePresenter extends PagingTablePresenter<CETBean> {
 
-    public PagingSearchResultsTablePresenter(Display<CETBean> display, DispatchAsync dispatchAsync, HandlerManager eventBus) {
-        super(display, dispatchAsync, eventBus);
+    public PagingBeanTablePresenter(Display<CETBean> display, DispatchAsync service, HandlerManager eventBus) {
+        super(display, service, eventBus);
     }
 
     @Override
@@ -63,13 +64,24 @@ public class PagingSearchResultsTablePresenter extends PagingTablePresenter<CETB
                     @Override
                     public void onAddNewDatasetOrCollection(AddNewDatasetOrCollectionEvent event) {
                         CETBean bean = event.getBean();
-                        String id = bean.getUri();
-                        int position = event.getPosition();
-                        String mimetype = "Collection";
-                        if (event.isDataset()) {
-                            mimetype = ((DatasetBean) bean).getMimeType();
+                        String id = event.getPreviewUri();
+                        String type = "Collection";
+                        if (bean instanceof DatasetBean) {
+                            type = ContentCategory.getCategory(((DatasetBean) bean).getMimeType(), service);
                         }
-                        display.addItem(id, bean, mimetype, position);
+                        if (event.getPosition() == -1) {
+                            if (event.getSectionUri() == null) {
+                                display.addItem(id, bean, type);
+                            } else {
+                                display.addItem(id, bean, type, event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
+                            }
+                        } else {
+                            if (event.getSectionUri() == null) {
+                                display.addItem(id, bean, type, event.getPosition());
+                            } else {
+                                display.addItem(id, bean, type, event.getPosition(), event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
+                            }
+                        }
                     }
                 });
     }

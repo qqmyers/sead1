@@ -51,16 +51,17 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.PagingDatasetTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.PagingBeanTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.PagingSearchResultsTableView;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHit;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSearchHitResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Search;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchWithFilter;
-import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetOrCollectionEvent;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
+import edu.uiuc.ncsa.cet.bean.CETBean;
+import edu.uiuc.ncsa.cet.bean.CETBean.TitledBean;
 
 /**
  * Page to handle search results.
@@ -75,7 +76,7 @@ public class SearchResultsPage extends Page {
     private final HandlerManager         eventbus;
     private HTML                         queryText;
     private final String                 query;
-    private PagingDatasetTablePresenter  datasetTablePresenter;
+    private PagingBeanTablePresenter     datasetTablePresenter;
     final String                         httpString = "http://";
 
     public SearchResultsPage(DispatchAsync dispatchasync, HandlerManager eventbus) {
@@ -107,6 +108,7 @@ public class SearchResultsPage extends Page {
             queryText = new HTML("Your search for <b>" + query
                     + "</b> returned the following results:");
             mainLayoutPanel.add(queryText);
+
             queryServer(query);
         }
     }
@@ -180,11 +182,11 @@ public class SearchResultsPage extends Page {
     }
 
     protected void showResults(SearchResult result) {
-        // paged table of datasets
+        // paged table of datasets/collections
         datasetTableView = new PagingSearchResultsTableView(dispatchAsync);
         datasetTableView.addStyleName("datasetTable");
         datasetTablePresenter =
-                new PagingDatasetTablePresenter(datasetTableView, dispatchAsync, eventbus);
+                new PagingBeanTablePresenter(datasetTableView, dispatchAsync, eventbus);
         datasetTablePresenter.bind();
         mainLayoutPanel.add(datasetTableView);
 
@@ -200,19 +202,20 @@ public class SearchResultsPage extends Page {
 
                         @Override
                         public void onSuccess(GetSearchHitResult result) {
-                            AddNewDatasetEvent event = new AddNewDatasetEvent();
+                            AddNewDatasetOrCollectionEvent event = new AddNewDatasetOrCollectionEvent();
                             if (result.getSectionUri() != null) {
                                 event.setSectionUri(result.getSectionUri());
                                 event.setSectionLabel(result.getSectionLabel());
                                 event.setSectionMarker(result.getSectionMarker());
                             }
-                            if (result.getDataset() != null) {
-                                DatasetBean dataset = result.getDataset();
-                                event.setDataset(dataset);
+                            CETBean cetBean = result.getBean();
+                            if (cetBean != null) {
+                                event.setDatasetOrCollection(cetBean);
+                                event.setPreviewUri(result.getPreviewUri());
                                 int position = hits.indexOf(hit);
                                 event.setPosition(position);
                                 MMDB.eventBus.fireEvent(event);
-                                GWT.log("Event add dataset " + dataset.getTitle() +
+                                GWT.log("Event add dataset/collection " + ((TitledBean) cetBean).getTitle() +
                                         " with position " + position + " sent", null);
                             }
                         }

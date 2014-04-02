@@ -36,41 +36,20 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
-package edu.illinois.ncsa.mmdb.web.client;
+/**
+ * 
+ */
+package edu.illinois.ncsa.mmdb.web.client.event;
 
-import net.customware.gwt.dispatch.client.DispatchAsync;
+import com.google.gwt.event.shared.EventHandler;
 
-import com.google.gwt.event.shared.HandlerManager;
+/**
+ * Triggered when a new dataset is added to the interface.
+ * 
+ * @author Luigi Marini
+ * 
+ */
+public interface AddNewDatasetOrCollectionHandler extends EventHandler {
 
-import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetOrCollectionEvent;
-import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetOrCollectionHandler;
-import edu.uiuc.ncsa.cet.bean.CETBean;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
-
-public class PagingSearchResultsTablePresenter extends PagingTablePresenter<CETBean> {
-
-    public PagingSearchResultsTablePresenter(Display<CETBean> display, DispatchAsync dispatchAsync, HandlerManager eventBus) {
-        super(display, dispatchAsync, eventBus);
-    }
-
-    @Override
-    public void bind() {
-
-        super.bind();
-
-        eventBus.addHandler(AddNewDatasetOrCollectionEvent.TYPE,
-                new AddNewDatasetOrCollectionHandler() {
-                    @Override
-                    public void onAddNewDatasetOrCollection(AddNewDatasetOrCollectionEvent event) {
-                        CETBean bean = event.getBean();
-                        String id = bean.getUri();
-                        int position = event.getPosition();
-                        String mimetype = "Collection";
-                        if (event.isDataset()) {
-                            mimetype = ((DatasetBean) bean).getMimeType();
-                        }
-                        display.addItem(id, bean, mimetype, position);
-                    }
-                });
-    }
+    void onAddNewDatasetOrCollection(AddNewDatasetOrCollectionEvent event);
 }

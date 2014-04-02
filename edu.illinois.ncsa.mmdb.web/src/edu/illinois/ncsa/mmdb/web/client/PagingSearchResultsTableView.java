@@ -45,6 +45,8 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
+import edu.uiuc.ncsa.cet.bean.CETBean;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
@@ -53,7 +55,7 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  * @author Joe Futrelle
  * 
  */
-public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean> {
+public class PagingSearchResultsTableView extends PagingDcThingView<CETBean> {
     DatasetTableView            table;
     int                         numberOfPages = 0;
     int                         pageOffset    = 0;
@@ -157,33 +159,48 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
     }
 
     @Override
-    public void addItem(String uri, DatasetBean dataset, String type) {
-        String title = dataset.getTitle();
-        Date date = dataset.getDate();
-        String previewUri = "/api/image/preview/small/" + uri;
-        String size = TextFormatter.humanBytes(dataset.getSize());
-        String authorsId = "Anonymous";
-        if (dataset.getCreator() != null) {
-            authorsId = dataset.getCreator().getName();
-        }
-        table.addRow(uri, title, type, date, previewUri, size, authorsId);
+    public void addItem(String uri, CETBean bean, String type) {
+        addItem(uri, bean, type, -1);
     }
 
     @Override
-    public void addItem(String uri, DatasetBean dataset, String type, int position) {
-        String title = dataset.getTitle();
-        Date date = dataset.getDate();
-        String previewUri = "/api/image/preview/small/" + uri;
-        String size = TextFormatter.humanBytes(dataset.getSize());
-        String authorsId = "Anonymous";
-        if (dataset.getCreator() != null) {
-            authorsId = dataset.getCreator().getName();
+    public void addItem(String previewId, CETBean bean, String type, int position) {
+        String title = null;
+        Date date = null;
+        String previewUri = "/api/image/preview/small/" + previewId;
+        String uri = bean.getUri();
+        String size = null;
+        String authorsId = null;
+        if (bean instanceof DatasetBean) {
+            DatasetBean db = (DatasetBean) bean;
+            title = db.getTitle();
+            date = db.getDate();
+            size = TextFormatter.humanBytes(db.getSize());
+            authorsId = "Anonymous";
+            if (db.getCreator() != null) {
+                authorsId = db.getCreator().getName();
+            }
+        } else if (bean instanceof CollectionBean) {
+            CollectionBean cb = (CollectionBean) bean;
+            title = cb.getTitle();
+            date = cb.getCreationDate();
+            size = (cb.getMemberCount() + " members");
+            authorsId = "Anonymous";
+            if (cb.getCreator() != null) {
+                authorsId = cb.getCreator().getName();
+            }
         }
-        table.insertRow(position, uri, title, type, date, previewUri, size, authorsId);
+
+        if (position == -1) {
+            table.addRow(uri, title, type, date, previewUri, size, authorsId);
+        } else {
+            table.insertRow(position, uri, title, type, date, previewUri, size, authorsId);
+        }
     }
 
     @Override
-    public void addItem(String uri, DatasetBean dataset, String type, int position, String sectionUri, String sectionLabel, String sectionMarker) {
+    public void addItem(String uri, CETBean bean, String type, int position, String sectionUri, String sectionLabel, String sectionMarker) {
+        DatasetBean dataset = (DatasetBean) bean; //only datasets should have sections
         String title = dataset.getTitle();
         Date date = dataset.getDate();
         String previewUri = "/api/image/preview/small/" + uri;
@@ -196,8 +213,9 @@ public class PagingSearchResultsTableView extends PagingDcThingView<DatasetBean>
     }
 
     @Override
-    public void addItem(String uri, DatasetBean item, String type, String sectionUri, String sectionLabel, String sectionMarker) {
+    public void addItem(String uri, CETBean item, String type, String sectionUri, String sectionLabel, String sectionMarker) {
         // TODO Auto-generated method stub
+        //Evidently not used?
 
     }
 }
