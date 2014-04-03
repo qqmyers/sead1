@@ -39,17 +39,35 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.client.event;
+package edu.illinois.ncsa.mmdb.web.client;
 
-import com.google.gwt.event.shared.EventHandler;
+import java.util.Date;
+import java.util.List;
+
+import com.google.gwt.event.dom.client.HasClickHandlers;
+
+import edu.illinois.ncsa.mmdb.web.client.mvp.View;
 
 /**
- * Triggered when a new dataset is added to the interface.
+ * List datasets in repository.
  * 
  * @author Luigi Marini
- *
  */
-public interface AddNewDatasetHandler extends EventHandler {
+public interface Display extends View {
+    /** add a row to this multi-dataset view */
+    void addRow(String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId);
 
-	void onAddNewDataset(AddNewDatasetEvent event);
+    void insertRow(int position, String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId);
+
+    /** signal that no more rows will be added on this page */
+    void doneAddingRows();
+
+    /** return the optimal page size for this view */
+    int getPageSize();
+
+    List<String> getSelectedDatasets();
+
+    HasClickHandlers getShowSelectedAnchor();
+
+    void insertRow(int row, String id, String title, String mimeType, Date date, String previewUri, String size, String authorsId, String sectionUri, String sectionLabel, String sectionMarker);
 }

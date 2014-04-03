@@ -78,9 +78,9 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/google-http-client-jackson-1.16.0-rc.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/ACRCommon.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang3-3.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.1-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-4.7.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-4.7.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.2-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

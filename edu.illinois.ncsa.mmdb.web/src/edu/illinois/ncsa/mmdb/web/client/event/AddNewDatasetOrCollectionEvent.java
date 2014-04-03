@@ -41,12 +41,11 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.event;
 
-import java.util.Collection;
-
 import com.google.gwt.event.shared.GwtEvent;
 
+import edu.uiuc.ncsa.cet.bean.CETBean;
+import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
 
 /**
  * Triggered when a new dataset is added to the interface.
@@ -54,46 +53,45 @@ import edu.uiuc.ncsa.cet.bean.PreviewImageBean;
  * @author Luigi Marini
  * 
  */
-public class AddNewDatasetEvent extends GwtEvent<AddNewDatasetHandler> {
+public class AddNewDatasetOrCollectionEvent extends GwtEvent<AddNewDatasetOrCollectionHandler> {
 
-    public static final GwtEvent.Type<AddNewDatasetHandler> TYPE     = new GwtEvent.Type<AddNewDatasetHandler>();
+    public static final GwtEvent.Type<AddNewDatasetOrCollectionHandler> TYPE          = new GwtEvent.Type<AddNewDatasetOrCollectionHandler>();
 
-    private DatasetBean                                     dataset  = new DatasetBean();
+    private CETBean                                                     bean          = new DatasetBean();
+    private boolean                                                     isDataset     = true;
+    private String                                                      previewUri    = null;
 
-    private Collection<PreviewImageBean>                    previews;
-
-    private int                                             position = -1;
+    private int                                                         position      = -1;
     /** Optional section information **/
-    private String                                          sectionUri;
+    private String                                                      sectionUri    = null;
     /** Optional section information **/
-    private String                                          sectionLabel;
+    private String                                                      sectionLabel  = null;
     /** Optional section information **/
-    private String                                          sectionMarker;
+    private String                                                      sectionMarker = null;
 
     @Override
-    protected void dispatch(AddNewDatasetHandler handler) {
-        handler.onAddNewDataset(this);
+    protected void dispatch(AddNewDatasetOrCollectionHandler handler) {
+        handler.onAddNewDatasetOrCollection(this);
     }
 
     @Override
-    public GwtEvent.Type<AddNewDatasetHandler> getAssociatedType() {
+    public GwtEvent.Type<AddNewDatasetOrCollectionHandler> getAssociatedType() {
         return TYPE;
     }
 
-    public void setDataset(DatasetBean dataset) {
-        this.dataset = dataset;
+    public void setDatasetOrCollection(CETBean bean) {
+        this.bean = bean;
+        if (bean instanceof CollectionBean) {
+            isDataset = false;
+        }
     }
 
-    public DatasetBean getDataset() {
-        return dataset;
+    public boolean isDataset() {
+        return isDataset;
     }
 
-    public void setPreviews(Collection<PreviewImageBean> previews) {
-        this.previews = previews;
-    }
-
-    public Collection<PreviewImageBean> getPreviews() {
-        return previews;
+    public CETBean getBean() {
+        return bean;
     }
 
     public void setPosition(int position) {
@@ -126,6 +124,14 @@ public class AddNewDatasetEvent extends GwtEvent<AddNewDatasetHandler> {
 
     public String getSectionMarker() {
         return sectionMarker;
+    }
+
+    public String getPreviewUri() {
+        return previewUri;
+    }
+
+    public void setPreviewUri(String previewUri) {
+        this.previewUri = previewUri;
     }
 
 }

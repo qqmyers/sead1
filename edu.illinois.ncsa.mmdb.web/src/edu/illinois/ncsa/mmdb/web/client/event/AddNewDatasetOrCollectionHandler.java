@@ -39,35 +39,17 @@
 /**
  * 
  */
-package edu.illinois.ncsa.mmdb.web.client;
+package edu.illinois.ncsa.mmdb.web.client.event;
 
-import com.google.gwt.user.client.ui.Widget;
-
-import edu.illinois.ncsa.mmdb.web.client.MainPresenter.MainViewInterface;
+import com.google.gwt.event.shared.EventHandler;
 
 /**
- * @author lmarini
- *
+ * Triggered when a new dataset is added to the interface.
+ * 
+ * @author Luigi Marini
+ * 
  */
-public class MainView implements MainViewInterface {
+public interface AddNewDatasetOrCollectionHandler extends EventHandler {
 
-	/* (non-Javadoc)
-	 * @see edu.illinois.ncsa.mmdb.web.client.mvp.View#asWidget()
-	 */
-	@Override
-	public Widget asWidget() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void removeContent() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void addContent(Widget asWidget) {
-		// TODO Auto-generated method stub
-		
-	}
-
+    void onAddNewDatasetOrCollection(AddNewDatasetOrCollectionEvent event);
 }
