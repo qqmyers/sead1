@@ -60,7 +60,9 @@ import edu.illinois.ncsa.mmdb.web.server.Authentication;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.SHAPasswordDigest;
 
 public class AuthenticatedServlet extends HttpServlet {
     /**
@@ -72,7 +74,7 @@ public class AuthenticatedServlet extends HttpServlet {
 
     public static final String AUTHENTICATED_AS = "edu.illinois.ncsa.mmdb.web.server.auth.authenticatedAs";
     public static final String REMOTE_ALLOWED   = "edu.illinois.ncsa.mmdb.web.server.auth.RemoteAllowed";
-    public static final String _anonymousId     = PersonBeanUtil.getAnonymous().getUri();                   ;
+    public static final String _anonymousId     = PersonBeanUtil.getAnonymous().getUri();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -92,7 +94,11 @@ public class AuthenticatedServlet extends HttpServlet {
             String googleAccessToken = request.getParameter("googleAccessToken");
 
             log.debug("u: " + username);
-            log.debug("p: " + password);
+            try {
+                log.debug("p: " + new SHAPasswordDigest().encrypt(password));
+            } catch (AuthenticationException e) {
+                log.debug("Can't encrpt password for debug purposes" + e.getMessage());
+            }
             log.debug("gAT: " + googleAccessToken);
 
             if ((username != null) && (!username.equals("")) && (password != null) && (!password.equals(""))) {
