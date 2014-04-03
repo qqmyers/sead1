@@ -63,13 +63,13 @@ import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
-public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implements ActionHandler<ListUserMetadataFields, ListUserMetadataFieldsResult> {
-    static Log                                     log             = LogFactory.getLog(ListUserMetadataFieldsHandler.class);
+public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMetadataFields, ListUserMetadataFieldsResult> {
+    static Log                                            log             = LogFactory.getLog(ListUserMetadataFieldsHandler.class);
 
-    private Memoized<ListUserMetadataFieldsResult> editResultCache = null;
-    private Memoized<ListUserMetadataFieldsResult> viewResultCache = null;
+    private static Memoized<ListUserMetadataFieldsResult> editResultCache = null;
+    private static Memoized<ListUserMetadataFieldsResult> viewResultCache = null;
 
-    public ListUserMetadataFieldsResult listUserMetadataFields(boolean isForEdit) {
+    public static ListUserMetadataFieldsResult listUserMetadataFields(boolean isForEdit) {
         ListUserMetadataFieldsResult lumfr = null;
         log.debug("Listing fields, editable = : " + isForEdit);
         if (isForEdit) {
@@ -77,8 +77,12 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
                 editResultCache = new Memoized<ListUserMetadataFieldsResult>() {
                     public ListUserMetadataFieldsResult computeValue() {
                         ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
-                        cache = null; //Don't use base-class cache
-                        ListNamedThingsResult r = listNamedThings(MMDB.USER_METADATA_FIELD, Rdfs.LABEL);
+                        ListNamedThingsResult r = new ListNamedThingsResult();
+                        try {
+                            r.setThingNames(TupeloStore.getInstance().listThingsOfType(MMDB.USER_METADATA_FIELD, Rdfs.LABEL));
+                        } catch (OperatorException e) {
+                            r = null;
+                        }
                         if (r == null) {
                             log.error("can't list plain metadata fields");
                         }
@@ -114,8 +118,12 @@ public class ListUserMetadataFieldsHandler extends ListNamedThingsHandler implem
                 viewResultCache = new Memoized<ListUserMetadataFieldsResult>() {
                     public ListUserMetadataFieldsResult computeValue() {
                         ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
-                        cache = null; //Don't use base-class cache
-                        ListNamedThingsResult r = listNamedThings(GetUserMetadataFieldsHandler.VIEW_METADATA, Rdfs.LABEL);
+                        ListNamedThingsResult r = new ListNamedThingsResult();
+                        try {
+                            r.setThingNames(TupeloStore.getInstance().listThingsOfType(GetUserMetadataFieldsHandler.VIEW_METADATA, Rdfs.LABEL));
+                        } catch (OperatorException e) {
+                            r = null;
+                        }
                         if (r == null) {
                             log.error("can't list plain metadata fields");
                         }

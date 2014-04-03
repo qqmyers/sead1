@@ -55,7 +55,6 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchWithFilter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
  * Text base search of the repository with filter
@@ -82,13 +81,12 @@ public class SearchWithFilterHandler implements ActionHandler<SearchWithFilter, 
         Resource filter = Resource.uriRef(arg0.getFilter());
         String query = arg0.getQuery();
         u.setColumnNames("dataset", "query");
-        u.addPattern("dataset", filter, "query"); // determine the target dataset uri from the relationship triple
+        u.addPattern("dataset", filter, "query"); // determine the target dataset/collection uri from the relationship triple
 
         try {
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "dataset") ) {
                 if (query.equals(row.get(1).getString())) {
-                    DatasetBean db = TupeloStore.fetchDataset(row.get(0)); // dbu's only take strings
-                    searchResult.addHit(db.getUri());
+                    searchResult.addHit(row.get(0).getString());
                 }
 
             }

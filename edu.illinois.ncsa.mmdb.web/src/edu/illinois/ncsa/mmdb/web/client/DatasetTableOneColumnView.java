@@ -170,7 +170,7 @@ public class DatasetTableOneColumnView extends DatasetTableView {
         });
 
         // preview
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, getRelativeURL(id, type), dispatchAsync);
         pre.setMaxWidth(100);
         setWidget(row, 1, pre);
 
@@ -182,7 +182,7 @@ public class DatasetTableOneColumnView extends DatasetTableView {
         setWidget(row, 2, verticalPanel);
 
         // title
-        Hyperlink hyperlink = new Hyperlink(name, "dataset?id=" + id);
+        Hyperlink hyperlink = new Hyperlink(name, getRelativeURL(id, type));
         verticalPanel.add(hyperlink);
 
         // date
@@ -228,7 +228,7 @@ public class DatasetTableOneColumnView extends DatasetTableView {
 
         GWT.log("Inserting dataset " + title + " to row " + row, null);
 
-        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, mimeType, dispatchAsync);
+        PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, getRelativeURL(id, mimeType), mimeType, dispatchAsync);
         pre.setMaxWidth(100);
         setWidget(row, 0, pre);
 
@@ -239,7 +239,7 @@ public class DatasetTableOneColumnView extends DatasetTableView {
         setWidget(row, 1, verticalPanel);
 
         // title
-        Hyperlink hyperlink = new Hyperlink(title, "dataset?id=" + id);
+        Hyperlink hyperlink = new Hyperlink(title, getRelativeURL(id, mimeType));
         verticalPanel.add(hyperlink);
 
         // date
@@ -344,5 +344,13 @@ public class DatasetTableOneColumnView extends DatasetTableView {
     public HasClickHandlers getShowSelectedAnchor() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    private String getRelativeURL(String id, String type) {
+        if ("Collection".equals(type)) {
+            return "collection?uri=" + id;
+        } else {
+            return "dataset?id=" + id;
+        }
     }
 }

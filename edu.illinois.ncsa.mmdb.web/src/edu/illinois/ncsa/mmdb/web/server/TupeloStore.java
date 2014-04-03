@@ -1034,6 +1034,8 @@ public class TupeloStore {
                         deindexFullText(d);
                     } else {
                         indexFullText(d);
+                        log.trace("Indexing data: " + d);
+
                     }
                 }
                 if (n < batchSize) {
@@ -1067,6 +1069,7 @@ public class TupeloStore {
                         deindexFullText(d);
                     } else {
                         indexFullText(d);
+                        log.trace("Indexing coll: " + d);
                     }
                 }
                 if (n < batchSize) {
@@ -1123,7 +1126,7 @@ public class TupeloStore {
                 }
                 toDeindex.addAll(moreToDeindex);
                 getSearch().deindex(toDeindex);
-                log.info("deindexed " + toDeindex.size() + " deleted dataset(s) @ " + new Date());
+                log.info("deindexed " + toDeindex.size() + " deleted dataset(s) and section(s) @ " + new Date());
             }
             if (toIndex.size() > 0) {
                 if (!logged) {

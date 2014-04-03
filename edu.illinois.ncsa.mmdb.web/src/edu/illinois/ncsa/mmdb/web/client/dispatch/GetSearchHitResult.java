@@ -41,12 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import net.customware.gwt.dispatch.shared.Result;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PreviewBean;
+import edu.uiuc.ncsa.cet.bean.CETBean;
 
 /**
  * Return information about a hit from a search.
@@ -56,43 +52,31 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
  */
 public class GetSearchHitResult implements Result {
 
-    private static final long       serialVersionUID = -86488013616325220L;
+    private static final long serialVersionUID = -86488013616325220L;
 
-    private DatasetBean             dataset;
+    private CETBean           bean;
 
-    private Collection<PreviewBean> previews;
+    private String            previewUri       = null;
 
-    private String                  sectionUri;
+    private String            sectionUri;
 
-    private String                  sectionLabel;
+    private String            sectionLabel;
 
-    private String                  sectionMarker;
+    private String            sectionMarker;
 
     public GetSearchHitResult() {
     }
 
-    public GetSearchHitResult(DatasetBean datasetBean, Collection<PreviewBean> previews) {
-        setDataset(datasetBean);
-        setPreviews(previews);
+    public GetSearchHitResult(CETBean hitbean) {
+        setBean(hitbean);
     }
 
-    public void setDataset(DatasetBean dataset) {
-        this.dataset = dataset;
+    public void setBean(CETBean hitbean) {
+        this.bean = hitbean;
     }
 
-    public DatasetBean getDataset() {
-        return dataset;
-    }
-
-    public void setPreviews(Collection<PreviewBean> previews) {
-        this.previews = previews;
-    }
-
-    public Collection<PreviewBean> getPreviews() {
-        if (previews == null) {
-            return new HashSet<PreviewBean>();
-        }
-        return previews;
+    public CETBean getBean() {
+        return bean;
     }
 
     public void setSectionUri(String sectionUri) {
@@ -117,5 +101,13 @@ public class GetSearchHitResult implements Result {
 
     public String getSectionMarker() {
         return sectionMarker;
+    }
+
+    public String getPreviewUri() {
+        return previewUri;
+    }
+
+    public void setPreviewUri(String previewUri) {
+        this.previewUri = previewUri;
     }
 }

@@ -42,14 +42,15 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
 
-import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetEvent;
-import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetHandler;
+import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetOrCollectionEvent;
+import edu.illinois.ncsa.mmdb.web.client.event.AddNewDatasetOrCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
+import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
-public class PagingDatasetTablePresenter extends PagingTablePresenter<DatasetBean> {
+public class PagingBeanTablePresenter extends PagingTablePresenter<CETBean> {
 
-    public PagingDatasetTablePresenter(Display<DatasetBean> display, DispatchAsync service, HandlerManager eventBus) {
+    public PagingBeanTablePresenter(Display<CETBean> display, DispatchAsync service, HandlerManager eventBus) {
         super(display, service, eventBus);
     }
 
@@ -58,24 +59,27 @@ public class PagingDatasetTablePresenter extends PagingTablePresenter<DatasetBea
 
         super.bind();
 
-        eventBus.addHandler(AddNewDatasetEvent.TYPE,
-                new AddNewDatasetHandler() {
+        eventBus.addHandler(AddNewDatasetOrCollectionEvent.TYPE,
+                new AddNewDatasetOrCollectionHandler() {
                     @Override
-                    public void onAddNewDataset(AddNewDatasetEvent event) {
-                        DatasetBean dataset = event.getDataset();
-                        String id = dataset.getUri();
-                        String type = ContentCategory.getCategory(dataset.getMimeType(), service);
+                    public void onAddNewDatasetOrCollection(AddNewDatasetOrCollectionEvent event) {
+                        CETBean bean = event.getBean();
+                        String id = event.getPreviewUri();
+                        String type = "Collection";
+                        if (bean instanceof DatasetBean) {
+                            type = ContentCategory.getCategory(((DatasetBean) bean).getMimeType(), service);
+                        }
                         if (event.getPosition() == -1) {
                             if (event.getSectionUri() == null) {
-                                display.addItem(id, dataset, type);
+                                display.addItem(id, bean, type);
                             } else {
-                                display.addItem(id, dataset, type, event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
+                                display.addItem(id, bean, type, event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
                             }
                         } else {
                             if (event.getSectionUri() == null) {
-                                display.addItem(id, dataset, type, event.getPosition());
+                                display.addItem(id, bean, type, event.getPosition());
                             } else {
-                                display.addItem(id, dataset, type, event.getPosition(), event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
+                                display.addItem(id, bean, type, event.getPosition(), event.getSectionUri(), event.getSectionLabel(), event.getSectionMarker());
                             }
                         }
                     }

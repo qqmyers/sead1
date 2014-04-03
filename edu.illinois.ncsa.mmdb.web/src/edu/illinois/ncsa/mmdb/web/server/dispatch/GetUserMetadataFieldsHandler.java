@@ -192,10 +192,11 @@ public class GetUserMetadataFieldsHandler implements
                     .getContext());
             Resource subject = Resource.uriRef(action.getUri());
             Thing t = ts.fetchThing(subject);
-            for (UserMetadataField field : umfHelper.listUserMetadataFields(false).getFieldsSortedByName() ) {
+            for (UserMetadataField field : ListUserMetadataFieldsHandler.listUserMetadataFields(false).getFieldsSortedByName() ) {
                 Resource predicate = Resource.uriRef(field.getUri());
                 Collection<UserMetadataValue> values = getUserMetadataValues(t, predicate);
                 // now look for sections with this field set; this is gonna produce lots of traffic
+                //FixMe - better to do one query for all predicates of rdftype VIEW_METADATA? Or fetch sections as Things?
                 Unifier u = new Unifier();
                 u.addPattern(subject, MMDB.METADATA_HASSECTION, "section");
                 u.addPattern("section", predicate, "value");
@@ -223,25 +224,6 @@ public class GetUserMetadataFieldsHandler implements
                     + action.getUri());
             throw new ActionException("failed", x);
         }
-    }
-
-    /**
-     * 
-     * @return
-     * @throws OperatorException
-     */
-    private Map<String, String> getUserMetadataFields()
-            throws OperatorException {
-        Unifier u = new Unifier();
-        u.setColumnNames("field", "label");
-        u.addPattern("field", Rdf.TYPE, VIEW_METADATA); //Current and past user metadata
-        u.addPattern("field", Rdfs.LABEL, "label");
-        Map<String, String> result = new HashMap<String, String>();
-        for (Tuple<Resource> row : TupeloStore.getInstance()
-                .unifyExcludeDeleted(u, "field") ) {
-            result.put(row.get(0).getString(), row.get(1).getString());
-        }
-        return result;
     }
 
     @Override

@@ -2,6 +2,7 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -43,5 +44,13 @@ public class ListUserMetadataFieldsResult implements Result {
 
     public void setFields(List<UserMetadataField> fields) {
         this.fields = fields;
+    }
+
+    public HashSet<String> getPredicates() {
+        HashSet<String> result = new HashSet<String>();
+        for (UserMetadataField umf : fields ) {
+            result.add(umf.getUri());
+        }
+        return result;
     }
 }
