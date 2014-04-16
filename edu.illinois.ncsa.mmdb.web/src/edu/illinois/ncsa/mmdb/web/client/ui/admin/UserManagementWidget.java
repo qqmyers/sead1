@@ -180,7 +180,7 @@ public class UserManagementWidget extends Composite {
                         public void onSuccess(AdminAddUserResult result) {
                             if (result.getError() == null) {
                                 GWT.log("Successfully created a new user");
-                                status.setText("User successfully created and invited by email. The new user's role has been set to: " + result.getRole() + ". Refresh user list to change their role.");
+                                status.setText("User successfully created and invited by email. The new user's role has been set to: " + result.getRole() + ".");
                                 email.setText("");
                                 firstName.setText("");
                                 lastName.setText("");
@@ -200,6 +200,9 @@ public class UserManagementWidget extends Composite {
     }
 
     private void loadRolesAndUsers() {
+        inactiveUsersTable.removeAllRows();
+        activeUsersTable.removeAllRows();
+        columnByRole.clear();
         dispatchAsync.execute(new GetPermissions(), new AsyncCallback<GetPermissionsResult>() {
             @Override
             public void onFailure(Throwable caught) {
