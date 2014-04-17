@@ -78,7 +78,7 @@ p {
 				coords="0,0,600,134" shape="rect">
 		</map>
 		<img id="projectLogo" usemap="#bannermap"
-			src="login_img/header-image.png" style="border: none;" height="135px">
+			src="<%=ConfigurationKey.getConfigurationKey("discovery_banner")%>" style="border: none;" height="135px">
 	</div>
 	</div>
 	<div style='height: 150px;'></div>
