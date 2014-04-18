@@ -534,7 +534,7 @@ public class ConfigurationWidget extends Composite {
     }
 
     private DisclosurePanel createDiscoveryConfigurationSection(ConfigurationResult configuration) {
-        return createSimpleConfigurationSection(configuration, "ACR Discovery Configuration", new String[] { "Discovery App URL", "Discovery App Banner ID" }, new ConfigurationKey[] { ConfigurationKey.DiscoveryURL, ConfigurationKey.DiscoveryBanner }, false);
+        return createSimpleConfigurationSection(configuration, "ACR Discovery Configuration", new String[] { "Discovery App URL", "Discovery App Banner ID", "Discovery App Background ID" }, new ConfigurationKey[] { ConfigurationKey.DiscoveryURL, ConfigurationKey.DiscoveryBanner, ConfigurationKey.DiscoveryBackground }, false);
     }
 
     private DisclosurePanel createExtractorSection(ConfigurationResult configuration) {

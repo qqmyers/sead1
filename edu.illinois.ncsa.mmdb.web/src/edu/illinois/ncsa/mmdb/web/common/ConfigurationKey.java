@@ -13,6 +13,7 @@ public enum ConfigurationKey {
     VAURL("va.url", "http://bluespruce.pti.indiana.edu:8181/dcs-nced/query/?q=resourceValue:(%s)"), //$NON-NLS-1$ //$NON-NLS-2$
     DiscoveryURL("discovery.url", ""), //$NON-NLS-1$ //$NON-NLS-2$
     DiscoveryBanner("discovery.banner", "login_img/header-image.png"), //$NON-NLS-1$ //$NON-NLS-2$
+    DiscoveryBackground("discovery.background", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
     // access level
     AccessLevelLabel("access.level.label", "Access Level"), //$NON-NLS-1$ //$NON-NLS-2$
