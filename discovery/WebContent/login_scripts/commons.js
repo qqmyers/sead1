@@ -263,7 +263,8 @@ function pageBGImageJsonParser(id, json) {
 	  if (obj.sparql.results.result != null) {
 	    if (obj.sparql.results.result.length != null) {
 	      var jsonBinding = obj.sparql.results.result.binding;
-	      get
+	      // TODO
+	    }
 
 	function getBackgroundsAndBanners(jsonBinding) {
 	  if (value == 'background') {
@@ -272,6 +273,7 @@ function pageBGImageJsonParser(id, json) {
 	      if (tempBackground.indexOf(tempBackground) == -1) {
 	        tempBackgrounds.push(tempBackground);
 	      }
+	    }
 	  }
 
 	  else if (value == 'banner')
@@ -281,7 +283,6 @@ function pageBGImageJsonParser(id, json) {
 	        tempBanners.push(tempBanner);
 	      }
 	  }
-	}
 }
 
 function createBlock(id, element) {
