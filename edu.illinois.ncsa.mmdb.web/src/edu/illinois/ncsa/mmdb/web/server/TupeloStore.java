@@ -1276,10 +1276,12 @@ public class TupeloStore {
             tw.remove(row.get(0), MMDB.CONFIGURATION_KEY, key);
             tw.remove(row.get(0), MMDB.CONFIGURATION_VALUE, row.get(1));
         }
-        Resource x = Resource.uriRef();
-        tw.add(x, Rdf.TYPE, MMDB.CONFIGURATION);
-        tw.add(x, MMDB.CONFIGURATION_KEY, key);
-        tw.add(x, MMDB.CONFIGURATION_VALUE, Resource.literal(value));
+        if (!getURI(ConfigurationKey.RemoteAPIKey).equals(key)) {
+            Resource x = Resource.uriRef();
+            tw.add(x, Rdf.TYPE, MMDB.CONFIGURATION);
+            tw.add(x, MMDB.CONFIGURATION_KEY, key);
+            tw.add(x, MMDB.CONFIGURATION_VALUE, Resource.literal(value));
+        }
         getContext().perform(tw);
     }
 
@@ -1291,7 +1293,9 @@ public class TupeloStore {
         uf.setColumnNames("key", "value");
         getContext().perform(uf);
         for (Tuple<Resource> row : uf.getResult() ) {
-            configuration.put(row.get(0), row.get(1).getString());
+            if (!getURI(ConfigurationKey.RemoteAPIKey).equals(row.get(0))) {
+                configuration.put(row.get(0), row.get(1).getString());
+            }
         }
     }
 
