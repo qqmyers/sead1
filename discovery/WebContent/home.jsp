@@ -1,3 +1,5 @@
+<%@ page import="edu.illinois.ncsa.mmdb.web.common.ConfigurationKey.*" %>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -59,7 +61,7 @@
 				coords="0,0,600,134" shape="rect">
 		</map>
 		<img id="projectLogo" usemap="#bannermap"
-			src="login_img/header-image.png" style="border: none;" height="135px">
+			src="<%=ConfigurationKey.getConfigurationKey("discovery_banner")%>" style="border: none;" height="135px">
 	</div>
 	<div style='height: 150px;'></div>
 	<div style='float: right;'>

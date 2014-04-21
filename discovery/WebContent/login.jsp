@@ -1,3 +1,5 @@
+<%@ page import="edu.illinois.ncsa.mmdb.web.common.ConfigurationKey" %>
+
 <!DOCTYPE html>
 <!--#include virtual="common.html" -->
 <html lang="en">
@@ -75,7 +77,6 @@ legend {
 	String medici = (String) request.getAttribute("medici");
 	String googleClientId=(String)request.getAttribute("googleClientId");
 %>
-
 
 <script type="text/javascript">
     var projInfo   = '<%=project_info%>';
@@ -212,12 +213,12 @@ legend {
 				coords="0,0,600,134" shape="rect">
 		</map>
 		<img id="projectLogo" usemap="#bannermap"
-			src="login_img/header-image.png" style="border: none;">
+			src="<%=(ConfigurationKey) ConfigurationKey.getConfigurationKey("discovery_banner")%>" style="border: none;" height="135px">
 	</div>
 	<!-- <img class="img-rounded" src='login_img/header-image.png'
 		style='width: 4000px; margin-top: -3%;'></img> -->
 	<div style='margin-top: 10%; margin-left: 2%; margin-right: 2%;'>
-		<table>
+		<table>    
 			<tbody>
 				<tr>
 					<td id="projectDesc"><h4>SEAD ACR Discovery</h4>
