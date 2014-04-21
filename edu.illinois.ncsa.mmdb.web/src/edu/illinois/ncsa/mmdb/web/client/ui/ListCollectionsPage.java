@@ -190,7 +190,7 @@ public class ListCollectionsPage extends Page {
 
                     @Override
                     public void onFailure(Throwable arg0) {
-                        statusLabel.setText("Error: could not load collections");
+                        statusLabel.setText("Error: could not add collection");
                         GWT.log("Failed creating new collection", arg0);
                     }
 
