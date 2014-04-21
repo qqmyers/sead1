@@ -265,8 +265,10 @@ function pageBGImageJsonParser(id, json) {
 	      var jsonBinding = obj.sparql.results.result.binding;
 	      // TODO
 	    }
+	  }
+}
 
-	function getBackgroundsAndBanners(jsonBinding) {
+function getBackgroundsAndBanners(jsonBinding) {
 	  if (value == 'background') {
 	    var tempBackground = jsonBinding['background'];
 	    if (tempBackground != "undefined") {
@@ -276,12 +278,13 @@ function pageBGImageJsonParser(id, json) {
 	    }
 	  }
 
-	  else if (value == 'banner')
+	  else if (value == 'banner') {
 	    var tempBanner = jsonBinding['banner'];
 	    if (tempBanner != "undefined") {
 	      if (tempBanner.indexOf(tempBanner) == -1) {
 	        tempBanners.push(tempBanner);
 	      }
+	    }
 	  }
 }
 
