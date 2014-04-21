@@ -95,7 +95,9 @@ public class AuthenticatedServlet extends HttpServlet {
 
             log.debug("u: " + username);
             try {
-                log.debug("p: " + new SHAPasswordDigest().encrypt(password));
+                if (password != null) {
+                    log.debug("p: " + new SHAPasswordDigest().encrypt(password));
+                }
             } catch (AuthenticationException e) {
                 log.debug("Can't encrpt password for debug purposes" + e.getMessage());
             }
