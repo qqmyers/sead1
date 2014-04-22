@@ -47,6 +47,7 @@ import org.tupeloproject.kernel.BlobFetcher;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.GetableResource;
@@ -66,21 +67,19 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  */
 public class DatasetBeanResource extends AbstractResource implements GetableResource
 {
-    private final long     size;
-    private final Resource uri;
-    private final String   mimetype;
+    private final long   size;
+
+    private final String mimetype;
 
     public DatasetBeanResource(DatasetBean db, Context context, SecurityManager security) {
         super(db.getTitle(), Resource.uriRef(db.getUri()), db.getDate(), context, security);
-        this.uri = Resource.uriRef(db.getUri());
         this.size = db.getSize();
         this.mimetype = db.getMimeType();
     }
 
-    public DatasetBeanResource(String name, Resource uri, long size, Date date, String mimetype, Context context, SecurityManager security)
+    public DatasetBeanResource(String name, UriRef uri, long size, Date date, String mimetype, Context context, SecurityManager security)
     {
         super(name, uri, date, context, security);
-        this.uri = uri;
         this.size = size;
         this.mimetype = mimetype;
     }
@@ -130,7 +129,7 @@ public class DatasetBeanResource extends AbstractResource implements GetableReso
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException, BadRequestException
     {
         BlobFetcher bf = new BlobFetcher();
-        bf.setSubject(uri);
+        bf.setSubject(getUri());
         try {
             getContext().perform(bf);
         } catch (OperatorException e) {
