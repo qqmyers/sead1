@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.CreateRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SubjectResult;
@@ -24,7 +25,7 @@ public class CreateRoleHandler implements ActionHandler<CreateRole, SubjectResul
         TupeloStore ts = TupeloStore.getInstance();
         if (ts.isAllowed(arg0, Permission.EDIT_ROLES)) {
             try {
-                Resource roleUri = Resource.uriRef(); // mint
+                UriRef roleUri = Resource.uriRef(); // mint
                 EnumSet<Permission> none = EnumSet.noneOf(Permission.class);
                 ts.getRbac().createRole(roleUri, arg0.getName(), none);
                 return new SubjectResult(roleUri.getString());

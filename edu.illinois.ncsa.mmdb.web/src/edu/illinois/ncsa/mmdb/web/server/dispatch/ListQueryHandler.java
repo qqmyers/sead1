@@ -53,6 +53,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
@@ -169,7 +170,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
 
                 item.setUri(row.get(0).getString());
                 item.setTitle(row.get(4).getString());
-                item.setAuthor(pbu.get(row.get(5)).getName());
+                item.setAuthor(pbu.get((UriRef) row.get(5)).getName());
                 if (row.get(2) != null) {
                     if (row.get(2).asObject() instanceof Date) {
                         item.setDate((Date) row.get(2).asObject());

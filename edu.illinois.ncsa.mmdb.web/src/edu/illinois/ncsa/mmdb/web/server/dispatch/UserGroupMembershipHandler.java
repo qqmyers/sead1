@@ -55,6 +55,7 @@ import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
+import org.tupeloproject.rdf.UriRef;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserGroupMembership;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserGroupMembership.Action;
@@ -88,7 +89,7 @@ public class UserGroupMembershipHandler implements ActionHandler<UserGroupMember
 
         Context context = TupeloStore.getInstance().getContext();
         Action action = arg0.getAction();
-        Resource user = null;
+        UriRef user = null;
         if (arg0.getUserURI() != null) {
             user = createUserURI(arg0.getUserURI());
         }
@@ -147,7 +148,7 @@ public class UserGroupMembershipHandler implements ActionHandler<UserGroupMember
      * 
      * @param user
      */
-    private void notify(Resource user) {
+    private void notify(UriRef user) {
         log.debug("Notifying " + user + " of change in permissions.");
         PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
         try {
@@ -166,13 +167,13 @@ public class UserGroupMembershipHandler implements ActionHandler<UserGroupMember
      * @param user
      * @return
      */
-    private Resource createUserURI(String user) {
+    private UriRef createUserURI(String user) {
         if (user.startsWith("http://cet.ncsa.uiuc.edu/")) {
-            Resource userURI = Resource.uriRef(user);
+            UriRef userURI = Resource.uriRef(user);
             log.debug("User id: " + userURI.getString());
             return userURI;
         } else {
-            Resource userURI = Resource.uriRef(PersonBeanUtil.getPersonID(user));
+            UriRef userURI = Resource.uriRef(PersonBeanUtil.getPersonID(user));
             log.debug("User id: " + userURI.getString());
             return userURI;
         }

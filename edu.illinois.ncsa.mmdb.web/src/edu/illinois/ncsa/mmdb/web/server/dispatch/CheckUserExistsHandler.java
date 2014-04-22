@@ -52,6 +52,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Foaf;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.CheckUserExists;
@@ -89,7 +90,7 @@ public class CheckUserExistsHandler implements ActionHandler<CheckUserExists, Ch
             List<Resource> uris = u.getFirstColumn();
             if (uris.size() == 1) {
                 log.debug("User in the system " + uris.get(0));
-                PersonBean pb = pbu.get(uris.get(0));
+                PersonBean pb = pbu.get((UriRef) uris.get(0));
                 log.debug("User retrieved " + pb.getUri());
                 return new CheckUserExistsResult(false);
             } else if (uris.size() == 0) {

@@ -48,6 +48,7 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ChangeUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
@@ -69,7 +70,7 @@ public class ChangeUserHandler implements ActionHandler<ChangeUser, EmptyResult>
 
     @Override
     public EmptyResult execute(ChangeUser action, ExecutionContext arg1) throws ActionException {
-        Resource user = Resource.uriRef(action.getUser());
+        UriRef user = Resource.uriRef(action.getUser());
 
         // change the name
         if (action.getName() != null) {

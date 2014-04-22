@@ -67,6 +67,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
@@ -143,7 +144,7 @@ public class GetCollectionHandler implements
     private CollectionBean fastGetCollection(CollectionBeanUtil cbu, String uriString) throws OperatorException {
         PersonBeanUtil pbu = new PersonBeanUtil(cbu.getBeanSession());
         Unifier u = new Unifier();
-        Resource uri = Resource.uriRef(uriString);
+        UriRef uri = Resource.uriRef(uriString);
         u.addPattern(uri, Rdf.TYPE, cbu.getType());
         u.addPattern(uri, Dc.CREATOR, "creator", true);
         u.addPattern(uri, Dc.TITLE, "title", true);
@@ -156,7 +157,7 @@ public class GetCollectionHandler implements
         for (Tuple<Resource> row : u.getResult() ) {
             log.debug(row);
             int r = 0;
-            Resource creator = row.get(r++);
+            UriRef creator = (UriRef) row.get(r++);
             Resource title = row.get(r++);
             Resource description = row.get(r++);
             Resource dateCreated = row.get(r++);
@@ -335,7 +336,7 @@ public class GetCollectionHandler implements
                 map.put(row.get(0).getString(), item);
 
                 item.setUri(row.get(0).getString());
-                item.setAuthor(pbu.get(row.get(5)).getName());
+                item.setAuthor(pbu.get((UriRef) row.get(5)).getName());
                 if (row.get(2) != null) {
                     if (row.get(2).asObject() instanceof Date) {
                         item.setDate((Date) row.get(2).asObject());

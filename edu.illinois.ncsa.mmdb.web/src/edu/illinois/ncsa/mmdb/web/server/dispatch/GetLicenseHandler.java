@@ -52,6 +52,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
@@ -106,7 +107,7 @@ public class GetLicenseHandler implements ActionHandler<GetLicense, LicenseResul
                 if (row.get(1).isUri()) {
                     result.setRightsHolderUri(row.get(1).getString());
                     try {
-                        PersonBean pb = pbu.get(row.get(1));
+                        PersonBean pb = pbu.get((UriRef) row.get(1));
                         result.setRightsHolder(pb.getName());
                     } catch (OperatorException e) {
                         log.warn("Could not get personbean.", e);
