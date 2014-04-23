@@ -59,7 +59,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.dom.client.HasKeyUpHandlers;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -593,6 +592,8 @@ public class AddMetadataWidget extends Composite {
         String currentVal = oldValue.getUri();
         if (currentVal == null) {
             currentVal = oldValue.getName();
+        } else if (currentVal.startsWith(vivoIDPrefixURL)) {
+            currentVal = oldValue.getName() + " : " + currentVal;
         } else {
             currentVal = stripPrefix(currentVal);
         }
@@ -619,12 +620,7 @@ public class AddMetadataWidget extends Composite {
         inputField.setValue(currentVal);
 
         inputField.addAnchor.setText("Update");
-
-        if (inputField.pressEnterHandler != null) {
-            //This is the type of field that has an enter key handler - not all do
-            inputField.pressEnterHandler.removeHandler();
-            ((HasKeyUpHandlers) inputField.inputWidget).addKeyUpHandler(editPressEnter);
-        }
+        inputField.setEnterHandler(editPressEnter);
         inputField.addClickHandler.removeHandler();
         inputField.addClickHandler = inputField.addAnchor.addClickHandler(editHandler);
 
@@ -721,6 +717,9 @@ public class AddMetadataWidget extends Composite {
 
         abstract String getUri();
 
+        public void setEnterHandler(KeyUpHandler pressEnter) {
+        }
+
         public void isAppliedToSectionVisible(boolean isVisible) {
             appliedToPanel.setVisible(isVisible);
         }
@@ -795,6 +794,12 @@ public class AddMetadataWidget extends Composite {
                 return null;
             }
         }
+
+        @Override
+        public void setEnterHandler(KeyUpHandler pressEnter) {
+            pressEnterHandler.removeHandler();
+            pressEnterHandler = textBox.addKeyUpHandler(pressEnter);
+        }
     }
 
     class MultiField extends InputField {
@@ -858,7 +863,8 @@ public class AddMetadataWidget extends Composite {
 
             vivoCreatorSuggestBox = new SuggestBox();
 
-            pressEnterHandler = vivoCreatorSuggestBox.addKeyUpHandler(pressEnter);
+            // HACK : https://code.google.com/p/google-web-toolkit/issues/detail?id=3533
+            pressEnterHandler = vivoCreatorSuggestBox.getTextBox().addKeyUpHandler(pressEnter);
             vivoCreatorSuggestBox.setWidth("500px");
             return vivoCreatorSuggestBox;
         }
@@ -867,6 +873,12 @@ public class AddMetadataWidget extends Composite {
         String getUri() {
             // TODO Auto-generated method stub
             return null;
+        }
+
+        @Override
+        public void setEnterHandler(KeyUpHandler pressEnter) {
+            pressEnterHandler.removeHandler();
+            pressEnterHandler = vivoCreatorSuggestBox.getTextBox().addKeyUpHandler(pressEnter);
         }
     }
 
@@ -896,7 +908,7 @@ public class AddMetadataWidget extends Composite {
 
             partOfSuggestBox = new SuggestBox();
 
-            pressEnterHandler = partOfSuggestBox.addKeyUpHandler(pressEnter);
+            pressEnterHandler = partOfSuggestBox.getTextBox().addKeyUpHandler(pressEnter);
             partOfSuggestBox.setWidth("500px");
             return partOfSuggestBox;
         }
@@ -905,6 +917,12 @@ public class AddMetadataWidget extends Composite {
         String getUri() {
             // TODO Auto-generated method stub
             return null;
+        }
+
+        @Override
+        public void setEnterHandler(KeyUpHandler pressEnter) {
+            pressEnterHandler.removeHandler();
+            pressEnterHandler = partOfSuggestBox.getTextBox().addKeyUpHandler(pressEnter);
         }
     }
 
@@ -950,6 +968,12 @@ public class AddMetadataWidget extends Composite {
         String getUri() {
             // TODO Auto-generated method stub
             return listBox.getValue(listBox.getSelectedIndex());
+        }
+
+        @Override
+        public void setEnterHandler(KeyUpHandler pressEnter) {
+            pressEnterHandler.removeHandler();
+            pressEnterHandler = listBox.addKeyUpHandler(pressEnter);
         }
     }
 
