@@ -35,6 +35,7 @@ function loadProjectInfo(pI) {
 		var response = pI.replace(/\n/g, "\\n");
 
 		var jsonObj = $.parseJSON(response);
+		
 		var map = new Object();
 		var nameURI;
 		var descURI;
@@ -79,6 +80,12 @@ function loadProjectInfo(pI) {
 				} else if (jsonBinding[0]['uri'] == descURI
 						&& jsonBinding[1]['uri'] == 'http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value') {
 					map['description'] = jsonBinding[2]['literal'];
+				} else if (jsonBinding[0]['uri'] == bannerID
+						&& jsonBinding[1]['uri'] == 'http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value') {
+					map['bannerID'] = jsonBinding[2]['literal'];
+				} else if (jsonBinding[0]['uri'] == backgroundID
+						&& jsonBinding[1]['uri'] == 'http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value') {
+					map['backgroundID'] = jsonBinding[2]['literal'];
 				}
 			}
 
@@ -88,6 +95,8 @@ function loadProjectInfo(pI) {
 		$('#projectDesc').html(map['description']);
 		$('#projectCollections').html(map['name'] + " Collections");
 		$('#projectURL').attr("href", (map['url']));
+		$('#bannerID').html(map['bannerID']);
+		$('#backgroundID').html(map['backgroundID']);
 	} catch (err) {
 		// Do nothing - default values will stay
 	}
