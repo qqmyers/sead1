@@ -39,6 +39,8 @@ function loadProjectInfo(pI) {
 		var nameURI;
 		var descURI;
 		var urlURI;
+		var bannerID;
+		var backgroundID;
 		for ( var i = 0; jsonObj.sparql.results.result
 				&& i < jsonObj.sparql.results.result.length; i++) {
 
@@ -50,6 +52,10 @@ function loadProjectInfo(pI) {
 				} else if (jsonBinding[2]['uri'].indexOf('ProjectName') != -1) {
 					nameURI = jsonBinding[0]['uri'];
 				} else if (jsonBinding[2]['uri'].indexOf('ProjectDescription') != -1) {
+					descURI = jsonBinding[0]['uri'];
+				} else if (jsonBinding[2]['uri'].indexOf('BannerID') != -1) {
+					descURI = jsonBinding[0]['uri'];
+				} else if (jsonBinding[2]['uri'].indexOf('BackgroundID') != -1) {
 					descURI = jsonBinding[0]['uri'];
 				}
 			}
