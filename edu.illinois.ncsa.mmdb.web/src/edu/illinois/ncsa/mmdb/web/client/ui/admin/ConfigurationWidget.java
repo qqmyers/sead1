@@ -92,7 +92,7 @@ public class ConfigurationWidget extends Composite {
         // va configuration.
         mainPanel.add(createVAConfigurationSection(configuration));
 
-        //Pointer to ACR discovery app
+        //Pointer to ACR discovery app and config options
         mainPanel.add(createDiscoveryConfigurationSection(configuration));
 
         // extractor configuration
@@ -534,7 +534,7 @@ public class ConfigurationWidget extends Composite {
     }
 
     private DisclosurePanel createDiscoveryConfigurationSection(ConfigurationResult configuration) {
-        return createSimpleConfigurationSection(configuration, "ACR Discovery Configuration", "Discovery App URL", ConfigurationKey.DiscoveryURL, false);
+        return createSimpleConfigurationSection(configuration, "ACR Discovery Configuration", new String[] { "Discovery App URL", "Discovery App Banner ID" }, new ConfigurationKey[] { ConfigurationKey.DiscoveryURL, ConfigurationKey.DiscoveryBanner }, false);
     }
 
     private DisclosurePanel createExtractorSection(ConfigurationResult configuration) {
