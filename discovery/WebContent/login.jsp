@@ -212,7 +212,7 @@ legend {
 				coords="0,0,600,134" shape="rect">
 		</map>
 		<img id="projectLogo" usemap="#bannermap"
-			src="<%=ConfigurationKey.getConfigurationKey("discovery_banner")%>" style="border: none;" height="135px">
+			src="<%=ConfigurationKey.getConfigurationKey("discovery.banner")%>" style="border: none;" height="135px">
 	</div>
 	<!-- <img class="img-rounded" src='login_img/header-image.png'
 		style='width: 4000px; margin-top: -3%;'></img> -->
