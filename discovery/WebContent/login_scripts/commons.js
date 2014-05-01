@@ -54,9 +54,9 @@ function loadProjectInfo(pI) {
 				} else if (jsonBinding[2]['uri'].indexOf('ProjectDescription') != -1) {
 					descURI = jsonBinding[0]['uri'];
 				} else if (jsonBinding[2]['uri'].indexOf('BannerID') != -1) {
-					descURI = jsonBinding[0]['uri'];
+					bannerID = jsonBinding[0]['uri'];
 				} else if (jsonBinding[2]['uri'].indexOf('BackgroundID') != -1) {
-					descURI = jsonBinding[0]['uri'];
+					backgroundID = jsonBinding[0]['uri'];
 				}
 			}
 
