@@ -69,15 +69,12 @@ function loadProjectInfo(pI) {
 			// j=j+3)
 			var jsonBinding = jsonObj.sparql.results.result[i].binding;
 			// http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value
-			if (jsonBinding[0]['uri'] != undefined) {
-				if (jsonBinding[0]['uri'] == urlURI
-						&& jsonBinding[1]['uri'] == 'http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value') {
+			if (jsonBinding[0]['uri'] != undefined && jsonBinding[1]['uri'] == 'http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value') {
+				if (jsonBinding[0]['uri'] == urlURI) {
 					map['url'] = jsonBinding[2]['literal'];
-				} else if (jsonBinding[0]['uri'] == nameURI
-						&& jsonBinding[1]['uri'] == 'http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value') {
+				} else if (jsonBinding[0]['uri'] == nameURI) {
 					map['name'] = jsonBinding[2]['literal'];
-				} else if (jsonBinding[0]['uri'] == descURI
-						&& jsonBinding[1]['uri'] == 'http://cet.ncsa.uiuc.edu/2007/mmdb/configuration/value') {
+				} else if (jsonBinding[0]['uri'] == descURI) {
 					map['description'] = jsonBinding[2]['literal'];
 				}
 			}
