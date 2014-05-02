@@ -101,17 +101,17 @@ public abstract class AbstractCollectionResource extends AbstractResource implem
         super(name, null, null, context, security);
     }
 
-    public AbstractCollectionResource(String name, org.tupeloproject.rdf.Resource uri, Context context, SecurityManager security)
+    public AbstractCollectionResource(String name, org.tupeloproject.rdf.UriRef uri, Context context, SecurityManager security)
     {
         super(name, uri, null, context, security);
     }
 
-    public AbstractCollectionResource(String name, org.tupeloproject.rdf.Resource uri, Date created, Context context, SecurityManager security)
+    public AbstractCollectionResource(String name, org.tupeloproject.rdf.UriRef uri, Date created, Context context, SecurityManager security)
     {
         super(name, uri, created, context, security);
     }
 
-    public AbstractCollectionResource(String name, org.tupeloproject.rdf.Resource uri, Date created, Date modified, Context context, SecurityManager security)
+    public AbstractCollectionResource(String name, org.tupeloproject.rdf.UriRef uri, Date created, Date modified, Context context, SecurityManager security)
     {
         super(name, uri, created, modified, context, security);
     }

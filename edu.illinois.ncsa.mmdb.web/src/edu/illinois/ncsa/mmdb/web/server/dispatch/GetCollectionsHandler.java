@@ -57,6 +57,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
@@ -137,8 +138,8 @@ public class GetCollectionsHandler implements
 
                 for (Tuple<Resource> row : result ) {
                     int r = 0;
-                    Resource subject = row.get(r++);
-                    Resource creator = row.get(r++);
+                    UriRef subject = (UriRef) row.get(r++);
+                    UriRef creator = (UriRef) row.get(r++);
                     Resource title = row.get(r++);
                     Resource description = row.get(r++);
                     Resource dateCreated = row.get(r++);

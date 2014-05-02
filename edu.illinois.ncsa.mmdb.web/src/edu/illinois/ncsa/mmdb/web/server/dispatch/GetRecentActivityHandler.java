@@ -55,6 +55,7 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.query.OrderBy;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
@@ -113,14 +114,14 @@ public class GetRecentActivityHandler implements ActionHandler<GetRecentActivity
                 //First time home page is loaded
                 if (getRecentActivity.getFirst()) {
                     if (showIndex < getRecentActivity.getMaxNum() && row.get(0) != null) {
-                        DatasetBean dsb = dbu.get(row.get(0));
+                        DatasetBean dsb = dbu.get((UriRef) row.get(0));
                         log.debug("Found: " + dsb.toString());
-                        datasets.add(dbu.get(row.get(0)));
+                        datasets.add(dbu.get((UriRef) row.get(0)));
                         showIndex++;
                     }
                     //Every time user presses "View More"
                 } else {
-                    long compareDate = dbu.get(row.get(0)).getDate().getTime();
+                    long compareDate = dbu.get((UriRef) row.get(0)).getDate().getTime();
                     long staticDate = getRecentActivity.getDate().getTime();
                     //Used in the instance of datasets having exact same date
                     if (staticDate == compareDate) {
@@ -130,7 +131,7 @@ public class GetRecentActivityHandler implements ActionHandler<GetRecentActivity
                         equalCounter++;
                     }
                     if (showIndex < getRecentActivity.getMaxNum() && row.get(0) != null && staticDate > compareDate) {
-                        datasets.add(dbu.get(row.get(0)));
+                        datasets.add(dbu.get((UriRef) row.get(0)));
                         showIndex++;
                     }
 

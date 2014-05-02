@@ -59,6 +59,7 @@ import org.codehaus.jackson.JsonToken;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Foaf;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -165,7 +166,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
             List<Resource> uris = u.getFirstColumn();
             if (uris.size() == 1) {
                 log.debug("User in the system " + uris.get(0));
-                PersonBean pb = pbu.get(uris.get(0));
+                PersonBean pb = pbu.get((UriRef) uris.get(0));
                 log.debug("User retrieved " + pb.getUri());
                 return false;
             } else if (uris.size() == 0) {

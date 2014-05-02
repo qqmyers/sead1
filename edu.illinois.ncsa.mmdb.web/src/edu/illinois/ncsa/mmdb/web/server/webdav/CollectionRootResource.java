@@ -49,6 +49,7 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
@@ -70,11 +71,11 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
  */
 public class CollectionRootResource extends AbstractCollectionResource
 {
-    private static Log log = LogFactory.getLog( CollectionRootResource.class );
+    private static Log log = LogFactory.getLog(CollectionRootResource.class);
 
-    public CollectionRootResource( Context context, SecurityManager security )
+    public CollectionRootResource(Context context, SecurityManager security)
     {
-        super( "collections", context, security );
+        super("collections", context, security);
     }
 
     // ----------------------------------------------------------------------
@@ -87,50 +88,50 @@ public class CollectionRootResource extends AbstractCollectionResource
         Map<String, AbstractResource> result = new HashMap<String, AbstractResource>();
 
         Unifier uf = new Unifier();
-        uf.addPattern( "collection", Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE );
-        uf.addColumnName( "collection" ); //$NON-NLS-1$
-        uf.addPattern( "collection", Dc.TITLE, "title", true ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addColumnName( "title" ); //$NON-NLS-1$
-        uf.addPattern( "collection", Rdfs.LABEL, "label", true ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addColumnName( "label" ); //$NON-NLS-1$
-        uf.addPattern( "collection", DcTerms.DATE_CREATED, "created", true ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addColumnName( "created" ); //$NON-NLS-1$
-        uf.addPattern( "collection", DcTerms.DATE_MODIFIED, "modified", true ); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addColumnName( "modified" ); //$NON-NLS-1$
+        uf.addPattern("collection", Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
+        uf.addColumnName("collection"); //$NON-NLS-1$
+        uf.addPattern("collection", Dc.TITLE, "title", true); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addColumnName("title"); //$NON-NLS-1$
+        uf.addPattern("collection", Rdfs.LABEL, "label", true); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addColumnName("label"); //$NON-NLS-1$
+        uf.addPattern("collection", DcTerms.DATE_CREATED, "created", true); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addColumnName("created"); //$NON-NLS-1$
+        uf.addPattern("collection", DcTerms.DATE_MODIFIED, "modified", true); //$NON-NLS-1$ //$NON-NLS-2$
+        uf.addColumnName("modified"); //$NON-NLS-1$
 
         try {
-            getContext().perform( uf );
-        } catch ( OperatorException e ) {
-            log.warn( "Could not get list of collections.", e );
+            getContext().perform(uf);
+        } catch (OperatorException e) {
+            log.warn("Could not get list of collections.", e);
         }
 
-        for ( Tuple<Resource> row : uf.getResult() ) {
+        for (Tuple<Resource> row : uf.getResult() ) {
             String label;
-            if ( row.get( 2 ) != null ) {
-                label = row.get( 2 ).toString();
+            if (row.get(2) != null) {
+                label = row.get(2).toString();
             } else {
-                label = row.get( 1 ).toString();
+                label = row.get(1).toString();
             }
             Date created = null;
-            if ( row.get( 3 ) != null ) {
+            if (row.get(3) != null) {
                 try {
-                    created = Iso8601.string2Date( row.get( 3 ).getString() ).getTime();
-                } catch ( ParseException e ) {
-                    log.info( "Could not parse date.", e );
+                    created = Iso8601.string2Date(row.get(3).getString()).getTime();
+                } catch (ParseException e) {
+                    log.info("Could not parse date.", e);
                     created = null;
                 }
             }
             Date modified = null;
-            if ( row.get( 4 ) != null ) {
+            if (row.get(4) != null) {
                 try {
-                    modified = Iso8601.string2Date( row.get( 4 ).getString() ).getTime();
-                } catch ( ParseException e ) {
-                    log.info( "Could not parse date.", e );
+                    modified = Iso8601.string2Date(row.get(4).getString()).getTime();
+                } catch (ParseException e) {
+                    log.info("Could not parse date.", e);
                     modified = null;
                 }
             }
-            AbstractResource r = new CollectionBeanResource( label, row.get( 0 ), created, modified, getContext(), getSecurity() );
-            result.put( row.get( 0 ).getString(), r );
+            AbstractResource r = new CollectionBeanResource(label, (UriRef) row.get(0), created, modified, getContext(), getSecurity());
+            result.put(row.get(0).getString(), r);
         }
 
         return result;

@@ -52,6 +52,7 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
@@ -135,7 +136,7 @@ public class TagBeanResource extends AbstractCollectionResource {//implements Pu
                     size = Long.parseLong(row.get(3).getString());
                 }
                 String format = row.get(6).getString();
-                AbstractResource r = new DeletableDatasetBeanResource(label, row.get(0), size, date, format, getContext(), getSecurity());
+                AbstractResource r = new DeletableDatasetBeanResource(label, (UriRef) row.get(0), size, date, format, getContext(), getSecurity());
                 result.put(row.get(0).getString(), r);
             }
         }
@@ -167,7 +168,7 @@ public class TagBeanResource extends AbstractCollectionResource {//implements Pu
     }
 
     class DeletableDatasetBeanResource extends DatasetBeanResource implements DeletableResource {
-        public DeletableDatasetBeanResource(String name, Resource uri, long size, Date date, String mimetype, Context context, SecurityManager security) {
+        public DeletableDatasetBeanResource(String name, UriRef uri, long size, Date date, String mimetype, Context context, SecurityManager security) {
             super(name, uri, size, date, mimetype, context, security);
         }
 

@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole;
@@ -79,9 +80,9 @@ public class EditRoleHandler implements ActionHandler<EditRole, EmptyResult> {
 
     @Override
     public EmptyResult execute(EditRole action, ExecutionContext arg1) throws ActionException {
-        Resource admin = Resource.uriRef(action.getUser());
-        Resource user = Resource.uriRef(action.getTargetUser());
-        Resource role = Resource.uriRef(action.getRole());
+        UriRef admin = Resource.uriRef(action.getUser());
+        UriRef user = Resource.uriRef(action.getTargetUser());
+        UriRef role = Resource.uriRef(action.getRole());
         SEADRbac rbac = TupeloStore.getInstance().getRbac();
 
         log.debug("user = " + user + ", admin = " + admin);
@@ -146,7 +147,7 @@ public class EditRoleHandler implements ActionHandler<EditRole, EmptyResult> {
      * 
      * @param user
      */
-    private void emailNotification(Resource user) {
+    private void emailNotification(UriRef user) {
         PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
 
         try {

@@ -41,7 +41,7 @@ package edu.illinois.ncsa.mmdb.web.server.webdav;
 import java.util.Date;
 
 import org.tupeloproject.kernel.Context;
-import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.DigestResource;
@@ -62,26 +62,26 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  * 
  */
 public abstract class AbstractResource implements com.bradmcevoy.http.Resource, DigestResource, PropFindableResource {
-    private String          name;
-    private Resource        uri;
-    private Date            created;
-    private Date            modified;
-    private Context         context;
-    private SecurityManager security;
+    private String                name;
+    private UriRef                uri;
+    private Date                  created;
+    private Date                  modified;
+    private final Context         context;
+    private final SecurityManager security;
 
     public AbstractResource(String name, Context context, SecurityManager security) {
         this(name, null, null, null, context, security);
     }
 
-    public AbstractResource(String name, Resource uri, Context context, SecurityManager security) {
+    public AbstractResource(String name, UriRef uri, Context context, SecurityManager security) {
         this(name, uri, null, null, context, security);
     }
 
-    public AbstractResource(String name, Resource uri, Date created, Context context, SecurityManager security) {
+    public AbstractResource(String name, UriRef uri, Date created, Context context, SecurityManager security) {
         this(name, uri, created, created, context, security);
     }
 
-    public AbstractResource(String name, Resource uri, Date created, Date modified, Context context, SecurityManager security) {
+    public AbstractResource(String name, UriRef uri, Date created, Date modified, Context context, SecurityManager security) {
         this.name = name;
         this.uri = uri;
         this.created = created;
@@ -104,7 +104,7 @@ public abstract class AbstractResource implements com.bradmcevoy.http.Resource, 
     /**
      * @return the uri
      */
-    public Resource getUri() {
+    public UriRef getUri() {
         return uri;
     }
 
@@ -112,7 +112,7 @@ public abstract class AbstractResource implements com.bradmcevoy.http.Resource, 
      * @param uri
      *            the uri to set
      */
-    public void setUri(Resource uri) {
+    public void setUri(UriRef uri) {
         this.uri = uri;
     }
 
