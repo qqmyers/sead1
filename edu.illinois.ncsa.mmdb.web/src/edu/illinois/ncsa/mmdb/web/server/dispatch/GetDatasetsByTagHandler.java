@@ -53,6 +53,7 @@ import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Tags;
@@ -97,7 +98,7 @@ public class GetDatasetsByTagHandler implements
         try {
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf, "dataset") ) {
                 if (row.get(0) != null) {
-                    datasets.add(dbu.get(row.get(0)));
+                    datasets.add(dbu.get((UriRef) row.get(0)));
                 }
             }
         } catch (OperatorException e1) {

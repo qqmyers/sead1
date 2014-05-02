@@ -52,6 +52,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.util.Tuple;
 
@@ -92,7 +93,7 @@ public class GetUserActionsHandler implements ActionHandler<GetUserActions, GetU
         for (Tuple<Resource> row : uf.getResult() ) {
             try {
                 Date date = (Date) row.get(2).asObject();
-                PersonBean pb = pbu.get(row.get(1));
+                PersonBean pb = pbu.get((UriRef) row.get(1));
                 result.addView(date, pb);
             } catch (Exception e) {
                 log.warn("Could not get view for dataset.", e);
@@ -113,7 +114,7 @@ public class GetUserActionsHandler implements ActionHandler<GetUserActions, GetU
         for (Tuple<Resource> row : uf.getResult() ) {
             try {
                 Date date = (Date) row.get(2).asObject();
-                PersonBean pb = pbu.get(row.get(1));
+                PersonBean pb = pbu.get((UriRef) row.get(1));
                 result.addDownload(date, pb);
             } catch (Exception e) {
                 log.warn("Could not get download for dataset.", e);

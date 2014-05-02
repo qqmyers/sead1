@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Rdf;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
@@ -31,7 +32,7 @@ public class ImagePyramidRestService {
 
         PreviewPyramidBean pyramid;
         try {
-            Resource uri = Resource.uriRef(dataset);
+            UriRef uri = Resource.uriRef(dataset);
             PreviewPyramidBeanUtil ipbu = new PreviewPyramidBeanUtil(TupeloStore.getInstance().getBeanSession());
             pyramid = ipbu.get(uri);
         } catch (OperatorException exc) {
