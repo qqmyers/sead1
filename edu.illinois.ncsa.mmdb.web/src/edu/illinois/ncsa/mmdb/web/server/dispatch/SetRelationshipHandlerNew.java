@@ -15,6 +15,7 @@ import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Reification;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.util.Tuple;
 
@@ -26,40 +27,44 @@ public class SetRelationshipHandlerNew implements ActionHandler<SetRelationship,
 
     @Override
     public SetRelationshipResult execute(SetRelationship action, ExecutionContext exc) throws ActionException {
-        // Here we interpret the "type" field of the action as the URI of the predicate to set
         try {
-            Context c = TupeloStore.getInstance().getContext();
-            //
+            // Here we interpret the "type" field of the action as the URI of the predicate to set
             // we're calling new URI below, to validate that these are all URI's.
-            Resource source = Resource.uriRef(new URI(action.getUri1()));
-            Resource target = Resource.uriRef(new URI(action.getUri2()));
-            Resource predicate = Resource.uriRef(new URI(action.getType()));
-            Resource creator = Resource.uriRef(new URI(action.getCreator()));
-            //
-            // construct a relationship triple, and its inverse
-            Resource inverse = null;
-            for (Triple t : c.match(predicate, Resource.uriRef(Namespaces.owl("inverseOf")), null) ) {
-                inverse = t.getObject();
-            }
-            if (inverse == null) {
-                throw new ActionException("no inverse predicate found for relationship " + predicate);
-            }
-            TripleWriter tw = new TripleWriter();
-            for (Triple relationshipTriple : new Tuple<Triple>(new Triple(source, predicate, target), new Triple(target, inverse, source)) ) {
-                tw.add(relationshipTriple);
-                Resource reified = Resource.uriRef();
-                tw.addAll(Reification.reify(reified, relationshipTriple));
-                tw.add(reified, Dc.CREATOR, creator);
-                tw.add(reified, Dc.DATE, new Date());
-            }
+            UriRef source = Resource.uriRef(new URI(action.getUri1()));
+            UriRef target = Resource.uriRef(new URI(action.getUri2()));
+            UriRef predicate = Resource.uriRef(new URI(action.getType()));
+            UriRef creator = Resource.uriRef(new URI(action.getCreator()));
 
-            c.perform(tw);
+            setRelationship(source, predicate, target, creator);
         } catch (OperatorException x) {
             throw new ActionException("set relationship failed", x);
         } catch (URISyntaxException e) {
             throw new ActionException("set relationship failed", e);
         }
         return new SetRelationshipResult();
+    }
+
+    public static void setRelationship(UriRef source, UriRef predicate, UriRef target, UriRef creator) throws OperatorException {
+        Context c = TupeloStore.getInstance().getContext();
+        //
+        //
+        // construct a relationship triple, and its inverse
+        Resource inverse = null;
+        for (Triple t : c.match(predicate, Resource.uriRef(Namespaces.owl("inverseOf")), null) ) {
+            inverse = t.getObject();
+        }
+        if (inverse == null) {
+            throw new OperatorException("no inverse predicate found for relationship " + predicate);
+        }
+        TripleWriter tw = new TripleWriter();
+        for (Triple relationshipTriple : new Tuple<Triple>(new Triple(source, predicate, target), new Triple(target, inverse, source)) ) {
+            tw.add(relationshipTriple);
+            Resource reified = Resource.uriRef();
+            tw.addAll(Reification.reify(reified, relationshipTriple));
+            tw.add(reified, Dc.CREATOR, creator);
+            tw.add(reified, Dc.DATE, new Date());
+        }
+        c.perform(tw);
     }
 
     @Override
