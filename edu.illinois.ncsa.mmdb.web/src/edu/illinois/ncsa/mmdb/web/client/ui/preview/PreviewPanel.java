@@ -140,6 +140,7 @@ public class PreviewPanel extends Composite {
             addWidget(new Preview3DWebGLBeanWidget(eventBus));
             addWidget(new PreviewPTMBeanWidget(eventBus));
             addWidget(new PreviewGeoserverBeanWidget(eventBus));
+            addWidget(new PreviewTimeseriesBeanWidget(eventBus));
             //The following previews currently not supported in embedded previewer
             if (!isEmbedded) {
                 addWidget(new PreviewMultiTabularDataBeanWidget(eventBus));
