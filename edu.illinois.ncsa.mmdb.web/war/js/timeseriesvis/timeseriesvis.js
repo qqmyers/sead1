@@ -1,4 +1,4 @@
-/*! timeseriesvis 2014-05-13 19:05:21 */
+/*! timeseriesvis 2014-05-16 14:05:44 */
 function update() {
     var a = $("#xCol option:selected").val(), b = sortDataByKey(originalData, a), c = projectDataByKey(b, a);
     console.log(c), render(c);
@@ -41,7 +41,8 @@ function sortDataByKey(a, b) {
 }
 
 function updateControls(a) {
-    $("#xCol option").remove(), $("#yCheckboxes input").remove(), $("label[for=yRadio]").remove();
+    console.log("Updating controls based on following data"), console.log(a), $("#xCol option").remove(), 
+    $("#yCheckboxes input").remove(), $("label[for=yRadio]").remove();
     $.each(Object.keys(a[0]), function() {
         $("#xCol").append($("<option />").val(this).text(this));
     }), defaultX = Object.keys(a[0])[0], console.log("controls updated");

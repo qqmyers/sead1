@@ -44,7 +44,7 @@ public class PreviewTimeseriesBeanWidget extends PreviewBeanWidget<PreviewTabula
     @Override
     protected void showSection() {
         String url = RestEndpoints.BLOB_URL + getDataset().getUri();
-        widget.add(new HTML("<div id='d3TimeseriesVis'><svg></svg></div>"));
+        widget.add(new HTML("<div id='graphControls'></div><div id='d3TimeseriesVis'><svg></svg></div>"));
         initNativeVis(url);
     }
 
@@ -65,6 +65,7 @@ public class PreviewTimeseriesBeanWidget extends PreviewBeanWidget<PreviewTabula
 
     public final native void initNativeVis(String url) /*-{
 		//		$wnd.LazyLoad.js('js/timeseriesvis/timeseriesvis.js', function() {
+		$wnd.setupControls();
 		$wnd.loadDataByUrl(url);
 		//		});
     }-*/;
