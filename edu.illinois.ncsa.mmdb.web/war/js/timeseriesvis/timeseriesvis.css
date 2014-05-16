@@ -32,6 +32,6 @@ div.tooltip {
   margin:0 auto; 
   width:600px; 
   height:500px; 
-  padding: 5 5 5 5;
+  padding: 10px;
   border: solid 1px #A8A8A8;
 }
