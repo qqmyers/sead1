@@ -25,7 +25,14 @@ if [ ! -e "/etc/apt/sources.list.d/ubuntugis-ubuntugis-unstable-`lsb_release -c 
   add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
 fi
 
+# make sure we have latest listing of packages
 apt-get -y update
+
+# install java 7 first, and remove java 6 in case it is installed
+apt-get -y install openjdk-7-jre-headless openjdk-7-jre-lib
+apt-get -y purge --auto-remove 6-jre*
+
+# install rest of packages
 apt-get -y install default-jre-headless ffmpeg imagemagick mysql-server poppler-utils tomcat6 ttf-dejavu-core ttf-dejavu-extra ttf-kochi-gothic ttf-kochi-mincho ttf-baekmuk ttf-arphic-gbsn00lp ttf-arphic-bsmi00lp ttf-arphic-gkai00mp ttf-arphic-bkai00mp ttf-sazanami-gothic ttf-kochi-gothic ttf-sazanami-mincho ttf-kochi-mincho ttf-wqy-microhei ttf-wqy-zenhei ttf-indic-fonts-core ttf-telugu-fonts ttf-oriya-fonts ttf-kannada-fonts ttf-bengali-fonts ubuntu-restricted-extras unzip gdal-bin python-gdal proj libgdal-dev
 
 # make tomcat run on port 80
@@ -87,22 +94,22 @@ if [ ! -e /var/lib/tomcat6/webapps/geoserver ]; then
 fi
 
 # install jai to speed up geoserver
-if [ ! -e /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/libclib_jiio.so ]; then
+if [ ! -e /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/libclib_jiio.so ]; then
   if [ ! -e jai_imageio-1_1-lib-linux-amd64.tar.gz ]; then
     wget -q -O jai_imageio-1_1-lib-linux-amd64.tar.gz http://download.java.net/media/jai-imageio/builds/release/1.1/jai_imageio-1_1-lib-linux-amd64.tar.gz
   fi
   tar zxvf jai_imageio-1_1-lib-linux-amd64.tar.gz
-  cp jai_imageio-1_1/lib/*.jar /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/ext
-  cp jai_imageio-1_1/lib/libclib_jiio.so /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/
-  chmod 644 /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/ext/jai_imageio.jar
+  cp jai_imageio-1_1/lib/*.jar /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/ext
+  cp jai_imageio-1_1/lib/libclib_jiio.so /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/
+  chmod 644 /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/ext/jai_imageio.jar
   rm -rf jai_imageio-1_1-lib-linux-amd64.tar.gz jai_imageio-1_1
 
   if [ ! -e jai-1_1_3-lib-linux-amd64.tar.gz ]; then
     wget -q -O jai-1_1_3-lib-linux-amd64.tar.gz http://download.java.net/media/jai/builds/release/1_1_3/jai-1_1_3-lib-linux-amd64.tar.gz
   fi
   tar zxvf jai-1_1_3-lib-linux-amd64.tar.gz
-  cp jai-1_1_3/lib/*.jar /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/ext
-  cp jai-1_1_3/lib/libmlib_jai.so /usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/
+  cp jai-1_1_3/lib/*.jar /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/ext
+  cp jai-1_1_3/lib/libmlib_jai.so /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/
   rm -rf jai-1_1_3-lib-linux-amd64.tar.gz jai-1_1_3
 
   rm -f /var/lib/tomcat6/webapps/geoserver/WEB-INF/lib/jai_*
