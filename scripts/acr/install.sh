@@ -25,9 +25,14 @@ if [ ! -e "/etc/apt/sources.list.d/ubuntugis-ubuntugis-unstable-`lsb_release -c 
   add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
 fi
 
+# make sure we have latest listing of packages
 apt-get -y update
-# install java 7 first, so we don't have to remove java-6
+
+# install java 7 first, and remove java 6 in case it is installed
 apt-get -y install openjdk-7-jre-headless openjdk-7-jre-lib
+apt-get -y purge --auto-remove 6-jre*
+
+# install rest of packages
 apt-get -y install default-jre-headless ffmpeg imagemagick mysql-server poppler-utils tomcat6 ttf-dejavu-core ttf-dejavu-extra ttf-kochi-gothic ttf-kochi-mincho ttf-baekmuk ttf-arphic-gbsn00lp ttf-arphic-bsmi00lp ttf-arphic-gkai00mp ttf-arphic-bkai00mp ttf-sazanami-gothic ttf-kochi-gothic ttf-sazanami-mincho ttf-kochi-mincho ttf-wqy-microhei ttf-wqy-zenhei ttf-indic-fonts-core ttf-telugu-fonts ttf-oriya-fonts ttf-kannada-fonts ttf-bengali-fonts ubuntu-restricted-extras unzip gdal-bin python-gdal proj libgdal-dev
 
 # make tomcat run on port 80
