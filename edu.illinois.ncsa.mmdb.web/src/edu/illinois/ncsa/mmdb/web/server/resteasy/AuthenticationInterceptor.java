@@ -184,7 +184,6 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
             if (lastIndex != -1) {
                 String user = decoded.substring(0, lastIndex);
                 String password = decoded.substring(lastIndex + 1);
-                log.debug("U: " + user + " P: " + password);
 
                 if ((new Authentication()).authenticate(user, password)) {
                     log.debug("REST Authentication successful");

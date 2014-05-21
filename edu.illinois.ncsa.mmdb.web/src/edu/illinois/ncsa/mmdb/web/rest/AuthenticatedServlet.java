@@ -127,9 +127,11 @@ public class AuthenticatedServlet extends HttpServlet {
                     response.getWriter().print(session.getId());
                 }
             } else if (googleAccessToken != null) {
-                String clientId = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleClientId);
-                validUser = Authentication.googleAuthenticate(clientId, googleAccessToken); // testID
-                log.info("Retrieved user from google " + validUser + " " + clientId + " " + googleAccessToken);
+                String[] clientIds = new String[2];
+                clientIds[0] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleClientId);
+                clientIds[1] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleDeviceClientId);
+                validUser = Authentication.googleAuthenticate(clientIds, googleAccessToken); // testID
+                log.info("Retrieved user from google " + validUser + " " + clientIds + " " + googleAccessToken);
                 if (validUser != null) {
                     // set the session attribute indicating that we're authenticated
 

@@ -43,6 +43,7 @@ public enum ConfigurationKey {
     ExtractorUrl("extractor.url", "http://localhost:9856/"), //$NON-NLS-1$ //$NON-NLS-2$
 
     GoogleClientId("google.client_id", ""),
+    GoogleDeviceClientId("google.device_client_id", ""),
 
     //optimizations for big data (many files)
     BigData("bigdata", "false");
