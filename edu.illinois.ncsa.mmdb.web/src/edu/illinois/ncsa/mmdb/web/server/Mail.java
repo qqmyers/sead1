@@ -155,7 +155,7 @@ public class Mail {
         String server = ts.getConfiguration(ConfigurationKey.MediciName);
         String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
         String subject = presubj + " Invitation to access data";
-        String body = String.format("Welcome to SEAD! - a new way for projects to manage, curate and preserve data.\n\n" +
+        String body = String.format("Dear " + user.getName() + ",\n\n Welcome to SEAD! - a new way for projects to manage, curate and preserve data.\n\n" +
                 "You have been invited by an administrator (cc'd) to access and contribute to the data collection(s) being " +
                 "developed by the project using a SEAD Active Content Repository.\n\n" +
                 "A user account on the server %s has been created using this email address. You can login using your Google password" +
