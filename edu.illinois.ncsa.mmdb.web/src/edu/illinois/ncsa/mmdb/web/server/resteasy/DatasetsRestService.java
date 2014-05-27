@@ -17,12 +17,10 @@ import java.net.URLEncoder;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +29,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.Encoded;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -62,21 +62,18 @@ import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Beans;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
 import org.tupeloproject.util.UnicodeTranscoder;
 
-import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
@@ -113,7 +110,7 @@ public class DatasetsRestService extends IngestService {
                                         };
 
     /** Commons logging **/
-    private static Log      log         = LogFactory.getLog(DatasetsRestService.class);
+    static Log              log         = LogFactory.getLog(DatasetsRestService.class);
 
     @POST
     @Path("/copy")
@@ -162,144 +159,6 @@ public class DatasetsRestService extends IngestService {
         }
     }
 
-    /**
-     * Simple function to create a predicate and store information about the
-     * predicate.
-     * 
-     * @param category
-     * @param id
-     * @param label
-     * @param tw
-     * @return
-     */
-    static public Resource createPredicate(String category, String id, String label, TripleWriter tw) {
-        String uType;
-        if (category.length() > 1) {
-            uType = category.substring(0, 1).toUpperCase() + category.substring(1);
-        } else {
-            uType = category.toUpperCase();
-        }
-        try {
-            uType = URLEncoder.encode(uType, "UTF8"); //$NON-NLS-1$ 
-        } catch (UnsupportedEncodingException e) {
-            log.warn("Could not encode type.", e); //$NON-NLS-1$
-            uType = uType.replace(" ", "%20"); //$NON-NLS-1$ //$NON-NLS-2$ 
-        }
-
-        Resource p;
-        try {
-            p = Cet.cet(String.format("metadata/%s/%s", URLEncoder.encode(category, "UTF8"), id)); //$NON-NLS-1$ //$NON-NLS-2$
-        } catch (UnsupportedEncodingException e) {
-            log.warn("Could not encode category.", e); //$NON-NLS-1$
-            p = Cet.cet(String.format("metadata/%s/%s", category.replace(" ", "%20"), id)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        }
-
-        tw.add(p, Rdf.TYPE, Cet.cet("metadata/" + uType)); //$NON-NLS-1$
-        tw.add(p, Rdf.TYPE, MMDB.METADATA_TYPE);
-        tw.add(p, MMDB.METADATA_CATEGORY, category);
-        tw.add(p, Rdfs.LABEL, label);
-        return p;
-    }
-
-    private void copyTriples(URL endpoint, String uri, TripleWriter tw, Set<String> copyURI, Set<String> ignoreURI) throws IOException, ParseException {
-        StringBuilder sb = new StringBuilder();
-        sb.append(URLEncoder.encode(ConfigurationKey.RemoteAPIKey.getPropertyKey(), "UTF8"));
-        sb.append("=");
-        sb.append(URLEncoder.encode(TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey), "UTF8"));
-        sb.append("&");
-        sb.append(URLEncoder.encode("query", "UTF8"));
-        sb.append("=");
-        sb.append(URLEncoder.encode("SELECT ?p ?o WHERE { <" + uri + "> ?p ?o . }", "UTF8"));
-
-        URLConnection conn = endpoint.openConnection();
-        conn.setRequestProperty("Accept", "text/csv");
-        conn.setDoOutput(true);
-        conn.setDoInput(true);
-        conn.getOutputStream().write(sb.toString().getBytes("UTF8"));
-        conn.getOutputStream().close();
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        Set<String> uris = new HashSet<String>();
-        if (br.readLine().equals("p\to")) {
-            String line;
-            Resource sub = Resource.uriRef(uri);
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split("\t");
-                if (data.length != 2) {
-                    log.warn("ignoring : " + line);
-                    continue;
-                    //throw (new IOException("Invalid result : " + line));
-                }
-
-                Resource pre = parseNTriples(data[0]);
-                Resource obj = parseNTriples(data[1]);
-
-                if (Arrays.asList(CopyIgnore).contains(pre.getString())) {
-                    continue;
-                }
-                if (Arrays.asList(CopyTriples).contains(pre.getString())) {
-                    uris.add(obj.getString());
-                }
-                if (pre.getString().startsWith(Cet.cet("metadata/").getString())) {
-                    uris.add(pre.getString());
-                }
-                if (Arrays.asList(CopyBytes).contains(pre.getString())) {
-                    copyURI.add(obj.getString());
-                }
-                if (Arrays.asList(CopyNoBytes).contains(obj.getString())) {
-                    log.info("Ignoring blob for " + obj.getString());
-                    ignoreURI.add(uri);
-                }
-
-                tw.add(sub, pre, obj);
-            }
-        }
-        br.close();
-
-        for (String s : uris ) {
-            copyTriples(endpoint, s, tw, copyURI, ignoreURI);
-        }
-    }
-
-    private Resource parseNTriples(String s) throws ParseException {
-        if (s.startsWith("<") && s.endsWith(">")) {
-            return Resource.uriRef(s.substring(1, s.length() - 1));
-        }
-
-        if (s.startsWith("_:")) {
-            return Resource.blankNode(s.substring(2));
-        }
-
-        if (s.startsWith("\"")) {
-            Matcher m = Pattern.compile("^\"(.*)\"(.*)$").matcher(s);
-            if (!m.matches()) {
-                throw (new ParseException("invalid literal " + s, -1));
-            }
-            String str = UnicodeTranscoder.decode(m.group(1));
-            if (m.groupCount() != 2) {
-                return Resource.literal(str);
-            }
-            if (m.group(2).startsWith("^^<")) {
-                return Resource.literal(str, m.group(2).substring(3, m.group(2).length() - 1));
-            } else if (m.group(2).startsWith("@")) {
-                return Resource.plainLiteral(str, m.group(2).substring(2));
-            } else {
-                return Resource.literal(str);
-            }
-        }
-
-        return Resource.literal(s);
-    }
-
-    private void copyData(URL endpoint, String uri) throws IOException, OperatorException {
-        InputStream is = endpoint.openStream();
-        BlobWriter bw = new BlobWriter();
-        bw.setSubject(Resource.uriRef(uri));
-        bw.setInputStream(is);
-        TupeloStore.getInstance().getContext().perform(bw);
-        is.close();
-    }
-
     @GET
     @Path("/{id}/file")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -322,46 +181,10 @@ public class DatasetsRestService extends IngestService {
     @GET
     @Path("/{id}")
     @Produces("application/json")
-    public Response getDatasetByIdAsJSON(@PathParam("id") String id) {
-        Map<String, String> result = new HashMap<String, String>();
+    public Response getDatasetByIdAsJSON(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
 
-        try {
-            id = URLDecoder.decode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
-            e1.printStackTrace();
-        }
-
-        // use DatasetBeanUtil to get DatasetBean of corresponding id
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-
-        try {
-            DatasetBean dataset = dbu.get(id);
-            if (dataset != null && dbu.get(id).getTitle() != null) {
-                result.put("Title", dataset.getTitle());
-                PersonBean creator = dataset.getCreator();
-                if (creator != null) {
-                    result.put("Contributor", creator.getName());
-                }
-                result.put("Filename", dataset.getFilename());
-                result.put("Size", TextFormatter.humanBytes(dataset.getSize()));
-                //                result.put("Category: " + dataset.get;
-                result.put("MIME Type", dataset.getMimeType());
-                if (dataset.getDate() != null) {
-                    result.put("Uploaded", DateFormat.getInstance().format(dataset.getDate()));
-                }
-            }
-            else {
-                return Response.status(404).entity("Dataset " + id + " Not Found.").build();
-            }
-        } catch (Throwable e1) {
-            log.error("Error getting DatasetBean for " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting DatasetBean for " + id).build();
-        }
-        return Response.status(200).entity(result).build();
+        return getMetadataById(id, datasetBasics, userId);
     }
 
     @GET
@@ -515,56 +338,26 @@ public class DatasetsRestService extends IngestService {
     @GET
     @Path("/{id}/collections")
     @Produces("application/json")
-    public Response getDatasetCollectionsByIdAsJSON(@PathParam("id") String id) {
-        List<String> result = new ArrayList<String>();
-
+    public Response getDatasetCollectionsByIdAsJSON(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        UriRef baseId = null;
         try {
             id = URLDecoder.decode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
+            baseId = Resource.uriRef(id);
+        } catch (Exception e1) {
             log.error("Error decoding url for " + id, e1);
             e1.printStackTrace();
         }
+        return getMetadataByReverseRelationship(baseId, DcTerms.HAS_PART, collectionBasics, userId);
+    }
 
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+    @GET
+    @Path("/{id}/biblio")
+    @Produces("application/json")
+    public Response getDatasetBiblioAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        return getBiblioByIdAsJSON(id, userId);
 
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-
-        try {
-            if (dbu.get(id) == null || dbu.get(id).getTitle() == null) {
-                return Response.status(404).entity("Dataset " + id + " Not Found").build();
-            }
-        } catch (Exception e1) {
-            log.error("Error getting " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting " + id).build();
-        }
-
-        // use Unifier to search for all collections of a corresponding dataset
-        Unifier uf = new Unifier();
-        uf.addPattern("collection", Rdf.TYPE,
-                CollectionBeanUtil.COLLECTION_TYPE);
-        uf.addPattern("collection", CollectionBeanUtil.DCTERMS_HAS_PART,
-                Resource.uriRef(id));
-        uf.setColumnNames("collection");
-        try {
-            TupeloStore.getInstance().getContext().perform(uf);
-
-            for (Tuple<Resource> row : uf.getResult() ) {
-                if (row.get(0) != null) {
-                    result.add(URLEncoder.encode(row.get(0).getString(), "UTF-8"));
-                }
-            }
-        } catch (OperatorException e1) {
-            log.error("Error getting Collections for " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting Collections for " + id).build();
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error encoding Collection's url for " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error encoding Collection's url for " + id).build();
-        }
-
-        return Response.status(200).entity(result).build();
     }
 
     @GET
@@ -622,20 +415,21 @@ public class DatasetsRestService extends IngestService {
     @POST
     @Path("")
     @Consumes("multipart/form-data")
-    public Response uploadFile(MultipartFormDataInput input, @HeaderParam("Authorization") String auth) {
+    public Response uploadFile(MultipartFormDataInput input, @javax.ws.rs.core.Context HttpServletRequest request) {
         Context c = TupeloStore.getInstance().getContext();
         String fileName = "unknown";
         String uri = RestUriMinter.getInstance().mintUri(null); // Create dataset uri
         ThingSession ts = c.getThingSession();
         Thing t = ts.newThing(Resource.uriRef(uri));
-        UriRef creator = getUserName(auth);
+        UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
+
         try {
             //Get API input data
             Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
 
             for (Entry<String, List<InputPart>> parts : uploadForm.entrySet() ) {
                 for (InputPart part : parts.getValue() ) {
-
+                    log.debug("Processing: " + parts.getKey());
                     if (parts.getKey().equals("datablob")) {
                         //get filename...
                         if (log.isDebugEnabled()) {
@@ -669,7 +463,7 @@ public class DatasetsRestService extends IngestService {
                             //Next 3 are Bean related
                             t.addType(Beans.STORAGE_TYPE_BEAN_ENTRY);
                             t.setValue(Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
-                                    Resource.uriRef("edu.uiuc.ncsa.cet.bean.DatasetBean"));
+                                    Resource.literal("edu.uiuc.ncsa.cet.bean.DatasetBean"));
                             t.setValue(Dc.IDENTIFIER, uri);
                             t.setValue(Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
                                     Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/http://cet.ncsa.uiuc.edu/2007/Dataset"));
@@ -703,6 +497,7 @@ public class DatasetsRestService extends IngestService {
 
                     } else {
                         //Should only be one val per Key...
+                        log.debug("Adding: " + parts.getKey() + " : " + part.getBodyAsString());
                         addMetadataItem(t, parts.getKey(), part.getBodyAsString(), part.getMediaType(), creator);//Should only be one val per Key...
                     }
 
@@ -731,7 +526,147 @@ public class DatasetsRestService extends IngestService {
                 .entity(uri).build();
     }
 
-    private Set<String> getTagSet(String cdl) {
+    @POST
+    @Path("/{id}/metadata")
+    @Consumes("multipart/form-data")
+    public Response uploadMetadata(@PathParam("id") String id, MultipartFormDataInput input, @HeaderParam("Authorization") String auth) {
+        return super.uploadMetadata(id, input, auth);
+    }
+
+    /**
+     * Simple function to create a predicate and store information about the
+     * predicate.
+     * 
+     * @param category
+     * @param id
+     * @param label
+     * @param tw
+     * @return
+     */
+    static private Resource createPredicate(String category, String id, String label, TripleWriter tw) {
+        assert (Character.isUpperCase(category.charAt(0)));
+        try {
+            category = URLEncoder.encode(category, "UTF8"); //$NON-NLS-1$ 
+        } catch (UnsupportedEncodingException e) {
+            log.warn("Could not encode type.", e); //$NON-NLS-1$
+            category = category.replace(" ", "%20"); //$NON-NLS-1$ //$NON-NLS-2$ 
+        }
+
+        Resource p;
+        try {
+            p = Cet.cet(String.format("metadata/%s/%s", URLEncoder.encode(category, "UTF8"), id)); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (UnsupportedEncodingException e) {
+            log.warn("Could not encode category.", e); //$NON-NLS-1$
+            p = Cet.cet(String.format("metadata/%s/%s", category.replace(" ", "%20"), id)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        }
+
+        tw.add(p, Rdf.TYPE, Cet.cet("metadata/" + category)); //$NON-NLS-1$
+        tw.add(p, Rdf.TYPE, MMDB.METADATA_TYPE);
+        tw.add(p, MMDB.METADATA_CATEGORY, category);
+        tw.add(p, Rdfs.LABEL, label);
+        return p;
+    }
+
+    private static void copyTriples(URL endpoint, String uri, TripleWriter tw, Set<String> copyURI, Set<String> ignoreURI) throws IOException, ParseException {
+        StringBuilder sb = new StringBuilder();
+        sb.append(URLEncoder.encode(ConfigurationKey.RemoteAPIKey.getPropertyKey(), "UTF8"));
+        sb.append("=");
+        sb.append(URLEncoder.encode(TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey), "UTF8"));
+        sb.append("&");
+        sb.append(URLEncoder.encode("query", "UTF8"));
+        sb.append("=");
+        sb.append(URLEncoder.encode("SELECT ?p ?o WHERE { <" + uri + "> ?p ?o . }", "UTF8"));
+
+        URLConnection conn = endpoint.openConnection();
+        conn.setRequestProperty("Accept", "text/csv");
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
+        conn.getOutputStream().write(sb.toString().getBytes("UTF8"));
+        conn.getOutputStream().close();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        Set<String> uris = new HashSet<String>();
+        if (br.readLine().equals("p\to")) {
+            String line;
+            Resource sub = Resource.uriRef(uri);
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split("\t");
+                if (data.length != 2) {
+                    log.warn("ignoring : " + line);
+                    continue;
+                    //throw (new IOException("Invalid result : " + line));
+                }
+
+                Resource pre = parseNTriples(data[0]);
+                Resource obj = parseNTriples(data[1]);
+
+                if (Arrays.asList(CopyIgnore).contains(pre.getString())) {
+                    continue;
+                }
+                if (Arrays.asList(CopyTriples).contains(pre.getString())) {
+                    uris.add(obj.getString());
+                }
+                if (pre.getString().startsWith(Cet.cet("metadata/").getString())) {
+                    uris.add(pre.getString());
+                }
+                if (Arrays.asList(CopyBytes).contains(pre.getString())) {
+                    copyURI.add(obj.getString());
+                }
+                if (Arrays.asList(CopyNoBytes).contains(obj.getString())) {
+                    log.info("Ignoring blob for " + obj.getString());
+                    ignoreURI.add(uri);
+                }
+
+                tw.add(sub, pre, obj);
+            }
+        }
+        br.close();
+
+        for (String s : uris ) {
+            copyTriples(endpoint, s, tw, copyURI, ignoreURI);
+        }
+    }
+
+    private static Resource parseNTriples(String s) throws ParseException {
+        if (s.startsWith("<") && s.endsWith(">")) {
+            return Resource.uriRef(s.substring(1, s.length() - 1));
+        }
+
+        if (s.startsWith("_:")) {
+            return Resource.blankNode(s.substring(2));
+        }
+
+        if (s.startsWith("\"")) {
+            Matcher m = Pattern.compile("^\"(.*)\"(.*)$").matcher(s);
+            if (!m.matches()) {
+                throw (new ParseException("invalid literal " + s, -1));
+            }
+            String str = UnicodeTranscoder.decode(m.group(1));
+            if (m.groupCount() != 2) {
+                return Resource.literal(str);
+            }
+            if (m.group(2).startsWith("^^<")) {
+                return Resource.literal(str, m.group(2).substring(3, m.group(2).length() - 1));
+            } else if (m.group(2).startsWith("@")) {
+                return Resource.plainLiteral(str, m.group(2).substring(2));
+            } else {
+                return Resource.literal(str);
+            }
+        }
+
+        return Resource.literal(s);
+    }
+
+    private static void copyData(URL endpoint, String uri) throws IOException, OperatorException {
+        InputStream is = endpoint.openStream();
+        BlobWriter bw = new BlobWriter();
+        bw.setSubject(Resource.uriRef(uri));
+        bw.setInputStream(is);
+        TupeloStore.getInstance().getContext().perform(bw);
+        is.close();
+    }
+
+    private static Set<String> getTagSet(String cdl) {
         Set<String> tagSet = new HashSet<String>();
         for (String s : cdl.split(",") ) {
             tagSet.add(s.trim());

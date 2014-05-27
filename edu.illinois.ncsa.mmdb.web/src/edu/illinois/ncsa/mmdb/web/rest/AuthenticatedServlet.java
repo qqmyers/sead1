@@ -131,7 +131,7 @@ public class AuthenticatedServlet extends HttpServlet {
                 clientIds[0] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleClientId);
                 clientIds[1] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleDeviceClientId);
                 validUser = Authentication.googleAuthenticate(clientIds, googleAccessToken); // testID
-                log.info("Retrieved user from google " + validUser + " " + clientIds + " " + googleAccessToken);
+                log.info("Retrieved user from google " + validUser + " " + clientIds[0] + ", " + clientIds[1] + " " + googleAccessToken);
                 if (validUser != null) {
                     // set the session attribute indicating that we're authenticated
 
