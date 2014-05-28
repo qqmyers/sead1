@@ -255,6 +255,7 @@ public class TupeloStore {
         for (Resource beanUri : toNuke ) {
             try {
                 getBeanSession().deregister(beanUri);
+                getBeanSession().getThingSession().clear(beanUri);
             } catch (OperatorException x) {
                 log.error("ERROR: could not expire bean " + beanUri + ": " + x.getMessage());
                 log.debug(x.getStackTrace().toString());
