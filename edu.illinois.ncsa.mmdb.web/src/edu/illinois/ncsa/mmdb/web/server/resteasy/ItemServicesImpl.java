@@ -16,10 +16,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Encoded;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -36,6 +33,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.TripleMatcher;
+import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
@@ -46,6 +44,7 @@ import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
+import org.tupeloproject.rdf.terms.Tags;
 import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tuple;
 
@@ -60,7 +59,6 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandlerNew;
-import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
@@ -188,54 +186,10 @@ public class ItemServicesImpl
         }
     }
 
-    /*
-        @GET
-        @Path("/{id}")
-        @Produces("application/json")
-        */
-    public Response getBiblioByIdAsJSON(@PathParam("id") @Encoded String id, UriRef userId) {
+    protected Response getBiblioByIdAsJSON(@PathParam("id") @Encoded String id, UriRef userId) {
 
         return getMetadataById(id, itemBiblio, userId);
 
-    }
-
-    @GET
-    @Path("/{id}/tags")
-    @Produces("application/json")
-    public Response getDatasetTagsByIdAsJSON(@PathParam("id") @Encoded String id) {
-        List<String> tags = new ArrayList<String>();
-
-        try {
-            id = URLDecoder.decode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
-            e1.printStackTrace();
-        }
-
-        // use TagEventBeanUtil to find all tags of a corresponding dataset
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-
-        TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
-
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-
-        try {
-
-            if (dbu.get(id) == null || dbu.get(id).getTitle() == null) {
-                return Response.status(404).entity("Dataset " + id + " Not Found").build();
-            }
-
-            Set<String> tagsSet = tebu.getTags(Resource.uriRef(id));
-            for (String tag : tagsSet ) {
-                tags.add(tag);
-            }
-        } catch (Exception e1) {
-            log.error("Error getting tags for " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting tags for " + id).build();
-        }
-
-        return Response.status(200).entity(tags).build();
     }
 
     static protected void addMetadataItem(Thing t, String pred, String obj, MediaType mediaType, UriRef user) {
@@ -769,6 +723,120 @@ public class ItemServicesImpl
         return Response.status(200).entity(result).build();
     }
 
+    protected Response getItemTagsByIdAsJSON(String id, Resource type, HttpServletRequest request) {
+        Response r;
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        List<String> tags = new ArrayList<String>();
+        try {
+            UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
+            ValidItem item = new ValidItem(itemId, type, userId);
+            if (!item.isValid()) {
+                r = item.getErrorResponse();
+            } else {
+                Unifier uf = new Unifier();
+                uf.addPattern(id, Tags.TAGGED_WITH_TAG, "tag");
+                uf.addPattern("tag", Tags.HAS_TAG_TITLE, "title");
+                uf.addColumnName("title");
+                c.perform(uf);
+                for (Tuple<Resource> row : uf.getResult() ) {
+                    if (row.get(0) != null) {
+                        tags.add(row.get(0).getString());
+                    }
+                }
+                r = Response.status(200).entity(tags).build();
+            }
+        } catch (Exception e) {
+            log.error("Error for " + id, e);
+            e.printStackTrace();
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            result.put("Error", "Server error while retrieving tags for " + id);
+            r = Response.status(500).entity(result).build();
+        }
+        return r;
+    }
+
+    protected Response addTagsToItem(String id, String tags, UriRef type, HttpServletRequest request) {
+        Response r;
+        try {
+            UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+            UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
+            ValidItem item = new ValidItem(itemId, type, userId);
+            if (!item.isValid()) {
+                r = item.getErrorResponse();
+            } else {
+                BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+                TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
+                Set<String> tagSet = getNormalizedTagSet(tags);
+                log.debug("normalized tags = " + tagSet);
+                tebu.addTags(Resource.uriRef(id), userId, tagSet);
+
+                Map<String, Object> result = new LinkedHashMap<String, Object>();
+                result.put("Tags Added", tagSet);
+                r = Response.status(200).entity(result).build();
+            }
+        } catch (Exception e) {
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            result.put("Error", "Server error while adding tags for " + id);
+            r = Response.status(500).entity(result).build();
+        }
+        return r;
+    }
+
+    protected Response deleteTagsFromItem(String id, String tags, UriRef type, HttpServletRequest request) {
+        Response r;
+        try {
+            UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+            UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
+            ValidItem item = new ValidItem(itemId, type, userId);
+            if (!item.isValid()) {
+                r = item.getErrorResponse();
+            } else {
+                BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
+                TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
+                Set<String> tagSet = getNormalizedTagSet(tags);
+                log.debug("normalized tags = " + tagSet);
+                // use TagEventBeanUtil to remove tags from dataset
+                tebu.removeTags(Resource.uriRef(id), tagSet);
+                log.debug("Removed tags " + tagSet + " from " + id);
+
+                Map<String, Object> result = new LinkedHashMap<String, Object>();
+                result.put("Tags Deleted", tagSet);
+                r = Response.status(200).entity(result).build();
+            }
+        } catch (Exception e) {
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            result.put("Error", "Server error while deleting tags for " + id);
+            r = Response.status(500).entity(result).build();
+        }
+        return r;
+    }
+
+    protected Response markItemAsDeleted(String encoded_id, UriRef type, HttpServletRequest request) {
+        Response r;
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        List<String> tags = new ArrayList<String>();
+        try {
+            UriRef itemId = Resource.uriRef(URLDecoder.decode(encoded_id, "UTF-8"));
+            ValidItem item = new ValidItem(itemId, type, userId);
+            if (!item.isValid()) {
+                r = item.getErrorResponse();
+            } else {
+                TripleWriter tw = new TripleWriter();
+                tw.add(itemId, DcTerms.IS_REPLACED_BY, Rdf.NIL);
+                c.perform(tw);
+
+                Map<String, Object> result = new LinkedHashMap<String, Object>();
+                result.put("Item Deleted", itemId.toString());
+                r = Response.status(200).entity(result).build();
+            }
+        } catch (Exception e) {
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            result.put("Error", "Server error while deleting " + encoded_id);
+            r = Response.status(500).entity(result).build();
+        }
+        return r;
+    }
+
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
 
     public static String asHex(byte[] buf)
@@ -780,5 +848,13 @@ public class ItemServicesImpl
             chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
         }
         return new String(chars);
+    }
+
+    protected static Set<String> getNormalizedTagSet(String cdl) {
+        Set<String> tagSet = new HashSet<String>();
+        for (String s : cdl.split(",") ) {
+            tagSet.add(s.trim().replaceAll("  +", " ").toLowerCase());
+        }
+        return tagSet;
     }
 }

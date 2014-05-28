@@ -2,6 +2,7 @@ package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
 /**
  * @author Rattanachai Ramathitima
+ * @author myersjd@umich.edu
  */
 
 import java.io.BufferedReader;
@@ -18,11 +19,9 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,14 +47,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.BlobFetcher;
 import org.tupeloproject.kernel.BlobWriter;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.TripleWriter;
-import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Beans;
@@ -65,16 +62,12 @@ import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
-import org.tupeloproject.rdf.terms.Tags;
-import org.tupeloproject.util.Tuple;
 import org.tupeloproject.util.UnicodeTranscoder;
 
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
@@ -109,7 +102,7 @@ public class DatasetsRestService extends ItemServicesImpl {
                                         };
 
     /** Commons logging **/
-    static Log              log         = LogFactory.getLog(DatasetsRestService.class);
+    private static Log      log         = LogFactory.getLog(DatasetsRestService.class);
 
     @POST
     @Path("/copy")
@@ -195,43 +188,18 @@ public class DatasetsRestService extends ItemServicesImpl {
         return getMetadataById(id, datasetBasics, userId);
     }
 
+    @DELETE
+    @Path("/{id}")
+    @Produces("application/json")
+    public Response markDatasetAsDeleted(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return markItemAsDeleted(id, Cet.DATASET, request);
+    }
+
     @GET
     @Path("/{id}/tags")
     @Produces("application/json")
     public Response getDatasetTagsByIdAsJSON(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         return getItemTagsByIdAsJSON(id, Cet.DATASET, request);
-    }
-
-    protected Response getItemTagsByIdAsJSON(String id, Resource type, HttpServletRequest request) {
-        Response r;
-        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
-        List<String> tags = new ArrayList<String>();
-        try {
-            UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
-            ValidItem item = new ValidItem(itemId, type, userId);
-            if (!item.isValid()) {
-                r = item.getErrorResponse();
-            } else {
-                Unifier uf = new Unifier();
-                uf.addPattern(id, Tags.TAGGED_WITH_TAG, "tag");
-                uf.addPattern("tag", Tags.HAS_TAG_TITLE, "title");
-                uf.addColumnName("title");
-                c.perform(uf);
-                for (Tuple<Resource> row : uf.getResult() ) {
-                    if (row.get(0) != null) {
-                        tags.add(row.get(0).getString());
-                    }
-                }
-                r = Response.status(200).entity(tags).build();
-            }
-        } catch (Exception e) {
-            log.error("Error for " + id, e);
-            e.printStackTrace();
-            Map<String, Object> result = new LinkedHashMap<String, Object>();
-            result.put("Error", "Server error while retrieving tags for " + id);
-            r = Response.status(500).entity(result).build();
-        }
-        return r;
     }
 
     @POST
@@ -240,115 +208,10 @@ public class DatasetsRestService extends ItemServicesImpl {
         return addTagsToItem(id, tags, Cet.DATASET, request);
     }
 
-    private Response addTagsToItem(String id, String tags, UriRef dataset, HttpServletRequest request) {
-
-        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
-
-        String result = "";
-
-        try {
-            id = URLDecoder.decode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
-            e1.printStackTrace();
-        }
-
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-
-        TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
-
-        Set<String> tagSet = getTagSet(tags);
-
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-
-        // use TagEventBeanUtil to add new tags to dataset
-        try {
-
-            if (dbu.get(id) == null || dbu.get(id).getTitle() == null) {
-                return Response.status(404).entity("Dataset " + id + " Not Found").build();
-            }
-
-            Set<String> normalizedTags = new HashSet<String>();
-            for (String tag : tagSet ) {
-                // collapse multiple spaces and lowercase
-                normalizedTags.add(tag.replaceAll("  +", " ").toLowerCase());
-            }
-
-            log.debug("normalized tags = " + normalizedTags);
-
-            tebu.addTags(Resource.uriRef(id), null, normalizedTags);
-
-            Set<String> allTags = tebu.getTags(id);
-            for (String tag : normalizedTags ) {
-                if (!allTags.contains(tag)) {
-                    log.error("failed to add tag " + tag);
-                }
-            }
-
-            log.debug("Tagged " + id + " with tags " + normalizedTags);
-            result = "Tagged " + id + " with tags " + normalizedTags;
-        } catch (Exception e1) {
-            log.error("Error tagging " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error tagging " + id).build();
-        }
-        return Response.status(200).entity(result).build();
-    }
-
     @DELETE
     @Path("/{id}/tags/{tags}")
     public Response removeTagFromDataset(@PathParam("id") String id, @PathParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
-        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
-
-        String result = "";
-
-        try {
-            id = URLDecoder.decode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
-            e1.printStackTrace();
-        }
-
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-
-        TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
-
-        Set<String> tagSet = getTagSet(tags);
-
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-
-        // use TagEventBeanUtil to remove tags from dataset
-        try {
-
-            if (dbu.get(id) == null || dbu.get(id).getTitle() == null) {
-                return Response.status(404).entity("Dataset " + id + " Not Found").build();
-            }
-
-            Set<String> normalizedTags = new HashSet<String>();
-            for (String tag : tagSet ) {
-                // collapse multiple spaces and lowercase
-                normalizedTags.add(tag.replaceAll("  +", " ").toLowerCase());
-            }
-
-            log.debug("normalized tags = " + normalizedTags);
-
-            tebu.removeTags(Resource.uriRef(id), normalizedTags);
-
-            Set<String> allTags = tebu.getTags(id);
-            for (String tag : normalizedTags ) {
-                if (allTags.contains(tag)) {
-                    log.error("failed to remove tag " + tag);
-                }
-            }
-
-            log.debug("Removed tags " + normalizedTags + " from " + id);
-            result = "Removed tags " + normalizedTags + " from " + id;
-        } catch (Exception e) {
-            log.error("Error removing tags on " + id, e);
-            e.printStackTrace();
-            return Response.status(500).entity("Error removing tags on " + id).build();
-        }
-        return Response.status(200).entity(result).build();
+        return deleteTagsFromItem(id, tags, Cet.DATASET, request);
     }
 
     @GET
@@ -396,6 +259,10 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     }
 
+    /*Upload dataset including blob and metadata. Adding metadata via this method should be done with awareness that
+     * it does not perform 'side effects', e.g. new predicates are not automatically added to the list of extracted or user
+     * metadata, and hence may not be displayed
+     */
     @POST
     @Path("")
     @Consumes("multipart/form-data")
@@ -650,11 +517,4 @@ public class DatasetsRestService extends ItemServicesImpl {
         is.close();
     }
 
-    private static Set<String> getTagSet(String cdl) {
-        Set<String> tagSet = new HashSet<String>();
-        for (String s : cdl.split(",") ) {
-            tagSet.add(s.trim());
-        }
-        return tagSet;
-    }
 }

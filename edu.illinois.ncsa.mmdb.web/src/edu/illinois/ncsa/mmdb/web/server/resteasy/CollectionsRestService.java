@@ -79,6 +79,13 @@ public class CollectionsRestService extends ItemServicesImpl {
         return getMetadataById(id, collectionBasics, userId);
     }
 
+    @DELETE
+    @Path("/{id}")
+    @Produces("application/json")
+    public Response markDatasetAsDeleted(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return markItemAsDeleted(id, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
+    }
+
     @GET
     @Path("/{id}/datasets")
     @Produces("application/json")
@@ -194,6 +201,25 @@ public class CollectionsRestService extends ItemServicesImpl {
         }
 
         return r;
+    }
+
+    @GET
+    @Path("/{id}/tags")
+    @Produces("application/json")
+    public Response getDatasetTagsByIdAsJSON(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return getItemTagsByIdAsJSON(id, CollectionBeanUtil.COLLECTION_TYPE, request);
+    }
+
+    @POST
+    @Path("/{id}/tags")
+    public Response addTagsToDataset(@PathParam("id") String id, @FormParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return addTagsToItem(id, tags, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
+    }
+
+    @DELETE
+    @Path("/{id}/tags/{tags}")
+    public Response removeTagFromDataset(@PathParam("id") String id, @PathParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return deleteTagsFromItem(id, tags, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 
     @POST
