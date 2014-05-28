@@ -14,11 +14,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.ws.rs.Consumes;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Encoded;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -32,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.jboss.resteasy.util.Base64;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
@@ -69,11 +66,10 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
-@Path("/item")
-public class IngestService
+public class ItemServicesImpl
 {
     /** Commons logging **/
-    private static Log                         log               = LogFactory.getLog(IngestService.class);
+    private static Log                         log               = LogFactory.getLog(ItemServicesImpl.class);
 
     public static UriRef                       SHA1_DIGEST       = Resource.uriRef("http://sead-data.net/terms/hasSHA1Digest");
 
@@ -91,7 +87,7 @@ public class IngestService
                                                                          ));
 
     //FixME - the labels used here should come from the database, but only user and extracted metadata have such labels right now (not all basic/biblio) - 
-    // should switch to lust listing predicates here and pulling labels once all exist.
+    // should switch to just listing predicates here and pulling labels once all exist.
 
     @SuppressWarnings("serial")
     protected static final Map<String, Object> datasetBasics     = new LinkedHashMap<String, Object>() {
@@ -152,11 +148,8 @@ public class IngestService
     static Context                             c                 = TupeloStore.getInstance().getContext();
     static SEADRbac                            rbac              = new SEADRbac(TupeloStore.getInstance().getContext());
 
-    @POST
-    @Path("/{id}/metadata")
-    @Consumes("multipart/form-data")
-    public Response uploadMetadata(@PathParam("id") @Encoded String id, MultipartFormDataInput input, @HeaderParam("Authorization") String auth) {
-        UriRef creator = getUserName(auth);
+    protected Response uploadMetadata(String id, MultipartFormDataInput input, HttpServletRequest request) {
+        UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
         try {
             id = URLDecoder.decode(id, "UTF-8");
         } catch (UnsupportedEncodingException e1) {
@@ -292,20 +285,6 @@ public class IngestService
             log.error("Could not retrieve relationships list:" + e.getMessage());
         }
         return false;
-    }
-
-    static UriRef getUserName(String auth) {
-        UriRef uploader = null;
-        try {
-            String authString = new String(Base64.decode(auth.substring(auth.indexOf("Basic ") + 6)));
-            authString = authString.substring(0, authString.indexOf(":"));
-            log.debug("Uploader : " + authString);
-            uploader = Resource.uriRef(PersonBeanUtil.getPersonID(authString));
-
-        } catch (IOException e) {
-            log.warn("Couldn't decode auth string to find uploader", e);
-        }
-        return uploader;
     }
 
     static boolean isManaged(String r) {
@@ -539,7 +518,7 @@ public class IngestService
      */
     @SuppressWarnings("unchecked")
     protected static Unifier populateUnifier(Object thing, Unifier uf, Map<String, Object> context) {
-        /*FixME: NOte: if the first pattern of an all optional unifier doesn't match, tupelo will return no results
+        /*FixME: Note: if the first pattern of an all optional unifier doesn't match, tupelo will return no results
          * even if the other terms would match. So - all contexts should be LinkedHashMaps / other order preserving map
          * and the first entry should be a predicate that is known to be assigned (e.g. dc:identifier). 
          */
@@ -714,5 +693,92 @@ public class IngestService
         }
         return false;
 
+    }
+
+    protected Response getItemsByMetadata(String pred, String type, String value, Map<String, Object> context, HttpServletRequest request) {
+        Response r = null;
+        Resource base = null;
+        Resource relationship = null;
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        try {
+            pred = URLDecoder.decode(pred, "UTF-8");
+            value = URLDecoder.decode(value, "UTF-8");
+            relationship = Resource.uriRef(pred);
+        } catch (UnsupportedEncodingException e1) {
+            log.error("Error decoding url for " + pred + " or " + value, e1);
+        }
+        if (type.equals("uri")) {
+            base = Resource.uriRef(value);
+            if ((base != null) && isAccessible(userId, (UriRef) base)) {
+
+                r = getMetadataByReverseRelationship((UriRef) base, relationship, context, userId);
+            } else {
+                return Response.status(403).entity("Related Item not accessible").build();
+            }
+        } else if (type.equals("literal")) {
+            r = getMetadataByReverseRelationship(value, relationship, context, userId);
+        }
+        if (r == null) {
+            r = Response.status(500).entity("Error getting information about " + base.toString()).build();
+
+        }
+        return r;
+
+    }
+
+    protected Response getTopLevelItems(Resource itemType, Map<String, Object> context, final UriRef userId) {
+
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Unifier uf = new Unifier();
+        uf.addPattern("item", Rdf.TYPE, itemType);
+
+        //column 0 must be identifier
+        populateUnifier("item", uf, context);
+        //Must come after to avoid having no result of row 0, column 0 would be null
+        uf.addColumnName("parent");
+        uf.addPattern("parent", DcTerms.HAS_PART, "item", true);
+        List<String> names = uf.getColumnNames();
+        final int parentIndex = names.indexOf("parent");
+        names.remove("parent");
+        try {
+            TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
+        } catch (OperatorException e) {
+            log.error("Error listing top-level collections: " + e.getMessage());
+            return Response.status(500).entity("Error listing top-level collections").build();
+        }
+        org.tupeloproject.util.Table<Resource> table = uf.getResult();
+
+        try {
+            buildResultMap(uf, context, names, true, new FilterCallback() {
+                @Override
+                public boolean include(Tuple<Resource> t) {
+                    if (t.get(parentIndex) == null) {
+                        if (isAccessible(userId, (UriRef) t.get(0))) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                    return false;
+                }
+            });
+        } catch (Exception e) {
+            //Nothing found
+            return Response.status(404).entity("Collections Not Found").build();
+        }
+        return Response.status(200).entity(result).build();
+    }
+
+    private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
+
+    public static String asHex(byte[] buf)
+    {
+        char[] chars = new char[2 * buf.length];
+        for (int i = 0; i < buf.length; ++i )
+        {
+            chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
+            chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
+        }
+        return new String(chars);
     }
 }

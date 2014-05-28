@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,7 +36,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.Encoded;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -51,7 +51,6 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.BlobFetcher;
 import org.tupeloproject.kernel.BlobWriter;
-import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
@@ -66,10 +65,10 @@ import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
+import org.tupeloproject.rdf.terms.Tags;
 import org.tupeloproject.util.Tuple;
 import org.tupeloproject.util.UnicodeTranscoder;
 
-import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
@@ -80,7 +79,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 @Path("/datasets")
-public class DatasetsRestService extends IngestService {
+public class DatasetsRestService extends ItemServicesImpl {
 
     private static String[] CopyIgnore  = new String[] {
                                         "http://cet.ncsa.uiuc.edu/2007/mmdb/isViewedBy",
@@ -159,6 +158,15 @@ public class DatasetsRestService extends IngestService {
         }
     }
 
+    /*Get top-level datasets*/
+    @GET
+    @Path("")
+    @Produces("application/json")
+    public Response getCollectionAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        return getTopLevelItems(Cet.DATASET, datasetBasics, userId);
+    }
+
     @GET
     @Path("/{id}/file")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -190,45 +198,51 @@ public class DatasetsRestService extends IngestService {
     @GET
     @Path("/{id}/tags")
     @Produces("application/json")
-    public Response getDatasetTagsByIdAsJSON(@PathParam("id") String id) {
+    public Response getDatasetTagsByIdAsJSON(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return getItemTagsByIdAsJSON(id, Cet.DATASET, request);
+    }
+
+    protected Response getItemTagsByIdAsJSON(String id, Resource type, HttpServletRequest request) {
+        Response r;
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         List<String> tags = new ArrayList<String>();
-
         try {
-            id = URLDecoder.decode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
-            e1.printStackTrace();
-        }
-
-        // use TagEventBeanUtil to find all tags of a corresponding dataset
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-
-        TagEventBeanUtil tebu = new TagEventBeanUtil(beanSession);
-
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-
-        try {
-
-            if (dbu.get(id) == null || dbu.get(id).getTitle() == null) {
-                return Response.status(404).entity("Dataset " + id + " Not Found").build();
+            UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
+            ValidItem item = new ValidItem(itemId, type, userId);
+            if (!item.isValid()) {
+                r = item.getErrorResponse();
+            } else {
+                Unifier uf = new Unifier();
+                uf.addPattern(id, Tags.TAGGED_WITH_TAG, "tag");
+                uf.addPattern("tag", Tags.HAS_TAG_TITLE, "title");
+                uf.addColumnName("title");
+                c.perform(uf);
+                for (Tuple<Resource> row : uf.getResult() ) {
+                    if (row.get(0) != null) {
+                        tags.add(row.get(0).getString());
+                    }
+                }
+                r = Response.status(200).entity(tags).build();
             }
-
-            Set<String> tagsSet = tebu.getTags(Resource.uriRef(id));
-            for (String tag : tagsSet ) {
-                tags.add(tag);
-            }
-        } catch (Exception e1) {
-            log.error("Error getting tags for " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting tags for " + id).build();
+        } catch (Exception e) {
+            log.error("Error for " + id, e);
+            e.printStackTrace();
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            result.put("Error", "Server error while retrieving tags for " + id);
+            r = Response.status(500).entity(result).build();
         }
-
-        return Response.status(200).entity(tags).build();
+        return r;
     }
 
     @POST
     @Path("/{id}/tags")
-    public Response addTagsToDataset(@PathParam("id") String id, @FormParam("tags") String tags) {
+    public Response addTagsToDataset(@PathParam("id") String id, @FormParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return addTagsToItem(id, tags, Cet.DATASET, request);
+    }
+
+    private Response addTagsToItem(String id, String tags, UriRef dataset, HttpServletRequest request) {
+
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
 
         String result = "";
 
@@ -283,7 +297,9 @@ public class DatasetsRestService extends IngestService {
 
     @DELETE
     @Path("/{id}/tags/{tags}")
-    public Response removeTagFromDataset(@PathParam("id") String id, @PathParam("tags") String tags) {
+    public Response removeTagFromDataset(@PathParam("id") String id, @PathParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
         String result = "";
 
         try {
@@ -360,63 +376,31 @@ public class DatasetsRestService extends IngestService {
 
     }
 
+    /* Get dataset(s) that have the specified metadata
+     * type must be "uri" or "literal"
+     */
+    @GET
+    @Path("/metadata/{pred}/{type}/{value}")
+    @Produces("application/json")
+    public Response getDatasetsWithMetadataAsJSON(@PathParam("pred") @Encoded String pred, @PathParam("type") @Encoded String type, @PathParam("value") @Encoded String value, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return getItemsByMetadata(pred, type, value, datasetBasics, request);
+    }
+
     @GET
     @Path("/{id}/metadata")
-    @Produces({ "application/json", "application/xml" })
-    public Response getDatasetMetadataByIdAsJSON(@PathParam("id") String id) {
-        List<Metadata> metadata = new ArrayList<Metadata>();
+    @Produces("application/json")
+    public Response getDatasetMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
 
-        try {
-            id = URLDecoder.decode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
-            e1.printStackTrace();
-        }
+        return getItemMetadataAsJSON(id, userId);
 
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-
-        try {
-            if (dbu.get(id) == null || dbu.get(id).getTitle() == null) {
-                return Response.status(404).entity("Dataset " + id + " Not Found").build();
-            }
-        } catch (Exception e1) {
-            log.error("Error getting " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting " + id).build();
-        }
-
-        // use Unifier to search for extracted metadata of a corresponding dataset
-        Resource uri = Resource.resource(id);
-        Unifier uf = new Unifier();
-        uf.addPattern(uri, "predicate", "value"); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addPattern("predicate", Rdf.TYPE, MMDB.METADATA_TYPE); //$NON-NLS-1$
-        uf.addPattern("predicate", MMDB.METADATA_CATEGORY, "category"); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addPattern("predicate", Rdfs.LABEL, "label"); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.setColumnNames("label", "value", "category"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-        try {
-            TupeloStore.getInstance().getContext().perform(uf);
-
-            for (Tuple<Resource> row : uf.getResult() ) {
-                if (row.get(0) != null) {
-                    metadata.add(new Metadata(row.get(2).getString(), row.get(0).getString(), row.get(1).getString()));
-                }
-            }
-        } catch (OperatorException e1) {
-            log.error("Error getting metadata for " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting metadata for" + id).build();
-        }
-        return Response.status(200).entity(metadata).build();
     }
 
     @POST
     @Path("")
     @Consumes("multipart/form-data")
     public Response uploadFile(MultipartFormDataInput input, @javax.ws.rs.core.Context HttpServletRequest request) {
-        Context c = TupeloStore.getInstance().getContext();
+
         String fileName = "unknown";
         String uri = RestUriMinter.getInstance().mintUri(null); // Create dataset uri
         ThingSession ts = c.getThingSession();
@@ -464,12 +448,12 @@ public class DatasetsRestService extends IngestService {
                             t.addType(Beans.STORAGE_TYPE_BEAN_ENTRY);
                             t.setValue(Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
                                     Resource.literal("edu.uiuc.ncsa.cet.bean.DatasetBean"));
-                            t.setValue(Dc.IDENTIFIER, uri);
+                            t.setValue(Dc.IDENTIFIER, Resource.uriRef(uri));
                             t.setValue(Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
                                     Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/http://cet.ncsa.uiuc.edu/2007/Dataset"));
 
                             t.addValue(Rdfs.LABEL, fileName);
-                            t.addValue(SHA1_DIGEST, new String(digest));
+                            t.addValue(SHA1_DIGEST, asHex(digest));
 
                             t.setValue(RestService.FILENAME_PROPERTY, fileName);
                             t.setValue(Dc.TITLE, fileName);
@@ -505,7 +489,7 @@ public class DatasetsRestService extends IngestService {
 
             }
             t.save();
-            ts.close();
+            ts.clear();
         }
 
         catch (OperatorException oe) {
@@ -529,8 +513,8 @@ public class DatasetsRestService extends IngestService {
     @POST
     @Path("/{id}/metadata")
     @Consumes("multipart/form-data")
-    public Response uploadMetadata(@PathParam("id") String id, MultipartFormDataInput input, @HeaderParam("Authorization") String auth) {
-        return super.uploadMetadata(id, input, auth);
+    public Response uploadMetadata(@PathParam("id") String id, MultipartFormDataInput input, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return super.uploadMetadata(id, input, request);
     }
 
     /**
