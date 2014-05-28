@@ -71,7 +71,8 @@ public class ExtractionServiceHandler implements ActionHandler<ExtractionService
     public ExtractionServiceResult execute(ExtractionService action, ExecutionContext arg1) throws ActionException {
         if (action.getUri() != null) {
             TupeloStore.getInstance().removeCachedPreview(action.getUri(), GetPreviews.SMALL);
-            return new ExtractionServiceResult(TupeloStore.getInstance().extractPreviews(action.getUri(), action.getDelete()));
+            TupeloStore.getInstance().extractPreviews(action.getUri(), action.getDelete());
+            return new ExtractionServiceResult("OK");
         } else {
             try {
                 // get the collection of all IDs (URL) and convert them into String[]

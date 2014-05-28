@@ -38,18 +38,13 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.Collection;
@@ -61,6 +56,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -123,9 +120,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  */
 public class TupeloStore {
 
-    public static String                                         HASBADGE              = "http://purl.org/dc/terms/description";
+    public static String                                         HASBADGE      = "http://purl.org/dc/terms/description";
     /** Commons logging **/
-    private static Log                                           log                   = LogFactory.getLog(TupeloStore.class);
+    private static Log                                           log           = LogFactory.getLog(TupeloStore.class);
 
     /** Singleton instance **/
     private static TupeloStore                                   instance;
@@ -136,17 +133,14 @@ public class TupeloStore {
     /** Tupelo beansession facing tupelo context **/
     private BeanSession                                          beanSession;
 
-    /** last time a certain uri was asked for extraction */
-    private final Map<String, Long>                              lastExtractionRequest = new HashMap<String, Long>();
-
     /** Dataset count by collection (memoized) */
-    private final Map<String, Memoized<Integer>>                 datasetCount          = new HashMap<String, Memoized<Integer>>();
+    private final Map<String, Memoized<Integer>>                 datasetCount  = new HashMap<String, Memoized<Integer>>();
 
     /** Dataset/collection previews (memoized) */
-    private Map<String, Map<String, Memoized<PreviewImageBean>>> previewCache          = null;
+    private Map<String, Map<String, Memoized<PreviewImageBean>>> previewCache  = null;
 
-    private final Map<Resource, Long>                            beanExp               = new HashMap<Resource, Long>();
-    private long                                                 soonestExp            = Long.MAX_VALUE;
+    private final Map<Resource, Long>                            beanExp       = new HashMap<Resource, Long>();
+    private long                                                 soonestExp    = Long.MAX_VALUE;
 
     /** FileNameMap to map from extension to MIME type. */
     private MimeMap                                              mimemap;
@@ -154,7 +148,7 @@ public class TupeloStore {
     /**
      * configuration values, either stored in context or from server.properties.
      */
-    private final Map<Resource, String>                          configuration         = new HashMap<Resource, String>();
+    private final Map<Resource, String>                          configuration = new HashMap<Resource, String>();
 
     private Context                                              ontologyContext;
 
@@ -164,6 +158,8 @@ public class TupeloStore {
 
     /** one time serialization of context. */
     private String                                               stringContext;
+
+    private ExecutorService                                      executor      = null;
 
     /**
      * Return singleton instance.
@@ -206,6 +202,7 @@ public class TupeloStore {
             log.error("Could not encode context as string.", e);
         }
         createBeanSession();
+        executor = Executors.newFixedThreadPool(5);
     }
 
     /**
@@ -509,7 +506,7 @@ public class TupeloStore {
      *            uri of dataset to pass to extraction service.
      * @return the job id at the extractor or null if the job was rejected.
      */
-    public String extractPreviews(String uri) {
+    public boolean extractPreviews(String uri) {
         return extractPreviews(uri, false);
     }
 
@@ -523,19 +520,15 @@ public class TupeloStore {
      *            set to true if extraction service should be run again.
      * @return the job id at the extractor or null if the job was rejected.
      */
-    public String extractPreviews(String uri, boolean rerun) {
-        Long lastRequest = lastExtractionRequest.get(uri);
-        String result = null;
+    public boolean extractPreviews(String uri, boolean rerun) {
+        ExtractorJob ej = null;
+        boolean result = false;
         String server = getConfiguration(ConfigurationKey.ExtractorUrl);
         // give it a minute
-        if (rerun || lastRequest == null || lastRequest < System.currentTimeMillis() - 120000) {
+        if (rerun || !ExtractorJob.isPending(uri)) {
+            ej = new ExtractorJob(uri, rerun, server, stringContext, mongoProps);
             log.debug("EXTRACT PREVIEWS " + uri);
-            lastExtractionRequest.put(uri, System.currentTimeMillis());
-            OutputStreamWriter wr = null;
-            BufferedReader rd = null;
             try {
-                StringBuilder sb = new StringBuilder();
-
                 Collection<Resource> types = getBeanSession().getRDFTypes(Resource.uriRef(uri));
                 boolean createpreview = false;
                 for (Resource type : types ) {
@@ -552,83 +545,14 @@ public class TupeloStore {
                         }
                     }
                 }
-                if (!createpreview) {
-                    return null;
+                if (createpreview) {
+
+                    executor.execute(ej);
+                    result = true;
                 }
-
-                // create the body of the message
-                sb.append("context="); //$NON-NLS-1$
-                sb.append(stringContext);
-                sb.append("&dataset="); //$NON-NLS-1$
-                sb.append(URLEncoder.encode(uri, "UTF-8")); //$NON-NLS-1$
-
-                if (mongoProps != null) {
-                    sb.append("&mongo=");
-                    StringWriter writer = new StringWriter();
-                    mongoProps.store(writer, "MongoDB Properties");
-                    sb.append(URLEncoder.encode(writer.toString(), "UTF-8"));
-                    writer.close();
-                }
-
-                if (rerun) {
-                    sb.append("&removeOld=true"); //$NON-NLS-1$
-                }
-
-                // launch the job
-                if (!server.endsWith("/")) { //$NON-NLS-1$
-                    server += "/"; //$NON-NLS-1$
-                }
-
-                server += "extractor/extract"; //$NON-NLS-1$
-
-                URL url = new URL(server);
-                URLConnection conn = url.openConnection();
-
-                conn.setReadTimeout(1000);
-                if (conn.getReadTimeout() != 1000) {
-                    log.info("Could not set read timeout! (set to " + conn.getReadTimeout() + ").");
-                }
-
-                // send post
-                conn.setDoOutput(true);
-                wr = new OutputStreamWriter(conn.getOutputStream());
-                wr.write(sb.toString());
-                wr.flush();
-                wr.close();
-
-                // Get the response
-                rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                sb = new StringBuilder();
-                while ((line = rd.readLine()) != null) {
-                    log.debug(line);
-                    sb.append(line);
-                    sb.append("\n"); //$NON-NLS-1$
-                }
-                rd.close();
-
-                // done
-                return sb.toString();
-                //result = extractorpbu.callExtractor(extractionServiceURL, uri, null, rerun);
             } catch (Exception e) {
-                log.error(String.format("Extraction service %s unavailable", server), e);
-            } finally {
-                if (rd != null) {
-                    try {
-                        rd.close();
-                    } catch (IOException e) {
-                        log.error("Could not close readstream.", e);
-                    }
-                }
-                if (wr != null) {
-                    try {
-                        wr.close();
-                    } catch (IOException e) {
-                        log.error("Could not close writestream.", e);
-                    }
-                }
+                log.error("Error launching extractor for: " + uri + ": " + e.getMessage());
             }
-            log.debug("EXTRACT PREVIEWS " + uri + " DONE");
         }
         return result;
     }
