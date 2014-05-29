@@ -22,6 +22,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -163,20 +164,30 @@ public class DatasetsRestService extends ItemServicesImpl {
     @GET
     @Path("/{id}/file")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response getDatasetBlob(@PathParam("id") String id) {
-
+    public Response getDatasetBlob(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        Response r;
         try {
-            id = URLDecoder.decode(id, "UTF-8");
-            BlobFetcher bf = new BlobFetcher();
-            bf.setSubject(Resource.uriRef(id));
-            TupeloStore.getInstance().getContext().perform(bf);
+            UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+            UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
+            ValidItem item = new ValidItem(itemId, Cet.DATASET, userId);
+            if (!item.isValid()) {
+                r = item.getErrorResponse();
+            } else {
 
-            ResponseBuilder response = Response.ok(bf.getInputStream());
-            return response.build();
+                id = URLDecoder.decode(id, "UTF-8");
+                BlobFetcher bf = new BlobFetcher();
+                bf.setSubject(Resource.uriRef(id));
+                TupeloStore.getInstance().getContext().perform(bf);
+
+                ResponseBuilder response = Response.ok(bf.getInputStream());
+                r = response.build();
+            }
         } catch (Exception e) {
-            log.error("Error copying blob from " + id, e);
-            return Response.status(500).entity("Error copying blob [" + e.getMessage() + "]").build();
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            result.put("Error", "Server error while retrieving content for " + id);
+            r = Response.status(500).entity(result).build();
         }
+        return r;
     }
 
     @GET
