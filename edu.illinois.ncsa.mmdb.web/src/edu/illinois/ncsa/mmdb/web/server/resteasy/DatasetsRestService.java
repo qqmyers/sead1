@@ -72,6 +72,17 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
+/**
+ * SEAD Dataset Service Endpoints
+ * These services require user authentication. The simplest mechanism to do this
+ * is to
+ * call /api/authenticate with an Oauth2 token (e.g. from Google) which will set
+ * a session
+ * cookie that can be returned with all calls here. (/api/logout will invalidate
+ * session).
+ * Credentials can also be sent with each call.
+ * 
+ */
 @Path("/datasets")
 public class DatasetsRestService extends ItemServicesImpl {
 
@@ -104,6 +115,14 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     /** Commons logging **/
     private static Log      log         = LogFactory.getLog(DatasetsRestService.class);
+
+    /**
+     * Copy Dataset from another SEAD repository
+     * 
+     * @param url
+     *            - the URL to copy from (the SEAD URL for the dataset page)
+     * @returns - success (200) or failure (500)
+     */
 
     @POST
     @Path("/copy")
@@ -152,7 +171,11 @@ public class DatasetsRestService extends ItemServicesImpl {
         }
     }
 
-    /*Get top-level datasets*/
+    /**
+     * Get top-level datasets
+     * 
+     * @return List of top-level datasets by ID with basic metadata as JSON-LD
+     */
     @GET
     @Path("")
     @Produces("application/json")
@@ -161,6 +184,13 @@ public class DatasetsRestService extends ItemServicesImpl {
         return getTopLevelItems(Cet.DATASET, datasetBasics, userId);
     }
 
+    /**
+     * Get dataset content
+     * 
+     * @param id
+     *            - the URL encoded SEAD ID for the desired dataset
+     * @return the bytes associated with this ID (i.e. the 'file' contents)
+     */
     @GET
     @Path("/{id}/file")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -190,6 +220,14 @@ public class DatasetsRestService extends ItemServicesImpl {
         return r;
     }
 
+    /**
+     * Get basic metadata for the given dataset
+     * 
+     * @param id
+     *            - the URL encoded ID of the dataset
+     * 
+     * @return - the basic metadata for this dataset as JSON-LD
+     */
     @GET
     @Path("/{id}")
     @Produces("application/json")
@@ -199,6 +237,14 @@ public class DatasetsRestService extends ItemServicesImpl {
         return getMetadataById(id, datasetBasics, userId);
     }
 
+    /**
+     * Delete dataset (Dataset will be marked as deleted)
+     * 
+     * @param id
+     *            - the URL-encoded SEAD ID for the dataset
+     * 
+     * @return - success or failure message
+     */
     @DELETE
     @Path("/{id}")
     @Produces("application/json")
@@ -206,6 +252,14 @@ public class DatasetsRestService extends ItemServicesImpl {
         return markItemAsDeleted(id, Cet.DATASET, request);
     }
 
+    /**
+     * Get tags associated with this dataset
+     * 
+     * @param id
+     *            - the URL-encoded ID of the dataset
+     * 
+     * @return - JSON array of tags
+     */
     @GET
     @Path("/{id}/tags")
     @Produces("application/json")
@@ -213,18 +267,44 @@ public class DatasetsRestService extends ItemServicesImpl {
         return getItemTagsByIdAsJSON(id, Cet.DATASET, request);
     }
 
+    /**
+     * Add tags to this dataset
+     * 
+     * @param id
+     *            - the URL-encoded ID of the dataset
+     * @param tags
+     *            - comma separated list of tags
+     * @return - JSON array of tags
+     */
     @POST
     @Path("/{id}/tags")
     public Response addTagsToDataset(@PathParam("id") String id, @FormParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
         return addTagsToItem(id, tags, Cet.DATASET, request);
     }
 
+    /**
+     * Remove some tags associated with this dataset
+     * 
+     * @param id
+     *            - the URL-encoded ID of the dataset
+     * @param tags
+     *            - comma separated list of tags
+     * @return - success or failure message
+     */
     @DELETE
     @Path("/{id}/tags/{tags}")
     public Response removeTagFromDataset(@PathParam("id") String id, @PathParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
         return deleteTagsFromItem(id, tags, Cet.DATASET, request);
     }
 
+    /**
+     * Get collection(s) that this dataset is in
+     * 
+     * @param id
+     *            - the URL-encoded ID of the dataset
+     * 
+     * @return - list of collections by ID with basic metadata as JSON-LD
+     */
     @GET
     @Path("/{id}/collections")
     @Produces("application/json")
@@ -241,6 +321,14 @@ public class DatasetsRestService extends ItemServicesImpl {
         return getMetadataByReverseRelationship(baseId, DcTerms.HAS_PART, collectionBasics, userId);
     }
 
+    /**
+     * Get bibliographic metadata for the given dataset
+     * 
+     * @param id
+     *            - the URL encoded ID of the dataset
+     * 
+     * @return - the bibliographic metadata for this dataset as JSON-LD
+     */
     @GET
     @Path("/{id}/biblio")
     @Produces("application/json")
@@ -250,8 +338,17 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     }
 
-    /* Get dataset(s) that have the specified metadata
-     * type must be "uri" or "literal"
+    /**
+     * Get dataset(s) that have the specified metadata
+     * 
+     * @param pred
+     *            - URL-encoded predicate
+     * @param type
+     *            - the type of the value (must be "uri" or "literal")
+     * @param value
+     *            - the URL-encoded value
+     * 
+     * @return - the list of matching datasets with basic metadata as JSON-LD
      */
     @GET
     @Path("/metadata/{pred}/{type}/{value}")
@@ -260,6 +357,14 @@ public class DatasetsRestService extends ItemServicesImpl {
         return getItemsByMetadata(pred, type, value, datasetBasics, request);
     }
 
+    /**
+     * Get all metadata for the given dataset
+     * 
+     * @param id
+     *            - the URL encoded ID of the dataset
+     * 
+     * @return - the full list of metadata for this dataset as JSON-LD
+     */
     @GET
     @Path("/{id}/metadata")
     @Produces("application/json")
@@ -270,9 +375,23 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     }
 
-    /*Upload dataset including blob and metadata. Adding metadata via this method should be done with awareness that
-     * it does not perform 'side effects', e.g. new predicates are not automatically added to the list of extracted or user
-     * metadata, and hence may not be displayed
+    /**
+     * Upload dataset including blob and metadata. Basic metadata and SHA1
+     * digest are generated from the file stats and session username
+     * (dc:creator/uploader)
+     * 
+     * Note: Adding metadata via this method should be done with awareness that
+     * it does not perform all 'side effects', e.g. while new predicates are
+     * automatically added to the list of extracted or user
+     * metadata, there is no way through this endpoint to give them
+     * human-friendly labels.
+     * 
+     * @param input
+     *            - multipart form data including "datablob" part specifying a
+     *            file name and additional predicate/value pairs for other
+     *            metadata
+     * 
+     * @return - success/failure message
      */
     @POST
     @Path("")
@@ -388,12 +507,23 @@ public class DatasetsRestService extends ItemServicesImpl {
                 .entity(uri).build();
     }
 
+    /**
+     * Add metadata to dataset.
+     * Note: Managed metadata cannot be changed by this method.
+     * 
+     * @param id
+     *            - URL-encoded id of dataset
+     * @param input
+     *            - multipart form data describing predicate/value pairs to add.
+     */
     @POST
     @Path("/{id}/metadata")
     @Consumes("multipart/form-data")
     public Response uploadMetadata(@PathParam("id") String id, MultipartFormDataInput input, @javax.ws.rs.core.Context HttpServletRequest request) {
         return super.uploadMetadata(id, input, request);
     }
+
+    //FixME - delete metadata??
 
     /**
      * Simple function to create a predicate and store information about the
