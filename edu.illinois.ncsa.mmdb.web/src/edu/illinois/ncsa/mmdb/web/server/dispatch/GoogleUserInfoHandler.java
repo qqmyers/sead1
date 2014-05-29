@@ -71,6 +71,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
+import edu.illinois.ncsa.mmdb.web.server.Mail;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
@@ -173,6 +174,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
                 log.debug("User not in the system " + email);
                 PersonBean pb = createUser(email, name);
                 TupeloStore.getInstance().getBeanSession().save(pb);
+                Mail.userAdded(pb);
                 log.debug("User created " + pb.getUri());
                 return true;
             } else {
