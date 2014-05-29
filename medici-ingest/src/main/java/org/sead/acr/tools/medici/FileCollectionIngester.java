@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -54,14 +57,13 @@ import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
 public class FileCollectionIngester extends MediciToolBase {
 
-    private static Resource    FRBR_EO         = Resource.uriRef("http://purl.org/vocab/frbr/core#embodimentOf");
+    private static Resource FRBR_EO         = Resource.uriRef("http://purl.org/vocab/frbr/core#embodimentOf");
+    private static Resource SHA1_DIGEST     = Resource.uriRef("http://sead-data.net/terms/hasSHA1Digest");
 
+    private static long     max             = 9223372036854775807l;
+    private static boolean  merge           = false;
 
-    private static long        max             = 9223372036854775807l;
-    private static boolean     merge           = false;
-
-    private static long        globalFileCount = 0l;
-    
+    private static long     globalFileCount = 0l;
 
     public static void main(String[] args) throws Exception {
 
@@ -89,7 +91,7 @@ public class FileCollectionIngester extends MediciToolBase {
                 if (file.isDirectory()) {
                     uploadCollection(file, "", null);
                 } else {
-                    
+
                     if (globalFileCount < max) {
                         uploadFile(file, "");
                     }
@@ -99,14 +101,15 @@ public class FileCollectionIngester extends MediciToolBase {
         flushLog();
     }
 
-   
-
     private static int uploadCollection(File dir, String path, Resource parent) throws OperatorException, IOException {
         path += "/" + dir.getName();
-        
-        //Fixme - could check title and parent hasPart relationships only (instead of relying on frbr metadata, e.g. requiring 
-        //that the top-level dir ingested matches (by dc:title) a top level collection (no parent) in Medici
-        //(or specifying the ID of the starting collection in Medici to match against)
+
+        // Fixme - could check title and parent hasPart relationships only
+        // (instead of relying on frbr metadata, e.g. requiring
+        // that the top-level dir ingested matches (by dc:title) a top level
+        // collection (no parent) in Medici
+        // (or specifying the ID of the starting collection in Medici to match
+        // against)
         Unifier uf = new Unifier();
         uf.addPattern("coll", Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
         uf.addPattern("coll", Resource.uriRef("http://purl.org/vocab/frbr/core#embodimentOf"), Resource.literal(path));
@@ -119,7 +122,7 @@ public class FileCollectionIngester extends MediciToolBase {
         Resource id = null;
         for (Tuple<Resource> row : uf.getResult()) {
             if (row.get(1) == null) {
-                    id = row.get(0);
+                id = row.get(0);
             }
         }
 
@@ -160,7 +163,7 @@ public class FileCollectionIngester extends MediciToolBase {
                 if (file.isDirectory()) {
                     uploadCollection(file, path, Resource.uriRef(collection.getUri()));
                 } else {
-                    
+
                     if (globalFileCount < max) {
                         numberOfFiles += 1;
                         // fileStats[1] += file.length();
@@ -226,16 +229,29 @@ public class FileCollectionIngester extends MediciToolBase {
                     return count;
                 };
             };
+            byte[] digest = null;
+            try {
+                MessageDigest sha1 = MessageDigest.getInstance("SHA1");
+                DigestInputStream dis = new DigestInputStream(is, sha1);
 
-            BlobWriter bw = new BlobWriter();
-            bw.setInputStream(is);
-            bw.setSubject(Resource.uriRef(dataset.getUri()));
-            beansession.getContext().perform(bw);
-            is.close();
+                BlobWriter bw = new BlobWriter();
+                bw.setInputStream(dis);
+                bw.setSubject(Resource.uriRef(dataset.getUri()));
+                beansession.getContext().perform(bw);
+                dis.close();
+                is.close();
+                digest = sha1.digest();
+            } catch (NoSuchAlgorithmException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
             beansession.save(dataset);
-           
+
             beansession.getContext().addTriple(Resource.uriRef(dataset.getUri()), FRBR_EO, path + "/" + file.getName());
+            if (digest != null) {
+                beansession.getContext().addTriple(Resource.uriRef(dataset.getUri()), SHA1_DIGEST, digest);
+            }
             println(String.format("Dataset    : %s [%d, %s] %d%%", dataset.getTitle(), dataset.getSize(), dataset.getMimeType(), 100));
 
             return dataset;
@@ -245,7 +261,5 @@ public class FileCollectionIngester extends MediciToolBase {
             return null;
         }
     }
-
-    
 
 }
