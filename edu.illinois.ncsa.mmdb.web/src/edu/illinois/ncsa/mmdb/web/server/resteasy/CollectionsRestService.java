@@ -5,6 +5,12 @@ package edu.illinois.ncsa.mmdb.web.server.resteasy;
  * @author myersjd@umich.edu
  */
 
+/*
+ *  NB: For these services to work, -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true must be set on the server. This 
+ * potentially opens the door for attacks related to CVE-2007-0450 if any code on the server follows paths sent 
+ * in URLs.
+ */
+
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.Date;
@@ -49,19 +55,23 @@ import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 
-/*Service endpoints for collections. NB: For collection IDs containing '/' characters, the ids must be urlencoded for 
- * transmission AND -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true must be set on the server. This 
- * potentially opens the door for attacks related to CVE-2007-0450 if any code on the server follows paths sent 
- * in URLs.
+/**
+ * SEAD Data Service endpoints for collections. NB: For collection IDs
+ * containing '/' characters, the ids must be urlencoded for
+ * transmission.
  */
-
 @Path("/collections")
 public class CollectionsRestService extends ItemServicesImpl {
 
     /** Commons logging **/
     private static Log log = LogFactory.getLog(CollectionsRestService.class);
 
-    /*Get top-level collections*/
+    /**
+     * Get top-level collections (those that are not sub-collections of any
+     * other collection)
+     * 
+     * @return IDs and basic metadata for collections as JSON-LD
+     */
     @GET
     @Path("")
     @Produces("application/json")
@@ -70,6 +80,15 @@ public class CollectionsRestService extends ItemServicesImpl {
         return getTopLevelItems(CollectionBeanUtil.COLLECTION_TYPE, collectionBasics, userId);
     }
 
+    /**
+     * Get Basic metadata for {id} : ( Identifier, Title, Date, Uploaded By,
+     * Abstract, Contact(s), Creator(s) )
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * 
+     * @return - Basic Metadata as JSON-LD
+     */
     @GET
     @Path("/{id}")
     @Produces("application/json")
@@ -79,6 +98,14 @@ public class CollectionsRestService extends ItemServicesImpl {
         return getMetadataById(id, collectionBasics, userId);
     }
 
+    /**
+     * Delete collection (Collection will be marked as deleted)
+     * 
+     * @param id
+     *            - the URL-encoded SEAD ID for the collection
+     * 
+     * @return - success or failure message
+     */
     @DELETE
     @Path("/{id}")
     @Produces("application/json")
@@ -86,6 +113,14 @@ public class CollectionsRestService extends ItemServicesImpl {
         return markItemAsDeleted(id, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 
+    /**
+     * Get Datasets that are children of this collection
+     * 
+     * @param id
+     *            = the URL-encoded ID of the collection
+     * 
+     * @return - ID and basic metadata for datasets in this collection
+     */
     @GET
     @Path("/{id}/datasets")
     @Produces("application/json")
@@ -104,12 +139,32 @@ public class CollectionsRestService extends ItemServicesImpl {
         return getMetadataByForwardRelationship(baseId, DcTerms.HAS_PART, datasetBasics, userId);
     }
 
+    /**
+     * Add a dataset to this collection
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @param item_id
+     *            - the URL-encoded ID of the dataset
+     * 
+     * @return - success or failure message
+     */
     @POST
     @Path("/{id}/datasets")
     public Response addDatasetToCollection(@PathParam("id") @Encoded String id, @FormParam("dataset_id") String item_id, @javax.ws.rs.core.Context HttpServletRequest request) {
         return addItemToCollection(id, item_id, Cet.DATASET, request);
     }
 
+    /**
+     * Add a collection to this collection (as a sub-collection)
+     * 
+     * @param id
+     *            - the URL-encoded ID of the parent collection
+     * @param item_id
+     *            - the URL-encoded ID of the sub-collection
+     * 
+     * @return - success or failure message
+     */
     @POST
     @Path("/{id}/collections")
     public Response addCollectionToCollection(@PathParam("id") @Encoded String id, @FormParam("collection_id") String item_id, @javax.ws.rs.core.Context HttpServletRequest request) {
@@ -155,6 +210,17 @@ public class CollectionsRestService extends ItemServicesImpl {
         return r;
     }
 
+    /**
+     * Remove a dataset or collection from a collection
+     * 
+     * @param id
+     *            - the URL-encoded ID of the parent collection
+     * @param item_id
+     *            - the URL-encoded ID of the child dataset/collection to be
+     *            removed
+     * 
+     * @return - success or failure message
+     */
     @DELETE
     @Path("/{id}/{item_id}")
     public Response removeItemFromCollection(@PathParam("id") @Encoded String id, @PathParam("item_id") String item_id, @javax.ws.rs.core.Context HttpServletRequest request) {
@@ -203,6 +269,14 @@ public class CollectionsRestService extends ItemServicesImpl {
         return r;
     }
 
+    /**
+     * Get tags associated with this collection
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * 
+     * @return - JSON array of tags
+     */
     @GET
     @Path("/{id}/tags")
     @Produces("application/json")
@@ -210,18 +284,60 @@ public class CollectionsRestService extends ItemServicesImpl {
         return getItemTagsByIdAsJSON(id, CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 
+    /**
+     * Add tags to this collection
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @param tags
+     *            - comma separated list of tags
+     * @return - JSON array of tags
+     */
     @POST
     @Path("/{id}/tags")
     public Response addTagsToDataset(@PathParam("id") String id, @FormParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
         return addTagsToItem(id, tags, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 
+    /**
+     * Remove some tags associated with this collection
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @param tags
+     *            - comma separated list of tags
+     * @return - success or failure message
+     */
     @DELETE
     @Path("/{id}/tags/{tags}")
     public Response removeTagFromDataset(@PathParam("id") String id, @PathParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
         return deleteTagsFromItem(id, tags, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 
+    /**
+     * Create a new collection including metadata and list of children (datasets
+     * and/or subcollections). Basic metadata
+     * are generated from the dir stats and session username
+     * (dc:creator/uploader).
+     * 
+     * Note: Adding metadata via this method should be done with awareness that
+     * it does not perform all 'side effects', e.g. while new predicates are
+     * automatically added to the list of extracted or user
+     * metadata, there is no way through this endpoint to give them
+     * human-friendly labels.
+     * 
+     * @param input
+     *            - multipart form data including "collection" part specifying
+     *            the
+     *            collection name and additional String predicate/value pairs as
+     *            other parts for other
+     *            metadata. The value strings will be interpreted based on a
+     *            submitted media/mime type:
+     *            text/plain (default) : a literal value
+     *            text/uri-list : a URI
+     * 
+     * @return - success/failure message
+     */
     @POST
     @Path("")
     @Consumes("multipart/form-data")
@@ -297,6 +413,17 @@ public class CollectionsRestService extends ItemServicesImpl {
                 .entity(uri).build();
     }
 
+    /**
+     * Get Bibliographic metadata for {id} : (Identifier, License, Rights
+     * Holder, Rights,
+     * Creation Date, Size, Label, Mimetype, Description(s), Title, Uploaded By,
+     * Abstract,
+     * Contact(s),Creator(s), Publication Date )
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @return - Biblio Metadata as JSON-LD
+     */
     @GET
     @Path("/{id}/biblio")
     @Produces("application/json")
@@ -306,6 +433,14 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     }
 
+    /**
+     * Get all metadata for {id} : (Basic/biblio + user-added metadata and
+     * extracted metadata)
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @return - Metadata as JSON-LD
+     */
     @GET
     @Path("/{id}/metadata")
     @Produces("application/json")
@@ -316,8 +451,18 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     }
 
-    /* Get collection(s) that have the specified metadata
-     * type must be "uri" or "literal"
+    /**
+     * Get collections(s) that have the specified metadata
+     * 
+     * @param pred
+     *            - URL-encoded predicate
+     * @param type
+     *            - the type of the value (must be "uri" or "literal")
+     * @param value
+     *            - the URL-encoded value
+     * 
+     * @return - the list of matching collections, with their basic metadata, as
+     *         JSON-LD
      */
     @GET
     @Path("/metadata/{pred}/{type}/{value}")
@@ -326,6 +471,26 @@ public class CollectionsRestService extends ItemServicesImpl {
         return getItemsByMetadata(pred, type, value, collectionBasics, request);
     }
 
+    /**
+     * Add metadata to collection.
+     * 
+     * Note: New predicates will be added as viewable user metadata. Some
+     * predicates (related to
+     * license, rightsHolder, rights, title, uploaded by, identifier, dates,
+     * size, label) cannot be changed through this method.
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @param input
+     *            - multipart form data specifying the String predicate/value
+     *            pairs for the
+     *            metadata. The value strings will be interpreted based on a
+     *            submitted media/mime type:
+     *            text/plain (default) : a literal value
+     *            text/uri-list : a URI
+     * 
+     * @result - success/failure message
+     */
     @POST
     @Path("/{id}/metadata")
     @Consumes("multipart/form-data")

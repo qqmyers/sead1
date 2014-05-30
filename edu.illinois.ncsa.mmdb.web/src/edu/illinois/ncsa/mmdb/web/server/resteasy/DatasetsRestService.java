@@ -221,7 +221,8 @@ public class DatasetsRestService extends ItemServicesImpl {
     }
 
     /**
-     * Get basic metadata for the given dataset
+     * Get basic metadata for the given dataset ( Identifier, Title, Date,
+     * Uploaded By, Size(Bytes), Mimetype, Creator(s) )
      * 
      * @param id
      *            - the URL encoded ID of the dataset
@@ -322,7 +323,11 @@ public class DatasetsRestService extends ItemServicesImpl {
     }
 
     /**
-     * Get bibliographic metadata for the given dataset
+     * Get bibliographic metadata for the given dataset (Identifier, License,
+     * Rights Holder, Rights,
+     * Data Creation Date, Size, Label, Mimetype, Description(s), Title,
+     * Uploaded By, Abstract,
+     * Contact(s),Creator(s), Publication Date )
      * 
      * @param id
      *            - the URL encoded ID of the dataset
@@ -358,7 +363,8 @@ public class DatasetsRestService extends ItemServicesImpl {
     }
 
     /**
-     * Get all metadata for the given dataset
+     * Get all metadata for the given dataset (Basic/biblio + user-added
+     * metadata and extracted metadata)
      * 
      * @param id
      *            - the URL encoded ID of the dataset
