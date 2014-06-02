@@ -11,6 +11,7 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.Table;
 
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
@@ -27,9 +28,9 @@ public class ValidItem {
         uf.addPattern("item", Rdf.TYPE, itemType);
         uf.addPattern("item", Dc.IDENTIFIER, itemId);
         try {
-            TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
+            Table<Resource> uResult = TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
 
-            if (uf.getResult().iterator().hasNext()) {
+            if (uResult.iterator().hasNext()) {
                 if (ItemServicesImpl.isAccessible(userId, itemId)) {
                     valid = true;
                 } else {

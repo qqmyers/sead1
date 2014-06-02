@@ -455,7 +455,7 @@ public class ItemServicesImpl
         }
         try {
 
-            result = buildResultMap(uf, context, names, false, null);
+            result = buildResultMap(uf.getResult(), context, names, false, null);
             return Response.status(200).entity(result).build();
         } catch (Exception e) {
             log.debug(e.getMessage());
@@ -512,14 +512,13 @@ public class ItemServicesImpl
      * 
      */
     @SuppressWarnings("unchecked")
-    protected static Map<String, Object> buildResultMap(Unifier uf, Map<String, Object> context, List<String> names, boolean useHierarchy, FilterCallback filter) throws Exception {
+    protected static Map<String, Object> buildResultMap(Table<Resource> table, Map<String, Object> context, List<String> names, boolean useHierarchy, FilterCallback filter) throws Exception {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
-        Table<Resource> table = uf.getResult();
-        log.debug("Table: " + table.getColumnNames());
 
         for (Tuple<Resource> tu : table ) {
-            log.debug(tu.toString());
+
             if ((filter == null) || filter.include(tu)) {
+
                 for (int i = 0; i < names.size(); i++ ) {
                     String key = names.get(i);
                     Resource o = tu.get(i);
@@ -531,9 +530,9 @@ public class ItemServicesImpl
                                 if (!result.containsKey(obj)) {
                                     result.put(obj, new LinkedHashMap<String, Object>());
                                 }
-                            } else {
-                                addTuple((Map<String, Object>) result.get(tu.get(0).toString()), key, obj);
                             }
+                            //For i=0, add "Identifier" as metadata as well 
+                            addTuple((Map<String, Object>) result.get(tu.get(0).toString()), key, obj);
 
                         } else {
                             addTuple(result, key, obj);
@@ -617,8 +616,9 @@ public class ItemServicesImpl
 
         //Get column name list before the is-deleted column is added
         List<String> names = uf.getColumnNames();
+        Table<Resource> results = null;
         try {
-            TupeloStore.getInstance().unifyExcludeDeleted(uf, "thing");
+            results = TupeloStore.getInstance().unifyExcludeDeleted(uf, "thing");
         } catch (Throwable e1) {
             log.error("Error getting requested metadata for " + baseId.toString(), e1);
             e1.printStackTrace();
@@ -626,7 +626,7 @@ public class ItemServicesImpl
         }
 
         try {
-            result = buildResultMap(uf, context, names, true, null);
+            result = buildResultMap(results, context, names, true, null);
             return Response.status(200).entity(result).build();
         } catch (Exception e) {
             //No results just means an empty list, which is OK
@@ -693,21 +693,29 @@ public class ItemServicesImpl
         uf.addPattern("parent", DcTerms.HAS_PART, "item", true);
         List<String> names = uf.getColumnNames();
         final int parentIndex = names.indexOf("parent");
-        names.remove("parent");
+        log.debug("Parent index: " + parentIndex);
+        org.tupeloproject.util.Table<Resource> table = null;
         try {
-            TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
+            table = TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
         } catch (OperatorException e) {
             log.error("Error listing top-level collections: " + e.getMessage());
-            return Response.status(500).entity("Error listing top-level collections").build();
+            return Response.status(500).entity("Error listing top-level items").build();
         }
-        org.tupeloproject.util.Table<Resource> table = uf.getResult();
+        names.remove("parent");
 
         try {
-            buildResultMap(uf, context, names, true, new FilterCallback() {
+            result = buildResultMap(table, context, names, true, new FilterCallback() {
                 @Override
                 public boolean include(Tuple<Resource> t) {
                     if (t.get(parentIndex) == null) {
-                        if (isAccessible(userId, (UriRef) t.get(0))) {
+                        UriRef id = null;
+                        if (t.get(0).isLiteral()) {
+                            id = Resource.uriRef(t.get(0).toString());
+                            log.warn("Literal identifier:" + t.get(0).toString());
+                        } else {
+                            id = (UriRef) t.get(0);
+                        }
+                        if (isAccessible(userId, id)) {
                             return true;
                         } else {
                             return false;
@@ -717,8 +725,11 @@ public class ItemServicesImpl
                 }
             });
         } catch (Exception e) {
+            log.debug("Exception during processing: " + e.getMessage());
+            e.printStackTrace();
+
             //Nothing found
-            return Response.status(404).entity("Collections Not Found").build();
+            return Response.status(404).entity("Items Not Found").build();
         }
         return Response.status(200).entity(result).build();
     }
