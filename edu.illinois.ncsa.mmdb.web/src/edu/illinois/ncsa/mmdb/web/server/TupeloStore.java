@@ -116,6 +116,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  * definition ends up in WEB-INF/classes/context.xml
  * 
  * @author Luigi Marini
+ * @author myersjd@umich.edu
  * 
  */
 public class TupeloStore {
@@ -1238,6 +1239,14 @@ public class TupeloStore {
             getContext().perform(uf);
         } catch (OperatorException e) {
             log.warn("pingContext Failed!", e);
+        }
+    }
+
+    public void shutdownExtractorExector(boolean now) {
+        if (now) {
+            executor.shutdownNow();
+        } else {
+            executor.shutdown();
         }
     }
 }
