@@ -17,6 +17,7 @@ package org.sead.acr.client;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -66,7 +67,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class SEADDatasetUploader {
+public class SEADUploader {
 
 	private static final String FRBR_EO = "http://purl.org/vocab/frbr/core#embodimentOf";
 	private static final String SHA1_DIGEST = "http://sead-data.net/terms/hasSHA1Digest";
@@ -84,10 +85,6 @@ public class SEADDatasetUploader {
 
 	static PrintWriter pw = null;
 	private static HttpClientContext localContext = HttpClientContext.create();
-	private static String refresh_token;
-	private static String access_token;
-	private static long tokenStartTime;
-	private static int token_expires_in;
 
 	public static void main(String args[]) throws Exception {
 
@@ -144,13 +141,12 @@ public class SEADDatasetUploader {
 					if (file.isDirectory()) {
 
 						String newUri = uploadCollection(file, "", null, tagId);
+					
 						if (newUri != null) {
 							println("              " + file.getPath()
 									+ " CREATED as: " + newUri);
-						} else if(tagId==null) {
+						} else if ((tagId == null) && !listonly) {
 							println("Error processing: " + file.getPath());
-						}  else {
-							println ("              Found " + file.getPath() + " as " + tagId);
 						}
 
 					} else {
@@ -159,10 +155,8 @@ public class SEADDatasetUploader {
 							String newUri = uploadDataset(file, null, tagId);
 							if (newUri != null) {
 								println("              UPLOADED as: " + newUri);
-							} else if(tagId==null) {
+							} else if ((tagId == null) && !listonly) {
 								println("Error processing: " + file.getPath());
-							} else {
-								println ("              Found " + file.getPath() + " as " + tagId);
 							}
 						}
 					}
@@ -180,182 +174,17 @@ public class SEADDatasetUploader {
 
 		boolean authenticated = false;
 		println("Authenticating");
-		String user_code = null;
-		String device_code = null;
-		String verification_url = null;
-		int expires_in = 0;
 
-		ObjectMapper mapper = new ObjectMapper();
+		String accessToken = SEADGoogleLogin.getAccessToken();
 
-		GoogleProps gProps;
-
-		try {
-			refresh_token = new String(Files.readAllBytes(Paths
-					.get("refresh.txt")));
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		// Contact google for a user code
+		// Now login to server and create a session
 		CloseableHttpClient httpclient = HttpClients.createDefault();
-
 		try {
-
-			// Read Google Oauth2 info
-			gProps = mapper.configure(DeserializationFeature.UNWRAP_ROOT_VALUE,
-					true).readValue(new File("sead-google.json"),
-					GoogleProps.class);
-
-			if (refresh_token == null) {
-				String codeUri = gProps.auth_uri.substring(0,
-						gProps.auth_uri.length() - 4)
-						+ "device/code";
-
-				HttpPost codeRequest = new HttpPost(codeUri);
-
-				MultipartEntityBuilder meb = MultipartEntityBuilder.create();
-				addLiteralMetadata(meb, "client_id", gProps.client_id);
-				addLiteralMetadata(meb, "scope", "email profile");
-				HttpEntity reqEntity = meb.build();
-
-				codeRequest.setEntity(reqEntity);
-				CloseableHttpResponse response = httpclient
-						.execute(codeRequest);
-				try {
-
-					if (response.getStatusLine().getStatusCode() == 200) {
-						HttpEntity resEntity = response.getEntity();
-						if (resEntity != null) {
-							String responseJSON = EntityUtils
-									.toString(resEntity);
-							ObjectNode root = (ObjectNode) new ObjectMapper()
-									.readTree(responseJSON);
-							device_code = root.get("device_code").asText();
-							user_code = root.get("user_code").asText();
-							verification_url = root.get("verification_url")
-									.asText();
-							expires_in = root.get("expires_in").asInt();
-						}
-					} else {
-						println("Error response from Google: "
-								+ response.getStatusLine().getReasonPhrase());
-					}
-				} finally {
-					response.close();
-				}
-				// Ask user to login via browser
-				println("To begin upload, login via Google:");
-				System.out.println("1) Go to : " + verification_url
-						+ " in your browser");
-				System.out.println("2) Type : " + user_code
-						+ " in your browser");
-				System.out.println("3) Hit <Return> to continue.");
-				System.in.read();
-
-				System.out.println("Proceeding");
-
-				// Query for token now that user has gone through browser part
-				// of
-				// flow
-				HttpPost tokenRequest = new HttpPost(gProps.token_uri);
-
-				MultipartEntityBuilder tokenRequestParams = MultipartEntityBuilder
-						.create();
-				addLiteralMetadata(tokenRequestParams, "client_id",
-						gProps.client_id);
-				addLiteralMetadata(tokenRequestParams, "client_secret",
-						gProps.client_secret);
-				addLiteralMetadata(tokenRequestParams, "code", device_code);
-				addLiteralMetadata(tokenRequestParams, "grant_type",
-						"http://oauth.net/grant_type/device/1.0");
-
-				reqEntity = tokenRequestParams.build();
-
-				tokenRequest.setEntity(reqEntity);
-
-				response = httpclient.execute(tokenRequest);
-				try {
-					if (response.getStatusLine().getStatusCode() == 200) {
-						HttpEntity resEntity = response.getEntity();
-						if (resEntity != null) {
-							String responseJSON = EntityUtils
-									.toString(resEntity);
-							println(responseJSON);
-							ObjectNode root = (ObjectNode) new ObjectMapper()
-									.readTree(responseJSON);
-							access_token = root.get("access_token").asText();
-							refresh_token = root.get("refresh_token").asText();
-							tokenStartTime = System.currentTimeMillis() / 1000;
-							token_expires_in = root.get("expires_in").asInt();
-						}
-					} else {
-						println("Error response from Google: "
-								+ response.getStatusLine().getReasonPhrase());
-					}
-				} finally {
-					response.close();
-				}
-
-				if (refresh_token != null) {
-					PrintWriter writer = new PrintWriter("refresh.txt", "UTF-8");
-					writer.println(refresh_token);
-					writer.close();
-				}
-			} else {
-				/* Try refresh token */
-				// Query for token now that user has gone through browser part
-				// of
-				// flow
-				HttpPost refreshRequest = new HttpPost(gProps.token_uri);
-
-				MultipartEntityBuilder tokenRequestParams = MultipartEntityBuilder
-						.create();
-				addLiteralMetadata(tokenRequestParams, "client_id",
-						gProps.client_id);
-				addLiteralMetadata(tokenRequestParams, "client_secret",
-						gProps.client_secret);
-				addLiteralMetadata(tokenRequestParams, "refresh_token",
-						refresh_token);
-				addLiteralMetadata(tokenRequestParams, "grant_type",
-						"refresh_token");
-
-				HttpEntity reqEntity = tokenRequestParams.build();
-
-				refreshRequest.setEntity(reqEntity);
-
-				CloseableHttpResponse response = httpclient
-						.execute(refreshRequest);
-				try {
-					if (response.getStatusLine().getStatusCode() == 200) {
-						HttpEntity resEntity = response.getEntity();
-						if (resEntity != null) {
-							String responseJSON = EntityUtils
-									.toString(resEntity);
-							println(responseJSON);
-							ObjectNode root = (ObjectNode) new ObjectMapper()
-									.readTree(responseJSON);
-							access_token = root.get("access_token").asText();
-							// refresh_token =
-							// root.get("refresh_token").asText();
-							tokenStartTime = System.currentTimeMillis() / 1000;
-							token_expires_in = root.get("expires_in").asInt();
-						}
-					} else {
-						println("Error response from Google: "
-								+ response.getStatusLine().getReasonPhrase());
-						new File("refresh.txt").delete();
-					}
-				} finally {
-					response.close();
-				}
-
-			}
-			// Now login to server and create a session
 			HttpPost seadAuthenticate = new HttpPost(server
 					+ "/api/authenticate");
 			List<NameValuePair> nvpList = new ArrayList<NameValuePair>(1);
 			nvpList.add(0, new BasicNameValuePair("googleAccessToken",
-					access_token));
+					accessToken));
 
 			seadAuthenticate.setEntity(new UrlEncodedFormEntity(nvpList));
 
@@ -365,9 +194,9 @@ public class SEADDatasetUploader {
 				if (response.getStatusLine().getStatusCode() == 200) {
 					HttpEntity resEntity = response.getEntity();
 					if (resEntity != null) {
-						String seadSessionId = EntityUtils.toString(resEntity);
+						// String seadSessionId =
+						// EntityUtils.toString(resEntity);
 						authenticated = true;
-
 					}
 				} else {
 					println("Error response from " + server + " : "
@@ -402,7 +231,11 @@ public class SEADDatasetUploader {
 		} else {
 			println("              Does not yet exist on server.");
 		}
-		path += "/" + dir.getName();
+		if (path != null) {
+			path += "/" + dir.getName();
+		} else {
+			path = "/" + dir.getName();
+		}
 
 		try {
 			for (File file : dir.listFiles()) {
@@ -547,6 +380,9 @@ public class SEADDatasetUploader {
 					// Just need to add any new children - addsubCollcall
 					CloseableHttpClient httpclient = HttpClients
 							.createDefault();
+					if(!childDatasetUris.isEmpty() || !childCollectionUris.isEmpty()) {
+						println("Adding child relationships to existing collection:");
+					}
 					try {
 						for (String child : childDatasetUris) {
 							createChildRelationship(httpclient, collectionId,
@@ -570,6 +406,8 @@ public class SEADDatasetUploader {
 					}
 
 				}
+			} else {
+				collectionId = null; //listonly - report no changes
 			}
 		} catch (IOException io) {
 			println("error: " + io.getMessage());// One or more files not
@@ -683,7 +521,11 @@ public class SEADDatasetUploader {
 		} else {
 			println("              Does not yet exist on server.");
 		}
-		path += "/" + file.getName();
+		if (path != null) {
+			path += "/" + file.getName();
+		} else {
+			path = "/" + file.getName();
+		}
 
 		if (!listonly) {
 			if (dataId == null) { // doesn't exist or we don't care (!merge)
@@ -752,6 +594,8 @@ public class SEADDatasetUploader {
 				// version if file changes
 
 			}
+		} else {
+			dataId=null; //listonly mode - we report that we did not create anything
 		}
 		return dataId;
 	}
