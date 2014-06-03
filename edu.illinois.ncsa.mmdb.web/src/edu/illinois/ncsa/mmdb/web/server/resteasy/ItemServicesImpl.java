@@ -529,11 +529,16 @@ public class ItemServicesImpl
                             if (i == 0) {
                                 if (!result.containsKey(obj)) {
                                     result.put(obj, new LinkedHashMap<String, Object>());
-                                }
-                            }
-                            //For i=0, add "Identifier" as metadata as well 
-                            addTuple((Map<String, Object>) result.get(tu.get(0).toString()), key, obj);
 
+                                }
+                                //For i=0, add value as  metadata if the key is "Identifier"  
+                                if (key.equals("Identifier")) {
+                                    addTuple((Map<String, Object>) result.get(tu.get(0).toString()), key, obj);
+                                }
+                            } else {
+
+                                addTuple((Map<String, Object>) result.get(tu.get(0).toString()), key, obj);
+                            }
                         } else {
                             addTuple(result, key, obj);
                         }
@@ -579,21 +584,21 @@ public class ItemServicesImpl
      * , respecting access control and ignoring deleted items.
      */
 
-    protected static Response getMetadataByForwardRelationship(UriRef base, Resource relationship, Map<String, Object> context, UriRef userId) {
-        return getMetadataByRelationship(base, true, relationship, context, userId);
+    protected static Response getMetadataByForwardRelationship(UriRef base, Resource relationship, Map<String, Object> context, UriRef userId, UriRef requestedType) {
+        return getMetadataByRelationship(base, true, relationship, context, userId, requestedType);
 
     }
 
-    protected static Response getMetadataByReverseRelationship(String base, Resource relationship, Map<String, Object> context, UriRef userId) {
+    protected static Response getMetadataByReverseRelationship(String base, Resource relationship, Map<String, Object> context, UriRef userId, UriRef requestedType) {
         Resource baseLiteral = Resource.literal(base);
-        return getMetadataByRelationship(baseLiteral, false, relationship, context, userId);
+        return getMetadataByRelationship(baseLiteral, false, relationship, context, userId, requestedType);
     }
 
-    protected static Response getMetadataByReverseRelationship(UriRef baseId, Resource relationship, Map<String, Object> context, UriRef userId) {
-        return getMetadataByRelationship(baseId, false, relationship, context, userId);
+    protected static Response getMetadataByReverseRelationship(UriRef baseId, Resource relationship, Map<String, Object> context, UriRef userId, UriRef requestedType) {
+        return getMetadataByRelationship(baseId, false, relationship, context, userId, requestedType);
     }
 
-    protected static Response getMetadataByRelationship(Resource baseId, boolean isSubject, Resource relationship, Map<String, Object> context, UriRef userId) {
+    protected static Response getMetadataByRelationship(Resource baseId, boolean isSubject, Resource relationship, Map<String, Object> context, UriRef userId, UriRef requestedType) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
         if (baseId instanceof UriRef) {
@@ -612,6 +617,9 @@ public class ItemServicesImpl
             uf.addPattern("thing", relationship, baseId);
         }
         uf.addColumnName("thing");
+        if (requestedType != null) {
+            uf.addPattern("thing", Rdf.TYPE, requestedType);
+        }
         uf = populateUnifier("thing", uf, context);
 
         //Get column name list before the is-deleted column is added
@@ -665,12 +673,12 @@ public class ItemServicesImpl
             base = Resource.uriRef(value);
             if ((base != null) && isAccessible(userId, (UriRef) base)) {
 
-                r = getMetadataByReverseRelationship((UriRef) base, relationship, context, userId);
+                r = getMetadataByReverseRelationship((UriRef) base, relationship, context, userId, null);
             } else {
                 return Response.status(403).entity("Related Item not accessible").build();
             }
         } else if (type.equals("literal")) {
-            r = getMetadataByReverseRelationship(value, relationship, context, userId);
+            r = getMetadataByReverseRelationship(value, relationship, context, userId, null);
         }
         if (r == null) {
             r = Response.status(500).entity("Error getting information about " + base.toString()).build();

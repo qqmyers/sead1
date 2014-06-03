@@ -121,6 +121,7 @@ public class CollectionsRestService extends ItemServicesImpl {
      * 
      * @return - ID and basic metadata for datasets in this collection
      */
+    @SuppressWarnings("deprecation")
     @GET
     @Path("/{id}/datasets")
     @Produces("application/json")
@@ -136,7 +137,7 @@ public class CollectionsRestService extends ItemServicesImpl {
             return Response.status(500).entity("Error decoding id: " + baseId.toString()).build();
         }
 
-        return getMetadataByForwardRelationship(baseId, DcTerms.HAS_PART, datasetBasics, userId);
+        return getMetadataByForwardRelationship(baseId, DcTerms.HAS_PART, datasetBasics, userId, Cet.DATASET);
     }
 
     /**
@@ -153,6 +154,32 @@ public class CollectionsRestService extends ItemServicesImpl {
     @Path("/{id}/datasets")
     public Response addDatasetToCollection(@PathParam("id") @Encoded String id, @FormParam("dataset_id") String item_id, @javax.ws.rs.core.Context HttpServletRequest request) {
         return addItemToCollection(id, item_id, Cet.DATASET, request);
+    }
+
+    /**
+     * Get Collections that are children (sub-collections) of this collection
+     * 
+     * @param id
+     *            = the URL-encoded ID of the collection
+     * 
+     * @return - ID and basic metadata for subcollections.
+     */
+    @GET
+    @Path("/{id}/collections")
+    @Produces("application/json")
+    public Response getCollectionsByCollectionAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        UriRef baseId = null;
+        try {
+            id = URLDecoder.decode(id, "UTF-8");
+            baseId = Resource.uriRef(id);
+        } catch (Exception e1) {
+            log.error("Error decoding url for " + baseId.toString(), e1);
+            e1.printStackTrace();
+            return Response.status(500).entity("Error decoding id: " + baseId.toString()).build();
+        }
+
+        return getMetadataByForwardRelationship(baseId, DcTerms.HAS_PART, collectionBasics, userId, (UriRef) CollectionBeanUtil.COLLECTION_TYPE);
     }
 
     /**
@@ -280,7 +307,7 @@ public class CollectionsRestService extends ItemServicesImpl {
     @GET
     @Path("/{id}/tags")
     @Produces("application/json")
-    public Response getDatasetTagsByIdAsJSON(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response getCollectionTagsByIdAsJSON(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         return getItemTagsByIdAsJSON(id, CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 

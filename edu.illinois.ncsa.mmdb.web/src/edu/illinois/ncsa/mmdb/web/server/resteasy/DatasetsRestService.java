@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
@@ -40,10 +41,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -54,6 +56,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Beans;
@@ -63,12 +66,14 @@ import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
+import org.tupeloproject.util.Tuple;
 import org.tupeloproject.util.UnicodeTranscoder;
 
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
@@ -179,10 +184,36 @@ public class DatasetsRestService extends ItemServicesImpl {
     @GET
     @Path("")
     @Produces("application/json")
-    public Response getCollectionAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response getDatasetsAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         return getTopLevelItems(Cet.DATASET, datasetBasics, userId);
     }
+
+    /**
+     * Get all datasets
+     * 
+     * @return List of all datasets by ID with basic metadata as JSON-LD
+     */
+    /*
+    @GET
+    @Path("/all")
+    @Produces("application/json")
+    public Response getAllDatasetsAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+    //Build output
+    StreamingOutput streamingResult = new StreamingOutput() {
+
+        @Override
+        public void write(OutputStream output) throws IOException, WebApplicationException {
+            IOUtils.copyLarge(bf.getInputStream(), output);
+        }
+    };
+
+    r = Response.ok(streamingResult, mimetype).header("content-disposition", "attachement; filename = " + title).build();
+    }
+
+    */
 
     /**
      * Get dataset content
@@ -193,7 +224,6 @@ public class DatasetsRestService extends ItemServicesImpl {
      */
     @GET
     @Path("/{id}/file")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response getDatasetBlob(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         Response r;
         try {
@@ -204,14 +234,33 @@ public class DatasetsRestService extends ItemServicesImpl {
                 r = item.getErrorResponse();
             } else {
 
-                id = URLDecoder.decode(id, "UTF-8");
-                BlobFetcher bf = new BlobFetcher();
-                bf.setSubject(Resource.uriRef(id));
+                //Get file metadata
+                Unifier uf = new Unifier();
+                uf.addPattern(itemId, Dc.FORMAT, "mimetype");
+                uf.addPattern(itemId, Dc.TITLE, "title");
+                uf.setColumnNames("mimetype", "title");
+                TupeloStore.getInstance().getContext().perform(uf);
+                Tuple<Resource> metadata = uf.getResult().iterator().next();
+                String mimetype = metadata.get(0).toString();
+                String title = metadata.get(1).toString();
+
+                //Get Bytes
+                final BlobFetcher bf = new BlobFetcher();
+                bf.setSubject(itemId);
                 TupeloStore.getInstance().getContext().perform(bf);
 
-                ResponseBuilder response = Response.ok(bf.getInputStream());
-                r = response.build();
+                //Build output
+                StreamingOutput streamingResult = new StreamingOutput() {
+
+                    @Override
+                    public void write(OutputStream output) throws IOException, WebApplicationException {
+                        IOUtils.copyLarge(bf.getInputStream(), output);
+                    }
+                };
+
+                r = Response.ok(streamingResult, mimetype).header("content-disposition", "attachement; filename = " + title).build();
             }
+
         } catch (Exception e) {
             Map<String, Object> result = new LinkedHashMap<String, Object>();
             result.put("Error", "Server error while retrieving content for " + id);
@@ -319,7 +368,7 @@ public class DatasetsRestService extends ItemServicesImpl {
             log.error("Error decoding url for " + id, e1);
             e1.printStackTrace();
         }
-        return getMetadataByReverseRelationship(baseId, DcTerms.HAS_PART, collectionBasics, userId);
+        return getMetadataByReverseRelationship(baseId, DcTerms.HAS_PART, collectionBasics, userId, (UriRef) CollectionBeanUtil.COLLECTION_TYPE);
     }
 
     /**
