@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+  <display-name>ACR Discovery View</display-name>
+  <welcome-file-list>
+    <welcome-file>home</welcome-file>
+  <welcome-file>index.html</welcome-file>
+
+  </welcome-file-list>
+
+  <servlet>
+    <servlet-name>Home</servlet-name>
+    <servlet-class>org.sead.acr.community.Home</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Home</servlet-name>
+    <url-pattern>/home</url-pattern>
+  </servlet-mapping>
+  
+  
+    <servlet>
+    <servlet-name>GetProjectInfo</servlet-name>
+    <servlet-class>org.sead.acr.community.GetProjectInfo</servlet-class>
+      <init-param>
+      <param-name>PropertiesFileName</param-name>
+      <param-value>/discovery.properties</param-value>
+    </init-param>
+    
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetProjectInfo</servlet-name>
+    <url-pattern>/GetProjectInfo</url-pattern>
+  </servlet-mapping>
+      <servlet>
+    <servlet-name>GetSystemInfo</servlet-name>
+    <servlet-class>org.sead.acr.community.GetSystemInfo</servlet-class>
+      <init-param>
+      <param-name>PropertiesFileName</param-name>
+      <param-value>/discovery.properties</param-value>
+    </init-param>
+    
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetSystemInfo</servlet-name>
+    <url-pattern>/GetSysInfo</url-pattern>
+  </servlet-mapping>
+        <servlet>
+    <servlet-name>Export</servlet-name>
+    <servlet-class>org.sead.acr.community.Export</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Export</servlet-name>
+    <url-pattern>/export</url-pattern>
+  </servlet-mapping>
+  
+</web-app>
