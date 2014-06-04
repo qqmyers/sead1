@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>SEAD Active Respositories</title>
+<title>SEAD Active Repositories</title>
 </head>
 <link href="login_css/bootstrap.css" rel="stylesheet">
 <link href="login_css/common.css" rel="stylesheet">
