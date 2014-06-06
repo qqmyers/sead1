@@ -48,9 +48,11 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
@@ -234,5 +236,23 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
 
     @Override
     public void rollback(ListUserMetadataFields arg0, ListUserMetadataFieldsResult arg1, ExecutionContext arg2) throws ActionException {
+    }
+
+    public static void addViewablePredicate(String pred) {
+        ListUserMetadataFieldsResult lmufr = listUserMetadataFields(false);
+        if (!lmufr.getPredicates().contains(pred)) {
+            viewResultCache.getValue().addField(new UserMetadataField(pred, pred));
+            TripleWriter tw = new TripleWriter();
+            UriRef u = Resource.uriRef(pred);
+            tw.add(u, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
+            tw.add(u, Rdfs.LABEL, pred);
+            try {
+                TupeloStore.getInstance().getContext().perform(tw);
+            } catch (OperatorException e) {
+                log.error("Could not add new predicate as viewable user metadata: " + pred + " " + e.getMessage());
+            }
+
+        }
+
     }
 }

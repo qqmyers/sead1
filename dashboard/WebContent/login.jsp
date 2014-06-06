@@ -60,7 +60,8 @@
 				client_id: googleClientId,
 				scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
 			 	access_type: 'online',
-   				immediate: 'false'
+   				immediate: 'false',
+   				authuser: -1,
 				}, function(authResult) {
 					if(authResult && ! authResult.error) {
 						googleAccessToken = authResult.access_token;

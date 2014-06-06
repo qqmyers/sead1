@@ -154,15 +154,18 @@ public class Mail {
         TupeloStore ts = TupeloStore.getInstance();
         String server = ts.getConfiguration(ConfigurationKey.MediciName);
         String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
+        String projName = ts.getConfiguration(ConfigurationKey.ProjectName);
         String subject = presubj + " Invitation to access data";
-        String body = String.format("Welcome to SEAD! - a new way for projects to manage, curate and preserve data.\n\n" +
+        String body = String.format("Dear " + user.getName() + ",\n\n Welcome to SEAD! - a new way for projects to manage, curate and preserve data.\n\n" +
                 "You have been invited by an administrator (cc'd) to access and contribute to the data collection(s) being " +
-                "developed by the project using a SEAD Active Content Repository.\n\n" +
-                "A user account on the server %s has been created using this email address. You can login using your Google password" +
+                "developed by the %s project using a SEAD Active Content Repository.\n\n" +
+                "A user account on the server %s has been created for you using the email address this message was sent to.\n\nYou can login at this URL using your Google password" +
                 " if this email is associated with a google account (recommended). Or, you can use the temporary password %s " +
                 "to login via a local account. (You can then change your password information by logging in and going to Home > Profile.)" +
-                "\n\nYou have initially been given full read/write access to this repository (an admin may subsequently add/remove privileges)." +
-                " Getting Started information is available at http://sead-data.net. Questions can be sent to seaddatanet@umich.edu.", server, password);
+                "\n\nYou have initially been given full read/write access to this repository (an admin may subsequently add/remove privileges) and can access all of the services " +
+                "listed at %s as well as create a profile on SEAD's Resaercher Profile service (listed under the \"Go To\" menu button." +
+                " Getting Started information is available at http://sead-data.net. Questions can be sent to seaddatanet@umich.edu." +
+                "\n\n -- The SEAD Project Team", projName, "http://" + server + "/acr", password, "http://" + server);
         try {
             String adminEmail = null;
             if (admin != null) {

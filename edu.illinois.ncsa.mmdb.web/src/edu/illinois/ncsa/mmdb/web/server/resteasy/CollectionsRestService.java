@@ -2,17 +2,27 @@ package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
 /**
  * @author Rattanachai Ramathitima
+ * @author myersjd@umich.edu
  */
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+/*
+ *  NB: For these services to work, -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true must be set on the server. This 
+ * potentially opens the door for attacks related to CVE-2007-0450 if any code on the server follows paths sent 
+ * in URLs.
+ */
 
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.Encoded;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -23,299 +33,497 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.kernel.BeanSession;
-import org.tupeloproject.kernel.Unifier;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Thing;
+import org.tupeloproject.kernel.ThingSession;
+import org.tupeloproject.kernel.TripleMatcher;
+import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
+import org.tupeloproject.rdf.terms.Beans;
+import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
-import org.tupeloproject.util.Tuple;
+import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.terms.Rdfs;
 
+import edu.illinois.ncsa.mmdb.web.rest.RestService;
+import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.CollectionBean;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
 
+/**
+ * SEAD Data Service endpoints for collections. NB: For collection IDs
+ * containing '/' characters, the ids must be urlencoded for
+ * transmission.
+ */
 @Path("/collections")
-public class CollectionsRestService {
+public class CollectionsRestService extends ItemServicesImpl {
 
     /** Commons logging **/
     private static Log log = LogFactory.getLog(CollectionsRestService.class);
 
-    @GET
-    @Path("")
-    public Response getCollection() {
-
-        String result = "";
-        // use getIDs to get String collection of Collections' URL
-        try {
-            Collection<String> ids = new CollectionBeanUtil(TupeloStore.getInstance().getBeanSession()).getIDs();
-            for (String id : ids ) {
-                // check whether this collection still exists
-                if (new CollectionBeanUtil(TupeloStore.getInstance().getBeanSession()).get(id) != null) {
-                    result += URLEncoder.encode(id, "UTF-8") + "<br>";
-                }
-            }
-
-        } catch (Exception e1) {
-            log.error("Error getting All CollectionBeans", e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting All CollectionBeans").build();
-        }
-
-        return Response.status(200).entity(result).build();
-    }
-
+    /**
+     * Get top-level collections (those that are not sub-collections of any
+     * other collection)
+     * 
+     * @return IDs and basic metadata for collections as JSON-LD
+     */
     @GET
     @Path("")
     @Produces("application/json")
-    public Response getCollectionAsJSON() {
-
-        HashSet<String> result = new HashSet<String>();
-
-        // use getIDs to get String collection of Collections' URL
-        try {
-            Collection<String> ids = new CollectionBeanUtil(TupeloStore.getInstance().getBeanSession()).getIDs();
-            for (String id : ids ) {
-                // check whether this collection still exists
-                if (new CollectionBeanUtil(TupeloStore.getInstance().getBeanSession()).get(id) != null) {
-                    result.add(URLEncoder.encode(id, "UTF-8"));
-                }
-            }
-
-        } catch (Exception e1) {
-            log.error("Error getting All CollectionBeans", e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting All CollectionBeans").build();
-        }
-
-        return Response.status(200).entity(result).build();
+    public Response getCollectionAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        return getTopLevelItems(CollectionBeanUtil.COLLECTION_TYPE, collectionBasics, userId);
     }
 
-    @GET
-    @Path("/{id}")
-    public Response getCollection(@PathParam("id") String id) {
-        String result = "";
-
-        try {
-            id = URLDecoder.decode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
-            e1.printStackTrace();
-        }
-
-        // use CollectionBeanUtil to get CollectionBean of corresponding id
-        try {
-            result = "Collection Id: " + URLEncoder.encode(id, "UTF-8") + "<br>";
-
-            CollectionBean col = new CollectionBeanUtil(TupeloStore.getInstance().getBeanSession()).get(id);
-            if (col == null || col.getTitle() == null) {
-                return Response.status(404).entity("Collection: " + id + "Not Found").build();
-            }
-            result += "Title: " + col.getTitle() + "<br>";
-            PersonBean creator = col.getCreator();
-            if (creator != null) {
-                result += "Creator: " + creator.getName() + "<br>";
-            }
-
-        } catch (Exception e1) {
-            log.error("Error getting collectionBean for " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting collectionBean for " + id).build();
-        }
-
-        return Response.status(200).entity(result).build();
-    }
-
+    /**
+     * Get Basic metadata for {id} : ( Identifier, Title, Date, Uploaded By,
+     * Abstract, Contact(s), Creator(s) )
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * 
+     * @return - Basic Metadata as JSON-LD
+     */
     @GET
     @Path("/{id}")
     @Produces("application/json")
-    public Response getCollectionAsJSON(@PathParam("id") String id) {
+    public Response getCollectionAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
 
-        Map<String, String> result = new HashMap<String, String>();
-
-        try {
-            result.put("Id", URLEncoder.encode(id, "UTF-8"));
-            id = URLDecoder.decode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
-            e1.printStackTrace();
-        }
-
-        // use CollectionBeanUtil to get CollectionBean of corresponding id
-        try {
-            CollectionBean col = new CollectionBeanUtil(TupeloStore.getInstance().getBeanSession()).get(id);
-            if (col == null || col.getTitle() == null) {
-                return Response.status(404).entity("Collection: " + id + "Not Found").build();
-            }
-            result.put("Title", col.getTitle());
-            PersonBean creator = col.getCreator();
-            if (creator != null) {
-                result.put("Creator", creator.getName());
-            }
-        } catch (Exception e1) {
-            log.error("Error getting collectionBean for " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting collectionBean for " + id).build();
-        }
-
-        return Response.status(200).entity(result).build();
+        return getMetadataById(id, collectionBasics, userId);
     }
 
-    @GET
-    @Path("/{id}/datasets")
-    public Response getDatasetsByCollection(@PathParam("id") String id) {
-
-        try {
-            id = URLDecoder.decode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
-            e1.printStackTrace();
-        }
-
-        String result = "";
-
-        Unifier u = new Unifier();
-
-        // use CollectionBeanUtil to get CollectionBean of corresponding id
-        // then use Unifier to search for datasets belonging to this collection
-        try {
-            CollectionBean col = new CollectionBeanUtil(TupeloStore.getInstance().getBeanSession()).get(id);
-            if (col == null || col.getTitle() == null) {
-                return Response.status(404).entity("Collection: " + id + "Not Found").build();
-            }
-            Resource collectionURI = Resource.uriRef(col.getUri());
-            u.setColumnNames("datasets");
-            u.addPattern(collectionURI, DcTerms.HAS_PART, "datasets");
-            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "datasets") ) {
-                result += URLEncoder.encode(row.get(0).getString(), "UTF-8") + "<br>";
-            }
-        } catch (Exception e) {
-            log.info("Retrieving datasets in collection failed.");
-            e.printStackTrace();
-            return Response.status(500).entity("Retrieving datasets in collection failed.").build();
-        }
-
-        return Response.status(200).entity(result).build();
+    /**
+     * Delete collection (Collection will be marked as deleted)
+     * 
+     * @param id
+     *            - the URL-encoded SEAD ID for the collection
+     * 
+     * @return - success or failure message
+     */
+    @DELETE
+    @Path("/{id}")
+    @Produces("application/json")
+    public Response markDatasetAsDeleted(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return markItemAsDeleted(id, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 
+    /**
+     * Get Datasets that are children of this collection
+     * 
+     * @param id
+     *            = the URL-encoded ID of the collection
+     * 
+     * @return - ID and basic metadata for datasets in this collection
+     */
+    @SuppressWarnings("deprecation")
     @GET
     @Path("/{id}/datasets")
     @Produces("application/json")
-    public Response getDatasetsByCollectionAsJSON(@PathParam("id") String id) {
-
+    public Response getDatasetsByCollectionAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        UriRef baseId = null;
         try {
             id = URLDecoder.decode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
+            baseId = Resource.uriRef(id);
+        } catch (Exception e1) {
+            log.error("Error decoding url for " + baseId.toString(), e1);
             e1.printStackTrace();
+            return Response.status(500).entity("Error decoding id: " + baseId.toString()).build();
         }
 
-        HashSet<String> result = new HashSet<String>();
-        Unifier u = new Unifier();
-
-        // use CollectionBeanUtil to get CollectionBean of corresponding id
-        // then use Unifier to search for datasets belonging to this collection
-        try {
-            CollectionBean col = new CollectionBeanUtil(TupeloStore.getInstance().getBeanSession()).get(id);
-            if (col == null || col.getTitle() == null) {
-                return Response.status(404).entity("Collection: " + id + "Not Found").build();
-            }
-            Resource collectionURI = Resource.uriRef(col.getUri());
-            u.setColumnNames("datasets");
-            u.addPattern(collectionURI, DcTerms.HAS_PART, "datasets");
-            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "datasets") ) {
-                result.add(URLEncoder.encode(row.get(0).getString(), "UTF-8"));
-            }
-        } catch (Exception e) {
-            log.info("Retrieving datasets in collection failed.");
-            e.printStackTrace();
-            return Response.status(500).entity("Retrieving datasets in collection failed.").build();
-        }
-
-        return Response.status(200).entity(result).build();
+        return getMetadataByForwardRelationship(baseId, DcTerms.HAS_PART, datasetBasics, userId, Cet.DATASET);
     }
 
+    /**
+     * Add a dataset to this collection
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @param item_id
+     *            - the URL-encoded ID of the dataset
+     * 
+     * @return - success or failure message
+     */
     @POST
     @Path("/{id}/datasets")
-    public Response addDataseToCollection(@PathParam("id") String id, @FormParam("data_id") String data_id) {
-        String result = "";
+    public Response addDatasetToCollection(@PathParam("id") @Encoded String id, @FormParam("dataset_id") String item_id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return addItemToCollection(id, item_id, Cet.DATASET, request);
+    }
 
+    /**
+     * Get Collections that are children (sub-collections) of this collection
+     * 
+     * @param id
+     *            = the URL-encoded ID of the collection
+     * 
+     * @return - ID and basic metadata for subcollections.
+     */
+    @GET
+    @Path("/{id}/collections")
+    @Produces("application/json")
+    public Response getCollectionsByCollectionAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        UriRef baseId = null;
         try {
             id = URLDecoder.decode(id, "UTF-8");
-            data_id = URLDecoder.decode(data_id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
+            baseId = Resource.uriRef(id);
+        } catch (Exception e1) {
+            log.error("Error decoding url for " + baseId.toString(), e1);
             e1.printStackTrace();
+            return Response.status(500).entity("Error decoding id: " + baseId.toString()).build();
         }
 
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-        CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
-        // check collection id and dataset id, then add dataset to collection using CollectionBeanUtil
+        return getMetadataByForwardRelationship(baseId, DcTerms.HAS_PART, collectionBasics, userId, (UriRef) CollectionBeanUtil.COLLECTION_TYPE);
+    }
+
+    /**
+     * Add a collection to this collection (as a sub-collection)
+     * 
+     * @param id
+     *            - the URL-encoded ID of the parent collection
+     * @param item_id
+     *            - the URL-encoded ID of the sub-collection
+     * 
+     * @return - success or failure message
+     */
+    @POST
+    @Path("/{id}/collections")
+    public Response addCollectionToCollection(@PathParam("id") @Encoded String id, @FormParam("collection_id") String item_id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return addItemToCollection(id, item_id, CollectionBeanUtil.COLLECTION_TYPE, request);
+    }
+
+    private Response addItemToCollection(String id, String item_id, Resource type, @javax.ws.rs.core.Context HttpServletRequest request) {
+
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        Response r = null;
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        UriRef colId = null;
+        UriRef childId = null;
         try {
-            CollectionBean col = cbu.get(id);
-            if (col == null || col.getTitle() == null) {
-                return Response.status(404).entity("Collection " + id + "Not Found.").build();
-            }
-            else {
-                DatasetBean dataset = dbu.get(data_id);
-                if (dataset == null || dataset.getTitle() == null) {
-                    return Response.status(404).entity("Dataset " + data_id + "Not Found.").build();
+            colId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
+            childId = Resource.uriRef(URLDecoder.decode(item_id, "UTF-8"));
+            ValidItem parent = new ValidItem(colId, CollectionBeanUtil.COLLECTION_TYPE, userId);
+
+            if (!parent.isValid()) {
+                r = parent.getErrorResponse();
+            } else {
+                ValidItem child = new ValidItem(childId, type, userId);
+                if (!child.isValid()) {
+                    r = child.getErrorResponse();
                 } else {
-                    Collection<Resource> input = new HashSet<Resource>();
-                    input.add(Resource.resource(data_id));
-                    cbu.addToCollection(col, input);
-                    result += "adding " + data_id + " to " + id + "<br>";
+                    TripleWriter tw = new TripleWriter();
+                    tw.add(colId, DcTerms.HAS_PART, childId);
+
+                    c.perform(tw);
+
+                    result.put("Success", childId.toString() + " added to " + colId.toString());
+                    r = Response.status(200).entity(result).build();
+
                 }
             }
         } catch (Exception e) {
-            log.info("Adding dataset " + data_id + " to collection " + id + " failed.");
+            log.info("Adding item " + childId + " to collection " + colId + " failed.");
             e.printStackTrace();
-            return Response.status(500).entity("Adding dataset " + data_id + " to collection " + id + " failed.").build();
+            result.put("Error", "Adding dataset " + item_id + " to collection " + id + " failed.");
+            r = Response.status(500).entity(result).build();
         }
-        return Response.status(200).entity(result).build();
+
+        return r;
     }
 
+    /**
+     * Remove a dataset or collection from a collection
+     * 
+     * @param id
+     *            - the URL-encoded ID of the parent collection
+     * @param item_id
+     *            - the URL-encoded ID of the child dataset/collection to be
+     *            removed
+     * 
+     * @return - success or failure message
+     */
     @DELETE
-    @Path("/{id}/{data_id}")
-    public Response removeDatasetFromCollection(@PathParam("id") String id, @PathParam("data_id") String data_id) {
-        String result = "";
-        try {
-            id = URLDecoder.decode(id, "UTF-8");
-            data_id = URLDecoder.decode(data_id, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            log.error("Error decoding url for " + id, e1);
-            e1.printStackTrace();
-        }
+    @Path("/{id}/{item_id}")
+    public Response removeItemFromCollection(@PathParam("id") @Encoded String id, @PathParam("item_id") String item_id, @javax.ws.rs.core.Context HttpServletRequest request) {
 
-        BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
-        DatasetBeanUtil dbu = new DatasetBeanUtil(beanSession);
-        CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        Response r = null;
 
-        // check collection id and dataset id, then remove dataset from collection using CollectionBeanUtil
         try {
-            CollectionBean col = cbu.get(id);
-            if (col == null || col.getTitle() == null) {
-                return Response.status(404).entity("Collection " + id + "Not Found.").build();
-            }
-            else {
-                DatasetBean dataset = dbu.get(data_id);
-                if (dataset == null || dataset.getTitle() == null) {
-                    return Response.status(404).entity("Dataset " + data_id + "Not Found.").build();
+            UriRef parentId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
+            UriRef childId = Resource.uriRef(URLDecoder.decode(item_id, "UTF-8"));
+
+            ValidItem parent = new ValidItem(parentId, CollectionBeanUtil.COLLECTION_TYPE, userId);
+
+            if (!parent.isValid()) {
+                r = parent.getErrorResponse();
+            } else {
+                TripleMatcher tm = new TripleMatcher();
+                tm.match(parentId, DcTerms.HAS_PART, childId);
+                c.perform(tm);
+                if (!tm.getResult().isEmpty()) {
+                    if (isAccessible(userId, childId)) {
+                        TripleWriter tw = new TripleWriter();
+                        tw.remove(parentId, DcTerms.HAS_PART, childId);
+                        c.perform(tw);
+                        Map<String, Object> result = new LinkedHashMap<String, Object>();
+                        result.put("Success", childId.toString() + " removed from " + parentId);
+                        r = Response.status(200).entity(result).build();
+                    } else {
+                        Map<String, Object> result = new LinkedHashMap<String, Object>();
+                        result.put("Error", childId.toString() + " not accessible.");
+                        r = Response.status(403).entity(result).build();
+                    }
                 } else {
-                    Collection<Resource> input = new HashSet<Resource>();
-                    input.add(Resource.resource(data_id));
-                    cbu.removeFromCollection(col, input);
-                    result += "removing " + data_id + " from " + id + "<br>";
+                    Map<String, Object> result = new LinkedHashMap<String, Object>();
+                    result.put("Error", childId.toString() + " not in " + parentId);
+                    r = Response.status(404).entity(result).build();
                 }
+
             }
         } catch (Exception e) {
-            log.info("Removing dataset " + data_id + " from collection " + id + " failed.");
+            log.info("Error: Removing " + item_id + " from collection " + id + " failed.");
             e.printStackTrace();
-            return Response.status(500).entity("Removing dataset " + data_id + " from collection " + id + " failed.").build();
+            r = Response.status(500).entity("Failure when removing " + item_id + " from collection " + id + " .").build();
         }
 
-        return Response.status(200).entity(result).build();
+        return r;
     }
+
+    /**
+     * Get tags associated with this collection
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * 
+     * @return - JSON array of tags
+     */
+    @GET
+    @Path("/{id}/tags")
+    @Produces("application/json")
+    public Response getCollectionTagsByIdAsJSON(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return getItemTagsByIdAsJSON(id, CollectionBeanUtil.COLLECTION_TYPE, request);
+    }
+
+    /**
+     * Add tags to this collection
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @param tags
+     *            - comma separated list of tags
+     * @return - JSON array of tags
+     */
+    @POST
+    @Path("/{id}/tags")
+    public Response addTagsToDataset(@PathParam("id") String id, @FormParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return addTagsToItem(id, tags, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
+    }
+
+    /**
+     * Remove some tags associated with this collection
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @param tags
+     *            - comma separated list of tags
+     * @return - success or failure message
+     */
+    @DELETE
+    @Path("/{id}/tags/{tags}")
+    public Response removeTagFromDataset(@PathParam("id") String id, @PathParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return deleteTagsFromItem(id, tags, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
+    }
+
+    /**
+     * Create a new collection including metadata and list of children (datasets
+     * and/or subcollections). Basic metadata
+     * are generated from the dir stats and session username
+     * (dc:creator/uploader).
+     * 
+     * Note: Adding metadata via this method should be done with awareness that
+     * it does not perform all 'side effects', e.g. while new predicates are
+     * automatically added to the list of extracted or user
+     * metadata, there is no way through this endpoint to give them
+     * human-friendly labels.
+     * 
+     * @param input
+     *            - multipart form data including "collection" part specifying
+     *            the
+     *            collection name and additional String predicate/value pairs as
+     *            other parts for other
+     *            metadata. The value strings will be interpreted based on a
+     *            submitted media/mime type:
+     *            text/plain (default) : a literal value
+     *            text/uri-list : a URI
+     * 
+     * @return - success/failure message
+     */
+    @POST
+    @Path("")
+    @Consumes("multipart/form-data")
+    public Response uploadDir(MultipartFormDataInput input, @javax.ws.rs.core.Context HttpServletRequest request) {
+        Context c = TupeloStore.getInstance().getContext();
+        String dirName = "unknown";
+        Map<Resource, Object> md = new LinkedHashMap<Resource, Object>();
+        md.put(Rdf.TYPE, RestService.COLLECTION_TYPE);
+        String uri = RestUriMinter.getInstance().mintUri(md); // Create collection uri
+        ThingSession ts = c.getThingSession();
+        Thing t = ts.newThing(Resource.uriRef(uri));
+        UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
+
+        try {
+            //Get API input data
+            Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
+
+            for (Entry<String, List<InputPart>> parts : uploadForm.entrySet() ) {
+                for (InputPart part : parts.getValue() ) {
+                    if (parts.getKey().equals("collection")) {
+
+                        if (log.isDebugEnabled()) {
+                            listHeaders(part);
+                        }
+
+                        //get name...
+                        dirName = part.getBodyAsString();
+
+                        t.addType(CollectionBeanUtil.COLLECTION_TYPE);
+                        t.addValue(Rdfs.LABEL, dirName);
+
+                        //Next 4 are Bean specific
+                        t.addType(Beans.STORAGE_TYPE_BEAN_ENTRY);
+                        t.setValue(Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
+                                Resource.literal("edu.uiuc.ncsa.cet.bean.CollectionBean"));
+                        t.setValue(Dc.IDENTIFIER, Resource.uriRef(uri));
+                        t.setValue(Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
+                                Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/" + CollectionBeanUtil.COLLECTION_TYPE));
+
+                        t.setValue(Dc.TITLE, dirName);
+                        t.addValue(DcTerms.DATE_CREATED, new Date());
+                        t.setValue(Dc.CREATOR, creator);
+                    } else {
+                        //Should only be one val per Key...
+                        addMetadataItem(t, parts.getKey(), part.getBodyAsString(), part.getMediaType(), creator);//Should only be one val per Key...
+                    }
+
+                }
+
+            }
+            t.save();
+            ts.close();
+        }
+
+        catch (OperatorException oe) {
+            log.error("Error uploading collection: ", oe);
+            return Response.status(500)
+                    .entity(uri).build();
+        } catch (IOException ie) {
+            log.error("Error uploading collection: ", ie);
+            return Response.status(500)
+                    .entity(uri).build();
+        }
+
+        // submit to extraction service
+        try {
+            TupeloStore.getInstance().extractPreviews(uri);
+        } catch (Exception e) {
+            log.info("Could not submit uri to extraction service, is it down?", e);
+        }
+
+        return Response.status(200)
+                .entity(uri).build();
+    }
+
+    /**
+     * Get Bibliographic metadata for {id} : (Identifier, License, Rights
+     * Holder, Rights,
+     * Creation Date, Size, Label, Mimetype, Description(s), Title, Uploaded By,
+     * Abstract,
+     * Contact(s),Creator(s), Publication Date )
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @return - Biblio Metadata as JSON-LD
+     */
+    @GET
+    @Path("/{id}/biblio")
+    @Produces("application/json")
+    public Response getCollectionBiblioAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        return getBiblioByIdAsJSON(id, userId);
+
+    }
+
+    /**
+     * Get all metadata for {id} : (Basic/biblio + user-added metadata and
+     * extracted metadata)
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @return - Metadata as JSON-LD
+     */
+    @GET
+    @Path("/{id}/metadata")
+    @Produces("application/json")
+    public Response getCollectionMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        return getItemMetadataAsJSON(id, userId);
+
+    }
+
+    /**
+     * Get collections(s) that have the specified metadata
+     * 
+     * @param pred
+     *            - URL-encoded predicate
+     * @param type
+     *            - the type of the value (must be "uri" or "literal")
+     * @param value
+     *            - the URL-encoded value
+     * 
+     * @return - the list of matching collections, with their basic metadata, as
+     *         JSON-LD
+     */
+    @GET
+    @Path("/metadata/{pred}/{type}/{value}")
+    @Produces("application/json")
+    public Response getCollectionsWithMetadataAsJSON(@PathParam("pred") @Encoded String pred, @PathParam("type") @Encoded String type, @PathParam("value") @Encoded String value, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return getItemsByMetadata(pred, type, value, collectionBasics, request);
+    }
+
+    /**
+     * Add metadata to collection.
+     * 
+     * Note: New predicates will be added as viewable user metadata. Some
+     * predicates (related to
+     * license, rightsHolder, rights, title, uploaded by, identifier, dates,
+     * size, label) cannot be changed through this method.
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @param input
+     *            - multipart form data specifying the String predicate/value
+     *            pairs for the
+     *            metadata. The value strings will be interpreted based on a
+     *            submitted media/mime type:
+     *            text/plain (default) : a literal value
+     *            text/uri-list : a URI
+     * 
+     * @result - success/failure message
+     */
+    @POST
+    @Path("/{id}/metadata")
+    @Consumes("multipart/form-data")
+    public Response uploadMetadata(@PathParam("id") @Encoded String id, MultipartFormDataInput input, @javax.ws.rs.core.Context HttpServletRequest request) {
+
+        return super.uploadMetadata(id, input, request);
+    }
+
 }

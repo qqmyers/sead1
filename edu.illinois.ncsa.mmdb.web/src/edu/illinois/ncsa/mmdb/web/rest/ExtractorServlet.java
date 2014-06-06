@@ -66,8 +66,10 @@ public class ExtractorServlet extends AuthenticatedServlet {
             return;
         }
         String uri = req.getParameter("uri");
-        String result = TupeloStore.getInstance().extractPreviews(uri);
-
+        String result = "Extraction not required";
+        if (TupeloStore.getInstance().extractPreviews(uri) == true) {
+            result = "Extraction Launched";
+        }
         resp.setStatus(200);
         PrintWriter pw = new PrintWriter(resp.getOutputStream());
         pw.println(result); //$NON-NLS-1$

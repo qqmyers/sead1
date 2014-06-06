@@ -102,8 +102,8 @@ public class Authentication {
         }
     }
 
-    public static String googleAuthenticate(String client_id, String googleAccessToken) {
-        String user = MediciProxy.isValidGoogleToken(client_id, googleAccessToken);
+    public static String googleAuthenticate(String[] client_ids, String googleAccessToken) {
+        String user = MediciProxy.isValidGoogleToken(client_ids, googleAccessToken);
         if (user != null) {
             try {
                 TripleWriter tw = new TripleWriter();

@@ -43,9 +43,13 @@ package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -72,6 +76,9 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
+import org.tupeloproject.rdf.terms.Beans;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Files;
@@ -353,7 +360,16 @@ public class UploadBlob extends AuthenticatedServlet {
                         log.debug("Added upload info with uri=" + uri + " for filename " + fileName); // FIXME debug
                     }
                     final FileUploadListener _listener = listener;
-                    bw.setInputStream(new FilterInputStream(item.getInputStream()) {
+                    MessageDigest sha1 = null;
+                    InputStream is = item.getInputStream();
+                    try {
+                        sha1 = MessageDigest.getInstance("SHA1");
+                        is = new DigestInputStream(item.getInputStream(), sha1);
+                    } catch (NoSuchAlgorithmException e1) {
+                        log.error("No SHA1 algorithm!");
+                    }
+
+                    bw.setInputStream(new FilterInputStream(is) {
                         int wrote(int written) {
                             if (written > 0 && _listener != null) {
                                 _listener.wrote(written);
@@ -385,14 +401,25 @@ public class UploadBlob extends AuthenticatedServlet {
                         log.trace("writing metadata for " + uri);
                         // add metadata
                         ThingSession ts = c.getThingSession();
-                        Thing t = ts.newThing(Resource.uriRef(uri));
-                        t.addType(RestService.IMAGE_TYPE);
+                        UriRef id = Resource.uriRef(uri);
+
+                        Thing t = ts.newThing(id);
+                        //DatasetBean-related metadata
+                        t.addType(Cet.DATASET);
+                        t.setValue(Dc.IDENTIFIER, id);
+                        t.addType(Beans.STORAGE_TYPE_BEAN_ENTRY);
+                        t.setValue(Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
+                                Resource.literal("edu.uiuc.ncsa.cet.bean.DatasetBean"));
+
                         t.setValue(Rdfs.LABEL, caption);
                         t.setValue(RestService.LABEL_PROPERTY, caption);
                         t.setValue(RestService.FILENAME_PROPERTY, fileName);
                         t.setValue(RestService.DATE_PROPERTY, new Date());
                         createdByUser(t, request);
                         t.setValue(Files.LENGTH, bw.getSize());
+                        byte[] digest = sha1.digest();
+                        t.addValue(edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl.SHA1_DIGEST, edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl.asHex(digest));
+
                         if (contentType != null) {
                             // httpclient also gives the content type a "charset"; ignore that.
                             contentType = contentType.replaceFirst("; charset=.*", "");

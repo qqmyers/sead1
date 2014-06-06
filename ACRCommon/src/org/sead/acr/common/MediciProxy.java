@@ -133,15 +133,20 @@ public class MediciProxy {
 		String username = null;
 		// Store credential
 		// Validate and get userinfo @ Google
-
-		String client_id = PropertiesLoader.getProperties().getProperty(
+		String[] client_ids = new String[2];
+		client_ids[0] = PropertiesLoader.getProperties().getProperty(
 				"google.client_id");
-		if (client_id == null) {
-			log.debug("No google Client ID found");
+		if (client_ids[0] == null) {
+			log.debug("No google web Client ID found");
+		}
+		client_ids[1] = PropertiesLoader.getProperties().getProperty(
+				"google.device_client_id");
+		if (client_ids[1] == null) {
+			log.debug("No google device Client ID found");
 		}
 
 		try {
-			username = isValidGoogleToken(client_id, googleAccessToken);
+			username = isValidGoogleToken(client_ids, googleAccessToken);
 			if (username != null) {
 				// FIXME Ping medici with test query to determine permissions
 				DataAccess authenticateDA = new DataAccess();
@@ -221,16 +226,16 @@ public class MediciProxy {
 		return is;
 	}
 
-	/* 
+	/*
 	 * An XML encioded JSON response, so use the newer method
 	 * 
 	 * @deprecated
 	 */
 	public String getSparqlJSONResponse(String query) throws IOException,
-	MalformedURLException, JSONException {
+			MalformedURLException, JSONException {
 		return getSparqlXMLResponse(query);
-	}	
-	
+	}
+
 	public String getSparqlXMLResponse(String query) throws IOException,
 			MalformedURLException, JSONException {
 
@@ -281,7 +286,7 @@ public class MediciProxy {
 		}
 		DataAccess authGetDA = DataAccess
 				.buildUnauthenticatedJsonGETResponseDataAccess(url);
-		if ((_geouser != null)&&(_geouser.length()!=0)) {
+		if ((_geouser != null) && (_geouser.length() != 0)) {
 			authGetDA.setBasicCreds(_geouser, _geopassword);
 			authGetDA.setUseBasicAuth(true);
 		} else {
@@ -312,7 +317,7 @@ public class MediciProxy {
 
 	}
 
-	public static String isValidGoogleToken(String client_id,
+	public static String isValidGoogleToken(String[] client_ids,
 			String googleAccessToken) {
 
 		try {
@@ -332,8 +337,12 @@ public class MediciProxy {
 				log.debug("Audience includes < :" + audience);
 				audience = audience.substring(0, i);
 			}
-			if ((audience.equals(client_id)) && verified) {
-				return tokeninfo.getString("email");
+			if (verified) {
+				for (String id : client_ids) {
+					if (audience.equals(id)) {
+						return tokeninfo.getString("email");
+					}
+				}
 			}
 		} catch (Exception e) {
 			log.debug("Google validation exception: " + e.getMessage());
