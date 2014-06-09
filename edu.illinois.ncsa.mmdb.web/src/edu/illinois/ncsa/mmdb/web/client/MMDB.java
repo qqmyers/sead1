@@ -276,7 +276,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         navMenu.addStyleName("navMenu");
 
         RootPanel.get("projectTitle").clear();
-        ConfigurationResult configuration = new ConfigurationResult();
 
         HorizontalPanel mainHeader = new HorizontalPanel();
         final Anchor projectNameLabel = new Anchor(true);

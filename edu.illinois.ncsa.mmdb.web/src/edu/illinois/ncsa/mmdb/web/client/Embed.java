@@ -64,10 +64,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MyDispatchAsync;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 
 /**
@@ -93,6 +96,8 @@ public class Embed implements EntryPoint {
     private int                        width;
     private int                        height;
 
+    private String                     accessLevelLabel   = "Access Level";
+
     /**
      * This is the entry point method.
      */
@@ -111,6 +116,18 @@ public class Embed implements EntryPoint {
 
             //Ensure a user is already logged in, if not log in anonymous
             checkLogin();
+
+            dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.AccessLevelLabel), new AsyncCallback<ConfigurationResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Could not get Names", caught);
+                }
+
+                @Override
+                public void onSuccess(ConfigurationResult result) {
+                    accessLevelLabel = result.getConfiguration(ConfigurationKey.AccessLevelLabel);
+                }
+            });
 
         }
     }
@@ -143,7 +160,7 @@ public class Embed implements EntryPoint {
                 @Override
                 public void onFailure(Throwable caught) {
                     GWT.log("Error getting dataset", null);
-                    rootPanel.add(new Label("Dataset Not Available"));
+                    rootPanel.add(new Label("Anonymous users unable to view this dataset. (Check " + accessLevelLabel + " level.)"));
                 }
 
                 @Override
@@ -286,7 +303,7 @@ public class Embed implements EntryPoint {
                 viewDataset.setHref(GWT.getHostPageBaseURL() + "mmdb.html#dataset?id=" + uri);
                 viewDataset.addStyleName("homePageLink");
 
-                Anchor homePage = new Anchor("Medici Home Page");
+                Anchor homePage = new Anchor("Go To Repository");
                 homePage.addStyleName("homePageLink");
                 homePage.addStyleName("permissionMultiAnchor");
                 homePage.setHref(GWT.getHostPageBaseURL());
