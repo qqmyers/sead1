@@ -60,7 +60,4 @@
 	<source path='common' />
 	<source path='client' />
 	
-	 <script src="./js/jquery-latest.js"></script>
-	 <script src="./js/jquery.tablesorter.min.js"></script>
-	 
 </module>
