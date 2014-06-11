@@ -1017,3 +1017,1973 @@ Validating units:
       [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
 Removing invalidated units
 Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-search-1.0.1-20110314.041314-1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\lucene-core-2.4.1.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   20% complete (ETR: 13 seconds)
+   20% complete (ETR: 13 seconds)
+   20% complete (ETR: 13 seconds)
+   30% complete (ETR: 13 seconds)
+   40% complete (ETR: 9 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 56.72 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\classes is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-search-1.0.1-20110314.041314-1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\lucene-core-2.4.1.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\classes is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-search-1.0.1-20110314.041314-1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\lucene-core-2.4.1.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   10% complete (ETR: 22 seconds)
+   10% complete (ETR: 22 seconds)
+   20% complete (ETR: 21 seconds)
+   30% complete (ETR: 14 seconds)
+   40% complete (ETR: 10 seconds)
+   50% complete (ETR: 7 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 12.81 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpclient-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpcore-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-core-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-jaxrs-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-mapper-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-xc-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jaxrs-api-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcip-annotations-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jsr250-api-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jackson-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jaxrs-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jettison-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\scannotation-1.0.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\activation-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\aopalliance-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\arq-2.8.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean-tupelo.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-beanutils-1.8.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-dbcp-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-fileupload-1.2.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-contrib-ssl-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-io-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-logging-1.1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-pool-1.5.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gin-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\guice-2.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-dispatch-1.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\icu4j-3.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\iri-0.7.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-jcr-commons-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-webdav-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcl-over-slf4j-1.5.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jdom-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jena-2.6.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\log4j-1.2.14.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mail-1.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-api-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-servlet-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mime-util-2.1.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mysql-connector-java-5.0.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\org.osgi.core-4.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\rome-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-api-1.5.8.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-log4j12-1.5.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\stax-api-1.0.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-client-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-jena-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-kernel-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-mysql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-rdf-ntriples-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-server-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sparql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-util-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-webdav-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA-sources.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\wstx-asl-3.2.9.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\xercesImpl-2.7.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\postgresql-8.4-702.jdbc4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-postgresql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-maps-1.1.1-rc1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-openlayers-client-0.9-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-api-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-oauth-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-oauth2-0.2-alpha.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-jackson-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\ACRCommon.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-lang3-3.1.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2719 units from cache.
+Compiling...
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 11.02 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpclient-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpcore-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-core-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-jaxrs-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-mapper-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-xc-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jaxrs-api-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcip-annotations-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jsr250-api-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jackson-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jaxrs-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jettison-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\scannotation-1.0.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\activation-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\aopalliance-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\arq-2.8.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean-tupelo.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-beanutils-1.8.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-dbcp-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-fileupload-1.2.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-contrib-ssl-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-io-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-logging-1.1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-pool-1.5.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gin-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\guice-2.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-dispatch-1.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\icu4j-3.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\iri-0.7.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-jcr-commons-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-webdav-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcl-over-slf4j-1.5.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jdom-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jena-2.6.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\log4j-1.2.14.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mail-1.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-api-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-servlet-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mime-util-2.1.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mysql-connector-java-5.0.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\org.osgi.core-4.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\rome-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-api-1.5.8.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-log4j12-1.5.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\stax-api-1.0.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-client-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-jena-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-kernel-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-mysql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-rdf-ntriples-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-server-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sparql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-util-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-webdav-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA-sources.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\wstx-asl-3.2.9.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\xercesImpl-2.7.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\postgresql-8.4-702.jdbc4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-postgresql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-maps-1.1.1-rc1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-openlayers-client-0.9-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-api-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-oauth-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-oauth2-0.2-alpha.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-jackson-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\ACRCommon.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-lang3-3.1.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpclient-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpcore-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-core-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-jaxrs-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-mapper-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-xc-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jaxrs-api-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcip-annotations-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jsr250-api-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jackson-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jaxrs-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jettison-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\scannotation-1.0.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\activation-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\aopalliance-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\arq-2.8.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean-tupelo.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-beanutils-1.8.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-dbcp-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-fileupload-1.2.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-contrib-ssl-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-io-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-logging-1.1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-pool-1.5.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gin-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\guice-2.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-dispatch-1.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\icu4j-3.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\iri-0.7.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-jcr-commons-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-webdav-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcl-over-slf4j-1.5.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jdom-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jena-2.6.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\log4j-1.2.14.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mail-1.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-api-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-servlet-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mime-util-2.1.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mysql-connector-java-5.0.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\org.osgi.core-4.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\rome-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-api-1.5.8.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-log4j12-1.5.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\stax-api-1.0.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-client-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-jena-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-kernel-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-mysql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-rdf-ntriples-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-server-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sparql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-util-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-webdav-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA-sources.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\wstx-asl-3.2.9.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\xercesImpl-2.7.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\postgresql-8.4-702.jdbc4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-postgresql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-maps-1.1.1-rc1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-openlayers-client-0.9-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-api-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-oauth-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-oauth2-0.2-alpha.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-jackson-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\ACRCommon.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-lang3-3.1.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   0% complete (ETR: 52 seconds)
+   10% complete (ETR: 54 seconds)
+   20% complete (ETR: 27 seconds)
+   30% complete (ETR: 17 seconds)
+   40% complete (ETR: 12 seconds)
+   50% complete (ETR: 9 seconds)
+   60% complete (ETR: 6 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 3 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 65.96 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   10% complete (ETR: 26 seconds)
+   10% complete (ETR: 26 seconds)
+   20% complete (ETR: 21 seconds)
+   30% complete (ETR: 15 seconds)
+   40% complete (ETR: 11 seconds)
+   50% complete (ETR: 8 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 100.42 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-search-1.0.1-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 11.40 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-search-1.0.1-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-search-1.0.1-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 3 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 57.49 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 12.95 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.03 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean-tupelo.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   20% complete (ETR: 14 seconds)
+   20% complete (ETR: 14 seconds)
+   20% complete (ETR: 14 seconds)
+   30% complete (ETR: 12 seconds)
+   40% complete (ETR: 9 seconds)
+   50% complete (ETR: 7 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 65.93 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean-tupelo.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean-tupelo.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   60% complete (ETR: 3 seconds)
+   70% complete (ETR: 2 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 11.63 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   40% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 11.43 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\ACRCommon.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   40% complete (ETR: 6 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 12.23 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\ACRCommon.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\ACRCommon.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpclient-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpcore-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-core-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-jaxrs-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-mapper-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-xc-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jaxrs-api-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcip-annotations-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jsr250-api-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jackson-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jaxrs-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jettison-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\scannotation-1.0.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\activation-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\aopalliance-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\arq-2.8.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-beanutils-1.8.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-dbcp-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-fileupload-1.2.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-contrib-ssl-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-io-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-logging-1.1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-pool-1.5.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gin-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\guice-2.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-dispatch-1.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\icu4j-3.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\iri-0.7.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-jcr-commons-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-webdav-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcl-over-slf4j-1.5.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jdom-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jena-2.6.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\log4j-1.2.14.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mail-1.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-api-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-servlet-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mime-util-2.1.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mysql-connector-java-5.0.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\org.osgi.core-4.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\rome-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-api-1.5.8.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-log4j12-1.5.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\stax-api-1.0.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-client-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-jena-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-kernel-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-mysql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-rdf-ntriples-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-server-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sparql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-util-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-webdav-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA-sources.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\wstx-asl-3.2.9.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\xercesImpl-2.7.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\postgresql-8.4-702.jdbc4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-postgresql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-maps-1.1.1-rc1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-openlayers-client-0.9-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-api-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-oauth-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-oauth2-0.2-alpha.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-jackson-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\ACRCommon.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-lang3-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\lucene-analyzers-common-4.7.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\lucene-core-4.7.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-search-1.0.2-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2719 units from cache.
+Compiling...
+   30% complete (ETR: 8 seconds)
+   30% complete (ETR: 8 seconds)
+   30% complete (ETR: 8 seconds)
+   30% complete (ETR: 8 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 13.10 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpclient-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpcore-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-core-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-jaxrs-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-mapper-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-xc-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jaxrs-api-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcip-annotations-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jsr250-api-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jackson-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jaxrs-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jettison-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\scannotation-1.0.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\activation-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\aopalliance-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\arq-2.8.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-beanutils-1.8.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-dbcp-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-fileupload-1.2.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-contrib-ssl-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-io-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-logging-1.1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-pool-1.5.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gin-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\guice-2.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-dispatch-1.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\icu4j-3.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\iri-0.7.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-jcr-commons-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-webdav-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcl-over-slf4j-1.5.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jdom-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jena-2.6.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\log4j-1.2.14.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mail-1.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-api-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-servlet-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mime-util-2.1.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mysql-connector-java-5.0.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\org.osgi.core-4.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\rome-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-api-1.5.8.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-log4j12-1.5.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\stax-api-1.0.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-client-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-jena-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-kernel-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-mysql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-rdf-ntriples-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-server-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sparql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-util-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-webdav-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA-sources.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\wstx-asl-3.2.9.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\xercesImpl-2.7.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\postgresql-8.4-702.jdbc4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-postgresql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-maps-1.1.1-rc1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-openlayers-client-0.9-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-api-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-oauth-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-oauth2-0.2-alpha.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-jackson-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\ACRCommon.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-lang3-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\lucene-analyzers-common-4.7.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\lucene-core-4.7.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-search-1.0.2-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpclient-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\httpcore-4.1.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-core-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-jaxrs-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-mapper-asl-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackson-xc-1.8.5.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jaxrs-api-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcip-annotations-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jsr250-api-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jackson-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jaxrs-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\resteasy-jettison-provider-2.3.2.Final.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\scannotation-1.0.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\activation-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\aopalliance-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\arq-2.8.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-bean.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-beanutils-1.8.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-codec-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-dbcp-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-fileupload-1.2.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-httpclient-contrib-ssl-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-io-1.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-logging-1.1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-pool-1.5.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gin-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\guice-2.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-dispatch-1.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-servlet-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-user-2.4.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\icu4j-3.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\iri-0.7.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-jcr-commons-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jackrabbit-webdav-1.6.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jcl-over-slf4j-1.5.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jdom-1.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\jena-2.6.2.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\log4j-1.2.14.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mail-1.4.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-api-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\milton-servlet-1.6.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mime-util-2.1.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\mysql-connector-java-5.0.4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\org.osgi.core-4.0.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\rome-1.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-api-1.5.8.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\slf4j-log4j12-1.5.3.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\stax-api-1.0.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-client-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-jena-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-kernel-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-mysql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-rdf-ntriples-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-server-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sparql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-util-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-webdav-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA-sources.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\validation-api-1.0.0.GA.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\wstx-asl-3.2.9.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\xercesImpl-2.7.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\postgresql-8.4-702.jdbc4.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-postgresql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-maps-1.1.1-rc1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-openlayers-client-0.9-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-api-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-oauth-client-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\gwt-oauth2-0.2-alpha.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\google-http-client-jackson-1.16.0-rc.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\ACRCommon.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\commons-lang3-3.1.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\lucene-analyzers-common-4.7.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\lucene-core-4.7.0.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\cet-search-1.0.2-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2719 cached/archived units.  Used 2719 / 2719 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 81.16 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   50% complete (ETR: 5 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 53.54 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   20% complete (ETR: 18 seconds)
+   20% complete (ETR: 18 seconds)
+   20% complete (ETR: 18 seconds)
+   30% complete (ETR: 13 seconds)
+   40% complete (ETR: 9 seconds)
+   50% complete (ETR: 7 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 39.83 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   60% complete (ETR: 3 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 38.79 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   10% complete (ETR: 30 seconds)
+   10% complete (ETR: 30 seconds)
+   20% complete (ETR: 22 seconds)
+   30% complete (ETR: 16 seconds)
+   40% complete (ETR: 11 seconds)
+   50% complete (ETR: 8 seconds)
+   60% complete (ETR: 6 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 3 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 56.16 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.06 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   30% complete (ETR: 11 seconds)
+   30% complete (ETR: 11 seconds)
+   30% complete (ETR: 11 seconds)
+   30% complete (ETR: 11 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 60.69 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-client-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-jena-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-kernel-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-mysql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-rdf-ntriples-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-server-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sparql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-util-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-webdav-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-postgresql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   60% complete (ETR: 3 seconds)
+   70% complete (ETR: 2 seconds)
+   80% complete (ETR: 1 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 30.41 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-client-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-jena-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-kernel-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-mysql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-rdf-ntriples-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-server-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sparql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-util-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-webdav-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-postgresql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-client-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-jena-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-kernel-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-mysql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-rdf-ntriples-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-server-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sparql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-sql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-util-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-webdav-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+   Unexpected entry in classpath; C:\Users\Jim\git\medici-gwt-web\edu.illinois.ncsa.mmdb.web\war\WEB-INF\lib\tupelo-postgresql-2.7.0-SNAPSHOT.jar is neither a directory nor an archive (.jar or .zip)
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   10% complete (ETR: 28 seconds)
+   10% complete (ETR: 28 seconds)
+   20% complete (ETR: 21 seconds)
+   30% complete (ETR: 14 seconds)
+   40% complete (ETR: 11 seconds)
+   50% complete (ETR: 8 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 15.93 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   30% complete (ETR: 10 seconds)
+   30% complete (ETR: 10 seconds)
+   30% complete (ETR: 10 seconds)
+   30% complete (ETR: 10 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 35.71 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   20% complete (ETR: 16 seconds)
+   20% complete (ETR: 16 seconds)
+   20% complete (ETR: 16 seconds)
+   30% complete (ETR: 13 seconds)
+   40% complete (ETR: 9 seconds)
+   50% complete (ETR: 7 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 14.43 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   50% complete (ETR: 4 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 31.04 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   10% complete (ETR: 43 seconds)
+   10% complete (ETR: 43 seconds)
+   20% complete (ETR: 28 seconds)
+   30% complete (ETR: 17 seconds)
+   40% complete (ETR: 12 seconds)
+   50% complete (ETR: 9 seconds)
+   60% complete (ETR: 6 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 3 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 52.60 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   40% complete (ETR: 8 seconds)
+   40% complete (ETR: 8 seconds)
+   40% complete (ETR: 8 seconds)
+   40% complete (ETR: 8 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 27.08 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   0% complete (ETR: 78 seconds)
+   10% complete (ETR: 53 seconds)
+   20% complete (ETR: 33 seconds)
+   30% complete (ETR: 21 seconds)
+   40% complete (ETR: 17 seconds)
+   50% complete (ETR: 14 seconds)
+   60% complete (ETR: 11 seconds)
+   70% complete (ETR: 9 seconds)
+   80% complete (ETR: 6 seconds)
+   90% complete (ETR: 3 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 78.37 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   0% complete (ETR: ?)
+   10% complete (ETR: 75 seconds)
+   20% complete (ETR: 41 seconds)
+   30% complete (ETR: 28 seconds)
+   40% complete (ETR: 21 seconds)
+   50% complete (ETR: 18 seconds)
+   60% complete (ETR: 14 seconds)
+   70% complete (ETR: 11 seconds)
+   80% complete (ETR: 6 seconds)
+   90% complete (ETR: 3 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 75.11 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   20% complete (ETR: 12 seconds)
+   20% complete (ETR: 12 seconds)
+   20% complete (ETR: 12 seconds)
+   30% complete (ETR: 12 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 41.34 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   20% complete (ETR: 20 seconds)
+   20% complete (ETR: 20 seconds)
+   20% complete (ETR: 20 seconds)
+   30% complete (ETR: 13 seconds)
+   40% complete (ETR: 10 seconds)
+   50% complete (ETR: 7 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 45.71 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.01 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 10 seconds)
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 49.31 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   30% complete (ETR: 8 seconds)
+   30% complete (ETR: 8 seconds)
+   30% complete (ETR: 8 seconds)
+   30% complete (ETR: 8 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 80.55 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   10% complete (ETR: 28 seconds)
+   10% complete (ETR: 28 seconds)
+   20% complete (ETR: 22 seconds)
+   30% complete (ETR: 14 seconds)
+   40% complete (ETR: 11 seconds)
+   50% complete (ETR: 7 seconds)
+   60% complete (ETR: 5 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 91.22 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   30% complete (ETR: 9 seconds)
+   40% complete (ETR: 8 seconds)
+   50% complete (ETR: 6 seconds)
+   60% complete (ETR: 4 seconds)
+   70% complete (ETR: 3 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 30.97 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   20% complete (ETR: 14 seconds)
+   20% complete (ETR: 19 seconds)
+   20% complete (ETR: 19 seconds)
+   30% complete (ETR: 16 seconds)
+   40% complete (ETR: 12 seconds)
+   50% complete (ETR: 8 seconds)
+   60% complete (ETR: 6 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 2 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 41.93 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 0 cached/archived units.  Used 0 / 2820 units from cache.
+Compiling...
+   0% complete (ETR: ?)
+   10% complete (ETR: 55 seconds)
+   20% complete (ETR: 28 seconds)
+   30% complete (ETR: 18 seconds)
+   40% complete (ETR: 13 seconds)
+   50% complete (ETR: 9 seconds)
+   60% complete (ETR: 7 seconds)
+   70% complete (ETR: 4 seconds)
+   80% complete (ETR: 3 seconds)
+   90% complete (ETR: 1 seconds)
+   100% complete (ETR: 0 seconds)
+   Compilation completed in 66.14 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes
+Public resources found in...
+Translatable source found in...
+Found 2820 cached/archived units.  Used 2820 / 2820 units from cache.
+Compiling...
+   Compilation completed in 0.00 seconds
+Validating units:
+   [ERROR] Errors in 'jar:file:/C:/Users/Jim/git/medici-gwt-web/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/gwt-user-2.4.0.jar!/com/google/gwt/validation/client/BaseGwtConfiguration.java'
+      [ERROR] Line 54: The constructor GwtConfigurationState() is undefined
+Removing invalidated units
+Finding entry point classes

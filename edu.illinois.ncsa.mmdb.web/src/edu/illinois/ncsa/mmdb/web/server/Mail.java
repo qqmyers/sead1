@@ -163,7 +163,7 @@ public class Mail {
                 " if this email is associated with a google account (recommended). Or, you can use the temporary password %s " +
                 "to login via a local account. (You can then change your password information by logging in and going to Home > Profile.)" +
                 "\n\nYou have initially been given full read/write access to this repository (an admin may subsequently add/remove privileges) and can access all of the services " +
-                "listed at %s as well as create a profile on SEAD's Resaercher Profile service (listed under the \"Go To\" menu button." +
+                "listed at %s as well as create a profile on SEAD's Researcher Profile service (listed under the \"Go To\" menu button." +
                 " Getting Started information is available at http://sead-data.net. Questions can be sent to seaddatanet@umich.edu." +
                 "\n\n -- The SEAD Project Team", projName, "http://" + server + "/acr", password, "http://" + server);
         try {
