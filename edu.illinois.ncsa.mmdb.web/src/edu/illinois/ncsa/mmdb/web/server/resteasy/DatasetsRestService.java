@@ -551,9 +551,11 @@ public class DatasetsRestService extends ItemServicesImpl {
 
         }
 
-        // submit to extraction service
+        // submit to extraction service unless we're big
         try {
-            TupeloStore.getInstance().extractPreviews(uri);
+            if (!TupeloStore.getInstance().getConfiguration(ConfigurationKey.BigData).equals("true")) {
+                TupeloStore.getInstance().extractPreviews(uri);
+            }
         } catch (Exception e) {
             log.info("Could not submit uri to extraction service, is it down?", e);
         }
