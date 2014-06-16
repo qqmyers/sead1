@@ -425,7 +425,7 @@ function callOnLoad() {
 										var length = '';
 										var div_html_datasets = '';
 										var type = '';
-										var isDeleted = false;
+										var isDeleted = null; 
 										for (var i = 0; jsonObj.sparql.results.result
 												&& (i < jsonObj.sparql.results.result.length || jsonObj.sparql.results.result.binding); ++i) {
 											var jsonBinding;
