@@ -44,6 +44,7 @@ function populateEntries(jsonBinding) {
 			} else if (value == 'type') {
 				type = jsonBinding[j]['uri'];
 			}
+			//Mimetype is also available now
 		});
 	}
 	if (!isDeleted) {

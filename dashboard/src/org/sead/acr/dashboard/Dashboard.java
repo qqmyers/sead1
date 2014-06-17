@@ -50,7 +50,7 @@ public class Dashboard extends SparqlQueryServlet {
 		String projectInfo = mp.getSparqlJSONResponse("query="
 				+ Queries.PROJECT_INFO);
 		String datasets = mp.getSparqlJSONResponse("query="
-				+ Queries.ALL_DATASETS);
+				+ Queries.ALL_DATASETS_BY_TYPE);
 		String layers = mp.getSparqlJSONResponse("query="
 				+ Queries.ALL_WMS_LAYERS_INFO);
 
@@ -66,16 +66,18 @@ public class Dashboard extends SparqlQueryServlet {
 		 */
 		String projectPath = PropertiesLoader.getProperties().getProperty(
 				"domain");
-		
+
 		String geobrowserUrl = PropertiesLoader.getProperties().getProperty(
-				"geobrowserUrl"); 
-		if((geobrowserUrl==null)||(geobrowserUrl.length()==0)) {
-			geobrowserUrl= projectPath.substring(0, projectPath.lastIndexOf('/')) + "/geobrowse";
+				"geobrowserUrl");
+		if ((geobrowserUrl == null) || (geobrowserUrl.length() == 0)) {
+			geobrowserUrl = projectPath.substring(0,
+					projectPath.lastIndexOf('/'))
+					+ "/geobrowse";
 		}
-		
+
 		// build the geoproxy url
-		String geoProxyUrl = projectPath+"/geoproxy/wms";
-		
+		String geoProxyUrl = projectPath + "/geoproxy/wms";
+
 		request.setAttribute("projectPath", projectPath);
 		request.setAttribute("geobrowserUrl", geobrowserUrl);
 		request.setAttribute("collections", collections);
@@ -89,7 +91,7 @@ public class Dashboard extends SparqlQueryServlet {
 
 		// adding geoproxy url
 		request.setAttribute("geoProxyUrl", geoProxyUrl);
-		
+
 		log.debug("Is Anon:  " + super.isAnonymous());
 		request.setAttribute("isAnonymous", super.isAnonymous());
 
@@ -123,30 +125,48 @@ public class Dashboard extends SparqlQueryServlet {
 		try {
 			JSONArray resultArray = obj.getJSONObject("sparql")
 					.getJSONObject("results").getJSONArray("result");
+			log.warn("Array: \n" + resultArray.toString(2));
+
 			for (int i = 0; i < resultArray.length(); i++) {
 				try {
-					String filename = resultArray.getJSONObject(i)
-							.getJSONObject("binding").getString("literal");
-					String nameParts[];
-					nameParts = filename.split("\\.");
-					if (nameParts.length == 2) {
-						String fileExt = nameParts[1];
-						String mimeType = MimeMap.findCategory(fileExt);
-						if (map.get(mimeType) != null) {
-							map.put(mimeType, map.get(mimeType) + 1);
+					// Should be an array - if not, no title and we can count as
+					// other)
+					JSONArray itemArray = resultArray.getJSONObject(i)
+							.getJSONArray("binding");
+					String mimetype = null;
+					String category = "Other";
+					boolean deleted = false;
+					for (int j = 0; j < itemArray.length(); j++) {
+						String key = itemArray.getJSONObject(j).getString(
+								"name");
+						if (key.equals("mime")) {
+							mimetype = itemArray.getJSONObject(j).getString(
+									"literal");
+						} else if (key.equals("deleted")) {
+							deleted = true;
+						}
+
+					}
+					if (!deleted) {
+
+						if (mimetype != null) {
+							category = MimeMap.findCategoryFromType(mimetype); 
+						}
+
+						if (map.get(category) != null) {
+							map.put(category, map.get(category) + 1);
 						} else {
-							map.put(mimeType, 1);
+							map.put(category, 1);
 						}
 					}
-					// Add filenames with no extension as unknown mime
-					// types? Use mimetype info in Medici rather than
+					// Use mimetype info in Medici rather than
 					// re-deriving from file extension?
 				} catch (org.sead.acr.common.utilities.json.JSONException je) {
-					// Why catch and ignore?
+					log.warn("i= " + i + " : " + je.getMessage());
 				}
 			}
 		} catch (org.sead.acr.common.utilities.json.JSONException je) {
-			//TODO: need to handle the JSONException
+			// TODO: need to handle the JSONException
 			// There are zero or one entries - for now we'll just leave the
 			// graph blank
 		}
@@ -168,7 +188,7 @@ public class Dashboard extends SparqlQueryServlet {
 			MalformedURLException, UnsupportedEncodingException {
 
 		JSONObject layerObj = new JSONObject(layers);
-		
+
 		// new json arry to store the extracted info
 		JSONArray layersArray = new JSONArray();
 
@@ -202,7 +222,7 @@ public class Dashboard extends SparqlQueryServlet {
 							deleted = entry.getString("uri");
 						}
 					}
-					
+
 					// if the dataset is deleted, skip
 					if (deleted
 							.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"))
@@ -219,7 +239,7 @@ public class Dashboard extends SparqlQueryServlet {
 				}
 			}
 		} catch (org.sead.acr.common.utilities.json.JSONException je) {
-			//TODO: need to handle the JSONException
+			// TODO: need to handle the JSONException
 			// There are zero or one entries - for now we'll just leave the
 			// graph blank
 		}

@@ -216,28 +216,39 @@ function FindCategory(fileExt) {
 		return "Other";
 	else
 		fileExt = mimeMap[fileExt];
+	return FindCategoryFromType(fileExt);
+}
+
+function FindCategoryFromType(mime) {
+	if(mime==null)
+		return "Other";
+	else
 	
-    if (fileExt.indexOf("image/")!=-1) {
+    if (mime.indexOf("image/")!=-1) {
         return "Image";
-    } else if (fileExt.indexOf("video/")!=-1) {
+    } else if (mime.indexOf("video/")!=-1) {
         return "Video";
-    } else if (fileExt.indexOf("audio/")!=-1) {
+    } else if (mime.indexOf("audio/")!=-1) {
         return "Audio";
-    } else if (fileExt.indexOf("x-tgif")!=-1) {
+    } else if (mime.indexOf("x-tgif")!=-1) {
         return "3D";
-    } else if (fileExt.indexOf("text/")!=-1) {
+    } else if (mime.indexOf("text/")!=-1) {
         return "Document";
-    } else if (fileExt.indexOf("pdf")!=-1) {
+    } else if (mime.indexOf("pdf")!=-1) {
         return "Document";
-    } else if (fileExt.indexOf("word")!=-1) {
+    } else if (mime.indexOf("word")!=-1) {
         return "Document";
-    } else if (fileExt.indexOf("powerpoint")!=-1) {
+    } else if (mime.indexOf("spreadsheetml")!=-1) {
         return "Document";
-    } else if (fileExt.indexOf("excel")!=-1) {
+    } else if (mime.indexOf("powerpoint")!=-1) {
+        return "Document";
+    } else if (mime.indexOf("excel")!=-1) {
         return "Document";
     } else {
         return "Other";
     }
 }
+
+
 
 //FindCategory.prototype = new SetMimeMap;
