@@ -87,7 +87,9 @@ public class Queries {
 
 	// Deprecated: Slow when there are lots of data sets - is this really what
 	// you want to do?
-	public static String ALL_DATASETS = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+	//NB - If ?tagID is not included in SELECT, different entries with the same title (and different IDs)
+	// will be returned as one line (undercounting)
+	public static String ALL_DATASETS_BY_TYPE = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
 			+ " "
 			+ "PREFIX cet: <http://cet.ncsa.uiuc.edu/2007/>"
 			+ " "
@@ -95,11 +97,11 @@ public class Queries {
 			+ " "
 			+ "PREFIX dc: <http://purl.org/dc/elements/1.1/>"
 			+ " "
-			+ "SELECT ?title ?deleted WHERE {"
+			+ "SELECT ?tagID ?mime ?deleted WHERE {"
 			+ " "
 			+ "?tagID <rdf:type> <cet:Dataset> ."
 			+ " "
-			+ "?tagID <dc:title> ?title . "
+			+ "?tagID <dc:format> ?mime . "
 			+ " "
 			+ "OPTIONAL { ?tagID <http://purl.org/dc/terms/isReplacedBy> ?deleted . }" // ?deleted
 																						// is
@@ -191,13 +193,15 @@ public class Queries {
 				+ " "
 				+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
 				+ "  "
-				+ "SELECT ?tagID ?title ?length ?abstract ?deleted ?type WHERE { <"
+				+ "SELECT ?tagID ?title ?length ?abstract ?deleted ?type ?mime WHERE { <"
 				+ parentID
 				+ "> <http://purl.org/dc/terms/hasPart> ?tagID ."
 				+ " "
 				+ "?tagID <http://purl.org/dc/elements/1.1/title> ?title ."
 				+ " "
 				+ "?tagID <rdf:type> ?type ."
+				+ " "
+				+ "?tagID <dc:format> ?mime . "
 				+ " "
 				+ "OPTIONAL { ?tagID <tag:tupeloproject.org,2006:/2.0/files/length> ?length .}"
 				+ " " + "OPTIONAL { <" + parentID
