@@ -227,6 +227,10 @@
         <filter-name>CORS</filter-name>
         <servlet-name>GeoProxy</servlet-name> 
     </filter-mapping>
+   	<filter-mapping>
+        <filter-name>CORS</filter-name>
+        <url-pattern>/resteasy/datasets/import/*</url-pattern>
+    </filter-mapping>
 	<filter>
     <filter-name>AuthFilter</filter-name>
     <filter-class>

@@ -158,7 +158,9 @@ public class UploadPage extends Page {
 
         final VerticalPanel singleUpload = new VerticalPanel();
         final HorizontalPanel hp = new HorizontalPanel();
-        hp.add(new Label("Select files you want to upload:"));
+        Label fileUploadLabel = new Label("Select files you want to upload:");
+        fileUploadLabel.addStyleName("importTitle");
+        hp.add(fileUploadLabel);
         Image helpButton = new Image("./images/help-browser.png");
         helpButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -292,6 +294,28 @@ public class UploadPage extends Page {
                 }
             }
         }));
+
+        panel.add(new Label("")); //Spacer
+        Label captureLabel = new Label("Capture Data From the Web");
+        captureLabel.addStyleName("importTitle");
+        panel.add(captureLabel);
+        Label captureDetails = new Label("[To capture: save the following link as a bookmark in your browser. Then, when you're at a URL with data, click the bookmark. Note: Currently, the URL must be for the data itself, not a page containing a link to the data. The data must also be public.");
+        captureDetails.addStyleName("smallText");
+        panel.add(captureDetails);
+        panel.add(new Anchor(MMDB._projectName + " Data Capture", "javascript:(function(){" +
+                "       var script=document.createElement('script');" +
+                "script.type='text/javascript';" +
+                "script.src='http://code.jquery.com/jquery-1.8.1.min.js';" +
+                "document.getElementsByTagName('head')[0].appendChild(script);" +
+                " $.ajax({" +
+                "       type : 'POST'," +
+                "       url : '" + GWT.getHostPageBaseURL() + "resteasy/datasets/import/' + encodeURIComponent(location.href)," +
+                "       xhrFields: {withCredentials: true}," +
+                "       dataType : 'json'," +
+                "       success : function (json) {alert(JSON.Stringify(json))}," +
+                "       error : function (json) {alert(JSON.Stringify(json))}" +
+                "   });" +
+                "})();"));
 
         // Add an event handler to the form.
         form.addSubmitCompleteHandler(new SubmitCompleteHandler() {
