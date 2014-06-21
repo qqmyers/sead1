@@ -425,7 +425,8 @@ function callOnLoad() {
 										var length = '';
 										var div_html_datasets = '';
 										var type = '';
-										var isDeleted = false;
+										var mimetype = '';
+										var isDeleted = null; 
 										for (var i = 0; jsonObj.sparql.results.result
 												&& (i < jsonObj.sparql.results.result.length || jsonObj.sparql.results.result.binding); ++i) {
 											var jsonBinding;
@@ -464,7 +465,9 @@ function callOnLoad() {
 
 																	} else if (value == 'type') {
 																		type = jsonBinding[j]['uri'];
-																	}
+																	} else if (value == 'mime') {
+																		mimetype = jsonBinding[j]['literal'];
+																	}	
 
 																});
 
@@ -500,11 +503,11 @@ function callOnLoad() {
 
 													var fileExt = displayTitle
 															.split('.')[1];
-													var mimeType = FindCategory(fileExt);
-													if (datasetDistribution[mimeType]) {
-														datasetDistribution[mimeType] = datasetDistribution[mimeType] + 1;
+													var category = FindCategoryFromType(mimetype);
+													if (datasetDistribution[category]) {
+														datasetDistribution[category] = datasetDistribution[category] + 1;
 													} else {
-														datasetDistribution[mimeType] = 1;
+														datasetDistribution[category] = 1;
 													}
 
 												} else if (type == "http://cet.ncsa.uiuc.edu/2007/Collection") {
