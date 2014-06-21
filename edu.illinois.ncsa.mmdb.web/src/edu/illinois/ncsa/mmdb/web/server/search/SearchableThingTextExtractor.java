@@ -351,11 +351,4 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
         }
         return unsplit(s);
     }
-
-    static public void main(String[] args) {
-        String val = "tag:cet.ncsa.uiuc.edu,2008:/tag#hello%20world";
-        String tag = val.substring("tag:cet.ncsa.uiuc.edu,2008:/tag#".length());
-        System.out.println(URLDecoder.decode(tag));
-
-    }
 }
