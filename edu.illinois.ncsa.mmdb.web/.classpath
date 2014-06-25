@@ -83,5 +83,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.2-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo-1.0.2-SNAPSHOT.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo/src/main/java"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-multipart-provider-2.3.2.Final.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-jaxb-provider-2.3.2.Final.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
