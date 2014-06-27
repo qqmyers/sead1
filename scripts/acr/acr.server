@@ -58,6 +58,7 @@ access.level.values=Raw, Preliminary Results, Provisional Product, Validated Pro
 
 #Google Ouath2
 #google.client_id=
+#google.device_client_id=
 
 #Optimize for larger repositories - true - index/count weekly, false - hourly, other effects may be added
 #bigdata=
