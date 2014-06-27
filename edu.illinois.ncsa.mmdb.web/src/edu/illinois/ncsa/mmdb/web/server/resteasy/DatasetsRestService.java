@@ -322,14 +322,24 @@ public class DatasetsRestService extends ItemServicesImpl {
     @GET
     @Path("/{id}/file")
     public Response getDatasetBlob(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
-        Response r;
+        Response r = null;
         try {
-            UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
             UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
-            ValidItem item = new ValidItem(itemId, Cet.DATASET, userId);
-            if (!item.isValid()) {
-                r = item.getErrorResponse();
+            boolean valid = false;
+            if (request.getAttribute("token") != null) {
+                valid = true;
             } else {
+                //only need user to check permissions - may be null for token exists case (above)
+                UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+                ValidItem item = new ValidItem(itemId, Cet.DATASET, userId);
+                if (!item.isValid()) {
+                    r = item.getErrorResponse();
+                } else {
+                    valid = true;
+                }
+            }
+            if (valid) {
 
                 //Get file metadata
                 Unifier uf = new Unifier();
@@ -359,8 +369,10 @@ public class DatasetsRestService extends ItemServicesImpl {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
+            log.debug(e.getMessage());
             Map<String, Object> result = new LinkedHashMap<String, Object>();
-            result.put("Error", "Server error while retrieving content for " + id);
+            result.put("Error", "Server error: " + e.getMessage() + " while retrieving content for " + id);
             r = Response.status(500).entity(result).build();
         }
         return r;

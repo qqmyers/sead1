@@ -47,7 +47,7 @@ public class PreviewTabularDataBeanWidget extends PreviewBeanWidget<PreviewTabul
 
     @Override
     public String getAnchorText() {
-        return "SpreadSheet";
+        return "Table";
     }
 
     @Override

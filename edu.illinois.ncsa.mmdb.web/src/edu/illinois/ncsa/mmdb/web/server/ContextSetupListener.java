@@ -374,6 +374,14 @@ public class ContextSetupListener implements ServletContextListener {
                 TupeloStore.getInstance().expireBeans();
             }
         }, 2 * 1000, 10 * 1000);
+
+        TokenStore.initialize();
+        timer.schedule(new TimerTask() {
+            public void run() {
+                TokenStore.generateSalt();
+            }
+        }, 100, 5 * 60 * 1000);
+
     }
 
     public static void updateSysInfoInBackground() {

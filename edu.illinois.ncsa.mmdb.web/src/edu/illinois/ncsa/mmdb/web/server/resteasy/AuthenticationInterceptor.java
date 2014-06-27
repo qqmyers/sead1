@@ -28,6 +28,7 @@ import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 import edu.illinois.ncsa.mmdb.web.server.Authentication;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
+import edu.illinois.ncsa.mmdb.web.server.TokenStore;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
@@ -63,32 +64,38 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
         String username = null;
         boolean defaultToAnonymous = false;
 
+        boolean hasValidToken = checkForValidToken(request);
+
         String path = request.getUri().getPath();
         log.debug("AuthInterceptor path: " + path);
-        if (path.startsWith("/datasets/") && (!path.startsWith("/datasets/copy")) || (path.startsWith("/sparql"))) {
-            log.debug("Should test remoteAPIKey for: " + path);
-
-            String mykey = TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey);
-            if ((mykey != null) && (mykey.length() != 0)) {
-                log.debug("Medici RemoteAPIKey = " + mykey);
-                String keyName = ConfigurationKey.RemoteAPIKey.getPropertyKey();
-                String theirkey = request.getFormParameters().getFirst(keyName);
-                log.debug("Key from form: " + keyName + " : " + theirkey);
-                if (theirkey == null) {
-                    theirkey = request.getUri().getQueryParameters().getFirst(keyName);
-                    log.debug("Key from query: " + keyName + " : " + theirkey);
-
-                }
-                if ((theirkey == null) || (!(mykey.equals(theirkey)))) {
-                    log.debug("RemoteAPIKey does not match - Access Forbidden");
-                    return forbiddenResponse(request.getPreprocessedPath());
-                }
-            }
-            //Either no remoteAPIKey is required or we've matched and, given that these methods
-            //are supposed to be programmatic (called by an app rather than the browser via user-entered URL/link.
-            // we should use anonymous rather than returning 401 if no other credentials are provided.
+        if (hasValidToken) {
             defaultToAnonymous = true;
+        } else {
+            if (path.startsWith("/datasets/") && (!path.startsWith("/datasets/copy")) || (path.startsWith("/sparql"))) {
+                log.debug("Should test remoteAPIKey for: " + path);
 
+                String mykey = TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey);
+                if ((mykey != null) && (mykey.length() != 0)) {
+                    log.debug("Medici RemoteAPIKey = " + mykey);
+                    String keyName = ConfigurationKey.RemoteAPIKey.getPropertyKey();
+                    String theirkey = request.getFormParameters().getFirst(keyName);
+                    log.debug("Key from form: " + keyName + " : " + theirkey);
+                    if (theirkey == null) {
+                        theirkey = request.getUri().getQueryParameters().getFirst(keyName);
+                        log.debug("Key from query: " + keyName + " : " + theirkey);
+
+                    }
+                    if ((theirkey == null) || (!(mykey.equals(theirkey)))) {
+                        log.debug("RemoteAPIKey does not match - Access Forbidden");
+                        return forbiddenResponse(request.getPreprocessedPath());
+                    }
+                }
+                //Either no remoteAPIKey is required or we've matched and, given that these methods
+                //are supposed to be programmatic (called by an app rather than the browser via user-entered URL/link.
+                // we should use anonymous rather than returning 401 if no other credentials are provided.
+                defaultToAnonymous = true;
+
+            }
         }
         //remoteAPIKey matches or is not required...
         //Now identify the user
@@ -124,8 +131,11 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
         try {
             if (!rbac.checkPermission(PersonBeanUtil.getPersonID(username), Permission.USE_REMOTEAPI)) {
                 if (!((path.startsWith("/sys/") && rbac.checkPermission(PersonBeanUtil.getPersonID(username), Permission.VIEW_SYSTEM)))) {
-                    log.debug("user: " + username + "  forbidden");
-                    return forbiddenResponse(request.getPreprocessedPath());
+                    if (!hasValidToken)
+                    {
+                        log.debug("user: " + username + "  forbidden");
+                        return forbiddenResponse(request.getPreprocessedPath());
+                    }
                 }
             }
         } catch (RBACException e) {
@@ -135,6 +145,23 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
         //Authenticated user with necessary remoteAPI permission...
         log.debug("User: " + username + " successfully authenticated and authorized");
         return (null);
+    }
+
+    private boolean checkForValidToken(HttpRequest request) {
+        request.setAttribute("token", null);
+        boolean hasIt = false;
+        MultivaluedMap<String, String> params = request.getUri().getQueryParameters();
+
+        if (params != null) {
+            String token = params.getFirst("token");
+            if (token != null) {
+                if (TokenStore.isValidToken(token, request.getPreprocessedPath())) {
+                    request.setAttribute("token", "true");
+                    hasIt = true;
+                }
+            }
+        }
+        return hasIt;
     }
 
     /**
