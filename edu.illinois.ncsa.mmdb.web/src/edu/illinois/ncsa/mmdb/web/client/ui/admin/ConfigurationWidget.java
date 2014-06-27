@@ -3,7 +3,6 @@ package edu.illinois.ncsa.mmdb.web.client.ui.admin;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
