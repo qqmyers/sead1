@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
@@ -70,11 +71,14 @@ import org.tupeloproject.util.Tuple;
 import org.tupeloproject.util.UnicodeTranscoder;
 
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
@@ -192,6 +196,19 @@ public class DatasetsRestService extends ItemServicesImpl {
             log.debug("Importing: " + decodedUrl);
             final URL url = new URL(decodedUrl);
             final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
+            SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+            try {
+                if (!rbac.checkPermission(creator.toString(), Permission.UPLOAD_DATA)) {
+                    log.debug("user: " + creator.toString() + "  forbidden");
+                    result.put("Failure", "User " + creator.toString() + " does not have permission to import datasets");
+                    return Response.status(HttpURLConnection.HTTP_FORBIDDEN).entity(result).build();
+                }
+            } catch (RBACException e) {
+                log.warn("RBAC exception in import", e);
+                result.put("Failure", "Unknown permission issue (contact admin)");
+                return Response.status(HttpURLConnection.HTTP_INTERNAL_ERROR).entity(result).build();
+            }
+
             final String id = RestUriMinter.getInstance().mintUri(null); // Create dataset uri
             final ThingSession ts = c.getThingSession();
 
@@ -202,7 +219,7 @@ public class DatasetsRestService extends ItemServicesImpl {
                         UriRef s = Resource.uriRef(id);
                         Thing t = ts.newThing(s);
 
-                        InputStream is = url.openStream();
+                        InputStream is = getDataStream(url);
                         byte[] digest = null;
                         try {
                             MessageDigest sha1 = MessageDigest.getInstance("SHA1");
@@ -262,8 +279,49 @@ public class DatasetsRestService extends ItemServicesImpl {
                     }
 
                 }
-            }).start();
 
+                private InputStream getDataStream(URL url) throws IOException {
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setReadTimeout(10000);
+                    conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+
+                    boolean redirect = false;
+
+                    // normally, 3xx is redirect
+                    int status = conn.getResponseCode();
+                    if (status != HttpURLConnection.HTTP_OK) {
+                        if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                                || status == HttpURLConnection.HTTP_MOVED_PERM
+                                || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                            redirect = true;
+                        }
+                    }
+
+                    if (redirect) {
+
+                        // get redirect url from "location" header field
+                        String newUrl = conn.getHeaderField("Location");
+
+                        // If the first site has set a cookie, pass it on in the redirect
+                        String cookies = conn.getHeaderField("Set-Cookie");
+
+                        // open the new connection
+                        conn = (HttpURLConnection) new URL(newUrl).openConnection();
+                        conn.setRequestProperty("Cookie", cookies);
+                        conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+                        status = conn.getResponseCode();
+
+                    }
+                    if (status == HttpURLConnection.HTTP_OK) {
+                        return conn.getInputStream();
+                    } else {
+                        throw new IOException("Remote server response for " + conn.getURL().toExternalForm() + " : " + status);
+                    }
+                }
+            }).start();
+            //TO be clear - success means we've done the job of making the call to the remote URL to get the data, not that that call(s) have succeeded.
+            //FixMe - could add the feedback service developed for the internal upload (showing state of the upload as it progresses.
             result.put("Success", "Object is imported as: " + id);
             return Response.status(200).entity(result).build();
         } catch (Exception e) {
