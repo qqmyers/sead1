@@ -19,6 +19,7 @@ import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.gwtopenmaps.openlayers.client.layer.OSM;
+import org.gwtopenmaps.openlayers.client.layer.OSMOptions;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.layer.VectorOptions;
 import org.gwtopenmaps.openlayers.client.layer.WMS;
@@ -218,8 +219,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 				tagPanel = createTagPanel(oracle);
 
 				RootPanel.get("tag").add(tagPanel);
-				FlowPanel dp2 = createBgSwitchPanel();
-				RootPanel.get("bg").add(dp2);
 				History.fireCurrentHistoryState();
 			}
 
@@ -290,7 +289,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		cleanApp();
 		RootPanel.get("map").setVisible(false);
 		RootPanel.get("tag").clear();
-		RootPanel.get("bg").clear();
 		if (lp == null) {
 			lp = new LoginPage(this, status);
 		}
@@ -343,35 +341,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		return dp;
 	}
 
-	protected FlowPanel createBgSwitchPanel() {
-		FlowPanel dp = new FlowPanel();
-
-		VerticalPanel vp = new VerticalPanel();
-		vp.setSpacing(10);
-
-		vp.add(new HTML("<h3>Background map:</h3>"));
-		vp.add(new HTML("<hr>"));
-
-		ListBox lb = new ListBox();
-		lb.addItem("Open Street Map", "osm");
-		lb.addItem("Toner Style", "toner");
-		lb.addItem("Hybrid Terrain", "terrain");
-
-		lb.addChangeHandler(new ChangeHandler() {
-
-			@Override
-			public void onChange(ChangeEvent event) {
-				ListBox lb = (ListBox) event.getSource();
-				String mapType = lb.getValue(lb.getSelectedIndex());
-				changeBg(mapType);
-
-			}
-		});
-
-		vp.add(lb);
-		dp.add(vp);
-		return dp;
-	}
 
 	// protected FlowPanel createLegendPanel(LayerInfo[] result) {
 	// List<String> layerNames = getLayerNames(result);
@@ -663,23 +632,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 	// layers[name].setOpacity(opacity);
 	// }-*/;
 
-	public void changeBg(String mapType) {
-		Layer tempBase = null;
-		if (mapType.equals("osm")) {
-			tempBase = new OSM();
-		} else {
-			tempBase = Layer.narrowToLayer(getStamenMap(mapType));
-
-		}
-		map.removeLayer(baseLayer);
-		baseLayer = tempBase;
-		map.addLayer(baseLayer);
-		map.setBaseLayer(baseLayer);
-		Layer bl = map.getBaseLayer();
-
-		baseLayer.redraw();
-	}
-
 	public native JSObject getStamenMap(String mapType) /*-{
 		return new $wnd.OpenLayers.Layer.Stamen(mapType);
 	}-*/;
@@ -709,7 +661,11 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 				+ "px", "400px", defaultMapOptions);
 		map = mapWidget.getMap();
 
-		baseLayer = new OSM();
+		baseLayer = new OSM("OpenStreetMap", new String[] {
+                        "//a.tile.openstreetmap.org/${z}/${x}/${y}.png",
+                        "//b.tile.openstreetmap.org/${z}/${x}/${y}.png",
+                        "//c.tile.openstreetmap.org/${z}/${x}/${y}.png",
+		}, new OSMOptions());
 		baseLayer.setIsBaseLayer(true);
 		// map.setBaseLayer(osm);
 		map.addLayer(baseLayer);
@@ -915,7 +871,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 						@Override
 						public void onSuccess(String result) {
 							RootPanel.get("tag").clear();
-							RootPanel.get("bg").clear();
 							setLoginState(result, null);
 							remoteLogout(new RequestCallback() {
 
