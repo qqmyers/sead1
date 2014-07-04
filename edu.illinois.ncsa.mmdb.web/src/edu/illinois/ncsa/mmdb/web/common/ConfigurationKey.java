@@ -46,7 +46,13 @@ public enum ConfigurationKey {
     GoogleDeviceClientId("google.device_client_id", ""),
 
     //optimizations for big data (many files)
-    BigData("bigdata", "false");
+    BigData("bigdata", "false"),
+
+    //Token key lifetime
+    TokenKeyLifetime("token.key.lifetime", "5"),
+
+    //Use Google Document Viewer
+    UseGoogleDocViewer("previewer.google_doc_viewer", "true");
 
     private final String propertyKey;
     private final String defaultValue;
