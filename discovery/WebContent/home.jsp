@@ -6,9 +6,9 @@
 </head>
 <link href="login_css/bootstrap.css" rel="stylesheet">
 <link href="login_css/common.css" rel="stylesheet">
-<script src="http://code.jquery.com/jquery-1.8.1.min.js"
+<script src="//code.jquery.com/jquery-1.8.1.min.js"
 	type="text/javascript"></script>
-<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="//code.jquery.com/jquery-latest.js"></script>
 <script src="login_scripts/commons.js"></script>
 <script src="login_scripts/json2.js"></script>
 <script src="login_scripts/homepage.js"></script>

@@ -374,6 +374,22 @@ public class ContextSetupListener implements ServletContextListener {
                 TupeloStore.getInstance().expireBeans();
             }
         }, 2 * 1000, 10 * 1000);
+
+        String lifetime = TupeloStore.getInstance().getConfiguration(ConfigurationKey.TokenKeyLifetime);
+        int lifetimeMinutes = 5;
+        try {
+            lifetimeMinutes = Integer.parseInt(lifetime);
+        } catch (NumberFormatException nfe) {
+            log.warn("Couldn't parse TokenKeyLifetime, using default");
+        }
+
+        TokenStore.initialize();
+        timer.schedule(new TimerTask() {
+            public void run() {
+                TokenStore.generateSalt();
+            }
+        }, 100, lifetimeMinutes * 60 * 1000);
+
     }
 
     public static void updateSysInfoInBackground() {

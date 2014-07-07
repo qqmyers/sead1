@@ -178,6 +178,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     public static String               _sessionCookieName               = "JSESSIONID";
     public static String               _googleClientId                  = null;
 
+    public static String               _projectName                     = "SEAD ACR";
     public static boolean              bigData                          = false;                              //Server's bigData flag
 
     /**
@@ -297,7 +298,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             @Override
             public void onSuccess(ConfigurationResult result) {
                 bigData = result.getConfiguration(ConfigurationKey.BigData).equalsIgnoreCase("true");
-                projectNameLabel.setText(result.getConfiguration(ConfigurationKey.ProjectName));
+                _projectName = result.getConfiguration(ConfigurationKey.ProjectName);
+                projectNameLabel.setText(_projectName);
                 projectNameLabel.setTitle(result.getConfiguration(ConfigurationKey.ProjectDescription));
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
             }

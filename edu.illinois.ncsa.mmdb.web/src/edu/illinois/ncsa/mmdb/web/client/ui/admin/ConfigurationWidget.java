@@ -3,7 +3,6 @@ package edu.illinois.ncsa.mmdb.web.client.ui.admin;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -94,6 +93,7 @@ public class ConfigurationWidget extends Composite {
 
         // extractor configuration
         mainPanel.add(createExtractorSection(configuration));
+
     }
 
     private DisclosurePanel createMailSection(ConfigurationResult configuration) {
@@ -449,7 +449,7 @@ public class ConfigurationWidget extends Composite {
     }
 
     private DisclosurePanel createExtractorSection(ConfigurationResult configuration) {
-        DisclosurePanel dp = new DisclosurePanel("Extraction Service");
+        DisclosurePanel dp = new DisclosurePanel("Preview/Extraction Services");
         dp.addStyleName("datasetDisclosurePanel");
         dp.setOpen(false);
 
@@ -574,6 +574,40 @@ public class ConfigurationWidget extends Composite {
             }
         });
         hp.add(button);
+
+        // Google Doc Viewer panel
+        hp = new HorizontalPanel();
+        vp.add(hp);
+
+        hp.add(new Label("Previews: "));
+
+        final CheckBox useGoogleDocViewerBox = new CheckBox();
+        useGoogleDocViewerBox.setValue(configuration.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
+        useGoogleDocViewerBox.setText("Enable Google Doc Viewer");
+        hp.add(useGoogleDocViewerBox);
+
+        useGoogleDocViewerBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+            @Override
+            public void onValueChange(final ValueChangeEvent<Boolean> event) {
+                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                query.setConfiguration(ConfigurationKey.UseGoogleDocViewer, useGoogleDocViewerBox.getValue().toString());
+                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not set configuration value for UseGoogleDocViewer.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        //Shouldn't have to do anything, but confirm by setting checkbox with result
+                        useGoogleDocViewerBox.setValue(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
+                    }
+                });
+
+            }
+        });
+
         return dp;
     }
 

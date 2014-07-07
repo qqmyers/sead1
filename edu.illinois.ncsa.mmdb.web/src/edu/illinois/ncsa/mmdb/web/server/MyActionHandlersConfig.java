@@ -91,6 +91,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRelationshipHandlerNew;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRolesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetSearchHitHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetSectionHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetServiceTokenHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetSubclassesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetTagsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUploadDestinationHandler;
@@ -223,6 +224,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new ChangeUserPIDHandler());
         DispatchUtil.registerHandler(new AdminAddUserHandler());
         DispatchUtil.registerHandler(new ClearGeoLocationHandler());
+        DispatchUtil.registerHandler(new GetServiceTokenHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

@@ -158,7 +158,9 @@ public class UploadPage extends Page {
 
         final VerticalPanel singleUpload = new VerticalPanel();
         final HorizontalPanel hp = new HorizontalPanel();
-        hp.add(new Label("Select files you want to upload:"));
+        Label fileUploadLabel = new Label("Select files you want to upload:");
+        fileUploadLabel.addStyleName("importTitle");
+        hp.add(fileUploadLabel);
         Image helpButton = new Image("./images/help-browser.png");
         helpButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -292,6 +294,71 @@ public class UploadPage extends Page {
                 }
             }
         }));
+
+        panel.add(new Label("")); //Spacer
+        Label captureLabel = new Label("Capture Data From the Web");
+        captureLabel.addStyleName("importTitle");
+        panel.add(captureLabel);
+        Label captureDetails = new Label("[To capture: save the following link as a bookmark in your browser. Then, when you're at a URL with data, click the bookmark. Note: Currently, the URL must be for the data itself, not a page containing a link to the data. The data must also be public.");
+        captureDetails.addStyleName("smallText");
+        panel.add(captureDetails);
+
+        /* Uncompressed script: Loads 4 files, waits for jquery and main import script to load and calls createPanel to get started:
+         * 
+         * (function(){
+         *    var headID=document.getElementsByTagName("head")[0];
+         *    var script=document.createElement("script");
+         *    script.type="text/javascript";
+         *    script.src="//code.jquery.com/jquery-1.8.1.min.js";
+         *    headID.appendChild(script);
+         *    
+         *    var cssNode=document.createElement("link");
+         *    cssNode.type="text/css";cssNode.rel="stylesheet";
+         *    cssNode.href="<Your server>css/seadimport.css";
+         *    cssNode.media="screen";
+         *    headID.appendChild(cssNode);
+         *    
+         *    var bootstrapNode=document.createElement("link");
+         *    bootstrapNode.type="text/css";
+         *    bootstrapNode.rel="stylesheet";
+         *    bootstrapNode.href="<Your server>css/bootstrap.sead-scope.css";
+         *    bootstrapNode.media="screen";
+         *    headID.appendChild(bootstrapNode);
+         *    
+         *    var attemptCount=0;
+         *    var undef="undefined";
+         *    function waitForJQuery() {
+         *       attemptCount++;
+         *       if ((typeof jQuery) != undef) {
+         *         init();
+         *         return;
+         *       }
+         *       if (attemptCount < 100) {
+         *         setTimeout(waitForJQuery, 100);
+         *       }
+         *       return;
+         *    }
+         *    
+         *    waitForJQuery();
+         *    
+         *    function init() { 
+         *      $.getScript("<Your server>js/seadimport.js", function(){
+         *         createPanel("<Your server>","<Project Name");
+         *      });
+         *    }
+         *  })();
+         */
+        panel.add(new Anchor(MMDB._projectName + " Data Import",
+
+                "javascript:(function(){function o(){i++;if(typeof jQuery!=s){u();return}if(i<100){setTimeout(o,100)}return}" +
+                        "function u(){$.getScript(\"" + GWT.getHostPageBaseURL() + "js/seadimport.js\",function(){" +
+                        "createPanel(\"" + GWT.getHostPageBaseURL() + "\",\"" + MMDB._projectName + "\",t,n,r);})}var e=document.getElementsByTagName(\"head\")[0];" +
+                        "var t=document.createElement(\"script\");t.type=\"text/javascript\";t.src=\"//code.jquery.com/jquery-1.8.1.min.js\";" +
+                        "e.appendChild(t);var n=document.createElement(\"link\");n.type=\"text/css\";n.rel=\"stylesheet\";" +
+                        "n.href=\"" + GWT.getHostPageBaseURL() + "css/seadimport.css\";n.media=\"screen\";e.appendChild(n);" +
+                        "var r=document.createElement(\"link\");r.type=\"text/css\";r.rel=\"stylesheet\";" +
+                        "r.href=\"" + GWT.getHostPageBaseURL() + "css/bootstrap.sead-scope.css\";r.media=\"screen\";" +
+                        "e.appendChild(r);var i=0;var s=\"undefined\";o()})()"));
 
         // Add an event handler to the form.
         form.addSubmitCompleteHandler(new SubmitCompleteHandler() {

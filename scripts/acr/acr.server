@@ -58,9 +58,23 @@ access.level.values=Raw, Preliminary Results, Provisional Product, Validated Pro
 
 #Google Ouath2
 #google.client_id=
+#google.device_client_id=
 
-#Optimize for larger repositories - true - index/count weekly, false - hourly, other effects may be added
+#Optimize for larger repositories - true - index/count weekly, false - hourly, other effects may be added. Default is false
 #bigdata=
+
+#
+#Limited lifetime tokens are generated using a key that is periodically changed.
+#Tokens last from 1-2 times the key lifetime (the retired key is kept for validation only for an additional lifetime, 
+#so token life depends on where in the cycle it is created). Currently used to allow Google doc viewer to access content.
+#default key lifetime is 5 minutes.
+#token.key.timeout=
+
+#
+#Previewer: Use Google Doc Viewer (google temporarily caches/converts file) - default is true
+#previewer.google_doc_viewer=
+
+
 
 #
 # List of automatically created users

@@ -64,7 +64,7 @@ public class MediciProxyServiceImpl extends ProxiedRemoteServiceServlet
 			}
 		} catch (Exception e) {
 			invalidateSession();
-			log.warn("getLayers - Error contacting medici or JSON has the error: " + e);
+			log.warn("getLayers - Error contacting medici or JSON has the error: ", e);
 		}
 		if ((layers == null) || (layers.isEmpty())) {
 			return null;

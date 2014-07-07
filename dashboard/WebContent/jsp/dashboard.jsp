@@ -10,7 +10,7 @@
 		<link rel="stylesheet" href="css/jquery.treetable.theme.default.css">
 		
 		<!--  ol2 styles -->
-		<link rel="stylesheet" href="http://openlayers.org/api/theme/default/style.css" type="text/css">
+		<link rel="stylesheet" href="js/openlayers/OpenLayers.css" type="text/css">
 		<link href="css/dashboard.css" rel="stylesheet">		
 <% 
 String collections = (String) request.getAttribute("collections"); 
@@ -137,16 +137,16 @@ Boolean isAnonymous = (Boolean) request.getAttribute("isAnonymous");
 			var isAnonymous = '<%= isAnonymous %>';
 			var geobrowserUrl = '<%= geobrowserUrl %>';
 		</script>
-		<script src="http://code.jquery.com/jquery-1.8.1.min.js" type="text/javascript"></script>
-		<script src="http://code.jquery.com/jquery-latest.js"></script>		
+		<script src="//code.jquery.com/jquery-1.8.1.min.js" type="text/javascript"></script>
+		<script src="//code.jquery.com/jquery-latest.js"></script>		
 	  	<script src="js/jquery.dateFormat-1.0.js" type="text/javascript"></script>
 		<script src="js/jquery.treetable.js"></script>
 	
 	    <!-- ol2 -->
-		<script src="http://openlayers.org/api/OpenLayers.js" type="text/javascript"></script>
+		<script src="js/openlayers/OpenLayers.js" type="text/javascript"></script>
 			
 		<!--  google map -->
-		<!-- <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyARkc86gaOrSG8C_MFgtJ5lHyoXLYi7N9Q&sensor=false"></script> -->
+		<!-- <script src="//maps.googleapis.com/maps/api/js?key=AIzaSyARkc86gaOrSG8C_MFgtJ5lHyoXLYi7N9Q&sensor=false"></script> -->
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 		<script type="text/javascript" src="js/mimeutil.js"></script>
 		<script type="text/javascript" src="js/dashboard.js"></script>

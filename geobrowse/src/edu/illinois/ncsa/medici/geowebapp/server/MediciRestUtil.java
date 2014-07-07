@@ -78,14 +78,24 @@ public class MediciRestUtil {
 
 		String responseBody = mp.executeAuthenticatedGet("/resteasy/tags/"
 				+ tag + "/datasets", null);
+		log.info("tags " + responseBody);
 
-		JSONArray jsArray = new JSONArray(responseBody);
-		for (int i = 0; i < jsArray.length(); i++) {
-			JSONObject js = jsArray.getJSONObject(i);
-			String uri = js.getString("uri");
-			log.debug("UrisByTag: " + uri);
-			uris.add(uri);
-		}
+		if (responseBody.startsWith("[")) {
+                    JSONArray jsArray = new JSONArray(responseBody);
+                    for (int i = 0; i < jsArray.length(); i++) {
+                        JSONObject js = jsArray.getJSONObject(i);
+                        String uri = js.getString("uri");
+                        log.debug("UrisByTag: " + uri);
+                        uris.add(uri);
+                    }
+                }
+                if (responseBody.startsWith("{")) {
+                    JSONObject js = new JSONObject(responseBody);
+                    for(String uri : JSONObject.getNames(js)) {
+                        log.debug("UrisByTag: " + uri);
+                        uris.add(uri);
+                    }
+                }
 
 		return uris;
 	}
@@ -193,6 +203,7 @@ public class MediciRestUtil {
 		// expect json error; should return null instead of invalidating the
 		// session
 		try {
+		    if (sparqlJson.get("results") instanceof JSONObject) {
 			Object resultObject = sparqlJson.getJSONObject("results").get(
 					"result");
 			JSONArray resultArray = null;
@@ -253,6 +264,7 @@ public class MediciRestUtil {
 				layerInfoList.add(li);
 
 			}
+		    }
 		} catch (JSONException e) {
 			log.warn("parseLayerInfo - JSON error", e);
 			return null;
