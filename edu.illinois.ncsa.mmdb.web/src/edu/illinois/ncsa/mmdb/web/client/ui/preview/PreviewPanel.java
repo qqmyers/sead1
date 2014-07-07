@@ -50,6 +50,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
@@ -57,7 +58,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEvent;
@@ -65,6 +69,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEventHandler
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEventHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
@@ -103,7 +108,7 @@ public class PreviewPanel extends Composite {
     private final DispatchAsync                      dispatchAsync;
     private final HandlerManager                     eventBus;
 
-    /** Width and height values only use in embedded widet */
+    /** Width and height values only use in embedded widget */
     private static boolean                           isEmbedded;
     private final int                                width;
     private final int                                height;
@@ -117,7 +122,7 @@ public class PreviewPanel extends Composite {
         registeredWidgets.add(widget);
     }
 
-    static private void initializePreviews(HandlerManager eventBus, boolean collectionPreviewer) {
+    static private void initializePreviews(DispatchAsync dispatchAsync, final HandlerManager eventBus, boolean collectionPreviewer) {
         if (isInitialized) {
             return;
         }
@@ -125,26 +130,28 @@ public class PreviewPanel extends Composite {
 
         if (!collectionPreviewer) {
             //register dataset specific previewers here.
-            if (!isEmbedded) {
-                addWidget(new PreviewMultiImageBeanWidget(eventBus));
-            }
-            addWidget(new PreviewMultiVideoBeanWidget(eventBus));
-            addWidget(new PreviewVideoBeanWidget(eventBus));
-            addWidget(new PreviewAudioBeanWidget(eventBus));
-            addWidget(new PreviewDocumentBeanWidget(eventBus));
-            addWidget(new PreviewTabularDataBeanWidget(eventBus));
-            addWidget(new PreviewImageBeanWidget(eventBus));
-            addWidget(new PreviewPyramidBeanWidget(eventBus));
-            addWidget(new Preview3DJavaBeanWidget(eventBus));
-            addWidget(new Preview3DHTML5BeanWidget(eventBus));
-            addWidget(new Preview3DWebGLBeanWidget(eventBus));
-            addWidget(new PreviewPTMBeanWidget(eventBus));
-            addWidget(new PreviewGeoserverBeanWidget(eventBus));
-            addWidget(new PreviewTimeseriesBeanWidget(eventBus));
+            //Left to right tab order in the GUI follows the order here and the first matching one is displayed by default (leftmost tab)
             //The following previews currently not supported in embedded previewer
             if (!isEmbedded) {
                 addWidget(new PreviewMultiTabularDataBeanWidget(eventBus));
             }
+            //Check UseGoogleDocViewer flag and then add it (or not) followed by others
+            dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.UseGoogleDocViewer), new AsyncCallback<ConfigurationResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Could not get UseGoogleDocViewer config flag", caught);
+                    setMoreDatasetPreviewers(isEmbedded, eventBus);
+
+                }
+
+                @Override
+                public void onSuccess(ConfigurationResult result) {
+                    addWidget(new PreviewGViewerDocumentBeanWidget(eventBus));
+                    setMoreDatasetPreviewers(isEmbedded, eventBus);
+
+                }
+            });
+
         } else {
             //register collection specific previewers here.
             addWidget(new PreviewImageBeanWidget(eventBus));
@@ -153,6 +160,26 @@ public class PreviewPanel extends Composite {
             //            addWidget(new PreviewGeoserverCollectionBeanWidget(eventBus));
             addWidget(new PreviewGeoCollectionBeanWidget(eventBus));
         }
+    }
+
+    private static void setMoreDatasetPreviewers(boolean isEmbedded, HandlerManager eventBus) {
+        if (!isEmbedded) {
+            addWidget(new PreviewMultiImageBeanWidget(eventBus));
+        }
+        addWidget(new PreviewMultiVideoBeanWidget(eventBus));
+        addWidget(new PreviewVideoBeanWidget(eventBus));
+        addWidget(new PreviewAudioBeanWidget(eventBus));
+        addWidget(new PreviewDocumentBeanWidget(eventBus));
+        addWidget(new PreviewTabularDataBeanWidget(eventBus));
+        addWidget(new PreviewImageBeanWidget(eventBus));
+        addWidget(new PreviewPyramidBeanWidget(eventBus));
+
+        addWidget(new Preview3DHTML5BeanWidget(eventBus));
+        addWidget(new Preview3DWebGLBeanWidget(eventBus));
+        addWidget(new Preview3DJavaBeanWidget(eventBus));
+        addWidget(new PreviewPTMBeanWidget(eventBus));
+        addWidget(new PreviewGeoserverBeanWidget(eventBus));
+        addWidget(new PreviewTimeseriesBeanWidget(eventBus));
     }
 
     public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus) {
@@ -171,7 +198,7 @@ public class PreviewPanel extends Composite {
         this.dispatchAsync = dispatchAsync;
         this.isEmbedded = isEmbedded;
         this.collectionPreviewer = collectionPreviewer;
-        initializePreviews(eventBus, collectionPreviewer);
+        initializePreviews(dispatchAsync, eventBus, collectionPreviewer);
 
         previewWidget = null;
 
@@ -334,16 +361,19 @@ public class PreviewPanel extends Composite {
      * @param result
      *            unordered list of all preview beans
      * @param maxwidth
-     *            the maximum widht of the panel
+     *            the maximum width of the panel
      * @return ordered list of all preview beans.
      */
     private List<PreviewBeanWidget> getOrderedBeans(GetDatasetResult result, int maxwidth) {
         boolean hasMultiVideo = false;
         boolean hasMultiImage = false;
 
+        boolean isGoogleViewable = PreviewGViewerDocumentBeanWidget.isGoogleViewable(result.getDataset());
+
         List<PreviewBeanWidget> list = new ArrayList<PreviewBeanWidget>();
 
         for (PreviewBeanWidget widget : registeredWidgets ) {
+
             if ((widget instanceof PreviewVideoBeanWidget) && hasMultiVideo) {
                 GWT.log("Skipping " + widget.getClass());
                 continue;
@@ -352,29 +382,10 @@ public class PreviewPanel extends Composite {
                 GWT.log("Skipping " + widget.getClass());
                 continue;
             }
-            PreviewBean best = null;
-            for (PreviewBean pb : result.getPreviews() ) {
-                if (widget.getPreviewBeanClass() == pb.getClass()) {
-                    if (best == null) {
-                        best = pb;
-                    } else {
-                        if (isEmbedded) {
-                            //needed for embedded widget so large widget always chosen
-                            maxwidth = MAX_WIDTH;
-                        }
-                        best = widget.bestFit(best, pb, maxwidth, -1);
-                    }
-                }
-            }
-            if (best != null) {
-                if (widget instanceof PreviewMultiVideoBeanWidget) {
-                    hasMultiVideo = true;
-                }
-                if (widget instanceof PreviewMultiImageBeanWidget) {
-                    hasMultiImage = true;
-                }
+
+            if ((widget instanceof PreviewGViewerDocumentBeanWidget) && isGoogleViewable) {
                 PreviewBeanWidget pbw = widget.newWidget();
-                pbw.setPreviewBean(best);
+                pbw.setPreviewBean(null);
                 pbw.setDatasetBean(dataset);
                 pbw.setDispatch(dispatchAsync);
                 pbw.setEmbedded(isEmbedded);
@@ -382,7 +393,44 @@ public class PreviewPanel extends Composite {
                     pbw.setWidth(width);
                     pbw.setHeight(height);
                 }
+
                 list.add(pbw);
+                continue;
+            } else {
+                PreviewBean best = null;
+                for (PreviewBean pb : result.getPreviews() ) {
+                    if (widget.getPreviewBeanClass() == pb.getClass()) {
+                        if (best == null) {
+                            best = pb;
+                        } else {
+                            if (isEmbedded) {
+                                //needed for embedded widget so large widget always chosen
+                                maxwidth = MAX_WIDTH;
+                            }
+                            best = widget.bestFit(best, pb, maxwidth, -1);
+                        }
+                    }
+                }
+
+                if (best != null) {
+                    if (widget instanceof PreviewMultiVideoBeanWidget) {
+                        hasMultiVideo = true;
+                    }
+                    if (widget instanceof PreviewMultiImageBeanWidget) {
+                        hasMultiImage = true;
+                    }
+                    PreviewBeanWidget pbw = widget.newWidget();
+                    pbw.setPreviewBean(best);
+                    pbw.setDatasetBean(dataset);
+                    pbw.setDispatch(dispatchAsync);
+                    pbw.setEmbedded(isEmbedded);
+                    if (isEmbedded) {
+                        pbw.setWidth(width);
+                        pbw.setHeight(height);
+                    }
+
+                    list.add(pbw);
+                }
             }
         }
 

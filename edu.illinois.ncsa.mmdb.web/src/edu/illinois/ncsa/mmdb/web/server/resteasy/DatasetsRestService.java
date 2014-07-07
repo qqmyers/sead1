@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
@@ -70,11 +71,14 @@ import org.tupeloproject.util.Tuple;
 import org.tupeloproject.util.UnicodeTranscoder;
 
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
@@ -147,8 +151,7 @@ public class DatasetsRestService extends ItemServicesImpl {
 
                         TripleWriter tw = new TripleWriter();
 
-                        Resource p = createPredicate("Medici", "original", "Original Source", tw);
-                        tw.add(Resource.uriRef(id), p, Resource.uriRef(url.toURI()));
+                        tw.add(Resource.uriRef(id), Resource.uriRef("http://www.w3c.org/ns/prov#hadPrimarySource"), Resource.uriRef(url.toURI()));
 
                         Set<String> copyURI = new HashSet<String>();
                         Set<String> ignoreURI = new HashSet<String>();
@@ -173,6 +176,158 @@ public class DatasetsRestService extends ItemServicesImpl {
         } catch (Exception e) {
             log.error("Error copying dataset from " + surl, e);
             return Response.status(500).entity("Error copying dataset [" + e.getMessage() + "]").build();
+        }
+    }
+
+    /**
+     * Copy Dataset from another SEAD repository
+     * 
+     * @param url
+     *            - the URL to copy from (the SEAD URL for the dataset page)
+     * @returns - success (200) or failure (500)
+     */
+
+    @POST
+    @Path("/import/{surl}")
+    public Response importDataset(@PathParam("surl") String surl, @javax.ws.rs.core.Context HttpServletRequest request) {
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        try {
+            String decodedUrl = URLDecoder.decode(surl, "UTF-8");
+            log.debug("Importing: " + decodedUrl);
+            final URL url = new URL(decodedUrl);
+            final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
+            SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+            try {
+                if (!rbac.checkPermission(creator.toString(), Permission.UPLOAD_DATA)) {
+                    log.debug("user: " + creator.toString() + "  forbidden");
+                    result.put("Failure", "User " + creator.toString() + " does not have permission to import datasets");
+                    return Response.status(HttpURLConnection.HTTP_FORBIDDEN).entity(result).build();
+                }
+            } catch (RBACException e) {
+                log.warn("RBAC exception in import", e);
+                result.put("Failure", "Unknown permission issue (contact admin)");
+                return Response.status(HttpURLConnection.HTTP_INTERNAL_ERROR).entity(result).build();
+            }
+
+            final String id = RestUriMinter.getInstance().mintUri(null); // Create dataset uri
+            final ThingSession ts = c.getThingSession();
+
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+
+                        UriRef s = Resource.uriRef(id);
+                        Thing t = ts.newThing(s);
+
+                        InputStream is = getDataStream(url);
+                        byte[] digest = null;
+                        try {
+                            MessageDigest sha1 = MessageDigest.getInstance("SHA1");
+                            DigestInputStream dis = new DigestInputStream(is, sha1);
+
+                            BlobWriter bw = new BlobWriter();
+                            bw.setSubject(s);
+                            bw.setInputStream(dis);
+                            c.perform(bw);
+                            dis.close();
+                            is.close();
+                            log.debug("user uploaded " + url.toExternalForm() + " (" + bw.getSize() + " bytes), uri=" + id);
+
+                            digest = sha1.digest();
+                            t.addType(Cet.DATASET);
+                            //Next 3 are Bean related
+                            t.addType(Beans.STORAGE_TYPE_BEAN_ENTRY);
+                            t.setValue(Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
+                                    Resource.literal("edu.uiuc.ncsa.cet.bean.DatasetBean"));
+                            t.setValue(Dc.IDENTIFIER, Resource.uriRef(id));
+                            t.setValue(Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
+                                    Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/http://cet.ncsa.uiuc.edu/2007/Dataset"));
+
+                            String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
+                            t.addValue(Rdfs.LABEL, fileName);
+                            t.addValue(SHA1_DIGEST, asHex(digest));
+
+                            t.setValue(RestService.FILENAME_PROPERTY, fileName);
+                            t.setValue(Dc.TITLE, fileName);
+                            t.addValue(Dc.DATE, new Date());
+                            t.setValue(Dc.CREATOR, creator);
+                            t.addValue(Files.LENGTH, bw.getSize());
+
+                            // mimetype
+                            String contentType = TupeloStore.getInstance().getMimeMap().getContentTypeFor(fileName);
+                            t.setValue(RestService.FORMAT_PROPERTY, contentType);
+                            // update context with new mime-type potentially
+                            TupeloStore.getInstance().getMimeMap().checkMimeType(contentType);
+
+                            t.addValue(Resource.uriRef("http://www.w3.org/ns/prov#hadPrimarySource"), Resource.uriRef(url.toExternalForm()));
+                        } catch (NoSuchAlgorithmException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        t.save();
+                        ts.clear();
+                    } catch (IOException io) {
+                        log.warn("IO error retrieving " + url.toExternalForm() + " for dataset " + id);
+                        if (log.isDebugEnabled()) {
+                            io.printStackTrace();
+                        }
+                    } catch (OperatorException e) {
+                        log.warn("OperatorError retrieving " + url.toExternalForm() + " for dataset " + id);
+                        if (log.isDebugEnabled()) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+
+                private InputStream getDataStream(URL url) throws IOException {
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setReadTimeout(10000);
+                    conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+
+                    boolean redirect = false;
+
+                    // normally, 3xx is redirect
+                    int status = conn.getResponseCode();
+                    if (status != HttpURLConnection.HTTP_OK) {
+                        if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                                || status == HttpURLConnection.HTTP_MOVED_PERM
+                                || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                            redirect = true;
+                        }
+                    }
+
+                    if (redirect) {
+
+                        // get redirect url from "location" header field
+                        String newUrl = conn.getHeaderField("Location");
+
+                        // If the first site has set a cookie, pass it on in the redirect
+                        String cookies = conn.getHeaderField("Set-Cookie");
+
+                        // open the new connection
+                        conn = (HttpURLConnection) new URL(newUrl).openConnection();
+                        conn.setRequestProperty("Cookie", cookies);
+                        conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+                        status = conn.getResponseCode();
+
+                    }
+                    if (status == HttpURLConnection.HTTP_OK) {
+                        return conn.getInputStream();
+                    } else {
+                        throw new IOException("Remote server response for " + conn.getURL().toExternalForm() + " : " + status);
+                    }
+                }
+            }).start();
+            //TO be clear - success means we've done the job of making the call to the remote URL to get the data, not that that call(s) have succeeded.
+            //FixMe - could add the feedback service developed for the internal upload (showing state of the upload as it progresses.
+            result.put("Success", "Object is imported as: " + id);
+            return Response.status(200).entity(result).build();
+        } catch (Exception e) {
+            log.error("Error importing dataset from " + surl, e);
+            result.put("Failure", "Error importing dataset [" + e.getMessage() + "]");
+            return Response.status(500).entity(result).build();
         }
     }
 
@@ -225,14 +380,24 @@ public class DatasetsRestService extends ItemServicesImpl {
     @GET
     @Path("/{id}/file")
     public Response getDatasetBlob(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
-        Response r;
+        Response r = null;
         try {
-            UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
             UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
-            ValidItem item = new ValidItem(itemId, Cet.DATASET, userId);
-            if (!item.isValid()) {
-                r = item.getErrorResponse();
+            boolean valid = false;
+            if (request.getAttribute("token") != null) {
+                valid = true;
             } else {
+                //only need user to check permissions - may be null for token exists case (above)
+                UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+                ValidItem item = new ValidItem(itemId, Cet.DATASET, userId);
+                if (!item.isValid()) {
+                    r = item.getErrorResponse();
+                } else {
+                    valid = true;
+                }
+            }
+            if (valid) {
 
                 //Get file metadata
                 Unifier uf = new Unifier();
@@ -262,8 +427,10 @@ public class DatasetsRestService extends ItemServicesImpl {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
+            log.debug(e.getMessage());
             Map<String, Object> result = new LinkedHashMap<String, Object>();
-            result.put("Error", "Server error while retrieving content for " + id);
+            result.put("Error", "Server error: " + e.getMessage() + " while retrieving content for " + id);
             r = Response.status(500).entity(result).build();
         }
         return r;
