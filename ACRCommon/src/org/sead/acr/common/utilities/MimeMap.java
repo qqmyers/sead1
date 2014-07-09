@@ -41,6 +41,8 @@ public class MimeMap {
 			return "Document";
 		} else if (mimetype.endsWith("powerpoint")) {
 			return "Document";
+		} else if (mimetype.contains("presentationml")) {
+			return "Document";
 		} else if (mimetype.endsWith("excel")) {
 			return "Document";
 		} else if (mimetype.contains("spreadsheetml")) {

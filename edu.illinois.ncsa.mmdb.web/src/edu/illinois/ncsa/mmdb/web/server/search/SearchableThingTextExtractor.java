@@ -196,8 +196,9 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
                     } else if (extractorMetadataPredicates.contains(pred.getString())) {
                         //Should this be  just literals instead?
                         resultStrings.add(val);
-                    } else if (pred.getString().equals("tag:cet.ncsa.uiuc.edu,2008:/tag#")) {
-                        resultStrings.add(URLDecoder.decode(val));
+                    } else if (pred.getString().equals("http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag")) {
+                        String tag = val.substring("tag:cet.ncsa.uiuc.edu,2008:/tag#".length());
+                        resultStrings.add(URLDecoder.decode(tag));
                     } else if (pred.equals(Dc.CREATOR)) { //The uploader (PersonBean.getCreator())
                         resultStrings.add(getUploaderText(obj));
                     } else if (pred.equals(Namespaces.dcTerms("creator"))) {// Creators (PersonBean.getContributors())

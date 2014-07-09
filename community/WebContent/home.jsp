@@ -126,9 +126,8 @@ var bwg_objectL10n = {"bwg_field_required":"field is required.","bwg_mail_valida
 <link href="login_css/bootstrap.sead-scope.css" rel="stylesheet">
 <link href="login_css/common.css" rel="stylesheet">
 
-
-<script src="http://code.jquery.com/jquery-latest.js"></script>
-
+<script src="//code.jquery.com/jquery-latest.js"></script>
+<script src="login_scripts/commons.js"></script>
 <script src="login_scripts/json2.js"></script>
 
 <script src="login_scripts/jquery-cookie.js"></script>

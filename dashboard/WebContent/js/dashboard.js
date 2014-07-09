@@ -20,7 +20,10 @@ function initMap() {
     //map.addControl(new OpenLayers.Control.MousePosition());
     
     
-    var osm = new OpenLayers.Layer.OSM();
+    var osm = new OpenLayers.Layer.OSM(undefined,
+  						["//a.tile.openstreetmap.org/${z}/${x}/${y}.png",
+   						 "//b.tile.openstreetmap.org/${z}/${x}/${y}.png",
+   						 "//c.tile.openstreetmap.org/${z}/${x}/${y}.png"]);
     olmap.addLayer(osm);
     
 	layerList = getWmsLayers();

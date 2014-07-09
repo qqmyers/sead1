@@ -63,9 +63,9 @@ legend {
 
 </head>
 
-<script src="http://code.jquery.com/jquery-1.8.1.min.js"
+<script src="//code.jquery.com/jquery-1.8.1.min.js"
 	type="text/javascript"></script>
-<script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+<script src="//code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
 <script src="login_scripts/commons.js"></script>
 
 <%
