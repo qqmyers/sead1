@@ -13,63 +13,63 @@
 <title>
 Project Spaces | SEAD </title>
 <link rel="profile" href="http://gmpg.org/xfn/11">
-<link rel="pingback" href="http://seadwp.sites.uofmhosting.net/xmlrpc.php">
-<link rel="alternate" type="application/rss+xml" title="SEAD » Feed" href="http://seadwp.sites.uofmhosting.net/feed/">
-<link rel="alternate" type="application/rss+xml" title="SEAD » Comments Feed" href="http://seadwp.sites.uofmhosting.net/comments/feed/">
-<link rel="alternate" type="application/rss+xml" title="SEAD » Help Comments Feed" href="http://seadwp.sites.uofmhosting.net/help/feed/">
-<link rel="stylesheet" id="cnss_css-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/easy-social-icons/css/cnss.css?ver=1.0" type="text/css" media="all">
-<link rel="stylesheet" id="fullcalendar-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/wp-calendar/css/fullcalendar.css?ver=3.9.1" type="text/css" media="all">
-<link rel="stylesheet" id="dashicons-css" href="http://seadwp.sites.uofmhosting.net/wp-includes/css/dashicons.min.css?ver=3.9.1" type="text/css" media="all">
-<link rel="stylesheet" id="elusive-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/menu-icons/css/elusive.min.css?ver=2.0" type="text/css" media="all">
-<link rel="stylesheet" id="fa-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/menu-icons/css/font-awesome.min.css?ver=4.0" type="text/css" media="all">
-<link rel="stylesheet" id="genericon-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/menu-icons/css/genericons.min.css?ver=3.0.3" type="text/css" media="all">
-<link rel="stylesheet" id="menu-icons-extra-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/menu-icons/css/extra.min.css?ver=0.3.2" type="text/css" media="all">
-<link rel="stylesheet" id="contact-form-7-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=3.8.1" type="text/css" media="all">
-<link rel="stylesheet" id="collapseomatic-css-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/jquery-collapse-o-matic/light_style.css?ver=1.5.7" type="text/css" media="all">
-<link rel="stylesheet" id="bwg_frontend-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/photo-gallery/css/bwg_frontend.css?ver=1.1.19" type="text/css" media="all">
-<link rel="stylesheet" id="bwg_font-awesome-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/photo-gallery/css/font-awesome-4.0.1/font-awesome.css?ver=4.0.1" type="text/css" media="all">
-<link rel="stylesheet" id="bwg_mCustomScrollbar-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/photo-gallery/css/jquery.mCustomScrollbar.css?ver=1.1.19" type="text/css" media="all">
+<link rel="pingback" href="http://sead-data.net/xmlrpc.php">
+<link rel="alternate" type="application/rss+xml" title="SEAD » Feed" href="http://sead-data.net/feed/">
+<link rel="alternate" type="application/rss+xml" title="SEAD » Comments Feed" href="http://sead-data.net/comments/feed/">
+<link rel="alternate" type="application/rss+xml" title="SEAD » Help Comments Feed" href="http://sead-data.net/help/feed/">
+<link rel="stylesheet" id="cnss_css-css" href="http://sead-data.net/wp-content/plugins/easy-social-icons/css/cnss.css?ver=1.0" type="text/css" media="all">
+<link rel="stylesheet" id="fullcalendar-css" href="http://sead-data.net/wp-content/plugins/wp-calendar/css/fullcalendar.css?ver=3.9.1" type="text/css" media="all">
+<link rel="stylesheet" id="dashicons-css" href="http://sead-data.net/wp-includes/css/dashicons.min.css?ver=3.9.1" type="text/css" media="all">
+<link rel="stylesheet" id="elusive-css" href="http://sead-data.net/wp-content/plugins/menu-icons/css/elusive.min.css?ver=2.0" type="text/css" media="all">
+<link rel="stylesheet" id="fa-css" href="http://sead-data.net/wp-content/plugins/menu-icons/css/font-awesome.min.css?ver=4.0" type="text/css" media="all">
+<link rel="stylesheet" id="genericon-css" href="http://sead-data.net/wp-content/plugins/menu-icons/css/genericons.min.css?ver=3.0.3" type="text/css" media="all">
+<link rel="stylesheet" id="menu-icons-extra-css" href="http://sead-data.net/wp-content/plugins/menu-icons/css/extra.min.css?ver=0.3.2" type="text/css" media="all">
+<link rel="stylesheet" id="contact-form-7-css" href="http://sead-data.net/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=3.8.1" type="text/css" media="all">
+<link rel="stylesheet" id="collapseomatic-css-css" href="http://sead-data.net/wp-content/plugins/jquery-collapse-o-matic/light_style.css?ver=1.5.7" type="text/css" media="all">
+<link rel="stylesheet" id="bwg_frontend-css" href="http://sead-data.net/wp-content/plugins/photo-gallery/css/bwg_frontend.css?ver=1.1.19" type="text/css" media="all">
+<link rel="stylesheet" id="bwg_font-awesome-css" href="http://sead-data.net/wp-content/plugins/photo-gallery/css/font-awesome-4.0.1/font-awesome.css?ver=4.0.1" type="text/css" media="all">
+<link rel="stylesheet" id="bwg_mCustomScrollbar-css" href="http://sead-data.net/wp-content/plugins/photo-gallery/css/jquery.mCustomScrollbar.css?ver=1.1.19" type="text/css" media="all">
 
 <link rel="stylesheet" id="spacious_googlefonts-css" href="http://fonts.googleapis.com/css?family=Lato%7CRaleway&amp;ver=3.9.1" type="text/css" media="all">
-<link rel="stylesheet" id="gmw-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/google-maps-widget/css/gmw.css?ver=1.66" type="text/css" media="all">
-<link rel="stylesheet" id="ggcl-style-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/grid-gallery-with-custom-links/css/grid-gallery-with-custom-links.css?ver=1.1.0" type="text/css" media="all">
-<link rel="stylesheet" id="wpgallery-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/wordpress-gallery-plugin/css/wp_gallery.css?ver=3.9.1" type="text/css" media="all">
-<link rel="stylesheet" id="nivoslider-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/wordpress-gallery-plugin/css/nivo-slider.css?ver=3.9.1" type="text/css" media="all">
-<link rel="stylesheet" id="colorbox-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/wordpress-gallery-plugin/lightbox/colorbox/colorbox.css?ver=3.9.1" type="text/css" media="all">
-<link rel="stylesheet" id="wpgmaps-style-css" href="http://seadwp.sites.uofmhosting.net/wp-content/plugins/wp-google-maps/css/wpgmza_style.css?ver=3.9.1" type="text/css" media="all">
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-includes/js/jquery/jquery.js?ver=1.11.0"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-includes/js/jquery/jquery-migrate.min.js?ver=1.2.1"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/easy-social-icons/js/cnss.js?ver=1.0"></script>
+<link rel="stylesheet" id="gmw-css" href="http://sead-data.net/wp-content/plugins/google-maps-widget/css/gmw.css?ver=1.66" type="text/css" media="all">
+<link rel="stylesheet" id="ggcl-style-css" href="http://sead-data.net/wp-content/plugins/grid-gallery-with-custom-links/css/grid-gallery-with-custom-links.css?ver=1.1.0" type="text/css" media="all">
+<link rel="stylesheet" id="wpgallery-css" href="http://sead-data.net/wp-content/plugins/wordpress-gallery-plugin/css/wp_gallery.css?ver=3.9.1" type="text/css" media="all">
+<link rel="stylesheet" id="nivoslider-css" href="http://sead-data.net/wp-content/plugins/wordpress-gallery-plugin/css/nivo-slider.css?ver=3.9.1" type="text/css" media="all">
+<link rel="stylesheet" id="colorbox-css" href="http://sead-data.net/wp-content/plugins/wordpress-gallery-plugin/lightbox/colorbox/colorbox.css?ver=3.9.1" type="text/css" media="all">
+<link rel="stylesheet" id="wpgmaps-style-css" href="http://sead-data.net/wp-content/plugins/wp-google-maps/css/wpgmza_style.css?ver=3.9.1" type="text/css" media="all">
+<script type="text/javascript" src="http://sead-data.net/wp-includes/js/jquery/jquery.js?ver=1.11.0"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-includes/js/jquery/jquery-migrate.min.js?ver=1.2.1"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/easy-social-icons/js/cnss.js?ver=1.0"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
-var WPCalendar = {"ajaxUrl":"http:\/\/seadwp.sites.uofmhosting.net\/wp-admin\/admin-ajax.php"};
+var WPCalendar = {"ajaxUrl":"http:\/\/sead-data.net\/wp-admin\/admin-ajax.php"};
 /* ]]> */
 </script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/wp-calendar/js/fullcalendar.min.js?ver=3.9.1"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/photo-gallery/js/bwg_frontend.js?ver=1.1.19"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/photo-gallery/js/jquery.mobile.js?ver=1.1.19"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/photo-gallery/js/jquery.mCustomScrollbar.concat.min.js?ver=1.1.19"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/photo-gallery/js/jquery.fullscreen-0.4.1.js?ver=0.4.1"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/wp-calendar/js/fullcalendar.min.js?ver=3.9.1"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/photo-gallery/js/bwg_frontend.js?ver=1.1.19"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/photo-gallery/js/jquery.mobile.js?ver=1.1.19"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/photo-gallery/js/jquery.mCustomScrollbar.concat.min.js?ver=1.1.19"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/photo-gallery/js/jquery.fullscreen-0.4.1.js?ver=0.4.1"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
 var bwg_objectL10n = {"bwg_field_required":"field is required.","bwg_mail_validation":"This is not a valid email address.","bwg_search_result":"There are no images matching your search."};
 /* ]]> */
 </script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/photo-gallery/js/bwg_gallery_box.js?ver=1.1.19"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/wp-float/js/jquery.easing.js?ver=3.9.1"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/wp-float/js/jquery.floater.2.2.js?ver=3.9.1"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/wp-float/js/jquery.hoverIntent.minified.js?ver=3.9.1"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/themes/spacious-pro/js/spacious-custom.js?ver=3.9.1"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/wordpress-gallery-plugin/js/jquery.nivo.slider.pack.js?ver=3.9.1"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/wordpress-gallery-plugin/lightbox/colorbox/jquery.colorbox-min.js?ver=3.9.1"></script>
-<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://seadwp.sites.uofmhosting.net/xmlrpc.php?rsd">
-<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://seadwp.sites.uofmhosting.net/wp-includes/wlwmanifest.xml"> 
-<link rel="prev" title="Research Network" href="http://seadwp.sites.uofmhosting.net/research-network/">
-<link rel="next" title="Contact Us" href="http://seadwp.sites.uofmhosting.net/contactus/">
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/photo-gallery/js/bwg_gallery_box.js?ver=1.1.19"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/wp-float/js/jquery.easing.js?ver=3.9.1"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/wp-float/js/jquery.floater.2.2.js?ver=3.9.1"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/wp-float/js/jquery.hoverIntent.minified.js?ver=3.9.1"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/themes/spacious-pro/js/spacious-custom.js?ver=3.9.1"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/wordpress-gallery-plugin/js/jquery.nivo.slider.pack.js?ver=3.9.1"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/wordpress-gallery-plugin/lightbox/colorbox/jquery.colorbox-min.js?ver=3.9.1"></script>
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://sead-data.net/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://sead-data.net/wp-includes/wlwmanifest.xml"> 
+<link rel="prev" title="Research Network" href="http://sead-data.net/research-network/">
+<link rel="next" title="Contact Us" href="http://sead-data.net/contactus/">
 <meta name="generator" content="WordPress 3.9.1">
-<link rel="canonical" href="http://seadwp.sites.uofmhosting.net/help/">
-<link rel="shortlink" href="http://seadwp.sites.uofmhosting.net/?p=13">
-<link rel="shortcut icon" href="http://seadwp.sites.uofmhosting.net/wp-content/uploads/2014/06/favicon1.png" type="image/x-icon">		<style type="text/css"> blockquote { border-left: 3px solid #f3882a; }
+<link rel="canonical" href="http://sead-data.net/help/">
+<link rel="shortlink" href="http://sead-data.net/?p=13">
+<link rel="shortcut icon" href="http://sead-data.net/wp-content/uploads/2014/06/favicon1.png" type="image/x-icon">		<style type="text/css"> blockquote { border-left: 3px solid #f3882a; }
 			.spacious-button, input[type="reset"], input[type="button"], input[type="submit"], button { background-color: #f3882a; }
 			.previous a:hover, .next a:hover { 	color: #f3882a; }
 			a { color: #f3882a; }
@@ -126,8 +126,9 @@ var bwg_objectL10n = {"bwg_field_required":"field is required.","bwg_mail_valida
 <link href="login_css/bootstrap.sead-scope.css" rel="stylesheet">
 <link href="login_css/common.css" rel="stylesheet">
 
+
 <script src="//code.jquery.com/jquery-latest.js"></script>
-<script src="login_scripts/commons.js"></script>
+
 <script src="login_scripts/json2.js"></script>
 
 <script src="login_scripts/jquery-cookie.js"></script>
@@ -266,12 +267,12 @@ var statsLeft=null;
 <div id="header-text-nav-wrap" class="clearfix">
 <div id="header-left-section">
 <div id="header-logo-image">
-<a href="http://seadwp.sites.uofmhosting.net/" title="SEAD" rel="home"><img src="http://seadwp.sites.uofmhosting.net/wp-content/uploads/2014/06/logo.png" alt="SEAD"></a>
+<a href="http://sead-data.net/" title="SEAD" rel="home"><img src="http://sead-data.net/wp-content/uploads/2014/06/logo.png" alt="SEAD"></a>
 </div><!-- #header-logo-image -->
 
 <div id="header-right-section">
 <div id="header-right-sidebar" class="clearfix">
-<aside id="cnss_widget-3" class="widget widget_cnss_widget"><table class="cnss-social-icon" style="width:111px" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td style="width:37px"><a target="_blank" title="facebook" href="https://www.facebook.com/SEADDataNet"><img src="http://seadwp.sites.uofmhosting.net/wp-content/uploads/1403285144_facebook.png" border="0" width="32" height="32" alt="facebook"></a></td><td style="width:37px"><a target="_blank" title="twitter" href="https://twitter.com/SEADdatanet"><img src="http://seadwp.sites.uofmhosting.net/wp-content/uploads/1403285215_twitter.png" border="0" width="32" height="32" alt="twitter"></a></td><td style="width:37px"><a target="_blank" title="Slideshare" href="http://www.slideshare.net/SEADdatanet"><img src="http://seadwp.sites.uofmhosting.net/wp-content/uploads/1403285311_slidershare.png" border="0" width="32" height="32" alt="Slideshare"></a></td></tr></tbody></table></aside></div>
+<aside id="cnss_widget-3" class="widget widget_cnss_widget"><table class="cnss-social-icon" style="width:111px" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td style="width:37px"><a target="_blank" title="facebook" href="https://www.facebook.com/SEADDataNet"><img src="http://sead-data.net/wp-content/uploads/1403285144_facebook.png" border="0" width="32" height="32" alt="facebook"></a></td><td style="width:37px"><a target="_blank" title="twitter" href="https://twitter.com/SEADdatanet"><img src="http://sead-data.net/wp-content/uploads/1403285215_twitter.png" border="0" width="32" height="32" alt="twitter"></a></td><td style="width:37px"><a target="_blank" title="Slideshare" href="http://www.slideshare.net/SEADdatanet"><img src="http://sead-data.net/wp-content/uploads/1403285311_slidershare.png" border="0" width="32" height="32" alt="Slideshare"></a></td></tr></tbody></table></aside></div>
                                                 
    	</div><!-- #header-right-section --> 
 
@@ -280,21 +281,21 @@ var statsLeft=null;
                             <div id="header-navigation">
                                <nav id="site-navigation" class="main-navigation" role="navigation">
      <h1 class="menu-toggle">Menu</h1>
-       <div class="menu-global-navigation-container"><ul id="menu-global-navigation" class="menunav-menu"><li id="menu-item-96" class="menu-item menu-item-type-post_type menu-item-object-page page_item page-item-2 menu-item-96"><a href="http://seadwp.sites.uofmhosting.net/">Home</a></li>
-<li id="menu-item-97" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-97"><a href="http://seadwp.sites.uofmhosting.net/about/">About</a>
+       <div class="menu-global-navigation-container"><ul id="menu-global-navigation" class="menunav-menu"><li id="menu-item-96" class="menu-item menu-item-type-post_type menu-item-object-page page_item page-item-2 menu-item-96"><a href="http://sead-data.net/">Home</a></li>
+<li id="menu-item-97" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-97"><a href="http://sead-data.net/about/">About</a>
 <ul class="sub-menu">
-	<li id="menu-item-98" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-98"><a href="http://seadwp.sites.uofmhosting.net/about/sead-team/">Project Team</a></li>
-	<li id="menu-item-352" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-352"><a href="http://seadwp.sites.uofmhosting.net/about/advisory-board/">Advisory Board</a></li>
-	<li id="menu-item-422" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-422"><a href="http://seadwp.sites.uofmhosting.net/about/publicationspresentations/">Publications &amp; Presentations</a></li>
-	<li id="menu-item-266" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-266"><a href="http://seadwp.sites.uofmhosting.net/about/newsevents/">News &amp; Events</a></li>
+	<li id="menu-item-98" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-98"><a href="http://sead-data.net/about/sead-team/">Project Team</a></li>
+	<li id="menu-item-352" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-352"><a href="http://sead-data.net/about/advisory-board/">Advisory Board</a></li>
+	<li id="menu-item-422" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-422"><a href="http://sead-data.net/about/publicationspresentations/">Publications &amp; Presentations</a></li>
+	<li id="menu-item-266" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-266"><a href="http://sead-data.net/about/newsevents/">News &amp; Events</a></li>
 </ul>
 </li>
-<li id="menu-item-101" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-101"><a href="http://seadwp.sites.uofmhosting.net/feature-tour/">Features Tour</a>
+<li id="menu-item-101" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-101"><a href="http://sead-data.net/feature-tour/">Features Tour</a>
 <ul class="sub-menu">
-	<li id="menu-item-872" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-872"><a href="http://seadwp.sites.uofmhosting.net/feature-tour/tools-in-development/">Tools in Development</a></li>
+	<li id="menu-item-872" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-872"><a href="http://sead-data.net/feature-tour/tools-in-development/">Tools in Development</a></li>
 </ul>
 </li>
-<li id="menu-item-244" class="menu-item menu-item-type-custom current-menu-item current_page_item menu-item-object-custom menu-item-244"><a href="http://sead.ncsa.illinois.edu/projects/">Project Spaces</a></li>
+<li id="menu-item-244" class="menu-item menu-item-type-custom current-menu-item current_page_item menu-item-object-custom menu-item-244"><a href="http://sead.ncsa.illinois.edu/community/">Project Spaces</a></li>
 <li id="menu-item-245" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-245"><a href="http://seadva.d2i.indiana.edu:8181/sead-access/">Virtual Archive</a></li>
 <li id="menu-item-246" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-246"><a href="http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/">Research Network</a>
 <ul class="sub-menu">
@@ -304,9 +305,9 @@ var statsLeft=null;
 	<li id="menu-item-250" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-250"><a href="http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/events">Events</a></li>
 </ul>
 </li>
-<li id="menu-item-109" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-109"><a href="http://seadwp.sites.uofmhosting.net/help/">Help</a>
+<li id="menu-item-109" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-109"><a href="http://sead-data.net/help/">Help</a>
 <ul class="sub-menu">
-	<li id="menu-item-110" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-110"><a href="http://seadwp.sites.uofmhosting.net/help/faq/">FAQ</a></li>
+	<li id="menu-item-110" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-110"><a href="http://sead-data.net/help/faq/">FAQ</a></li>
 </ul>
 </li>
 </ul></div>              </nav>
@@ -323,8 +324,8 @@ var statsLeft=null;
 <div class="article entry-content clearfix">
 <p><h1><span>Project Spaces</span></h1></p>
 
-<p>Welcome to SEAD Project Spaces where you and your team can collect and manage data. The table below lists all active project spaces in SEAD. Click one of the links to go to a given project's data collections (note: you will need access permission from the space's admins).</p>
-<p>You can try out Project Spaces features by going to the demo space (linked text to demo space) or contact us (SEADdatanet@umich.edu) about setting up a space for your group.</p>
+<p>Welcome to SEAD Project Spaces, where you and your team can collect and manage your project's active data. The table below lists all active project spaces in SEAD. Click one of the links to go to a given project's data collections (note: you will need access permission from the space's admins).</p>
+<p>You can try out Project Spaces features by going to the <a hre="http://sead-demo.ncsa.illinois.edu/">demo space</a> or <a href="http://sead-data.net/contactus/">contact us</a> about setting up a space for your group.</p>
 </div></article></div>
 
 
@@ -393,7 +394,7 @@ var statsLeft=null;
 	
 									<div id="respond" class="comment-respond">
 				<h3 id="reply-title" class="comment-reply-title">Leave a Reply <small><a rel="nofollow" id="cancel-comment-reply-link" href="/help/#respond" style="display:none;">Cancel reply</a></small></h3>
-									<form action="http://seadwp.sites.uofmhosting.net/wp-comments-post.php" method="post" id="commentform" class="comment-form">
+									<form action="http://sead-data.net/wp-comments-post.php" method="post" id="commentform" class="comment-form">
 																			<p class="comment-notes">Your email address will not be published. Required fields are marked <span class="required">*</span></p>							<p class="comment-form-author"><label for="author">Name <span class="required">*</span></label> <input id="author" name="author" type="text" value="" size="30" aria-required='true' /></p>
 <p class="comment-form-email"><label for="email">Email <span class="required">*</span></label> <input id="email" name="email" type="text" value="" size="30" aria-required='true' /></p>
 <p class="comment-form-url"><label for="url">Website</label> <input id="url" name="url" type="text" value="" size="30" /></p>
@@ -402,7 +403,7 @@ var statsLeft=null;
 							<input type='hidden' name='comment_post_ID' value='13' id='comment_post_ID' />
 <input type='hidden' name='comment_parent' id='comment_parent' value='0' />
 						</p>
-						<p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="f2d66b71b3" /></p><script type='text/javascript' src='http://seadwp.sites.uofmhosting.net/wp-content/plugins/akismet/_inc/form.js?ver=3.0.0'></script>
+						<p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="f2d66b71b3" /></p><script type='text/javascript' src='http://sead-data.net/wp-content/plugins/akismet/_inc/form.js?ver=3.0.0'></script>
 <p style="display: none;"><input type="hidden" id="ak_js" name="ak_js" value="73"/></p>					</form>
 							</div><!-- #respond -->
 			
@@ -423,8 +424,8 @@ var statsLeft=null;
 			<div class="footer-socket-wrapper clearfix">
 				<div class="inner-wrap">
 					<div class="footer-socket-area">
-						<div class="copyright"><img id="nsf" src="http://seadwp.sites.uofmhosting.net/wp-content/uploads/2014/06/nsf2.png" alt="NSF" width="30px" height="30px">SEAD is funded by the National Science Foundation under cooperative agreement #OCI0940824.</div>						<nav class="small-menu">
-							<div class="menu-footer-menu-container"><ul id="menu-footer-menu" class="menu"><li id="menu-item-112" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-112"><a href="http://seadwp.sites.uofmhosting.net/contactus/">Contact Us</a></li>
+						<div class="copyright"><img id="nsf" src="http://sead-data.net/wp-content/uploads/2014/06/nsf2.png" alt="NSF " width="30px" height="30px">SEAD is funded by the National Science Foundation under cooperative agreement #OCI0940824.</div>						<nav class="small-menu">
+							<div class="menu-footer-menu-container"><ul id="menu-footer-menu" class="menu"><li id="menu-item-112" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-112"><a href="http://sead-data.net/contactus/">Contact Us</a></li>
 </ul></div>		    			</nav>
 					</div>
 				</div>
@@ -460,27 +461,27 @@ var colomatslideEffect = 'slideFade';
 }
 </style>
 			<script type="text/javascript">function showhide_toggle(a,b,c,d){var e=jQuery("#"+a+"-link-"+b),f=jQuery("#"+a+"-content-"+b);a=jQuery("#"+a+"-toggle-"+b);e.toggleClass("sh-show sh-hide");f.toggleClass("sh-show sh-hide").toggle();a.text()===c?a.text(d):a.text(c)};</script>
-	<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-includes/js/jquery/ui/jquery.ui.core.min.js?ver=1.10.4"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-includes/js/jquery/ui/jquery.ui.widget.min.js?ver=1.10.4"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-includes/js/jquery/ui/jquery.ui.mouse.min.js?ver=1.10.4"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-includes/js/jquery/ui/jquery.ui.sortable.min.js?ver=1.10.4"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/contact-form-7/includes/js/jquery.form.min.js?ver=3.50.0-2014.02.05"></script>
+	<script type="text/javascript" src="http://sead-data.net/wp-includes/js/jquery/ui/jquery.ui.core.min.js?ver=1.10.4"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-includes/js/jquery/ui/jquery.ui.widget.min.js?ver=1.10.4"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-includes/js/jquery/ui/jquery.ui.mouse.min.js?ver=1.10.4"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-includes/js/jquery/ui/jquery.ui.sortable.min.js?ver=1.10.4"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/contact-form-7/includes/js/jquery.form.min.js?ver=3.50.0-2014.02.05"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
-var _wpcf7 = {"loaderUrl":"http:\/\/seadwp.sites.uofmhosting.net\/wp-content\/plugins\/contact-form-7\/images\/ajax-loader.gif","sending":"Sending ..."};
+var _wpcf7 = {"loaderUrl":"http:\/\/sead-data.net\/wp-content\/plugins\/contact-form-7\/images\/ajax-loader.gif","sending":"Sending ..."};
 /* ]]> */
 </script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/contact-form-7/includes/js/scripts.js?ver=3.8.1"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/page-scroll-to-id/js/jquery.malihu.PageScroll2id.js?ver=1.5.6"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/contact-form-7/includes/js/scripts.js?ver=3.8.1"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/page-scroll-to-id/js/jquery.malihu.PageScroll2id.js?ver=1.5.6"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
 var mPS2id_params = {"instances":{"mPS2id_instance_0":{"selector":{"value":"a[rel='m_PageScroll2id']","values":null,"id":"page_scroll_to_id_0_selector","field_type":"text","label":"Selector(s)","checkbox_label":null,"radio_labels":null,"field_info":null,"description":"The link(s) that will scroll the page when clicked. Defaults to all links with <code>m_PageScroll2id<\/code> rel attribute value","wrapper":null},"scrollSpeed":{"value":1300,"values":null,"id":"page_scroll_to_id_0_scrollSpeed","field_type":"text-integer","label":"Scroll animation speed","checkbox_label":null,"radio_labels":null,"field_info":"milliseconds","description":"Scroll animation speed in milliseconds (1000 milliseconds equals 1 second)","wrapper":null},"autoScrollSpeed":{"value":"true","values":null,"id":"page_scroll_to_id_0_autoScrollSpeed","field_type":"checkbox","label":"","checkbox_label":"Auto-adjust animation speed","radio_labels":null,"field_info":null,"description":"Auto-adjust animation speed according to target element position and window scroll","wrapper":"fieldset"},"scrollEasing":{"value":"easeInOutExpo","values":"linear,swing,easeInQuad,easeOutQuad,easeInOutQuad,easeInCubic,easeOutCubic,easeInOutCubic,easeInQuart,easeOutQuart,easeInOutQuart,easeInQuint,easeOutQuint,easeInOutQuint,easeInExpo,easeOutExpo,easeInOutExpo,easeInSine,easeOutSine,easeInOutSine,easeInCirc,easeOutCirc,easeInOutCirc,easeInElastic,easeOutElastic,easeInOutElastic,easeInBack,easeOutBack,easeInOutBack,easeInBounce,easeOutBounce,easeInOutBounce","id":"page_scroll_to_id_0_scrollEasing","field_type":"select","label":"Scroll animation easing","checkbox_label":null,"radio_labels":null,"field_info":null,"description":"Animation easing when page is idle","wrapper":null},"scrollingEasing":{"value":"easeInOutCirc","values":"linear,swing,easeInQuad,easeOutQuad,easeInOutQuad,easeInCubic,easeOutCubic,easeInOutCubic,easeInQuart,easeOutQuart,easeInOutQuart,easeInQuint,easeOutQuint,easeInOutQuint,easeInExpo,easeOutExpo,easeInOutExpo,easeInSine,easeOutSine,easeInOutSine,easeInCirc,easeOutCirc,easeInOutCirc,easeInElastic,easeOutElastic,easeInOutElastic,easeInBack,easeOutBack,easeInOutBack,easeInBounce,easeOutBounce,easeInOutBounce","id":"page_scroll_to_id_0_scrollingEasing","field_type":"select","label":"","checkbox_label":null,"radio_labels":null,"field_info":null,"description":"Animation easing while page is animating","wrapper":null},"pageEndSmoothScroll":{"value":"true","values":null,"id":"page_scroll_to_id_0_pageEndSmoothScroll","field_type":"checkbox","label":"Scroll-to position","checkbox_label":"Auto-adjust","radio_labels":null,"field_info":null,"description":"Auto-adjust the scroll-to position so it does not exceed document length","wrapper":"fieldset"},"layout":{"value":"vertical","values":"vertical,horizontal,auto","id":"page_scroll_to_id_0_layout","field_type":"radio","label":"Page layout","checkbox_label":null,"radio_labels":"vertical|horizontal|auto","field_info":null,"description":"Restrict page scrolling to top-bottom (vertical) or left-right (horizontal) accordingly. For both vertical and horizontal scrolling select <code>auto<\/code>","wrapper":"fieldset"},"offset":{"value":0,"values":null,"id":"page_scroll_to_id_0_offset","field_type":"text","label":"Offset","checkbox_label":null,"radio_labels":null,"field_info":"pixels","description":"Offset scroll-to position by x amount of pixels (positive or negative) or by selector (e.g. <code>#navigation-menu<\/code>)","wrapper":null},"highlightSelector":{"value":"","values":null,"id":"page_scroll_to_id_0_highlightSelector","field_type":"text","label":"Highlight selector(s)","checkbox_label":null,"radio_labels":null,"field_info":null,"description":"The link(s) that are highlighted. Leave empty to highlight all or enter your specific selector(s)","wrapper":null},"clickedClass":{"value":"mPS2id-clicked","values":null,"id":"page_scroll_to_id_0_clickedClass","field_type":"text","label":"Classes","checkbox_label":null,"radio_labels":null,"field_info":"class name","description":"Class of the clicked link","wrapper":null},"targetClass":{"value":"mPS2id-target","values":null,"id":"page_scroll_to_id_0_targetClass","field_type":"text","label":"","checkbox_label":null,"radio_labels":null,"field_info":"class name","description":"Class of the (current) target element. First (current) target element class suffix: <code>-first<\/code> (e.g. <code>.mPS2id-target-first<\/code>). Last (current) target element class suffix: <code>-last<\/code> (e.g. <code>.mPS2id-target-last<\/code>)","wrapper":null},"highlightClass":{"value":"mPS2id-highlight","values":null,"id":"page_scroll_to_id_0_highlightClass","field_type":"text","label":"","checkbox_label":null,"radio_labels":null,"field_info":"class name","description":"Class of the (current) highlighted element. First (current) highlighted element class suffix: <code>-first<\/code> (e.g. <code>.mPS2id-highlight-first<\/code>). Last (current) highlighted element class suffix: <code>-last<\/code> (e.g. <code>.mPS2id-highlight-last<\/code>)","wrapper":null},"forceSingleHighlight":{"value":"false","values":null,"id":"page_scroll_to_id_0_forceSingleHighlight","field_type":"checkbox","label":"","checkbox_label":"Force single highlight","radio_labels":null,"field_info":null,"description":"Allow only one highlighted element at a time","wrapper":"fieldset"},"keepHighlightUntilNext":{"value":"false","values":null,"id":"page_scroll_to_id_0_keepHighlightUntilNext","field_type":"checkbox","label":"","checkbox_label":"Keep highlight until next","radio_labels":null,"field_info":null,"description":"Keep the current element highlighted until the next one comes into view","wrapper":"fieldset"},"scrollToHash":{"value":"false","values":null,"id":"page_scroll_to_id_0_scrollToHash","field_type":"checkbox","label":"Scroll to location hash","checkbox_label":"Enable","radio_labels":null,"field_info":null,"description":"Scroll to target id (e.g. <code>&lt;div id=\"id\" \/&gt;<\/code>) based on location hash (e.g. <code>mysite.com\/mypage#id<\/code>) on page load","wrapper":"fieldset"},"disablePluginBelow":{"value":0,"values":null,"id":"page_scroll_to_id_0_disablePluginBelow","field_type":"text","label":"Disable plugin below","checkbox_label":null,"radio_labels":null,"field_info":"screen-size","description":"Set the width,height screen-size (in pixels), below which the plugin will be disabled (e.g. <code>1024<\/code>, <code>1024,600<\/code>)","wrapper":null}}},"total_instances":"1","shortcode_class":"_ps2id"};
 /* ]]> */
 </script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/page-scroll-to-id/js/jquery.malihu.PageScroll2id-init.js?ver=1.5.6"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-includes/js/comment-reply.min.js?ver=3.9.1"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/themes/spacious-pro/js/navigation.js?ver=3.9.1"></script>
-<script type="text/javascript" src="http://seadwp.sites.uofmhosting.net/wp-content/plugins/google-maps-widget/js/jquery.colorbox-min.js?ver=1.66"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/page-scroll-to-id/js/jquery.malihu.PageScroll2id-init.js?ver=1.5.6"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-includes/js/comment-reply.min.js?ver=3.9.1"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/themes/spacious-pro/js/navigation.js?ver=3.9.1"></script>
+<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/google-maps-widget/js/jquery.colorbox-min.js?ver=1.66"></script>
 
 
 

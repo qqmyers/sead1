@@ -15,15 +15,18 @@ div#banner {
 	height: 85px;
 }
 #xmlBody {
-	width: 90%; 
+	width: 96%; 
 	padding-top: 10px; 
 margin-top: 40px;
-	margin-left: 0px; 
-	margin-right: 0px;
+	margin-left: auto; 
+	margin-right: auto;
 }
 
 #home-loading {
 
+}
+#exportForm {
+padding-bottom:30px;
 }
 
 /* Sorted table for spreadsheet preview */
@@ -43,6 +46,9 @@ table.tablesorter tbody tr {
   width:1px;
 }
 
+.sead-scope <p> {
+font-family:initial;
+}
 table.tablesorter tbody tr:nth-child(odd) td {
 	background-color:#F0F0F6;
 
@@ -100,3 +106,4 @@ table.tablesorter tbody tr td:nth-child(n+3) {
 table.tablesorter tbody tr td:last-child {
 	text-align:left;
 }
+
