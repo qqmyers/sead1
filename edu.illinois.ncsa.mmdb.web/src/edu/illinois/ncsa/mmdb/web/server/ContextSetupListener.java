@@ -121,7 +121,7 @@ public class ContextSetupListener implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent arg0) {
         timer.cancel();
-        TupeloStore.getInstance().shutdownExtractorExector(true);
+        TupeloStore.getInstance().shutdownExtractorExecutor(true);
     }
 
     /* (non-Javadoc)
