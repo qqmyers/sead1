@@ -527,7 +527,7 @@ public class ItemServicesImpl
      * 
      */
     @SuppressWarnings("unchecked")
-    protected static Map<String, Object> buildResultMap(Table<Resource> table, Map<String, Object> context, List<String> names, boolean useHierarchy, FilterCallback filter) throws Exception {
+    protected static Map<String, Object> buildResultMap(Table<Resource> table, Map<String, Object> context, List<String> names, boolean useHierarchy, FilterCallback filter) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
         for (Tuple<Resource> tu : table ) {
@@ -562,7 +562,7 @@ public class ItemServicesImpl
             }
         }
         if (result.isEmpty()) {
-            throw new Exception("Empty result");
+            log.debug("Empty result");
         }
         result.put("@context", context);
         return result;
@@ -648,14 +648,8 @@ public class ItemServicesImpl
             return Response.status(500).entity("Error getting information about " + baseId.toString()).build();
         }
 
-        try {
-            result = buildResultMap(results, context, names, true, null);
-            return Response.status(200).entity(result).build();
-        } catch (Exception e) {
-            //No results just means an empty list, which is OK
-            result.put("@context", context);
-            return Response.status(200).entity(result).build();
-        }
+        result = buildResultMap(results, context, names, true, null);
+        return Response.status(200).entity(result).build();
     }
 
     protected boolean isDeleted(String objectId) throws OperatorException {
@@ -749,10 +743,7 @@ public class ItemServicesImpl
             });
         } catch (Exception e) {
             log.debug("Exception during processing: " + e.getMessage());
-            e.printStackTrace();
-
-            //Nothing found
-            return Response.status(404).entity("Items Not Found").build();
+            return Response.status(500).entity("Error retrieving items").build();
         }
         return Response.status(200).entity(result).build();
     }
