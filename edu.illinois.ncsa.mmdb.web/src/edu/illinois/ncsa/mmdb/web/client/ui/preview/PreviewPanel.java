@@ -100,8 +100,6 @@ public class PreviewPanel extends Composite {
     /** List of widgets used to show dataset */
     private List<PreviewBeanWidget>                  widgets;
 
-    private DatasetBean                              dataset;
-
     /** Mapping from widget to corresponding anchor */
     private final Map<PreviewBeanWidget, Anchor>     anchors             = new HashMap<PreviewBeanWidget, Anchor>();
 
@@ -249,7 +247,7 @@ public class PreviewPanel extends Composite {
      * @param uri
      */
     public void drawPreview(final GetDatasetResult result, FlowPanel leftColumn, String uri) {
-        dataset = result.getDataset();
+        DatasetBean dataset = result.getDataset();
         widgets = getOrderedBeans(result, leftColumn.getOffsetWidth());
         anchors.clear();
 
@@ -365,10 +363,10 @@ public class PreviewPanel extends Composite {
      * @return ordered list of all preview beans.
      */
     private List<PreviewBeanWidget> getOrderedBeans(GetDatasetResult result, int maxwidth) {
+        DatasetBean dataset = result.getDataset();
+
         boolean hasMultiVideo = false;
         boolean hasMultiImage = false;
-
-        boolean isGoogleViewable = PreviewGViewerDocumentBeanWidget.isGoogleViewable(result.getDataset());
 
         List<PreviewBeanWidget> list = new ArrayList<PreviewBeanWidget>();
 
@@ -382,19 +380,23 @@ public class PreviewPanel extends Composite {
                 GWT.log("Skipping " + widget.getClass());
                 continue;
             }
+            if (widget instanceof PreviewGViewerDocumentBeanWidget) {
+                boolean isGoogleViewable = PreviewGViewerDocumentBeanWidget.isGoogleViewable(result.getDataset());
 
-            if ((widget instanceof PreviewGViewerDocumentBeanWidget) && isGoogleViewable) {
-                PreviewBeanWidget pbw = widget.newWidget();
-                pbw.setPreviewBean(null);
-                pbw.setDatasetBean(dataset);
-                pbw.setDispatch(dispatchAsync);
-                pbw.setEmbedded(isEmbedded);
-                if (isEmbedded) {
-                    pbw.setWidth(width);
-                    pbw.setHeight(height);
+                if (isGoogleViewable) {
+                    @SuppressWarnings("unchecked")
+                    PreviewBeanWidget<PreviewGViewerDocumentBean> pbw = widget.newWidget();
+                    pbw.setPreviewBean(new PreviewGViewerDocumentBean());
+                    pbw.setDatasetBean(dataset);
+                    pbw.setDispatch(dispatchAsync);
+                    pbw.setEmbedded(isEmbedded);
+                    if (isEmbedded) {
+                        pbw.setWidth(width);
+                        pbw.setHeight(height);
+                    }
+
+                    list.add(pbw);
                 }
-
-                list.add(pbw);
                 continue;
             } else {
                 PreviewBean best = null;

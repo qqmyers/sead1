@@ -16,6 +16,6 @@ package edu.illinois.ncsa.mmdb.web.client.ui.preview;
 
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
-public class PreviewGoogleDocumentBean extends PreviewBean {
+public class PreviewGViewerDocumentBean extends PreviewBean {
 
 }
