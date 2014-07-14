@@ -31,7 +31,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetServiceTokenResult;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
-public class PreviewGViewerDocumentBeanWidget extends PreviewBeanWidget<PreviewGoogleDocumentBean> {
+public class PreviewGViewerDocumentBeanWidget extends PreviewBeanWidget<PreviewGViewerDocumentBean> {
     private final Panel widget;
 
     public PreviewGViewerDocumentBeanWidget(HandlerManager eventBus) {
@@ -42,13 +42,13 @@ public class PreviewGViewerDocumentBeanWidget extends PreviewBeanWidget<PreviewG
     }
 
     @Override
-    public PreviewBeanWidget<PreviewGoogleDocumentBean> newWidget() {
+    public PreviewBeanWidget<PreviewGViewerDocumentBean> newWidget() {
         return new PreviewGViewerDocumentBeanWidget(eventBus);
     }
 
     @Override
     public Class<? extends PreviewBean> getPreviewBeanClass() {
-        return PreviewGoogleDocumentBean.class;
+        return PreviewGViewerDocumentBean.class;
     }
 
     @Override
@@ -122,80 +122,90 @@ public class PreviewGViewerDocumentBeanWidget extends PreviewBeanWidget<PreviewG
     private static Set<String> mimetypes  = null;
 
     public static boolean isGoogleViewable(DatasetBean d) {
+        if (d == null) {
+            return false;
+        }
         String mimeType = d.getMimeType();
         String filename = d.getFilename();
         long size = d.getSize();
-        if (size < 1024 * 1024 * 20) {
+        if (size > 0) {
+            if (size < 1024 * 1024 * 20) {
 
-            if (extensions == null) {
-                extensions = new HashSet<String>();
-                //extensions.add("jpg");
-                //extensions.add("jpeg");
-                //extensions.add("png");
-                //extensions.add("gif");
-                //extensions.add("tif");
-                //extensions.add("tiff");
-                //extensions.add("bmp");
-                //extensions.add("mpeg");
-                //extensions.add("mpg");
-                //extensions.add("mp4");
-                //extensions.add("m4a");
-                //extensions.add("m4p");
-                //extensions.add("3gpp");
-                //extensions.add("mov");
-                //extensions.add("avi");
-                //extensions.add("mpegps");
-                extensions.add("ps"); //mpegps and post script
-                //extensions.add("wmv");
-                //extensions.add("flv");
-                //extensions.add("ogg");
-                extensions.add("doc");
-                extensions.add("docx");
-                extensions.add("xls");
-                extensions.add("xlsx");
-                extensions.add("ppt");
-                extensions.add("pptx");
-                extensions.add("pdf");
-                extensions.add("svg");
-                extensions.add("eps");
-                extensions.add("xps");
-                extensions.add("mts");
-                extensions.add("ttf");
+                if (extensions == null) {
+                    extensions = new HashSet<String>();
+                    //extensions.add("jpg");
+                    //extensions.add("jpeg");
+                    //extensions.add("png");
+                    //extensions.add("gif");
+                    //extensions.add("tif");
+                    //extensions.add("tiff");
+                    //extensions.add("bmp");
+                    //extensions.add("mpeg");
+                    //extensions.add("mpg");
+                    //extensions.add("mp4");
+                    //extensions.add("m4a");
+                    //extensions.add("m4p");
+                    //extensions.add("3gpp");
+                    //extensions.add("mov");
+                    //extensions.add("avi");
+                    //extensions.add("mpegps");
+                    extensions.add("ps"); //mpegps and post script
+                    //extensions.add("wmv");
+                    //extensions.add("flv");
+                    //extensions.add("ogg");
+                    extensions.add("doc");
+                    extensions.add("docx");
+                    extensions.add("xls");
+                    extensions.add("xlsx");
+                    extensions.add("ppt");
+                    extensions.add("pptx");
+                    extensions.add("pdf");
+                    extensions.add("svg");
+                    extensions.add("eps");
+                    extensions.add("xps");
+                    extensions.add("mts");
+                    extensions.add("ttf");
 
-                mimetypes = new HashSet<String>();
-                //Could retrieve these from MimeMap via a handler... 
-                mimetypes.add("application/msword");
-                mimetypes.add("application/pdf");
-                mimetypes.add("application/postscript");
-                mimetypes.add("application/vnd.ms-excel");
-                mimetypes.add("application/vnd.ms-powerpoint");
-                mimetypes.add("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-                mimetypes.add("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-                mimetypes.add("application/vnd.openxmlformats-officedocument.presentationml.presentation");
-                //mimetypes.add("application/x-troff-msvideo");
-                //mimetypes.add("image/bmp");
-                //mimetypes.add("image/gif");
-                //mimetypes.add("image/jpeg");
-                //mimetypes.add("image/png");
-                //mimetypes.add("image/tiff");
-                //mimetypes.add("video/mpeg");
-                //mimetypes.add("video/quicktime");
-                //mimetypes.add("video/x-msvideo");
-                //mimetypes.add("video/avchd");
-            }
-            int index = filename.lastIndexOf(".");
-            if (index != -1) {
-                String ext = filename.substring(index + 1);
+                    mimetypes = new HashSet<String>();
+                    //Could retrieve these from MimeMap via a handler... 
+                    mimetypes.add("application/msword");
+                    mimetypes.add("application/pdf");
+                    mimetypes.add("application/postscript");
+                    mimetypes.add("application/vnd.ms-excel");
+                    mimetypes.add("application/vnd.ms-powerpoint");
+                    mimetypes.add("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                    mimetypes.add("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                    mimetypes.add("application/vnd.openxmlformats-officedocument.presentationml.presentation");
+                    //mimetypes.add("application/x-troff-msvideo");
+                    //mimetypes.add("image/bmp");
+                    //mimetypes.add("image/gif");
+                    //mimetypes.add("image/jpeg");
+                    //mimetypes.add("image/png");
+                    //mimetypes.add("image/tiff");
+                    //mimetypes.add("video/mpeg");
+                    //mimetypes.add("video/quicktime");
+                    //mimetypes.add("video/x-msvideo");
+                    //mimetypes.add("video/avchd");
+                }
 
-                for (String s : extensions ) {
-                    if (s.equalsIgnoreCase(ext)) {
-                        return true;
+                if (filename != null) {
+                    int index = filename.lastIndexOf(".");
+                    if (index != -1) {
+                        String ext = filename.substring(index + 1);
+
+                        for (String s : extensions ) {
+                            if (s.equalsIgnoreCase(ext)) {
+                                return true;
+                            }
+                        }
                     }
                 }
-            }
-            for (String m : mimetypes ) {
-                if (m.equals(mimeType)) {
-                    return true;
+                if (mimeType != null) {
+                    for (String m : mimetypes ) {
+                        if (m.equals(mimeType)) {
+                            return true;
+                        }
+                    }
                 }
             }
         }
