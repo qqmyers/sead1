@@ -299,7 +299,7 @@ public class UploadPage extends Page {
         Label captureLabel = new Label("Capture Data From the Web");
         captureLabel.addStyleName("importTitle");
         panel.add(captureLabel);
-        Label captureDetails = new Label("[To capture: save the following link as a bookmark in your browser. Then, when you're at a URL with data, click the bookmark. Note: Currently, the URL must be for the data itself, not a page containing a link to the data. The data must also be public.");
+        Label captureDetails = new Label("To capture: save the following link as a bookmark in your browser. Then, when you're viewing the data or on a page with a download link for it, click the bookmark.  Note: The data must be public.");
         captureDetails.addStyleName("smallText");
         panel.add(captureDetails);
 
