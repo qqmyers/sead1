@@ -160,7 +160,7 @@ public class Mail {
                 "Welcome to the SEAD project space for %s! You've been invited by an " +
                 "administrator to access and contribute to the data being developed by the project using SEAD's Project Spaces, " +
                 "a set of tools that makes it easy for scientists to collect and manage active data." + "\n\n" +
-                "A user account at %s has been created using your email address. If the email is a Google address, you can login " +
+                "A user account at %s has been created using your email address. If this email is associated with a Google account, you can login " +
                 "using your Google password. Otherwise, use the temporary password %s to login (after logging in, change your password " +
                 "by going to Home > Profile). The full list of your project spaces's services can be accessed via %s." + "\n\n" +
                 "We also encourage you to create a SEAD Research Network profile: http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/." + "\n\n" +
