@@ -135,11 +135,15 @@ public class Mail {
         TupeloStore ts = TupeloStore.getInstance();
         String server = ts.getConfiguration(ConfigurationKey.MediciName);
         String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
-        String subject = presubj + " New User";
-        StringBuilder body = new StringBuilder();
-        body.append(String.format("A new user has registered on server %s\n\n", server));
-        body.append(String.format("NAME  : %s\n", user.getName()));
-        body.append(String.format("EMAIL : %s\n", user.getEmail()));
+        String projName = ts.getConfiguration(ConfigurationKey.ProjectName);
+        String subject = presubj + " New User Has Requested Access to Your Project Space";
+        String body = String.format("A new user has registered membership to the SEAD " +
+                "%s project space. Please visit the \"inactive users\" list at %s to grant the person listed below " +
+                "permission and assign them a role. If this person should not have access, it's not necessary to take " +
+                "any further action." + "\n\n" +
+                "NAME:%s" + "\n" +
+                "EMAIL:%s" + "\n", projName, "http://" + server + "/acr/#administration", user.getName(), user.getEmail());
+        log.debug("email subject:" + subject);
         try {
             sendMessage(getAdminEmail(), null, subject, body.toString()); //$NON-NLS-1$
         } catch (MessagingException e) {
