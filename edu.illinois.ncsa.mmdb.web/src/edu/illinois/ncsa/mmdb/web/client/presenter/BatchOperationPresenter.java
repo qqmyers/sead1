@@ -89,7 +89,6 @@ import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.DownloadDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
 import edu.illinois.ncsa.mmdb.web.client.view.CreateCollectionDialogView;
-import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
 import edu.illinois.ncsa.mmdb.web.client.view.TagDialogViewWSuggest;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 
@@ -231,7 +230,24 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 if (selectionEmpty()) {
                     return;
                 }
-                TagDialogView tagView = new TagDialogView(title("Remove tag(s) from %s"));
+                final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+                service.execute(new GetAllTags(), new AsyncCallback<GetTagsResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error getting tags", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(GetTagsResult result) {
+                        if (result.getTags().size() != 0) {
+                            for (String s : result.getTags().keySet() ) {
+                                oracle.add(s);
+                            }
+                        }
+                    }
+                });
+
+                TagDialogViewWSuggest tagView = new TagDialogViewWSuggest(title("Remove tag(s) from %s"), oracle);
                 TagDialogPresenter tagPresenter = new TagDialogPresenter(service, eventBus, tagView, true);
                 tagPresenter.bind();
                 tagPresenter.setSelectedResources(sessionState.getSelectedItems());
