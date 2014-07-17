@@ -137,13 +137,10 @@ public class Mail {
         String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
         String projName = ts.getConfiguration(ConfigurationKey.ProjectName);
         String subject = presubj + " New User Has Requested Access to Your Project Space";
-        String body = String.format("A new user has registered membership to the SEAD " +
-                "%s project space. Please visit the \"inactive users\" list at %s to grant the person listed below " +
-                "permission and assign them a role. If this person should not have access, it's not necessary to take " +
-                "any further action." + "\n\n" +
-                "NAME:%s" + "\n" +
-                "EMAIL:%s" + "\n", projName, "http://" + server + "/acr/#administration", user.getName(), user.getEmail());
-        log.debug("email subject:" + subject);
+        String body = String.format("%s [%s] has requested access to the %s SEAD " +
+                "Project Space. Please visit the \"inactive users\" list at %s to assign %s " +
+                "a role with appropriate permissions. If this person should not have access, it's not necessary to take " +
+                "any further action." + "\n", user.getName(), user.getEmail(), projName, "http://" + server + "/acr/#administration", user.getName());
         try {
             sendMessage(getAdminEmail(), null, subject, body.toString()); //$NON-NLS-1$
         } catch (MessagingException e) {
