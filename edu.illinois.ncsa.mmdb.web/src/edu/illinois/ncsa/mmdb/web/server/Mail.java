@@ -142,7 +142,7 @@ public class Mail {
                 "a role with appropriate permissions. If this person should not have access, it's not necessary to take " +
                 "any further action." + "\n", user.getName(), user.getEmail(), projName, "http://" + server + "/acr/#administration", user.getName());
         try {
-            sendMessage(getAdminEmail(), null, subject, body.toString()); //$NON-NLS-1$
+            sendMessage(getAdminEmail(), null, subject, body); //$NON-NLS-1$
         } catch (MessagingException e) {
             log.error(String.format("Could not send email to admins about '%s'.", subject), e);
         }
