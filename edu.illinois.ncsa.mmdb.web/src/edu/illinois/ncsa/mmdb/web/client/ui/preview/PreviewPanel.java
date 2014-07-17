@@ -50,7 +50,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
@@ -58,10 +57,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
-import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEvent;
@@ -69,7 +65,6 @@ import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEventHandler
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEventHandler;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
-import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 import edu.uiuc.ncsa.cet.bean.PreviewBean;
@@ -86,14 +81,14 @@ public class PreviewPanel extends Composite {
     private PreviewBeanWidget<? extends PreviewBean> previewWidget;
 
     /** Mapping from preview to widget */
-    private static List<PreviewBeanWidget>           registeredDataWidgets        = new ArrayList<PreviewBeanWidget>();
-    private static List<PreviewBeanWidget>           registeredCollectionaWidgets = new ArrayList<PreviewBeanWidget>();
+    private static List<PreviewBeanWidget>           registeredDataWidgets       = new ArrayList<PreviewBeanWidget>();
+    private static List<PreviewBeanWidget>           registeredCollectionWidgets = new ArrayList<PreviewBeanWidget>();
 
     /** Check to see if all previews are added. */
-    private static boolean                           isInitialized                = false;
+    private static boolean                           isInitialized               = false;
 
     /** Check to see if this Panel is initialized to display collection previews */
-    private boolean                                  collectionPreviewer          = false;
+    private boolean                                  collectionPreviewer         = false;
 
     /** Panel that will hold the actual preview widget */
     private AbsolutePanel                            previewPanel;
@@ -102,56 +97,38 @@ public class PreviewPanel extends Composite {
     private List<PreviewBeanWidget>                  widgets;
 
     /** Mapping from widget to corresponding anchor */
-    private final Map<PreviewBeanWidget, Anchor>     anchors                      = new HashMap<PreviewBeanWidget, Anchor>();
+    private final Map<PreviewBeanWidget, Anchor>     anchors                     = new HashMap<PreviewBeanWidget, Anchor>();
 
     private final DispatchAsync                      dispatchAsync;
     private final HandlerManager                     eventBus;
 
+    private static boolean                           useGoogleDocViewer          = false;
     /** Width and height values only use in embedded widget */
     private static boolean                           isEmbedded;
     private final int                                width;
     private final int                                height;
-    private static final int                         MAX_WIDTH                    = 600;
+    private static final int                         MAX_WIDTH                   = 600;
     private HorizontalPanel                          anchorTabs;
 
-    static private void initializePreviews(DispatchAsync dispatchAsync, final HandlerManager eventBus, boolean collectionPreviewer) {
+    static public void setUseGoogleDocViewer(boolean b) {
+        useGoogleDocViewer = b;
+    }
+
+    static private void initializePreviews(DispatchAsync dispatchAsync, final HandlerManager eventBus) {
         if (isInitialized) {
             return;
         }
         isInitialized = true;
-
         //register dataset specific previewers here.
         //Left to right tab order in the GUI follows the order here and the first matching one is displayed by default (leftmost tab)
         //The following previews currently not supported in embedded previewer
         if (!isEmbedded) {
             registeredDataWidgets.add(new PreviewMultiTabularDataBeanWidget(eventBus));
         }
-        //Check UseGoogleDocViewer flag and then add it (or not) followed by others
-        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.UseGoogleDocViewer), new AsyncCallback<ConfigurationResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Could not get UseGoogleDocViewer config flag", caught);
-                setMoreDatasetPreviewers(isEmbedded, eventBus);
-
-            }
-
-            @Override
-            public void onSuccess(ConfigurationResult result) {
-                registeredDataWidgets.add(new PreviewGViewerDocumentBeanWidget(eventBus));
-                setMoreDatasetPreviewers(isEmbedded, eventBus);
-
-            }
-        });
-
-        //register collection specific previewers here.
-        registeredCollectionaWidgets.add(new PreviewImageBeanWidget(eventBus));
-        registeredCollectionaWidgets.add(new PreviewCollectionMultiImageBeanWidget(eventBus));
-        //            registeredCollectionaWidgets.add(new PreviewGeoPointBeanWidget(eventBus));
-        //            registeredCollectionaWidgets.add(new PreviewGeoserverCollectionBeanWidget(eventBus));
-        registeredCollectionaWidgets.add(new PreviewGeoCollectionBeanWidget(eventBus));
-    }
-
-    private static void setMoreDatasetPreviewers(boolean isEmbedded, HandlerManager eventBus) {
+        //Flag set to config value in MMDB.java /default is false (e.g. when Embed.java is the entry point)
+        if (useGoogleDocViewer && !isEmbedded) {
+            registeredDataWidgets.add(new PreviewGViewerDocumentBeanWidget(eventBus));
+        }
         if (!isEmbedded) {
             registeredDataWidgets.add(new PreviewMultiImageBeanWidget(eventBus));
         }
@@ -162,13 +139,19 @@ public class PreviewPanel extends Composite {
         registeredDataWidgets.add(new PreviewTabularDataBeanWidget(eventBus));
         registeredDataWidgets.add(new PreviewImageBeanWidget(eventBus));
         registeredDataWidgets.add(new PreviewPyramidBeanWidget(eventBus));
-
         registeredDataWidgets.add(new Preview3DHTML5BeanWidget(eventBus));
         registeredDataWidgets.add(new Preview3DWebGLBeanWidget(eventBus));
         registeredDataWidgets.add(new Preview3DJavaBeanWidget(eventBus));
         registeredDataWidgets.add(new PreviewPTMBeanWidget(eventBus));
         registeredDataWidgets.add(new PreviewGeoserverBeanWidget(eventBus));
         registeredDataWidgets.add(new PreviewTimeseriesBeanWidget(eventBus));
+        //register collection specific previewers here.
+        registeredCollectionWidgets.add(new PreviewImageBeanWidget(eventBus));
+        registeredCollectionWidgets.add(new PreviewCollectionMultiImageBeanWidget(eventBus));
+        //            registeredCollectionWidgets.add(new PreviewGeoPointBeanWidget(eventBus));
+        //            registeredCollectionWidgets.add(new PreviewGeoserverCollectionBeanWidget(eventBus));
+        registeredCollectionWidgets.add(new PreviewGeoCollectionBeanWidget(eventBus));
+
     }
 
     public PreviewPanel(DispatchAsync dispatchAsync, HandlerManager eventBus) {
@@ -187,7 +170,7 @@ public class PreviewPanel extends Composite {
         this.dispatchAsync = dispatchAsync;
         this.isEmbedded = isEmbedded;
         this.collectionPreviewer = collectionPreviewer;
-        initializePreviews(dispatchAsync, eventBus, collectionPreviewer);
+        initializePreviews(dispatchAsync, eventBus);
 
         previewWidget = null;
 
@@ -361,7 +344,7 @@ public class PreviewPanel extends Composite {
 
         List<PreviewBeanWidget> list = new ArrayList<PreviewBeanWidget>();
 
-        for (PreviewBeanWidget widget : collectionPreviewer ? registeredCollectionaWidgets : registeredDataWidgets ) {
+        for (PreviewBeanWidget widget : collectionPreviewer ? registeredCollectionWidgets : registeredDataWidgets ) {
 
             if ((widget instanceof PreviewVideoBeanWidget) && hasMultiVideo) {
                 GWT.log("Skipping " + widget.getClass());

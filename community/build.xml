@@ -23,7 +23,7 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH 
 	THE SOFTWARE. -->
 
-<project name="community" default="war" basedir=".">
+<project name="projects" default="war" basedir=".">
 
 	<property environment="env" />
 

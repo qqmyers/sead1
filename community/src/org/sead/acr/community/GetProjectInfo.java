@@ -47,10 +47,6 @@ public class GetProjectInfo extends HttpServlet {
 	protected static Log log = LogFactory.getLog(GetProjectInfo.class);
 
 	public void init(ServletConfig config) throws ServletException {
-		// FixMe move to filter?
-		// Get Property file parameter
-		String propFile = config.getInitParameter("PropertiesFileName");
-		PropertiesLoader.getProperties(propFile);
 
 		super.init(config);
 	}
