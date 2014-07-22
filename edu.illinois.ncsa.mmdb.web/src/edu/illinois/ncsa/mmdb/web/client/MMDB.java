@@ -110,6 +110,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.UploadPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.admin.AdminPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
@@ -289,7 +290,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
 
-        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData), new AsyncCallback<ConfigurationResult>() {
+        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData, ConfigurationKey.UseGoogleDocViewer), new AsyncCallback<ConfigurationResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Could not get Names", caught);
@@ -302,6 +303,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 projectNameLabel.setText(_projectName);
                 projectNameLabel.setTitle(result.getConfiguration(ConfigurationKey.ProjectDescription));
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
+                PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
             }
         });
 

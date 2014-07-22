@@ -47,9 +47,6 @@ public class GetSystemInfo extends HttpServlet {
 	protected static Log log = LogFactory.getLog(GetSystemInfo.class);
 
 	public void init(ServletConfig config) throws ServletException {
-		// Get Property file parameter
-		String propFile = config.getInitParameter("PropertiesFileName");
-		PropertiesLoader.getProperties(propFile);
 
 		super.init(config);
 	}

@@ -200,7 +200,7 @@ public class CollectionPage extends Composite {
     }
 
     private Widget createMetadataPanel(UserMetadataWidget um) {
-        DisclosurePanel userInformationPanel = new DisclosurePanel("User Specified Information");
+        DisclosurePanel userInformationPanel = new DisclosurePanel("User Specified Metadata");
         userInformationPanel.addStyleName("datasetDisclosurePanel");
         userInformationPanel.setOpen(true);
         userInformationPanel.setAnimationEnabled(true);
