@@ -33,7 +33,7 @@ public class MediciProxyServiceImpl extends ProxiedRemoteServiceServlet
 			tags = MediciRestUtil.getTags(mp);
 		} catch (Exception e) {
 			invalidateSession();
-			log.warn("Error contacting medici: " + e);
+			log.warn("getTags: Error contacting medici: " + e);
 		}
 		if ((tags == null) || (tags.isEmpty())) {
 			return null;
