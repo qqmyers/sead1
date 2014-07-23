@@ -239,7 +239,7 @@ public class DatasetsRestService extends ItemServicesImpl {
                             t.addType(Beans.STORAGE_TYPE_BEAN_ENTRY);
                             t.setValue(Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
                                     Resource.literal("edu.uiuc.ncsa.cet.bean.DatasetBean"));
-                            t.setValue(Dc.IDENTIFIER, Resource.uriRef(id));
+                            t.setValue(Dc.IDENTIFIER, Resource.literal(id));
                             t.setValue(Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
                                     Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/http://cet.ncsa.uiuc.edu/2007/Dataset"));
 

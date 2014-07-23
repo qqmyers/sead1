@@ -400,7 +400,7 @@ public class CollectionsRestService extends ItemServicesImpl {
                         t.addType(Beans.STORAGE_TYPE_BEAN_ENTRY);
                         t.setValue(Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
                                 Resource.literal("edu.uiuc.ncsa.cet.bean.CollectionBean"));
-                        t.setValue(Dc.IDENTIFIER, Resource.uriRef(uri));
+                        t.setValue(Dc.IDENTIFIER, Resource.literal(uri));
                         t.setValue(Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
                                 Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/" + CollectionBeanUtil.COLLECTION_TYPE));
 

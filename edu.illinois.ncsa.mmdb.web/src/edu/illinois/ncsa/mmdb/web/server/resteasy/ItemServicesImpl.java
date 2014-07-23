@@ -732,16 +732,20 @@ public class ItemServicesImpl
                 public boolean include(Tuple<Resource> t) {
                     if (t.get(parentIndex) == null) {
                         UriRef id = null;
-                        if (t.get(0).isLiteral()) {
-                            id = Resource.uriRef(t.get(0).toString());
-                            log.warn("Literal identifier:" + t.get(0).toString());
+                        if (t.get(0) == null) {
+                            log.error("Missing identifier - skipping a dataset");
                         } else {
-                            id = (UriRef) t.get(0);
-                        }
-                        if (isAccessible(userId, id)) {
-                            return true;
-                        } else {
-                            return false;
+                            if (t.get(0).isLiteral()) {
+                                id = Resource.uriRef(t.get(0).toString());
+                            } else {
+                                id = (UriRef) t.get(0);
+                                log.warn("UriRef identifier:" + t.get(0).toString());
+                            }
+                            if (isAccessible(userId, id)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
                         }
                     }
                     return false;
