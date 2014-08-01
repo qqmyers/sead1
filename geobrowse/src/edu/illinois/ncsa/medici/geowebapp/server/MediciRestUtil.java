@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,25 +78,22 @@ public class MediciRestUtil {
 		List<String> uris = new ArrayList<String>();
 
 		String responseBody = mp.executeAuthenticatedGet("/resteasy/tags/"
-				+ tag + "/datasets", null);
+				+ tag + "/layers", null);
 		log.info("tags " + responseBody);
-
-		if (responseBody.startsWith("[")) {
-                    JSONArray jsArray = new JSONArray(responseBody);
-                    for (int i = 0; i < jsArray.length(); i++) {
-                        JSONObject js = jsArray.getJSONObject(i);
-                        String uri = js.getString("uri");
-                        log.debug("UrisByTag: " + uri);
-                        uris.add(uri);
-                    }
-                }
-                if (responseBody.startsWith("{")) {
-                    JSONObject js = new JSONObject(responseBody);
-                    for(String uri : JSONObject.getNames(js)) {
-                        log.debug("UrisByTag: " + uri);
-                        uris.add(uri);
-                    }
-                }
+		/*
+		 * if (responseBody.startsWith("[")) { JSONArray jsArray = new
+		 * JSONArray(responseBody); for (int i = 0; i < jsArray.length(); i++) {
+		 * JSONObject js = jsArray.getJSONObject(i); String uri =
+		 * js.getString("uri"); log.debug("UrisByTag: " + uri); uris.add(uri); }
+		 * }
+		 */
+		if (responseBody.startsWith("{")) {
+			JSONObject js = new JSONObject(responseBody);
+			for (String uri : JSONObject.getNames(js)) {
+				log.debug("UrisByTag: " + uri);
+				uris.add(uri);
+			}
+		}
 
 		return uris;
 	}
@@ -113,8 +111,7 @@ public class MediciRestUtil {
 	public static List<LayerInfo> getLayers(MediciProxy mp)
 			throws MalformedURLException, IOException,
 			org.sead.acr.common.utilities.json.JSONException, JSONException {
-		String layers = mp.getSparqlJSONResponse("query="
-				+ Queries.ALL_WMS_LAYERS_INFO);
+		String layers = mp.executeAuthenticatedGet("/resteasy/datasets/layers", null);
 		log.warn("layers in json: " + layers);
 
 		return parseLayerInfo(layers);
@@ -197,64 +194,25 @@ public class MediciRestUtil {
 
 		// unexpected json error; should throw JSONException to invalidate the
 		// session
-		JSONObject layerObj = new JSONObject(layers);
-		JSONObject sparqlJson = layerObj.getJSONObject("sparql");
-
-		// expect json error; should return null instead of invalidating the
-		// session
-		try {
-		    if (sparqlJson.get("results") instanceof JSONObject) {
-			Object resultObject = sparqlJson.getJSONObject("results").get(
-					"result");
-			JSONArray resultArray = null;
-			if (resultObject instanceof JSONArray) {
-				resultArray = (JSONArray) resultObject;
-			} else {
-				resultArray = new JSONArray();
-				resultArray.put(resultObject);
-			}
-			for (int i = 0; i < resultArray.length(); i++) {
-
-				// getting wmsURL to parse out extents
-				JSONArray jsonArray = resultArray.getJSONObject(i)
-						.getJSONArray("binding");
-
+		JSONObject layersObj = new JSONObject(layers);
+		String[] names = JSONObject.getNames(layersObj);
+		for (String datasetId : names) {
+			if (!datasetId.equals("@context")) {
+				JSONObject layerObj = layersObj.getJSONObject(datasetId);
 				LayerInfo li = new LayerInfo();
 
-				String uri = "";
-				String layerName = "";
-				String layerUrl = "";
-				String extents = "";
-				String deleted = "";
-				String title = "";
-				String srs = "";
-				for (int j = 0; j < jsonArray.length(); j++) {
-					JSONObject entry = jsonArray.getJSONObject(j);
-					if (entry.getString("name").equals("uri")) {
-						uri = entry.getString("uri");
-					} else if (entry.getString("name").equals("layername")) {
-						layerName = entry.getString("literal");
-					} else if (entry.getString("name").equals("title")) {
-						title = entry.getString("literal");
-					} else if (entry.getString("name").equals("layerurl")) {
-						layerUrl = entry.getString("literal");
-						Map<String, String> params = splitQuery(new URL(
-								layerUrl));
-						extents = params.get("bbox");
-						srs = params.get("srs");
-					} else if (entry.getString("name").equals("deleted")) {
-						deleted = entry.getString("uri");
-					}
-				}
+				li.setUri(layerObj.getString("Identifier"));
+				li.setName(layerObj.getString("WMSLayerName"));
+				li.setTitle(layerObj.getString("Title"));
 
-				// if the dataset is deleted, skip
-				if (deleted
-						.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"))
-					continue;
+				String layerUrl = layerObj.getString("WMSLayerUrl");
+				String extents = "";
+				String srs = "";
+
+				Map<String, String> params = splitQuery(new URL(layerUrl));
+				extents = params.get("bbox");
+				srs = params.get("srs");
 				li.setSrs(srs);
-				li.setName(layerName);
-				li.setTitle(title);
-				li.setUri(uri);
 				String[] split = extents.split(",");
 				li.setMinx(Double.parseDouble(split[0]));
 				li.setMiny(Double.parseDouble(split[1]));
@@ -264,12 +222,7 @@ public class MediciRestUtil {
 				layerInfoList.add(li);
 
 			}
-		    }
-		} catch (JSONException e) {
-			log.warn("parseLayerInfo - JSON error", e);
-			return null;
 		}
-
 		return layerInfoList;
 	}
 
