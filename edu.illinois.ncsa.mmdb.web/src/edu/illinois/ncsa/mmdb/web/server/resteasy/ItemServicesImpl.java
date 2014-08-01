@@ -515,7 +515,7 @@ public class ItemServicesImpl
         } catch (Exception e) {
             log.debug(e.getMessage());
 
-            return Response.status(404).entity("Item " + id + " Not Found.").build();
+            return Response.status(500).entity("Error processing id: " + id).build();
         }
 
     }
@@ -608,9 +608,10 @@ public class ItemServicesImpl
             }
         }
         if (result.isEmpty()) {
-            throw new Exception("Empty result");
+            log.debug("Empty result");
+        } else {
+            result.put("@context", context);
         }
-        result.put("@context", context);
         return result;
     }
 
@@ -773,18 +774,23 @@ public class ItemServicesImpl
                 @Override
                 public boolean include(Tuple<Resource> t) {
                     UriRef id = null;
-                    if (t.get(0).isLiteral()) {
-                        id = Resource.uriRef(t.get(0).toString());
+                    if (t.get(0) == null) {
+                        log.error("Missing identifier - skipping a dataset");
                     } else {
-                        id = (UriRef) t.get(0);
-                        log.warn("UriRef identifier:" + t.get(0).toString());
+                        if (t.get(0).isLiteral()) {
+                            id = Resource.uriRef(t.get(0).toString());
+                        } else {
+                            id = (UriRef) t.get(0);
+                            log.warn("UriRef identifier:" + t.get(0).toString());
+                        }
+                        log.debug("U: " + userId.toString() + " O: " + id.toString());
+                        if (isAccessible(userId, id)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
-                    log.debug("U: " + userId.toString() + " O: " + id.toString());
-                    if (isAccessible(userId, id)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return false;
                 }
             });
             return Response.status(200).entity(result).build();
@@ -861,17 +867,22 @@ public class ItemServicesImpl
                 public boolean include(Tuple<Resource> t) {
                     if (t.get(parentIndex) == null) {
                         UriRef id = null;
-                        if (t.get(0).isLiteral()) {
-                            id = Resource.uriRef(t.get(0).toString());
-                            log.warn("Literal identifier:" + t.get(0).toString());
+                        if (t.get(0) == null) {
+                            log.error("Missing identifier - skipping a dataset");
                         } else {
-                            id = (UriRef) t.get(0);
+                            if (t.get(0).isLiteral()) {
+                                id = Resource.uriRef(t.get(0).toString());
+                                log.warn("Literal identifier:" + t.get(0).toString());
+                            } else {
+                                id = (UriRef) t.get(0);
+                            }
+                            if (isAccessible(userId, id)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
                         }
-                        if (isAccessible(userId, id)) {
-                            return true;
-                        } else {
-                            return false;
-                        }
+                        return false;
                     }
                     return false;
                 }
@@ -879,9 +890,7 @@ public class ItemServicesImpl
         } catch (Exception e) {
             log.debug("Exception during processing: " + e.getMessage());
             e.printStackTrace();
-
-            //Nothing found
-            return Response.status(404).entity("Items Not Found").build();
+            return Response.status(500).entity("Error during processing").build();
         }
         return Response.status(200).entity(result).build();
     }
