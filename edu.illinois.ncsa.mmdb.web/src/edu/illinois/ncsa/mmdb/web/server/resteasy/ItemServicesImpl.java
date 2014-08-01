@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,6 +55,7 @@ import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Files;
@@ -65,7 +67,6 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.Memoized;
@@ -74,6 +75,7 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandlerNew;
+import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
@@ -142,7 +144,7 @@ public class ItemServicesImpl
                                                                          put("License", "http://purl.org/dc/terms/license");
                                                                          put("Rights Holder", "http://purl.org/dc/terms/rightsHolder");
                                                                          put("Rights", "http://purl.org/dc/terms/rights");
-                                                                         put("Data Creation Date", Dc.DATE.toString());
+                                                                         put("Date", Dc.DATE.toString());
                                                                          put("Creation Date", Namespaces.dcTerms("created"));
                                                                          put("Size", Files.LENGTH.toString());
                                                                          put("Label", Namespaces.rdfs("label"));
@@ -155,6 +157,21 @@ public class ItemServicesImpl
                                                                          put("Creator", Namespaces.dcTerms("creator"));
                                                                          put("Publication Date", Namespaces.dcTerms("issued"));
 
+                                                                     }
+                                                                 };
+
+    @SuppressWarnings("serial")
+    protected static final Map<String, Object> itemGeoBasics     = new LinkedHashMap<String, Object>() {
+                                                                     {
+                                                                         put("Identifier", Dc.IDENTIFIER.toString());
+                                                                         put("Date", Dc.DATE.toString());
+                                                                         put("Creation Date", Namespaces.dcTerms("created"));
+                                                                         put("Size", Files.LENGTH.toString());
+                                                                         put("Label", Namespaces.rdfs("label"));
+                                                                         put("Mimetype", Dc.FORMAT.toString());
+                                                                         put("Title", Dc.TITLE.toString());
+                                                                         put("WMSLayerName", Cet.cet("metadata/Extractor/WmsLayerName").toString());
+                                                                         put("WMSLayerUrl", Cet.cet("metadata/Extractor/WmsLayerUrl").toString());
                                                                      }
                                                                  };
 
@@ -293,33 +310,45 @@ public class ItemServicesImpl
 
     }
 
-    public static List<Metadata> listExtractedMetadataFields() {
+    private static Memoized<Map<UriRef, String>> extractedMap = null;
 
-        List<Metadata> metadata = new ArrayList<Metadata>();
-        Unifier uf = new Unifier();
-        uf.addPattern("predicate", Rdf.TYPE, MMDB.METADATA_TYPE); //$NON-NLS-1$
-        uf.addPattern("predicate", MMDB.METADATA_CATEGORY, "category"); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addPattern("predicate", Rdfs.LABEL, "label"); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.setColumnNames("label", "predicate", "category"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    public static Map<UriRef, String> listExtractedMetadataFields() {
+        if (extractedMap == null) {
+            extractedMap = new Memoized<Map<UriRef, String>>() {
+                @SuppressWarnings("unchecked")
+                public Map<UriRef, String> computeValue() {
+                    Map<UriRef, String> metadata = new LinkedHashMap<UriRef, String>();
+                    ;
+                    Unifier uf = new Unifier();
+                    uf.addPattern("predicate", Rdf.TYPE, MMDB.METADATA_EXTRACTOR); //$NON-NLS-1$
+                    uf.addPattern("predicate", Rdfs.LABEL, "label"); //$NON-NLS-1$ //$NON-NLS-2$
+                    uf.setColumnNames("label", "predicate"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-        try {
-            TupeloStore.getInstance().getContext().perform(uf);
+                    try {
+                        TupeloStore.getInstance().getContext().perform(uf);
 
-            for (Tuple<Resource> row : uf.getResult() ) {
-                if (row.get(0) != null) {
-                    log.debug("extracted fields found: " + row.get(0).getString());
-                    log.debug(row.get(1).getString());
-                    log.debug(row.get(2).getString());
-                    metadata.add(new Metadata(row.get(2).getString(), row.get(0).getString(), row.get(1).getString()));
+                        for (Tuple<Resource> row : uf.getResult() ) {
+                            if (row.get(0) != null) {
+                                log.debug("extracted fields found: " + row.get(0).getString());
+                                log.debug(row.get(1).getString());
+                                log.debug(row.get(2).getString());
+                                metadata.put(Resource.uriRef(row.get(1).getString()), row.get(0).getString());
+                            }
+                        }
+                    } catch (OperatorException e1) {
+                        log.error("Error getting Extracted Metadata list", e1);
+                    }
+                    return metadata;
                 }
-            }
-        } catch (OperatorException e1) {
-            log.error("Error getting Extracted Metadata list", e1);
+            };
+
+            extractedMap.setTtl(60 * 60 * 1000); // 1 hour
         }
-        return metadata;
+        return extractedMap.getValue();
+
     }
 
-    public Response getItemMetadataAsJSON(String id, UriRef userId) {
+    public Response getItemMetadataAsJSON(String id, UriRef userId, boolean includeExtracted) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
         try {
@@ -345,7 +374,7 @@ public class ItemServicesImpl
             log.error("Error getting metadata for id: " + id + " : " + e.getMessage());
             return Response.status(500).entity("Error getting information about " + id).build();
         }
-        Map<UriRef, String> metadataMap = getPredToLabelMap();
+        Map<UriRef, String> metadataMap = getPredToLabelMap(includeExtracted);
         for (Triple t : tm.getResult() ) {
             UriRef pred = (UriRef) t.getPredicate();
             if (metadataMap.containsKey(pred)) {
@@ -355,12 +384,20 @@ public class ItemServicesImpl
         if (result.isEmpty()) {
             return Response.status(404).entity("Item " + id + " Not Found.").build();
         }
+        Map<String, String> context = new HashMap<String, String>(metadataMap.size());
+
+        for (Entry<UriRef, String> entry : metadataMap.entrySet() ) {
+            context.put(entry.getValue(), entry.getKey().toString());
+        }
+        // Note - since this context comes form simple pred/label info, none of the entries can have the 
+        // value-type info possible with set contexts (see example at top of file)
+        result.put("@context", context);
         return Response.status(200).entity(result).build();
     }
 
     private static Memoized<Map<UriRef, String>> predToLabelMap = null;
 
-    public static Map<UriRef, String> getPredToLabelMap() {
+    public static Map<UriRef, String> getPredToLabelMap(boolean includeExtracted) {
 
         if (predToLabelMap == null) {
             predToLabelMap = new Memoized<Map<UriRef, String>>() {
@@ -395,24 +432,27 @@ public class ItemServicesImpl
                     } catch (ActionException e1) {
                         log.error("Error retrieving relationship predicates" + e1);
                     }
-                    //4) Extracted metadata
-                    List<Metadata> extracted = listExtractedMetadataFields();
-                    for (Metadata md : extracted ) {
-                        metadataMap.put(Resource.uriRef(md.getValue()), md.getLabel());
-                    }
                     return metadataMap;
                 }
             };
+            predToLabelMap.setTtl(60 * 60 * 1000); // 1 hour
         }
-
-        predToLabelMap.setTtl(60 * 60 * 1000); // 1 hour
-        return predToLabelMap.getValue();
+        // extracted fields are memoized/cached separately, just assemble here if needed
+        Map<UriRef, String> fullMap = predToLabelMap.getValue();
+        if (includeExtracted) {
+            fullMap.putAll(listExtractedMetadataFields());
+        }
+        return fullMap;
     }
 
     protected boolean isPermitted(String userId, Permission permission, String objectUri) {
-        Resource userUri = userId == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(userId);
-        Resource permissionUri = Resource.uriRef(permission.getUri());
-        Resource oUri = objectUri != null ? Resource.uriRef(objectUri) : null;
+        UriRef userUri = (UriRef) (userId == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(userId));
+        UriRef permissionUri = Resource.uriRef(permission.getUri());
+        UriRef oUri = objectUri != null ? Resource.uriRef(objectUri) : null;
+        return isPermitted(userUri, oUri, permissionUri);
+    }
+
+    protected boolean isPermitted(UriRef userUri, UriRef oUri, UriRef permissionUri) {
         try {
             if (!rbac.checkPermission(userUri, oUri, permissionUri)) {
                 return false;
@@ -456,7 +496,7 @@ public class ItemServicesImpl
 
         //Get fields
         Unifier uf = new Unifier();
-        uf = populateUnifier(itemUri, uf, context);
+        uf = populateUnifier(itemUri, uf, context, null);
         //Get columns to put in result (all in this case)
         List<String> names = uf.getColumnNames();
         log.debug("names: " + names);
@@ -486,7 +526,7 @@ public class ItemServicesImpl
      * 
      */
     @SuppressWarnings("unchecked")
-    protected static Unifier populateUnifier(Object thing, Unifier uf, Map<String, Object> context) {
+    protected static Unifier populateUnifier(Object thing, Unifier uf, Map<String, Object> context, Set<String> requiredKeys) {
         /*FixME: Note: if the first pattern of an all optional unifier doesn't match, tupelo will return no results
          * even if the other terms would match. So - all contexts should be LinkedHashMaps / other order preserving map
          * and the first entry should be a predicate that is known to be assigned (e.g. dc:identifier). 
@@ -494,6 +534,12 @@ public class ItemServicesImpl
 
         for (String key : context.keySet() ) {
             String pred = null;
+            boolean optional = true;
+            if (requiredKeys != null) {
+                if (requiredKeys.contains(key)) {
+                    optional = false;
+                }
+            }
             Object temp = context.get(key);
             if (temp instanceof String) {
                 pred = (String) temp;
@@ -503,11 +549,11 @@ public class ItemServicesImpl
             UriRef predRef = Resource.uriRef(pred);
             if (thing instanceof UriRef) {
                 log.debug("Adding pattern for id: " + ((UriRef) thing).toString() + " " + predRef.toString() + " " + key);
-                uf.addPattern(thing, predRef, key, true);
+                uf.addPattern(thing, predRef, key, optional);
 
             } else {
                 log.debug("Adding pattern: " + thing + " " + predRef.toString() + " " + key);
-                uf.addPattern(thing, predRef, key, true);
+                uf.addPattern(thing, predRef, key, optional);
 
             }
             uf.addColumnName(key);
@@ -613,10 +659,10 @@ public class ItemServicesImpl
         return getMetadataByRelationship(baseId, false, relationship, context, userId, requestedType);
     }
 
-    protected static Response getMetadataByRelationship(Resource baseId, boolean isSubject, Resource relationship, Map<String, Object> context, UriRef userId, UriRef requestedType) {
+    protected static Response getMetadataByRelationship(Resource baseId, boolean isSubject, Resource relationship, Map<String, Object> context, final UriRef userId, UriRef requestedType) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
-        if (baseId instanceof UriRef) {
+        if (isSubject && (baseId instanceof UriRef)) {
             if (!isAccessible(userId, (UriRef) baseId)) {
 
                 result.put("Error", "Parent Item not accessible");
@@ -635,7 +681,7 @@ public class ItemServicesImpl
         if (requestedType != null) {
             uf.addPattern("thing", Rdf.TYPE, requestedType);
         }
-        uf = populateUnifier("thing", uf, context);
+        uf = populateUnifier("thing", uf, context, null);
 
         //Get column name list before the is-deleted column is added
         List<String> names = uf.getColumnNames();
@@ -647,9 +693,34 @@ public class ItemServicesImpl
             e1.printStackTrace();
             return Response.status(500).entity("Error getting information about " + baseId.toString()).build();
         }
-
+        final int idIndex = names.indexOf("Identifier");
+        log.debug(names);
+        log.debug("idIndex: " + idIndex);
         try {
-            result = buildResultMap(results, context, names, true, null);
+            result = buildResultMap(results, context, names, true, new FilterCallback() {
+                @Override
+                public boolean include(Tuple<Resource> t) {
+                    UriRef id = null;
+                    if (t.get(0) == null) {
+                        log.error("Missing identifier - skipping a dataset");
+                    } else {
+                        if (t.get(idIndex).isLiteral()) {
+
+                            id = Resource.uriRef(t.get(0).toString());
+                        } else {
+                            id = (UriRef) t.get(idIndex);
+                            log.warn("UriRef identifier:" + t.get(0).toString());
+                        }
+                        log.debug("by rel U: " + userId.toString() + " o: " + id.toString());
+                        if (isAccessible(userId, id)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                    return false;
+                }
+            });
             return Response.status(200).entity(result).build();
         } catch (Exception e) {
             //No results just means an empty list, which is OK
@@ -672,11 +743,69 @@ public class ItemServicesImpl
 
     }
 
-    protected Response getItemsByMetadata(String pred, String type, String value, Map<String, Object> context, HttpServletRequest request) {
+    protected Response getItemsThatAreGeoLayers(UriRef itemType, UriRef tag, HttpServletRequest request) {
+        final UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        Map<String, Object> context = itemGeoBasics;
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Unifier uf = new Unifier();
+        uf.addPattern("item", Rdf.TYPE, itemType);
+        if (tag != null) {
+            uf.addPattern("item", Tags.TAGGED_WITH_TAG, tag);
+        }
+        Set<String> requiredKeys = new HashSet<String>();
+        //requiredKeys are the labels, not the preds in the @context
+        requiredKeys.add("WMSLayerUrl");
+        //column 0 must be identifier
+        populateUnifier("item", uf, context, requiredKeys);
+
+        //Get column name list before the is-deleted column is added
+        List<String> names = uf.getColumnNames();
+        log.debug(names);
+        Table<Resource> results = null;
+        try {
+            results = TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
+        } catch (Throwable e1) {
+            log.error("Error getting Geo Layers", e1);
+            return Response.status(500).entity("Error getting Items that are Geo Layers").build();
+        }
+        try {
+            result = buildResultMap(results, context, names, true, new FilterCallback() {
+                @Override
+                public boolean include(Tuple<Resource> t) {
+                    UriRef id = null;
+                    if (t.get(0).isLiteral()) {
+                        id = Resource.uriRef(t.get(0).toString());
+                    } else {
+                        id = (UriRef) t.get(0);
+                        log.warn("UriRef identifier:" + t.get(0).toString());
+                    }
+                    log.debug("U: " + userId.toString() + " O: " + id.toString());
+                    if (isAccessible(userId, id)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+            return Response.status(200).entity(result).build();
+        } catch (Exception e) {
+            //No results just means an empty list, which is OK
+            result.put("@context", context);
+            return Response.status(200).entity(result).build();
+        }
+    }
+
+    protected Response getItemsByMetadata(String pred, String type, String value, UriRef itemType, HttpServletRequest request) {
         Response r = null;
         Resource base = null;
         Resource relationship = null;
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        Map<String, Object> context = itemGeoBasics;
+        if (itemType.equals(Cet.DATASET)) {
+            context = datasetBasics;
+        } else if (itemType.equals(CollectionBeanUtil.COLLECTION_TYPE)) {
+            context = collectionBasics;
+        }
         try {
             pred = URLDecoder.decode(pred, "UTF-8");
             value = URLDecoder.decode(value, "UTF-8");
@@ -688,12 +817,12 @@ public class ItemServicesImpl
             base = Resource.uriRef(value);
             if ((base != null) && isAccessible(userId, (UriRef) base)) {
 
-                r = getMetadataByReverseRelationship((UriRef) base, relationship, context, userId, null);
+                r = getMetadataByReverseRelationship((UriRef) base, relationship, context, userId, itemType);
             } else {
                 return Response.status(403).entity("Related Item not accessible").build();
             }
         } else if (type.equals("literal")) {
-            r = getMetadataByReverseRelationship(value, relationship, context, userId, null);
+            r = getMetadataByReverseRelationship(value, relationship, context, userId, itemType);
         }
         if (r == null) {
             r = Response.status(500).entity("Error getting information about " + base.toString()).build();
@@ -710,7 +839,7 @@ public class ItemServicesImpl
         uf.addPattern("item", Rdf.TYPE, itemType);
 
         //column 0 must be identifier
-        populateUnifier("item", uf, context);
+        populateUnifier("item", uf, context, null);
         //Must come after to avoid having no result of row 0, column 0 would be null
         uf.addColumnName("parent");
         uf.addPattern("parent", DcTerms.HAS_PART, "item", true);
