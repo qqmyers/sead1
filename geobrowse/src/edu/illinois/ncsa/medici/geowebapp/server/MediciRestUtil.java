@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ public class MediciRestUtil {
 	 * @throws IOException
 	 * @throws JSONException
 	 */
-	public static List<String> getUrisByTag(String tag, MediciProxy mp)
+	private static List<String> getUrisByTag(String tag, MediciProxy mp)
 			throws IOException, JSONException {
 
 		List<String> uris = new ArrayList<String>();
@@ -103,44 +102,13 @@ public class MediciRestUtil {
 	 * 
 	 * @param mp
 	 * @return
-	 * @throws MalformedURLException
 	 * @throws IOException
-	 * @throws org.sead.acr.common.utilities.json.JSONException
 	 * @throws JSONException
 	 */
-	public static List<LayerInfo> getLayers(MediciProxy mp)
-			throws MalformedURLException, IOException,
-			org.sead.acr.common.utilities.json.JSONException, JSONException {
-		String layers = mp.executeAuthenticatedGet("/resteasy/datasets/layers", null);
-		log.warn("layers in json: " + layers);
-
-		return parseLayerInfo(layers);
+	public static List<LayerInfo> getLayers(MediciProxy mp) throws JSONException, IOException {
+		return getLayersByTag(null, mp);
 	}
-
-	/**
-	 * Construct the map of uris and layerInfo as a lookup table
-	 * 
-	 * @param mp
-	 * @return
-	 * @throws MalformedURLException
-	 * @throws IOException
-	 * @throws org.sead.acr.common.utilities.json.JSONException
-	 * @throws JSONException
-	 */
-	public static LinkedHashMap<String, LayerInfo> getLayerInfoMap(
-			MediciProxy mp) throws MalformedURLException, IOException,
-			org.sead.acr.common.utilities.json.JSONException, JSONException {
-		LinkedHashMap<String, LayerInfo> map = new LinkedHashMap<String, LayerInfo>();
-		List<LayerInfo> allLayers = getLayers(mp);
-
-		if (allLayers != null) {
-			for (LayerInfo li : allLayers) {
-				map.put(li.getUri(), li);
-			}
-		}
-		return map;
-	}
-
+	
 	/**
 	 * get the layers filtered by tag
 	 * 
@@ -148,33 +116,21 @@ public class MediciRestUtil {
 	 * @param mp
 	 * @return
 	 * @throws JSONException
-	 * @throws org.sead.acr.common.utilities.json.JSONException
 	 * @throws IOException
-	 * @throws MalformedURLException
 	 */
-	public static List<LayerInfo> getLayersByTag(String tag, MediciProxy mp)
-			throws MalformedURLException, IOException,
-			org.sead.acr.common.utilities.json.JSONException, JSONException {
-
-		List<LayerInfo> layers = new ArrayList<LayerInfo>();
-		List<String> urisByTag = getUrisByTag(tag, mp);
-
-		// if there is no uris with the given tag, don't do anything
-		// if there is uris with the given tag, find the corresponding layers
-		// with the uri
-		if (!urisByTag.isEmpty()) {
-			LinkedHashMap<String, LayerInfo> map = getLayerInfoMap(mp);
-			if (!map.isEmpty()) {
-				for (String uri : map.keySet()) {
-					if (urisByTag.contains(uri)) {
-						layers.add(map.get(uri));
-					}
-				}
-			}
+	public static List<LayerInfo> getLayersByTag(String tag, MediciProxy mp) throws JSONException, IOException
+			{
+		String layers = null;
+		if(tag == null) {
+		layers = mp.executeAuthenticatedGet("/resteasy/datasets/layers", null);
+		} else {
+			layers = mp.executeAuthenticatedGet("/resteasy/tags/" + tag + "/layers", null);
 		}
+		log.warn("layers in json: " + layers);
 
-		return layers;
+		return parseLayerInfo(layers);
 	}
+
 
 	/**
 	 * 
@@ -186,7 +142,7 @@ public class MediciRestUtil {
 	 * @throws MalformedURLException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static List<LayerInfo> parseLayerInfo(String layers)
+	private static List<LayerInfo> parseLayerInfo(String layers)
 			throws MalformedURLException, UnsupportedEncodingException,
 			JSONException {
 
@@ -233,7 +189,7 @@ public class MediciRestUtil {
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static Map<String, String> splitQuery(URL url)
+	private static Map<String, String> splitQuery(URL url)
 			throws UnsupportedEncodingException {
 		Map<String, String> query_pairs = new LinkedHashMap<String, String>();
 		String query = url.getQuery();
@@ -247,7 +203,7 @@ public class MediciRestUtil {
 	}
 
 	/**
-	 * Get all locations of dataset via sparql query
+	 * Get all locations of datasets via sparql query
 	 * 
 	 * @param mp
 	 * @return
@@ -394,7 +350,7 @@ public class MediciRestUtil {
 	 * @throws org.sead.acr.common.utilities.json.JSONException
 	 * @throws JSONException
 	 */
-	public static LinkedHashMap<String, LocationInfo> getLocationInfoMap(
+	private static LinkedHashMap<String, LocationInfo> getLocationInfoMap(
 			MediciProxy mp) throws MalformedURLException, IOException,
 			org.sead.acr.common.utilities.json.JSONException, JSONException {
 		LinkedHashMap<String, LocationInfo> map = new LinkedHashMap<String, LocationInfo>();
