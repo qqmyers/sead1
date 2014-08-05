@@ -135,13 +135,14 @@ public class Mail {
         TupeloStore ts = TupeloStore.getInstance();
         String server = ts.getConfiguration(ConfigurationKey.MediciName);
         String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
-        String subject = presubj + " New User";
-        StringBuilder body = new StringBuilder();
-        body.append(String.format("A new user has registered on server %s\n\n", server));
-        body.append(String.format("NAME  : %s\n", user.getName()));
-        body.append(String.format("EMAIL : %s\n", user.getEmail()));
+        String projName = ts.getConfiguration(ConfigurationKey.ProjectName);
+        String subject = presubj + " New User Has Requested Access to Your Project Space";
+        String body = String.format("%s [%s] has requested access to the %s SEAD " +
+                "Project Space. Please visit the \"inactive users\" list at %s to assign %s " +
+                "a role with appropriate permissions. If this person should not have access, it's not necessary to take " +
+                "any further action." + "\n", user.getName(), user.getEmail(), projName, "http://" + server + "/acr/#administration", user.getName());
         try {
-            sendMessage(getAdminEmail(), null, subject, body.toString()); //$NON-NLS-1$
+            sendMessage(getAdminEmail(), null, subject, body); //$NON-NLS-1$
         } catch (MessagingException e) {
             log.error(String.format("Could not send email to admins about '%s'.", subject), e);
         }
