@@ -75,6 +75,11 @@
 	</servlet>
 	
 	<servlet>
+		<servlet-name>OAuth</servlet-name>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.server.OAuth</servlet-class>
+	</servlet>
+	
+	<servlet>
 		<servlet-name>WebDAV Servlet</servlet-name>
 		<servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
 		<init-param>
@@ -172,6 +177,11 @@
 	<servlet-mapping>
 		<servlet-name>BatchDownload</servlet-name>
 		<url-pattern>/BatchDownload</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>OAuth</servlet-name>
+		<url-pattern>/oauth/*</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>
