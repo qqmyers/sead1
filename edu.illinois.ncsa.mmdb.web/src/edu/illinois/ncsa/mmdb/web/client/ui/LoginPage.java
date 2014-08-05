@@ -236,7 +236,7 @@ public class LoginPage extends Composite {
 
                     @Override
                     public void onSuccess(String userUri, String sessionKey) {
-                        GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
+                        GWT.log("Google authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
                     }
                 });
             }
@@ -246,11 +246,42 @@ public class LoginPage extends Composite {
         table.getFlexCellFormatter().setColSpan(5, 0, 2);
         table.getFlexCellFormatter().setHorizontalAlignment(5, 0, HasAlignment.ALIGN_CENTER);
 
+        // Orcid Oauth2 link
+        Anchor orcidLogin = new Anchor("Login using Orcid credentials");
+        orcidLogin.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                orcidAuthLogin(new AuthenticationCallback() {
+                    @Override
+                    public void onFailure() {
+                        fail();
+                    }
+
+                    @Override
+                    public void onSuccess(String userUri, String sessionKey) {
+                        GWT.log("Orcid authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
+                    }
+                });
+            }
+        });
+
+        table.setWidget(6, 0, orcidLogin);
+        table.getFlexCellFormatter().setColSpan(6, 0, 2);
+        table.getFlexCellFormatter().setHorizontalAlignment(6, 0, HasAlignment.ALIGN_CENTER);
+
         return table;
     }
 
     /**
-     * Login using google oauth2.
+     * Login using Orcid oAuth2.
+     */
+    private void orcidAuthLogin(final AuthenticationCallback callback) {
+        callback.onFailure();
+    }
+
+    /**
+     * Login using Google oAuth2.
      */
     private void googleAuthLogin(final AuthenticationCallback callback) {
 

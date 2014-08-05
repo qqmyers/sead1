@@ -46,7 +46,10 @@ public enum ConfigurationKey {
     GoogleDeviceClientId("google.device_client_id", ""),
 
     //optimizations for big data (many files)
-    BigData("bigdata", "false");
+    BigData("bigdata", "false"),
+
+    // Orcid oAuth 
+    OrcidClientId("orcid.client_id", "");
 
     private final String propertyKey;
     private final String defaultValue;
