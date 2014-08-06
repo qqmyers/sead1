@@ -44,7 +44,8 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.SuggestBox;
 
 /**
  * A simple widget to add a tag to a resource
@@ -54,17 +55,19 @@ import com.google.gwt.user.client.ui.TextBox;
  */
 public class AddTagWidget extends Composite {
 
-    FlowPanel             layout;
-    private final TextBox tagBox;
-    private final Anchor  submitLink;
-    private final Anchor  cancelLink;
+    FlowPanel                layout;
+    private final SuggestBox tagBox;
+    private final Anchor     submitLink;
+    private final Anchor     cancelLink;
 
-    public AddTagWidget() {
+    public AddTagWidget(MultiWordSuggestOracle oracle) {
 
         layout = new FlowPanel();
         initWidget(layout);
         layout.addStyleName("addTags");
-        tagBox = new TextBox();
+        tagBox = new SuggestBox(oracle);
+
+        tagBox.setLimit(5);
         tagBox.setWidth("100px");
         layout.add(tagBox);
 
@@ -89,7 +92,7 @@ public class AddTagWidget extends Composite {
         return cancelLink;
     }
 
-    public TextBox getTagBox() {
+    public SuggestBox getTagBox() {
         return tagBox;
     }
 
