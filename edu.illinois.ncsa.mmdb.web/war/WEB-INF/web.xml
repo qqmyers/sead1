@@ -75,8 +75,13 @@
 	</servlet>
 	
 	<servlet>
-		<servlet-name>OAuth</servlet-name>
-		<servlet-class>edu.illinois.ncsa.mmdb.web.server.OAuth</servlet-class>
+		<servlet-name>OAuthAuthorization</servlet-name>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.server.OAuthAuthorization</servlet-class>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>OAuthCallback</servlet-name>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.server.OAuthCallback</servlet-class>
 	</servlet>
 	
 	<servlet>
@@ -180,8 +185,13 @@
 	</servlet-mapping>
 	
 	<servlet-mapping>
-		<servlet-name>OAuth</servlet-name>
-		<url-pattern>/oauth/*</url-pattern>
+		<servlet-name>OAuthCallback</servlet-name>
+		<url-pattern>/oauth2callback/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>OAuthAuthorization</servlet-name>
+		<url-pattern>/oauth2/auth/*</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>

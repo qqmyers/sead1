@@ -25,10 +25,10 @@ import org.apache.commons.logging.LogFactory;
  * 
  */
 @SuppressWarnings("serial")
-public class OAuth extends HttpServlet {
+public class OAuthCallback extends HttpServlet {
 
     private static final String DEFAULT_PROVIDER = "orcid";
-    private static Log          log              = LogFactory.getLog(OAuth.class);
+    private static Log          log              = LogFactory.getLog(OAuthCallback.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -36,7 +36,7 @@ public class OAuth extends HttpServlet {
         // extract provider from url
         String url = req.getRequestURL().toString();
         log.debug("Requested " + url);
-        Pattern pattern = Pattern.compile(".*/oauth/(.+)");
+        Pattern pattern = Pattern.compile(".*/oauth2callback/(.+)");
         Matcher matcher = pattern.matcher(url);
         matcher.find();
         String provider = DEFAULT_PROVIDER;
