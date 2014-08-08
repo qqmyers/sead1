@@ -575,7 +575,27 @@ public class DatasetsRestService extends ItemServicesImpl {
     @Path("/metadata/{pred}/{type}/{value}")
     @Produces("application/json")
     public Response getDatasetsWithMetadataAsJSON(@PathParam("pred") @Encoded String pred, @PathParam("type") @Encoded String type, @PathParam("value") @Encoded String value, @javax.ws.rs.core.Context HttpServletRequest request) {
-        return getItemsByMetadata(pred, type, value, datasetBasics, request);
+        return getItemsByMetadata(pred, type, value, Cet.DATASET, request);
+    }
+
+    /**
+     * Get unique metadata (i.e. not from an extractor) for the given dataset
+     * (Basic/biblio + user-added
+     * metadata)
+     * 
+     * @param id
+     *            - the URL encoded ID of the dataset
+     * 
+     * @return - the full list of metadata for this dataset as JSON-LD
+     */
+    @GET
+    @Path("/{id}/unique")
+    @Produces("application/json")
+    public Response getDatasetUniqueMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        return getItemMetadataAsJSON(id, userId, false);
+
     }
 
     /**
@@ -593,7 +613,23 @@ public class DatasetsRestService extends ItemServicesImpl {
     public Response getDatasetMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
 
-        return getItemMetadataAsJSON(id, userId);
+        return getItemMetadataAsJSON(id, userId, true);
+
+    }
+
+    /**
+     * Get all (non-deleted, that user can see) geo layers (collections or
+     * datasets that have a WMSLayer annotation) that are tagged with
+     * the given tag
+     * 
+     * @return geo metadata for each item in json-ld
+     */
+
+    @GET
+    @Path("/layers")
+    @Produces("application/json")
+    public Response getGeoDatasetsByTagAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
+        return getItemsThatAreGeoLayers(Cet.DATASET, null, request);
 
     }
 
@@ -627,6 +663,10 @@ public class DatasetsRestService extends ItemServicesImpl {
         UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
 
         try {
+
+            if (!rbac.checkPermission(creator, Resource.uriRef(Permission.UPLOAD_DATA.getUri()))) {
+                return Response.status(403).build();
+            }
             //Get API input data
             Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
 
@@ -713,9 +753,14 @@ public class DatasetsRestService extends ItemServicesImpl {
 
         catch (OperatorException oe) {
             log.error("Error uploading dataset: ", oe);
+            return Response.status(500).entity(uri).build();
         } catch (IOException ie) {
             log.error("Error uploading dataset: ", ie);
+            return Response.status(500).entity(uri).build();
 
+        } catch (RBACException re) {
+            log.error("Error uploading dataset: ", re);
+            return Response.status(500).entity(uri).build();
         }
 
         // submit to extraction service unless we're big
