@@ -295,7 +295,7 @@ var statsLeft=null;
 	<li id="menu-item-872" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-872"><a href="http://sead-data.net/feature-tour/tools-in-development/">Tools in Development</a></li>
 </ul>
 </li>
-<li id="menu-item-244" class="menu-item menu-item-type-custom current-menu-item current_page_item menu-item-object-custom menu-item-244"><a href="http://sead.ncsa.illinois.edu/community/">Project Spaces</a></li>
+<li id="menu-item-244" class="menu-item menu-item-type-custom current-menu-item current_page_item menu-item-object-custom menu-item-244"><a href="http://sead.ncsa.illinois.edu/projects/">Project Spaces</a></li>
 <li id="menu-item-245" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-245"><a href="http://seadva.d2i.indiana.edu:8181/sead-access/">Virtual Archive</a></li>
 <li id="menu-item-246" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-246"><a href="http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/">Research Network</a>
 <ul class="sub-menu">
