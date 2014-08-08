@@ -415,7 +415,7 @@ public class LoginPage extends Composite {
 				});
 	}
 
-	private void remoteLogin(final String username, String password,
+	public static void remoteLogin(final String username, String password,
 			final AsyncCallback<String> callback) {
 		String restUrl = Geo_webapp.getMediciUrl() + "/api/authenticate";
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
@@ -429,6 +429,7 @@ public class LoginPage extends Composite {
 		StringBuilder sb = new StringBuilder();
 		sb.append("username=" + username);
 		sb.append("&password=" + password);
+		builder.setIncludeCredentials(true);
 		builder.setRequestData(sb.toString());
 		builder.setCallback(new RequestCallback() {
 			public void onError(Request request, Throwable exception) {
@@ -472,7 +473,7 @@ public class LoginPage extends Composite {
 		// "application/x-www-form-urlencoded");
 		// builder.setHeader("Content-type",
 		// "application/x-www-form-urlencoded");
-
+		builder. setIncludeCredentials(true);
 		StringBuilder sb = new StringBuilder();
 		sb.append("username=" + username);
 		sb.append("&googleAccessToken=" + googleAccessToken);
