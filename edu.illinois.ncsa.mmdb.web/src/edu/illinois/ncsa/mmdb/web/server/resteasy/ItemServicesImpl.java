@@ -17,7 +17,6 @@ package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -77,10 +76,8 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandlerNew;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 public class ItemServicesImpl
 {
@@ -195,12 +192,18 @@ public class ItemServicesImpl
                                                                  };
 
     static Context                             c                 = TupeloStore.getInstance().getContext();
-    static SEADRbac                            rbac              = new SEADRbac(TupeloStore.getInstance().getContext());
+    static protected SEADRbac                  rbac              = new SEADRbac(TupeloStore.getInstance().getContext());
 
     protected Response uploadMetadata(String id, MultipartFormDataInput input, HttpServletRequest request) {
         UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
         try {
             id = URLDecoder.decode(id, "UTF-8");
+            //FixMe - don't have a general permission for add/edit any metadata
+
+            PermissionCheck p = new PermissionCheck(creator, Permission.EDIT_USER_METADATA);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
         } catch (UnsupportedEncodingException e1) {
             log.error("Error decoding url for " + id, e1);
         }
@@ -370,6 +373,11 @@ public class ItemServicesImpl
     public Response getItemMetadataAsJSON(String id, UriRef userId, boolean includeExtracted) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
+        //Permission to see pages means you can see metadata as well...
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
         try {
             id = URLDecoder.decode(id, "UTF-8");
         } catch (UnsupportedEncodingException e1) {
@@ -464,25 +472,6 @@ public class ItemServicesImpl
         return fullMap;
     }
 
-    protected boolean isPermitted(String userId, Permission permission, String objectUri) {
-        UriRef userUri = (UriRef) (userId == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(userId));
-        UriRef permissionUri = Resource.uriRef(permission.getUri());
-        UriRef oUri = objectUri != null ? Resource.uriRef(objectUri) : null;
-        return isPermitted(userUri, oUri, permissionUri);
-    }
-
-    protected boolean isPermitted(UriRef userUri, UriRef oUri, UriRef permissionUri) {
-        try {
-            if (!rbac.checkPermission(userUri, oUri, permissionUri)) {
-                return false;
-            }
-        } catch (RBACException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
     protected static boolean isAccessible(UriRef userId, UriRef objId) {
 
         if (!rbac.checkAccessLevel(userId, objId)) {
@@ -505,35 +494,35 @@ public class ItemServicesImpl
             e1.printStackTrace();
             return Response.status(500).entity("Error decoding id: " + id).build();
         }
-        UriRef itemUri = Resource.uriRef(id);
+        //Permission to see pages means you can see metadata as well...
 
-        if (!isAccessible(userId, itemUri)) {
-
-            result.put("Error", "Item not accessible");
-            return Response.status(403).entity(result).build();
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
         }
-
-        //Get fields
-        Unifier uf = new Unifier();
-        uf = populateUnifier(itemUri, uf, context, null);
-        //Get columns to put in result (all in this case)
-        List<String> names = uf.getColumnNames();
-        log.debug("names: " + names);
+        UriRef itemUri = Resource.uriRef(id);
         try {
+
+            if (!isAccessible(userId, itemUri)) {
+
+                result.put("Error", "Item not accessible");
+                return Response.status(403).entity(result).build();
+            }
+
+            //Get fields
+            Unifier uf = new Unifier();
+            uf = populateUnifier(itemUri, uf, context, null);
+            //Get columns to put in result (all in this case)
+            List<String> names = uf.getColumnNames();
+            log.debug("names: " + names);
+
             c.perform(uf);
             log.debug("Performed");
-        } catch (Throwable e1) {
-            log.error("Error getting requested metadata for " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting information about " + id).build();
-        }
-        try {
 
             result = buildResultMap(uf.getResult(), context, names, false, null);
             return Response.status(200).entity(result).build();
         } catch (Exception e) {
-            log.debug(e.getMessage());
-
+            log.error(e.getMessage(), e);
             return Response.status(500).entity("Error processing id: " + id).build();
         }
 
@@ -692,7 +681,7 @@ public class ItemServicesImpl
 
     }
 
-    protected static Response getMetadataByReverseRelationship(String base, Resource relationship, Map<String, Object> context, UriRef userId, UriRef requestedType) {
+    private static Response getMetadataByReverseRelationship(String base, Resource relationship, Map<String, Object> context, UriRef userId, UriRef requestedType) {
         Resource baseLiteral = Resource.literal(base);
         return getMetadataByRelationship(baseLiteral, false, relationship, context, userId, requestedType);
     }
@@ -701,7 +690,7 @@ public class ItemServicesImpl
         return getMetadataByRelationship(baseId, false, relationship, context, userId, requestedType);
     }
 
-    protected static Response getMetadataByRelationship(Resource baseId, boolean isSubject, Resource relationship, Map<String, Object> context, final UriRef userId, UriRef requestedType) {
+    private static Response getMetadataByRelationship(Resource baseId, boolean isSubject, Resource relationship, Map<String, Object> context, final UriRef userId, UriRef requestedType) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
         if (isSubject && (baseId instanceof UriRef)) {
@@ -787,6 +776,12 @@ public class ItemServicesImpl
 
     protected Response getItemsThatAreGeoLayers(UriRef itemType, UriRef tag, HttpServletRequest request) {
         final UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_LOCATION);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
+
         Map<String, Object> context = layerBasics;
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         Unifier uf = new Unifier();
@@ -847,6 +842,12 @@ public class ItemServicesImpl
         Resource base = null;
         Resource relationship = null;
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
+
         Map<String, Object> context = layerBasics;
         if (itemType.equals(Cet.DATASET)) {
             context = datasetBasics;
@@ -883,10 +884,10 @@ public class ItemServicesImpl
 
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         try {
-            if (!rbac.checkPermission(userId.toString(), Permission.VIEW_MEMBER_PAGES)) {
-                log.debug("user: " + userId.toString() + "  forbidden");
-                result.put("Failure", "User " + userId.toString() + " does not have permission to view datasets");
-                return Response.status(HttpURLConnection.HTTP_FORBIDDEN).entity(result).build();
+
+            PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
             }
 
             Unifier uf = new Unifier();
@@ -942,6 +943,12 @@ public class ItemServicesImpl
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         List<String> tags = new ArrayList<String>();
         try {
+
+            PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
+
             UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
             ValidItem item = new ValidItem(itemId, type, userId);
             if (!item.isValid()) {
@@ -973,6 +980,12 @@ public class ItemServicesImpl
         Response r;
         try {
             UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+            PermissionCheck p = new PermissionCheck(userId, Permission.ADD_TAG);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
+
             UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
             ValidItem item = new ValidItem(itemId, type, userId);
             if (!item.isValid()) {
@@ -1000,6 +1013,11 @@ public class ItemServicesImpl
         Response r;
         try {
             UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+            PermissionCheck p = new PermissionCheck(userId, Permission.DELETE_TAG);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
             UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
             ValidItem item = new ValidItem(itemId, type, userId);
             if (!item.isValid()) {
@@ -1031,6 +1049,7 @@ public class ItemServicesImpl
         List<String> tags = new ArrayList<String>();
         try {
             UriRef itemId = Resource.uriRef(URLDecoder.decode(encoded_id, "UTF-8"));
+
             ValidItem item = new ValidItem(itemId, type, userId);
             if (!item.isValid()) {
                 r = item.getErrorResponse();
