@@ -45,6 +45,7 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 	protected String login(String username, String password,
 			String googleAccessToken) {
 
+		log.debug("Logging in as " + username);
 		dontCache();
 
 		// Destroy any existing credentials
@@ -58,9 +59,13 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 			getRemoteServerProperties();
 			if (username != null) {
 				mp.setCredentials(username, password, _server, _remoteAPIKey);
+				log.debug("U/P Credentials set for " + username);
+				
 			} else if (googleAccessToken != null) {
 				username = mp.setGoogleCredentials(googleAccessToken, _server,
 						_remoteAPIKey);
+				log.debug("G Credentials set");
+				
 			} else {
 				log.debug("No credentials available");
 			}
@@ -70,7 +75,8 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 			String geopassword = PropertiesLoader.getProperties().getProperty("geopassword");
 			//In that case, rely on the proxy in medici - _geoserver is already set correctly
 			mp.setGeoCredentials(geouser, geopassword, _geoserver);
-
+			log.debug("GeoCredentials set.");
+			
 			// Create session
 			HttpSession session = getThreadLocalRequest().getSession(true);
 			// Store MediciProxy
@@ -103,6 +109,7 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 	}
 
 	public String getUsername() {
+		log.debug("Get Username");
 
 		dontCache();
 
@@ -112,6 +119,7 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 
 		if (session != null) {
 			name = (String) session.getAttribute(AUTHENTICATED_AS);
+			log.debug("Already have name: " + name);
 		}
 		// If null and enableAnonymous==true, try logging in as anonymous
 		if ((name == null) && (_tryAnonymous == true)) {
