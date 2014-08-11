@@ -41,7 +41,7 @@ public class PermissionCheck {
         try {
             if (!ItemServicesImpl.rbac.checkPermission(userId.toString(), p)) {
                 log.debug(userId.toString() + "  forbidden");
-                result.put("Failure", "User " + userId.toString() + " does not the required \"" + p.getLabel() + "\" permission");
+                result.put("Failure", "User " + userId.toString() + " does not have the required \"" + p.getLabel() + "\" permission");
                 r = Response.status(HttpURLConnection.HTTP_FORBIDDEN).entity(result).build();
             } else {
                 hasPermission = true;

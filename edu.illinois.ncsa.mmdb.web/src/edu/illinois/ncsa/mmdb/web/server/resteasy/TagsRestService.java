@@ -145,4 +145,19 @@ public class TagsRestService extends ItemServicesImpl {
 
     }
 
+    /**
+     * Get all (non-deleted, that user can see) geo fatures (collections or
+     * datasets that have a GeoPoint annotation) that are tagged with
+     * the given tag
+     * 
+     * @return geo metadata for each item in json-ld
+     */
+
+    @GET
+    @Path("/{tag}/features")
+    @Produces("application/json")
+    public Response getGeoFeatureDatasetsByTagAsJSON(@PathParam("tag") String tagString, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return getItemsThatAreGeoFeatures(Cet.DATASET, (UriRef) TagEventBeanUtil.createTagUri(tagString), request);
+    }
+
 }

@@ -593,11 +593,12 @@ public class ItemServicesImpl
     @SuppressWarnings("unchecked")
     protected static Map<String, Object> buildResultMap(Table<Resource> table, Map<String, Object> context, List<String> names, boolean useHierarchy, FilterCallback filter) throws Exception {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Map<String, String> partsMap = buildPartsMap(context);
 
         for (Tuple<Resource> tu : table ) {
 
             if ((filter == null) || filter.include(tu)) {
-
+                Map<String, Map<String, String>> currentRowObjects = new LinkedHashMap<String, Map<String, String>>();
                 for (int i = 0; i < names.size(); i++ ) {
                     String key = names.get(i);
                     Resource o = tu.get(i);
@@ -612,26 +613,13 @@ public class ItemServicesImpl
                                 }
                                 //For i=0, add value as  metadata if the key is "Identifier"  
                                 if (key.equals("Identifier")) {
-                                    addTuple((Map<String, Object>) result.get(tu.get(0).toString()), key, obj);
+                                    ((Map<String, Object>) result.get(tu.get(0).toString())).put(key, obj);
                                 }
                             } else {
-
-                                addTuple((Map<String, Object>) result.get(tu.get(0).toString()), key, obj);
+                                addToResult((Map<String, Object>) result.get(tu.get(0).toString()), key, obj, context, currentRowObjects, partsMap);
                             }
                         } else {
-                            if (context.get(key) != null) {
-                                //top level item
-                                if (context.get(key) instanceof String) {
-                                    //flat item
-                                    addTuple(result, key, obj);
-                                } else {
-                                    //an object with structure - add an id field and be ready to find other parts
-
-                                }
-                            } else {
-                                //entry is from a sub object - find where it goes and add it there
-
-                            }
+                            addToResult(result, key, obj, context, currentRowObjects, partsMap);
                         }
                     }
                 }
@@ -643,6 +631,43 @@ public class ItemServicesImpl
             result.put("@context", context);
         }
         return result;
+    }
+
+    private static void addToResult(Map<String, Object> resultItem, String key, String obj, Map<String, Object> context, Map<String, Map<String, String>> currentRowObjects, Map<String, String> partsMap) {
+        if (context.get(key) != null) {
+            //top level item
+            if (context.get(key) instanceof String) {
+                //flat item
+                addTuple(resultItem, key, obj);
+            } else {
+                //an object with structure - add an id field and be ready to find other parts
+                Map<String, String> newObj = new HashMap<String, String>();
+                newObj.put("Identifier", obj);
+                currentRowObjects.put(key, newObj);
+                resultItem.put(key, newObj);
+            }
+        } else {
+            //entry is from a sub object - find where it goes and add it there
+            String objectName = partsMap.get(key);
+            Map<String, String> objectMap = currentRowObjects.get(objectName);
+            objectMap.put(key, obj);
+        }
+
+    }
+
+    private static Map<String, String> buildPartsMap(Map<String, Object> context) {
+        Map<String, String> partsMap = new LinkedHashMap<String, String>();
+        for (Entry<String, Object> e : context.entrySet() ) {
+            Object o = e.getValue();
+            if (o instanceof Map<?, ?>) {
+                for (String s : ((Map<String, String>) o).keySet() ) {
+                    if (!s.equals("@id")) {
+                        partsMap.put(s, e.getKey());
+                    }
+                }
+            }
+        }
+        return partsMap;
     }
 
     /* Logic to only add unique values to the map and to switch from string to List<String> for multiple values
@@ -811,7 +836,70 @@ public class ItemServicesImpl
                 public boolean include(Tuple<Resource> t) {
                     UriRef id = null;
                     if (t.get(0) == null) {
-                        log.error("Missing identifier - skipping a dataset");
+                        log.error("Missing identifier - skipping an item");
+                    } else {
+                        if (t.get(0).isLiteral()) {
+                            id = Resource.uriRef(t.get(0).toString());
+                        } else {
+                            id = (UriRef) t.get(0);
+                            log.warn("UriRef identifier:" + t.get(0).toString());
+                        }
+                        log.debug("U: " + userId.toString() + " O: " + id.toString());
+                        if (isAccessible(userId, id)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                    return false;
+                }
+            });
+            return Response.status(200).entity(result).build();
+        } catch (Exception e) {
+            //No results just means an empty list, which is OK
+            result.put("@context", context);
+            return Response.status(200).entity(result).build();
+        }
+    }
+
+    protected Response getItemsThatAreGeoFeatures(UriRef itemType, UriRef tag, HttpServletRequest request) {
+        final UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_LOCATION);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
+
+        Map<String, Object> context = featureBasics;
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Unifier uf = new Unifier();
+        uf.addPattern("item", Rdf.TYPE, itemType);
+        if (tag != null) {
+            uf.addPattern("item", Tags.TAGGED_WITH_TAG, tag);
+        }
+        Set<String> requiredKeys = new HashSet<String>();
+        //requiredKeys are the labels, not the preds in the @context
+        requiredKeys.add("GeoPoint");
+        //column 0 must be identifier
+        populateUnifier("item", uf, context, requiredKeys);
+
+        //Get column name list before the is-deleted column is added
+        List<String> names = uf.getColumnNames();
+        log.debug(names);
+        Table<Resource> results = null;
+        try {
+            results = TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
+        } catch (Throwable e1) {
+            log.error("Error getting Geo Features", e1);
+            return Response.status(500).entity("Error getting Items that are Geo Features").build();
+        }
+        try {
+            result = buildResultMap(results, context, names, true, new FilterCallback() {
+                @Override
+                public boolean include(Tuple<Resource> t) {
+                    UriRef id = null;
+                    if (t.get(0) == null) {
+                        log.error("Missing identifier - skipping an item");
                     } else {
                         if (t.get(0).isLiteral()) {
                             id = Resource.uriRef(t.get(0).toString());

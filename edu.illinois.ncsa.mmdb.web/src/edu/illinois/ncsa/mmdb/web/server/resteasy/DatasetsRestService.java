@@ -645,8 +645,24 @@ public class DatasetsRestService extends ItemServicesImpl {
     @GET
     @Path("/layers")
     @Produces("application/json")
-    public Response getGeoDatasetsByTagAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response getGeoLayerDatasetsByTagAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
         return getItemsThatAreGeoLayers(Cet.DATASET, null, request);
+
+    }
+
+    /**
+     * Get all (non-deleted, that user can see) geo fatures (collections or
+     * datasets that have a GeoPoint annotation) that are tagged with
+     * the given tag
+     * 
+     * @return geo metadata for each item in json-ld
+     */
+
+    @GET
+    @Path("/features")
+    @Produces("application/json")
+    public Response getGeoFeatureDatasetsByTagAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
+        return getItemsThatAreGeoFeatures(Cet.DATASET, null, request);
 
     }
 
