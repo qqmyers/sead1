@@ -135,12 +135,22 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     @POST
     @Path("/copy")
-    public Response copyDataset(@FormParam("url") String surl) {
+    public Response copyDataset(@FormParam("url") String surl, @javax.ws.rs.core.Context HttpServletRequest request) {
         try {
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+
             final URL url = new URL(surl);
 
             if (!url.getRef().startsWith("dataset?id=")) {
                 throw (new Exception("URL does not appear to be medici URL"));
+            }
+            final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
+            SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+
+            if (!rbac.checkPermission(creator.toString(), Permission.UPLOAD_DATA)) {
+                log.debug("/copy: user: " + creator.toString() + "  forbidden");
+                result.put("Failure", "User " + creator.toString() + " does not have permission to copy datasets");
+                return Response.status(HttpURLConnection.HTTP_FORBIDDEN).entity(result).build();
             }
 
             new Thread(new Runnable() {

@@ -71,7 +71,7 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
         if (hasValidToken) {
             defaultToAnonymous = true;
         } else {
-            if (path.startsWith("/datasets/") && (!(path.startsWith("/datasets/copy") || path.startsWith("/datasets/import"))) || (path.startsWith("/sparql"))) {
+            if (path.startsWith("/sparql")) {
                 log.debug("Should test remoteAPIKey for: " + path);
 
                 String mykey = TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey);

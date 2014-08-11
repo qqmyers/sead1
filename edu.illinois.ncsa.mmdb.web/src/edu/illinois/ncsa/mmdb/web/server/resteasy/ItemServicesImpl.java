@@ -17,6 +17,7 @@ package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -161,7 +162,7 @@ public class ItemServicesImpl
                                                                  };
 
     @SuppressWarnings("serial")
-    protected static final Map<String, Object> itemGeoBasics     = new LinkedHashMap<String, Object>() {
+    protected static final Map<String, Object> layerBasics       = new LinkedHashMap<String, Object>() {
                                                                      {
                                                                          put("Identifier", Dc.IDENTIFIER.toString());
                                                                          put("Date", Dc.DATE.toString());
@@ -172,6 +173,24 @@ public class ItemServicesImpl
                                                                          put("Title", Dc.TITLE.toString());
                                                                          put("WMSLayerName", Cet.cet("metadata/Extractor/WmsLayerName").toString());
                                                                          put("WMSLayerUrl", Cet.cet("metadata/Extractor/WmsLayerUrl").toString());
+                                                                     }
+                                                                 };
+
+    protected static final Map<String, Object> featureBasics     = new LinkedHashMap<String, Object>() {
+                                                                     {
+                                                                         put("Identifier", Dc.IDENTIFIER.toString());
+                                                                         put("Date", Dc.DATE.toString());
+                                                                         put("Creation Date", Namespaces.dcTerms("created"));
+                                                                         put("Size", Files.LENGTH.toString());
+                                                                         put("Label", Namespaces.rdfs("label"));
+                                                                         put("Mimetype", Dc.FORMAT.toString());
+                                                                         put("Title", Dc.TITLE.toString());
+
+                                                                         Map<String, String> geopoint = new HashMap<String, String>();
+                                                                         geopoint.put("@id", "tag:tupeloproject.org,2006:/2.0/gis/hasGeoPoint");
+                                                                         geopoint.put("lat", "http://www.w3.org/2003/01/geo/wgs84_pos#lat");
+                                                                         geopoint.put("long", "http://www.w3.org/2003/01/geo/wgs84_pos#long");
+                                                                         put("GeoPoint", geopoint);
                                                                      }
                                                                  };
 
@@ -557,6 +576,16 @@ public class ItemServicesImpl
 
             }
             uf.addColumnName(key);
+            if (!(temp instanceof String)) {
+                //Deal with other terms needed for key
+
+                for (String subkey : ((Map<String, String>) temp).keySet() ) {
+                    if (!subkey.equals("@id")) {
+                        uf.addPattern(key, Resource.uriRef(((Map<String, String>) temp).get(subkey)), subkey, true);
+                        uf.addColumnName(subkey);
+                    }
+                }
+            }
         }
         return uf;
     }
@@ -601,7 +630,19 @@ public class ItemServicesImpl
                                 addTuple((Map<String, Object>) result.get(tu.get(0).toString()), key, obj);
                             }
                         } else {
-                            addTuple(result, key, obj);
+                            if (context.get(key) != null) {
+                                //top level item
+                                if (context.get(key) instanceof String) {
+                                    //flat item
+                                    addTuple(result, key, obj);
+                                } else {
+                                    //an object with structure - add an id field and be ready to find other parts
+
+                                }
+                            } else {
+                                //entry is from a sub object - find where it goes and add it there
+
+                            }
                         }
                     }
                 }
@@ -746,7 +787,7 @@ public class ItemServicesImpl
 
     protected Response getItemsThatAreGeoLayers(UriRef itemType, UriRef tag, HttpServletRequest request) {
         final UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
-        Map<String, Object> context = itemGeoBasics;
+        Map<String, Object> context = layerBasics;
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         Unifier uf = new Unifier();
         uf.addPattern("item", Rdf.TYPE, itemType);
@@ -806,7 +847,7 @@ public class ItemServicesImpl
         Resource base = null;
         Resource relationship = null;
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
-        Map<String, Object> context = itemGeoBasics;
+        Map<String, Object> context = layerBasics;
         if (itemType.equals(Cet.DATASET)) {
             context = datasetBasics;
         } else if (itemType.equals(CollectionBeanUtil.COLLECTION_TYPE)) {
@@ -841,27 +882,28 @@ public class ItemServicesImpl
     protected Response getTopLevelItems(Resource itemType, Map<String, Object> context, final UriRef userId) {
 
         Map<String, Object> result = new LinkedHashMap<String, Object>();
-        Unifier uf = new Unifier();
-        uf.addPattern("item", Rdf.TYPE, itemType);
-
-        //column 0 must be identifier
-        populateUnifier("item", uf, context, null);
-        //Must come after to avoid having no result of row 0, column 0 would be null
-        uf.addColumnName("parent");
-        uf.addPattern("parent", DcTerms.HAS_PART, "item", true);
-        List<String> names = uf.getColumnNames();
-        final int parentIndex = names.indexOf("parent");
-        log.debug("Parent index: " + parentIndex);
-        org.tupeloproject.util.Table<Resource> table = null;
         try {
+            if (!rbac.checkPermission(userId.toString(), Permission.VIEW_MEMBER_PAGES)) {
+                log.debug("user: " + userId.toString() + "  forbidden");
+                result.put("Failure", "User " + userId.toString() + " does not have permission to view datasets");
+                return Response.status(HttpURLConnection.HTTP_FORBIDDEN).entity(result).build();
+            }
+
+            Unifier uf = new Unifier();
+            uf.addPattern("item", Rdf.TYPE, itemType);
+
+            //column 0 must be identifier
+            populateUnifier("item", uf, context, null);
+            //Must come after to avoid having no result of row 0, column 0 would be null
+            uf.addColumnName("parent");
+            uf.addPattern("parent", DcTerms.HAS_PART, "item", true);
+            List<String> names = uf.getColumnNames();
+            final int parentIndex = names.indexOf("parent");
+            log.debug("Parent index: " + parentIndex);
+            org.tupeloproject.util.Table<Resource> table = null;
             table = TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
-        } catch (OperatorException e) {
-            log.error("Error listing top-level collections: " + e.getMessage());
-            return Response.status(500).entity("Error listing top-level items").build();
-        }
-        names.remove("parent");
+            names.remove("parent");
 
-        try {
             result = buildResultMap(table, context, names, true, new FilterCallback() {
                 @Override
                 public boolean include(Tuple<Resource> t) {
