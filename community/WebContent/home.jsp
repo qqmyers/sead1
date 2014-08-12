@@ -37,11 +37,6 @@ Project Spaces | SEAD </title>
 <link rel="stylesheet" id="nivoslider-css" href="http://sead-data.net/wp-content/plugins/wordpress-gallery-plugin/css/nivo-slider.css?ver=3.9.1" type="text/css" media="all">
 <link rel="stylesheet" id="colorbox-css" href="http://sead-data.net/wp-content/plugins/wordpress-gallery-plugin/lightbox/colorbox/colorbox.css?ver=3.9.1" type="text/css" media="all">
 <link rel="stylesheet" id="wpgmaps-style-css" href="http://sead-data.net/wp-content/plugins/wp-google-maps/css/wpgmza_style.css?ver=3.9.1" type="text/css" media="all">
-<<<<<<< HEAD
-<script type="text/javascript" src="http://sead-data.net/wp-includes/js/jquery/jquery.js?ver=1.11.0"></script>
-=======
-<!--<script type="text/javascript" src="http://sead-data.net/wp-includes/js/jquery/jquery.js?ver=1.11.0"></script>-->
->>>>>>> branch 'master' of https://jimmyers@opensource.ncsa.illinois.edu/stash/scm/mmdb/medici-gwt-web.git
 <script type="text/javascript" src="http://sead-data.net/wp-includes/js/jquery/jquery-migrate.min.js?ver=1.2.1"></script>
 <script type="text/javascript" src="http://sead-data.net/wp-content/plugins/easy-social-icons/js/cnss.js?ver=1.0"></script>
 <script type="text/javascript">
