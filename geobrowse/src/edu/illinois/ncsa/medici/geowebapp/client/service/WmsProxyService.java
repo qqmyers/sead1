@@ -15,6 +15,4 @@ import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
 public interface WmsProxyService extends RemoteService {
 	LayerInfo[] getCapabilities();
 
-	LayerInfo[] getLayers(String tag);
-
 }

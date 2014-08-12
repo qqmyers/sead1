@@ -13,7 +13,4 @@ import edu.illinois.ncsa.medici.geowebapp.shared.LayerInfo;
 public interface WmsProxyServiceAsync {
 
 	void getCapabilities(AsyncCallback<LayerInfo[]> callback);
-
-	void getLayers(String tag, AsyncCallback<LayerInfo[]> callback);
-
 }

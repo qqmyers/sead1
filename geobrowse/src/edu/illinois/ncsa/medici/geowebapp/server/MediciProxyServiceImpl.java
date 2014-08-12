@@ -33,7 +33,7 @@ public class MediciProxyServiceImpl extends ProxiedRemoteServiceServlet
 			tags = MediciRestUtil.getTags(mp);
 		} catch (Exception e) {
 			invalidateSession();
-			log.warn("Error contacting medici: " + e);
+			log.warn("Error contacting medici ", e);
 		}
 		if ((tags == null) || (tags.isEmpty())) {
 			return null;
@@ -57,11 +57,7 @@ public class MediciProxyServiceImpl extends ProxiedRemoteServiceServlet
 
 		try {
 			MediciProxy mp = getProxy();
-			if (tag == null || "".equals(tag)) {
-				layers = MediciRestUtil.getLayers(mp);
-			} else {
 				layers = MediciRestUtil.getLayersByTag(tag, mp);
-			}
 		} catch (Exception e) {
 			invalidateSession();
 			log.warn("getLayers - Error contacting medici or JSON has the error: ", e);
@@ -88,11 +84,7 @@ public class MediciProxyServiceImpl extends ProxiedRemoteServiceServlet
 
 		try {
 			MediciProxy mp = getProxy();
-			if (tag == null || "".equals(tag)) {
-				locations = MediciRestUtil.getLocations(mp);
-			} else {
 				locations = MediciRestUtil.getLocationsByTag(tag, mp);
-			}
 		} catch (Exception e) {
 			invalidateSession();
 			log.warn("getLocations - Error contacting medici or JSON has the error: " + e);
@@ -103,5 +95,6 @@ public class MediciProxyServiceImpl extends ProxiedRemoteServiceServlet
 			return locations.toArray(new LocationInfo[locations.size()]);
 		}
 	}
+
 
 }

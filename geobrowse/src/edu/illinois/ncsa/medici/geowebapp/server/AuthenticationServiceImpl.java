@@ -50,17 +50,18 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 		// Destroy any existing credentials
 		logout();
 		// Verify credentials
-		MediciProxy mp = new MediciProxy();
+		MediciProxy mp = new MediciProxy(false);
 
 		String result = "success";
 		try {
 			// Try to use/store credentials
 			getRemoteServerProperties();
 			if (username != null) {
-				mp.setCredentials(username, password, _server, _remoteAPIKey);
+				log.debug("set Creds");
+				mp.setCredentials(username, password, _server); //, _remoteAPIKey);
+				log.debug("Done: set Creds");
 			} else if (googleAccessToken != null) {
-				username = mp.setGoogleCredentials(googleAccessToken, _server,
-						_remoteAPIKey);
+				username = mp.setGoogleCredentials(googleAccessToken, _server, null);//_remoteAPIKey);
 			} else {
 				log.debug("No credentials available");
 			}
