@@ -38,6 +38,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLuceneResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
+import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
+import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 
@@ -236,6 +238,33 @@ public class ConfigurationWidget extends Composite {
         table.setText(idx, 0, "Description");
         table.setWidget(idx, 1, desc);
         idx++;
+        //Sort order
+        final LabeledListBox sortOptions = new LabeledListBox("");
+        sortOptions.addStyleName("pagingLabel");
+
+        for (Map.Entry<String, String> entry : DynamicTableView.SORTCHOICES.entrySet() ) {
+            sortOptions.addItem(entry.getValue(), entry.getKey());
+        }
+
+        sortOptions.setSelected(configuration.getConfiguration(ConfigurationKey.ProjectSortOrder));
+        table.setText(idx, 0, "Default Sort Order");
+        table.setWidget(idx, 1, sortOptions);
+        idx++;
+
+        //page view type
+        final LabeledListBox pageViewType = new LabeledListBox("");
+        pageViewType.addStyleName("pagingLabel");
+        for (Map.Entry<String, String> entry : DynamicTableView.PAGE_VIEW_TYPES.entrySet() ) {
+            pageViewType.addItem(entry.getValue(), entry.getKey());
+        }
+        String selected = configuration.getConfiguration(ConfigurationKey.ProjectPageViewType);
+        if (selected == null || selected.isEmpty()) {
+            selected = DynamicTableView.GRID_VIEW_TYPE;
+        }
+        pageViewType.setSelected(selected);
+        table.setText(idx, 0, "Default Page View Type");
+        table.setWidget(idx, 1, pageViewType);
+        idx++;
 
         // buttons
         HorizontalPanel hp = new HorizontalPanel();
@@ -248,6 +277,8 @@ public class ConfigurationWidget extends Composite {
                 query.setConfiguration(ConfigurationKey.ProjectName, name.getText());
                 query.setConfiguration(ConfigurationKey.ProjectURL, url.getText());
                 query.setConfiguration(ConfigurationKey.ProjectDescription, desc.getText());
+                query.setConfiguration(ConfigurationKey.ProjectSortOrder, sortOptions.getSelected());
+                query.setConfiguration(ConfigurationKey.ProjectPageViewType, pageViewType.getSelected());
                 dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -259,12 +290,14 @@ public class ConfigurationWidget extends Composite {
                         name.setText(result.getConfiguration(ConfigurationKey.ProjectName));
                         url.setText(result.getConfiguration(ConfigurationKey.ProjectURL));
                         desc.setText(result.getConfiguration(ConfigurationKey.ProjectDescription));
+                        sortOptions.setSelected(result.getConfiguration(ConfigurationKey.ProjectSortOrder));
+                        pageViewType.setSelected(result.getConfiguration(ConfigurationKey.ProjectPageViewType));
                     }
                 });
             }
         });
         hp.add(button);
-
+        //only resets changes before "submit" button is clicked. i.e. does not have memory of previously submitted changes.
         button = new Button("Reset", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -279,6 +312,8 @@ public class ConfigurationWidget extends Composite {
                         name.setText(result.getConfiguration(ConfigurationKey.ProjectName));
                         url.setText(result.getConfiguration(ConfigurationKey.ProjectURL));
                         desc.setText(result.getConfiguration(ConfigurationKey.ProjectDescription));
+                        sortOptions.setSelected(result.getConfiguration(ConfigurationKey.ProjectSortOrder));
+                        pageViewType.setSelected(result.getConfiguration(ConfigurationKey.ProjectPageViewType));
                     }
                 });
             }
