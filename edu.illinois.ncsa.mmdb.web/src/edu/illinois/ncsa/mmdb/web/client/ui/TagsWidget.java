@@ -61,9 +61,11 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAllTags;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTags;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.TagResource;
@@ -78,15 +80,16 @@ import edu.illinois.ncsa.mmdb.web.common.Permission;
  */
 public class TagsWidget extends Composite {
 
-    private final FlowPanel      mainPanel;
-    private final FlexTable      tagsPanel;
-    private final String         id;
-    private final DispatchAsync  service;
-    private final PermissionUtil rbac;
-    private final Label          tagLabel;
-    private AddTagWidget         tagWidget;
-    final Set<String>            tagsShown;
-    private boolean              hasPermission;
+    private final FlowPanel              mainPanel;
+    private final FlexTable              tagsPanel;
+    private final String                 id;
+    private final DispatchAsync          service;
+    private final PermissionUtil         rbac;
+    private final Label                  tagLabel;
+    private AddTagWidget                 tagWidget;
+    final Set<String>                    tagsShown;
+    private final MultiWordSuggestOracle oracle;
+    private boolean                      hasPermission;
 
     /**
      * A widget listing tags and providing a way to add a new one.
@@ -118,6 +121,7 @@ public class TagsWidget extends Composite {
 
         tagsPanel = new FlexTable();
         mainPanel.add(tagsPanel);
+        oracle = new MultiWordSuggestOracle();
 
         rbac.doIfAllowed(Permission.ADD_TAG, id, new PermissionCallback() {
             @Override
@@ -128,7 +132,9 @@ public class TagsWidget extends Composite {
                     public void onClick(ClickEvent event) {
                         mainPanel.remove(addTagAnchor);
 
-                        tagWidget = new AddTagWidget();
+                        getAllTagsForAutocomplete();
+
+                        tagWidget = new AddTagWidget(oracle);
 
                         tagWidget.getSubmitLink().addClickHandler(new ClickHandler() {
                             @Override
@@ -200,6 +206,27 @@ public class TagsWidget extends Composite {
             });
             tagsShown.add(tag);
         }
+    }
+
+    /**
+     * Use service to retrieve all tags from server to be used in autocomplete
+     */
+    private void getAllTagsForAutocomplete() {
+        service.execute(new GetAllTags(), new AsyncCallback<GetTagsResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error getting tags", caught);
+            }
+
+            @Override
+            public void onSuccess(GetTagsResult result) {
+                if (result.getTags().size() != 0) {
+                    for (String s : result.getTags().keySet() ) {
+                        oracle.add(s);
+                    }
+                }
+            }
+        });
     }
 
     /**
