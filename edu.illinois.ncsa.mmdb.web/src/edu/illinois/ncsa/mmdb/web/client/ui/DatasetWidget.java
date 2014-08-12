@@ -608,9 +608,9 @@ public class DatasetWidget extends Composite {
 
     private Composite createMetaDataPanel(UserMetadataWidget um) {
 
-        //User Specified Information
+        //User Specified Metadata
 
-        DisclosurePanel userInformationPanel = new DisclosurePanel("User Specified Information");
+        DisclosurePanel userInformationPanel = new DisclosurePanel("User Specified Metadata");
         userInformationPanel.addStyleName("datasetDisclosurePanel");
         userInformationPanel.setOpen(true);
         userInformationPanel.setAnimationEnabled(true);

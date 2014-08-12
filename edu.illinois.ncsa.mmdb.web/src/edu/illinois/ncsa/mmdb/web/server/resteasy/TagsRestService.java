@@ -1,141 +1,140 @@
-/**
+/*******************************************************************************
+ * Copyright 2014 University of Michigan
  * 
- */
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
-import org.tupeloproject.rdf.terms.Dc;
-import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Tags;
-import org.tupeloproject.util.Tuple;
 
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.TagBean;
+import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
- * @author Luigi Marini <lmarini@ncsa.illinois.edu>
+ * @author Jim Myers <myersjd@umich.edu>
  * 
  */
 @Path("/tags")
-public class TagsRestService {
+public class TagsRestService extends ItemServicesImpl {
 
     /** Commons logging **/
     private static Log log = LogFactory.getLog(TagsRestService.class);
 
-    @POST
-    @Path("/object/{id}")
-    public Response tagDataset(@PathParam("id") String id, @Context HttpServletRequest request, @FormParam("tags") String tags) {
-        TagEventBeanUtil teb = new TagEventBeanUtil(TupeloStore.getInstance().getBeanSession());
-
-        String userid = request.getAttribute("userid").toString();
-        try {
-            teb.addTags(id, userid, tags);
-            return Response.status(200).entity("OK").build();
-        } catch (OperatorException e) {
-            log.error("Error adding tags to " + id, e);
-            return Response.status(500).entity("Error adding tags : " + e.getMessage()).build();
-        }
-    }
-
-    //FixMe - return JSON?
-    @GET
-    @Path("/object/{id}")
-    public Response getTags(@PathParam("id") String id) {
-        TagEventBeanUtil teb = new TagEventBeanUtil(TupeloStore.getInstance().getBeanSession());
-        try {
-            Set<String> tags = teb.getTags(id);
-            return Response.status(200).entity(StringUtils.join(tags, ",")).build();
-        } catch (OperatorException e) {
-            log.error("Error getting tags for " + id, e);
-            return Response.status(500).entity("Error getting tags for : " + e.getMessage()).build();
-        }
-    }
+    /**
+     * List all tags used
+     * 
+     * @param request
+     *            - used to get user Id
+     * @return JSON list of tag strings
+     */
 
     @GET
     @Path("")
     @Produces("application/json")
-    public Response getTagAsJSON() {
+    public Response getTagAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
         List<String> result = new ArrayList<String>();
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         try {
+            //Should we require any permission to know what tags exist?
+            if (!rbac.checkPermission(userId, Resource.uriRef(Permission.VIEW_DATA.getUri()))) {
+                result.add("Server error while listing all tags.");
+                return Response.status(500).entity(result).build();
+            }
+
             Collection<TagBean> tags = new TagBeanUtil(TupeloStore.getInstance().getBeanSession()).getAll();
             for (TagBean tag : tags ) {
                 result.add(tag.getTagString());
             }
 
         } catch (Exception e1) {
-            log.error("Error getting All TagBeans");
+            log.error("Error getting all Tags");
             e1.printStackTrace();
-            return Response.status(500).entity("Error getting All TagBeans").build();
+            return Response.status(500).entity("Error getting all Tags").build();
         }
         return Response.status(200).entity(result).build();
     }
 
-    @GET
-    @Path("/{tag}")
-    public Response getTag(@PathParam("tag") String tag) {
-
-        String result = "Getting tag: " + tag;
-
-        return Response.status(200).entity(result).build();
-
-    }
+    /**
+     * Get all datasets (non-deleted, that user can see) that are tagged with
+     * the given tag
+     * 
+     * @param tag
+     * @return basic metadata for each dataset in json-ld
+     */
 
     @GET
     @Path("/{tag}/datasets")
     @Produces("application/json")
-    public Response getDatasetsByTagAsJSON(@PathParam("tag") String tag) {
-        try {
-            HashMap<String, String> datasets = getDatasets(tag);
-            return Response.status(200).entity(datasets).build();
-        } catch (OperatorException e1) {
-            log.error("Error retrieving datasets with tag " + tag);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error retrieving datasets with tag " + tag).build();
-        }
+    public Response getDatasetsByTagAsJSON(@PathParam("tag") String tag, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        return getMetadataByReverseRelationship((UriRef) TagEventBeanUtil.createTagUri(tag), Tags.TAGGED_WITH_TAG, datasetBasics, userId, Cet.DATASET);
 
     }
 
-    private HashMap<String, String> getDatasets(String tag) throws OperatorException {
-        HashMap<String, String> datasets = new HashMap<String, String>();
+    /**
+     * Get all collections (non-deleted, that user can see) that are tagged with
+     * the given tag
+     * 
+     * @param tag
+     * @return basic metadata for each collection in json-ld
+     */
 
-        Unifier uf = new Unifier();
-        uf.addPattern("dataset", Tags.TAGGED_WITH_TAG, TagEventBeanUtil.createTagUri(tag));
-        uf.addPattern("dataset", Rdf.TYPE, Cet.DATASET);
-        uf.addPattern("dataset", Dc.TITLE, "title");
-        uf.setColumnNames("dataset", "title");
+    @GET
+    @Path("/{tag}/collections")
+    @Produces("application/json")
+    public Response getCollectionsByTagAsJSON(@PathParam("tag") String tag, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
 
-        for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf, "dataset") ) {
-            if (row.get(0) != null) {
-                datasets.put(row.get(0).getString(), row.get(1).getString());
-            }
-        }
-        log.debug("Found " + datasets.size() + " datasets with tag '"
-                + tag + "'");
-        return datasets;
+        return getMetadataByReverseRelationship((UriRef) TagEventBeanUtil.createTagUri(tag), Tags.TAGGED_WITH_TAG, collectionBasics, userId, (UriRef) CollectionBeanUtil.COLLECTION_TYPE);
+
+    }
+
+    /**
+     * Get all (non-deleted, that user can see) geo layers (collections or
+     * datasets that have a WMSLayer annotation) that are tagged with
+     * the given tag
+     * 
+     * @param tag
+     * @return geo metadata for each item in json-ld
+     */
+
+    @GET
+    @Path("/{tag}/layers")
+    @Produces("application/json")
+    public Response getGeoDatasetsByTagAsJSON(@PathParam("tag") String tagString, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return getItemsThatAreGeoLayers(Cet.DATASET, (UriRef) TagEventBeanUtil.createTagUri(tagString), request);
+
     }
 
 }

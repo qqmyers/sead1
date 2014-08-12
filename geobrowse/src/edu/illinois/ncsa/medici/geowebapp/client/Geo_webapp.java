@@ -158,24 +158,129 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		});
 
 		History.addValueChangeHandler(this);
+		lsw = new LoginStatusWidget();
+		RootPanel.get("loginMenu").add(lsw);
 
 		authSvc.getUsername(new AsyncCallback<String>() {
 
 			public void onFailure(Throwable caught) {
-				// Could not contact server
-				fail();
+				// Could not contact server or anon not allowed
+				setLoginState(null, "Login required for access");
 			}
 
 			public void onSuccess(String result) {
+				/*
+				 * If we have a name, need to verify that remote server agrees /
+				 * that a session w/the remote server also exists. If yes and
+				 * names match, we're good. If yes and names don't match, we
+				 * should logout and start again (two users in same browser) If
+				 * no, and local name is anonymous, remotelogin as anonymous.
+				 */
 				final String name = result;
 				authSvc.getUrls(new AsyncCallback<String[]>() {
 
 					public void onSuccess(String[] result) {
 						wmsUrl = result[0];
 						mediciUrl = result[1];
-						lsw = new LoginStatusWidget();
-						RootPanel.get("loginMenu").add(lsw);
-						setLoginState(name, null);
+						/*
+						 * Call the REST checkLogin endpoint to verify the user
+						 * is logged in (session cookie is valid) and return the
+						 * user's ID for local use.
+						 */
+						String restUrl = getMediciUrl() + "/api/checkLogin";
+						RequestBuilder builder = new RequestBuilder(
+								RequestBuilder.GET, restUrl);
+						builder.setIncludeCredentials(true);
+						try {
+							GWT.log("checking login status @ " + restUrl, null);
+							// we need to block.
+							builder.sendRequest("", new RequestCallback() {
+								public void onError(Request request,
+										Throwable exception) {
+									fail();
+								}
+
+								public void onResponseReceived(Request request,
+										Response response) {
+									// success!
+									GWT.log("REST auth status code = "
+											+ response.getStatusCode(), null);
+									if (response.getStatusCode() > 300) {
+										GWT.log("not authenticated to REST services",
+												null);
+										if (name.equals("anonymous")) {
+											LoginPage
+													.remoteLogin(
+															name,
+															"none",
+															new AsyncCallback<String>() {
+																@Override
+																public void onSuccess(
+																		String name) {
+																	setLoginState(
+																			name,
+																			null);
+																}
+
+																@Override
+																public void onFailure(
+																		Throwable caught) {
+																	setLoginState(
+																			null,
+																			"Login required for access");
+																}
+															});
+										} else {
+											setLoginState(null,
+													"Login required for access");
+
+										}
+
+									} else {
+										String userid = response.getText();
+										// FixMe! Don't assume name/id mapping
+										// here
+										if (userid
+												.equals("http://cet.ncsa.uiuc.edu/2007/person/"
+														+ name)) {
+											setLoginState(name, null);
+										} else {
+											if (name.equals("anonymous")) {
+												LoginPage
+														.remoteLogin(
+																name,
+																"none",
+																new AsyncCallback<String>() {
+																	@Override
+																	public void onSuccess(
+																			String name) {
+																		setLoginState(
+																				name,
+																				null);
+																	}
+
+																	@Override
+																	public void onFailure(
+																			Throwable caught) {
+																		setLoginState(
+																				null,
+																				"Login required for access");
+																	}
+																});
+											} else {
+												setLoginState(null,
+														"Login required for access");
+
+											}
+										}
+
+									}
+								}
+							});
+						} catch (RequestException x) {
+							fail();
+						}
+
 					}
 
 					public void onFailure(Throwable caught) {
@@ -340,7 +445,6 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		dp.add(vp);
 		return dp;
 	}
-
 
 	// protected FlowPanel createLegendPanel(LayerInfo[] result) {
 	// List<String> layerNames = getLayerNames(result);
@@ -662,10 +766,10 @@ public class Geo_webapp implements EntryPoint, ValueChangeHandler<String> {
 		map = mapWidget.getMap();
 
 		baseLayer = new OSM("OpenStreetMap", new String[] {
-                        "//a.tile.openstreetmap.org/${z}/${x}/${y}.png",
-                        "//b.tile.openstreetmap.org/${z}/${x}/${y}.png",
-                        "//c.tile.openstreetmap.org/${z}/${x}/${y}.png",
-		}, new OSMOptions());
+				"//a.tile.openstreetmap.org/${z}/${x}/${y}.png",
+				"//b.tile.openstreetmap.org/${z}/${x}/${y}.png",
+				"//c.tile.openstreetmap.org/${z}/${x}/${y}.png", },
+				new OSMOptions());
 		baseLayer.setIsBaseLayer(true);
 		// map.setBaseLayer(osm);
 		map.addLayer(baseLayer);
