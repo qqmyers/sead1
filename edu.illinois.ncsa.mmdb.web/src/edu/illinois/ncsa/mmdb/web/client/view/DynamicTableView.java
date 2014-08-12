@@ -39,6 +39,8 @@
 package edu.illinois.ncsa.mmdb.web.client.view;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
@@ -61,27 +63,44 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
  */
 public class DynamicTableView extends Composite implements Display {
 
-    public static final String    LIST_VIEW_TYPE = "list";
-    public static final String    GRID_VIEW_TYPE = "grid";
-    public static final String    FLOW_VIEW_TYPE = "flow";
-    public static final String    PAGE_SIZE_X1   = "default";
-    public static final String    PAGE_SIZE_X2   = "two";
-    public static final String    PAGE_SIZE_X4   = "four";
-    private final FlowPanel       mainPanel;
-    private final HorizontalPanel topPagingPanel;
-    private final VerticalPanel   middlePanel;
-    private final HorizontalPanel bottomPagingPanel;
-    private final PagingWidget    pagingWidgetTop;
-    private final PagingWidget    pagingWidgetBottom;
-    private final LabeledListBox  sortOptionsTop;
-    private final LabeledListBox  viewOptionsTop;
-    private final LabeledListBox  sizeOptionsTop;
-    private String                sortKey;
-    private String                viewType;
-    private String                sizeType;
-    private final LabeledListBox  sortOptionsBottom;
-    private final LabeledListBox  viewOptionsBottom;
-    private final LabeledListBox  sizeOptionsBottom;
+    public static final String                        LIST_VIEW_TYPE = "list";
+    public static final String                        GRID_VIEW_TYPE = "grid";
+    public static final String                        FLOW_VIEW_TYPE = "flow";
+    public static final String                        PAGE_SIZE_X1   = "default";
+    public static final String                        PAGE_SIZE_X2   = "two";
+    public static final String                        PAGE_SIZE_X4   = "four";
+    public static final LinkedHashMap<String, String> SORTCHOICES;
+    public static final LinkedHashMap<String, String> PAGE_VIEW_TYPES;
+
+    static {
+        SORTCHOICES = new LinkedHashMap<String, String>();
+        SORTCHOICES.put("date-desc", "Date: newest first");
+        SORTCHOICES.put("date-asc", "Date: oldest first");
+        SORTCHOICES.put("title-asc", "Title: A-Z");
+        SORTCHOICES.put("title-desc", "Title: Z-A");
+        SORTCHOICES.put("category-asc", "Category: A-Z");
+        SORTCHOICES.put("category-desc", "Category: Z-A");
+
+        PAGE_VIEW_TYPES = new LinkedHashMap<String, String>();
+        PAGE_VIEW_TYPES.put(LIST_VIEW_TYPE, "List");
+        PAGE_VIEW_TYPES.put(GRID_VIEW_TYPE, "Grid");
+    }
+
+    private final FlowPanel                           mainPanel;
+    private final HorizontalPanel                     topPagingPanel;
+    private final VerticalPanel                       middlePanel;
+    private final HorizontalPanel                     bottomPagingPanel;
+    private final PagingWidget                        pagingWidgetTop;
+    private final PagingWidget                        pagingWidgetBottom;
+    private final LabeledListBox                      sortOptionsTop;
+    private final LabeledListBox                      viewOptionsTop;
+    private final LabeledListBox                      sizeOptionsTop;
+    private String                                    sortKey;
+    private String                                    viewType;
+    private String                                    sizeType;
+    private final LabeledListBox                      sortOptionsBottom;
+    private final LabeledListBox                      viewOptionsBottom;
+    private final LabeledListBox                      sizeOptionsBottom;
 
     public DynamicTableView() {
         mainPanel = new FlowPanel();
@@ -121,12 +140,9 @@ public class DynamicTableView extends Composite implements Display {
     private LabeledListBox createSortOptions() {
         LabeledListBox sortOptions = new LabeledListBox("Sort by: ");
         sortOptions.addStyleName("pagingLabel");
-        sortOptions.addItem("Date: newest first", "date-desc");
-        sortOptions.addItem("Date: oldest first", "date-asc");
-        sortOptions.addItem("Title: A-Z", "title-asc");
-        sortOptions.addItem("Title: Z-A", "title-desc");
-        sortOptions.addItem("Category: A-Z", "category-asc");
-        sortOptions.addItem("Category: Z-A", "category-desc");
+        for (Map.Entry<String, String> entry : DynamicTableView.SORTCHOICES.entrySet() ) {
+            sortOptions.addItem(entry.getValue(), entry.getKey());
+        }
         sortOptions.setSelected(sortKey);
         return sortOptions;
     }
@@ -134,8 +150,9 @@ public class DynamicTableView extends Composite implements Display {
     private LabeledListBox createViewOptions() {
         LabeledListBox viewOptions = new LabeledListBox("View:");
         viewOptions.addStyleName("pagingLabel");
-        viewOptions.addItem("List", LIST_VIEW_TYPE);
-        viewOptions.addItem("Grid", GRID_VIEW_TYPE);
+        for (Map.Entry<String, String> entry : DynamicTableView.PAGE_VIEW_TYPES.entrySet() ) {
+            viewOptions.addItem(entry.getValue(), entry.getKey());
+        }
         viewOptions.setSelected(viewType);
         return viewOptions;
     }

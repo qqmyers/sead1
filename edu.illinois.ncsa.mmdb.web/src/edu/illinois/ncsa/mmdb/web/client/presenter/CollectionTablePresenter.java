@@ -59,7 +59,7 @@ import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 public class CollectionTablePresenter extends DynamicTablePresenter {
 
     public CollectionTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
-        super(dispatch, eventBus, display, DynamicTableView.GRID_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
+        super(dispatch, eventBus, display, DynamicTableView.PAGE_SIZE_X1);
         // TODO Auto-generated constructor stub
     }
 

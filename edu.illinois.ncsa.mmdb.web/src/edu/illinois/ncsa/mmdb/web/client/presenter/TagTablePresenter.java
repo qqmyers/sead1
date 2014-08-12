@@ -48,6 +48,7 @@ import com.google.gwt.event.shared.HandlerManager;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
+import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
 /**
  * @author lmarini
@@ -58,7 +59,7 @@ public class TagTablePresenter extends DynamicTablePresenter {
     private String tagName;
 
     public TagTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display, String tagName) {
-        super(dispatch, eventBus, display);
+        super(dispatch, eventBus, display, DynamicTableView.PAGE_SIZE_X1);
         setTagName(tagName);
     }
 

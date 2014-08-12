@@ -76,13 +76,16 @@ import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
  */
 public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePresenter.Display> {
 
-    private int                pageSize    = DynamicListView.DEFAULT_PAGE_SIZE;
-    protected String           sortKey     = "date-desc";
+    private int                pageSize        = DynamicListView.DEFAULT_PAGE_SIZE;
+    protected String           sortKey         = "date-desc";
     protected String           viewTypePreference;
-    protected String           viewType    = DynamicTableView.LIST_VIEW_TYPE;
-    protected String           sizeType    = DynamicTableView.PAGE_SIZE_X1;
+    protected String           viewType        = DynamicTableView.GRID_VIEW_TYPE;
+    protected String           sizeType        = DynamicTableView.PAGE_SIZE_X1;
     protected int              numberOfPages;
-    protected int              currentPage = 1;
+    protected int              currentPage     = 1;
+
+    private static String      initialSortKey  = "date-desc";
+    private static String      initialViewType = DynamicTableView.GRID_VIEW_TYPE;
     protected BasePresenter<?> viewTypePresenter;
 
     public interface Display {
@@ -119,15 +122,13 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
         void changeListSizeNumbers();
     }
 
-    /**
-     * Setup a presenter and view for the inner table visualization.
-     * 
-     * @param dispatch
-     * @param eventBus
-     * @param display
-     */
-    public DynamicTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
-        this(dispatch, eventBus, display, DynamicTableView.LIST_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
+    static public void setInitialKeys(String sort, String view) {
+        if (sort != null && !sort.isEmpty()) {
+            initialSortKey = sort;
+        }
+        if (view != null && !view.isEmpty()) {
+            initialViewType = view;
+        }
     }
 
     /**
@@ -137,13 +138,12 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
      * @param eventBus
      * @param display
      */
-    public DynamicTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display, String defaultview, String defaultsize) {
+    public DynamicTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display, String defaultsize) {
         super(display, dispatch, eventBus);
-
-        sortKey = MMDB.getSessionPreference(getViewSortPreference(), "date-desc");
+        sortKey = MMDB.getSessionPreference(getViewSortPreference(), initialSortKey);
+        viewType = MMDB.getSessionPreference(getViewTypePreference(), initialViewType);
         display.setOrder(sortKey);
-        setViewType(MMDB.getSessionPreference(getViewTypePreference(), defaultview), MMDB.getSessionPreference(getViewSizeTypePreference(), defaultsize));
-
+        setViewType(viewType, MMDB.getSessionPreference(getViewSizeTypePreference(), defaultsize));
         addHandler(RefreshEvent.TYPE, new RefreshHandler() {
             @Override
             public void onRefresh(RefreshEvent event) {

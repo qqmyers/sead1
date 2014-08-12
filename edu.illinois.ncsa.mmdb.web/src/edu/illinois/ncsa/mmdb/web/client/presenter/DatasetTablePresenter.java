@@ -61,12 +61,12 @@ public class DatasetTablePresenter extends DynamicTablePresenter {
     private String collectionURI = null;
 
     public DatasetTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
-        super(dispatch, eventBus, display, DynamicTableView.GRID_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
+        super(dispatch, eventBus, display, DynamicTableView.PAGE_SIZE_X1);
         // TODO Auto-generated constructor stub
     }
 
     public DatasetTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display, String collectionURI) {
-        super(dispatch, eventBus, display, DynamicTableView.GRID_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
+        super(dispatch, eventBus, display, DynamicTableView.PAGE_SIZE_X1);
 
         this.collectionURI = collectionURI;
     }
