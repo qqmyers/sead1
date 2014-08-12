@@ -54,6 +54,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
@@ -65,6 +66,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.BatchResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasets;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetAllTags;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveFromCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
@@ -86,7 +89,7 @@ import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.DownloadDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.SetLicenseDialog;
 import edu.illinois.ncsa.mmdb.web.client.view.CreateCollectionDialogView;
-import edu.illinois.ncsa.mmdb.web.client.view.TagDialogView;
+import edu.illinois.ncsa.mmdb.web.client.view.TagDialogViewWSuggest;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 
 /**
@@ -196,7 +199,24 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 if (selectionEmpty()) {
                     return;
                 }
-                TagDialogView tagView = new TagDialogView(title("Add tag(s) to %s"));
+                final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+                service.execute(new GetAllTags(), new AsyncCallback<GetTagsResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error getting tags", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(GetTagsResult result) {
+                        if (result.getTags().size() != 0) {
+                            for (String s : result.getTags().keySet() ) {
+                                oracle.add(s);
+                            }
+                        }
+                    }
+                });
+
+                TagDialogViewWSuggest tagView = new TagDialogViewWSuggest(title("Add tag(s) to %s"), oracle);
                 TagDialogPresenter tagPresenter = new TagDialogPresenter(service, eventBus, tagView);
                 tagPresenter.bind();
                 tagPresenter.setSelectedResources(sessionState.getSelectedItems());
@@ -210,7 +230,24 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                 if (selectionEmpty()) {
                     return;
                 }
-                TagDialogView tagView = new TagDialogView(title("Remove tag(s) from %s"));
+                final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+                service.execute(new GetAllTags(), new AsyncCallback<GetTagsResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error getting tags", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(GetTagsResult result) {
+                        if (result.getTags().size() != 0) {
+                            for (String s : result.getTags().keySet() ) {
+                                oracle.add(s);
+                            }
+                        }
+                    }
+                });
+
+                TagDialogViewWSuggest tagView = new TagDialogViewWSuggest(title("Remove tag(s) from %s"), oracle);
                 TagDialogPresenter tagPresenter = new TagDialogPresenter(service, eventBus, tagView, true);
                 tagPresenter.bind();
                 tagPresenter.setSelectedResources(sessionState.getSelectedItems());

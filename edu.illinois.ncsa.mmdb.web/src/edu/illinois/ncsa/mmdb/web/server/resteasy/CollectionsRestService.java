@@ -50,10 +50,12 @@ import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
  * SEAD Data Service endpoints for collections. NB: For collection IDs
@@ -322,7 +324,7 @@ public class CollectionsRestService extends ItemServicesImpl {
      */
     @POST
     @Path("/{id}/tags")
-    public Response addTagsToDataset(@PathParam("id") String id, @FormParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response addTagsToCollection(@PathParam("id") String id, @FormParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
         return addTagsToItem(id, tags, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 
@@ -379,6 +381,10 @@ public class CollectionsRestService extends ItemServicesImpl {
         UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
 
         try {
+
+            if (!rbac.checkPermission(creator, Resource.uriRef(Permission.ADD_COLLECTION.getUri()))) {
+                return Response.status(403).build();
+            }
             //Get API input data
             Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
 
@@ -427,6 +433,10 @@ public class CollectionsRestService extends ItemServicesImpl {
             log.error("Error uploading collection: ", ie);
             return Response.status(500)
                     .entity(uri).build();
+        } catch (RBACException re) {
+            log.error("Error uploading collection: ", re);
+            return Response.status(500).entity(uri).build();
+
         }
 
         // submit to extraction service
@@ -461,6 +471,25 @@ public class CollectionsRestService extends ItemServicesImpl {
     }
 
     /**
+     * Get unique metadata (excluding extracted metadata) for {id} :
+     * (Basic/biblio + user-added metadata )
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @return - Metadata as JSON-LD
+     */
+    @GET
+    @Path("/{id}/unique")
+    @Produces("application/json")
+    public Response getCollectionUniqueMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        //Note - don't currently have extractors that work on collections so this currently just returns 
+        //the same results as /metadata minus the triples about extractor run start/end times 
+        return getItemMetadataAsJSON(id, userId, false);
+
+    }
+
+    /**
      * Get all metadata for {id} : (Basic/biblio + user-added metadata and
      * extracted metadata)
      * 
@@ -474,7 +503,7 @@ public class CollectionsRestService extends ItemServicesImpl {
     public Response getCollectionMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
 
-        return getItemMetadataAsJSON(id, userId);
+        return getItemMetadataAsJSON(id, userId, true);
 
     }
 
@@ -495,7 +524,7 @@ public class CollectionsRestService extends ItemServicesImpl {
     @Path("/metadata/{pred}/{type}/{value}")
     @Produces("application/json")
     public Response getCollectionsWithMetadataAsJSON(@PathParam("pred") @Encoded String pred, @PathParam("type") @Encoded String type, @PathParam("value") @Encoded String value, @javax.ws.rs.core.Context HttpServletRequest request) {
-        return getItemsByMetadata(pred, type, value, collectionBasics, request);
+        return getItemsByMetadata(pred, type, value, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 
     /**
