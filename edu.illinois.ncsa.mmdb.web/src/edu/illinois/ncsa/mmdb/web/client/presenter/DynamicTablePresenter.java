@@ -86,6 +86,7 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
 
     private static String      initialSortKey  = "date-desc";
     private static String      initialViewType = DynamicTableView.GRID_VIEW_TYPE;
+    private static String      initialSize     = DynamicTableView.PAGE_SIZE_X1;
     protected BasePresenter<?> viewTypePresenter;
 
     public interface Display {
@@ -129,6 +130,7 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
         if (view != null && !view.isEmpty()) {
             initialViewType = view;
         }
+
     }
 
     /**
@@ -138,12 +140,12 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
      * @param eventBus
      * @param display
      */
-    public DynamicTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display, String defaultsize) {
+    public DynamicTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
         super(display, dispatch, eventBus);
         sortKey = MMDB.getSessionPreference(getViewSortPreference(), initialSortKey);
         viewType = MMDB.getSessionPreference(getViewTypePreference(), initialViewType);
         display.setOrder(sortKey);
-        setViewType(viewType, MMDB.getSessionPreference(getViewSizeTypePreference(), defaultsize));
+        setViewType(viewType, MMDB.getSessionPreference(getViewSizeTypePreference(), initialSize));
         addHandler(RefreshEvent.TYPE, new RefreshHandler() {
             @Override
             public void onRefresh(RefreshEvent event) {
