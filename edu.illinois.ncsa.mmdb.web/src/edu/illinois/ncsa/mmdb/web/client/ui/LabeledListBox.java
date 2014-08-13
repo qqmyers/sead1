@@ -109,6 +109,13 @@ public class LabeledListBox extends Composite implements ValueSelectionControl<S
         }
     }
 
+    public void clear() {
+        int itemCount = choice.getItemCount();
+        for (int i = 0; i < itemCount; i++ ) {
+            choice.removeItem(itemCount - 1 - i); //remove from end, or can remove(0) itemCount-1 times.
+        }
+    }
+
     public void setText(String text) {
         label.setText(text);
     }
