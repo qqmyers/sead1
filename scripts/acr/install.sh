@@ -28,16 +28,24 @@ fi
 # make sure we have latest listing of packages
 apt-get -y update
 
-# install java 7 first, and remove java 6 in case it is installed
-apt-get -y install openjdk-7-jre-headless openjdk-7-jre-lib
+# install rest of packages
+apt-get -y install openjdk-7-jre-headless openjdk-7-jre-lib ffmpeg imagemagick mysql-server poppler-utils tomcat6 ttf-dejavu-core ttf-dejavu-extra ttf-kochi-gothic ttf-kochi-mincho ttf-baekmuk ttf-arphic-gbsn00lp ttf-arphic-bsmi00lp ttf-arphic-gkai00mp ttf-arphic-bkai00mp ttf-sazanami-gothic ttf-kochi-gothic ttf-sazanami-mincho ttf-kochi-mincho ttf-wqy-microhei ttf-wqy-zenhei ttf-indic-fonts-core ttf-telugu-fonts ttf-oriya-fonts ttf-kannada-fonts ttf-bengali-fonts ubuntu-restricted-extras unzip gdal-bin python-gdal proj libgdal-dev nginx
+
+# remove java-6
 apt-get -y purge --auto-remove 6-jre*
 
-# install rest of packages
-apt-get -y install default-jre-headless ffmpeg imagemagick mysql-server poppler-utils tomcat6 ttf-dejavu-core ttf-dejavu-extra ttf-kochi-gothic ttf-kochi-mincho ttf-baekmuk ttf-arphic-gbsn00lp ttf-arphic-bsmi00lp ttf-arphic-gkai00mp ttf-arphic-bkai00mp ttf-sazanami-gothic ttf-kochi-gothic ttf-sazanami-mincho ttf-kochi-mincho ttf-wqy-microhei ttf-wqy-zenhei ttf-indic-fonts-core ttf-telugu-fonts ttf-oriya-fonts ttf-kannada-fonts ttf-bengali-fonts ubuntu-restricted-extras unzip gdal-bin python-gdal proj libgdal-dev
-
-# make tomcat run on port 80
-sed -i -e 's/8080/80/g' -e 's/8443/443/g' /etc/tomcat6/server.xml
-sed -i -e 's/^#*AUTHBIND=.*$/AUTHBIND=yes/' /etc/default/tomcat6
+# setup nginx
+rm /etc/nginx/sites-enabled/default
+cp nginx.conf /etc/nginx/sites-enabled/sead
+if [ -e sead.key -a -e sead.crt ]; then
+  cp sead.key /etc/ssl/sead.key
+  if [ -e intermediate.crt ]; then
+    cat sead.crt intermediate.crt > /etc/ssl/sead.crt
+  else
+    cp sead.crt /etc/ssl/sead.crt
+  fi
+fi
+service nginx restart
 
 # create folders
 if [ ! -e /home/medici/data ]; then
