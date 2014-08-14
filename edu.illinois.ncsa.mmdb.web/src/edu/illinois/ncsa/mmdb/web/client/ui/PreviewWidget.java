@@ -183,11 +183,13 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
     protected void createDefaultNoPreviewImages(String type) {
         if (type != null && !UNKNOWN_TYPE.equals(type)) {
-            String defaultImageFileName = "./images/defaultpreviews/nopreview-" + type + "-100.gif";
+            String defaultSmallImageFileName = "./images/defaultpreviews/" + type + "-100.jpg";
+            String defaultLargeImageFileName = "./images/defaultpreviews/" + type + "-500.jpg";
+
             ALT_GRAY_URL = new HashMap<String, String>();
-            ALT_GRAY_URL.put(GetPreviews.SMALL, defaultImageFileName);
-            ALT_GRAY_URL.put(GetPreviews.LARGE, defaultImageFileName); // TODO is this correct?
-            ALT_GRAY_URL.put(GetPreviews.BADGE, defaultImageFileName);
+            ALT_GRAY_URL.put(GetPreviews.SMALL, defaultSmallImageFileName);
+            ALT_GRAY_URL.put(GetPreviews.LARGE, defaultLargeImageFileName); // TODO is this correct?
+            ALT_GRAY_URL.put(GetPreviews.BADGE, defaultSmallImageFileName);
         }
 
     }
