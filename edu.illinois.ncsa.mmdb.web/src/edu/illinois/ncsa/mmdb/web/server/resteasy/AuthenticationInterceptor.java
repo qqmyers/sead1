@@ -71,7 +71,7 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
         if (hasValidToken) {
             defaultToAnonymous = true;
         } else {
-            if (path.startsWith("/datasets/") && (!(path.startsWith("/datasets/copy") || path.startsWith("/datasets/import"))) || (path.startsWith("/sparql"))) {
+            if (path.startsWith("/sparql")) {
                 log.debug("Should test remoteAPIKey for: " + path);
 
                 String mykey = TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey);
@@ -134,6 +134,11 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
 
         SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         try {
+            //FixMe - with many of the services (e,g, /datasets, /collections, /tags) now checking specific permissions,
+            // it may make sense to redefine user_remoteapi to only apply to sparql or other unchecked service interfaces
+            //Nominally, this check here could be rewritten to only apply to /sparql now but it would be better to
+            // review other services to make sure that /sparql is the only service that needs this protection
+            //For now, users will need remoteapi and the service-specific permission to use the services.
             if (!rbac.checkPermission(PersonBeanUtil.getPersonID(username), Permission.USE_REMOTEAPI)) {
                 if (!((path.startsWith("/sys/") && rbac.checkPermission(PersonBeanUtil.getPersonID(username), Permission.VIEW_SYSTEM)))) {
                     if (!hasValidToken)

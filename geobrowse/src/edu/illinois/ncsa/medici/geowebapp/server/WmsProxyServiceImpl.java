@@ -116,25 +116,5 @@ public class WmsProxyServiceImpl extends ProxiedRemoteServiceServlet implements
 		return layerInfo;
 	}
 
-	public LayerInfo[] getLayers(String tag) {
-
-		dontCache();
-		
-		List<LayerInfo> layers = null;
-		
-		try {
-		if (tag == null || tag.trim().equals("")) {
-			layers = GeoServerRestUtil.getLayers(getProxy());
-		} else {
-			layers = GeoServerRestUtil.getLayersByTag(tag, getProxy());
-		}
-		return layers.toArray(new LayerInfo[layers.size()]);
-		} catch (Exception e) {
-			invalidateSession();
-			log.warn("Error getting layers: " + e);
-		}
-		return null;
-	}
-
 
 }

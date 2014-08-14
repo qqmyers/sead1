@@ -151,26 +151,4 @@ public class GeoServerRestUtil {
 		return null;
 	}
 
-	public static List<LayerInfo> getLayersByTag(String tag, MediciProxy mp)
-			throws IOException, JSONException {
-		List<LayerInfo> layers = new ArrayList<LayerInfo>();
-
-		// getting URIs by tag
-		List<String> urisByTag = MediciRestUtil.getUrisByTag(tag, mp);
-		if (urisByTag.isEmpty())
-			return layers;
-
-		// getting layers with uri
-		Map<String, LayerInfo> layerMap = getLayerUriMap(mp);
-		if (layerMap.isEmpty())
-			return layers;
-
-		for (String uri : urisByTag) {
-			LayerInfo layer = layerMap.get(uri);
-			if (layer != null)
-				layers.add(layer);
-		}
-		return layers;
-	}
-
 }

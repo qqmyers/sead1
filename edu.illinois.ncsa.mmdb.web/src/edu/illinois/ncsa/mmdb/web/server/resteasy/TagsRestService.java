@@ -64,13 +64,13 @@ public class TagsRestService extends ItemServicesImpl {
     public Response getTagAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
         List<String> result = new ArrayList<String>();
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        //Permission to see pages means you can see metadata as well...
+        //Should we even require any permission to know what tags exist?
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_SYSTEM);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
         try {
-            //Should we require any permission to know what tags exist?
-            if (!rbac.checkPermission(userId, Resource.uriRef(Permission.VIEW_DATA.getUri()))) {
-                result.add("Server error while listing all tags.");
-                return Response.status(500).entity(result).build();
-            }
-
             Collection<TagBean> tags = new TagBeanUtil(TupeloStore.getInstance().getBeanSession()).getAll();
             for (TagBean tag : tags ) {
                 result.add(tag.getTagString());
@@ -97,6 +97,10 @@ public class TagsRestService extends ItemServicesImpl {
     @Produces("application/json")
     public Response getDatasetsByTagAsJSON(@PathParam("tag") String tag, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
 
         return getMetadataByReverseRelationship((UriRef) TagEventBeanUtil.createTagUri(tag), Tags.TAGGED_WITH_TAG, datasetBasics, userId, Cet.DATASET);
 
@@ -115,6 +119,10 @@ public class TagsRestService extends ItemServicesImpl {
     @Produces("application/json")
     public Response getCollectionsByTagAsJSON(@PathParam("tag") String tag, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
 
         return getMetadataByReverseRelationship((UriRef) TagEventBeanUtil.createTagUri(tag), Tags.TAGGED_WITH_TAG, collectionBasics, userId, (UriRef) CollectionBeanUtil.COLLECTION_TYPE);
 
@@ -135,6 +143,21 @@ public class TagsRestService extends ItemServicesImpl {
     public Response getGeoDatasetsByTagAsJSON(@PathParam("tag") String tagString, @javax.ws.rs.core.Context HttpServletRequest request) {
         return getItemsThatAreGeoLayers(Cet.DATASET, (UriRef) TagEventBeanUtil.createTagUri(tagString), request);
 
+    }
+
+    /**
+     * Get all (non-deleted, that user can see) geo fatures (collections or
+     * datasets that have a GeoPoint annotation) that are tagged with
+     * the given tag
+     * 
+     * @return geo metadata for each item in json-ld
+     */
+
+    @GET
+    @Path("/{tag}/features")
+    @Produces("application/json")
+    public Response getGeoFeatureDatasetsByTagAsJSON(@PathParam("tag") String tagString, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return getItemsThatAreGeoFeatures(Cet.DATASET, (UriRef) TagEventBeanUtil.createTagUri(tagString), request);
     }
 
 }

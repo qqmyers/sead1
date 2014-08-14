@@ -29,7 +29,6 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 	private static String _geoserver;
 	private static String _proxiedgeoserver;
 
-	private static String _remoteAPIKey;
 	private static boolean _tryAnonymous = false;
 
 	private static Log log = LogFactory.getLog(AuthenticationServiceImpl.class);
@@ -51,21 +50,18 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 		// Destroy any existing credentials
 		logout();
 		// Verify credentials
-		MediciProxy mp = new MediciProxy();
+		MediciProxy mp = new MediciProxy(false);
 
 		String result = "success";
 		try {
 			// Try to use/store credentials
 			getRemoteServerProperties();
 			if (username != null) {
-				mp.setCredentials(username, password, _server, _remoteAPIKey);
+				mp.setCredentials(username, password, _server); 
 				log.debug("U/P Credentials set for " + username);
-				
 			} else if (googleAccessToken != null) {
-				username = mp.setGoogleCredentials(googleAccessToken, _server,
-						_remoteAPIKey);
+				username = mp.setGoogleCredentials(googleAccessToken, _server, null);
 				log.debug("G Credentials set");
-				
 			} else {
 				log.debug("No credentials available");
 			}
@@ -152,9 +148,6 @@ public class AuthenticationServiceImpl extends ProxiedRemoteServiceServlet
 			_proxiedgeoserver = PropertiesLoader.getProperties().getProperty("proxiedgeoserver");
 			_geoserver = PropertiesLoader.getProperties().getProperty("geoserver");
 			log.debug("Server: " + _server);
-			_remoteAPIKey = PropertiesLoader.getProperties().getProperty(
-					"remoteAPIKey");
-			log.debug("RemoteAPIKey: " + _remoteAPIKey);
 			String anonymous = PropertiesLoader.getProperties().getProperty(
 					"enableAnonymous");
 			if ((anonymous == null) || (!anonymous.equalsIgnoreCase("true"))) {

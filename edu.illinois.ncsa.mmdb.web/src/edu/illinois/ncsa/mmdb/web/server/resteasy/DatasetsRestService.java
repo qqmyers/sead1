@@ -74,11 +74,9 @@ import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
-import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
@@ -135,14 +133,21 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     @POST
     @Path("/copy")
-    public Response copyDataset(@FormParam("url") String surl) {
+    public Response copyDataset(@FormParam("url") String surl, @javax.ws.rs.core.Context HttpServletRequest request) {
         try {
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+
             final URL url = new URL(surl);
 
             if (!url.getRef().startsWith("dataset?id=")) {
                 throw (new Exception("URL does not appear to be medici URL"));
             }
+            final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
 
+            PermissionCheck p = new PermissionCheck(creator, Permission.UPLOAD_DATA);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
             new Thread(new Runnable() {
                 public void run() {
                     try {
@@ -180,10 +185,12 @@ public class DatasetsRestService extends ItemServicesImpl {
     }
 
     /**
-     * Copy Dataset from another SEAD repository
+     * Import Data from any URL. Unless something is known about a given source,
+     * this simply copies the bytes as a new
+     * dataset and adds metadata linking back to the source URL.
      * 
-     * @param url
-     *            - the URL to copy from (the SEAD URL for the dataset page)
+     * @param surl
+     *            - the URL to import from
      * @returns - success (200) or failure (500)
      */
 
@@ -196,17 +203,10 @@ public class DatasetsRestService extends ItemServicesImpl {
             log.debug("Importing: " + decodedUrl);
             final URL url = new URL(decodedUrl);
             final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
-            SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
-            try {
-                if (!rbac.checkPermission(creator.toString(), Permission.UPLOAD_DATA)) {
-                    log.debug("user: " + creator.toString() + "  forbidden");
-                    result.put("Failure", "User " + creator.toString() + " does not have permission to import datasets");
-                    return Response.status(HttpURLConnection.HTTP_FORBIDDEN).entity(result).build();
-                }
-            } catch (RBACException e) {
-                log.warn("RBAC exception in import", e);
-                result.put("Failure", "Unknown permission issue (contact admin)");
-                return Response.status(HttpURLConnection.HTTP_INTERNAL_ERROR).entity(result).build();
+
+            PermissionCheck p = new PermissionCheck(creator, Permission.UPLOAD_DATA);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
             }
 
             final String id = RestUriMinter.getInstance().mintUri(null); // Create dataset uri
@@ -382,6 +382,12 @@ public class DatasetsRestService extends ItemServicesImpl {
     public Response getDatasetBlob(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         Response r = null;
         try {
+            final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
+
+            PermissionCheck p = new PermissionCheck(creator, Permission.DOWNLOAD);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
 
             UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
             boolean valid = false;
@@ -466,6 +472,12 @@ public class DatasetsRestService extends ItemServicesImpl {
     @Path("/{id}")
     @Produces("application/json")
     public Response markDatasetAsDeleted(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
+
+        PermissionCheck p = new PermissionCheck(creator, Permission.DELETE_DATA);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
         return markItemAsDeleted(id, Cet.DATASET, request);
     }
 
@@ -528,12 +540,17 @@ public class DatasetsRestService extends ItemServicesImpl {
     public Response getDatasetCollectionsByIdAsJSON(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         UriRef baseId = null;
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
         try {
             id = URLDecoder.decode(id, "UTF-8");
             baseId = Resource.uriRef(id);
-        } catch (Exception e1) {
-            log.error("Error decoding url for " + id, e1);
+        } catch (UnsupportedEncodingException e1) {
+            log.error("Error decoding url for " + baseId.toString(), e1);
             e1.printStackTrace();
+            return Response.status(500).entity("Error decoding id: " + baseId.toString()).build();
         }
         return getMetadataByReverseRelationship(baseId, DcTerms.HAS_PART, collectionBasics, userId, (UriRef) CollectionBeanUtil.COLLECTION_TYPE);
     }
@@ -628,8 +645,24 @@ public class DatasetsRestService extends ItemServicesImpl {
     @GET
     @Path("/layers")
     @Produces("application/json")
-    public Response getGeoDatasetsByTagAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response getGeoLayerDatasetsByTagAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
         return getItemsThatAreGeoLayers(Cet.DATASET, null, request);
+
+    }
+
+    /**
+     * Get all (non-deleted, that user can see) geo fatures (collections or
+     * datasets that have a GeoPoint annotation) that are tagged with
+     * the given tag
+     * 
+     * @return geo metadata for each item in json-ld
+     */
+
+    @GET
+    @Path("/features")
+    @Produces("application/json")
+    public Response getGeoFeatureDatasetsByTagAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
+        return getItemsThatAreGeoFeatures(Cet.DATASET, null, request);
 
     }
 
@@ -664,8 +697,9 @@ public class DatasetsRestService extends ItemServicesImpl {
 
         try {
 
-            if (!rbac.checkPermission(creator, Resource.uriRef(Permission.UPLOAD_DATA.getUri()))) {
-                return Response.status(403).build();
+            PermissionCheck p = new PermissionCheck(creator, Permission.UPLOAD_DATA);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
             }
             //Get API input data
             Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
@@ -758,9 +792,6 @@ public class DatasetsRestService extends ItemServicesImpl {
             log.error("Error uploading dataset: ", ie);
             return Response.status(500).entity(uri).build();
 
-        } catch (RBACException re) {
-            log.error("Error uploading dataset: ", re);
-            return Response.status(500).entity(uri).build();
         }
 
         // submit to extraction service unless we're big
