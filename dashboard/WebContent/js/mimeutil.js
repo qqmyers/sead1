@@ -242,6 +242,8 @@ function FindCategoryFromType(mime) {
         return "Document";
     } else if (mime.indexOf("powerpoint")!=-1) {
         return "Document";
+    } else if (mime.indexOf("presentationml")!=-1) {
+        return "Document";
     } else if (mime.indexOf("excel")!=-1) {
         return "Document";
     } else {

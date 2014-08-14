@@ -61,6 +61,8 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  * 
  *  To scan, this class looks for all datasets and checks to see if they have a dc:identifier property set. If not, one is added along with 
  *  the other bean metadata.
+ *  
+ *  If the dc:identifier value is a UriRef, this scan will replace it with a literal value (consistent with the DataSetBean mapping). 
  * 
  * @author myersjd@umich.edu
  *                               
@@ -101,6 +103,11 @@ public class DatasetBeanRepair extends MediciToolBase {
                         Resource.literal("edu.uiuc.ncsa.cet.bean.DatasetBean"));
                 tw.add(tu.get(0), Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
                         Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/http://cet.ncsa.uiuc.edu/2007/Dataset"));
+            }
+            else if(tu.get(1).isUri() ) {
+                println("Updating uri id to string: " + tu.get(0).toString());                
+                tw.remove(tu.get(0), Dc.IDENTIFIER, tu.get(1));
+                tw.add(tu.get(0), Dc.IDENTIFIER, Resource.literal(tu.get(0).toString()));
             }
         }
                 context.perform(tw);

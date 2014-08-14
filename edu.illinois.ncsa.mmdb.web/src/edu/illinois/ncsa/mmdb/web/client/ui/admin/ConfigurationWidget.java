@@ -247,7 +247,8 @@ public class ConfigurationWidget extends Composite {
                 SetConfiguration query = new SetConfiguration(MMDB.getUsername());
                 query.setConfiguration(ConfigurationKey.ProjectName, name.getText());
                 query.setConfiguration(ConfigurationKey.ProjectURL, url.getText());
-                query.setConfiguration(ConfigurationKey.ProjectDescription, desc.getText());
+                String cleanDesc = desc.getText().replace("'", "&#39;").replace("\"", "&#34;");
+                query.setConfiguration(ConfigurationKey.ProjectDescription, cleanDesc);
                 dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -258,7 +259,7 @@ public class ConfigurationWidget extends Composite {
                     public void onSuccess(ConfigurationResult result) {
                         name.setText(result.getConfiguration(ConfigurationKey.ProjectName));
                         url.setText(result.getConfiguration(ConfigurationKey.ProjectURL));
-                        desc.setText(result.getConfiguration(ConfigurationKey.ProjectDescription));
+                        desc.setText(result.getConfiguration(ConfigurationKey.ProjectDescription).replace("&#34;", "\"").replace("&#39;", "'"));
                     }
                 });
             }
