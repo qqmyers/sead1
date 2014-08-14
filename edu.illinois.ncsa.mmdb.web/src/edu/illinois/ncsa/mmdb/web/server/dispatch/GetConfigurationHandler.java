@@ -103,9 +103,11 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
             SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
             try {
                 if (!rbac.checkPermission(arg0.getUser(), Permission.VIEW_ADMIN_PAGES)) {
+                    log.warn("Non-admin request for non-whitelisted configuration parameters - sending exception to client");
                     throw (new ActionException("No admin permission."));
                 }
             } catch (RBACException exc) {
+                log.error("Permission exception when retrieving config values", exc);
                 throw (new ActionException("No admin permission.", exc));
             }
         }
