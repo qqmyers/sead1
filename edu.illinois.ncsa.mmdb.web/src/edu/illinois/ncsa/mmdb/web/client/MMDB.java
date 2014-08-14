@@ -88,6 +88,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
+import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.AuthenticationCallback;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
@@ -290,7 +291,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
 
-        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData, ConfigurationKey.UseGoogleDocViewer), new AsyncCallback<ConfigurationResult>() {
+        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData, ConfigurationKey.UseGoogleDocViewer, ConfigurationKey.PresentationSortOrder, ConfigurationKey.PresentationPageViewType), new AsyncCallback<ConfigurationResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Could not get Names", caught);
@@ -304,6 +305,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 projectNameLabel.setTitle(result.getConfiguration(ConfigurationKey.ProjectDescription));
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
                 PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
+                DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType));
+
             }
         });
 
@@ -994,9 +997,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * and no personal information.
      */
     static void initializePreferences() {
-        getSessionState().getPreferences().put(MMDB.DATASET_VIEW_TYPE_PREFERENCE, DynamicTableView.GRID_VIEW_TYPE);
         getSessionState().getPreferences().put(MMDB.DATASET_VIEWSIZE_TYPE_PREFERENCE, DynamicTableView.PAGE_SIZE_X1);
-        getSessionState().getPreferences().put(MMDB.COLLECTION_VIEW_TYPE_PREFERENCE, DynamicTableView.LIST_VIEW_TYPE);
     }
 
     // a common idiom

@@ -39,6 +39,8 @@
 package edu.illinois.ncsa.mmdb.web.client.view;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
@@ -61,27 +63,56 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
  */
 public class DynamicTableView extends Composite implements Display {
 
-    public static final String    LIST_VIEW_TYPE = "list";
-    public static final String    GRID_VIEW_TYPE = "grid";
-    public static final String    FLOW_VIEW_TYPE = "flow";
-    public static final String    PAGE_SIZE_X1   = "default";
-    public static final String    PAGE_SIZE_X2   = "two";
-    public static final String    PAGE_SIZE_X4   = "four";
-    private final FlowPanel       mainPanel;
-    private final HorizontalPanel topPagingPanel;
-    private final VerticalPanel   middlePanel;
-    private final HorizontalPanel bottomPagingPanel;
-    private final PagingWidget    pagingWidgetTop;
-    private final PagingWidget    pagingWidgetBottom;
-    private final LabeledListBox  sortOptionsTop;
-    private final LabeledListBox  viewOptionsTop;
-    private final LabeledListBox  sizeOptionsTop;
-    private String                sortKey;
-    private String                viewType;
-    private String                sizeType;
-    private final LabeledListBox  sortOptionsBottom;
-    private final LabeledListBox  viewOptionsBottom;
-    private final LabeledListBox  sizeOptionsBottom;
+    public static final String                        LIST_VIEW_TYPE = "list";
+    public static final String                        GRID_VIEW_TYPE = "grid";
+    public static final String                        FLOW_VIEW_TYPE = "flow";
+    public static final String                        PAGE_SIZE_X1   = "default";
+    public static final String                        PAGE_SIZE_X2   = "two";
+    public static final String                        PAGE_SIZE_X4   = "four";
+    public static final LinkedHashMap<String, String> SORTCHOICES;
+    public static final LinkedHashMap<String, String> PAGE_VIEW_TYPES;
+    public static final LinkedHashMap<String, String> LIST_PAGE_SIZES;
+    public static final LinkedHashMap<String, String> GRID_PAGE_SIZES;
+
+    static {
+        SORTCHOICES = new LinkedHashMap<String, String>();
+        SORTCHOICES.put("date-desc", "Date: newest first");
+        SORTCHOICES.put("date-asc", "Date: oldest first");
+        SORTCHOICES.put("title-asc", "Title: A-Z");
+        SORTCHOICES.put("title-desc", "Title: Z-A");
+        SORTCHOICES.put("category-asc", "Category: A-Z");
+        SORTCHOICES.put("category-desc", "Category: Z-A");
+
+        PAGE_VIEW_TYPES = new LinkedHashMap<String, String>();
+        PAGE_VIEW_TYPES.put(LIST_VIEW_TYPE, "List");
+        PAGE_VIEW_TYPES.put(GRID_VIEW_TYPE, "Grid");
+
+        LIST_PAGE_SIZES = new LinkedHashMap<String, String>();
+        LIST_PAGE_SIZES.put(PAGE_SIZE_X1, "5");
+        LIST_PAGE_SIZES.put(PAGE_SIZE_X2, "10");
+        LIST_PAGE_SIZES.put(PAGE_SIZE_X4, "15");
+
+        GRID_PAGE_SIZES = new LinkedHashMap<String, String>();
+        GRID_PAGE_SIZES.put(PAGE_SIZE_X1, "24");
+        GRID_PAGE_SIZES.put(PAGE_SIZE_X2, "48");
+        GRID_PAGE_SIZES.put(PAGE_SIZE_X4, "96");
+    }
+
+    private final FlowPanel                           mainPanel;
+    private final HorizontalPanel                     topPagingPanel;
+    private final VerticalPanel                       middlePanel;
+    private final HorizontalPanel                     bottomPagingPanel;
+    private final PagingWidget                        pagingWidgetTop;
+    private final PagingWidget                        pagingWidgetBottom;
+    private final LabeledListBox                      sortOptionsTop;
+    private final LabeledListBox                      viewOptionsTop;
+    private final LabeledListBox                      sizeOptionsTop;
+    private String                                    sortKey;
+    private String                                    viewType;
+    private String                                    sizeType;
+    private final LabeledListBox                      sortOptionsBottom;
+    private final LabeledListBox                      viewOptionsBottom;
+    private final LabeledListBox                      sizeOptionsBottom;
 
     public DynamicTableView() {
         mainPanel = new FlowPanel();
@@ -121,12 +152,9 @@ public class DynamicTableView extends Composite implements Display {
     private LabeledListBox createSortOptions() {
         LabeledListBox sortOptions = new LabeledListBox("Sort by: ");
         sortOptions.addStyleName("pagingLabel");
-        sortOptions.addItem("Date: newest first", "date-desc");
-        sortOptions.addItem("Date: oldest first", "date-asc");
-        sortOptions.addItem("Title: A-Z", "title-asc");
-        sortOptions.addItem("Title: Z-A", "title-desc");
-        sortOptions.addItem("Category: A-Z", "category-asc");
-        sortOptions.addItem("Category: Z-A", "category-desc");
+        for (Map.Entry<String, String> entry : DynamicTableView.SORTCHOICES.entrySet() ) {
+            sortOptions.addItem(entry.getValue(), entry.getKey());
+        }
         sortOptions.setSelected(sortKey);
         return sortOptions;
     }
@@ -134,8 +162,9 @@ public class DynamicTableView extends Composite implements Display {
     private LabeledListBox createViewOptions() {
         LabeledListBox viewOptions = new LabeledListBox("View:");
         viewOptions.addStyleName("pagingLabel");
-        viewOptions.addItem("List", LIST_VIEW_TYPE);
-        viewOptions.addItem("Grid", GRID_VIEW_TYPE);
+        for (Map.Entry<String, String> entry : DynamicTableView.PAGE_VIEW_TYPES.entrySet() ) {
+            viewOptions.addItem(entry.getValue(), entry.getKey());
+        }
         viewOptions.setSelected(viewType);
         return viewOptions;
     }
@@ -143,9 +172,9 @@ public class DynamicTableView extends Composite implements Display {
     private LabeledListBox createSizeOptions() {
         LabeledListBox sizeOptions = new LabeledListBox("Page Size:");
         sizeOptions.addStyleName("pagingLabel");
-        sizeOptions.addItem("5", PAGE_SIZE_X1);
-        sizeOptions.addItem("10", PAGE_SIZE_X2);
-        sizeOptions.addItem("20", PAGE_SIZE_X4);
+        for (Map.Entry<String, String> entry : DynamicTableView.LIST_PAGE_SIZES.entrySet() ) {
+            sizeOptions.addItem(entry.getValue(), entry.getKey());
+        }
         sizeOptions.setSelected(sizeType);
         return sizeOptions;
     }
@@ -180,35 +209,24 @@ public class DynamicTableView extends Composite implements Display {
     @Override
     public void changeGridSizeNumbers() {
 
-        sizeOptionsTop.removeItem(PAGE_SIZE_X4);
-        sizeOptionsTop.removeItem(PAGE_SIZE_X2);
-        sizeOptionsTop.removeItem(PAGE_SIZE_X1);
-        sizeOptionsTop.addItem("24", PAGE_SIZE_X1);
-        sizeOptionsTop.addItem("48", PAGE_SIZE_X2);
-        sizeOptionsTop.addItem("96", PAGE_SIZE_X4);
-        sizeOptionsBottom.removeItem(PAGE_SIZE_X4);
-        sizeOptionsBottom.removeItem(PAGE_SIZE_X2);
-        sizeOptionsBottom.removeItem(PAGE_SIZE_X1);
-        sizeOptionsBottom.addItem("24", PAGE_SIZE_X1);
-        sizeOptionsBottom.addItem("48", PAGE_SIZE_X2);
-        sizeOptionsBottom.addItem("96", PAGE_SIZE_X4);
+        sizeOptionsTop.clear();
+        sizeOptionsBottom.clear();
+        for (Map.Entry<String, String> entry : DynamicTableView.GRID_PAGE_SIZES.entrySet() ) {
+            sizeOptionsTop.addItem(entry.getValue(), entry.getKey());
+            sizeOptionsBottom.addItem(entry.getValue(), entry.getKey());
+        }
     }
 
     @Override
     public void changeListSizeNumbers() {
 
-        sizeOptionsTop.removeItem(PAGE_SIZE_X4);
-        sizeOptionsTop.removeItem(PAGE_SIZE_X2);
-        sizeOptionsTop.removeItem(PAGE_SIZE_X1);
-        sizeOptionsTop.addItem("5", PAGE_SIZE_X1);
-        sizeOptionsTop.addItem("10", PAGE_SIZE_X2);
-        sizeOptionsTop.addItem("20", PAGE_SIZE_X4);
-        sizeOptionsBottom.removeItem(PAGE_SIZE_X4);
-        sizeOptionsBottom.removeItem(PAGE_SIZE_X2);
-        sizeOptionsBottom.removeItem(PAGE_SIZE_X1);
-        sizeOptionsBottom.addItem("5", PAGE_SIZE_X1);
-        sizeOptionsBottom.addItem("10", PAGE_SIZE_X2);
-        sizeOptionsBottom.addItem("20", PAGE_SIZE_X4);
+        sizeOptionsTop.clear();
+        sizeOptionsBottom.clear();
+
+        for (Map.Entry<String, String> entry : DynamicTableView.LIST_PAGE_SIZES.entrySet() ) {
+            sizeOptionsTop.addItem(entry.getValue(), entry.getKey());
+            sizeOptionsBottom.addItem(entry.getValue(), entry.getKey());
+        }
     }
 
     @Override

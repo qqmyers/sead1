@@ -38,6 +38,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLuceneResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
+import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
+import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 
@@ -75,6 +77,9 @@ public class ConfigurationWidget extends Composite {
 
         // mail configuration
         mainPanel.add(createProjectSection(configuration));
+
+        //presentation defaults
+        mainPanel.add(createPresentationSection(configuration));
 
         // google map key
         mainPanel.add(createMapSection(configuration));
@@ -265,7 +270,7 @@ public class ConfigurationWidget extends Composite {
             }
         });
         hp.add(button);
-
+        //only resets changes before "submit" button is clicked. i.e. does not have memory of previously submitted changes.
         button = new Button("Reset", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -288,6 +293,97 @@ public class ConfigurationWidget extends Composite {
         hp.add(button);
 
         return dp;
+    }
+
+    private DisclosurePanel createPresentationSection(ConfigurationResult configuration) {
+        DisclosurePanel dp = new DisclosurePanel("Presentation Defaults");
+        dp.addStyleName("datasetDisclosurePanel");
+        dp.setOpen(false);
+        VerticalPanel vp = new VerticalPanel();
+        vp.setWidth("100%");
+        dp.add(vp);
+
+        FlexTable table = new FlexTable();
+        vp.add(table);
+
+        int idx = 0;
+
+        //Sort order
+        final LabeledListBox sortOptions = new LabeledListBox("");
+        sortOptions.addStyleName("pagingLabel");
+
+        for (Map.Entry<String, String> entry : DynamicTableView.SORTCHOICES.entrySet() ) {
+            sortOptions.addItem(entry.getValue(), entry.getKey());
+        }
+
+        sortOptions.setSelected(configuration.getConfiguration(ConfigurationKey.PresentationSortOrder));
+        table.setText(idx, 0, "Default Sort Order");
+        table.setWidget(idx, 1, sortOptions);
+        idx++;
+
+        //page view type
+        final LabeledListBox pageViewType = new LabeledListBox("");
+        pageViewType.addStyleName("pagingLabel");
+        for (Map.Entry<String, String> entry : DynamicTableView.PAGE_VIEW_TYPES.entrySet() ) {
+            pageViewType.addItem(entry.getValue(), entry.getKey());
+        }
+        String selected = configuration.getConfiguration(ConfigurationKey.PresentationPageViewType);
+        if (selected == null || selected.isEmpty()) {
+            selected = DynamicTableView.GRID_VIEW_TYPE;
+        }
+        pageViewType.setSelected(selected);
+        table.setText(idx, 0, "Default Page View Type");
+        table.setWidget(idx, 1, pageViewType);
+        idx++;
+
+        // buttons
+        HorizontalPanel hp = new HorizontalPanel();
+        vp.add(hp);
+
+        Button button = new Button("Submit", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                query.setConfiguration(ConfigurationKey.PresentationSortOrder, sortOptions.getSelected());
+                query.setConfiguration(ConfigurationKey.PresentationPageViewType, pageViewType.getSelected());
+                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        sortOptions.setSelected(result.getConfiguration(ConfigurationKey.PresentationSortOrder));
+                        pageViewType.setSelected(result.getConfiguration(ConfigurationKey.PresentationPageViewType));
+                    }
+                });
+            }
+        });
+        hp.add(button);
+        //only resets changes before "submit" button is clicked. i.e. does not have memory of previously submitted changes.
+        button = new Button("Reset", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername()), new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        sortOptions.setSelected(result.getConfiguration(ConfigurationKey.PresentationSortOrder));
+                        pageViewType.setSelected(result.getConfiguration(ConfigurationKey.PresentationPageViewType));
+                    }
+                });
+            }
+        });
+        button.addStyleName("multiAnchor");
+        hp.add(button);
+
+        return dp;
+
     }
 
     private DisclosurePanel createMapSection(ConfigurationResult configuration) {

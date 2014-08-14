@@ -77,7 +77,10 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
                                                           ConfigurationKey.VIVOIDENTIFIERURL,
                                                           ConfigurationKey.DiscoveryURL,
                                                           ConfigurationKey.BigData,
-                                                          ConfigurationKey.AccessLevelLabel
+                                                          ConfigurationKey.AccessLevelLabel,
+                                                          ConfigurationKey.UseGoogleDocViewer,
+                                                          ConfigurationKey.PresentationSortOrder,
+                                                          ConfigurationKey.PresentationPageViewType
                                                           });
 
     /** Commons logging **/
