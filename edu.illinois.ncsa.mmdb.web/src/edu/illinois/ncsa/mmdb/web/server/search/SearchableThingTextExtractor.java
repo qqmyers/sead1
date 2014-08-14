@@ -284,15 +284,12 @@ public class SearchableThingTextExtractor implements TextExtractor<String> {
 
     String getSectionMetadata(Resource uri) {
         Unifier u = new Unifier();
-        u.setColumnNames("d", "t");
+        u.setColumnNames("t");
         u.addPattern(uri, MMDB.SECTION_TEXT, "t");
-        u.addPattern(uri, Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "d");
         try {
             TupeloStore.getInstance().getContext().perform(u);
             for (Tuple<Resource> row : u.getResult() ) {
-                if (row.get(0) == null) {
-                    return row.get(1).getString();
-                }
+                return row.get(0).getString();
             }
         } catch (OperatorException e) {
             log.warn("Exception indexing section text: " + e);
