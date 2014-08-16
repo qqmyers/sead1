@@ -54,7 +54,7 @@ public class MediciProxy {
 
 	static String _sparql_path = "/resteasy/sparql";
 
-	static final String USER_INFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=";
+	static final String USER_INFO_URL = "https://www.googleapis.com/plus/v1/people/me/openIdConnect?access_token=";
 	static final String TOKEN_INFO_URL = "https://www.googleapis.com/oauth2/v1/tokeninfo";
 
 	public MediciProxy() {
