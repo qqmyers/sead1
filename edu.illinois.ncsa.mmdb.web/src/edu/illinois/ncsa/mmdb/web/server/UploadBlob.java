@@ -403,7 +403,7 @@ public class UploadBlob extends AuthenticatedServlet {
                         ThingSession ts = c.getThingSession();
                         Literal id = Resource.literal(uri);
 
-                        Thing t = ts.newThing(id);
+                        Thing t = ts.newThing(Resource.uriRef(uri));
                         //DatasetBean-related metadata
                         t.addType(Cet.DATASET);
                         t.setValue(Dc.IDENTIFIER, id);
