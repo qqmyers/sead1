@@ -527,16 +527,25 @@ public class ContextSetupListener implements ServletContextListener {
             for (String key : props.stringPropertyNames() ) {
                 if (key.startsWith("userfield.") && key.endsWith(".predicate")) { //$NON-NLS-1$ //$NON-NLS-2$
                     String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
-                    if (props.containsKey(pre + ".label")) { //$NON-NLS-1$
+                    if (props.containsKey(pre + ".label") || props.containsKey(pre + ".definition")) { //$NON-NLS-1$
                         Resource r = Resource.uriRef(props.getProperty(key));
-                        String l = props.getProperty(pre + ".label");
                         tw.add(r, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
                         tw.add(r, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
-                        // remove existing label
-                        context.removeTriples(context.match(r, Rdfs.LABEL, null));
+                        if (props.containsKey(pre + ".label")) {
+                            // remove existing label
+                            context.removeTriples(context.match(r, Rdfs.LABEL, null));
+                            String l = props.getProperty(pre + ".label");
+                            tw.add(r, Rdfs.LABEL, l);
+                            log.debug("Adding user metadata field '" + l + "' (" + r + ")");
+                        }
+                        if (props.containsKey(pre + ".definition")) {
+                            // remove existing label
+                            context.removeTriples(context.match(r, Rdfs.COMMENT, null));
+                            String l = props.getProperty(pre + ".definition");
+                            tw.add(r, Rdfs.COMMENT, l);
+                            log.debug("Adding user metadata field '" + l + "' (" + r + ")");
 
-                        tw.add(r, Rdfs.LABEL, l);
-                        log.debug("Adding user metadata field '" + l + "' (" + r + ")");
+                        }
                     }
                 }
             }
