@@ -165,7 +165,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     }
 
     public static PreviewWidget newCollectionBadge(String collectionUri, String link, DispatchAsync dispatchAsync) {
-        return new PreviewWidget(collectionUri, GetPreviews.BADGE, link, UNKNOWN_TYPE, true, false, dispatchAsync);
+        return new PreviewWidget(collectionUri, GetPreviews.BADGE, link, "Collection", true, false, dispatchAsync);
     }
 
     public PreviewWidget(String uri, String desiredSize, String link, String type, boolean checkPending, boolean initialDisplay, DispatchAsync dispatchAsync) {
@@ -188,7 +188,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
             ALT_GRAY_URL = new HashMap<String, String>();
             ALT_GRAY_URL.put(GetPreviews.SMALL, defaultSmallImageFileName);
-            ALT_GRAY_URL.put(GetPreviews.LARGE, defaultLargeImageFileName); // TODO is this correct?
+            ALT_GRAY_URL.put(GetPreviews.LARGE, defaultSmallImageFileName); // To be consistent with previously released versions, NOPREVIEW SHOULD ALWAYS BE SMALL
             ALT_GRAY_URL.put(GetPreviews.BADGE, defaultSmallImageFileName);
         }
 

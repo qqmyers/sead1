@@ -44,10 +44,7 @@ import java.util.Set;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -56,7 +53,6 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -110,32 +106,11 @@ public class DynamicGridView extends FlexTable implements Display {
             pre.setWidth("120px");
             pre.setMaxWidth(100);
             images.add(pre);
-            Image overlay = new Image("images/icons/Folder.png");
-            overlay.addStyleName("imageOverlay");
-            overlay.addClickHandler(new ClickHandler() {
-                public void onClick(ClickEvent event) {
-                    History.newItem("collection?uri=" + id);
-                }
-            });
-            images.add(overlay);
         } else {
             PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
             pre.setWidth("120px");
             pre.setMaxWidth(100);
             images.add(pre);
-
-            //badge type overlay
-            if (type != null && !UNKNOWN_TYPE.equals(type)) {
-                Image overlay = new Image("images/icons/" + type + ".png");
-                overlay.addStyleName("imageOverlay");
-                overlay.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        History.newItem("dataset?id=" + id);
-                    }
-                });
-
-                images.add(overlay);
-            }
         }
 
         layoutPanel.add(images);
