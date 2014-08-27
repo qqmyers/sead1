@@ -10,6 +10,7 @@ HOSTNAME=$( hostname -f )
 ANONYMOUS="true"
 APIKEY=$( uuidgen -r )
 GOOGLEID=""
+GOOGLE_DEVID=""
 MEDICI_EMAIL="root@localhost"
 MEDICI_PASSWORD="secret"
 GEO_USER="admin"
@@ -200,7 +201,8 @@ sed -e "s/^#*remoteAPI=.*$/remoteAPI=${APIKEY}/" \
     -e "s/^#*mail.from=.*$/mail.from=${MEDICI_EMAIL}/" \
     -e "s/^#*user.0.email=.*$/user.0.email=${MEDICI_EMAIL}/" \
     -e "s/^#*user.0.password=.*$/user.0.password=${MEDICI_PASSWORD}/" \
-    -e "s/^#*google.client_id=.*$/google.client_id=${GOOGLEID}/" acr.server > /home/medici/acr.server
+    -e "s/^#*google.client_id=.*$/google.client_id=${GOOGLEID}/" \
+    -e "s/^#*google.device_client_id=.*$/google.device_client_id=${GOOGLE_DEVID}/" acr.server > /home/medici/acr.server
 echo "geoserver=http://${HOSTNAME}/geoserver" > /home/medici/acr.common
 echo "geouser=${GEO_USER}" >> /home/medici/acr.common
 echo "geopassword=${GEO_PASSWORD}" >> /home/medici/acr.common
