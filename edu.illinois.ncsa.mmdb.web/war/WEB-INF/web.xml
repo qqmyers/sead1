@@ -215,13 +215,17 @@
            <param-value>*</param-value>
         </init-param>
         <init-param>
-           <param-name>cors.supportedMethods</param-name>
-           <param-value>POST, HEAD, OPTIONS</param-value>
+          <param-name>cors.supportedMethods</param-name>
+           <param-value>GET, POST, HEAD, OPTIONS</param-value>
         </init-param>
     </filter>
 	<filter-mapping>
         <filter-name>CORS</filter-name>
         <url-pattern>/api/authenticate</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CORS</filter-name>
+        <url-pattern>/api/checkLogin</url-pattern>
     </filter-mapping>
   	<filter-mapping>
         <filter-name>CORS</filter-name>

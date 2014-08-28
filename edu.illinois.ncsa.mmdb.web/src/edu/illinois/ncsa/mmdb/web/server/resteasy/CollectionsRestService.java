@@ -12,6 +12,7 @@ package edu.illinois.ncsa.mmdb.web.server.resteasy;
  */
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -50,6 +51,7 @@ import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
@@ -110,6 +112,12 @@ public class CollectionsRestService extends ItemServicesImpl {
     @Path("/{id}")
     @Produces("application/json")
     public Response markDatasetAsDeleted(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
+
+        PermissionCheck p = new PermissionCheck(creator, Permission.DELETE_COLLECTION);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
         return markItemAsDeleted(id, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 
@@ -128,10 +136,15 @@ public class CollectionsRestService extends ItemServicesImpl {
     public Response getDatasetsByCollectionAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         UriRef baseId = null;
+
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
         try {
             id = URLDecoder.decode(id, "UTF-8");
             baseId = Resource.uriRef(id);
-        } catch (Exception e1) {
+        } catch (UnsupportedEncodingException e1) {
             log.error("Error decoding url for " + baseId.toString(), e1);
             e1.printStackTrace();
             return Response.status(500).entity("Error decoding id: " + baseId.toString()).build();
@@ -171,14 +184,18 @@ public class CollectionsRestService extends ItemServicesImpl {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         UriRef baseId = null;
         try {
+
+            PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
             id = URLDecoder.decode(id, "UTF-8");
             baseId = Resource.uriRef(id);
-        } catch (Exception e1) {
+        } catch (UnsupportedEncodingException e1) {
             log.error("Error decoding url for " + baseId.toString(), e1);
             e1.printStackTrace();
             return Response.status(500).entity("Error decoding id: " + baseId.toString()).build();
         }
-
         return getMetadataByForwardRelationship(baseId, DcTerms.HAS_PART, collectionBasics, userId, (UriRef) CollectionBeanUtil.COLLECTION_TYPE);
     }
 
@@ -201,6 +218,12 @@ public class CollectionsRestService extends ItemServicesImpl {
     private Response addItemToCollection(String id, String item_id, Resource type, @javax.ws.rs.core.Context HttpServletRequest request) {
 
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        PermissionCheck p = new PermissionCheck(userId, Permission.ADD_RELATIONSHIP);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
+
         Response r = null;
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         UriRef colId = null;
@@ -255,6 +278,10 @@ public class CollectionsRestService extends ItemServicesImpl {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         Response r = null;
 
+        PermissionCheck p = new PermissionCheck(userId, Permission.ADD_RELATIONSHIP);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
         try {
             UriRef parentId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
             UriRef childId = Resource.uriRef(URLDecoder.decode(item_id, "UTF-8"));
@@ -322,7 +349,7 @@ public class CollectionsRestService extends ItemServicesImpl {
      */
     @POST
     @Path("/{id}/tags")
-    public Response addTagsToDataset(@PathParam("id") String id, @FormParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response addTagsToCollection(@PathParam("id") String id, @FormParam("tags") String tags, @javax.ws.rs.core.Context HttpServletRequest request) {
         return addTagsToItem(id, tags, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 
@@ -378,6 +405,11 @@ public class CollectionsRestService extends ItemServicesImpl {
         Thing t = ts.newThing(Resource.uriRef(uri));
         UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
 
+        PermissionCheck p = new PermissionCheck(creator, Permission.ADD_COLLECTION);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
+
         try {
             //Get API input data
             Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
@@ -400,7 +432,7 @@ public class CollectionsRestService extends ItemServicesImpl {
                         t.addType(Beans.STORAGE_TYPE_BEAN_ENTRY);
                         t.setValue(Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
                                 Resource.literal("edu.uiuc.ncsa.cet.bean.CollectionBean"));
-                        t.setValue(Dc.IDENTIFIER, Resource.uriRef(uri));
+                        t.setValue(Dc.IDENTIFIER, Resource.literal(uri));
                         t.setValue(Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
                                 Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/" + CollectionBeanUtil.COLLECTION_TYPE));
 
@@ -461,6 +493,25 @@ public class CollectionsRestService extends ItemServicesImpl {
     }
 
     /**
+     * Get unique metadata (excluding extracted metadata) for {id} :
+     * (Basic/biblio + user-added metadata )
+     * 
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @return - Metadata as JSON-LD
+     */
+    @GET
+    @Path("/{id}/unique")
+    @Produces("application/json")
+    public Response getCollectionUniqueMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        //Note - don't currently have extractors that work on collections so this currently just returns 
+        //the same results as /metadata minus the triples about extractor run start/end times 
+        return getItemMetadataAsJSON(id, userId, false);
+
+    }
+
+    /**
      * Get all metadata for {id} : (Basic/biblio + user-added metadata and
      * extracted metadata)
      * 
@@ -474,7 +525,7 @@ public class CollectionsRestService extends ItemServicesImpl {
     public Response getCollectionMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
 
-        return getItemMetadataAsJSON(id, userId);
+        return getItemMetadataAsJSON(id, userId, true);
 
     }
 
@@ -495,7 +546,7 @@ public class CollectionsRestService extends ItemServicesImpl {
     @Path("/metadata/{pred}/{type}/{value}")
     @Produces("application/json")
     public Response getCollectionsWithMetadataAsJSON(@PathParam("pred") @Encoded String pred, @PathParam("type") @Encoded String type, @PathParam("value") @Encoded String value, @javax.ws.rs.core.Context HttpServletRequest request) {
-        return getItemsByMetadata(pred, type, value, collectionBasics, request);
+        return getItemsByMetadata(pred, type, value, (UriRef) CollectionBeanUtil.COLLECTION_TYPE, request);
     }
 
     /**

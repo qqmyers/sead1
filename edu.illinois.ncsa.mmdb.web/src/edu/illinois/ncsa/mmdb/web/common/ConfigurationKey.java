@@ -24,6 +24,10 @@ public enum ConfigurationKey {
     ProjectDescription("project.description", ""), //$NON-NLS-1$
     ProjectURL("project.url", ""), //$NON-NLS-1$
 
+    //presentation defaults
+    PresentationSortOrder("presentation.sortorder", ""), //$NON-NLS-1$
+    PresentationPageViewType("presentation.pageviewtype", ""), //$NON-NLS-1$
+
     // name of medici server
     MediciName("medici.name", null), //$NON-NLS-1$ 
 

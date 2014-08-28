@@ -45,6 +45,8 @@ public class MediciProxy {
 	private String _remoteAPIKey = null;
 	private boolean _validCredentials = false;
 
+	private boolean testRemoteApi = true;
+
 	// private String _googleAccessToken = null;
 	private String _sessionId = null;
 
@@ -54,10 +56,14 @@ public class MediciProxy {
 
 	static String _sparql_path = "/resteasy/sparql";
 
-	static final String USER_INFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=";
+	static final String USER_INFO_URL = "https://www.googleapis.com/plus/v1/people/me/openIdConnect?access_token=";
 	static final String TOKEN_INFO_URL = "https://www.googleapis.com/oauth2/v1/tokeninfo";
 
 	public MediciProxy() {
+	}
+
+	public MediciProxy(boolean requireTest) {
+		testRemoteApi = requireTest;
 	}
 
 	public void setCredentials(String username, String password, String server) {
@@ -103,15 +109,19 @@ public class MediciProxy {
 
 			DataAccess authPostDA = new DataAccess();
 			authPostDA.setServer(server + "/api/authenticate");
-			authPostDA.setRemoteAPIKey(remoteAPIKey);
+			if (remoteAPIKey != null) {
+				authPostDA.setRemoteAPIKey(remoteAPIKey);
+			}
 			authPostDA.setMethod(DataAccess.POST);
 			authPostDA.setReturnType(DataAccess.JSON);
 			authPostDA.setRemoteAPIKey(remoteAPIKey);
 			String sessionId = authPostDA.getResponse("username=" + username
 					+ "&password=" + password);
-
-			postTestQuery(sessionId, server, remoteAPIKey);
-			// If no exception - it worked and all the params should be stored
+			if (testRemoteApi) {
+				postTestQuery(sessionId, server, remoteAPIKey);
+			}
+			// If no exception - it worked/wasn't needed and all the params
+			// should be stored
 			// as valid login info
 			_validCredentials = true;
 			_sessionId = sessionId;
@@ -152,7 +162,9 @@ public class MediciProxy {
 				DataAccess authenticateDA = new DataAccess();
 				authenticateDA.setUseBasicAuth(false);
 				authenticateDA.setMethod(DataAccess.POST);
-				authenticateDA.setRemoteAPIKey(remoteAPIKey);
+				if (remoteAPIKey != null) {
+					authenticateDA.setRemoteAPIKey(remoteAPIKey);
+				}
 				authenticateDA.setReturnType(DataAccess.XML);
 				authenticateDA.setServer(server + "/api/authenticate");
 
@@ -162,10 +174,12 @@ public class MediciProxy {
 				log.debug("started session" + sessionId);
 				// FIXME: Make medici accept googleaccesstoken on resteasy calls
 				// (versus via api/authenticate only)
+				if (testRemoteApi) {
+					postTestQuery(sessionId, server, remoteAPIKey);
+				}
 
-				postTestQuery(sessionId, server, remoteAPIKey);
-
-				// If no exception - it worked and all the params should be
+				// If no exception - it worked/wasn't needed and all the params
+				// should be
 				// stored
 				// as valid login info
 				_validCredentials = true;
@@ -190,16 +204,14 @@ public class MediciProxy {
 			// user is forbidden to sparqlquery/use the remoteAPI
 			username = null;
 		}
-
-		// Test Query @ medici
-		// set validCredentials
 		return username;
 	}
 
 	private void postTestQuery(String sessionId, String server,
 			String remoteAPIKey) throws Exception {
-		// A dummy query to check if user is authenticated - there is no
-		// token based authentication yet.
+		// A dummy query to check if user is authenticated and has remoteApi
+		// permission and remoteAPI key matches
+		// - there is no token based authentication yet.
 
 		String query = "query=SELECT ?p ?o WHERE { <s> ?p ?o . }";
 		DataAccess xmlPostDA = DataAccess
@@ -243,7 +255,9 @@ public class MediciProxy {
 		sparqlQueryDA.setServer(_server + _sparql_path);
 		sparqlQueryDA.setMethod(DataAccess.POST);
 		sparqlQueryDA.setReturnType(DataAccess.XML);
-		sparqlQueryDA.setRemoteAPIKey(_remoteAPIKey);
+		if (_remoteAPIKey != null) {
+			sparqlQueryDA.setRemoteAPIKey(_remoteAPIKey);
+		}
 		sparqlQueryDA.setSessionId(_sessionId);
 
 		String responseText = sparqlQueryDA.getResponse(query);
@@ -273,7 +287,9 @@ public class MediciProxy {
 				.buildUnauthenticatedJsonGETResponseDataAccess(url);
 		// authGetDA.setBasicCreds(_username, _password);
 		authGetDA.setUseBasicAuth(false);
-		authGetDA.setRemoteAPIKey(_remoteAPIKey);
+		if (_remoteAPIKey != null) {
+			authGetDA.setRemoteAPIKey(_remoteAPIKey);
+		}
 		authGetDA.setSessionId(_sessionId);
 		return authGetDA.getResponse(query);
 	}
@@ -291,7 +307,9 @@ public class MediciProxy {
 			authGetDA.setUseBasicAuth(true);
 		} else {
 			authGetDA.setSessionId(_sessionId);
-			authGetDA.setRemoteAPIKey(_remoteAPIKey);
+			if (_remoteAPIKey != null) {
+				authGetDA.setRemoteAPIKey(_remoteAPIKey);
+			}
 		}
 
 		return authGetDA.getResponse(query);

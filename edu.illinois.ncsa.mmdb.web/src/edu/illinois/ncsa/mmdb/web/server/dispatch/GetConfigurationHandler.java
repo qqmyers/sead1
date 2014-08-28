@@ -77,7 +77,10 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
                                                           ConfigurationKey.VIVOIDENTIFIERURL,
                                                           ConfigurationKey.DiscoveryURL,
                                                           ConfigurationKey.BigData,
-                                                          ConfigurationKey.AccessLevelLabel
+                                                          ConfigurationKey.AccessLevelLabel,
+                                                          ConfigurationKey.UseGoogleDocViewer,
+                                                          ConfigurationKey.PresentationSortOrder,
+                                                          ConfigurationKey.PresentationPageViewType
                                                           });
 
     /** Commons logging **/
@@ -103,9 +106,11 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
             SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
             try {
                 if (!rbac.checkPermission(arg0.getUser(), Permission.VIEW_ADMIN_PAGES)) {
+                    log.warn("Non-admin request for non-whitelisted configuration parameters - sending exception to client");
                     throw (new ActionException("No admin permission."));
                 }
             } catch (RBACException exc) {
+                log.error("Permission exception when retrieving config values", exc);
                 throw (new ActionException("No admin permission.", exc));
             }
         }

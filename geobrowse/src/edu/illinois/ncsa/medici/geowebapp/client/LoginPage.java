@@ -51,9 +51,10 @@ public class LoginPage extends Composite {
 	private String googleClientId = null;
 
 	// Google Oauth2
+	//Should get from Google discovery doc...(https://accounts.google.com/.well-known/openid-configuration)
 	private final String AUTH_URL = "https://accounts.google.com/o/oauth2/auth";
-	private final String EMAIL_SCOPE = "https://www.googleapis.com/auth/userinfo.email";
-	private final String PROFILE_SCOPE = "https://www.googleapis.com/auth/userinfo.profile";
+	private final String EMAIL_SCOPE = "email";
+	private final String PROFILE_SCOPE = "profile";
 
 	/**
 	 * @param dispatchasync
@@ -237,6 +238,7 @@ public class LoginPage extends Composite {
 				AuthRequest req = new AuthRequest(AUTH_URL, googleClientId)
 						.withScopes(EMAIL_SCOPE, PROFILE_SCOPE);
 				Auth AUTH = Auth.get();
+				//Remove to avoid popup!!!!!
 				AUTH.clearAllTokens();
 				AUTH.login(req, new Callback<String, Throwable>() {
 					@Override
@@ -415,7 +417,7 @@ public class LoginPage extends Composite {
 				});
 	}
 
-	private void remoteLogin(final String username, String password,
+	public static void remoteLogin(final String username, String password,
 			final AsyncCallback<String> callback) {
 		String restUrl = Geo_webapp.getMediciUrl() + "/api/authenticate";
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST,
@@ -429,6 +431,7 @@ public class LoginPage extends Composite {
 		StringBuilder sb = new StringBuilder();
 		sb.append("username=" + username);
 		sb.append("&password=" + password);
+		builder.setIncludeCredentials(true);
 		builder.setRequestData(sb.toString());
 		builder.setCallback(new RequestCallback() {
 			public void onError(Request request, Throwable exception) {
@@ -472,7 +475,7 @@ public class LoginPage extends Composite {
 		// "application/x-www-form-urlencoded");
 		// builder.setHeader("Content-type",
 		// "application/x-www-form-urlencoded");
-
+		builder. setIncludeCredentials(true);
 		StringBuilder sb = new StringBuilder();
 		sb.append("username=" + username);
 		sb.append("&googleAccessToken=" + googleAccessToken);

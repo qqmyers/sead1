@@ -75,8 +75,8 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
+import org.tupeloproject.rdf.Literal;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Beans;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
@@ -401,9 +401,9 @@ public class UploadBlob extends AuthenticatedServlet {
                         log.trace("writing metadata for " + uri);
                         // add metadata
                         ThingSession ts = c.getThingSession();
-                        UriRef id = Resource.uriRef(uri);
+                        Literal id = Resource.literal(uri);
 
-                        Thing t = ts.newThing(id);
+                        Thing t = ts.newThing(Resource.uriRef(uri));
                         //DatasetBean-related metadata
                         t.addType(Cet.DATASET);
                         t.setValue(Dc.IDENTIFIER, id);

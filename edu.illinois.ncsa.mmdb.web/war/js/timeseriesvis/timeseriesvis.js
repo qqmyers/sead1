@@ -1,4 +1,4 @@
-/*! timeseriesvis 2014-05-16 14:05:44 */
+/*! timeseriesvis 2014-08-05 14:08:02 */
 function update() {
     var a = $("#xCol option:selected").val(), b = sortDataByKey(originalData, a), c = projectDataByKey(b, a);
     console.log(c), render(c);
@@ -59,26 +59,36 @@ function loadData() {
 
 function loadDataByUrl(a) {
     console.log("Loading data at " + a), d3.csv(a, function(a, b) {
-        updateControls(b), b.forEach(function(a) {
+        updateControls(b);
+        var c = b.filter(function(a) {
+            var b = !0;
+            return Object.keys(a).forEach(function(c) {
+                var d = a[c];
+                "0" != d && "undefined" != typeof d && "" != d && (console.log("Found nonzero " + a[c]), 
+                b = !1);
+            }), 1 == b ? (console.log("Dropping empty row"), !1) : !0;
+        });
+        c.forEach(function(a) {
             Object.keys(a).forEach(function(b) {
-                b === defaultX ? moment(a[b]).isValid() && (console.log("Is valid date: " + a[b]), 
-                a[b] = moment(a[b])) : a[b] = 1 * a[b];
+                "" !== b ? b === defaultX ? moment.utc(a[b]).isValid() && (console.log("Is valid date: " + a[b]), 
+                a[b] = moment.utc(a[b]).utc().toDate()) : a[b] = 1 * a[b] : console.log("Found empty key");
             });
-        }), originalData = b, b = sortDataByKey(b, defaultX);
-        var c = projectData(b);
-        render(c);
+        }), console.log("Filtered data: "), console.log(c), originalData = c, c = sortDataByKey(c, defaultX);
+        var d = projectData(c);
+        render(d);
     });
 }
 
 function render(a) {
-    console.log("rendering data"), console.log(a), nv.addGraph(function() {
+    console.log("Rendering data"), console.log(a), nv.addGraph(function() {
         var b = a[0].values[0].x;
-        return (isNaN(b) || moment(new Date(b.toString()), dateFormats).isValid()) && (console.log("setting x axis to date format"), 
+        return isNaN(b) || moment.utc(b.toString()).isValid() ? (console.log("Setting x axis to date format based on value " + b), 
         chart.xAxis.tickFormat(function(a) {
             return d3.time.format("%Y-%m-%d")(new Date(a));
         }), chart.x2Axis.tickFormat(function(a) {
             return d3.time.format("%Y-%m-%d")(new Date(a));
-        })), chart.yAxis, chart.y2Axis, d3.select("#d3TimeseriesVis svg").datum(a).transition().duration(500).call(chart), 
+        })) : (console.log("Setting x axis format to default type " + b), chart.xAxis.tickFormat(d3.format(",.2f")), 
+        chart.x2Axis.tickFormat(d3.format(",.2f"))), chart.yAxis, chart.y2Axis, d3.select("#d3TimeseriesVis svg").datum(a).transition().duration(500).call(chart), 
         nv.utils.windowResize(chart.update), chart;
     });
 }

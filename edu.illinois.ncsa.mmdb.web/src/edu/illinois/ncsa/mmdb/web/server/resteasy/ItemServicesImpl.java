@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,6 +55,7 @@ import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Files;
@@ -65,7 +67,6 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.Memoized;
@@ -74,10 +75,9 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandlerNew;
-import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 public class ItemServicesImpl
 {
@@ -142,7 +142,7 @@ public class ItemServicesImpl
                                                                          put("License", "http://purl.org/dc/terms/license");
                                                                          put("Rights Holder", "http://purl.org/dc/terms/rightsHolder");
                                                                          put("Rights", "http://purl.org/dc/terms/rights");
-                                                                         put("Data Creation Date", Dc.DATE.toString());
+                                                                         put("Date", Dc.DATE.toString());
                                                                          put("Creation Date", Namespaces.dcTerms("created"));
                                                                          put("Size", Files.LENGTH.toString());
                                                                          put("Label", Namespaces.rdfs("label"));
@@ -158,13 +158,52 @@ public class ItemServicesImpl
                                                                      }
                                                                  };
 
+    @SuppressWarnings("serial")
+    protected static final Map<String, Object> layerBasics       = new LinkedHashMap<String, Object>() {
+                                                                     {
+                                                                         put("Identifier", Dc.IDENTIFIER.toString());
+                                                                         put("Date", Dc.DATE.toString());
+                                                                         put("Creation Date", Namespaces.dcTerms("created"));
+                                                                         put("Size", Files.LENGTH.toString());
+                                                                         put("Label", Namespaces.rdfs("label"));
+                                                                         put("Mimetype", Dc.FORMAT.toString());
+                                                                         put("Title", Dc.TITLE.toString());
+                                                                         put("WMSLayerName", Cet.cet("metadata/Extractor/WmsLayerName").toString());
+                                                                         put("WMSLayerUrl", Cet.cet("metadata/Extractor/WmsLayerUrl").toString());
+                                                                     }
+                                                                 };
+
+    protected static final Map<String, Object> featureBasics     = new LinkedHashMap<String, Object>() {
+                                                                     {
+                                                                         put("Identifier", Dc.IDENTIFIER.toString());
+                                                                         put("Date", Dc.DATE.toString());
+                                                                         put("Creation Date", Namespaces.dcTerms("created"));
+                                                                         put("Size", Files.LENGTH.toString());
+                                                                         put("Label", Namespaces.rdfs("label"));
+                                                                         put("Mimetype", Dc.FORMAT.toString());
+                                                                         put("Title", Dc.TITLE.toString());
+
+                                                                         Map<String, String> geopoint = new HashMap<String, String>();
+                                                                         geopoint.put("@id", "tag:tupeloproject.org,2006:/2.0/gis/hasGeoPoint");
+                                                                         geopoint.put("lat", "http://www.w3.org/2003/01/geo/wgs84_pos#lat");
+                                                                         geopoint.put("long", "http://www.w3.org/2003/01/geo/wgs84_pos#long");
+                                                                         put("GeoPoint", geopoint);
+                                                                     }
+                                                                 };
+
     static Context                             c                 = TupeloStore.getInstance().getContext();
-    static SEADRbac                            rbac              = new SEADRbac(TupeloStore.getInstance().getContext());
+    static protected SEADRbac                  rbac              = new SEADRbac(TupeloStore.getInstance().getContext());
 
     protected Response uploadMetadata(String id, MultipartFormDataInput input, HttpServletRequest request) {
         UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
         try {
             id = URLDecoder.decode(id, "UTF-8");
+            //FixMe - don't have a general permission for add/edit any metadata
+
+            PermissionCheck p = new PermissionCheck(creator, Permission.EDIT_USER_METADATA);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
         } catch (UnsupportedEncodingException e1) {
             log.error("Error decoding url for " + id, e1);
         }
@@ -293,35 +332,52 @@ public class ItemServicesImpl
 
     }
 
-    public static List<Metadata> listExtractedMetadataFields() {
+    private static Memoized<Map<UriRef, String>> extractedMap = null;
 
-        List<Metadata> metadata = new ArrayList<Metadata>();
-        Unifier uf = new Unifier();
-        uf.addPattern("predicate", Rdf.TYPE, MMDB.METADATA_TYPE); //$NON-NLS-1$
-        uf.addPattern("predicate", MMDB.METADATA_CATEGORY, "category"); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.addPattern("predicate", Rdfs.LABEL, "label"); //$NON-NLS-1$ //$NON-NLS-2$
-        uf.setColumnNames("label", "predicate", "category"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    public static Map<UriRef, String> listExtractedMetadataFields() {
+        if (extractedMap == null) {
+            extractedMap = new Memoized<Map<UriRef, String>>() {
+                @SuppressWarnings("unchecked")
+                public Map<UriRef, String> computeValue() {
+                    Map<UriRef, String> metadata = new LinkedHashMap<UriRef, String>();
+                    ;
+                    Unifier uf = new Unifier();
+                    uf.addPattern("predicate", Rdf.TYPE, MMDB.METADATA_EXTRACTOR); //$NON-NLS-1$
+                    uf.addPattern("predicate", Rdfs.LABEL, "label"); //$NON-NLS-1$ //$NON-NLS-2$
+                    uf.setColumnNames("label", "predicate"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-        try {
-            TupeloStore.getInstance().getContext().perform(uf);
+                    try {
+                        TupeloStore.getInstance().getContext().perform(uf);
 
-            for (Tuple<Resource> row : uf.getResult() ) {
-                if (row.get(0) != null) {
-                    log.debug("extracted fields found: " + row.get(0).getString());
-                    log.debug(row.get(1).getString());
-                    log.debug(row.get(2).getString());
-                    metadata.add(new Metadata(row.get(2).getString(), row.get(0).getString(), row.get(1).getString()));
+                        for (Tuple<Resource> row : uf.getResult() ) {
+                            if (row.get(0) != null) {
+                                log.debug("extracted fields found: " + row.get(0).getString());
+                                log.debug(row.get(1).getString());
+                                log.debug(row.get(2).getString());
+                                metadata.put(Resource.uriRef(row.get(1).getString()), row.get(0).getString());
+                            }
+                        }
+                    } catch (OperatorException e1) {
+                        log.error("Error getting Extracted Metadata list", e1);
+                    }
+                    return metadata;
                 }
-            }
-        } catch (OperatorException e1) {
-            log.error("Error getting Extracted Metadata list", e1);
+            };
+
+            extractedMap.setTtl(60 * 60 * 1000); // 1 hour
         }
-        return metadata;
+        return extractedMap.getValue();
+
     }
 
-    public Response getItemMetadataAsJSON(String id, UriRef userId) {
+    public Response getItemMetadataAsJSON(String id, UriRef userId, boolean includeExtracted) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
+        //Permission to see pages means you can see metadata as well...
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
         try {
             id = URLDecoder.decode(id, "UTF-8");
         } catch (UnsupportedEncodingException e1) {
@@ -345,7 +401,7 @@ public class ItemServicesImpl
             log.error("Error getting metadata for id: " + id + " : " + e.getMessage());
             return Response.status(500).entity("Error getting information about " + id).build();
         }
-        Map<UriRef, String> metadataMap = getPredToLabelMap();
+        Map<UriRef, String> metadataMap = getPredToLabelMap(includeExtracted);
         for (Triple t : tm.getResult() ) {
             UriRef pred = (UriRef) t.getPredicate();
             if (metadataMap.containsKey(pred)) {
@@ -355,12 +411,20 @@ public class ItemServicesImpl
         if (result.isEmpty()) {
             return Response.status(404).entity("Item " + id + " Not Found.").build();
         }
+        Map<String, String> context = new HashMap<String, String>(metadataMap.size());
+
+        for (Entry<UriRef, String> entry : metadataMap.entrySet() ) {
+            context.put(entry.getValue(), entry.getKey().toString());
+        }
+        // Note - since this context comes form simple pred/label info, none of the entries can have the 
+        // value-type info possible with set contexts (see example at top of file)
+        result.put("@context", context);
         return Response.status(200).entity(result).build();
     }
 
     private static Memoized<Map<UriRef, String>> predToLabelMap = null;
 
-    public static Map<UriRef, String> getPredToLabelMap() {
+    public static Map<UriRef, String> getPredToLabelMap(boolean includeExtracted) {
 
         if (predToLabelMap == null) {
             predToLabelMap = new Memoized<Map<UriRef, String>>() {
@@ -395,33 +459,17 @@ public class ItemServicesImpl
                     } catch (ActionException e1) {
                         log.error("Error retrieving relationship predicates" + e1);
                     }
-                    //4) Extracted metadata
-                    List<Metadata> extracted = listExtractedMetadataFields();
-                    for (Metadata md : extracted ) {
-                        metadataMap.put(Resource.uriRef(md.getValue()), md.getLabel());
-                    }
                     return metadataMap;
                 }
             };
+            predToLabelMap.setTtl(60 * 60 * 1000); // 1 hour
         }
-
-        predToLabelMap.setTtl(60 * 60 * 1000); // 1 hour
-        return predToLabelMap.getValue();
-    }
-
-    protected boolean isPermitted(String userId, Permission permission, String objectUri) {
-        Resource userUri = userId == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(userId);
-        Resource permissionUri = Resource.uriRef(permission.getUri());
-        Resource oUri = objectUri != null ? Resource.uriRef(objectUri) : null;
-        try {
-            if (!rbac.checkPermission(userUri, oUri, permissionUri)) {
-                return false;
-            }
-        } catch (RBACException e) {
-            e.printStackTrace();
-            return false;
+        // extracted fields are memoized/cached separately, just assemble here if needed
+        Map<UriRef, String> fullMap = predToLabelMap.getValue();
+        if (includeExtracted) {
+            fullMap.putAll(listExtractedMetadataFields());
         }
-        return true;
+        return fullMap;
     }
 
     protected static boolean isAccessible(UriRef userId, UriRef objId) {
@@ -446,36 +494,36 @@ public class ItemServicesImpl
             e1.printStackTrace();
             return Response.status(500).entity("Error decoding id: " + id).build();
         }
-        UriRef itemUri = Resource.uriRef(id);
+        //Permission to see pages means you can see metadata as well...
 
-        if (!isAccessible(userId, itemUri)) {
-
-            result.put("Error", "Item not accessible");
-            return Response.status(403).entity(result).build();
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
         }
-
-        //Get fields
-        Unifier uf = new Unifier();
-        uf = populateUnifier(itemUri, uf, context);
-        //Get columns to put in result (all in this case)
-        List<String> names = uf.getColumnNames();
-        log.debug("names: " + names);
+        UriRef itemUri = Resource.uriRef(id);
         try {
+
+            if (!isAccessible(userId, itemUri)) {
+
+                result.put("Error", "Item not accessible");
+                return Response.status(403).entity(result).build();
+            }
+
+            //Get fields
+            Unifier uf = new Unifier();
+            uf = populateUnifier(itemUri, uf, context, null);
+            //Get columns to put in result (all in this case)
+            List<String> names = uf.getColumnNames();
+            log.debug("names: " + names);
+
             c.perform(uf);
             log.debug("Performed");
-        } catch (Throwable e1) {
-            log.error("Error getting requested metadata for " + id, e1);
-            e1.printStackTrace();
-            return Response.status(500).entity("Error getting information about " + id).build();
-        }
-        try {
 
             result = buildResultMap(uf.getResult(), context, names, false, null);
             return Response.status(200).entity(result).build();
         } catch (Exception e) {
-            log.debug(e.getMessage());
-
-            return Response.status(404).entity("Item " + id + " Not Found.").build();
+            log.error(e.getMessage(), e);
+            return Response.status(500).entity("Error processing id: " + id).build();
         }
 
     }
@@ -486,7 +534,7 @@ public class ItemServicesImpl
      * 
      */
     @SuppressWarnings("unchecked")
-    protected static Unifier populateUnifier(Object thing, Unifier uf, Map<String, Object> context) {
+    protected static Unifier populateUnifier(Object thing, Unifier uf, Map<String, Object> context, Set<String> requiredKeys) {
         /*FixME: Note: if the first pattern of an all optional unifier doesn't match, tupelo will return no results
          * even if the other terms would match. So - all contexts should be LinkedHashMaps / other order preserving map
          * and the first entry should be a predicate that is known to be assigned (e.g. dc:identifier). 
@@ -494,6 +542,12 @@ public class ItemServicesImpl
 
         for (String key : context.keySet() ) {
             String pred = null;
+            boolean optional = true;
+            if (requiredKeys != null) {
+                if (requiredKeys.contains(key)) {
+                    optional = false;
+                }
+            }
             Object temp = context.get(key);
             if (temp instanceof String) {
                 pred = (String) temp;
@@ -503,14 +557,24 @@ public class ItemServicesImpl
             UriRef predRef = Resource.uriRef(pred);
             if (thing instanceof UriRef) {
                 log.debug("Adding pattern for id: " + ((UriRef) thing).toString() + " " + predRef.toString() + " " + key);
-                uf.addPattern(thing, predRef, key, true);
+                uf.addPattern(thing, predRef, key, optional);
 
             } else {
                 log.debug("Adding pattern: " + thing + " " + predRef.toString() + " " + key);
-                uf.addPattern(thing, predRef, key, true);
+                uf.addPattern(thing, predRef, key, optional);
 
             }
             uf.addColumnName(key);
+            if (!(temp instanceof String)) {
+                //Deal with other terms needed for key
+
+                for (String subkey : ((Map<String, String>) temp).keySet() ) {
+                    if (!subkey.equals("@id")) {
+                        uf.addPattern(key, Resource.uriRef(((Map<String, String>) temp).get(subkey)), subkey, true);
+                        uf.addColumnName(subkey);
+                    }
+                }
+            }
         }
         return uf;
     }
@@ -527,13 +591,14 @@ public class ItemServicesImpl
      * 
      */
     @SuppressWarnings("unchecked")
-    protected static Map<String, Object> buildResultMap(Table<Resource> table, Map<String, Object> context, List<String> names, boolean useHierarchy, FilterCallback filter) throws Exception {
+    protected static Map<String, Object> buildResultMap(Table<Resource> table, Map<String, Object> context, List<String> names, boolean useHierarchy, FilterCallback filter) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Map<String, String> partsMap = buildPartsMap(context);
 
         for (Tuple<Resource> tu : table ) {
 
             if ((filter == null) || filter.include(tu)) {
-
+                Map<String, Map<String, String>> currentRowObjects = new LinkedHashMap<String, Map<String, String>>();
                 for (int i = 0; i < names.size(); i++ ) {
                     String key = names.get(i);
                     Resource o = tu.get(i);
@@ -548,24 +613,61 @@ public class ItemServicesImpl
                                 }
                                 //For i=0, add value as  metadata if the key is "Identifier"  
                                 if (key.equals("Identifier")) {
-                                    addTuple((Map<String, Object>) result.get(tu.get(0).toString()), key, obj);
+                                    ((Map<String, Object>) result.get(tu.get(0).toString())).put(key, obj);
                                 }
                             } else {
-
-                                addTuple((Map<String, Object>) result.get(tu.get(0).toString()), key, obj);
+                                addToResult((Map<String, Object>) result.get(tu.get(0).toString()), key, obj, context, currentRowObjects, partsMap);
                             }
                         } else {
-                            addTuple(result, key, obj);
+                            addToResult(result, key, obj, context, currentRowObjects, partsMap);
                         }
                     }
                 }
             }
         }
         if (result.isEmpty()) {
-            throw new Exception("Empty result");
+            log.debug("Empty result");
+        } else {
+            result.put("@context", context);
         }
-        result.put("@context", context);
         return result;
+    }
+
+    private static void addToResult(Map<String, Object> resultItem, String key, String obj, Map<String, Object> context, Map<String, Map<String, String>> currentRowObjects, Map<String, String> partsMap) {
+        if (context.get(key) != null) {
+            //top level item
+            if (context.get(key) instanceof String) {
+                //flat item
+                addTuple(resultItem, key, obj);
+            } else {
+                //an object with structure - add an id field and be ready to find other parts
+                Map<String, String> newObj = new HashMap<String, String>();
+                newObj.put("Identifier", obj);
+                currentRowObjects.put(key, newObj);
+                resultItem.put(key, newObj);
+            }
+        } else {
+            //entry is from a sub object - find where it goes and add it there
+            String objectName = partsMap.get(key);
+            Map<String, String> objectMap = currentRowObjects.get(objectName);
+            objectMap.put(key, obj);
+        }
+
+    }
+
+    private static Map<String, String> buildPartsMap(Map<String, Object> context) {
+        Map<String, String> partsMap = new LinkedHashMap<String, String>();
+        for (Entry<String, Object> e : context.entrySet() ) {
+            Object o = e.getValue();
+            if (o instanceof Map<?, ?>) {
+                for (String s : ((Map<String, String>) o).keySet() ) {
+                    if (!s.equals("@id")) {
+                        partsMap.put(s, e.getKey());
+                    }
+                }
+            }
+        }
+        return partsMap;
     }
 
     /* Logic to only add unique values to the map and to switch from string to List<String> for multiple values
@@ -604,7 +706,7 @@ public class ItemServicesImpl
 
     }
 
-    protected static Response getMetadataByReverseRelationship(String base, Resource relationship, Map<String, Object> context, UriRef userId, UriRef requestedType) {
+    private static Response getMetadataByReverseRelationship(String base, Resource relationship, Map<String, Object> context, UriRef userId, UriRef requestedType) {
         Resource baseLiteral = Resource.literal(base);
         return getMetadataByRelationship(baseLiteral, false, relationship, context, userId, requestedType);
     }
@@ -613,10 +715,10 @@ public class ItemServicesImpl
         return getMetadataByRelationship(baseId, false, relationship, context, userId, requestedType);
     }
 
-    protected static Response getMetadataByRelationship(Resource baseId, boolean isSubject, Resource relationship, Map<String, Object> context, UriRef userId, UriRef requestedType) {
+    private static Response getMetadataByRelationship(Resource baseId, boolean isSubject, Resource relationship, Map<String, Object> context, final UriRef userId, UriRef requestedType) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
-        if (baseId instanceof UriRef) {
+        if (isSubject && (baseId instanceof UriRef)) {
             if (!isAccessible(userId, (UriRef) baseId)) {
 
                 result.put("Error", "Parent Item not accessible");
@@ -635,7 +737,7 @@ public class ItemServicesImpl
         if (requestedType != null) {
             uf.addPattern("thing", Rdf.TYPE, requestedType);
         }
-        uf = populateUnifier("thing", uf, context);
+        uf = populateUnifier("thing", uf, context, null);
 
         //Get column name list before the is-deleted column is added
         List<String> names = uf.getColumnNames();
@@ -647,9 +749,34 @@ public class ItemServicesImpl
             e1.printStackTrace();
             return Response.status(500).entity("Error getting information about " + baseId.toString()).build();
         }
-
+        final int idIndex = names.indexOf("Identifier");
+        log.debug(names);
+        log.debug("idIndex: " + idIndex);
         try {
-            result = buildResultMap(results, context, names, true, null);
+            result = buildResultMap(results, context, names, true, new FilterCallback() {
+                @Override
+                public boolean include(Tuple<Resource> t) {
+                    UriRef id = null;
+                    if (t.get(0) == null) {
+                        log.error("Missing identifier - skipping a dataset");
+                    } else {
+                        if (t.get(idIndex).isLiteral()) {
+
+                            id = Resource.uriRef(t.get(0).toString());
+                        } else {
+                            id = (UriRef) t.get(idIndex);
+                            log.warn("UriRef identifier:" + t.get(0).toString());
+                        }
+                        log.debug("by rel U: " + userId.toString() + " o: " + id.toString());
+                        if (isAccessible(userId, id)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                    return false;
+                }
+            });
             return Response.status(200).entity(result).build();
         } catch (Exception e) {
             //No results just means an empty list, which is OK
@@ -672,11 +799,149 @@ public class ItemServicesImpl
 
     }
 
-    protected Response getItemsByMetadata(String pred, String type, String value, Map<String, Object> context, HttpServletRequest request) {
+    protected Response getItemsThatAreGeoLayers(UriRef itemType, UriRef tag, HttpServletRequest request) {
+        final UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_LOCATION);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
+
+        Map<String, Object> context = layerBasics;
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Unifier uf = new Unifier();
+        uf.addPattern("item", Rdf.TYPE, itemType);
+        if (tag != null) {
+            uf.addPattern("item", Tags.TAGGED_WITH_TAG, tag);
+        }
+        Set<String> requiredKeys = new HashSet<String>();
+        //requiredKeys are the labels, not the preds in the @context
+        requiredKeys.add("WMSLayerUrl");
+        //column 0 must be identifier
+        populateUnifier("item", uf, context, requiredKeys);
+
+        //Get column name list before the is-deleted column is added
+        List<String> names = uf.getColumnNames();
+        log.debug(names);
+        Table<Resource> results = null;
+        try {
+            results = TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
+        } catch (Throwable e1) {
+            log.error("Error getting Geo Layers", e1);
+            return Response.status(500).entity("Error getting Items that are Geo Layers").build();
+        }
+        try {
+            result = buildResultMap(results, context, names, true, new FilterCallback() {
+                @Override
+                public boolean include(Tuple<Resource> t) {
+                    UriRef id = null;
+                    if (t.get(0) == null) {
+                        log.error("Missing identifier - skipping an item");
+                    } else {
+                        if (t.get(0).isLiteral()) {
+                            id = Resource.uriRef(t.get(0).toString());
+                        } else {
+                            id = (UriRef) t.get(0);
+                            log.warn("UriRef identifier:" + t.get(0).toString());
+                        }
+                        log.debug("U: " + userId.toString() + " O: " + id.toString());
+                        if (isAccessible(userId, id)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                    return false;
+                }
+            });
+            return Response.status(200).entity(result).build();
+        } catch (Exception e) {
+            //No results just means an empty list, which is OK
+            result.put("@context", context);
+            return Response.status(200).entity(result).build();
+        }
+    }
+
+    protected Response getItemsThatAreGeoFeatures(UriRef itemType, UriRef tag, HttpServletRequest request) {
+        final UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_LOCATION);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
+
+        Map<String, Object> context = featureBasics;
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Unifier uf = new Unifier();
+        uf.addPattern("item", Rdf.TYPE, itemType);
+        if (tag != null) {
+            uf.addPattern("item", Tags.TAGGED_WITH_TAG, tag);
+        }
+        Set<String> requiredKeys = new HashSet<String>();
+        //requiredKeys are the labels, not the preds in the @context
+        requiredKeys.add("GeoPoint");
+        //column 0 must be identifier
+        populateUnifier("item", uf, context, requiredKeys);
+
+        //Get column name list before the is-deleted column is added
+        List<String> names = uf.getColumnNames();
+        log.debug(names);
+        Table<Resource> results = null;
+        try {
+            results = TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
+        } catch (Throwable e1) {
+            log.error("Error getting Geo Features", e1);
+            return Response.status(500).entity("Error getting Items that are Geo Features").build();
+        }
+        try {
+            result = buildResultMap(results, context, names, true, new FilterCallback() {
+                @Override
+                public boolean include(Tuple<Resource> t) {
+                    UriRef id = null;
+                    if (t.get(0) == null) {
+                        log.error("Missing identifier - skipping an item");
+                    } else {
+                        if (t.get(0).isLiteral()) {
+                            id = Resource.uriRef(t.get(0).toString());
+                        } else {
+                            id = (UriRef) t.get(0);
+                            log.warn("UriRef identifier:" + t.get(0).toString());
+                        }
+                        log.debug("U: " + userId.toString() + " O: " + id.toString());
+                        if (isAccessible(userId, id)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                    return false;
+                }
+            });
+            return Response.status(200).entity(result).build();
+        } catch (Exception e) {
+            //No results just means an empty list, which is OK
+            result.put("@context", context);
+            return Response.status(200).entity(result).build();
+        }
+    }
+
+    protected Response getItemsByMetadata(String pred, String type, String value, UriRef itemType, HttpServletRequest request) {
         Response r = null;
         Resource base = null;
         Resource relationship = null;
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
+
+        Map<String, Object> context = layerBasics;
+        if (itemType.equals(Cet.DATASET)) {
+            context = datasetBasics;
+        } else if (itemType.equals(CollectionBeanUtil.COLLECTION_TYPE)) {
+            context = collectionBasics;
+        }
         try {
             pred = URLDecoder.decode(pred, "UTF-8");
             value = URLDecoder.decode(value, "UTF-8");
@@ -688,12 +953,12 @@ public class ItemServicesImpl
             base = Resource.uriRef(value);
             if ((base != null) && isAccessible(userId, (UriRef) base)) {
 
-                r = getMetadataByReverseRelationship((UriRef) base, relationship, context, userId, null);
+                r = getMetadataByReverseRelationship((UriRef) base, relationship, context, userId, itemType);
             } else {
                 return Response.status(403).entity("Related Item not accessible").build();
             }
         } else if (type.equals("literal")) {
-            r = getMetadataByReverseRelationship(value, relationship, context, userId, null);
+            r = getMetadataByReverseRelationship(value, relationship, context, userId, itemType);
         }
         if (r == null) {
             r = Response.status(500).entity("Error getting information about " + base.toString()).build();
@@ -706,53 +971,55 @@ public class ItemServicesImpl
     protected Response getTopLevelItems(Resource itemType, Map<String, Object> context, final UriRef userId) {
 
         Map<String, Object> result = new LinkedHashMap<String, Object>();
-        Unifier uf = new Unifier();
-        uf.addPattern("item", Rdf.TYPE, itemType);
-
-        //column 0 must be identifier
-        populateUnifier("item", uf, context);
-        //Must come after to avoid having no result of row 0, column 0 would be null
-        uf.addColumnName("parent");
-        uf.addPattern("parent", DcTerms.HAS_PART, "item", true);
-        List<String> names = uf.getColumnNames();
-        final int parentIndex = names.indexOf("parent");
-        log.debug("Parent index: " + parentIndex);
-        org.tupeloproject.util.Table<Resource> table = null;
         try {
+
+            PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
+
+            Unifier uf = new Unifier();
+            uf.addPattern("item", Rdf.TYPE, itemType);
+
+            //column 0 must be identifier
+            populateUnifier("item", uf, context, null);
+            //Must come after to avoid having no result of row 0, column 0 would be null
+            uf.addColumnName("parent");
+            uf.addPattern("parent", DcTerms.HAS_PART, "item", true);
+            List<String> names = uf.getColumnNames();
+            final int parentIndex = names.indexOf("parent");
+            log.debug("Parent index: " + parentIndex);
+            org.tupeloproject.util.Table<Resource> table = null;
             table = TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
-        } catch (OperatorException e) {
-            log.error("Error listing top-level collections: " + e.getMessage());
-            return Response.status(500).entity("Error listing top-level items").build();
-        }
-        names.remove("parent");
+            names.remove("parent");
 
-        try {
             result = buildResultMap(table, context, names, true, new FilterCallback() {
                 @Override
                 public boolean include(Tuple<Resource> t) {
                     if (t.get(parentIndex) == null) {
                         UriRef id = null;
-                        if (t.get(0).isLiteral()) {
-                            id = Resource.uriRef(t.get(0).toString());
-                            log.warn("Literal identifier:" + t.get(0).toString());
+                        if (t.get(0) == null) {
+                            log.error("Missing identifier - skipping a dataset");
                         } else {
-                            id = (UriRef) t.get(0);
-                        }
-                        if (isAccessible(userId, id)) {
-                            return true;
-                        } else {
-                            return false;
+                            if (t.get(0).isLiteral()) {
+                                id = Resource.uriRef(t.get(0).toString());
+                            } else {
+                                id = (UriRef) t.get(0);
+                                log.warn("UriRef identifier:" + t.get(0).toString());
+                            }
+                            if (isAccessible(userId, id)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
                         }
                     }
                     return false;
                 }
             });
         } catch (Exception e) {
-            log.debug("Exception during processing: " + e.getMessage());
-            e.printStackTrace();
-
-            //Nothing found
-            return Response.status(404).entity("Items Not Found").build();
+            log.debug("Exception during processing: ", e);
+            return Response.status(500).entity("Error retrieving items").build();
         }
         return Response.status(200).entity(result).build();
     }
@@ -762,6 +1029,12 @@ public class ItemServicesImpl
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         List<String> tags = new ArrayList<String>();
         try {
+
+            PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
+
             UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
             ValidItem item = new ValidItem(itemId, type, userId);
             if (!item.isValid()) {
@@ -793,6 +1066,12 @@ public class ItemServicesImpl
         Response r;
         try {
             UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+            PermissionCheck p = new PermissionCheck(userId, Permission.ADD_TAG);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
+
             UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
             ValidItem item = new ValidItem(itemId, type, userId);
             if (!item.isValid()) {
@@ -820,6 +1099,11 @@ public class ItemServicesImpl
         Response r;
         try {
             UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+            PermissionCheck p = new PermissionCheck(userId, Permission.DELETE_TAG);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
             UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
             ValidItem item = new ValidItem(itemId, type, userId);
             if (!item.isValid()) {
@@ -851,6 +1135,7 @@ public class ItemServicesImpl
         List<String> tags = new ArrayList<String>();
         try {
             UriRef itemId = Resource.uriRef(URLDecoder.decode(encoded_id, "UTF-8"));
+
             ValidItem item = new ValidItem(itemId, type, userId);
             if (!item.isValid()) {
                 r = item.getErrorResponse();

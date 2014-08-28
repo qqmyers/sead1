@@ -48,7 +48,6 @@ import com.google.gwt.event.shared.HandlerManager;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
-import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
 /**
  * Dynamic table presenter for datasets.
@@ -61,12 +60,12 @@ public class DatasetTablePresenter extends DynamicTablePresenter {
     private String collectionURI = null;
 
     public DatasetTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
-        super(dispatch, eventBus, display, DynamicTableView.GRID_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
+        super(dispatch, eventBus, display);
         // TODO Auto-generated constructor stub
     }
 
     public DatasetTablePresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display, String collectionURI) {
-        super(dispatch, eventBus, display, DynamicTableView.GRID_VIEW_TYPE, DynamicTableView.PAGE_SIZE_X1);
+        super(dispatch, eventBus, display);
 
         this.collectionURI = collectionURI;
     }

@@ -81,6 +81,8 @@ public class SEADUploader {
 
 	protected static boolean listonly = false;
 
+	protected static Set<String> excluded = new HashSet<String>();;
+
 	private static String server = null;
 
 	static PrintWriter pw = null;
@@ -116,16 +118,21 @@ public class SEADUploader {
 			} else if (arg.startsWith("-limit")) {
 				max = Long.parseLong(arg.substring(6));
 				println("Max ingest file count: " + max);
+			} else if (arg.startsWith("-ex")) {
+
+				excluded.add(arg.substring(3));
+				println("Exluding pattern: " + arg.substring(3));
 			}
+
 		}
 
 		// go through arguments
 		for (String arg : args) {
-			if (!((arg.equalsIgnoreCase("-listonly")) || (arg.equals("-merge")) || (arg
-					.startsWith("-limit")))) {
+			if (!((arg.equalsIgnoreCase("-listonly")) || (arg.equals("-merge"))
+					|| (arg.startsWith("-limit")) || (arg.startsWith("-ex")))) {
 				// First non-flag arg is the server URL
 				if (server == null) {
-					// println("setting server: " + arg);
+					println("Server: " + arg);
 					server = arg;
 					if (!authenticate(server)) {
 						println("Authentication failure - exiting.");
@@ -133,30 +140,35 @@ public class SEADUploader {
 					}
 				} else {
 					File file = new File(arg);
-					String tagId = null;
-					if (merge) {
-						tagId = itemExists("/" + file.getName());
-					}
-
-					if (file.isDirectory()) {
-
-						String newUri = uploadCollection(file, "", null, tagId);
-					
-						if (newUri != null) {
-							println("              " + file.getPath()
-									+ " CREATED as: " + newUri);
-						} else if ((tagId == null) && !listonly) {
-							println("Error processing: " + file.getPath());
+					if (!excluded(file.getName())) {
+						String tagId = null;
+						if (merge) {
+							tagId = itemExists("/" + file.getName());
 						}
 
-					} else {
+						if (file.isDirectory()) {
 
-						if (globalFileCount < max) {
-							String newUri = uploadDataset(file, null, tagId);
+							String newUri = uploadCollection(file, "", null,
+									tagId);
+
 							if (newUri != null) {
-								println("              UPLOADED as: " + newUri);
+								println("              " + file.getPath()
+										+ " CREATED as: " + newUri);
 							} else if ((tagId == null) && !listonly) {
 								println("Error processing: " + file.getPath());
+							}
+
+						} else {
+
+							if (globalFileCount < max) {
+								String newUri = uploadDataset(file, null, tagId);
+								if (newUri != null) {
+									println("              UPLOADED as: "
+											+ newUri);
+								} else if ((tagId == null) && !listonly) {
+									println("Error processing: "
+											+ file.getPath());
+								}
 							}
 						}
 					}
@@ -168,6 +180,17 @@ public class SEADUploader {
 			pw.close();
 		}
 
+	}
+
+	private static boolean excluded(String name) {
+
+		for (String s : excluded) {
+			if (name.matches(s)) {
+				println("Excluding: " + name);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static boolean authenticate(String server) {
@@ -199,6 +222,7 @@ public class SEADUploader {
 						authenticated = true;
 					}
 				} else {
+					//Seems to occur when google device id is not set on server - with a Not Found response...
 					println("Error response from " + server + " : "
 							+ response.getStatusLine().getReasonPhrase());
 				}
@@ -222,6 +246,10 @@ public class SEADUploader {
 
 	protected static String uploadCollection(File dir, String path,
 			String parentId, String collectionId) {
+
+		Set<String> existingDatasetChildren = null;
+		Set<String> existingCollectionChildren = null;
+
 		Set<String> childDatasetUris = new HashSet<String>();
 		Set<String> childCollectionUris = new HashSet<String>();
 
@@ -239,7 +267,7 @@ public class SEADUploader {
 
 		try {
 			for (File file : dir.listFiles()) {
-				if (file.getName().startsWith(".")) {
+				if (excluded(file.getName())) {
 					continue;
 				}
 				String existingUri = null;
@@ -297,24 +325,37 @@ public class SEADUploader {
 								childDatasetUris.add(newUri);
 							}
 						} else { // Child didn't exist and still doesn't
-							throw (new IOException(
-									"Did not process item correctly: "
-											+ file.getAbsolutePath()));
+							if (globalFileCount < max) { // and it should
+								throw (new IOException(
+										"Did not process item correctly: "
+												+ file.getAbsolutePath()));
+							} else {
+								println("Reached file limit before processing: "
+										+ file);
+							}
 						}
 					} else if (collectionId != null) { // Child did exist, and
 														// parent (current
 														// focus) does
 						// Need to check existing children and add any missing
 						// ones that aren't new (those were already added)
-						Set<String> children = getChildren(collectionId);
-						if (!children.contains(existingUri)) {
-							if (file.isDirectory()) {
+						if (existingDatasetChildren == null) {
+							existingDatasetChildren = getDatasetChildren(collectionId);
+						}
+						if (existingCollectionChildren == null) {
+							existingCollectionChildren = getCollectionChildren(collectionId);
+						}
+						if (file.isDirectory()) {
+							if (!existingCollectionChildren
+									.contains(existingUri)) {
 								childCollectionUris.add(existingUri);
-							} else {
+							}
+						} else {
+							if (!existingDatasetChildren.contains(existingUri)) {
 								childDatasetUris.add(existingUri);
 							}
-
 						}
+
 					}
 				}
 			}
@@ -380,7 +421,8 @@ public class SEADUploader {
 					// Just need to add any new children - addsubCollcall
 					CloseableHttpClient httpclient = HttpClients
 							.createDefault();
-					if(!childDatasetUris.isEmpty() || !childCollectionUris.isEmpty()) {
+					if (!childDatasetUris.isEmpty()
+							|| !childCollectionUris.isEmpty()) {
 						println("Adding child relationships to existing collection:");
 					}
 					try {
@@ -407,7 +449,7 @@ public class SEADUploader {
 
 				}
 			} else {
-				collectionId = null; //listonly - report no changes
+				collectionId = null; // listonly - report no changes
 			}
 		} catch (IOException io) {
 			println("error: " + io.getMessage());// One or more files not
@@ -417,7 +459,7 @@ public class SEADUploader {
 		return collectionId;
 	}
 
-	private static Set<String> getChildren(String collectionId) {
+	private static Set<String> getDatasetChildren(String collectionId) {
 		Set<String> tagIds = new HashSet<String>();
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 
@@ -449,8 +491,9 @@ public class SEADUploader {
 
 					}
 				} else {
-					println("Error response when checking for children of "
-							+ collectionId + " : "
+					println("Error response when checking for dataset children of "
+							+ collectionId
+							+ " : "
 							+ response.getStatusLine().getReasonPhrase());
 
 				}
@@ -458,8 +501,62 @@ public class SEADUploader {
 				response.close();
 			}
 		} catch (IOException e) {
-			println("Error processing children check on " + collectionId
-					+ " : " + e.getMessage());
+			println("Error processing dataset children check on "
+					+ collectionId + " : " + e.getMessage());
+		} finally {
+			try {
+				httpclient.close();
+			} catch (IOException e) {
+				println("Couldn't close httpclient: " + e.getMessage());
+			}
+		}
+		return (tagIds);
+	}
+
+	private static Set<String> getCollectionChildren(String collectionId) {
+		Set<String> tagIds = new HashSet<String>();
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+
+		try {
+			String serviceUrl = server + "/resteasy/collections/"
+					+ URLEncoder.encode(collectionId, "UTF-8") + "/"
+					+ "collections";
+
+			HttpGet httpget = new HttpGet(serviceUrl);
+			CloseableHttpResponse response = httpclient.execute(httpget,
+					localContext);
+			try {
+				if (response.getStatusLine().getStatusCode() == 200) {
+					HttpEntity resEntity = response.getEntity();
+					if (resEntity != null) {
+						String json = EntityUtils.toString(resEntity);
+						Map<String, Object> mapObject = new ObjectMapper()
+								.readValue(
+										json,
+										new TypeReference<Map<String, Object>>() {
+										});
+						if (mapObject.size() > 1) {
+							for (String key : mapObject.keySet()) {
+								if (!key.equals("@context")) {
+									tagIds.add(key);
+								}
+							}
+						}
+
+					}
+				} else {
+					println("Error response when checking for collection children of "
+							+ collectionId
+							+ " : "
+							+ response.getStatusLine().getReasonPhrase());
+
+				}
+			} finally {
+				response.close();
+			}
+		} catch (IOException e) {
+			println("Error processing collection children check on "
+					+ collectionId + " : " + e.getMessage());
 		} finally {
 			try {
 				httpclient.close();
@@ -507,7 +604,6 @@ public class SEADUploader {
 			try {
 				response.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -595,7 +691,8 @@ public class SEADUploader {
 
 			}
 		} else {
-			dataId=null; //listonly mode - we report that we did not create anything
+			dataId = null; // listonly mode - we report that we did not create
+							// anything
 		}
 		return dataId;
 	}

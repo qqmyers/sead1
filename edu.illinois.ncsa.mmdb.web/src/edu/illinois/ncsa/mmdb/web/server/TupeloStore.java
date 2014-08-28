@@ -1242,7 +1242,7 @@ public class TupeloStore {
         }
     }
 
-    public void shutdownExtractorExector(boolean now) {
+    public void shutdownExtractorExecutor(boolean now) {
         if (now) {
             executor.shutdownNow();
         } else {

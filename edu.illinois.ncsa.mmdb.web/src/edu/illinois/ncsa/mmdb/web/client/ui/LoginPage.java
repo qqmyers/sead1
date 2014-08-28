@@ -100,8 +100,8 @@ public class LoginPage extends Composite {
 
     // Google Oauth2
     private final String        AUTH_URL      = "https://accounts.google.com/o/oauth2/auth";
-    private final String        EMAIL_SCOPE   = "https://www.googleapis.com/auth/userinfo.email";
-    private final String        PROFILE_SCOPE = "https://www.googleapis.com/auth/userinfo.profile";
+    private final String        EMAIL_SCOPE   = "email";
+    private final String        PROFILE_SCOPE = "profile";
 
     /**
      * @param dispatchasync
@@ -256,6 +256,8 @@ public class LoginPage extends Composite {
 
         AuthRequest req = new AuthRequest(AUTH_URL, MMDB._googleClientId).withScopes(EMAIL_SCOPE, PROFILE_SCOPE);
         Auth AUTH = Auth.get();
+
+        //Remove to stop popup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         AUTH.clearAllTokens();
         AUTH.login(req, new Callback<String, Throwable>() {
             @Override
