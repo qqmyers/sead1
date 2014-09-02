@@ -47,6 +47,17 @@ public class OrcidClient {
         return sb.toString();
     }
 
+    public static String authenticationURL(String clientId, String redirectURI) {
+        String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
+        StringBuilder sb = new StringBuilder();
+        sb.append("client_id=" + clientId + "&");
+        sb.append("scope=" + "/authenticate" + "&");
+        sb.append("response_type=" + "code&");
+        sb.append("redirect_uri=" + redirectURI + "&");
+        sb.append("state=" + "magic-bean");
+        return orcidAuthorizeURL + "?" + sb.toString();
+    }
+
     public static void oAuth() {
         log.debug("Connecting to Orcid API");
         // factory for all requests

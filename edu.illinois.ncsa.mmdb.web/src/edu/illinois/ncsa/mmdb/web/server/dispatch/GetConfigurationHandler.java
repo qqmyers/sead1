@@ -77,7 +77,8 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
                                                           ConfigurationKey.VIVOIDENTIFIERURL,
                                                           ConfigurationKey.DiscoveryURL,
                                                           ConfigurationKey.BigData,
-                                                          ConfigurationKey.AccessLevelLabel
+                                                          ConfigurationKey.AccessLevelLabel,
+                                                          ConfigurationKey.OrcidClientId
                                                           });
 
     /** Commons logging **/

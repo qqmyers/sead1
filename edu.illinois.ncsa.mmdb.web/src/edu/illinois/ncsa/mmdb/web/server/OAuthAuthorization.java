@@ -49,7 +49,12 @@ public class OAuthAuthorization extends HttpServlet {
 
         if (provider.equals(DEFAULT_PROVIDER)) {
             String clientId = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientId);
-            String orcidURL = OrcidClient.createAuthenticationURL(clientId);
+            String protocol = "http:";
+            if (req.isSecure()) {
+                protocol = "https:";
+            }
+            String redirectURI = protocol + "//" + req.getServerName() + ":" + req.getServerPort() + "/oauth2callback/orcid";
+            String orcidURL = OrcidClient.authenticationURL(clientId, redirectURI);
             log.debug("Redirecting to " + orcidURL);
             resp.sendRedirect(orcidURL);
         } else {

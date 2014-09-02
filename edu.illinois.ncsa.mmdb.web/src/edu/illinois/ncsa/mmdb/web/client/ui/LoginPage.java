@@ -58,6 +58,7 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DeferredCommand;
@@ -80,8 +81,11 @@ import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 
 /**
  * @author Luigi Marini
@@ -252,32 +256,43 @@ public class LoginPage extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                orcidAuthLogin(new AuthenticationCallback() {
-                    @Override
-                    public void onFailure() {
-                        fail();
-                    }
-
-                    @Override
-                    public void onSuccess(String userUri, String sessionKey) {
-                        GWT.log("Orcid authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
-                    }
-                });
+                orcidAuthLogin();
             }
         });
 
         table.setWidget(6, 0, orcidLogin);
         table.getFlexCellFormatter().setColSpan(6, 0, 2);
         table.getFlexCellFormatter().setHorizontalAlignment(6, 0, HasAlignment.ALIGN_CENTER);
-
         return table;
     }
 
     /**
      * Login using Orcid oAuth2.
      */
-    private void orcidAuthLogin(final AuthenticationCallback callback) {
-        callback.onFailure();
+    private void orcidAuthLogin() {
+
+        dispatchasync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.OrcidClientId), new AsyncCallback<ConfigurationResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Could not get OrcidClientId", caught);
+                // TODO provide feedback on page
+            }
+
+            @Override
+            public void onSuccess(ConfigurationResult result) {
+                String client_id = result.getConfiguration(ConfigurationKey.OrcidClientId);
+                String redirect_uri = Window.Location.getProtocol() + "//" + Window.Location.getHost() + "/oauth2callback/orcid";
+                String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
+                StringBuilder sb = new StringBuilder();
+                sb.append("client_id=" + client_id + "&");
+                sb.append("scope=" + URL.encodeQueryString("/authenticate") + "&");
+                sb.append("response_type=" + "code&");
+                sb.append("redirect_uri=" + URL.encodeQueryString(redirect_uri) + "&");
+                sb.append("state=" + "magic-bean");
+                String url = orcidAuthorizeURL + "?" + sb.toString();
+                Window.Location.assign(url);
+            }
+        });
     }
 
     /**
