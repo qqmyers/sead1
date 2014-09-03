@@ -116,7 +116,7 @@ legend {
 			
 			gapi.auth.authorize({
 				client_id: googleClientId,
-				scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+				scope: 'email profile',
 			 	access_type: 'online',
    				immediate: 'false',
 				authuser: -1

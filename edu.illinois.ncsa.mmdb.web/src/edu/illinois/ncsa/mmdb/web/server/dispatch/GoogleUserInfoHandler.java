@@ -87,7 +87,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
     /** Commons logging **/
     private static Log                            log            = LogFactory.getLog(GoogleUserInfoHandler.class);
 
-    private static final String                   USER_INFO_URL  = "https://www.googleapis.com/oauth2/v1/userinfo";
+    private static final String                   USER_INFO_URL  = "https://www.googleapis.com/plus/v1/people/me/openIdConnect";
     private static final HttpTransport            HTTP_TRANSPORT = new NetHttpTransport();
 
     private static final ThreadLocal<HttpSession> session        = new ThreadLocal<HttpSession>();
@@ -111,6 +111,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
             log.debug("Identity = " + request.execute().parseAsString());
             String identity = request.execute().parseAsString();
             String[] info = parseJson(identity);
+            log.debug(info);
             //            Userinfo userInfo = request.execute().parseAs(Userinfo.class);
             //            log.debug("User credentials retrieved from Google: " + userInfo.getEmail());
             boolean created = checkUsersExists(info[0], info[1]);
@@ -189,6 +190,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
     }
 
     private PersonBean createUser(String email, String name) {
+        //FixMe - name may be null/blank from Google
         PersonBean pb = new PersonBean();
         pb.setUri(PersonBeanUtil.getPersonID(email));
         pb.setEmail(email);

@@ -132,7 +132,7 @@ public class SEADUploader {
 					|| (arg.startsWith("-limit")) || (arg.startsWith("-ex")))) {
 				// First non-flag arg is the server URL
 				if (server == null) {
-					// println("setting server: " + arg);
+					println("Server: " + arg);
 					server = arg;
 					if (!authenticate(server)) {
 						println("Authentication failure - exiting.");
@@ -222,6 +222,7 @@ public class SEADUploader {
 						authenticated = true;
 					}
 				} else {
+					//Seems to occur when google device id is not set on server - with a Not Found response...
 					println("Error response from " + server + " : "
 							+ response.getStatusLine().getReasonPhrase());
 				}
