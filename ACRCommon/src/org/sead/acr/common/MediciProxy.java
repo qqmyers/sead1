@@ -28,10 +28,10 @@ import javax.xml.ws.http.HTTPException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.XML;
 import org.sead.acr.common.utilities.PropertiesLoader;
-import org.sead.acr.common.utilities.json.JSONException;
-import org.sead.acr.common.utilities.json.JSONObject;
-import org.sead.acr.common.utilities.json.XML;
 
 public class MediciProxy {
 
@@ -335,6 +335,11 @@ public class MediciProxy {
 
 	}
 
+	/**
+	 * @ deprecated - use getValidatedGoogleToken instead
+	 * 
+	 */
+
 	public static String isValidGoogleToken(String[] client_ids,
 			String googleAccessToken) {
 
@@ -359,6 +364,39 @@ public class MediciProxy {
 				for (String id : client_ids) {
 					if (audience.equals(id)) {
 						return tokeninfo.getString("email");
+					}
+				}
+			}
+		} catch (Exception e) {
+			log.debug("Google validation exception: " + e.getMessage());
+		}
+
+		return null;
+	}
+
+	public static JSONObject getValidatedGoogleToken(String[] client_ids,
+			String googleAccessToken) {
+
+		try {
+			DataAccess jsonGETDA = DataAccess
+					.buildUnauthenticatedJsonGETResponseDataAccess(TOKEN_INFO_URL);
+
+			String result = jsonGETDA.getResponse("access_token="
+					+ googleAccessToken);
+			log.debug("TokenInfo retrieved from Google: " + result);
+
+			JSONObject tokeninfo = new JSONObject(result);
+			String audience = tokeninfo.getString("audience");
+			boolean verified = tokeninfo.getBoolean("verified_email");
+			int i = audience.indexOf("<");
+			if (i > 0) {
+				log.debug("Audience includes < :" + audience);
+				audience = audience.substring(0, i);
+			}
+			if (verified) {
+				for (String id : client_ids) {
+					if (audience.equals(id)) {
+						return tokeninfo;
 					}
 				}
 			}

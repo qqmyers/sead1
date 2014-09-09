@@ -84,6 +84,12 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
     public static String getUser(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null) {
+            Integer expireTime = (Integer) session.getAttribute("exp");
+            if (expireTime != null) {
+                if (expireTime.intValue() < (int)(System.currentTimeMillis() / 1000L)) {
+                    return null;
+                }
+            }
             return (String) session.getAttribute(AuthenticatedServlet.AUTHENTICATED_AS);
         }
         return null;

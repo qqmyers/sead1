@@ -44,6 +44,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.constraints.NotNull;
+
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -52,6 +54,7 @@ import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.UmbrellaException;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -183,6 +186,16 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     public static String               _projectName                     = "SEAD ACR";
     public static boolean              bigData                          = false;                              //Server's bigData flag
 
+    private static void reportUmbrellaError(@NotNull Throwable e) {
+        for (Throwable th : ((UmbrellaException) e).getCauses() ) {
+            if (th instanceof UmbrellaException) {
+                reportUmbrellaError(th);
+            } else {
+                Window.alert("Error: " + th.getMessage());
+            }
+        }
+    }
+
     /**
      * This is the entry point method.
      */
@@ -192,6 +205,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             public void onUncaughtException(Throwable e) {
                 String s = "SEAD ACR Error:\n An unexpected error (such as a temporary communications issue or server error) has occurred.\n Please refresh your browser page to continue.\n If the issue persists, please report it to SEAD"; //, including the following message:\n" + e.getMessage();
                 Window.alert(s + e + e.getMessage());
+                reportUmbrellaError(e);
                 GWT.log("uncaught exception", e);
             }
         });
@@ -290,6 +304,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         RootPanel.get("projectTitle").add(mainHeader);
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
+
+        LoginPage.setMainWindow(this);
 
         dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData, ConfigurationKey.UseGoogleDocViewer, ConfigurationKey.PresentationSortOrder, ConfigurationKey.PresentationPageViewType), new AsyncCallback<ConfigurationResult>() {
             @Override
@@ -508,7 +524,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             if (!token.startsWith("logout_st")) {
                 History.newItem("listDatasets", false);
             }
-            LoginPage.authenticate(dispatchAsync, this, "anonymous", "none", new AuthenticationCallback() {
+            LoginPage.clearPreferredUser();
+            LoginPage.oauth2Login(new AuthenticationCallback() {
                 @Override
                 public void onFailure() {
                 }
@@ -516,7 +533,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 @Override
                 public void onSuccess(String userUri, String sessionKey) {
                 }
-            });
+            }, true);
 
         } else if (token.startsWith("login")) {
             /*Once the loginpage is shown, it's internal logic determines what happens next.
@@ -601,8 +618,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * @param sessionId
      * 
      */
-    public void login(final String userId, final String sessionKey) {
-        login(null, userId, sessionKey, new AuthenticationCallback() {
+    public void retrieveUserInfo(final String userId, final String sessionKey) {
+        retrieveUserInfo(null, userId, sessionKey, new AuthenticationCallback() {
             @Override
             public void onFailure() {
             }
@@ -613,12 +630,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         });
     }
 
-    public void loginByName(final String username, final String sessionKey, final AuthenticationCallback callback) {
-        login(username, null, sessionKey, callback);
+    public void retrieveUserInfoByName(final String username, final String sessionKey, final AuthenticationCallback callback) {
+        retrieveUserInfo(username, null, sessionKey, callback);
     }
 
     //username or userId needs to be non-null, userId will be used if both are provided
-    private void login(final String username, final String userId, final String sessionKey, final AuthenticationCallback callback) {
+    private void retrieveUserInfo(final String username, final String userId, final String sessionKey, final AuthenticationCallback callback) {
         final UserSessionState state = MMDB.getSessionState();
 
         state.setSessionKey(sessionKey);
@@ -646,7 +663,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 }
 
                 doWithPermission(History.getToken());
-
+                //Before doWithPerm? (most/all(?) callbacks are null now, so minor issue
                 callback.onSuccess(username, sessionKey);
             }
         };
@@ -849,7 +866,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         adminLink.addStyleName("hidden");
         loginStatusWidget.loggedOut();
         mainContainer.clear();
-        LoginPage lp = new LoginPage(dispatchAsync, this);
+        LoginPage lp = new LoginPage();
         if (interrupted) {
             lp.setFeedback("Session Interrupted/Timed Out. Login again to continue.");
         }
@@ -882,10 +899,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         }
 
         if (!loggedIn) {
-            //try to log in as anonymous
+            //try to log in as preferred user or anonymous
             GWT.log("not logged in, attempting to login as anonymous");
-            LoginPage.authenticate(dispatchAsync, MMDB.this,
-                    "anonymous", "none", new
+            LoginPage.oauth2Login(new
                     AuthenticationCallback() {
 
                         @Override
@@ -898,7 +914,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                                 sessionKey) {
                             GWT.log("logged in as anonymous");
                         }
-                    });
+                    }, true);
         } else {
             String localKey = state.getSessionKey();
             if ((localKey != null) && cookieSessionKey.equals(localKey)) {
@@ -915,9 +931,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                             @Override
                             public void onFailure() {
-                                //Start fresh
-                                LoginPage.authenticate(dispatchAsync, MMDB.this,
-                                        "anonymous", "none", new
+                                //Start fresh - login as preferred user if possible or anon if not
+                                LoginPage.oauth2Login(new
                                         AuthenticationCallback() {
 
                                             @Override
@@ -930,7 +945,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                                                     sessionKey) {
                                                 GWT.log("logged in as anonymous");
                                             }
-                                        });
+                                        }, true);
                             }
 
                             @Override
@@ -939,7 +954,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                                 // login menu
                                 //Get the user's info (PersonBean) and store in UserSessionState
-                                login(userUri, sessionKey);
+                                retrieveUserInfo(userUri, sessionKey);
                             }
                         });
 

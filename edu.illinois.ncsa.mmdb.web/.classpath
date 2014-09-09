@@ -19,7 +19,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/arq-2.8.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-beanutils-1.8.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-dbcp-1.4.jar"/>
@@ -73,7 +72,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/google-api-client-1.16.0-rc.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/google-http-client-1.16.0-rc.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/google-oauth-client-1.16.0-rc.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-oauth2-0.2-alpha.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-oauth2-0.2-alpha.jar" sourcepath="C:/Users/Jim/.m2/repository/com/google/api/gwt-oauth2/0.2/gwt-oauth2-0.2-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/google-http-client-jackson-1.16.0-rc.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/ACRCommon.jar" sourcepath="/ACRCommon/src"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang3-3.1.jar"/>
@@ -81,7 +80,8 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-4.7.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.2-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo/src/main/java"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-multipart-provider-2.3.2.Final.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

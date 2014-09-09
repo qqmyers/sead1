@@ -89,28 +89,36 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
  */
 public class LoginPage extends Composite {
 
-    private final FlowPanel     mainPanel;
-    private Label               pageTitle;
-    private TextBox             usernameBox;
-    private PasswordTextBox     passwordBox;
-    private SimplePanel         feedbackPanel;
-    private Label               progressLabel;
-    private final DispatchAsync dispatchasync;
-    private final MMDB          mainWindow;
+    private final FlowPanel      mainPanel;
+    private Label                pageTitle;
+    private TextBox              usernameBox;
+    private PasswordTextBox      passwordBox;
+    private SimplePanel          feedbackPanel;
+    private Label                progressLabel;
+    private static DispatchAsync dispatchasync;
+    private static MMDB          mainWindow;
 
     // Google Oauth2
-    private final String        AUTH_URL      = "https://accounts.google.com/o/oauth2/auth";
-    private final String        EMAIL_SCOPE   = "email";
-    private final String        PROFILE_SCOPE = "profile";
+    private static final String  AUTH_URL      = "https://accounts.google.com/o/oauth2/auth";
+    private static final String  EMAIL_SCOPE   = "email";
+    private static final String  PROFILE_SCOPE = "profile";
+
+    private static boolean       autologin     = false;
+
+    public static void setMainWindow(MMDB mWindow) {
+        mainWindow = mWindow;
+        dispatchasync = mWindow.dispatchAsync;
+    }
+
+    public static void clearautologin() {
+        autologin = false;
+    }
 
     /**
      * @param dispatchasync
      * 
      */
-    public LoginPage(DispatchAsync dispatchasync, MMDB mainWindow) {
-
-        this.dispatchasync = dispatchasync;
-        this.mainWindow = mainWindow;
+    public LoginPage() {
 
         mainPanel = new FlowPanel();
 
@@ -228,7 +236,11 @@ public class LoginPage extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                googleAuthLogin(new AuthenticationCallback() {
+                //Kludge - testing assignment of autologin
+                if (usernameBox.getText().length() > 0) {
+                    autologin = true;
+                }
+                oauth2Login(new AuthenticationCallback() {
                     @Override
                     public void onFailure() {
                         fail();
@@ -238,7 +250,7 @@ public class LoginPage extends Composite {
                     public void onSuccess(String userUri, String sessionKey) {
                         GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
                     }
-                });
+                }, false);
             }
         });
 
@@ -249,76 +261,140 @@ public class LoginPage extends Composite {
         return table;
     }
 
+    public static native void checkForOauth2Token(TokenCallback tCallback) /*-{
+        
+		$wnd.gapi.auth
+				.authorize(
+						{
+							client_id : "972225704837.apps.googleusercontent.com",
+							scope : 'email profile',
+							access_type : 'online',
+							immediate : 'true',
+							authuser : -1
+						},
+						function(authResult) {
+							if (authResult && !authResult.error) {
+								tCallback.@edu.illinois.ncsa.mmdb.web.client.ui.TokenCallback::onSuccess(Ljava/lang/String;) (authResult.access_token);
+							} else {
+							    tCallback.@edu.illinois.ncsa.mmdb.web.client.ui.TokenCallback::onFailure() ();
+							}
+							
+						});
+    }-*/;
+
     /**
      * Login using google oauth2.
      */
-    private void googleAuthLogin(final AuthenticationCallback callback) {
+    public static void oauth2Login(final AuthenticationCallback callback, final boolean silent) {
+        //CheckForToken will try a silent login if the preferred user is known
+        if (autologin) {
+            checkForOauth2Token(new TokenCallback() {
+                @Override
+                public void onFailure() {
+                    //No token available
+                    if (silent) {
+                        //Try anonymous login
+                        authenticate("anonymous", "none", callback);
+                    } else {
+                        //Go forward and ask user for credentials
+                        realOauth2Login(callback);
+                    }
+                }
+
+                @Override
+                public void onSuccess(String token) {
+                    //Silent or not, we have a token and will complete silently
+                    doOauth2Authenticate(token, callback);
+                }
+
+            });
+        } else {
+            //Preferred user not known 
+            if (silent) {
+                //Try anonymous login
+                authenticate("anonymous", "none", callback);
+            } else {
+                //Go forward and ask user for credentials
+                realOauth2Login(callback);
+            }
+        }
+
+    }
+
+    private static void realOauth2Login(final AuthenticationCallback callback) {
 
         AuthRequest req = new AuthRequest(AUTH_URL, MMDB._googleClientId).withScopes(EMAIL_SCOPE, PROFILE_SCOPE);
         Auth AUTH = Auth.get();
+        //AUTH.tokenStore;
 
-        //Remove to stop popup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //If we're here, we could not get a valid token from gapi (or don't know the preferred user and didn't try), so we should clear any cached token info that is potentially stale
         AUTH.clearAllTokens();
         AUTH.login(req, new Callback<String, Throwable>() {
             @Override
             public void onSuccess(final String token) {
                 GWT.log("Successful login with Google OAuth2 " + token);
-
-                dispatchasync.execute(new GoogleUserInfo(token), new AsyncCallback<GoogleUserInfoResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        callback.onFailure();
-                    }
-
-                    @Override
-                    public void onSuccess(final GoogleUserInfoResult result) {
-                        if (result.isCreated()) {
-                            GWT.log("Created new user " + result.getUserName() + " " + result.getEmail());
-                        } else {
-                            GWT.log("User found " + result.getUserName() + " " + result.getEmail());
-                        }
-
-                        // authenticate on the server side
-                        String restUrl = "./api/authenticate";
-                        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
-                        builder.setHeader("Content-type", "application/x-www-form-urlencoded");
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("googleAccessToken=" + token);
-                        builder.setRequestData(sb.toString());
-                        builder.setCallback(new RequestCallback() {
-                            public void onError(Request request, Throwable exception) {
-                                GWT.log("Error authenticating on the server side");
-                            }
-
-                            public void onResponseReceived(Request request, Response response) {
-                                // success!
-                                String sessionKey = response.getText();
-
-                                GWT.log("REST auth status code = " + response.getStatusCode(), null);
-                                if (response.getStatusCode() > 300) {
-                                    GWT.log("Authentication failed: " + sessionKey, null);
-                                } else {
-                                    GWT.log("User " + result.getEmail() + " associated with session key " + sessionKey, null);
-                                    // login local
-                                    mainWindow.loginByName(result.getEmail(), sessionKey, callback);
-                                }
-                            }
-                        });
-
-                        try {
-                            GWT.log("attempting to authenticate " + result.getEmail() + " against " + restUrl, null);
-                            builder.send();
-                        } catch (RequestException x) {
-                            callback.onFailure();
-                        }
-                    }
-                });
+                doOauth2Authenticate(token, callback);
             }
 
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure();
+            }
+        });
+    }
+
+    private static void doOauth2Authenticate(final String token, final AuthenticationCallback callback) {
+        dispatchasync.execute(new GoogleUserInfo(token), new AsyncCallback<GoogleUserInfoResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure();
+            }
+
+            @Override
+            public void onSuccess(final GoogleUserInfoResult result) {
+                if (result.isCreated()) {
+                    GWT.log("Created new user " + result.getUserName() + " " + result.getEmail());
+                } else {
+                    GWT.log("User found " + result.getUserName() + " " + result.getEmail());
+                }
+
+                // authenticate on the server side
+                String restUrl = "./api/authenticate";
+                RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
+                builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+                StringBuilder sb = new StringBuilder();
+                sb.append("googleAccessToken=" + token);
+                builder.setRequestData(sb.toString());
+                builder.setCallback(new RequestCallback() {
+                    public void onError(Request request, Throwable exception) {
+                        GWT.log("Error authenticating on the server side");
+                    }
+
+                    public void onResponseReceived(Request request, Response response) {
+                        // success!
+                        String sessionKey = response.getText();
+
+                        GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                        if (response.getStatusCode() > 300) {
+                            GWT.log("Authentication failed: " + sessionKey, null);
+                        } else {
+                            GWT.log("User " + result.getEmail() + " associated with session key " + sessionKey, null);
+                            // login local
+                            mainWindow.retrieveUserInfoByName(result.getEmail(), sessionKey, callback);
+                        }
+                        //Set timer to renew credentials
+                        Window.alert("Expires at:" + result.getExpirationTime());
+
+                    }
+                });
+
+                try {
+                    GWT.log("attempting to authenticate " + result.getEmail() + " against " + restUrl, null);
+                    builder.send();
+                } catch (RequestException x) {
+                    callback.onFailure();
+                }
             }
         });
 
@@ -337,7 +413,7 @@ public class LoginPage extends Composite {
      * 
      * Called to process logout/login as anonymous from MMDB
      */
-    public static void authenticate(final DispatchAsync dispatch, final MMDB mainWindow, final String username, final String password, final AuthenticationCallback callback) {
+    public static void authenticate(final String username, final String password, final AuthenticationCallback callback) {
         logout(new Command() { // ensure we're logged out before authenticating
             public void execute() {
 
@@ -367,7 +443,7 @@ public class LoginPage extends Composite {
                             GWT.log("user " + username + " associated with session key " + sessionKey, null);
                             // login local
 
-                            mainWindow.loginByName(username, sessionKey, callback);
+                            mainWindow.retrieveUserInfoByName(username, sessionKey, callback);
                         }
                     }
                 });
@@ -426,7 +502,7 @@ public class LoginPage extends Composite {
      * 
      */
     public void authenticate(final String username, final String password) {
-        authenticate(dispatchasync, mainWindow, username, password, new AuthenticationCallback() {
+        authenticate(username, password, new AuthenticationCallback() {
             @Override
             public void onFailure() {
                 fail();
@@ -440,7 +516,7 @@ public class LoginPage extends Composite {
     }
 
     /**
-     * TODO Placehoder: Show terms of service.
+     * TODO Placeholder: Show terms of service.
      * 
      */
     private void showTermsOfService() {

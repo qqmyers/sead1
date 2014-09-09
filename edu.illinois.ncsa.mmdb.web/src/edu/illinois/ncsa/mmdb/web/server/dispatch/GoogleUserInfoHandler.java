@@ -52,14 +52,12 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.sead.acr.common.MediciProxy;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Foaf;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -71,6 +69,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
@@ -80,6 +79,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
  * Retrieve Google user info.
  * 
  * @author Luigi Marini
+ * @author myersjd@umich.edu
  * 
  */
 public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, GoogleUserInfoResult> {
@@ -103,43 +103,41 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
         log.debug("Getting user information from google using OAuth2, token = " + action.getToken());
 
         try {
-            GoogleCredential credential = new GoogleCredential().setAccessToken(action.getToken());
-            HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(credential);
-            GenericUrl url = new GenericUrl(USER_INFO_URL);
-            HttpRequest request = requestFactory.buildGetRequest(url);
-            request.getHeaders().setContentType("application/json");
-            log.debug("Identity = " + request.execute().parseAsString());
-            String identity = request.execute().parseAsString();
-            String[] info = parseJson(identity);
-            log.debug(info);
-            //            Userinfo userInfo = request.execute().parseAs(Userinfo.class);
-            //            log.debug("User credentials retrieved from Google: " + userInfo.getEmail());
-            boolean created = checkUsersExists(info[0], info[1]);
-            // register user with session
-            //            session.get().setAttribute(AuthenticatedServlet.AUTHENTICATED_AS, userInfo.getEmail());
-            return new GoogleUserInfoResult(created, info[0], info[1]);
+            //First verify token is for us
+            String[] client_ids = new String[1];
+            client_ids[0] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleClientId);
+            JSONObject tokenInfo = MediciProxy.getValidatedGoogleToken(client_ids, action.getToken());
+            if (tokenInfo != null) {
+                int ttl = tokenInfo.getInt("expires_in");
+                int exp = (int) (ttl + (int) (System.currentTimeMillis() / 1000L));
+
+                //Now get user info, which validates the token in the process
+                GoogleCredential credential = new GoogleCredential().setAccessToken(action.getToken());
+                HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(credential);
+                GenericUrl url = new GenericUrl(USER_INFO_URL);
+                HttpRequest request = requestFactory.buildGetRequest(url);
+                request.getHeaders().setContentType("application/json");
+                String result = request.execute().parseAsString();
+                JSONObject personInfo = new JSONObject(result);
+                log.debug(personInfo.toString());
+                boolean verified = personInfo.getBoolean("email_verified");
+                if (verified) {
+                    boolean created = checkUsersExists(personInfo.getString("name"), personInfo.getString("email"));
+                    // register user with session
+                    //            session.get().setAttribute(AuthenticatedServlet.AUTHENTICATED_AS, userInfo.getEmail());
+                    return new GoogleUserInfoResult(created, personInfo.getString("name"), personInfo.getString("email"), exp);
+                }
+            }
+            //Something's not right - wrong audience, expired token, email not yet verified by google
+            throw new ActionException("Invalid google user");
+
         } catch (IOException e) {
             log.error("Error retrieving google user info", e);
             throw new ActionException("Error retrieving google user info");
+        } catch (JSONException e) {
+            log.error("Error parsing google tokenInfo", e);
+            throw new ActionException("Error parsing Google tokeninfo");
         }
-    }
-
-    private String[] parseJson(String identity) throws JsonParseException, IOException {
-        JsonFactory jfactory = new JsonFactory();
-        JsonParser jParser = jfactory.createJsonParser(identity);
-        String[] info = new String[2];
-        while (jParser.nextToken() != JsonToken.END_OBJECT) {
-            String fieldname = jParser.getCurrentName();
-            if ("name".equals(fieldname)) {
-                jParser.nextToken();
-                info[0] = jParser.getText();
-            }
-            if ("email".equals(fieldname)) {
-                jParser.nextToken();
-                info[1] = jParser.getText();
-            }
-        }
-        return info;
     }
 
     @Override
@@ -168,7 +166,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
             List<Resource> uris = u.getFirstColumn();
             if (uris.size() == 1) {
                 log.debug("User in the system " + uris.get(0));
-                PersonBean pb = pbu.get((UriRef) uris.get(0));
+                PersonBean pb = pbu.get(uris.get(0));
                 log.debug("User retrieved " + pb.getUri());
                 return false;
             } else if (uris.size() == 0) {

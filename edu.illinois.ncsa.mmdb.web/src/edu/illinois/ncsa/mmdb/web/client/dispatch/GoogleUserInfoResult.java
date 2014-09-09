@@ -50,20 +50,27 @@ import net.customware.gwt.dispatch.shared.Result;
  * @author Luigi Marini
  * 
  */
-@SuppressWarnings("serial")
+
 public class GoogleUserInfoResult implements Result {
 
-    private boolean created;
-    private String  userName;
-    private String  email;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2645395902591679254L;
+
+    private boolean           created;
+    private String            userName;
+    private String            email;
+    private int               expirationTime;
 
     public GoogleUserInfoResult() {
     }
 
-    public GoogleUserInfoResult(boolean created, String userName, String email) {
+    public GoogleUserInfoResult(boolean created, String userName, String email, int exp) {
         this.created = created;
         this.userName = userName;
         this.setEmail(email);
+        this.setExpirationTime(exp);
     }
 
     public boolean isCreated() {
@@ -80,6 +87,14 @@ public class GoogleUserInfoResult implements Result {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public int getExpirationTime() {
+        return expirationTime;
+    }
+
+    public void setExpirationTime(int expirationTime) {
+        this.expirationTime = expirationTime;
     }
 
 }

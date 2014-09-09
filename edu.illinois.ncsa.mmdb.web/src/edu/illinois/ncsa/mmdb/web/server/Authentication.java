@@ -42,6 +42,8 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.sead.acr.common.MediciProxy;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
@@ -102,25 +104,32 @@ public class Authentication {
         }
     }
 
-    public static String googleAuthenticate(String[] client_ids, String googleAccessToken) {
-        String user = MediciProxy.isValidGoogleToken(client_ids, googleAccessToken);
-        if (user != null) {
+    public static JSONObject googleAuthenticate(String[] client_ids, String googleAccessToken) {
+        JSONObject tokenInfo = MediciProxy.getValidatedGoogleToken(client_ids, googleAccessToken);
+        if (tokenInfo != null) {
+            String user;
             try {
-                TripleWriter tw = new TripleWriter();
-                Resource person = Resource.uriRef(PersonBeanUtil.getPersonID(user));
-                tw.add(person, Cet.cet("lastLogin"), new Date());
-                Unifier uf = new Unifier();
-                uf.addPattern(person, Cet.cet("lastLogin"), "date");
-                uf.setColumnNames("date");
-                TupeloStore.getInstance().getContext().perform(uf);
-                for (Tuple<Resource> row : uf.getResult() ) {
-                    tw.remove(person, Cet.cet("lastLogin"), row.get(0));
+                user = tokenInfo.getString("email");
+                try {
+                    TripleWriter tw = new TripleWriter();
+
+                    Resource person = Resource.uriRef(PersonBeanUtil.getPersonID(user));
+                    tw.add(person, Cet.cet("lastLogin"), new Date());
+                    Unifier uf = new Unifier();
+                    uf.addPattern(person, Cet.cet("lastLogin"), "date");
+                    uf.setColumnNames("date");
+                    TupeloStore.getInstance().getContext().perform(uf);
+                    for (Tuple<Resource> row : uf.getResult() ) {
+                        tw.remove(person, Cet.cet("lastLogin"), row.get(0));
+                    }
+                    TupeloStore.getInstance().getContext().perform(tw);
+                } catch (OperatorException exc) {
+                    log.debug("LOGIN: could not write last login for " + user, exc);
                 }
-                TupeloStore.getInstance().getContext().perform(tw);
-            } catch (OperatorException exc) {
-                log.debug("LOGIN: could not write last login for " + user, exc);
+            } catch (JSONException e) {
+                log.error(e);
             }
         }
-        return user;
+        return tokenInfo;
     }
 }

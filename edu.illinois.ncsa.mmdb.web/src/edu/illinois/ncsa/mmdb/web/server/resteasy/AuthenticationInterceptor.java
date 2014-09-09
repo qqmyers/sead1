@@ -108,10 +108,18 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
 
         //Retrieve username from session if it exists
         HttpSession session = servletRequest.getSession(false);
+        log.debug("SESSION TTL: " + session.getMaxInactiveInterval());
         if (session != null) {
-            username = (String) session.getAttribute(AuthenticatedServlet.AUTHENTICATED_AS);
-            log.debug("Found session - Sucessfully authenticated as " + username);
+            int exp = ((Integer) session.getAttribute("exp")).intValue();
+            if (exp > (int) (System.currentTimeMillis() / 1000L)) {
+                log.debug("Unexpired token found: exp = " + exp);
+                username = (String) session.getAttribute(AuthenticatedServlet.AUTHENTICATED_AS);
+                log.debug("Found session - Sucessfully authenticated as " + username);
+            } else {
+                log.debug("Expired token found: exp = " + exp);
+            }
         } else if (request.getHttpHeaders().getRequestHeader("Authorization") != null) {
+            //FixMe - only handles local login (still needed?), not Oauth2
             String token = request.getHttpHeaders().getRequestHeader("Authorization").get(0);
             if (token != null && ((username = checkLoggedIn(token)) != null)) {
                 log.debug("Authorization header found - Sucessfully authenticated as " + username);

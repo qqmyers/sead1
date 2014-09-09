@@ -49,6 +49,8 @@ import javax.xml.ws.http.HTTPException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.util.Base64;
@@ -130,7 +132,12 @@ public class AuthenticatedServlet extends HttpServlet {
                 String[] clientIds = new String[2];
                 clientIds[0] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleClientId);
                 clientIds[1] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleDeviceClientId);
-                validUser = Authentication.googleAuthenticate(clientIds, googleAccessToken); // testID
+                JSONObject tokenInfo = Authentication.googleAuthenticate(clientIds, googleAccessToken); // testID
+                try {
+                    validUser = tokenInfo.getString("email");
+                } catch (JSONException e) {
+                    log.error(e);
+                }
                 log.info("Retrieved user from google " + validUser + " " + clientIds[0] + ", " + clientIds[1] + " " + googleAccessToken);
                 if (validUser != null) {
                     // set the session attribute indicating that we're authenticated
@@ -142,8 +149,17 @@ public class AuthenticatedServlet extends HttpServlet {
                         session.invalidate();
                     }
                     session = request.getSession(true);
+                    try {
+                        session.setAttribute("exp", tokenInfo.getInt("expires_in") + (int) (System.currentTimeMillis() / 1000L));
+                    } catch (JSONException e) {
+                        // TODO Auto-generated catch block
+                        log.error("Can't set token expiration", e);
+                    }
                     log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
                     session.setAttribute(AUTHENTICATED_AS, validUser);
+
+                    session.setMaxInactiveInterval(3601); //longer than gAT lifetime - (note gAT lifetime now governs how long the session is considered valid, not the session lifetime)
+
                     SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
                     try {
                         if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {

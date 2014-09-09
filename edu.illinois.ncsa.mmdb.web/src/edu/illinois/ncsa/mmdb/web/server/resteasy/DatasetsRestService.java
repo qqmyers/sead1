@@ -641,7 +641,6 @@ public class DatasetsRestService extends ItemServicesImpl {
      * 
      * @return geo metadata for each item in json-ld
      */
-
     @GET
     @Path("/layers")
     @Produces("application/json")
@@ -657,7 +656,6 @@ public class DatasetsRestService extends ItemServicesImpl {
      * 
      * @return geo metadata for each item in json-ld
      */
-
     @GET
     @Path("/features")
     @Produces("application/json")
