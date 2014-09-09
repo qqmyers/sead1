@@ -49,7 +49,8 @@ public enum ConfigurationKey {
     BigData("bigdata", "false"),
 
     // Orcid oAuth 
-    OrcidClientId("orcid.client_id", "");
+    OrcidClientId("orcid.client_id", ""),
+    OrcidClientSecret("orcid.client_secret", "");
 
     private final String propertyKey;
     private final String defaultValue;

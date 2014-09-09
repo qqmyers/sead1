@@ -17,6 +17,8 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientRequestFactory;
 import org.jboss.resteasy.client.ClientResponse;
 
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+
 /**
  * Client to interact with orchid.org API. Currently focusing on social sign on.
  * 
@@ -25,14 +27,14 @@ import org.jboss.resteasy.client.ClientResponse;
  */
 public class OrcidClient {
 
-    public static final String SANDBOX_LOGIN_URL = "https://sandbox.orcid.org";
-    public static final String SANDBOX_API_URL   = "https://api.sandbox.orcid.org";
-    //    private static final String BASE_URL      = "http://orcid.org";
-    public static final String AUTH_ENDPOINT     = "/oauth/authorize";
-    public static final String CLIENT_ID         = "0000-0002-8511-0211";
+    public static final String  SANDBOX_LOGIN_URL = "https://sandbox.orcid.org";
+    public static final String  SANDBOX_API_URL   = "https://api.sandbox.orcid.org";
+    private static final String BASE_URL          = "http://orcid.org";
+    public static final String  AUTH_ENDPOINT     = "/oauth/authorize";
+    public static final String  CLIENT_ID         = "0000-0002-8511-0211";
     //    private static final String CLIENT_ID         = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientId);
-    public static final String REDIRECT_URI      = "https://developers.google.com/oauthplayground";
-    private static Log         log               = LogFactory.getLog(OrcidClient.class);
+    public static final String  REDIRECT_URI      = "https://developers.google.com/oauthplayground";
+    private static Log          log               = LogFactory.getLog(OrcidClient.class);
 
     public static String createAuthenticationURL(String clientId) throws MalformedURLException {
         final StringBuilder sb = new StringBuilder();
@@ -56,6 +58,42 @@ public class OrcidClient {
         sb.append("redirect_uri=" + redirectURI + "&");
         sb.append("state=" + "magic-bean");
         return orcidAuthorizeURL + "?" + sb.toString();
+    }
+
+    public static void requestAccessToken(String code, String redirectURI) {
+        String clientId = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientId);
+        String clientSecret = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientSecret);
+        ClientRequest authorize = new ClientRequest("https://api.orcid.org/oauth/token");
+        authorize.followRedirects(true);
+        authorize.accept(MediaType.APPLICATION_JSON_TYPE);
+        authorize.queryParameter("client_id", clientId);
+        authorize.queryParameter("client_secret", clientSecret);
+        authorize.queryParameter("grant_type", "authorization_code");
+        //        authorize.queryParameter("scope", "/read-public");
+        authorize.queryParameter("redirect_uri", redirectURI);
+        authorize.queryParameter("code", code);
+        try {
+            log.debug("Requesting access token " + authorize.getUri());
+        } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        try {
+            ClientResponse<String> clientResponse = authorize.post(String.class);
+            log.debug("Authorization status: " + clientResponse.getStatus());
+            log.debug("Authorization body: " + clientResponse.getEntity());
+            log.debug("Location: " + clientResponse.getLocation());
+            MultivaluedMap<String, String> headers = clientResponse.getHeaders();
+            for (String key : headers.keySet() ) {
+                log.debug(key + ": " + headers.get(key));
+            }
+
+        } catch (Exception e) {
+            log.error("Failed to authorize user", e);
+        }
+        log.debug("Done authorizing against Orcid API");
+
     }
 
     public static void oAuth() {

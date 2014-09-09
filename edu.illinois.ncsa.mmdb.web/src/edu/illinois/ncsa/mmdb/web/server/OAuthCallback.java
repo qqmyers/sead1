@@ -33,6 +33,12 @@ public class OAuthCallback extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        // protocol for redirect uri
+        String protocol = "http:";
+        if (req.isSecure()) {
+            protocol = "https:";
+        }
+
         // extract provider from url
         String url = req.getRequestURL().toString();
         log.debug("Requested " + url);
@@ -61,8 +67,9 @@ public class OAuthCallback extends HttpServlet {
             resp.setStatus(200);
         } else if (code != null) {
             log.debug("Code submitted");
+            String redirectURI = protocol + "//" + req.getServerName() + ":" + req.getServerPort() + "/oauth2callback/orcid";
             if (provider.equals("orcid")) {
-                requestOrcidAccessToken(code);
+                requestOrcidAccessToken(code, redirectURI);
                 resp.setStatus(200);
                 out.println("Success");
             } else {
@@ -77,7 +84,8 @@ public class OAuthCallback extends HttpServlet {
         }
     }
 
-    private void requestOrcidAccessToken(String code) {
+    private void requestOrcidAccessToken(String code, String redirectURI) {
         log.debug("Requesting orcid access token");
+        OrcidClient.requestAccessToken(code, redirectURI);
     }
 }
