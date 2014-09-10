@@ -405,7 +405,7 @@ public class ItemServicesImpl
         for (Triple t : tm.getResult() ) {
             UriRef pred = (UriRef) t.getPredicate();
             if (metadataMap.containsKey(pred)) {
-                result.put(metadataMap.get(pred), t.getObject().toString());
+                addTuple(result, metadataMap.get(pred), t.getObject().toString());
             }
         }
         if (result.isEmpty()) {
