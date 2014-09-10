@@ -65,6 +65,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -97,6 +98,7 @@ public class LoginPage extends Composite {
     private Label                progressLabel;
     private static DispatchAsync dispatchasync;
     private static MMDB          mainWindow;
+    private CheckBox             autoBox;
 
     // Google Oauth2
     private static final String  AUTH_URL      = "https://accounts.google.com/o/oauth2/auth";
@@ -110,8 +112,12 @@ public class LoginPage extends Composite {
         dispatchasync = mWindow.dispatchAsync;
     }
 
-    public static void clearautologin() {
-        autologin = false;
+    public static void setAutologin(boolean state) {
+        autologin = state;
+    }
+
+    public static boolean getAutologin() {
+        return autologin;
     }
 
     /**
@@ -236,10 +242,8 @@ public class LoginPage extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                //Kludge - testing assignment of autologin
-                if (usernameBox.getText().length() > 0) {
-                    autologin = true;
-                }
+                autologin = autoBox.getValue();
+
                 oauth2Login(new AuthenticationCallback() {
                     @Override
                     public void onFailure() {
@@ -257,6 +261,10 @@ public class LoginPage extends Composite {
         table.setWidget(5, 0, googleLogin);
         table.getFlexCellFormatter().setColSpan(5, 0, 2);
         table.getFlexCellFormatter().setHorizontalAlignment(5, 0, HasAlignment.ALIGN_CENTER);
+
+        autoBox = new CheckBox();
+        autoBox.setValue(autologin);
+        table.setWidget(6, 0, autoBox);
 
         return table;
     }

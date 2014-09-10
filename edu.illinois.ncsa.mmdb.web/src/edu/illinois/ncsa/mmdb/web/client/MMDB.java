@@ -522,10 +522,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
              *  the default content screen (currently listDatasets) 
              */
             if (!token.startsWith("logout_st")) {
-                History.newItem("listDatasets", false);
+                History.newItem("listDatasets", true);
             }
-            LoginPage.clearPreferredUser();
-            LoginPage.oauth2Login(new AuthenticationCallback() {
+            LoginPage.authenticate("anonymous", "none", new AuthenticationCallback() {
                 @Override
                 public void onFailure() {
                 }
@@ -533,14 +532,30 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 @Override
                 public void onSuccess(String userUri, String sessionKey) {
                 }
-            }, true);
+            });
 
         } else if (token.startsWith("login")) {
             /*Once the loginpage is shown, it's internal logic determines what happens next.
             * Right now, if the user succeeds, doWithPermissions("login") gets called
             */
-            showLoginPage();
+            if (LoginPage.getAutologin()) {
+                LoginPage.oauth2Login(new AuthenticationCallback() {
+                    @Override
+                    public void onFailure() {
+                        showLoginPage();
+                    }
+
+                    @Override
+                    public void onSuccess(String userUri, String sessionKey) {
+                    }
+                }, true);
+
+            } else {
+                showLoginPage();
+            }
         } else if (token.startsWith("signup")) {
+            //Kludge - remove
+            LoginPage.setAutologin(false);
             showSignupPage();
         } else if (token.startsWith("requestNewPassword")) {
             showRequestNewPasswordPage();
