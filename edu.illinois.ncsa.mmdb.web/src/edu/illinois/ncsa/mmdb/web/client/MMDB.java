@@ -342,7 +342,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         RootPanel.get("navMenu").add(navMenu);
 
-        // datasets
+        // Home
         final Hyperlink homeLink = new Hyperlink("Home", "home");
         homeLink.addStyleName("navMenuLink");
         navMenu.add(homeLink);
@@ -350,7 +350,31 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         HTML bullet = new HTML("&bull;");
         bullet.addStyleName("navMenuText");
         navMenu.add(bullet);
-        // datasets
+        // discovery
+        final Anchor discoveryLink = new Anchor("Discovery", "/discovery");
+        discoveryLink.addStyleName("navMenuLink");
+        navMenu.add(discoveryLink);
+        // bullet
+        bullet = new HTML("&bull;");
+        bullet.addStyleName("navMenuText");
+        navMenu.add(bullet);
+        // dashboard
+        final Anchor dashboardLink = new Anchor("Dashboard", "/dashboard");
+        dashboardLink.addStyleName("navMenuLink");
+        navMenu.add(dashboardLink);
+        // bullet
+        bullet = new HTML("&bull;");
+        bullet.addStyleName("navMenuText");
+        navMenu.add(bullet);
+        // geobrowser
+        final Anchor geobrowseLink = new Anchor("Geobrowse", "/geobrowse");
+        geobrowseLink.addStyleName("navMenuLink");
+        navMenu.add(geobrowseLink);
+        // bullet
+        bullet = new HTML("&bull;");
+        bullet.addStyleName("navMenuText");
+        navMenu.add(bullet);
+        //datasets
         Hyperlink listLink = new Hyperlink("Data", "listDatasets");
         listLink.addStyleName("navMenuLink");
         navMenu.add(listLink);
@@ -395,7 +419,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         adminBbullet.addStyleName("hidden");
         navMenu.add(adminBbullet);
 
-        // upload link
+        // admin link
         adminLink = new Hyperlink("Administration", "administration");
         adminLink.addStyleName("navMenuLink");
         adminLink.addStyleName("hidden");
