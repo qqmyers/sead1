@@ -91,6 +91,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     public static final Map<String, String> PREVIEW_URL;
     public static final Map<String, String> GRAY_URL;
     public static final Map<String, String> PENDING_URL;
+    public Map<String, String>              ALT_GRAY_URL;
 
     int                                     maxWidth     = 600;
 
@@ -142,7 +143,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
     /**
      * Create a preview. If the desired size is small (thumbnail) try showing
-     * the thumbnail, if thumbnail notavailable show a no preview label. If the
+     * the thumbnail, if thumbnail not available show a no preview label. If the
      * desired size is large (preview) ask the server for the size of the
      * preview and then properly size the image keeping the correct aspect
      * ratio.
@@ -152,11 +153,11 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
      * @param link
      */
     public PreviewWidget(String datasetUri, String desiredSize, final String link, DispatchAsync dispatchAsync) {
-        this(datasetUri, desiredSize, link, UNKNOWN_TYPE, true, dispatchAsync);
+        this(datasetUri, desiredSize, link, UNKNOWN_TYPE, dispatchAsync);
     }
 
     public PreviewWidget(String datasetUri, String desiredSize, String link, String type, DispatchAsync dispatchAsync) {
-        this(datasetUri, desiredSize, link, type, true, true, dispatchAsync);
+        this(datasetUri, desiredSize, link, type, true, dispatchAsync);
     }
 
     public PreviewWidget(String datasetUri, String desiredSize, String link, String type, final boolean checkPending, DispatchAsync dispatchAsync) {
@@ -164,7 +165,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     }
 
     public static PreviewWidget newCollectionBadge(String collectionUri, String link, DispatchAsync dispatchAsync) {
-        return new PreviewWidget(collectionUri, GetPreviews.BADGE, link, UNKNOWN_TYPE, true, false, dispatchAsync);
+        return new PreviewWidget(collectionUri, GetPreviews.BADGE, link, "Collection", true, false, dispatchAsync);
     }
 
     public PreviewWidget(String uri, String desiredSize, String link, String type, boolean checkPending, boolean initialDisplay, DispatchAsync dispatchAsync) {
@@ -176,7 +177,21 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         //
         changeImage(uri, size, link, type, checkPending, initialDisplay);
         //
+        createDefaultNoPreviewImages(type);
         initWidget(imagePanel);
+    }
+
+    protected void createDefaultNoPreviewImages(String type) {
+        if (type != null && !UNKNOWN_TYPE.equals(type)) {
+            String defaultSmallImageFileName = "./images/defaultpreviews/" + type + "-100.png";
+            String defaultLargeImageFileName = "./images/defaultpreviews/" + type + "-500.png";
+
+            ALT_GRAY_URL = new HashMap<String, String>();
+            ALT_GRAY_URL.put(GetPreviews.SMALL, defaultSmallImageFileName);
+            ALT_GRAY_URL.put(GetPreviews.LARGE, defaultSmallImageFileName); // To be consistent with previously released versions, NOPREVIEW SHOULD ALWAYS BE SMALL
+            ALT_GRAY_URL.put(GetPreviews.BADGE, defaultSmallImageFileName);
+        }
+
     }
 
     public void changeImage(String uri, String sz, String link, String type, boolean checkPending, boolean initialDisplay) {
@@ -317,7 +332,19 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
     void showNoPreview(String sz, String link) {
         if (!isNoPreview()) {
-            noPreview = new Image(GRAY_URL.get(sz));
+            if (ALT_GRAY_URL != null) {
+                noPreview = new Image(ALT_GRAY_URL.get(sz));
+                final String siz = sz;
+                //revert back to the GRAY_URL if the nopreview file for this type is not found!
+                noPreview.addErrorHandler(new ErrorHandler() {
+                    @Override
+                    public void onError(ErrorEvent event) {
+                        noPreview.setUrl(GRAY_URL.get(siz));
+                    }
+                });
+            } else {
+                noPreview = new Image(GRAY_URL.get(sz));
+            }
             addLink(noPreview, link);
             setImage(noPreview);
         }

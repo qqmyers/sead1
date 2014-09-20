@@ -64,6 +64,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionChangedEventHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEventHandler;
+import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
@@ -258,7 +259,12 @@ public class PreviewPanel extends Composite {
         }
 
         if (showme) {
-            previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null, dispatchAsync));
+            String mimetype = dataset.getMimeType();
+            String categorytype = ContentCategory.getCategory(mimetype, dispatchAsync);
+            if ("Collection".equals(mimetype)) {
+                categorytype = mimetype; //kludge dont know how to get "collection" here, what mimetype corresponds to Collection? Set that in the fakeDataset
+            }
+            previewPanel.add(new PreviewWidget(uri, GetPreviews.LARGE, null, categorytype, dispatchAsync));
         }
 
         //Add Metadata Preview to Embedded Widget
@@ -301,6 +307,7 @@ public class PreviewPanel extends Composite {
         fakeDataset.setLabel(collection.getLabel());
         fakeDataset.setTitle(collection.getTitle());
         fakeDataset.setUri(collection.getUri());
+        fakeDataset.setMimeType("Collection");
 
         GetDatasetResult datasetResult = new GetDatasetResult(fakeDataset, result.getPreviews());
         drawPreview(datasetResult, leftColumn, uri);
