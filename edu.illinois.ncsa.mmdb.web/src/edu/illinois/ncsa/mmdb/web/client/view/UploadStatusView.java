@@ -67,6 +67,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
 import edu.illinois.ncsa.mmdb.web.client.presenter.UploadStatusPresenter.Display;
+import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
 import edu.illinois.ncsa.mmdb.web.client.ui.EditableLabel;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.ProgressBar;
@@ -135,7 +136,7 @@ public class UploadStatusView extends Composite implements Display {
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             public void execute() {
                 // check pending, but don't initially display
-                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, null/*"dataset?id=" + dataset.getUri()*/, dataset.getMimeType(), true, false, dispatchAsync);
+                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, null/*"dataset?id=" + dataset.getUri()*/, ContentCategory.getCategory(dataset.getMimeType(), dispatchAsync), true, false, dispatchAsync);
                 statusTable.setWidget(ix, 1, preview);
                 //
                 statusTable.setWidget(ix, 2, editableDatasetInfo(dataset));

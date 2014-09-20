@@ -61,7 +61,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -215,12 +214,6 @@ public class DatasetWidget extends Composite {
         // icon - content category
         HorizontalPanel titlePanel = new HorizontalPanel();
         titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        titlePanel.addStyleName("datasetTitleIcon");
-        final Image image = new Image();
-
-        image.setUrl("images/icons/" + ContentCategory.getCategory(result.getDataset().getMimeType(), service) + ".png");
-        image.setTitle(ContentCategory.getCategory(result.getDataset().getMimeType(), service) + " File");
-        titlePanel.add(image);
 
         // title
         final EditableLabel titleLabel = new EditableLabel(result.getDataset().getTitle());

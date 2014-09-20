@@ -939,10 +939,7 @@ a:hover {
 	font-size: 1.5em;
   	color: black;
   	text-align: left;
-}
-
-.datasetTitleIcon {
-	margin-left: 20px;		
+  	margin-left: 20px;
 }
 
 .pencilIcon {
