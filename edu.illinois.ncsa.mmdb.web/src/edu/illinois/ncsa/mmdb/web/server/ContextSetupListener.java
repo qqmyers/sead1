@@ -528,21 +528,21 @@ public class ContextSetupListener implements ServletContextListener {
                 if (key.startsWith("userfield.") && key.endsWith(".predicate")) { //$NON-NLS-1$ //$NON-NLS-2$
                     String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
                     if (props.containsKey(pre + ".label")) { //$NON-NLS-1$
-                        Resource uri_r = Resource.uriRef(props.getProperty(key));
-                        tw.add(uri_r, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
-                        tw.add(uri_r, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
+                        Resource r = Resource.uriRef(props.getProperty(key));
+                        tw.add(r, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
+                        tw.add(r, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
                         if (props.containsKey(pre + ".label")) {
                             // remove existing label
-                            context.removeTriples(context.match(uri_r, Rdfs.LABEL, null));
+                            context.removeTriples(context.match(r, Rdfs.LABEL, null));
                             String l = props.getProperty(pre + ".label");
-                            tw.add(uri_r, Rdfs.LABEL, l);
-                            log.debug("Adding user metadata field '" + l + "' (" + uri_r + ")");
+                            tw.add(r, Rdfs.LABEL, l);
+                            log.debug("Adding user metadata field '" + l + "' (" + r + ")");
                         }
                         if (props.containsKey(pre + ".definition")) {
                             // remove existing definition
-                            context.removeTriples(context.match(uri_r, Rdfs.COMMENT, null));
+                            context.removeTriples(context.match(r, Rdfs.COMMENT, null));
                             String def = props.getProperty(pre + ".definition");
-                            tw.add(uri_r, Rdfs.COMMENT, def);
+                            tw.add(r, Rdfs.COMMENT, def);
                         }
                     }
                 }
