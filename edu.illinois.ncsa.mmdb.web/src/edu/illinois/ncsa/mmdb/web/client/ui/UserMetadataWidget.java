@@ -158,8 +158,9 @@ public class UserMetadataWidget extends Composite {
                             } else {
                                 for (String predicate : predicates ) {
                                     String label = result.getThingNames().get(predicate);
+                                    String description = getDescription(predicate);
                                     SortedSet<UserMetadataValue> values = NamedThing.orderByName(result.getValues().get(predicate));
-                                    addNewField(predicate, label, values, canEdit);
+                                    addNewField(predicate, label, description, values, canEdit);
                                 }
                             }
                         }
@@ -168,6 +169,10 @@ public class UserMetadataWidget extends Composite {
                 }
             }
         });
+    }
+
+    private String getDescription(String predicate) {
+        return addMetadata.labels_description.get(predicate);
     }
 
     /**
@@ -194,7 +199,7 @@ public class UserMetadataWidget extends Composite {
      * @param label
      * @param values
      */
-    private void addNewField(final String predicate, final String label, final Collection<UserMetadataValue> values, boolean canEdit) {
+    private void addNewField(final String predicate, final String label, final String description, final Collection<UserMetadataValue> values, boolean canEdit) {
 
         removeNoFields();
         int row = getRowForField(predicate);
@@ -216,7 +221,12 @@ public class UserMetadataWidget extends Composite {
                 fieldTable.insertRow(row);
                 // field name
                 Label predicateLabel = new Label(label);
-                predicateLabel.setTitle(predicate);
+                if ("".equals(description)) {
+                    predicateLabel.setTitle(predicate);
+                }
+                else {
+                    predicateLabel.setTitle(description);
+                }
                 fieldTable.setWidget(row, 0, predicateLabel);
                 if (i++ != 0) {
                     predicateLabel.addStyleName("hidden");
