@@ -118,6 +118,8 @@ public class AuthenticatedServlet extends HttpServlet {
                     session = request.getSession(true);
                     log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
                     session.setAttribute(AUTHENTICATED_AS, validUser);
+                    //Set a default timeout 
+                    session.setAttribute("exp", 3600 + (int) (System.currentTimeMillis() / 1000L));
                     SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
                     try {
                         if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {

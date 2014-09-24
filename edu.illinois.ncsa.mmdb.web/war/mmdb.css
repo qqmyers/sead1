@@ -22,7 +22,7 @@ pre {
 
 .mainMenu, .mainContainer, .bottomMenu {
 /*	font-size: 0.9em; */
-	width: 1000px;
+	width: 1200px;
 }
 
 /* ----------------------------------------------------------------------
@@ -142,7 +142,7 @@ a:hover {
  * Menu Bar
  * ---------------------------------------------------------------------- */
 .mainMenu {
-	height: 40px;
+	height: 120px;
 	margin: 0px auto 0px auto;
 	padding: 0px;
 	position: relative;
@@ -154,37 +154,59 @@ a:hover {
 	height: 40px;
 	padding: 15px 5px 0px 0px;
 	position: relative;
-	vertical-align: center;
-	margin: 0px 0px 0px 225px;
+	vertical-align: middle;
+	margin: 0px 0px 0px 240px;
 }
 
 .menuElementRight{
 	height: 40px;
-	padding:15px 5px 0px 0px;
+	font-size: 0.8em;
+	padding:0px 9px 0px 0px;
 	position: relative;
-	vertical-align:center;
+	vertical-align:middle;
 	margin:auto;
 }
 
 #logo{
 	float:left;
-	height:40px;
+	height:120px;
+
 	padding:1px 0px 0px;
+}
+
+#logo img {
+	width: 240px;
+	height: 120px;
+}
+
+#loginMenu {
+	width: 152px;
+	background-color: #F0F0F0;
+}
+
+.gwt-DisclosurePanel {
+	width:100%;
+}
+.gwt-DisclosurePanel-open {
+	width:100%;
+	background-color: #F0F0F0;
+	font-style: normal;
+	font-weight: normal;
 }
 
 
 #gradient{
 	float:right;
-	height:40px;
-	width:77%;
+	height:120px;
+	width:80%;
 	background-image:url('images/Border.png');
 	text-align:right;
 }
 
 .headerTitle, .headerTitle a:link, .headerTitle a:visited{
-	float:right;
+
 	margin:auto;
-	padding:4px;
+	padding:6px;
 	font-size: 1.1em;
 	font-family:"Times New Roman", Georiga, Serif;
 	font-style:italic;
@@ -208,11 +230,18 @@ a:hover {
 	color: black;
 	position: relative;
 	white-space: nowrap;
+	width: 148px;
+	height:100%
 }
 
 .navMenuLink, .navMenuLink a:link, .navMenuLink a:visited {
-	color: black;
+	color: black !important;
 	margin: 0px 5px;
+	height:100%
+}
+
+.navMenuLink.gwt-Anchor {
+	margin: 0px 10px;
 }
 
 .searchMenu {

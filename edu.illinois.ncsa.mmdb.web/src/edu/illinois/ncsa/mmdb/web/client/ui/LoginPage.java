@@ -392,7 +392,7 @@ public class LoginPage extends Composite {
                             mainWindow.retrieveUserInfoByName(result.getEmail(), sessionKey, callback);
                         }
                         //Set timer to renew credentials
-                        Window.alert("Expires at:" + result.getExpirationTime());
+                        //Window.alert("Expires at:" + result.getExpirationTime());
 
                     }
                 });

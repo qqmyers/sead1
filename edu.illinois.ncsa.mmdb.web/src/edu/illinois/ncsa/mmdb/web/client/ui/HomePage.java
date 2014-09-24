@@ -90,7 +90,7 @@ public class HomePage extends Page {
      * @param dispatchAsync
      */
     public HomePage(DispatchAsync dispatchAsync) {
-        super("Home", dispatchAsync);
+        super("My Account", dispatchAsync);
         rbac = new PermissionUtil(dispatchAsync);
         createTabs();
         viewButton = new Button("View More");

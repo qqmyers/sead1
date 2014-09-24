@@ -342,36 +342,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         RootPanel.get("navMenu").add(navMenu);
 
-        // Home
-        final Hyperlink homeLink = new Hyperlink("Home", "home");
-        homeLink.addStyleName("navMenuLink");
-        navMenu.add(homeLink);
-        // bullet
-        HTML bullet = new HTML("&bull;");
-        bullet.addStyleName("navMenuText");
-        navMenu.add(bullet);
         // discovery
-        final Anchor discoveryLink = new Anchor("Discovery", "/discovery");
+        final Anchor discoveryLink = new Anchor("Overview", "/discovery");
         discoveryLink.addStyleName("navMenuLink");
         navMenu.add(discoveryLink);
         // bullet
-        bullet = new HTML("&bull;");
-        bullet.addStyleName("navMenuText");
-        navMenu.add(bullet);
-        // dashboard
-        final Anchor dashboardLink = new Anchor("Dashboard", "/dashboard");
-        dashboardLink.addStyleName("navMenuLink");
-        navMenu.add(dashboardLink);
-        // bullet
-        bullet = new HTML("&bull;");
-        bullet.addStyleName("navMenuText");
-        navMenu.add(bullet);
-        // geobrowser
-        final Anchor geobrowseLink = new Anchor("Geobrowse", "/geobrowse");
-        geobrowseLink.addStyleName("navMenuLink");
-        navMenu.add(geobrowseLink);
-        // bullet
-        bullet = new HTML("&bull;");
+        HTML bullet = new HTML("&bull;");
         bullet.addStyleName("navMenuText");
         navMenu.add(bullet);
         //datasets
@@ -400,8 +376,17 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         HTML bullet3 = new HTML("&bull;");
         bullet3.addStyleName("navMenuText");
         navMenu.add(bullet3);
-        // tags
-        Hyperlink mapLink = new Hyperlink("Map",
+        // geobrowser
+        final Anchor geobrowseLink = new Anchor("MapView", "/geobrowse");
+        geobrowseLink.addStyleName("navMenuLink");
+        navMenu.add(geobrowseLink);
+        // bullet
+        bullet = new HTML("&bull;");
+        bullet.addStyleName("navMenuText");
+        navMenu.add(bullet);
+
+        // map
+        Hyperlink mapLink = new Hyperlink("SimpleMap",
                 "map");
         mapLink.addStyleName("navMenuLink");
         navMenu.add(mapLink);
@@ -418,17 +403,37 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         adminBbullet.addStyleName("navMenuText");
         adminBbullet.addStyleName("hidden");
         navMenu.add(adminBbullet);
+        // dashboard
+        final Anchor dashboardLink = new Anchor("Dashboard", "/dashboard");
+        dashboardLink.addStyleName("navMenuLink");
+        navMenu.add(dashboardLink);
+        // bullet
+        bullet = new HTML("&bull;");
+        bullet.addStyleName("navMenuText");
+        navMenu.add(bullet);
 
+        /*
+        // Home
+        final Hyperlink homeLink = new Hyperlink("MyProfile", "home");
+        homeLink.addStyleName("navMenuLink");
+        navMenu.add(homeLink);
+        // bullet
+        bullet = new HTML("&bull;");
+        bullet.addStyleName("navMenuText");
+        navMenu.add(bullet);
+        */
         // admin link
         adminLink = new Hyperlink("Administration", "administration");
         adminLink.addStyleName("navMenuLink");
         adminLink.addStyleName("hidden");
         navMenu.add(adminLink);
 
+        /*
         // FIXME debug
         debugLabel = new Label();
         debugLabel.addStyleName("navMenuText");
         navMenu.add(debugLabel);
+        */
 
         // search box
         SearchBox searchBox = new SearchBox("Search");

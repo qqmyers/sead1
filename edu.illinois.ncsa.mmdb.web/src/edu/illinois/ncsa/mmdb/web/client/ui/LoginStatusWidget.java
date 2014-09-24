@@ -41,10 +41,12 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 
@@ -91,10 +93,16 @@ public class LoginStatusWidget extends Composite {
      */
     public void loggedIn(String name) {
         mainPanel.clear();
-        Label label = new Label(name);
-        label.setStyleName("navMenuText");
-        mainPanel.add(label);
-        mainPanel.add(anchor("(Logout)", "logout"));
+
+        DisclosurePanel d = new DisclosurePanel(name);
+        VerticalPanel vp = new VerticalPanel();
+        vp.setStyleName("navMenuText");
+        vp.add(anchor("Switch User", "login"));
+        vp.add(anchor("Logout", "logout"));
+        vp.add(new Anchor(" Social Logout", "http://accounts.google.com/logout"));
+        vp.add(anchor("MyAccount", "home"));
+        d.add(vp);
+        mainPanel.add(d);
     }
 
     /**
