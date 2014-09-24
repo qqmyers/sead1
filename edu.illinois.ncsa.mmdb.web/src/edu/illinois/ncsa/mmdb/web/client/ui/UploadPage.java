@@ -161,6 +161,7 @@ public class UploadPage extends Page {
         Label fileUploadLabel = new Label("Select files you want to upload:");
         fileUploadLabel.addStyleName("importTitle");
         hp.add(fileUploadLabel);
+        //Only shown eith DnD applet?
         Image helpButton = new Image("./images/help-browser.png");
         helpButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
@@ -244,8 +245,9 @@ public class UploadPage extends Page {
 
         final HorizontalPanel switchUploader = new HorizontalPanel();
         switchUploader.addStyleName("pagingButton");
-        Label basicLabel = new Label("Having problems? Click here to try the");
-        Anchor basicUploader = new Anchor("Java uploader.");
+        Label basicLabel = new Label("For uploading large numbers of files, contact SEAD about our desktop Upload tool.");
+        /*
+         * Anchor basicUploader = new Anchor("Java uploader.");
         basicUploader.addStyleName("addTagsLink");
         basicUploader.addClickHandler(new ClickHandler() {
             @Override
@@ -255,8 +257,9 @@ public class UploadPage extends Page {
                 tableLayout.remove(switchUploader);
             }
         });
+        */
         switchUploader.add(basicLabel);
-        switchUploader.add(basicUploader);
+        //switchUploader.add(basicUploader);
 
         Label or = new Label("OR");
         or.addStyleName("uploadOrLabel");
