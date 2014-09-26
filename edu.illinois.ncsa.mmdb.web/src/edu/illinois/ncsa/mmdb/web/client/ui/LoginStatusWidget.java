@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,15 +32,19 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
@@ -54,10 +58,10 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
  * A widget showing links to login and logout and a name
  * if the user is logged in. Currently used in the main
  * menu.
- * 
+ *
  * @author Luigi Marini
  * @author Rob Kooper
- * 
+ *
  */
 public class LoginStatusWidget extends Composite {
 
@@ -87,7 +91,7 @@ public class LoginStatusWidget extends Composite {
     /**
      * Add the name of the user logged in and
      * a link to log out.
-     * 
+     *
      * @param name
      *            user logged in
      */
@@ -97,9 +101,43 @@ public class LoginStatusWidget extends Composite {
         DisclosurePanel d = new DisclosurePanel(name);
         VerticalPanel vp = new VerticalPanel();
         vp.setStyleName("navMenuText");
-        vp.add(anchor("Switch User", "login"));
+        Anchor switchLink = new Anchor("Switch User");
+        switchLink.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+
+                LoginPage.logout(new Command() {
+
+                    @Override
+                    public void execute() {
+                        LoginPage.setAutologin(false);
+                        History.newItem("login", true);
+                    }
+                });
+            }
+        });
+        vp.add(switchLink);
         vp.add(anchor("Logout", "logout"));
-        vp.add(new Anchor(" Social Logout", "http://accounts.google.com/logout"));
+        Anchor socialLink = new Anchor(" Social Logout", "http://accounts.google.com/logout");
+        socialLink.setTarget("_blank");
+        if (!"local".equals(MMDB.getSessionState().getLoginProvider())) {
+            socialLink.addClickHandler(new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    LoginPage.logout(new Command() {
+
+                        @Override
+                        public void execute() {
+                            LoginPage.setAutologin(false);
+                            History.newItem("login", true);
+                        }
+                    });
+                }
+            });
+            vp.add(socialLink);
+        }
         vp.add(anchor("MyAccount", "home"));
         d.add(vp);
         mainPanel.add(d);

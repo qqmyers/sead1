@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
@@ -86,7 +86,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
 
 /**
  * @author Luigi Marini
- * 
+ *
  */
 public class LoginPage extends Composite {
 
@@ -105,7 +105,7 @@ public class LoginPage extends Composite {
     private static final String  EMAIL_SCOPE   = "email";
     private static final String  PROFILE_SCOPE = "profile";
 
-    private static boolean       autologin     = false;
+    private static boolean       autologin     = true;
 
     public static void setMainWindow(MMDB mWindow) {
         mainWindow = mWindow;
@@ -122,7 +122,7 @@ public class LoginPage extends Composite {
 
     /**
      * @param dispatchasync
-     * 
+     *
      */
     public LoginPage() {
 
@@ -140,7 +140,7 @@ public class LoginPage extends Composite {
     }
 
     /**
-     * 
+     *
      * @return
      */
     private Widget createPageTitle() {
@@ -148,7 +148,7 @@ public class LoginPage extends Composite {
     }
 
     /**
-     * 
+     *
      * @return
      */
     private Widget createLoginForm() {
@@ -317,7 +317,7 @@ public class LoginPage extends Composite {
 
             });
         } else {
-            //Preferred user not known 
+            //Preferred user not known
             if (silent) {
                 //Try anonymous login
                 authenticate("anonymous", "none", callback);
@@ -389,11 +389,12 @@ public class LoginPage extends Composite {
                         } else {
                             GWT.log("User " + result.getEmail() + " associated with session key " + sessionKey, null);
                             // login local
+                            MMDB.getSessionState().setLoginProvider("google");
                             mainWindow.retrieveUserInfoByName(result.getEmail(), sessionKey, callback);
                         }
                         //Set timer to renew credentials
                         //Window.alert("Expires at:" + result.getExpirationTime());
-
+                        setAutologin(true);
                     }
                 });
 
@@ -418,7 +419,7 @@ public class LoginPage extends Composite {
      * start
      * processing of the next
      * History token.
-     * 
+     *
      * Called to process logout/login as anonymous from MMDB
      */
     public static void authenticate(final String username, final String password, final AuthenticationCallback callback) {
@@ -450,7 +451,7 @@ public class LoginPage extends Composite {
                         } else {
                             GWT.log("user " + username + " associated with session key " + sessionKey, null);
                             // login local
-
+                            MMDB.getSessionState().setLoginProvider("local");
                             mainWindow.retrieveUserInfoByName(username, sessionKey, callback);
                         }
                     }
@@ -507,7 +508,7 @@ public class LoginPage extends Composite {
 
     /**
      * Called to process credentials from login form
-     * 
+     *
      */
     public void authenticate(final String username, final String password) {
         authenticate(username, password, new AuthenticationCallback() {
@@ -525,7 +526,7 @@ public class LoginPage extends Composite {
 
     /**
      * TODO Placeholder: Show terms of service.
-     * 
+     *
      */
     private void showTermsOfService() {
 
@@ -576,7 +577,7 @@ public class LoginPage extends Composite {
         String restUrl = "./api/logout";
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
 
-        /* Since we don't use Basic AUth for the app/session, therefore we don't need to reset credentials here 
+        /* Since we don't use Basic AUth for the app/session, therefore we don't need to reset credentials here
          * If the user has separately used a download URL in their browser, these two lines would remove it
          * but that is separate from the app, so - at this point - we leave normal browser behavior in place.
          */
@@ -620,12 +621,14 @@ public class LoginPage extends Composite {
         // in case anyone is holding refs to the state, zero out the auth information in it
         state.setCurrentUser(null);
         state.setSessionKey(null);
+        state.setLoginProvider(null);
 
         state.setAnonymous(false); // not logged in as anonymous, or anyone
+        setAutologin(true);
         MMDB.loginStatusWidget.loggedOut();
         /* Remove session cookie - clearBrowserCreds has caused the server to invalidate it
          * so this isn't strictly necessary
-         * 
+         *
          */
 
         String path = Window.Location.getPath();

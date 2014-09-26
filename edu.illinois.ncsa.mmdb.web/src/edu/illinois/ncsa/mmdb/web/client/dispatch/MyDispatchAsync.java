@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
@@ -55,7 +55,7 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
 
 /**
  * Default dispatcher.
- * 
+ *
  * @author Luigi Marini
  */
 public class MyDispatchAsync implements DispatchAsync {
@@ -74,13 +74,17 @@ public class MyDispatchAsync implements DispatchAsync {
         if (action instanceof AuthorizedAction<?>) {
             AuthorizedAction<?> authzAction = (AuthorizedAction<?>) action;
             authzAction.setUser(MMDB.getUsername());
+
         }
 
         realService.execute(action, new AsyncCallback<Result>() {
 
             public void onFailure(Throwable caught) {
                 if ((caught.getMessage() != null) && caught.getMessage().contains("User has no server credentials")) {
-                    History.newItem("logout_st", true);
+                    if (!MMDB.credChangeOccuring) {
+                        History.newItem("logout_st", true);
+                    } // else ignore - some asynch calls (e.g. from retrieving data previews) are failing after user has logged out/
+                      // is trying to login again and we just want the normal logout/login process
                 } else {
                     callback.onFailure(caught);
                 }

@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -123,7 +123,7 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
  * MMDB entry point.
- * 
+ *
  * @author Luigi Marini
  * @author Rob Kooper
  * @author Jim Myers
@@ -168,6 +168,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private PlaceService               placeService;
 
     public static LoginStatusWidget    loginStatusWidget;
+
+    public static boolean              credChangeOccuring               = true;
 
     private String                     previousHistoryToken             = new String();
 
@@ -444,7 +446,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     /**
      * For debugging purposes. Monitor events of interest.
-     * 
+     *
      * @param eventBus
      */
     private void logEvent(HandlerManager eventBus) {
@@ -475,7 +477,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     /**
      * Parse the parameters in the history token after the '?'
-     * 
+     *
      * @return
      */
     Map<String, String> getParams() {
@@ -545,21 +547,25 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         if (token.startsWith("logout")) {
             /* logout triggers an implicit attempt to login as anonymous
-             *  (as does checkLogin() if there are no existing credentials). 
+             *  (as does checkLogin() if there are no existing credentials).
              *  It's the success or failure of that login that determines whether the
-             *  user sees the login screen or (if anonymous has view member age privileges),
-             *  the default content screen (currently listDatasets) 
+             *  user sees the login screen or (if anonymous has view member page privileges),
+             *  the default content screen (currently listDatasets)
              */
-            if (!token.startsWith("logout_st")) {
-                History.newItem("listDatasets", true);
-            }
+            credChangeOccuring = true;
             LoginPage.authenticate("anonymous", "none", new AuthenticationCallback() {
                 @Override
                 public void onFailure() {
+                    if (!token.startsWith("logout_st")) {
+                        History.newItem("listDatasets", true);
+                    }
                 }
 
                 @Override
                 public void onSuccess(String userUri, String sessionKey) {
+                    if (!token.startsWith("logout_st")) {
+                        History.newItem("listDatasets", true);
+                    }
                 }
             });
 
@@ -567,6 +573,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             /*Once the loginpage is shown, it's internal logic determines what happens next.
             * Right now, if the user succeeds, doWithPermissions("login") gets called
             */
+            credChangeOccuring = true;
             if (LoginPage.getAutologin()) {
                 LoginPage.oauth2Login(new AuthenticationCallback() {
                     @Override
@@ -583,8 +590,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 showLoginPage();
             }
         } else if (token.startsWith("signup")) {
-            //Kludge - remove
-            LoginPage.setAutologin(false);
             showSignupPage();
         } else if (token.startsWith("requestNewPassword")) {
             showRequestNewPasswordPage();
@@ -606,12 +611,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * Run the action for the given token, subject to a permission check to see
      * if user has permission to view member pages. The pages themselves must
      * check further if additional permissions are needed to see their content.
-     * 
+     *
      * Right now, doWithPermissions gets called via the checkLogin() method, as
      * well as by the login() method (on success, login and logout tokens only).
      * Login/logout trigger viewing the default member page (listDatasets), so
      * the user's permissions need to be checked.
-     * 
+     *
      * @param token
      */
     private void doWithPermission(final String token) {
@@ -658,9 +663,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * stores it in a local cache of session information, and, if successful,
      * triggers execution
      * of the action for the History token that triggered the call.
-     * 
+     *
      * @param sessionId
-     * 
+     *
      */
     public void retrieveUserInfo(final String userId, final String sessionKey) {
         retrieveUserInfo(null, userId, sessionKey, new AuthenticationCallback() {
@@ -698,6 +703,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 if (result.isAnonymous()) {
                     MMDB.loginStatusWidget.loggedOut();
                     getSessionState().setAnonymous(true);
+                    LoginPage.setAutologin(false);
                     GWT.log("Current user is anonymous");
                 } else {
                     MMDB.loginStatusWidget.loggedIn(personBean.getName());
@@ -724,9 +730,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     /**
      * Parse history token and show the proper widgets/
      * trigger the appropriate actions.
-     * 
+     *
      * parseHistory should only be called by doWithPermissions!
-     * 
+     *
      * @param token
      *            history token (everything after the #)
      */
@@ -734,7 +740,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         if (token.startsWith("dataset")) {
             showDataset();
-        } else if (token.startsWith("listDatasets") && !previousHistoryToken.startsWith("listDatasets")) {
+        } else if (token.startsWith("listDatasets") /*&& !previousHistoryToken.startsWith("listDatasets")*/) {
             showListDatasetsPage();
         } else if (token.startsWith("upload")) {
             showUploadPage();
@@ -908,6 +914,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private void showLoginPage(boolean interrupted) {
         adminBbullet.addStyleName("hidden");
         adminLink.addStyleName("hidden");
+        LoginPage.setAutologin(true);
         loginStatusWidget.loggedOut();
         mainContainer.clear();
         LoginPage lp = new LoginPage();
@@ -925,7 +932,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * just hit the
      * browser refresh button and restarted the app, this method will
      * try to re-establish the local cache and continue.
-     * 
+     *
      */
     public void checkLogin() {
         boolean loggedIn = false;
@@ -956,7 +963,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                         @Override
                         public void onSuccess(String userUri, String
                                 sessionKey) {
-                            GWT.log("logged in as anonymous");
+                            GWT.log("logged in as " + userUri);
+                            credChangeOccuring = false;
                         }
                     }, true);
         } else {
@@ -967,7 +975,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 doWithPermission(History.getToken());
             } else {
                 // Check REST auth and get the userID so we can then go retrieve the PersonBean (in login())
-                // Having a sessionKey and no local key will occur when the user has hit a browser 
+                // Having a sessionKey and no local key will occur when the user has hit a browser
                 // refresh and restarts the app
 
                 checkRestAuth(cookieSessionKey, new
@@ -987,7 +995,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                                             @Override
                                             public void onSuccess(String userUri, String
                                                     sessionKey) {
-                                                GWT.log("logged in as anonymous");
+                                                GWT.log("logged in as " + userUri);
                                             }
                                         }, true);
                             }
@@ -999,6 +1007,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                                 // login menu
                                 //Get the user's info (PersonBean) and store in UserSessionState
                                 retrieveUserInfo(userUri, sessionKey);
+                                credChangeOccuring = false;
                             }
                         });
 
@@ -1007,7 +1016,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     /*Call the REST checkLogin endpoint to verify the user is logged in (session cookie is valid)
-     * and return the user's ID for local use. 
+     * and return the user's ID for local use.
      */
     public void checkRestAuth(final String sessionID, final AuthenticationCallback callback) {
         String restUrl = "./api/checkLogin";

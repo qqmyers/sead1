@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo/src/main/java"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.2-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/ACRCommon.jar" sourcepath="/ACRCommon/src"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
@@ -36,7 +36,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-2.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-dispatch-1.0.0.jar" sourcepath="C:/Users/Jim/.m2/repository/net/customware/gwt/dispatch/gwt-dispatch/1.0.0/gwt-dispatch-1.0.0-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-servlet-2.4.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-user-2.4.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/iri-0.7.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackrabbit-jcr-commons-1.6.0.jar"/>
