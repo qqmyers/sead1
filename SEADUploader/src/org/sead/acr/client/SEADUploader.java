@@ -143,7 +143,7 @@ public class SEADUploader {
 					if (!excluded(file.getName())) {
 						String tagId = null;
 						if (merge) {
-							tagId = itemExists("/" + file.getName());
+							tagId = itemExists("/", file);
 						}
 
 						if (file.isDirectory()) {
@@ -274,7 +274,7 @@ public class SEADUploader {
 				String newUri = null;
 
 				if (merge) {
-					existingUri = itemExists(path + "/" + file.getName());
+					existingUri = itemExists(path + "/", file);
 
 				}
 				/*
@@ -691,17 +691,28 @@ public class SEADUploader {
 
 			}
 		} else {
+			//Increment count if we would have uploaded (dataId==null)
+			if(dataId==null) {
+				globalFileCount++;	
+			}
 			dataId = null; // listonly mode - we report that we did not create
 							// anything
 		}
 		return dataId;
 	}
 
-	static String itemExists(String sourcepath) {
+	static String itemExists(String path, File item) {
 		String tagId = null;
 		CloseableHttpClient httpclient = HttpClients.createDefault();
+		String sourcepath = path + item.getName();
+		String servicePrefix = server + "/resteasy/";
+		if(item.isDirectory()) {
+			servicePrefix = servicePrefix + "collections/metadata/";
+		} else {
+			servicePrefix = servicePrefix + "datasets/metadata/";
+		}
 		try {
-			String serviceUrl = server + "/resteasy/collections/metadata/"
+			String serviceUrl = servicePrefix 
 					+ URLEncoder.encode(FRBR_EO, "UTF-8") + "/" + "literal/"
 					+ URLEncoder.encode(sourcepath, "UTF-8");
 			HttpGet httpget = new HttpGet(serviceUrl);
