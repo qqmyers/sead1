@@ -31,8 +31,7 @@ public class OrcidClient {
     public static final String  SANDBOX_API_URL   = "https://api.sandbox.orcid.org";
     private static final String BASE_URL          = "http://orcid.org";
     public static final String  AUTH_ENDPOINT     = "/oauth/authorize";
-    public static final String  CLIENT_ID         = "0000-0002-8511-0211";
-    //    private static final String CLIENT_ID         = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientId);
+    private static final String CLIENT_ID         = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientId);
     public static final String  REDIRECT_URI      = "https://developers.google.com/oauthplayground";
     private static Log          log               = LogFactory.getLog(OrcidClient.class);
 
@@ -63,20 +62,23 @@ public class OrcidClient {
     public static void requestAccessToken(String code, String redirectURI) {
         String clientId = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientId);
         String clientSecret = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientSecret);
-        ClientRequest authorize = new ClientRequest("https://api.orcid.org/oauth/token");
+        ClientRequest authorize = new ClientRequest("https://pub.orcid.org/oauth/token");
         authorize.followRedirects(true);
         authorize.accept(MediaType.APPLICATION_JSON_TYPE);
-        authorize.queryParameter("client_id", clientId);
-        authorize.queryParameter("client_secret", clientSecret);
-        authorize.queryParameter("grant_type", "authorization_code");
-        //        authorize.queryParameter("scope", "/read-public");
-        authorize.queryParameter("redirect_uri", redirectURI);
-        authorize.queryParameter("code", code);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("client_id=" + clientId + "&");
+        sb.append("client_secret=" + clientSecret + "&");
+        sb.append("grant_type=" + "authorization_code&");
+        sb.append("redirect_uri=" + redirectURI + "&");
+        sb.append("code=" + code);
+
+        authorize.body(MediaType.APPLICATION_FORM_URLENCODED_TYPE, sb.toString());
+
         try {
             log.debug("Requesting access token " + authorize.getUri());
         } catch (Exception e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            log.error("Error requesting access token", e1);
         }
 
         try {
@@ -141,5 +143,13 @@ public class OrcidClient {
 
     public static void main(String[] args) {
         oAuth();
+    }
+
+    class AccessTokenParams {
+        private String client_id;
+        private String client_secret;
+        private String grant_type;
+        private String redirect_uri;
+        private String code;
     }
 }
