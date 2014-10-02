@@ -2,10 +2,14 @@ package edu.illinois.ncsa.mmdb.web.common;
 
 import java.io.Serializable;
 
+/**
+ * The bean to hold the information about geo names
+ * 
+ * @author Jong Lee
+ *
+ */
 public class GeoName implements Serializable {
-    /**
-     *
-     */
+
     private static final long serialVersionUID = 652067111846561437L;
 
     String                    name;

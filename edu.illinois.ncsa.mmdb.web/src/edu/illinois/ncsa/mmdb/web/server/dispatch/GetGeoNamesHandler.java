@@ -67,9 +67,9 @@ import edu.illinois.ncsa.mmdb.web.common.GeoName;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
- * Retrieve a specific dataset.
+ * Retrieve geonames from google place search api
  *
- * @author Luigi Marini
+ * @author jonglee
  *
  */
 public class GetGeoNamesHandler implements ActionHandler<GetGeoNames, GetGeoNamesResult> {
@@ -77,14 +77,15 @@ public class GetGeoNamesHandler implements ActionHandler<GetGeoNames, GetGeoName
     /** Commons logging **/
     private static Log        log = LogFactory.getLog(GetGeoNamesHandler.class);
 
+    /** server property to get google api key **/
     private static Properties props;
 
     @Override
     public GetGeoNamesResult execute(GetGeoNames arg0, ExecutionContext arg1) throws ActionException {
 
+        // reading the server.properties file for google api key
         if (props == null) {
             props = new Properties();
-
             // property file location
             String path = "/server.properties"; //$NON-NLS-1$
             log.debug("Loading server property file: " + path);
@@ -107,15 +108,20 @@ public class GetGeoNamesHandler implements ActionHandler<GetGeoNames, GetGeoName
         }
 
         String googleKey = props.getProperty("google.api.key");
+
+        // query string
         String query = arg0.getPlaceQuery();
 
         HashSet<GeoName> geoNames = new HashSet<GeoName>();
 
         try {
+            // need to url encode the query string for URL
             String encode = URLEncoder.encode(query, "UTF-8");
-            String url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + encode + "&key=" + googleKey;
-            log.info(url);
 
+            // generate the url with query string
+            String url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + encode + "&key=" + googleKey;
+
+            // GET request
             URL u = new URL(url);
             HttpURLConnection uc = (HttpURLConnection) u.openConnection();
             uc.setRequestProperty("Content-Type", "application/json");
@@ -136,10 +142,13 @@ public class GetGeoNamesHandler implements ActionHandler<GetGeoNames, GetGeoName
                 }
                 d.close();
 
+                // load the json string into json object by using jackson library
                 ObjectMapper mapper = new ObjectMapper();
 
                 JsonNode jsObject = mapper.readTree(buffer);
                 JsonNode results = jsObject.get("results");
+
+                // retrive the data from json and create GeoName bean
                 for (JsonNode r : results ) {
                     GeoName g = new GeoName();
                     String name = r.get("formatted_address").getTextValue();

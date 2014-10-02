@@ -44,6 +44,8 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 import net.customware.gwt.dispatch.shared.Action;
 
 /**
+ * GetGeoNames action holding query string
+ *
  * @author jonglee
  *
  */

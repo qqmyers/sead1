@@ -47,9 +47,9 @@ import net.customware.gwt.dispatch.shared.Result;
 import edu.illinois.ncsa.mmdb.web.common.GeoName;
 
 /**
- * Return a dataset and associated previews if available.
+ * Return GeoNames as HashSet
  *
- * @author Luigi Marini
+ * @author jonglee
  *
  */
 public class GetGeoNamesResult implements Result

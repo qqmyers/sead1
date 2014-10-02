@@ -103,8 +103,14 @@ public class LocationWidget extends Composite {
     private MapWidget                      map;
     private final DispatchAsync            service;
     private final String                   uri;
+
+    // popup for locaiton by place name
     protected PickLocationByPlaceNamePanel locationByPlaceNamePanel;
+
+    // popup for locaiton on map
     protected PickLocationOnMapPanel       locationOnMapPanel;
+
+    // container panel for anchor for location picking
     private VerticalPanel                  anchorContainer;
 
     /**
@@ -408,6 +414,8 @@ public class LocationWidget extends Composite {
     class PickLocationByPlaceNamePanel extends PopupPanel {
 
         private final TextBox       placeText;
+
+        // panel to show the search results
         private final VerticalPanel geoNameResultsPanel;
 
         public PickLocationByPlaceNamePanel() {
@@ -415,11 +423,11 @@ public class LocationWidget extends Composite {
             setGlassEnabled(true);
             setAnimationEnabled(true);
 
+            // make the result panel scrollable
             ScrollPanel sp = new ScrollPanel();
             sp.setHeight("200px");
             sp.setWidth("400px");
             geoNameResultsPanel = new VerticalPanel();
-            //            geoNameResultsPanel.setHeight("100px");
             sp.add(geoNameResultsPanel);
 
             FlowPanel mainPanel = new FlowPanel();
@@ -431,9 +439,9 @@ public class LocationWidget extends Composite {
             HorizontalPanel searchPanel = new HorizontalPanel();
             placeText = new TextBox();
             placeText.addKeyDownHandler(new KeyDownHandler() {
-
                 @Override
                 public void onKeyDown(KeyDownEvent event) {
+                    // hit Enter do the search
                     if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
                         geoNameResultsPanel.clear();
                         getGeoNames();
@@ -442,7 +450,6 @@ public class LocationWidget extends Composite {
                 }
             });
             Button searchButton = new Button("Search", new ClickHandler() {
-
                 @Override
                 public void onClick(ClickEvent event) {
                     geoNameResultsPanel.clear();
@@ -468,6 +475,9 @@ public class LocationWidget extends Composite {
 
         }
 
+        /**
+         * get places by using GetGeoNames Action
+         */
         private void getGeoNames() {
             service.execute(new GetGeoNames(placeText.getText()), new AsyncCallback<GetGeoNamesResult>() {
                 @Override
@@ -478,21 +488,24 @@ public class LocationWidget extends Composite {
                 @Override
                 public void onSuccess(GetGeoNamesResult arg0) {
                     if (!arg0.getGeoNames().isEmpty()) {
+                        // display the results to the panel
                         for (GeoName g : arg0.getGeoNames() ) {
-                            final Anchor l = new Anchor(g.getName() + " [" + g.getLat() + "," + g.getLng() + "]");
-                            l.addClickHandler(new ClickHandler() {
+                            final Anchor anchor = new Anchor(g.getName() + " [" + g.getLat() + "," + g.getLng() + "]");
+
+                            // click handler: if a user click on the anchor, set the location and close the popup
+                            anchor.addClickHandler(new ClickHandler() {
 
                                 @Override
                                 public void onClick(ClickEvent event) {
-                                    int s = l.getText().indexOf("[");
-                                    int e = l.getText().indexOf("]");
-                                    String latLngStr = l.getText().substring(s + 1, e);
+                                    int s = anchor.getText().indexOf("[");
+                                    int e = anchor.getText().indexOf("]");
+                                    String latLngStr = anchor.getText().substring(s + 1, e);
 
                                     submitNewLocation(LatLng.fromUrlValue(latLngStr));
                                     locationByPlaceNamePanel.hide();
                                 }
                             });
-                            geoNameResultsPanel.add(l);
+                            geoNameResultsPanel.add(anchor);
                         }
                     } else {
                         Label l = new Label("No results!");
