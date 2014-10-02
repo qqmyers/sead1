@@ -108,20 +108,15 @@ public class DynamicGridView extends FlexTable implements Display {
         // preview
         if ("Collection".equals(type)) {
             PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "collection?uri=" + id, type, dispatchAsync);
-            //pre.setWidth("210px");
-            //pre.setMaxWidth(100);
             images.add(pre);
         } else {
             PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
-            //pre.setWidth("210px");
-            //pre.setMaxWidth(100);
             images.add(pre);
         }
         // selection checkbox
         CheckBox checkBox = new CheckBox();
         checkBoxes.put(numItems, checkBox);
         checkBox.addStyleName("imageOverlay");
- //       titlePanel.add(checkBox);
         images.add(checkBox);
         layoutPanel.add(images);
 
@@ -139,7 +134,7 @@ public class DynamicGridView extends FlexTable implements Display {
         hyperlink.addStyleName("inline");
         hyperlink.setWidth("210px");
         titlePanel.add(hyperlink);
-
+        
         layoutPanel.add(titlePanel);
         layoutPanel.setCellHeight(titlePanel, "20px");
         
@@ -153,8 +148,6 @@ public class DynamicGridView extends FlexTable implements Display {
         authorLabel = new Label(author);
         authorLabel.addStyleName("smallerItalicText");
         authorLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        //authorLabel.addStyleName("alignLeft");
-        //authorLabel.setWidth("100px");
         uploadInfoPanel.add(authorLabel);
         
         Label dateuploaded = new Label(DateTimeFormat.getShortDateFormat().format(date));
@@ -181,8 +174,9 @@ public class DynamicGridView extends FlexTable implements Display {
     }
 
     private String shortenTitle(String title) {
-        if (title != null && title.length() > 36) {
-            return title.substring(0, 36-3) + "...";
+        int max_chars = 33;
+        if (title != null && title.length() > max_chars) {
+            return title.substring(0, max_chars-3) + "...";
         } else {
             return title;
         }
