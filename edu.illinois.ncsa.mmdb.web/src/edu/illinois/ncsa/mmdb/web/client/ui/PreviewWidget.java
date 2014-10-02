@@ -294,6 +294,8 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             preview = new Image(PREVIEW_URL.get(sz) + newPrefix + uri);
             addLink(preview, link);
             if (!GetPreviews.LARGE.equals(sz)) {
+                preview.setWidth("100%");
+                preview.setHeight("100%");
                 //preview.addStyleName("thumbnail");
             } else {
                 if (width > 0) {
@@ -344,6 +346,10 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
                 });
             } else {
                 noPreview = new Image(GRAY_URL.get(sz));
+            }
+            if(!GetPreviews.LARGE.equals(sz)){
+                noPreview.setHeight("100%");
+                noPreview.setWidth("100%");
             }
             addLink(noPreview, link);
             setImage(noPreview);

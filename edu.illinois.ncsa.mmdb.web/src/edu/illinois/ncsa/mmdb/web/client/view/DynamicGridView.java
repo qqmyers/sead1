@@ -40,6 +40,7 @@ package edu.illinois.ncsa.mmdb.web.client.view;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Date;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -53,6 +54,7 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -73,7 +75,7 @@ public class DynamicGridView extends FlexTable implements Display {
     public static final int                       DEFAULT_PAGE_SIZE = 24;
     public static final int                       PAGE_SIZE_X2      = 48;
     public static final int                       PAGE_SIZE_X4      = 96;
-    private final int                             ROW_WIDTH         = 6;
+    private final int                             ROW_WIDTH         = 4;
     private int                                   numItems          = 0;
     private final DispatchAsync                   dispatchAsync;
 
@@ -86,16 +88,19 @@ public class DynamicGridView extends FlexTable implements Display {
     }
 
     @Override
-    public int insertItem(final String id, String title, String type) {
+    public int insertItem(final String id, String title, String type, String author, Date date) {
 
         final VerticalPanel layoutPanel = new VerticalPanel();
         layoutPanel.addStyleName("dynamicGridElement");
-        layoutPanel.setHeight("130px");
+        //layoutPanel.setHeight("130px");
         layoutPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         layouts.put(numItems, layoutPanel);
 
         HorizontalPanel titlePanel = new HorizontalPanel();
         titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        
+        HorizontalPanel uploadInfoPanel = new HorizontalPanel();
+        uploadInfoPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
         FlowPanel images = new FlowPanel();
         images.setStyleName("imageOverlayPanel");
@@ -103,22 +108,23 @@ public class DynamicGridView extends FlexTable implements Display {
         // preview
         if ("Collection".equals(type)) {
             PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "collection?uri=" + id, type, dispatchAsync);
-            pre.setWidth("120px");
-            pre.setMaxWidth(100);
+            //pre.setWidth("210px");
+            //pre.setMaxWidth(100);
             images.add(pre);
         } else {
             PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
-            pre.setWidth("120px");
-            pre.setMaxWidth(100);
+            //pre.setWidth("210px");
+            //pre.setMaxWidth(100);
             images.add(pre);
         }
-
-        layoutPanel.add(images);
-
         // selection checkbox
         CheckBox checkBox = new CheckBox();
         checkBoxes.put(numItems, checkBox);
-        titlePanel.add(checkBox);
+        checkBox.addStyleName("imageOverlay");
+ //       titlePanel.add(checkBox);
+        images.add(checkBox);
+        layoutPanel.add(images);
+
 
         // title
         Hyperlink hyperlink;
@@ -131,12 +137,34 @@ public class DynamicGridView extends FlexTable implements Display {
         hyperlink.setTitle(title);
         hyperlink.addStyleName("smallText");
         hyperlink.addStyleName("inline");
-        hyperlink.setWidth("100px");
+        hyperlink.setWidth("210px");
         titlePanel.add(hyperlink);
 
         layoutPanel.add(titlePanel);
         layoutPanel.setCellHeight(titlePanel, "20px");
-
+        
+        //uploader information
+        Label authorLabel;
+        if (author == null) {
+            author = "Contributor unknown";
+            }
+        
+        uploadInfoPanel.setWidth("210px");
+        authorLabel = new Label(author);
+        authorLabel.addStyleName("smallerItalicText");
+        authorLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        //authorLabel.addStyleName("alignLeft");
+        //authorLabel.setWidth("100px");
+        uploadInfoPanel.add(authorLabel);
+        
+        Label dateuploaded = new Label(DateTimeFormat.getShortDateFormat().format(date));
+        dateuploaded.addStyleName("smallerItalicText");
+        dateuploaded.addStyleName("alignRight");
+        uploadInfoPanel.add(dateuploaded);
+        
+        layoutPanel.add(uploadInfoPanel);
+        layoutPanel.setCellHeight(uploadInfoPanel, "20px");
+        
         final int row = this.getRowCount();
 
         setWidget(numItems / ROW_WIDTH, numItems % ROW_WIDTH, layoutPanel);
@@ -153,8 +181,8 @@ public class DynamicGridView extends FlexTable implements Display {
     }
 
     private String shortenTitle(String title) {
-        if (title != null && title.length() > 15) {
-            return title.substring(0, 10) + "...";
+        if (title != null && title.length() > 36) {
+            return title.substring(0, 36-3) + "...";
         } else {
             return title;
         }
