@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
@@ -48,6 +48,9 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.maps.client.MapWidget;
@@ -67,6 +70,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
@@ -76,30 +82,34 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ClearGeoLocation;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoNames;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoNamesResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPoint;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetGeoPointResult;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.GeoName;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.gis.GeoPointBean;
 
 /**
  * Retrieve all geopointBeans associated with the URI and show them on a Map.
  * This widget is hidden by default unless a geopoint is shown on the map.
- * 
+ *
  * @author Rob Kooper
- * 
+ *
  */
 public class LocationWidget extends Composite {
-    private final FlowPanel     mainPanel;
-    private MapWidget           map;
-    private final DispatchAsync service;
-    private final String        uri;
-    private Label               noLocationLabel;
-    private Anchor              addLocationAnchor;
+    private final FlowPanel                mainPanel;
+    private MapWidget                      map;
+    private final DispatchAsync            service;
+    private final String                   uri;
+    protected PickLocationByPlaceNamePanel locationByPlaceNamePanel;
+    protected PickLocationOnMapPanel       locationOnMapPanel;
+    private VerticalPanel                  anchorContainer;
 
     /**
      * A widget listing tags and providing a way to add a new one.
-     * 
+     *
      * @param id
      * @param service
      */
@@ -175,29 +185,52 @@ public class LocationWidget extends Composite {
     }
 
     protected void showAddLocation() {
-        noLocationLabel = new Label("No location set");
-        mainPanel.add(noLocationLabel);
-        addLocationAnchor = new Anchor("Set location");
-        addLocationAnchor.addClickHandler(new ClickHandler() {
+        if (anchorContainer == null) {
+            anchorContainer = new VerticalPanel();
+            Label noLocationLabel = new Label("No location set");
+            anchorContainer.add(noLocationLabel);
 
-            @Override
-            public void onClick(ClickEvent event) {
-                final PickLocationPanel locationPanel = new PickLocationPanel();
-                locationPanel.center();
-                locationPanel.show();
-                locationPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
+            // add location anchor on map
+            Anchor addLocationOnMapAnchor = new Anchor("Set location on map");
+            addLocationOnMapAnchor.addClickHandler(new ClickHandler() {
 
-                    @Override
-                    public void onClose(CloseEvent<PopupPanel> event) {
-                        Marker location = locationPanel.getLocation();
-                        if (location != null) {
-                            submitNewLocation(location.getLatLng());
+                @Override
+                public void onClick(ClickEvent event) {
+                    locationOnMapPanel = new PickLocationOnMapPanel();
+                    locationOnMapPanel.center();
+                    locationOnMapPanel.show();
+                    locationOnMapPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
+
+                        @Override
+                        public void onClose(CloseEvent<PopupPanel> event) {
+                            Marker location = locationOnMapPanel.getLocation();
+                            if (location != null) {
+                                submitNewLocation(location.getLatLng());
+                            }
                         }
-                    }
-                });
-            }
-        });
-        mainPanel.add(addLocationAnchor);
+                    });
+                }
+            });
+            anchorContainer.add(addLocationOnMapAnchor);
+
+            // add location anchor by place name
+            Anchor addLocationByPlaceNameAnchor = new Anchor("Set location by place name");
+            addLocationByPlaceNameAnchor.addClickHandler(new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    locationByPlaceNamePanel = new PickLocationByPlaceNamePanel();
+                    locationByPlaceNamePanel.center();
+                    locationByPlaceNamePanel.show();
+                }
+            });
+            anchorContainer.add(addLocationByPlaceNameAnchor);
+
+            mainPanel.add(anchorContainer);
+        } else {
+            anchorContainer.setVisible(true);
+        }
+
     }
 
     private void submitNewLocation(LatLng latLng) {
@@ -210,8 +243,7 @@ public class LocationWidget extends Composite {
 
             @Override
             public void onSuccess(EmptyResult result) {
-                mainPanel.remove(noLocationLabel);
-                mainPanel.remove(addLocationAnchor);
+                anchorContainer.setVisible(false);
                 getGeoPoint();
             }
         });
@@ -263,20 +295,21 @@ public class LocationWidget extends Composite {
 
     private void initialize() {
         if (map == null) {
-            //            setVisible(true);
-
             map = new MapWidget();
             map.setSize("200px", "200px");
             map.setUIToDefault();
-            mainPanel.add(map);
         }
+        mainPanel.add(map);
     }
 
-    class PickLocationPanel extends PopupPanel {
+    /*
+     * Popup class for pick locaiton on map
+     */
+    class PickLocationOnMapPanel extends PopupPanel {
         MapWidget map;
         Marker    marker;
 
-        public PickLocationPanel() {
+        public PickLocationOnMapPanel() {
             super();
             setGlassEnabled(true);
             setAnimationEnabled(true);
@@ -367,5 +400,106 @@ public class LocationWidget extends Composite {
             return marker;
         }
 
+    }
+
+    /*
+     * Popup class for pick locaiton by place name
+     */
+    class PickLocationByPlaceNamePanel extends PopupPanel {
+
+        private final TextBox       placeText;
+        private final VerticalPanel geoNameResultsPanel;
+
+        public PickLocationByPlaceNamePanel() {
+            super();
+            setGlassEnabled(true);
+            setAnimationEnabled(true);
+
+            ScrollPanel sp = new ScrollPanel();
+            sp.setHeight("200px");
+            sp.setWidth("400px");
+            geoNameResultsPanel = new VerticalPanel();
+            //            geoNameResultsPanel.setHeight("100px");
+            sp.add(geoNameResultsPanel);
+
+            FlowPanel mainPanel = new FlowPanel();
+
+            // directions
+            mainPanel.add(new Label("Type your place name"));
+
+            // search panel
+            HorizontalPanel searchPanel = new HorizontalPanel();
+            placeText = new TextBox();
+            placeText.addKeyDownHandler(new KeyDownHandler() {
+
+                @Override
+                public void onKeyDown(KeyDownEvent event) {
+                    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                        geoNameResultsPanel.clear();
+                        getGeoNames();
+                    }
+
+                }
+            });
+            Button searchButton = new Button("Search", new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    geoNameResultsPanel.clear();
+                    getGeoNames();
+                }
+            });
+            searchPanel.add(placeText);
+            searchPanel.add(searchButton);
+
+            mainPanel.add(searchPanel);
+
+            mainPanel.add(sp);
+
+            Button closeButton = new Button("Cancel", new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    hide();
+                }
+            });
+            mainPanel.add(closeButton);
+            setWidget(mainPanel);
+
+        }
+
+        private void getGeoNames() {
+            service.execute(new GetGeoNames(placeText.getText()), new AsyncCallback<GetGeoNamesResult>() {
+                @Override
+                public void onFailure(Throwable arg0) {
+                    GWT.log("Error retrieving geo names for " + placeText.getText(), arg0);
+                }
+
+                @Override
+                public void onSuccess(GetGeoNamesResult arg0) {
+                    if (!arg0.getGeoNames().isEmpty()) {
+                        for (GeoName g : arg0.getGeoNames() ) {
+                            final Anchor l = new Anchor(g.getName() + " [" + g.getLat() + "," + g.getLng() + "]");
+                            l.addClickHandler(new ClickHandler() {
+
+                                @Override
+                                public void onClick(ClickEvent event) {
+                                    int s = l.getText().indexOf("[");
+                                    int e = l.getText().indexOf("]");
+                                    String latLngStr = l.getText().substring(s + 1, e);
+
+                                    submitNewLocation(LatLng.fromUrlValue(latLngStr));
+                                    locationByPlaceNamePanel.hide();
+                                }
+                            });
+                            geoNameResultsPanel.add(l);
+                        }
+                    } else {
+                        Label l = new Label("No results!");
+                        geoNameResultsPanel.add(l);
+                    }
+                }
+            });
+        }
     }
 }
