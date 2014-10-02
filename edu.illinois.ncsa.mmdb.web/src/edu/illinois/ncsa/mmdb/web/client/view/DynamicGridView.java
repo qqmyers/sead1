@@ -145,7 +145,7 @@ public class DynamicGridView extends FlexTable implements Display {
             }
         
         uploadInfoPanel.setWidth("210px");
-        authorLabel = new Label(author);
+        authorLabel = new Label(shortenName(author));
         authorLabel.addStyleName("smallerItalicText");
         authorLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         uploadInfoPanel.add(authorLabel);
@@ -173,6 +173,21 @@ public class DynamicGridView extends FlexTable implements Display {
         numItems = 0;
     }
 
+    private String shortenName(String authorName){
+        int max_chars = 27;
+        if (authorName != null && authorName.length() > max_chars){
+            String[] names = authorName.split(" ");
+            String lastName = names[names.length-1];
+            if (lastName.length() > 23)
+                lastName = lastName.substring(0, 20) + "...";
+            String firstInitial = names[0].substring(0, Math.max(1, 23-lastName.length()));
+            return firstInitial + " " + lastName;
+         }
+        else{
+            return authorName;
+        }
+    }
+    
     private String shortenTitle(String title) {
         int max_chars = 33;
         if (title != null && title.length() > max_chars) {
