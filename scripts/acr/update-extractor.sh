@@ -6,7 +6,7 @@ cd /home/medici
 
 rm -rf extractor Extractor.gtk.linux.x86_64.zip
 
-wget -q -O Extractor.gtk.linux.x86_64.zip https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-EX/latest/artifact/shared/extractors/edu.illinois.ncsa.medici.extractor.site_1.3.100-eclipse.feature/Extractor.gtk.linux.x86_64.zip
+wget -q -O Extractor.gtk.linux.x86_64.zip https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-EX/latestSuccessful/artifact/shared/extractors/edu.illinois.ncsa.medici.extractor.site_1.3.100-eclipse.feature/Extractor.gtk.linux.x86_64.zip
 unzip -q Extractor.gtk.linux.x86_64.zip
 mv Extractor.gtk.linux.x86_64 extractor
 mv extractor.properties extractor/server.properties
