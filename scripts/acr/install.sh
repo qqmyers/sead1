@@ -45,6 +45,7 @@ if [ -e sead.key -a -e sead.crt ]; then
   else
     cp sead.crt /etc/ssl/sead.crt
   fi
+  cat nginx.ssl >> /etc/nginx/sites-enabled/sead
 fi
 service nginx restart
 
