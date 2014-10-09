@@ -135,13 +135,14 @@ public class Mail {
         TupeloStore ts = TupeloStore.getInstance();
         String server = ts.getConfiguration(ConfigurationKey.MediciName);
         String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
-        String subject = presubj + " New User";
-        StringBuilder body = new StringBuilder();
-        body.append(String.format("A new user has registered on server %s\n\n", server));
-        body.append(String.format("NAME  : %s\n", user.getName()));
-        body.append(String.format("EMAIL : %s\n", user.getEmail()));
+        String projName = ts.getConfiguration(ConfigurationKey.ProjectName);
+        String subject = presubj + " New User Has Requested Access to Your Project Space";
+        String body = String.format("%s [%s] has requested access to the %s SEAD " +
+                "Project Space. Please visit the \"inactive users\" list at %s to assign %s " +
+                "a role with appropriate permissions. If this person should not have access, it's not necessary to take " +
+                "any further action." + "\n", user.getName(), user.getEmail(), projName, "http://" + server + "/acr/#administration", user.getName());
         try {
-            sendMessage(getAdminEmail(), null, subject, body.toString()); //$NON-NLS-1$
+            sendMessage(getAdminEmail(), null, subject, body); //$NON-NLS-1$
         } catch (MessagingException e) {
             log.error(String.format("Could not send email to admins about '%s'.", subject), e);
         }
@@ -156,16 +157,18 @@ public class Mail {
         String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
         String projName = ts.getConfiguration(ConfigurationKey.ProjectName);
         String subject = presubj + " Invitation to access data";
-        String body = String.format("Dear " + user.getName() + ",\n\n Welcome to SEAD! - a new way for projects to manage, curate and preserve data.\n\n" +
-                "You have been invited by an administrator (cc'd) to access and contribute to the data collection(s) being " +
-                "developed by the %s project using a SEAD Active Content Repository.\n\n" +
-                "A user account on the server %s has been created for you using the email address this message was sent to.\n\nYou can login at this URL using your Google password" +
-                " if this email is associated with a google account (recommended). Or, you can use the temporary password %s " +
-                "to login via a local account. (You can then change your password information by logging in and going to Home > Profile.)" +
-                "\n\nYou have initially been given full read/write access to this repository (an admin may subsequently add/remove privileges) and can access all of the services " +
-                "listed at %s as well as create a profile on SEAD's Researcher Profile service (listed under the \"Go To\" menu button." +
-                " Getting Started information is available at http://sead-data.net. Questions can be sent to seaddatanet@umich.edu." +
-                "\n\n -- The SEAD Project Team", projName, "http://" + server + "/acr", password, "http://" + server);
+        String body = String.format("Dear " + user.getName() + "," + "\n\n" +
+                "Welcome to the SEAD project space for %s! You've been invited by an " +
+                "administrator to access and contribute to the data being developed by the project using SEAD's Project Spaces, " +
+                "a set of tools that makes it easy for scientists to collect and manage active data." + "\n\n" +
+                "A user account at %s has been created using your email address. If this email is associated with a Google account, you can login " +
+                "using your Google password. Otherwise, use the temporary password %s to login (after logging in, change your password " +
+                "by going to Home > Profile). The full list of your project spaces's services can be accessed via %s." + "\n\n" +
+                "We also encourage you to create a SEAD Research Network profile: http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/." + "\n\n" +
+                "-- The SEAD Project Team" + "\n" +
+                "seaddatanet@umich.edu" + "\n" +
+                "http://sead-data.net" + "\n" +
+                "@SEADdatanet" + "\n", projName, "http://" + server + "/acr", password, "http://" + server);
         try {
             String adminEmail = null;
             if (admin != null) {

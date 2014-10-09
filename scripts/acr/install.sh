@@ -134,7 +134,7 @@ echo '<Context path="/" docBase="/var/lib/tomcat6/webapps/ROOT"/>' > /etc/tomcat
 
 # install geobrowse
 echo "Installing geobrowse"
-wget -q -O geobrowse.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI/latest/artifact/JOB1/geobrowse.war/geobrowse.war
+wget -q -O geobrowse.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI2/latest/artifact/JOB1/geobrowse.war/geobrowse.war
 unzip -q -d geobrowse geobrowse.war
 echo "domain=http://${HOSTNAME}/acr" > geobrowse/WEB-INF/classes/geobrowse.properties 
 echo "enableAnonymous=${ANONYMOUS}" >> geobrowse/WEB-INF/classes/geobrowse.properties
@@ -151,7 +151,7 @@ mv geobrowse /var/lib/tomcat6/webapps
 
 # install discovery
 echo "Installing discovery"
-wget -q -O discovery.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI/latest/artifact/JOB1/discovery.war/discovery.war
+wget -q -O discovery.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI2/latest/artifact/JOB1/discovery.war/discovery.war
 unzip -q -d discovery discovery.war
 echo "domain=http://${HOSTNAME}/acr" > discovery/WEB-INF/classes/discovery.properties 
 echo "enableAnonymous=${ANONYMOUS}" >> discovery/WEB-INF/classes/discovery.properties
@@ -166,7 +166,7 @@ mv discovery /var/lib/tomcat6/webapps
 
 # install dashboard
 echo "Installing dashboard"
-wget -q -O dashboard.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI/latest/artifact/JOB1/dashboard.war/dashboard.war
+wget -q -O dashboard.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI2/latest/artifact/JOB1/dashboard.war/dashboard.war
 unzip -q -d dashboard dashboard.war
 echo "domain=http://${HOSTNAME}/acr" > dashboard/WEB-INF/classes/dashboard.properties 
 echo "enableAnonymous=${ANONYMOUS}" >> dashboard/WEB-INF/classes/dashboard.properties

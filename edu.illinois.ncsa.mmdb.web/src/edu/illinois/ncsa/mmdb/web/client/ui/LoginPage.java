@@ -2,7 +2,7 @@
  * University of Illinois/NCSA
  * Open Source License
  *
- * Copyright (c) 2010, NCSA 2013 U. Michigan.  All rights reserved.
+ * Copyright (c) 2010, NCSA, 2013 U. Michigan.  All rights reserved.
  *
  * Developed by:
  * Cyberenvironments and Technologies (CET)
@@ -86,6 +86,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
 
 /**
  * @author Luigi Marini
+ *
  *
  */
 public class LoginPage extends Composite {
