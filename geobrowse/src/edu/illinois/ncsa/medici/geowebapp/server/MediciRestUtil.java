@@ -197,9 +197,10 @@ public class MediciRestUtil {
 	private static List<LocationInfo> parseLocationInfo(String locations)
 			throws MalformedURLException, UnsupportedEncodingException,
 			JSONException {
-		
-		if(locations==null) return null;
-		
+
+		if (locations == null)
+			return null;
+
 		List<LocationInfo> locationInfoList = new ArrayList<LocationInfo>();
 		try {
 
@@ -214,9 +215,13 @@ public class MediciRestUtil {
 					li.setUri(location.getString("Identifier"));
 					li.setTitle(location.getString("Title"));
 					JSONObject point = location.getJSONObject("GeoPoint");
-					li.setLat(point.getDouble("lat"));
-					li.setLon(point.getDouble("long"));
-					locationInfoList.add(li);
+					
+					// if there are no lat/long, skip
+					if (point.has("lat") && point.has("long")) {
+						li.setLat(point.getDouble("lat"));
+						li.setLon(point.getDouble("long"));
+						locationInfoList.add(li);
+					}
 				}
 
 			}
@@ -245,11 +250,11 @@ public class MediciRestUtil {
 		String locations = null;
 		if ((tag == null) || tag.equals("")) {
 			locations = mp.executeAuthenticatedGet(
-					"/resteasy/datasets/features", null); 
+					"/resteasy/datasets/features", null);
 		} else {
-			locations = mp.executeAuthenticatedGet(
-				"/resteasy/tags/" + tag + "/features", null);
-		} 
+			locations = mp.executeAuthenticatedGet("/resteasy/tags/" + tag
+					+ "/features", null);
+		}
 		log.debug("locations in json: " + locations);
 		return parseLocationInfo(locations);
 	}

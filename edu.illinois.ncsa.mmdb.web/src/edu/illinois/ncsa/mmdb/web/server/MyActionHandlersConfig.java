@@ -78,6 +78,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsByTagHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDatasetsInCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDerivedFromHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetDownloadCountHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoNamesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetGeoPointHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetItemsBySetHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLicenseHandler;
@@ -148,6 +149,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetDatasetsByTagHandler());
         DispatchUtil.registerHandler(new GetMetadataHandler());
         DispatchUtil.registerHandler(new GetGeoPointHandler());
+        DispatchUtil.registerHandler(new GetGeoNamesHandler());
         DispatchUtil.registerHandler(new GetCollectionsHandler());
         DispatchUtil.registerHandler(new AddCollectionHandler());
         DispatchUtil.registerHandler(new GetCollectionHandler());

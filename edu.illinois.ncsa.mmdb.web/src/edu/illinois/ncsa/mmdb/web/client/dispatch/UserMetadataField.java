@@ -27,6 +27,7 @@ public class UserMetadataField implements Serializable {
 
     String                    uri;                                    // ID
     String                    label;                                  // user-readable name
+    String                    description;                            // description associated with the label
     int                       type             = PLAIN;               // property type
     String                    datatype;                               // datatype URI, for DATATYPE properties
     Set<NamedThing>           range;                                  // range; interpretation depends on type
@@ -44,8 +45,13 @@ public class UserMetadataField implements Serializable {
     String descriptionLabel = "description";
 
     public UserMetadataField(String uri, String label) {
+        this(uri, label, null);
+    }
+
+    public UserMetadataField(String uri, String label, String description) {
         setUri(uri);
         setLabel(label);
+        setDescription(description);
 
         //Make provision to get the type metadata field type as VIVO if the label is creator
         if (label.toLowerCase().contains(creatorLabel)) {
@@ -78,6 +84,14 @@ public class UserMetadataField implements Serializable {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public int getType() {

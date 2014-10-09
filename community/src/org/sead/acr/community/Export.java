@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.sql.Date;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
@@ -62,7 +63,9 @@ public class Export extends HttpServlet {
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		PrintWriter pw = response.getWriter();
-		response.setContentType("application/octet-stream");
+		response.setContentType("text/csv");
+		Date date = new Date(System.currentTimeMillis());
+		response.setHeader("Content-Disposition", "attachment; filename=\"SEADProjects_" + date.toString() + ".csv\"");
 		pw.write(request.getParameter("csv_text"));
 		pw.flush();
 		pw.close();
