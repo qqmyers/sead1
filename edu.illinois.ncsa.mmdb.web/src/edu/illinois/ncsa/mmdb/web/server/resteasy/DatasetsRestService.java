@@ -12,13 +12,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -60,11 +57,9 @@ import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
-import org.tupeloproject.rdf.terms.Beans;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
-import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
@@ -72,9 +67,9 @@ import org.tupeloproject.util.UnicodeTranscoder;
 
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
-import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.util.BeanFiller;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
@@ -88,7 +83,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  * cookie that can be returned with all calls here. (/api/logout will invalidate
  * session).
  * Credentials can also be sent with each call.
- * 
+ *
  */
 @Path("/datasets")
 public class DatasetsRestService extends ItemServicesImpl {
@@ -125,7 +120,7 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     /**
      * Copy Dataset from another SEAD repository
-     * 
+     *
      * @param url
      *            - the URL to copy from (the SEAD URL for the dataset page)
      * @returns - success (200) or failure (500)
@@ -188,7 +183,7 @@ public class DatasetsRestService extends ItemServicesImpl {
      * Import Data from any URL. Unless something is known about a given source,
      * this simply copies the bytes as a new
      * dataset and adds metadata linking back to the source URL.
-     * 
+     *
      * @param surl
      *            - the URL to import from
      * @returns - success (200) or failure (500)
@@ -220,44 +215,14 @@ public class DatasetsRestService extends ItemServicesImpl {
                         Thing t = ts.newThing(s);
 
                         InputStream is = getDataStream(url);
-                        byte[] digest = null;
+                        String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
+                        // mimetype
+                        String contentType = TupeloStore.getInstance().getMimeMap().getContentTypeFor(fileName);
+                        // update context with new mime-type potentially
+                        TupeloStore.getInstance().getMimeMap().checkMimeType(contentType);
+
                         try {
-                            MessageDigest sha1 = MessageDigest.getInstance("SHA1");
-                            DigestInputStream dis = new DigestInputStream(is, sha1);
-
-                            BlobWriter bw = new BlobWriter();
-                            bw.setSubject(s);
-                            bw.setInputStream(dis);
-                            c.perform(bw);
-                            dis.close();
-                            is.close();
-                            log.debug("user uploaded " + url.toExternalForm() + " (" + bw.getSize() + " bytes), uri=" + id);
-
-                            digest = sha1.digest();
-                            t.addType(Cet.DATASET);
-                            //Next 3 are Bean related
-                            t.addType(Beans.STORAGE_TYPE_BEAN_ENTRY);
-                            t.setValue(Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
-                                    Resource.literal("edu.uiuc.ncsa.cet.bean.DatasetBean"));
-                            t.setValue(Dc.IDENTIFIER, Resource.literal(id));
-                            t.setValue(Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
-                                    Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/http://cet.ncsa.uiuc.edu/2007/Dataset"));
-
-                            String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
-                            t.addValue(Rdfs.LABEL, fileName);
-                            t.addValue(SHA1_DIGEST, asHex(digest));
-
-                            t.setValue(RestService.FILENAME_PROPERTY, fileName);
-                            t.setValue(Dc.TITLE, fileName);
-                            t.addValue(Dc.DATE, new Date());
-                            t.setValue(Dc.CREATOR, creator);
-                            t.addValue(Files.LENGTH, bw.getSize());
-
-                            // mimetype
-                            String contentType = TupeloStore.getInstance().getMimeMap().getContentTypeFor(fileName);
-                            t.setValue(RestService.FORMAT_PROPERTY, contentType);
-                            // update context with new mime-type potentially
-                            TupeloStore.getInstance().getMimeMap().checkMimeType(contentType);
+                            BeanFiller.fillDataBean(c, t, fileName, contentType, creator, new Date(), is);
 
                             t.addValue(Resource.uriRef("http://www.w3.org/ns/prov#hadPrimarySource"), Resource.uriRef(url.toExternalForm()));
                         } catch (NoSuchAlgorithmException e) {
@@ -266,6 +231,7 @@ public class DatasetsRestService extends ItemServicesImpl {
                         }
                         t.save();
                         ts.clear();
+                        log.debug("Created dataset from " + url.getPath());
                     } catch (IOException io) {
                         log.warn("IO error retrieving " + url.toExternalForm() + " for dataset " + id);
                         if (log.isDebugEnabled()) {
@@ -333,7 +299,7 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     /**
      * Get top-level datasets
-     * 
+     *
      * @return List of top-level datasets by ID with basic metadata as JSON-LD
      */
     @GET
@@ -346,7 +312,7 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     /**
      * Get all datasets
-     * 
+     *
      * @return List of all datasets by ID with basic metadata as JSON-LD
      */
     /*
@@ -372,7 +338,7 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     /**
      * Get dataset content
-     * 
+     *
      * @param id
      *            - the URL encoded SEAD ID for the desired dataset
      * @return the bytes associated with this ID (i.e. the 'file' contents)
@@ -445,10 +411,10 @@ public class DatasetsRestService extends ItemServicesImpl {
     /**
      * Get basic metadata for the given dataset ( Identifier, Title, Date,
      * Uploaded By, Size(Bytes), Mimetype, Creator(s) )
-     * 
+     *
      * @param id
      *            - the URL encoded ID of the dataset
-     * 
+     *
      * @return - the basic metadata for this dataset as JSON-LD
      */
     @GET
@@ -462,10 +428,10 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     /**
      * Delete dataset (Dataset will be marked as deleted)
-     * 
+     *
      * @param id
      *            - the URL-encoded SEAD ID for the dataset
-     * 
+     *
      * @return - success or failure message
      */
     @DELETE
@@ -483,10 +449,10 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     /**
      * Get tags associated with this dataset
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the dataset
-     * 
+     *
      * @return - JSON array of tags
      */
     @GET
@@ -498,7 +464,7 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     /**
      * Add tags to this dataset
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the dataset
      * @param tags
@@ -513,7 +479,7 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     /**
      * Remove some tags associated with this dataset
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the dataset
      * @param tags
@@ -528,10 +494,10 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     /**
      * Get collection(s) that this dataset is in
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the dataset
-     * 
+     *
      * @return - list of collections by ID with basic metadata as JSON-LD
      */
     @GET
@@ -561,10 +527,10 @@ public class DatasetsRestService extends ItemServicesImpl {
      * Data Creation Date, Size, Label, Mimetype, Description(s), Title,
      * Uploaded By, Abstract,
      * Contact(s),Creator(s), Publication Date )
-     * 
+     *
      * @param id
      *            - the URL encoded ID of the dataset
-     * 
+     *
      * @return - the bibliographic metadata for this dataset as JSON-LD
      */
     @GET
@@ -578,14 +544,14 @@ public class DatasetsRestService extends ItemServicesImpl {
 
     /**
      * Get dataset(s) that have the specified metadata
-     * 
+     *
      * @param pred
      *            - URL-encoded predicate
      * @param type
      *            - the type of the value (must be "uri" or "literal")
      * @param value
      *            - the URL-encoded value
-     * 
+     *
      * @return - the list of matching datasets with basic metadata as JSON-LD
      */
     @GET
@@ -599,10 +565,10 @@ public class DatasetsRestService extends ItemServicesImpl {
      * Get unique metadata (i.e. not from an extractor) for the given dataset
      * (Basic/biblio + user-added
      * metadata)
-     * 
+     *
      * @param id
      *            - the URL encoded ID of the dataset
-     * 
+     *
      * @return - the full list of metadata for this dataset as JSON-LD
      */
     @GET
@@ -618,10 +584,10 @@ public class DatasetsRestService extends ItemServicesImpl {
     /**
      * Get all metadata for the given dataset (Basic/biblio + user-added
      * metadata and extracted metadata)
-     * 
+     *
      * @param id
      *            - the URL encoded ID of the dataset
-     * 
+     *
      * @return - the full list of metadata for this dataset as JSON-LD
      */
     @GET
@@ -638,7 +604,7 @@ public class DatasetsRestService extends ItemServicesImpl {
      * Get all (non-deleted, that user can see) geo layers (collections or
      * datasets that have a WMSLayer annotation) that are tagged with
      * the given tag
-     * 
+     *
      * @return geo metadata for each item in json-ld
      */
 
@@ -654,7 +620,7 @@ public class DatasetsRestService extends ItemServicesImpl {
      * Get all (non-deleted, that user can see) geo fatures (collections or
      * datasets that have a GeoPoint annotation) that are tagged with
      * the given tag
-     * 
+     *
      * @return geo metadata for each item in json-ld
      */
 
@@ -670,18 +636,18 @@ public class DatasetsRestService extends ItemServicesImpl {
      * Upload dataset including blob and metadata. Basic metadata and SHA1
      * digest are generated from the file stats and session username
      * (dc:creator/uploader)
-     * 
+     *
      * Note: Adding metadata via this method should be done with awareness that
      * it does not perform all 'side effects', e.g. while new predicates are
      * automatically added to the list of extracted or user
      * metadata, there is no way through this endpoint to give them
      * human-friendly labels.
-     * 
+     *
      * @param input
      *            - multipart form data including "datablob" part specifying a
      *            file name and additional predicate/value pairs for other
      *            metadata
-     * 
+     *
      * @return - success/failure message
      */
     @POST
@@ -722,38 +688,7 @@ public class DatasetsRestService extends ItemServicesImpl {
                         log.debug("Filename: " + end + fileName);
 
                         InputStream is = part.getBody(InputStream.class, null);
-                        byte[] digest = null;
                         try {
-                            MessageDigest sha1 = MessageDigest.getInstance("SHA1");
-                            DigestInputStream dis = new DigestInputStream(is, sha1);
-
-                            BlobWriter bw = new BlobWriter();
-                            bw.setUri(URI.create(uri));
-                            bw.setInputStream(dis);
-                            c.perform(bw);
-                            dis.close();
-                            is.close();
-                            log.debug("user uploaded " + fileName + " (" + bw.getSize() + " bytes), uri=" + uri);
-
-                            digest = sha1.digest();
-                            t.addType(Cet.DATASET);
-                            //Next 3 are Bean related
-                            t.addType(Beans.STORAGE_TYPE_BEAN_ENTRY);
-                            t.setValue(Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
-                                    Resource.literal("edu.uiuc.ncsa.cet.bean.DatasetBean"));
-                            t.setValue(Dc.IDENTIFIER, Resource.uriRef(uri));
-                            t.setValue(Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
-                                    Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/http://cet.ncsa.uiuc.edu/2007/Dataset"));
-
-                            t.addValue(Rdfs.LABEL, fileName);
-                            t.addValue(SHA1_DIGEST, asHex(digest));
-
-                            t.setValue(RestService.FILENAME_PROPERTY, fileName);
-                            t.setValue(Dc.TITLE, fileName);
-                            t.addValue(Dc.DATE, new Date());
-                            t.setValue(Dc.CREATOR, creator);
-                            t.addValue(Files.LENGTH, bw.getSize());
-
                             // mimetype
                             String contentType = part.getHeaders().get("Content-Type").get(0);
                             if (contentType != null) {
@@ -762,10 +697,11 @@ public class DatasetsRestService extends ItemServicesImpl {
                                 if (MimeMap.UNKNOWN_TYPE.equals(contentType)) {
                                     contentType = TupeloStore.getInstance().getMimeMap().getContentTypeFor(fileName);
                                 }
-                                t.setValue(RestService.FORMAT_PROPERTY, contentType);
                                 // update context with new mime-type potentially
                                 TupeloStore.getInstance().getMimeMap().checkMimeType(contentType);
                             }
+                            //Add blob and file-related metadata to Thing t (not saved here)
+                            BeanFiller.fillDataBean(c, t, fileName, contentType, creator, new Date(), is);
 
                         } catch (NoSuchAlgorithmException e) {
                             // TODO Auto-generated catch block
@@ -810,7 +746,7 @@ public class DatasetsRestService extends ItemServicesImpl {
     /**
      * Add metadata to dataset.
      * Note: Managed metadata cannot be changed by this method.
-     * 
+     *
      * @param id
      *            - URL-encoded id of dataset
      * @param input
@@ -828,7 +764,7 @@ public class DatasetsRestService extends ItemServicesImpl {
     /**
      * Simple function to create a predicate and store information about the
      * predicate.
-     * 
+     *
      * @param category
      * @param id
      * @param label
@@ -838,10 +774,10 @@ public class DatasetsRestService extends ItemServicesImpl {
     static private Resource createPredicate(String category, String id, String label, TripleWriter tw) {
         assert (Character.isUpperCase(category.charAt(0)));
         try {
-            category = URLEncoder.encode(category, "UTF8"); //$NON-NLS-1$ 
+            category = URLEncoder.encode(category, "UTF8"); //$NON-NLS-1$
         } catch (UnsupportedEncodingException e) {
             log.warn("Could not encode type.", e); //$NON-NLS-1$
-            category = category.replace(" ", "%20"); //$NON-NLS-1$ //$NON-NLS-2$ 
+            category = category.replace(" ", "%20"); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         Resource p;

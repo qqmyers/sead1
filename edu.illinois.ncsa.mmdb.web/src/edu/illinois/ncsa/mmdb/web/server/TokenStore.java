@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2014 University of Michigan
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,7 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl;
+import edu.illinois.ncsa.mmdb.web.server.util.BeanFiller;
 
 public class TokenStore {
 
@@ -64,7 +64,7 @@ public class TokenStore {
             dis.close();
             is.close();
 
-            token = ItemServicesImpl.asHex(sha1.digest());
+            token = BeanFiller.asHex(sha1.digest());
         } catch (Exception e) {
             log.debug(e.getMessage());
         }
