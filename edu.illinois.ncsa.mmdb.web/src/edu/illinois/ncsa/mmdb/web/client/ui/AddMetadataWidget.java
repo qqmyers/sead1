@@ -119,9 +119,10 @@ public class AddMetadataWidget extends Composite {
     VerticalPanel                          thePanel;
     Label                                  noFields;
     FlexTable                              fieldTable;
-    Map<String, String>                    labels     = new HashMap<String, String>();
-    Map<String, Integer>                   indexLabel = new HashMap<String, Integer>();
-    Map<String, Integer>                   listLabel  = new HashMap<String, Integer>();
+    Map<String, String>                    labels             = new HashMap<String, String>();
+    Map<String, String>                    labels_description = new HashMap<String, String>();
+    Map<String, Integer>                   indexLabel         = new HashMap<String, Integer>();
+    Map<String, Integer>                   listLabel          = new HashMap<String, Integer>();
     private final SimplePanel              newFieldPanel;
     protected InputField                   inputField;
     protected KeyUpHandler                 pressEnter;
@@ -406,9 +407,15 @@ public class AddMetadataWidget extends Composite {
         int count = 1;
         for (UserMetadataField field : availableFields ) {
             String label = field.getLabel();
+            String description = field.getDescription();
+            String field_label = label;
+            if (!("".equals(description))) {
+                field_label += ": " + description;
+            }
             String predicate = field.getUri();
-            fieldChoice.addItem(label, predicate);
+            fieldChoice.addItem(field_label, predicate);
             labels.put(predicate, label);
+            labels_description.put(predicate, description);
             indexLabel.put(predicate, count);
             count++;
         }

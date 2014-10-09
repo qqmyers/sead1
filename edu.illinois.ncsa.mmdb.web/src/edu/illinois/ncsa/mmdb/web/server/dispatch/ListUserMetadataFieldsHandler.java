@@ -80,17 +80,21 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
                     public ListUserMetadataFieldsResult computeValue() {
                         ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
                         ListNamedThingsResult r = new ListNamedThingsResult();
+                        ListNamedThingsResult r_d = new ListNamedThingsResult();
+
                         try {
                             r.setThingNames(TupeloStore.getInstance().listThingsOfType(MMDB.USER_METADATA_FIELD, Rdfs.LABEL));
+                            r_d.setThingNames(TupeloStore.getInstance().listThingsOfType(GetUserMetadataFieldsHandler.VIEW_METADATA, Rdfs.COMMENT));
                         } catch (OperatorException e) {
                             r = null;
+                            r_d = null;
                         }
                         if (r == null) {
                             log.error("can't list plain metadata fields");
                         }
                         for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
-                            log.debug("Found plain editable umf :" + entry.getKey() + " : " + entry.getValue());
-                            result.addField(new UserMetadataField(entry.getKey(), entry.getValue()));
+                            log.debug("Found plain viewable umf :" + entry.getKey() + " : " + entry.getValue() + "desciption: " + r_d.getThingNames().get(entry.getKey()));
+                            result.addField(new UserMetadataField(entry.getKey(), entry.getValue(), r_d.getThingNames().get(entry.getKey())));
                         }
                         // now run more queries to get user metadata fields of various other types
                         try {
@@ -121,17 +125,21 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
                     public ListUserMetadataFieldsResult computeValue() {
                         ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
                         ListNamedThingsResult r = new ListNamedThingsResult();
+                        ListNamedThingsResult r_d = new ListNamedThingsResult();
                         try {
                             r.setThingNames(TupeloStore.getInstance().listThingsOfType(GetUserMetadataFieldsHandler.VIEW_METADATA, Rdfs.LABEL));
+                            r_d.setThingNames(TupeloStore.getInstance().listThingsOfType(GetUserMetadataFieldsHandler.VIEW_METADATA, Rdfs.COMMENT));
                         } catch (OperatorException e) {
                             r = null;
+                            r_d = null;
                         }
                         if (r == null) {
                             log.error("can't list plain metadata fields");
                         }
                         for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
-                            log.debug("Found plain viewable umf :" + entry.getKey() + " : " + entry.getValue());
-                            result.addField(new UserMetadataField(entry.getKey(), entry.getValue()));
+
+                            log.debug("Found plain viewable umf :" + entry.getKey() + " : " + entry.getValue() + "desciption: " + r_d.getThingNames().get(entry.getKey()));
+                            result.addField(new UserMetadataField(entry.getKey(), entry.getValue(), r_d.getThingNames().get(entry.getKey())));
                         }
                         // now run more queries to get user metadata fields of various other types
                         try {

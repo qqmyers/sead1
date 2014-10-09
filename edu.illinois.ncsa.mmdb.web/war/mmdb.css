@@ -1930,8 +1930,8 @@ a:hover {
 .imageOverlay {
 	position:absolute;
 	background-repeat: no-repeat;
-	top: 80px;
-	left: 102px;
+	top: 0px;
+	left: 190px;
 	width: 23px;
 	height: 23px;
 	cursor: pointer; 
@@ -1955,19 +1955,19 @@ a:hover {
 	
 .imageThumbnail {
 	position:relative;
-	height:100px;
+	height:200px;
 	border: none;
 	}
 
 .imageThumbnailBordered {
 	position:relative;
-	height:100px;
+	height:200px;
 	border: 1px solid #A8A8A8;
 	}
 	
 .thumbnail {
 	position: relative;
-	width: 130px;
+	width: 200px;
 	display: block;
 	cursor: pointer; 
 	cursor: hand;
@@ -2239,6 +2239,11 @@ a:hover {
 
 .smallText {
     font-size: 0.9em;
+}
+
+.smallerItalicText {
+	font-size: 0.8em;
+	font-style: italic;
 }
 
 .tooltip {
