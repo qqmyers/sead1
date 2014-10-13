@@ -67,7 +67,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
@@ -177,9 +176,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     private static UserSessionState    sessionState;
 
-    private Label                      debugLabel;
+    //private Label                      debugLabel;
     private HorizontalPanel            navMenu;
-    private HTML                       adminBbullet;
+    //private HTML                       adminBbullet;
     private Hyperlink                  adminLink;
 
     public static String               _sessionCookieName               = "JSESSIONID";
@@ -344,49 +343,54 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         RootPanel.get("navMenu").add(navMenu);
 
-        // discovery
-        final Anchor discoveryLink = new Anchor("Overview", "/discovery");
-        discoveryLink.addStyleName("navMenuLink");
-        navMenu.add(discoveryLink);
-        // bullet
+        /* bullet
         HTML bullet = new HTML("&bull;");
         bullet.addStyleName("navMenuText");
         navMenu.add(bullet);
+        */
         //datasets
         Hyperlink listLink = new Hyperlink("Data", "listDatasets");
         listLink.addStyleName("navMenuLink");
         navMenu.add(listLink);
-        // bullet
+        /*// bullet
         bullet = new HTML("&bull;");
         bullet.addStyleName("navMenuText");
         navMenu.add(bullet);
+        */
         // collections
         Hyperlink collectionsLink = new Hyperlink("Collections",
                 "listCollections");
         collectionsLink.addStyleName("navMenuLink");
         navMenu.add(collectionsLink);
-        // bullet
+        /*// bullet
         HTML bullet2 = new HTML("&bull;");
         bullet2.addStyleName("navMenuText");
         navMenu.add(bullet2);
+        */
         // tags
         Hyperlink tagsLink = new Hyperlink("Tags",
                 "tags");
         tagsLink.addStyleName("navMenuLink");
         navMenu.add(tagsLink);
-        // bullet
+        /*// bullet
         HTML bullet3 = new HTML("&bull;");
         bullet3.addStyleName("navMenuText");
         navMenu.add(bullet3);
+        */
         // geobrowser
         final Anchor geobrowseLink = new Anchor("MapView", "/geobrowse");
         geobrowseLink.addStyleName("navMenuLink");
         navMenu.add(geobrowseLink);
-        // bullet
+        /*// bullet
         bullet = new HTML("&bull;");
         bullet.addStyleName("navMenuText");
         navMenu.add(bullet);
-
+        */
+        // discovery
+        final Anchor discoveryLink = new Anchor("Published", "/discovery");
+        discoveryLink.addStyleName("navMenuLink");
+        navMenu.add(discoveryLink);
+        /*
         // map
         Hyperlink mapLink = new Hyperlink("SimpleMap",
                 "map");
@@ -396,24 +400,29 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         HTML bullet4 = new HTML("&bull;");
         bullet4.addStyleName("navMenuText");
         navMenu.add(bullet4);
-        // upload link
-        final Hyperlink uploadLink = new Hyperlink("Upload", "upload");
-        uploadLink.addStyleName("navMenuLink");
-        navMenu.add(uploadLink);
-
-        adminBbullet = new HTML("&bull;");
-        adminBbullet.addStyleName("navMenuText");
-        adminBbullet.addStyleName("hidden");
-        navMenu.add(adminBbullet);
+        */
         // dashboard
         final Anchor dashboardLink = new Anchor("Dashboard", "/dashboard");
         dashboardLink.addStyleName("navMenuLink");
         navMenu.add(dashboardLink);
-        // bullet
+        // upload link
+        final Hyperlink uploadLink = new Hyperlink("Upload", "upload");
+        uploadLink.addStyleName("navMenuLink");
+        navMenu.add(uploadLink);
+        /*
+        adminBbullet = new HTML("&bull;");
+        adminBbullet.addStyleName("navMenuText");
+        adminBbullet.addStyleName("hidden");
+        navMenu.add(adminBbullet);
+        */
+
+        /*
+         * // bullet
+
         bullet = new HTML("&bull;");
         bullet.addStyleName("navMenuText");
         navMenu.add(bullet);
-
+        */
         /*
         // Home
         final Hyperlink homeLink = new Hyperlink("MyProfile", "home");
@@ -645,13 +654,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new PermissionCallback() {
             @Override
             public void onAllowed() {
-                adminBbullet.removeStyleName("hidden");
+                //adminBbullet.removeStyleName("hidden");
                 adminLink.removeStyleName("hidden");
             }
 
             @Override
             public void onDenied() {
-                adminBbullet.addStyleName("hidden");
+                //adminBbullet.addStyleName("hidden");
                 adminLink.addStyleName("hidden");
             }
         });
@@ -912,7 +921,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     private void showLoginPage(boolean interrupted) {
-        adminBbullet.addStyleName("hidden");
+        ///adminBbullet.addStyleName("hidden");
         adminLink.addStyleName("hidden");
         LoginPage.setAutologin(true);
         loginStatusWidget.loggedOut();

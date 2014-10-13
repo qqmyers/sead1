@@ -73,7 +73,7 @@ public class LoginStatusWidget extends Composite {
      */
     public LoginStatusWidget() {
         mainPanel = new HorizontalPanel();
-        mainPanel.addStyleName("navMenu");
+        mainPanel.addStyleName("loginPanel");
         initWidget(mainPanel);
         if (MMDB.getUsername() != null) {
             loggedIn(MMDB.getUsername());
@@ -84,7 +84,7 @@ public class LoginStatusWidget extends Composite {
 
     Hyperlink anchor(String name, String link) {
         Hyperlink anchor = new Hyperlink(name, link);
-        anchor.addStyleName("navMenuLink");
+        // anchor.addStyleName("navMenuLink");
         return anchor;
     }
 
