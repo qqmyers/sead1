@@ -132,9 +132,9 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         PREVIEW_URL.put(GetPreviews.LARGE, "./api/image/preview/large/");
         PREVIEW_URL.put(GetPreviews.BADGE, "./api/collection/preview/");
         GRAY_URL = new HashMap<String, String>(); // how I yearn for map literals
-        GRAY_URL.put(GetPreviews.SMALL, "./images/nopreview-100.gif");
-        GRAY_URL.put(GetPreviews.LARGE, "./images/nopreview-100.gif"); // TODO is this correct?
-        GRAY_URL.put(GetPreviews.BADGE, "./images/nopreview-100.gif");
+        GRAY_URL.put(GetPreviews.SMALL, "./images/nopreview-200.gif");
+        GRAY_URL.put(GetPreviews.LARGE, "./images/nopreview-200.gif");
+        GRAY_URL.put(GetPreviews.BADGE, "./images/nopreview-200.gif");
         PENDING_URL = new HashMap<String, String>(); // how I yearn for map literals
         PENDING_URL.put(GetPreviews.SMALL, "./images/loading-small.gif");
         PENDING_URL.put(GetPreviews.LARGE, "./images/loading-large.gif");
@@ -183,7 +183,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
     protected void createDefaultNoPreviewImages(String type) {
         if (type != null && !UNKNOWN_TYPE.equals(type)) {
-            String defaultSmallImageFileName = "./images/defaultpreviews/" + type + "-100.png";
+            String defaultSmallImageFileName = "./images/defaultpreviews/" + type + "-200.png";
             String defaultLargeImageFileName = "./images/defaultpreviews/" + type + "-500.png";
 
             ALT_GRAY_URL = new HashMap<String, String>();
@@ -347,7 +347,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
             } else {
                 noPreview = new Image(GRAY_URL.get(sz));
             }
-            if(!GetPreviews.LARGE.equals(sz)){
+            if (!GetPreviews.LARGE.equals(sz)) {
                 noPreview.setHeight("100%");
                 noPreview.setWidth("100%");
             }
