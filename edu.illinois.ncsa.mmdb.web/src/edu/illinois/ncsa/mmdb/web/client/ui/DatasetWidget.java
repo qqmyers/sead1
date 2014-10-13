@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -52,6 +52,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
@@ -89,6 +90,8 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.LicenseResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Metadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UnpackZip;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UnpackZipResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserAction;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.ConfirmHandler;
@@ -102,9 +105,9 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**
  * Show one datasets and related information about it.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  *         TODO replace VerticalPanel and HorizontalPanel with FlowPanel
  */
 @SuppressWarnings("nls")
@@ -134,7 +137,7 @@ public class DatasetWidget extends Composite {
     private static final int        MAX_TEXT_SIZE = 80;
 
     /**
-     * 
+     *
      * @param dispatchAsync
      */
     public DatasetWidget(DispatchAsync dispatchAsync, HandlerManager eventBus) {
@@ -170,7 +173,7 @@ public class DatasetWidget extends Composite {
 
     /**
      * Retrieve a specific dataset given the uri.
-     * 
+     *
      * @param uri
      *            dataset uri
      */
@@ -201,7 +204,7 @@ public class DatasetWidget extends Composite {
 
     /**
      * Draw the content on the page given a specific dataset.
-     * 
+     *
      * @param dataset
      * @param collection
      */
@@ -297,6 +300,11 @@ public class DatasetWidget extends Composite {
         uploadWidget.addStyleName("inlineBlock");
         actionsPanel.add(uploadWidget);
 
+        // Unpack to Collection action
+        final FlowPanel unpackWidget = new FlowPanel();
+        unpackWidget.addStyleName("inlineBlock");
+        actionsPanel.add(unpackWidget);
+
         Anchor embedAnchor = new Anchor("Embed");
         embedAnchor.addStyleName("datasetActionLink");
         embedAnchor.addClickHandler(new ClickHandler() {
@@ -316,7 +324,7 @@ public class DatasetWidget extends Composite {
 
         leftColumn.add(createCollectionContextPanel());
 
-        // metadata        
+        // metadata
         final UserMetadataWidget um = new UserMetadataWidget(uri, service, eventBus);
         um.setWidth("100%");
         leftColumn.add(createMetaDataPanel(um));
@@ -364,7 +372,7 @@ public class DatasetWidget extends Composite {
         ShowRelationshipsWidget showRelationshipsWidget = new ShowRelationshipsWidget(uri, service);
         rightColumn.add(showRelationshipsWidget);
 
-        // additional operations based on 
+        // additional operations based on
         rbac.withPermissions(uri, new PermissionsCallback() {
             @Override
             public void onPermissions(final HasPermissionResult p) {
@@ -397,6 +405,19 @@ public class DatasetWidget extends Composite {
                     up.setText("Upload Derived Data");
                     up.setTargetHistoryToken("upload?id=" + uri);
                     uploadWidget.add(up);
+
+                    String mimetype = result.getDataset().getMimeType();
+                    if (mimetype.equals("application/zip") || mimetype.equals("application/x-zip-compressed")) {
+                        Anchor unpackAnchor = new Anchor("Unpack To Collection");
+                        unpackAnchor.addStyleName("datasetActionLink");
+                        unpackAnchor.addClickHandler(new ClickHandler() {
+                            public void onClick(ClickEvent event) {
+                                unpackZip(result.getDataset().getUri(), result.getDataset().getTitle(), MMDB.getUsername());
+                            }
+                        });
+                        unpackWidget.add(unpackAnchor);
+
+                    }
                 }
                 um.showTableFields(p.isPermitted(Permission.EDIT_USER_METADATA));
                 //
@@ -722,5 +743,27 @@ public class DatasetWidget extends Composite {
         }
 
         return additionalInformationPanel;
+    }
+
+    private void unpackZip(String datasetURI, String datasetName, String user) {
+
+        UnpackZip uz = new UnpackZip();
+        uz.setUri(datasetURI);
+        uz.setUser(user);
+        uz.setName(datasetName);
+        service.execute(uz,
+                new AsyncCallback<UnpackZipResult>() {
+
+                    @Override
+                    public void onFailure(Throwable arg0) {
+                        GWT.log("Error unzipping to collection: ", arg0);
+                        Window.alert("Unzip was unsuccessful: " + arg0.getLocalizedMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(UnpackZipResult arg0) {
+                        History.newItem("collection?uri=" + arg0.getUri(), true);
+                    }
+                });
     }
 }

@@ -13,14 +13,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.http.HTTPException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.sead.acr.common.MediciProxy;
 import org.sead.acr.common.SparqlQueryServlet;
 import org.sead.acr.common.utilities.MimeMap;
 import org.sead.acr.common.utilities.PropertiesLoader;
 import org.sead.acr.common.utilities.Queries;
-import org.sead.acr.common.utilities.json.JSONArray;
-import org.sead.acr.common.utilities.json.JSONException;
-import org.sead.acr.common.utilities.json.JSONObject;
 
 public class Dashboard extends SparqlQueryServlet {
 
@@ -161,11 +161,11 @@ public class Dashboard extends SparqlQueryServlet {
 					}
 					// Use mimetype info in Medici rather than
 					// re-deriving from file extension?
-				} catch (org.sead.acr.common.utilities.json.JSONException je) {
+				} catch (JSONException je) {
 					log.warn("i= " + i + " : " + je.getMessage());
 				}
 			}
-		} catch (org.sead.acr.common.utilities.json.JSONException je) {
+		} catch (JSONException je) {
 			// TODO: need to handle the JSONException
 			// There are zero or one entries - for now we'll just leave the
 			// graph blank
@@ -234,11 +234,11 @@ public class Dashboard extends SparqlQueryServlet {
 
 					layersArray.put(newJson);
 
-				} catch (org.sead.acr.common.utilities.json.JSONException je) {
+				} catch (JSONException je) {
 					// Why catch and ignore?
 				}
 			}
-		} catch (org.sead.acr.common.utilities.json.JSONException je) {
+		} catch (JSONException je) {
 			// TODO: need to handle the JSONException
 			// There are zero or one entries - for now we'll just leave the
 			// graph blank
