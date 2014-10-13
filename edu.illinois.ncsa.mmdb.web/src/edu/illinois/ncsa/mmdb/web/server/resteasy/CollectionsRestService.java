@@ -6,8 +6,8 @@ package edu.illinois.ncsa.mmdb.web.server.resteasy;
  */
 
 /*
- *  NB: For these services to work, -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true must be set on the server. This 
- * potentially opens the door for attacks related to CVE-2007-0450 if any code on the server follows paths sent 
+ *  NB: For these services to work, -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true must be set on the server. This
+ * potentially opens the door for attacks related to CVE-2007-0450 if any code on the server follows paths sent
  * in URLs.
  */
 
@@ -44,17 +44,15 @@ import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
-import org.tupeloproject.rdf.terms.Beans;
 import org.tupeloproject.rdf.terms.Cet;
-import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
-import org.tupeloproject.rdf.terms.Rdfs;
 
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.util.BeanFiller;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 
 /**
@@ -71,7 +69,7 @@ public class CollectionsRestService extends ItemServicesImpl {
     /**
      * Get top-level collections (those that are not sub-collections of any
      * other collection)
-     * 
+     *
      * @return IDs and basic metadata for collections as JSON-LD
      */
     @GET
@@ -85,10 +83,10 @@ public class CollectionsRestService extends ItemServicesImpl {
     /**
      * Get Basic metadata for {id} : ( Identifier, Title, Date, Uploaded By,
      * Abstract, Contact(s), Creator(s) )
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the collection
-     * 
+     *
      * @return - Basic Metadata as JSON-LD
      */
     @GET
@@ -102,10 +100,10 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     /**
      * Delete collection (Collection will be marked as deleted)
-     * 
+     *
      * @param id
      *            - the URL-encoded SEAD ID for the collection
-     * 
+     *
      * @return - success or failure message
      */
     @DELETE
@@ -123,10 +121,10 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     /**
      * Get Datasets that are children of this collection
-     * 
+     *
      * @param id
      *            = the URL-encoded ID of the collection
-     * 
+     *
      * @return - ID and basic metadata for datasets in this collection
      */
     @SuppressWarnings("deprecation")
@@ -155,12 +153,12 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     /**
      * Add a dataset to this collection
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the collection
      * @param item_id
      *            - the URL-encoded ID of the dataset
-     * 
+     *
      * @return - success or failure message
      */
     @POST
@@ -171,10 +169,10 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     /**
      * Get Collections that are children (sub-collections) of this collection
-     * 
+     *
      * @param id
      *            = the URL-encoded ID of the collection
-     * 
+     *
      * @return - ID and basic metadata for subcollections.
      */
     @GET
@@ -201,12 +199,12 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     /**
      * Add a collection to this collection (as a sub-collection)
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the parent collection
      * @param item_id
      *            - the URL-encoded ID of the sub-collection
-     * 
+     *
      * @return - success or failure message
      */
     @POST
@@ -262,13 +260,13 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     /**
      * Remove a dataset or collection from a collection
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the parent collection
      * @param item_id
      *            - the URL-encoded ID of the child dataset/collection to be
      *            removed
-     * 
+     *
      * @return - success or failure message
      */
     @DELETE
@@ -325,10 +323,10 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     /**
      * Get tags associated with this collection
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the collection
-     * 
+     *
      * @return - JSON array of tags
      */
     @GET
@@ -340,7 +338,7 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     /**
      * Add tags to this collection
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the collection
      * @param tags
@@ -355,7 +353,7 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     /**
      * Remove some tags associated with this collection
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the collection
      * @param tags
@@ -373,13 +371,13 @@ public class CollectionsRestService extends ItemServicesImpl {
      * and/or subcollections). Basic metadata
      * are generated from the dir stats and session username
      * (dc:creator/uploader).
-     * 
+     *
      * Note: Adding metadata via this method should be done with awareness that
      * it does not perform all 'side effects', e.g. while new predicates are
      * automatically added to the list of extracted or user
      * metadata, there is no way through this endpoint to give them
      * human-friendly labels.
-     * 
+     *
      * @param input
      *            - multipart form data including "collection" part specifying
      *            the
@@ -389,7 +387,7 @@ public class CollectionsRestService extends ItemServicesImpl {
      *            submitted media/mime type:
      *            text/plain (default) : a literal value
      *            text/uri-list : a URI
-     * 
+     *
      * @return - success/failure message
      */
     @POST
@@ -425,20 +423,8 @@ public class CollectionsRestService extends ItemServicesImpl {
                         //get name...
                         dirName = part.getBodyAsString();
 
-                        t.addType(CollectionBeanUtil.COLLECTION_TYPE);
-                        t.addValue(Rdfs.LABEL, dirName);
+                        BeanFiller.fillCollectionBean(t, dirName, creator, new Date());
 
-                        //Next 4 are Bean specific
-                        t.addType(Beans.STORAGE_TYPE_BEAN_ENTRY);
-                        t.setValue(Beans.PROPERTY_VALUE_IMPLEMENTATION_CLASSNAME,
-                                Resource.literal("edu.uiuc.ncsa.cet.bean.CollectionBean"));
-                        t.setValue(Dc.IDENTIFIER, Resource.literal(uri));
-                        t.setValue(Beans.PROPERTY_IMPLEMENTATION_MAPPING_SUBJECT,
-                                Resource.uriRef("tag:cet.ncsa.uiuc.edu,2009:/mapping/" + CollectionBeanUtil.COLLECTION_TYPE));
-
-                        t.setValue(Dc.TITLE, dirName);
-                        t.addValue(DcTerms.DATE_CREATED, new Date());
-                        t.setValue(Dc.CREATOR, creator);
                     } else {
                         //Should only be one val per Key...
                         addMetadataItem(t, parts.getKey(), part.getBodyAsString(), part.getMediaType(), creator);//Should only be one val per Key...
@@ -478,7 +464,7 @@ public class CollectionsRestService extends ItemServicesImpl {
      * Creation Date, Size, Label, Mimetype, Description(s), Title, Uploaded By,
      * Abstract,
      * Contact(s),Creator(s), Publication Date )
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the collection
      * @return - Biblio Metadata as JSON-LD
@@ -495,7 +481,7 @@ public class CollectionsRestService extends ItemServicesImpl {
     /**
      * Get unique metadata (excluding extracted metadata) for {id} :
      * (Basic/biblio + user-added metadata )
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the collection
      * @return - Metadata as JSON-LD
@@ -505,8 +491,8 @@ public class CollectionsRestService extends ItemServicesImpl {
     @Produces("application/json")
     public Response getCollectionUniqueMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
-        //Note - don't currently have extractors that work on collections so this currently just returns 
-        //the same results as /metadata minus the triples about extractor run start/end times 
+        //Note - don't currently have extractors that work on collections so this currently just returns
+        //the same results as /metadata minus the triples about extractor run start/end times
         return getItemMetadataAsJSON(id, userId, false);
 
     }
@@ -514,7 +500,7 @@ public class CollectionsRestService extends ItemServicesImpl {
     /**
      * Get all metadata for {id} : (Basic/biblio + user-added metadata and
      * extracted metadata)
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the collection
      * @return - Metadata as JSON-LD
@@ -531,14 +517,14 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     /**
      * Get collections(s) that have the specified metadata
-     * 
+     *
      * @param pred
      *            - URL-encoded predicate
      * @param type
      *            - the type of the value (must be "uri" or "literal")
      * @param value
      *            - the URL-encoded value
-     * 
+     *
      * @return - the list of matching collections, with their basic metadata, as
      *         JSON-LD
      */
@@ -551,12 +537,12 @@ public class CollectionsRestService extends ItemServicesImpl {
 
     /**
      * Add metadata to collection.
-     * 
+     *
      * Note: New predicates will be added as viewable user metadata. Some
      * predicates (related to
      * license, rightsHolder, rights, title, uploaded by, identifier, dates,
      * size, label) cannot be changed through this method.
-     * 
+     *
      * @param id
      *            - the URL-encoded ID of the collection
      * @param input
@@ -566,7 +552,7 @@ public class CollectionsRestService extends ItemServicesImpl {
      *            submitted media/mime type:
      *            text/plain (default) : a literal value
      *            text/uri-list : a URI
-     * 
+     *
      * @result - success/failure message
      */
     @POST

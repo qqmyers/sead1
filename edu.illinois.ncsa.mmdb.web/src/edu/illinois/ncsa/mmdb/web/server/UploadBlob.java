@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -95,7 +95,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
  * @author plutchak
- * 
+ *
  */
 public class UploadBlob extends AuthenticatedServlet {
 
@@ -264,7 +264,7 @@ public class UploadBlob extends AuthenticatedServlet {
      * Handle POST request.<br>
      * A post should only be be the initial upload request, i.e., a form with
      * multipart content
-     * 
+     *
      * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
      *      response)
      */
@@ -418,7 +418,7 @@ public class UploadBlob extends AuthenticatedServlet {
                         createdByUser(t, request);
                         t.setValue(Files.LENGTH, bw.getSize());
                         byte[] digest = sha1.digest();
-                        t.addValue(edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl.SHA1_DIGEST, edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl.asHex(digest));
+                        t.addValue(edu.illinois.ncsa.mmdb.web.server.util.BeanFiller.SHA1_DIGEST, edu.illinois.ncsa.mmdb.web.server.util.BeanFiller.asHex(digest));
 
                         if (contentType != null) {
                             // httpclient also gives the content type a "charset"; ignore that.
@@ -515,7 +515,7 @@ public class UploadBlob extends AuthenticatedServlet {
      * "collection", depending on whether the URI identifies a dataset, or a
      * collection. Datasets come first, any collection last. e.g.,:
      * <p>
-     * 
+     *
      * <pre>
      * <ol>
      *   <li class="dataset">http://foo.bar#myKewlDataset</li>
@@ -523,7 +523,7 @@ public class UploadBlob extends AuthenticatedServlet {
      *   <li class="collection">http://foo.bar#collection3</li>
      * </ol>
      * </pre>
-     * 
+     *
      * @param response
      * @param collectionUri
      * @param blobUris
@@ -551,7 +551,7 @@ public class UploadBlob extends AuthenticatedServlet {
 
     /**
      * Convert a vector of values into a Jason array of strings
-     * 
+     *
      * @param name
      *            the name of the array
      * @param v
@@ -586,7 +586,7 @@ public class UploadBlob extends AuthenticatedServlet {
 
     /**
      * Create a JSON string from the state variables.
-     * 
+     *
      * @param req
      * @return a JSON representation of state variables
      */
@@ -624,7 +624,7 @@ public class UploadBlob extends AuthenticatedServlet {
 
     /**
      * Set response to a JSON string with all zero or null values.
-     * 
+     *
      * @param response
      * @throws IOException
      */
@@ -638,7 +638,7 @@ public class UploadBlob extends AuthenticatedServlet {
     /**
      * The GET request is used to check the listener object for file upload
      * stats
-     * 
+     *
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse)
      */
@@ -701,7 +701,7 @@ public class UploadBlob extends AuthenticatedServlet {
 
     /**
      * return the base URL string for this servlet
-     * 
+     *
      * @param req
      *            the HttpServletRequest
      * @return a string form of the base servlet URL
@@ -719,7 +719,7 @@ public class UploadBlob extends AuthenticatedServlet {
 
     /**
      * Return the request port for this servlet
-     * 
+     *
      * @param req
      *            the HttpServletRequest
      * @return the request port with prepended separator; blank for standard
