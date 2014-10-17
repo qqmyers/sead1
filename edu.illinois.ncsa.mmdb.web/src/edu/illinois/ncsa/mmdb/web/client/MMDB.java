@@ -68,7 +68,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -179,7 +178,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     //private Label                      debugLabel;
     private HorizontalPanel            navMenu;
     //private HTML                       adminBbullet;
-    private Hyperlink                  adminLink;
+    private RootPanel                  adminLink;
 
     public static String               _sessionCookieName               = "JSESSIONID";
     public static String               _googleClientId                  = null;
@@ -286,13 +285,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      */
     void initNavMenu() {
 
-        if (RootPanel.get("navMenu") == null) {
-            GWT.log("failed to get rootpanel", null);
-        }
-        RootPanel.get("navMenu").clear();
-        navMenu = new HorizontalPanel();
-        navMenu.addStyleName("navMenu");
-
         RootPanel.get("projectTitle").clear();
 
         HorizontalPanel mainHeader = new HorizontalPanel();
@@ -341,103 +333,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             }
         });
 
-        RootPanel.get("navMenu").add(navMenu);
-
-        /* bullet
-        HTML bullet = new HTML("&bull;");
-        bullet.addStyleName("navMenuText");
-        navMenu.add(bullet);
-        */
-        //datasets
-        Hyperlink listLink = new Hyperlink("Data", "listDatasets");
-        listLink.addStyleName("navMenuLink");
-        navMenu.add(listLink);
-        /*// bullet
-        bullet = new HTML("&bull;");
-        bullet.addStyleName("navMenuText");
-        navMenu.add(bullet);
-        */
-        // collections
-        Hyperlink collectionsLink = new Hyperlink("Collections",
-                "listCollections");
-        collectionsLink.addStyleName("navMenuLink");
-        navMenu.add(collectionsLink);
-        /*// bullet
-        HTML bullet2 = new HTML("&bull;");
-        bullet2.addStyleName("navMenuText");
-        navMenu.add(bullet2);
-        */
-        // tags
-        Hyperlink tagsLink = new Hyperlink("Tags",
-                "tags");
-        tagsLink.addStyleName("navMenuLink");
-        navMenu.add(tagsLink);
-        /*// bullet
-        HTML bullet3 = new HTML("&bull;");
-        bullet3.addStyleName("navMenuText");
-        navMenu.add(bullet3);
-        */
-        // geobrowser
-        final Anchor geobrowseLink = new Anchor("MapView", "/geobrowse");
-        geobrowseLink.addStyleName("navMenuLink");
-        navMenu.add(geobrowseLink);
-        /*// bullet
-        bullet = new HTML("&bull;");
-        bullet.addStyleName("navMenuText");
-        navMenu.add(bullet);
-        */
-        // discovery
-        final Anchor discoveryLink = new Anchor("Published", "/discovery");
-        discoveryLink.addStyleName("navMenuLink");
-        navMenu.add(discoveryLink);
-        /*
-        // map
-        Hyperlink mapLink = new Hyperlink("SimpleMap",
-                "map");
-        mapLink.addStyleName("navMenuLink");
-        navMenu.add(mapLink);
-        // bullet
-        HTML bullet4 = new HTML("&bull;");
-        bullet4.addStyleName("navMenuText");
-        navMenu.add(bullet4);
-        */
-        // dashboard
-        final Anchor dashboardLink = new Anchor("Dashboard", "/dashboard");
-        dashboardLink.addStyleName("navMenuLink");
-        navMenu.add(dashboardLink);
-        // upload link
-        final Hyperlink uploadLink = new Hyperlink("Upload", "upload");
-        uploadLink.addStyleName("navMenuLink");
-        navMenu.add(uploadLink);
-        /*
-        adminBbullet = new HTML("&bull;");
-        adminBbullet.addStyleName("navMenuText");
-        adminBbullet.addStyleName("hidden");
-        navMenu.add(adminBbullet);
-        */
-
-        /*
-         * // bullet
-
-        bullet = new HTML("&bull;");
-        bullet.addStyleName("navMenuText");
-        navMenu.add(bullet);
-        */
-        /*
-        // Home
-        final Hyperlink homeLink = new Hyperlink("MyProfile", "home");
-        homeLink.addStyleName("navMenuLink");
-        navMenu.add(homeLink);
-        // bullet
-        bullet = new HTML("&bull;");
-        bullet.addStyleName("navMenuText");
-        navMenu.add(bullet);
-        */
         // admin link
-        adminLink = new Hyperlink("Administration", "administration");
-        adminLink.addStyleName("navMenuLink");
-        adminLink.addStyleName("hidden");
-        navMenu.add(adminLink);
+        adminLink = RootPanel.get("adminLink");
 
         /*
         // FIXME debug

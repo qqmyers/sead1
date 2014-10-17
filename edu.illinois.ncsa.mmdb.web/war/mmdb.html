@@ -43,6 +43,7 @@
     <!-- hack to create an array in the main window -->
     <script type="text/javascript">function createAnArray(){return [];}</script>
 	
+    <link rel="stylesheet" type="text/css" href="css/zocial.css">
 
 
 
@@ -78,7 +79,7 @@
 
 <div id="header">
 <div><ul id="sead-menu" >
-   <li><img id="nav-logo" src="images/SEAD-small.png" ></img> </li>
+   <li><a id="seadlink" href="http://sead-data.net"><img id="nav-logo" src="images/SEAD-small.png" ></img></a> </li>
    <li ><span>SEAD</span></li>
    <li><a href="http://sead-data.net">Home</a></li>
    <li class="has-submenu"><a  href="http://sead-data.net/about/" 
@@ -128,18 +129,26 @@
     
 </ul></div>
 <div id="project-header">
-     <div id="project-logo"><img src="images/nced.png"></img></div>
+     <div id="project-logo"><img src="images/nced-logo.png"></img>	</div>
      <div id="projectTitle"></div>
-     <div  id="login-img"><div id="loginMenu">
+     <div id="loginMenu">
      <img src="images/login.png"></img>
-     </div></div>
+     </div>
 </div>
-<div class="mainMenu">
-	      <div class="menuElementLeft" id="navMenu"></div>
-	      <div class="searchMenu" id="searchMenu"></div>
-	      <br class="clearBoth" />
-	    </div></li>
+<ul id="mainMenu" class="navMenu">
+   <li><a href="/">About</a></li>
+   <li><a href="#listDatasets">Datasets</a></li>
+   <li><a href="#listCollections">Collections</a></li>
+   <li><a href="#tags">Tags</a></li>
+   <li><a href="/geobrowse">Geobrowser</a></li>
+   <li><a href="/discovery">Published Data</a></li>
+   <li><a href="/dashboard">Dashboard</a></li>
+   <li id="adminLink" display="none"><a href="#administration">Administration</a></li>
+	<li><a href="#upload">Upload</a></li>
 
+   <li id="searchMenu" class="searchMenu"></li>
+        
+</ul>
 <div style="clear:both"></div>
 </div>
 <!--End SEAD-MAIN-MENU HTML-->

@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,17 +32,20 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
+import com.google.api.gwt.oauth2.client.Auth;
+import com.google.api.gwt.oauth2.client.AuthRequest;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -51,9 +54,12 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -64,16 +70,19 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
 
 /**
  * Page to request an account
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class SignupPage extends Composite {
 
@@ -83,11 +92,15 @@ public class SignupPage extends Composite {
     private final Widget        pageTitle;
     private final Widget        signupForm;
     private SimplePanel         feedbackPanel;
+    private SimplePanel         socialFeedbackPanel;
     private TextBox             firstNameBox;
     private TextBox             passwordBox;
     private TextBox             emailBox;
     private TextBox             confirmPasswordBox;
     private TextBox             lastNameBox;
+
+    private final String        socialEmail = null;
+    private final String        socialName  = null;
 
     public SignupPage(DispatchAsync dispatchAsync) {
         this.dispatchAsync = dispatchAsync;
@@ -107,10 +120,50 @@ public class SignupPage extends Composite {
 
     /**
      * Signup form.
-     * 
+     *
      * @return
      */
     private Widget createSignupForm() {
+        FlexTable socialTable = new FlexTable();
+        socialTable.addStyleName("signupForm");
+        Label requestLabel = new Label("To request access to this space using a social account, simply click the appropriate button below. You'll receive email once the project space administrators have reviewed your request.");
+        socialTable.setWidget(0, 0, requestLabel);
+        socialTable.getFlexCellFormatter().setColSpan(0, 0, 2);
+
+        socialFeedbackPanel = new SimplePanel();
+        socialTable.setWidget(1, 0, feedbackPanel);
+
+        socialTable.getFlexCellFormatter().setColSpan(1, 0, 2);
+
+        // Google Oauth2 link
+        Anchor googleLogin = new Anchor("Request Access using Google");
+        googleLogin.setStylePrimaryName("zocial");
+        googleLogin.setStyleName("google", true);
+        googleLogin.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                googleSubmit();
+            }
+        });
+        socialTable.setWidget(2, 0, googleLogin);
+        socialTable.getFlexCellFormatter().setColSpan(2, 0, 2);
+
+        // Orcid Oauth2 link
+        Anchor orcidLogin = new Anchor("Request Access using ORCID");
+        orcidLogin.setStylePrimaryName("zocial");
+        orcidLogin.setStyleName("orcid", true);
+
+        orcidLogin.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("Coming Soon!");
+            }
+        });
+        socialTable.setWidget(3, 0, orcidLogin);
+        socialTable.getFlexCellFormatter().setColSpan(3, 0, 2);
+
+        DisclosurePanel dp = new DisclosurePanel("or Create Local Account");
 
         FlexTable table = new FlexTable();
 
@@ -130,7 +183,7 @@ public class SignupPage extends Composite {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    checkEmailAndSubmit();
+                    checkEmailAndSubmit(LoginPage.LocalProvider);
                 }
 
             }
@@ -159,9 +212,9 @@ public class SignupPage extends Composite {
         table.setWidget(2, 1, lastNameBox);
 
         // email
-        Label emailLabel = new Label("Email:");
+        Label localEmailLabel = new Label("Email:");
 
-        table.setWidget(3, 0, emailLabel);
+        table.setWidget(3, 0, localEmailLabel);
 
         emailBox = new TextBox();
 
@@ -192,11 +245,11 @@ public class SignupPage extends Composite {
         table.setWidget(5, 1, confirmPasswordBox);
 
         // submit button
-        Button submitButton = new Button("Sign up", new ClickHandler() {
+        Button submitButton = new Button("Request Access", new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                checkEmailAndSubmit();
+                checkEmailAndSubmit(LoginPage.LocalProvider);
             }
         });
 
@@ -209,13 +262,20 @@ public class SignupPage extends Composite {
                 firstNameBox.setFocus(true);
             }
         });
+        dp.setContent(table);
+        socialTable.setWidget(4, 0, dp);
+        socialTable.getFlexCellFormatter().setColSpan(4, 0, 2);
 
-        return table;
+        return socialTable;
     }
 
-    protected void checkEmailAndSubmit() {
+    protected void checkEmailAndSubmit(final String provider) {
         GetUser getUser = new GetUser();
-        getUser.setEmailAddress(emailBox.getValue());
+        if (provider.equals(LoginPage.LocalProvider)) {
+            getUser.setEmailAddress(emailBox.getValue());
+        } else {
+            getUser.setEmailAddress(socialEmail);
+        }
         dispatchAsync.execute(getUser,
                 new AsyncCallback<GetUserResult>() {
 
@@ -233,7 +293,11 @@ public class SignupPage extends Composite {
                             showFeedbackMessage("The email address you have specified is already in the system. " +
                                     "Please chose a different email address.");
                         } else {
-                            submit();
+                            if (provider.equals(LoginPage.LocalProvider)) {
+                                submit();
+                            } else {
+                                //Check provider - verify that user
+                            }
                         }
 
                     }
@@ -263,9 +327,8 @@ public class SignupPage extends Composite {
 
                     mainPanel.remove(signupForm);
                     final HTML thankyouText = new HTML(
-                            "Thank you for signing up. "
-                                    + "An administrator will review your submission and notify you when your account has been approved.<br>"
-                                    + "Until your account has been approved you will be unable to log into the system.");
+                            "Your request has been received! "
+                                    + "A project space administrator will review your submission and notify you when your request has been approved.");
                     thankyouText.addStyleName("loginForm");
                     mainPanel.add(thankyouText);
                 }
@@ -273,11 +336,61 @@ public class SignupPage extends Composite {
         }
     }
 
+    private void googleSubmit() {
+        AuthRequest req = new AuthRequest(LoginPage.AUTH_URL, MMDB._googleClientId).withScopes(LoginPage.EMAIL_SCOPE, LoginPage.PROFILE_SCOPE);
+        Auth AUTH = Auth.get();
+        AUTH.clearAllTokens();
+        AUTH.login(req, new Callback<String, Throwable>() {
+            @Override
+            public void onSuccess(final String token) {
+                GWT.log("Successful auth with Google OAuth2 during signup" + token);
+                googleRequestAccess(token);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                //feedback
+                showFeedbackMessage("Unable to authenticate with Google.");
+
+            }
+        });
+    }
+
+    private void googleRequestAccess(String token) {
+        dispatchAsync.execute(new GoogleUserInfo(token, true), new AsyncCallback<GoogleUserInfoResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                showFeedbackMessage("Unable to make access request. Please contact SEAD.");
+
+            }
+
+            @Override
+            public void onSuccess(final GoogleUserInfoResult result) {
+                if (result.isCreated()) {
+                    GWT.log("Created new user " + result.getUserName() + " " + result.getEmail());
+                    mainPanel.remove(signupForm);
+                    final HTML thankyouText = new HTML(
+                            "Your request has been received! "
+                                    + "A project space administrator will review your submission and notify you when your request has been approved.");
+                    thankyouText.addStyleName("loginForm");
+                    mainPanel.add(thankyouText);
+
+                } else {
+                    GWT.log("User already exists: " + result.getUserName() + " " + result.getEmail());
+                    showFeedbackMessage("The email address you have specified is already in the system. " +
+                            "Please use a different email address.");
+
+                }
+            }
+        });
+    }
+
     /**
      * Check validity of fields.
-     * 
+     *
      * @return
-     * 
+     *
      *         TODO stronger checks
      */
     private boolean checkForm() {
@@ -307,7 +420,7 @@ public class SignupPage extends Composite {
 
     /**
      * Check password strength.
-     * 
+     *
      * @return
      */
     private boolean checkStrengthPassword() {
@@ -324,7 +437,7 @@ public class SignupPage extends Composite {
 
     /**
      * Create page title
-     * 
+     *
      * @return title widget
      */
     private Widget createPageTitle() {

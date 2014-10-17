@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
@@ -77,10 +77,10 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Retrieve Google user info.
- * 
+ *
  * @author Luigi Marini
  * @author myersjd@umich.edu
- * 
+ *
  */
 public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, GoogleUserInfoResult> {
 
@@ -109,7 +109,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
             JSONObject tokenInfo = MediciProxy.getValidatedGoogleToken(client_ids, action.getToken());
             if (tokenInfo != null) {
                 int ttl = tokenInfo.getInt("expires_in");
-                int exp = (int) (ttl + (int) (System.currentTimeMillis() / 1000L));
+                int exp = ttl + (int) (System.currentTimeMillis() / 1000L);
 
                 //Now get user info, which validates the token in the process
                 GoogleCredential credential = new GoogleCredential().setAccessToken(action.getToken());
@@ -122,9 +122,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
                 log.debug(personInfo.toString());
                 boolean verified = personInfo.getBoolean("email_verified");
                 if (verified) {
-                    boolean created = checkUsersExists(personInfo.getString("name"), personInfo.getString("email"));
-                    // register user with session
-                    //            session.get().setAttribute(AuthenticatedServlet.AUTHENTICATED_AS, userInfo.getEmail());
+                    boolean created = checkUsersExists(personInfo.getString("name"), personInfo.getString("email"), action.isAccessRequest());
                     return new GoogleUserInfoResult(created, personInfo.getString("name"), personInfo.getString("email"), exp);
                 }
             }
@@ -151,7 +149,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
         // TODO Auto-generated method stub
     }
 
-    private boolean checkUsersExists(String name, String email) {
+    private boolean checkUsersExists(String name, String email, boolean accessRequest) {
         log.debug("Checking if user exists " + email);
 
         Context context = TupeloStore.getInstance().getContext();
@@ -171,11 +169,15 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
                 return false;
             } else if (uris.size() == 0) {
                 log.debug("User not in the system " + email);
-                PersonBean pb = createUser(email, name);
-                TupeloStore.getInstance().getBeanSession().save(pb);
-                Mail.userAdded(pb);
-                log.debug("User created " + pb.getUri());
-                return true;
+                if (accessRequest) {
+                    PersonBean pb = createUser(email, name);
+                    TupeloStore.getInstance().getBeanSession().save(pb);
+                    Mail.userAdded(pb);
+                    log.debug("User created " + pb.getUri());
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
                 log.error("Query returned too many users with email " + email);
                 return false;

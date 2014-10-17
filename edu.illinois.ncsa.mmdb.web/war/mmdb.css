@@ -124,7 +124,7 @@ table td, select {
  * ---------------------------------------------------------------------- */
 
 a, a:link, a:hover,a:visited, a:active{
-   color:#1111CC;
+   
    text-decoration:none;
 }
 
@@ -180,7 +180,7 @@ a:hover {
 }
 
 #loginMenu {
-	width: 200px;
+
 	background-color: #F0F0F0;
 }
 
@@ -249,7 +249,7 @@ width:1000px;
 
 .searchMenu {
 	position: relative;
-	float: right;
+	float: right; !important
 	padding: 5px;
 }
 
@@ -793,12 +793,19 @@ width:1000px;
 }
 
 .loginForm {
-	margin: 20px auto 100px auto;
+	margin: 20px auto 10px auto;
+	text-align: justify;
 }
 
 .loginError {
 	padding: 5px;
 	background: #FFFCCA;
+}
+
+.signupForm {
+	margin: auto;
+	width: 400px;
+	text-align: justify;
 }
 
 .titlePanel {

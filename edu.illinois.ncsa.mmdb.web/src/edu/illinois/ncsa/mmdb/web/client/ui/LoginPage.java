@@ -69,8 +69,6 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
@@ -102,11 +100,15 @@ public class LoginPage extends Composite {
     private CheckBox             autoBox;
 
     // Google Oauth2
-    private static final String  AUTH_URL      = "https://accounts.google.com/o/oauth2/auth";
-    private static final String  EMAIL_SCOPE   = "email";
-    private static final String  PROFILE_SCOPE = "profile";
+    static final String          AUTH_URL       = "https://accounts.google.com/o/oauth2/auth";
+    static final String          EMAIL_SCOPE    = "email";
+    static final String          PROFILE_SCOPE  = "profile";
 
-    private static boolean       autologin     = true;
+    public static final String   GoogleProvider = "google";
+    public static final String   OrcidProvider  = "orcid";
+    public static final String   LocalProvider  = "local";
+
+    private static boolean       autologin      = true;
 
     public static void setMainWindow(MMDB mWindow) {
         mainWindow = mWindow;
@@ -163,82 +165,10 @@ public class LoginPage extends Composite {
 
         table.getFlexCellFormatter().setColSpan(0, 0, 2);
 
-        table.getFlexCellFormatter().setHorizontalAlignment(0, 0,
-                HasHorizontalAlignment.ALIGN_CENTER);
-
-        Label usernameLabel = new Label("Email:");
-
-        table.setWidget(1, 0, usernameLabel);
-
-        usernameBox = new TextBox();
-        usernameBox.getElement().setAttribute("autocapitalize", "none");
-        usernameBox.getElement().setAttribute("autocorrect", "off");
-        usernameBox.setTabIndex(1);
-        usernameBox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    authenticate();
-                }
-            }
-        });
-
-        table.setWidget(1, 1, usernameBox);
-
-        DeferredCommand.addCommand(new Command() {
-            @Override
-            public void execute() {
-                usernameBox.setFocus(true);
-            }
-        });
-
-        // sign up
-        table.setWidget(1, 3, new Hyperlink("Sign up", "signup"));
-
-        Label passwordLabel = new Label("Password:");
-
-        table.setWidget(2, 0, passwordLabel);
-
-        passwordBox = new PasswordTextBox();
-
-        passwordBox.setTabIndex(2);
-
-        passwordBox.addKeyUpHandler(new KeyUpHandler() {
-
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    authenticate();
-                }
-
-            }
-        });
-
-        table.setWidget(2, 1, passwordBox);
-
-        // forgot password link
-        table.setWidget(2, 3, new Hyperlink("Forgot Password?", "requestNewPassword"));
-
-        Button submitButton = new Button("Login", new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                progressLabel.setText("Logging in...");
-                authenticate();
-            }
-        });
-
-        submitButton.setTabIndex(3);
-
-        table.setWidget(3, 1, submitButton);
-
-        progressLabel = new Label("");
-        table.setWidget(4, 0, progressLabel);
-        table.getFlexCellFormatter().setColSpan(4, 0, 2);
-        table.getFlexCellFormatter().setHorizontalAlignment(4, 0, HasAlignment.ALIGN_CENTER);
-
         // Google Oauth2 link
-        Anchor googleLogin = new Anchor("Login using Google credentials");
+        Anchor googleLogin = new Anchor("Sign in with Google");
+        googleLogin.setStylePrimaryName("zocial");
+        googleLogin.setStyleName("google", true);
         googleLogin.addClickHandler(new ClickHandler() {
 
             @Override
@@ -258,14 +188,110 @@ public class LoginPage extends Composite {
                 }, false);
             }
         });
+        googleLogin.setTabIndex(1);
+        table.setWidget(1, 0, googleLogin);
+        table.getFlexCellFormatter().setColSpan(1, 0, 2);
 
-        table.setWidget(5, 0, googleLogin);
-        table.getFlexCellFormatter().setColSpan(5, 0, 2);
-        table.getFlexCellFormatter().setHorizontalAlignment(5, 0, HasAlignment.ALIGN_CENTER);
+        // Orcid Oauth2 link
+        Anchor orcidLogin = new Anchor("Sign in with ORCID");
+        orcidLogin.setStylePrimaryName("zocial");
+        orcidLogin.setStyleName("orcid", true);
 
-        autoBox = new CheckBox();
-        autoBox.setValue(autologin);
-        table.setWidget(6, 0, autoBox);
+        orcidLogin.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("Coming soon!");
+                /*
+                autologin = autoBox.getValue();
+
+                oauth2Login(new AuthenticationCallback() {
+                    @Override
+                    public void onFailure() {
+                        fail();
+                    }
+
+                    @Override
+                    public void onSuccess(String userUri, String sessionKey) {
+                        GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
+                    }
+                }, false);
+                */
+            }
+        });
+        orcidLogin.setTabIndex(2);
+        table.setWidget(2, 0, orcidLogin);
+        table.getFlexCellFormatter().setColSpan(2, 0, 2);
+
+        Label usernameLabel = new Label("Email:");
+
+        table.setWidget(3, 0, usernameLabel);
+
+        usernameBox = new TextBox();
+        usernameBox.getElement().setAttribute("autocapitalize", "none");
+        usernameBox.getElement().setAttribute("autocorrect", "off");
+        usernameBox.setTabIndex(3);
+        usernameBox.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    authenticate();
+                }
+            }
+        });
+
+        table.setWidget(3, 1, usernameBox);
+
+        DeferredCommand.addCommand(new Command() {
+            @Override
+            public void execute() {
+                usernameBox.setFocus(true);
+            }
+        });
+
+        // sign up
+        table.setWidget(3, 3, new Hyperlink("Sign up", "signup"));
+
+        Label passwordLabel = new Label("Password:");
+
+        table.setWidget(4, 0, passwordLabel);
+
+        passwordBox = new PasswordTextBox();
+
+        passwordBox.setTabIndex(4);
+
+        passwordBox.addKeyUpHandler(new KeyUpHandler() {
+
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    authenticate();
+                }
+
+            }
+        });
+
+        table.setWidget(4, 1, passwordBox);
+
+        // forgot password link
+        table.setWidget(4, 3, new Hyperlink("Forgot Password?", "requestNewPassword"));
+
+        Button submitButton = new Button("Login", new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                progressLabel.setText("Logging in...");
+                authenticate();
+            }
+        });
+
+        submitButton.setTabIndex(5);
+
+        table.setWidget(5, 1, submitButton);
+
+        progressLabel = new Label("");
+        table.setWidget(6, 0, progressLabel);
+        table.getFlexCellFormatter().setColSpan(6, 0, 2);
 
         return table;
     }
@@ -390,7 +416,7 @@ public class LoginPage extends Composite {
                         } else {
                             GWT.log("User " + result.getEmail() + " associated with session key " + sessionKey, null);
                             // login local
-                            MMDB.getSessionState().setLoginProvider("google");
+                            MMDB.getSessionState().setLoginProvider(LoginPage.GoogleProvider);
                             mainWindow.retrieveUserInfoByName(result.getEmail(), sessionKey, callback);
                         }
                         //Set timer to renew credentials
