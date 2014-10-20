@@ -793,6 +793,7 @@ width:1000px;
 }
 
 .loginForm {
+	width: 400px;
 	margin: 20px auto 10px auto;
 	text-align: justify;
 }
@@ -1682,3 +1683,11 @@ padding-left: 20px;
 padding: 0px;
 	margin: 0px auto 0px auto;
 }
+
+/* SEAD Modification - to counter gwt defaults */
+a.zocial.google, 
+a.zocial.google:visited, 
+a.zocial.google:hover {
+  color: #FFFFFF;
+}
+

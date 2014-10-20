@@ -65,10 +65,11 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
@@ -97,7 +98,6 @@ public class LoginPage extends Composite {
     private Label                progressLabel;
     private static DispatchAsync dispatchasync;
     private static MMDB          mainWindow;
-    private CheckBox             autoBox;
 
     // Google Oauth2
     static final String          AUTH_URL       = "https://accounts.google.com/o/oauth2/auth";
@@ -155,15 +155,19 @@ public class LoginPage extends Composite {
      * @return
      */
     private Widget createLoginForm() {
-        FlexTable table = new FlexTable();
+        FlexTable socialTable = new FlexTable();
 
-        table.addStyleName("loginForm");
+        socialTable.addStyleName("loginForm");
+
+        HTML requestLabel = new HTML("If you're a member of this project space, simply sign in below. If not, you can <a href=\"#signup\">Request Access here</a>.");
+        socialTable.setWidget(0, 0, requestLabel);
+        socialTable.getFlexCellFormatter().setColSpan(0, 0, 2);
 
         feedbackPanel = new SimplePanel();
 
-        table.setWidget(0, 0, feedbackPanel);
+        socialTable.setWidget(1, 0, feedbackPanel);
 
-        table.getFlexCellFormatter().setColSpan(0, 0, 2);
+        socialTable.getFlexCellFormatter().setColSpan(1, 0, 2);
 
         // Google Oauth2 link
         Anchor googleLogin = new Anchor("Sign in with Google");
@@ -173,8 +177,6 @@ public class LoginPage extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                autologin = autoBox.getValue();
-
                 oauth2Login(new AuthenticationCallback() {
                     @Override
                     public void onFailure() {
@@ -189,8 +191,8 @@ public class LoginPage extends Composite {
             }
         });
         googleLogin.setTabIndex(1);
-        table.setWidget(1, 0, googleLogin);
-        table.getFlexCellFormatter().setColSpan(1, 0, 2);
+        socialTable.setWidget(2, 0, googleLogin);
+        socialTable.getFlexCellFormatter().setColSpan(2, 0, 2);
 
         // Orcid Oauth2 link
         Anchor orcidLogin = new Anchor("Sign in with ORCID");
@@ -220,12 +222,18 @@ public class LoginPage extends Composite {
             }
         });
         orcidLogin.setTabIndex(2);
-        table.setWidget(2, 0, orcidLogin);
-        table.getFlexCellFormatter().setColSpan(2, 0, 2);
+        socialTable.setWidget(3, 0, orcidLogin);
+        socialTable.getFlexCellFormatter().setColSpan(3, 0, 2);
+
+        DisclosurePanel dp = new DisclosurePanel("or Login with your Local Account");
+
+        FlexTable table = new FlexTable();
+
+        table.addStyleName("loginForm");
 
         Label usernameLabel = new Label("Email:");
 
-        table.setWidget(3, 0, usernameLabel);
+        table.setWidget(0, 0, usernameLabel);
 
         usernameBox = new TextBox();
         usernameBox.getElement().setAttribute("autocapitalize", "none");
@@ -240,7 +248,7 @@ public class LoginPage extends Composite {
             }
         });
 
-        table.setWidget(3, 1, usernameBox);
+        table.setWidget(0, 1, usernameBox);
 
         DeferredCommand.addCommand(new Command() {
             @Override
@@ -249,12 +257,9 @@ public class LoginPage extends Composite {
             }
         });
 
-        // sign up
-        table.setWidget(3, 3, new Hyperlink("Sign up", "signup"));
-
         Label passwordLabel = new Label("Password:");
 
-        table.setWidget(4, 0, passwordLabel);
+        table.setWidget(1, 0, passwordLabel);
 
         passwordBox = new PasswordTextBox();
 
@@ -271,10 +276,10 @@ public class LoginPage extends Composite {
             }
         });
 
-        table.setWidget(4, 1, passwordBox);
+        table.setWidget(1, 1, passwordBox);
 
         // forgot password link
-        table.setWidget(4, 3, new Hyperlink("Forgot Password?", "requestNewPassword"));
+        table.setWidget(1, 3, new Hyperlink("Forgot Password?", "requestNewPassword"));
 
         Button submitButton = new Button("Login", new ClickHandler() {
 
@@ -287,13 +292,16 @@ public class LoginPage extends Composite {
 
         submitButton.setTabIndex(5);
 
-        table.setWidget(5, 1, submitButton);
+        table.setWidget(2, 1, submitButton);
 
         progressLabel = new Label("");
-        table.setWidget(6, 0, progressLabel);
-        table.getFlexCellFormatter().setColSpan(6, 0, 2);
+        table.setWidget(3, 0, progressLabel);
+        table.getFlexCellFormatter().setColSpan(3, 0, 2);
+        dp.setContent(table);
+        socialTable.setWidget(4, 0, dp);
+        socialTable.getFlexCellFormatter().setColSpan(4, 0, 2);
 
-        return table;
+        return socialTable;
     }
 
     public static native void checkForOauth2Token(TokenCallback tCallback) /*-{
@@ -421,7 +429,7 @@ public class LoginPage extends Composite {
                         }
                         //Set timer to renew credentials
                         //Window.alert("Expires at:" + result.getExpirationTime());
-                        setAutologin(true);
+                        // setAutologin(true);
                     }
                 });
 
@@ -651,7 +659,7 @@ public class LoginPage extends Composite {
         state.setLoginProvider(null);
 
         state.setAnonymous(false); // not logged in as anonymous, or anyone
-        setAutologin(true);
+        //setAutologin(true);
         MMDB.loginStatusWidget.loggedOut();
         /* Remove session cookie - clearBrowserCreds has caused the server to invalidate it
          * so this isn't strictly necessary

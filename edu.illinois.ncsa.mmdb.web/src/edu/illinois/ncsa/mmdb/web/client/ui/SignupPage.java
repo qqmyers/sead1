@@ -2,7 +2,7 @@
  * University of Illinois/NCSA
  * Open Source License
  *
- * Copyright (c) 2010, NCSA.  All rights reserved.
+ * Copyright (c) 2010, NCSA, 2014 U. Michigan.  All rights reserved.
  *
  * Developed by:
  * Cyberenvironments and Technologies (CET)
@@ -63,7 +63,6 @@ import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -130,7 +129,7 @@ public class SignupPage extends Composite {
         socialTable.setWidget(0, 0, requestLabel);
         socialTable.getFlexCellFormatter().setColSpan(0, 0, 2);
 
-        socialFeedbackPanel = new SimplePanel();
+        feedbackPanel = new SimplePanel();
         socialTable.setWidget(1, 0, feedbackPanel);
 
         socialTable.getFlexCellFormatter().setColSpan(1, 0, 2);
@@ -169,15 +168,6 @@ public class SignupPage extends Composite {
 
         table.addStyleName("loginForm");
 
-        feedbackPanel = new SimplePanel();
-
-        table.setWidget(0, 0, feedbackPanel);
-
-        table.getFlexCellFormatter().setColSpan(0, 0, 2);
-
-        table.getFlexCellFormatter().setHorizontalAlignment(0, 0,
-                HasHorizontalAlignment.ALIGN_CENTER);
-
         KeyUpHandler submitOnEnterHandler = new KeyUpHandler() {
 
             @Override
@@ -192,57 +182,57 @@ public class SignupPage extends Composite {
         // first name
         Label firstNameLabel = new Label("First name:");
 
-        table.setWidget(1, 0, firstNameLabel);
+        table.setWidget(0, 0, firstNameLabel);
 
         firstNameBox = new TextBox();
 
         firstNameBox.addKeyUpHandler(submitOnEnterHandler);
 
-        table.setWidget(1, 1, firstNameBox);
+        table.setWidget(0, 1, firstNameBox);
 
         // last name
         Label lastNameLabel = new Label("Last name:");
 
-        table.setWidget(2, 0, lastNameLabel);
+        table.setWidget(1, 0, lastNameLabel);
 
         lastNameBox = new TextBox();
 
         lastNameBox.addKeyUpHandler(submitOnEnterHandler);
 
-        table.setWidget(2, 1, lastNameBox);
+        table.setWidget(1, 1, lastNameBox);
 
         // email
         Label localEmailLabel = new Label("Email:");
 
-        table.setWidget(3, 0, localEmailLabel);
+        table.setWidget(2, 0, localEmailLabel);
 
         emailBox = new TextBox();
 
         emailBox.addKeyUpHandler(submitOnEnterHandler);
 
-        table.setWidget(3, 1, emailBox);
+        table.setWidget(2, 1, emailBox);
 
         // password
         Label passwordLabel = new Label("Password:");
 
-        table.setWidget(4, 0, passwordLabel);
+        table.setWidget(3, 0, passwordLabel);
 
         passwordBox = new PasswordTextBox();
 
         passwordBox.addKeyUpHandler(submitOnEnterHandler);
 
-        table.setWidget(4, 1, passwordBox);
+        table.setWidget(3, 1, passwordBox);
 
         // confirm password
         Label confirmPasswordLabel = new Label("Confirm password:");
 
-        table.setWidget(5, 0, confirmPasswordLabel);
+        table.setWidget(4, 0, confirmPasswordLabel);
 
         confirmPasswordBox = new PasswordTextBox();
 
         confirmPasswordBox.addKeyUpHandler(submitOnEnterHandler);
 
-        table.setWidget(5, 1, confirmPasswordBox);
+        table.setWidget(4, 1, confirmPasswordBox);
 
         // submit button
         Button submitButton = new Button("Request Access", new ClickHandler() {
@@ -253,7 +243,7 @@ public class SignupPage extends Composite {
             }
         });
 
-        table.setWidget(6, 1, submitButton);
+        table.setWidget(5, 1, submitButton);
 
         // set focus
         DeferredCommand.addCommand(new Command() {

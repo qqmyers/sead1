@@ -481,6 +481,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             */
             credChangeOccuring = true;
             if (LoginPage.getAutologin()) {
+                //Try to pick up existing credential silently
                 LoginPage.oauth2Login(new AuthenticationCallback() {
                     @Override
                     public void onFailure() {
@@ -489,6 +490,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                     @Override
                     public void onSuccess(String userUri, String sessionKey) {
+                        GWT.log(userUri + " logged in");
                     }
                 }, true);
 
@@ -609,7 +611,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 if (result.isAnonymous()) {
                     MMDB.loginStatusWidget.loggedOut();
                     getSessionState().setAnonymous(true);
-                    LoginPage.setAutologin(false);
+                    //LoginPage.setAutologin(false);
                     GWT.log("Current user is anonymous");
                 } else {
                     MMDB.loginStatusWidget.loggedIn(personBean.getName());
@@ -654,7 +656,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             shosTagsPage();
         } else if (token.startsWith("tag")) {
             showTagPage();
-        } else if (token.startsWith("listCollections") && !previousHistoryToken.startsWith("listCollections")) {
+        } else if (token.startsWith("listCollections") /*&& !previousHistoryToken.startsWith("listCollections")*/) {
             listCollections();
         } else if (token.startsWith("listCollections")) {
             // skip default case!
@@ -683,11 +685,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         }
         else if (token.startsWith("login")) {
             //just logged in
-            showListDatasetsPage();
-            token = "listDatasets";
-            History.newItem("listDatasets", false);
-
-        } else if (!previousHistoryToken.startsWith("listDatasets")) {
+            if (!MMDB.getSessionState().isAnonymous()) {
+                showListDatasetsPage();
+                token = "listDatasets";
+                History.newItem("listDatasets", false);
+            } else {
+                showLoginPage();
+            }
+        } else /*if (!previousHistoryToken.startsWith("listDatasets")) */{
             //Default page
             showListDatasetsPage();
         }
@@ -820,7 +825,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private void showLoginPage(boolean interrupted) {
         ///adminBbullet.addStyleName("hidden");
         adminLink.addStyleName("hidden");
-        LoginPage.setAutologin(true);
+        //LoginPage.setAutologin(true);
         loginStatusWidget.loggedOut();
         mainContainer.clear();
         LoginPage lp = new LoginPage();
