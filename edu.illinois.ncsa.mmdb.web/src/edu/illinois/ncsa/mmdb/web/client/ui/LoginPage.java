@@ -2,7 +2,7 @@
  * University of Illinois/NCSA
  * Open Source License
  *
- * Copyright (c) 2010, NCSA, 2013 U. Michigan.  All rights reserved.
+ * Copyright (c) 2010, NCSA, 2013, 2014 U. Michigan.  All rights reserved.
  *
  * Developed by:
  * Cyberenvironments and Technologies (CET)
@@ -58,6 +58,7 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DeferredCommand;
@@ -203,7 +204,7 @@ public class LoginPage extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                Window.alert("Coming soon!");
+                 orcidAuthLogin();
                 /*
                 autologin = autoBox.getValue();
 
@@ -303,13 +304,32 @@ public class LoginPage extends Composite {
 
         return socialTable;
     }
+    
+        /**
+     * Login using Orcid oAuth2.
+     */
+    private void orcidAuthLogin() {
 
-    public static native void checkForOauth2Token(TokenCallback tCallback) /*-{
+                
+                String redirect_uri = GWT.getModuleBaseURL() + "oauth2callback/orcid";
+                String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
+                StringBuilder sb = new StringBuilder();
+                sb.append("client_id=" + MMDB._orcidClientId + "&");
+                sb.append("scope=" + URL.encodeQueryString("/authenticate") + "&");
+                sb.append("response_type=" + "code&");
+                sb.append("redirect_uri=" + URL.encodeQueryString(redirect_uri) + "&");
+                sb.append("state=" + "magic-bean");
+                String url = orcidAuthorizeURL + "?" + sb.toString();
+                Window.Location.assign(url);
+    }
+    
+
+    public static native void checkForOauth2Token(String googleClientId, TokenCallback tCallback) /*-{
         
 		$wnd.gapi.auth
 				.authorize(
 						{
-							client_id : "972225704837.apps.googleusercontent.com",
+							client_id : googleClientId,
 							scope : 'email profile',
 							access_type : 'online',
 							immediate : 'true',
@@ -331,7 +351,7 @@ public class LoginPage extends Composite {
     public static void oauth2Login(final AuthenticationCallback callback, final boolean silent) {
         //CheckForToken will try a silent login if the preferred user is known
         if (autologin) {
-            checkForOauth2Token(new TokenCallback() {
+            checkForOauth2Token(MMDB._googleClientId, new TokenCallback() {
                 @Override
                 public void onFailure() {
                     //No token available

@@ -182,6 +182,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     public static String               _sessionCookieName               = "JSESSIONID";
     public static String               _googleClientId                  = null;
+    public static String               _orcidClientId                  = null;
 
     public static String               _projectName                     = "SEAD ACR";
     public static boolean              bigData                          = false;                              //Server's bigData flag
@@ -275,6 +276,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             }
         } catch (Exception e) {
             Window.alert("Initialization error: " + e.getMessage());
+            reportUmbrellaError(e);
             GWT.log("initialization error", e);
         }
 
@@ -300,7 +302,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         LoginPage.setMainWindow(this);
 
-        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData, ConfigurationKey.UseGoogleDocViewer, ConfigurationKey.PresentationSortOrder, ConfigurationKey.PresentationPageViewType), new AsyncCallback<ConfigurationResult>() {
+        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData, ConfigurationKey.UseGoogleDocViewer, ConfigurationKey.PresentationSortOrder, ConfigurationKey.PresentationPageViewType, ConfigurationKey.OrcidClientId), new AsyncCallback<ConfigurationResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Could not get Names", caught);
@@ -310,6 +312,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             public void onSuccess(ConfigurationResult result) {
                 bigData = result.getConfiguration(ConfigurationKey.BigData).equalsIgnoreCase("true");
                 _projectName = result.getConfiguration(ConfigurationKey.ProjectName);
+                _orcidClientId = result.getConfiguration(ConfigurationKey.OrcidClientId);
                 projectNameLabel.setText(_projectName);
                 projectNameLabel.setTitle(result.getConfiguration(ConfigurationKey.ProjectDescription));
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));

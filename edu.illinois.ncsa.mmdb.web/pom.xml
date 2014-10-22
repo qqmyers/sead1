@@ -120,23 +120,17 @@
 		<dependency>
 			<groupId>edu.illinois.ncsa.cet</groupId>
 			<artifactId>cet-bean</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>compile</scope>
+			<version>1.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.illinois.ncsa.cet</groupId>
 			<artifactId>cet-bean-tupelo</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>compile</scope>
+			<version>1.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.illinois.ncsa.cet</groupId>
 			<artifactId>cet-search</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>compile</scope>
+			<version>1.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.tupeloproject</groupId>
