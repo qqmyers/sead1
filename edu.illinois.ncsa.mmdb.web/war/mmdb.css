@@ -5,7 +5,7 @@ html {
 body {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 0.9em;
-	margin: 8px 0px;
+	margin: 0px;
 	padding: 0px;
 	text-align: center;
 	background-color: white;
@@ -35,6 +35,21 @@ table td, select {
 
 .gwt-Button {
 	font-size: 0.9em;
+	margin-left: 5px;
+	padding: 3px 10px;
+	text-decoration: none;
+	font-size: small;
+	cursor: pointer;
+	cursor: hand;
+	color:#fff;
+	background: none;
+	border: 0px outset #ccc;
+	background-color:#f3822a;
+}
+
+.gwt-button:hover, .gwt-button:focus{
+	background-color:#444;
+	color:#fff; 
 }
 
 /* ----------------------------------------------------------------------
@@ -125,6 +140,7 @@ table td, select {
 
 a, a:link, a:hover,a:visited, a:active{
    
+   color:#0b5ca3;
    text-decoration:none;
 }
 
@@ -312,19 +328,19 @@ width:1000px;
 	
 .imageThumbnail {
 	position:relative;
-	height:100px;
+	height:200px;
 	border: none;
 	}
 
 .imageThumbnailBordered {
 	position:relative;
-	height:100px;
+	height:200px;
 	border: 1px solid #A8A8A8;
 	}
 	
 .thumbnail {
 	position: relative;
-	width: 130px;
+	width: 200px;
 	display: block;
 	cursor: pointer; 
 	cursor: hand;
@@ -596,6 +612,13 @@ width:1000px;
 
 .smallText {
     font-size: 0.9em;
+}
+
+
+.smallerItalicText {
+	font-size: 0.8em;
+	font-style: italic;
+	margin-left:8px;
 }
 
 .tooltip {
@@ -903,7 +926,9 @@ width:1000px;
 	position: relative;
 	float: right;
 }
-
+div.gwt-Label.smallerItalicText.alignRight{
+	margin-right:8px;
+}
 .datasetSocialPanel {
 	width: 100px;
 }
@@ -1269,6 +1294,10 @@ width:1000px;
 	zoom: 1;
 	display:inline;
 	*display:inline;	
+	float:left;
+	padding-left:8px;
+	height:30px;
+	margin-top:3px;	
 }
 
 .tagCount {
@@ -1313,23 +1342,35 @@ width:1000px;
 }
 
 .batchOperationCount {
-	color: gray;
+	color: #444;
 	font-size: 0.9em;
 	margin: 5px;
 	display: inline-block;
 	*display: inline;
 	zoom: 1;
+	line-height:0px;
+	padding-bottom:5px;
+}
+#rssIcon{
+	margin-top:3px;
 }
 
 .batchOperationMenu {
 	display: inline-block;
 	*display: inline;
 	zoom: 1;
+	background:none;
+	border:0px;
+	background-color:#f3822a;
+}
+.batchOperationMenu:hover{
+        background:#444;
+
 }
 
 .gwt-MenuBar-horizontal .gwt-MenuItem {
 	font-weight: normal;
-	color: #000;
+	color: #fff;
 }
 
 .progressBar {
@@ -1343,26 +1384,49 @@ width:1000px;
 }
 
 .titlePanelRightElement {
-	margin-right: 60px
+	margin-right: 20px;
 }
 
 .gwt-MenuBar .gwt-MenuItem-selected {
-	background: #dddddd;
+	background: #f3822a;
 		z-index: 3;
+	color:#fff;
 }
-
+.batchOperationMenu .gwt-MenuItem {
+	background: transparent;
+}
+.batchOperationMenu .gwt-MenuItem:after {
+	content: ' ▾';
+}
+.gwt-MenuItem-selected {
+	background: #444;
+}
+.gwt-MenuItem-selected{
+        background:#444;
+}
+.batchOperationMenu .gwt-MenuItem:hover{
+	background:#444;
+}
 .gwt-MenuBar-vertical .subMenuIcon-selected {
-  background: #dddddd;
+        background: #f3822a;
+	color:#fff;
   	z-index: 3;
 }
 
 .gwt-MenuBar-horizontal .subMenuIcon-selected {
-  background: #dddddd;
+  	background: #444;
   	z-index: 3;
 }
 
+
+.gwt-MenuBarPopup {
+	margin: 1px 0px 0px -1px;
+	text-align: left;
+}
+
+
 .dynamicTable {
-    width: 900px;
+    width: 940px;
     margin: 10px auto;
 }
 
@@ -1424,17 +1488,18 @@ width:1000px;
 }
 
 .dynamicGrid {
-	width: 900px;
+	width: 940px;
 	vertical-align: top;
-	margin: 20px auto 20px auto;
+	margin: 15px auto 10px auto;
 	padding: 0px;
 	border-spacing:0px;
 	border-collapse: collapse;	
 }
 
 .dynamicGridElement {
-	border: 1px solid #CCC;
-	margin: 10px;
+	/*border: 1px solid #CCC;*/
+	margin: 5px 5px 10px 5px;
+	border: 1px solid #ddd;
 }
 
 .dynamicGridSelected {
@@ -1446,7 +1511,9 @@ width:1000px;
 	text-align: left;
 	vertical-align: middle;
 }
-
+input[type="checkbox"]{
+        font-size:200%;
+}
 .selectedLeftContainer {
 	margin-left: 12px;
 	float: left;
