@@ -267,15 +267,9 @@ public class DatasetsRestService extends ItemServicesImpl {
                         t.save();
                         ts.clear();
                     } catch (IOException io) {
-                        log.warn("IO error retrieving " + url.toExternalForm() + " for dataset " + id);
-                        if (log.isDebugEnabled()) {
-                            io.printStackTrace();
-                        }
+                        log.warn("IO error retrieving " + url.toExternalForm() + " for dataset " + id, io);
                     } catch (OperatorException e) {
-                        log.warn("OperatorError retrieving " + url.toExternalForm() + " for dataset " + id);
-                        if (log.isDebugEnabled()) {
-                            e.printStackTrace();
-                        }
+                        log.warn("OperatorError retrieving " + url.toExternalForm() + " for dataset " + id, e);
                     }
 
                 }
