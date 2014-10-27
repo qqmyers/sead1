@@ -37,7 +37,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
@@ -62,7 +62,7 @@ import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 
 /**
  * @author lmarini
- * 
+ *
  */
 public class ListDatasetsPage extends Page {
 
@@ -83,7 +83,6 @@ public class ListDatasetsPage extends Page {
         rss.addStyleName("rssIcon");
         DOM.setElementAttribute(rss.getElement(), "type", "application/rss+xml");
         rss.setHTML("<img src='./images/rss_icon.gif' border='0px' id='rssIcon' class='navMenuLink'>"); // FIXME hack
-        rightHeader.add(rss);
 
         if (MMDB.bigData) {
 
@@ -116,6 +115,9 @@ public class ListDatasetsPage extends Page {
             BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatch, eventBus, batchOperationView, false);
             batchOperationPresenter.bind();
             rightHeader.add(batchOperationView);
+
+            //add rss in same place as on colletions page
+            rightHeader.add(rss);
 
             DynamicTableView dynamicTableView = new DynamicTableView();
             final DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatch, eventBus, dynamicTableView);
