@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server;
 
@@ -56,19 +56,21 @@ import net.customware.gwt.dispatch.shared.Result;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthorizedAction;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMimeTypeCategories;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleUserInfoHandler;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Default dispatch servlet.
- * 
+ *
  * @author Luigi Marini
  * @author Jim Myers
- * 
+ *
  */
 
 public class MyDispatchServiceServlet extends DispatchServiceServlet {
@@ -109,13 +111,21 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
     public Result execute(Action<?> action) throws ActionException {
 
         HttpServletRequest request = getThreadLocalRequest();
-        if (getUser(request) == null) {
+        String user = getUser(request);
+        if (user != null) {
+            user = PersonBeanUtil.getPersonID(user);
+        }
+        //FIXME elsewhere - should not trust that client has sent the current user's name in the actions
+        //Shouldn't send user at all in AuthorizedAction
+        if (action instanceof AuthorizedAction) {
+            ((AuthorizedAction<?>) action).setUser(user);
+        }
 
-            //FIXME - should not trust that client has sent the current user's name in the actions
+        if (user == null) {
 
             log.debug("executing action: " + action.getClass().getName());
             //If you're not authenticated to the server, don't do the dispatch
-            //These are the only actions that should be allowed when there are no credentials 
+            //These are the only actions that should be allowed when there are no credentials
             if (!((action instanceof GoogleOAuth2Props) ||
                     (action instanceof GetConfiguration) ||
                     (action instanceof GoogleUserInfo) || (action instanceof GetMimeTypeCategories))) {

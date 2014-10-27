@@ -66,7 +66,7 @@
 		</fileset>
 	</path>
 
-	<target name="bamboo" depends="cetbean, war" />
+	<target name="bamboo" depends="cetbean, updateversion, war" />
 
 	<target name="mmdb-dev" depends="resources" description="setup for bamboo build and deployment">
 		<replace file="war/WEB-INF/classes/server.properties" token="#search.path=" value="search.path=/home/medici/medici/lucene" />
@@ -154,6 +154,7 @@
 		<copy todir="war/WEB-INF/classes">
 			<fileset dir="src">
 				<include name="nopreview-100.gif" />
+				<include name="nopreview-200.gif" />
 				<include name="preview-100.gif" />
 				<include name="preview-500.gif" />
 				<include name="commons-logging.properties" />

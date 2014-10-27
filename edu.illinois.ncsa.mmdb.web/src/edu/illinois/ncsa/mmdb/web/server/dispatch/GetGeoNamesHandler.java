@@ -107,7 +107,7 @@ public class GetGeoNamesHandler implements ActionHandler<GetGeoNames, GetGeoName
 
         }
 
-        String googleKey = props.getProperty("google.client_id");
+        String googleKey = props.getProperty("google.api_key");
 
         // query string
         String query = arg0.getPlaceQuery();

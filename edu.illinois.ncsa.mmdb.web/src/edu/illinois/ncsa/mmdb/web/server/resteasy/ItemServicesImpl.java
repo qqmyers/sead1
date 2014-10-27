@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2014 University of Michigan
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -84,8 +84,6 @@ public class ItemServicesImpl
     /** Commons logging **/
     private static Log                         log               = LogFactory.getLog(ItemServicesImpl.class);
 
-    public static UriRef                       SHA1_DIGEST       = Resource.uriRef("http://sead-data.net/terms/hasSHA1Digest");
-
     static final Set<String>                   managedPredicates = new HashSet<String>(Arrays.asList(
                                                                          "http://purl.org/dc/terms/license",
                                                                          "http://purl.org/dc/terms/rightsHolder",
@@ -99,7 +97,7 @@ public class ItemServicesImpl
                                                                          Namespaces.rdfs("label")
                                                                          ));
 
-    //FixME - the labels used here should come from the database, but only user and extracted metadata have such labels right now (not all basic/biblio) - 
+    //FixME - the labels used here should come from the database, but only user and extracted metadata have such labels right now (not all basic/biblio) -
     // should switch to just listing predicates here and pulling labels once all exist.
 
     @SuppressWarnings("serial")
@@ -318,7 +316,7 @@ public class ItemServicesImpl
             /*
             // convert the uploaded file to inputstream
             InputStream inputStream = inputPart.getBody(InputStream.class, null);
-            
+
             byte[] bytes = IOUtils.toByteArray(inputStream);
             // constructs upload file path
             fileName = UPLOADED_FILE_PATH + fileName;
@@ -416,7 +414,7 @@ public class ItemServicesImpl
         for (Entry<UriRef, String> entry : metadataMap.entrySet() ) {
             context.put(entry.getValue(), entry.getKey().toString());
         }
-        // Note - since this context comes form simple pred/label info, none of the entries can have the 
+        // Note - since this context comes form simple pred/label info, none of the entries can have the
         // value-type info possible with set contexts (see example at top of file)
         result.put("@context", context);
         return Response.status(200).entity(result).build();
@@ -481,7 +479,7 @@ public class ItemServicesImpl
 
     }
 
-    /* Get metadata corresponding to all the predicates in context for the id given, respecting access control 
+    /* Get metadata corresponding to all the predicates in context for the id given, respecting access control
      * and ignoring deleted items.
      */
     protected static Response getMetadataById(String id, Map<String, Object> context, UriRef userId) {
@@ -530,14 +528,14 @@ public class ItemServicesImpl
 
     /* Adds patterns corresponding to each entry in the context to the Unifier prior to evaluation
      * @thing  - can be a UriRef, or a String (making it a variable in the query).
-     * 
-     * 
+     *
+     *
      */
     @SuppressWarnings("unchecked")
     protected static Unifier populateUnifier(Object thing, Unifier uf, Map<String, Object> context, Set<String> requiredKeys) {
         /*FixME: Note: if the first pattern of an all optional unifier doesn't match, tupelo will return no results
          * even if the other terms would match. So - all contexts should be LinkedHashMaps / other order preserving map
-         * and the first entry should be a predicate that is known to be assigned (e.g. dc:identifier). 
+         * and the first entry should be a predicate that is known to be assigned (e.g. dc:identifier).
          */
 
         for (String key : context.keySet() ) {
@@ -581,14 +579,14 @@ public class ItemServicesImpl
 
     /*
      * Read Unifier result and add an entry for each unique 'triple' by: reading through returned table and
-     * for useHierarchy = false, using the column name as predicate and corresponding row value as the object to 
+     * for useHierarchy = false, using the column name as predicate and corresponding row value as the object to
      * create tuples associated with the queried id.
      * for useHierarchy=true, treat column 1 as an id and make collections of triples associated with each id using all other columns
-     * Due to the way tupelo returns results, there can be duplicate information in different rows, so logic is required to 
+     * Due to the way tupelo returns results, there can be duplicate information in different rows, so logic is required to
      * check for existing values and to capture multiple values for the same id/predicate.
      * The use of Maps provides a nice json structure as output. Adding the context in is consistent with the draft JSON-LD spec
      * that links the readable terms with formal rdf predicates for linked data
-     * 
+     *
      */
     @SuppressWarnings("unchecked")
     protected static Map<String, Object> buildResultMap(Table<Resource> table, Map<String, Object> context, List<String> names, boolean useHierarchy, FilterCallback filter) {
@@ -611,7 +609,7 @@ public class ItemServicesImpl
                                     result.put(obj, new LinkedHashMap<String, Object>());
 
                                 }
-                                //For i=0, add value as  metadata if the key is "Identifier"  
+                                //For i=0, add value as  metadata if the key is "Identifier"
                                 if (key.equals("Identifier")) {
                                     ((Map<String, Object>) result.get(tu.get(0).toString())).put(key, obj);
                                 }
@@ -671,7 +669,7 @@ public class ItemServicesImpl
     }
 
     /* Logic to only add unique values to the map and to switch from string to List<String> for multiple values
-     * 
+     *
      */
     @SuppressWarnings("unchecked")
     private static void addTuple(Map<String, Object> map, String key, String object) {
@@ -696,7 +694,7 @@ public class ItemServicesImpl
 
     }
 
-    /* Get metadata corresponding to all the predicates in context for datasets or collections related to the 
+    /* Get metadata corresponding to all the predicates in context for datasets or collections related to the
      * given id by the given relationship working in the given direction (isSubject means the given id is the subject of the relationship triple)
      * , respecting access control and ignoring deleted items.
      */
@@ -1154,19 +1152,6 @@ public class ItemServicesImpl
             r = Response.status(500).entity(result).build();
         }
         return r;
-    }
-
-    private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
-
-    public static String asHex(byte[] buf)
-    {
-        char[] chars = new char[2 * buf.length];
-        for (int i = 0; i < buf.length; ++i )
-        {
-            chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
-            chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
-        }
-        return new String(chars);
     }
 
     protected static Set<String> getNormalizedTagSet(String cdl) {

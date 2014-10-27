@@ -130,6 +130,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.SetTitleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.UnpackZipHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
 
 /**
@@ -227,6 +228,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new AdminAddUserHandler());
         DispatchUtil.registerHandler(new ClearGeoLocationHandler());
         DispatchUtil.registerHandler(new GetServiceTokenHandler());
+        DispatchUtil.registerHandler(new UnpackZipHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

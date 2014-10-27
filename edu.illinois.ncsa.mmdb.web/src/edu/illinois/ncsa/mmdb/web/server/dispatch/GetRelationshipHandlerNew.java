@@ -50,22 +50,26 @@ public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship,
                 if (!rbac.checkAccessLevel(user, row.get(1))) {
                     continue;
                 }
-                DatasetBean db = TupeloStore.fetchDataset(row.get(1)); // dbu's only take strings
-                String label = row.get(0).getString();
-                String type = row.get(2).getString();
-                //update datasets in the specific type
-                if (dataset.containsKey(type)) {
-                    Relationship rel = dataset.get(type);
-                    dataset.get(type).datasets.add(db);
-                    dataset.get(type).uris.add(db.getUri());
-                    dataset.put(type, rel);
+                try {
+                    DatasetBean db = TupeloStore.fetchDataset(row.get(1)); // dbu's only take strings
+                    String label = row.get(0).getString();
+                    String type = row.get(2).getString();
+                    //update datasets in the specific type
+                    if (dataset.containsKey(type)) {
+                        Relationship rel = dataset.get(type);
+                        dataset.get(type).datasets.add(db);
+                        dataset.get(type).uris.add(db.getUri());
+                        dataset.put(type, rel);
 
-                } else {
-                    Relationship result = new Relationship();
-                    result.datasets.add(db);
-                    result.uris.add(db.getUri());
-                    result.typeLabel = label;
-                    dataset.put(type, result);
+                    } else {
+                        Relationship result = new Relationship();
+                        result.datasets.add(db);
+                        result.uris.add(db.getUri());
+                        result.typeLabel = label;
+                        dataset.put(type, result);
+                    }
+                } catch (ClassCastException cce) {
+                    log.warn("Non dataset in relationship: " + row.get(1));
                 }
             }
 

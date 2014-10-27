@@ -201,7 +201,7 @@ public class Queries {
 				+ " "
 				+ "?tagID <rdf:type> ?type ."
 				+ " "
-				+ "?tagID <dc:format> ?mime . "
+				+ "OPTIONAL { ?tagID <dc:format> ?mime . }"
 				+ " "
 				+ "OPTIONAL { ?tagID <tag:tupeloproject.org,2006:/2.0/files/length> ?length .}"
 				+ " " + "OPTIONAL { <" + parentID

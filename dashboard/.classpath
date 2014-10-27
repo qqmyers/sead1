@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-io-2.2.jar"/>
 	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/httpcore-4.1.2.jar"/>
 	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/httpclient-4.1.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/org.json-20131017.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
