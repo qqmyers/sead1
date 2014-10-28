@@ -182,7 +182,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     public static String               _sessionCookieName               = "JSESSIONID";
     public static String               _googleClientId                  = null;
-    public static String               _orcidClientId                  = null;
+    public static String               _orcidClientId                   = null;
 
     public static String               _projectName                     = "SEAD ACR";
     public static boolean              bigData                          = false;                              //Server's bigData flag
@@ -656,7 +656,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         } else if (token.startsWith("upload")) {
             showUploadPage();
         } else if (token.startsWith("tags")) {
-            shosTagsPage();
+            showTagsPage();
         } else if (token.startsWith("tag")) {
             showTagPage();
         } else if (token.startsWith("listCollections") /*&& !previousHistoryToken.startsWith("listCollections")*/) {
@@ -714,7 +714,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         mainContainer.add(new MapPage(dispatchAsync, eventBus));
     }
 
-    private void shosTagsPage() {
+    private void showTagsPage() {
         GWT.log("Loading Tags Page", null);
         mainContainer.clear();
         mainContainer.add(new TagsPage(dispatchAsync));
