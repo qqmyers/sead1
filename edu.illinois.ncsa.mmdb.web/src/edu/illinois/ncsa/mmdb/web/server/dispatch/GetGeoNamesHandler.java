@@ -121,8 +121,6 @@ public class GetGeoNamesHandler implements ActionHandler<GetGeoNames, GetGeoName
             // generate the url with query string
             String url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + encode + "&key=" + googleKey;
 
-            System.out.println(url);
-
             // GET request
             URL u = new URL(url);
             HttpURLConnection uc = (HttpURLConnection) u.openConnection();
@@ -148,7 +146,6 @@ public class GetGeoNamesHandler implements ActionHandler<GetGeoNames, GetGeoName
                 }
                 d.close();
 
-                System.out.println(buffer);
                 // load the json string into json object by using jackson library
                 ObjectMapper mapper = new ObjectMapper();
 
