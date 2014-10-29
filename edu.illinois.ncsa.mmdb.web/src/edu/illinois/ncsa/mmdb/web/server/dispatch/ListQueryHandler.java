@@ -123,6 +123,14 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
         u.addPattern("s", Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "k", true);
         u.addColumnName("k"); // 9
 
+        int parentIndex = -1;
+        //if we are looking for top level collections
+        if (listquery.getBean() != null && listquery.getCollection() == null && CollectionBeanUtil.COLLECTION_TYPE.toString().equals(listquery.getBean())) {
+            u.addColumnName("parent"); //10
+            u.addPattern("parent", DcTerms.HAS_PART, "s", true);
+            List<String> names = u.getColumnNames();
+            parentIndex = names.indexOf("parent");
+        }
         // fetch results
         Set<String> keys = new HashSet<String>();
         List<ListQueryItem> result = new ArrayList<ListQueryItem>();
@@ -161,7 +169,10 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                         continue;
                     }
                 }
-
+                //skip items if we are looking for top level collections
+                if (parentIndex >= 0 && row.get(parentIndex) != null) {
+                    continue;
+                }
                 // all items are ok from here forward
                 count++;
 

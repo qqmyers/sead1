@@ -107,7 +107,7 @@ public class GetGeoNamesHandler implements ActionHandler<GetGeoNames, GetGeoName
 
         }
 
-        String googleKey = props.getProperty("google.client_id");
+        String googleKey = props.getProperty("google.api_key");
 
         // query string
         String query = arg0.getPlaceQuery();
@@ -125,6 +125,10 @@ public class GetGeoNamesHandler implements ActionHandler<GetGeoNames, GetGeoName
             URL u = new URL(url);
             HttpURLConnection uc = (HttpURLConnection) u.openConnection();
             uc.setRequestProperty("Content-Type", "application/json");
+
+            // add header with referer to support referer restriction
+            uc.setRequestProperty("Referer", "sead.ncsa.illinois.edu");
+
             uc.setRequestMethod("GET");
             uc.setDoOutput(false);
             int status = uc.getResponseCode();
@@ -181,6 +185,16 @@ public class GetGeoNamesHandler implements ActionHandler<GetGeoNames, GetGeoName
     public void rollback(GetGeoNames arg0, GetGeoNamesResult arg1, ExecutionContext arg2) throws ActionException {
         // TODO Auto-generated method stub
 
+    }
+
+    public static void main(String[] args) throws ActionException {
+        GetGeoNamesHandler g = new GetGeoNamesHandler();
+        GetGeoNames gg = new GetGeoNames("chicago");
+        GetGeoNamesResult e = g.execute(gg, null);
+        HashSet<GeoName> geoNames = e.getGeoNames();
+        for (GeoName gn : geoNames ) {
+            System.out.println(gn.getName());
+        }
     }
 
 }
