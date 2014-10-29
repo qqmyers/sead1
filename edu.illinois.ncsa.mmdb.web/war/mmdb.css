@@ -1308,8 +1308,10 @@ div.gwt-Label.smallerItalicText.alignRight{
 	line-height:0px;
 	padding-bottom:5px;
 }
+
 #rssIcon{
 	margin-top:3px;
+	margin-right: 22px;
 }
 
 .batchOperationMenu {
