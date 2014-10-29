@@ -37,7 +37,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.view;
 
@@ -53,7 +53,7 @@ import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 
 /**
  * @author Luigi Marini
- * 
+ *
  */
 public class BatchOperationView extends Composite implements BatchOperationPresenter.Display {
 
@@ -66,7 +66,6 @@ public class BatchOperationView extends Composite implements BatchOperationPrese
         mainLayout.addStyleName("batchOperationPanel");
         initWidget(mainLayout);
         MenuBar actionsBar = new MenuBar();
-        actionsBar.setWidth("80px");
         actionsBar.addStyleName("batchOperationMenu");
         actionsMenu = new MenuBar(true);
         actionsBar.addItem("Actions", actionsMenu);
