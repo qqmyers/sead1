@@ -43,17 +43,13 @@ import java.util.Set;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
@@ -117,19 +113,6 @@ public class DynamicListView extends FlexTable implements Display {
             PreviewWidget pre = new PreviewWidget(id, GetPreviews.SMALL, "dataset?id=" + id, type, dispatchAsync);
             pre.setMaxWidth(100);
             images.add(pre);
-
-            //badge type overlay
-            if (type != null && !UNKNOWN_TYPE.equals(type)) {
-                Image overlay = new Image("images/icons/" + type + ".png");
-                overlay.addStyleName("imageOverlayList");
-                overlay.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        History.newItem("dataset?id=" + id);
-                    }
-                });
-
-                images.add(overlay);
-            }
         }
 
         setWidget(row, 1, images);
