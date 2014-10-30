@@ -121,6 +121,17 @@
 		</init-param>
 	    
 	</servlet>
+	
+	<servlet>
+		<servlet-name>wmsProxyImpl</servlet-name>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.server.geo.WmsProxyServiceImpl</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>mediciProxyImpl</servlet-name>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.server.geo.MediciProxyServiceImpl</servlet-class>
+	</servlet>
+	
+	
 
 	<!-- servlet mapping -->
 	<servlet-mapping>
@@ -197,6 +208,14 @@
 	<servlet-mapping>
 	    <servlet-name>GeoProxy</servlet-name>
 	    <url-pattern>/geoproxy/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>wmsProxyImpl</servlet-name>
+		<url-pattern>/mmdb/wmsProxy</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>mediciProxyImpl</servlet-name>
+		<url-pattern>/mmdb/mediciProxy</url-pattern>
 	</servlet-mapping>
 
 	<!-- Servlet context listener -->
@@ -276,6 +295,9 @@
   <filter-mapping>
     <filter-name>AuthFilter</filter-name>
     <url-pattern>/geoproxy/*</url-pattern>
+    
+	<servlet-name>wmsProxyImpl</servlet-name>
+	<servlet-name>mediciProxyImpl</servlet-name>
   </filter-mapping>
 	
 

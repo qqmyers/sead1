@@ -41,6 +41,11 @@
 	<inherits name="com.google.gwt.maps.GoogleMaps" />
 	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
 	
+	<inherits name="com.google.gwt.logging.Logging"/>
+	
+    <set-property name="gwt.logging.logLevel" value="INFO"/>
+    <set-property name="gwt.logging.enabled" value="FALSE"/>
+    <set-property name="gwt.logging.consoleHandler" value="DISABLED"/>
 
 	<!-- Inherit the default GWT style sheet. You can change -->
 	<!-- the theme of your GWT application by uncommenting -->
@@ -59,5 +64,6 @@
 	<!-- Specify the paths for translatable code -->
 	<source path='common' />
 	<source path='client' />
+
 	
 </module>

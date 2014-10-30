@@ -88,6 +88,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
+import edu.illinois.ncsa.mmdb.web.client.geo.GeoPage;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.AuthenticationCallback;
@@ -101,7 +102,6 @@ import edu.illinois.ncsa.mmdb.web.client.ui.ListCollectionsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListDatasetsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
-import edu.illinois.ncsa.mmdb.web.client.ui.MapPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.NotEnabledPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchBox;
@@ -667,8 +667,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showCollectionPage();
         } else if (token.startsWith("search")) {
             showSearchResultsPage();
-        } else if (token.startsWith("map")) {
-            showMapPage();
+        } else if (token.startsWith("geo")) {
+            String tag = null;
+            if (token.startsWith("geo_tag_")) {
+                tag = URL.decode(token.substring("geo_tag_".length()));
+            }
+            showGeoPage(tag);
         } else if (token.startsWith("signup")) {
             showSignupPage();
         } else if (token.startsWith("home")) {
@@ -708,10 +712,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         mainContainer.add(new AdminPage(dispatchAsync, eventBus));
     }
 
-    private void showMapPage() {
-        GWT.log("Loading Map Page", null);
+    private void showGeoPage(String tag) {
+        GWT.log("Loading GeoBrowse Page", null);
         mainContainer.clear();
-        mainContainer.add(new MapPage(dispatchAsync, eventBus));
+        mainContainer.add(new GeoPage(tag, dispatchAsync, eventBus));
     }
 
     private void showTagsPage() {

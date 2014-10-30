@@ -233,9 +233,15 @@ public class DatasetsRestService extends ItemServicesImpl {
                         ts.clear();
                         log.debug("Created dataset from " + url.getPath());
                     } catch (IOException io) {
-                        log.warn("IO error retrieving " + url.toExternalForm() + " for dataset " + id, io);
+                        log.warn("IO error retrieving " + url.toExternalForm() + " for dataset " + id);
+                        if (log.isDebugEnabled()) {
+                            io.printStackTrace();
+                        }
                     } catch (OperatorException e) {
-                        log.warn("OperatorError retrieving " + url.toExternalForm() + " for dataset " + id, e);
+                        log.warn("OperatorError retrieving " + url.toExternalForm() + " for dataset " + id);
+                        if (log.isDebugEnabled()) {
+                            e.printStackTrace();
+                        }
                     }
 
                 }
@@ -601,6 +607,7 @@ public class DatasetsRestService extends ItemServicesImpl {
      *
      * @return geo metadata for each item in json-ld
      */
+
     @GET
     @Path("/layers")
     @Produces("application/json")
@@ -616,6 +623,7 @@ public class DatasetsRestService extends ItemServicesImpl {
      *
      * @return geo metadata for each item in json-ld
      */
+
     @GET
     @Path("/features")
     @Produces("application/json")

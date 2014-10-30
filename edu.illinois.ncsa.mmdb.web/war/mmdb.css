@@ -1758,8 +1758,14 @@ a.zocial.google:hover {
   color: #FFFFFF;
 }
 
+/* Login page display of social login options*/
 .zocial {
 	width: 174px;
 }
 
+/* #geo display map width*/
+
+.smallmap {
+	width: 978px;
+}
 
