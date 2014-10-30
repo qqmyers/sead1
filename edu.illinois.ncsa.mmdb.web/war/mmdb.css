@@ -1351,10 +1351,10 @@ div.gwt-Label.smallerItalicText.alignRight{
 	z-index: 3;
 	color:#fff;
 }
-#.batchOperationMenu .gwt-MenuItem{
+.batchOperationMenu .gwt-MenuItem{
 	background: transparent;
 }
-#.batchOperationMenu .gwt-MenuItem:after{
+.batchOperationMenu .gwt-MenuItem:after{
 	content: ' ▾';
 }
 .gwt-MenuItem-selected {
@@ -1363,7 +1363,7 @@ div.gwt-Label.smallerItalicText.alignRight{
 .gwt-MenuItem-selected{
         background:#444;
 }
-#.batchOperationMenu .gwt-MenuItem:hover{
+.batchOperationMenu .gwt-MenuItem:hover{
 	background:#444;
 }
 .gwt-MenuBar-vertical .subMenuIcon-selected {
