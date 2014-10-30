@@ -1298,6 +1298,7 @@ div.gwt-Label.smallerItalicText.alignRight{
 	padding-left:8px;
 	height:30px;
 	margin-top:3px;	
+	word-wrap: break-word;
 }
 
 .tagCount {
@@ -1353,6 +1354,7 @@ div.gwt-Label.smallerItalicText.alignRight{
 }
 #rssIcon{
 	margin-top:3px;
+	margin-right: 22px;
 }
 
 .batchOperationMenu {
@@ -1768,4 +1770,3 @@ a.zocial.google:hover {
 .smallmap {
 	width: 978px;
 }
-
