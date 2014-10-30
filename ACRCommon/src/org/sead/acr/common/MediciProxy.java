@@ -40,7 +40,6 @@ public class MediciProxy {
 	private static Log log = LogFactory.getLog(MediciProxy.class);
 
 	private String _username = null;
-	private String _password = null;
 	private String _server = null;
 	private String _remoteAPIKey = null;
 	private boolean _validCredentials = false;
@@ -90,7 +89,6 @@ public class MediciProxy {
 			String remoteAPIKey) throws HTTPException {
 		log.debug("Setting credentials");
 		_username = username;
-		_password = password;
 		_server = server;
 		_remoteAPIKey = remoteAPIKey;
 
@@ -220,6 +218,19 @@ public class MediciProxy {
 		xmlPostDA.setSessionId(sessionId);
 		xmlPostDA.getResponse(query);
 
+	}
+	
+	/**Use when in a local context that shares a session with the target server
+	 *  
+	 * @param sessionId
+	 * @param localServer
+	 * @param remoteAPIKey
+	 */
+	public void setLocalCredentials(String sessionId, String localServer, String remoteAPIKey) {
+		_sessionId = sessionId;
+		_server = localServer;
+		_remoteAPIKey=remoteAPIKey;
+		_validCredentials = true;
 	}
 
 	public boolean hasValidCredentials() {
