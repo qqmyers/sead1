@@ -1253,7 +1253,8 @@ div.gwt-Label.smallerItalicText.alignRight{
 	float:left;
 	padding-left:8px;
 	height:30px;
-	margin-top:3px;	
+	margin-top:3px;
+	word-wrap: break-word;
 }
 
 .tagCount {
@@ -1307,8 +1308,10 @@ div.gwt-Label.smallerItalicText.alignRight{
 	line-height:0px;
 	padding-bottom:5px;
 }
+
 #rssIcon{
 	margin-top:3px;
+	margin-right: 22px;
 }
 
 .batchOperationMenu {
@@ -1348,10 +1351,10 @@ div.gwt-Label.smallerItalicText.alignRight{
 	z-index: 3;
 	color:#fff;
 }
-#gwt-uid-1{
+#.batchOperationMenu .gwt-MenuItem{
 	background: transparent;
 }
-#gwt-uid-1:after{
+#.batchOperationMenu .gwt-MenuItem:after{
 	content: ' ▾';
 }
 .gwt-MenuItem-selected {
@@ -1360,7 +1363,7 @@ div.gwt-Label.smallerItalicText.alignRight{
 .gwt-MenuItem-selected{
         background:#444;
 }
-#gwt-uid-1:hover{
+#.batchOperationMenu .gwt-MenuItem:hover{
 	background:#444;
 }
 .gwt-MenuBar-vertical .subMenuIcon-selected {

@@ -38,9 +38,9 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.view;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.Date;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -98,7 +98,7 @@ public class DynamicGridView extends FlexTable implements Display {
 
         HorizontalPanel titlePanel = new HorizontalPanel();
         titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        
+
         HorizontalPanel uploadInfoPanel = new HorizontalPanel();
         uploadInfoPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
@@ -120,7 +120,6 @@ public class DynamicGridView extends FlexTable implements Display {
         images.add(checkBox);
         layoutPanel.add(images);
 
-
         // title
         Hyperlink hyperlink;
         if ("Collection".equals(type)) {
@@ -134,30 +133,30 @@ public class DynamicGridView extends FlexTable implements Display {
         hyperlink.addStyleName("inline");
         hyperlink.setWidth("210px");
         titlePanel.add(hyperlink);
-        
+
         layoutPanel.add(titlePanel);
         layoutPanel.setCellHeight(titlePanel, "20px");
-        
+
         //uploader information
         Label authorLabel;
         if (author == null) {
             author = "Contributor unknown";
-            }
-        
+        }
+
         uploadInfoPanel.setWidth("210px");
         authorLabel = new Label(shortenName(author));
         authorLabel.addStyleName("smallerItalicText");
         authorLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         uploadInfoPanel.add(authorLabel);
-        
+
         Label dateuploaded = new Label(DateTimeFormat.getShortDateFormat().format(date));
         dateuploaded.addStyleName("smallerItalicText");
         dateuploaded.addStyleName("alignRight");
         uploadInfoPanel.add(dateuploaded);
-        
+
         layoutPanel.add(uploadInfoPanel);
         layoutPanel.setCellHeight(uploadInfoPanel, "20px");
-        
+
         final int row = this.getRowCount();
 
         setWidget(numItems / ROW_WIDTH, numItems % ROW_WIDTH, layoutPanel);
@@ -173,25 +172,26 @@ public class DynamicGridView extends FlexTable implements Display {
         numItems = 0;
     }
 
-    private String shortenName(String authorName){
+    private String shortenName(String authorName) {
         int max_chars = 27;
-        if (authorName != null && authorName.length() > max_chars){
+        if (authorName != null && authorName.length() > max_chars) {
             String[] names = authorName.split(" ");
-            String lastName = names[names.length-1];
-            if (lastName.length() > 23)
+            String lastName = names[names.length - 1];
+            if (lastName.length() > 23) {
                 lastName = lastName.substring(0, 20) + "...";
-            String firstInitial = names[0].substring(0, Math.max(1, 23-lastName.length()));
+            }
+            String firstInitial = names[0].substring(0, Math.max(1, 23 - lastName.length()));
             return firstInitial + " " + lastName;
-         }
-        else{
+        }
+        else {
             return authorName;
         }
     }
-    
+
     private String shortenTitle(String title) {
-        int max_chars = 33;
+        int max_chars = 53;
         if (title != null && title.length() > max_chars) {
-            return title.substring(0, max_chars-3) + "...";
+            return title.substring(0, max_chars - 3) + "...";
         } else {
             return title;
         }
