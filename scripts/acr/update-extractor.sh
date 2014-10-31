@@ -9,7 +9,6 @@ rm -rf extractor Extractor.gtk.linux.x86_64.zip
 wget -q -O Extractor.gtk.linux.x86_64.zip https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-EX/latestSuccessful/artifact/shared/extractors/edu.illinois.ncsa.medici.extractor.site_1.3.100-eclipse.feature/Extractor.gtk.linux.x86_64.zip
 unzip -q Extractor.gtk.linux.x86_64.zip
 mv Extractor.gtk.linux.x86_64 extractor
-mv extractor.properties extractor/server.properties
 
 cd extractor
 ./ExtractionServer -application org.eclipse.equinox.p2.director \
@@ -18,7 +17,7 @@ cd extractor
 cd ..
 
 if [ -e extractor.properties ]; then
-  mv extractor.properties extractor/server.properties
+  cp extractor.properties extractor/server.properties
 fi
 
 chown -R tomcat6.users extractor
