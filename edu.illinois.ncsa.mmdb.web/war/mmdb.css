@@ -1355,6 +1355,7 @@ div.gwt-Label.smallerItalicText.alignRight{
 #rssIcon{
 	margin-top:3px;
 	margin-right: 22px;
+<<<<<<< HEAD
 }
 
 .batchOperationMenu {
@@ -1770,3 +1771,402 @@ a.zocial.google:hover {
 .smallmap {
 	width: 960px;
 }
+=======
+}
+
+.batchOperationMenu {
+	display: inline-block;
+	*display: inline;
+	zoom: 1;
+	background:none;
+	border:0px;
+	background-color:#f3822a;
+}
+.batchOperationMenu:hover{
+        background:#444;
+
+}
+
+.gwt-MenuBar-horizontal .gwt-MenuItem {
+	font-weight: normal;
+	color: #fff;
+}
+
+.progressBar {
+	border: 1px solid;
+	padding: 1px;
+}
+
+.progressBarBar {
+	background-color: #002b55;
+	font-size: 0.5em;
+}
+
+.titlePanelRightElement {
+	margin-right: 20px;
+}
+
+.gwt-MenuBar .gwt-MenuItem-selected {
+	background: #f3822a;
+	z-index: 3;
+	color:#fff;
+}
+.batchOperationMenu .gwt-MenuItem{
+	background: transparent;
+}
+.batchOperationMenu .gwt-MenuItem:after{
+	content: ' ▾';
+}
+.gwt-MenuItem-selected {
+	background: #444;
+}
+.gwt-MenuItem-selected{
+        background:#444;
+}
+.batchOperationMenu .gwt-MenuItem:hover{
+	background:#444;
+}
+.gwt-MenuBar-vertical .subMenuIcon-selected {
+        background: #f3822a;
+	color:#fff;
+  	z-index: 3;
+}
+
+.gwt-MenuBar-horizontal .subMenuIcon-selected {
+  	background: #444;
+  	z-index: 3;
+}
+
+
+.gwt-MenuBarPopup {
+	margin: 1px 0px 0px -1px;
+	text-align: left;
+}
+
+
+.dynamicTable {
+    width: 940px;
+    margin: 10px auto;
+}
+
+.dynamicTable .content {
+    margin: 0px auto;
+}
+
+.dynamicTableHeader {
+	width: 100%;
+    border: #CCC solid 1px;
+}
+
+.dynamicTableList {
+	width: 900px;
+	border: #CCC solid 1px;
+	vertical-align: top;
+	margin: 20px auto 20px auto;
+	padding: 0px;
+	border-spacing:0px;
+	border-collapse: collapse;
+}
+
+.dynamicTableListCell {
+	margin: 0px;
+	padding: 10px;
+	border-top: #CCC solid 1px;
+	text-align: left;
+	vertical-align: top;
+}
+
+.dynamicTableListCheckbox {
+	width: 100px;
+	margin: 0px;
+	padding: 10px;
+	border-top: #CCC solid 1px;
+	text-align: right;
+	vertical-align: top;
+}
+
+.dynamicTableListPreview {
+	width: 150px;
+	margin: 0px;
+	padding: 5px;
+	border-top: #CCC solid 1px;
+	text-align: left;
+	vertical-align: top;
+}
+
+.dynamicTableListInformation {
+	width: 350px;
+}
+
+.dynamicTableListCol0 {
+	width: 250px;
+}
+
+.dynamicTableListCol1 {
+	width: 250px;
+}
+
+.dynamicGrid {
+	width: 940px;
+	vertical-align: top;
+	margin: 15px auto 10px auto;
+	padding: 0px;
+	border-spacing:0px;
+	border-collapse: collapse;	
+}
+
+.dynamicGridElement {
+	/*border: 1px solid #CCC;*/
+	margin: 5px 5px 10px 5px;
+	border: 1px solid #ddd;
+}
+
+.dynamicGridSelected {
+	background-color: #f1f5ff
+}
+
+.dynamicGridElementTitle {
+	width: 130px;
+	text-align: left;
+	vertical-align: middle;
+}
+input[type="checkbox"]{
+        font-size:200%;
+}
+.selectedLeftContainer {
+	margin-left: 12px;
+	float: left;
+	text-align: left;
+
+}
+
+.selectedRightContainer {
+	float: right;
+    width: 500px;
+	margin-top: 34px;
+	text-align: left;
+	padding: 0px;
+}
+
+.selectedMainContainer {
+	text-align: left;
+}
+
+.createRelationshipContainer{
+	position:fixed; 	
+}
+
+.createRelationshipThumbs{
+	margin-left: 25px;	
+}
+
+.createRelationshipType {
+	margin: 0px 10px 0px 10px;	
+}
+
+.relationshipForms {
+	position: relative;
+}
+
+.relationshipDatasets {
+	margin-left: 85px;
+}
+
+.relationshipSubmit {
+	margin: 20px 0px 0px 170px;
+}
+
+.relationshipDatasetPulldown {
+	width: 140px;	
+}
+
+.relationshipCreated {
+	padding: 5px;
+	margin: 15px 0px 0px 5px;	
+	background-color: #EFF5FB;
+}
+
+.relationshipHyperlink{
+	margin: 0px 3px 0px 3px;	
+}
+
+.relationshipDelete{
+	display: none;
+	height: 0px;
+	clear: both;
+	visibility: hidden;
+}
+
+#uploadForm {
+    position:absolute;
+    top:0;
+    left:0;
+    font-size:130px;
+    filter:alpha(opacity=0);
+    -khtml-opacity:0;
+    -webkit-opacity:0;
+    -moz-opacity:0;
+    opacity:0;
+}
+
+#dropbox {
+    width:200px;
+    overflow:hidden;
+    position:relative;
+    text-align:center;
+    color:#999;
+    font:normal 24px arial, helvetica, sans serif;
+}
+        
+#dropzone {
+    position:relative;
+    height:120px;
+    border: 2px dashed #999;
+}
+
+#box {
+	font:normal 24px arial, helvetica, sans serif;
+	color:#999;
+	background-color: #fff;
+	width: 200px;
+	border: 2px dashed #999;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	padding-bottom: 10px;
+    text-align:center;
+}
+#drop {
+	position:relative;
+	width: 200px;
+	height: 170px;
+}
+
+#list {
+	width: 210px;
+	font-size: 10px;
+	float: left;
+	margin-left: 10px;
+}
+.addedIMG {
+	width: 100px;
+	height: 100px;
+}
+
+.downloadDialog {
+	margin-top: 15px;	
+}
+
+.embeddedWidget {
+	width: 90%;
+	border: 1px dashed #A8A8A8;
+	margin: 0px 0px 20px 20px;
+}
+
+.embedhtmlPreview {
+	padding: 10px;	
+}
+
+.embedTextArea {
+	color: black;
+	margin: 10px 0px 7px 0px;
+}
+
+.embedPreviewButton {
+	margin-bottom: 10px;	
+}
+
+.embedSizeBoxes {
+	margin: 0px 3px 0px 3px;
+}
+
+.embedBoxSpacer {
+	margin-right: 20px;	
+	margin-bottom: 15px;
+}
+
+.importTitle {
+	font-weight:bold;
+	margin-top: 40px;
+}
+
+/* Sorted table for spreadsheet preview */
+table.tablesorter {
+	font-family:arial;
+	background-color: #CDCDCD;
+	margin:10px 0pt 15px;
+	font-size: 8pt;
+	width: 100%;
+	text-align: left;
+}
+
+
+table.tablesorter tbody tr:nth-child(odd) td {
+	background-color:#F0F0F6;
+}
+
+table.tablesorter tbody tr:nth-child(even) td {
+	background-color:#FFFFFF;
+}
+
+
+table.tablesorter thead tr th, 
+
+table.tablesorter tfoot tr th {
+	background-color: #e6EEEE;
+	border: 1px solid #FFF;
+	font-size: 8pt;
+	padding: 4px;
+	padding-right: 15px;
+}
+table.tablesorter thead tr .header {
+	background-image: url('images/bg.gif');
+	background-repeat: no-repeat;
+	background-position: center right;
+	cursor: pointer;
+}
+table.tablesorter tbody td {
+	color: #3D3D3D;
+	padding: 4px;
+	background-color: #FFF;
+	vertical-align: 
+
+top;
+}
+
+table.tablesorter thead tr .headerSortUp {
+	background-image: url('images/asc.gif');
+}
+table.tablesorter thead tr .headerSortDown {
+	
+
+background-image: url('images/desc.gif');
+}
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+background-color: #8dbdd8;
+}
+
+/*Upload page - derived data callout*/
+.callout {
+background-color: #EEEEEE;
+text-align: left;
+border-radius: 6px;
+padding: 5px;
+}
+
+.derivechoice  .gwt-Label {
+padding-top: 10px;
+padding-left: 10px;
+padding-bottom: 10px;
+padding-right: 100px;
+}
+
+.callout .gwt-RadioButton {
+padding-left: 20px;
+}
+
+.callout .datasetInfoDescription div{
+padding: 0px;
+	margin: 0px auto 0px auto;
+}
+>>>>>>> branch 'master' of https://jimmyers@opensource.ncsa.illinois.edu/stash/scm/mmdb/medici-gwt-web.git
