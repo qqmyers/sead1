@@ -35,7 +35,7 @@ public class MediciRestUtil {
     public static List<String> getTags(MediciProxy mp) throws IOException,
             JSONException {
         String tagsJson = mp.executeAuthenticatedGet("/resteasy/tags", null);
-        log.warn("tags in json: " + tagsJson);
+        log.debug("tags in json: " + tagsJson);
 
         return parseTags(tagsJson);
     }
@@ -92,7 +92,7 @@ public class MediciRestUtil {
             layers = mp.executeAuthenticatedGet("/resteasy/tags/" + tag
                     + "/layers", null);
         }
-        log.warn("layers in json: " + layers);
+        log.debug("layers in json: " + layers);
 
         return parseLayerInfo(layers);
     }

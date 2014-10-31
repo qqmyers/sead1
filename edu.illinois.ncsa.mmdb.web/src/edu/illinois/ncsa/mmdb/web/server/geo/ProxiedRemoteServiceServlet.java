@@ -3,6 +3,8 @@ package edu.illinois.ncsa.mmdb.web.server.geo;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sead.acr.common.MediciProxy;
 import org.sead.acr.common.utilities.PropertiesLoader;
 
@@ -24,6 +26,8 @@ public class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
     private static String     _geoserver;
     private static String     _proxiedgeoserver;
 
+    protected static Log      log              = LogFactory.getLog(ProxiedRemoteServiceServlet.class);
+
     /**
      *
      * @author Jim Myers <myersjd@umich.edu>
@@ -33,15 +37,18 @@ public class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
         MediciProxy mp = null;
         HttpSession session = getThreadLocalRequest().getSession(false);
         if (session != null) {
+            log.debug("Session is: " + session.getId());
             mp = (MediciProxy) session.getAttribute(_proxy);
             if (mp == null) {
                 mp = new MediciProxy();
                 getRemoteServerProperties();
+                log.debug("Setting mp to session: " + session.getId());
                 mp.setLocalCredentials(session.getId(), _server, null);
                 mp.setGeoCredentials(null, null, _geoserver);
                 session.setAttribute(_proxy, mp);
             }
         }
+
         return mp;
     }
 

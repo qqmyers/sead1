@@ -36,8 +36,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.http.client.URL;
@@ -86,8 +84,8 @@ public class GeoPage extends Page {
     private static final String           EPSG_900913          = "EPSG:900913";
     private static final String           EPSG_4326            = "EPSG:4326";
 
-    private static String                 wmsUrl               = "http://localhost/geoserver/wms";
-    private static String                 mediciUrl            = "http://localhost/acr";
+    private static String                 wmsUrl               = null;
+    private static String                 mediciUrl            = null;
 
     private static final Bounds           defaultBox           = new Bounds(-137.42, 19.28, -61.30,
                                                                        51.62);
@@ -117,8 +115,11 @@ public class GeoPage extends Page {
 
     public GeoPage(String tag, DispatchAsync dispatchAsync, HandlerManager eventBus) {
         super("GeoBrowser", dispatchAsync, eventBus, true);
+        mediciUrl = GWT.getHostPageBaseURL();
+        wmsUrl = GWT.getHostPageBaseURL() + "/geoproxy/wms";
+
         this.tag = tag;
-        Window.alert("GPage");
+
         eventBus.addHandler(LayerOpacityChangeEvent.TYPE,
                 new LayerOpacityChangeHandler() {
 
@@ -138,14 +139,6 @@ public class GeoPage extends Page {
                     }
                 });
 
-        Window.addResizeHandler(new ResizeHandler() {
-            public void onResize(ResizeEvent event) {
-                int newWidth = RootPanel.get("map").getOffsetWidth();
-                if (mapWidget != null) {
-                    mapWidget.setWidth((newWidth - 2) + "px");
-                }
-            }
-        });
         layout();
     }
 
@@ -180,7 +173,7 @@ public class GeoPage extends Page {
      * @param tag
      */
     private void buildMapUi(String tag) {
-        Window.alert("Building Map UI");
+
         encodedTag = null;
         if (tag != null) {
             encodedTag = URL.encode(tag);
@@ -217,8 +210,8 @@ public class GeoPage extends Page {
         });
     }
 
-    private void cleanApp() {
-        Window.alert("Cleanup");
+    private void cleanPage() {
+
         logger.log(Level.INFO, "Cleaning up for refresh");
         mapWidget = null;
         map = null;
@@ -233,7 +226,6 @@ public class GeoPage extends Page {
      */
     protected VerticalPanel createTagPanel(MultiWordSuggestOracle oracle) {
 
-        Window.alert("Creating tp");
         VerticalPanel vp = new VerticalPanel();
         vp.setSpacing(10);
 
@@ -296,7 +288,7 @@ public class GeoPage extends Page {
 
     protected FlowPanel createLayerSwitcher(LayerInfo[] layers,
             LocationInfo[] locations) {
-        Window.alert("Building Layer switcher");
+
         // List<String> layerNames = getLayerNames(result);
         FlowPanel dp = new FlowPanel();
 
@@ -576,7 +568,6 @@ public class GeoPage extends Page {
      * @param layerInfos
      */
     public void buildGwtmap(LayerInfo[] layerInfos) {
-        Window.alert("Building GWT Map");
         MapOptions defaultMapOptions = new MapOptions();
         defaultMapOptions.setProjection(EPSG_900913);
         // defaultMapOptions.setAllOverlays(true);
@@ -584,7 +575,7 @@ public class GeoPage extends Page {
         mapWidget = new MapWidget((RootPanel.get("map").getOffsetWidth() - 2)
                 + "px", "400px", defaultMapOptions);
         map = mapWidget.getMap();
-        Window.alert("Have widget");
+
         baseLayer = new OSM("OpenStreetMap", new String[] {
                 "//a.tile.openstreetmap.org/${z}/${x}/${y}.png",
                 "//b.tile.openstreetmap.org/${z}/${x}/${y}.png",
@@ -600,7 +591,7 @@ public class GeoPage extends Page {
         if (layerInfos != null) {
             for (LayerInfo layerInfo : layerInfos ) {
                 String name = layerInfo.getName();
-                Window.alert("Layer: " + name);
+
                 Bounds orgBnd = new Bounds(layerInfo.getMinx(),
                         layerInfo.getMiny(), layerInfo.getMaxx(),
                         layerInfo.getMaxy());
@@ -631,9 +622,7 @@ public class GeoPage extends Page {
                                 + "," + mapExtent.getLowerLeftY() + ","
                                 + mapExtent.getUpperRightX() + ","
                                 + mapExtent.getUpperRightY());
-                Window.alert("adding wms");
                 map.addLayer(wms);
-                Window.alert("done adding wms");
             }
         }
 
@@ -657,7 +646,6 @@ public class GeoPage extends Page {
 
         map.zoomToExtent(mapExtent);
         mapWidget.getElement().getFirstChildElement().getStyle().setZIndex(0);
-        Window.alert("Done");
     }
 
     /**
@@ -793,8 +781,8 @@ public class GeoPage extends Page {
     }
 
     public VerticalPanel buildGui(String tag) {
-        cleanApp();
-        Window.alert("Building GUI");
+        cleanPage();
+
         HorizontalPanel hp = new HorizontalPanel();
         FlowPanel dp = new FlowPanel();
         buildTagPanel(dp);
