@@ -76,17 +76,19 @@ import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
  */
 public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePresenter.Display> {
 
-    private int                pageSize        = DynamicListView.DEFAULT_PAGE_SIZE;
-    protected String           sortKey         = "date-desc";
+    private int                pageSize             = DynamicListView.DEFAULT_PAGE_SIZE;
+    protected String           sortKey              = "date-desc";
     protected String           viewTypePreference;
-    protected String           viewType        = DynamicTableView.GRID_VIEW_TYPE;
-    protected String           sizeType        = DynamicTableView.PAGE_SIZE_X1;
+    protected String           viewType             = DynamicTableView.GRID_VIEW_TYPE;
+    protected String           sizeType             = DynamicTableView.PAGE_SIZE_X1;
     protected int              numberOfPages;
-    protected int              currentPage     = 1;
+    protected int              currentPage          = 1;
 
-    private static String      initialSortKey  = "date-desc";
-    private static String      initialViewType = DynamicTableView.GRID_VIEW_TYPE;
-    private static String      initialSize     = DynamicTableView.PAGE_SIZE_X1;
+    private static String      initialSortKey       = "date-desc";
+    private static String      initialViewType      = DynamicTableView.GRID_VIEW_TYPE;
+    private static String      initialSize          = DynamicTableView.PAGE_SIZE_X1;
+
+    protected static Boolean   showTopLevelDatasets = false;
     protected BasePresenter<?> viewTypePresenter;
 
     public interface Display {
@@ -123,12 +125,15 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
         void changeListSizeNumbers();
     }
 
-    static public void setInitialKeys(String sort, String view) {
+    static public void setInitialKeys(String sort, String view, Boolean showTopLevelData) {
         if (sort != null && !sort.isEmpty()) {
             initialSortKey = sort;
         }
         if (view != null && !view.isEmpty()) {
             initialViewType = view;
+        }
+        if (showTopLevelData != null) {
+            showTopLevelDatasets = showTopLevelData;
         }
 
     }

@@ -38,15 +38,15 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-
 @SuppressWarnings("serial")
 public class ListQuery extends AuthorizedAction<ListQueryResult> {
-    private String orderBy;
-    private int    limit;
-    private int    offset;
-    private String tag;
-    private String collection;
-    private String bean;
+    private String  orderBy;
+    private int     limit;
+    private int     offset;
+    private String  tag;
+    private String  collection;
+    private String  bean;
+    private Boolean showTopLevelDatasets;
 
     public ListQuery() {
     }
@@ -103,5 +103,13 @@ public class ListQuery extends AuthorizedAction<ListQueryResult> {
 
     public void setBean(String bean) {
         this.bean = bean;
+    }
+
+    public void setShowDataLevel(Boolean show) {
+        this.showTopLevelDatasets = show;
+    }
+
+    public Boolean getShowDataLevel() {
+        return this.showTopLevelDatasets;
     }
 }
