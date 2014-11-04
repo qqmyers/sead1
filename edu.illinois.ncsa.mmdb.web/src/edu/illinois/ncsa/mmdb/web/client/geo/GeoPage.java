@@ -116,7 +116,7 @@ public class GeoPage extends Page {
     public GeoPage(String tag, DispatchAsync dispatchAsync, HandlerManager eventBus) {
         super("GeoBrowser", dispatchAsync, eventBus, true);
         mediciUrl = GWT.getHostPageBaseURL();
-        wmsUrl = GWT.getHostPageBaseURL() + "/geoproxy/wms";
+        wmsUrl = GWT.getHostPageBaseURL() + "geoproxy/wms";
 
         this.tag = tag;
 
@@ -245,6 +245,8 @@ public class GeoPage extends Page {
 
             @Override
             public void onClick(ClickEvent event) {
+
+                //FixMe - update history but don't fire event (which causes a new geopage to be created) and just handle the update needed within page?
                 History.newItem("geo_tag_" + tagTextBox.getText());
             }
         });
@@ -404,8 +406,8 @@ public class GeoPage extends Page {
         final Image open = new Image("images/downarrow.png");
         open.setVisible(false);
 
-        String htmlString = "<a href='" + getMediciUrl() + "/#dataset?id="
-                + uri + "' target='new'>" + title + "</a>";
+        String htmlString = "<a href='" + getMediciUrl() + "#dataset?id="
+                + uri + "'>" + title + "</a>";
         HTML htmltitle = new HTML(htmlString);
 
         hp.add(close);
@@ -462,8 +464,7 @@ public class GeoPage extends Page {
         final Image open = new Image("images/downarrow.png");
         open.setVisible(false);
 
-        String htmlString = "<a href='" + getMediciUrl()
-                + "/#map' target='new'>" + LOCATION_OF_DATASETS + "</a>";
+        String htmlString = "GeoTagged_Datasets";
         HTML htmltitle = new HTML(htmlString);
 
         hp.add(close);
@@ -675,9 +676,10 @@ public class GeoPage extends Page {
             // add the location to the vector layer
             Point point = new Point(locations[i].getLon(),
                     locations[i].getLat());
+            
             point.transform(new Projection(EPSG_4326), new Projection(
                     EPSG_900913));
-
+            
             VectorFeature feature = new VectorFeature(point, pointStyle);
             Attributes attributes = new Attributes();
             attributes.setAttribute("title", locations[i].getTitle());
@@ -721,7 +723,7 @@ public class GeoPage extends Page {
                         String uri = feature.getAttributes()
                                 .getAttributeAsString("uri");
                         String content = "<b><a href='" + getMediciUrl()
-                                + "/#dataset?id=" + uri + "' target='new'>"
+                                + "#dataset?id=" + uri + "' >"
                                 + title + "</a></b>";
 
                         // close button has a bug; so turn off "close" button

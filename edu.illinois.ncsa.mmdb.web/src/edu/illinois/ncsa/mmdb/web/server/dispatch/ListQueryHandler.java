@@ -182,6 +182,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                 item.setUri(row.get(0).getString());
                 item.setTitle(row.get(4).getString());
                 item.setAuthor(pbu.get((UriRef) row.get(5)).getName());
+                
                 if (row.get(2) != null) {
                     if (row.get(2).asObject() instanceof Date) {
                         item.setDate((Date) row.get(2).asObject());

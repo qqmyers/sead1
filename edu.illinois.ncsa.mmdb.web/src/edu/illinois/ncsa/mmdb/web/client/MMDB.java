@@ -1014,4 +1014,5 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     public static void setSessionPreference(String key, String value) {
         getSessionPreferences().put(key, value);
     }
+
 }

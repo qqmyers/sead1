@@ -62,6 +62,8 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -204,7 +206,7 @@ public class LoginPage extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                 orcidAuthLogin();
+                orcidAuthLogin();
                 /*
                 autologin = autoBox.getValue();
 
@@ -304,25 +306,23 @@ public class LoginPage extends Composite {
 
         return socialTable;
     }
-    
-        /**
+
+    /**
      * Login using Orcid oAuth2.
      */
     private void orcidAuthLogin() {
 
-                
-                String redirect_uri = GWT.getModuleBaseURL() + "oauth2callback/orcid";
-                String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
-                StringBuilder sb = new StringBuilder();
-                sb.append("client_id=" + MMDB._orcidClientId + "&");
-                sb.append("scope=" + URL.encodeQueryString("/authenticate") + "&");
-                sb.append("response_type=" + "code&");
-                sb.append("redirect_uri=" + URL.encodeQueryString(redirect_uri) + "&");
-                sb.append("state=" + "magic-bean");
-                String url = orcidAuthorizeURL + "?" + sb.toString();
-                Window.Location.assign(url);
+        String redirect_uri = "http://sead.ncsa.illinois.edu/projects/authredirect?server=" + GWT.getModuleBaseURL() + "oauth2callback/orcid";
+        String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
+        StringBuilder sb = new StringBuilder();
+        sb.append("client_id=" + MMDB._orcidClientId + "&");
+        sb.append("scope=" + URL.encodeQueryString("/authenticate") + "&");
+        sb.append("response_type=" + "code&");
+        sb.append("redirect_uri=" + URL.encodeQueryString(redirect_uri) + "&");
+        sb.append("state=" + "magic-bean");
+        String url = orcidAuthorizeURL + "?" + sb.toString();
+        Window.Location.assign(url);
     }
-    
 
     public static native void checkForOauth2Token(String googleClientId, TokenCallback tCallback) /*-{
         
@@ -406,7 +406,7 @@ public class LoginPage extends Composite {
         });
     }
 
-    private static void doOauth2Authenticate(final String token, final AuthenticationCallback callback) {
+    static void doOauth2Authenticate(final String token, final AuthenticationCallback callback) {
         dispatchasync.execute(new GoogleUserInfo(token), new AsyncCallback<GoogleUserInfoResult>() {
 
             @Override
@@ -448,6 +448,7 @@ public class LoginPage extends Composite {
                             mainWindow.retrieveUserInfoByName(result.getEmail(), sessionKey, callback);
                         }
                         //Set timer to renew credentials
+                        refreshCheck(result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L));
                         //Window.alert("Expires at:" + result.getExpirationTime());
                         // setAutologin(true);
                     }
@@ -701,6 +702,49 @@ public class LoginPage extends Composite {
         feedbackPanel.add(message);
     }
 
+    public static void refreshCheck(int seconds) {
+
+        // Create a new timer that calls Window.alert().
+        Timer t = new Timer() {
+            @Override
+            public void run() {
+                /*Once the loginpage is shown, it's internal logic determines what happens next.
+                 * Right now, if the user succeeds, doWithPermissions("login") gets called
+                 */
+                MMDB.credChangeOccuring = true;
+                if (LoginPage.getAutologin()) {
+                    //Try to pick up existing credential silently
+                    LoginPage.checkForOauth2Token(MMDB._googleClientId, new TokenCallback() {
+                        @Override
+                        public void onFailure() {
+                            History.newItem("logout_st", true);
+                        }
+
+                        @Override
+                        public void onSuccess(String token) {
+                            //Silent or not, we have a token and will complete silently
+                            LoginPage.doOauth2Authenticate(token, new AuthenticationCallback() {
+                                @Override
+                                public void onFailure() {
+                                    History.newItem("logout_st", true);
+                                }
+
+                                @Override
+                                public void onSuccess(String userUri, String sessionKey) {
+                                    GWT.log(userUri + " logged in");
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    History.newItem("logout_st", true);
+                }
+            }
+        };
+
+        // Schedule the timer to run once in 5 seconds.
+        t.schedule(seconds * 1000);
+    }
 }
 
 class Entry extends JavaScriptObject {
