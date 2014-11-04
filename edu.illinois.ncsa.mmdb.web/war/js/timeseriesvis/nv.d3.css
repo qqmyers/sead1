@@ -142,8 +142,9 @@
  * SVG CSS
  */
 
+/**SEAD - scoping svg styling to the d3TimeseriesVis - otherwise it affects the OpenLayers feature layer on maps*/
 
-svg {
+#d3TimeseriesVis svg {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
