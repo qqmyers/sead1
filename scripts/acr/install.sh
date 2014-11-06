@@ -30,7 +30,7 @@ fi
 apt-get -y update
 
 # install rest of packages
-apt-get -y install openjdk-7-jre-headless openjdk-7-jre-lib ffmpeg imagemagick mysql-server poppler-utils tomcat6 ttf-dejavu-core ttf-dejavu-extra ttf-kochi-gothic ttf-kochi-mincho ttf-baekmuk ttf-arphic-gbsn00lp ttf-arphic-bsmi00lp ttf-arphic-gkai00mp ttf-arphic-bkai00mp ttf-sazanami-gothic ttf-kochi-gothic ttf-sazanami-mincho ttf-kochi-mincho ttf-wqy-microhei ttf-wqy-zenhei ttf-indic-fonts-core ttf-telugu-fonts ttf-oriya-fonts ttf-kannada-fonts ttf-bengali-fonts ubuntu-restricted-extras unzip gdal-bin python-gdal proj libgdal-dev nginx
+apt-get -y install openjdk-7-jre-headless openjdk-7-jre-lib ffmpeg imagemagick mysql-server poppler-utils tomcat6 ttf-dejavu-core ttf-dejavu-extra ttf-kochi-gothic ttf-kochi-mincho ttf-baekmuk ttf-arphic-gbsn00lp ttf-arphic-bsmi00lp ttf-arphic-gkai00mp ttf-arphic-bkai00mp ttf-sazanami-gothic ttf-kochi-gothic ttf-sazanami-mincho ttf-kochi-mincho ttf-wqy-microhei ttf-wqy-zenhei ttf-indic-fonts-core ttf-telugu-fonts ttf-oriya-fonts ttf-kannada-fonts ttf-bengali-fonts ubuntu-restricted-extras unzip gdal-bin python-gdal proj libgdal-dev nginx p7zip-full
 
 # remove java-6
 apt-get -y purge --auto-remove 6-jre*
@@ -132,52 +132,35 @@ mkdir /var/lib/tomcat6/webapps/ROOT
 cp -r static/* /var/lib/tomcat6/webapps/ROOT
 echo '<Context path="/" docBase="/var/lib/tomcat6/webapps/ROOT"/>' > /etc/tomcat6/Catalina/localhost/ROOT.xml
 
+# install all update scripts
+cp update-*.sh /home/medici
+cp *.log4j /home/medici
+
 # install geobrowse
 echo "Installing geobrowse"
-wget -q -O geobrowse.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI2/latest/artifact/JOB1/geobrowse.war/geobrowse.war
-unzip -q -d geobrowse geobrowse.war
-echo "domain=http://${HOSTNAME}/acr" > geobrowse/WEB-INF/classes/geobrowse.properties 
-echo "enableAnonymous=${ANONYMOUS}" >> geobrowse/WEB-INF/classes/geobrowse.properties
-echo "remoteAPIKey=${APIKEY}" >> geobrowse/WEB-INF/classes/geobrowse.properties
-echo "google.client_id=${GOOGLEID}" >> geobrowse/WEB-INF/classes/geobrowse.properties
-echo "geoserver=http://${HOSTNAME}/acr/geoproxy" >> geobrowse/WEB-INF/classes/geobrowse.properties
-echo "proxiedgeoserver=http://${HOSTNAME}/geoserver" >> geobrowse/WEB-INF/classes/geobrowse.properties
-rm -f geobrowse/WEB-INF/classes/log4j.xml
-echo "org.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger" > geobrowse/WEB-INF/classes/commons-logging.properties
-cp geobrowse.log4j geobrowse/WEB-INF/classes/properties.log4j
-chown -R tomcat6 geobrowse
-rm -rf /var/lib/tomcat6/webapps/geobrowse
-mv geobrowse /var/lib/tomcat6/webapps
+echo "domain=http://${HOSTNAME}/acr" > /home/medici/geobrowse.properties 
+echo "enableAnonymous=${ANONYMOUS}" >> /home/medici/geobrowse.properties
+echo "remoteAPIKey=${APIKEY}" >> /home/medici/geobrowse.properties
+echo "google.client_id=${GOOGLEID}" >> /home/medici/geobrowse.properties
+echo "geoserver=http://${HOSTNAME}/acr/geoproxy" >> /home/medici/geobrowse.properties
+echo "proxiedgeoserver=http://${HOSTNAME}/geoserver" >> /home/medici/geobrowse.properties
+/home/medici/update-geobrowse.sh
 
 # install discovery
 echo "Installing discovery"
-wget -q -O discovery.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI2/latest/artifact/JOB1/discovery.war/discovery.war
-unzip -q -d discovery discovery.war
-echo "domain=http://${HOSTNAME}/acr" > discovery/WEB-INF/classes/discovery.properties 
-echo "enableAnonymous=${ANONYMOUS}" >> discovery/WEB-INF/classes/discovery.properties
-echo "remoteAPIKey=${APIKEY}" >> discovery/WEB-INF/classes/discovery.properties
-echo "google.client_id=${GOOGLEID}" >> discovery/WEB-INF/classes/discovery.properties
-rm -f discovery/WEB-INF/classes/log4j.xml
-echo "org.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger" > discovery/WEB-INF/classes/commons-logging.properties
-cp discovery.log4j discovery/WEB-INF/classes/properties.log4j
-chown -R tomcat6 discovery
-rm -rf /var/lib/tomcat6/webapps/discovery
-mv discovery /var/lib/tomcat6/webapps
+echo "domain=http://${HOSTNAME}/acr" > /home/medici/discovery.properties 
+echo "enableAnonymous=${ANONYMOUS}" >> /home/medici/discovery.properties
+echo "remoteAPIKey=${APIKEY}" >> /home/medici/discovery.properties
+echo "google.client_id=${GOOGLEID}" >> /home/medici/discovery.properties
+/home/medici/update-discovery.sh
 
 # install dashboard
 echo "Installing dashboard"
-wget -q -O dashboard.war https://opensource.ncsa.illinois.edu/bamboo/browse/MMDB-MEDICI2/latest/artifact/JOB1/dashboard.war/dashboard.war
-unzip -q -d dashboard dashboard.war
-echo "domain=http://${HOSTNAME}/acr" > dashboard/WEB-INF/classes/dashboard.properties 
-echo "enableAnonymous=${ANONYMOUS}" >> dashboard/WEB-INF/classes/dashboard.properties
-echo "remoteAPIKey=${APIKEY}" >> dashboard/WEB-INF/classes/dashboard.properties
-echo "google.client_id=${GOOGLEID}" >> dashboard/WEB-INF/classes/dashboard.properties
-rm -f dashboard/WEB-INF/classes/log4j.xml
-echo "org.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger" > dashboard/WEB-INF/classes/commons-logging.properties
-cp dashboard.log4j dashboard/WEB-INF/classes/properties.log4j
-chown -R tomcat6 dashboard
-rm -rf /var/lib/tomcat6/webapps/dashboard
-mv dashboard /var/lib/tomcat6/webapps
+echo "domain=http://${HOSTNAME}/acr" > /home/medici/dashboard.properties 
+echo "enableAnonymous=${ANONYMOUS}" >> /home/medici/dashboard.properties
+echo "remoteAPIKey=${APIKEY}" >> /home/medici/dashboard.properties
+echo "google.client_id=${GOOGLEID}" >> /home/medici/dashboard.properties
+/home/medici/update-dashboard.sh
 
 # install medici extractor
 echo "Installing Medici Extractor"
@@ -192,12 +175,10 @@ sed -e "s#^geoserver.username=.*\$#geoserver.username=${GEO_USER}#" \
     -e "s#^geoserver.password=.*\$#geoserver.password=${GEO_PASSWORD}#" \
     -e "s#^geoserver.server=.*\$#geoserver.server=http://${HOSTNAME}/geoserver#" \
     -e "s#^geoserver.owsserver=.*\$#geoserver.owsserver=http://${HOSTNAME}/geoserver/wms#" extractor.properties > /home/medici/extractor.properties
-cp -f update-extractor.sh /home/medici
 /home/medici/update-extractor.sh
 
 # install medici web app
 echo "Installing Medici WebApp"
-cp acr.log4j /home/medici
 sed -e "s/^#*remoteAPI=.*$/remoteAPI=${APIKEY}/" \
     -e "s/^#*mail.from=.*$/mail.from=${MEDICI_EMAIL}/" \
     -e "s/^#*user.0.email=.*$/user.0.email=${MEDICI_EMAIL}/" \
@@ -207,7 +188,6 @@ sed -e "s/^#*remoteAPI=.*$/remoteAPI=${APIKEY}/" \
 echo "geoserver=http://${HOSTNAME}/geoserver" > /home/medici/acr.common
 echo "geouser=${GEO_USER}" >> /home/medici/acr.common
 echo "geopassword=${GEO_PASSWORD}" >> /home/medici/acr.common
-cp -f update-web.sh /home/medici
 /home/medici/update-web.sh
 
 # All done
