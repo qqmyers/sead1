@@ -121,7 +121,7 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
                     username = (String) session.getAttribute(AuthenticatedServlet.AUTHENTICATED_AS);
                     log.debug("Found session - Sucessfully authenticated as " + username);
                 } else {
-                    log.debug("Expired token found: exp = " + exp);
+                    log.warn("Expired token found: exp = " + exp);
                 }
             }
             else {
