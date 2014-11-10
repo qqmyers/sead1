@@ -134,14 +134,6 @@
 	
 	<!-- DisoveryPage servlets-->
 	<servlet>
-    	<servlet-name>DiscoveryHome</servlet-name>
-	    <servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.DiscoveryHome</servlet-class>
-  	</servlet>
-  	<servlet>
-    	<servlet-name>ContentPage</servlet-name>
-    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.Content</servlet-class>
-  	</servlet>
-  	<servlet>
     	<servlet-name>GetPublishedCollections</servlet-name>
     	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.GetPublishedCollections</servlet-class>
   	</servlet>
@@ -244,14 +236,6 @@
 
 	<!-- DisocveryPage Servlet Mappings -->
 	<servlet-mapping>
-    	<servlet-name>DiscoveryHome</servlet-name>
-	    <url-pattern>/mmdb/discovery/home</url-pattern>
-  	</servlet-mapping>
-  	<servlet-mapping>
-    	<servlet-name>ContentPage</servlet-name>
-    	<url-pattern>/mmdb/discovery/contents</url-pattern>
-  	</servlet-mapping>
-  	<servlet-mapping>
     	<servlet-name>GetPublishedCollections</servlet-name>
     	<url-pattern>/mmdb/discovery/GetPublishedCollections</url-pattern>
   	</servlet-mapping>
