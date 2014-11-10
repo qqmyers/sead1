@@ -132,6 +132,29 @@
 	</servlet>
 	
 	
+	<!-- DisoveryPage servlets-->
+	<servlet>
+    	<servlet-name>DiscoveryHome</servlet-name>
+	    <servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.DiscoveryHome</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>ContentPage</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.Content</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>GetPublishedCollections</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.GetPublishedCollections</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>CollectionContents</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.CollectionContents</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>GetBibliographicInfo</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.GetBibliographicInfo</servlet-class>
+  	</servlet>
+  
+  
 
 	<!-- servlet mapping -->
 	<servlet-mapping>
@@ -195,16 +218,17 @@
 		<url-pattern>/BatchDownload</url-pattern>
 	</servlet-mapping>
 	
+	<!-- ORCID Oauth2 servlet mappings -->
 	<servlet-mapping>
 		<servlet-name>OAuthCallback</servlet-name>
 		<url-pattern>/oauth2callback/*</url-pattern>
 	</servlet-mapping>
-	
 	<servlet-mapping>
 		<servlet-name>OAuthAuthorization</servlet-name>
 		<url-pattern>/oauth2/auth/*</url-pattern>
 	</servlet-mapping>
 	
+	<!-- Geo Page servelet mappings -->
 	<servlet-mapping>
 	    <servlet-name>GeoProxy</servlet-name>
 	    <url-pattern>/geoproxy/*</url-pattern>
@@ -217,6 +241,29 @@
 		<servlet-name>mediciProxyImpl</servlet-name>
 		<url-pattern>/mmdb/mediciProxy</url-pattern>
 	</servlet-mapping>
+
+	<!-- DisocveryPage Servlet Mappings -->
+	<servlet-mapping>
+    	<servlet-name>DiscoveryHome</servlet-name>
+	    <url-pattern>/mmdb/discovery/home</url-pattern>
+  	</servlet-mapping>
+  	<servlet-mapping>
+    	<servlet-name>ContentPage</servlet-name>
+    	<url-pattern>/mmdb/discovery/contents</url-pattern>
+  	</servlet-mapping>
+  	<servlet-mapping>
+    	<servlet-name>GetPublishedCollections</servlet-name>
+    	<url-pattern>/mmdb/discovery/GetPublishedCollections</url-pattern>
+  	</servlet-mapping>
+  	<servlet-mapping>
+    	<servlet-name>CollectionContents</servlet-name>
+    	<url-pattern>/mmdb/discovery/GetContents</url-pattern>
+  	</servlet-mapping>
+  	<servlet-mapping>
+	    <servlet-name>GetBibliographicInfo</servlet-name>
+    	<url-pattern>/mmdb/discovery/GetBiblio</url-pattern>
+	</servlet-mapping>
+  
 
 	<!-- Servlet context listener -->
 	<listener>
@@ -298,6 +345,11 @@
     
 	<servlet-name>wmsProxyImpl</servlet-name>
 	<servlet-name>mediciProxyImpl</servlet-name>
+		<servlet-name>DiscoveryHome</servlet-name>
+	<servlet-name>ContentPage</servlet-name>
+	<servlet-name>GetPublishedCollections</servlet-name>
+	<servlet-name>CollectionContents</servlet-name>
+	<servlet-name>GetBibliographicInfo</servlet-name>
   </filter-mapping>
 	
 

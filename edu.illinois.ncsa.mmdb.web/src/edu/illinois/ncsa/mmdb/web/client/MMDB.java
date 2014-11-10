@@ -95,7 +95,9 @@ import edu.illinois.ncsa.mmdb.web.client.ui.AuthenticationCallback;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
+import edu.illinois.ncsa.mmdb.web.client.ui.DashboardPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
+import edu.illinois.ncsa.mmdb.web.client.ui.DiscoveryPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.HomePage;
 import edu.illinois.ncsa.mmdb.web.client.ui.JiraIssuePage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListCollectionsPage;
@@ -185,6 +187,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     public static String               _orcidClientId                   = null;
 
     public static String               _projectName                     = "SEAD ACR";
+    public static String               _projectDescription              = "A generic SEAD Project Space";
     public static boolean              bigData                          = false;                              //Server's bigData flag
 
     private static void reportUmbrellaError(@NotNull Throwable e) {
@@ -312,9 +315,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             public void onSuccess(ConfigurationResult result) {
                 bigData = result.getConfiguration(ConfigurationKey.BigData).equalsIgnoreCase("true");
                 _projectName = result.getConfiguration(ConfigurationKey.ProjectName);
+                _projectDescription = result.getConfiguration(ConfigurationKey.ProjectDescription);
                 _orcidClientId = result.getConfiguration(ConfigurationKey.OrcidClientId);
                 projectNameLabel.setText(_projectName);
-                projectNameLabel.setTitle(result.getConfiguration(ConfigurationKey.ProjectDescription));
+                projectNameLabel.setTitle(_projectDescription);
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
                 PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
                 DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType));
@@ -673,6 +677,14 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 tag = URL.decode(token.substring("geo_tag_".length()));
             }
             showGeoPage(tag);
+        } else if (token.startsWith("discovery")) {
+            String collection = null;
+            if (token.startsWith("discovery_")) {
+                collection = URL.decode(token.substring("discovery_".length()));
+            }
+            showDiscoveryPage(collection);
+        } else if (token.startsWith("dashboard")) {
+            showDashboardPage();
         } else if (token.startsWith("signup")) {
             showSignupPage();
         } else if (token.startsWith("home")) {
@@ -704,6 +716,18 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showListDatasetsPage();
         }
         previousHistoryToken = token;
+    }
+
+    private void showDashboardPage() {
+        GWT.log("Loading Dashboard Page", null);
+        mainContainer.clear();
+        mainContainer.add(new DashboardPage("Dashboard", dispatchAsync, eventBus));
+    }
+
+    private void showDiscoveryPage(String collection) {
+        GWT.log("Loading Discovery Page", null);
+        mainContainer.clear();
+        mainContainer.add(new DiscoveryPage(collection, "Published Collections", dispatchAsync, eventBus));
     }
 
     private void showAdminPage() {

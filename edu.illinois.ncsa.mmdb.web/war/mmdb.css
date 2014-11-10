@@ -835,6 +835,7 @@ width:1000px;
 .titlePanel {
     width: 100%;
     padding: 10px;
+    border-collapse: separate; !important
 }
 
 .pageTitle {
