@@ -4,7 +4,7 @@ var creator = '';
 var contact = '';
 var keyword = '';
 
-var ft; //Filtrify
+var ft; // Filtrify
 
 function homePageJsonParser(json) {
 
@@ -40,42 +40,49 @@ function homePageJsonParser(json) {
 		singleCollection = false;
 	} catch (err) {
 	}
- 
+
 	if (singleCollection) {
 		writeCollection('0', json, obj.sparql.results.result);
 	} else {
-		for ( var i = 0; i < obj.sparql.results.result.length; i++) {
+		for (var i = 0; i < obj.sparql.results.result.length; i++) {
 			writeCollection(i, json, obj.sparql.results.result[i]);
 		}
 	}
 	$("#home-loading").hide();
-	ft = $.filtrify("xmlBody", "facetedSearch", { close : true, 
-	callback : function(query, match, mismatch) {
-	
-	if(!mismatch.length) {
-		$("#legend").html("<i>Viewing all collections.</i>");
-		$("div#reset").hide();
-	} else {
-		$("div#reset").show();
-		var category, tags, i, tag, legend = "<h4>Viewing:</h4>";
-		for(category in query) {
-			tags=query[category];
-			if(tags.length) {
-				legend += "<p><span>" + category + ":</span>";
-				for(i=0; i<tags.length; i++) {
-					tag=tags[i];
-					legend+="<em>" + tag + "</em>";
+	ft = $.filtrify("xmlBody", "facetedSearch", {
+		close : true,
+		callback : function(query, match, mismatch) {
+
+			if (!mismatch.length) {
+				$("#legend").html("<i>Viewing all collections.</i>");
+				$("div#reset").hide();
+			} else {
+				$("div#reset").show();
+				var category, tags, i, tag, legend = "<h4>Viewing:</h4>";
+				for (category in query) {
+					tags = query[category];
+					if (tags.length) {
+						legend += "<p><span>" + category + ":</span>";
+						for (i = 0; i < tags.length; i++) {
+							tag = tags[i];
+							legend += "<em>" + tag + "</em>";
+						}
+						legend += "</p>";
+					}
+					;
 				}
-				legend += "</p>";
-			};
-		};
-		legend += "<p><i>" + match.length + " collection" + (match.length !== 1 ? "s" : "") + " found.</i></p>";
-	$("#legend").html(legend);
-	};
-	}
-});
+				;
+				legend += "<p><i>" + match.length + " collection"
+						+ (match.length !== 1 ? "s" : "") + " found.</i></p>";
+				$("#legend").html(legend);
+			}
+			;
+		}
+	});
 
-
+	$("div#reset span").click(function() {
+		filterreset();
+	});
 	// $("#xmlBody").append(($("<div/>")).html(div_html));
 }
 
@@ -86,7 +93,7 @@ function writeCollection(id, json, result) {
 	var isDeleted = false;
 
 	var jsonBinding = result.binding;
-	for ( var j = 0; j < jsonBinding.length; j++) {
+	for (var j = 0; j < jsonBinding.length; j++) {
 		$.each(jsonBinding[j], function(key, value) {
 			if (value == 'tagID') {
 				uri = jsonBinding[j]['uri'];
@@ -116,8 +123,8 @@ function writeCollection(id, json, result) {
 
 			if (abs.length > 750) {
 				summary += "...";
-				$("#abstract" + id + ">a").attr("href", "#discovery_" + uri).html(
-				"more ...");
+				$("#abstract" + id + ">a").attr("href", "#discovery_" + uri)
+						.html("more ...");
 			}
 			$("#abstract" + id + ">pre").html(summary);
 			$("#abstract" + id).css("visibility", "visible");
@@ -135,7 +142,6 @@ function writeCollection(id, json, result) {
 		});
 	}
 }
-
 
 function filterreset() {
 	ft.reset();

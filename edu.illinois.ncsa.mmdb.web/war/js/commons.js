@@ -17,12 +17,11 @@ function roundNumber(num, dec) {
 	return result;
 }
 
-
 function loadPublishedCollections() {
 	/*
-	 $("#home-loading").show();
+	 * $("#home-loading").show();
 	 */
-	
+
 	$.ajax({
 		type : "GET",
 		url : "mmdb/discovery/GetPublishedCollections",
@@ -30,15 +29,12 @@ function loadPublishedCollections() {
 		success : homePageJsonParser,
 		error : homePageErrorParser
 	});
-	$("div#reset span").click(function() {
-		filterreset();
-	});
+
 }
 
 function homePageErrorParser(jqXHR, textStatus, errorThrown) {
 	$("div#xmlBody").html("Error: Unable to load Published Datasets");
 }
-
 
 function loadProjectInfo(pI) {
 	try {
@@ -56,7 +52,7 @@ function loadProjectInfo(pI) {
 		var nameURI;
 		var descURI;
 		var urlURI;
-		for ( var i = 0; jsonObj.sparql.results.result
+		for (var i = 0; jsonObj.sparql.results.result
 				&& i < jsonObj.sparql.results.result.length; i++) {
 
 			var jsonBinding = jsonObj.sparql.results.result[i].binding;
@@ -73,7 +69,7 @@ function loadProjectInfo(pI) {
 
 		}
 
-		for ( var i = 0; jsonObj.sparql.results.result
+		for (var i = 0; jsonObj.sparql.results.result
 				&& i < jsonObj.sparql.results.result.length; i++) {
 
 			// for(var j =0; j<jsonObj.sparql.results.result[i].binding.length;
@@ -134,7 +130,7 @@ function pageBiblioJsonParser(id, json) {
 			var jsonBinding = obj.sparql.results.result.binding;
 			getBiblioBindingsForPage(jsonBinding);
 		} else {
-			for ( var i = 0; i < obj.sparql.results.result.length; i++) {
+			for (var i = 0; i < obj.sparql.results.result.length; i++) {
 				var jsonBinding = obj.sparql.results.result[i].binding;
 				getBiblioBindingsForPage(jsonBinding);
 			}
@@ -167,7 +163,7 @@ function pageBiblioJsonParser(id, json) {
 	if (creators.length != 0) {
 		var creatorString = creators[0];
 		var datacreatorString = creatornames[0];
-		for ( var i = 1; i < creators.length; i++) {
+		for (var i = 1; i < creators.length; i++) {
 			creatorString += "," + creators[i];
 			datacreatorString += ", " + creatornames[i];
 		}
@@ -178,7 +174,7 @@ function pageBiblioJsonParser(id, json) {
 	if (contacts.length != 0) {
 		var contactString = contacts[0];
 		var datacontactString = contactnames[0];
-		for ( var i = 1; i < contacts.length; i++) {
+		for (var i = 1; i < contacts.length; i++) {
 			contactString += "," + contacts[i];
 			datacontactString += ", " + contactnames[i];
 		}
@@ -188,7 +184,7 @@ function pageBiblioJsonParser(id, json) {
 	}
 	if (coll_location.length != 0) {
 		var datalocationString = coll_location[0];
-		for ( var i = 1; i < coll_location.length; i++) {
+		for (var i = 1; i < coll_location.length; i++) {
 			datalocationString += ", " + coll_location[i];
 		}
 
@@ -197,12 +193,12 @@ function pageBiblioJsonParser(id, json) {
 		$("#coll" + id).attr("data-location", datalocationString);
 	}
 	if (keywords.length != 0) {
-		var keywordString = "<i><a href='" + tag_Path + keywords[0]
-				+ "'>" + keywords[0] + "</a></i>";
+		var keywordString = "<i><a href='" + tag_Path + keywords[0] + "'>"
+				+ keywords[0] + "</a></i>";
 		var datakeywordString = keywords[0];
-		for ( var i = 1; i < keywords.length; i++) {
-			keywordString += ", <i><a href='" + tag_Path + keywords[i]
-					+ "'>" + keywords[i] + "</a></i>";
+		for (var i = 1; i < keywords.length; i++) {
+			keywordString += ", <i><a href='" + tag_Path + keywords[i] + "'>"
+					+ keywords[i] + "</a></i>";
 			datakeywordString += ", " + keywords[i];
 		}
 
@@ -212,12 +208,10 @@ function pageBiblioJsonParser(id, json) {
 	}
 	if (descriptors.length != 0) {
 		descriptorString = "";
-		for ( var i = 0; i < descriptors.length; i++) {
-			descriptorString += " <a href='" + dataset_Path
-					+ descriptors[i]
-					+ "'><img class='discoveryPreview' src='"
-					+ image_Path + descriptors[i]
-					+ "' alt = 'Click to view' />" + "</a> ";
+		for (var i = 0; i < descriptors.length; i++) {
+			descriptorString += " <a href='" + dataset_Path + descriptors[i]
+					+ "'><img class='discoveryPreview' src='" + image_Path
+					+ descriptors[i] + "' alt = 'Click to view' />" + "</a> ";
 
 		}
 
@@ -231,7 +225,7 @@ function getBiblioBindingsForPage(jsonBinding) {
 	if (jsonBinding.length == null) {
 		getBiblioAttributesForPage(jsonBinding);
 	} else {
-		for ( var i = 0; i < jsonBinding.length; i++) {
+		for (var i = 0; i < jsonBinding.length; i++) {
 			getBiblioAttributesForPage(jsonBinding[i]);
 		}
 	}
@@ -329,11 +323,11 @@ function createBlock(id, element) {
 	$("#title" + id + ">table>tbody>tr").append(
 			$("<td/>").append(
 					$("<a/>").attr("id", "acrlink" + id).append(
-							$("<img/>")
-									.attr("src", "images/open_in_acr.png")
-									.attr("title", "View Collection Page").attr("alt",
-											"View Collection Page").attr("border", "0")
-									.css('margin-top', '-15px'))));
+							$("<img/>").attr("src", "images/open_in_acr.png")
+									.attr("title", "View Collection Page")
+									.attr("alt", "View Collection Page").attr(
+											"border", "0").css('margin-top',
+											'-15px'))));
 	$("#coll" + id).append(
 			$("<div/>").attr("class", "well").attr("id", "div" + id));
 	$("#div" + id).append(
@@ -363,5 +357,3 @@ function createBlock(id, element) {
 			($("<p/>")).attr("id", "description" + id).css("visibility",
 					"hidden"));
 }
-
-
