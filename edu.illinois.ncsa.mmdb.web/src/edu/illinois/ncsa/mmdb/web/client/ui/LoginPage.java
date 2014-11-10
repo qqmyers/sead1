@@ -313,7 +313,9 @@ public class LoginPage extends Composite {
     private void orcidAuthLogin() {
 
         String redirect_uri = "http://sead.ncsa.illinois.edu/projects/authredirect?server=" + GWT.getModuleBaseURL() + "oauth2callback/orcid";
-        String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
+        // String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
+        //Temporarily point at sandbox for testing
+        String orcidAuthorizeURL = "https://sandbox.orcid.org/oauth/authorize";
         StringBuilder sb = new StringBuilder();
         sb.append("client_id=" + MMDB._orcidClientId + "&");
         sb.append("scope=" + URL.encodeQueryString("/authenticate") + "&");
