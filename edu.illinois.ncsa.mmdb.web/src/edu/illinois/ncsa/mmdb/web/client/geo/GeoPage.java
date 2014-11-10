@@ -215,7 +215,7 @@ public class GeoPage extends Page {
         logger.log(Level.INFO, "Cleaning up for refresh");
         mapWidget = null;
         map = null;
-        mainLayoutPanel.clear();
+        clear();
     }
 
     /**
@@ -676,10 +676,10 @@ public class GeoPage extends Page {
             // add the location to the vector layer
             Point point = new Point(locations[i].getLon(),
                     locations[i].getLat());
-            
+
             point.transform(new Projection(EPSG_4326), new Projection(
                     EPSG_900913));
-            
+
             VectorFeature feature = new VectorFeature(point, pointStyle);
             Attributes attributes = new Attributes();
             attributes.setAttribute("title", locations[i].getTitle());
