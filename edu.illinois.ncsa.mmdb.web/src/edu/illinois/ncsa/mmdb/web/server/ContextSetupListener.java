@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -100,11 +100,11 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /**
  * Create users and roles specified in the server.properties file.
- * 
+ *
  * FIXME: add roles to admin and guest account and not specific permissions
- * 
+ *
  * @author Luigi Marini, Rob Kooper
- * 
+ *
  */
 public class ContextSetupListener implements ServletContextListener {
     private static Log                  log   = LogFactory.getLog(ContextSetupListener.class);
@@ -306,6 +306,9 @@ public class ContextSetupListener implements ServletContextListener {
             Set<Triple> triples = RdfXml.parse(is);
             oc.addTriples(triples);
             log.debug("Read " + triples.size() + " ontology triple(s)");
+            for (Triple t : triples ) {
+                log.trace(t.toString());
+            }
         } catch (FileNotFoundException e) {
             log.warn("no ontology found");
         } catch (IOException e) {
@@ -462,11 +465,11 @@ public class ContextSetupListener implements ServletContextListener {
     /* Reset the usermetadata or relationship sets:
      * remove all triples that indicate predicates have an rdf:type of editPredicate
      * (legacy) assure that all predicates that had an rdf:type editPredicate have an rdf:type viewPredicate
-     * 
+     *
      * editPredicate - used to decide which predicates users can add
-     * viewPredicate - used to show the larger list of predicates that should be viewable (currently includes just 
+     * viewPredicate - used to show the larger list of predicates that should be viewable (currently includes just
      *                  the current and past sets of editPredicates
-     *                  
+     *
      */
     private void reset(Context context, Resource editPredicate, Resource viewPredicate) {
 
