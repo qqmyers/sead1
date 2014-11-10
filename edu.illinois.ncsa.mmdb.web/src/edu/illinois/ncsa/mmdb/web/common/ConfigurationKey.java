@@ -29,13 +29,13 @@ public enum ConfigurationKey {
     PresentationPageViewType("presentation.pageviewtype", ""), //$NON-NLS-1$
 
     // name of medici server
-    MediciName("medici.name", null), //$NON-NLS-1$ 
+    MediciName("medici.name", null), //$NON-NLS-1$
 
     // location of lucene search index
-    SearchPath("search.path", null), //$NON-NLS-1$ 
+    SearchPath("search.path", null), //$NON-NLS-1$
 
     // location of taxonomy file
-    TaxonomyFile("taxonomy.file", "taxonomy.owl"), //$NON-NLS-1$ //$NON-NLS-2$ 
+    TaxonomyFile("taxonomy.file", "taxonomy.owl"), //$NON-NLS-1$ //$NON-NLS-2$
 
     // google map key
     GoogleMapKey("google.mapkey", ""), //$NON-NLS-1$ //$NON-NLS-2$
@@ -49,10 +49,10 @@ public enum ConfigurationKey {
     GoogleClientId("google.client_id", ""),
     GoogleDeviceClientId("google.device_client_id", ""),
 
-    // Orcid oAuth 
+    // Orcid oAuth
     OrcidClientId("orcid.client_id", ""),
     OrcidClientSecret("orcid.client_secret", ""),
-    
+
     //optimizations for big data (many files)
     BigData("bigdata", "false"),
 
@@ -60,7 +60,13 @@ public enum ConfigurationKey {
     TokenKeyLifetime("token.key.lifetime", "5"),
 
     //Use Google Document Viewer
-    UseGoogleDocViewer("previewer.google_doc_viewer", "true");
+    UseGoogleDocViewer("previewer.google_doc_viewer", "true"),
+
+    //Geospatial data support
+    //GeoServer("geo.server", ""), - Fixed at <app URL>/geoproxy, e.g. http://sead.ncsa.illinois.edu/acr/geoproxy
+    //ProxiedGeoServer("geo.proxied.server", ""), - fixed at <server>/geoserver, e.g. http://sead.ncsa.illinois.edu/geoserver
+    GeoUser("geo.user", ""),
+    GeoPassword("geo.password", "");
 
     private final String propertyKey;
     private final String defaultValue;
