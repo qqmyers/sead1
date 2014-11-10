@@ -44,5 +44,13 @@
 		<servlet-name>Export</servlet-name>
 		<url-pattern>/export</url-pattern>
 	</servlet-mapping>
+	<servlet>
+		<servlet-name>authredirect</servlet-name>
+		<servlet-class>org.sead.acr.community.Oauth2Redirect</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>authredirect</servlet-name>
+		<url-pattern>/authredirect</url-pattern>
+	</servlet-mapping>
 
 </web-app>

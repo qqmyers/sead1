@@ -26,7 +26,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-httpclient-contrib-ssl-3.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-pool-1.5.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gin-1.0.jar"/>
@@ -84,5 +83,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo/src/main/java"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-multipart-provider-2.3.2.Final.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/org.json-20131017.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-io-2.2.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
