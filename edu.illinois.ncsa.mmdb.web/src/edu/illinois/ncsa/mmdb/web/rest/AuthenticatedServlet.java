@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -51,6 +51,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sead.acr.common.MediciProxy;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.util.Base64;
@@ -68,7 +69,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.SHAPasswordDigest;
 
 public class AuthenticatedServlet extends HttpServlet {
     /**
-     * 
+     *
      */
     private static final long  serialVersionUID = -4256332408054511050L;
 
@@ -86,6 +87,7 @@ public class AuthenticatedServlet extends HttpServlet {
     public void postAuthenticate(HttpServletRequest request, HttpServletResponse response) throws IOException {
         //FIXME .equals("/authenticate") ?
         log.debug("POST Authenticate");
+
         String validUser = null;
         if (request.getRequestURL().toString().endsWith("authenticate")) {
 
@@ -118,12 +120,14 @@ public class AuthenticatedServlet extends HttpServlet {
                     session = request.getSession(true);
                     log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
                     session.setAttribute(AUTHENTICATED_AS, validUser);
-                    //Set a default timeout 
+                    //Set a default timeout
                     session.setAttribute("exp", 3600 + (int) (System.currentTimeMillis() / 1000L));
                     SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
                     try {
                         if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
                             session.setAttribute(REMOTE_ALLOWED, "true");
+                            addProxyToSession(request); //Local proxy
+
                         }
                     } catch (RBACException re) {
                         log.warn("Error determining remote api permission");
@@ -166,6 +170,7 @@ public class AuthenticatedServlet extends HttpServlet {
                     try {
                         if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
                             session.setAttribute(REMOTE_ALLOWED, "true");
+                            addProxyToSession(request); //Local proxy
                         }
                     } catch (RBACException re) {
                         log.warn("Error determining remote api permission");
@@ -187,6 +192,17 @@ public class AuthenticatedServlet extends HttpServlet {
 
         }
         //else - pass through to derived classes w/o handling anything
+    }
+
+    private void addProxyToSession(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        MediciProxy mp = new MediciProxy();
+        StringBuffer sBuffer = request.getRequestURL();
+        String server = sBuffer.substring(0, sBuffer.length() - request.getServletPath().length() - request.getPathInfo().length());
+        log.debug("Setting mp to session: " + session.getId());
+        mp.setLocalCredentials(session.getId(), server, TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey));
+        mp.setGeoCredentials(null, null, server + "/geoproxy");
+        session.setAttribute("proxy", mp);
     }
 
     public void doLogout(HttpServletRequest request, HttpServletResponse response) {
@@ -226,8 +242,8 @@ public class AuthenticatedServlet extends HttpServlet {
     /* This method checks credentials and returns the users identity - 'anonymous' if no other credentials are presented
      * It does not change state by storing the credentials in the session (which requires a call to /api/authenticate
      * It's primary use is to retrieve the ID from the session, but it also supports the case where a URL is requested outside
-     * an app/session context - i.e. when the browser sends a Basic auth header in response to a 401 
-     * 
+     * an app/session context - i.e. when the browser sends a Basic auth header in response to a 401
+     *
      */
     public static String doBasicAuthenticate(HttpServletRequest request, HttpServletResponse response) throws HTTPException {
 
