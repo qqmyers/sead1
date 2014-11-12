@@ -87,6 +87,7 @@ public class DatasetTablePresenter extends DynamicTablePresenter {
             query.setBean("http://cet.ncsa.uiuc.edu/2007/Dataset");
         }
         query.setUser(MMDB.getUsername());
+        query.setShowDataLevel(showTopLevelDatasets);
         return query;
     }
 
