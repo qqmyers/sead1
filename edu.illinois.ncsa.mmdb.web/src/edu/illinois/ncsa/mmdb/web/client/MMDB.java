@@ -291,7 +291,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
 
-        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData, ConfigurationKey.UseGoogleDocViewer, ConfigurationKey.PresentationSortOrder, ConfigurationKey.PresentationPageViewType), new AsyncCallback<ConfigurationResult>() {
+        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData, ConfigurationKey.UseGoogleDocViewer, ConfigurationKey.PresentationSortOrder, ConfigurationKey.PresentationPageViewType, ConfigurationKey.PresentationDataViewLevel), new AsyncCallback<ConfigurationResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Could not get Names", caught);
@@ -305,7 +305,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 projectNameLabel.setTitle(result.getConfiguration(ConfigurationKey.ProjectDescription));
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
                 PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
-                DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType));
+                DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType), result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true") || bigData);
 
             }
         });
