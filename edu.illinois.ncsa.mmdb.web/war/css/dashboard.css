@@ -1,0 +1,177 @@
+#datadistribution {
+	height: 330px;
+}
+
+#map {
+	margin-top: 10px;
+}
+
+/*fixes popup shape on dashboard map locations layer) */ 
+#map img {
+	max-width: none;
+}
+
+
+body {
+	padding-top: 60px;
+}
+
+.map {
+	height: 300px;
+	border: 1px solid black;
+}
+
+.olControlAttribution {
+	bottom: 5px;
+}
+
+.fixed-height-col {
+	height: 330px;
+	overflow: auto;
+}
+
+.navbar-inner {
+	background-color: white;
+	/* background color will be black for all browsers */
+	background-image: none;
+	background-repeat: no-repeat;
+	filter: none;
+}
+
+.logo {
+	width: 240px;
+	height: 30px;
+	padding: 0px;
+}
+
+.pageHeader {
+	height: auto;
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+
+.mainMenu {
+	border-bottom: 1px solid #888888;
+	height: 40px;
+	margin: 0 auto;
+	padding: 0;
+	position: relative;
+	vertical-align: top;
+}
+
+.mainMenu,.mainContainer,.bottomMenu {
+	font-size: 0.9em;
+	width: 1000px;
+}
+
+/* Jag changes */
+.container .row {
+	padding-top: 30px;
+}
+
+.gradient {
+	background-image: url("../login_images/Border.png");
+	float: right;
+	height: 40px;
+	text-align: right;
+	width: 77%;
+}
+
+#logo {
+	float: left;
+	height: 20px;
+	padding: 1px 0 0;
+}
+
+.navbar .nav-collapse {
+	padding-left: 22%;
+	height: 40px;
+}
+
+.banner {
+	border-bottom: 1px solid;
+	height: 40px;
+	position: relative;
+}
+
+.navbar .nav>li>a {
+	float: none;
+	font-size: 0.9em;
+	padding: 10px 8px;
+	text-decoration: none;
+	text-shadow: 0 1px 0 #FFFFFF;
+}
+/*
+ .container {
+	width:82%;
+ }
+ */
+.menuElementRight {
+	font-size: 0.9em;
+	padding: 10px 8px;
+	text-decoration: none;
+	text-shadow: 0 1px 0 #FFFFFF;
+	position: relative;
+	margin: 0 10px 0 0;
+}
+
+.menuElementRight {
+	float: right;
+}
+
+.menuElementRight  li {
+	display: block;
+}
+
+.menuElementRight .navMenu {
+	color: black;
+	position: relative;
+	white-space: nowrap;
+}
+
+.menuElementRight  a {
+	float: none;
+	display: block;
+	list-style: none;
+	padding: 0px 0px;
+	text-decoration: none;
+	text-shadow: 0 1px 0 #FFFFFF;
+}
+
+.projectTitle {
+	float: right;
+	margin: auto;
+	padding: 4px;
+	font-size: 130%;
+	font-family: "Times New Roman", Georiga, Serif;
+	font-style: italic;
+	font-weight: bold;
+	color: black;
+	width: 99%;
+	text-align: right;
+	padding-top: 1%;
+}
+
+.imageThumbnail {
+	border: medium none;
+	height: 100px;
+	position: relative;
+}
+
+/* ----------------------------------------------------------------------
+ * Footer
+ * ---------------------------------------------------------------------- */
+.bottomMenu {
+	border-top: #888888 solid 1px;
+	margin: 4% auto 0px auto;
+	padding-top: 10px;
+	text-align: center;
+	text-decoration: none;
+	color: #888888;
+	font-size: 0.9em;
+}
+
+.bottomMenu a:link,.bottomMenu a:visited {
+	color: #888888;
+}

@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.HTML;
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 
 /**
- * @author Jim
+ * @author myersjd@umich.edu
  *
  */
 public class DiscoveryPage extends Page {
@@ -36,20 +36,20 @@ public class DiscoveryPage extends Page {
         FlowPanel top = new FlowPanel();
         top.getElement().setId("discovery");
         top.setStyleName("row-fluid");
-        top.addStyleName("sead-scope");
+
         FlowPanel left = new FlowPanel();
         left.setStyleName("span3");
         FlowPanel search = new FlowPanel();
         search.getElement().setId("search");
         search.setStyleName("well");
         if (currentCollection == null) {
-            HTML searchHtml = new HTML("<h3>Search By</h3><div id=\"facetedSearch\" class=\"well\" style=\"margin-left:20px\"></div>" +
+            HTML searchHtml = new HTML("<h3>Search By</h3><div id=\"facetedSearch\" class=\"well\"></div>" +
                     "<div id=\"reset\" style=\"display:none;float:right;color:blue;margin-right:10px;margin-top:10px;\"><span>Reset Filters</span></div>" +
-                    "<div id=\"legend\" class=\"well\" style=\"margin-left:20px\"><i>Viewing all collections.</i>");
+                    "<div id=\"legend\" class=\"well\" ><i>Viewing all collections.</i>");
             search.add(searchHtml);
         }
         left.add(search);
-        HTML projInfo = new HTML("<div class=\"well\" style=\"margin-left:20px;background-color:#DFDFDF;\"><h4>About:</h4><div id=\"projectDesc\"" +
+        HTML projInfo = new HTML("<div class=\"well\"><div id=\"projectDesc\"" +
                 MMDB._projectDescription + "</div></div>");
         left.add(projInfo);
         top.add(left);

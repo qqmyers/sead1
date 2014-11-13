@@ -682,7 +682,7 @@ width:1000px;
 .page {
 	float: none;
 	width: 100%;
-	text-align: center;
+	text-align: left;
 	minHeight: 600px;
 	margin: 0px;
 	padding: 5px;
@@ -1767,11 +1767,6 @@ a.zocial.google:hover {
 	width: 174px;
 }
 
-/* #geo display map width*/
-
-.smallmap {
-	width: 960px;
-}
 =======
 }
 

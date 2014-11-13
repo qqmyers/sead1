@@ -158,11 +158,11 @@
 }
 
 
-svg text {
+#d3TimeseriesVis svg text {
   font: normal 12px Arial;
 }
 
-svg .title {
+#d3TimeseriesVis svg .title {
  font: bold 14px Arial;
 }
 

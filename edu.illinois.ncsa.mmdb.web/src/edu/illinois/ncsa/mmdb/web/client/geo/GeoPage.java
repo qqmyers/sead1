@@ -1,36 +1,11 @@
 package edu.illinois.ncsa.mmdb.web.client.geo;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
-import org.gwtopenmaps.openlayers.client.Bounds;
-import org.gwtopenmaps.openlayers.client.Map;
-import org.gwtopenmaps.openlayers.client.MapOptions;
-import org.gwtopenmaps.openlayers.client.MapWidget;
-import org.gwtopenmaps.openlayers.client.Projection;
-import org.gwtopenmaps.openlayers.client.Style;
-import org.gwtopenmaps.openlayers.client.control.MousePosition;
-import org.gwtopenmaps.openlayers.client.control.SelectFeature;
-import org.gwtopenmaps.openlayers.client.event.VectorFeatureSelectedListener;
-import org.gwtopenmaps.openlayers.client.event.VectorFeatureUnselectedListener;
-import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
-import org.gwtopenmaps.openlayers.client.geometry.Point;
-import org.gwtopenmaps.openlayers.client.layer.Layer;
-import org.gwtopenmaps.openlayers.client.layer.OSM;
-import org.gwtopenmaps.openlayers.client.layer.OSMOptions;
-import org.gwtopenmaps.openlayers.client.layer.Vector;
-import org.gwtopenmaps.openlayers.client.layer.VectorOptions;
-import org.gwtopenmaps.openlayers.client.layer.WMS;
-import org.gwtopenmaps.openlayers.client.layer.WMSOptions;
-import org.gwtopenmaps.openlayers.client.layer.WMSParams;
-import org.gwtopenmaps.openlayers.client.popup.FramedCloud;
-import org.gwtopenmaps.openlayers.client.popup.Popup;
-import org.gwtopenmaps.openlayers.client.util.Attributes;
-
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -59,14 +34,13 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.geo.event.LayerOpacityChangeEvent;
 import edu.illinois.ncsa.mmdb.web.client.geo.event.LayerOpacityChangeHandler;
 import edu.illinois.ncsa.mmdb.web.client.geo.event.LayerVisibilityChangeEvent;
 import edu.illinois.ncsa.mmdb.web.client.geo.event.LayerVisibilityChangeHandler;
 import edu.illinois.ncsa.mmdb.web.client.geo.service.MediciProxyService;
 import edu.illinois.ncsa.mmdb.web.client.geo.service.MediciProxyServiceAsync;
-import edu.illinois.ncsa.mmdb.web.client.geo.service.WmsProxyService;
-import edu.illinois.ncsa.mmdb.web.client.geo.service.WmsProxyServiceAsync;
 import edu.illinois.ncsa.mmdb.web.client.ui.Page;
 import edu.illinois.ncsa.mmdb.web.common.geo.LayerInfo;
 import edu.illinois.ncsa.mmdb.web.common.geo.LocationInfo;
@@ -81,37 +55,19 @@ import edu.illinois.ncsa.mmdb.web.common.geo.LocationInfo;
 public class GeoPage extends Page {
     Logger                                logger               = Logger.getLogger(this.getClass().getName());
     private static final String           LOCATION_OF_DATASETS = "Location of Datasets";
-    private static final String           EPSG_900913          = "EPSG:900913";
-    private static final String           EPSG_4326            = "EPSG:4326";
-
     private static String                 wmsUrl               = null;
     private static String                 mediciUrl            = null;
 
-    private static final Bounds           defaultBox           = new Bounds(-137.42, 19.28, -61.30,
-                                                                       51.62);
-
-    private final WmsProxyServiceAsync    wmsProxySvc          = (WmsProxyServiceAsync) GWT
-                                                                       .create(WmsProxyService.class);
-
     private final MediciProxyServiceAsync mediciProxySvc       = (MediciProxyServiceAsync) GWT
                                                                        .create(MediciProxyService.class);
-
-    private MapWidget                     mapWidget;
-
-    private Map                           map;
-
-    private Layer                         baseLayer;
-
     private SuggestBox                    tagTextBox;
 
     private String                        tag;
 
     protected FlowPanel                   layerSwitcher;
     private String                        encodedTag;
-    private Bounds                        mapExtent;
-    private Vector                        locationLayer;
-
     private VerticalPanel                 tagPanel             = null;
+    private GeoWidget                     theMap               = null;
 
     public GeoPage(String tag, DispatchAsync dispatchAsync, HandlerManager eventBus) {
         super("GeoBrowser", dispatchAsync, eventBus, true);
@@ -178,32 +134,20 @@ public class GeoPage extends Page {
         if (tag != null) {
             encodedTag = URL.encode(tag);
         }
-        mediciProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
-            public void onSuccess(final LayerInfo[] layers) {
-                // showMap(result);
-                logger.log(Level.INFO, "** Building UI ***");
-                buildGwtmap(layers);
 
-                // add the layer of dataset locations
-                mediciProxySvc.getLocations(encodedTag,
-                        new AsyncCallback<LocationInfo[]>() {
-                            public void onSuccess(LocationInfo[] locations) {
-                                if (locations != null) {
-                                    addLocationLayer(locations);
-                                }
+        int x = 958;
+        theMap = new GeoWidget(mediciProxySvc, "map", x, 400);
 
-                                layerSwitcher = createLayerSwitcher(layers,
-                                        locations);
-                                RootPanel.get("layers").add(layerSwitcher);
-                            }
+        theMap.buildMapUi(encodedTag, new Callback<EmptyResult, Throwable>() {
 
-                            public void onFailure(Throwable caught) {
-                                fail(caught);
-                            }
-                        });
-
+            @Override
+            public void onSuccess(EmptyResult result) {
+                layerSwitcher = createLayerSwitcher(theMap.getLayers(),
+                        theMap.getLocations());
+                RootPanel.get("layers").add(layerSwitcher);
             }
 
+            @Override
             public void onFailure(Throwable caught) {
                 fail(caught);
             }
@@ -213,8 +157,10 @@ public class GeoPage extends Page {
     private void cleanPage() {
 
         logger.log(Level.INFO, "Cleaning up for refresh");
-        mapWidget = null;
-        map = null;
+        if (theMap != null) {
+            theMap.cleanMap();
+            theMap = null;
+        }
         clear();
     }
 
@@ -256,36 +202,6 @@ public class GeoPage extends Page {
         vp.add(hp);
 
         return vp;
-    }
-
-    // protected FlowPanel createLegendPanel(LayerInfo[] result) {
-    // List<String> layerNames = getLayerNames(result);
-    // FlowPanel hp = new FlowPanel();
-    // for (String n : layerNames) {
-    // VerticalPanel vp = new VerticalPanel();
-    // HTML label = new HTML("<b><center>" + n + "</center></b>");
-    //
-    // vp.add(label);
-    //
-    // String url =
-    // "http://sead.ncsa.illinois.edu/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER="
-    // + n;
-    // Image img = new Image(url);
-    //
-    // vp.add(img);
-    //
-    // hp.add(vp);
-    //
-    // }
-    // return hp;
-    // }
-
-    private List<String> getLayerNames(LayerInfo[] result) {
-        List<String> layerNames = new ArrayList<String>();
-        for (int i = result.length - 1; i >= 0; i-- ) {
-            layerNames.add(result[i].getName());
-        }
-        return layerNames;
     }
 
     protected FlowPanel createLayerSwitcher(LayerInfo[] layers,
@@ -507,250 +423,12 @@ public class GeoPage extends Page {
         return content;
     }
 
-    // public List<String> getLayerList(String namespace, String xml) {
-    // List<String> names = new ArrayList<String>();
-    // Document xmlDoc = XMLParser.parse(xml);
-    // NodeList layers = xmlDoc.getElementsByTagName("Layer");
-    // for (int i = 0; i < layers.getLength(); i++) {
-    // Node layer = layers.item(i);
-    // String name = getLayerName(layer);
-    // if (name.startsWith(namespace + ":")) {
-    // names.add(name);
-    // }
-    // }
-    // return names;
-    // }
-    //
-    // public String getLayerName(Node layer) {
-    // NodeList childNodes = layer.getChildNodes();
-    // for (int i = 0; i < childNodes.getLength(); i++) {
-    // Node e = childNodes.item(i);
-    // if (e.getNodeName().toUpperCase().equals("NAME")) {
-    // return e.getNodeValue();
-    // }
-    // }
-    // return "";
-    // }
-
     public void updateVisibility(String name, boolean v) {
-        map.getLayerByName(name).setIsVisible(v);
+        theMap.updateVisibility(name, v);
     }
-
-    // public native void updateVisibility(String name, boolean v) /*-{
-    // layers[name].setVisibility(v);
-    // }-*/;
 
     public void updateOpacity(String name, float opacity) {
-        map.getLayerByName(name).setOpacity(opacity);
-    }
-
-    // public native void updateOpacity(String name, double opacity) /*-{
-    // layers[name].setOpacity(opacity);
-    // }-*/;
-    /*
-        public native JSObject getStamenMap(String mapType) /*-{
-    		return new $wnd.OpenLayers.Layer.Stamen(mapType);
-        }-*/;
-
-    // public native void changeBg(String maptype) /*-{
-    // if (maptype == "terrian") {
-    // $wnd.bg = new $wnd.OpenLayers.Layer.Stamen("terrain");
-    // } else if (maptype == "toner") {
-    // $wnd.bg = new $wnd.OpenLayers.Layer.Stamen("toner");
-    // }
-    // var bbox = new $wnd.OpenLayers.Bounds(-14376519, 2908438, -7155972,
-    // 6528496);
-    // $wnd.map.zoomToExtent(bbox);
-    // }-*/;
-
-    /**
-     * Build the map widget and initialize it
-     *
-     * @param layerInfos
-     */
-    public void buildGwtmap(LayerInfo[] layerInfos) {
-        MapOptions defaultMapOptions = new MapOptions();
-        defaultMapOptions.setProjection(EPSG_900913);
-        // defaultMapOptions.setAllOverlays(true);
-
-        mapWidget = new MapWidget((RootPanel.get("map").getOffsetWidth() - 2)
-                + "px", "400px", defaultMapOptions);
-        map = mapWidget.getMap();
-
-        baseLayer = new OSM("OpenStreetMap", new String[] {
-                "//a.tile.openstreetmap.org/${z}/${x}/${y}.png",
-                "//b.tile.openstreetmap.org/${z}/${x}/${y}.png",
-                "//c.tile.openstreetmap.org/${z}/${x}/${y}.png", },
-                new OSMOptions());
-        baseLayer.setIsBaseLayer(true);
-        // map.setBaseLayer(osm);
-        map.addLayer(baseLayer);
-        map.addControl(new MousePosition());
-
-        mapExtent = null;
-
-        if (layerInfos != null) {
-            for (LayerInfo layerInfo : layerInfos ) {
-                String name = layerInfo.getName();
-
-                Bounds orgBnd = new Bounds(layerInfo.getMinx(),
-                        layerInfo.getMiny(), layerInfo.getMaxx(),
-                        layerInfo.getMaxy());
-                Bounds newBnd = orgBnd;
-                if (layerInfo.getSrs().startsWith("EPSG:")) {
-                    newBnd = orgBnd.transform(
-                            new Projection(layerInfo.getSrs()), new Projection(
-                                    EPSG_900913));
-                }
-                logger.log(Level.INFO, "adding layers: " + name + " " + newBnd);
-                WMSOptions options = new WMSOptions();
-                options.setProjection(EPSG_900913);
-                options.setLayerOpacity(0.8);
-
-                // options.setMaxExtent(newBnd);
-
-                WMSParams params = new WMSParams();
-                params.setTransparent(true);
-                params.setLayers(name);
-                WMS wms = new WMS(name, wmsUrl, params, options);
-                if (mapExtent == null) {
-                    mapExtent = newBnd;
-                }
-                mapExtent.extend(newBnd);
-                logger.log(
-                        Level.INFO,
-                        "[layer] new extent: " + mapExtent.getLowerLeftX()
-                                + "," + mapExtent.getLowerLeftY() + ","
-                                + mapExtent.getUpperRightX() + ","
-                                + mapExtent.getUpperRightY());
-                map.addLayer(wms);
-            }
-        }
-
-        RootPanel.get("map").add(mapWidget);
-
-        if (mapExtent == null) {
-            logger.log(Level.INFO,
-                    "[layer] displaying default box because there is no layers");
-
-            // mapExtent = defaultBox.transform(new Projection(EPSG_4326), new
-            // Projection(EPSG_900913));
-            mapExtent = new Bounds(-15297524.424811654, 2187929.276048484,
-                    -6823884.785627671, 6731706.073556644);
-        }
-        logger.log(
-                Level.INFO,
-                "[layer] final extent: " + mapExtent.getLowerLeftX() + ","
-                        + mapExtent.getLowerLeftY() + ","
-                        + mapExtent.getUpperRightX() + ","
-                        + mapExtent.getUpperRightY());
-
-        map.zoomToExtent(mapExtent);
-        mapWidget.getElement().getFirstChildElement().getStyle().setZIndex(0);
-    }
-
-    /**
-     * add the layer of dataset location
-     *
-     * @param locations
-     */
-    public void addLocationLayer(LocationInfo[] locations) {
-        logger.log(Level.INFO, "** adding dataset location **");
-
-        if (locations == null) {
-            logger.log(Level.INFO, "** no dataset location **");
-            return;
-        }
-        // construct a vector layer from
-        VectorOptions vectorOptions = new VectorOptions();
-        locationLayer = new Vector(LOCATION_OF_DATASETS, vectorOptions);
-
-        // build a style (marker) for the layer
-        Style pointStyle = new Style();
-        pointStyle.setExternalGraphic("images/red-marker.png");
-        pointStyle.setGraphicSize(32, 37);
-        pointStyle.setGraphicOffset(-16, -37); // anchor on bottom center
-        pointStyle.setFillOpacity(1.0);
-
-        for (int i = 0; i < locations.length; i++ ) {
-            // add the location to the vector layer
-            Point point = new Point(locations[i].getLon(),
-                    locations[i].getLat());
-
-            point.transform(new Projection(EPSG_4326), new Projection(
-                    EPSG_900913));
-
-            VectorFeature feature = new VectorFeature(point, pointStyle);
-            Attributes attributes = new Attributes();
-            attributes.setAttribute("title", locations[i].getTitle());
-            attributes.setAttribute("uri", locations[i].getUri());
-            feature.setAttributes(attributes);
-
-            locationLayer.addFeature(feature);
-
-            // change the map extent by the point
-            mapExtent.extend(point);
-            logger.log(
-                    Level.INFO,
-                    "[location] new extent: " + mapExtent.getLowerLeftX() + ","
-                            + mapExtent.getLowerLeftY() + ","
-                            + mapExtent.getUpperRightX() + ","
-                            + mapExtent.getUpperRightY());
-        }
-
-        // add the vector (maker) layer to the map
-        map.addLayer(locationLayer);
-
-        // now we want a popup to appear when user clicks
-        // First create a select control and make sure it is actived
-        SelectFeature selectFeature = new SelectFeature(locationLayer);
-        selectFeature.setAutoActivate(true);
-        map.addControl(selectFeature);
-
-        // add a VectorFeatureSelectedListener to the feature to show the popup
-        locationLayer
-                .addVectorFeatureSelectedListener(new VectorFeatureSelectedListener() {
-                    @Override
-                    public void onFeatureSelected(
-                            FeatureSelectedEvent eventObject) {
-                        logger.log(Level.INFO, "onFeatureSelected");
-
-                        VectorFeature feature = eventObject.getVectorFeature();
-
-                        // creating popup
-                        String title = feature.getAttributes()
-                                .getAttributeAsString("title");
-                        String uri = feature.getAttributes()
-                                .getAttributeAsString("uri");
-                        String content = "<b><a href='" + getMediciUrl()
-                                + "#dataset?id=" + uri + "' >"
-                                + title + "</a></b>";
-
-                        // close button has a bug; so turn off "close" button
-                        Popup popup = new FramedCloud(feature.getFID(), feature
-                                .getCenterLonLat(), null, content, null, false);
-                        popup.setPanMapIfOutOfView(true);
-                        popup.setAutoSize(true);
-                        feature.setPopup(popup);
-
-                        // And attach the popup to the map
-                        map.addPopup(feature.getPopup());
-                    }
-                });
-        // add a VectorFeatureUnselectedListener which removes the popup.
-        locationLayer
-                .addVectorFeatureUnselectedListener(new VectorFeatureUnselectedListener() {
-                    public void onFeatureUnselected(
-                            FeatureUnselectedEvent eventObject) {
-                        logger.log(Level.INFO, "onFeatureUnselected");
-                        VectorFeature pointFeature = eventObject
-                                .getVectorFeature();
-                        map.removePopup(pointFeature.getPopup());
-                        pointFeature.resetPopup();
-                    }
-                });
-        map.zoomToExtent(mapExtent);
-        mapWidget.getElement().getFirstChildElement().getStyle().setZIndex(0);
+        theMap.updateOpacity(name, opacity);
     }
 
     public void onValueChange(ValueChangeEvent<String> event) {

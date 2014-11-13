@@ -146,6 +146,27 @@
     	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.GetBibliographicInfo</servlet-class>
   	</servlet>
   
+  <!-- DashboardPage servlets-->
+	<servlet>
+    	<servlet-name>GetCollections</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.dashboard.GetCollections</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>GetAllDatasetsByType</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.dashboard.GetAllDatasetsByType</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>GetTeamMembers</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.dashboard.GetTeamMembers</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>GetWMSLayers</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.dashboard.GetWMSLayers</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>GetRecentUploads</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.dashboard.GetRecentUploads</servlet-class>
+  	</servlet>
   
 
 	<!-- servlet mapping -->
@@ -247,7 +268,30 @@
 	    <servlet-name>GetBibliographicInfo</servlet-name>
     	<url-pattern>/mmdb/discovery/GetBiblio</url-pattern>
 	</servlet-mapping>
-  
+
+
+	<!-- DashboardPage Servlet Mappings -->
+	<servlet-mapping>
+    	<servlet-name>GetCollections</servlet-name>
+    	<url-pattern>/mmdb/dashboard/GetCollections</url-pattern>
+  	</servlet-mapping>
+    <servlet-mapping>
+    	<servlet-name>GetAllDatasetsByType</servlet-name>
+    	<url-pattern>/mmdb/dashboard/GetAllDatasetsByType</url-pattern>
+  	</servlet-mapping>
+  <servlet-mapping>
+    	<servlet-name>GetTeamMembers</servlet-name>
+    	<url-pattern>/mmdb/dashboard/GetTeamMembers</url-pattern>
+  	</servlet-mapping>
+  <servlet-mapping>
+    	<servlet-name>GetWMSLayers</servlet-name>
+    	<url-pattern>/mmdb/dashboard/GetWMSLayers</url-pattern>
+  	</servlet-mapping>
+<servlet-mapping>
+    	<servlet-name>GetRecentUploads</servlet-name>
+    	<url-pattern>/mmdb/dashboard/GetRecentUploads</url-pattern>
+  	</servlet-mapping>
+    
 
 	<!-- Servlet context listener -->
 	<listener>
