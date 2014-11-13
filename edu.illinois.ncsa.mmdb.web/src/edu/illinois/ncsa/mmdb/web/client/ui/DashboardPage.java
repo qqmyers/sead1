@@ -53,7 +53,7 @@ public class DashboardPage extends Page {
         projInfo.addStyleName("fixed-height-col");
         projInfo.getElement().setId("projInfo");
 
-        HTML projDesc = new HTML("<div class=\"well\"><div id=\"projectDesc\"" +
+        HTML projDesc = new HTML("<div class=\"well\"><div id=\"projectDesc\">" +
                 MMDB._projectDescription + "</div></div>");
         projInfo.add(projDesc);
 

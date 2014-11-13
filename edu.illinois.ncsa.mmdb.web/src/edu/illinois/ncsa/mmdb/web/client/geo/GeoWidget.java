@@ -82,7 +82,6 @@ public class GeoWidget {
      * @param tag
      */
     public void buildMapUi(final String encodedTag, final Callback<EmptyResult, Throwable> callback) {
-
         mediciProxySvc.getLayers(encodedTag, new AsyncCallback<LayerInfo[]>() {
             public void onSuccess(final LayerInfo[] layers) {
                 setLayers(layers);

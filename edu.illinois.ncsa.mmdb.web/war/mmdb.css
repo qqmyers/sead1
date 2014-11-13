@@ -303,13 +303,13 @@ width:1000px;
 .imageOverlay {
 	position:absolute;
 	background-repeat: no-repeat;
-	top: 80px;
-	left: 102px;
-	width: 23px;
-	height: 23px;
+	top: -4px;
+	left: 189px;
+	width: 25px;
+	height: 25px;
 	cursor: pointer; 
-	cursor: hand;
 }
+
 
 .imageOverlayList {
 	position:absolute;
@@ -1462,7 +1462,6 @@ div.gwt-Label.smallerItalicText.alignRight{
 }
 
 .dynamicTableListCheckbox {
-	width: 100px;
 	margin: 0px;
 	padding: 10px;
 	border-top: #CCC solid 1px;

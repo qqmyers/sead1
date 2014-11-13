@@ -11,7 +11,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.History;
@@ -62,10 +61,10 @@ public class GeoPage extends Page {
                                                                        .create(MediciProxyService.class);
     private SuggestBox                    tagTextBox;
 
-    private String                        tag;
+    private String                        tag                  = null;
 
     protected FlowPanel                   layerSwitcher;
-    private String                        encodedTag;
+
     private VerticalPanel                 tagPanel             = null;
     private GeoWidget                     theMap               = null;
 
@@ -73,9 +72,7 @@ public class GeoPage extends Page {
         super("GeoBrowser", dispatchAsync, eventBus, true);
         mediciUrl = GWT.getHostPageBaseURL();
         wmsUrl = GWT.getHostPageBaseURL() + "geoproxy/wms";
-
         this.tag = tag;
-
         eventBus.addHandler(LayerOpacityChangeEvent.TYPE,
                 new LayerOpacityChangeHandler() {
 
@@ -130,14 +127,13 @@ public class GeoPage extends Page {
      */
     private void buildMapUi(String tag) {
 
-        encodedTag = null;
+        String encodedTag = null;
         if (tag != null) {
+
             encodedTag = URL.encode(tag);
         }
-
         int x = 958;
         theMap = new GeoWidget(mediciProxySvc, "map", x, 400);
-
         theMap.buildMapUi(encodedTag, new Callback<EmptyResult, Throwable>() {
 
             @Override
@@ -431,26 +427,6 @@ public class GeoPage extends Page {
         theMap.updateOpacity(name, opacity);
     }
 
-    public void onValueChange(ValueChangeEvent<String> event) {
-
-        String historyToken = event.getValue();
-        tag = null;
-
-        if (historyToken.startsWith("geo_tag_")) {
-            String[] tokens = historyToken.substring("geo_tag_".length())
-                    .split("/");
-            if (tokens != null) {
-                tag = URL.decode(tokens[0]);
-            }
-            if (tagTextBox != null && tag != null) {
-                tagTextBox.setText(tag);
-            }
-        }
-        buildGui(tag);
-        buildMapUi(tag);
-
-    }
-
     private void fail(Throwable caught) {
         Window.alert("Could not retrieve data from repository - try later or contact your administrator.:" + caught.getMessage());
         GWT.log("Service call failure");
@@ -460,7 +436,7 @@ public class GeoPage extends Page {
         return mediciUrl;
     }
 
-    public VerticalPanel buildGui(String tag) {
+    public VerticalPanel buildGui() {
         cleanPage();
 
         HorizontalPanel hp = new HorizontalPanel();
@@ -481,8 +457,8 @@ public class GeoPage extends Page {
 
     @Override
     public void layout() {
-        mainLayoutPanel.add(buildGui(null));
-        buildMapUi(null);
+        mainLayoutPanel.add(buildGui());
+        buildMapUi(tag);
     }
 
 }

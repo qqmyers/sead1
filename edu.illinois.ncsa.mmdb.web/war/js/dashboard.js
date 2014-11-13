@@ -517,7 +517,7 @@ function uploadsJsonParser(json) {
 					+ uri
 					+ '"> <img style="width: 100px; height: 100px;" title="'
 					+ displayTitle + '" class="media-object" src="'
-					+ '/api/image/preview/small/' + uri
+					+ './api/image/preview/small/' + uri
 					+ '" /> </a>' + '<div class="media-body">' + '<a href="'
 					+ '#dataset?id=' + uri
 					+ '" title="' + displayTitle + '">'
