@@ -32,12 +32,6 @@ function loadPublishedCollections() {
 
 }
 
-function loadPublishedCollection(collectionId) {
-	
-}
-
-
-
 function homePageErrorParser(jqXHR, textStatus, errorThrown) {
 	$("div#xmlBody").html("Error: Unable to load Published Datasets");
 }
@@ -362,4 +356,7 @@ function createBlock(id, element) {
 	$("#div" + id).append(
 			($("<p/>")).attr("id", "description" + id).css("visibility",
 					"hidden"));
+
+	$("#div" + id).append(
+			($("<p/>")).attr("id", "contents" + id).append($("<a/>")));
 }

@@ -128,7 +128,10 @@ function writeCollection(id, json, result) {
 			}
 			$("#abstract" + id + ">pre").html(summary);
 			$("#abstract" + id).css("visibility", "visible");
+			
 		}
+$("#contents" + id + ">a").attr("href", "#discovery_" + uri)
+			.html("View Contents Listing ...");
 
 		$.ajax({
 			type : "GET",
