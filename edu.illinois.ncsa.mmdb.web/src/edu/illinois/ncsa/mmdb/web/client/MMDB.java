@@ -91,6 +91,8 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.geo.GeoPage;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.ui.AboutPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.AccountPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.AuthenticationCallback;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
@@ -98,7 +100,6 @@ import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
 import edu.illinois.ncsa.mmdb.web.client.ui.DashboardPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.DiscoveryPage;
-import edu.illinois.ncsa.mmdb.web.client.ui.HomePage;
 import edu.illinois.ncsa.mmdb.web.client.ui.JiraIssuePage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListCollectionsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListDatasetsPage;
@@ -177,10 +178,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     private static UserSessionState    sessionState;
 
-    //private Label                      debugLabel;
     private HorizontalPanel            navMenu;
-    //private HTML                       adminBbullet;
+
     private RootPanel                  adminLink;
+    private RootPanel                  uploadLink;
 
     public static String               _sessionCookieName               = "JSESSIONID";
     public static String               _googleClientId                  = null;
@@ -292,14 +293,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         RootPanel.get("projectTitle").clear();
 
-        HorizontalPanel mainHeader = new HorizontalPanel();
         final Anchor projectNameLabel = new Anchor(true);
         projectNameLabel.setText("");
         projectNameLabel.setTitle("");
         projectNameLabel.setHref("");
-        mainHeader.add(projectNameLabel);
-        mainHeader.setStyleName("headerTitle");
-        RootPanel.get("projectTitle").add(mainHeader);
+        RootPanel.get("projectTitle").add(projectNameLabel);
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
 
@@ -342,13 +340,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         // admin link
         adminLink = RootPanel.get("adminLink");
-
-        /*
-        // FIXME debug
-        debugLabel = new Label();
-        debugLabel.addStyleName("navMenuText");
-        navMenu.add(debugLabel);
-        */
+        uploadLink = RootPanel.get("uploadLink");
 
         // search box
         SearchBox searchBox = new SearchBox("Search");
@@ -556,6 +548,19 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             }
         });
 
+        //Upload menu item
+        rbac().doIfAllowed(Permission.UPLOAD_DATA, new PermissionCallback() {
+            @Override
+            public void onAllowed() {
+                uploadLink.removeStyleName("hidden");
+            }
+
+            @Override
+            public void onDenied() {
+                uploadLink.addStyleName("hidden");
+            }
+        });
+
         // admin menu
         rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new PermissionCallback() {
             @Override
@@ -659,6 +664,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showListDatasetsPage();
         } else if (token.startsWith("upload")) {
             showUploadPage();
+        } else if (token.startsWith("about")) {
+            showAboutPage();
         } else if (token.startsWith("tags")) {
             showTagsPage();
         } else if (token.startsWith("tag")) {
@@ -687,8 +694,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showDashboardPage();
         } else if (token.startsWith("signup")) {
             showSignupPage();
-        } else if (token.startsWith("home")) {
-            showHomePage();
+        } else if (token.startsWith("account")) {
+            showAccountPage();
         } else if (token.startsWith("viewSelected")) {
             showSelected(true);
         } else if (token.startsWith("editRelationships")) {
@@ -716,6 +723,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             showListDatasetsPage();
         }
         previousHistoryToken = token;
+    }
+
+    private void showAboutPage() {
+        GWT.log("Loading Dashboard Page", null);
+        mainContainer.clear();
+        mainContainer.add(new AboutPage(dispatchAsync, eventBus));
     }
 
     private void showDashboardPage() {
@@ -772,9 +785,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         });
     }
 
-    private void showHomePage() {
+    private void showAccountPage() {
         mainContainer.clear();
-        mainContainer.add(new HomePage(dispatchAsync));
+        mainContainer.add(new AccountPage(dispatchAsync));
     }
 
     private void showRequestNewPasswordPage() {

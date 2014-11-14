@@ -201,10 +201,10 @@ a:hover {
 }
 
 .gwt-DisclosurePanel {
-	width:100%;
+	width:200px;
 }
 .gwt-DisclosurePanel-open {
-	width:100%;
+	width:200px;
 	background-color: #F0F0F0;
 	font-style: normal;
 	font-weight: normal;
@@ -1318,7 +1318,7 @@ div.gwt-Label.smallerItalicText.alignRight{
 }
 
 .datasetInfoThumbnail {
-	width: 150px;
+	width: 250px;
 	float: left;
 }
 
@@ -2164,4 +2164,8 @@ padding-left: 20px;
 padding: 0px;
 	margin: 0px auto 0px auto;
 }
->>>>>>> branch 'master' of https://jimmyers@opensource.ncsa.illinois.edu/stash/scm/mmdb/medici-gwt-web.git
+
+
+#sysinfo .gwt-Label{
+	display: inline;
+}

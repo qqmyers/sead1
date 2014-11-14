@@ -48,7 +48,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -65,14 +65,14 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
  */
 public class LoginStatusWidget extends Composite {
 
-    private final HorizontalPanel mainPanel;
+    private final FlowPanel mainPanel;
 
     /**
      * Create a main panel and show the appropriate
      * link depending on what the sessionID is.
      */
     public LoginStatusWidget() {
-        mainPanel = new HorizontalPanel();
+        mainPanel = new FlowPanel();
         mainPanel.addStyleName("loginPanel");
         initWidget(mainPanel);
         if (MMDB.getUsername() != null) {
@@ -138,7 +138,7 @@ public class LoginStatusWidget extends Composite {
             });
             vp.add(socialLink);
         }
-        vp.add(anchor("MyAccount", "home"));
+        vp.add(anchor("MyAccount", "account"));
         d.add(vp);
         mainPanel.add(d);
     }

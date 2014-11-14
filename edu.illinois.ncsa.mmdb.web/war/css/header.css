@@ -1,91 +1,97 @@
-#header, #footer{
+#header, #footer {
 	font-family: 'lato';
 	width: 1200px;
-    margin: auto;
+	margin: auto;
 }
-li{
+
+li {
 	list-style: none;
 }
-#project-header{
-	-webkit-padding-start:0px;
-	height: 120px;
-}
-#project-logo{
-	margin-top: 0px;
-    float: left;
-    width: 16%;
-	height: 120px;
 
-}
-#project-logo img{
+#project-header {
+	-webkit-padding-start: 0px;
 	height: 120px;
 }
-#projectTitle{
+
+#project-logo {
+	margin-top: 0px;
 	float: left;
-    width: 64%;
-    height: 40px;
-    margin-top: 39px;
+	width: 16%;
+	height: 120px;
+}
+
+#project-logo img {
+	height: 120px;
+}
+
+#projectTitle {
+	float: left;
+	width: 64%;
+	height: 40px;
+	margin-top: 39px;
 	text-align: left;
 }
-#projectTitle a{
-	margin:auto;
+
+#projectTitle a {
+	margin: auto;
 	width: 50%;
 	font-family: 'lato';
 	font-size: 22px;
-
 }
-#loginMenu{
+
+#loginMenu {
 	float: left;
 	height: 40px;
 	width: 20%;
 }
 
 .loginPanel {
-width: 200px;
-margin-top: 5px;
+	width: 200px;
+	margin-top: 5px;
 }
 
 #loginMenu div, #loginMenu a {
-
 	text-align: left;
 	font-size: medium;
-color: black; !important
-margin-left: 0px;
-
+	color: black; !
+	important margin-left: 0px;
+	display: inline;
 }
 
-#loginMenu img{
+#loginMenu img {
 	width: 40px;
-float: left;
+	float: left;
 }
 
-.loginPanel .gwt-Hyperlink, .gwt-Anchor{
+.loginPanel .gwt-Hyperlink, .gwt-Anchor {
 	padding-left: 10px;
 }
 
-#nav-logo{
+#nav-logo {
 	width: 20px;
-	margin-left:5px
+	margin-left: 5px
 }
-#sead-menu
-{	margin: 0;
+
+#sead-menu {
+	margin: 0;
 	padding: 0;
 	z-index: 0;
-    height: 26px;
-    background-color: #e9e9e9;
+	height: 26px;
+	background-color: #e9e9e9;
 }
-#sead-menu li
-{	margin: 0;
+
+#sead-menu li {
+	margin: 0;
 	padding: 0;
 	padding-top: 2px;
 	list-style: none;
 	float: left;
 	font: 12px 'lato';
-	
 	background-color: #e9e9e9;
 }
-#sead-menu li a
-{	display: block;
+
+#sead-menu li a {
+	display: block;
 	margin: 0 1px 0 0;
 	padding: 4px 10px;
 	background: #e9e9e9;
@@ -93,12 +99,13 @@ float: left;
 	text-align: center;
 	text-decoration: none
 }
+
 #sead-menu li #seadlink {
-	padding: 0px; 
+	padding: 0px;
 }
 
-#sead-menu li span
-{	display: block;
+#sead-menu li span {
+	display: block;
 	margin: 0px 2px 0 -8px;
 	padding: 4px 10px;
 	background: transparent;
@@ -106,11 +113,13 @@ float: left;
 	text-align: center;
 	text-decoration: none;
 }
-#sead-menu li a:hover
-{	color: #f3882a;
+
+#sead-menu li a:hover {
+	color: #f3882a;
 }
-#sead-menu div
-{	position: absolute;
+
+#sead-menu div {
+	position: absolute;
 	visibility: hidden;
 	margin: 0;
 	padding: 0;
@@ -118,12 +127,12 @@ float: left;
 	margin-top: 2px;
 }
 
-#sead-menu div a
-{	position: relative;
+#sead-menu div a {
+	position: relative;
 	display: block;
 	margin: 0;
 	padding: 5px 10px;
-    /* padding-left: 5px; */
+	/* padding-left: 5px; */
 	padding-right: 20px;
 	width: 120px;
 	white-space: nowrap;
@@ -135,87 +144,92 @@ float: left;
 	border-bottom: 1px solid #fff;
 }
 
-#sead-menu div a:hover
-	{	background: #fff;
-		color: #f3882a}
+#sead-menu div a:hover {
+	background: #fff;
+	color: #f3882a
+}
 
-
-#logo-sead{
+#logo-sead {
 	background-color: transparent;
 	margin-top: 5px;
 }
+
 #sead-menu .has-submenu {
 	padding-right: 8px;
 }
-.has-submenu >a:after{
-    width: 0; 
-    height: 0; 
-    content: "";
-    position: absolute;
-    top: 13px;
-    margin-left:2px;
-    border-top: 4px solid rgba(0, 0, 0, 0.5);     
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
+
+.has-submenu>a:after {
+	width: 0;
+	height: 0;
+	content: "";
+	position: absolute;
+	top: 13px;
+	margin-left: 2px;
+	border-top: 4px solid rgba(0, 0, 0, 0.5);
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
 }
-.has-submenu >a:hover:after{
-    border-top: 4px solid #f3822a;  
+
+.has-submenu>a:hover:after {
+	border-top: 4px solid #f3822a;
 }
 
 .mainMenu {
-background-color: #0C5CA3;
-height: 50px;
+	background-color: #0C5CA3;
+	height: 50px;
 }
 /*navMenu*/
-.navMenu
-{	
+.navMenu {
 	margin-top: 0px;
 	margin-bottom: 0px;
 	padding: 0;
 	z-index: 0;
-    width: 1200px;
-    height: 50px;
-    background-color: #0c5ca3;
+	width: 1200px;
+	height: 50px;
+	background-color: #0c5ca3;
 }
-.navMenu li
-{	
+
+.navMenu li {
 	margin: 9px 10px 0 10px;
-    padding: 2px;
+	padding: 2px;
 	list-style: none;
 	float: left;
 	font: 16px 'Raleway';
 	background-color: #0c5ca3;
 }
-.navMenu li:first-child{
+
+.navMenu li:first-child {
 	margin-left: 20px;
 }
-.navMenu li a
-{	display: block;
+
+.navMenu li a {
+	display: block;
 	padding: 4px 6px;
 	background: #0c5ca3;
 	color: #FFF;
-    font-weight: 4;
+	font-weight: 4;
 	text-align: center;
-	text-decoration: none}
-.navMenu li a:hover
-{	
+	text-decoration: none
+}
+
+.navMenu li a:hover {
 	color: #f3882a
 }
 
 /*footer*/
-#footer{
-	
-    padding: 5px 0px;
+#footer {
+	padding: 5px 0px;
 	background-color: #0b5ca3;
 	color: #fff;
 	font-size: 12px;
 	width: 1200px;
 	height: 30px;
 	margin: auto;
-	bottom:10px;
+	bottom: 10px;
 	left: 0;
-    right: 0;
+	right: 0;
 }
+
 #footer .copyright {
 	color: #fff;
 	max-width: 90%;
@@ -226,43 +240,45 @@ height: 50px;
 }
 
 #footer a {
-	color:white;
+	color: white;
 }
 
-#nsf{
-     width:30px ;
-     height: 30px;
-     float: left;
+#nsf {
+	width: 30px;
+	height: 30px;
+	float: left;
 }
 
-#nsf-text{
+#nsf-text {
 	float: left;
 	line-height: 30px;
-
 }
+
 #contact {
 	float: right;
-     margin-right: 2%;
+	margin-right: 2%;
 	float: left;
 	font: 12px 'lato';
 	right: 2%;
 	line-height: 30px;
 }
-#contact a{
+
+#contact a {
 	text-decoration: none;
-    color: #fff;
+	color: #fff;
 }
-#contact a:hover{
-     color: #f3822a;	
+
+#contact a:hover {
+	color: #f3822a;
 }
+
 @media screen and (max-width: 1200px) {
-	#header, #footer{
-	width: 1200px;
-    margin: auto;
-    }
+	#header, #footer {
+		width: 1200px;
+		margin: auto;
+	}
 }
 
 #searchMenu {
 	float: right;
 }
-

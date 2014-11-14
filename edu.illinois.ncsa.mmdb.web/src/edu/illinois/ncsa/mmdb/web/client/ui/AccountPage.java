@@ -71,7 +71,7 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
  * @author Luigi Marini
  * 
  */
-public class HomePage extends Page {
+public class AccountPage extends Page {
 
     private static final int     MAX_DATASETS = 10;
     protected Widget             userInfoTable;
@@ -89,7 +89,7 @@ public class HomePage extends Page {
      * 
      * @param dispatchAsync
      */
-    public HomePage(DispatchAsync dispatchAsync) {
+    public AccountPage(DispatchAsync dispatchAsync) {
         super("My Account", dispatchAsync);
         rbac = new PermissionUtil(dispatchAsync);
         createTabs();
