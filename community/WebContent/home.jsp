@@ -9,6 +9,7 @@
 <link href='//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
 <link href='//fonts.googleapis.com/css?family=Raleway:400,100,200,300,500,600,700,800,900' rel='stylesheet' type='text/css'>
 <title>Project Spaces | SEAD </title>
+<script type="text/javascript" src="login_scripts/cnss.js"></script>
 <link href="login_css/bootstrap.sead-scope.css" rel="stylesheet">
 <link href="login_css/common.css" rel="stylesheet">
 <script src="//code.jquery.com/jquery-latest.js"></script>
@@ -16,8 +17,6 @@
 <script src="login_scripts/jquery-cookie.js"></script>
 <script src="login_scripts/jquery.tablesorter.min.js"></script>
 <script src="login_scripts/table2CSV.js"></script>
-<script type="text/javascript" src="http://sead-data.net/wp-content/plugins/easy-social-icons/js/cnss.js?ver=1.0"></script>
-
 <link rel="stylesheet" id="um_style_sheet" href="login_css/um-style.css" type="text/css" media="all">
 <link rel="stylesheet" id="spacious_style-css" href="login_css/project-space.css" type="text/css" media="all">
 
@@ -147,25 +146,25 @@
 	<div id="header-right-section">
 		<div id="header-right-sidebar" class="clearfix">
 			<aside id="cnss_widget-3" class="widget widget_cnss_widget">
-				<table class="cnss-social-icon" style="width:111px" border="0" cellspacing="0" cellpadding="0">
+				<table class="cnss-social-icon" style="width:138px" border="0" cellspacing="0" cellpadding="0">
 					<tbody>
 						<tr>
-							<td style="width:37px">
+							<td >
 								<a target="_blank" title="facebook" href="https://www.facebook.com/SEADDataNet">
 									<img src="http://sead-data.net/wp-content/uploads/1403285144_facebook.png" border="0" width="32" height="32" alt="facebook">
 								</a>
 							</td>
-							<td style="width:37px">
+							<td >
 								<a target="_blank" title="twitter" href="https://twitter.com/SEADdatanet">
 									<img src="http://sead-data.net/wp-content/uploads/1403285215_twitter.png" border="0" width="32" height="32" alt="twitter">
 								</a>
 							</td>
-							<td style="width:37px">
+							<td >
 								<a target="_blank" title="Slideshare" href="http://www.slideshare.net/SEADdatanet">
 									<img src="http://sead-data.net/wp-content/uploads/1403285311_slidershare.png" border="0" width="32" height="32" alt="Slideshare">
 								</a>
 							</td>
-							<td style="width:37px"><a target="_blank" title="Rss Feed" href="http://www.sead-data.net/?cat=11,12,13,29,30,31&amp;feed=rss2"><img src="http://sead-data.net/wp-content/uploads/1415982481_rss.png" border="0" width="32" height="32" alt="Rss Feed" style="opacity: 1;"></a></td>
+							<td ><a target="_blank" title="Rss Feed" href="http://www.sead-data.net/?cat=11,12,13,29,30,31&amp;feed=rss2"><img src="http://sead-data.net/wp-content/uploads/1415982481_rss.png" border="0" width="32" height="32" alt="Rss Feed" style="opacity: 1;"></a></td>
 						</tr>
 					</tbody>
 				</table>

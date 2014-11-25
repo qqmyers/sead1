@@ -10,7 +10,6 @@ div#banner {
 }
 
 #projectLogo {
-
 	width: 540px;
 	height: 85px;
 }
@@ -31,60 +30,81 @@ padding-bottom:30px;
 
 /* Sorted table for spreadsheet preview */
 table.tablesorter {
-	font-family:arial;
+	font-family:'Lato',arial;
 	background-color: #CDCDCD;
 	margin:10px 0pt 15px;
 	font-size: 8pt;
 	width: 100%;
 	text-align: left;
-	border: 1px solid #BBBBBB;
+	border: 1px solid #f3822a;
 	table-layout:auto;
 
 }
 
 table.tablesorter tbody tr {
-  width:1px;
+  width:100px;
 }
-
+table.tablesorter tbody{
+	overflow:auto;
+        height:500px;
+}
 .sead-scope <p> {
 font-family:initial;
 }
 table.tablesorter tbody tr:nth-child(odd) td {
-	background-color:#F0F0F6;
+	background-color:#eeeeee;
 
 }
-
 table.tablesorter tbody tr:nth-child(even) td {
 	background-color:#FFFFFF;
 }
 
-
+thead>tr,tbody{
+	display:block;
+}
 table.tablesorter thead tr th, 
 
 table.tablesorter tfoot tr th {
-	background-color: #e6EEEE;
+	background-color: #fff;
 	font-size: 8pt;
-	padding: 4px;
-    	padding-right: 18px;
-	width:1px;
+	padding: 6px;
 
+}
+table.tablesorter thead tr{
+        border-bottom:1px solid #f3822a;
 }
 table.tablesorter thead tr .header {
 	background-image: url('bg.gif');
 	background-repeat: no-repeat;
 	background-position: center right;
-	border: 1px solid #BBBBBB;
+    border:1px solid #fff;
+	/*border-bottom: 1px solid #f3822a;*/
 	cursor: pointer;
+    text-align:left;
+    vertical-align:middle;
 }
 table.tablesorter tbody td {
-	border: 1px solid #BBBBBB;
-	color: #3D3D3D;
-	padding: 4px;
+	border: 0px solid #ccc;
+	color: #444;
+	padding: 2px;
 	background-color: #FFF;
-	vertical-align: 
-
-
-top;
+	text-align:center;
+	vertical-align:top;
+	width: 8%;
+}
+table.tablesorter tbody td:first-child{
+	width: 10%;	
+}
+table.tablesorter tbody td:nth-child(2){
+	width: 15%;	
+}
+table.tablesorter tbody td:last-child{
+	width: 15%;	
+}
+table.tablesorter tbody td div{
+        padding:4px;
+        font:12px 'Lato',sans-serif;
+        margin-top:5px; 
 }
 
 table.tablesorter thead tr .headerSortUp {
@@ -96,7 +116,7 @@ table.tablesorter thead tr .headerSortDown {
 }
 
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
-	background-color: #8dbdd8;
+	color:#f3822a;
 }
 
 table.tablesorter tbody tr td:nth-child(n+3) {
