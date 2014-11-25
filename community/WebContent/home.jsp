@@ -194,7 +194,7 @@
 							<li class="menu-item"><a href="http://sead-data.net/feature-tour/tools-in-development/">Tools in Development</a></li>
 						</ul>
 					</li>
-					<li class="menu-item current-menu-item "><a href="http://sead.ncsa.illinois.edu/community/">Project Spaces</a></li>
+					<li class="menu-item current-menu-item "><a href="https://sead.ncsa.illinois.edu/projects/">Project Spaces</a></li>
 					<li class="menu-item "><a href="http://seadva.d2i.indiana.edu:8181/sead-access/">Virtual Archive</a></li>
 					<li class="menu-item menu-item-has-children"><a href="http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/">Research Network</a>
 						<ul class="sub-menu">
