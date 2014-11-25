@@ -21,7 +21,10 @@ package org.sead.acr.community;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Enumeration;
+import java.util.Map;
 
+import javax.crypto.spec.IvParameterSpec;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -54,8 +57,20 @@ public class Oauth2Redirect extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		log.debug("Redirecting");
+		log.debug("Redirecting: " + request.getRequestURI() + " " + request.getQueryString());
+		Map<String, String[]> paramMap = request.getParameterMap();
+		
 		String server = request.getParameter("server");
-		response.sendRedirect(server + "oauth2callback/orcid");
+		String query = "";
+		for (String p: paramMap.keySet()) {
+			if (!p.equals("server")) {
+				if(query.length()==0) {
+					query += "?" + p +  "=" + paramMap.get(p)[0];
+				} else {
+					query += "&" + p + "=" + paramMap.get(p)[0];
+				}
+			}
+		}
+		response.sendRedirect(server + "oauth2OrcidWindow.html" + query);
 	}
 }
