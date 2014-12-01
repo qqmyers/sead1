@@ -68,7 +68,10 @@
 
 		if((serversLeft==0)&&(statsLeft==0)) {
 			$("#home-loading").hide();
-			$("#projects").tablesorter();
+			$("#projects").tablesorter({
+        		// sort on the first column , order asc
+		        sortList: [[0,0]]
+		    });
 		}
 	}
 
@@ -89,7 +92,7 @@
 		var current = decodeURIComponent(this.url.substr(this.url.indexOf("http")));
 		var index = jQuery.inArray(current, ${projects});
 	 
-		 $("#" + index + ">td:eq(2)").html("<div class='project-preprint'><a href=\"" + current + "/../discovery\">" + json["Public Preprint Collections"] + "</a></div>");
+		 $("#" + index + ">td:eq(2)").html("<div class='project-preprint'><a href=\"" + current + "/#listCollections\">" + json["Public Preprint Collections"] + "</a></div>");
 		 $("#" + index + ">td:eq(3)").html("<div class='project-publish'><a href=\"" + current + "/../discovery\">" + json["Published Collections"] + "</div></a>");
 		 $("#" + index + ">td:eq(4)").html("<div class='project-view'>"+json["Total Views"]+"</div>" );
 		 $("#" + index + ">td:eq(5)").html("<div class='project-users'>"+json["Number of Users"] +"</div>");

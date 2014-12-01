@@ -108,3 +108,24 @@ a#scroll-up { background-color: #f3882a; }
 .project-name a{
 	font-weight:900;
 }
+
+/*change of um-style.css*/
+th, td {
+   border: 0px dashed #EAEAEA !important;
+   padding: 6px 10px;
+}
+
+.menu-item-has-children a:after {
+/* color: #FFFFFF; */
+content: ' \25be' !important;
+}
+
+.entry-content a, .entry-content p a {
+text-decoration: none !important;
+}
+
+.sead-scope a {
+color: #0b5ca3 !important;
+text-decoration: none !important;
+font-size: 12px !important;
+}
