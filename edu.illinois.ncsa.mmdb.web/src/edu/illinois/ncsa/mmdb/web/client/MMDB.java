@@ -180,8 +180,15 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     private HorizontalPanel            navMenu;
 
-    private RootPanel                  adminLink;
-    private RootPanel                  uploadLink;
+    private RootPanel                  aboutMenuItem;
+    private RootPanel                  datasetsMenuItem;
+    private RootPanel                  collectionsMenuItem;
+    private RootPanel                  tagsMenuItem;
+    private RootPanel                  geoMenuItem;
+    private RootPanel                  publishedDataMenuItem;
+    private RootPanel                  dashboardMenuItem;
+    private RootPanel                  adminMenuItem;
+    private RootPanel                  uploadMenuItem;
 
     public static String               _sessionCookieName               = "JSESSIONID";
     public static String               _googleClientId                  = null;
@@ -338,15 +345,23 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             }
         });
 
-        // admin link
-        adminLink = RootPanel.get("adminLink");
-        uploadLink = RootPanel.get("uploadLink");
+        // Panels for menu items
+        aboutMenuItem = RootPanel.get("aboutMenuItem");
+        datasetsMenuItem = RootPanel.get("listDatasetsMenuItem");
+        collectionsMenuItem = RootPanel.get("listCollectionsMenuItem");
+        tagsMenuItem = RootPanel.get("tagsMenuItem");
+        geoMenuItem = RootPanel.get("geoMenuItem");
+        publishedDataMenuItem = RootPanel.get("discoveryMenuItem");
+        dashboardMenuItem = RootPanel.get("dashboardMenuItem");
+        adminMenuItem = RootPanel.get("administrationMenuItem");
+        uploadMenuItem = RootPanel.get("uploadMenuItem");
 
         // search box
         SearchBox searchBox = new SearchBox("Search");
         searchBox.setWidth("150px"); // maybe add this as CSS style?
         RootPanel.get("searchMenu").add(searchBox);
 
+        setMenuItemVisibility();
     }
 
     /**
@@ -449,6 +464,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         final String token = event.getValue();
         GWT.log("History changed: " + event.getValue(), null);
+        changeMenuSelection(previousHistoryToken, token);
 
         if (token.startsWith("logout")) {
             /* logout triggers an implicit attempt to login as anonymous
@@ -514,67 +530,64 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         }
     }
 
-    /**
-     * Run the action for the given token, subject to a permission check to see
-     * if user has permission to view member pages. The pages themselves must
-     * check further if additional permissions are needed to see their content.
-     *
-     * Right now, doWithPermissions gets called via the checkLogin() method, as
-     * well as by the login() method (on success, login and logout tokens only).
-     * Login/logout trigger viewing the default member page (listDatasets), so
-     * the user's permissions need to be checked.
-     *
-     * @param token
-     */
-    private void doWithPermission(final String token) {
+    //Change the selected menu item to have class = "selected" and remove it from the previous entry
+    //Ignore tokens such as login that don't match a menu item
+    private void changeMenuSelection(String previousHistoryToken, String token) {
 
-        rbac().doIfAllowed(Permission.VIEW_MEMBER_PAGES, new PermissionCallback() {
+        RootPanel oldPanel = getCoreElement(previousHistoryToken);
+        if (oldPanel != null) {
+            oldPanel.removeStyleName("selected");
+        }
+        RootPanel newPanel = getCoreElement(token);
+        if (newPanel != null) {
+            newPanel.addStyleName("selected");
+        }
+    }
+
+    private RootPanel getCoreElement(String token) {
+        String elemString = token;
+        // Map requests for indivudal datasets or collections to the generic datasets and collections menu items
+        if (token.startsWith("dataset")) {
+            elemString = "listDatasetsMenuItem";
+        } else if (token.startsWith("collection")) {
+            elemString = "listCollectionsMenuItem";
+        } else {
+            //Else token should correspond directly to a menu item
+            if (token.contains("_")) {
+                elemString = token.substring(0, token.indexOf("_"));
+            }
+            elemString += "MenuItem";
+        }
+        return RootPanel.get(elemString);
+
+    }
+
+    private void setMenuItemVisibility() {
+        showBasedOnPermission(aboutMenuItem, Permission.VIEW_SYSTEM);
+        showBasedOnPermission(datasetsMenuItem, Permission.VIEW_MEMBER_PAGES);
+        showBasedOnPermission(collectionsMenuItem, Permission.VIEW_MEMBER_PAGES);
+        showBasedOnPermission(tagsMenuItem, Permission.VIEW_MEMBER_PAGES);
+        showBasedOnPermission(geoMenuItem, Permission.VIEW_LOCATION);
+        showBasedOnPermission(publishedDataMenuItem, Permission.VIEW_PUBLISHED);
+        showBasedOnPermission(dashboardMenuItem, Permission.VIEW_MEMBER_PAGES);
+        showBasedOnPermission(adminMenuItem, Permission.VIEW_ADMIN_PAGES);
+        showBasedOnPermission(uploadMenuItem, Permission.UPLOAD_DATA);
+    }
+
+    private void showBasedOnPermission(final RootPanel menuItem, Permission perm) {
+
+        rbac().doIfAllowed(perm, new PermissionCallback() {
             @Override
             public void onAllowed() {
-                parseHistoryToken(token);
+                menuItem.removeStyleName("hidden");
             }
 
             @Override
             public void onDenied() {
-                if (getSessionState().isAnonymous()) {
-                    if (token.startsWith("logout_st")) {
-                        showLoginPage(true);
-                    } else {
-                        showLoginPage();
-                    }
-                } else {
-                    showNotEnabledPage();
-                }
+                menuItem.addStyleName("hidden");
             }
         });
 
-        //Upload menu item
-        rbac().doIfAllowed(Permission.UPLOAD_DATA, new PermissionCallback() {
-            @Override
-            public void onAllowed() {
-                uploadLink.removeStyleName("hidden");
-            }
-
-            @Override
-            public void onDenied() {
-                uploadLink.addStyleName("hidden");
-            }
-        });
-
-        // admin menu
-        rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new PermissionCallback() {
-            @Override
-            public void onAllowed() {
-                //adminBbullet.removeStyleName("hidden");
-                adminLink.removeStyleName("hidden");
-            }
-
-            @Override
-            public void onDenied() {
-                //adminBbullet.addStyleName("hidden");
-                adminLink.addStyleName("hidden");
-            }
-        });
     }
 
     /**
@@ -632,7 +645,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                     GWT.log("Current user set to " + personBean.getUri());
                 }
 
-                doWithPermission(History.getToken());
+                parseHistoryToken(History.getToken());
                 //Before doWithPerm? (most/all(?) callbacks are null now, so minor issue
                 callback.onSuccess(username, sessionKey);
             }
@@ -648,81 +661,124 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     /**
+     * Run the action for the given token, subject to a permission check to see
+     * if user has permission require to view a given pages (most require
+     * VIEW_MEMBER_PAGES).
+     * The pages themselves must check further if additional permissions are
+     * needed to see
+     * their content/parts of their content.
+     *
+     * Right now, parseHistory gets called via the checkLogin() method, as
+     * well as by the login() method (on success, login and logout tokens only).
+     * Login/logout trigger viewing the default member page (listDatasets), so
+     * the user's permissions need to be checked.
+     *
      * Parse history token and show the proper widgets/
      * trigger the appropriate actions.
-     *
-     * parseHistory should only be called by doWithPermissions!
      *
      * @param token
      *            history token (everything after the #)
      */
     private void parseHistoryToken(String token) {
 
-        if (token.startsWith("dataset")) {
-            showDataset();
-        } else if (token.startsWith("listDatasets") /*&& !previousHistoryToken.startsWith("listDatasets")*/) {
-            showListDatasetsPage();
-        } else if (token.startsWith("upload")) {
-            showUploadPage();
-        } else if (token.startsWith("about")) {
-            showAboutPage();
-        } else if (token.startsWith("tags")) {
-            showTagsPage();
-        } else if (token.startsWith("tag")) {
-            showTagPage();
-        } else if (token.startsWith("listCollections") /*&& !previousHistoryToken.startsWith("listCollections")*/) {
-            listCollections();
-        } else if (token.startsWith("listCollections")) {
-            // skip default case!
-        } else if (token.startsWith("collection")) {
-            showCollectionPage();
-        } else if (token.startsWith("search")) {
-            showSearchResultsPage();
-        } else if (token.startsWith("geo")) {
-            String tag = null;
-            if (token.startsWith("geo_tag_")) {
-                tag = URL.decode(token.substring("geo_tag_".length()));
-            }
-            showGeoPage(tag);
-        } else if (token.startsWith("discovery")) {
-            String collection = null;
-            if (token.startsWith("discovery_")) {
-                collection = URL.decode(token.substring("discovery_".length()));
-            }
-            showDiscoveryPage(collection);
-        } else if (token.startsWith("dashboard")) {
-            showDashboardPage();
-        } else if (token.startsWith("signup")) {
-            showSignupPage();
-        } else if (token.startsWith("account")) {
-            showAccountPage();
-        } else if (token.startsWith("viewSelected")) {
-            showSelected(true);
-        } else if (token.startsWith("editRelationships")) {
-            showSelected(true);
-        } else if (token.startsWith("noneSelected")) {
-            showSelected(false);
-        } else if (token.startsWith("administration")) {
-            showAdminPage();
+        if (token.startsWith("upload")) {
+            rbac().doIfAllowed(Permission.UPLOAD_DATA, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
+                    showUploadPage();
+                }
+            });
 
-        } else if (token.startsWith("logout_st")) {
-            //Successfully logged in after logout due to timeout/session issue - just go back to where the user was
-            History.back();
-        }
-        else if (token.startsWith("login")) {
-            //just logged in
-            if (!MMDB.getSessionState().isAnonymous()) {
-                showListDatasetsPage();
-                token = "listDatasets";
-                History.newItem("listDatasets", false);
-            } else {
-                showLoginPage();
-            }
-        } else /*if (!previousHistoryToken.startsWith("listDatasets")) */{
-            //Default page
-            showListDatasetsPage();
+        } else if (token.startsWith("about")) {
+            rbac().doIfAllowed(Permission.VIEW_SYSTEM, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
+                    showAboutPage();
+                }
+            });
+        } else if (token.startsWith("geo")) {
+            rbac().doIfAllowed(Permission.VIEW_LOCATION, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
+                    String tag = null;
+                    if (this.token.startsWith("geo_tag_")) {
+                        tag = URL.decode(this.token.substring("geo_tag_".length()));
+                    }
+                    showGeoPage(tag);
+                }
+            });
+        } else if (token.startsWith("discovery")) {
+            rbac().doIfAllowed(Permission.VIEW_PUBLISHED, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
+                    String collection = null;
+                    if (token.startsWith("discovery_")) {
+                        collection = URL.decode(token.substring("discovery_".length()));
+                    }
+                    showDiscoveryPage(collection);
+                }
+            });
+        } else if (token.startsWith("administration")) {
+            rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
+                    showAdminPage();
+                }
+            });
+        } else {
+            rbac().doIfAllowed(Permission.VIEW_MEMBER_PAGES, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
+
+                    if (token.startsWith("dataset")) {
+                        showDataset();
+                    } else if (token.startsWith("listDatasets") /*&& !previousHistoryToken.startsWith("listDatasets")*/) {
+                        showListDatasetsPage();
+                    } else if (token.startsWith("tags")) {
+                        showTagsPage();
+                    } else if (token.startsWith("tag")) {
+                        showTagPage();
+                    } else if (token.startsWith("listCollections") /*&& !previousHistoryToken.startsWith("listCollections")*/) {
+                        listCollections();
+                    } else if (token.startsWith("listCollections")) {
+                        // skip default case!
+                    } else if (token.startsWith("collection")) {
+                        showCollectionPage();
+                    } else if (token.startsWith("search")) {
+                        showSearchResultsPage();
+                    } else if (token.startsWith("dashboard")) {
+                        showDashboardPage();
+                    } else if (token.startsWith("signup")) {
+                        showSignupPage();
+                    } else if (token.startsWith("account")) {
+                        showAccountPage();
+                    } else if (token.startsWith("viewSelected")) {
+                        showSelected(true);
+                    } else if (token.startsWith("editRelationships")) {
+                        showSelected(true);
+                    } else if (token.startsWith("noneSelected")) {
+                        showSelected(false);
+                    } else if (token.startsWith("login")) {
+                        //just logged in
+                        if (!MMDB.getSessionState().isAnonymous()) {
+                            showListDatasetsPage();
+                            token = "listDatasets";
+                            History.newItem("listDatasets", false);
+                        } else {
+                            showLoginPage();
+                        }
+                    } else if (token.startsWith("logout_st")) {
+                        //Successfully logged in after logout due to timeout/session issue - just go back to where the user was
+                        History.back();
+                    } else /*if (!previousHistoryToken.startsWith("listDatasets")) */{
+                        //Default page
+                        showListDatasetsPage();
+                    }
+                }
+            });
         }
         previousHistoryToken = token;
+        setMenuItemVisibility();
     }
 
     private void showAboutPage() {
@@ -867,9 +923,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     private void showLoginPage(boolean interrupted) {
-        ///adminBbullet.addStyleName("hidden");
-        adminLink.addStyleName("hidden");
-        //LoginPage.setAutologin(true);
+        setMenuItemVisibility();
         loginStatusWidget.loggedOut();
         mainContainer.clear();
         LoginPage lp = new LoginPage();
@@ -927,7 +981,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             if ((localKey != null) && cookieSessionKey.equals(localKey)) {
                 //Assume state.getCurrentUser is correct
                 //localKey should only be null or equal to the cookieSessionKey
-                doWithPermission(History.getToken());
+                parseHistoryToken(History.getToken());
             } else {
                 // Check REST auth and get the userID so we can then go retrieve the PersonBean (in login())
                 // Having a sessionKey and no local key will occur when the user has hit a browser
@@ -1050,6 +1104,32 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     public static void setSessionPreference(String key, String value) {
         getSessionPreferences().put(key, value);
+    }
+
+    public abstract class StandardDenialPermissionCallback extends PermissionCallback {
+
+        protected String token;
+
+        public StandardDenialPermissionCallback(String token) {
+            this.token = token;
+        }
+
+        @Override
+        public abstract void onAllowed();
+
+        @Override
+        public void onDenied() {
+            if (getSessionState().isAnonymous()) {
+                if (token.startsWith("logout_st")) {
+                    showLoginPage(true);
+                } else {
+                    showLoginPage();
+                }
+            } else {
+                showNotEnabledPage();
+            }
+        }
+
     }
 
 }
