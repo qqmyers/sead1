@@ -368,7 +368,7 @@ public class LoginPage extends Composite {
 
             @Override
             public void onSuccess(final Oauth2ServerFlowTokenRequestResult result) {
-                Window.alert("Oauth Token: " + result.getAuthToken());
+
                 dispatchasync.execute(new Oauth2ServerFlowUserInfo(result.getAuthToken(), OrcidProvider), new AsyncCallback<Oauth2ServerFlowUserInfoResult>() {
 
                     @Override

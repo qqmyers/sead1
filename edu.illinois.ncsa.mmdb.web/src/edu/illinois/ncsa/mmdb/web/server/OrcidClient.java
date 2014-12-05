@@ -119,7 +119,7 @@ public class OrcidClient {
                 String tokenString = clientResponse.getEntity();
                 org.json.JSONObject tokenObject = new org.json.JSONObject(tokenString);
                 result.setAuthToken(tokenObject.getString("access_token"));
-                result.setExpirationTime(tokenObject.getInt("expires_in"));
+                result.setExpirationTime(tokenObject.getInt("expires_in") + (int) (System.currentTimeMillis() / 1000L));
                 result.setId(tokenObject.getString("orcid"));
             }
         } catch (Exception e) {
