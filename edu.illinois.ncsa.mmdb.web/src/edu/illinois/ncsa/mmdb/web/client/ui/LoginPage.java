@@ -189,7 +189,7 @@ public class LoginPage extends Composite {
                 oauth2Login(new AuthenticationCallback() {
                     @Override
                     public void onFailure() {
-                        fail();
+                        fail("Google Login Failure");
                     }
 
                     @Override
@@ -383,56 +383,27 @@ public class LoginPage extends Composite {
                         } else {
                             GWT.log("User found " + userInfoResult.getUserName() + " " + userInfoResult.getEmail());
                         }
-                        /*
-                        // authenticate on the server side
-                        String restUrl = "./api/authenticate";
-                        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
-                        builder.setHeader("Content-type", "application/x-www-form-urlencoded");
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("orcidAccessToken=" + result.getAuthToken());
-                        builder.setRequestData(sb.toString());
-                        builder.setCallback(new RequestCallback() {
-                            public void onError(Request request, Throwable exception) {
-                                GWT.log("Error authenticating on the server side");
-                            }
-
-                            public void onResponseReceived(Request request, Response response) {
-                                // success!
-                                String sessionKey = response.getText();
-
-                                GWT.log("REST auth status code = " + response.getStatusCode(), null);
-                                if (response.getStatusCode() > 300) {
-                                    GWT.log("Authentication failed: " + sessionKey, null);
-                                } else {
-                                    GWT.log("User " + userInfoResult.getEmail() + " associated with session key " + sessionKey, null);
-                                    // login local
-                                    MMDB.getSessionState().setLoginProvider(LoginPage.OrcidProvider);
-                                    mainWindow.retrieveUserInfoByName(userInfoResult.getEmail(), sessionKey, null );
-                                }
-                                //Set timer to renew credentials
-                                refreshCheck(result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L));
-                                //Window.alert("Expires at:" + result.getExpirationTime());
-                                // setAutologin(true);
-                            }
-                        });
-                        */
 
                         String sessionKey = userInfoResult.getSessionId();
                         GWT.log("User " + userInfoResult.getEmail() + " associated with session key " + sessionKey, null);
                         // login local
                         MMDB.getSessionState().setLoginProvider(LoginPage.OrcidProvider);
-                        mainWindow.retrieveUserInfoByName(userInfoResult.getEmail(), sessionKey, null /*callback*/);
+                        mainWindow.retrieveUserInfoByName(userInfoResult.getEmail(), sessionKey, new AuthenticationCallback() {
+
+                            @Override
+                            public void onSuccess(String userUri, String sessionKey) {
+                                // TODO Auto-generated method stub
+
+                            }
+
+                            @Override
+                            public void onFailure() {
+                                mainWindow.getLoginPage().fail("Unable to retrieve name and email from ORCID");
+
+                            }
+                        });
                         //Set timer to renew credentials
                         refreshCheck(result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L));
-
-                        /*
-                        try {
-                            GWT.log("attempting to authenticate " + userInfoResult.getEmail() + " against " + restUrl, null);
-                            builder.send();
-                        } catch (RequestException x) {
-                            //callback.onFailure();
-                        }
-                        */
                     }
                 });
             }
@@ -686,7 +657,7 @@ public class LoginPage extends Composite {
         authenticate(username, password, new AuthenticationCallback() {
             @Override
             public void onFailure() {
-                fail();
+                fail("Incorrect username/password combination");
             }
 
             @Override
@@ -730,13 +701,13 @@ public class LoginPage extends Composite {
         }
     }
 
-    void fail() {
+    void fail(String message) {
         GWT.log("Failed authenticating", null);
-        Label message = new Label(
-                "Incorrect username/password combination");
-        message.addStyleName("loginError");
+        Label messageLabel = new Label(
+                message);
+        messageLabel.addStyleName("loginError");
         feedbackPanel.clear();
-        feedbackPanel.add(message);
+        feedbackPanel.add(messageLabel);
         progressLabel.setText("");
     }
 

@@ -67,9 +67,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
@@ -89,7 +89,6 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.geo.GeoPage;
-import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.AboutPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.AccountPage;
@@ -156,17 +155,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     /** Event bus for propagating events in the interface **/
     public static final HandlerManager eventBus                         = new HandlerManager(null);
 
-    /** The upload button */
-    private Anchor                     uploadButton;
-
-    /** The upload widget in the upload toolbar */
-    private FlowPanel                  uploadPanel;
-
     /** Main content panel **/
     private static final FlowPanel     mainContainer                    = new FlowPanel();
-
-    /** Place support for history management **/
-    private PlaceService               placeService;
 
     public static LoginStatusWidget    loginStatusWidget;
 
@@ -177,8 +167,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private Label                      breadcrumb;
 
     private static UserSessionState    sessionState;
-
-    private HorizontalPanel            navMenu;
 
     private RootPanel                  aboutMenuItem;
     private RootPanel                  datasetsMenuItem;
@@ -313,7 +301,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData, ConfigurationKey.UseGoogleDocViewer, ConfigurationKey.PresentationSortOrder, ConfigurationKey.PresentationPageViewType, ConfigurationKey.OrcidClientId), new AsyncCallback<ConfigurationResult>() {
             @Override
             public void onFailure(Throwable caught) {
-                GWT.log("Could not get Names", caught);
+                GWT.log("Could not get Config Info", caught);
             }
 
             @Override
@@ -962,7 +950,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
             loggedIn = true;
         }
-
+        final String localKey = state.getSessionKey();
         if (!loggedIn) {
             //try to log in as preferred user or anonymous
             GWT.log("not logged in, attempting to login as anonymous");
@@ -971,7 +959,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                         @Override
                         public void onFailure() {
-                            showLoginPage(true);
+                            showLoginPage(localKey != null);
                         }
 
                         @Override
@@ -982,7 +970,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                         }
                     }, true);
         } else {
-            String localKey = state.getSessionKey();
+
             if ((localKey != null) && cookieSessionKey.equals(localKey)) {
                 //Assume state.getCurrentUser is correct
                 //localKey should only be null or equal to the cookieSessionKey
@@ -1135,6 +1123,15 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             }
         }
 
+    }
+
+    public LoginPage getLoginPage() {
+        Widget widget = mainContainer.getWidget(0);
+        if ((widget != null) && (widget instanceof LoginPage)) {
+            return (LoginPage) widget;
+        } else {
+            return null;
+        }
     }
 
 }
