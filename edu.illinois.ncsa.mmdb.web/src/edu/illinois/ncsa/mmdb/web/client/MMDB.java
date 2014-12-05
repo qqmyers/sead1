@@ -474,6 +474,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
              *  the default content screen (currently listDatasets)
              */
             credChangeOccuring = true;
+            getSessionState().setCurrentUser(null);
+            getSessionState().setLoginProvider("local");
+            getSessionState().setAnonymous(true);
+            setMenuItemVisibility();
+
             LoginPage.authenticate("anonymous", "none", new AuthenticationCallback() {
                 @Override
                 public void onFailure() {

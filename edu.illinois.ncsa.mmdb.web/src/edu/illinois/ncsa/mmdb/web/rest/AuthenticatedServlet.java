@@ -89,6 +89,7 @@ public class AuthenticatedServlet extends HttpServlet {
         log.debug("POST Authenticate");
 
         String validUser = null;
+        int expires_in = -1;
         if (request.getRequestURL().toString().endsWith("authenticate")) {
 
             //Expect two application/x-www-form-urlencoded parameters
@@ -96,6 +97,7 @@ public class AuthenticatedServlet extends HttpServlet {
             String username = request.getParameter("username");
             String password = request.getParameter("password");
             String googleAccessToken = request.getParameter("googleAccessToken");
+            String orcidAccessToken = request.getParameter("orcidAccessToken");
 
             log.debug("u: " + username);
             try {
@@ -126,7 +128,7 @@ public class AuthenticatedServlet extends HttpServlet {
                     try {
                         if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
                             session.setAttribute(REMOTE_ALLOWED, "true");
-                            addProxyToSession(request); //Local proxy
+                            addProxyToSession(session, getServer(request)); //Local proxy
 
                         }
                     } catch (RBACException re) {
@@ -141,43 +143,20 @@ public class AuthenticatedServlet extends HttpServlet {
                 JSONObject tokenInfo = Authentication.googleAuthenticate(clientIds, googleAccessToken); // testID
                 try {
                     validUser = tokenInfo.getString("email");
+                    expires_in = tokenInfo.getInt("expires_in");
                 } catch (JSONException e) {
                     log.error(e);
                 }
                 log.info("Retrieved user from google " + validUser + " " + clientIds[0] + ", " + clientIds[1] + " " + googleAccessToken);
-                if (validUser != null) {
+                if ((validUser != null) && (expires_in != -1)) {
                     // set the session attribute indicating that we're authenticated
+                    String sessionId = createAuthenticatedSession(validUser, expires_in, request);
 
-                    // we're authenticating, so we need to create a session and put it in the context
-                    HttpSession session = request.getSession(false);
-                    if (session != null) {
-                        log.debug("Invalidating: " + session.getId());
-                        session.invalidate();
-                    }
-                    session = request.getSession(true);
-                    try {
-                        session.setAttribute("exp", tokenInfo.getInt("expires_in") + (int) (System.currentTimeMillis() / 1000L));
-                    } catch (JSONException e) {
-                        // TODO Auto-generated catch block
-                        log.error("Can't set token expiration", e);
-                    }
-                    log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
-                    session.setAttribute(AUTHENTICATED_AS, validUser);
-
-                    session.setMaxInactiveInterval(3601); //longer than gAT lifetime - (note gAT lifetime now governs how long the session is considered valid, not the session lifetime)
-
-                    SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
-                    try {
-                        if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
-                            session.setAttribute(REMOTE_ALLOWED, "true");
-                            addProxyToSession(request); //Local proxy
-                        }
-                    } catch (RBACException re) {
-                        log.warn("Error determining remote api permission");
-                    }
-                    response.getWriter().print(session.getId());
+                    response.getWriter().print(sessionId);
 
                 }
+            } else if (orcidAccessToken != null) {
+
             }
 
             if (validUser == null) {
@@ -194,11 +173,50 @@ public class AuthenticatedServlet extends HttpServlet {
         //else - pass through to derived classes w/o handling anything
     }
 
-    private void addProxyToSession(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        MediciProxy mp = new MediciProxy();
+    private String getServer(HttpServletRequest request) {
         StringBuffer sBuffer = request.getRequestURL();
-        String server = sBuffer.substring(0, sBuffer.length() - request.getServletPath().length() - request.getPathInfo().length());
+        return sBuffer.substring(0, sBuffer.length() - request.getServletPath().length() - request.getPathInfo().length());
+    }
+
+    private String createAuthenticatedSession(String validUser, int expiry, HttpServletRequest request) {
+        // we're authenticating, so we need to create a session and put it in the context
+        //but first we remove any old session for security reasons
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            log.debug("Invalidating: " + session.getId());
+            session.invalidate();
+        }
+        session = request.getSession(true);
+        String server = getServer(request);
+
+        fillAuthenticatedSession(session, validUser, expiry, server);
+        return session.getId();
+
+    }
+
+    public static void fillAuthenticatedSession(HttpSession session, String validUser, int expiry, String server) {
+        session.setAttribute("exp", expiry + (int) (System.currentTimeMillis() / 1000L));
+
+        log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
+        session.setAttribute(AUTHENTICATED_AS, validUser);
+
+        session.setMaxInactiveInterval(expiry + 1); //longer than gAT lifetime - (note gAT lifetime now governs how long the session is considered valid, not the session lifetime)
+
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        try {
+            if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
+                session.setAttribute(REMOTE_ALLOWED, "true");
+                addProxyToSession(session, server); //Local proxy
+            }
+        } catch (RBACException re) {
+            log.warn("Error determining remote api permission");
+        }
+
+    }
+
+    private static void addProxyToSession(HttpSession session, String server) {
+
+        MediciProxy mp = new MediciProxy();
         log.debug("Setting mp to session: " + session.getId());
         mp.setLocalCredentials(session.getId(), server, TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey));
         mp.setGeoCredentials(null, null, server + "/geoproxy");

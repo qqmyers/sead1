@@ -85,6 +85,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLikeDislikeHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMimeTypeCategoriesHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetOauth2ServerFlowStateHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPermissionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRecentActivityHandler;
@@ -112,6 +113,8 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.MintHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.Oauth2ServerFlowTokenRequestHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.Oauth2ServerFlowUserInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveUserMetadataHandler;
@@ -229,6 +232,9 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new ClearGeoLocationHandler());
         DispatchUtil.registerHandler(new GetServiceTokenHandler());
         DispatchUtil.registerHandler(new UnpackZipHandler());
+        DispatchUtil.registerHandler(new GetOauth2ServerFlowStateHandler());
+        DispatchUtil.registerHandler(new Oauth2ServerFlowTokenRequestHandler());
+        DispatchUtil.registerHandler(new Oauth2ServerFlowUserInfoHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

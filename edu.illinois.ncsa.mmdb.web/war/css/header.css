@@ -282,3 +282,8 @@ li {
 #searchMenu {
 	float: right;
 }
+
+
+.selected a {
+	color: #f3882a !important;
+}

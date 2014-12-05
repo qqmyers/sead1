@@ -42,6 +42,7 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.IOException;
+import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -59,10 +60,15 @@ import org.apache.commons.logging.LogFactory;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AuthorizedAction;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMimeTypeCategories;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetOauth2ServerFlowState;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.Oauth2ServerFlowTokenRequest;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.Oauth2ServerFlowUserInfo;
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleUserInfoHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.Oauth2ServerFlowTokenRequestHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.Oauth2ServerFlowUserInfoHandler;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
@@ -122,7 +128,10 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
             //These are the only actions that should be allowed when there are no credentials
             if (!((action instanceof GoogleOAuth2Props) ||
                     (action instanceof GetConfiguration) ||
-                    (action instanceof GoogleUserInfo) || (action instanceof GetMimeTypeCategories))) {
+                    (action instanceof GoogleUserInfo) ||
+                    (action instanceof GetMimeTypeCategories) ||
+                    (action instanceof GetOauth2ServerFlowState) ||
+                    (action instanceof Oauth2ServerFlowTokenRequest) || (action instanceof Oauth2ServerFlowUserInfo))) {
                 log.debug("Refusing a dispatch request due to lack of credentials: " + action.getClass().getName());
 
                 //FIXME: Is there a lighter-weight option, e.g. to send an ActionException from here?
@@ -132,14 +141,68 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
 
         // HACK required to login user on the server side
         if (action instanceof GoogleUserInfo) {
-            log.debug("GoogleUserInfo is being called");
+            log.debug("GoogleUserInfoHandler is being called");
+            //FixMe - not currently used?
             GoogleUserInfoHandler.setSession(request.getSession(false));
+        } else if (action instanceof Oauth2ServerFlowTokenRequest) {
+            log.debug("Oauth2ServerFlowTokenRequestHandle is being called");
+            Oauth2ServerFlowTokenRequestHandler.setSession(request.getSession(true));
+        } else if (action instanceof Oauth2ServerFlowUserInfo) {
+            log.debug("Oauth2ServerFlowUserInfoHandler is being called");
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                String id = (String) session.getAttribute("orcid_id");
+                int expires_in = (Integer) session.getAttribute("expires_in");
+                log.debug("id: " + id + " exp: " + expires_in);
+                Oauth2ServerFlowUserInfoHandler.setId(id);
+                Oauth2ServerFlowUserInfoHandler.setExpiresIn(expires_in);
+                log.debug("static copies set");
+                log.debug(getServer(request));
+                Oauth2ServerFlowUserInfoHandler.setServer(getServer(request));
+                log.debug(("User Info session id: " + id));
+                session.invalidate();
+            } else {
+                log.debug("Null Session");
+            }
+            Oauth2ServerFlowUserInfoHandler.setSession(request.getSession(true));
         }
 
         Result execute = super.execute(action);
+
         if (action instanceof GoogleUserInfo) {
             GoogleUserInfoHandler.setSession(null);
+        } else if (action instanceof Oauth2ServerFlowTokenRequest) {
+            Oauth2ServerFlowTokenRequestHandler.setSession(null);
+            @SuppressWarnings("unchecked")
+            Enumeration<String> enumeration = request.getSession(false).getAttributeNames();
+            while (enumeration.hasMoreElements()) {
+                log.debug("Session has: " + enumeration.nextElement());
+            }
+        } else if (action instanceof Oauth2ServerFlowUserInfo) {
+            @SuppressWarnings("unchecked")
+            Enumeration<String> enumeration = request.getSession(false).getAttributeNames();
+            while (enumeration.hasMoreElements()) {
+                log.debug("Session has: " + enumeration.nextElement());
+            }
+            Oauth2ServerFlowUserInfoHandler.setSession(null);
         }
         return execute;
+    }
+
+    private String getServer(HttpServletRequest request) {
+        StringBuffer sBuffer = request.getRequestURL();
+        log.debug(sBuffer.toString());
+        log.debug(request.getServletPath());
+        log.debug(request.getPathInfo());
+        String sp = request.getServletPath();
+        String pi = request.getPathInfo();
+        int end = sBuffer.length();
+        if (sp != null) {
+            end -= sp.length();
+        }
+        if (pi != null) {
+            end -= pi.length();
+        }
+        return sBuffer.substring(0, end);
     }
 }

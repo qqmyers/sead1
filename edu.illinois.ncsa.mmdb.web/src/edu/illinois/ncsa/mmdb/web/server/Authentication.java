@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -49,6 +49,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.util.Tuple;
 
@@ -69,7 +70,7 @@ public class Authentication {
         }
 
         try {
-            Resource person = Resource.uriRef(PersonBeanUtil.getPersonID(username));
+            UriRef person = Resource.uriRef(PersonBeanUtil.getPersonID(username));
             if (person.getString().equals(Anonymous.USER)) {
                 // Which should be equivalent to:
                 // if (username.equals(Anonymous.USER)) {
@@ -83,6 +84,18 @@ public class Authentication {
                     return false;
                 }
             }
+            setLastLogin(person);
+
+            return true;
+
+        } catch (AuthenticationException ex) {
+            log.debug("LOGIN: authentication FAILED for " + username, ex);
+            return false;
+        }
+    }
+
+    public static void setLastLogin(UriRef person) {
+        try {
             TripleWriter tw = new TripleWriter();
             tw.add(person, Cet.cet("lastLogin"), new Date());
             Unifier uf = new Unifier();
@@ -93,14 +106,8 @@ public class Authentication {
                 tw.remove(person, Cet.cet("lastLogin"), row.get(0));
             }
             TupeloStore.getInstance().getContext().perform(tw);
-            return true;
-
         } catch (OperatorException ex) {
-            log.debug("LOGIN: authentication FAILED for " + username, ex);
-            return false;
-        } catch (AuthenticationException ex) {
-            log.debug("LOGIN: authentication FAILED for " + username, ex);
-            return false;
+            log.debug(" FAILED to write last login info for  " + person.getString(), ex);
         }
     }
 
@@ -110,22 +117,8 @@ public class Authentication {
             String user;
             try {
                 user = tokenInfo.getString("email");
-                try {
-                    TripleWriter tw = new TripleWriter();
-
-                    Resource person = Resource.uriRef(PersonBeanUtil.getPersonID(user));
-                    tw.add(person, Cet.cet("lastLogin"), new Date());
-                    Unifier uf = new Unifier();
-                    uf.addPattern(person, Cet.cet("lastLogin"), "date");
-                    uf.setColumnNames("date");
-                    TupeloStore.getInstance().getContext().perform(uf);
-                    for (Tuple<Resource> row : uf.getResult() ) {
-                        tw.remove(person, Cet.cet("lastLogin"), row.get(0));
-                    }
-                    TupeloStore.getInstance().getContext().perform(tw);
-                } catch (OperatorException exc) {
-                    log.debug("LOGIN: could not write last login for " + user, exc);
-                }
+                UriRef person = Resource.uriRef(PersonBeanUtil.getPersonID(user));
+                setLastLogin(person);
             } catch (JSONException e) {
                 log.error(e);
             }

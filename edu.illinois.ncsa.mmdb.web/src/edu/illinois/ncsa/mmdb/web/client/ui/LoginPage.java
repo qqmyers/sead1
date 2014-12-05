@@ -83,8 +83,14 @@ import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetOauth2ServerFlowState;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetOauth2ServerFlowStateResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.Oauth2ServerFlowTokenRequest;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.Oauth2ServerFlowTokenRequestResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.Oauth2ServerFlowUserInfo;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.Oauth2ServerFlowUserInfoResult;
 
 /**
  * @author Luigi Marini
@@ -312,18 +318,126 @@ public class LoginPage extends Composite {
      */
     private void orcidAuthLogin() {
 
-        String redirect_uri = "http://sead.ncsa.illinois.edu/projects/authredirect?server=" + GWT.getModuleBaseURL() + "oauth2callback/orcid";
-        // String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
-        //Temporarily point at sandbox for testing
-        String orcidAuthorizeURL = "https://sandbox.orcid.org/oauth/authorize";
-        StringBuilder sb = new StringBuilder();
-        sb.append("client_id=" + MMDB._orcidClientId + "&");
-        sb.append("scope=" + URL.encodeQueryString("/authenticate") + "&");
-        sb.append("response_type=" + "code&");
-        sb.append("redirect_uri=" + URL.encodeQueryString(redirect_uri) + "&");
-        sb.append("state=" + "magic-bean");
-        String url = orcidAuthorizeURL + "?" + sb.toString();
-        Window.Location.assign(url);
+        dispatchasync.execute(new GetOauth2ServerFlowState(OrcidProvider), new AsyncCallback<GetOauth2ServerFlowStateResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                //callback.onFailure();
+            }
+
+            @Override
+            public void onSuccess(final GetOauth2ServerFlowStateResult result) {
+                String redirect_uri = "http://sead.ncsa.illinois.edu/projects/authredirect?server=" + GWT.getHostPageBaseURL();
+                // String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
+                //Temporarily point at sandbox for testing
+                String orcidAuthorizeURL = "https://sandbox.orcid.org/oauth/authorize";
+                StringBuilder sb = new StringBuilder();
+                sb.append("client_id=" + MMDB._orcidClientId + "&");
+                sb.append("scope=" + URL.encodeQueryString("/authenticate") + "&");
+                sb.append("response_type=" + "code&");
+                sb.append("redirect_uri=" + URL.encodeQueryString(redirect_uri) + "&");
+                sb.append("state=" + result.getState());
+                String url = orcidAuthorizeURL + "?" + sb.toString();
+                registerOrcidCallback();
+                Window.open(url, "ORCID Oauth2", "height = 600,width = 800,resizeable,scrollbars");
+            }
+        });
+    }
+
+    static void orcidGetToken(String queryString) {
+
+        if (queryString.startsWith("?")) {
+            queryString = queryString.substring(1);
+        }
+        final String[] pairs = queryString.split("&");
+        String codeString = null;
+        String stateString = null;
+        for (String pair : pairs ) {
+            if (pair.startsWith("code=")) {
+                codeString = pair.substring(5);
+            } else if (pair.startsWith("state=")) {
+                stateString = pair.substring(6);
+            }
+        }
+        dispatchasync.execute(new Oauth2ServerFlowTokenRequest(codeString, stateString, OrcidProvider), new AsyncCallback<Oauth2ServerFlowTokenRequestResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                //callback.onFailure();
+            }
+
+            @Override
+            public void onSuccess(final Oauth2ServerFlowTokenRequestResult result) {
+                Window.alert("Oauth Token: " + result.getAuthToken());
+                dispatchasync.execute(new Oauth2ServerFlowUserInfo(result.getAuthToken(), OrcidProvider), new AsyncCallback<Oauth2ServerFlowUserInfoResult>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        //callback.onFailure();
+                    }
+
+                    @Override
+                    public void onSuccess(final Oauth2ServerFlowUserInfoResult userInfoResult) {
+                        if (userInfoResult.isCreated()) {
+                            GWT.log("Created new user " + userInfoResult.getUserName() + " " + userInfoResult.getEmail());
+                        } else {
+                            GWT.log("User found " + userInfoResult.getUserName() + " " + userInfoResult.getEmail());
+                        }
+                        /*
+                        // authenticate on the server side
+                        String restUrl = "./api/authenticate";
+                        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
+                        builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("orcidAccessToken=" + result.getAuthToken());
+                        builder.setRequestData(sb.toString());
+                        builder.setCallback(new RequestCallback() {
+                            public void onError(Request request, Throwable exception) {
+                                GWT.log("Error authenticating on the server side");
+                            }
+
+                            public void onResponseReceived(Request request, Response response) {
+                                // success!
+                                String sessionKey = response.getText();
+
+                                GWT.log("REST auth status code = " + response.getStatusCode(), null);
+                                if (response.getStatusCode() > 300) {
+                                    GWT.log("Authentication failed: " + sessionKey, null);
+                                } else {
+                                    GWT.log("User " + userInfoResult.getEmail() + " associated with session key " + sessionKey, null);
+                                    // login local
+                                    MMDB.getSessionState().setLoginProvider(LoginPage.OrcidProvider);
+                                    mainWindow.retrieveUserInfoByName(userInfoResult.getEmail(), sessionKey, null );
+                                }
+                                //Set timer to renew credentials
+                                refreshCheck(result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L));
+                                //Window.alert("Expires at:" + result.getExpirationTime());
+                                // setAutologin(true);
+                            }
+                        });
+                        */
+
+                        String sessionKey = userInfoResult.getSessionId();
+                        GWT.log("User " + userInfoResult.getEmail() + " associated with session key " + sessionKey, null);
+                        // login local
+                        MMDB.getSessionState().setLoginProvider(LoginPage.OrcidProvider);
+                        mainWindow.retrieveUserInfoByName(userInfoResult.getEmail(), sessionKey, null /*callback*/);
+                        //Set timer to renew credentials
+                        refreshCheck(result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L));
+
+                        /*
+                        try {
+                            GWT.log("attempting to authenticate " + userInfoResult.getEmail() + " against " + restUrl, null);
+                            builder.send();
+                        } catch (RequestException x) {
+                            //callback.onFailure();
+                        }
+                        */
+                    }
+                });
+            }
+        });
+
     }
 
     public static native void checkForOauth2Token(String googleClientId, TokenCallback tCallback) /*-{
@@ -747,6 +861,21 @@ public class LoginPage extends Composite {
         // Schedule the timer to run once in 5 seconds.
         t.schedule(seconds * 1000);
     }
+
+    /**
+     * Register a global function to receive auth responses from the popup
+     * window.
+     */
+    private native void registerOrcidCallback() /*-{
+		var self = this;
+		if (!$wnd.oauth2) {
+			$wnd.oauth2 = {};
+		}
+		$wnd.oauth2.__orcidGetToken = $entry(function(search) {
+			@edu.illinois.ncsa.mmdb.web.client.ui.LoginPage::orcidGetToken(Ljava/lang/String;)(search);
+		});
+    }-*/;
+
 }
 
 class Entry extends JavaScriptObject {
