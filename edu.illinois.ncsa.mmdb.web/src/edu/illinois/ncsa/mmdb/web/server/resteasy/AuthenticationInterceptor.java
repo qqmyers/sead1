@@ -127,7 +127,7 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
             else {
                 username = (String) session.getAttribute(AuthenticatedServlet.AUTHENTICATED_AS);
                 log.debug("Found session - Sucessfully authenticated as " + username);
-                log.warn("exo not found in session");
+                log.warn("exp not found in session");
             }
         } else if (request.getHttpHeaders().getRequestHeader("Authorization") != null) {
             //FixMe - only handles local login (still needed?), not Oauth2

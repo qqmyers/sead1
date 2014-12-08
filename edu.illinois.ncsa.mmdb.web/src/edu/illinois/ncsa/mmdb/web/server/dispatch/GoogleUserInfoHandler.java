@@ -70,6 +70,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
+import edu.illinois.ncsa.mmdb.web.server.Authentication;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
@@ -91,9 +93,14 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
     private static final HttpTransport            HTTP_TRANSPORT = new NetHttpTransport();
 
     private static final ThreadLocal<HttpSession> session        = new ThreadLocal<HttpSession>();
+    private static final ThreadLocal<String>      theServer      = new ThreadLocal<String>();
 
     public static void setSession(HttpSession session) {
         GoogleUserInfoHandler.session.set(session);
+    }
+
+    public static void setServer(String server) {
+        theServer.set(server);
     }
 
     @Override
@@ -105,6 +112,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
         try {
             //First verify token is for us
             String[] client_ids = new String[1];
+            //Only using interactive client ID, not device ID since this should only be called via the browser
             client_ids[0] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleClientId);
             JSONObject tokenInfo = MediciProxy.getValidatedGoogleToken(client_ids, action.getToken());
             if (tokenInfo != null) {
@@ -120,10 +128,15 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
                 String result = request.execute().parseAsString();
                 JSONObject personInfo = new JSONObject(result);
                 log.debug(personInfo.toString());
-                boolean verified = personInfo.getBoolean("email_verified");
+                boolean verified = personInfo.getBoolean("email_verified"); //should always be true here since getValidatedGoogleToken tests this
                 if (verified) {
                     boolean created = checkUsersExists(personInfo.getString("name"), personInfo.getString("email"), action.isAccessRequest());
-                    return new GoogleUserInfoResult(created, personInfo.getString("name"), personInfo.getString("email"), exp);
+                    //Create a valid session for authenticated user (as if /api/authentication was called)
+                    AuthenticatedServlet.fillAuthenticatedSession(session.get(), personInfo.getString("email"), exp, theServer.get());
+                    //Record login
+                    Authentication.setLastLogin(Resource.uriRef(PersonBeanUtil.getPersonID(personInfo.getString("email"))));
+                    //Send sessionId to client in an easy to parse form
+                    return new GoogleUserInfoResult(created, personInfo.getString("name"), personInfo.getString("email"), exp, session.get().getId());
                 }
             }
             //Something's not right - wrong audience, expired token, email not yet verified by google

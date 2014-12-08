@@ -139,11 +139,15 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
             }
         }
 
-        // HACK required to login user on the server side
+        // Required to login user for restful API
         if (action instanceof GoogleUserInfo) {
             log.debug("GoogleUserInfoHandler is being called");
-            //FixMe - not currently used?
-            GoogleUserInfoHandler.setSession(request.getSession(false));
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+            GoogleUserInfoHandler.setSession(request.getSession(true));
+            GoogleUserInfoHandler.setServer(getServer(request));
         } else if (action instanceof Oauth2ServerFlowTokenRequest) {
             log.debug("Oauth2ServerFlowTokenRequestHandle is being called");
             Oauth2ServerFlowTokenRequestHandler.setSession(request.getSession(true));
@@ -152,14 +156,11 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
             HttpSession session = request.getSession(false);
             if (session != null) {
                 String id = (String) session.getAttribute("orcid_id");
-                int expires_in = (Integer) session.getAttribute("expires_in");
-                log.debug("id: " + id + " exp: " + expires_in);
+                int expires_at = (Integer) session.getAttribute("expires_at");
                 Oauth2ServerFlowUserInfoHandler.setId(id);
-                Oauth2ServerFlowUserInfoHandler.setExpiresIn(expires_in);
-                log.debug("static copies set");
+                Oauth2ServerFlowUserInfoHandler.setExpiresAt(expires_at);
                 log.debug(getServer(request));
                 Oauth2ServerFlowUserInfoHandler.setServer(getServer(request));
-                log.debug(("User Info session id: " + id));
                 session.invalidate();
             } else {
                 log.debug("Null Session");
@@ -191,9 +192,6 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
 
     private String getServer(HttpServletRequest request) {
         StringBuffer sBuffer = request.getRequestURL();
-        log.debug(sBuffer.toString());
-        log.debug(request.getServletPath());
-        log.debug(request.getPathInfo());
         String sp = request.getServletPath();
         String pi = request.getPathInfo();
         int end = sBuffer.length();

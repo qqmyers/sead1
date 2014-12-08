@@ -626,6 +626,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             public void onSuccess(GetUserResult result) {
                 PersonBean personBean = result.getPersonBean();
                 state.setCurrentUser(personBean);
+
                 if (result.isAnonymous()) {
                     MMDB.loginStatusWidget.loggedOut();
                     getSessionState().setAnonymous(true);
@@ -637,7 +638,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                     GWT.log("Current user set to " + personBean.getUri());
                 }
-
                 parseHistoryToken(History.getToken());
                 //Before doWithPerm? (most/all(?) callbacks are null now, so minor issue
                 callback.onSuccess(username, sessionKey);
@@ -1125,13 +1125,20 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     }
 
-    public LoginPage getLoginPage() {
+    /* Utility to get handle to current page - caller must check type of page)
+     *
+     */
+    public Widget getPage() {
         Widget widget = mainContainer.getWidget(0);
-        if ((widget != null) && (widget instanceof LoginPage)) {
-            return (LoginPage) widget;
+        if (widget != null) {
+            return widget;
         } else {
             return null;
         }
+    }
+
+    public FlowPanel getMainContainer() {
+        return mainContainer;
     }
 
 }

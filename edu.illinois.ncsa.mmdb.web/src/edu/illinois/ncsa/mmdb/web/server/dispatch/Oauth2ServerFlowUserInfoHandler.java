@@ -30,10 +30,13 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Foaf;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserPID;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Oauth2ServerFlowUserInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Oauth2ServerFlowUserInfoResult;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
@@ -63,15 +66,15 @@ public class Oauth2ServerFlowUserInfoHandler implements ActionHandler<Oauth2Serv
     }
 
     private static final ThreadLocal<String>  orcidId        = new ThreadLocal<String>();
-    private static final ThreadLocal<Integer> tokenExpiresIn = new ThreadLocal<Integer>();
+    private static final ThreadLocal<Integer> tokenExpiresAt = new ThreadLocal<Integer>();
     private static final ThreadLocal<String>  theServer      = new ThreadLocal<String>();
 
     public static void setId(String id) {
         orcidId.set(id);
     }
 
-    public static void setExpiresIn(int expires_in) {
-        tokenExpiresIn.set(expires_in);
+    public static void setExpiresAt(int expires_at) {
+        tokenExpiresAt.set(expires_at);
     }
 
     public static void setServer(String server) {
@@ -86,12 +89,28 @@ public class Oauth2ServerFlowUserInfoHandler implements ActionHandler<Oauth2Serv
         if (LoginPage.OrcidProvider.equals(action.getProvider())) {
             String id = orcidId.get();
             Oauth2ServerFlowUserInfoResult result = OrcidClient.requestUserInfo(id, action.getToken());
-            int expires_in = tokenExpiresIn.get();
+            result.setId(id);
+            int expires_at = tokenExpiresAt.get();
             HttpSession newSession = session.get();
-            AuthenticatedServlet.fillAuthenticatedSession(newSession, result.getEmail(), expires_in, theServer.get());
-            Authentication.setLastLogin(Resource.uriRef(PersonBeanUtil.getPersonID(result.getEmail())));
+            //Send sessionId to client in an easy to parse form
             result.setSessionId(newSession.getId());
-            return result;
+
+            if (result.getEmail() != null) {
+                result.setCreated(checkUsersExists(result.getUserName(), result.getEmail(), result.getId(), action.shouldCreate()));
+                if (action.shouldCreate()) {
+                    //Do nothing - currently signup does not log you in (since you wouldn't have permissions anyway)
+                    log.debug("User creation requested: result: " + result.isCreated());
+                } else {
+                    //Create a valid session for authenticated user (as if /api/authentication was called)
+                    AuthenticatedServlet.fillAuthenticatedSession(newSession, result.getEmail(), expires_at, theServer.get());
+                    //Record login
+                    Authentication.setLastLogin(Resource.uriRef(PersonBeanUtil.getPersonID(result.getEmail())));
+                }
+                return result;
+            } else {
+                //couldn't get email - fail...
+                throw new ActionException("no email");
+            }
         }
         return null;
     }
@@ -101,7 +120,7 @@ public class Oauth2ServerFlowUserInfoHandler implements ActionHandler<Oauth2Serv
         return Oauth2ServerFlowUserInfo.class;
     }
 
-    private boolean checkUsersExists(String name, String email, boolean accessRequest) {
+    private boolean checkUsersExists(String name, String email, String orcidId, boolean accessRequest) {
         log.debug("Checking if user exists " + email);
 
         Context context = TupeloStore.getInstance().getContext();
@@ -125,6 +144,14 @@ public class Oauth2ServerFlowUserInfoHandler implements ActionHandler<Oauth2Serv
                     PersonBean pb = createUser(email, name);
                     TupeloStore.getInstance().getBeanSession().save(pb);
                     Mail.userAdded(pb);
+                    //Add orcid ID
+                    TripleWriter tw = new TripleWriter();
+                    tw.add(Resource.uriRef(pb.getUri()), Resource.uriRef(GetUserPID.userPIDPredicate), orcidId);
+                    try {
+                        TupeloStore.getInstance().getContext().perform(tw);
+                    } catch (OperatorException oe) {
+                        log.warn("Could not write id for user");
+                    }
                     log.debug("User created " + pb.getUri());
                     return true;
                 } else {

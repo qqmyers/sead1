@@ -116,7 +116,7 @@ public class Oauth2ServerFlowTokenRequestHandler implements ActionHandler<Oauth2
                 log.debug("Orcid Provider");
                 Oauth2ServerFlowTokenRequestResult requestResult = OrcidClient.requestAccessToken(action.getCode());
                 session.get().setAttribute("orcid_id", requestResult.getId());
-                session.get().setAttribute("expires_in", requestResult.getExpirationTime());
+                session.get().setAttribute("expires_at", requestResult.getExpirationTime());
                 return requestResult;
             }
         }

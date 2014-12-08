@@ -94,6 +94,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.Oauth2ServerFlowUserInfoResult
 
 /**
  * @author Luigi Marini
+ * @author myersjd@umich.edu
  *
  *
  */
@@ -109,15 +110,20 @@ public class LoginPage extends Composite {
     private static MMDB          mainWindow;
 
     // Google Oauth2
-    static final String          AUTH_URL       = "https://accounts.google.com/o/oauth2/auth";
-    static final String          EMAIL_SCOPE    = "email";
-    static final String          PROFILE_SCOPE  = "profile";
+    static final String          AUTH_URL             = "https://accounts.google.com/o/oauth2/auth";
+    static final String          EMAIL_SCOPE          = "email";
+    static final String          PROFILE_SCOPE        = "profile";
 
-    public static final String   GoogleProvider = "google";
-    public static final String   OrcidProvider  = "orcid";
-    public static final String   LocalProvider  = "local";
+    public static final String   GoogleProvider       = "google";
+    public static final String   OrcidProvider        = "orcid";
+    public static final String   LocalProvider        = "local";
 
-    private static boolean       autologin      = true;
+    static final String          orcidSignInURL       = "https://sandbox.orcid.org/signin";
+    static final String          orcidAuthorizeURL    = "https://sandbox.orcid.org/oauth/authorize";
+
+    static final String          seadOauthRedirectURL = "http://sead.ncsa.illinois.edu/projects/authredirect?server=";
+
+    private static boolean       autologin            = true;
 
     public static void setMainWindow(MMDB mWindow) {
         mainWindow = mWindow;
@@ -212,22 +218,7 @@ public class LoginPage extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                orcidAuthLogin();
-                /*
-                autologin = autoBox.getValue();
-
-                oauth2Login(new AuthenticationCallback() {
-                    @Override
-                    public void onFailure() {
-                        fail();
-                    }
-
-                    @Override
-                    public void onSuccess(String userUri, String sessionKey) {
-                        GWT.log("authentication succeeded for " + userUri + " with key " + sessionKey + ", redirecting ...");
-                    }
-                }, false);
-                */
+                orcidAuthLogin(Boolean.FALSE);
             }
         });
         orcidLogin.setTabIndex(2);
@@ -316,7 +307,7 @@ public class LoginPage extends Composite {
     /**
      * Login using Orcid oAuth2.
      */
-    private void orcidAuthLogin() {
+    public static void orcidAuthLogin(final Boolean signup) {
 
         dispatchasync.execute(new GetOauth2ServerFlowState(OrcidProvider), new AsyncCallback<GetOauth2ServerFlowStateResult>() {
 
@@ -327,10 +318,10 @@ public class LoginPage extends Composite {
 
             @Override
             public void onSuccess(final GetOauth2ServerFlowStateResult result) {
-                String redirect_uri = "http://sead.ncsa.illinois.edu/projects/authredirect?server=" + GWT.getHostPageBaseURL();
+                String redirect_uri = seadOauthRedirectURL + GWT.getHostPageBaseURL();
                 // String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
                 //Temporarily point at sandbox for testing
-                String orcidAuthorizeURL = "https://sandbox.orcid.org/oauth/authorize";
+
                 StringBuilder sb = new StringBuilder();
                 sb.append("client_id=" + MMDB._orcidClientId + "&");
                 sb.append("scope=" + URL.encodeQueryString("/authenticate") + "&");
@@ -338,13 +329,13 @@ public class LoginPage extends Composite {
                 sb.append("redirect_uri=" + URL.encodeQueryString(redirect_uri) + "&");
                 sb.append("state=" + result.getState());
                 String url = orcidAuthorizeURL + "?" + sb.toString();
-                registerOrcidCallback();
+                registerOrcidCallback(signup);
                 Window.open(url, "ORCID Oauth2", "height = 600,width = 800,resizeable,scrollbars");
             }
         });
     }
 
-    static void orcidGetToken(String queryString) {
+    static void orcidGetToken(String queryString, final Boolean signup) {
 
         if (queryString.startsWith("?")) {
             queryString = queryString.substring(1);
@@ -369,11 +360,22 @@ public class LoginPage extends Composite {
             @Override
             public void onSuccess(final Oauth2ServerFlowTokenRequestResult result) {
 
-                dispatchasync.execute(new Oauth2ServerFlowUserInfo(result.getAuthToken(), OrcidProvider), new AsyncCallback<Oauth2ServerFlowUserInfoResult>() {
+                dispatchasync.execute(new Oauth2ServerFlowUserInfo(result.getAuthToken(), OrcidProvider, signup.booleanValue()), new AsyncCallback<Oauth2ServerFlowUserInfoResult>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        //callback.onFailure();
+                        Window.alert("Failed: " + caught.getMessage());
+                        Widget widget = mainWindow.getPage();
+                        //if 'no email' - provide feedback about orcid permissions and email validation
+                        if ("no email".equals(caught.getMessage())) {
+                            if ((widget != null) && (widget instanceof LoginPage)) {
+                                ((LoginPage) widget).fail("Unable to retrieve name and email from ORCID");
+                            } else if ((widget != null) && (widget instanceof SignupPage)) {
+
+                                ((SignupPage) widget).showFeedbackMessage("Unable to retrieve name and email from ORCID. Check your ORCID account at " + orcidSignInURL + " to make sure you have verified your primary email and have allowed your email to be shared.");
+                            }
+
+                        }
                     }
 
                     @Override
@@ -383,27 +385,54 @@ public class LoginPage extends Composite {
                         } else {
                             GWT.log("User found " + userInfoResult.getUserName() + " " + userInfoResult.getEmail());
                         }
+                        Widget widget = mainWindow.getPage();
+                        if (signup.booleanValue()) {
+                            if (!userInfoResult.isCreated()) {
 
-                        String sessionKey = userInfoResult.getSessionId();
-                        GWT.log("User " + userInfoResult.getEmail() + " associated with session key " + sessionKey, null);
-                        // login local
-                        MMDB.getSessionState().setLoginProvider(LoginPage.OrcidProvider);
-                        mainWindow.retrieveUserInfoByName(userInfoResult.getEmail(), sessionKey, new AuthenticationCallback() {
+                                if ((widget != null) && (widget instanceof SignupPage)) {
+                                    ((SignupPage) widget).showFeedbackMessage("The email address you have specified is already in the system. " +
+                                            "Please chose a different email address.");
+                                }
+                            } else {
+                                if ((widget != null) && (widget instanceof SignupPage)) {
+                                    mainWindow.getMainContainer().remove(widget);
+                                    final HTML thankyouText = new HTML(
+                                            "Your request has been received! "
+                                                    + "A project space administrator will review your submission and notify you when your request has been approved.");
+                                    thankyouText.addStyleName("loginForm");
+                                    mainWindow.getMainContainer().clear();
+                                    mainWindow.getMainContainer().add(thankyouText);
+                                }
+                            }
+                        } else {
+                            if (userInfoResult.isCreated()) {
+                                Window.alert("Created new user instead of logging in - please contact SEAD");
+                            } else {
+                                String sessionKey = userInfoResult.getSessionId();
+                                GWT.log("User " + userInfoResult.getEmail() + " associated with session key " + sessionKey, null);
+                                // login local
+                                MMDB.getSessionState().setLoginProvider(LoginPage.OrcidProvider);
+                                mainWindow.retrieveUserInfoByName(userInfoResult.getEmail(), sessionKey, new AuthenticationCallback() {
 
-                            @Override
-                            public void onSuccess(String userUri, String sessionKey) {
-                                // TODO Auto-generated method stub
+                                    @Override
+                                    public void onSuccess(String userUri, String sessionKey) {
+                                        // TODO Auto-generated method stub
 
+                                    }
+
+                                    @Override
+                                    public void onFailure() {
+                                        Widget widget = mainWindow.getPage();
+                                        if ((widget != null) && (widget instanceof LoginPage)) {
+                                            ((LoginPage) widget).fail("Unable to retrieve name and email.");
+                                        }
+                                    }
+                                });
+                                //Set timer to renew credentials
+                                refreshCheck(result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L));
                             }
 
-                            @Override
-                            public void onFailure() {
-                                mainWindow.getLoginPage().fail("Unable to retrieve name and email from ORCID");
-
-                            }
-                        });
-                        //Set timer to renew credentials
-                        refreshCheck(result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L));
+                        }
                     }
                 });
             }
@@ -508,48 +537,15 @@ public class LoginPage extends Composite {
                 } else {
                     GWT.log("User found " + result.getUserName() + " " + result.getEmail());
                 }
+                GWT.log("User " + result.getEmail() + " associated with session key " + result.getSessionId(), null);
+                // login local
+                MMDB.getSessionState().setLoginProvider(LoginPage.GoogleProvider);
+                mainWindow.retrieveUserInfoByName(result.getEmail(), result.getSessionId(), callback);
 
-                // authenticate on the server side
-                String restUrl = "./api/authenticate";
-                RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, restUrl);
-                builder.setHeader("Content-type", "application/x-www-form-urlencoded");
-                StringBuilder sb = new StringBuilder();
-                sb.append("googleAccessToken=" + token);
-                builder.setRequestData(sb.toString());
-                builder.setCallback(new RequestCallback() {
-                    public void onError(Request request, Throwable exception) {
-                        GWT.log("Error authenticating on the server side");
-                    }
-
-                    public void onResponseReceived(Request request, Response response) {
-                        // success!
-                        String sessionKey = response.getText();
-
-                        GWT.log("REST auth status code = " + response.getStatusCode(), null);
-                        if (response.getStatusCode() > 300) {
-                            GWT.log("Authentication failed: " + sessionKey, null);
-                        } else {
-                            GWT.log("User " + result.getEmail() + " associated with session key " + sessionKey, null);
-                            // login local
-                            MMDB.getSessionState().setLoginProvider(LoginPage.GoogleProvider);
-                            mainWindow.retrieveUserInfoByName(result.getEmail(), sessionKey, callback);
-                        }
-                        //Set timer to renew credentials
-                        refreshCheck(result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L));
-                        //Window.alert("Expires at:" + result.getExpirationTime());
-                        // setAutologin(true);
-                    }
-                });
-
-                try {
-                    GWT.log("attempting to authenticate " + result.getEmail() + " against " + restUrl, null);
-                    builder.send();
-                } catch (RequestException x) {
-                    callback.onFailure();
-                }
+                //Set timer to renew credentials
+                refreshCheck(result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L));
             }
         });
-
     }
 
     protected void authenticate() {
@@ -610,44 +606,6 @@ public class LoginPage extends Composite {
             }
         });
     }
-
-    /*
-    private void authenticateOnServer(final String username, final String password, final String sessionId, final AuthenticationCallback callback) {
-        // now hit the REST authentication endpoint
-        String restUrl = "./api/authenticate";
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
-        builder.setUser(TextFormatter.escapeEmailAddress(username));
-        builder.setPassword(password);
-
-        try {
-            GWT.log("attempting to authenticate " + username + " against " + restUrl, null);
-            builder.sendRequest("", new RequestCallback() {
-                public void onError(Request request, Throwable exception) {
-                    fail();
-                }
-
-                public void onResponseReceived(Request request, Response response) {
-                    // success!
-                    String sessionKey = response.getText();
-
-                    GWT.log("REST auth status code = " + response.getStatusCode(), null);
-                    if (response.getStatusCode() > 300) {
-                        GWT.log("authentication failed: " + sessionKey, null);
-                        fail();
-                    } else {
-                        GWT.log("user " + username + " associated with session key " + sessionKey, null);
-                        // login local
-
-                        mainWindow.loginByName(username, sessionKey, callback);
-                    }
-                }
-            });
-        } catch (RequestException x) {
-            // another error condition
-            callback.onFailure();
-        }
-    }
-    */
 
     /**
      * Called to process credentials from login form
@@ -800,36 +758,42 @@ public class LoginPage extends Composite {
                  */
                 MMDB.credChangeOccuring = true;
                 if (LoginPage.getAutologin()) {
-                    //Try to pick up existing credential silently
-                    LoginPage.checkForOauth2Token(MMDB._googleClientId, new TokenCallback() {
-                        @Override
-                        public void onFailure() {
-                            History.newItem("logout_st", true);
-                        }
+                    if (GoogleProvider.equals(MMDB.getSessionState().getLoginProvider())) {
+                        //Try to pick up existing credential silently
+                        LoginPage.checkForOauth2Token(MMDB._googleClientId, new TokenCallback() {
+                            @Override
+                            public void onFailure() {
+                                History.newItem("logout_st", true);
+                            }
 
-                        @Override
-                        public void onSuccess(String token) {
-                            //Silent or not, we have a token and will complete silently
-                            LoginPage.doOauth2Authenticate(token, new AuthenticationCallback() {
-                                @Override
-                                public void onFailure() {
-                                    History.newItem("logout_st", true);
-                                }
+                            @Override
+                            public void onSuccess(String token) {
+                                //Silent or not, we have a token and will complete silently
+                                LoginPage.doOauth2Authenticate(token, new AuthenticationCallback() {
+                                    @Override
+                                    public void onFailure() {
+                                        History.newItem("logout_st", true);
+                                    }
 
-                                @Override
-                                public void onSuccess(String userUri, String sessionKey) {
-                                    GWT.log(userUri + " logged in");
-                                }
-                            });
-                        }
-                    });
+                                    @Override
+                                    public void onSuccess(String userUri, String sessionKey) {
+                                        GWT.log(userUri + " logged in");
+                                    }
+                                });
+                            }
+                        });
+                    } else if (OrcidProvider.equals(MMDB.getSessionState().getLoginProvider())) {
+                        //ORCID is dropping the refresh token - for authentication purposes, it appears that we just have to re login at timeout (currently 1 hour)
+                        orcidAuthLogin(Boolean.FALSE);
+                    }
                 } else {
                     History.newItem("logout_st", true);
                 }
+
             }
         };
 
-        // Schedule the timer to run once in 5 seconds.
+        // Schedule the timer to run
         t.schedule(seconds * 1000);
     }
 
@@ -837,13 +801,13 @@ public class LoginPage extends Composite {
      * Register a global function to receive auth responses from the popup
      * window.
      */
-    private native void registerOrcidCallback() /*-{
+    private native static void registerOrcidCallback(Boolean signup) /*-{
 		var self = this;
 		if (!$wnd.oauth2) {
 			$wnd.oauth2 = {};
 		}
 		$wnd.oauth2.__orcidGetToken = $entry(function(search) {
-			@edu.illinois.ncsa.mmdb.web.client.ui.LoginPage::orcidGetToken(Ljava/lang/String;)(search);
+			@edu.illinois.ncsa.mmdb.web.client.ui.LoginPage::orcidGetToken(Ljava/lang/String;Ljava/lang/Boolean;)(search, signup);
 		});
     }-*/;
 

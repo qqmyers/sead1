@@ -203,6 +203,11 @@ a:hover {
 .gwt-DisclosurePanel {
 	width:200px;
 }
+
+.signupForm .gwt-DisclosurePanel {
+	width:247px;
+}
+ 
 .gwt-DisclosurePanel-open {
 	width:200px;
 	background-color: #F0F0F0;
@@ -1763,11 +1768,15 @@ a.zocial.google:hover {
 
 /* Login page display of social login options*/
 .zocial {
-	width: 174px;
+	width: 200px;
+}
+
+.signupForm .zocial {
+        width: 230px;
 }
 
 =======
-}
+
 
 .batchOperationMenu {
 	display: inline-block;

@@ -194,13 +194,13 @@ public class AuthenticatedServlet extends HttpServlet {
 
     }
 
-    public static void fillAuthenticatedSession(HttpSession session, String validUser, int expiry, String server) {
-        session.setAttribute("exp", expiry + (int) (System.currentTimeMillis() / 1000L));
+    public static void fillAuthenticatedSession(HttpSession session, String validUser, int expiresAt, String server) {
+        session.setAttribute("exp", expiresAt);
 
         log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
         session.setAttribute(AUTHENTICATED_AS, validUser);
 
-        session.setMaxInactiveInterval(expiry + 1); //longer than gAT lifetime - (note gAT lifetime now governs how long the session is considered valid, not the session lifetime)
+        session.setMaxInactiveInterval(expiresAt - (int) (System.currentTimeMillis() / 1000L) + 1); //longer than gAT lifetime - (note gAT lifetime now governs how long the session is considered valid, not the session lifetime)
 
         SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         try {
