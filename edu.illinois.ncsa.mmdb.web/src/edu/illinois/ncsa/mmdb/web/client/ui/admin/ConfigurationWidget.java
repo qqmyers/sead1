@@ -243,17 +243,24 @@ public class ConfigurationWidget extends Composite {
         idx++;
 
         final TextBox logo = new TextBox();
-        url.setVisibleLength(40);
-        url.setText(configuration.getConfiguration(ConfigurationKey.ProjectLogo));
-        table.setText(idx, 0, "Logo");
+        logo.setVisibleLength(40);
+        logo.setText(configuration.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
+        table.setText(idx, 0, "Logo URL (max height 100px)");
         table.setWidget(idx, 1, logo);
         idx++;
 
         final TextBox background = new TextBox();
-        url.setVisibleLength(40);
-        url.setText(configuration.getConfiguration(ConfigurationKey.ProjectBackground));
-        table.setText(idx, 0, "Background");
+        background.setVisibleLength(40);
+        background.setText(configuration.getConfiguration(ConfigurationKey.ProjectHeaderBackground));
+        table.setText(idx, 0, "Header background image URL (max height 100px)");
         table.setWidget(idx, 1, background);
+        idx++;
+
+        final TextBox titleColor = new TextBox();
+        titleColor.setVisibleLength(40);
+        titleColor.setText(configuration.getConfiguration(ConfigurationKey.ProjectHeaderTitleColor));
+        table.setText(idx, 0, "Header title color");
+        table.setWidget(idx, 1, titleColor);
         idx++;
 
         // buttons
@@ -268,8 +275,9 @@ public class ConfigurationWidget extends Composite {
                 query.setConfiguration(ConfigurationKey.ProjectURL, url.getText());
                 String cleanDesc = desc.getText().replace("'", "&#39;").replace("\"", "&#34;");
                 query.setConfiguration(ConfigurationKey.ProjectDescription, cleanDesc);
-                query.setConfiguration(ConfigurationKey.ProjectLogo, logo.getText());
-                query.setConfiguration(ConfigurationKey.ProjectBackground, background.getText());
+                query.setConfiguration(ConfigurationKey.ProjectHeaderLogo, logo.getText());
+                query.setConfiguration(ConfigurationKey.ProjectHeaderBackground, background.getText());
+                query.setConfiguration(ConfigurationKey.ProjectHeaderTitleColor, titleColor.getText());
                 dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -281,6 +289,9 @@ public class ConfigurationWidget extends Composite {
                         name.setText(result.getConfiguration(ConfigurationKey.ProjectName));
                         url.setText(result.getConfiguration(ConfigurationKey.ProjectURL));
                         desc.setText(result.getConfiguration(ConfigurationKey.ProjectDescription).replace("&#34;", "\"").replace("&#39;", "'"));
+                        logo.setText(result.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
+                        background.setText(result.getConfiguration(ConfigurationKey.ProjectHeaderBackground));
+                        titleColor.setText(result.getConfiguration(ConfigurationKey.ProjectHeaderTitleColor));
                     }
                 });
             }
