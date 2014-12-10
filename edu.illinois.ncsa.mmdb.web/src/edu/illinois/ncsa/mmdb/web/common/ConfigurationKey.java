@@ -23,6 +23,8 @@ public enum ConfigurationKey {
     ProjectName("project.name", ""), //$NON-NLS-1$
     ProjectDescription("project.description", ""), //$NON-NLS-1$
     ProjectURL("project.url", ""), //$NON-NLS-1$
+    ProjectLogo("project.logo", ""), //$NON-NLS-1$
+    ProjectBackground("project.background", ""), //$NON-NLS-1$
 
     //presentation defaults
     PresentationSortOrder("presentation.sortorder", ""), //$NON-NLS-1$

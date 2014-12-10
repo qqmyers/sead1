@@ -242,6 +242,20 @@ public class ConfigurationWidget extends Composite {
         table.setWidget(idx, 1, desc);
         idx++;
 
+        final TextBox logo = new TextBox();
+        url.setVisibleLength(40);
+        url.setText(configuration.getConfiguration(ConfigurationKey.ProjectLogo));
+        table.setText(idx, 0, "Logo");
+        table.setWidget(idx, 1, logo);
+        idx++;
+
+        final TextBox background = new TextBox();
+        url.setVisibleLength(40);
+        url.setText(configuration.getConfiguration(ConfigurationKey.ProjectBackground));
+        table.setText(idx, 0, "Background");
+        table.setWidget(idx, 1, background);
+        idx++;
+
         // buttons
         HorizontalPanel hp = new HorizontalPanel();
         vp.add(hp);
@@ -254,6 +268,8 @@ public class ConfigurationWidget extends Composite {
                 query.setConfiguration(ConfigurationKey.ProjectURL, url.getText());
                 String cleanDesc = desc.getText().replace("'", "&#39;").replace("\"", "&#34;");
                 query.setConfiguration(ConfigurationKey.ProjectDescription, cleanDesc);
+                query.setConfiguration(ConfigurationKey.ProjectLogo, logo.getText());
+                query.setConfiguration(ConfigurationKey.ProjectBackground, background.getText());
                 dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
