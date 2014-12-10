@@ -80,12 +80,13 @@ public class GetUserMetadataFieldsHandler implements
         ActionHandler<GetUserMetadataFields, GetUserMetadataFieldsResult> {
 
     /** Commons logging **/
-    private static Log            log           = LogFactory
-                                                        .getLog(GetUserMetadataFieldsHandler.class);
+    private static Log            log              = LogFactory
+                                                           .getLog(GetUserMetadataFieldsHandler.class);
 
-    public static final Resource  VIEW_METADATA = Resource.uriRef("http://sead-data.net/terms/acr/Viewable_Metadata");
+    public static final Resource  DEFAULT_METADATA = Resource.uriRef("http://sead-data.net/terms/acr/Default_Metadata");
+    public static final Resource  VIEW_METADATA    = Resource.uriRef("http://sead-data.net/terms/acr/Viewable_Metadata");
 
-    ListUserMetadataFieldsHandler umfHelper     = new ListUserMetadataFieldsHandler();
+    ListUserMetadataFieldsHandler umfHelper        = new ListUserMetadataFieldsHandler();
 
     private String nameOf(Resource uri) throws OperatorException {
         log.debug("Name of: " + uri.toString());

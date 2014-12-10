@@ -46,6 +46,7 @@ import javax.servlet.ServletContextListener;
 
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddGeoLocationHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AddMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AdminAddUserHandler;
@@ -135,9 +136,9 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
 
 /**
  * Setup registry of action handlers when the servlet context is initialized.
- *
+ * 
  * @author Luigi Marini
- *
+ * 
  */
 public class MyActionHandlersConfig implements ServletContextListener {
     public void contextInitialized(ServletContextEvent evt) {
@@ -148,6 +149,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetAnnotationsHandler());
         DispatchUtil.registerHandler(new GetDatasetsByTagHandler());
         DispatchUtil.registerHandler(new GetMetadataHandler());
+        DispatchUtil.registerHandler(new AddMetadataHandler());
         DispatchUtil.registerHandler(new GetGeoPointHandler());
         DispatchUtil.registerHandler(new GetGeoNamesHandler());
         DispatchUtil.registerHandler(new GetCollectionsHandler());

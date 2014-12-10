@@ -508,7 +508,7 @@ public class ContextSetupListener implements ServletContextListener {
 
         Context context = TupeloStore.getInstance().getContext();
 
-        reset(context, MMDB.USER_METADATA_FIELD, GetUserMetadataFieldsHandler.VIEW_METADATA);
+        //reset(context, MMDB.USER_METADATA_FIELD, GetUserMetadataFieldsHandler.VIEW_METADATA);
         TripleWriter tw = new TripleWriter();
 
         Set<Resource> blacklistedPredicates = new HashSet<Resource>();

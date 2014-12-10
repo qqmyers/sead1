@@ -118,6 +118,9 @@ public class AdminPage extends Page {
         // SPARQL Queries
         tabPanel.add(new SparqlWidget(dispatchAsync), "SPARQL");
 
+        //Manage Metadata
+        tabPanel.add(new ManageMetadataWidget(dispatchAsync), "Manage Metadata");
+
         tabPanel.selectTab(0);
     }
 
