@@ -313,8 +313,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                 // override default logo
                 Document.get().getElementById("logo-img").setAttribute("src", result.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
-                // ovveride deafult menu font color
-                Document.get().getElementById("mainMenu").setAttribute("src", result.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
             }
         });
 
