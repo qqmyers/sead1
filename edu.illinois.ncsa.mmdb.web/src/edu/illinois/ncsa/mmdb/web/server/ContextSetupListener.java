@@ -74,7 +74,6 @@ import org.tupeloproject.postgresql.PostgresqlContext;
 import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
-import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.rdf.xml.RdfXml;
@@ -511,16 +510,7 @@ public class ContextSetupListener implements ServletContextListener {
         //reset(context, MMDB.USER_METADATA_FIELD, GetUserMetadataFieldsHandler.VIEW_METADATA);
         TripleWriter tw = new TripleWriter();
 
-        Set<Resource> blacklistedPredicates = new HashSet<Resource>();
-        blacklistedPredicates.add(Resource.uriRef("http://purl.org/dc/terms/license"));
-        blacklistedPredicates.add(Resource.uriRef("http://purl.org/dc/terms/rightsHolder"));
-        blacklistedPredicates.add(Resource.uriRef("http://purl.org/dc/terms/rights"));
-        blacklistedPredicates.add(Dc.TITLE);
-        blacklistedPredicates.add(Dc.CREATOR);
-        blacklistedPredicates.add(Dc.IDENTIFIER);
-        blacklistedPredicates.add(Dc.CONTRIBUTOR); // should whitelist once we have multi-valued user properties
-        blacklistedPredicates.add(Rdfs.LABEL);
-        // there's an even longer list, but these are some of the ones I expect we'd have the most problems with
+        Set<Resource> blacklistedPredicates = BlacklistedPredicates.GetResources();
 
         try {
             // add all the userfields

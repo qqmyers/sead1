@@ -1,5 +1,7 @@
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.Set;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -15,6 +17,7 @@ import org.tupeloproject.rdf.terms.Rdfs;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MetadataTermResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UpdateMetadata;
+import edu.illinois.ncsa.mmdb.web.server.BlacklistedPredicates;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
@@ -28,26 +31,28 @@ public class UpdateMetadataHandler implements ActionHandler<UpdateMetadata, Meta
         String description = action.getDescription();
         MetadataTermResult result = new MetadataTermResult();
         TripleWriter tw = new TripleWriter();
+        Set<Resource> blacklistedPredicates = BlacklistedPredicates.GetResources();
+
         try {
             Context context = TupeloStore.getInstance().getContext();
+            if (!blacklistedPredicates.contains(uri)) {
+                tw.add(uri, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
+                tw.add(uri, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
 
-            tw.add(uri, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
-            tw.add(uri, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
+                // remove existing label
+                context.removeTriples(context.match(uri, Rdfs.LABEL, null));
+                tw.add(uri, Rdfs.LABEL, label);
 
-            // remove existing label
-            context.removeTriples(context.match(uri, Rdfs.LABEL, null));
-            tw.add(uri, Rdfs.LABEL, label);
-
-            // remove existing definition
-            context.removeTriples(context.match(uri, Rdfs.COMMENT, null));
-            tw.add(uri, Rdfs.COMMENT, description);
-            context.perform(tw);
+                // remove existing definition
+                context.removeTriples(context.match(uri, Rdfs.COMMENT, null));
+                tw.add(uri, Rdfs.COMMENT, description);
+                context.perform(tw);
+                ListUserMetadataFieldsHandler.resetCache();
+            }
 
         } catch (OperatorException exc) {
             log.warn("Could not update metadata userfields.", exc);
         }
-
-        ListUserMetadataFieldsHandler.resetCache();
         return result;
 
     }
