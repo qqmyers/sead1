@@ -9,10 +9,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.OpenEvent;
-import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -20,10 +16,8 @@ import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
@@ -48,11 +42,10 @@ public class ManageMetadataWidget extends Composite {
         initWidget(mainFlowPanel);
 
         mainPanel = new VerticalPanel();
-        mainPanel.addStyleName("userManagementMain");
 
-        mainPanel.add(discloseAs(addNewTermPanel(), "Add new editable term", "Add Editable term", true));
-        mainPanel.add(discloseAs(modifyExistingTermPanel(), "Modify label/description of Metadata", "Modify label/description", false));
-        mainPanel.add(discloseAs(removeEditableTermPanel(), "Mark as viewable term", "Mark as viewable", false));
+        mainPanel.add(addNewTermPanel());
+        mainPanel.add(modifyExistingTermPanel());
+        mainPanel.add(removeEditableTermPanel());
 
         mainFlowPanel.add(mainPanel);
     }
@@ -62,11 +55,37 @@ public class ManageMetadataWidget extends Composite {
      * of any existing
      * metadata term, editable or viewable
      **/
-    protected Panel modifyExistingTermPanel() {
+    protected DisclosurePanel modifyExistingTermPanel() {
+        DisclosurePanel dp = new DisclosurePanel("Modify Label/Description of Metadata");
+        dp.addStyleName("datasetDisclosurePanel");
+        dp.setOpen(false);
+
         final VerticalPanel existingPanel = new VerticalPanel();
-        final ListBox uriList = new ListBox();
-        final TextBox labelText = new TextBox();
-        final TextBox descriptionText = new TextBox();
+        dp.add(existingPanel);
+        final FlexTable table = new FlexTable();
+        int idx = 0;
+
+        ListBox listbox = new ListBox();
+        table.setText(idx, 0, "URI");
+        table.setWidget(idx, 1, listbox);
+        idx++;
+
+        TextBox textbox = new TextBox();
+        textbox.setVisibleLength(40);
+        table.setText(idx, 0, "Label");
+        table.setWidget(idx, 1, textbox);
+        idx++;
+
+        textbox = new TextBox();
+        textbox.setVisibleLength(80);
+        table.setText(idx, 0, "Description");
+        table.setWidget(idx, 1, textbox);
+        idx++;
+
+        final ListBox uriList = ((ListBox) table.getWidget(0, 1));
+        final TextBox labelText = ((TextBox) table.getWidget(1, 1));
+        final TextBox descriptionText = ((TextBox) table.getWidget(2, 1));
+
         final Button submitButton = new Button("Submit", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -122,16 +141,14 @@ public class ManageMetadataWidget extends Composite {
                         String uri = field.getUri();
                         uriList.addItem(uri);
                     }
-                    existingPanel.add(uriList);
-                    existingPanel.add(labelText);
-                    existingPanel.add(descriptionText);
+                    existingPanel.add(table);
                     existingPanel.add(submitButton);
                 }
 
             }
         });
 
-        return existingPanel;
+        return dp;
     }
 
     /**
@@ -139,11 +156,37 @@ public class ManageMetadataWidget extends Composite {
      * viewable, effectively removing
      * it from the list visible to the user.
      **/
-    protected Panel removeEditableTermPanel() {
+    protected DisclosurePanel removeEditableTermPanel() {
+        DisclosurePanel dp = new DisclosurePanel("Remove Metadata term");
+        dp.addStyleName("datasetDisclosurePanel");
+        dp.setOpen(false);
+
         final VerticalPanel existingPanel = new VerticalPanel();
-        final ListBox uriList = new ListBox();
-        final TextBox labelText = new TextBox();
-        final TextBox descriptionText = new TextBox();
+        dp.add(existingPanel);
+
+        final FlexTable table = new FlexTable();
+        int idx = 0;
+
+        ListBox listbox = new ListBox();
+        table.setText(idx, 0, "URI");
+        table.setWidget(idx, 1, listbox);
+        idx++;
+
+        TextBox textbox = new TextBox();
+        textbox.setVisibleLength(40);
+        table.setText(idx, 0, "Label");
+        table.setWidget(idx, 1, textbox);
+        idx++;
+
+        textbox = new TextBox();
+        textbox.setVisibleLength(80);
+        table.setText(idx, 0, "Description");
+        table.setWidget(idx, 1, textbox);
+        idx++;
+
+        final ListBox uriList = ((ListBox) table.getWidget(0, 1));
+        final TextBox labelText = ((TextBox) table.getWidget(1, 1));
+        final TextBox descriptionText = ((TextBox) table.getWidget(2, 1));
         final Button submitButton = new Button("Submit", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -209,20 +252,23 @@ public class ManageMetadataWidget extends Composite {
                         String uri = field.getUri();
                         uriList.addItem(uri);
                     }
-                    existingPanel.add(uriList);
-                    existingPanel.add(labelText);
-                    existingPanel.add(descriptionText);
+                    existingPanel.add(table);
                     existingPanel.add(submitButton);
                 }
 
             }
         });
 
-        return existingPanel;
+        return dp;
     }
 
-    protected Panel addNewTermPanel() {
+    protected DisclosurePanel addNewTermPanel() {
+        DisclosurePanel dp = new DisclosurePanel("Add new Metadata term");
+        dp.addStyleName("datasetDisclosurePanel");
+        dp.setOpen(true);
+
         VerticalPanel newTermPanel = new VerticalPanel();
+        dp.add(newTermPanel);
         final FlexTable table = new FlexTable();
 
         int idx = 0;
@@ -282,32 +328,6 @@ public class ManageMetadataWidget extends Composite {
         newTermPanel.add(table);
         newTermPanel.add(submitButton);
 
-        return newTermPanel;
-    }
-
-    /**
-     * 
-     * Code to deal with panel minimize and open.Copied from
-     * UserManagementWidget
-     */
-    DisclosurePanel discloseAs(Widget w, final String openTitle, final String closedTitle, boolean open) {
-        final DisclosurePanel dp = new DisclosurePanel(open ? openTitle : closedTitle);
-        dp.setAnimationEnabled(true);
-        dp.setOpen(open);
-
-        dp.add(w);
-        dp.addOpenHandler(new OpenHandler<DisclosurePanel>() {
-            @Override
-            public void onOpen(OpenEvent<DisclosurePanel> event) {
-                dp.getHeaderTextAccessor().setText(openTitle);
-            }
-        });
-        dp.addCloseHandler(new CloseHandler<DisclosurePanel>() {
-            @Override
-            public void onClose(CloseEvent<DisclosurePanel> event) {
-                dp.getHeaderTextAccessor().setText(closedTitle);
-            }
-        });
         return dp;
     }
 
