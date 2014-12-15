@@ -1,21 +1,13 @@
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
-/**
- * Add the metadata attached to a resource.
- * 
- * @author Ashwini Vaidya
- * 
- */
-
-@SuppressWarnings("serial")
-public class AddMetadata extends SubjectAction<MetadataTermResult> {
+public class RemoveMetadata extends SubjectAction<MetadataTermResult> {
     String label;
     String description;
 
-    public AddMetadata() {
+    public RemoveMetadata() {
     }
 
-    public AddMetadata(String uri, String label, String description) {
+    public RemoveMetadata(String uri, String label, String description) {
         super(uri);
         this.label = label;
         this.description = description;

@@ -246,6 +246,11 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
     public void rollback(ListUserMetadataFields arg0, ListUserMetadataFieldsResult arg1, ExecutionContext arg2) throws ActionException {
     }
 
+    public static void resetCache() {
+        editResultCache = null;
+        viewResultCache = null;
+    }
+
     public static void addViewablePredicate(String pred) {
         ListUserMetadataFieldsResult lmufr = listUserMetadataFields(false);
         if (!lmufr.getPredicates().contains(pred)) {

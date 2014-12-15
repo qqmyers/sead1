@@ -1,8 +1,12 @@
 package edu.illinois.ncsa.mmdb.web.client.ui.admin;
 
+import java.util.SortedSet;
+
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -15,23 +19,28 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddMetadata;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.AddMetadataResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.MetadataTermResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UpdateMetadata;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 
 public class ManageMetadataWidget extends Composite {
-    private final DispatchAsync dispatchAsync;
-    private final FlowPanel     mainFlowPanel;
+    private final DispatchAsync            dispatch;
+    private final FlowPanel                mainFlowPanel;
 
-    private final VerticalPanel mainPanel;
-    protected FlexTable         table;
+    private final VerticalPanel            mainPanel;
+    protected SortedSet<UserMetadataField> availableFields;
 
     public ManageMetadataWidget(DispatchAsync dispatchAsync) {
-        this.dispatchAsync = dispatchAsync;
+        this.dispatch = dispatchAsync;
 
         mainFlowPanel = new FlowPanel();
         mainFlowPanel.addStyleName("page");
@@ -40,7 +49,7 @@ public class ManageMetadataWidget extends Composite {
         mainPanel = new VerticalPanel();
         mainPanel.addStyleName("userManagementMain");
 
-        mainPanel.add(discloseAs(addNewTermPanel(), "Add new term", "Add term", false));
+        mainPanel.add(discloseAs(addNewTermPanel(), "Add new term", "Add term", true));
         mainPanel.add(discloseAs(modifyExistingTermPanel(), "Modify existing Metadata", "Modify term", false));
         mainPanel.add(discloseAs(removeEditableTermPanel(), "Remove editable term", "Remove term", false));
 
@@ -53,7 +62,74 @@ public class ManageMetadataWidget extends Composite {
      * metadata term, editable or viewable
      **/
     protected Panel modifyExistingTermPanel() {
-        VerticalPanel existingPanel = new VerticalPanel();
+        final VerticalPanel existingPanel = new VerticalPanel();
+        final ListBox uriList = new ListBox();
+        final TextBox labelText = new TextBox();
+        final TextBox descriptionText = new TextBox();
+        final Button submitButton = new Button("Submit", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                String label = labelText.getText();
+                String description = descriptionText.getText();
+                String predicate = uriList.getItemText(uriList.getSelectedIndex());
+
+                UpdateMetadata m = new UpdateMetadata(predicate, label, description);
+                dispatch.execute(m, new AsyncCallback<MetadataTermResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not add Metadata value.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(MetadataTermResult result) {
+                        dispatch.execute(new ListUserMetadataFields(false), new AsyncCallback<ListUserMetadataFieldsResult>() {
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
+                            }
+
+                            public void onSuccess(ListUserMetadataFieldsResult result) {
+                                availableFields = result.getFieldsSortedByName();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        uriList.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                String selectedText = uriList.getItemText(uriList.getSelectedIndex());
+                for (UserMetadataField field : availableFields ) {
+                    if (field.getUri().compareTo(selectedText) == 0) {
+                        labelText.setText(field.getLabel());
+                        descriptionText.setText(field.getDescription());
+                    }
+                }
+            }
+        });
+
+        dispatch.execute(new ListUserMetadataFields(false), new AsyncCallback<ListUserMetadataFieldsResult>() {
+            public void onFailure(Throwable caught) {
+                GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
+            }
+
+            public void onSuccess(ListUserMetadataFieldsResult result) {
+                availableFields = result.getFieldsSortedByName();
+                if (availableFields.size() > 0) {
+                    for (UserMetadataField field : availableFields ) {
+                        String uri = field.getUri();
+                        uriList.addItem(uri);
+                    }
+                    existingPanel.add(uriList);
+                    existingPanel.add(labelText);
+                    existingPanel.add(descriptionText);
+                    existingPanel.add(submitButton);
+                }
+
+            }
+        });
+
         return existingPanel;
     }
 
@@ -63,13 +139,80 @@ public class ManageMetadataWidget extends Composite {
      * it from the list visible to the user.
      **/
     protected Panel removeEditableTermPanel() {
-        VerticalPanel editableMetadataPanel = new VerticalPanel();
-        return editableMetadataPanel;
+        final VerticalPanel existingPanel = new VerticalPanel();
+        final ListBox uriList = new ListBox();
+        final TextBox labelText = new TextBox();
+        final TextBox descriptionText = new TextBox();
+        final Button submitButton = new Button("Submit", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                String label = labelText.getText();
+                String description = descriptionText.getText();
+                String predicate = uriList.getItemText(uriList.getSelectedIndex());
+
+                UpdateMetadata m = new UpdateMetadata(predicate, label, description);
+                dispatch.execute(m, new AsyncCallback<MetadataTermResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not add Metadata value.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(MetadataTermResult result) {
+                        dispatch.execute(new ListUserMetadataFields(false), new AsyncCallback<ListUserMetadataFieldsResult>() {
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
+                            }
+
+                            public void onSuccess(ListUserMetadataFieldsResult result) {
+                                availableFields = result.getFieldsSortedByName();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        uriList.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                String selectedText = uriList.getItemText(uriList.getSelectedIndex());
+                for (UserMetadataField field : availableFields ) {
+                    if (field.getUri().compareTo(selectedText) == 0) {
+                        labelText.setText(field.getLabel());
+                        descriptionText.setText(field.getDescription());
+                    }
+                }
+            }
+        });
+
+        dispatch.execute(new ListUserMetadataFields(true), new AsyncCallback<ListUserMetadataFieldsResult>() {
+            public void onFailure(Throwable caught) {
+                GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
+            }
+
+            public void onSuccess(ListUserMetadataFieldsResult result) {
+                availableFields = result.getFieldsSortedByName();
+                if (availableFields.size() > 0) {
+                    for (UserMetadataField field : availableFields ) {
+                        String uri = field.getUri();
+                        uriList.addItem(uri);
+                    }
+                    existingPanel.add(uriList);
+                    existingPanel.add(labelText);
+                    existingPanel.add(descriptionText);
+                    existingPanel.add(submitButton);
+                }
+
+            }
+        });
+
+        return existingPanel;
     }
 
     protected Panel addNewTermPanel() {
         VerticalPanel newTermPanel = new VerticalPanel();
-        table = new FlexTable();
+        final FlexTable table = new FlexTable();
 
         int idx = 0;
 
@@ -97,16 +240,26 @@ public class ManageMetadataWidget extends Composite {
                 String label = ((TextBox) table.getWidget(0, 1)).getText();
                 String predicate = ((TextBox) table.getWidget(1, 1)).getText();
                 String description = ((TextBox) table.getWidget(2, 1)).getText();
-                GWT.log("dummy message" + label + predicate + description);
+
                 AddMetadata m = new AddMetadata(predicate, label, description);
-                dispatchAsync.execute(m, new AsyncCallback<AddMetadataResult>() {
+                dispatch.execute(m, new AsyncCallback<MetadataTermResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Could not add Metadata value.", caught);
                     }
 
                     @Override
-                    public void onSuccess(AddMetadataResult result) {
+                    public void onSuccess(MetadataTermResult result) {
+                        //on success adding a new term, kill the cached metadata list.
+                        dispatch.execute(new ListUserMetadataFields(false), new AsyncCallback<ListUserMetadataFieldsResult>() {
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
+                            }
+
+                            public void onSuccess(ListUserMetadataFieldsResult result) {
+                            }
+                        });
+
                         ((TextBox) table.getWidget(0, 1)).setText("");
                         ((TextBox) table.getWidget(1, 1)).setText("");
                         ((TextBox) table.getWidget(2, 1)).setText("");

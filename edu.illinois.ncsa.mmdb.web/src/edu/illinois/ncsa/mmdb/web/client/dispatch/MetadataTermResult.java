@@ -3,8 +3,8 @@ package edu.illinois.ncsa.mmdb.web.client.dispatch;
 import net.customware.gwt.dispatch.shared.Result;
 
 @SuppressWarnings("serial")
-public class AddMetadataResult implements Result {
-    public AddMetadataResult() {
+public class MetadataTermResult implements Result {
+    public MetadataTermResult() {
     }
 
 }
