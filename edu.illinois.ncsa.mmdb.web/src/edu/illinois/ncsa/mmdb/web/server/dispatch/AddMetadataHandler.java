@@ -26,7 +26,7 @@ public class AddMetadataHandler implements ActionHandler<AddMetadata, MetadataTe
 
     @Override
     public MetadataTermResult execute(AddMetadata action, ExecutionContext arg1) throws ActionException {
-        Resource uri = Resource.resource(action.getUri());
+        Resource uri = Resource.uriRef(action.getUri());
         String label = action.getLabel();
         String description = action.getDescription();
         MetadataTermResult result = new MetadataTermResult();

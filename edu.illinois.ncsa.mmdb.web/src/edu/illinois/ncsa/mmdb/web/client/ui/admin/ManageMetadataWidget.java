@@ -32,7 +32,8 @@ public class ManageMetadataWidget extends Composite {
     private final FlowPanel                mainFlowPanel;
 
     private final VerticalPanel            mainPanel;
-    protected SortedSet<UserMetadataField> availableFields;
+    protected SortedSet<UserMetadataField> editableFields; //editable
+    protected SortedSet<UserMetadataField> availableFields; //editable + viewable
 
     public ManageMetadataWidget(DispatchAsync dispatchAsync) {
         this.dispatch = dispatchAsync;
@@ -89,11 +90,9 @@ public class ManageMetadataWidget extends Composite {
         final Button submitButton = new Button("Submit", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                String label = labelText.getText();
-                String description = descriptionText.getText();
                 String predicate = uriList.getItemText(uriList.getSelectedIndex());
+                UpdateMetadata m = new UpdateMetadata(predicate, labelText.getText(), descriptionText.getText());
 
-                UpdateMetadata m = new UpdateMetadata(predicate, label, description);
                 dispatch.execute(m, new AsyncCallback<MetadataTermResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -190,11 +189,8 @@ public class ManageMetadataWidget extends Composite {
         final Button submitButton = new Button("Submit", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                String label = labelText.getText();
-                String description = descriptionText.getText();
                 String predicate = uriList.getItemText(uriList.getSelectedIndex());
-
-                RemoveMetadata m = new RemoveMetadata(predicate, label, description);
+                RemoveMetadata m = new RemoveMetadata(predicate, labelText.getText(), descriptionText.getText());
                 dispatch.execute(m, new AsyncCallback<MetadataTermResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -209,12 +205,12 @@ public class ManageMetadataWidget extends Composite {
                             }
 
                             public void onSuccess(ListUserMetadataFieldsResult result) {
-                                availableFields = result.getFieldsSortedByName();
+                                editableFields = result.getFieldsSortedByName();
                                 uriList.clear();
                                 labelText.setText("");
                                 descriptionText.setText("");
-                                if (availableFields.size() > 0) {
-                                    for (UserMetadataField field : availableFields ) {
+                                if (editableFields.size() > 0) {
+                                    for (UserMetadataField field : editableFields ) {
                                         String uri = field.getUri();
                                         uriList.addItem(uri);
                                     }
@@ -231,7 +227,7 @@ public class ManageMetadataWidget extends Composite {
             @Override
             public void onChange(ChangeEvent event) {
                 String selectedText = uriList.getItemText(uriList.getSelectedIndex());
-                for (UserMetadataField field : availableFields ) {
+                for (UserMetadataField field : editableFields ) {
                     if (field.getUri().compareTo(selectedText) == 0) {
                         labelText.setText(field.getLabel());
                         descriptionText.setText(field.getDescription());
@@ -246,9 +242,9 @@ public class ManageMetadataWidget extends Composite {
             }
 
             public void onSuccess(ListUserMetadataFieldsResult result) {
-                availableFields = result.getFieldsSortedByName();
-                if (availableFields.size() > 0) {
-                    for (UserMetadataField field : availableFields ) {
+                editableFields = result.getFieldsSortedByName();
+                if (editableFields.size() > 0) {
+                    for (UserMetadataField field : editableFields ) {
                         String uri = field.getUri();
                         uriList.addItem(uri);
                     }
