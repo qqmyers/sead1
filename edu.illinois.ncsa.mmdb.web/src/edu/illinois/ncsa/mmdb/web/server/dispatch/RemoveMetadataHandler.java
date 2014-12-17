@@ -28,19 +28,18 @@ public class RemoveMetadataHandler implements ActionHandler<RemoveMetadata, Meta
         Resource uri = Resource.resource(action.getUri());
         MetadataTermResult result = new MetadataTermResult();
         Set<Resource> blacklistedPredicates = BlacklistedPredicates.GetResources();
+        if (blacklistedPredicates.contains(uri)) {
+            return result;
+        }
 
         TripleWriter tw = new TripleWriter();
         try {
             Context context = TupeloStore.getInstance().getContext();
-            // remove non blacklisted Predicates only
-            if (!blacklistedPredicates.contains(uri)) {
+            tw.remove(uri, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
+            tw.add(uri, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
 
-                tw.remove(uri, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
-                tw.add(uri, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
-
-                context.perform(tw);
-                ListUserMetadataFieldsHandler.resetCache();
-            }
+            context.perform(tw);
+            ListUserMetadataFieldsHandler.resetCache();
         } catch (OperatorException exc) {
             log.warn("Could not update metadata userfields.", exc);
         }

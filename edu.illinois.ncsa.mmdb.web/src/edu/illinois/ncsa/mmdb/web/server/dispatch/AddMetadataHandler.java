@@ -27,13 +27,15 @@ public class AddMetadataHandler implements ActionHandler<AddMetadata, MetadataTe
     @Override
     public MetadataTermResult execute(AddMetadata action, ExecutionContext arg1) throws ActionException {
         Resource uri = Resource.uriRef(action.getUri());
+        MetadataTermResult result = new MetadataTermResult();
+        Set<Resource> blacklistedPredicates = BlacklistedPredicates.GetResources();
+        if (blacklistedPredicates.contains(uri)) {
+            return result;
+        }
+
+        TripleWriter tw = new TripleWriter();
         String label = action.getLabel();
         String description = action.getDescription();
-        MetadataTermResult result = new MetadataTermResult();
-        TripleWriter tw = new TripleWriter();
-
-        Set<Resource> blacklistedPredicates = BlacklistedPredicates.GetResources();
-
         try {
             Context context = TupeloStore.getInstance().getContext();
 
@@ -48,11 +50,6 @@ public class AddMetadataHandler implements ActionHandler<AddMetadata, MetadataTe
             context.removeTriples(context.match(uri, Rdfs.COMMENT, null));
             tw.add(uri, Rdfs.COMMENT, description);
 
-            // remove blacklisted predicates
-            for (Resource blacklisted : blacklistedPredicates ) {
-                tw.remove(blacklisted, Rdf.TYPE, MMDB.USER_METADATA_FIELD);
-                tw.remove(blacklisted, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA);
-            }
             context.perform(tw);
             ListUserMetadataFieldsHandler.resetCache();
         } catch (OperatorException exc) {
