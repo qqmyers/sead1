@@ -315,7 +315,7 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                     if (selectionEmpty()) {
                         return;
                     }
-                    final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Add %s to collection"));
+                    final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Add %s to collection"), true);
                     atc.addClickHandler(new ClickHandler() {
                         public void onClick(ClickEvent event) {
 
@@ -365,7 +365,7 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                     if (selectionEmpty()) {
                         return;
                     }
-                    final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Remove %s from collection"));
+                    final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Remove %s from collection"), true);
                     atc.addClickHandler(new ClickHandler() {
                         public void onClick(ClickEvent event) {
 
@@ -415,7 +415,7 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                     if (selectionEmpty()) {
                         return;
                     }
-                    final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Set %s as collection description/preview dataset(s)"));
+                    final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Set %s as collection description/preview dataset(s)"), true);
                     atc.addClickHandler(new ClickHandler() {
                         public void onClick(ClickEvent event) {
 

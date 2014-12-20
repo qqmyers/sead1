@@ -73,6 +73,10 @@ public class AddToCollectionDialog extends DialogBox {
     }
 
     public AddToCollectionDialog(DispatchAsync service, String text) {
+        this(service, text, false);
+    }
+
+    public AddToCollectionDialog(DispatchAsync service, String text, Boolean hideNewCollectionBox) {
 
         super();
         setAnimationEnabled(true);
@@ -110,10 +114,12 @@ public class AddToCollectionDialog extends DialogBox {
                 });
 
         // new collection
-        mainContainer.add(new HTML("<b>Create new collection</b>"));
         newCollectionBox = new TextBox();
         newCollectionBox.setWidth("350px");
-        mainContainer.add(newCollectionBox);
+        if (!hideNewCollectionBox) {
+            mainContainer.add(new HTML("<b>Create new collection</b>"));
+            mainContainer.add(newCollectionBox);
+        }
 
         // buttons
         FlowPanel buttonsPanels = new FlowPanel();
