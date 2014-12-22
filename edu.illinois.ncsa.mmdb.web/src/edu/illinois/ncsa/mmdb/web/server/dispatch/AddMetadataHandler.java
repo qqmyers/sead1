@@ -30,7 +30,7 @@ public class AddMetadataHandler implements ActionHandler<AddMetadata, MetadataTe
         MetadataTermResult result = new MetadataTermResult();
         Set<Resource> blacklistedPredicates = BlacklistedPredicates.GetResources();
         if (blacklistedPredicates.contains(uri)) {
-            return result;
+            throw new ActionException("Cannot add a blacklisted Predicate.");
         }
 
         TripleWriter tw = new TripleWriter();

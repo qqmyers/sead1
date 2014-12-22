@@ -12,14 +12,12 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MetadataTermResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UpdateMetadata;
 import edu.illinois.ncsa.mmdb.web.server.BlacklistedPredicates;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class UpdateMetadataHandler implements ActionHandler<UpdateMetadata, MetadataTermResult> {
     private static Log log = LogFactory.getLog(AddMetadataHandler.class);
@@ -30,7 +28,7 @@ public class UpdateMetadataHandler implements ActionHandler<UpdateMetadata, Meta
         MetadataTermResult result = new MetadataTermResult();
         Set<Resource> blacklistedPredicates = BlacklistedPredicates.GetResources();
         if (blacklistedPredicates.contains(uri)) {
-            return result;
+            throw new ActionException("Cannot update a blacklisted Predicate.");
         }
 
         TripleWriter tw = new TripleWriter();
@@ -38,8 +36,6 @@ public class UpdateMetadataHandler implements ActionHandler<UpdateMetadata, Meta
         String description = action.getDescription();
         try {
             Context context = TupeloStore.getInstance().getContext();
-            tw.add(uri, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
-            tw.add(uri, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
 
             // remove existing label
             context.removeTriples(context.match(uri, Rdfs.LABEL, null));

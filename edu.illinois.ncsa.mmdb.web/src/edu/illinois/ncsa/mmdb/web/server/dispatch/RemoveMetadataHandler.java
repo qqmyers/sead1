@@ -29,7 +29,7 @@ public class RemoveMetadataHandler implements ActionHandler<RemoveMetadata, Meta
         MetadataTermResult result = new MetadataTermResult();
         Set<Resource> blacklistedPredicates = BlacklistedPredicates.GetResources();
         if (blacklistedPredicates.contains(uri)) {
-            return result;
+            throw new ActionException("Cannot remove a blacklisted Predicate.");
         }
 
         TripleWriter tw = new TripleWriter();

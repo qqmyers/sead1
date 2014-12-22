@@ -519,6 +519,11 @@ public class ContextSetupListener implements ServletContextListener {
                     String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
                     if (props.containsKey(pre + ".label")) { //$NON-NLS-1$
                         Resource r = Resource.uriRef(props.getProperty(key));
+                        //if the field already exists in the triplestore don't update through server.properties config file.
+                        if (context.match(r, Rdf.TYPE, null) != null) {
+                            continue;
+                        }
+                        // this code should never be executed other than the first time after setting up the database.
                         tw.add(r, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
                         tw.add(r, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
                         if (props.containsKey(pre + ".label")) {
