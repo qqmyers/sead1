@@ -51,6 +51,7 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -310,42 +311,48 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 ConfigurationKey.PresentationSortOrder,
                 ConfigurationKey.PresentationPageViewType,
                 ConfigurationKey.PresentationDataViewLevel,
-                ConfigurationKey.OrcidClientId), new AsyncCallback<ConfigurationResult>() {
+                ConfigurationKey.OrcidClientId,
+                ConfigurationKey.ProjectHeaderLogo,
+                ConfigurationKey.ProjectHeaderBackground,
+                ConfigurationKey.ProjectHeaderTitleColor
+                ), new AsyncCallback<ConfigurationResult>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Could not get Config Info", caught);
-            }
-
-            @Override
-            public void onSuccess(ConfigurationResult result) {
-                bigData = result.getConfiguration(ConfigurationKey.BigData).equalsIgnoreCase("true");
-                _projectName = result.getConfiguration(ConfigurationKey.ProjectName);
-                _projectDescription = result.getConfiguration(ConfigurationKey.ProjectDescription);
-                _orcidClientId = result.getConfiguration(ConfigurationKey.OrcidClientId);
-                projectNameLabel.setHTML(wrapIfNeeded(_projectName));
-                projectNameLabel.setTitle(_projectDescription);
-                projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
-                PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
-                DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType), result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true") || bigData);
-
-            }
-
-            //If the title is long (>40 chars), split it at the first space that exists between the 30% and 70% mark. If no spaces are in this range, don't split.
-            private SafeHtml wrapIfNeeded(String label) {
-                int len = label.length();
-                if (len > 40) {
-                    //Wrap close to the half-way point if there's a space
-                    int firstPosible = (int) Math.round((len * 0.4));
-                    int spaceIndex = label.substring(firstPosible).indexOf(' ');
-                    if ((spaceIndex >= 0) && (spaceIndex < (int) Math.round((len * 0.3)))) {
-                        //Replace the space with an html break
-                        return new SafeHtmlBuilder().appendEscaped(label.substring(0, firstPosible + spaceIndex)).appendHtmlConstant("<br/>").appendEscaped(label.substring(firstPosible + spaceIndex + 1)).toSafeHtml();
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get Config Info", caught);
                     }
-                }
-                return new SafeHtmlBuilder().appendEscaped(label).toSafeHtml();
-            }
-        });
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        bigData = result.getConfiguration(ConfigurationKey.BigData).equalsIgnoreCase("true");
+                        _projectName = result.getConfiguration(ConfigurationKey.ProjectName);
+                        _projectDescription = result.getConfiguration(ConfigurationKey.ProjectDescription);
+                        _orcidClientId = result.getConfiguration(ConfigurationKey.OrcidClientId);
+                        projectNameLabel.setHTML(wrapIfNeeded(_projectName));
+                        projectNameLabel.setTitle(_projectDescription);
+                        projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
+                        PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
+                        DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType), result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true") || bigData);
+
+                        // override default logo
+                        Document.get().getElementById("logo-img").setAttribute("src", result.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
+                    }
+
+                    //If the title is long (>40 chars), split it at the first space that exists between the 30% and 70% mark. If no spaces are in this range, don't split.
+                    private SafeHtml wrapIfNeeded(String label) {
+                        int len = label.length();
+                        if (len > 40) {
+                            //Wrap close to the half-way point if there's a space
+                            int firstPosible = (int) Math.round((len * 0.4));
+                            int spaceIndex = label.substring(firstPosible).indexOf(' ');
+                            if ((spaceIndex >= 0) && (spaceIndex < (int) Math.round((len * 0.3)))) {
+                                //Replace the space with an html break
+                                return new SafeHtmlBuilder().appendEscaped(label.substring(0, firstPosible + spaceIndex)).appendHtmlConstant("<br/>").appendEscaped(label.substring(firstPosible + spaceIndex + 1)).toSafeHtml();
+                            }
+                        }
+                        return new SafeHtmlBuilder().appendEscaped(label).toSafeHtml();
+                    }
+                });
 
         dispatchAsync.execute(new GoogleOAuth2Props(), new AsyncCallback<GoogleOAuth2PropsResult>() {
 
