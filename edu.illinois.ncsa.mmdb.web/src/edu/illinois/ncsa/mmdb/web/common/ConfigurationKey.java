@@ -27,6 +27,7 @@ public enum ConfigurationKey {
     //presentation defaults
     PresentationSortOrder("presentation.sortorder", ""), //$NON-NLS-1$
     PresentationPageViewType("presentation.pageviewtype", ""), //$NON-NLS-1$
+    PresentationDataViewLevel("presentation.dataviewlevel", "false"),
 
     // name of medici server
     MediciName("medici.name", null), //$NON-NLS-1$

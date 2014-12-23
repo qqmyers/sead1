@@ -301,7 +301,17 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         LoginPage.setMainWindow(this);
 
-        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData, ConfigurationKey.UseGoogleDocViewer, ConfigurationKey.PresentationSortOrder, ConfigurationKey.PresentationPageViewType, ConfigurationKey.OrcidClientId), new AsyncCallback<ConfigurationResult>() {
+        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(),
+                ConfigurationKey.ProjectName,
+                ConfigurationKey.ProjectURL,
+                ConfigurationKey.ProjectDescription,
+                ConfigurationKey.BigData,
+                ConfigurationKey.UseGoogleDocViewer,
+                ConfigurationKey.PresentationSortOrder,
+                ConfigurationKey.PresentationPageViewType,
+                ConfigurationKey.PresentationDataViewLevel,
+                ConfigurationKey.OrcidClientId), new AsyncCallback<ConfigurationResult>() {
+
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Could not get Config Info", caught);
@@ -317,7 +327,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 projectNameLabel.setTitle(_projectDescription);
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
                 PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
-                DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType));
+                DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType), result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true") || bigData);
 
             }
 

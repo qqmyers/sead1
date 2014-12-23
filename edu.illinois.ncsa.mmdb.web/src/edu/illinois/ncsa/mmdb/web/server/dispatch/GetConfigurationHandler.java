@@ -81,6 +81,7 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
                                                           ConfigurationKey.UseGoogleDocViewer,
                                                           ConfigurationKey.PresentationSortOrder,
                                                           ConfigurationKey.PresentationPageViewType,
+                                                          ConfigurationKey.PresentationDataViewLevel,
                                                           ConfigurationKey.OrcidClientId
                                                           });
 

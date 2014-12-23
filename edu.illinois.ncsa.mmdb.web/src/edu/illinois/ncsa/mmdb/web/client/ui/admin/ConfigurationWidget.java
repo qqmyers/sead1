@@ -336,6 +336,11 @@ public class ConfigurationWidget extends Composite {
         table.setWidget(idx, 1, pageViewType);
         idx++;
 
+        final CheckBox showTopLevelDataBox = new CheckBox();
+        showTopLevelDataBox.setValue(configuration.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true"));
+        showTopLevelDataBox.setText("Show top level datasets");
+        vp.add(showTopLevelDataBox);
+
         // buttons
         HorizontalPanel hp = new HorizontalPanel();
         vp.add(hp);
@@ -346,6 +351,7 @@ public class ConfigurationWidget extends Composite {
                 SetConfiguration query = new SetConfiguration(MMDB.getUsername());
                 query.setConfiguration(ConfigurationKey.PresentationSortOrder, sortOptions.getSelected());
                 query.setConfiguration(ConfigurationKey.PresentationPageViewType, pageViewType.getSelected());
+                query.setConfiguration(ConfigurationKey.PresentationDataViewLevel, showTopLevelDataBox.getValue().toString());
                 dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -356,6 +362,7 @@ public class ConfigurationWidget extends Composite {
                     public void onSuccess(ConfigurationResult result) {
                         sortOptions.setSelected(result.getConfiguration(ConfigurationKey.PresentationSortOrder));
                         pageViewType.setSelected(result.getConfiguration(ConfigurationKey.PresentationPageViewType));
+                        showTopLevelDataBox.setValue(result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true"));
                     }
                 });
             }
@@ -375,6 +382,7 @@ public class ConfigurationWidget extends Composite {
                     public void onSuccess(ConfigurationResult result) {
                         sortOptions.setSelected(result.getConfiguration(ConfigurationKey.PresentationSortOrder));
                         pageViewType.setSelected(result.getConfiguration(ConfigurationKey.PresentationPageViewType));
+                        showTopLevelDataBox.setValue(result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true"));
                     }
                 });
             }
