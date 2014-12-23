@@ -41,7 +41,7 @@ public class RemoveMetadataHandler implements ActionHandler<RemoveMetadata, Meta
             context.perform(tw);
             ListUserMetadataFieldsHandler.resetCache();
         } catch (OperatorException exc) {
-            log.warn("Could not update metadata userfields.", exc);
+            log.warn("Could not remove metadata userfields.", exc);
         }
         return result;
 
