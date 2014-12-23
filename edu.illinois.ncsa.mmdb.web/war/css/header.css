@@ -1,3 +1,6 @@
+body{
+padding-top:0px !important;
+}
 #header, #footer {
 	font-family: 'lato';
 	width: 1200px;
@@ -13,23 +16,25 @@ li {
 	height: 120px;
 }
 
-#project-logo {
-	margin-top: 0px;
+#project-logo{
 	float: left;
-	width: 16%;
 	height: 120px;
+	margin:0px 20px;
 }
 
 #project-logo img {
-	height: 120px;
+	height: 100px;
+	margin-top:11px;
 }
 
 #projectTitle {
 	float: left;
 	width: 64%;
 	height: 40px;
-	margin-top: 39px;
+	margin-top: 30px;
 	text-align: left;
+        font-size:24px;
+	line-height:32px;
 }
 
 #projectTitle a {
@@ -40,22 +45,34 @@ li {
 }
 
 #loginMenu {
-	float: left;
+	float: right;
 	height: 40px;
-	width: 20%;
+	width: 18%;
+	background-color:#fff;
+	margin-top:40px;
+	margin-right:40px;
+	float:left;
+	display:inline-block;
 }
-
+#loginMenu div{
+	display:inline-block;
+	float:left;
+}
+#loginMenu .loginPanel .gwt-DisclosurePanel{
+	width:200px;
+}
 .loginPanel {
-	width: 200px;
+	width: 100px;
 	margin-top: 5px;
 }
 
 #loginMenu div, #loginMenu a {
 	text-align: left;
 	font-size: medium;
-	color: black; !
-	important margin-left: 0px;
-	display: inline;
+	color: #666 !important; 
+	margin-left: 0px;
+	margin-top:0px;
+	/*display: inline;*/
 }
 
 #loginMenu img {
@@ -86,7 +103,7 @@ li {
 	padding-top: 2px;
 	list-style: none;
 	float: left;
-	font: 12px 'lato';
+        font:12px 'Raleway';
 	background-color: #e9e9e9;
 }
 
@@ -95,9 +112,9 @@ li {
 	margin: 0 1px 0 0;
 	padding: 4px 10px;
 	background: #e9e9e9;
-	color: #666;
+	color: #666 !important;
 	text-align: center;
-	text-decoration: none
+	text-decoration: none;
 }
 
 #sead-menu li #seadlink {
@@ -109,13 +126,13 @@ li {
 	margin: 0px 2px 0 -8px;
 	padding: 4px 10px;
 	background: transparent;
-	color: #666;
+	color: #666 !important;
 	text-align: center;
 	text-decoration: none;
 }
 
 #sead-menu li a:hover {
-	color: #f3882a;
+	color: #f3882a !important;
 }
 
 #sead-menu div {
@@ -139,14 +156,14 @@ li {
 	text-align: left;
 	text-decoration: none;
 	background: #f3882a;
-	color: #fff;
+	color: #fff !important;
 	font: 10px lato;
 	border-bottom: 1px solid #fff;
 }
 
 #sead-menu div a:hover {
 	background: #fff;
-	color: #f3882a
+	color: #f3882a !important;
 }
 
 #logo-sead {
@@ -163,7 +180,7 @@ li {
 	height: 0;
 	content: "";
 	position: absolute;
-	top: 13px;
+	top: 12px;
 	margin-left: 2px;
 	border-top: 4px solid rgba(0, 0, 0, 0.5);
 	border-left: 4px solid transparent;
@@ -206,21 +223,21 @@ li {
 	display: block;
 	padding: 4px 6px;
 	background: #0c5ca3;
-	color: #FFF;
-	font-weight: 4;
+	color: #FFF !important;
+	font-weight: 400;
 	text-align: center;
-	text-decoration: none
+	text-decoration: none;
+	font-size:18px !important;
 }
 
-.navMenu li a:hover {
-	color: #f3882a
+.navMenu li a:hover ,.navMenu li a:active{
+	color: #f3882a !important;
 }
-
 /*footer*/
 #footer {
 	padding: 5px 0px;
 	background-color: #0b5ca3;
-	color: #fff;
+	color: #fff !important;
 	font-size: 12px;
 	width: 1200px;
 	height: 30px;
@@ -240,7 +257,8 @@ li {
 }
 
 #footer a {
-	color: white;
+	color: #fff !important;
+	text-decoration:none;
 }
 
 #nsf {
@@ -265,11 +283,11 @@ li {
 
 #contact a {
 	text-decoration: none;
-	color: #fff;
+	color: #fff !important;
 }
 
 #contact a:hover {
-	color: #f3822a;
+	color: #f3822a !important;
 }
 
 @media screen and (max-width: 1200px) {
@@ -286,4 +304,9 @@ li {
 
 .selected a {
 	color: #f3882a !important;
+}
+table td{
+	font-family:"lato" !important;
+	font-size:14px;
+	color:#444;
 }

@@ -61,6 +61,8 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -292,6 +294,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         projectNameLabel.setText("");
         projectNameLabel.setTitle("");
         projectNameLabel.setHref("");
+
         RootPanel.get("projectTitle").add(projectNameLabel);
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
@@ -310,12 +313,27 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 _projectName = result.getConfiguration(ConfigurationKey.ProjectName);
                 _projectDescription = result.getConfiguration(ConfigurationKey.ProjectDescription);
                 _orcidClientId = result.getConfiguration(ConfigurationKey.OrcidClientId);
-                projectNameLabel.setText(_projectName);
+                projectNameLabel.setHTML(wrapIfNeeded(_projectName));
                 projectNameLabel.setTitle(_projectDescription);
                 projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
                 PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
                 DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType));
 
+            }
+
+            //If the title is long (>40 chars), split it at the first space that exists between the 30% and 70% mark. If no spaces are in this range, don't split.
+            private SafeHtml wrapIfNeeded(String label) {
+                int len = label.length();
+                if (len > 40) {
+                    //Wrap close to the half-way point if there's a space
+                    int firstPosible = (int) Math.round((len * 0.4));
+                    int spaceIndex = label.substring(firstPosible).indexOf(' ');
+                    if ((spaceIndex >= 0) && (spaceIndex < (int) Math.round((len * 0.3)))) {
+                        //Replace the space with an html break
+                        return new SafeHtmlBuilder().appendEscaped(label.substring(0, firstPosible + spaceIndex)).appendHtmlConstant("<br/>").appendEscaped(label.substring(firstPosible + spaceIndex + 1)).toSafeHtml();
+                    }
+                }
+                return new SafeHtmlBuilder().appendEscaped(label).toSafeHtml();
             }
         });
 
