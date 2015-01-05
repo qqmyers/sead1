@@ -365,7 +365,7 @@ public class ConfigurationWidget extends Composite {
 
         final CheckBox showTopLevelDataBox = new CheckBox();
         showTopLevelDataBox.setValue(configuration.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true"));
-        showTopLevelDataBox.setText("Show top level datasets");
+        showTopLevelDataBox.setText("Only show top-level datasets and collections");
         vp.add(showTopLevelDataBox);
 
         // buttons
