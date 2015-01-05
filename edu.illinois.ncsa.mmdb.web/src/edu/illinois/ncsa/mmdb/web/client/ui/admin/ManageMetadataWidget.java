@@ -5,10 +5,12 @@ import java.util.SortedSet;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -87,7 +89,7 @@ public class ManageMetadataWidget extends Composite {
         final TextBox labelText = ((TextBox) table.getWidget(1, 1));
         final TextBox descriptionText = ((TextBox) table.getWidget(2, 1));
 
-        final Button submitButton = new Button("Submit", new ClickHandler() {
+        final Button submitButton = new Button("Modify", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 String predicate = uriList.getItemText(uriList.getSelectedIndex());
@@ -142,6 +144,9 @@ public class ManageMetadataWidget extends Composite {
                     }
                     existingPanel.add(table);
                     existingPanel.add(submitButton);
+                    //Pre-fill label and description for the current/first item
+                    uriList.setItemSelected(0, true);
+                    DomEvent.fireNativeEvent(Document.get().createChangeEvent(), uriList);
                 }
 
             }
@@ -173,6 +178,7 @@ public class ManageMetadataWidget extends Composite {
 
         TextBox textbox = new TextBox();
         textbox.setVisibleLength(40);
+        textbox.setReadOnly(true);
         table.setText(idx, 0, "Label");
         table.setWidget(idx, 1, textbox);
         idx++;
@@ -180,13 +186,14 @@ public class ManageMetadataWidget extends Composite {
         textbox = new TextBox();
         textbox.setVisibleLength(80);
         table.setText(idx, 0, "Description");
+        textbox.setReadOnly(true);
         table.setWidget(idx, 1, textbox);
         idx++;
 
         final ListBox uriList = ((ListBox) table.getWidget(0, 1));
         final TextBox labelText = ((TextBox) table.getWidget(1, 1));
         final TextBox descriptionText = ((TextBox) table.getWidget(2, 1));
-        final Button submitButton = new Button("Submit", new ClickHandler() {
+        final Button submitButton = new Button("Remove", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 String predicate = uriList.getItemText(uriList.getSelectedIndex());
@@ -214,6 +221,9 @@ public class ManageMetadataWidget extends Composite {
                                         String uri = field.getUri();
                                         uriList.addItem(uri);
                                     }
+                                    //Pre-fill label and description for the current/first item
+                                    uriList.setItemSelected(0, true);
+                                    DomEvent.fireNativeEvent(Document.get().createChangeEvent(), uriList);
                                 }
 
                             }
@@ -250,6 +260,9 @@ public class ManageMetadataWidget extends Composite {
                     }
                     existingPanel.add(table);
                     existingPanel.add(submitButton);
+                    //Pre-fill label and description for the current/first item
+                    uriList.setItemSelected(0, true);
+                    DomEvent.fireNativeEvent(Document.get().createChangeEvent(), uriList);
                 }
 
             }
@@ -287,7 +300,7 @@ public class ManageMetadataWidget extends Composite {
         table.setWidget(idx, 1, textbox);
         idx++;
 
-        Button submitButton = new Button("Submit", new ClickHandler() {
+        Button submitButton = new Button("Add", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 String label = ((TextBox) table.getWidget(0, 1)).getText();
