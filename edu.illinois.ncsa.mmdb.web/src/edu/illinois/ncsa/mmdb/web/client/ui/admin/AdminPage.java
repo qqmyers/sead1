@@ -73,7 +73,8 @@ public class AdminPage extends Page {
         super("Administration", dispatch, eventBus);
         new PermissionUtil(dispatch);
 
-        HasPermission permission = new HasPermission(MMDB.getUsername(), Permission.VIEW_ADMIN_PAGES, Permission.EDIT_ROLES, Permission.REINDEX_FULLTEXT);
+        HasPermission permission = new HasPermission(MMDB.getUsername(), Permission.VIEW_ADMIN_PAGES, Permission.EDIT_ROLES,
+                Permission.REINDEX_FULLTEXT, Permission.MANAGE_METADATA);
         dispatch.execute(permission, new AsyncCallback<HasPermissionResult>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -115,6 +116,11 @@ public class AdminPage extends Page {
 
         // SPARQL Queries
         tabPanel.add(new SparqlWidget(dispatchAsync), "SPARQL");
+
+        //Manage Metadata
+        if (permissions.isPermitted(Permission.MANAGE_METADATA)) {
+            tabPanel.add(new ManageMetadataWidget(dispatchAsync), "Manage Metadata");
+        }
 
         tabPanel.selectTab(0);
     }

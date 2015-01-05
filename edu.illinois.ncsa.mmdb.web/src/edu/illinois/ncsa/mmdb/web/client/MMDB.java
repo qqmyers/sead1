@@ -331,11 +331,19 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                         projectNameLabel.setHTML(wrapIfNeeded(_projectName));
                         projectNameLabel.setTitle(_projectDescription);
                         projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
+
+                        // override default logo, background, title color
+                        Document.get().getElementById("project-logo").getFirstChildElement().getFirstChildElement().setAttribute("src", result.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
+                        com.google.gwt.dom.client.Element background = Document.get().getElementById("project-header");
+                        //background.setPropertyString("background-image", result.getConfiguration(ConfigurationKey.ProjectHeaderBackground));
+                        changeBackgroundImage(result.getConfiguration(ConfigurationKey.ProjectHeaderBackground));
+                        //background.setPropertyString("backgroundRepeat", "repeat-x");
+                        projectNameLabel.getElement().setPropertyString("color", "red");
+                        //result.getConfiguration(ConfigurationKey.ProjectHeaderTitleColor));
+
                         PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
                         DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType), result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true") || bigData);
 
-                        // override default logo
-                        Document.get().getElementById("logo-img").setAttribute("src", result.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
                     }
 
                     //If the title is long (>40 chars), split it at the first space that exists between the 30% and 70% mark. If no spaces are in this range, don't split.
@@ -352,6 +360,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                         }
                         return new SafeHtmlBuilder().appendEscaped(label).toSafeHtml();
                     }
+
                 });
 
         dispatchAsync.execute(new GoogleOAuth2Props(), new AsyncCallback<GoogleOAuth2PropsResult>() {
@@ -1175,5 +1184,17 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     public FlowPanel getMainContainer() {
         return mainContainer;
     }
+
+    /**
+    *
+    */
+    private static native void changeBackgroundImage(String url) /*-{
+		var theUrl = 'url(\'' + url + '\')';
+		alert(theUrl);
+		var el = document.getElementById('project-header');
+		if (el) {
+			el.style.backgroundImage = theUrl;
+		}
+    }-*/;
 
 }

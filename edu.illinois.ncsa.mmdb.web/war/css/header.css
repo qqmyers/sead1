@@ -24,7 +24,9 @@ li {
 
 #project-logo img {
 	height: 100px;
-	margin-top:11px;
+	margin-top: 11px;
+	max-height: 100px;
+	max-width: 140px;
 }
 
 #projectTitle {
@@ -49,7 +51,7 @@ li {
 	height: 40px;
 	width: 18%;
 	background-color:#fff;
-	margin-top:40px;
+	margin-top:0px;
 	margin-right:40px;
 	float:left;
 	display:inline-block;
