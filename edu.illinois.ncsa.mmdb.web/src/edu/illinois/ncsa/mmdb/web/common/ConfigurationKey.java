@@ -45,7 +45,7 @@ public enum ConfigurationKey {
     GoogleMapKey("google.mapkey", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
     // remote API key
-    RemoteAPIKey("remoteAPI", ""), //$NON-NLS-1$ //$NON-NLS-2$
+    RemoteAPIKey("remoteAPIKey", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
     // extractor url
     ExtractorUrl("extractor.url", "http://localhost:9856/"), //$NON-NLS-1$ //$NON-NLS-2$
@@ -64,13 +64,7 @@ public enum ConfigurationKey {
     TokenKeyLifetime("token.key.lifetime", "5"),
 
     //Use Google Document Viewer
-    UseGoogleDocViewer("previewer.google_doc_viewer", "true"),
-
-    //Geospatial data support
-    //GeoServer("geo.server", ""), - Fixed at <app URL>/geoproxy, e.g. http://sead.ncsa.illinois.edu/acr/geoproxy
-    //ProxiedGeoServer("geo.proxied.server", ""), - fixed at <server>/geoserver, e.g. http://sead.ncsa.illinois.edu/geoserver
-    GeoUser("geo.user", ""),
-    GeoPassword("geo.password", "");
+    UseGoogleDocViewer("previewer.google_doc_viewer", "true");
 
     private final String propertyKey;
     private final String defaultValue;
