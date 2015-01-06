@@ -142,7 +142,7 @@ table td, select {
 
 a, a:link, a:hover,a:visited, a:active{
    
-   color:#0b5ca3 !important;
+   color:#0b5ca3;
    text-decoration:none !important;
 }
 
@@ -1822,7 +1822,7 @@ a.zocial.google:hover {
 
 }
 .zocial.google{
-	background-color:#f3822a !important;
+/*	background-color:#f3822a !important; */
 	margin-top:10px;
 }
 .zocial.google:hover,.zocial.orcid:hover{
@@ -1835,9 +1835,6 @@ a.zocial.google:hover {
 .zocial.orcid:hover{
 	color:#66cc66 !important;
 }
-
-=======
-
 
 .batchOperationMenu {
 	display: inline-block;

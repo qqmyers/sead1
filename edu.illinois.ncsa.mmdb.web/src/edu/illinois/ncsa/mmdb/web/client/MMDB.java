@@ -335,11 +335,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                         // override default logo, background, title color
                         Document.get().getElementById("project-logo").getFirstChildElement().getFirstChildElement().setAttribute("src", result.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
                         com.google.gwt.dom.client.Element background = Document.get().getElementById("project-header");
-                        //background.setPropertyString("background-image", result.getConfiguration(ConfigurationKey.ProjectHeaderBackground));
-                        changeBackgroundImage(result.getConfiguration(ConfigurationKey.ProjectHeaderBackground));
-                        //background.setPropertyString("backgroundRepeat", "repeat-x");
-                        projectNameLabel.getElement().setPropertyString("color", "red");
-                        //result.getConfiguration(ConfigurationKey.ProjectHeaderTitleColor));
+                        RootPanel headerPanel = RootPanel.get("project-header");
+                        headerPanel.getElement().getStyle().setBackgroundImage("url('" + result.getConfiguration(ConfigurationKey.ProjectHeaderBackground) + "')");
+                        headerPanel.getElement().getStyle().setProperty("background-repeat", "repeat-x");
+                        projectNameLabel.asWidget().getElement().getStyle().setProperty("color", result.getConfiguration(ConfigurationKey.ProjectHeaderTitleColor));
 
                         PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
                         DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType), result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true") || bigData);
@@ -1184,17 +1183,5 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     public FlowPanel getMainContainer() {
         return mainContainer;
     }
-
-    /**
-    *
-    */
-    private static native void changeBackgroundImage(String url) /*-{
-		var theUrl = 'url(\'' + url + '\')';
-		alert(theUrl);
-		var el = document.getElementById('project-header');
-		if (el) {
-			el.style.backgroundImage = theUrl;
-		}
-    }-*/;
 
 }
