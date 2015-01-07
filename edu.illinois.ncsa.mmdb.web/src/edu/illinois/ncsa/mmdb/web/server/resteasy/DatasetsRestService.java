@@ -346,6 +346,10 @@ public class DatasetsRestService extends ItemServicesImpl {
     @GET
     @Path("/{id}/file")
     public Response getDatasetBlob(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return getDataFile(id, request);
+    }
+
+    public static Response getDataFile(String id, HttpServletRequest request) {
         Response r = null;
         try {
             final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));

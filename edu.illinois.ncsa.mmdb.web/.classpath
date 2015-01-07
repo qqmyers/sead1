@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.2-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/ACRCommon.jar" sourcepath="/ACRCommon/src"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/httpclient-4.1.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/httpcore-4.1.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-core-asl-1.8.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-jaxrs-1.8.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.8.5.jar" sourcepath="C:/Users/Jim/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.8.5/jackson-mapper-asl-1.8.5-sources.jar"/>
@@ -18,38 +19,26 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/scannotation-1.0.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/arq-2.8.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-beanutils-1.8.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-dbcp-1.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-httpclient-contrib-ssl-3.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-pool-1.5.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gin-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-2.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-dispatch-1.0.0.jar" sourcepath="C:/Users/Jim/.m2/repository/net/customware/gwt/dispatch/gwt-dispatch/1.0.0/gwt-dispatch-1.0.0-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-servlet-2.4.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-user-2.4.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/iri-0.7.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackrabbit-jcr-commons-1.6.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackrabbit-webdav-1.6.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jcl-over-slf4j-1.5.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jdom-1.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jena-2.6.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/mail-1.4.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/milton-api-1.6.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/milton-servlet-1.6.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/mime-util-2.1.3.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/mysql-connector-java-5.0.4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/org.osgi.core-4.0.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/rome-1.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.5.8.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-log4j12-1.5.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/stax-api-1.0.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-client-2.7.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-jena-2.7.0-SNAPSHOT.jar"/>
@@ -64,7 +53,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/validation-api-1.0.0.GA-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/validation-api-1.0.0.GA.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/wstx-asl-3.2.9.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/xercesImpl-2.7.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/postgresql-8.4-702.jdbc4.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-postgresql-2.7.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-maps-1.1.1-rc1.jar"/>
@@ -72,17 +60,26 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/google-api-client-1.16.0-rc.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/google-http-client-1.16.0-rc.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/google-oauth-client-1.16.0-rc.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-oauth2-0.2-alpha.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-oauth2-0.2-alpha.jar" sourcepath="C:/Users/Jim/.m2/repository/com/google/api/gwt-oauth2/0.2/gwt-oauth2-0.2-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/google-http-client-jackson-1.16.0-rc.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/ACRCommon.jar" sourcepath="/ACRCommon/src"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang3-3.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-4.7.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-4.7.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.2-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo/src/main/java"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-multipart-provider-2.3.2.Final.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/org.json-20131017.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-io-2.2.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jena-arq-2.10.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jena-core-2.10.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jena-iri-0.9.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.6.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-log4j12-1.6.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-codec-1.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/httpclient-4.3.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/httpclient-cache-4.3.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/httpmime-4.3.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jcl-over-slf4j-1.6.4.jar"/>
+	<classpathentry kind="lib" path="gwt/gwt-dev-2.4.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
