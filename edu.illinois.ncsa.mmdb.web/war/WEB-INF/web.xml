@@ -75,16 +75,6 @@
 	</servlet>
 	
 	<servlet>
-		<servlet-name>OAuthAuthorization</servlet-name>
-		<servlet-class>edu.illinois.ncsa.mmdb.web.server.OAuthAuthorization</servlet-class>
-	</servlet>
-	
-	<servlet>
-		<servlet-name>OAuthCallback</servlet-name>
-		<servlet-class>edu.illinois.ncsa.mmdb.web.server.OAuthCallback</servlet-class>
-	</servlet>
-	
-	<servlet>
 		<servlet-name>WebDAV Servlet</servlet-name>
 		<servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
 		<init-param>
@@ -229,16 +219,6 @@
 	<servlet-mapping>
 		<servlet-name>BatchDownload</servlet-name>
 		<url-pattern>/BatchDownload</url-pattern>
-	</servlet-mapping>
-	
-	<!-- ORCID Oauth2 servlet mappings -->
-	<servlet-mapping>
-		<servlet-name>OAuthCallback</servlet-name>
-		<url-pattern>/oauth2callback/*</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>OAuthAuthorization</servlet-name>
-		<url-pattern>/oauth2/auth/*</url-pattern>
 	</servlet-mapping>
 	
 	<!-- Geo Page servelet mappings -->

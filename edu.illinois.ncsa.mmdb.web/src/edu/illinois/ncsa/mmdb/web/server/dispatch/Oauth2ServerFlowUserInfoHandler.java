@@ -86,7 +86,7 @@ public class Oauth2ServerFlowUserInfoHandler implements ActionHandler<Oauth2Serv
     public Oauth2ServerFlowUserInfoResult execute(Oauth2ServerFlowUserInfo action, ExecutionContext arg1)
             throws ActionException {
 
-        if (LoginPage.OrcidProvider.equals(action.getProvider())) {
+        if (LoginPage.ORCID_PROVIDER.equals(action.getProvider())) {
             String id = orcidId.get();
             Oauth2ServerFlowUserInfoResult result = OrcidClient.requestUserInfo(id, action.getToken());
             result.setId(id);

@@ -172,7 +172,7 @@ public class SignupPage extends Composite {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-                    checkEmailAndSubmit(LoginPage.LocalProvider);
+                    checkEmailAndSubmit(LoginPage.LOCAL_PROVIDER);
                 }
 
             }
@@ -238,7 +238,7 @@ public class SignupPage extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                checkEmailAndSubmit(LoginPage.LocalProvider);
+                checkEmailAndSubmit(LoginPage.LOCAL_PROVIDER);
             }
         });
 
@@ -260,7 +260,7 @@ public class SignupPage extends Composite {
 
     protected void checkEmailAndSubmit(final String provider) {
         GetUser getUser = new GetUser();
-        if (provider.equals(LoginPage.LocalProvider)) {
+        if (provider.equals(LoginPage.LOCAL_PROVIDER)) {
             getUser.setEmailAddress(emailBox.getValue());
         } else {
             getUser.setEmailAddress(socialEmail);
@@ -282,7 +282,7 @@ public class SignupPage extends Composite {
                             showFeedbackMessage("The email address you have specified is already in the system. " +
                                     "Please chose a different email address.");
                         } else {
-                            if (provider.equals(LoginPage.LocalProvider)) {
+                            if (provider.equals(LoginPage.LOCAL_PROVIDER)) {
                                 submit();
                             } else {
                                 //Check provider - verify that user
@@ -326,7 +326,7 @@ public class SignupPage extends Composite {
     }
 
     private void googleSubmit() {
-        AuthRequest req = new AuthRequest(LoginPage.AUTH_URL, MMDB._googleClientId).withScopes(LoginPage.EMAIL_SCOPE, LoginPage.PROFILE_SCOPE);
+        AuthRequest req = new AuthRequest(LoginPage.GOOGLE_AUTH_URL, MMDB._googleClientId).withScopes(LoginPage.EMAIL_SCOPE, LoginPage.PROFILE_SCOPE);
         Auth AUTH = Auth.get();
         AUTH.clearAllTokens();
         AUTH.login(req, new Callback<String, Throwable>() {

@@ -1,15 +1,11 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
 import java.io.StringWriter;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -18,11 +14,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
 import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientRequestFactory;
 import org.jboss.resteasy.client.ClientResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,41 +29,15 @@ import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
  * Client to interact with orchid.org API. Currently focusing on social sign on.
  *
  * @author Luigi Marini
+ * @author myersjd@umich.edu
  *
  */
 public class OrcidClient {
 
-    public static final String  SANDBOX_LOGIN_URL = "https://sandbox.orcid.org";
-    public static final String  SANDBOX_API_URL   = "https://api.sandbox.orcid.org";
-    private static final String BASE_URL          = "http://orcid.org";
-    public static final String  AUTH_ENDPOINT     = "/oauth/authorize";
-    private static final String CLIENT_ID         = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientId);
-    public static final String  REDIRECT_URI      = "https://developers.google.com/oauthplayground";
-    private static Log          log               = LogFactory.getLog(OrcidClient.class);
+    private static String ORCID_TOKEN_REQUEST_URL   = "https://api.sandbox.orcid.org/oauth/token";
+    private static String ORCID_PUBLIC_API_BASE_URL = "http://pub.sandbox.orcid.org/v1.1/";
 
-    public static String createAuthenticationURL(String clientId) throws MalformedURLException {
-        final StringBuilder sb = new StringBuilder();
-        final List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
-        queryParams.add(new BasicNameValuePair("client_id", clientId));
-        queryParams.add(new BasicNameValuePair("response_type", "code"));
-        queryParams.add(new BasicNameValuePair("scope", "/authenticate"));
-        queryParams.add(new BasicNameValuePair("redirect_uri", REDIRECT_URI));
-        sb.append(SANDBOX_LOGIN_URL + AUTH_ENDPOINT);
-        sb.append("?");
-        sb.append(URLEncodedUtils.format(queryParams, "UTF-8"));
-        return sb.toString();
-    }
-
-    public static String authenticationURL(String clientId, String redirectURI) {
-        String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
-        StringBuilder sb = new StringBuilder();
-        sb.append("client_id=" + clientId + "&");
-        sb.append("scope=" + "/authenticate" + "&");
-        sb.append("response_type=" + "code&");
-        sb.append("redirect_uri=" + redirectURI + "&");
-        sb.append("state=" + "magic-bean");
-        return orcidAuthorizeURL + "?" + sb.toString();
-    }
+    private static Log    log                       = LogFactory.getLog(OrcidClient.class);
 
     /* Get an authentication token using the code and retrieve the username/email via the API
      * (this requires two calls with Orcid vs. one with Google)
@@ -85,7 +51,7 @@ public class OrcidClient {
 
         String clientId = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientId);
         String clientSecret = TupeloStore.getInstance().getConfiguration(ConfigurationKey.OrcidClientSecret);
-        ClientRequest authorize = new ClientRequest("https://api.sandbox.orcid.org/oauth/token");
+        ClientRequest authorize = new ClientRequest(ORCID_TOKEN_REQUEST_URL);
         authorize.followRedirects(true);
         authorize.accept(MediaType.APPLICATION_JSON_TYPE);
 
@@ -133,7 +99,7 @@ public class OrcidClient {
         Oauth2ServerFlowUserInfoResult result = new Oauth2ServerFlowUserInfoResult();
 
         try {
-            URL url = new URL("http://pub.sandbox.orcid.org/v1.1/" + id + "/orcid-bio");
+            URL url = new URL("ORCID_PUBLIC_API_BASE_URL" + id + "/orcid-bio");
             URLConnection urlCon = url.openConnection();
             urlCon.setRequestProperty("Accept", "application/xml");
             urlCon.setRequestProperty("Authorization", "Bearer " + token);
@@ -171,60 +137,5 @@ public class OrcidClient {
         log.debug("Done authorizing against Orcid API");
         return result;
 
-    }
-
-    public static void oAuth() {
-        log.debug("Connecting to Orcid API");
-        // factory for all requests
-        ClientRequestFactory crf = new ClientRequestFactory(UriBuilder.fromUri(SANDBOX_LOGIN_URL).build());
-        // test connection
-        //        ClientRequest test = crf.createRelativeRequest("/oauth");
-        //        test.followRedirects(true);
-        //        try {
-        //            ClientResponse<String> clientResponse = test.get(String.class);
-        //            log.debug("Test connection: " + clientResponse.getStatus() + " " + clientResponse.getEntity());
-        //            log.debug("Location: " + clientResponse.getLocation());
-        //            MultivaluedMap<String, String> headers = clientResponse.getHeaders();
-        //            for (String key : headers.keySet() ) {
-        //                log.debug(key + ": " + headers.get(key));
-        //            }
-        //        } catch (Exception e) {
-        //            log.error("Failed to connect to base uri", e);
-        //        }
-        // authorize token
-        ClientRequest authorize = crf.createRelativeRequest(AUTH_ENDPOINT);
-        authorize.followRedirects(true);
-        authorize.accept(MediaType.APPLICATION_JSON_TYPE);
-        authorize.queryParameter("client_id", CLIENT_ID);
-        authorize.queryParameter("response_type", "code");
-        authorize.queryParameter("scope", "/authenticate");
-        authorize.queryParameter("redirect_uri", REDIRECT_URI);
-
-        try {
-            ClientResponse<String> clientResponse = authorize.get(String.class);
-            log.debug("Authorization status: " + clientResponse.getStatus());
-            log.debug("Authorization body: " + clientResponse.getEntity());
-            log.debug("Location: " + clientResponse.getLocation());
-            MultivaluedMap<String, String> headers = clientResponse.getHeaders();
-            for (String key : headers.keySet() ) {
-                log.debug(key + ": " + headers.get(key));
-            }
-
-        } catch (Exception e) {
-            log.error("Failed to authorize user", e);
-        }
-        log.debug("Done authorizing against Orcid API");
-    }
-
-    public static void main(String[] args) {
-        oAuth();
-    }
-
-    class AccessTokenParams {
-        private String client_id;
-        private String client_secret;
-        private String grant_type;
-        private String redirect_uri;
-        private String code;
     }
 }

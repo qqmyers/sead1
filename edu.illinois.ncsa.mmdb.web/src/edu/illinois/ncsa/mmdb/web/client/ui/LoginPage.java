@@ -110,18 +110,18 @@ public class LoginPage extends Composite {
     private static MMDB          mainWindow;
 
     // Google Oauth2
-    static final String          AUTH_URL             = "https://accounts.google.com/o/oauth2/auth";
+    static final String          GOOGLE_AUTH_URL             = "https://accounts.google.com/o/oauth2/auth";
     static final String          EMAIL_SCOPE          = "email";
     static final String          PROFILE_SCOPE        = "profile";
 
-    public static final String   GoogleProvider       = "google";
-    public static final String   OrcidProvider        = "orcid";
-    public static final String   LocalProvider        = "local";
+    public static final String   GOOGLE_PROVIDER       = "google";
+    public static final String   ORCID_PROVIDER        = "orcid";
+    public static final String   LOCAL_PROVIDER        = "local";
 
-    static final String          orcidSignInURL       = "https://sandbox.orcid.org/signin";
-    static final String          orcidAuthorizeURL    = "https://sandbox.orcid.org/oauth/authorize";
+    static final String          ORCID_SIGNIN_URL       = "https://sandbox.orcid.org/signin";
+    static final String          ORCID_AUTHORIZE_URL    = "https://sandbox.orcid.org/oauth/authorize";
 
-    static final String          seadOauthRedirectURL = "http://sead.ncsa.illinois.edu/projects/authredirect?server=";
+    static final String          sSEAD_OAUTH_REDIRECT_URL = "http://sead.ncsa.illinois.edu/projects/authredirect?server=";
 
     private static boolean       autologin            = true;
 
@@ -309,7 +309,7 @@ public class LoginPage extends Composite {
      */
     public static void orcidAuthLogin(final Boolean signup) {
 
-        dispatchasync.execute(new GetOauth2ServerFlowState(OrcidProvider), new AsyncCallback<GetOauth2ServerFlowStateResult>() {
+        dispatchasync.execute(new GetOauth2ServerFlowState(ORCID_PROVIDER), new AsyncCallback<GetOauth2ServerFlowStateResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -318,7 +318,7 @@ public class LoginPage extends Composite {
 
             @Override
             public void onSuccess(final GetOauth2ServerFlowStateResult result) {
-                String redirect_uri = seadOauthRedirectURL + GWT.getHostPageBaseURL();
+                String redirect_uri = sSEAD_OAUTH_REDIRECT_URL + GWT.getHostPageBaseURL();
                 // String orcidAuthorizeURL = "https://orcid.org/oauth/authorize";
                 //Temporarily point at sandbox for testing
 
@@ -328,7 +328,7 @@ public class LoginPage extends Composite {
                 sb.append("response_type=" + "code&");
                 sb.append("redirect_uri=" + URL.encodeQueryString(redirect_uri) + "&");
                 sb.append("state=" + result.getState());
-                String url = orcidAuthorizeURL + "?" + sb.toString();
+                String url = ORCID_AUTHORIZE_URL + "?" + sb.toString();
                 registerOrcidCallback(signup);
                 Window.open(url, "ORCID Oauth2", "height = 600,width = 800,resizeable,scrollbars");
             }
@@ -350,7 +350,7 @@ public class LoginPage extends Composite {
                 stateString = pair.substring(6);
             }
         }
-        dispatchasync.execute(new Oauth2ServerFlowTokenRequest(codeString, stateString, OrcidProvider), new AsyncCallback<Oauth2ServerFlowTokenRequestResult>() {
+        dispatchasync.execute(new Oauth2ServerFlowTokenRequest(codeString, stateString, ORCID_PROVIDER), new AsyncCallback<Oauth2ServerFlowTokenRequestResult>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -360,7 +360,7 @@ public class LoginPage extends Composite {
             @Override
             public void onSuccess(final Oauth2ServerFlowTokenRequestResult result) {
 
-                dispatchasync.execute(new Oauth2ServerFlowUserInfo(result.getAuthToken(), OrcidProvider, signup.booleanValue()), new AsyncCallback<Oauth2ServerFlowUserInfoResult>() {
+                dispatchasync.execute(new Oauth2ServerFlowUserInfo(result.getAuthToken(), ORCID_PROVIDER, signup.booleanValue()), new AsyncCallback<Oauth2ServerFlowUserInfoResult>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -372,7 +372,7 @@ public class LoginPage extends Composite {
                                 ((LoginPage) widget).fail("Unable to retrieve name and email from ORCID");
                             } else if ((widget != null) && (widget instanceof SignupPage)) {
 
-                                ((SignupPage) widget).showFeedbackMessage("Unable to retrieve name and email from ORCID. Check your ORCID account at " + orcidSignInURL + " to make sure you have verified your primary email and have allowed your email to be shared.");
+                                ((SignupPage) widget).showFeedbackMessage("Unable to retrieve name and email from ORCID. Check your ORCID account at " + ORCID_SIGNIN_URL + " to make sure you have verified your primary email and have allowed your email to be shared.");
                             }
 
                         }
@@ -411,7 +411,7 @@ public class LoginPage extends Composite {
                                 String sessionKey = userInfoResult.getSessionId();
                                 GWT.log("User " + userInfoResult.getEmail() + " associated with session key " + sessionKey, null);
                                 // login local
-                                MMDB.getSessionState().setLoginProvider(LoginPage.OrcidProvider);
+                                MMDB.getSessionState().setLoginProvider(LoginPage.ORCID_PROVIDER);
                                 mainWindow.retrieveUserInfoByName(userInfoResult.getEmail(), sessionKey, new AuthenticationCallback() {
 
                                     @Override
@@ -502,7 +502,7 @@ public class LoginPage extends Composite {
 
     private static void realOauth2Login(final AuthenticationCallback callback) {
 
-        AuthRequest req = new AuthRequest(AUTH_URL, MMDB._googleClientId).withScopes(EMAIL_SCOPE, PROFILE_SCOPE);
+        AuthRequest req = new AuthRequest(GOOGLE_AUTH_URL, MMDB._googleClientId).withScopes(EMAIL_SCOPE, PROFILE_SCOPE);
         Auth AUTH = Auth.get();
         //AUTH.tokenStore;
 
@@ -539,7 +539,7 @@ public class LoginPage extends Composite {
                 }
                 GWT.log("User " + result.getEmail() + " associated with session key " + result.getSessionId(), null);
                 // login local
-                MMDB.getSessionState().setLoginProvider(LoginPage.GoogleProvider);
+                MMDB.getSessionState().setLoginProvider(LoginPage.GOOGLE_PROVIDER);
                 mainWindow.retrieveUserInfoByName(result.getEmail(), result.getSessionId(), callback);
 
                 //Set timer to renew credentials
@@ -758,7 +758,7 @@ public class LoginPage extends Composite {
                  */
                 MMDB.credChangeOccuring = true;
                 if (LoginPage.getAutologin()) {
-                    if (GoogleProvider.equals(MMDB.getSessionState().getLoginProvider())) {
+                    if (GOOGLE_PROVIDER.equals(MMDB.getSessionState().getLoginProvider())) {
                         //Try to pick up existing credential silently
                         LoginPage.checkForOauth2Token(MMDB._googleClientId, new TokenCallback() {
                             @Override
@@ -782,7 +782,7 @@ public class LoginPage extends Composite {
                                 });
                             }
                         });
-                    } else if (OrcidProvider.equals(MMDB.getSessionState().getLoginProvider())) {
+                    } else if (ORCID_PROVIDER.equals(MMDB.getSessionState().getLoginProvider())) {
                         //ORCID is dropping the refresh token - for authentication purposes, it appears that we just have to re login at timeout (currently 1 hour)
                         orcidAuthLogin(Boolean.FALSE);
                     }

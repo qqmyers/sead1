@@ -112,7 +112,7 @@ public class Oauth2ServerFlowTokenRequestHandler implements ActionHandler<Oauth2
         log.debug("Received state token: " + action.getState());
         if (TokenStore.isValidToken(action.getState(), GetOauth2ServerFlowStateHandler.OAUTH2_STATE)) {
             log.debug("Validated");
-            if (LoginPage.OrcidProvider.equals(action.getProvider())) {
+            if (LoginPage.ORCID_PROVIDER.equals(action.getProvider())) {
                 log.debug("Orcid Provider");
                 Oauth2ServerFlowTokenRequestResult requestResult = OrcidClient.requestAccessToken(action.getCode());
                 session.get().setAttribute("orcid_id", requestResult.getId());
