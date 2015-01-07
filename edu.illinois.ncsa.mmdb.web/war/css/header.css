@@ -31,7 +31,7 @@ li {
 
 #projectTitle {
 	float: left;
-	width: 64%;
+	width: 60%;
 	height: 40px;
 	margin-top: 30px;
 	text-align: left;
@@ -49,11 +49,11 @@ li {
 #loginMenu {
 	float: right;
 	height: 40px;
-	width: 18%;
-	background-color:#fff;
-	margin-top:0px;
-	margin-right:40px;
-	float:left;
+	width: 20%;
+	background-color:#e9e9e9;
+	margin-top:30px;
+	margin-right:0px;
+	float:right;
 	display:inline-block;
 }
 #loginMenu div{
@@ -85,7 +85,10 @@ li {
 .loginPanel .gwt-Hyperlink, .gwt-Anchor {
 	padding-left: 10px;
 }
+#projectTitle .gwt-Anchor{
+	padding-left:0;
 
+}
 #nav-logo {
 	width: 20px;
 	margin-left: 5px
@@ -205,7 +208,7 @@ li {
 	z-index: 0;
 	width: 1200px;
 	height: 50px;
-	background-color: #0c5ca3;
+	background-color: #0b5ca3;
 }
 
 .navMenu li {
@@ -214,7 +217,7 @@ li {
 	list-style: none;
 	float: left;
 	font: 16px 'Raleway';
-	background-color: #0c5ca3;
+	background-color: #0b5ca3;
 }
 
 .navMenu li:first-child {
@@ -224,7 +227,7 @@ li {
 .navMenu li a {
 	display: block;
 	padding: 4px 6px;
-	background: #0c5ca3;
+	background: #0b5ca3;
 	color: #FFF !important;
 	font-weight: 400;
 	text-align: center;
