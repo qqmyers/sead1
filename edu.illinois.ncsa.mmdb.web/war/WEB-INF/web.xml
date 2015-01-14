@@ -205,7 +205,7 @@
 		<!-- this additional mapping is kludgy, but necessary for GWT -->
 	</servlet-mapping>
 
-	<-- URIQA and webdav support - permissions but no fine-grained access control>
+	<!-- URIQA and webdav support - permissions but no fine-grained access control>
 	<servlet-mapping>
 		<servlet-name>tupelo</servlet-name>
 		<url-pattern>/tupelo/*</url-pattern>
