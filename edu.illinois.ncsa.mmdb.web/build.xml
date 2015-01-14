@@ -117,7 +117,6 @@
 			<exclude name="WEB-INF/lib/gwt-dev-*.jar" />
 			<exclude name="WEB-INF/lib/gwt-servlet.jar" />
 			<exclude name="WEB-INF/lib/commons-logging-*.jar" />
-			<exclude name="WEB-INF/lib/mysql-connector-java-*.jar" />
 			<exclude name="WEB-INF/lib/xercesImpl-*.jar" />
 		</zip>
 	</target>
