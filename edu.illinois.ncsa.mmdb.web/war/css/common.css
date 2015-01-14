@@ -110,9 +110,17 @@ table.tablesorter tbody tr td:last-child {
 	padding:3px; 
 }
 
-#discovery .span3 .well {
+#discovery .span3 {
+	margin-top: 0px;
+}
+
+#discovery .span3> .well {
 	text-align:left;
 	background-color: #DFDFDF;
+}
+
+#discovery .span3> .gwt-HTML {
+        margin-left: 0px!important;
 }
 
 #reset span:hover {

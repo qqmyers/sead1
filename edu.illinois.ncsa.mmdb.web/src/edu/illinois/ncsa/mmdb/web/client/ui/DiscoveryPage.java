@@ -49,7 +49,7 @@ public class DiscoveryPage extends Page {
             search.add(searchHtml);
         }
         left.add(search);
-        HTML projInfo = new HTML("<div class=\"well\"><div id=\"projectDesc\"" +
+        HTML projInfo = new HTML("<div class=\"well\"><div id=\"projectDesc\">" +
                 MMDB._projectDescription + "</div></div>");
         left.add(projInfo);
         top.add(left);
