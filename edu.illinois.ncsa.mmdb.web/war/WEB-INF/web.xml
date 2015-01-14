@@ -59,11 +59,28 @@
 		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.ExtractorServlet</servlet-class>
 	</servlet>
 
+	<!-- Can be enabled to support URIQA and webdav calls respectively. Note these do not support fine-grained access control but are controlled via permissions
 	<servlet>
 		<servlet-name>tupelo</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.server.TupeloServlet</servlet-class>
 	</servlet>
-
+	<servlet>
+		<servlet-name>WebDAV Servlet</servlet-name>
+		<servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
+		<init-param>
+			<param-name>resource.factory.class</param-name>
+			<param-value>edu.illinois.ncsa.mmdb.web.server.webdav.MediciResourceFactory</param-value>
+		</init-param>
+	-->		
+		<!-- <init-param> <param-name>response.handler.class</param-name> <param-value>com.bradmcevoy.http.webdav.DefaultWebDavResponseHandler</param-value> 
+			</init-param> -->
+	<!--	<init-param>
+			<param-name>authentication.handler.classes</param-name>
+			<param-value>com.bradmcevoy.http.http11.auth.BasicAuthHandler</param-value>
+		</init-param>
+	</servlet>
+	-->
+	
 	<servlet>
 		<servlet-name>UploadBlob</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.server.UploadBlob</servlet-class>
@@ -74,20 +91,6 @@
 		<servlet-class>edu.illinois.ncsa.mmdb.web.server.BatchDownload</servlet-class>
 	</servlet>
 	
-	<servlet>
-		<servlet-name>WebDAV Servlet</servlet-name>
-		<servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
-		<init-param>
-			<param-name>resource.factory.class</param-name>
-			<param-value>edu.illinois.ncsa.mmdb.web.server.webdav.MediciResourceFactory</param-value>
-		</init-param>
-		<!-- <init-param> <param-name>response.handler.class</param-name> <param-value>com.bradmcevoy.http.webdav.DefaultWebDavResponseHandler</param-value> 
-			</init-param> -->
-		<init-param>
-			<param-name>authentication.handler.classes</param-name>
-			<param-value>com.bradmcevoy.http.http11.auth.BasicAuthHandler</param-value>
-		</init-param>
-	</servlet>
 	
 	<servlet>
         <servlet-name>Resteasy</servlet-name>
@@ -190,10 +193,6 @@
 		<url-pattern>/extractor/*</url-pattern>
 	</servlet-mapping>
 
-	<servlet-mapping>
-		<servlet-name>tupelo</servlet-name>
-		<url-pattern>/tupelo/*</url-pattern>
-	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>UploadBlob</servlet-name>
@@ -206,10 +205,17 @@
 		<!-- this additional mapping is kludgy, but necessary for GWT -->
 	</servlet-mapping>
 
+	<-- URIQA and webdav support - permissions but no fine-grained access control>
+	<servlet-mapping>
+		<servlet-name>tupelo</servlet-name>
+		<url-pattern>/tupelo/*</url-pattern>
+	</servlet-mapping>
+	
 	<servlet-mapping>
 		<servlet-name>WebDAV Servlet</servlet-name>
 		<url-pattern>/webdav/*</url-pattern>
 	</servlet-mapping>
+	<  -->
 
 	<servlet-mapping>
         <servlet-name>Resteasy</servlet-name>
