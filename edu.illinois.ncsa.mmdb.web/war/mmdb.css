@@ -2292,3 +2292,7 @@ padding: 0px;
 .update-failure {
 	background-color : red!important;
 }
+
+.roleManagement .gwt-Button {
+    margin-top: 10px;
+}
