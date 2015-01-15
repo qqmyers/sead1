@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-bean-tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo/src/main/java"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.2-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/ACRCommon.jar" sourcepath="/ACRCommon/src"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>

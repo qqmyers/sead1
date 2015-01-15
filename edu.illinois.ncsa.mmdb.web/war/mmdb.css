@@ -2284,3 +2284,11 @@ padding: 0px;
 	color:#222;
 	line-height:24px;
 }
+
+.updated {
+	background-color : green;
+}
+
+.update-failure {
+	background-color : red!important;
+}

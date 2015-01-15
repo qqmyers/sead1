@@ -65,6 +65,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteRelationshipHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.EditRoleHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.EditUserRetirementHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ExtractionServiceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GeoSearchHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAccessLevelHandler;
@@ -141,9 +142,9 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
 
 /**
  * Setup registry of action handlers when the servlet context is initialized.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class MyActionHandlersConfig implements ServletContextListener {
     public void contextInitialized(ServletContextEvent evt) {
@@ -241,6 +242,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetOauth2ServerFlowStateHandler());
         DispatchUtil.registerHandler(new Oauth2ServerFlowTokenRequestHandler());
         DispatchUtil.registerHandler(new Oauth2ServerFlowUserInfoHandler());
+        DispatchUtil.registerHandler(new EditUserRetirementHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {
