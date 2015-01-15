@@ -113,8 +113,8 @@ public class UserManagementWidget extends Composite {
     private final HashMap<String, Integer> columnByRole;
     private int                            retireColumn;
 
-    private static final String            updated       = "updated";
-    private static final String            updateFailure = "update-failure";
+    public static final String             updated       = "updated";
+    public static final String             updateFailure = "update-failure";
 
     public UserManagementWidget(DispatchAsync dispatchAsync) {
 
