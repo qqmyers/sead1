@@ -1841,7 +1841,7 @@ padding: 0px;
 a.zocial.google, 
 a.zocial.google:visited, 
 a.zocial.google:hover {
-  color: #FFFFFF;
+  color: #FFFFFF!important;
 }
 
 /* Login page display of social login options*/
@@ -1870,10 +1870,9 @@ a.zocial.google:hover {
 /*	background-color:#f3822a !important; */
 	margin-top:10px;
 }
-.zocial.google:hover,.zocial.orcid:hover{
+/*.zocial.google:hover,.zocial.orcid:hover{
 	background-color:#666666 !important;
-	color:#f3822a !important;
-}
+}*/
 .zocial.orcid{
 	background-color:#f2f2f2 !important;
 }
