@@ -438,6 +438,22 @@ public class UserManagementWidget extends Composite {
                 } else {
                     box.addStyleName(updated);
                 }
+                //Now find all permission entries for this user and set them to false/no update/fail style
+                int currentRow = -1;
+                for (int i = 1; i < inactiveUsersTable.getRowCount(); i++ ) {
+                    if (inactiveUsersTable.getWidget(i, retireColumn).equals(box)) {
+                        currentRow = i;
+                        break;
+                    }
+                }
+                if (currentRow != -1) { //Found row
+                    for (int j = 3; j < retireColumn; j++ ) {
+                        CheckBox cBox = (CheckBox) inactiveUsersTable.getWidget(currentRow, j);
+                        cBox.setValue(false);
+                        cBox.removeStyleName(updateFailure);
+                        cBox.removeStyleName(updated);
+                    }
+                }
             }
 
         });
