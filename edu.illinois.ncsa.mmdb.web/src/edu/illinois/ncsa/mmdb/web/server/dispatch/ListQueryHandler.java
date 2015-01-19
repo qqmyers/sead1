@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -53,7 +53,6 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
@@ -74,9 +73,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
  * TODO Add comments
- * 
+ *
  * @author Rob Kooepr
- * 
+ *
  */
 public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResult> {
 
@@ -124,8 +123,8 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
         u.addColumnName("k"); // 9
 
         int parentIndex = -1;
-        //if we are looking for top level collections
-        if (listquery.getBean() != null && listquery.getCollection() == null && (CollectionBeanUtil.COLLECTION_TYPE.toString().equals(listquery.getBean()) || listquery.getShowDataLevel() == true)) {
+        //if we are looking for top level items
+        if (listquery.getShowDataLevel() == true) {
             u.addColumnName("parent"); //10
             u.addPattern("parent", DcTerms.HAS_PART, "s", true);
             List<String> names = u.getColumnNames();
@@ -181,7 +180,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
 
                 item.setUri(row.get(0).getString());
                 item.setTitle(row.get(4).getString());
-                item.setAuthor(pbu.get((UriRef) row.get(5)).getName());
+                item.setAuthor(pbu.get(row.get(5)).getName());
                 if (row.get(2) != null) {
                     if (row.get(2).asObject() instanceof Date) {
                         item.setDate((Date) row.get(2).asObject());

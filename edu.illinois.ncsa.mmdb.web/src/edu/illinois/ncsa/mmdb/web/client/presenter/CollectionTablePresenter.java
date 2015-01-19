@@ -37,7 +37,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
@@ -51,9 +51,9 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 
 /**
  * Dynamic table presenter for datasets.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class CollectionTablePresenter extends DynamicTablePresenter {
 
@@ -75,6 +75,7 @@ public class CollectionTablePresenter extends DynamicTablePresenter {
         query.setOffset(offset);
         query.setBean("http://cet.ncsa.uiuc.edu/2007/Collection");
         query.setUser(MMDB.getUsername());
+        query.setShowDataLevel(showTopLevelDatasets);
         return query;
     }
 

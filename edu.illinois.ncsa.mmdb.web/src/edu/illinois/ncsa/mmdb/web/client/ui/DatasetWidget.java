@@ -38,10 +38,8 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -65,20 +63,15 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionsCallback;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.DeleteDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionService;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ExtractionServiceResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollections;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionsResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetLicense;
@@ -99,9 +92,7 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetDeletedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewPanel;
-import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
-import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**
  * Show one datasets and related information about it.
@@ -238,29 +229,6 @@ public class DatasetWidget extends Composite {
             }
         });
 
-        service.execute(new GetConfiguration(null, ConfigurationKey.DiscoveryURL), new AsyncCallback<ConfigurationResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(ConfigurationResult configresult) {
-                String discoveryURL = null;
-                for (Entry<ConfigurationKey, String> entry : configresult.getConfiguration().entrySet() ) {
-                    switch (entry.getKey()) {
-                        case DiscoveryURL:
-                            discoveryURL = entry.getValue();
-                            if (!discoveryURL.equals("")) {
-                                discoveryURL = discoveryURL.endsWith("/") ? discoveryURL : discoveryURL + "/";
-                                addCollectionContexts(result.getDataset().getUri(), discoveryURL);
-                            }
-                            break;
-                        default:
-                    }
-                }
-            }
-        });
-
         titlePanel.add(titleLabel);
         leftColumn.add(titlePanel);
 
@@ -321,8 +289,6 @@ public class DatasetWidget extends Composite {
         embedWidget.add(embedAnchor);
 
         leftColumn.add(embedBox);
-
-        leftColumn.add(createCollectionContextPanel());
 
         // metadata
         final UserMetadataWidget um = new UserMetadataWidget(uri, service, eventBus);
@@ -455,45 +421,6 @@ public class DatasetWidget extends Composite {
         // FIXME allow owner to do stuff
     }
 
-    private void addCollectionContexts(String datasetURI, final String discoveryURL) {
-        service.execute(new GetCollections(datasetURI),
-                new AsyncCallback<GetCollectionsResult>() {
-
-                    @Override
-                    public void onFailure(Throwable arg0) {
-                        GWT.log("Error loading collections the dataset is part of", arg0);
-                    }
-
-                    @Override
-                    public void onSuccess(GetCollectionsResult arg0) {
-                        ArrayList<CollectionBean> collections = arg0
-                                .getCollections();
-
-                        try {
-                            for (CollectionBean collection : collections ) {
-                                String collectionContextText = collection.getTitle();
-
-                                collectionContextText = collectionContextText.contains("/") ? collectionContextText.substring(collectionContextText.lastIndexOf("/") + 1) : collectionContextText;
-
-                                collectionContextLink = new Anchor();
-                                String collectionContextURI = discoveryURL + "contents?i=" + collection.getUri() + "&t=" + collection.getTitle();
-                                collectionContextLink.setHref(collectionContextURI);
-                                collectionContextLink.setTarget("_blank");
-                                collectionContextLink.setText(collectionContextText);
-                                collectionContextLinksPanel.add(collectionContextLink);
-
-                            }
-                        } catch (Exception ex) {
-                            //Handle exception
-                            String exc = ex.getMessage();
-                            System.out.println(exc);
-                        }
-
-                    }
-                });
-
-    }
-
     protected void showRerunExtraction() {
         ConfirmDialog dialog = new ConfirmDialog("Rerun Extraction", "Are you sure you want to rerun the extraction on this dataset? Results can take a few seconds to minutes to show up.");
 
@@ -553,19 +480,6 @@ public class DatasetWidget extends Composite {
     Anchor        collectionContextLink = null;
     VerticalPanel collectionContextLinksPanel;
 
-    private Widget createCollectionContextPanel() {
-        DisclosurePanel userInformationPanel = new DisclosurePanel("Collection Context");
-        userInformationPanel.addStyleName("datasetDisclosurePanel");
-        userInformationPanel.setOpen(true);
-        userInformationPanel.setAnimationEnabled(true);
-
-        collectionContextLinksPanel = new VerticalPanel();
-        collectionContextLinksPanel.addStyleName("userSpecifiedBody");
-        userInformationPanel.add(collectionContextLinksPanel);
-
-        return userInformationPanel;
-    }
-
     private Composite createUserViewPanel() {
         final DisclosurePanel userViewPanel = new DisclosurePanel("User Views");
         userViewPanel.addStyleName("datasetDisclosurePanel");
@@ -583,6 +497,7 @@ public class DatasetWidget extends Composite {
                                 userViewPanel.add(new Label("Error retrieving metadata about dataset " + uri));
                             }
 
+                            @SuppressWarnings("deprecation")
                             @Override
                             public void onSuccess(GetUserActionsResult arg0) {
                                 FlexTable userViewTable = new FlexTable();

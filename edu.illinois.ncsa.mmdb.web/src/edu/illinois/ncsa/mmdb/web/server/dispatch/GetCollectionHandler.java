@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
@@ -104,9 +104,10 @@ import edu.uiuc.ncsa.cet.bean.tupelo.gis.GeoPointBeanUtil;
 
 /**
  * Get datasets in a paricular collection.
- * 
+ *
  * @author lmarini
- * 
+ * @author myersjd@umich.edu
+ *
  */
 public class GetCollectionHandler implements
         ActionHandler<GetCollection, GetCollectionResult> {
@@ -134,10 +135,26 @@ public class GetCollectionHandler implements
 
             getDOI(arg0.getUri(), result);
 
+            getParent(arg0.getUri(), result);
+
             return result;
         } catch (Exception e) {
             throw new ActionException(e);
         }
+    }
+
+    private void getParent(String uri, GetCollectionResult result) throws OperatorException {
+        Unifier u = new Unifier();
+        UriRef collUri = Resource.uriRef(uri);
+        u.addPattern("parent", DcTerms.HAS_PART, collUri);
+        u.addPattern("parent", Dc.TITLE, "title", true);
+        u.setColumnNames("parent", "title");
+        HashMap<String, String> parents = new HashMap<String, String>();
+        TupeloStore.getInstance().unifyExcludeDeleted(u, "parent");
+        for (Tuple<Resource> row : u.getResult() ) {
+            parents.put(row.get(0).toString(), row.get(1).toString());
+        }
+        result.setParents(parents);
     }
 
     // FIXME use Rob's BeanFactory instead of this hardcoded way
@@ -336,7 +353,7 @@ public class GetCollectionHandler implements
                 map.put(row.get(0).getString(), item);
 
                 item.setUri(row.get(0).getString());
-                item.setAuthor(pbu.get((UriRef) row.get(5)).getName());
+                item.setAuthor(pbu.get(row.get(5)).getName());
                 if (row.get(2) != null) {
                     if (row.get(2).asObject() instanceof Date) {
                         item.setDate((Date) row.get(2).asObject());
