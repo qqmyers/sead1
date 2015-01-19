@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -56,9 +56,9 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**
  * Small info widget for a dataset.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class CollectionInfoWidget extends Composite {
 
@@ -103,7 +103,7 @@ public class CollectionInfoWidget extends Composite {
         } else {
             descriptionPanel.add(new Label("Contributor unknown"));
         }
-        descriptionPanel.add(new Label(DateTimeFormat.getLongDateFormat().format(collection.getCreationDate())));
+        descriptionPanel.add(new Label(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG).format(collection.getCreationDate())));
         descriptionPanel.add(new Label(Integer.toString(collection.getMemberCount())));
         descriptionPanel.add(new Label("Collection"));
         mainPanel.add(descriptionPanel);

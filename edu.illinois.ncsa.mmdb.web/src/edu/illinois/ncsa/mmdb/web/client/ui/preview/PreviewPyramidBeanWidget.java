@@ -53,7 +53,7 @@ public class PreviewPyramidBeanWidget extends PreviewBeanWidget<PreviewPyramidBe
             setWidth(600);
             setHeight(400);
         }
-        showSeadragon(RestEndpoints.PYRAMID_URL + URL.encodeComponent(getPreviewBean().getUri()) + "/xml", getWidgetID()); //$NON-NLS-1$
+        showSeadragon(RestEndpoints.PYRAMID_URL + URL.encodeQueryString(getPreviewBean().getUri()) + "/xml", getWidgetID()); //$NON-NLS-1$
     }
 
     @Override

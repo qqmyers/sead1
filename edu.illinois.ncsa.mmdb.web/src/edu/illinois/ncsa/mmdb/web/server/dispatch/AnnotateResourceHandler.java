@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
@@ -61,9 +61,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
  * Annotate any resource in repository. Given a sessionId, retrieve the
  * PersonBean and add set it as the creator of the annotation. Store the
  * annotation in the context.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class AnnotateResourceHandler implements
         ActionHandler<AnnotateResource, AnnotateResourceResult> {
@@ -81,7 +81,7 @@ public class AnnotateResourceHandler implements
 
         AnnotationBean annotation = arg0.getAnnotation();
 
-        String resource = arg0.getId();
+        String resource = arg0.getUri();
 
         String sessionId = arg0.getSessionId();
 

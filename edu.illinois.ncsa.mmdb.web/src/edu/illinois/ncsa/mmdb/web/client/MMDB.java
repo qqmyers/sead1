@@ -439,7 +439,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             for (String paramEntry : paramString.split("&") ) {
                 String[] terms = paramEntry.split("=");
                 if (terms.length == 2) {
-                    params.put(URL.decodeComponent(terms[0]), URL.decodeComponent(terms[1]));
+                    params.put(URL.decodeQueryString(terms[0]), URL.decodeQueryString(terms[1]));
                 }
             }
         }

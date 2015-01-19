@@ -62,15 +62,15 @@ import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicGridPresenter.Display;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
 /**
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class DynamicGridView extends FlexTable implements Display {
 
     private final HashMap<Integer, CheckBox>      checkBoxes;
     private final HashMap<Integer, VerticalPanel> layouts;
-    private final static DateTimeFormat           DATE_TIME_FORMAT  = DateTimeFormat.getShortDateTimeFormat();
+    private final static DateTimeFormat           DATE_TIME_FORMAT  = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_SHORT);
     public static final String                    UNKNOWN_TYPE      = "Unknown";
     public static final int                       DEFAULT_PAGE_SIZE = 24;
     public static final int                       PAGE_SIZE_X2      = 48;
@@ -149,7 +149,7 @@ public class DynamicGridView extends FlexTable implements Display {
         authorLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         uploadInfoPanel.add(authorLabel);
 
-        Label dateuploaded = new Label(DateTimeFormat.getShortDateFormat().format(date));
+        Label dateuploaded = new Label(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format(date));
         dateuploaded.addStyleName("smallerItalicText");
         dateuploaded.addStyleName("alignRight");
         uploadInfoPanel.add(dateuploaded);

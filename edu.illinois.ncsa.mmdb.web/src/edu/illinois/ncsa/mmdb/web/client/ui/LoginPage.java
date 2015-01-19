@@ -48,6 +48,7 @@ import com.google.api.gwt.oauth2.client.AuthRequest;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -61,7 +62,6 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -110,20 +110,20 @@ public class LoginPage extends Composite {
     private static MMDB          mainWindow;
 
     // Google Oauth2
-    static final String          GOOGLE_AUTH_URL             = "https://accounts.google.com/o/oauth2/auth";
-    static final String          EMAIL_SCOPE          = "email";
-    static final String          PROFILE_SCOPE        = "profile";
+    static final String          GOOGLE_AUTH_URL          = "https://accounts.google.com/o/oauth2/auth";
+    static final String          EMAIL_SCOPE              = "email";
+    static final String          PROFILE_SCOPE            = "profile";
 
-    public static final String   GOOGLE_PROVIDER       = "google";
-    public static final String   ORCID_PROVIDER        = "orcid";
-    public static final String   LOCAL_PROVIDER        = "local";
+    public static final String   GOOGLE_PROVIDER          = "google";
+    public static final String   ORCID_PROVIDER           = "orcid";
+    public static final String   LOCAL_PROVIDER           = "local";
 
-    static final String          ORCID_SIGNIN_URL       = "https://sandbox.orcid.org/signin";
-    static final String          ORCID_AUTHORIZE_URL    = "https://sandbox.orcid.org/oauth/authorize";
+    static final String          ORCID_SIGNIN_URL         = "https://sandbox.orcid.org/signin";
+    static final String          ORCID_AUTHORIZE_URL      = "https://sandbox.orcid.org/oauth/authorize";
 
     static final String          sSEAD_OAUTH_REDIRECT_URL = "http://sead.ncsa.illinois.edu/projects/authredirect?server=";
 
-    private static boolean       autologin            = true;
+    private static boolean       autologin                = true;
 
     public static void setMainWindow(MMDB mWindow) {
         mainWindow = mWindow;
@@ -250,7 +250,7 @@ public class LoginPage extends Composite {
 
         table.setWidget(0, 1, usernameBox);
 
-        DeferredCommand.addCommand(new Command() {
+        Scheduler.get().scheduleDeferred(new Command() {
             @Override
             public void execute() {
                 usernameBox.setFocus(true);

@@ -104,7 +104,7 @@ public class DatasetInfoWidget extends Composite {
         } else {
             descriptionPanel.add(new Label("Contributor unknown"));
         }
-        descriptionPanel.add(new Label(DateTimeFormat.getLongDateFormat().format(dataset.getDate())));
+        descriptionPanel.add(new Label(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG).format(dataset.getDate())));
         descriptionPanel.add(new Label(TextFormatter.humanBytes(dataset.getSize())));
         descriptionPanel.add(new Label(ContentCategory.getCategory(dataset.getMimeType(), service)));
         mainPanel.add(descriptionPanel);

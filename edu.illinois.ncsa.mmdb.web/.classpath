@@ -72,7 +72,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jena-iri-1.1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-client-2.7.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-jena-2.7.2-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-kernel-2.7.2-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-kernel-2.7.2-SNAPSHOT.jar" sourcepath="/org.tupeloproject.core/tupelo-kernel/src/main/java"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-mysql-2.7.2-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-postgresql-2.7.2-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-rdf-ntriples-2.7.2-SNAPSHOT.jar"/>

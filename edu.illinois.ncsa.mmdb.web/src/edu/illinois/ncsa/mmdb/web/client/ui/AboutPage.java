@@ -89,9 +89,9 @@ public class AboutPage extends Page {
         sysInfoPanel.getElement().setId("sysinfo");
         sysInfoPanel.addStyleName("well");
         for (java.util.Map.Entry<String, String> e : info.entrySet() ) {
-            FlowPanel fp = new FlowPanel();
             Label keyLabel = new Label(e.getKey());
             Label valueLabel = new Label(e.getValue());
+            FlowPanel fp = new FlowPanel();
             fp.add(keyLabel);
             fp.add(valueLabel);
             sysInfoPanel.add(fp);

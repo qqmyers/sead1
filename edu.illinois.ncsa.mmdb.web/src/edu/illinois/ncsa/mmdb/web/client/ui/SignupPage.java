@@ -47,13 +47,13 @@ import com.google.api.gwt.oauth2.client.Auth;
 import com.google.api.gwt.oauth2.client.AuthRequest;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -90,7 +90,6 @@ public class SignupPage extends Composite {
     private final Widget        pageTitle;
     private final Widget        signupForm;
     private SimplePanel         feedbackPanel;
-    private SimplePanel         socialFeedbackPanel;
     private TextBox             firstNameBox;
     private TextBox             passwordBox;
     private TextBox             emailBox;
@@ -98,7 +97,6 @@ public class SignupPage extends Composite {
     private TextBox             lastNameBox;
 
     private final String        socialEmail = null;
-    private final String        socialName  = null;
 
     public SignupPage(DispatchAsync dispatchAsync) {
         this.dispatchAsync = dispatchAsync;
@@ -245,7 +243,7 @@ public class SignupPage extends Composite {
         table.setWidget(5, 1, submitButton);
 
         // set focus
-        DeferredCommand.addCommand(new Command() {
+        Scheduler.get().scheduleDeferred(new Command() {
             @Override
             public void execute() {
                 firstNameBox.setFocus(true);
@@ -406,16 +404,6 @@ public class SignupPage extends Composite {
     /**
      * Check form.
      */
-
-    /**
-     * Check password strength.
-     *
-     * @return
-     */
-    private boolean checkStrengthPassword() {
-        // TODO Auto-generated method stub
-        return false;
-    }
 
     protected void showFeedbackMessage(String message) {
         Label messageLabel = new Label(message);

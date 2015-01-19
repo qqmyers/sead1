@@ -221,7 +221,7 @@ public class PreviewGeoCollectionBeanWidget extends PreviewBeanWidget<PreviewGeo
         String html = "<table border=0>";
         html += "<tr><td>Title:</td><td><a href='#dataset?id=" + dataset.getUri() + "'>" + dataset.getTitle() + "</a></td></tr>";
         html += "<tr><td>Contributor:</td><td>" + dataset.getCreator().getName() + "</td></tr>";
-        html += "<tr><td>Uploaded:</td><td>" + DateTimeFormat.getShortDateFormat().format(dataset.getDate()) + "</td></tr>";
+        html += "<tr><td>Uploaded:</td><td>" + DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format(dataset.getDate()) + "</td></tr>";
         html += "</table>";
 
         //        FramedCloud popup = new FramedCloud("test", loc, null, html, null, true, new CloseListener() {
