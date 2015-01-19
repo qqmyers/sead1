@@ -1862,10 +1862,13 @@ a.zocial.google:hover {
 	margin-bottom:20px;
 
 }
-.zocial:hover,.zocial:active,.zocial:focus{
+
+/*.zocial:hover,.zocial:active,.zocial:focus{
 	background:none !important;
 
 }
+*/
+
 .zocial.google{
 /*	background-color:#f3822a !important; */
 	margin-top:10px;
@@ -2265,14 +2268,24 @@ padding: 0px;
 
 
 #sysinfo .gwt-Label{
-	display: inline;
+	display: inline-block;
 }
 #sysinfo .gwt-Label:nth-child(odd):after{
 	content:": ";
 }
+#sysinfo .gwt-Label:nth-child(odd){
+min-width: 180px;
+}
+
+#sysinfo .gwt-Label:nth-child(even){
+	min-width: 100px;
+	text-align: right;
+}
+
 #sysinfo{
 	margin-top:10px;
 }
+
 .gwt-Label.datasetRightColText{
 	font-size:14px !important;
 	color:#444;
