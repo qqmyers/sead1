@@ -137,11 +137,20 @@ public class LoginStatusWidget extends Composite {
                 @Override
                 public void onClick(ClickEvent event) {
                     LoginPage.logout(new Command() {
-
                         @Override
                         public void execute() {
                             LoginPage.setAutologin(false);
-                            History.newItem("login", true);
+                            LoginPage.authenticate("anonymous", "none", new AuthenticationCallback() {
+                                @Override
+                                public void onFailure() {
+                                    History.newItem("login", true);
+                                }
+
+                                @Override
+                                public void onSuccess(String userUri, String sessionKey) {
+                                    History.newItem("login", true);
+                                }
+                            });
                         }
                     });
                 }
