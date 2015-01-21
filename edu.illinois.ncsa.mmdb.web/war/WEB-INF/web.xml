@@ -342,7 +342,7 @@
     </filter-class>
     <init-param>
       <param-name>PropertiesFileName</param-name>
-      <param-value>/server.properties</param-value>
+      <param-value>server.properties</param-value>
     </init-param>
     <init-param>
       <param-name>OpenPath</param-name>
@@ -356,8 +356,7 @@
   <filter-mapping>
     <filter-name>AuthFilter</filter-name>
     <url-pattern>/geoproxy/*</url-pattern>
-    
-	<servlet-name>wmsProxyImpl</servlet-name>
+    <servlet-name>wmsProxyImpl</servlet-name>
 	<servlet-name>mediciProxyImpl</servlet-name>
 		<servlet-name>DiscoveryHome</servlet-name>
 	<servlet-name>ContentPage</servlet-name>
