@@ -123,8 +123,8 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
         u.addColumnName("k"); // 9
 
         int parentIndex = -1;
-        //if we are looking for top level items
-        if (listquery.getShowDataLevel() == true) {
+        //if we are looking for top level items (Flag is true and no parent collection set)
+        if ((listquery.getShowDataLevel() == true) && (listquery.getCollection() == null)) {
             u.addColumnName("parent"); //10
             u.addPattern("parent", DcTerms.HAS_PART, "s", true);
             List<String> names = u.getColumnNames();
