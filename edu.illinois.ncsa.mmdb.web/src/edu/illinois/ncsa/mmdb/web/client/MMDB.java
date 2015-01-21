@@ -611,7 +611,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     private void showBasedOnPermission(final RootPanel menuItem, Permission perm) {
-
         rbac().doIfAllowed(perm, new PermissionCallback() {
             @Override
             public void onAllowed() {
@@ -623,7 +622,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 menuItem.addStyleName("hidden");
             }
         });
-
     }
 
     /**
