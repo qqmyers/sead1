@@ -21,6 +21,7 @@ package org.sead.acr.common;
  */
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.Properties;
 
@@ -33,7 +34,9 @@ import org.json.JSONObject;
 import org.json.XML;
 import org.sead.acr.common.utilities.PropertiesLoader;
 
-public class MediciProxy {
+public class MediciProxy implements Serializable {
+
+	private static final long serialVersionUID = -585115097919778904L;
 
 	static Object padlock = new Object();
 
