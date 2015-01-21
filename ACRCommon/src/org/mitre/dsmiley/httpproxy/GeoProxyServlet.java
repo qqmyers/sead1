@@ -13,14 +13,17 @@ import org.apache.http.HttpRequest;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.mitre.dsmiley.httpproxy.ProxyServlet;
+import org.sead.acr.common.MediciProxy;
 import org.sead.acr.common.utilities.PropertiesLoader;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
+
 import javax.servlet.http.HttpServlet;
 
 public class GeoProxyServlet extends org.mitre.dsmiley.httpproxy.ProxyServlet {
@@ -40,10 +43,9 @@ public class GeoProxyServlet extends org.mitre.dsmiley.httpproxy.ProxyServlet {
 	}
 
 	@Override
-	public void init(ServletConfig servletConfig) throws ServletException {
-		super.init(servletConfig);
+	public void init() throws ServletException {
 
-		String doLogStr = servletConfig.getInitParameter(P_LOG);
+		String doLogStr = getServletConfig().getInitParameter(P_LOG);
 		if (doLogStr != null) {
 			this.doLog = Boolean.parseBoolean(doLogStr);
 		}
@@ -58,7 +60,7 @@ public class GeoProxyServlet extends org.mitre.dsmiley.httpproxy.ProxyServlet {
 			// _propFile is only used if the PropertiesLoader is not already
 			// configured
 			_server = PropertiesLoader.getProperties(_propFile).getProperty(
-					"geoserver");
+					"proxiedgeoserver");
 			// now the prop file is set for sure
 			_user = PropertiesLoader.getProperties().getProperty("geouser");
 			_password = PropertiesLoader.getProperties().getProperty(
@@ -79,6 +81,8 @@ public class GeoProxyServlet extends org.mitre.dsmiley.httpproxy.ProxyServlet {
 					"Trying to process targetUri (geoserver) and u/p parameters: "
 							+ e, e);
 		}
+		targetHost = URIUtils.extractHost(targetUriObj);
+
 		targetUri = targetUriObj.toString();
 		if (doLog) {
 			log(targetUri);
@@ -101,16 +105,30 @@ public class GeoProxyServlet extends org.mitre.dsmiley.httpproxy.ProxyServlet {
 		boolean allow = false;
 		HttpSession session = servletRequest.getSession(false);
 		if (session != null) {
+			if(doLog) {
+				log("Found Session: " + session.getId());
+			}
 			String remoteAllowed = (String) session
 					.getAttribute(REMOTE_ALLOWED);
-			if ((remoteAllowed!=null) && (remoteAllowed.equals("true"))) {
+			if(doLog) {
+				log("Remote Allowed: x" + remoteAllowed + "x");
+			}
+			if(doLog) {
+				MediciProxy mediciProxy = (MediciProxy) session.getAttribute("proxy");
+				if(mediciProxy!=null) {
+					log("MP found: anon =  " + mediciProxy.isAnonymous());
+				}
+			}
+			
+			if ((remoteAllowed != null) && (remoteAllowed.equals("true"))) {
 				allow = true;
 			}
 		}
 		if (allow) {
 			super.service(servletRequest, servletResponse);
 		} else {
-			if(doLog) log("Could not confirm remote api permission - forbidding");
+			if (doLog)
+				log("Could not confirm remote api permission - forbidding");
 			servletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
 		}
 		return;
