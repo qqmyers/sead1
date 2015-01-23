@@ -82,7 +82,9 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
                                                           ConfigurationKey.PresentationSortOrder,
                                                           ConfigurationKey.PresentationPageViewType,
                                                           ConfigurationKey.PresentationDataViewLevel,
-                                                          ConfigurationKey.ProjectHeaderLogo
+                                                          ConfigurationKey.ProjectHeaderLogo,
+                                                          ConfigurationKey.ProjectHeaderBackground,
+                                                          ConfigurationKey.ProjectHeaderTitleColor
                                                           });
 
     /** Commons logging **/
