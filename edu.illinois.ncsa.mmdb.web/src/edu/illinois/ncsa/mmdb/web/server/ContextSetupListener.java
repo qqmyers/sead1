@@ -74,7 +74,6 @@ import org.tupeloproject.postgresql.PostgresqlContext;
 import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
-import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.rdf.xml.RdfXml;
@@ -508,19 +507,10 @@ public class ContextSetupListener implements ServletContextListener {
 
         Context context = TupeloStore.getInstance().getContext();
 
-        reset(context, MMDB.USER_METADATA_FIELD, GetUserMetadataFieldsHandler.VIEW_METADATA);
+        //reset(context, MMDB.USER_METADATA_FIELD, GetUserMetadataFieldsHandler.VIEW_METADATA);
         TripleWriter tw = new TripleWriter();
 
-        Set<Resource> blacklistedPredicates = new HashSet<Resource>();
-        blacklistedPredicates.add(Resource.uriRef("http://purl.org/dc/terms/license"));
-        blacklistedPredicates.add(Resource.uriRef("http://purl.org/dc/terms/rightsHolder"));
-        blacklistedPredicates.add(Resource.uriRef("http://purl.org/dc/terms/rights"));
-        blacklistedPredicates.add(Dc.TITLE);
-        blacklistedPredicates.add(Dc.CREATOR);
-        blacklistedPredicates.add(Dc.IDENTIFIER);
-        blacklistedPredicates.add(Dc.CONTRIBUTOR); // should whitelist once we have multi-valued user properties
-        blacklistedPredicates.add(Rdfs.LABEL);
-        // there's an even longer list, but these are some of the ones I expect we'd have the most problems with
+        Set<Resource> blacklistedPredicates = BlacklistedPredicates.GetResources();
 
         try {
             // add all the userfields
@@ -529,6 +519,11 @@ public class ContextSetupListener implements ServletContextListener {
                     String pre = key.substring(0, key.lastIndexOf(".")); //$NON-NLS-1$
                     if (props.containsKey(pre + ".label")) { //$NON-NLS-1$
                         Resource r = Resource.uriRef(props.getProperty(key));
+                        //if the field already exists in the triplestore don't update through server.properties config file.
+                        if (context.match(r, Rdf.TYPE, null) != null) {
+                            continue;
+                        }
+                        // this code should never be executed other than the first time after setting up the database.
                         tw.add(r, Rdf.TYPE, MMDB.USER_METADATA_FIELD); //$NON-NLS-1$
                         tw.add(r, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
                         if (props.containsKey(pre + ".label")) {
