@@ -72,7 +72,8 @@ public enum Permission {
      * System info (stats - #preprint/published collections, #datasets, size,
      * etc.)
      */
-    VIEW_SYSTEM("view system information", "System");
+    VIEW_SYSTEM("View system information", "System"),
+    MANAGE_METADATA("Manage Metadata", "ManageMetadata");
 
     private final String label;
     private final String uri;

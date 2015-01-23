@@ -135,7 +135,7 @@ public class UploadPage extends Page {
                 showhtml5 = false;
             }
         }
-        if (getUserAgent().contains("opera")) {
+        if (getUserAgent().contains("opera") || getUserAgent().contains("firefox/23.0")) {
             showhtml5 = false;
         }
 

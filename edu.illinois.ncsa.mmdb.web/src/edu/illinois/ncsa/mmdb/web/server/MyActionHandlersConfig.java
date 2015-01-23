@@ -46,6 +46,7 @@ import javax.servlet.ServletContextListener;
 
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddGeoLocationHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AddMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AdminAddUserHandler;
@@ -114,6 +115,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.MintHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
@@ -131,13 +133,14 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.SetUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UnpackZipHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.UpdateMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
 
 /**
  * Setup registry of action handlers when the servlet context is initialized.
- *
+ * 
  * @author Luigi Marini
- *
+ * 
  */
 public class MyActionHandlersConfig implements ServletContextListener {
     public void contextInitialized(ServletContextEvent evt) {
@@ -148,6 +151,9 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetAnnotationsHandler());
         DispatchUtil.registerHandler(new GetDatasetsByTagHandler());
         DispatchUtil.registerHandler(new GetMetadataHandler());
+        DispatchUtil.registerHandler(new AddMetadataHandler());
+        DispatchUtil.registerHandler(new UpdateMetadataHandler());
+        DispatchUtil.registerHandler(new RemoveMetadataHandler());
         DispatchUtil.registerHandler(new GetGeoPointHandler());
         DispatchUtil.registerHandler(new GetGeoNamesHandler());
         DispatchUtil.registerHandler(new GetCollectionsHandler());
