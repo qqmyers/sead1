@@ -89,6 +89,10 @@ li {
 	outline:none;
 }
 
+.loginPanel {
+	width:200px;
+}
+
 .loginPanel a:hover ,.loginPanel a:active{
 	color: #f3882a !important;
 }
