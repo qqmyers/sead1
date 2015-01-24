@@ -68,8 +68,8 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -186,6 +186,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     public static String               _orcidClientId                   = null;
 
     public static String               _projectName                     = "SEAD ACR";
+    public static String               _projectUrl                      = "http://sead-data.net";
     public static String               _projectDescription              = "A generic SEAD Project Space";
     public static boolean              bigData                          = false;                              //Server's bigData flag
 
@@ -291,10 +292,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         RootPanel.get("projectTitle").clear();
 
-        final Anchor projectNameLabel = new Anchor(true);
-        projectNameLabel.setText("");
-        projectNameLabel.setTitle("");
-        projectNameLabel.setHref("");
+        final InlineHTML projectNameLabel = new InlineHTML();
 
         RootPanel.get("projectTitle").add(projectNameLabel);
         loginStatusWidget = new LoginStatusWidget();
@@ -326,11 +324,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                     public void onSuccess(ConfigurationResult result) {
                         bigData = result.getConfiguration(ConfigurationKey.BigData).equalsIgnoreCase("true");
                         _projectName = result.getConfiguration(ConfigurationKey.ProjectName);
+                        _projectUrl = result.getConfiguration(ConfigurationKey.ProjectURL);
                         _projectDescription = result.getConfiguration(ConfigurationKey.ProjectDescription);
                         _orcidClientId = result.getConfiguration(ConfigurationKey.OrcidClientId);
                         projectNameLabel.setHTML(wrapIfNeeded(_projectName));
-                        projectNameLabel.setTitle(_projectDescription);
-                        projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
 
                         // override default logo, background, title color
                         Document.get().getElementById("project-logo").getFirstChildElement().getFirstChildElement().setAttribute("src", result.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
@@ -619,6 +616,11 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
             @Override
             public void onDenied() {
+                menuItem.addStyleName("hidden");
+            }
+
+            @Override
+            public void onFailure() {
                 menuItem.addStyleName("hidden");
             }
         });

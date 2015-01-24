@@ -44,12 +44,15 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
@@ -61,11 +64,14 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
  *
  * @author Luigi Marini
  * @author Rob Kooper
+ *         #author myersjd@umich.edu
  *
  */
 public class LoginStatusWidget extends Composite {
 
-    private final FlowPanel mainPanel;
+    private final FlowPanel   mainPanel;
+    protected DisclosurePanel logoutPanel;
+    protected Label           dropLabel;
 
     /**
      * Create a main panel and show the appropriate
@@ -82,10 +88,10 @@ public class LoginStatusWidget extends Composite {
         }
     }
 
-    Hyperlink anchor(String name, String link) {
-        Hyperlink anchor = new Hyperlink(name, link);
+    Hyperlink hyperlink(String name, String link) {
+        Hyperlink theLink = new Hyperlink(name, link);
         // anchor.addStyleName("navMenuLink");
-        return anchor;
+        return theLink;
     }
 
     /**
@@ -97,8 +103,39 @@ public class LoginStatusWidget extends Composite {
      */
     public void loggedIn(String name) {
         mainPanel.clear();
+        mainPanel.add(hyperlink(name, "account"));
+        logoutPanel = new DisclosurePanel();
+        FocusPanel fp = new FocusPanel();
+        FlowPanel newHeaderFlowPanel = new FlowPanel();
+        newHeaderFlowPanel.addStyleName("logoutPanel");
+        newHeaderFlowPanel.add(hyperlink("Logout", "logout"));
+        dropLabel = new Label('\u25BC' + "");
+        dropLabel.addStyleName("droparrow");
+        dropLabel.addClickHandler(new ClickHandler() {
 
-        DisclosurePanel d = new DisclosurePanel(name);
+            @Override
+            public void onClick(ClickEvent event) {
+                logoutPanel.setOpen(!logoutPanel.isOpen());
+                dropLabel.setText(logoutPanel.isOpen() ? "\u25B2" : "\u25BC");
+                event.stopPropagation();
+
+            }
+        });
+
+        newHeaderFlowPanel.add(dropLabel);
+        fp.add(newHeaderFlowPanel);
+        logoutPanel.setHeader(fp);
+
+        logoutPanel.getHeader().unsinkEvents(Event.ONCLICK);
+        //Stop panel clicks from opening disclosure panel
+        fp.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                event.stopPropagation();
+            }
+
+        });
         VerticalPanel vp = new VerticalPanel();
         vp.setStyleName("navMenuText");
         Anchor switchLink = new Anchor("Switch User");
@@ -106,29 +143,17 @@ public class LoginStatusWidget extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-
                 LoginPage.logout(new Command() {
 
                     @Override
                     public void execute() {
                         LoginPage.setAutologin(false);
-                        LoginPage.authenticate("anonymous", "none", new AuthenticationCallback() {
-                            @Override
-                            public void onFailure() {
-                                History.newItem("login", true);
-                            }
-
-                            @Override
-                            public void onSuccess(String userUri, String sessionKey) {
-                                History.newItem("login", true);
-                            }
-                        });
+                        History.newItem("login", true);
                     }
                 });
             }
         });
         vp.add(switchLink);
-        vp.add(anchor("Logout", "logout"));
         Anchor socialLink = new Anchor(" Social Logout", "http://accounts.google.com/logout");
         socialLink.setTarget("_blank");
         if (!"local".equals(MMDB.getSessionState().getLoginProvider())) {
@@ -140,26 +165,15 @@ public class LoginStatusWidget extends Composite {
                         @Override
                         public void execute() {
                             LoginPage.setAutologin(false);
-                            LoginPage.authenticate("anonymous", "none", new AuthenticationCallback() {
-                                @Override
-                                public void onFailure() {
-                                    History.newItem("login", true);
-                                }
-
-                                @Override
-                                public void onSuccess(String userUri, String sessionKey) {
-                                    History.newItem("login", true);
-                                }
-                            });
+                            History.newItem("login", true);
                         }
                     });
                 }
             });
             vp.add(socialLink);
         }
-        vp.add(anchor("MyAccount", "account"));
-        d.add(vp);
-        mainPanel.add(d);
+        logoutPanel.add(vp);
+        mainPanel.add(logoutPanel);
     }
 
     /**
@@ -167,7 +181,7 @@ public class LoginStatusWidget extends Composite {
      */
     public void loggedOut() {
         mainPanel.clear();
-        mainPanel.add(anchor("Login", "login"));
-        mainPanel.add(anchor("Sign up", "signup"));
+        mainPanel.add(hyperlink("Login", "login"));
+        mainPanel.add(hyperlink("Sign up", "signup"));
     }
 }

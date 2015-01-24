@@ -2282,10 +2282,6 @@ min-width: 180px;
 	text-align: right;
 }
 
-#sysinfo{
-	margin-top:10px;
-}
-
 .gwt-Label.datasetRightColText{
 	font-size:14px !important;
 	color:#444;

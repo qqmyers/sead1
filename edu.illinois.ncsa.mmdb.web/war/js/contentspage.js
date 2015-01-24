@@ -106,7 +106,7 @@ function contentsPageJsonParser(jsonObj) {
 	var acrLink = collection_Path + tagID;
 	$("#acrlink0").attr("href", acrLink);
 	$("#search").empty();
-	$("#search").html("<h3>Viewing: <i><span id='collname'></span></i></h3><div><a id='returnanchor' href='#disocvery'>Search All Collections</a></div>");
+	$("#search").html("<h3>Viewing: <i><span id='collname'></span></i></h3><div><a id='returnanchor' href='#discovery'>Search All Collections</a></div>");
 
 
 	if (jsonObj.sparql.results.result != null) {

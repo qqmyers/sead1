@@ -42,6 +42,7 @@ public class ManageMetadataWidget extends Composite {
 
         mainFlowPanel = new FlowPanel();
         mainFlowPanel.addStyleName("page");
+        mainFlowPanel.getElement().setClassName("metadatapanel");
         initWidget(mainFlowPanel);
 
         mainPanel = new VerticalPanel();

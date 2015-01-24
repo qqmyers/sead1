@@ -24,8 +24,12 @@ import java.util.Map;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
@@ -74,7 +78,7 @@ public class AboutPage extends Page {
         top.setStyleName("row-fluid");
 
         FlowPanel projInfo = new FlowPanel();
-        projInfo.setStyleName("span3");
+        projInfo.setStyleName("span8");
         projInfo.addStyleName("fixed-height-col");
         projInfo.getElement().setId("projInfo");
 
@@ -83,9 +87,10 @@ public class AboutPage extends Page {
         projInfo.add(projDesc);
 
         top.add(projInfo);
-
+        FlowPanel rightFlowPanel = new FlowPanel();
+        rightFlowPanel.setStyleName("span4");
         FlowPanel sysInfoPanel = new FlowPanel();
-        sysInfoPanel.setStyleName("span9");
+
         sysInfoPanel.getElement().setId("sysinfo");
         sysInfoPanel.addStyleName("well");
         for (java.util.Map.Entry<String, String> e : info.entrySet() ) {
@@ -96,7 +101,19 @@ public class AboutPage extends Page {
             fp.add(valueLabel);
             sysInfoPanel.add(fp);
         }
-        top.add(sysInfoPanel);
+        rightFlowPanel.add(sysInfoPanel);
+        Button homeButton = new Button("Visit Project Homepage");
+        homeButton.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.open(MMDB._projectUrl, null, null);
+
+            }
+
+        });
+        rightFlowPanel.add(homeButton);
+        top.add(rightFlowPanel);
         mainLayoutPanel.add(top);
     }
 }

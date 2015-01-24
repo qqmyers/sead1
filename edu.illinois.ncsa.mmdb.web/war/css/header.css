@@ -49,7 +49,7 @@ li {
 #loginMenu {
 	float: right;
 	height: 40px;
-	width: 20%;
+	width: 200px;
 	background-color:#e9e9e9;
 	margin-top:30px;
 	margin-right:0px;
@@ -68,18 +68,33 @@ li {
 	margin-top: 5px;
 }
 
+.logoutPanel {
+	width:100px;
+}
+
+.logoutPanel>.droparrow {
+	float:right!important;
+}
+
 #loginMenu div, #loginMenu a {
 	text-align: left;
 	font-size: medium;
-	color: #666 !important; 
+	color: #666; 
 	margin-left: 0px;
 	margin-top:0px;
 	/*display: inline;*/
 }
 
-#loginMenu img {
-	width: 40px;
-	float: left;
+#loginMenu div:focus{
+	outline:none;
+}
+
+.loginPanel a:hover ,.loginPanel a:active{
+	color: #f3882a !important;
+}
+
+.droparrow:hover, .droparrow:active{
+	color: #f3882a !important;
 }
 
 .loginPanel .gwt-Hyperlink, .gwt-Anchor {
@@ -87,7 +102,6 @@ li {
 }
 #projectTitle .gwt-Anchor{
 	padding-left:0;
-
 }
 #nav-logo {
 	width: 20px;
