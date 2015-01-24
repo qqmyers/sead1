@@ -64,7 +64,7 @@ li {
 	width:200px;
 }
 .loginPanel {
-	width: 100px;
+	width: 200px;
 	margin-top: 5px;
 }
 
@@ -87,10 +87,6 @@ li {
 
 #loginMenu div:focus{
 	outline:none;
-}
-
-.loginPanel {
-	width:200px;
 }
 
 .loginPanel a:hover ,.loginPanel a:active{
