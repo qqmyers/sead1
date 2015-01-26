@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
+ * a copy of this software and associated documentation files (the 
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -72,9 +72,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
  * TODO Add comments
- *
+ * 
  * @author Joe Futrelle
- *
+ * 
  */
 public class GetUserMetadataFieldsHandler implements
         ActionHandler<GetUserMetadataFields, GetUserMetadataFieldsResult> {
@@ -95,22 +95,17 @@ public class GetUserMetadataFieldsHandler implements
         u.addPattern(uri, Dc.TITLE, "title", true);
         TupeloStore.getInstance().getContext().perform(u); // FIXME memorize
         for (Tuple<Resource> row : u.getResult() ) {
-            //Use title if it exists
+            if (row.get(0) != null) {
+                return row.get(0).getString();
+            }
             if (row.get(1) != null) {
                 return row.get(1).getString();
             }
-            //Otherwise use label
-            if (row.get(0) != null) {
-                return row.get(0).getString();
-            } else {
-                log.warn("null value in col 0 of Tupelo response");
-            }
-
         }
         return uri.getString();
     }
 
-    /* For URIs, if the URI is really a tagId of some ACR resource, modify it to be the full
+    /* For URIs, if the URI is really a tagId of some ACR resource, modify it to be the full 
      * relative URL required to access the resource.
      */
     private String rewrite(Resource uri) throws OperatorException {
