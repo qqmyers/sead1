@@ -252,6 +252,11 @@ li {
 .navMenu li a:hover ,.navMenu li a:active{
 	color: #f3882a !important;
 }
+
+.navMenu li.selected a {
+	color: #f3882a !important;
+}
+
 /*footer*/
 #footer {
 	padding: 5px 0px;
@@ -321,9 +326,6 @@ li {
 }
 
 
-.selected a {
-	color: #f3882a !important;
-}
 table td{
 	font-family:"lato" !important;
 	font-size:14px;
