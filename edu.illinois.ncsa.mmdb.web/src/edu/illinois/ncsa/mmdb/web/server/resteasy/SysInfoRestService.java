@@ -68,8 +68,8 @@ public class SysInfoRestService {
             Map<String, String> map = sir.getMap();
 
             //Add software version/build info
-            map.put("version", _versionNumberString);
-            map.put("build", _buildNumber);
+            map.put("Version", _versionNumberString);
+            map.put("Build", _buildNumber);
 
             return Response.status(200).entity(map).build();
         } catch (Exception e) {
