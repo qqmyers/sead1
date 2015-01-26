@@ -146,6 +146,7 @@
 
 	<target name="updateversion" description="update version number in html file">
 		<replaceregexp file="war/mmdb.html" flags="m" match="@VERSION@"  replace="${version}"/> 
+		<replaceregexp file="src/edu/illinois/ncsa/mmdb/web/client/MMDB.java" flags="m" match="@VERSION@"  replace="${version}"/>
 	</target>
 
 	<target name="resources" description="Copy all resources to output folder.">
