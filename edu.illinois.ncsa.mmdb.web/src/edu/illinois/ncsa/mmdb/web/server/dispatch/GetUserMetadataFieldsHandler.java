@@ -95,12 +95,17 @@ public class GetUserMetadataFieldsHandler implements
         u.addPattern(uri, Dc.TITLE, "title", true);
         TupeloStore.getInstance().getContext().perform(u); // FIXME memorize
         for (Tuple<Resource> row : u.getResult() ) {
-            if (row.get(0) != null) {
-                return row.get(0).getString();
-            }
+            //Use title if it exists
             if (row.get(1) != null) {
                 return row.get(1).getString();
             }
+            //Otherwise use label
+            if (row.get(0) != null) {
+                return row.get(0).getString();
+            } else {
+                log.warn("null value in col 0 of Tupelo response");
+            }
+
         }
         return uri.getString();
     }
