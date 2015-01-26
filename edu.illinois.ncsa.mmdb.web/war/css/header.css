@@ -63,6 +63,11 @@ li {
 #loginMenu .loginPanel .gwt-DisclosurePanel{
 	width:200px;
 }
+
+#loginMenu .loginPanel>div:nth-child(even){
+	width:200px;
+}
+
 .loginPanel {
 	width: 200px;
 	margin-top: 5px;
