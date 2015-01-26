@@ -388,8 +388,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         SearchBox searchBox = new SearchBox("Search");
         searchBox.setWidth("150px"); // maybe add this as CSS style?
         RootPanel.get("searchMenu").add(searchBox);
-
-        setMenuItemVisibility();
     }
 
     /**
@@ -505,7 +503,6 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             getSessionState().setCurrentUser(null);
             getSessionState().setLoginProvider("local");
             getSessionState().setAnonymous(true);
-            setMenuItemVisibility();
 
             LoginPage.authenticate("anonymous", "none", new AuthenticationCallback() {
                 @Override
@@ -517,6 +514,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                 @Override
                 public void onSuccess(String userUri, String sessionKey) {
+                    setMenuItemVisibility();
                     if (!token.startsWith("logout_st")) {
                         History.newItem("listDatasets", true);
                     }
@@ -608,20 +606,37 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     private void showBasedOnPermission(final RootPanel menuItem, Permission perm) {
+        final String username = MMDB.getUsername();
         rbac().doIfAllowed(perm, new PermissionCallback() {
             @Override
             public void onAllowed() {
-                menuItem.removeStyleName("hidden");
+                if (username.equals(MMDB.getUsername())) {
+                    menuItem.removeStyleName("hidden");
+                } else {
+                    Window.alert("allowed was : " + username + " now: " + MMDB.getUsername());
+                }
             }
 
             @Override
             public void onDenied() {
-                menuItem.addStyleName("hidden");
+                if (username.equals(MMDB.getUsername())) {
+
+                    menuItem.addStyleName("hidden");
+                } else {
+                    Window.alert("denied was : " + username + " now: " + MMDB.getUsername());
+                }
+
             }
 
             @Override
             public void onFailure() {
-                menuItem.addStyleName("hidden");
+                if (username.equals(MMDB.getUsername())) {
+
+                    menuItem.addStyleName("hidden");
+                } else {
+                    Window.alert("fail was : " + username + " now: " + MMDB.getUsername());
+                }
+
             }
         });
     }
@@ -1010,6 +1025,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                                 sessionKey) {
                             GWT.log("logged in as " + userUri);
                             credChangeOccuring = false;
+                            setMenuItemVisibility();
                         }
                     }, true);
         } else {
@@ -1053,6 +1069,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                                 //Get the user's info (PersonBean) and store in UserSessionState
                                 retrieveUserInfo(userUri, sessionKey);
                                 credChangeOccuring = false;
+
                             }
                         });
 
