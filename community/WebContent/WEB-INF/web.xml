@@ -18,6 +18,15 @@
 		<servlet-name>Home</servlet-name>
 		<url-pattern>/home</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>Spaces</servlet-name>
+		<servlet-class>org.sead.acr.community.Spaces</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Spaces</servlet-name>
+		<url-pattern>/spaces</url-pattern>
+	</servlet-mapping>
 
 
 	<servlet>
