@@ -50,7 +50,8 @@ table td, select {
 
 .gwt-button:hover, .gwt-button:focus{
 	background-color:#666;
-	color:#f3822a; 
+	color:#f3822a;
+	border:none; 
 }
 
 /* ----------------------------------------------------------------------
@@ -937,11 +938,30 @@ input.gwt-SuggestBox{
 	border-radius:0px;
 	border-color:#f5f5f5;
 }
+#discovery .well p:last-child a{
+	padding:3px 6px;
+
+}
 #discovery pre{
 	background-color:#f5f5f5 !important;
 	font-size:14px;
 	color:#444;
 	border:none;
+}
+#abouttop .well{
+	border:none !important;
+	-webkit-border-radius:0px;
+	background-color:#fff;
+	-moz-border-radius:0px;
+	-webkit-border-shadow:none;
+	-moz-box-shadow:none;
+	box-shadow:none;
+	margin-top:10px;
+	margin-right:40px;
+	padding:0 !important;
+}
+#abouttop .fixed-height-col{
+	height:auto;
 }
 .sead-scope a{
 	color:#0b5ca3 !important;
@@ -2309,15 +2329,7 @@ padding: 0px;
 	display: inline-block;
 }
 #sysinfo .gwt-Label:nth-child(odd):after{
-	content:": ";
-}
-#sysinfo .gwt-Label:nth-child(odd){
-min-width: 180px;
-}
-
-#sysinfo .gwt-Label:nth-child(even){
-	min-width: 100px;
-	text-align: right;
+	content:":\00a0\00a0";
 }
 
 .gwt-Label.datasetRightColText{
