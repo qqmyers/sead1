@@ -43,7 +43,9 @@ import org.sead.acr.common.utilities.Queries;
 public class Oauth2Redirect extends HttpServlet {
 
 	/**
-	 * 
+	 * This class provides a single endpoint for Oauth2 redirects from ORCID. It is a singleton service for all 
+	 * of SEAD but it otherwise not directly related to the projects page. (At some point, it may be useful to limit
+	 * redirects to the same set of servers that are shown in the projects page).
 	 */
 	private static final long serialVersionUID = -8642016544488942571L;
 

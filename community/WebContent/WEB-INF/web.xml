@@ -28,7 +28,15 @@
 		<url-pattern>/spaces</url-pattern>
 	</servlet-mapping>
 
-
+	<servlet>
+		<servlet-name>Manage</servlet-name>
+		<servlet-class>org.sead.acr.community.Manage</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Manage</servlet-name>
+		<url-pattern>/exp</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>GetProjectInfo</servlet-name>
 		<servlet-class>org.sead.acr.community.GetProjectInfo</servlet-class>

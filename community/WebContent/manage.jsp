@@ -60,7 +60,7 @@
 
 	
 	function addRow(rowId) {
-		$("#projects>tbody").append("<tr  id=\"" + rowId + "\"><td class='project-name'/><td class='project-description'/><td class='project-preprint'/><td  class='project-publish'/><td class='project-view'/><td class='project-users'/><td class='project-collections'/><td class='project-datasets'/><td class='project-bytes'/><td class='project-link'/></tr>");
+		$("#projects>tbody").append("<tr  id=\"" + rowId + "\"><td class='project-name'/><td class='project-preprint'/><td  class='project-publish'/><td class='project-view'/><td class='project-users'/><td class='project-collections'/><td class='project-datasets'/><td class='project-bytes'/><td class='project-link'/><td class='project-version'/></tr>");
 	}
 
 	function checkDone() {
@@ -78,9 +78,12 @@
 	function projInfoJsonParser(json) {
 		var current = decodeURIComponent(this.url.substr(this.url.indexOf("http")));
 		var index = jQuery.inArray(current, ${projects});
-		 $("#" + index + ">td:eq(0)").html("<div><a href=\"" + current + "/..\">" + json['project.name'] + "</div></a>");
-		 $("#" + index + ">td:eq(1)").html("<div>" +  json['project.description']  + "</div>");
-		 $("#" + index + ">td:eq(9)").html( "<div><a href=\"" + json['project.url'] + "\">" + json['project.url'] + "</div></a>");
+		 $("#" + index + ">td:eq(0)").html("<div ><a href=\"" + current + "/..\">" + json['project.name'] + "</div></a>");
+		 if(json['project.url']) {
+		   $("#" + index + ">td:eq(8)").html( "<div><a href=\"" + json['project.url'] + "\">" + json['project.url'] + "</div></a>");
+		 } else {
+		   $("#" + index + ">td:eq(8)").html("<div/>");
+		 }
 		serversLeft = serversLeft-1;
 		checkDone();
 	}
@@ -91,13 +94,14 @@
 		var current = decodeURIComponent(this.url.substr(this.url.indexOf("http")));
 		var index = jQuery.inArray(current, ${projects});
 	 
-		 $("#" + index + ">td:eq(2)").html("<div><a href=\"" + current + "/#listCollections\">" + json["Public Preprint Collections"] + "</a></div>");
-		 $("#" + index + ">td:eq(3)").html("<div><a href=\"" + current + "/../discovery\">" + json["Published Collections"] + "</div></a>");
-		 $("#" + index + ">td:eq(4)").html("<div>"+json["Total Views"]+"</div>" );
-		 $("#" + index + ">td:eq(5)").html("<div>"+json["Number of Users"] +"</div>");
-		 $("#" + index + ">td:eq(6)").html("<div>"+json["Collections "]+"</div>");
-		 $("#" + index + ">td:eq(7)").html("<div>"+ json.Datasets+"</div>");
-		 $("#" + index + ">td:eq(8)").html("<div>"+json["Bytes from uploaded dataset"]+"</div>");
+		 $("#" + index + ">td:eq(1)").html("<div ><a href=\"" + current + "/#listCollections\">" + json["Public Preprint Collections"] + "</a></div>");
+		 $("#" + index + ">td:eq(2)").html("<div><a href=\"" + current + "/../discovery\">" + json["Published Collections"] + "</div></a>");
+		 $("#" + index + ">td:eq(3)").html("<div>"+json["Total Views"]+"</div>" );
+		 $("#" + index + ">td:eq(4)").html("<div>"+json["Number of Users"] +"</div>");
+		 $("#" + index + ">td:eq(5)").html("<div>"+json["Collections "]+"</div>");
+		 $("#" + index + ">td:eq(6)").html("<div>"+ json.Datasets+"</div>");
+		 $("#" + index + ">td:eq(7)").html("<div>"+json["Bytes from uploaded dataset"]+"</div>");
+ 		 $("#" + index + ">td:eq(9)").html("<div>"+json['Version'] + "-" + json['Build'] + "</div>");
 
 		statsLeft = statsLeft-1;
 		checkDone();
@@ -236,12 +240,11 @@
 		Loading ...&nbsp;&nbsp;<img src="login_img/loading.gif"></img>
 	</div>
 
-	<div id="projects-table">
+	<div id="exp-table">
 		<table id='projects' class='tablesorter'>
 			<thead>
 				<tr>
 					<th class="table-header-project-name">Project Space</th>
-					<th class="table-header-project-description">Project Description</th>
 					<th class="table-header-project-preprint">Preprint Collections</th>
 					<th class="table-header-project-publish">Published Collections</th>
 					<th class="table-header-project-view"><div>Data Page Views</div></th>
@@ -250,7 +253,9 @@
 					<th class="table-header-project-datasets"><div>Total Datasets</div></th>
 					<th class="table-header-project-bytes"><div>Total Data Size</div></th>
 					<th class="table-header-project-link">Group Home Page</th>
+					<th class="table-header-project-version">Version</th>
 					<th class="gutter"></th>
+
 				</tr>
 			</thead>
 			<tbody></tbody>
