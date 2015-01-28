@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,73 +32,74 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.TagTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
 /**
  * @author lmarini
- * 
+ *
  */
-public class TagPage extends Composite {
+public class TagPage extends Page {
 
-    private final FlowPanel      mainPanel;
-    private TitlePanel           pageTitle;
-    private final String         tagName;
-    private final DispatchAsync  dispatchAsync;
-    private final HandlerManager eventBus;
+    private final String tagName;
 
     public TagPage(String uri, DispatchAsync dispatchAsync, HandlerManager eventBus) {
+        super("Tag", dispatchAsync, eventBus);
         this.tagName = uri;
-        this.dispatchAsync = dispatchAsync;
-        this.eventBus = eventBus;
 
-        mainPanel = new FlowPanel();
-        mainPanel.addStyleName("page");
-        initWidget(mainPanel);
+        HorizontalPanel rightHeader = new HorizontalPanel();
+        pageTitle.addEast(rightHeader);
 
-        // page title
-        mainPanel.add(createPageTitle());
+        // batch operations
+        BatchOperationView batchOperationView = new BatchOperationView();
+        batchOperationView.addStyleName("titlePanelRightElement");
+        BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatchAsync, eventBus, batchOperationView, false);
+        batchOperationPresenter.bind();
+        rightHeader.add(batchOperationView);
 
-        mainPanel.add(createTagInformation());
+        mainLayoutPanel.add(createTagInformation());
 
-        // datasets
-        retrieveDatasets();
+        DynamicTableView dynamicTableView = new DynamicTableView();
+        final TagTablePresenter tablePresenter = new TagTablePresenter(dispatchAsync, eventBus, dynamicTableView, tagName);
+        tablePresenter.bind();
+
+        VerticalPanel vp = new VerticalPanel() {
+            @Override
+            protected void onDetach() {
+                tablePresenter.unbind();
+            }
+        };
+        vp.add(dynamicTableView.asWidget());
+        vp.addStyleName("tableCenter");
+        mainLayoutPanel.add(vp);
     }
 
     private Widget createTagInformation() {
         return new HTML("Data tagged with '<b>" + tagName + "</b>'");
     }
 
-    private void retrieveDatasets() {
-        DynamicTableView dynamicTableView = new DynamicTableView();
-        TagTablePresenter tablePresenter = new TagTablePresenter(dispatchAsync, eventBus, dynamicTableView, tagName);
-        tablePresenter.bind();
-        mainPanel.add(dynamicTableView.asWidget());
-    }
+    @Override
+    public void layout() {
+        // TODO Auto-generated method stub
 
-    /**
-     * 
-     * @return
-     */
-    private Widget createPageTitle() {
-        pageTitle = new TitlePanel("Tag");
-        return pageTitle;
     }
 }
