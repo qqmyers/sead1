@@ -358,8 +358,6 @@
     <url-pattern>/geoproxy/*</url-pattern>
     <servlet-name>wmsProxyImpl</servlet-name>
 	<servlet-name>mediciProxyImpl</servlet-name>
-		<servlet-name>DiscoveryHome</servlet-name>
-	<servlet-name>ContentPage</servlet-name>
 	<servlet-name>GetPublishedCollections</servlet-name>
 	<servlet-name>CollectionContents</servlet-name>
 	<servlet-name>GetBibliographicInfo</servlet-name>
