@@ -37,7 +37,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
@@ -49,10 +49,12 @@ import net.customware.gwt.dispatch.shared.Result;
 
 /**
  * @author lmarini
- * 
+ * @author myersjd@umich.edu
+ *
  */
 @SuppressWarnings("serial")
 public class ListQueryResult implements Result {
+
     private List<ListQueryItem> results;
     private int                 totalCount;
 
@@ -80,12 +82,13 @@ public class ListQueryResult implements Result {
     }
 
     static public class ListQueryItem implements Serializable {
-        private String uri;
-        private String title;
-        private String author;
-        private Date   date;
-        private String size;
-        private String category;
+        private String           uri;
+        private String           title;
+        private String           author;
+        private Date             date;
+        private String           size;
+        private String           category;
+        private List<SectionHit> hits = null;
 
         public String getUri() {
             return uri;
@@ -133,6 +136,53 @@ public class ListQueryResult implements Result {
 
         public void setCategory(String category) {
             this.category = category;
+        }
+
+        public List<SectionHit> getHits() {
+            return hits;
+        }
+
+        public void setHits(List<SectionHit> hits) {
+            this.hits = hits;
+        }
+
+        static public class SectionHit implements Serializable {
+            private String sectionUri;
+            private String sectionLabel;
+            private String sectionMarker;
+
+            public SectionHit() {
+            }
+
+            public SectionHit(String sectionUri2, String sectionLabel2, String sectionMarker2) {
+                setSectionUri(sectionUri2);
+                setSectionLabel(sectionLabel2);
+                setSectionMarker(sectionMarker2);
+            }
+
+            public String getSectionUri() {
+                return sectionUri;
+            }
+
+            public void setSectionUri(String sectionUri) {
+                this.sectionUri = sectionUri;
+            }
+
+            public String getSectionLabel() {
+                return sectionLabel;
+            }
+
+            public void setSectionLabel(String sectionLabel) {
+                this.sectionLabel = sectionLabel;
+            }
+
+            public String getSectionMarker() {
+                return sectionMarker;
+            }
+
+            public void setSectionMarker(String sectionMarker) {
+                this.sectionMarker = sectionMarker;
+            }
         }
     }
 }

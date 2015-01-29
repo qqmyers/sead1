@@ -40,11 +40,15 @@ package edu.illinois.ncsa.mmdb.web.client.view;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -55,9 +59,11 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult.ListQueryItem.SectionHit;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicGridPresenter.Display;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
 
@@ -88,16 +94,13 @@ public class DynamicGridView extends FlexTable implements Display {
     }
 
     @Override
-    public int insertItem(final String id, String title, String type, String author, Date date) {
+    public int insertItem(final String id, String title, String type, String author, Date date, List<SectionHit> hitList) {
 
         final VerticalPanel layoutPanel = new VerticalPanel();
         layoutPanel.addStyleName("dynamicGridElement");
         //layoutPanel.setHeight("130px");
         layoutPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         layouts.put(numItems, layoutPanel);
-
-        HorizontalPanel titlePanel = new HorizontalPanel();
-        titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
         HorizontalPanel uploadInfoPanel = new HorizontalPanel();
         uploadInfoPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -132,8 +135,36 @@ public class DynamicGridView extends FlexTable implements Display {
         hyperlink.addStyleName("smallText");
         hyperlink.addStyleName("inline");
         hyperlink.setWidth("210px");
+        HorizontalPanel titlePanel = new HorizontalPanel();
+
+        titlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+
         titlePanel.add(hyperlink);
 
+        if (hitList != null) {
+            final PopupPanel hitsPanel = new PopupPanel();
+            hitsPanel.setAutoHideEnabled(true);
+            hitsPanel.setAutoHideOnHistoryEventsEnabled(true);
+            hitsPanel.addStyleName("search-hits");
+
+            VerticalPanel vp = new VerticalPanel();
+            vp.add(new Label("Search Hits: "));
+            for (SectionHit s : hitList ) {
+                vp.add(new Hyperlink(s.getSectionLabel() + " " + s.getSectionMarker(), URL.encode("dataset?id=" + id + "&section=" + s.getSectionLabel() + " " + s.getSectionMarker())));
+            }
+
+            hitsPanel.add(vp);
+            final Label hits = new Label("*");
+            hits.addClickHandler(new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    hitsPanel.showRelativeTo(hits);
+
+                }
+            });
+            titlePanel.add(hits);
+        }
         layoutPanel.add(titlePanel);
         layoutPanel.setCellHeight(titlePanel, "20px");
 

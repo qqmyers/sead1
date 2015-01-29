@@ -47,6 +47,8 @@ public class ListQuery extends AuthorizedAction<ListQueryResult> {
     private String  collection;
     private String  bean;
     private Boolean showTopLevelDatasets = false;
+    private String  filter               = null;
+    private String  searchTerm           = null;
 
     public ListQuery() {
     }
@@ -111,5 +113,21 @@ public class ListQuery extends AuthorizedAction<ListQueryResult> {
 
     public Boolean getShowDataLevel() {
         return this.showTopLevelDatasets;
+    }
+
+    public String getFilter() {
+        return filter;
+    }
+
+    public void setFilter(String filter) {
+        this.filter = filter;
+    }
+
+    public String getSearchTerm() {
+        return searchTerm;
+    }
+
+    public void setSearchTerm(String searchTerm) {
+        this.searchTerm = searchTerm;
     }
 }

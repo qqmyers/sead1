@@ -40,8 +40,10 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
@@ -53,6 +55,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
@@ -64,28 +67,84 @@ import org.tupeloproject.util.Tuple;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQuery;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult.ListQueryItem;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult.ListQueryItem.SectionHit;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchResult;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.search.SearchHandler;
+import edu.illinois.ncsa.mmdb.web.server.search.SearchWithFilterHandler;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
- * TODO Add comments
+ * ListQueryHandler retrieves lists of items (datasets or collections) based on
+ * a number of metadata and search criteria. It handles basic queries to find
+ * top-level items, items in a collection or with a given tag, and, via other
+ * classes, metadata and free-text based searches. Results may be filtered to
+ * list
+ * only datasets or collections, and deleted items and those not accessible to a
+ * given user are automatically removed from the returned lists.
+ * Sort options and list size offsets and limits can also be specified.
  *
- * @author Rob Kooepr
- *
+ * @author Rob Kooper
+ * @author myersjd@umich.edu
  */
 public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResult> {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(ListQueryHandler.class);
+    private static Log           log = LogFactory.getLog(ListQueryHandler.class);
+    private final PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
 
     @Override
     public ListQueryResult execute(ListQuery listquery, ExecutionContext context) throws ActionException {
         ListQueryResult queryResult = new ListQueryResult();
-        long l = System.currentTimeMillis();
+        List<ListQueryItem> resultList;
+
+        long startTime = System.currentTimeMillis();
+
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        int userlevel = rbac.getUserAccessLevel(Resource.uriRef(listquery.getUser()));
+        int defaultlevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
+
+        /* Handle Search - with or without predicate filter */
+        SearchResult sr = null;
+        if (listquery.getFilter() != null) {
+            sr = new SearchWithFilterHandler().performQuery(listquery.getSearchTerm(), listquery.getFilter());
+
+        } else if (listquery.getSearchTerm() != null) {
+            sr = new SearchHandler().performQuery(listquery.getSearchTerm());
+        }
+        /*If a search, package hits as a set of items with hits*/
+        if (sr != null) {
+            //Turn hits into a list of items
+            Map<String, ListQueryItem> hitMap = getHitItems(sr, listquery.getUser(), userlevel, defaultlevel);
+            log.debug("hitmap has " + hitMap.size() + " entries");
+            // fill in result
+            resultList = new ArrayList<ListQueryItem>();
+            for (java.util.Map.Entry<String, ListQueryItem> e : hitMap.entrySet() ) {
+                addQueryItem(e.getValue(), listquery, resultList);
+            }
+
+        } else {
+            //Do Normal ListQuery for matching items
+            resultList = performQuery(listquery, userlevel, defaultlevel);
+        }
+        // fill in result
+        queryResult.setTotalCount(resultList.size());
+        queryResult.setResults(new ArrayList<ListQueryItem>());
+        for (int i = listquery.getOffset(); i < listquery.getOffset() + listquery.getLimit() && i < resultList.size(); i++ ) {
+            queryResult.getResults().add(resultList.get(i));
+        }
+
+        log.info("Items fetch results : " + (System.currentTimeMillis() - startTime));
+        return queryResult;
+
+    }
+
+    private List<ListQueryItem> performQuery(ListQuery listquery, int userlevel, int defaultlevel) throws ActionException {
 
         Unifier u = new Unifier();
 
@@ -132,14 +191,10 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
         }
         // fetch results
         Set<String> keys = new HashSet<String>();
-        List<ListQueryItem> result = new ArrayList<ListQueryItem>();
-        PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
-        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
-        int userlevel = rbac.getUserAccessLevel(Resource.uriRef(listquery.getUser()));
-        int defaultlevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
+        List<ListQueryItem> resultList = new ArrayList<ListQueryItem>();
         try {
             TupeloStore.getInstance().getContext().perform(u);
-            int count = 0;
+
             for (Tuple<Resource> row : u.getResult() ) {
                 // skip wrong beans
                 if (listquery.getBean() == null) {
@@ -151,6 +206,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                 }
 
                 if (keys.contains(row.get(0).getString())) {
+                    //Happens if a metadata field have multiple values when it shouldn't (given the items were asking for)
                     log.warn("Already contain item for " + row);
                     continue;
                 }
@@ -173,7 +229,6 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                     continue;
                 }
                 // all items are ok from here forward
-                count++;
 
                 // create the item
                 ListQueryItem item = new ListQueryItem();
@@ -207,41 +262,211 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                         item.setCategory("Unknown");
                     }
                 }
-
-                // find location in list
-                if (result.size() == 0) {
-                    result.add(item);
-                } else {
-                    int location = 0;
-                    while ((location < result.size()) && compare(item, result.get(location), listquery) >= 0) {
-                        location++;
-                    }
-                    if (location <= listquery.getOffset() + listquery.getLimit()) {
-                        if (location > result.size()) {
-                            result.add(item);
-                        } else {
-                            result.add(location, item);
-                        }
-                        if (result.size() > (listquery.getOffset() + listquery.getLimit())) {
-                            result.remove(result.size() - 1);
-                        }
-                    }
-                }
+                addQueryItem(item, listquery, resultList);
             }
-
-            // fill in result
-            queryResult.setTotalCount(count);
-            queryResult.setResults(new ArrayList<ListQueryItem>());
-            for (int i = listquery.getOffset(); i < listquery.getOffset() + listquery.getLimit() && i < result.size(); i++ ) {
-                queryResult.getResults().add(result.get(i));
-            }
-
-            log.info("Items fetch results : " + (System.currentTimeMillis() - l));
-            return queryResult;
         } catch (OperatorException exc) {
             log.error("Could not fetch items.", exc);
             throw new ActionException("Could not get items from tupelo.", exc);
         }
+        return resultList;
+    }
+
+    private void addQueryItem(ListQueryItem item, ListQuery listquery, List<ListQueryItem> resultList) {
+        // find location in list
+        if (resultList.size() == 0) {
+            resultList.add(item);
+        } else {
+            int location = 0;
+            while ((location < resultList.size()) && compare(item, resultList.get(location), listquery) >= 0) {
+                location++;
+            }
+            if (location <= listquery.getOffset() + listquery.getLimit()) {
+                if (location > resultList.size()) {
+                    resultList.add(item);
+                } else {
+                    resultList.add(location, item);
+                }
+                if (resultList.size() > (listquery.getOffset() + listquery.getLimit())) {
+                    resultList.remove(resultList.size() - 1);
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Get the set of items (datasets or collections) associated with hits
+     * (which may be to sections of documents).
+     *
+     * @param sr
+     *            - the list of hits
+     * @param user
+     *            - the current user - used to check access control
+     * @param userlevel
+     *            - the user's access level
+     * @param defaultlevel
+     *            - the default level to assume for items that don't have one
+     *            set
+     * @return - a map of item ids (uri strings) to ListQueryItems with item
+     *         info and a list of associated hits
+     * @throws ActionException
+     */
+    private Map<String, ListQueryItem> getHitItems(SearchResult sr, String user, int userlevel, int defaultlevel) throws ActionException {
+        Map<String, ListQueryItem> hits = new HashMap<String, ListQueryItem>();
+        for (String s : sr.getHits() ) {
+            log.debug("Hit uri is: " + s);
+            // get the type of the hit
+            Unifier u = new Unifier();
+            u.setColumnNames("type");
+            UriRef item = Resource.uriRef(s);
+            u.addPattern(item, Rdf.TYPE, "type");
+            try {
+                TupeloStore.getInstance().getContext().perform(u);
+            } catch (OperatorException e1) {
+                log.error("Operator exception getting search hit: ", e1);
+            }
+            boolean isCollection = false;
+            String uri = s;
+            String sectionUri = null;
+            String sectionLabel = null;
+            String sectionMarker = null;
+
+            for (Tuple<Resource> row : u.getResult() ) {
+
+                Resource type = row.get(0);
+                log.debug("Hit of type: " + type.getString());
+                if (Cet.DATASET.equals(type)) {
+                    //Done - have the right uri
+                    break;
+                } else if (CollectionBeanUtil.COLLECTION_TYPE.equals(type)) {
+                    //uri is OK
+                    isCollection = true;
+                    break;
+                } else if (MMDB.SECTION_TYPE.equals(type)) {
+                    // get section info
+                    log.debug("lloking for parent item");
+                    Unifier us = new Unifier();
+                    us.setColumnNames("dataset", "label", "marker");
+
+                    us.addPattern("dataset", MMDB.METADATA_HASSECTION, item);
+                    us.addPattern(item, MMDB.SECTION_LABEL, "label");
+                    us.addPattern(item, MMDB.SECTION_MARKER, "marker");
+                    try {
+                        TupeloStore.getInstance().getContext().perform(us);
+                    } catch (OperatorException e) {
+                        log.error("Error querying for information about section of dataset " + s, e);
+                    }
+                    for (Tuple<Resource> row2 : us.getResult() ) {
+                        //Get uri of item with tag
+                        uri = row2.get(0).getString();
+                        //record section info
+                        sectionUri = s;
+                        sectionLabel = row2.get(1).getString();
+                        sectionMarker = row2.get(2).getString();
+                        log.debug("Found: " + uri + " " + sectionLabel + " " + sectionMarker);
+
+                    }
+                    break;
+                }
+            }
+            log.debug("Item uri for hit is: " + uri);
+            if (!hits.containsKey(uri)) {
+                ListQueryItem lqItem = new ListQueryItem();
+
+                Unifier u1 = new Unifier();
+                UriRef sRef = Resource.uriRef(uri);
+                // add all items we might need
+                u1.addPattern(sRef, Dc.TITLE, "n");
+                u1.addColumnName("n"); // 0
+                u1.addPattern(sRef, Dc.DATE, "d1", true);
+                u1.addColumnName("d1"); // 1
+                u1.addPattern(sRef, DcTerms.DATE_CREATED, "d2", true);
+                u1.addColumnName("d2"); // 2
+                u1.addPattern(sRef, Dc.CREATOR, "a");
+                u1.addColumnName("a"); // 3
+                u1.addPattern(sRef, Files.LENGTH, "l", true);
+                u1.addColumnName("l"); // 4
+                u1.addPattern(sRef, Dc.FORMAT, "f", true);
+                u1.addColumnName("f"); // 5
+                String pred = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+                u1.addPattern(sRef, Resource.uriRef(pred), "r", true);
+                u1.addColumnName("r"); // 6
+                u1.addPattern(sRef, Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "k", true);
+                u1.addColumnName("k"); // 7
+                try {
+                    TupeloStore.getInstance().getContext().perform(u1);
+
+                    for (Tuple<Resource> row1 : u1.getResult() ) {
+
+                        // skip deleted items
+                        if (row1.get(7) != null) {
+                            log.debug("skipping deleted");
+                            continue;
+                        }
+
+                        // skip items user can not see
+                        if (!isCollection && !row1.get(3).getString().equals(user)) {
+                            int datasetlevel = (row1.get(6) != null) ? Integer.parseInt(row1.get(6).getString()) : defaultlevel;
+                            if (datasetlevel < userlevel) {
+                                log.debug("skipping access-controlled item");
+                                continue;
+                            }
+                        }
+
+                        // create the item
+
+                        lqItem.setUri(uri);
+                        lqItem.setTitle(row1.get(0).getString());
+                        lqItem.setAuthor(pbu.get(row1.get(3)).getName());
+                        if (row1.get(1) != null) {
+                            if (row1.get(1).asObject() instanceof Date) {
+                                lqItem.setDate((Date) row1.get(1).asObject());
+                            }
+                        } else {
+                            if (row1.get(2).asObject() instanceof Date) {
+                                lqItem.setDate((Date) row1.get(2).asObject());
+                            }
+                        }
+                        if (row1.get(4) != null) {
+                            if (row1.get(4).asObject() instanceof Long) {
+                                lqItem.setSize(humanBytes((Long) row1.get(4).asObject()));
+                            } else {
+                                lqItem.setSize(row1.get(4).getString());
+                            }
+                        }
+                        if (row1.get(5) != null) {
+                            lqItem.setCategory(TupeloStore.getInstance().getMimeMap().getCategory(row1.get(5).getString()));
+                        }
+                        if (lqItem.getCategory() == null) {
+                            if (isCollection) {
+                                lqItem.setCategory("Collection");
+                            } else {
+                                lqItem.setCategory("Unknown");
+                            }
+                        }
+                        if (sectionUri != null) {
+                            List<SectionHit> hitList = new ArrayList<SectionHit>();
+                            hitList.add(new SectionHit(sectionUri, sectionLabel, sectionMarker));
+                            lqItem.setHits(hitList);
+                        }
+                    }
+
+                } catch (OperatorException exc) {
+                    log.error("Could not fetch items.", exc);
+                    throw new ActionException("Could not get items from tupelo.", exc);
+                }
+                hits.put(uri, lqItem);
+            } else {
+                //Just add the hit
+                List<SectionHit> theList = hits.get(uri).getHits();
+                if (theList == null) {
+                    theList = new ArrayList<SectionHit>();
+                    hits.get(uri).setHits(theList);
+                }
+                theList.add(new SectionHit(sectionUri, sectionLabel, sectionMarker));
+            }
+        }
+        return hits;
     }
 
     /**

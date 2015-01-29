@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,20 +32,18 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
-package edu.illinois.ncsa.mmdb.web.server.dispatch;
+package edu.illinois.ncsa.mmdb.web.server.search;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import net.customware.gwt.dispatch.server.ActionHandler;
-import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
@@ -58,26 +56,21 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.Hit;
 import edu.illinois.ncsa.cet.search.SearchableTextIndex;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.Search;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SearchResult;
-import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
-import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
  * Text base search of the repository.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
-public class SearchHandler implements ActionHandler<Search, SearchResult> {
-    final int RESULT_COUNT_LIMIT = 20;                                    // FIXME this is a hack, we need paging
+public class SearchHandler {
 
-    Log       log                = LogFactory.getLog(SearchHandler.class);
+    Log log = LogFactory.getLog(SearchHandler.class);
 
-    @Override
-    public SearchResult execute(Search arg0, ExecutionContext arg1) throws ActionException {
+    public SearchResult performQuery(String query) throws ActionException {
         long then = System.currentTimeMillis();
         SearchResult searchResult = new SearchResult();
 
@@ -85,7 +78,7 @@ public class SearchHandler implements ActionHandler<Search, SearchResult> {
         Unifier uf = new Unifier();
         uf.setColumnNames("s");
 
-        for (String s : arg0.getQuery().split("\\s+") ) {
+        for (String s : query.split("\\s+") ) {
             if (s.startsWith("tag:")) {
                 uf.addPattern("s", Tags.TAGGED_WITH_TAG, TagEventBeanUtil.createTagUri(s.substring(4)));
             } else {
@@ -93,18 +86,15 @@ public class SearchHandler implements ActionHandler<Search, SearchResult> {
             }
         }
         rawtext = rawtext.trim();
+        log.debug("Rawtext search: " + rawtext);
 
         // search for ids using RDF matcher.
-        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
-        Resource userUri = arg0.getUser() == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(arg0.getUser());
         Set<String> idsfound = null;
         if (uf.getPatterns().size() > 0) {
             try {
                 idsfound = new HashSet<String>();
                 for (Tuple<Resource> r : TupeloStore.getInstance().unifyExcludeDeleted(uf, "s") ) {
-                    if (rbac.checkAccessLevel(userUri, r.get(0))) {
-                        idsfound.add(r.get(0).getString());
-                    }
+                    idsfound.add(r.get(0).getString());
                 }
             } catch (OperatorException e) {
                 log.error("Could not search for tags.", e);
@@ -116,9 +106,6 @@ public class SearchHandler implements ActionHandler<Search, SearchResult> {
             // only tag search
             for (String id : idsfound ) {
                 searchResult.addHit(id);
-                if (searchResult.getHits().size() > RESULT_COUNT_LIMIT) {
-                    break;
-                }
             }
         } else {
             // search for ids using lucene.
@@ -126,34 +113,20 @@ public class SearchHandler implements ActionHandler<Search, SearchResult> {
             Iterable<Hit> result = search.search(rawtext);
             // merge lucene with tags
             for (Hit hit : result ) {
-                if (!rbac.checkAccessLevel(Resource.uriRef(arg0.getUser()), Resource.uriRef(hit.getId()))) {
-                    continue;
-                }
+                log.debug("Hit: " + hit.getId());
+                //FixMe - this code tries to AND between a tag and text search, but if the text search returns a section( and not the dataset),
+                //the AND test fails and the hit is excluded - probably not what we want
                 if ((idsfound != null) && !idsfound.contains(hit.getId())) {
+                    log.debug("Not AND tag(s)");
                     continue;
                 }
                 searchResult.addHit(hit.getId());
-                if (searchResult.getHits().size() > RESULT_COUNT_LIMIT) {
-                    break;
-                }
             }
         }
 
         long elapsed = System.currentTimeMillis() - then;
-        log.debug("Search for '" + arg0.getQuery() + "' took " + elapsed + "ms");
+        log.debug("Search for '" + query + "' took " + elapsed + "ms to find " + searchResult.getHits().size() + " hits");
         return searchResult;
-    }
-
-    @Override
-    public Class<Search> getActionType() {
-        return Search.class;
-    }
-
-    @Override
-    public void rollback(Search arg0, SearchResult arg1, ExecutionContext arg2)
-            throws ActionException {
-        // TODO Auto-generated method stub
-
     }
 
 }

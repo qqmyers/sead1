@@ -123,8 +123,6 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchWithFilterHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetAccessLevelHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetConfigurationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetInfoHandler;
@@ -181,7 +179,6 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetUserMetadataFieldsHandler());
         DispatchUtil.registerHandler(new ExtractionServiceHandler());
         DispatchUtil.registerHandler(new DeleteAnnotationHandler());
-        DispatchUtil.registerHandler(new SearchHandler());
         DispatchUtil.registerHandler(new RemoveFromCollectionHandler());
         DispatchUtil.registerHandler(new GetAllTagsHandler());
         DispatchUtil.registerHandler(new GetRecentActivityHandler());
@@ -223,7 +220,6 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new Create3DImageHandler());
         DispatchUtil.registerHandler(new GetConfigurationHandler());
         DispatchUtil.registerHandler(new SetConfigurationHandler());
-        DispatchUtil.registerHandler(new SearchWithFilterHandler());
         DispatchUtil.registerHandler(new GetItemsBySetHandler());
         DispatchUtil.registerHandler(new GetDatasetsInCollectionHandler());
         DispatchUtil.registerHandler(new DefaultRoleHandler());

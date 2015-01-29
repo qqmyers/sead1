@@ -44,39 +44,33 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
-import edu.illinois.ncsa.mmdb.web.client.presenter.DatasetTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.presenter.SearchTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
 /**
  * @author lmarini
+ * @author myersjd@umich.edu
  *
  */
-public class ListDatasetsPage extends Page {
+public class ListSearchResultsPage extends Page {
 
     private final DispatchAsync  dispatch;
     private final HandlerManager eventbus;
+    private final static String  HTTPSTRING = "http://";
 
-    public ListDatasetsPage(DispatchAsync dispatch, HandlerManager eventBus) {
-        super("Datasets", dispatch);
+    public ListSearchResultsPage(DispatchAsync dispatch, HandlerManager eventBus) {
+        super("Search Results", dispatch);
         this.dispatch = dispatch;
         this.eventbus = eventBus;
 
         HorizontalPanel rightHeader = new HorizontalPanel();
         pageTitle.addEast(rightHeader);
-
-        // rss feed
-        Anchor rss = new Anchor();
-        rss.setHref("rss.xml");
-        rss.addStyleName("rssIcon");
-        DOM.setElementAttribute(rss.getElement(), "type", "application/rss+xml");
-        rss.setHTML("<img src='./images/rss_icon.gif' border='0px' id='rssIcon' class='navMenuLink'>"); // FIXME hack
 
         // batch operations
         BatchOperationView batchOperationView = new BatchOperationView();
@@ -85,11 +79,32 @@ public class ListDatasetsPage extends Page {
         batchOperationPresenter.bind();
         rightHeader.add(batchOperationView);
 
-        //add rss in same place as on collections page
-        rightHeader.add(rss);
+        String query = PlaceService.getParams().get("q");
+
+        String filter = PlaceService.getParams().get("f");
+        /* Fixme - get a string to describe search terms that parses our combined VIVOname:URL format (e.g. for dcterms:creator)
+         * Current code doesn't account for name at the front or URL
+         *
+        if (filter != null) {
+            String link = (query != null && query.contains(HTTPSTRING)) ? query.substring(query.indexOf(HTTPSTRING)) : "";
+            String remainderQuery = link.contains(" ") ? link.substring(link.indexOf(" ") + 1) : "";
+            link = link.contains(" ") ? link.substring(0, link.indexOf(" ")) : link;
+
+            //Need to accommodate for (VIVO) URLs obtained from metadata - if any
+            if (link == "") {
+                queryText = new HTML("Your search for datasets with metadata <b>" + query
+                        + "</b> returned the following results:");
+            }
+            else {
+                String newQuery = query.replace(link, "");
+                queryText = new HTML("Your search for datasets with metadata <b>" + newQuery + "<a href=\"" + link + "\">" + link + "</a>"
+                        + remainderQuery + "</b> returned the following results:");
+            }
+            //END - Modified by Ram
+        */
 
         DynamicTableView dynamicTableView = new DynamicTableView();
-        final DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatch, eventBus, dynamicTableView);
+        final SearchTablePresenter dynamicTablePresenter = new SearchTablePresenter(dispatch, eventBus, dynamicTableView, filter, query);
         dynamicTablePresenter.bind();
 
         VerticalPanel vp = new VerticalPanel() {
@@ -101,6 +116,7 @@ public class ListDatasetsPage extends Page {
         vp.add(dynamicTableView.asWidget());
         vp.addStyleName("tableCenter");
         mainLayoutPanel.add(vp);
+        mainLayoutPanel.addStyleName("search-page");
     }
 
     @Override

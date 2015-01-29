@@ -38,10 +38,11 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Date;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -51,6 +52,7 @@ import com.google.gwt.user.client.ui.HasValue;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.UserSessionState;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult.ListQueryItem.SectionHit;
 import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.AllOnPageSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.ClearDatasetsEvent;
@@ -71,9 +73,9 @@ import edu.illinois.ncsa.mmdb.web.client.ui.DatasetSelectionCheckboxHandler;
 
 /**
  * Show contents of a {@link DynamicTablePresenter} as a grid.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Display> {
 
@@ -87,7 +89,7 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
 
         void removeAllRows();
 
-        int insertItem(String id, String title, String type, String author, Date date);
+        int insertItem(String id, String title, String type, String author, Date date, List<SectionHit> list);
 
         void showSelected(boolean checked, int location);
     }
@@ -181,7 +183,7 @@ public class DynamicGridPresenter extends BasePresenter<DynamicGridPresenter.Dis
 
     public void addItem(final ShowItemEvent showItemEvent) {
         String id = showItemEvent.getId();
-        int location = display.insertItem(id, showItemEvent.getTitle(), showItemEvent.getType(), showItemEvent.getAuthor(), showItemEvent.getDate());
+        int location = display.insertItem(id, showItemEvent.getTitle(), showItemEvent.getType(), showItemEvent.getAuthor(), showItemEvent.getDate(), showItemEvent.getHitList());
         items.put(id, location);
         final HasValue<Boolean> selected = display.getSelected(location);
         selected.addValueChangeHandler(new DatasetSelectionCheckboxHandler(id, eventBus));

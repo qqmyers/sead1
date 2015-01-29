@@ -39,10 +39,12 @@
 package edu.illinois.ncsa.mmdb.web.client.view;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -51,8 +53,11 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPreviews;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult.ListQueryItem.SectionHit;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicListPresenter.Display;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.PreviewWidget;
@@ -93,7 +98,7 @@ public class DynamicListView extends FlexTable implements Display {
     }
 
     @Override
-    public int insertItem(final String id, String title, String author, Date date, String size, String type) {
+    public int insertItem(final String id, String title, String author, Date date, String size, String type, List<SectionHit> hitList) {
 
         final int row = this.getRowCount();
 
@@ -140,6 +145,19 @@ public class DynamicListView extends FlexTable implements Display {
         informationPanel.setWidget(2, 1, new Label(type));
         informationPanel.getWidget(2, 1).addStyleName("dynamicTableListCol1");
         setWidget(row, 2, informationPanel);
+
+        if (hitList != null) {
+            ScrollPanel hitsPanel = new ScrollPanel();
+            VerticalPanel vp = new VerticalPanel();
+            for (SectionHit s : hitList ) {
+                vp.add(new Hyperlink(s.getSectionLabel() + " " + s.getSectionMarker(), URL.encode("dataset?id=" + id + "&section=" + s.getSectionLabel() + " " + s.getSectionMarker())));
+            }
+            hitsPanel.add(vp);
+            informationPanel.setWidget(0, 2, new Label("Search Hits: ")); //Since title spans two columns
+            informationPanel.setWidget(1, 3, hitsPanel);
+            informationPanel.getFlexCellFormatter().setRowSpan(1, 3, 5);
+            informationPanel.getFlexCellFormatter().addStyleName(1, 3, "dynamicTableSearchResults");
+        }
 
         getFlexCellFormatter().addStyleName(row, 0, "dynamicTableListCheckbox");
         getFlexCellFormatter().addStyleName(row, 1, "dynamicTableListPreview");

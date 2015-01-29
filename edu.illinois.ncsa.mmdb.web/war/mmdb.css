@@ -218,6 +218,11 @@ a:hover {
 	width:410px;
 	color:#222;
 }
+.search-page .gwt-DisclosurePanel {
+	width:inherit;
+	color:initial;
+}
+
 .loginForm .gwt-DisclosurePanel, .signupForm .gwt-DisclosurePanel{
 	display:block;
 	margin:auto;

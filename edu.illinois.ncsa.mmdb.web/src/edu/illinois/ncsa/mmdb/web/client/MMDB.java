@@ -105,12 +105,12 @@ import edu.illinois.ncsa.mmdb.web.client.ui.DiscoveryPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.JiraIssuePage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListCollectionsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListDatasetsPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.ListSearchResultsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
 import edu.illinois.ncsa.mmdb.web.client.ui.NotEnabledPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchBox;
-import edu.illinois.ncsa.mmdb.web.client.ui.SearchResultsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SelectedItemsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
@@ -871,7 +871,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private void showSearchResultsPage() {
         GWT.log("Loading Search Results Page", null);
         mainContainer.clear();
-        mainContainer.add(new SearchResultsPage(dispatchAsync, eventBus));
+        mainContainer.add(new ListSearchResultsPage(dispatchAsync, eventBus));
     }
 
     private void showUploadPage() {
