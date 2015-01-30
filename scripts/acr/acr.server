@@ -68,7 +68,7 @@ access.level.values=Raw, Preliminary Results, Provisional Product, Validated Pro
 #Tokens last from 1-2 times the key lifetime (the retired key is kept for validation only for an additional lifetime, 
 #so token life depends on where in the cycle it is created). Currently used to allow Google doc viewer to access content.
 #default key lifetime is 5 minutes.
-#token.key.timeout=
+#token.key.lifetime=
 
 #
 #Previewer: Use Google Doc Viewer (google temporarily caches/converts file) - default is true
