@@ -47,9 +47,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -98,13 +96,7 @@ public class ListCollectionsPage extends Page {
         batchOperationPresenter.bind();
         rightHeader.add(batchOperationView);
 
-        // rss feed
-        Anchor rss = new Anchor();
-        rss.setHref("rss.xml");
-        rss.addStyleName("rssIcon");
-        DOM.setElementAttribute(rss.getElement(), "type", "application/rss+xml");
-        rss.setHTML("<img src='./images/rss_icon.gif' border='0px' id='rssIcon' class='navMenuLink'>"); // FIXME hack
-        rightHeader.add(rss);
+        rightHeader.add(getRssFeed());
 
         DynamicTableView dynamicTableView = new DynamicTableView();
         dynamicTablePresenter = new CollectionTablePresenter(dispatch, eventBus, dynamicTableView);

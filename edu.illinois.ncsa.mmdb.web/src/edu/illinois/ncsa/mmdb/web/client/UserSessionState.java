@@ -59,6 +59,7 @@ public class UserSessionState {
     private Map<String, Integer> currentPage;
     boolean                      isAnonymous;
     private String               loginProvider;
+    private String               token = null;
 
     public UserSessionState() {
         initialize();
@@ -136,5 +137,13 @@ public class UserSessionState {
 
     public void setLoginProvider(String loginProvider) {
         this.loginProvider = loginProvider;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

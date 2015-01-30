@@ -44,8 +44,6 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -71,13 +69,6 @@ public class ListDatasetsPage extends Page {
         HorizontalPanel rightHeader = new HorizontalPanel();
         pageTitle.addEast(rightHeader);
 
-        // rss feed
-        Anchor rss = new Anchor();
-        rss.setHref("rss.xml");
-        rss.addStyleName("rssIcon");
-        DOM.setElementAttribute(rss.getElement(), "type", "application/rss+xml");
-        rss.setHTML("<img src='./images/rss_icon.gif' border='0px' id='rssIcon' class='navMenuLink'>"); // FIXME hack
-
         // batch operations
         BatchOperationView batchOperationView = new BatchOperationView();
         batchOperationView.addStyleName("titlePanelRightElement");
@@ -86,7 +77,7 @@ public class ListDatasetsPage extends Page {
         rightHeader.add(batchOperationView);
 
         //add rss in same place as on collections page
-        rightHeader.add(rss);
+        rightHeader.add(getRssFeed());
 
         DynamicTableView dynamicTableView = new DynamicTableView();
         final DatasetTablePresenter dynamicTablePresenter = new DatasetTablePresenter(dispatch, eventBus, dynamicTableView);

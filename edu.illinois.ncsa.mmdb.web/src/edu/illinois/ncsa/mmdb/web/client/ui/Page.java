@@ -44,10 +44,14 @@ package edu.illinois.ncsa.mmdb.web.client.ui;
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 
 /**
  * @author Luigi Marini
@@ -149,5 +153,26 @@ public abstract class Page extends Composite {
         messageLabel.addStyleName("feedbackMessage");
         feedbackPanel.clear();
         feedbackPanel.add(messageLabel);
+    }
+
+    /**
+     * Get RSS feed link
+     *
+     */
+    protected Anchor getRssFeed() {
+        // rss feed
+        Anchor rss = new Anchor();
+        String linkString = "rss.xml";
+
+        if (!MMDB.getSessionState().isAnonymous() && (MMDB.getSessionState().getToken() != null)) {
+            linkString += "?user=" + MMDB.getUsername() + "&token=" + MMDB.getSessionState().getToken();
+            rss.setTitle("This feed URL has your access permissions. Do not share it.");
+        }
+        rss.setHref(linkString);
+        rss.addStyleName("rssIcon");
+        DOM.setElementAttribute(rss.getElement(), "type", "application/rss+xml");
+        rss.setHTML("<img src='./images/rss_icon.gif' border='0px' id='rssIcon' class='navMenuLink'>"); // FIXME hack
+
+        return rss;
     }
 }

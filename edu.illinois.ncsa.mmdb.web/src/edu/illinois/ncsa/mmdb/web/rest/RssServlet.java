@@ -77,10 +77,18 @@ import com.sun.syndication.feed.synd.SyndFeedImpl;
 import com.sun.syndication.io.SyndFeedOutput;
 
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
+import edu.illinois.ncsa.mmdb.web.server.TokenStore;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 
 public class RssServlet extends HttpServlet {
+
+    private static int _searchDepth = 100; //Kludge - we'll look through the last 100 entries
+    private static int _limit       = 25; // and report up to this number if there are that many
+                                           // that are not deleted and accessible given access controls
+
     void die(int code, HttpServletResponse resp, String msg, Throwable exception) throws ServletException {
         resp.setStatus(code);
         try {
@@ -93,18 +101,33 @@ public class RssServlet extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
+
+        String token = req.getParameter("token");
+        String claimedUser = req.getParameter("user");
+        //Assume anonymous unless user and token match
+        String user = PersonBeanUtil.getAnonymousURI().toString();
+        if ((token != null) && (claimedUser != null)) {
+            if (getToken(claimedUser).equals(token)) {
+                user = claimedUser;
+            }
+        }
+
         Context c = TupeloStore.getInstance().getContext();
         Unifier u = new Unifier();
-        u.setColumnNames("r", "s", "date", "label", "title", "description");
+        u.setColumnNames("r", "s", "date", "label", "title", "description", "a", "c");
         u.addPattern("s", Rdf.TYPE, Cet.DATASET);
         u.addPattern("s", Dc.DATE, "date");
+        u.addPattern("s", Dc.CREATOR, "c");
         u.addPattern("s", Dc.TITLE, "title", true);
         u.addPattern("s", Rdfs.LABEL, "label", true);
         u.addPattern("s", Dc.DESCRIPTION, "description", true);
         u.addPattern("s", DcTerms.IS_REPLACED_BY, "r", true);
         u.addOrderBy("r"); // FIXME should be orderByDesc once TUP-479 is resolved
         u.addOrderByDesc("date");
-        u.setLimit(20);
+        String pred = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
+        u.addPattern("s", Resource.uriRef(pred), "a", true);
+
+        u.setLimit(_searchDepth);
         try {
             c.perform(u);
         } catch (OperatorException x) {
@@ -118,38 +141,56 @@ public class RssServlet extends HttpServlet {
         feed.setLink(req.getRequestURL().toString());
         feed.setDescription("Recent datasets added to project space");
         feed.setFeedType("rss_2.0");
-        //
+
+        SEADRbac rbac = TupeloStore.getInstance().getRbac();
+        int level = rbac.getUserAccessLevel(Resource.uriRef(user));
+        int defaultAccessLevel = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
+
         List<SyndEntry> entries = new LinkedList<SyndEntry>();
         for (Tuple<Resource> row : u.getResult() ) {
-            int i = 0;
-            if (row.get(i++) == null) { // i.e., non-deleted current version
-                String datasetUri = row.get(i++).getString();
-                UriCanonicalizer canon = TupeloStore.getInstance().getUriCanonicalizer(req);
-                String link = canon.canonicalize("dataset", datasetUri);
-                Date date = (Date) row.get(i++).asObject();
-                Resource t = row.get(i++);
-                Resource l = row.get(i++);
-                String label = "[no title]";
-                if (t != null) {
-                    label = t.getString();
+            while (entries.size() < _limit) {
+                int i = 0;
+                if (row.get(i++) == null) { // i.e., non-deleted current version
+                    //Check access control - user must be owner or have a lvel lower than that of the item to see it
+                    int accesslevel = defaultAccessLevel;
+                    if (row.get(6) != null) {
+                        accesslevel = Integer.parseInt(row.get(6).toString());
+                    }
+                    String creator = row.get(7).getString();
+                    if (creator.equals(user) || level <= accesslevel) {
+                        String datasetUri = row.get(i++).getString();
+                        UriCanonicalizer canon = TupeloStore.getInstance().getUriCanonicalizer(req);
+                        String link = canon.canonicalize("dataset", datasetUri);
+                        Date date = (Date) row.get(i++).asObject();
+                        Resource t = row.get(i++);
+                        Resource l = row.get(i++);
+                        String label = "[no title]";
+                        if (t != null) {
+                            label = t.getString();
+                        }
+                        else if (l != null) {
+                            label = l.getString();
+                        }
+                        String description = "<img src='" + canon.canonicalize(RestServlet.PREVIEW_SMALL, datasetUri) + "'>";
+                        if (row.get(i) != null) {
+                            description += "<p>" + row.get(i++).getString() + "</p>";
+                        }
+                        //
+                        SyndEntry entry = new SyndEntryImpl();
+                        entry.setLink(link);
+                        entry.setPublishedDate(date);
+                        entry.setTitle(label);
+                        SyndContentImpl d = new SyndContentImpl();
+                        d.setValue(description);
+                        d.setType("text/html");
+                        entry.setDescription(d);
+                        entries.add(entry);
+                    }
                 }
-                else if (l != null) {
-                    label = l.getString();
-                }
-                String description = "<img src='" + canon.canonicalize(RestServlet.PREVIEW_SMALL, datasetUri) + "'>";
-                if (row.get(i) != null) {
-                    description += "<p>" + row.get(i++).getString() + "</p>";
-                }
-                //
-                SyndEntry entry = new SyndEntryImpl();
-                entry.setLink(link);
-                entry.setPublishedDate(date);
-                entry.setTitle(label);
-                SyndContentImpl d = new SyndContentImpl();
-                d.setValue(description);
-                entry.setDescription(d);
-                entries.add(entry);
             }
+        }
+        if (entries.isEmpty()) {
+            feed.setDescription("There are no recent datasets that you have permission to see");
         }
         feed.setEntries(entries);
         // produce it in XML
@@ -160,6 +201,15 @@ public class RssServlet extends HttpServlet {
         } catch (Exception x) {
             throw new ServletException("error producing RSS feed", x);
         }
+    }
+
+    //Generate a token that identifies the user unless/until the remoteAPIKey is changed
+    static public String getToken(String user) {
+        String key = TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey);
+        if (key.length() == 0) {
+            return null;
+        }
+        return TokenStore.generateToken(user, key);
     }
 
     static Transformer theTransformer;

@@ -688,12 +688,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 if (result.isAnonymous()) {
                     MMDB.loginStatusWidget.loggedOut();
                     getSessionState().setAnonymous(true);
+                    getSessionState().setToken(null);
                     //LoginPage.setAutologin(false);
                     GWT.log("Current user is anonymous");
                 } else {
                     MMDB.loginStatusWidget.loggedIn(personBean.getName());
                     getSessionState().setAnonymous(false);
-
+                    getSessionState().setToken(result.getToken());
                     GWT.log("Current user set to " + personBean.getUri());
                 }
                 parseHistoryToken(History.getToken());
