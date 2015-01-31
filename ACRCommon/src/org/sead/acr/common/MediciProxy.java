@@ -427,4 +427,16 @@ public class MediciProxy implements Serializable {
 		return null;
 	}
 
+	//Simple way to test if username/password/server/remoteAPIKey combo is valid
+	
+	public static void main(String[] args) {
+		if(args.length==0) {
+			System.out.println("Use params: <username> <password> <server> <remoteAPIKey>");
+			System.exit(0);
+		}
+		MediciProxy mp = new MediciProxy();
+		mp.setCredentials(args[0], args[1], args[2], args[3]);
+		System.out.println("setting credentials completed.");
+		System.exit(0);
+	}
 }

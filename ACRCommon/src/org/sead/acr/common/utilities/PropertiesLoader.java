@@ -26,7 +26,7 @@ public class PropertiesLoader {
 				}
 				new PropertiesLoader().loadProperties();
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println("Warning: Properties file can't be read in org.sead.acr.common.utilities.PropertiesLoader");
 			}
 		}
 		return _properties;
