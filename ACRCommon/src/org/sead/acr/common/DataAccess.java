@@ -261,6 +261,8 @@ public class DataAccess {
 		String prepend = "";
 		if ((remoteAPIKey != null) && (remoteAPIKey.length() != 0)) {
 			prepend = "remoteAPIKey=" + remoteAPIKey;
+			//Backward compatibility for pre 1.5.1
+			prepend+="&remoteApi=" + remoteAPIKey;
 		}
 		// write a query to contact the server
 		if (query != null) {

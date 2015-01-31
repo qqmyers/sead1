@@ -100,11 +100,15 @@ public class MediciProxy implements Serializable {
 		// hardcoded for now
 		// Optional Geoserver info - may or may not be supplied/required by app
 		if (_geoserver == null) {
-			Properties p = PropertiesLoader.getProperties();
 
-			_geoserver = p.getProperty("geoserver");
-			_geouser = p.getProperty("geouser");
-			_geopassword = p.getProperty("geopassword");
+			Properties p = PropertiesLoader.getProperties();
+			if (p != null) {
+				_geoserver = p.getProperty("geoserver");
+				_geouser = p.getProperty("geouser");
+				_geopassword = p.getProperty("geopassword");
+			} else {
+				log.warn("No properties file found");
+			}
 		}
 		try {
 
@@ -222,17 +226,19 @@ public class MediciProxy implements Serializable {
 		xmlPostDA.getResponse(query);
 
 	}
-	
-	/**Use when in a local context that shares a session with the target server
-	 *  
+
+	/**
+	 * Use when in a local context that shares a session with the target server
+	 * 
 	 * @param sessionId
 	 * @param localServer
 	 * @param remoteAPIKey
 	 */
-	public void setLocalCredentials(String sessionId, String localServer, String remoteAPIKey) {
+	public void setLocalCredentials(String sessionId, String localServer,
+			String remoteAPIKey) {
 		_sessionId = sessionId;
 		_server = localServer;
-		_remoteAPIKey=remoteAPIKey;
+		_remoteAPIKey = remoteAPIKey;
 		_validCredentials = true;
 	}
 
