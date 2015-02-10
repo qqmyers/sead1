@@ -33,6 +33,9 @@ table td, select {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 1.0em;
 }
+table td{
+	line-height:18px;
+}
 
 .gwt-Button {
 	font-size: 0.9em;
@@ -218,11 +221,6 @@ a:hover {
 	width:410px;
 	color:#222;
 }
-.search-page .gwt-DisclosurePanel {
-	width:inherit;
-	color:initial;
-}
-
 .loginForm .gwt-DisclosurePanel, .signupForm .gwt-DisclosurePanel{
 	display:block;
 	margin:auto;
@@ -380,6 +378,7 @@ width: 1000px;
 	cursor: pointer; 
 	cursor: hand;
 	margin: 5px;
+	margin-left:0px;
 }
 
 .pendingSmall {
@@ -1105,6 +1104,7 @@ div.gwt-Label.smallerItalicText.alignRight{
 	margin-bottom: 20px;
 	padding: 0px;
 	width: 100%;
+	margin-left:-2px;
 }
 
 .tag {
@@ -1146,6 +1146,9 @@ div.gwt-Label.smallerItalicText.alignRight{
 	margin-left: 10px;
 	margin-top: 1px;
 }
+.datasetRightColText .pencilIcon{
+	width:16px;
+}
 
 .datasetMainContainer {
 	position: relative;
@@ -1154,6 +1157,12 @@ div.gwt-Label.smallerItalicText.alignRight{
 	margin:auto;
 }
 
+.tagsLinks .gwt-Anchor{
+	margin-left:-178px;
+}
+.tagsLinks .gwt-Hyperlink{
+	width:140px;
+}
 .previewPanel {
 	width: 98%;
 	text-align: center;

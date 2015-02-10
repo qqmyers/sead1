@@ -84,7 +84,9 @@ li {
 	margin-top:0px;
 	/*display: inline;*/
 }
-
+#loginMenu .gwt-Hyperlink{
+	width:80%;
+}
 #loginMenu div:focus{
 	outline:none;
 }
@@ -252,6 +254,10 @@ li {
 .navMenu li a:hover ,.navMenu li a:active{
 	color: #f3882a !important;
 }
+.navMenu .selected{
+	color:#f3822a;
+}
+
 /*footer*/
 #footer {
 	padding: 5px 0px;
