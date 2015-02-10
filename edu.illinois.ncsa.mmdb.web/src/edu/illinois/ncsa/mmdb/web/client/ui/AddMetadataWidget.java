@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -46,7 +46,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.SortedSet;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
@@ -90,11 +89,10 @@ import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.ParentJson;
 import edu.illinois.ncsa.mmdb.web.client.Results;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSubclasses;
@@ -108,7 +106,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
 import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
-import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 
 public class AddMetadataWidget extends Composite {
     public String                          uri;
@@ -129,8 +126,6 @@ public class AddMetadataWidget extends Composite {
     protected SortedSet<UserMetadataField> availableFields;
     private final HandlerManager           eventBus;
     UserMetadataField                      userMetadataField;
-    private String                         vivoQueryURL;
-    private String                         vivoIDPrefixURL;
 
     public AddMetadataWidget(String uri, final DispatchAsync dispatch, HandlerManager events) {
         this(new HashSet<String>(), dispatch, events);
@@ -139,28 +134,6 @@ public class AddMetadataWidget extends Composite {
     }
 
     public AddMetadataWidget(Collection<String> batch, final DispatchAsync dispatch, HandlerManager eventBus) {
-        dispatch.execute(new GetConfiguration(null, ConfigurationKey.VIVOQUERYURL, ConfigurationKey.VIVOIDENTIFIERURL), new AsyncCallback<ConfigurationResult>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(ConfigurationResult result) {
-                for (Entry<ConfigurationKey, String> entry : result.getConfiguration().entrySet() ) {
-                    switch (entry.getKey()) {
-                        case VIVOQUERYURL:
-                            vivoQueryURL = entry.getValue();
-                            break;
-                        case VIVOIDENTIFIERURL:
-                            vivoIDPrefixURL = entry.getValue();
-                            break;
-
-                        default:
-                    }
-                }
-            }
-        });
 
         this.resources = batch;
         this.dispatch = dispatch;
@@ -370,8 +343,8 @@ public class AddMetadataWidget extends Composite {
 
     private void InitializeVIVOConnection(String query) {
         // Send request to server to get the json object.
-        if (!vivoQueryURL.equals("")) {
-            getJson(1, vivoQueryURL + query, this);
+        if (!MMDB._vivoQueryUri.equals("")) {
+            getJson(1, MMDB._vivoQueryUri + query, this);
         }
     }
 
@@ -398,7 +371,7 @@ public class AddMetadataWidget extends Composite {
 
     /**
      * Widget to create new entry in table.
-     * 
+     *
      * @param availableFields
      */
     private void populateTypes(SortedSet<UserMetadataField> availableFields) {
@@ -435,8 +408,8 @@ public class AddMetadataWidget extends Composite {
      */
     protected void addValue(final boolean refresh) {
         String theValue = inputField.getValue();
-        // Only MultiField inputs will display as HTML right now (in the MEdiciinterface to the data), 
-        // but should avoid storing problematic values that may be displayed as HTML in other javascript apps 
+        // Only MultiField inputs will display as HTML right now (in the MEdiciinterface to the data),
+        // but should avoid storing problematic values that may be displayed as HTML in other javascript apps
         final String text = SimpleHtmlSanitizer.sanitizeHtml(theValue).asString();
 
         if (text.isEmpty() || text.equals("Select...")) {
@@ -506,7 +479,7 @@ public class AddMetadataWidget extends Composite {
                                 }
                                 // FIXME this will refresh once per section!
                                 //Since this is an add and we're sending in one section name (if it isn't the main value),
-                                //won't this always be one section, i.e. no fix required even if there are annotations on 
+                                //won't this always be one section, i.e. no fix required even if there are annotations on
                                 //multiple sections?
                             }
                         });
@@ -526,7 +499,7 @@ public class AddMetadataWidget extends Composite {
 
     /**
      * RPC call to remove an entry.
-     * 
+     *
      * @param property
      * @param isEdit
      *            - in an edit, the removal of the old property should trigger
@@ -555,7 +528,7 @@ public class AddMetadataWidget extends Composite {
                         GWT.log("removing URI value '" + value.getUri() + "'");
                         String valUri = value.getUri();
                         //FixMe : VIVO ID special case - storing name and Uri in one triple until we have the list of vivo ids cached on the server
-                        if (valUri.startsWith(vivoIDPrefixURL)) {
+                        if (valUri.startsWith(MMDB._vivoIdentifierUri)) {
                             valUri = value.getName() + " : " + valUri;
                             remove = new RemoveUserMetadata(uri, property, valUri);
                         } else {
@@ -588,7 +561,7 @@ public class AddMetadataWidget extends Composite {
 
     /**
      * Edit value of the property
-     * 
+     *
      * @param property
      */
     public void editValue(final String property, final UserMetadataValue oldValue) {
@@ -599,7 +572,7 @@ public class AddMetadataWidget extends Composite {
         String currentVal = oldValue.getUri();
         if (currentVal == null) {
             currentVal = oldValue.getName();
-        } else if (currentVal.startsWith(vivoIDPrefixURL)) {
+        } else if (currentVal.startsWith(MMDB._vivoIdentifierUri)) {
             currentVal = oldValue.getName() + " : " + currentVal;
         } else {
             currentVal = stripPrefix(currentVal);
@@ -643,10 +616,10 @@ public class AddMetadataWidget extends Composite {
             //Don't bother to write, just remove and refresh
             removeValue(property, oldValue, false);
         } else {
-            //Fixme? Unless I'm missing something, to determine whether we can avoid having to remove and 
-            // then write just to keep the same value, we have to check whether the uris match 
+            //Fixme? Unless I'm missing something, to determine whether we can avoid having to remove and
+            // then write just to keep the same value, we have to check whether the uris match
             // (if present), the values (if present), or whether the section and section value match,
-            // ... complex enough to skip since remove and then write the new value should always work, 
+            // ... complex enough to skip since remove and then write the new value should always work,
             // just be less efficient.
             //
             //add the new value after removing the old and before refreshing
@@ -846,7 +819,7 @@ public class AddMetadataWidget extends Composite {
     //Inherit input field class to build a creator field - contains a suggest box instead of a text box
     class CreatorField extends InputField {
 
-        //The suggest box contains the list of VIVO persons retrieved from the VIVO server 
+        //The suggest box contains the list of VIVO persons retrieved from the VIVO server
         private SuggestBox vivoCreatorSuggestBox;
 
         public CreatorField(UserMetadataField userMetadataField, ClickHandler addHandler, ClickHandler clearHandler) {
@@ -891,7 +864,7 @@ public class AddMetadataWidget extends Composite {
 
     class PartOfField extends InputField {
 
-        //The suggest box contains the list of VIVO persons retrieved from the VIVO server 
+        //The suggest box contains the list of VIVO persons retrieved from the VIVO server
         private SuggestBox partOfSuggestBox;
 
         public PartOfField(UserMetadataField userMetadataField, ClickHandler addHandler, ClickHandler clearHandler) {
@@ -1009,7 +982,7 @@ public class AddMetadataWidget extends Composite {
 
         /**
          * Recursevely populate subtree starting at node.
-         * 
+         *
          * @param node
          */
         private void populateChildren(final TaxonomyTreeItem node) {

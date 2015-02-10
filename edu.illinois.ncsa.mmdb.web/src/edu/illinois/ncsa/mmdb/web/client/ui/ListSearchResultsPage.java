@@ -41,12 +41,21 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.SearchTablePresenter;
@@ -69,8 +78,15 @@ public class ListSearchResultsPage extends Page {
         this.dispatch = dispatch;
         this.eventbus = eventBus;
 
+        mainLayoutPanel.addStyleName("searchpage");
         HorizontalPanel rightHeader = new HorizontalPanel();
         pageTitle.addEast(rightHeader);
+
+        String query = PlaceService.getParams().get("q");
+
+        String filter = PlaceService.getParams().get("f");
+
+        addSearchInformation(mainLayoutPanel, filter, query);
 
         // batch operations
         BatchOperationView batchOperationView = new BatchOperationView();
@@ -78,30 +94,6 @@ public class ListSearchResultsPage extends Page {
         BatchOperationPresenter batchOperationPresenter = new BatchOperationPresenter(dispatch, eventBus, batchOperationView, false);
         batchOperationPresenter.bind();
         rightHeader.add(batchOperationView);
-
-        String query = PlaceService.getParams().get("q");
-
-        String filter = PlaceService.getParams().get("f");
-        /* Fixme - get a string to describe search terms that parses our combined VIVOname:URL format (e.g. for dcterms:creator)
-         * Current code doesn't account for name at the front or URL
-         *
-        if (filter != null) {
-            String link = (query != null && query.contains(HTTPSTRING)) ? query.substring(query.indexOf(HTTPSTRING)) : "";
-            String remainderQuery = link.contains(" ") ? link.substring(link.indexOf(" ") + 1) : "";
-            link = link.contains(" ") ? link.substring(0, link.indexOf(" ")) : link;
-
-            //Need to accommodate for (VIVO) URLs obtained from metadata - if any
-            if (link == "") {
-                queryText = new HTML("Your search for datasets with metadata <b>" + query
-                        + "</b> returned the following results:");
-            }
-            else {
-                String newQuery = query.replace(link, "");
-                queryText = new HTML("Your search for datasets with metadata <b>" + newQuery + "<a href=\"" + link + "\">" + link + "</a>"
-                        + remainderQuery + "</b> returned the following results:");
-            }
-            //END - Modified by Ram
-        */
 
         DynamicTableView dynamicTableView = new DynamicTableView();
         final SearchTablePresenter dynamicTablePresenter = new SearchTablePresenter(dispatch, eventBus, dynamicTableView, filter, query);
@@ -117,6 +109,70 @@ public class ListSearchResultsPage extends Page {
         vp.addStyleName("tableCenter");
         mainLayoutPanel.add(vp);
         mainLayoutPanel.addStyleName("search-page");
+    }
+
+    private void addSearchInformation(FlowPanel basePanel, final String filter, final String query) {
+        String queryText = "";
+        final HTML searchResultsHtml = new HTML();
+        basePanel.add(searchResultsHtml);
+
+        List<String> tags = new ArrayList<String>();
+        List<String> textTerms = new ArrayList<String>();
+
+        if (filter == null) {
+            for (String s : query.split("\\s+") ) {
+                if (s.startsWith("tag:")) {
+                    tags.add(s.substring(4));
+                } else {
+                    textTerms.add(s);
+                }
+                queryText = "Search results for ";
+                Iterator<String> it = tags.iterator();
+                while (it.hasNext()) {
+                    queryText += "tag=<b>" + it.next() + "</b>";
+                    if (it.hasNext() || !textTerms.isEmpty()) {
+                        queryText += " AND ";
+                    }
+                }
+                Iterator<String> it2 = textTerms.iterator();
+                if (it2.hasNext()) {
+                    queryText += "text term" + ((textTerms.size() > 1) ? "s: <b>" : ": <b>");
+
+                    while (it2.hasNext()) {
+                        queryText += it2.next();
+                        if (it2.hasNext()) {
+                            queryText += ", ";
+                        }
+                    }
+                    queryText += "</b>";
+                }
+            }
+            searchResultsHtml.setHTML(queryText);
+        } else {
+            UserMetadataWidget.initReadableFields(dispatch, new AsyncCallback<ListUserMetadataFieldsResult>() {
+
+                @Override
+                public void onSuccess(ListUserMetadataFieldsResult result) {
+                    // TODO Auto-generated method stub
+                    String queryText = "Search results for: <b>" + UserMetadataWidget.getFieldLabel(filter);
+                    queryText += " = ";
+                    if (query.contains(MMDB._vivoIdentifierUri)) {
+                        //VIVO URLs are of the form '<URI> : <name>'
+                        int sep = query.indexOf(" : ");
+                        queryText += "<a href=\"" + query.substring(sep + 3) + "\">" + query.substring(0, sep) + "</a></b>";
+                    } else {
+                        queryText += query + "</b>";
+                    }
+                    searchResultsHtml.setHTML(queryText);
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    // TODO Auto-generated method stub
+
+                }
+            });
+        }
     }
 
     @Override

@@ -188,6 +188,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     public static String               _projectName                     = "SEAD ACR";
     public static String               _projectUrl                      = "http://sead-data.net";
     public static String               _projectDescription              = "A generic SEAD Project Space";
+    public static String               _vivoIdentifierUri               = null;
+    public static String               _vivoQueryUri                    = null;
     public static boolean              bigData                          = false;                              //Server's bigData flag
 
     private static void reportUmbrellaError(@NotNull Throwable e) {
@@ -312,7 +314,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 ConfigurationKey.OrcidClientId,
                 ConfigurationKey.ProjectHeaderLogo,
                 ConfigurationKey.ProjectHeaderBackground,
-                ConfigurationKey.ProjectHeaderTitleColor
+                ConfigurationKey.ProjectHeaderTitleColor,
+                ConfigurationKey.VIVOIDENTIFIERURL,
+                ConfigurationKey.VIVOQUERYURL
                 ), new AsyncCallback<ConfigurationResult>() {
 
                     @Override
@@ -327,6 +331,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                         _projectUrl = result.getConfiguration(ConfigurationKey.ProjectURL);
                         _projectDescription = result.getConfiguration(ConfigurationKey.ProjectDescription);
                         _orcidClientId = result.getConfiguration(ConfigurationKey.OrcidClientId);
+                        _vivoIdentifierUri = result.getConfiguration(ConfigurationKey.VIVOIDENTIFIERURL);
+                        _vivoQueryUri = result.getConfiguration(ConfigurationKey.VIVOQUERYURL);
                         projectNameLabel.setHTML(wrapIfNeeded(_projectName));
 
                         // override default logo, background, title color
