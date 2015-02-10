@@ -482,8 +482,19 @@ public class LoginPage extends Composite {
 
                 @Override
                 public void onSuccess(String token) {
-                    //Silent or not, we have a token and will complete silently
-                    doOauth2Authenticate(token, callback);
+                    if (token != null) {
+                        //Silent or not, we have a token and will complete silently
+                        doOauth2Authenticate(token, callback);
+                    } else { //Seeing some way that google indicates success but gives null token
+                        //No token available
+                        if (silent) {
+                            //Try anonymous login
+                            authenticate("anonymous", "none", callback);
+                        } else {
+                            //Go forward and ask user for credentials
+                            realOauth2Login(callback);
+                        }
+                    }
                 }
 
             });
