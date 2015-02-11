@@ -64,6 +64,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -705,7 +706,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 }
                 parseHistoryToken(History.getToken());
                 //Before doWithPerm? (most/all(?) callbacks are null now, so minor issue
-                callback.onSuccess(username, sessionKey);
+                callback.onSuccess(personBean.getEmail(), sessionKey);
             }
         };
 
@@ -1069,12 +1070,40 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                             }
 
                             @Override
-                            public void onSuccess(String userUri, String
+                            public void onSuccess(final String userUri, String
                                     sessionKey) {
 
                                 // login menu
                                 //Get the user's info (PersonBean) and store in UserSessionState
-                                retrieveUserInfo(userUri, sessionKey);
+                                retrieveUserInfo(null, userUri, sessionKey, new AuthenticationCallback() {
+                                    @Override
+                                    public void onFailure() {
+                                    }
+
+                                    @Override
+                                    public void onSuccess(String userName, String sessionKey) {
+                                        /* We've lost info about the provider and session/token expire time:
+                                         * If it has been written to local storage, retrieve and use it to
+                                         * restart the session refresh timer (for Oauth2 providers)
+                                         */
+                                        Storage store = Storage.getLocalStorageIfSupported();
+                                        if (store != null) {
+                                            String provider = store.getItem(userUri);
+                                            if (provider == null) {
+                                                provider = store.getItem(userName);
+                                            }
+                                            if (provider != null) {
+                                                MMDB.getSessionState().setLoginProvider(provider);
+                                                String exp = store.getItem("expires");
+                                                if (exp != null) {
+                                                    int expires_at = Integer.parseInt(exp);
+                                                    LoginPage.refreshCheck(expires_at - (int) (System.currentTimeMillis() / 1000L));
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                });
                                 credChangeOccuring = false;
 
                             }

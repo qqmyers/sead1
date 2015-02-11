@@ -60,6 +60,7 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
@@ -412,6 +413,12 @@ public class LoginPage extends Composite {
                                 GWT.log("User " + userInfoResult.getEmail() + " associated with session key " + sessionKey, null);
                                 // login local
                                 MMDB.getSessionState().setLoginProvider(LoginPage.ORCID_PROVIDER);
+                                Storage store = Storage.getLocalStorageIfSupported();
+                                if (store != null) {
+                                    store.setItem(userInfoResult.getEmail(), LoginPage.ORCID_PROVIDER);
+                                    store.setItem("expires", Integer.toString(result.getExpirationTime()));
+                                }
+
                                 mainWindow.retrieveUserInfoByName(userInfoResult.getEmail(), sessionKey, new AuthenticationCallback() {
 
                                     @Override
@@ -551,10 +558,17 @@ public class LoginPage extends Composite {
                 GWT.log("User " + result.getEmail() + " associated with session key " + result.getSessionId(), null);
                 // login local
                 MMDB.getSessionState().setLoginProvider(LoginPage.GOOGLE_PROVIDER);
-                mainWindow.retrieveUserInfoByName(result.getEmail(), result.getSessionId(), callback);
+                Storage store = Storage.getLocalStorageIfSupported();
+                if (store != null) {
+                    store.setItem(result.getEmail(), LoginPage.GOOGLE_PROVIDER);
+                    store.setItem("expires", Integer.toString(result.getExpirationTime()));
+                }
 
                 //Set timer to renew credentials
                 refreshCheck(result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L));
+
+                mainWindow.retrieveUserInfoByName(result.getEmail(), result.getSessionId(), callback);
+
             }
         });
     }
@@ -602,6 +616,11 @@ public class LoginPage extends Composite {
                             GWT.log("user " + username + " associated with session key " + sessionKey, null);
                             // login local
                             MMDB.getSessionState().setLoginProvider("local");
+                            Storage store = Storage.getLocalStorageIfSupported();
+                            if (store != null) {
+                                store.setItem(username, "local");
+                            }
+
                             mainWindow.retrieveUserInfoByName(username, sessionKey, callback);
                         }
                     }
@@ -734,6 +753,10 @@ public class LoginPage extends Composite {
         state.setCurrentUser(null);
         state.setSessionKey(null);
         state.setLoginProvider(null);
+        Storage store = Storage.getLocalStorageIfSupported();
+        if (store != null) {
+            store.clear();
+        }
 
         state.setAnonymous(false); // not logged in as anonymous, or anyone
         //setAutologin(true);
@@ -760,7 +783,7 @@ public class LoginPage extends Composite {
 
     public static void refreshCheck(int seconds) {
 
-        // Create a new timer that calls Window.alert().
+        // Create a new timer
         Timer t = new Timer() {
             @Override
             public void run() {
