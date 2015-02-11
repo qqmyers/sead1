@@ -42,7 +42,7 @@ function homePageJsonParser(json) {
 	}
 
 	if (singleCollection) {
-		writeCollection('0', json, obj.sparql.results.result, false);
+		writeCollection('0', json, obj.sparql.results.result, true);
 	} else {
 		for (var i = 0; i < obj.sparql.results.result.length; i++) {
 			writeCollection(i, json, obj.sparql.results.result[i], true);
@@ -131,7 +131,6 @@ function writeCollection(id, json, result, topLevel) {
 		$("#contents" + id + ">a").attr("href", "#discovery_" + uri)
 			.html("View Contents Listing ...");
 		} else {
-alert("yes");
 			$("#contents" + id + ">a").hide();
 		}
 
