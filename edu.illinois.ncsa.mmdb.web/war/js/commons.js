@@ -141,9 +141,8 @@ function pageBiblioJsonParser(id, json) {
 	if (title.indexOf("/") != -1) {
 		title = title.substring(title.lastIndexOf("/") + 1);
 	}
-	if (!($("#collectionTitle" + id + ">a").length)) {
-		$("#collectionTitle" + id).html(title);
-	}
+	$("#collectionTitle" + id + ">a").html(title);
+
 	if (document.title == "Contents: ")
 		document.title = "Contents: " + title;
 
@@ -209,10 +208,13 @@ function pageBiblioJsonParser(id, json) {
 	if (descriptors.length != 0) {
 		descriptorString = "";
 		for (var i = 0; i < descriptors.length; i++) {
-			descriptorString += " <a href='" + dataset_Path + descriptors[i]
-					+ "'><img class='discoveryPreview' src='" + image_Path
-					+ descriptors[i] + "' alt = 'Click to view' />" + "</a> ";
-
+			if (descriptors[i]) {
+				descriptorString += " <a href='" + dataset_Path
+						+ descriptors[i]
+						+ "'><img class='discoveryPreview' src='" + image_Path
+						+ descriptors[i] + "' alt = 'Click to view' />"
+						+ "</a> ";
+			}
 		}
 
 		$("#description" + id).html(
@@ -314,20 +316,14 @@ function createBlock(id, element) {
 					$("<tbody/>").append(
 							$("<tr/>").append(
 									$("<td/>").append(
-											$("<h1/>").attr("id",
+											$("<h1/>").append("<a/>").attr(
+													"id",
 													"collectionTitle" + id)
 													.css("padding-top", "5px")
 													.css("padding-left", "5px")
 													.css("padding-bottom",
 															"3px"))))));
-	$("#title" + id + ">table>tbody>tr").append(
-			$("<td/>").append(
-					$("<a/>").attr("id", "acrlink" + id).append(
-							$("<img/>").attr("src", "images/open_in_acr.png")
-									.attr("title", "View Collection Page")
-									.attr("alt", "View Collection Page").attr(
-											"border", "0").css('margin-top',
-											'-15px'))));
+	$("#title" + id + ">table>tbody>tr").append($("<td/>"));
 	$("#coll" + id).append(
 			$("<div/>").attr("class", "well").attr("id", "div" + id));
 	$("#div" + id).append(

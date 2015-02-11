@@ -118,10 +118,15 @@ function datatypesJsonParser(json) {
 
 	var options = {
 		title : 'Dataset Distribution',
+		titleTextStyle : {
+			color : 'blue',
+			fontSize : '16'
+		},
 		hAxis : {
 			title : 'File Type',
 			titleTextStyle : {
-				color : 'blue'
+				color : 'blue',
+				fontSize : '14'
 			}
 		},
 		legend : {

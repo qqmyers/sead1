@@ -854,7 +854,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private void showDiscoveryPage(String collection) {
         GWT.log("Loading Discovery Page", null);
         mainContainer.clear();
-        mainContainer.add(new DiscoveryPage(collection, "Published Collections", dispatchAsync, eventBus));
+        mainContainer.add(new DiscoveryPage(collection, "Published Data", dispatchAsync, eventBus));
     }
 
     private void showAdminPage() {

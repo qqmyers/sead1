@@ -103,8 +103,9 @@ function contentsPageJsonParser(jsonObj) {
 
 
 	createBlock(0, "#xmlBody");
-	var acrLink = collection_Path + tagID;
-	$("#acrlink0").attr("href", acrLink);
+	$("#collectionTitle0>a").attr("href", collection_Path + tagID);
+	$("#contents0>a").hide();
+
 	$("#search").empty();
 	$("#search").html("<h3>Viewing: <i><span id='collname'></span></i></h3><div><a id='returnanchor' href='#discovery'>Search All Collections</a></div>");
 
@@ -142,7 +143,7 @@ function contentsPageJsonParser(jsonObj) {
 		},
 		async : false
 	});
-	
+
 
 	$("#contents-loading").hide();
 	$("#xmlBody").css('visibility','visible');

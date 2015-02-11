@@ -82,7 +82,7 @@ public class AboutPage extends Page {
         projInfo.addStyleName("fixed-height-col");
         projInfo.getElement().setId("projInfo");
 
-        HTML projDesc = new HTML("<div class=\"well\"><div id=\"projectDesc\">" +
+        HTML projDesc = new HTML("<div class=\"well\"><h4>Project Description</h4><div id=\"projectDesc\">" +
                 MMDB._projectDescription + "</div></div>");
         projInfo.add(projDesc);
 
@@ -93,6 +93,7 @@ public class AboutPage extends Page {
 
         sysInfoPanel.getElement().setId("sysinfo");
         sysInfoPanel.addStyleName("well");
+        sysInfoPanel.add(new HTML("<h4>Basic Information</h4>"));
         for (java.util.Map.Entry<String, String> e : info.entrySet() ) {
             Label keyLabel = new Label(e.getKey());
             Label valueLabel = new Label(e.getValue());
@@ -102,17 +103,19 @@ public class AboutPage extends Page {
             sysInfoPanel.add(fp);
         }
         rightFlowPanel.add(sysInfoPanel);
-        Button homeButton = new Button("Visit Project Homepage");
-        homeButton.addClickHandler(new ClickHandler() {
+        if (MMDB._projectUrl.length() != 0) {
+            Button homeButton = new Button("Visit Project Homepage");
+            homeButton.addClickHandler(new ClickHandler() {
 
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.open(MMDB._projectUrl, null, null);
+                @Override
+                public void onClick(ClickEvent event) {
+                    Window.open(MMDB._projectUrl, null, null);
 
-            }
+                }
 
-        });
-        rightFlowPanel.add(homeButton);
+            });
+            rightFlowPanel.add(homeButton);
+        }
         top.add(rightFlowPanel);
         mainLayoutPanel.add(top);
     }

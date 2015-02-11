@@ -625,6 +625,21 @@ width: 1000px;
 	padding: 5px;
 }
 
+.metadataTableCell>.gwt-Label {
+	word-break: break-all;
+}
+
+.metadataTable .gwt-Hyperlink {
+display:inline;
+padding-left: 10px;
+margin-right:5px;
+}
+.metadataTableCell .gwt-Anchor {
+padding-left: 0px;
+}
+
+
+
 .metadataTitle {
 	padding: 5px;
 	background-color: #EBEBFF;
@@ -1156,6 +1171,7 @@ div.gwt-Label.smallerItalicText.alignRight{
   	text-align: left;
 	border-bottom:2px solid #f3822a;
 	padding-bottom:5px;
+	word-break: break-all;
 }
 
 .datasetTitleIcon {
@@ -1483,7 +1499,8 @@ div.gwt-Label.smallerItalicText.alignRight{
 
 .tagCount {
 	/*font-size: 0.9em;
-	vertical-align: super;*/
+	vertical-align: super;
+*/
 	color: #666;
 	zoom: 1;
 	display: inline;
@@ -1504,7 +1521,8 @@ div.gwt-Label.smallerItalicText.alignRight{
 .datasetInfoDescription {
 	width:40%;
 	float: left;
-	/*margin-left: 20px;*/
+	/*margin-left: 20px;
+*/
 }
 .datasetInfoDescription table{
 	margin-left:-10px;
@@ -1572,7 +1590,8 @@ div.gwt-Label.smallerItalicText.alignRight{
 }
 
 .titlePanelRightElement {
-	/*margin-right: 20px;*/
+	/*margin-right: 20px;
+*/
 }
 
 .gwt-MenuBar .gwt-MenuItem-selected {
@@ -2366,6 +2385,10 @@ padding: 0px;
 #sysinfo .gwt-Label:nth-child(odd):after{
 	content:":\00a0\00a0";
 }
+
+#sysInfo>.gwt-HTML {
+	margin-left: 0px !important;
+} 
 
 .gwt-Label.datasetRightColText{
 	font-size:14px !important;

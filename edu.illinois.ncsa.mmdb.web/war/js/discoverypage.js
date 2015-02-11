@@ -42,10 +42,10 @@ function homePageJsonParser(json) {
 	}
 
 	if (singleCollection) {
-		writeCollection('0', json, obj.sparql.results.result);
+		writeCollection('0', json, obj.sparql.results.result, false);
 	} else {
 		for (var i = 0; i < obj.sparql.results.result.length; i++) {
-			writeCollection(i, json, obj.sparql.results.result[i]);
+			writeCollection(i, json, obj.sparql.results.result[i], true);
 		}
 	}
 	$("#home-loading").hide();
@@ -86,7 +86,7 @@ function homePageJsonParser(json) {
 	// $("#xmlBody").append(($("<div/>")).html(div_html));
 }
 
-function writeCollection(id, json, result) {
+function writeCollection(id, json, result, topLevel) {
 	var uri = '';
 	var abs = '';
 	var displayTitle = '';
@@ -113,11 +113,8 @@ function writeCollection(id, json, result) {
 	if (isDeleted == false) {
 
 		createBlock(id, "#xmlBody");
-		$("#collectionTitle" + id).append(
-				$("<a/>").html(displayTitle).attr("href", "#discovery_" + uri));
-		var acrLink = collection_Path + uri;
-		$("#acrlink" + id).attr("href", acrLink);
-
+		$("#collectionTitle" + id + ">a").html(displayTitle).attr("href", collection_Path + uri);
+		
 		if (abs) {
 			var summary = abs.substring(0, 750);
 
@@ -130,8 +127,13 @@ function writeCollection(id, json, result) {
 			$("#abstract" + id).css("visibility", "visible");
 			
 		}
-$("#contents" + id + ">a").attr("href", "#discovery_" + uri)
+		if(topLevel==true) {
+		$("#contents" + id + ">a").attr("href", "#discovery_" + uri)
 			.html("View Contents Listing ...");
+		} else {
+alert("yes");
+			$("#contents" + id + ">a").hide();
+		}
 
 		$.ajax({
 			type : "GET",

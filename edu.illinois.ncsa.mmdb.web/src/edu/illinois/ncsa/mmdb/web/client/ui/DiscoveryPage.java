@@ -8,6 +8,7 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.RootPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 
@@ -56,6 +57,9 @@ public class DiscoveryPage extends Page {
         HTML bodyHtml = new HTML("<div id=\"xmlBody\"></div>");
         bodyHtml.setStyleName("span9");
         top.add(bodyHtml);
+        String va_url = RootPanel.get("va").getElement().getAttribute("href");
+        mainLayoutPanel.add(new HTML("This page contains collections of datasets that this project team has published through the" +
+                "<a href=\"" + va_url + "\">SEAD Virtual Archive</a> (or manually marked as having a publication date)."));
         mainLayoutPanel.add(top);
         if (currentCollection == null) {
             loadCollections();

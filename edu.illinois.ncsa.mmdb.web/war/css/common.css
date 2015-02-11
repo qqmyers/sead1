@@ -110,6 +110,10 @@ table.tablesorter tbody tr td:last-child {
 	padding:3px; 
 }
 
+#discovery {
+	padding-top: 12px;
+}
+
 #discovery .span3 {
 	margin-top: 0px;
 }
