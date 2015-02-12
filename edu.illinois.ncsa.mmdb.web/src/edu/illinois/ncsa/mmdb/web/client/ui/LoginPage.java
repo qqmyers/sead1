@@ -787,52 +787,56 @@ public class LoginPage extends Composite {
 
     public static void refreshCheck(int seconds) {
 
-        // Create a new timer
-        Timer t = new Timer() {
-            @Override
-            public void run() {
-                /*Once the loginpage is shown, it's internal logic determines what happens next.
-                 * Right now, if the user succeeds, doWithPermissions("login") gets called
-                 */
-                MMDB.credChangeOccuring = true;
-                if (LoginPage.getAutologin()) {
-                    if (GOOGLE_PROVIDER.equals(MMDB.getSessionState().getLoginProvider())) {
-                        //Try to pick up existing credential silently
-                        LoginPage.checkForOauth2Token(MMDB._googleClientId, new TokenCallback() {
-                            @Override
-                            public void onFailure() {
-                                History.newItem("logout_st", true);
-                            }
+        if (seconds > 0) {
+            // Create a new timer
+            Timer t = new Timer() {
+                @Override
+                public void run() {
+                    /*Once the loginpage is shown, it's internal logic determines what happens next.
+                     * Right now, if the user succeeds, doWithPermissions("login") gets called
+                     */
+                    MMDB.credChangeOccuring = true;
+                    if (LoginPage.getAutologin()) {
+                        if (GOOGLE_PROVIDER.equals(MMDB.getSessionState().getLoginProvider())) {
+                            //Try to pick up existing credential silently
+                            LoginPage.checkForOauth2Token(MMDB._googleClientId, new TokenCallback() {
+                                @Override
+                                public void onFailure() {
+                                    History.newItem("logout_st", true);
+                                }
 
-                            @Override
-                            public void onSuccess(String token) {
-                                //Silent or not, we have a token and will complete silently
-                                LoginPage.doOauth2Authenticate(token, new AuthenticationCallback() {
-                                    @Override
-                                    public void onFailure() {
-                                        History.newItem("logout_st", true);
-                                    }
+                                @Override
+                                public void onSuccess(String token) {
+                                    //Silent or not, we have a token and will complete silently
+                                    LoginPage.doOauth2Authenticate(token, new AuthenticationCallback() {
+                                        @Override
+                                        public void onFailure() {
+                                            History.newItem("logout_st", true);
+                                        }
 
-                                    @Override
-                                    public void onSuccess(String userUri, String sessionKey) {
-                                        GWT.log(userUri + " logged in");
-                                    }
-                                });
-                            }
-                        });
-                    } else if (ORCID_PROVIDER.equals(MMDB.getSessionState().getLoginProvider())) {
-                        //ORCID is dropping the refresh token - for authentication purposes, it appears that we just have to re login at timeout (currently 1 hour)
-                        orcidAuthLogin(Boolean.FALSE);
+                                        @Override
+                                        public void onSuccess(String userUri, String sessionKey) {
+                                            GWT.log(userUri + " logged in");
+                                        }
+                                    });
+                                }
+                            });
+                        } else if (ORCID_PROVIDER.equals(MMDB.getSessionState().getLoginProvider())) {
+                            //ORCID is dropping the refresh token - for authentication purposes, it appears that we just have to re login at timeout (currently 1 hour)
+                            orcidAuthLogin(Boolean.FALSE);
+                        }
+                    } else {
+                        History.newItem("logout_st", true);
                     }
-                } else {
-                    History.newItem("logout_st", true);
+
                 }
+            };
 
-            }
-        };
-
-        // Schedule the timer to run
-        t.schedule(seconds * 1000);
+            // Schedule the timer to run
+            t.schedule(seconds * 1000);
+        } else {
+            GWT.log("Token already expired: clock issue on server or local machine?");
+        }
     }
 
     /**
