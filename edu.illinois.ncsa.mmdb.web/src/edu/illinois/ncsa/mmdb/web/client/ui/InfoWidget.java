@@ -181,7 +181,7 @@ public class InfoWidget extends Composite {
         initWidget(panel);
     }
 
-    protected void getCreators(final String uri) {
+    private void getCreators(final String uri) {
         //START - Added by Ram on Nov.21, 2011
         //FIXME : Need to refresh automatically on adding creator metadata
         //FIXME - just get creators, not all user metadata for efficiency
@@ -198,9 +198,15 @@ public class InfoWidget extends Composite {
                         if (!values.isEmpty()) {
                             for (UserMetadataValue value : values ) {
                                 try {
-                                    Anchor creator = new Anchor(value.getName(), value.getUri());
-                                    creator.addStyleName("datasetRightColText");
-                                    creatorsListPanel.add(creator);
+                                    if (value.getUri() != null) {
+                                        Anchor creator = new Anchor(value.getName(), value.getUri());
+                                        creator.addStyleName("datasetRightColText");
+                                        creatorsListPanel.add(creator);
+                                    } else {
+                                        Label creatorLabel = new Label(value.getName());
+                                        creatorLabel.addStyleName("datasetRightColText");
+                                        creatorsListPanel.add(creatorLabel);
+                                    }
                                 }
                                 catch (Exception ex) {
                                     GWT.log(ex.getMessage());
