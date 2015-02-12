@@ -436,7 +436,11 @@ public class LoginPage extends Composite {
                                     }
                                 });
                                 //Set timer to renew credentials
-                                refreshCheck(result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L));
+                                int time = result.getExpirationTime() - (int) (System.currentTimeMillis() / 1000L);
+                                if (time <= 0) {
+                                    time = 1;
+                                }
+                                refreshCheck(time);
                             }
 
                         }
