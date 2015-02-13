@@ -113,7 +113,7 @@ th, td {
 	color: #f3882a;
 }
 
-.menu-item-has-children a:after {
+.menu-item-has-children>a:after {
 	/* color: #FFFFFF; */
 	content: ' \25be' !important;
 }
