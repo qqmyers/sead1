@@ -772,29 +772,85 @@ padding-left: 0px;
 	margin-left: 75px;	
 }
 
-.uploadPageLayout {
-	width: 95%;
+#uploadcolumns {
+	display:flex;
+}
+
+#uploadLeft {
+	width: 500px;
+	margin: 10px auto 10px 10px;
+	padding-bottom: 30px;
+	display:inline-block;
+
+}
+
+#uploadLeft .gwt-TextBox {
+	width: 75%;
+}
+
+#html5form {
+	display:flex;
+	flex-direction:row;
+}
+
+#html5form .gwt-HTML, #html5form .gwt-Label {
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+#bmlet .gwt-Anchor {
+	margin:10px;
+	background-color: lightgray;
+	font-size: 18px;
+	word-break:break-all;
+	display:inline-block;
+
+}
+
+#uploadRight {
+	width: 575px;
 	margin: 10px auto 10px auto;
 	padding-bottom: 30px;
+	float:right;
+display:inline-block;
+
 }
 
-.uploadPageLargeCell {
-	width: 50%;
+#uploadstatustable {
+	overflow: auto;
+	max-height: 600px;
+	background-color: white;
+	margin-top: 20px;
 }
 
-.uploadOrLabel {
-	font-size: 1.4em;
+.uploadStatus {
+overflow: auto;
 }
 
-.dndContainer {
-	width: 152px;
+.uploading {
+	display:flex;
 }
 
-.dndTooltip {
-	width: 152px;
-	border: 1px dashed #002B55;
-	padding: 7px;
+.uploading .thumbnail, .uploading .pendingSmall{
+	margin:auto;
+	height:150px!important;
+	width:150px;
 	cursor: pointer;
+}
+.uploading>table {
+	width:250px;
+}
+
+.uploading table gwt-Label{
+	word-break: break-all;
+}
+
+.uploading div, .uploading a, .uploading span, .uploading table {
+	margin:auto;
+}
+
+.uploading-hidden {
+  display:hide;
 }
 
 .dragAndDrop {
@@ -1582,6 +1638,7 @@ div.gwt-Label.smallerItalicText.alignRight{
 .progressBar {
 	border: 1px solid;
 	padding: 1px;
+	width:150px;
 }
 
 .progressBarBar {
@@ -1815,16 +1872,11 @@ input[type="checkbox"]{
 	padding-bottom: 10px;
     text-align:center;
 }
-#drop {
-	position:relative;
-	width: 200px;
-	height: 170px;
-}
 
 #list {
 	width: 210px;
-	font-size: 10px;
-	float: left;
+	font-size: 16px;
+	display:block;
 	margin-left: 10px;
 }
 .addedIMG {
@@ -1866,7 +1918,12 @@ input[type="checkbox"]{
 
 .importTitle {
 	font-weight:bold;
-	margin-top: 40px;
+	margin-top: 25px;
+	font-size: 16px;
+}
+
+#options {
+	font-weight:bold;
 }
 
 /* Sorted table for spreadsheet preview */
@@ -1947,6 +2004,15 @@ padding-left: 20px;
 .callout .datasetInfoDescription div{
 padding: 0px;
 	margin: 0px auto 0px auto;
+}
+
+.callout .datasetInfoThumbnail {
+	width: 150px;
+}
+
+.callout .imageThumbnail, .callout .pendingSmall{
+	width: 100px;
+	height: 100px!important;
 }
 
 /* SEAD Modification - to counter gwt defaults */
@@ -2229,30 +2295,13 @@ input[type="checkbox"]{
     border: 2px dashed #999;
 }
 
-#box {
-	font:normal 24px arial, helvetica, sans serif;
-	color:#999;
-	background-color: #fff;
-	width: 200px;
-	border: 2px dashed #999;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
-	border-radius: 6px;
-	padding-bottom: 10px;
-    text-align:center;
-}
+
 #drop {
 	position:relative;
 	width: 200px;
-	height: 170px;
+	height: 50px;
 }
 
-#list {
-	width: 210px;
-	font-size: 10px;
-	float: left;
-	margin-left: 10px;
-}
 .addedIMG {
 	width: 100px;
 	height: 100px;
@@ -2290,10 +2339,6 @@ input[type="checkbox"]{
 	margin-bottom: 15px;
 }
 
-.importTitle {
-	font-weight:bold;
-	margin-top: 40px;
-}
 
 /* Sorted table for spreadsheet preview */
 table.tablesorter {
