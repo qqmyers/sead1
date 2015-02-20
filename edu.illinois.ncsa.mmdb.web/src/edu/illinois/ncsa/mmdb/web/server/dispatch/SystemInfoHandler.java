@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
@@ -70,9 +70,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
  * Get license attached to a specific resource.
- * 
+ *
  * @author Rob Kooper
- * 
+ *
  */
 public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoResult> {
     static private long             UNSIGNED_INT = (long) Math.pow(2, 32);
@@ -171,23 +171,27 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
                 // row.get(1) is null if there's no parent, i.e. a top level collection that should be counted if anon can see it
                 // row.get(2) is not null if the collection has been published, i.e. should be added to the published count
                 // for now, the logic requires that a published collection be visible in the ACR to be counted but this could be improved
-                // once we have our lifecycle worked out (would be odd if a collection were published and not visible to anon. 
+                // once we have our lifecycle worked out (would be odd if a collection were published and not visible to anon.
                 // Eventually we may need to query the VA to find published collections if all record of them is flushed from an ACR.)
                 if ((row.get(1) == null) || (row.get(2) != null)) {
                     //check permissions
                     if (rbac.checkPermission(anon, row.get(0), Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri()))) {
+                        //Collections don't have an explicit access level, but this checks to see if anon is allowed to see the default level
                         if (rbac.checkAccessLevel(anon, row.get(0))) {
                             if (row.get(1) == null) {
                                 log.debug("Adding preprint: " + row.get(0));
                                 preprintCollCount++;
                             }
 
-                            if (row.get(2) != null) {
-                                log.debug("Adding published: " + row.get(0));
-                                publishedCollCount++;
-                            }
                         }
                     }
+                }
+                //Published collections can have parents and we should report them regardless of whether anon can view their data
+                // based on permissions and access control - nominally pub means data is available elsewhere (though it would be somewhat odd
+                // to not allow anon to see published data)
+                if (row.get(2) != null) {
+                    log.debug("Adding published: " + row.get(0));
+                    publishedCollCount++;
                 }
             }
         } catch (OperatorException e) {
