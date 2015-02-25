@@ -322,6 +322,8 @@ public class TupeloStore {
     public MimeMap getMimeMap() {
         if (mimemap == null) {
             mimemap = new MimeMap(context);
+            //FixMe - could be pushed to cet-beans-tupelo jar
+            mimemap.addMimeType("7z", "application/x-7z-compressed", false, "Compound");
         }
         return mimemap;
     }
