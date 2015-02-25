@@ -82,9 +82,6 @@ public class ConfigurationWidget extends Composite {
         //presentation defaults
         mainPanel.add(createPresentationSection(configuration));
 
-        // google map key
-        mainPanel.add(createMapSection(configuration));
-
         // server updates.
         mainPanel.add(createUpdateSection());
 
@@ -421,10 +418,6 @@ public class ConfigurationWidget extends Composite {
 
         return dp;
 
-    }
-
-    private DisclosurePanel createMapSection(ConfigurationResult configuration) {
-        return createSimpleConfigurationSection(configuration, "Map", "GoogleMapKey", ConfigurationKey.GoogleMapKey, true);
     }
 
     private DisclosurePanel createUpdateSection() {
