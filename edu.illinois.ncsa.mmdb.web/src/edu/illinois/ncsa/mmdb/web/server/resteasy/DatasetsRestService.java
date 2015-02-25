@@ -46,6 +46,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.tupeloproject.kernel.BlobFetcher;
@@ -86,6 +87,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  *
  */
 @Path("/datasets")
+@NoCache
 public class DatasetsRestService extends ItemServicesImpl {
 
     private static String[] CopyIgnore  = new String[] {

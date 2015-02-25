@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.resteasy.annotations.cache.NoCache;
 import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfoResult;
@@ -33,6 +34,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
  */
 
 @Path("/sys")
+@NoCache
 public class SysInfoRestService {
 
     /** Commons logging **/

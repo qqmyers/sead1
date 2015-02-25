@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2014 University of Michigan
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.resteasy.annotations.cache.NoCache;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
@@ -42,9 +43,10 @@ import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 
 /**
  * @author Jim Myers <myersjd@umich.edu>
- * 
+ *
  */
 @Path("/tags")
+@NoCache
 public class TagsRestService extends ItemServicesImpl {
 
     /** Commons logging **/
@@ -52,7 +54,7 @@ public class TagsRestService extends ItemServicesImpl {
 
     /**
      * List all tags used
-     * 
+     *
      * @param request
      *            - used to get user Id
      * @return JSON list of tag strings
@@ -87,7 +89,7 @@ public class TagsRestService extends ItemServicesImpl {
     /**
      * Get all datasets (non-deleted, that user can see) that are tagged with
      * the given tag
-     * 
+     *
      * @param tag
      * @return basic metadata for each dataset in json-ld
      */
@@ -109,7 +111,7 @@ public class TagsRestService extends ItemServicesImpl {
     /**
      * Get all collections (non-deleted, that user can see) that are tagged with
      * the given tag
-     * 
+     *
      * @param tag
      * @return basic metadata for each collection in json-ld
      */
@@ -132,7 +134,7 @@ public class TagsRestService extends ItemServicesImpl {
      * Get all (non-deleted, that user can see) geo layers (collections or
      * datasets that have a WMSLayer annotation) that are tagged with
      * the given tag
-     * 
+     *
      * @param tag
      * @return geo metadata for each item in json-ld
      */
@@ -149,7 +151,7 @@ public class TagsRestService extends ItemServicesImpl {
      * Get all (non-deleted, that user can see) geo fatures (collections or
      * datasets that have a GeoPoint annotation) that are tagged with
      * the given tag
-     * 
+     *
      * @return geo metadata for each item in json-ld
      */
 

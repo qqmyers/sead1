@@ -34,6 +34,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.tupeloproject.kernel.Context;
@@ -61,6 +62,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
  * transmission.
  */
 @Path("/collections")
+@NoCache
 public class CollectionsRestService extends ItemServicesImpl {
 
     /** Commons logging **/
