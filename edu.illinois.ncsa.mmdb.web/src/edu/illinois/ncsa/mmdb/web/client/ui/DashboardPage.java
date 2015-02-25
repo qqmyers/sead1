@@ -7,7 +7,9 @@ import org.gwtopenmaps.openlayers.client.MapWidget;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -106,8 +108,12 @@ public class DashboardPage extends Page {
         mainLayoutPanel.add(bottom);
 
         buildMapUi();
-        loadDashboard();
 
+        Scheduler.get().scheduleDeferred(new Command() {
+            public void execute() {
+                loadDashboard();
+            }
+        });
     }
 
     public static native void loadDashboard() /*-{
@@ -121,7 +127,7 @@ public class DashboardPage extends Page {
      * @param tag
      */
     private void buildMapUi() {
-        theMap = new GeoWidget(mediciProxySvc, "map", 586, 300);
+        theMap = new GeoWidget(mediciProxySvc, "map", 564, 300);
         theMap.buildMapUi(null, new Callback<EmptyResult, Throwable>() {
 
             @Override

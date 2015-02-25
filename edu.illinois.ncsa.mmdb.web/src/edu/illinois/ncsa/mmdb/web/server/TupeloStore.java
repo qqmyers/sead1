@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -114,10 +114,10 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  * Singleton class to manage a tupelo context and its associated beansession.
  * Context is loaded from disk. By default the location of the context
  * definition ends up in WEB-INF/classes/context.xml
- * 
+ *
  * @author Luigi Marini
  * @author myersjd@umich.edu
- * 
+ *
  */
 public class TupeloStore {
 
@@ -164,7 +164,7 @@ public class TupeloStore {
 
     /**
      * Return singleton instance.
-     * 
+     *
      * @return singleton TupeloStore
      */
     public static synchronized TupeloStore getInstance() {
@@ -176,7 +176,7 @@ public class TupeloStore {
 
     /**
      * Return singleton instance.
-     * 
+     *
      * @return singleton TupeloStore
      */
     public static synchronized void createInstance(Context context) {
@@ -208,7 +208,7 @@ public class TupeloStore {
 
     /**
      * Bean session.
-     * 
+     *
      * @return
      */
     public BeanSession getBeanSession() {
@@ -279,7 +279,7 @@ public class TupeloStore {
 
     /**
      * Get the tupelo context.
-     * 
+     *
      * @return tupelo context
      */
     public Context getContext() {
@@ -288,7 +288,7 @@ public class TupeloStore {
 
     /**
      * Get rbac
-     * 
+     *
      * @return
      */
     public SEADRbac getRbac() {
@@ -316,7 +316,7 @@ public class TupeloStore {
     /**
      * Returns a MimeMap that is initialized with default mappings as well
      * as those stored inside the context.
-     * 
+     *
      * @return the FileNameMap
      */
     public MimeMap getMimeMap() {
@@ -440,7 +440,7 @@ public class TupeloStore {
 
     /**
      * return a path to the iamge in the "/images" directory of the webapp
-     * 
+     *
      * @throws ServletException
      */
     public static String getImagePath(HttpServletRequest request, String imageName) throws ServletException {
@@ -503,7 +503,7 @@ public class TupeloStore {
 
     /**
      * Extract metadata and previews from the given URI.
-     * 
+     *
      * @param uri
      *            uri of dataset to pass to extraction service.
      * @return the job id at the extractor or null if the job was rejected.
@@ -515,12 +515,12 @@ public class TupeloStore {
     /**
      * Extract metadata and previews from the given URI. If rerun is set to true
      * it will tell the extraction service to rerun the extraction.
-     * 
+     *
      * @param uri
      *            uri of dataset to pass to extraction service.
      * @param rerun
      *            set to true if extraction service should be run again.
-     * @return the job id at the extractor or null if the job was rejected.
+     * @return successful launch (true/false)
      */
     public boolean extractPreviews(String uri, boolean rerun) {
         ExtractorJob ej = null;
@@ -725,7 +725,8 @@ public class TupeloStore {
             if (size.equals(GetPreviews.SMALL) || size.equals(GetPreviews.LARGE)) {
                 mPreview = new Memoized<PreviewImageBean>() {
                     public PreviewImageBean computeValue() {
-                        return RestServlet.getPreview(uri, size);
+                        PreviewImageBean pib = RestServlet.getPreview(uri, size);
+                        return pib;
                     }
                 };
             } else if (size.equals(GetPreviews.BADGE)) {
@@ -764,7 +765,7 @@ public class TupeloStore {
     }
 
     /**
-     * 
+     *
      * @param collectionUri
      * @return
      */
@@ -791,7 +792,7 @@ public class TupeloStore {
     /**
      * Perform a unifier, but exclude anything that is marked as deleted
      * (dcterms:isReplacedBy rdf:nil).
-     * 
+     *
      * @param u
      *            the unifier
      * @param subjectVar
@@ -849,7 +850,7 @@ public class TupeloStore {
      * This notifies the store that cached information (e.g., full-text
      * indexing)
      * needs to be computed
-     * 
+     *
      * @param uri
      *            the uri of the added thing
      */
@@ -861,7 +862,7 @@ public class TupeloStore {
      * This notifies the store that cached information (e.g., full-text
      * indexing)
      * needs to be recomputed.
-     * 
+     *
      * @param uri
      *            the uri of the changed thing
      */
@@ -879,7 +880,7 @@ public class TupeloStore {
      * This notifies the store that cached information (e.g., full-text
      * indexing)
      * needs to be recomputed.
-     * 
+     *
      * @param uri
      *            the uri of the deleted thing
      */
@@ -902,7 +903,7 @@ public class TupeloStore {
 
     /**
      * Queue a dataset for full-text (re)indexing
-     * 
+     *
      * @param datasetUri
      */
     public void indexFullText(String datasetUri) {
@@ -920,7 +921,7 @@ public class TupeloStore {
 
     /**
      * Queue a dataset for full-text deindexing
-     * 
+     *
      * @param datasetUri
      */
     public void deindexFullText(String datasetUri) {
@@ -1136,7 +1137,7 @@ public class TupeloStore {
      * Configuration, this section will read/write the configuration to the
      * context. If any values are set in the server.properties they will be
      * used as defaults.
-     * 
+     *
      * @param defaults
      * @throws OperatorException
      */
@@ -1184,7 +1185,7 @@ public class TupeloStore {
         try {
             return MMDB.medici("configuration/" + URLEncoder.encode(key.toString(), "UTF8")); //$NON-NLS-1$ //$NON-NLS-2$
         } catch (UnsupportedEncodingException e) {
-            return MMDB.medici("configuration/" + key.toString()); //$NON-NLS-1$ 
+            return MMDB.medici("configuration/" + key.toString()); //$NON-NLS-1$
         }
     }
 

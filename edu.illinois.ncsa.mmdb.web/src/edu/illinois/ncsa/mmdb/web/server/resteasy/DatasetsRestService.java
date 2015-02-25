@@ -311,6 +311,20 @@ public class DatasetsRestService extends ItemServicesImpl {
     }
 
     /**
+     * Get recent datasets (latest 100 datasets are searched)
+     *
+     * @return List of recent datasets that have not been deleted by ID with
+     *         basic metadata as JSON-LD
+     */
+    @GET
+    @Path("/recent")
+    @Produces("application/json")
+    public Response getRecentDatasetsAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        return getLatestItems(Cet.DATASET, datasetBasics, userId, "Date");
+    }
+
+    /**
      * Get all datasets
      *
      * @return List of all datasets by ID with basic metadata as JSON-LD

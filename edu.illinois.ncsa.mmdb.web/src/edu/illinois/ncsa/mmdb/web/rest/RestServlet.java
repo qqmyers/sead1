@@ -61,6 +61,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.mail.MessagingException;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -322,6 +323,28 @@ public class RestServlet extends AuthenticatedServlet {
         }
     }
 
+    String getDefaultPreviewImage(String uri) {
+        //Return our default content icon while waiting for extraction...
+        Unifier u2 = new Unifier();
+        u2.setColumnNames("mimeType");
+        u2.addPattern(Resource.uriRef(uri), Dc.FORMAT, "mimeType");
+        try {
+            TupeloStore.getInstance().getContext().perform(u2);
+        } catch (OperatorException e) {
+            log.error(e);
+            return null;
+        }
+        String mimeType = "";
+        for (Tuple<Resource> row : u2.getResult() ) {
+            mimeType = row.get(0).getString();
+        }
+
+        String category = TupeloStore.getInstance().getMimeMap().getCategory(mimeType);
+        log.trace("Found mimetype: " + mimeType + ", assigned category: " + category);
+        //relative Uri!
+        return "/images/defaultpreviews/" + category + "-200.png";
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         long then = System.currentTimeMillis();
@@ -533,9 +556,11 @@ public class RestServlet extends AuthenticatedServlet {
 
         } else if (hasPrefix(PREVIEW_ANY, request)) {
             if (isAllowed(userId, uri, Permission.VIEW_DATA, false)) {
-
+                //caching defeats access control - previews downloaded by a auth'd user will be cached and
+                //reused by the browser for some time, such that this method is not called and the old copy may be seen.
+                //So limit cache time...
+                response.addHeader("cache-control", "max-age=900"); // 15 minute expiration
                 log.trace("Getting preview: " + request.getRequestURL().toString());
-                response.flushBuffer(); // MMDB-620
                 long then = System.currentTimeMillis(); // FIXME debug
                 PreviewImageBean preview = null;
                 String image404 = null;
@@ -559,17 +584,32 @@ public class RestServlet extends AuthenticatedServlet {
                     if (now - then > 100) {
                         log.warn("preview lookup took " + (now - then) + "ms");
                     }
+                }
+                String previewUri = preview != null ? preview.getUri() : null;
+                if (previewUri == null) {
+                    previewUri = getDefaultPreviewImage(uri);
+                    //using relative URL for local content icons versus tag: ids for tupelo managed previews
+                    //not cached to avoid messing with 'pending' logic
+                    if (previewUri != null) {
+                        log.trace("uri = " + previewUri);
+                        if (previewUri.startsWith("/images/default")) {
+                            //using a defaultpreviews content icon - need to create the absolute URL using request
+                            RequestDispatcher dispatcher = request.getRequestDispatcher(previewUri);
+                            dispatcher.forward(request, response);
+                            return;
+                        }
+                    }
+                }
+                if (preview != null) {
                     String contentType = preview.getMimeType();
                     if (contentType != null) {
                         response.setContentType(contentType);
-                        response.flushBuffer(); // MMDB-620
                     }
                 }
-                String previewUri = preview != null ? preview.getUri() : null;
-                //FixMe: is 404 w/o any image the right thing to send when a preview is not available?
-                //(e.g. if, for example, extractor is down, should we send the 404 image and no-cache headers?)
-                //Does this break logic anywhere?
+                response.flushBuffer(); // MMDB-620
+
                 returnImage(request, response, previewUri, image404, shouldCache404(uri));
+
             } else {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             }

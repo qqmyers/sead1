@@ -307,10 +307,11 @@ public class AuthenticatedServlet extends HttpServlet {
 
     void dontCache(HttpServletResponse response) {
         // OK, we REALLY don't want the browser to cache this. For reals
-        response.addHeader("cache-control", "no-store, no-cache, must-revalidate, max-age=-1"); // don't cache
+        //set to clear any previous values
+        response.setHeader("cache-control", "no-store, no-cache, must-revalidate, max-age=-1"); // don't cache
         response.addHeader("cache-control", "post-check=0, pre-check=0, false"); // really don't cache
         response.addHeader("pragma", "no-cache, no-store"); // no, we mean it, really don't cache
-        response.addHeader("expires", "-1"); // if you cache, we're going to be very, very angry
+        response.setHeader("expires", "-1"); // if you cache, we're going to be very, very angry
     }
 
     Context getContext() {

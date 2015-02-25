@@ -981,7 +981,7 @@ public class ItemServicesImpl
 
             //column 0 must be identifier
             populateUnifier("item", uf, context, null);
-            //Must come after to avoid having no result of row 0, column 0 would be null
+            //Must come after to avoid having no result if row 0, column 0 would be null
             uf.addColumnName("parent");
             uf.addPattern("parent", DcTerms.HAS_PART, "item", true);
             List<String> names = uf.getColumnNames();
@@ -1010,6 +1010,56 @@ public class ItemServicesImpl
                             } else {
                                 return false;
                             }
+                        }
+                    }
+                    return false;
+                }
+            });
+        } catch (Exception e) {
+            log.debug("Exception during processing: ", e);
+            return Response.status(500).entity("Error retrieving items").build();
+        }
+        return Response.status(200).entity(result).build();
+    }
+
+    protected Response getLatestItems(Resource itemType, Map<String, Object> context, final UriRef userId, final String dateColumn) {
+
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        try {
+
+            PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
+
+            Unifier uf = new Unifier();
+            uf.addPattern("item", Rdf.TYPE, itemType);
+
+            //column 0 must be identifier
+            populateUnifier("item", uf, context, null);
+            uf.addOrderByDesc(dateColumn);
+            uf.setLimit(100);
+            List<String> names = uf.getColumnNames();
+            org.tupeloproject.util.Table<Resource> table = null;
+            table = TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
+
+            result = buildResultMap(table, context, names, true, new FilterCallback() {
+                @Override
+                public boolean include(Tuple<Resource> t) {
+                    UriRef id = null;
+                    if (t.get(0) == null) {
+                        log.error("Missing identifier - skipping a dataset");
+                    } else {
+                        if (t.get(0).isLiteral()) {
+                            id = Resource.uriRef(t.get(0).toString());
+                        } else {
+                            id = (UriRef) t.get(0);
+                            log.warn("UriRef identifier:" + t.get(0).toString());
+                        }
+                        if (isAccessible(userId, id)) {
+                            return true;
+                        } else {
+                            return false;
                         }
                     }
                     return false;
