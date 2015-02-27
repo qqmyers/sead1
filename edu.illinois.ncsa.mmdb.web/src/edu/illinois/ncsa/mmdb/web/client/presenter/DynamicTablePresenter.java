@@ -88,7 +88,7 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
     private static String      initialViewType      = DynamicTableView.GRID_VIEW_TYPE;
     private static String      initialSize          = DynamicTableView.PAGE_SIZE_X1;
 
-    protected static Boolean   showTopLevelDatasets = false;
+    public static Boolean      showTopLevelDatasets = false;
     protected BasePresenter<?> viewTypePresenter;
 
     public interface Display {

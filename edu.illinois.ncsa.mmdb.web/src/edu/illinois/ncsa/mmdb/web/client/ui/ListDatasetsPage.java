@@ -49,6 +49,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DatasetTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
@@ -63,6 +64,9 @@ public class ListDatasetsPage extends Page {
 
     public ListDatasetsPage(DispatchAsync dispatch, HandlerManager eventBus) {
         super("Datasets", dispatch);
+        if (DynamicTablePresenter.showTopLevelDatasets == true) {
+            setPageTitle("Datasets not in a Collection");
+        }
         this.dispatch = dispatch;
         this.eventbus = eventBus;
 

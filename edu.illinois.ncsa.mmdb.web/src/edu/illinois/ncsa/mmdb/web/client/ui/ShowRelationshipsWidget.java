@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -139,7 +139,8 @@ public class ShowRelationshipsWidget extends Composite {
 
         //initialize preview with image and title
         String url = "dataset?id=" + ds.getUri();
-        final PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url, service);
+        String category = ContentCategory.getCategory(ds.getMimeType(), service);
+        final PreviewWidget pw = new PreviewWidget(ds.getUri(), GetPreviews.SMALL, url, category, service);
         String title = ds.getTitle();
         title = title.length() > 15 ? title.substring(0, 15) + "..." : title;
         Hyperlink link = new Hyperlink(title, url);

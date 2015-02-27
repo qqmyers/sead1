@@ -62,6 +62,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.CollectionTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
@@ -83,6 +84,9 @@ public class ListCollectionsPage extends Page {
 
     public ListCollectionsPage(DispatchAsync dispatch, HandlerManager eventBus) {
         super("Collections", dispatch);
+        if (DynamicTablePresenter.showTopLevelDatasets == true) {
+            setPageTitle("Top-level Collections");
+        }
         this.dispatch = dispatch;
         this.eventbus = eventBus;
 
@@ -158,9 +162,7 @@ public class ListCollectionsPage extends Page {
 
             @Override
             public void onDenied() {
-                String msg = "You do not have permission to create collections";
-                GWT.log(msg);
-                statusLabel.setText(msg);
+                GWT.log("You do not have permission to create collections");
             }
         });
 

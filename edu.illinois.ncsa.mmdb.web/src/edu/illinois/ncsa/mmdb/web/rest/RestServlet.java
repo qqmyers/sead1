@@ -335,11 +335,12 @@ public class RestServlet extends AuthenticatedServlet {
             return null;
         }
         String mimeType = "";
+        String category = "Collection";
         for (Tuple<Resource> row : u2.getResult() ) {
             mimeType = row.get(0).getString();
+            category = TupeloStore.getInstance().getMimeMap().getCategory(mimeType);
         }
 
-        String category = TupeloStore.getInstance().getMimeMap().getCategory(mimeType);
         log.trace("Found mimetype: " + mimeType + ", assigned category: " + category);
         //relative Uri!
         return "/images/defaultpreviews/" + category + "-200.png";

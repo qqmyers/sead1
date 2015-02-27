@@ -57,9 +57,9 @@ import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
 
 /**
  * A table widget to enable paging, sorting and ordering of business beans.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class DynamicTableView extends Composite implements Display {
 
