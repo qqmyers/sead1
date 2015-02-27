@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -47,6 +47,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BlobRemover;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
@@ -65,7 +67,8 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  * SimpleRestService
  */
 public class RestServiceImpl implements RestService {
-    Context c = new MemoryContext();
+    static Log log = LogFactory.getLog(RestServiceImpl.class);
+    Context    c   = new MemoryContext();
 
     Context getContext() {
         return TupeloStore.getInstance().getContext();
@@ -73,7 +76,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Create an image
-     * 
+     *
      * @param imageData
      *            a stream containing image data
      * @return a new URI identifying the image
@@ -89,7 +92,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Create an image
-     * 
+     *
      * @param metadata
      *            to give it
      * @param imageData
@@ -107,7 +110,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Create an image
-     * 
+     *
      * @param imageUri
      *            the URI to give it
      * @param imageData
@@ -121,7 +124,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Create an image
-     * 
+     *
      * @param imageUri
      *            the URI to give it
      * @param md
@@ -145,12 +148,13 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Retrieve an image. The caller <b>must</b> close the returned stream.
-     * 
+     *
      * @param imageUri
      *            the URI of the image to retrieve
      * @return a stream on the image data
      */
     public InputStream retrieveImage(String imageUri) throws RestServiceException {
+        log.trace("Retrieving: " + imageUri);
         try {
             return getContext().read(Resource.uriRef(imageUri));
         } catch (OperatorException e) {
@@ -160,7 +164,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Update an image
-     * 
+     *
      * @param imageUri
      *            the image URI
      * @param imageData
@@ -174,7 +178,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Update an image
-     * 
+     *
      * @param imageUri
      *            the image URI
      * @param metadata
@@ -206,7 +210,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Delete an image
-     * 
+     *
      * @param imageUri
      *            the image URI
      */
@@ -225,7 +229,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Create a collection
-     * 
+     *
      * @param members
      *            the members of the collection (should be URI's)
      * @return a new URI identifying the collection
@@ -267,7 +271,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Update a collection
-     * 
+     *
      * @param collectionUri
      *            the collection URI
      * @param members
@@ -279,7 +283,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Retrieve a collection
-     * 
+     *
      * @param collectionUri
      *            the collection URI
      * @return the members (a list of URI's)
@@ -298,7 +302,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Delete a collection
-     * 
+     *
      * @param collectionUri
      *            the collection URI
      */
@@ -314,7 +318,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Add to a collection
-     * 
+     *
      * @param collectionUri
      *            the collection URI
      * @param members
@@ -326,7 +330,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Remove from a collection
-     * 
+     *
      * @param collectionUri
      *            the collection URI
      * @param members
@@ -338,7 +342,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Add tag(s) to a resource
-     * 
+     *
      * @param resourceUri
      *            the resource URI
      * @param tags
@@ -349,7 +353,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Remove tag(s) from a resource
-     * 
+     *
      * @param resourceUri
      *            the resource URI
      * @param tags
@@ -361,7 +365,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Rate the resource
-     * 
+     *
      * @param resourceUri
      *            the resource URI
      * @param rating
@@ -372,7 +376,7 @@ public class RestServiceImpl implements RestService {
 
     /**
      * Retrieve the user's rating for the resource
-     * 
+     *
      * @param resourceUri
      *            the resource URI
      * @return the rating (1-5)
