@@ -124,27 +124,35 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
             log.debug("hitmap has " + hitMap.size() + " entries");
             // fill in result
             resultList = new ArrayList<ListQueryItem>();
+            int count = 0;
             for (java.util.Map.Entry<String, ListQueryItem> e : hitMap.entrySet() ) {
                 addQueryItem(e.getValue(), listquery, resultList);
+                count++;
             }
+            queryResult.setTotalCount(count);
+            queryResult.setResults(trimResultList(resultList, listquery.getOffset(), listquery.getLimit()));
 
         } else {
             //Do Normal ListQuery for matching items
-            resultList = performQuery(listquery, userlevel, defaultlevel);
-        }
-        // fill in result
-        queryResult.setTotalCount(resultList.size());
-        queryResult.setResults(new ArrayList<ListQueryItem>());
-        for (int i = listquery.getOffset(); i < listquery.getOffset() + listquery.getLimit() && i < resultList.size(); i++ ) {
-            queryResult.getResults().add(resultList.get(i));
+            log.debug("offset and limit: " + listquery.getOffset() + " " + listquery.getLimit());
+            performQuery(queryResult, listquery, userlevel, defaultlevel);
         }
 
-        log.info("Items fetch results : " + (System.currentTimeMillis() - startTime));
+        log.info("Items fetch results : " + queryResult.getTotalCount() + " in " + (System.currentTimeMillis() - startTime) + " ms");
         return queryResult;
 
     }
 
-    private List<ListQueryItem> performQuery(ListQuery listquery, int userlevel, int defaultlevel) throws ActionException {
+    private List<ListQueryItem> trimResultList(List<ListQueryItem> resultList, int offset, int limit) {
+        List<ListQueryItem> finalList = new ArrayList<ListQueryItem>();
+        for (int i = offset; i < offset + limit && i < resultList.size(); i++ ) {
+            finalList.add(resultList.get(i));
+        }
+        return finalList;
+    }
+
+    //Fills in queryResult
+    private void performQuery(ListQueryResult queryResult, ListQuery listquery, int userlevel, int defaultlevel) throws ActionException {
 
         Unifier u = new Unifier();
 
@@ -192,6 +200,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
         // fetch results
         Set<String> keys = new HashSet<String>();
         List<ListQueryItem> resultList = new ArrayList<ListQueryItem>();
+        int count = 0;
         try {
             TupeloStore.getInstance().getContext().perform(u);
 
@@ -229,7 +238,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                     continue;
                 }
                 // all items are ok from here forward
-
+                count++;
                 // create the item
                 ListQueryItem item = new ListQueryItem();
 
@@ -268,7 +277,8 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
             log.error("Could not fetch items.", exc);
             throw new ActionException("Could not get items from tupelo.", exc);
         }
-        return resultList;
+        queryResult.setTotalCount(count);
+        queryResult.setResults(trimResultList(resultList, listquery.getOffset(), listquery.getLimit()));
     }
 
     private void addQueryItem(ListQueryItem item, ListQuery listquery, List<ListQueryItem> resultList) {
@@ -344,7 +354,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                     break;
                 } else if (MMDB.SECTION_TYPE.equals(type)) {
                     // get section info
-                    log.debug("lloking for parent item");
+                    log.trace("looking for parent item");
                     Unifier us = new Unifier();
                     us.setColumnNames("dataset", "label", "marker");
 
@@ -363,7 +373,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                         sectionUri = s;
                         sectionLabel = row2.get(1).getString();
                         sectionMarker = row2.get(2).getString();
-                        log.debug("Found: " + uri + " " + sectionLabel + " " + sectionMarker);
+                        log.trace("Found: " + uri + " " + sectionLabel + " " + sectionMarker);
 
                     }
                     break;
@@ -400,7 +410,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
 
                         // skip deleted items
                         if (row1.get(7) != null) {
-                            log.debug("skipping deleted");
+                            log.trace("skipping deleted");
                             continue;
                         }
 
@@ -408,7 +418,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                         if (!isCollection && !row1.get(3).getString().equals(user)) {
                             int datasetlevel = (row1.get(6) != null) ? Integer.parseInt(row1.get(6).getString()) : defaultlevel;
                             if (datasetlevel < userlevel) {
-                                log.debug("skipping access-controlled item");
+                                log.trace("skipping access-controlled item");
                                 continue;
                             }
                         }
