@@ -73,9 +73,11 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
 
     public static ListUserMetadataFieldsResult listUserMetadataFields(boolean isForEdit) {
         ListUserMetadataFieldsResult lumfr = null;
-        log.debug("Listing fields, editable = : " + isForEdit);
+        log.trace("Listing fields, editable = : " + isForEdit);
         if (isForEdit) {
             if (editResultCache == null) {
+                log.debug("Initializing field list, editable = : " + isForEdit);
+
                 editResultCache = new Memoized<ListUserMetadataFieldsResult>() {
                     public ListUserMetadataFieldsResult computeValue() {
                         ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
