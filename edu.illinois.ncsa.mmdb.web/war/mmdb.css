@@ -306,6 +306,26 @@ width: 1000px;
 	width:80px !important;
 }
 
+.hitslabel {
+	font-size: 32px;
+	color: #f3822a;
+	margin-left: -12px;
+}
+.search-hits .popupContent {
+	overflow: auto;
+	max-height: 160px;
+}
+
+.dynamicTableSearchResults>div {
+	width:100px;
+	max-height: 125px;
+}
+
+
+.dynamicTableListInformation tr:nth-child(4) .gwt-Label {
+	height: 75px;
+}
+
 /* ----------------------------------------------------------------------
  * Footer
  * ---------------------------------------------------------------------- */
@@ -674,7 +694,13 @@ padding-left: 0px;
 .smallText {
     font-size: 0.9em;
 }
-
+#uploadcolumns .smallText{
+	margin-top:5px;
+ 	font-size:14px;
+	line-height:18px;
+	color:#444;
+		
+}
 
 .smallerItalicText {
 	font-size: 0.8em;
@@ -694,6 +720,80 @@ padding-left: 0px;
 
 .uploadStatusColumn {
     padding: 15px;
+}
+
+.dataset_info>div {
+	display:inline-flex;
+}
+
+.dataset_info {
+	width: 210px;
+}
+
+
+
+.dataset_info>div>div:nth-child(even) {
+	width:150px;
+	margin-left: 10px;
+}
+
+.dataset_info>div:nth-child(1)>div:nth-child(1) {
+	height:20px;
+}
+
+.dataset_info>div:nth-child(1)>table {
+	margin-left: 10px;
+}
+
+.dataset_info>div:nth-child(1)>table .gwt-Label {
+word-break: break-all;
+max-width: 118px;
+}
+
+#uploadstatustable {
+	width:600px;
+}
+
+.uploading {
+	width: 575px;
+}
+
+.uploading-started .gwt-Label {
+	width: 220px;
+margin-left: 0px;
+margin-right: 0px;
+	word-break: break-all;
+} 
+.uploading-started .progressBar {
+	width:150px;
+}
+
+.uploading .tagsLinks .gwt-Hyperlink {
+	width: 50px;
+	margin-right:0px;
+}
+
+.uploading .tagsLinks .gwt-Anchor {
+	margin-left: -110px;
+}
+
+.uploading input.gwt-SuggestBox {
+padding: 2px;
+margin-left: 0px; 
+width: 80px;
+}
+
+.uploading .datasetRightColSection {
+width: 100px;
+}
+
+.uploading .tagsLinks {
+130px;
+}
+
+.uploading .imageThumbnail .gwt-Image {
+	height:150px;
+	width:150px;
 }
 
 .centered {
@@ -781,9 +881,19 @@ padding-left: 0px;
 	margin: 10px auto 10px 10px;
 	padding-bottom: 30px;
 	display:inline-block;
+	font-size:14px;
+	line-height:18px;
+	color:#444;
 
 }
-
+#uploadLeft #files{
+	font-size:14px;
+	line-height:18px;
+	width:220px;
+}
+#uploadLeft form{
+	margin-top:20px;
+}
 #uploadLeft .gwt-TextBox {
 	width: 75%;
 }
@@ -799,9 +909,9 @@ padding-left: 0px;
 }
 
 #bmlet .gwt-Anchor {
-	margin:10px;
-	background-color: lightgray;
+	margin:10px 10px 20px -10px;
 	font-size: 18px;
+	font-weight:bold;
 	word-break:break-all;
 	display:inline-block;
 
@@ -818,7 +928,7 @@ display:inline-block;
 
 #uploadstatustable {
 	overflow: auto;
-	max-height: 600px;
+	max-height: 450px;
 	background-color: white;
 	margin-top: 20px;
 }
@@ -841,6 +951,9 @@ overflow: auto;
 	width:250px;
 }
 
+.uploading-started>table {
+	width:200px;
+}
 .uploading table gwt-Label{
 	word-break: break-all;
 }
@@ -852,7 +965,11 @@ overflow: auto;
 .uploading-hidden {
   display:hide;
 }
+.uploading table tr:first-child td:nth-child(2) .gwt-Label{
+	margin-left:-30px;
+	margin-top:3px;
 
+}
 .dragAndDrop {
 	width: 152px;
 	border: 1px dashed #002B55;
@@ -1602,7 +1719,7 @@ div.gwt-Label.smallerItalicText.alignRight{
 
 .batchOperationCount {
 	color: #444;
-	font-size: 0.9em;
+	font-size: 14px;
 	margin: 5px;
 	display: inline-block;
 	*display: inline;
@@ -1634,11 +1751,15 @@ div.gwt-Label.smallerItalicText.alignRight{
 	font-weight: normal;
 	color: #fff;
 }
-
+#progressPanel .gwt-Label{
+	font:normal 14px "lato";
+}
 .progressBar {
 	border: 1px solid;
 	padding: 1px;
-	width:150px;
+	width:200px;
+	margin-left:-10px;
+	margin-bottom:10px;
 }
 
 .progressBarBar {
@@ -1861,18 +1982,25 @@ input[type="checkbox"]{
 }
 
 #box {
-	font:normal 24px arial, helvetica, sans serif;
+	/*font:normal 24px arial, helvetica, sans serif;*/
+	font:normal 14px "lato". helvetica;
 	color:#999;
 	background-color: #fff;
 	width: 200px;
-	border: 2px dashed #999;
-	-webkit-border-radius: 6px;
+	border: 1px dashed #999;
+	/*-webkit-border-radius: 6px;
 	-moz-border-radius: 6px;
-	border-radius: 6px;
+	border-radius: 6px;*/
 	padding-bottom: 10px;
-    text-align:center;
+    	text-align:center;
+	vertical-align:middle;
 }
-
+#uploadLeft #box{
+	padding-top:20px;
+}
+#uploadLeft button{
+	margin-left:10px;
+}
 #list {
 	width: 210px;
 	font-size: 16px;
@@ -1918,10 +2046,17 @@ input[type="checkbox"]{
 
 .importTitle {
 	font-weight:bold;
-	margin-top: 25px;
-	font-size: 16px;
+	margin-top: 0px;
+	line-height:24px;
+	font-size: 18px;
+	color:#222;
+	margin-top:10px;
+	margin-bottom:10px;
+	text-rendering: optimizelegibility;
 }
-
+.importTitle:first-child{
+	margin-top:0px;
+}
 #options {
 	font-weight:bold;
 }
@@ -2299,7 +2434,8 @@ input[type="checkbox"]{
 #drop {
 	position:relative;
 	width: 200px;
-	height: 50px;
+	height: 30px;
+	font-size: 16px;
 }
 
 .addedIMG {

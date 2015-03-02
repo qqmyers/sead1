@@ -38,6 +38,7 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.view;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -144,9 +145,12 @@ public class DynamicListView extends FlexTable implements Display {
         informationPanel.getWidget(1, 1).addStyleName("dynamicTableListCol1");
         informationPanel.setWidget(2, 1, new Label(type));
         informationPanel.getWidget(2, 1).addStyleName("dynamicTableListCol1");
+        //Allows hit list to be longer w/o separating the text rows in the table (because it spans this empty row)
+        informationPanel.setWidget(3, 1, new Label(""));
         setWidget(row, 2, informationPanel);
 
         if (hitList != null) {
+            Collections.sort(hitList, new DynamicTableView.SectionHitComparator());
             ScrollPanel hitsPanel = new ScrollPanel();
             VerticalPanel vp = new VerticalPanel();
             for (SectionHit s : hitList ) {
@@ -156,6 +160,7 @@ public class DynamicListView extends FlexTable implements Display {
             informationPanel.setWidget(0, 2, new Label("Search Hits: ")); //Since title spans two columns
             informationPanel.setWidget(1, 3, hitsPanel);
             informationPanel.getFlexCellFormatter().setRowSpan(1, 3, 5);
+
             informationPanel.getFlexCellFormatter().addStyleName(1, 3, "dynamicTableSearchResults");
         }
 

@@ -55,7 +55,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Image;
@@ -119,6 +118,7 @@ public class UploadStatusView extends Composite implements Display {
 
     @Override
     public HasValue<Boolean> onComplete(int ix, String uri, int total) {
+
         nUploaded++;
         GWT.log("onComplete " + ix + " " + uri);
         Anchor anchor = new Anchor("View", "#dataset?id=" + uri);
@@ -147,11 +147,12 @@ public class UploadStatusView extends Composite implements Display {
 
     @Override
     public void onPostComplete(final int ix, final DatasetBean dataset) {
+
         GWT.log("onPostComplete " + ix + " " + dataset.getFilename());
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             public void execute() {
                 // check pending, but don't initially display
-                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, null/*"dataset?id=" + dataset.getUri()*/, ContentCategory.getCategory(dataset.getMimeType(), dispatchAsync), true, false, dispatchAsync);
+                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, null, ContentCategory.getCategory(dataset.getMimeType(), dispatchAsync), true, false, dispatchAsync);
                 FlowPanel entry = getNthEntry(ix);
                 entry.remove(3);//"Complete"
 
@@ -179,6 +180,7 @@ public class UploadStatusView extends Composite implements Display {
             }
         });
         GWT.log("onPostComplete " + ix);
+
     }
 
     @Override
@@ -225,9 +227,9 @@ public class UploadStatusView extends Composite implements Display {
     }
 
     public Widget editableDatasetInfo(final DatasetBean ds) {
-        FlexTable layout = new FlexTable();
-        int row = 0;
-        layout.setWidget(row, 0, new Label("Title:"));
+        FlowPanel layout = new FlowPanel();
+        layout.addStyleName("dataset_info");
+
         final EditableLabel titleLabel = new EditableLabel(ds.getTitle());
         // FIXME this contains dispatching logic, and so should be moved to a presenter
         titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -244,16 +246,22 @@ public class UploadStatusView extends Composite implements Display {
                 });
             }
         });
-        layout.setWidget(row, 1, titleLabel);
-        row++;
-        layout.setWidget(row, 0, new Label("Size:"));
-        layout.setWidget(row, 1, new Label(TextFormatter.humanBytes(ds.getSize())));
-        row++;
-        layout.setWidget(row, 0, new Label("Type:"));
-        layout.setWidget(row, 1, new Label(ds.getMimeType()));
-        row++;
-        layout.setWidget(row, 0, new Label("Date:"));
-        layout.setWidget(row, 1, new Label(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_SHORT).format(ds.getDate())));
+        FlowPanel row1 = new FlowPanel();
+        row1.add(new Label("Title:"));
+        row1.add(titleLabel);
+        layout.add(row1);
+        FlowPanel row2 = new FlowPanel();
+        row2.add(new Label("Size:"));
+        row2.add(new Label(TextFormatter.humanBytes(ds.getSize())));
+        layout.add(row2);
+        FlowPanel row3 = new FlowPanel();
+        row3.add(new Label("Type:"));
+        row3.add(new Label(ds.getMimeType()));
+        layout.add(row3);
+        FlowPanel row4 = new FlowPanel();
+        row4.add(new Label("Date:"));
+        row4.add(new Label(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_SHORT).format(ds.getDate())));
+        layout.add(row4);
         return layout;
     }
 

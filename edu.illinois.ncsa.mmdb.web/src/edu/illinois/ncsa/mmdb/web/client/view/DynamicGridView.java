@@ -38,6 +38,7 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.view;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +49,8 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -142,6 +145,7 @@ public class DynamicGridView extends FlexTable implements Display {
         titlePanel.add(hyperlink);
 
         if (hitList != null) {
+            Collections.sort(hitList, new DynamicTableView.SectionHitComparator());
             final PopupPanel hitsPanel = new PopupPanel();
             hitsPanel.setAutoHideEnabled(true);
             hitsPanel.setAutoHideOnHistoryEventsEnabled(true);
@@ -155,6 +159,7 @@ public class DynamicGridView extends FlexTable implements Display {
 
             hitsPanel.add(vp);
             final Label hits = new Label("*");
+            hits.addStyleName("hitslabel");
             hits.addClickHandler(new ClickHandler() {
 
                 @Override
@@ -162,6 +167,14 @@ public class DynamicGridView extends FlexTable implements Display {
                     hitsPanel.showRelativeTo(hits);
 
                 }
+            });
+            hits.addMouseOverHandler(new MouseOverHandler() {
+
+                @Override
+                public void onMouseOver(MouseOverEvent event) {
+                    hitsPanel.showRelativeTo(hits);
+                }
+
             });
             titlePanel.add(hits);
         }
