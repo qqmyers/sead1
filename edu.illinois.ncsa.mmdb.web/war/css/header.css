@@ -270,6 +270,7 @@ li {
 	bottom: 10px;
 	left: 0;
 	right: 0;
+	display:inline-block;
 }
 
 #footer .copyright {
