@@ -340,6 +340,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
             String sectionUri = null;
             String sectionLabel = null;
             String sectionMarker = null;
+            Set<String> restrictedUris = new HashSet<String>();
 
             for (Tuple<Resource> row : u.getResult() ) {
 
@@ -380,8 +381,9 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                 }
             }
             log.debug("Item uri for hit is: " + uri);
-            if (!hits.containsKey(uri)) {
-                ListQueryItem lqItem = new ListQueryItem();
+            //we haven't processed this uri before...
+            if (!hits.containsKey(uri) && !restrictedUris.contains(uri)) {
+                ListQueryItem lqItem = null;
 
                 Unifier u1 = new Unifier();
                 UriRef sRef = Resource.uriRef(uri);
@@ -418,13 +420,14 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                         if (!isCollection && !row1.get(3).getString().equals(user)) {
                             int datasetlevel = (row1.get(6) != null) ? Integer.parseInt(row1.get(6).getString()) : defaultlevel;
                             if (datasetlevel < userlevel) {
-                                log.trace("skipping access-controlled item");
+                                log.trace("skipping access-controlled item:" + uri);
+                                restrictedUris.add(uri);
                                 continue;
                             }
                         }
 
                         // create the item
-
+                        lqItem = new ListQueryItem();
                         lqItem.setUri(uri);
                         lqItem.setTitle(row1.get(0).getString());
                         lqItem.setAuthor(pbu.get(row1.get(3)).getName());
@@ -465,9 +468,11 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                     log.error("Could not fetch items.", exc);
                     throw new ActionException("Could not get items from tupelo.", exc);
                 }
-                hits.put(uri, lqItem);
-            } else {
-                //Just add the hit
+                if (lqItem != null) {
+                    hits.put(uri, lqItem);
+                }
+            } else if (hits.containsKey(uri)) {
+                //We've already added a hit(s) for this uri so just add the current hit
                 List<SectionHit> theList = hits.get(uri).getHits();
                 if (theList == null) {
                     theList = new ArrayList<SectionHit>();
