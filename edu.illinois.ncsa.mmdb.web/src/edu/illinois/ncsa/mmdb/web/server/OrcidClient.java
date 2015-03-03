@@ -99,7 +99,7 @@ public class OrcidClient {
         Oauth2ServerFlowUserInfoResult result = new Oauth2ServerFlowUserInfoResult();
 
         try {
-            URL url = new URL("ORCID_PUBLIC_API_BASE_URL" + id + "/orcid-bio");
+            URL url = new URL(ORCID_PUBLIC_API_BASE_URL + id + "/orcid-bio");
             URLConnection urlCon = url.openConnection();
             urlCon.setRequestProperty("Accept", "application/xml");
             urlCon.setRequestProperty("Authorization", "Bearer " + token);
