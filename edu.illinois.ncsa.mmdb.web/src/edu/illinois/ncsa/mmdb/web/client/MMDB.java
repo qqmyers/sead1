@@ -301,7 +301,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
 
-        LoginPage.setMainWindow(this);
+        LoginPage.setMainWindow(this); 
 
         dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(),
                 ConfigurationKey.ProjectName,
