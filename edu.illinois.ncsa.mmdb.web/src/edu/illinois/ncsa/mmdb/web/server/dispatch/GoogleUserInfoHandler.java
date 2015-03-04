@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sead.acr.common.MediciProxy;
 import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Foaf;
@@ -130,13 +131,31 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
                 log.debug(personInfo.toString());
                 boolean verified = personInfo.getBoolean("email_verified"); //should always be true here since getValidatedGoogleToken tests this
                 if (verified) {
-                    boolean created = checkUsersExists(personInfo.getString("name"), personInfo.getString("email"), action.isAccessRequest());
-                    //Create a valid session for authenticated user (as if /api/authentication was called)
-                    AuthenticatedServlet.fillAuthenticatedSession(session.get(), personInfo.getString("email"), exp, theServer.get());
-                    //Record login
-                    Authentication.setLastLogin(Resource.uriRef(PersonBeanUtil.getPersonID(personInfo.getString("email"))));
-                    //Send sessionId to client in an easy to parse form
-                    return new GoogleUserInfoResult(created, personInfo.getString("name"), personInfo.getString("email"), exp, session.get().getId());
+                    boolean created = false;
+                    boolean exists = checkUsersExists(personInfo.getString("name"), personInfo.getString("email"), action.isAccessRequest());
+                    if (action.isAccessRequest()) {
+                        if (exists) {
+                            //report issue
+                            created = false;
+                        } else {
+                            createUser(personInfo.getString("email"), personInfo.getString("name"));
+                            created = true;
+                            log.debug("User creation requested: result: " + created);
+
+                        }
+                    } else {
+                        if (exists) {
+                            //Create a valid session for authenticated user (as if /api/authentication was called)
+                            AuthenticatedServlet.fillAuthenticatedSession(session.get(), personInfo.getString("email"), exp, theServer.get());
+                            //Record login
+                            Authentication.setLastLogin(Resource.uriRef(PersonBeanUtil.getPersonID(personInfo.getString("email"))));
+                            //Send sessionId to client in an easy to parse form
+                            return new GoogleUserInfoResult(created, personInfo.getString("name"), personInfo.getString("email"), exp, session.get().getId());
+                        } else {
+                            //expected user to exist and no record found
+                            throw new ActionException("user not found");
+                        }
+                    }
                 }
             }
             //Something's not right - wrong audience, expired token, email not yet verified by google
@@ -179,18 +198,10 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
                 log.debug("User in the system " + uris.get(0));
                 PersonBean pb = pbu.get(uris.get(0));
                 log.debug("User retrieved " + pb.getUri());
-                return false;
+                return true;
             } else if (uris.size() == 0) {
                 log.debug("User not in the system " + email);
-                if (accessRequest) {
-                    PersonBean pb = createUser(email, name);
-                    TupeloStore.getInstance().getBeanSession().save(pb);
-                    Mail.userAdded(pb);
-                    log.debug("User created " + pb.getUri());
-                    return true;
-                } else {
-                    return false;
-                }
+                return false;
             } else {
                 log.error("Query returned too many users with email " + email);
                 return false;
@@ -198,17 +209,23 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
         } catch (Exception e) {
             log.error("Error retrieving information about user "
                     + email, e);
-            return true;
+            return false;
         }
     }
 
-    private PersonBean createUser(String email, String name) {
-        //FixMe - name may be null/blank from Google
+    private void createUser(String email, String name) throws ActionException {
+
         PersonBean pb = new PersonBean();
         pb.setUri(PersonBeanUtil.getPersonID(email));
         pb.setEmail(email);
         pb.setName(name);
-        return pb;
+        try {
+            TupeloStore.getInstance().getBeanSession().save(pb);
+        } catch (OperatorException oe) {
+            log.warn("Could not create user");
+            throw new ActionException("Can't create person");
+        }
+        Mail.userAdded(pb);
+        log.debug("User created " + pb.getUri());
     }
-
 }

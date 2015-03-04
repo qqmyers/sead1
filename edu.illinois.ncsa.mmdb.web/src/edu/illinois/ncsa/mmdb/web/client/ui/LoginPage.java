@@ -365,7 +365,6 @@ public class LoginPage extends Composite {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert("Failed: " + caught.getMessage());
                         Widget widget = mainWindow.getPage();
                         //if 'no email' - provide feedback about orcid permissions and email validation
                         if ("no email".equals(caught.getMessage())) {
@@ -376,7 +375,16 @@ public class LoginPage extends Composite {
                                 ((SignupPage) widget).showFeedbackMessage("Unable to retrieve name and email from ORCID. Check your ORCID account at " + ORCID_SIGNIN_URL + " to make sure you have verified your primary email and have allowed your email to be shared.");
                             }
 
+                        } else if ("user not found".equals(caught.getMessage())) {
+                            if ((widget != null) && (widget instanceof LoginPage)) {
+                                ((LoginPage) widget).fail("To request access to a space, use \"Sign up\" or contact the owner(s) for an invite");
+                            }
+                        } else {
+                            if ((widget != null) && (widget instanceof LoginPage)) {
+                                ((LoginPage) widget).fail("Login failure: please contact SEAD: " + caught.getMessage());
+                            }
                         }
+
                     }
 
                     @Override
@@ -495,7 +503,26 @@ public class LoginPage extends Composite {
                 public void onSuccess(String token) {
                     if (token != null) {
                         //Silent or not, we have a token and will complete silently
-                        doOauth2Authenticate(token, callback);
+                        doOauth2Authenticate(token, new AuthenticationCallback() {
+
+                            @Override
+                            public void onFailure() {
+                                //Something wrong with user account record in SEAD, so try anon or go through google popup
+                                if (silent) {
+                                    //Try anonymous login
+                                    authenticate("anonymous", "none", callback);
+                                } else {
+                                    //Go forward and ask user for credentials
+                                    realOauth2Login(callback);
+                                }
+                            }
+
+                            @Override
+                            public void onSuccess(String userUri, String sessionKey) {
+                                callback.onSuccess(userUri, sessionKey);
+                            }
+
+                        });
                     } else { //Seeing some way that google indicates success but gives null token
                         //No token available
                         if (silent) {
@@ -549,7 +576,16 @@ public class LoginPage extends Composite {
 
             @Override
             public void onFailure(Throwable caught) {
-                callback.onFailure();
+                Widget widget = mainWindow.getPage();
+                if ("user not found".equals(caught.getMessage())) {
+                    if ((widget != null) && (widget instanceof LoginPage)) {
+                        ((LoginPage) widget).fail("To request access to a space, use \"Sign up\" or contact the owner(s) for an invite");
+                    } else {
+                        callback.onFailure();
+                    }
+                } else {
+                    callback.onFailure();
+                }
             }
 
             @Override

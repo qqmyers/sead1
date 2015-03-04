@@ -49,7 +49,7 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
- * Retrieve Google user info based on Oauth2 code (in server-side flow).
+ * Retrieve Orcid user info based on Oauth2 code (in server-side flow).
  *
  * @author myersjd@umich.edu
  *
@@ -65,9 +65,11 @@ public class Oauth2ServerFlowUserInfoHandler implements ActionHandler<Oauth2Serv
         Oauth2ServerFlowUserInfoHandler.session.set(session);
     }
 
-    private static final ThreadLocal<String>  orcidId        = new ThreadLocal<String>();
-    private static final ThreadLocal<Integer> tokenExpiresAt = new ThreadLocal<Integer>();
-    private static final ThreadLocal<String>  theServer      = new ThreadLocal<String>();
+    private static final ThreadLocal<String>  orcidId                       = new ThreadLocal<String>();
+    private static final ThreadLocal<Integer> tokenExpiresAt                = new ThreadLocal<Integer>();
+    private static final ThreadLocal<String>  theServer                     = new ThreadLocal<String>();
+
+    private static String                     ORCID_PUBLIC_PROFILE_BASE_URL = "http://orcid.org/";
 
     public static void setId(String id) {
         orcidId.set(id);
@@ -96,15 +98,27 @@ public class Oauth2ServerFlowUserInfoHandler implements ActionHandler<Oauth2Serv
             result.setSessionId(newSession.getId());
 
             if (result.getEmail() != null) {
-                result.setCreated(checkUsersExists(result.getUserName(), result.getEmail(), result.getId(), action.shouldCreate()));
+                boolean exists = checkUsersExists(result.getUserName(), result.getEmail(), result.getId(), action.shouldCreate());
                 if (action.shouldCreate()) {
-                    //Do nothing - currently signup does not log you in (since you wouldn't have permissions anyway)
-                    log.debug("User creation requested: result: " + result.isCreated());
+                    if (!exists) {
+                        createUser(result.getEmail(), result.getUserName());
+                        result.setCreated(true);
+                        //Do nothing else - currently signup does not log you in (since you wouldn't have permissions anyway)
+                        log.debug("User creation requested: result: " + result.isCreated());
+                    } else {
+                        //report that user already existed
+                        result.setCreated(false);
+                    }
                 } else {
-                    //Create a valid session for authenticated user (as if /api/authentication was called)
-                    AuthenticatedServlet.fillAuthenticatedSession(newSession, result.getEmail(), expires_at, theServer.get());
-                    //Record login
-                    Authentication.setLastLogin(Resource.uriRef(PersonBeanUtil.getPersonID(result.getEmail())));
+                    if (exists) {
+                        //Create a valid session for authenticated user (as if /api/authentication was called)
+                        AuthenticatedServlet.fillAuthenticatedSession(newSession, result.getEmail(), expires_at, theServer.get());
+                        //Record login
+                        Authentication.setLastLogin(Resource.uriRef(PersonBeanUtil.getPersonID(result.getEmail())));
+                    } else {
+                        //expected user to exist and no record found
+                        throw new ActionException("user not found");
+                    }
                 }
                 return result;
             } else {
@@ -137,26 +151,10 @@ public class Oauth2ServerFlowUserInfoHandler implements ActionHandler<Oauth2Serv
                 log.debug("User in the system " + uris.get(0));
                 PersonBean pb = pbu.get(uris.get(0));
                 log.debug("User retrieved " + pb.getUri());
-                return false;
+                return true;
             } else if (uris.size() == 0) {
                 log.debug("User not in the system " + email);
-                if (accessRequest) {
-                    PersonBean pb = createUser(email, name);
-                    TupeloStore.getInstance().getBeanSession().save(pb);
-                    Mail.userAdded(pb);
-                    //Add orcid ID
-                    TripleWriter tw = new TripleWriter();
-                    tw.add(Resource.uriRef(pb.getUri()), Resource.uriRef(GetUserPID.userPIDPredicate), orcidId);
-                    try {
-                        TupeloStore.getInstance().getContext().perform(tw);
-                    } catch (OperatorException oe) {
-                        log.warn("Could not write id for user");
-                    }
-                    log.debug("User created " + pb.getUri());
-                    return true;
-                } else {
-                    return false;
-                }
+                return false;
             } else {
                 log.error("Query returned too many users with email " + email);
                 return false;
@@ -164,17 +162,33 @@ public class Oauth2ServerFlowUserInfoHandler implements ActionHandler<Oauth2Serv
         } catch (Exception e) {
             log.error("Error retrieving information about user "
                     + email, e);
-            return true;
+            return false;
         }
     }
 
-    private PersonBean createUser(String email, String name) {
+    private void createUser(String email, String name) throws ActionException {
         //FixMe - name may be null/blank from Google
         PersonBean pb = new PersonBean();
         pb.setUri(PersonBeanUtil.getPersonID(email));
         pb.setEmail(email);
         pb.setName(name);
-        return pb;
+        try {
+            TupeloStore.getInstance().getBeanSession().save(pb);
+            Mail.userAdded(pb);
+            //Add orcid ID
+            TripleWriter tw = new TripleWriter();
+            tw.add(Resource.uriRef(pb.getUri()), Resource.uriRef(GetUserPID.userPIDPredicate), ORCID_PUBLIC_PROFILE_BASE_URL + orcidId.get());
+            try {
+                TupeloStore.getInstance().getContext().perform(tw);
+            } catch (OperatorException oe) {
+                log.warn("Could not write id for user");
+            }
+        } catch (OperatorException oe) {
+            log.warn("Could not create user");
+            throw new ActionException("Can't create person");
+        }
+        log.debug("User created " + pb.getUri());
+        return;
     }
 
     @Override
