@@ -119,8 +119,8 @@ public class LoginPage extends Composite {
     public static final String   ORCID_PROVIDER           = "orcid";
     public static final String   LOCAL_PROVIDER           = "local";
 
-    static final String          ORCID_SIGNIN_URL         = "https://sandbox.orcid.org/signin";
-    static final String          ORCID_AUTHORIZE_URL      = "https://sandbox.orcid.org/oauth/authorize";
+    static final String          ORCID_SIGNIN_URL         = "https://orcid.org/signin";
+    static final String          ORCID_AUTHORIZE_URL      = "https://orcid.org/oauth/authorize";
 
     static final String          sSEAD_OAUTH_REDIRECT_URL = "http://sead.ncsa.illinois.edu/projects/authredirect?server=";
 
