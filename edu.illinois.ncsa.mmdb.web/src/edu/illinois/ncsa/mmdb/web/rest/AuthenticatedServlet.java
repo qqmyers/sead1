@@ -150,7 +150,7 @@ public class AuthenticatedServlet extends HttpServlet {
                 log.info("Retrieved user from google " + validUser + " " + clientIds[0] + ", " + clientIds[1] + " " + googleAccessToken);
                 if ((validUser != null) && (expires_in != -1)) {
                     // set the session attribute indicating that we're authenticated
-                    String sessionId = createAuthenticatedSession(validUser, expires_in, request);
+                    String sessionId = createAuthenticatedSession(validUser, expires_in + (int) (System.currentTimeMillis() / 1000L), request);
 
                     response.getWriter().print(sessionId);
 
