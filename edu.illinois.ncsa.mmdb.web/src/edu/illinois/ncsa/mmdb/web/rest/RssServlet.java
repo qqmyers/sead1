@@ -57,6 +57,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
@@ -85,9 +87,11 @@ import edu.uiuc.ncsa.cet.bean.tupelo.UriCanonicalizer;
 
 public class RssServlet extends HttpServlet {
 
-    private static int _searchDepth = 100; //Kludge - we'll look through the last 100 entries
-    private static int _limit       = 25; // and report up to this number if there are that many
-                                           // that are not deleted and accessible given access controls
+    private static int _searchDepth = 100;                                //Kludge - we'll look through the last 100 entries
+    private static int _limit       = 25;                                 // and report up to this number if there are that many
+                                                                           // that are not deleted and accessible given access controls
+
+    static Log         log          = LogFactory.getLog(RssServlet.class);
 
     void die(int code, HttpServletResponse resp, String msg, Throwable exception) throws ServletException {
         resp.setStatus(code);
@@ -111,6 +115,7 @@ public class RssServlet extends HttpServlet {
                 user = claimedUser;
             }
         }
+        log.debug("RSS for user: " + user);
 
         Context c = TupeloStore.getInstance().getContext();
         Unifier u = new Unifier();
@@ -148,10 +153,10 @@ public class RssServlet extends HttpServlet {
 
         List<SyndEntry> entries = new LinkedList<SyndEntry>();
         for (Tuple<Resource> row : u.getResult() ) {
-            while (entries.size() < _limit) {
+            if (entries.size() < _limit) {
                 int i = 0;
                 if (row.get(i++) == null) { // i.e., non-deleted current version
-                    //Check access control - user must be owner or have a lvel lower than that of the item to see it
+                    //Check access control - user must be owner or have a level lower than that of the item to see it
                     int accesslevel = defaultAccessLevel;
                     if (row.get(6) != null) {
                         accesslevel = Integer.parseInt(row.get(6).toString());
@@ -187,6 +192,9 @@ public class RssServlet extends HttpServlet {
                         entries.add(entry);
                     }
                 }
+            } else {
+                //have enough, stop
+                break;
             }
         }
         if (entries.isEmpty()) {
