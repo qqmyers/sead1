@@ -50,6 +50,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
@@ -60,11 +61,13 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
  * A page listing all tags in the system.
  *
  * @author Luigi Marini
+ * @author myersjd@umich.edu
  *
  */
 public class TagsPage extends Page {
 
     private FlowPanel tagsPanel;
+    private FlowPanel tagCloudPanel;
 
     /**
      * Build the page and retrieve all the tags in the system.
@@ -94,6 +97,7 @@ public class TagsPage extends Page {
                     public void onSuccess(GetTagsResult result) {
                         TreeMap<String, Integer> tags = result.getTags();
                         Iterator<String> iterator = tags.keySet().iterator();
+                        String uListString = "";
                         while (iterator.hasNext()) {
                             FlowPanel tagPanel = new FlowPanel();
                             String tag = iterator.next();
@@ -111,17 +115,32 @@ public class TagsPage extends Page {
                                 tagPanel.add(tagCount);
                                 tagPanel.addStyleName("tagInPanel");
                                 tagsPanel.add(tagPanel);
+                                uListString = uListString + "<li><a href=\"#" + "tag?title=" + URL.encodeQueryString(tag) + "\" data-weight=\"" + tags.get(tag) + "\">" + tag + "</a></li>";
                             }
                         }
+
+                        HTML list = new HTML();
+                        list.getElement().setId("weightedtaglist");
+                        list.setHTML("<ul>" + uListString + "</ul>");
+                        tagCloudPanel.add(list);
                     }
 
                 });
     }
 
+    //public static native void startCloud() /*-{
+    //    $wnd.jQuery("#sortedtable").tablesorter();
+    //}-*/;
+
     @Override
     public void layout() {
         tagsPanel = new FlowPanel();
         tagsPanel.addStyleName("tagsPanel");
+        tagCloudPanel = new FlowPanel();
+        tagCloudPanel.getElement().setId("tagCloud");
+
+        mainLayoutPanel.add(tagCloudPanel);
         mainLayoutPanel.add(tagsPanel);
+
     }
 }

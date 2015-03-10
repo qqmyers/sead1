@@ -2593,3 +2593,8 @@ padding: 0px;
 .roleManagement .gwt-Button {
     margin-top: 10px;
 }
+
+#weightedtaglist {
+	display: none;
+}
+}
