@@ -152,7 +152,7 @@
   overflow: auto;
   vertical-align: top;
 }
-.sead-scope @media print {
+@media print {
   * {
     text-shadow: none !important;
     color: #000 !important;
@@ -189,7 +189,7 @@
 .sead-scope   img {
     max-width: 100% !important;
   }
-.sead-scope   @page  {
+@page  {
     margin: 0.5cm;
   }
 .sead-scope   p,
@@ -202,7 +202,7 @@
 .sead-scope   h3 {
     page-break-after: avoid;
   }
-.sead-scope }
+}
 .sead-scope body {
   margin: 0;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -4266,46 +4266,46 @@
 .sead-scope .alert-block p + p {
   margin-top: 5px;
 }
-.sead-scope @-webkit-keyframes progress-bar-stripes {
+@-webkit-keyframes progress-bar-stripes {
   from {
     background-position: 40px 0;
   }
-.sead-scope   to {
+  to {
     background-position: 0 0;
   }
-.sead-scope }
-.sead-scope @-moz-keyframes progress-bar-stripes {
+}
+@-moz-keyframes progress-bar-stripes {
   from {
     background-position: 40px 0;
   }
-.sead-scope   to {
+  to {
     background-position: 0 0;
   }
-.sead-scope }
-.sead-scope @-ms-keyframes progress-bar-stripes {
+}
+@-ms-keyframes progress-bar-stripes {
   from {
     background-position: 40px 0;
   }
-.sead-scope   to {
+  to {
     background-position: 0 0;
   }
-.sead-scope }
-.sead-scope @-o-keyframes progress-bar-stripes {
+}
+@-o-keyframes progress-bar-stripes {
   from {
     background-position: 0 0;
   }
-.sead-scope   to {
+  to {
     background-position: 40px 0;
   }
-.sead-scope }
-.sead-scope @keyframes progress-bar-stripes {
+}
+@keyframes progress-bar-stripes {
   from {
     background-position: 40px 0;
   }
-.sead-scope   to {
+  to {
     background-position: 0 0;
   }
-.sead-scope }
+}
 .sead-scope .progress {
   overflow: hidden;
   height: 20px;
@@ -5255,7 +5255,7 @@
 .sead-scope .collapse.in {
   height: auto;
 }
-.sead-scope @-ms-viewport {
+@-ms-viewport {
   width: device-width;
 }
 .sead-scope .hidden {
@@ -5274,7 +5274,7 @@
 .sead-scope .visible-desktop {
   display: inherit !important;
 }
-.sead-scope @media (min-width: 768px) and (max-width: 979px) {
+@media (min-width: 768px) and (max-width: 979px) {
   .hidden-desktop {
     display: inherit !important;
   }
@@ -5287,8 +5287,8 @@
 .sead-scope   .hidden-tablet {
     display: none !important;
   }
-.sead-scope }
-.sead-scope @media (max-width: 767px) {
+}
+@media (max-width: 767px) {
   .hidden-desktop {
     display: inherit !important;
   }
@@ -5301,19 +5301,19 @@
 .sead-scope   .hidden-phone {
     display: none !important;
   }
-.sead-scope }
+}
 .sead-scope .visible-print {
   display: none !important;
 }
-.sead-scope @media print {
+@media print {
   .visible-print {
     display: inherit !important;
   }
 .sead-scope   .hidden-print {
     display: none !important;
   }
-.sead-scope }
-.sead-scope @media (max-width: 767px) {
+}
+@media (max-width: 767px) {
   body {
     padding-left: 20px;
     padding-right: 20px;
@@ -5409,8 +5409,8 @@
 .sead-scope   .modal.fade.in {
     top: 20px;
   }
-.sead-scope }
-.sead-scope @media (max-width: 480px) {
+}
+@media (max-width: 480px) {
   .nav-collapse {
     -webkit-transform: translate3d(0, 0, 0);
   }
@@ -5460,8 +5460,8 @@
 .sead-scope   .carousel-caption {
     position: static;
   }
-.sead-scope }
-.sead-scope @media (min-width: 768px) and (max-width: 979px) {
+}
+@media (min-width: 768px) and (max-width: 979px) {
   .row {
     margin-left: -20px;
     *zoom: 1;
@@ -5800,8 +5800,8 @@
 .sead-scope   .uneditable-input.span1 {
     width: 28px;
   }
-.sead-scope }
-.sead-scope @media (min-width: 1200px) {
+}
+@media (min-width: 1200px) {
   .row {
     margin-left: -30px;
     *zoom: 1;
@@ -6149,8 +6149,8 @@
 .sead-scope   .row-fluid .thumbnails {
     margin-left: 0;
   }
-.sead-scope }
-.sead-scope @media (max-width: 979px) {
+}
+@media (max-width: 979px) {
   body {
     padding-top: 0;
   }
@@ -6301,11 +6301,10 @@
     padding-left: 10px;
     padding-right: 10px;
   }
-.sead-scope }
-.sead-scope @media (min-width: 980px) {
-  .nav-collapse.collapse {
+}
+@media (min-width: 980px) {
+  .sead-scope .nav-collapse.collapse {
     height: auto !important;
     overflow: visible !important;
   }
-.sead-scope }
-.sead-scope 
+}

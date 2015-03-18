@@ -485,7 +485,7 @@ width: 1000px;
 	font-size: 1.5em;
 }
 .datasetRightColSection .gwt-Anchor{
-	padding-left:0px;
+	padding-left:2px;
 	padding-right:10px;
 }
 
@@ -727,10 +727,8 @@ padding-left: 0px;
 }
 
 .dataset_info {
-	width: 210px;
+	width: 200px;
 }
-
-
 
 .dataset_info>div>div:nth-child(even) {
 	width:150px;
@@ -738,7 +736,7 @@ padding-left: 0px;
 }
 
 .dataset_info>div:nth-child(1)>div:nth-child(1) {
-	height:20px;
+	height:18px;
 }
 
 .dataset_info>div:nth-child(1)>table {
@@ -750,12 +748,20 @@ word-break: break-all;
 max-width: 118px;
 }
 
+.dataset_info{
+	font-size:14px;
+	line-height:18px;
+	margin-top:40px;
+	padding-left:10px;
+}
+
 #uploadstatustable {
 	width:600px;
 }
 
 .uploading {
 	width: 575px;
+	min-height:150px;
 }
 
 .uploading-started .gwt-Label {
@@ -771,12 +777,15 @@ margin-right: 0px;
 .uploading .tagsLinks .gwt-Hyperlink {
 	width: 50px;
 	margin-right:0px;
+	word-break:break-all;
 }
 
 .uploading .tagsLinks .gwt-Anchor {
 	margin-left: -110px;
 }
-
+.uploading .tagsLinks .deleteLink{
+	margin-left:10px;
+}
 .uploading input.gwt-SuggestBox {
 padding: 2px;
 margin-left: 0px; 
@@ -784,7 +793,7 @@ width: 80px;
 }
 
 .uploading .datasetRightColSection {
-width: 100px;
+width: 110px;
 }
 
 .uploading .tagsLinks {
@@ -960,8 +969,11 @@ overflow: auto;
 
 .uploading div, .uploading a, .uploading span, .uploading table {
 	margin:auto;
+	float:left;
 }
-
+.uploading span.gwt-CheckBox{
+	margin-top:65px;
+}
 .uploading-hidden {
   display:hide;
 }
@@ -1355,6 +1367,7 @@ div.gwt-Label.smallerItalicText.alignRight{
 	/* not just for dataset widget, so no extra padding */
 	margin-left: 10px;
 	margin-top: 1px;
+	width:16px;
 }
 .datasetRightColText .pencilIcon{
 	width:16px;
@@ -1667,6 +1680,7 @@ div.gwt-Label.smallerItalicText.alignRight{
 	height:30px;
 	margin-top:3px;	
 	word-wrap: break-word;
+	word-break: break-all;
 	line-height:14px;
 }
 
@@ -2001,6 +2015,7 @@ input[type="checkbox"]{
 #uploadLeft button{
 	margin-left:10px;
 }
+ 
 #list {
 	width: 210px;
 	font-size: 16px;
@@ -2176,19 +2191,11 @@ a.zocial.google:hover {
 
 }
 
-/*.zocial:hover,.zocial:active,.zocial:focus{
-	background:none !important;
-
-}
-*/
 
 .zocial.google{
-/*	background-color:#f3822a !important; */
 	margin-top:10px;
 }
-/*.zocial.google:hover,.zocial.orcid:hover{
-	background-color:#666666 !important;
-}*/
+
 .zocial.orcid{
 	background-color:#f2f2f2 !important;
 }
@@ -2581,7 +2588,9 @@ padding: 0px;
 	color:#222;
 	line-height:24px;
 }
-
+.gwt-Label.datasetRightColText_Value{
+	word-break:break-all;
+}
 .updated {
 	background-color : green;
 }
