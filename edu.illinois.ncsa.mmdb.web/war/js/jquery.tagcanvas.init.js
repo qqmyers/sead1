@@ -1,6 +1,4 @@
-jQuery(document).ready(function() {
-	setTimeout(function() {
-
+function startTagCloud() {
         jQuery('#tagCloud').append('<div id="CanvasContainer"><canvas width="300" height="300" id="tagCanvas"></canvas></div>');
 
           if(!jQuery('#tagCanvas').tagcanvas({
@@ -17,7 +15,6 @@ jQuery(document).ready(function() {
             jQuery('#CanvasContainer').hide();
           }
   
-	}, 800);
+	};
      
 	 
-});

@@ -123,14 +123,15 @@ public class TagsPage extends Page {
                         list.getElement().setId("weightedtaglist");
                         list.setHTML("<ul>" + uListString + "</ul>");
                         tagCloudPanel.add(list);
+                        startCloud();
                     }
 
                 });
     }
 
-    //public static native void startCloud() /*-{
-    //    $wnd.jQuery("#sortedtable").tablesorter();
-    //}-*/;
+    public static native void startCloud() /*-{
+		$wnd.startTagCloud();
+    }-*/;
 
     @Override
     public void layout() {
