@@ -301,7 +301,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
 
-        LoginPage.setMainWindow(this); 
+        LoginPage.setMainWindow(this);
 
         dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(),
                 ConfigurationKey.ProjectName,
@@ -1117,7 +1117,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * and return the user's ID for local use.
      */
     public void checkRestAuth(final String sessionID, final AuthenticationCallback callback) {
-        String restUrl = "./api/checkLogin";
+        String restUrl = GWT.getModuleBaseURL() + "api/checkLogin";
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
         try {
             GWT.log("checking login status @ " + restUrl, null);

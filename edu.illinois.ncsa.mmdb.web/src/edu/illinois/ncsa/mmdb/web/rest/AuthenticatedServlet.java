@@ -198,6 +198,8 @@ public class AuthenticatedServlet extends HttpServlet {
         session.setAttribute("exp", expiresAt);
 
         log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
+        log.debug("expires: " + expiresAt);
+        log.debug("Server is: " + server);
         session.setAttribute(AUTHENTICATED_AS, validUser);
 
         session.setMaxInactiveInterval(expiresAt - (int) (System.currentTimeMillis() / 1000L) + 1); //longer than gAT lifetime - (note gAT lifetime now governs how long the session is considered valid, not the session lifetime)

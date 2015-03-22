@@ -192,6 +192,7 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
 
     private String getServer(HttpServletRequest request) {
         StringBuffer sBuffer = request.getRequestURL();
+        log.debug("URL is: " + sBuffer);
         String sp = request.getServletPath();
         String pi = request.getPathInfo();
         int end = sBuffer.length();
