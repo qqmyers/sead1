@@ -136,17 +136,18 @@ public class SelectedItemsPage extends Page {
                 } else {
                     rightcolumn.add(relationshipWidget);
                 }
+                //fetch all datasets via their URI to add to list & relationship widget
+                fetchData(selectedItems);
             }
 
             @Override
             public void onDenied() {
                 Label notAllowed = new Label("You do not have permission to create relationships");
                 rightcolumn.add(notAllowed);
+                //fetch all datasets via their URI to add to list
+                fetchData(selectedItems);
             }
         });
-
-        //fetch all datasets via their URI to add to list & relationship widget
-        fetchData(selectedItems);
 
         mainLayoutPanel.add(selectedPanel);
 
@@ -182,10 +183,12 @@ public class SelectedItemsPage extends Page {
                         public void onAllowed() {
                             relationshipWidget.addToList(shortenTitle(collection.getTitle()), collection.getUri(), true);
                             if (first == 1) {
+                                relationshipWidget.item1.setSelected(0);
                                 relationshipWidget.thumb1.changeImage(collection.getUri(), "Collection");
 
                                 first = 0;
                             } else if (first == 0) {
+                                relationshipWidget.item2.setSelected(1);
                                 relationshipWidget.thumb2.changeImage(collection.getUri(), "Collection");
                                 first = -1;
                             }
@@ -213,10 +216,12 @@ public class SelectedItemsPage extends Page {
 
                             relationshipWidget.addToList(shortenTitle(dataset.getTitle()), dataset.getUri(), false);
                             if (first == 1) {
+                                relationshipWidget.item1.setSelected(0);
                                 relationshipWidget.thumb1.changeImage(dataset.getUri(), dataset.getMimeType());
 
                                 first = 0;
                             } else if (first == 0) {
+                                relationshipWidget.item2.setSelected(1);
                                 relationshipWidget.thumb2.changeImage(dataset.getUri(), dataset.getMimeType());
                                 first = -1;
                             }

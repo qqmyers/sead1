@@ -127,7 +127,7 @@ public class CreateRelationshipsWidget extends Composite {
         thumb1 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false, service);
         thumb1.setWidth("110px");
         thumb1.setHeight("110px");
-        thumb1.setStyleName("relationshipTumbnail");
+        thumb1.setStyleName("relationshipThumbnail");
         relationshipsWidget.setWidget(0, 0, thumb1);
 
         relationshipsList = new LabeledListBox("");
@@ -137,7 +137,7 @@ public class CreateRelationshipsWidget extends Composite {
         thumb2 = new PreviewWidget(null, GetPreviews.SMALL, null, "Unknown", false, false, service);
         thumb2.setWidth("110px");
         thumb2.setHeight("110px");
-        thumb2.setStyleName("relationshipTumbnail");
+        thumb2.setStyleName("relationshipThumbnail");
         relationshipsWidget.setWidget(0, 2, thumb2);
 
         //user interface: Filename dropdown forms
@@ -146,7 +146,7 @@ public class CreateRelationshipsWidget extends Composite {
 
         item1.addValueChangeHandler(new ValueChangeHandler<String>() {
             public void onValueChange(ValueChangeEvent<String> event) {
-                fetchItem(event.getValue(), thumb1);
+                fetchItem(event.getValue().substring(1), thumb1);
                 updateRelationShipOptions();
             }
         });
@@ -156,7 +156,7 @@ public class CreateRelationshipsWidget extends Composite {
 
         item2.addValueChangeHandler(new ValueChangeHandler<String>() {
             public void onValueChange(ValueChangeEvent<String> event) {
-                fetchItem(event.getValue(), thumb2);
+                fetchItem(event.getValue().substring(1), thumb2);
                 updateRelationShipOptions();
             }
         });

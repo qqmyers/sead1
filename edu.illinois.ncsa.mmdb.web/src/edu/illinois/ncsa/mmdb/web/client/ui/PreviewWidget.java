@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -77,10 +77,10 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPending;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsPreviewPendingResult;
 
 /**
- * 
+ *
  * @author Joe Futrelle
  * @author Luigi Marini
- * 
+ *
  */
 public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
@@ -147,7 +147,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
      * desired size is large (preview) ask the server for the size of the
      * preview and then properly size the image keeping the correct aspect
      * ratio.
-     * 
+     *
      * @param datasetUri
      * @param desiredSize
      * @param link
@@ -198,6 +198,8 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
         killTimer();
         // are we supposed to show the image immediately?
         if (initialDisplay) {
+            state = State.BLANK;
+
             // figure out if we need to show the overlay
             showPreview(uri, size, link, 0, 0);
             preview.addErrorHandler(new ErrorHandler() {
@@ -358,7 +360,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
 
     /**
      * Implements a default size of {@link GetPreviews#SMALL}.
-     * 
+     *
      * @param size
      *            the size
      * @return the size, unless it's null or unknown, in which case return
@@ -436,7 +438,7 @@ public class PreviewWidget extends Composite implements HasAllMouseHandlers {
     }
 
     /**
-     * 
+     *
      * @return
      */
     public HasClickHandlers getTarget() {
