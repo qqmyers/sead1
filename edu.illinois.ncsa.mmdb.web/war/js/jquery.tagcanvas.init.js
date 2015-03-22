@@ -1,5 +1,5 @@
 function startTagCloud() {
-        jQuery('#tagCloud').append('<div id="CanvasContainer"><canvas width="300" height="300" id="tagCanvas"></canvas></div>');
+        jQuery('#tagCloud').append('<div id="CanvasContainer"><canvas width="1000" height="400" id="tagCanvas"></canvas></div>');
 
           if(!jQuery('#tagCanvas').tagcanvas({
             textColour: '#0b5ca3',
@@ -9,12 +9,11 @@ function startTagCloud() {
             maxSpeed: 0.05,
             textHeight: 25,
             weight: true,
-            weightFrom: 'data-weight'
+            weightFrom: 'data-weight',
+			weightSize: 20
           },'weightedtaglist')) {
    		   console.log('Error: could not create canvas');
             jQuery('#CanvasContainer').hide();
           }
   
 	};
-     
-	 

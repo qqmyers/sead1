@@ -336,3 +336,7 @@ table td{
 	font-size:14px;
 	color:#444;
 }
+
+#CanvasContainer {
+	text-align: center;
+}
