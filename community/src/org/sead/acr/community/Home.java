@@ -25,9 +25,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.sead.acr.common.utilities.json.JSONArray;
 
 public class Home extends HttpServlet {
 
@@ -70,7 +70,7 @@ public class Home extends HttpServlet {
 
 		rd.forward(request, response);
 	}
-	protected JSONArray getServerList() throws IOException {
+	protected org.json.JSONArray getServerList() throws IOException {
 
 		InputStream inputStream = this.getClass().getClassLoader()
 				.getResourceAsStream(_serverFile);
@@ -81,7 +81,7 @@ public class Home extends HttpServlet {
 
 		inputStream.close();
 		log.debug(_serverMap.toString());
-		return new JSONArray(_serverMap.keySet());
+		return new org.json.JSONArray(_serverMap.keySet());
 	}
 
 	public static String getServerKey(String server) {
