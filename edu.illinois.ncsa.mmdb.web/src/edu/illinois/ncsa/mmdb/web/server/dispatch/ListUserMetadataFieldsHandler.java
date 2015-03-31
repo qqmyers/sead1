@@ -47,6 +47,7 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sead.acr.common.utilities.Memoized;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
@@ -61,7 +62,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
-import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 

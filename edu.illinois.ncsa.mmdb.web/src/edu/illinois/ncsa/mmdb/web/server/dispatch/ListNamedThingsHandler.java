@@ -2,11 +2,11 @@ package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sead.acr.common.utilities.Memoized;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.rdf.Resource;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
-import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 public abstract class ListNamedThingsHandler {

@@ -67,6 +67,7 @@ import net.customware.gwt.dispatch.shared.Result;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sead.acr.common.utilities.Memoized;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.BlobChecker;
 import org.tupeloproject.kernel.Context;
