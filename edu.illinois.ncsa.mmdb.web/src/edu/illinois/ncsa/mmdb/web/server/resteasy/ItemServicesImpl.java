@@ -20,6 +20,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.sql.Date;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -65,6 +67,8 @@ import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.rdf.terms.Tags;
 import org.tupeloproject.util.Table;
 import org.tupeloproject.util.Tuple;
+
+import com.hp.hpl.jena.vocabulary.DCTerms;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
@@ -1089,7 +1093,7 @@ public class ItemServicesImpl
                 r = item.getErrorResponse();
             } else {
                 Unifier uf = new Unifier();
-                uf.addPattern(id, Tags.TAGGED_WITH_TAG, "tag");
+                uf.addPattern(itemId, Tags.TAGGED_WITH_TAG, "tag");
                 uf.addPattern("tag", Tags.HAS_TAG_TITLE, "title");
                 uf.addColumnName("title");
                 c.perform(uf);
@@ -1180,7 +1184,14 @@ public class ItemServicesImpl
     protected Response markItemAsDeleted(String encoded_id, UriRef type, HttpServletRequest request) {
         Response r;
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
-        List<String> tags = new ArrayList<String>();
+        Permission perm = Permission.DELETE_DATA;
+        if (type.equals(CollectionBeanUtil.COLLECTION_TYPE)) {
+            perm = Permission.DELETE_COLLECTION;
+        }
+        PermissionCheck p = new PermissionCheck(userId, perm);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
         try {
             UriRef itemId = Resource.uriRef(URLDecoder.decode(encoded_id, "UTF-8"));
 
@@ -1199,6 +1210,57 @@ public class ItemServicesImpl
         } catch (Exception e) {
             Map<String, Object> result = new LinkedHashMap<String, Object>();
             result.put("Error", "Server error while deleting " + encoded_id);
+            r = Response.status(500).entity(result).build();
+        }
+        return r;
+    }
+
+    protected Response publishItem(String encoded_id, Resource type, long date, HttpServletRequest request) {
+        Response r;
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        PermissionCheck p = new PermissionCheck(userId, Permission.EDIT_METADATA);
+        if (!p.userHasPermission()) {
+            return p.getErrorResponse();
+        }
+
+        try {
+            UriRef itemId = Resource.uriRef(URLDecoder.decode(encoded_id, "UTF-8"));
+
+            ValidItem item = new ValidItem(itemId, type, userId);
+            if (!item.isValid()) {
+                r = item.getErrorResponse();
+            } else {
+                TripleMatcher tMatcher = new TripleMatcher();
+
+                tMatcher.match(itemId, new UriRef("http://sead-data.net/terms/ProposedForPublication"), null);
+                c.perform(tMatcher);
+                Set<Triple> triples = tMatcher.getResult();
+                TripleWriter tw = new TripleWriter();
+                Map<String, Object> result = new LinkedHashMap<String, Object>();
+                if (triples.size() >= 1) {
+                    tw.remove((Triple) triples.toArray()[0]);
+
+                    Date theDate = new Date(date);
+                    UriRef issued = Resource.uriRef(DCTerms.issued.getURI());
+                    //Fixme - we can't delete non-string literals from the GUI since we lose type info along the way...
+                    //So - using a string here
+                    tw.add(itemId, issued, Resource.literal(DateFormat.getDateTimeInstance().format(theDate)));
+                    c.perform(tw);
+
+                    ListUserMetadataFieldsHandler.addViewablePredicate(issued.toString());
+
+                    result.put("Item Published", itemId.toString());
+                    r = Response.status(200).entity(result).build();
+
+                } else {
+                    result.put("Item Not Proposed For Publication", itemId.toString());
+                    r = Response.status(409).entity(result).build();
+                }
+
+            }
+        } catch (Exception e) {
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            result.put("Error", "Server error while publishing " + encoded_id);
             r = Response.status(500).entity(result).build();
         }
         return r;

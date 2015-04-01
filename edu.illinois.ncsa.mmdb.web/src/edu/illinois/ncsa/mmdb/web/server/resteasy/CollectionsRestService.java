@@ -27,6 +27,7 @@ import javax.ws.rs.Encoded;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -563,6 +564,50 @@ public class CollectionsRestService extends ItemServicesImpl {
     public Response uploadMetadata(@PathParam("id") @Encoded String id, MultipartFormDataInput input, @javax.ws.rs.core.Context HttpServletRequest request) {
 
         return super.uploadMetadata(id, input, request);
+    }
+
+    /**
+     * Publish collection.
+     *
+     * This removes the proposed for publication metadata and sets a publication
+     * date
+     *
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @param date
+     *            - the publication date to be set, as a long (milliseconds
+     *            since January 1, 1970, 00:00:00 GMT) - now by default,
+     *
+     * @result - success/failure message
+     */
+    @PUT
+    @Path("/{id}/published")
+    public Response uploadMetadata(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+
+        return super.publishItem(id, CollectionBeanUtil.COLLECTION_TYPE, System.currentTimeMillis(), request);
+    }
+
+    /**
+     * Publish collection.
+     *
+     * This removes the proposed for publication metadata and sets a publication
+     * date
+     *
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @param date
+     *            - the publication date to be set, as a long (milliseconds
+     *            since January 1, 1970, 00:00:00 GMT) - now by default,
+     *
+     * @result - success/failure message: 200 - item published,, 403 -
+     *         permission issue, 409 - item has not been
+     *         "proposed for publication"
+     */
+    @PUT
+    @Path("/{id}/published/{date}")
+    public Response uploadMetadata(@PathParam("id") @Encoded String id, @PathParam("date") long date, @javax.ws.rs.core.Context HttpServletRequest request) {
+
+        return super.publishItem(id, CollectionBeanUtil.COLLECTION_TYPE, date, request);
     }
 
 }
