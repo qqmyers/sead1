@@ -22,6 +22,7 @@ package org.sead.acr.community;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,57 +62,47 @@ public class VIVOProxyServlet extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		log.debug("Redirecting: " + request.getRequestURI() + " "
 				+ request.getQueryString());
-		String query = request.getQueryString();
+		final String query = request.getQueryString();
 
-		HttpURLConnection conn = null;
-
-		URL requestURL;
 		if (!query.equals("")) {
-			requestURL = new URL(
-					"http://sead-vivo.d2i.indiana.edu:3030/SEAD-VIVO/sparql?"
-							+ query);
+			Memoized<String> answer = queryResponses.get(query);
+			if (answer == null) {
+				answer = new Memoized<String>() {
+					public String computeValue() {
+						URL requestURL = null;
+						String theAnswer = "";
+						try {
+							requestURL = new URL(
+									"http://sead-vivo.d2i.indiana.edu:3030/SEAD-VIVO/sparql?"
+											+ query);
 
-			// Make a connect to the server
-			log.debug("Connecting to: " + requestURL.toString());
+							// Make a connect to the server
+							log.debug("Connecting to: " + requestURL.toString());
+							HttpURLConnection conn = null;
+							conn = (HttpURLConnection) requestURL
+									.openConnection();
 
-			conn = (HttpURLConnection) requestURL.openConnection();
+							conn.setDoInput(true);
+							conn.setUseCaches(false);
+							InputStream is = conn.getInputStream();
+							theAnswer = IOUtils.toString(is);
+							IOUtils.closeQuietly(is);
 
-			conn.setDoInput(true);
-			conn.setUseCaches(false);
-			InputStream is = conn.getInputStream();
-			IOUtils.copy(is,response.getOutputStream());	
-			
+						} catch (MalformedURLException e) {
+							log.error("Bad VIVO query URL");
+						} catch (IOException e) {
+							log.warn("Could not contact VIVO: "
+									+ requestURL.toString());
+						}
+						return theAnswer;
+					}
+				};
+				answer.setTtl(30000);
+				queryResponses.put(query, answer);
+			}
+
+			IOUtils.write(answer.getValue(), response.getOutputStream());
+
 		}
 	}
 }
-
-/*
- * Map<String, String[]> paramMap = request.getParameterMap();
- * 
- * String server = request.getParameter("server"); String query = ""; for
- * (String p: paramMap.keySet()) { if (!p.equals("server")) {
- * if(query.length()==0) { query += "?" + p + "=" + paramMap.get(p)[0]; } else {
- * query += "&" + p + "=" + paramMap.get(p)[0]; } } }
- * response.sendRedirect(_vivoServer + request.getQ); } }
- * 
- * Memoized<Integer> count = datasetCount.get(key); if (count == null) { count =
- * new Memoized<Integer>() { public Integer computeValue() { return
- * countDatasetsInCollectionWithTag(inCollection, withTag); } }; if
- * (inCollection != null || withTag != null) { count.setTtl(10000); } else {
- * count.setTtl(120000); } datasetCount.put(key, count); } return
- * count.getValue(force);
- * 
- * 
- * static Memoized<Integer> collectionCount;
- * 
- * static int getCollectionCount() { if (collectionCount == null) {
- * collectionCount = new Memoized<Integer>() { public Integer computeValue() {
- * Unifier u = new Unifier(); u.setColumnNames("c"); u.addPattern("c", Rdf.TYPE,
- * MMDB.COLLECTION_TYPE); try { long then = System.currentTimeMillis();
- * Table<Resource> result = TupeloStore.getInstance().unifyExcludeDeleted(u,
- * "c"); int count = 0; for (Tuple<Resource> row : result ) { count++; } long ms
- * = System.currentTimeMillis() - then; log.debug("counted " + count +
- * " collection(s) in " + ms + "ms"); return count; } catch (OperatorException
- * e) { e.printStackTrace(); return 0; } } }; collectionCount.setTtl(30000); }
- * return collectionCount.getValue(); }
- */
