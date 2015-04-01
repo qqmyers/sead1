@@ -29,6 +29,17 @@ pre {
 /* ----------------------------------------------------------------------
  * Make it all look the same
  * ---------------------------------------------------------------------- */
+table.treetable tbody tr td:nth-child(2){
+	width:100px !important;
+}
+span.indenter{
+	padding-left:0px;
+	width:0px !important;
+}
+table.treetable span{
+	word-break: break-all;
+	word-wrap: break-word;
+}
 table td, select {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 1.0em;
