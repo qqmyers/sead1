@@ -121,6 +121,7 @@ function pageBiblioJsonParser(id, json) {
 	descriptors = new Array();
 	title = '';
 	abstract = '';
+	doi = '';
 	coll_location = new Array();
 
 	var jsonString = JSON.stringify(json);
@@ -159,6 +160,11 @@ function pageBiblioJsonParser(id, json) {
 		}
 	}
 
+	if(doi!='') {
+		$("#doi" + id).html("<b>DOI: </b><a target = \'blank\' href=\'" + doi + "\'>" + doi + "</a>");
+		$("#doi" + id).css("visibility", "visible");
+	}
+	
 	if (creators.length != 0) {
 		var creatorString = creators[0];
 		var datacreatorString = creatornames[0];
@@ -166,6 +172,7 @@ function pageBiblioJsonParser(id, json) {
 			creatorString += "," + creators[i];
 			datacreatorString += ", " + creatornames[i];
 		}
+
 		$("#authors" + id).html("<b>Authors: </b>" + creatorString);
 		$("#authors" + id).css("visibility", "visible");
 		$("#coll" + id).attr("data-authors", datacreatorString);
@@ -256,7 +263,7 @@ function getBiblioAttributesForPage(jsonBinding) {
 				}
 			}
 		} else if (value == 'abstract' || value == 'title'
-				|| value == 'location') {
+				|| value == 'location')  {
 			var temp = jsonBinding['literal'];
 			if (value == 'abstract') {
 				if ((abstract.length > 0) && (abstract != temp)) {
@@ -274,7 +281,7 @@ function getBiblioAttributesForPage(jsonBinding) {
 				if (coll_location.indexOf(temp) == -1) {
 					coll_location.push(temp);
 				}
-			}
+			} 
 		}
 
 		else if (value == 'descriptor') {
@@ -300,7 +307,14 @@ function getBiblioAttributesForPage(jsonBinding) {
 
 			if (keywords.indexOf(temp) == -1)
 				keywords.push(temp);
-		}
+		}else if (value == 'doi') {
+			var temp = jsonBinding['uri'];
+				if ((doi.length > 0) && (doi != temp)) {
+					alert("Multiple DOIs");
+				} else {
+					doi = temp;
+				}
+			}
 	});
 }
 
@@ -327,8 +341,10 @@ function createBlock(id, element) {
 	$("#coll" + id).append(
 			$("<div/>").attr("class", "well").attr("id", "div" + id));
 	$("#div" + id).append(
-			($("<p/>")).attr("id", "authors" + id).css("visibility", "hidden")
+			($("<p/>")).attr("id", "doi" + id).css("visibility", "hidden")
 					.css("margin-top", "-5px"));
+	$("#div" + id).append(
+			($("<p/>")).attr("id", "authors" + id).css("visibility", "hidden"));
 	$("#div" + id)
 			.append(
 					($("<p/>")).attr("id", "contacts" + id).css("visibility",

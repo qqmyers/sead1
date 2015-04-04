@@ -99,7 +99,7 @@ li {
 	color: #f3882a !important;
 }
 
-.loginPanel .gwt-Hyperlink, .gwt-Anchor {
+.loginPanel .gwt-Hyperlink,.loginPanel .gwt-Anchor {
 	padding-left: 10px;
 }
 #projectTitle .gwt-Anchor{

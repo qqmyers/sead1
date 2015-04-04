@@ -1215,53 +1215,65 @@ public class ItemServicesImpl
         return r;
     }
 
-    protected Response publishItem(String encoded_id, Resource type, long date, HttpServletRequest request) {
+    protected Response publishItem(String encoded_id, Resource type, long date, String pid, HttpServletRequest request) {
         Response r;
-        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
-        PermissionCheck p = new PermissionCheck(userId, Permission.EDIT_METADATA);
-        if (!p.userHasPermission()) {
-            return p.getErrorResponse();
-        }
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
 
-        try {
-            UriRef itemId = Resource.uriRef(URLDecoder.decode(encoded_id, "UTF-8"));
+        if (pid == null) {
+            result.put("Missing", "pid");
+            r = Response.status(400).entity(result).build();
 
-            ValidItem item = new ValidItem(itemId, type, userId);
-            if (!item.isValid()) {
-                r = item.getErrorResponse();
-            } else {
-                TripleMatcher tMatcher = new TripleMatcher();
+        } else {
 
-                tMatcher.match(itemId, new UriRef("http://sead-data.net/terms/ProposedForPublication"), null);
-                c.perform(tMatcher);
-                Set<Triple> triples = tMatcher.getResult();
-                TripleWriter tw = new TripleWriter();
-                Map<String, Object> result = new LinkedHashMap<String, Object>();
-                if (triples.size() >= 1) {
-                    tw.remove((Triple) triples.toArray()[0]);
-
-                    Date theDate = new Date(date);
-                    UriRef issued = Resource.uriRef(DCTerms.issued.getURI());
-                    //Fixme - we can't delete non-string literals from the GUI since we lose type info along the way...
-                    //So - using a string here
-                    tw.add(itemId, issued, Resource.literal(DateFormat.getDateTimeInstance().format(theDate)));
-                    c.perform(tw);
-
-                    ListUserMetadataFieldsHandler.addViewablePredicate(issued.toString());
-
-                    result.put("Item Published", itemId.toString());
-                    r = Response.status(200).entity(result).build();
-
-                } else {
-                    result.put("Item Not Proposed For Publication", itemId.toString());
-                    r = Response.status(409).entity(result).build();
-                }
-
+            UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+            PermissionCheck p = new PermissionCheck(userId, Permission.EDIT_METADATA);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
             }
-        } catch (Exception e) {
-            Map<String, Object> result = new LinkedHashMap<String, Object>();
-            result.put("Error", "Server error while publishing " + encoded_id);
-            r = Response.status(500).entity(result).build();
+
+            try {
+                UriRef itemId = Resource.uriRef(URLDecoder.decode(encoded_id, "UTF-8"));
+                UriRef itemPid = Resource.uriRef(URLDecoder.decode(pid, "UTF-8"));
+
+                ValidItem item = new ValidItem(itemId, type, userId);
+                if (!item.isValid()) {
+                    r = item.getErrorResponse();
+                } else {
+                    TripleMatcher tMatcher = new TripleMatcher();
+
+                    tMatcher.match(itemId, new UriRef("http://sead-data.net/terms/ProposedForPublication"), null);
+                    c.perform(tMatcher);
+                    Set<Triple> triples = tMatcher.getResult();
+                    TripleWriter tw = new TripleWriter();
+                    if (triples.size() >= 1) {
+                        tw.remove((Triple) triples.toArray()[0]);
+
+                        Date theDate = new Date(date);
+                        UriRef issued = Resource.uriRef(DCTerms.issued.getURI());
+                        UriRef identifier = Resource.uriRef(DCTerms.identifier.getURI());
+                        //Fixme - we can't delete non-string literals from the GUI since we lose type info along the way...
+                        //So - using a string here
+                        tw.add(itemId, issued, Resource.literal(DateFormat.getDateTimeInstance().format(theDate)));
+                        tw.add(itemId, identifier, itemPid);
+
+                        c.perform(tw);
+
+                        ListUserMetadataFieldsHandler.addViewablePredicate(issued.toString());
+
+                        result.put("Item Published", itemId.toString());
+                        r = Response.status(200).entity(result).build();
+
+                    } else {
+                        result.put("Item Not Proposed For Publication", itemId.toString());
+                        r = Response.status(409).entity(result).build();
+                    }
+
+                }
+            } catch (Exception e) {
+                result = new LinkedHashMap<String, Object>();
+                result.put("Error", "Server error while publishing " + encoded_id);
+                r = Response.status(500).entity(result).build();
+            }
         }
         return r;
     }
