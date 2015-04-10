@@ -19,6 +19,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.MetadataTermResult;
 import edu.illinois.ncsa.mmdb.web.server.BlacklistedPredicates;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class AddMetadataHandler implements ActionHandler<AddMetadata, MetadataTermResult> {
@@ -31,6 +32,9 @@ public class AddMetadataHandler implements ActionHandler<AddMetadata, MetadataTe
         Set<Resource> blacklistedPredicates = BlacklistedPredicates.GetResources();
         if (blacklistedPredicates.contains(uri)) {
             throw new ActionException("Cannot add a blacklisted Predicate.");
+        }
+        if (ItemServicesImpl.getReservedLabels().contains(action.getLabel())) {
+            throw new ActionException("Cannot add a term using a reserved label.");
         }
 
         TripleWriter tw = new TripleWriter();

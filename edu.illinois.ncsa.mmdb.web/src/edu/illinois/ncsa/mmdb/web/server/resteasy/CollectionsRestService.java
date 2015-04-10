@@ -493,7 +493,7 @@ public class CollectionsRestService extends ItemServicesImpl {
     @GET
     @Path("/{id}/unique")
     @Produces("application/json")
-    public Response getCollectionUniqueMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response getCollectionUniqueMetadataAsJSON2(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         //Note - don't currently have extractors that work on collections so this currently just returns
         //the same results as /metadata minus the triples about extractor run start/end times

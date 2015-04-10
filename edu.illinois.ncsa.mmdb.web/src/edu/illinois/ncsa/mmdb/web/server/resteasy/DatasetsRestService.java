@@ -594,7 +594,7 @@ public class DatasetsRestService extends ItemServicesImpl {
     @GET
     @Path("/{id}/unique")
     @Produces("application/json")
-    public Response getDatasetUniqueMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response getDatasetUniqueMetadataAsJSON2(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
 
         return getItemMetadataAsJSON(id, userId, false);

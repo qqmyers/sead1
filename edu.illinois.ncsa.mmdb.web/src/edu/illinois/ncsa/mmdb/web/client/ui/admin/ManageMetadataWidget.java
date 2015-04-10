@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -99,7 +100,8 @@ public class ManageMetadataWidget extends Composite {
                 dispatch.execute(m, new AsyncCallback<MetadataTermResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        GWT.log("Could not add Metadata value.", caught);
+                        GWT.log("Could not update a Metadata value.", caught);
+                        Window.alert(caught.getLocalizedMessage());
                     }
 
                     @Override
@@ -202,7 +204,7 @@ public class ManageMetadataWidget extends Composite {
                 dispatch.execute(m, new AsyncCallback<MetadataTermResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        GWT.log("Could not add Metadata value.", caught);
+                        GWT.log("Could not remove Metadata value.", caught);
                     }
 
                     @Override
@@ -313,6 +315,7 @@ public class ManageMetadataWidget extends Composite {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Could not add Metadata value.", caught);
+                        Window.alert(caught.getLocalizedMessage());
                     }
 
                     @Override
