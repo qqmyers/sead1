@@ -5,6 +5,7 @@ padding-top:0px !important;
 	font-family: 'lato';
 	width: 1200px;
 	margin: auto;
+	position: relative;
 }
 
 li {
