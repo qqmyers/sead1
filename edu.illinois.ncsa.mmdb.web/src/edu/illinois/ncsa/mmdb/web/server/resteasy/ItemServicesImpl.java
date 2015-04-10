@@ -237,14 +237,15 @@ public class ItemServicesImpl
     static Context                             c                 = TupeloStore.getInstance().getContext();
     static protected SEADRbac                  rbac              = new SEADRbac(TupeloStore.getInstance().getContext());
 
-    static public Set<String> getReservedLabels() {
-        Set<String> labelsSet = datasetBasics.keySet();
-        labelsSet.addAll(collectionBasics.keySet());
-        labelsSet.addAll(itemBiblio.keySet());
-        labelsSet.addAll(layerBasics.keySet());
-        labelsSet.addAll(featureBasics.keySet());
-        labelsSet.addAll(commentBasics.keySet());
-        return labelsSet;
+    static public List<String> getReservedLabels() {
+        ArrayList<String> labelsArrayList = new ArrayList<String>();
+        labelsArrayList.addAll(datasetBasics.keySet());
+        labelsArrayList.addAll(collectionBasics.keySet());
+        labelsArrayList.addAll(itemBiblio.keySet());
+        labelsArrayList.addAll(layerBasics.keySet());
+        labelsArrayList.addAll(featureBasics.keySet());
+        labelsArrayList.addAll(commentBasics.keySet());
+        return labelsArrayList;
     }
 
     protected Response uploadMetadata(String id, MultipartFormDataInput input, HttpServletRequest request) {
@@ -466,6 +467,10 @@ public class ItemServicesImpl
                     }
                     //6 tags http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag
                     combinedMap.put("keyword", "http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag");
+
+                    //7 - Don't show hasPart relationships since there are other endpoints for those and we would not be handling
+                    //    access control here
+                    combinedMap.remove("Has Subcollection");
                     return combinedMap;
                 }
             };
