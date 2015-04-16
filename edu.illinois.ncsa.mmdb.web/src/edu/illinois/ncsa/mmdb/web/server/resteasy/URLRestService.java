@@ -43,7 +43,7 @@ import edu.illinois.ncsa.mmdb.web.common.Permission;
  * cookie that can be returned with all calls here. (/api/logout will invalidate
  * session).
  * Credentials can also be sent with each call.
- * 
+ *
  */
 @Path("/urls")
 public class URLRestService extends ItemServicesImpl {
@@ -58,7 +58,7 @@ public class URLRestService extends ItemServicesImpl {
                                                                   desc.put("@type", "@id");
                                                                   put("Description", desc);
                                                                  */
-                                                                 put("Identifier", Namespaces.dcTerms("identifier"));
+                                                                 put("External Identifier", Namespaces.dcTerms("identifier"));
                                                                  put("Title", Namespaces.dcTerms("title"));
                                                                  put("Date", Namespaces.dcTerms("date"));
                                                                  put("Publisher", Namespaces.dcTerms("publisher"));
@@ -70,7 +70,7 @@ public class URLRestService extends ItemServicesImpl {
 
     /**
      * Get metadata for URI
-     * 
+     *
      * @return basic metadata as JSON-LD
      */
     @GET
@@ -93,7 +93,7 @@ public class URLRestService extends ItemServicesImpl {
             //      log.error("Getting  " + url);
             IDMediator.getMetadata(url, tempResult);
         } else if (uri.startsWith("tag:")) {
-            //return sead info        
+            //return sead info
             return getItemMetadataAsJSON(uri, id, true);
         }
         Map<UriRef, String> ptlMap = getPredToLabelMap(doiBasics);
@@ -115,7 +115,7 @@ public class URLRestService extends ItemServicesImpl {
         if (result.isEmpty()) {
             return Response.status(404).entity("Item " + id + " Not Found.").build();
         }
-        // Note - since this context comes form simple pred/label info, none of the entries can have the 
+        // Note - since this context comes form simple pred/label info, none of the entries can have the
         // value-type info possible with set contexts (see example at top of file)
         result.put("@context", context);
         return Response.status(200).entity(result).build();
@@ -123,7 +123,7 @@ public class URLRestService extends ItemServicesImpl {
 
     /**
      * Get dataset content
-     * 
+     *
      * @param id
      *            - the URL encoded SEAD ID for the desired dataset
      * @return the bytes associated with this ID (i.e. the 'file' contents)
@@ -172,7 +172,7 @@ public class URLRestService extends ItemServicesImpl {
             return Response.ok(streamingResult, "application/octet-stream").header("content-disposition", "attachement; filename = " + uri).build();
 
         } else if (uri.startsWith("tag:")) {
-            //return sead info        
+            //return sead info
             return DatasetsRestService.getDataFile(origUri, request);
         }
         result.put("Not Found", uri);

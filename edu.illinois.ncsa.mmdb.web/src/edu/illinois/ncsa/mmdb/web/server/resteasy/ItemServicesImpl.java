@@ -245,6 +245,7 @@ public class ItemServicesImpl
         labelsArrayList.addAll(layerBasics.keySet());
         labelsArrayList.addAll(featureBasics.keySet());
         labelsArrayList.addAll(commentBasics.keySet());
+        labelsArrayList.addAll(URLRestService.doiBasics.keySet());
         return labelsArrayList;
     }
 
