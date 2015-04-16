@@ -55,7 +55,6 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.SubjectRemover;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
-import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Files;
@@ -68,7 +67,6 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
  */
 public class RestServiceImpl implements RestService {
     static Log log = LogFactory.getLog(RestServiceImpl.class);
-    Context    c   = new MemoryContext();
 
     Context getContext() {
         return TupeloStore.getInstance().getContext();
