@@ -620,7 +620,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 if (username.equals(MMDB.getUsername())) {
                     menuItem.removeStyleName("hidden");
                 } else {
-                    Window.alert("allowed was : " + username + " now: " + MMDB.getUsername());
+                    Window.alert("Server Restarted. Please reload page to restablish session. Contact SEAD if issue persists.");
                 }
             }
 
@@ -630,7 +630,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                     menuItem.addStyleName("hidden");
                 } else {
-                    Window.alert("denied was : " + username + " now: " + MMDB.getUsername());
+                    Window.alert("Server Restarted. Please reload page to restablish session. Contact SEAD if issue persists.");
                 }
 
             }
@@ -641,7 +641,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                     menuItem.addStyleName("hidden");
                 } else {
-                    Window.alert("fail was : " + username + " now: " + MMDB.getUsername());
+                    Window.alert("Server Restarted. Please reload page to restablish session. Contact SEAD if issue persists.");
                 }
 
             }
