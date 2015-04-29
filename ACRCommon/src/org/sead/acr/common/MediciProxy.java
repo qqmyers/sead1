@@ -21,6 +21,7 @@ package org.sead.acr.common;
  */
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.Properties;
 
@@ -28,19 +29,20 @@ import javax.xml.ws.http.HTTPException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.XML;
 import org.sead.acr.common.utilities.PropertiesLoader;
-import org.sead.acr.common.utilities.json.JSONException;
-import org.sead.acr.common.utilities.json.JSONObject;
-import org.sead.acr.common.utilities.json.XML;
 
-public class MediciProxy {
+public class MediciProxy implements Serializable {
+
+	private static final long serialVersionUID = -585115097919778904L;
 
 	static Object padlock = new Object();
 
 	private static Log log = LogFactory.getLog(MediciProxy.class);
 
 	private String _username = null;
-	private String _password = null;
 	private String _server = null;
 	private String _remoteAPIKey = null;
 	private boolean _validCredentials = false;
@@ -90,7 +92,6 @@ public class MediciProxy {
 			String remoteAPIKey) throws HTTPException {
 		log.debug("Setting credentials");
 		_username = username;
-		_password = password;
 		_server = server;
 		_remoteAPIKey = remoteAPIKey;
 
@@ -99,11 +100,15 @@ public class MediciProxy {
 		// hardcoded for now
 		// Optional Geoserver info - may or may not be supplied/required by app
 		if (_geoserver == null) {
-			Properties p = PropertiesLoader.getProperties();
 
-			_geoserver = p.getProperty("geoserver");
-			_geouser = p.getProperty("geouser");
-			_geopassword = p.getProperty("geopassword");
+			Properties p = PropertiesLoader.getProperties();
+			if (p != null) {
+				_geoserver = p.getProperty("geoserver");
+				_geouser = p.getProperty("geouser");
+				_geopassword = p.getProperty("geopassword");
+			} else {
+				log.warn("No properties file found");
+			}
 		}
 		try {
 
@@ -222,6 +227,21 @@ public class MediciProxy {
 
 	}
 
+	/**
+	 * Use when in a local context that shares a session with the target server
+	 * 
+	 * @param sessionId
+	 * @param localServer
+	 * @param remoteAPIKey
+	 */
+	public void setLocalCredentials(String sessionId, String localServer,
+			String remoteAPIKey) {
+		_sessionId = sessionId;
+		_server = localServer;
+		_remoteAPIKey = remoteAPIKey;
+		_validCredentials = true;
+	}
+
 	public boolean hasValidCredentials() {
 		return _validCredentials;
 	}
@@ -335,6 +355,11 @@ public class MediciProxy {
 
 	}
 
+	/**
+	 * @ deprecated - use getValidatedGoogleToken instead
+	 * 
+	 */
+
 	public static String isValidGoogleToken(String[] client_ids,
 			String googleAccessToken) {
 
@@ -369,4 +394,49 @@ public class MediciProxy {
 		return null;
 	}
 
+	public static JSONObject getValidatedGoogleToken(String[] client_ids,
+			String googleAccessToken) {
+
+		try {
+			DataAccess jsonGETDA = DataAccess
+					.buildUnauthenticatedJsonGETResponseDataAccess(TOKEN_INFO_URL);
+
+			String result = jsonGETDA.getResponse("access_token="
+					+ googleAccessToken);
+			log.debug("TokenInfo retrieved from Google: " + result);
+
+			JSONObject tokeninfo = new JSONObject(result);
+			String audience = tokeninfo.getString("audience");
+			boolean verified = tokeninfo.getBoolean("verified_email");
+			int i = audience.indexOf("<");
+			if (i > 0) {
+				log.debug("Audience includes < :" + audience);
+				audience = audience.substring(0, i);
+			}
+			if (verified) {
+				for (String id : client_ids) {
+					if (audience.equals(id)) {
+						return tokeninfo;
+					}
+				}
+			}
+		} catch (Exception e) {
+			log.debug("Google validation exception: " + e.getMessage());
+		}
+
+		return null;
+	}
+
+	//Simple way to test if username/password/server/remoteAPIKey combo is valid
+	
+	public static void main(String[] args) {
+		if(args.length==0) {
+			System.out.println("Use params: <username> <password> <server> <remoteAPIKey>");
+			System.exit(0);
+		}
+		MediciProxy mp = new MediciProxy();
+		mp.setCredentials(args[0], args[1], args[2], args[3]);
+		System.out.println("setting credentials completed.");
+		System.exit(0);
+	}
 }

@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,16 +32,17 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.dispatch;
 
 import java.util.Collection;
+import java.util.Map;
 
 import net.customware.gwt.dispatch.shared.Result;
 import edu.uiuc.ncsa.cet.bean.CollectionBean;
@@ -49,7 +50,7 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
 /**
  * @author lmarini
- * 
+ *
  */
 @SuppressWarnings("serial")
 public class GetCollectionResult implements Result {
@@ -58,6 +59,7 @@ public class GetCollectionResult implements Result {
     private int                     collectionSize;
     private Collection<PreviewBean> previews;
     private String                  doi;
+    private Map<String, String>     parents;
 
     public GetCollectionResult() {
     }
@@ -96,5 +98,13 @@ public class GetCollectionResult implements Result {
 
     public void setDOI(String doi) {
         this.doi = doi;
+    }
+
+    public Map<String, String> getParents() {
+        return parents;
+    }
+
+    public void setParents(Map<String, String> parents) {
+        this.parents = parents;
     }
 }

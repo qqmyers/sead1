@@ -37,7 +37,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.presenter;
 
@@ -94,7 +94,7 @@ import edu.illinois.ncsa.mmdb.web.common.Permission;
 
 /**
  * @author LUigi Marini
- * 
+ *
  */
 public class BatchOperationPresenter extends BasePresenter<BatchOperationPresenter.Display> {
 
@@ -425,7 +425,8 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
                                 public void onAllowed() {
                                     final String collectionUri = atc.getSelectedValue();
                                     final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedItems());
-                                    //DCTERMS:description is being overloaded - the user message is 'describes collection' but we will also be using this to select a collection preview image 
+
+                                    //DCTERMS:description is being overloaded - the user message is 'describes collection' but we will also be using this to select a collection preview image
                                     SetUserMetadata sum = new SetUserMetadata(collectionUri, "http://purl.org/dc/terms/description", selectedDatasets, true);
                                     final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "set");
                                     service.execute(sum,

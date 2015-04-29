@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
@@ -47,9 +47,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -64,6 +62,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.CollectionTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
@@ -71,9 +70,9 @@ import edu.uiuc.ncsa.cet.bean.CollectionBean;
 
 /**
  * List all collections in system.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class ListCollectionsPage extends Page {
 
@@ -85,6 +84,9 @@ public class ListCollectionsPage extends Page {
 
     public ListCollectionsPage(DispatchAsync dispatch, HandlerManager eventBus) {
         super("Collections", dispatch);
+        if (DynamicTablePresenter.showTopLevelDatasets == true) {
+            setPageTitle("Top-level Collections");
+        }
         this.dispatch = dispatch;
         this.eventbus = eventBus;
 
@@ -98,13 +100,7 @@ public class ListCollectionsPage extends Page {
         batchOperationPresenter.bind();
         rightHeader.add(batchOperationView);
 
-        // rss feed
-        Anchor rss = new Anchor();
-        rss.setHref("rss.xml");
-        rss.addStyleName("rssIcon");
-        DOM.setElementAttribute(rss.getElement(), "type", "application/rss+xml");
-        rss.setHTML("<img src='./images/rss_icon.gif' border='0px' id='rssIcon' class='navMenuLink'>"); // FIXME hack
-        rightHeader.add(rss);
+        rightHeader.add(getRssFeed());
 
         DynamicTableView dynamicTableView = new DynamicTableView();
         dynamicTablePresenter = new CollectionTablePresenter(dispatch, eventBus, dynamicTableView);
@@ -131,11 +127,12 @@ public class ListCollectionsPage extends Page {
 
     /**
      * Widget to create a new collection.
-     * 
+     *
      * @return
      */
     private FlowPanel createAddCollectionWidget() {
         final FlowPanel addCollectionPanel = new FlowPanel();
+        addCollectionPanel.addStyleDependentName("add-collection");
         PermissionUtil rbac = new PermissionUtil(dispatch);
         rbac.doIfAllowed(Permission.ADD_COLLECTION, new PermissionCallback() {
             @Override
@@ -165,9 +162,7 @@ public class ListCollectionsPage extends Page {
 
             @Override
             public void onDenied() {
-                String msg = "You do not have permission to create collections";
-                GWT.log(msg);
-                statusLabel.setText(msg);
+                GWT.log("You do not have permission to create collections");
             }
         });
 
@@ -176,7 +171,7 @@ public class ListCollectionsPage extends Page {
 
     /**
      * Create new collection on the server.
-     * 
+     *
      * @param text
      *            name of collection
      */

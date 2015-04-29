@@ -38,6 +38,7 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.client.view;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,15 +52,16 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.ListQueryResult.ListQueryItem.SectionHit;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter.Display;
 import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
 import edu.illinois.ncsa.mmdb.web.client.ui.PagingWidget;
 
 /**
  * A table widget to enable paging, sorting and ordering of business beans.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class DynamicTableView extends Composite implements Display {
 
@@ -290,5 +292,31 @@ public class DynamicTableView extends Composite implements Display {
     public void setSizeType(String sizeType) {
         sizeOptionsTop.setSelected(sizeType);
         sizeOptionsBottom.setSelected(sizeType);
+    }
+
+    //Compare alphabetically by sectionLabel and then numerically by sectionMarker
+    protected static class SectionHitComparator implements Comparator<SectionHit> {
+
+        @Override
+        public int compare(SectionHit sh1, SectionHit sh2) {
+            int result = sh1.getSectionLabel().compareTo(sh2.getSectionLabel());
+            if (result == 0) {
+                try {
+                    int mark1 = Integer.parseInt(sh1.getSectionMarker());
+                    int mark2 = Integer.parseInt(sh2.getSectionMarker());
+                    if (mark1 < mark2) {
+                        result = -1;
+                    } else if (mark1 == mark2) {
+                        result = 0;
+                    } else {
+                        result = 1;
+                    }
+                } catch (NumberFormatException nfe) {
+                    result = sh1.getSectionMarker().compareTo(sh2.getSectionMarker());
+                }
+            }
+            return result;
+        }
+
     }
 }

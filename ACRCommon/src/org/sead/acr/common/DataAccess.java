@@ -7,14 +7,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
-
 import java.net.MalformedURLException;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.http.HTTPException;
 
 import org.sead.acr.common.utilities.Base64;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -168,6 +166,7 @@ public class DataAccess {
 		if (method.equals(GET)) {
 			if (!query.equals("")) {
 				requestURL = new URL(server + "?" + query);
+		
 			} else {
 				requestURL = new URL(server);
 			}
@@ -177,7 +176,6 @@ public class DataAccess {
 
 		// Make a connect to the server
 		log.debug("Connecting to: " + requestURL.toString());
-
 
 		conn = (HttpURLConnection) requestURL.openConnection();
 
@@ -260,7 +258,9 @@ public class DataAccess {
 		// Add remoteAPIKey to query if set
 		String prepend = "";
 		if ((remoteAPIKey != null) && (remoteAPIKey.length() != 0)) {
-			prepend = "remoteAPI=" + remoteAPIKey;
+			prepend = "remoteAPIKey=" + remoteAPIKey;
+			//Backward compatibility for pre 1.5.1
+			prepend+="&remoteAPI=" + remoteAPIKey;
 		}
 		// write a query to contact the server
 		if (query != null) {

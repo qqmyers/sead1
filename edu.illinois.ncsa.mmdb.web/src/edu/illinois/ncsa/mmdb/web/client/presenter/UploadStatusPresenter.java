@@ -66,16 +66,14 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 /**
  * This presenter manages the relationship between DND upload applet callbacks
  * and the display of upload status for a batch of uploads
- * 
+ *
  * @author futrelle
- * 
+ *
  */
 public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.Display> {
     private final DispatchAsync dispatch;
 
     private int                 nDropped  = 0;
-    private int                 nUploaded = 0;
-
     Set<Integer>                completed = new HashSet<Integer>();
 
     public UploadStatusPresenter(DispatchAsync dispatch, HandlerManager eventBus, Display display) {
@@ -103,18 +101,20 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
      * <li>calls back with progress, repeatedly</li>
      * <li>calls back on completion with dataset uri</li>
      * </ol>
-     * 
+     *
+     * @param count
+     *
      * @param file
      */
-    public void onDropped(String filename, String sizeString) {
+    public void onDropped(int count, String filename, String sizeString) {
         if (nDropped == 0) {
-            nUploaded = 0;
             nDropped = 0;
             display.clear();
             // clear the selection
             eventBus.fireEvent(new AllDatasetsUnselectedEvent());
         }
-        display.onDropped(nDropped++, filename, sizeString);
+        nDropped++;
+        display.onDropped(count, filename, sizeString);
     }
 
     public void onProgressIndex(int percent, int index) {
@@ -125,7 +125,6 @@ public class UploadStatusPresenter extends BasePresenter<UploadStatusPresenter.D
 
     public void onComplete(final String uri, final int ix) {
         completed.add(ix);
-        nUploaded++;
         final HasValue<Boolean> selectionControl = display.onComplete(ix, uri, nDropped);
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             public void execute() {

@@ -18,6 +18,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.MetadataTermResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UpdateMetadata;
 import edu.illinois.ncsa.mmdb.web.server.BlacklistedPredicates;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl;
 
 public class UpdateMetadataHandler implements ActionHandler<UpdateMetadata, MetadataTermResult> {
     private static Log log = LogFactory.getLog(AddMetadataHandler.class);
@@ -29,6 +30,9 @@ public class UpdateMetadataHandler implements ActionHandler<UpdateMetadata, Meta
         Set<Resource> blacklistedPredicates = BlacklistedPredicates.GetResources();
         if (blacklistedPredicates.contains(uri)) {
             throw new ActionException("Cannot update a blacklisted Predicate.");
+        }
+        if (ItemServicesImpl.getReservedLabels().contains(action.getLabel())) {
+            throw new ActionException("Cannot update to use a reserved label.");
         }
 
         TripleWriter tw = new TripleWriter();

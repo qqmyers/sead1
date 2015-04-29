@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,26 +32,30 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
+
 /**
  * @author Luigi Marini
- * 
+ *
  */
 public abstract class Page extends Composite {
 
@@ -62,29 +66,33 @@ public abstract class Page extends Composite {
     private final SimplePanel  feedbackPanel;
 
     /**
-	 * 
+	 *
 	 */
     public Page() {
-        this(null, null, null);
+        this(null, null, null, false);
     }
 
     public Page(DispatchAsync dispatchAsync) {
-        this(null, dispatchAsync, null);
+        this(null, dispatchAsync, null, false);
     }
 
     /**
-     * 
+     *
      * @param title
      */
     public Page(String title, DispatchAsync dispatchAsync) {
-        this(title, dispatchAsync, null);
+        this(title, dispatchAsync, null, false);
+    }
+
+    public Page(String title, DispatchAsync dispatchAsync, HandlerManager eventBus) {
+        this(title, dispatchAsync, eventBus, false);
     }
 
     /**
-     * 
+     *
      * @param title
      */
-    public Page(String title, DispatchAsync dispatchAsync, HandlerManager eventBus) {
+    public Page(String title, DispatchAsync dispatchAsync, HandlerManager eventBus, boolean delegateLayout) {
         this.dispatchAsync = dispatchAsync;
         this.eventBus = eventBus;
 
@@ -102,12 +110,13 @@ public abstract class Page extends Composite {
         // feedback panel
         feedbackPanel = new SimplePanel();
         mainLayoutPanel.add(feedbackPanel);
-
-        layout();
+        if (!delegateLayout) {
+            layout();
+        }
     }
 
     /**
-     * 
+     *
      * @param title
      */
     public void setPageTitle(String title) {
@@ -115,7 +124,7 @@ public abstract class Page extends Composite {
     }
 
     /**
-	 * 
+	 *
 	 */
     public void clear() {
         mainLayoutPanel.clear();
@@ -124,19 +133,19 @@ public abstract class Page extends Composite {
     }
 
     /**
-	 * 
+	 *
 	 */
     public void refresh() {
         layout();
     }
 
     /**
-	 * 
+	 *
 	 */
     public abstract void layout();
 
     /**
-     * 
+     *
      * @param message
      */
     public void showFeedbackMessage(String message) {
@@ -144,5 +153,26 @@ public abstract class Page extends Composite {
         messageLabel.addStyleName("feedbackMessage");
         feedbackPanel.clear();
         feedbackPanel.add(messageLabel);
+    }
+
+    /**
+     * Get RSS feed link
+     *
+     */
+    protected Anchor getRssFeed() {
+        // rss feed
+        Anchor rss = new Anchor();
+        String linkString = "rss.xml";
+
+        if (!MMDB.getSessionState().isAnonymous() && (MMDB.getSessionState().getToken() != null)) {
+            linkString += "?user=" + MMDB.getUsername() + "&token=" + MMDB.getSessionState().getToken();
+            rss.setTitle("This feed URL has your access permissions. Do not share it.");
+        }
+        rss.setHref(linkString);
+        rss.addStyleName("rssIcon");
+        DOM.setElementAttribute(rss.getElement(), "type", "application/rss+xml");
+        rss.setHTML("<img src='./images/rss_icon.gif' border='0px' id='rssIcon' class='navMenuLink'>"); // FIXME hack
+
+        return rss;
     }
 }

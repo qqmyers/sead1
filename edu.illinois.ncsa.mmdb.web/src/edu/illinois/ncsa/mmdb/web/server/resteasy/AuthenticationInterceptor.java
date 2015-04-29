@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
@@ -41,11 +41,12 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
  * edu.illinois.ncsa.mmdb.common.Permission.USE_REMOTEAPI permission and that
  * the app send
  * the Medici-defined remoteAPIKey if it is defined (non-null)
- * 
- * @author Luigi Marini <lmarini@illinois.edu>, Jim Myers(myersjd@umich.edu)
- * 
- * 
- * 
+ *
+ * @author Luigi Marini <lmarini@illinois.edu>
+ * @author Jim Myers(myersjd@umich.edu)
+ *
+ *
+ *
  */
 @Provider
 @ServerInterceptor
@@ -100,18 +101,36 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
 
         //remoteAPIKey matches or is not required...
 
-        //defaultToAnonymous is now always true - this shuts off the browser response to a 401 to send credentials, but, since we're 
-        //shifting from local to ouath2 tokens, the alternate route of requiring use of the login method and keeping a session token 
+        //defaultToAnonymous is now always true - this shuts off the browser response to a 401 to send credentials, but, since we're
+        //shifting from local to ouath2 tokens, the alternate route of requiring use of the login method and keeping a session token
         //is OK/desired.
 
         //Now identify the user
 
         //Retrieve username from session if it exists
         HttpSession session = servletRequest.getSession(false);
+
         if (session != null) {
-            username = (String) session.getAttribute(AuthenticatedServlet.AUTHENTICATED_AS);
-            log.debug("Found session - Sucessfully authenticated as " + username);
+            Integer i = ((Integer) session.getAttribute("exp"));
+            int exp = 0;
+            if (i != null) {
+                exp = i.intValue();
+
+                if (exp > (int) (System.currentTimeMillis() / 1000L)) {
+                    log.debug("Unexpired token found: exp = " + exp);
+                    username = (String) session.getAttribute(AuthenticatedServlet.AUTHENTICATED_AS);
+                    log.debug("Found session - Sucessfully authenticated as " + username);
+                } else {
+                    log.warn("Expired token found: exp = " + exp);
+                }
+            }
+            else {
+                username = (String) session.getAttribute(AuthenticatedServlet.AUTHENTICATED_AS);
+                log.debug("Found session - Sucessfully authenticated as " + username);
+                log.warn("exp not found in session");
+            }
         } else if (request.getHttpHeaders().getRequestHeader("Authorization") != null) {
+            //FixMe - only handles local login (still needed?), not Oauth2
             String token = request.getHttpHeaders().getRequestHeader("Authorization").get(0);
             if (token != null && ((username = checkLoggedIn(token)) != null)) {
                 log.debug("Authorization header found - Sucessfully authenticated as " + username);
@@ -125,7 +144,7 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
             }
         }
         //All we do for RestEasy calls is validate the user for the current request -
-        // FIXME: we do not (currently) establish a session for future requests (should we? is it different than an mmdb login?) 
+        // FIXME: we do not (currently) establish a session for future requests (should we? is it different than an mmdb login?)
         // We do support existing sessions, so apps can use POST /api/authenticate and /api/logout
         // rather than sending Basic Auth info with each call
         request.setAttribute("userid", PersonBeanUtil.getPersonID(username));
@@ -176,7 +195,7 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
 
     /**
      * Response in case of failed authentication.
-     * 
+     *
      * @param preprocessedPath
      * @return
      */
@@ -193,7 +212,7 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
 
     /**
      * Response in case of failed authorization.
-     * 
+     *
      * @param preprocessedPath
      * @return
      */
@@ -210,7 +229,7 @@ public class AuthenticationInterceptor implements PreProcessInterceptor {
 
     /**
      * Decode token and check against local user database.
-     * 
+     *
      * @param token
      * @return the name of the user, or null if it failed
      */

@@ -60,7 +60,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  * AddL - add a triple with a literal (string) object
  * AddL<type> - add a triple with a literal object of the XML type <type>
  * 
- * The last option is important for some Medici functionlity, i.e. a file size that is sent as a literal 
+ * The last option is important for some Medici functionality, i.e. a file size that is sent as a literal 
  * rather than a literal/long will not show up as a file size in the GUI (although the triple will be there)
  * 
  * The triple elements must be enclosed in quotes if they contain a ',' character (standard csv)
@@ -82,7 +82,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  *               skip should also be even - the first skip/2 removes and adds will be read before new writes are processed.
  *               
  * Example:
- * java -cp mi.jar edu.illinois.ncsa.medici.ingest.MetadataRepair -listOnly -limit100 -skip100 test.csv
+ * java -cp mi.jar org.sead.acr.tools.medici.MetadataRepair -listOnly -limit100 -skip100 test.csv
  * 
  * Triples parsed are written to a repair-log file as well as to the console along with the parameters used.
  * 

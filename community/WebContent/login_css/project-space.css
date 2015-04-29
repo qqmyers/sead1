@@ -1,0 +1,343 @@
+blockquote {
+	border-left: 3px solid #f3882a;
+}
+
+.spacious-button, input[type="reset"], input[type="button"], input[type="submit"],
+	button {
+	background-color: #f3882a;
+}
+
+a {
+	color: #f3882a;
+}
+
+#site-title a:hover {
+	color: #f3882a;
+}
+
+.sead-scope a {
+	color: #0b5ca3 !important;
+	text-decoration: none !important;
+	font-size: 12px !important;
+}
+
+.sead-scope p {
+font-family:initial;
+}
+
+/*change of um-style.css*/
+th, td {
+	border: 0px dashed #EAEAEA !important;
+	padding: 6px 10px;
+}
+
+/*Main Navigation*/
+.main-navigation ul li.current_page_item a, .main-navigation ul li:hover>a
+	{
+	color: #f3882a;
+}
+
+.main-navigation ul li ul {
+	border-top: 1px solid #f3882a;
+}
+
+.main-navigation ul li ul li a:hover, .main-navigation ul li ul li:hover>a,
+	.main-navigation ul li.current-menu-item ul li a:hover {
+	color: #f3882a;
+}
+
+.main-navigation a {
+	color: #ffffff;
+}
+
+.main-navigation ul li ul li a {
+	color: #ffffff;
+}
+
+.main-navigation li, .small-menu li {
+	font-family: "Raleway";
+}
+
+#site-title a {
+	font-size: 26px;
+}
+
+#site-description {
+	font-size: 18px;
+}
+
+.main-navigation ul li a {
+	font-size: 18px;
+}
+
+.main-navigation ul li ul li a {
+	font-size: 14px;
+}
+
+#featured-slider 
+.entry-title span {
+	font-size: 24px;
+}
+
+#featured-slider .entry-content p {
+	font-size: 14px;
+}
+
+#featured-slider  
+.header-post-title-class {
+	font-size: 18px;
+}
+
+.post .entry-title, .page .entry-title, .widget_featured_posts .tg-one-half .entry-title
+	{
+	font-size: 20px;
+}
+
+.site-header .menu-toggle:hover {
+	background: #f3882a;
+}
+
+.main-small-navigation li:hover {
+	background: #f3882a;
+}
+
+.main-small-navigation ul>.current_page_item, .main-small-navigation ul>.current-menu-item
+	{
+	background: #f3882a;
+}
+
+.main-navigation a:hover, .main-navigation ul li.current-menu-item a,
+	.main-navigation ul li.current_page_ancestor a, .main-navigation ul li.current-menu-ancestor a,
+	.main-navigation ul li.current_page_item a, .main-navigation ul li:hover>a
+	{
+	color: #f3882a;
+}
+
+.menu-item-has-children>a:after {
+	/* color: #FFFFFF; */
+	content: ' \25be' !important;
+}
+
+.entry-content a, .entry-content p a {
+	text-decoration: none !important;
+}
+
+/*Footer Area*/
+.footer-widgets-area a:hover {
+	color: #f3882a !important;
+}
+
+.footer-socket-wrapper .copyright a:hover {
+	color: #f3882a;
+}
+
+a#back-top:before {
+	background-color: #f3882a;
+}
+
+a#scroll-up {
+	background-color: #f3882a;
+}
+
+#search-form span {
+	background-color: #f3882a;
+}
+
+.entry-meta {
+	font-size: 12px;
+}
+
+.read-more, .more-link {
+	font-size: 12px;
+}
+
+#colophon, #colophon p {
+	font-size: 12px;
+}
+
+.footer-socket-wrapper .copyright, .footer-socket-wrapper .copyright a {
+	color: #ffffff;
+}
+
+#colophon .small-menu a {
+	color: #ffffff;
+}
+
+.footer-socket-wrapper {
+	background-color: #0b5ca3;
+}
+
+.table-header-project-name {
+	text-align: left;
+	font-weight: 900;
+	padding: 6px 0px 6px 6px !important;
+	width: 110px;
+}
+
+#exp-table {
+	width: 90%;
+	padding-top: 10px;
+	margin-top: 40px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#projects-table {
+	width: 96%;
+	padding-top: 10px;
+	margin-top: 40px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.project-name, .project-name>div {
+	text-align: left;
+	width: 97px;
+}
+
+.project-name a {
+	font-weight: 900;
+}
+
+.table-header-project-description {
+	text-align: left;
+	width: 180px;
+	font-size: 12px;
+	line-height: 14px;
+}
+
+.project-description {
+	text-align: left !important;
+	width: 181px;
+	font-size: 12px;
+	line-height: 14px;
+}
+
+.project-description>div {
+	max-width: 174px;
+}
+
+.table-header-project-preprint, .table-header-project-publish,
+	.table-header-project-view, .table-header-project-users,
+	.table-header-project-collections, .table-header-project-datasets,
+	.table-header-project-bytes, .table-header-project-version {
+	width: 90px;
+	padding: 6px 6px 6px 0px !important;
+	text-align: center;
+}
+
+.project-preprint, .project-publish, .project-view, .project-users,
+	.project-collections, .project-datasets, .project-bytes,
+	.project-version {
+	width: 93px;
+	text-align: center !important;
+}
+
+.tablesorter .gutter {
+	padding-right: 0px;
+	width: 10px;
+	background-image: none !important;
+}
+
+.table-header-project-link {
+	text-align: left;
+	width: 169px;
+}
+
+.project-link, .project-link>div {
+	text-align: left;
+	width: 165px;
+}
+
+.table-header-project-view div, .table-header-project-datasets div,
+	.table-header-project-collections div, .table-header-project-bytes div
+	{
+	max-width: 75px;
+}
+
+
+
+#exportForm {
+	padding-bottom: 30px;
+}
+
+/* Sorted table for spreadsheet preview */
+table.tablesorter {
+	font-family: 'Lato', arial;
+	background-color: #CDCDCD;
+	margin: 10px 0pt 15px;
+	font-size: 8pt;
+	width: 100%;
+	text-align: left;
+	border: 1px solid #f3822a;
+	table-layout: auto;
+}
+
+table.tablesorter tbody tr {
+	width: 100px;
+}
+
+table.tablesorter tbody {
+	overflow: auto;
+	height: 500px;
+}
+
+table.tablesorter tbody tr:nth-child(odd) td {
+	background-color: #eeeeee;
+}
+
+table.tablesorter tbody tr:nth-child(even) td {
+	background-color: #FFFFFF;
+}
+
+thead>tr, tbody {
+	display: block;
+}
+
+table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+	background-color: #fff;
+	font-size: 8pt;
+	padding: 6px;
+}
+
+table.tablesorter thead tr {
+	border-bottom: 1px solid #f3822a;
+}
+
+table.tablesorter thead tr .header {
+	background-image: url('bg.gif');
+	background-repeat: no-repeat;
+	background-position: center right;
+	border: 1px solid #fff;
+	/*border-bottom: 1px solid #f3822a;*/
+	cursor: pointer;
+	vertical-align: middle;
+}
+
+table.tablesorter tbody td {
+	border: 0px solid #ccc;
+	color: #444;
+	padding: 2px;
+	background-color: #FFF;
+	text-align: center;
+	vertical-align: top;
+}
+
+table.tablesorter tbody td div {
+	padding: 4px;
+	font: 12px 'Lato', sans-serif;
+	margin-top: 5px;
+}
+
+table.tablesorter thead tr .headerSortUp {
+	background-image: url('asc.gif');
+}
+
+table.tablesorter thead tr .headerSortDown {
+	background-image: url('desc.gif');
+}
+
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp
+	{
+	color: #f3822a;
+}

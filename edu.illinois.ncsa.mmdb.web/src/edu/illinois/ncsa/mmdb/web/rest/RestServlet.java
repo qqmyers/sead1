@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -49,6 +49,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -60,6 +61,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.mail.MessagingException;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -171,7 +173,7 @@ public class RestServlet extends AuthenticatedServlet {
      * and the infix is /image/
      * and the URI is urn:foo, the canonical URL is
      * http://mymmdb.org/api/image/urn:foo
-     * 
+     *
      * @param uri
      *            the RDF subject of the resource
      * @param infix
@@ -321,6 +323,29 @@ public class RestServlet extends AuthenticatedServlet {
         }
     }
 
+    String getDefaultPreviewImage(String uri) {
+        //Return our default content icon while waiting for extraction...
+        Unifier u2 = new Unifier();
+        u2.setColumnNames("mimeType");
+        u2.addPattern(Resource.uriRef(uri), Dc.FORMAT, "mimeType");
+        try {
+            TupeloStore.getInstance().getContext().perform(u2);
+        } catch (OperatorException e) {
+            log.error(e);
+            return null;
+        }
+        String mimeType = "";
+        String category = "Collection";
+        for (Tuple<Resource> row : u2.getResult() ) {
+            mimeType = row.get(0).getString();
+            category = TupeloStore.getInstance().getMimeMap().getCategory(mimeType);
+        }
+
+        log.trace("Found mimetype: " + mimeType + ", assigned category: " + category);
+        //relative Uri!
+        return "/images/defaultpreviews/" + category + "-200.png";
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         long then = System.currentTimeMillis();
@@ -350,7 +375,7 @@ public class RestServlet extends AuthenticatedServlet {
 
         /*********
          * APP SESSION MANAGEMENT ************
-         * 
+         *
          * /authenticate is handles as a POST
          * /logout invalidates the current session
          * /checklogin returns the user associated with the session
@@ -388,10 +413,10 @@ public class RestServlet extends AuthenticatedServlet {
         //If user is not identified by session, check for BasicAuth credentials and authenticate or assign as anonymous
         if ((userId == null) || (userId.equals(PersonBeanUtil.getAnonymous().getUri()))) {
             try {
-                //doBasic will set the id based on basic auth credentials if set, otherwise will return anonymous 
+                //doBasic will set the id based on basic auth credentials if set, otherwise will return anonymous
                 userId = doBasicAuthenticate(request, response);
             } catch (HTTPException he) {
-                //If the client sent an auth header and did not succeed in establishing a valid ID, 
+                //If the client sent an auth header and did not succeed in establishing a valid ID,
                 //send an SC_UNAUTHORIZED response with a WWW_Authenticate Header
                 // and stop processing
                 unauthorized(request, response);
@@ -407,10 +432,10 @@ public class RestServlet extends AuthenticatedServlet {
          * SC_FORBIDDEN lets the app know that 'anonymous' /the current user
          * doesn't have enough permissions, and lets our login page provide a relevant
          * message related to permissions (versus bad user/pass)
-         * 
+         *
          */
 
-        /*Begin large switch - for each class of uri, 
+        /*Begin large switch - for each class of uri,
          * 1) check appropriate permission for userId and the resource
          * 2) handle processing
          * 3) decide how to handle permission failure (401 0r 403)
@@ -532,9 +557,11 @@ public class RestServlet extends AuthenticatedServlet {
 
         } else if (hasPrefix(PREVIEW_ANY, request)) {
             if (isAllowed(userId, uri, Permission.VIEW_DATA, false)) {
-
+                //caching defeats access control - previews downloaded by a auth'd user will be cached and
+                //reused by the browser for some time, such that this method is not called and the old copy may be seen.
+                //So limit cache time...
+                response.addHeader("cache-control", "max-age=900"); // 15 minute expiration
                 log.trace("Getting preview: " + request.getRequestURL().toString());
-                response.flushBuffer(); // MMDB-620
                 long then = System.currentTimeMillis(); // FIXME debug
                 PreviewImageBean preview = null;
                 String image404 = null;
@@ -558,17 +585,32 @@ public class RestServlet extends AuthenticatedServlet {
                     if (now - then > 100) {
                         log.warn("preview lookup took " + (now - then) + "ms");
                     }
+                }
+                String previewUri = preview != null ? preview.getUri() : null;
+                if (previewUri == null) {
+                    previewUri = getDefaultPreviewImage(uri);
+                    //using relative URL for local content icons versus tag: ids for tupelo managed previews
+                    //not cached to avoid messing with 'pending' logic
+                    if (previewUri != null) {
+                        log.trace("uri = " + previewUri);
+                        if (previewUri.startsWith("/images/default")) {
+                            //using a defaultpreviews content icon - need to create the absolute URL using request
+                            RequestDispatcher dispatcher = request.getRequestDispatcher(previewUri);
+                            dispatcher.forward(request, response);
+                            return;
+                        }
+                    }
+                }
+                if (preview != null) {
                     String contentType = preview.getMimeType();
                     if (contentType != null) {
                         response.setContentType(contentType);
-                        response.flushBuffer(); // MMDB-620
                     }
                 }
-                String previewUri = preview != null ? preview.getUri() : null;
-                //FixMe: is 404 w/o any image the right thing to send when a preview is not available?
-                //(e.g. if, for example, extractor is down, should we send the 404 image and no-cache headers?)
-                //Does this break logic anywhere?
+                response.flushBuffer(); // MMDB-620
+
                 returnImage(request, response, previewUri, image404, shouldCache404(uri));
+
             } else {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             }
@@ -596,7 +638,7 @@ public class RestServlet extends AuthenticatedServlet {
                     PreviewVideoBean pvb = new PreviewVideoBeanUtil(TupeloStore.getInstance().getBeanSession()).get(uri);
 
                     if (request.getHeader("If-Modified-Since") != null) {
-                        Date d = new Date(request.getHeader("If-Modified-Since"));
+                        Date d = DateFormat.getDateInstance().parse(request.getHeader("If-Modified-Since"));
                         if ((pvb.getDate().getTime() - d.getTime()) < 1000) {
                             response.setStatus(304);
                             return;
@@ -722,7 +764,7 @@ public class RestServlet extends AuthenticatedServlet {
 
     /**
      * Submit the issue to the Jira Issue Handler
-     * 
+     *
      * @param request
      *            the form with all information about the issue to be created.
      * @param response
@@ -824,7 +866,7 @@ public class RestServlet extends AuthenticatedServlet {
         //Get ID from session - could be null at this point
         String userId = getUserUri(request);
         if (userId != null) {
-            //            duplicates what's in doPost()            
+            //            duplicates what's in doPost()
             //            if (isAllowed(userId, Permission.UPLOAD_DATA)) {
             Map<Resource, Object> md = new HashMap<Resource, Object>();
             md.put(RestService.DATE_PROPERTY, new Date());

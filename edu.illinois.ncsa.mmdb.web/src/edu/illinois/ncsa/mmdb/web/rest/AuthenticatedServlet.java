@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -49,6 +49,9 @@ import javax.xml.ws.http.HTTPException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.sead.acr.common.MediciProxy;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.util.Base64;
@@ -66,7 +69,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.SHAPasswordDigest;
 
 public class AuthenticatedServlet extends HttpServlet {
     /**
-     * 
+     *
      */
     private static final long  serialVersionUID = -4256332408054511050L;
 
@@ -84,7 +87,9 @@ public class AuthenticatedServlet extends HttpServlet {
     public void postAuthenticate(HttpServletRequest request, HttpServletResponse response) throws IOException {
         //FIXME .equals("/authenticate") ?
         log.debug("POST Authenticate");
+
         String validUser = null;
+        int expires_in = -1;
         if (request.getRequestURL().toString().endsWith("authenticate")) {
 
             //Expect two application/x-www-form-urlencoded parameters
@@ -92,6 +97,7 @@ public class AuthenticatedServlet extends HttpServlet {
             String username = request.getParameter("username");
             String password = request.getParameter("password");
             String googleAccessToken = request.getParameter("googleAccessToken");
+            String orcidAccessToken = request.getParameter("orcidAccessToken");
 
             log.debug("u: " + username);
             try {
@@ -116,10 +122,14 @@ public class AuthenticatedServlet extends HttpServlet {
                     session = request.getSession(true);
                     log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
                     session.setAttribute(AUTHENTICATED_AS, validUser);
+                    //Set a default timeout
+                    session.setAttribute("exp", 3600 + (int) (System.currentTimeMillis() / 1000L));
                     SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
                     try {
                         if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
                             session.setAttribute(REMOTE_ALLOWED, "true");
+                            addProxyToSession(session, getServer(request)); //Local proxy
+
                         }
                     } catch (RBACException re) {
                         log.warn("Error determining remote api permission");
@@ -130,31 +140,23 @@ public class AuthenticatedServlet extends HttpServlet {
                 String[] clientIds = new String[2];
                 clientIds[0] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleClientId);
                 clientIds[1] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleDeviceClientId);
-                validUser = Authentication.googleAuthenticate(clientIds, googleAccessToken); // testID
+                JSONObject tokenInfo = Authentication.googleAuthenticate(clientIds, googleAccessToken); // testID
+                try {
+                    validUser = tokenInfo.getString("email");
+                    expires_in = tokenInfo.getInt("expires_in");
+                } catch (JSONException e) {
+                    log.error(e);
+                }
                 log.info("Retrieved user from google " + validUser + " " + clientIds[0] + ", " + clientIds[1] + " " + googleAccessToken);
-                if (validUser != null) {
+                if ((validUser != null) && (expires_in != -1)) {
                     // set the session attribute indicating that we're authenticated
+                    String sessionId = createAuthenticatedSession(validUser, expires_in + (int) (System.currentTimeMillis() / 1000L), request);
 
-                    // we're authenticating, so we need to create a session and put it in the context
-                    HttpSession session = request.getSession(false);
-                    if (session != null) {
-                        log.debug("Invalidating: " + session.getId());
-                        session.invalidate();
-                    }
-                    session = request.getSession(true);
-                    log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
-                    session.setAttribute(AUTHENTICATED_AS, validUser);
-                    SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
-                    try {
-                        if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
-                            session.setAttribute(REMOTE_ALLOWED, "true");
-                        }
-                    } catch (RBACException re) {
-                        log.warn("Error determining remote api permission");
-                    }
-                    response.getWriter().print(session.getId());
+                    response.getWriter().print(sessionId);
 
                 }
+            } else if (orcidAccessToken != null) {
+
             }
 
             if (validUser == null) {
@@ -169,6 +171,58 @@ public class AuthenticatedServlet extends HttpServlet {
 
         }
         //else - pass through to derived classes w/o handling anything
+    }
+
+    private String getServer(HttpServletRequest request) {
+        StringBuffer sBuffer = request.getRequestURL();
+        return sBuffer.substring(0, sBuffer.length() - request.getServletPath().length() - request.getPathInfo().length());
+    }
+
+    private String createAuthenticatedSession(String validUser, int expiry, HttpServletRequest request) {
+        // we're authenticating, so we need to create a session and put it in the context
+        //but first we remove any old session for security reasons
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            log.debug("Invalidating: " + session.getId());
+            session.invalidate();
+        }
+        session = request.getSession(true);
+        String server = getServer(request);
+
+        fillAuthenticatedSession(session, validUser, expiry, server);
+        return session.getId();
+
+    }
+
+    public static void fillAuthenticatedSession(HttpSession session, String validUser, int expiresAt, String server) {
+        session.setAttribute("exp", expiresAt);
+
+        log.info("User " + validUser + " is now authenticated in HTTP session " + session.getId());
+        log.debug("expires: " + expiresAt);
+        log.debug("Server is: " + server);
+        session.setAttribute(AUTHENTICATED_AS, validUser);
+
+        session.setMaxInactiveInterval(expiresAt - (int) (System.currentTimeMillis() / 1000L) + 1); //longer than gAT lifetime - (note gAT lifetime now governs how long the session is considered valid, not the session lifetime)
+
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
+        try {
+            if (rbac.checkPermission(PersonBeanUtil.getPersonID(validUser), Permission.USE_REMOTEAPI)) {
+                session.setAttribute(REMOTE_ALLOWED, "true");
+                addProxyToSession(session, server); //Local proxy
+            }
+        } catch (RBACException re) {
+            log.warn("Error determining remote api permission");
+        }
+
+    }
+
+    private static void addProxyToSession(HttpSession session, String server) {
+
+        MediciProxy mp = new MediciProxy();
+        log.debug("Setting mp to session: " + session.getId());
+        mp.setLocalCredentials(session.getId(), server, TupeloStore.getInstance().getConfiguration(ConfigurationKey.RemoteAPIKey));
+        mp.setGeoCredentials(null, null, server + "/geoproxy");
+        session.setAttribute("proxy", mp);
     }
 
     public void doLogout(HttpServletRequest request, HttpServletResponse response) {
@@ -208,8 +262,8 @@ public class AuthenticatedServlet extends HttpServlet {
     /* This method checks credentials and returns the users identity - 'anonymous' if no other credentials are presented
      * It does not change state by storing the credentials in the session (which requires a call to /api/authenticate
      * It's primary use is to retrieve the ID from the session, but it also supports the case where a URL is requested outside
-     * an app/session context - i.e. when the browser sends a Basic auth header in response to a 401 
-     * 
+     * an app/session context - i.e. when the browser sends a Basic auth header in response to a 401
+     *
      */
     public static String doBasicAuthenticate(HttpServletRequest request, HttpServletResponse response) throws HTTPException {
 
@@ -255,10 +309,11 @@ public class AuthenticatedServlet extends HttpServlet {
 
     void dontCache(HttpServletResponse response) {
         // OK, we REALLY don't want the browser to cache this. For reals
-        response.addHeader("cache-control", "no-store, no-cache, must-revalidate, max-age=-1"); // don't cache
+        //set to clear any previous values
+        response.setHeader("cache-control", "no-store, no-cache, must-revalidate, max-age=-1"); // don't cache
         response.addHeader("cache-control", "post-check=0, pre-check=0, false"); // really don't cache
         response.addHeader("pragma", "no-cache, no-store"); // no, we mean it, really don't cache
-        response.addHeader("expires", "-1"); // if you cache, we're going to be very, very angry
+        response.setHeader("expires", "-1"); // if you cache, we're going to be very, very angry
     }
 
     Context getContext() {

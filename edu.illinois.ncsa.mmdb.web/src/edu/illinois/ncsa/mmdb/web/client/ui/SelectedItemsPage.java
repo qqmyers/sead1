@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
@@ -66,9 +66,9 @@ import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 /**
  * View of the selected datasets
- * 
+ *
  * @author Luis Mendez
- * 
+ *
  */
 public class SelectedItemsPage extends Page {
 
@@ -90,7 +90,7 @@ public class SelectedItemsPage extends Page {
 
     /**
      * Create an instance of selected datasets view page.
-     * 
+     *
      * @param dispatchAsync
      */
     public SelectedItemsPage(DispatchAsync dispatchAsync) {
@@ -136,17 +136,18 @@ public class SelectedItemsPage extends Page {
                 } else {
                     rightcolumn.add(relationshipWidget);
                 }
+                //fetch all datasets via their URI to add to list & relationship widget
+                fetchData(selectedItems);
             }
 
             @Override
             public void onDenied() {
                 Label notAllowed = new Label("You do not have permission to create relationships");
                 rightcolumn.add(notAllowed);
+                //fetch all datasets via their URI to add to list
+                fetchData(selectedItems);
             }
         });
-
-        //fetch all datasets via their URI to add to list & relationship widget
-        fetchData(selectedItems);
 
         mainLayoutPanel.add(selectedPanel);
 
@@ -182,9 +183,14 @@ public class SelectedItemsPage extends Page {
                         public void onAllowed() {
                             relationshipWidget.addToList(shortenTitle(collection.getTitle()), collection.getUri(), true);
                             if (first == 1) {
+                                relationshipWidget.item1.setSelected(0);
                                 relationshipWidget.thumb1.changeImage(collection.getUri(), "Collection");
-                                relationshipWidget.thumb2.changeImage(collection.getUri(), "Collection");
+
                                 first = 0;
+                            } else if (first == 0) {
+                                relationshipWidget.item2.setSelected(1);
+                                relationshipWidget.thumb2.changeImage(collection.getUri(), "Collection");
+                                first = -1;
                             }
                         }
                     });
@@ -210,9 +216,14 @@ public class SelectedItemsPage extends Page {
 
                             relationshipWidget.addToList(shortenTitle(dataset.getTitle()), dataset.getUri(), false);
                             if (first == 1) {
+                                relationshipWidget.item1.setSelected(0);
                                 relationshipWidget.thumb1.changeImage(dataset.getUri(), dataset.getMimeType());
-                                relationshipWidget.thumb2.changeImage(dataset.getUri(), dataset.getMimeType());
+
                                 first = 0;
+                            } else if (first == 0) {
+                                relationshipWidget.item2.setSelected(1);
+                                relationshipWidget.thumb2.changeImage(dataset.getUri(), dataset.getMimeType());
+                                first = -1;
                             }
 
                         }

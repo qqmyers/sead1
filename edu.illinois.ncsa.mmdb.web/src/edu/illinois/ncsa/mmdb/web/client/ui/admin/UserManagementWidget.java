@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui.admin;
 
@@ -56,6 +56,7 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -76,6 +77,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.AdminAddUser;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AdminAddUserResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole.ActionType;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.EditUserRetirement;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissions;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
@@ -84,20 +86,19 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsersResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
-import edu.illinois.ncsa.mmdb.web.client.ui.TitlePanel;
 import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
 
 /**
  * A page to manage users. Currently only the ability to enable/disable users is
  * implemented.
- * 
+ *
  * FIXME: Currently permissions are set directly on users. Checkboxes in this
  * page manipulate permissions on users. Instead checkboxes should manipulate
  * roles for specific users. This will remove the awkward manual setting of
  * users as regular members when a user is made an admin.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class UserManagementWidget extends Composite {
 
@@ -105,10 +106,15 @@ public class UserManagementWidget extends Composite {
 
     private final FlexTable                activeUsersTable;
     private final FlexTable                inactiveUsersTable;
-
+    private final FlexTable                archivedUsersTable;
+    private final Button                   refresh;
     private final DispatchAsync            dispatchAsync;
 
     private final HashMap<String, Integer> columnByRole;
+    private int                            retireColumn;
+
+    public static final String             updated       = "updated";
+    public static final String             updateFailure = "update-failure";
 
     public UserManagementWidget(DispatchAsync dispatchAsync) {
 
@@ -124,9 +130,19 @@ public class UserManagementWidget extends Composite {
         // users table
         activeUsersTable = createUsersTable();
         inactiveUsersTable = createUsersTable();
+        archivedUsersTable = createUsersTable();
         usersPanel.add(discloseAs(createUserPanel(), "Add user", "Add user", true));
         usersPanel.add(discloseAs(inactiveUsersTable, "Inactive users", "Inactive users", true));
         usersPanel.add(discloseAs(activeUsersTable, "Active users", false));
+        usersPanel.add(discloseAs(archivedUsersTable, "Archived users", false));
+        refresh = new Button("Refresh Lists", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                loadRolesAndUsers();
+
+            }
+        });
+        usersPanel.add(refresh);
         mainPanel.add(usersPanel);
 
         // necessary so that the main container wraps around center panel
@@ -136,12 +152,13 @@ public class UserManagementWidget extends Composite {
 
         // load users and roles from server side
         columnByRole = new HashMap<String, Integer>();
+
         loadRolesAndUsers();
     }
 
     /**
      * Create a new user and send a notification email to that user.
-     * 
+     *
      * @return
      */
     private Panel createUserPanel() {
@@ -201,8 +218,13 @@ public class UserManagementWidget extends Composite {
 
     private void loadRolesAndUsers() {
         inactiveUsersTable.removeAllRows();
+        addHeaders(inactiveUsersTable);
         activeUsersTable.removeAllRows();
+        addHeaders(activeUsersTable);
+        archivedUsersTable.removeAllRows();
+        addHeaders(archivedUsersTable);
         columnByRole.clear();
+        refresh.setFocus(false);
         dispatchAsync.execute(new GetPermissions(), new AsyncCallback<GetPermissionsResult>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -225,6 +247,10 @@ public class UserManagementWidget extends Composite {
                         col++;
                     }
                 }
+                retireColumn = col;
+                inactiveUsersTable.setText(0, retireColumn, "Mark as Archived");
+                inactiveUsersTable.getColumnFormatter().addStyleName(retireColumn, "roleColumn");
+                archivedUsersTable.setText(0, 3, "Archived");
                 loadUsers();
             }
         });
@@ -282,7 +308,7 @@ public class UserManagementWidget extends Composite {
 
     /**
      * Create a single row in the table based on user.
-     * 
+     *
      * @param user
      */
     protected void createRows(final List<GetUsersResult.User> users) {
@@ -291,7 +317,13 @@ public class UserManagementWidget extends Composite {
         }
         for (GetUsersResult.User user : users ) {
             Set<String> roles = user.roles;
-            FlexTable usersTable = roles.size() == 0 ? inactiveUsersTable : activeUsersTable;
+            FlexTable usersTable;
+            if (user.retired.equals("never")) {
+                usersTable = roles.size() == 0 ? inactiveUsersTable : activeUsersTable;
+            } else {
+                usersTable = archivedUsersTable;
+            }
+            //Setup initial columns for this row
 
             int row = usersTable.getRowCount();
 
@@ -303,20 +335,38 @@ public class UserManagementWidget extends Composite {
                 usersTable.setText(row, 0, user.id);
             }
 
-            GWT.log("user " + user.id + " belongs to roles " + roles);
-            for (Map.Entry<String, Integer> entry : columnByRole.entrySet() ) {
-                final String roleUri = entry.getKey();
-                final Integer col = entry.getValue();
+            if (user.retired.equals("never")) {
+                GWT.log("user " + user.id + " belongs to roles " + roles);
+                for (Map.Entry<String, Integer> entry : columnByRole.entrySet() ) {
+                    final String roleUri = entry.getKey();
+                    final Integer col = entry.getValue();
+                    final CheckBox box = new CheckBox();
+                    final String userid = user.id;
+                    box.setValue(roles.contains(roleUri));
+                    box.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            modifyPermissions(userid, roleUri, box);
+                        }
+                    });
+                    usersTable.setWidget(row, col, box);
+                }
+            }
+            if (roles.isEmpty()) { //already retired or inactive
+                //Add a retire/restore checkbox
+                boolean retired = !user.retired.equals("never");
                 final CheckBox box = new CheckBox();
                 final String userid = user.id;
-                box.setValue(roles.contains(roleUri));
+                box.setValue(retired);
                 box.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        modifyPermissions(userid, roleUri, box);
+                        modifyRetirement(userid, box);
                     }
+
                 });
-                usersTable.setWidget(row, col, box);
+                //Checkbox goes in 4th column of archived table or the last column in the inactive tables
+                usersTable.setWidget(row, (retired ? 3 : retireColumn), box);
             }
 
             // stripe it
@@ -326,20 +376,9 @@ public class UserManagementWidget extends Composite {
     }
 
     /**
-     * Check if the user is the last administrator
-     * 
-     * @return
-     */
-    protected boolean lastAdmin() {
-        return false;
-    }
-
-    /**
      * Add and remove a permission for a particular user, then properly set the
      * value of the checkbox.
-     * 
-     * FIXME: this should add/remove user from group
-     * 
+     *
      * @param userUri
      * @param permission
      * @param type
@@ -358,10 +397,63 @@ public class UserManagementWidget extends Composite {
                 new ConfirmDialog("Role membership not changed", caught.getMessage(), false);
                 // FIXME notify user if the error is because they would lock themselves out
                 checkbox.setValue(!checkbox.getValue());
+                //Set a style to show failure
+                checkbox.addStyleName(updateFailure);
             }
 
             @Override
             public void onSuccess(EmptyResult result) {
+                //Add a style toggle that shows whether this value is different than when the page was loaded
+                if (checkbox.getStyleName().contains(updated)) {
+                    checkbox.removeStyleName(updated);
+                } else {
+                    checkbox.addStyleName(updated);
+                }
+            }
+
+        });
+    }
+
+    protected void modifyRetirement(final String userUri, final CheckBox box) {
+        ActionType type = ActionType.REMOVE;
+        if (box.getValue()) {
+            type = ActionType.ADD;
+        }
+        dispatchAsync.execute(new EditUserRetirement(userUri, type), new AsyncCallback<EmptyResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error changing retirement", caught);
+                Window.alert("Error: User " + userUri + " Not Updated. Cause: " + caught.getMessage() + " " + caught.getClass().getName());
+                box.setValue(!box.getValue());
+                //Set a style to show failure
+                box.addStyleName(updateFailure);
+            }
+
+            @Override
+            public void onSuccess(EmptyResult result) {
+                //Add a style toggle that shows whether this value is different than when the page was loaded
+                if (box.getStyleName().contains(updated)) {
+                    box.removeStyleName(updated);
+                } else {
+                    box.addStyleName(updated);
+                }
+                //Now find all permission entries for this user and set them to false/no update/fail style
+                int currentRow = -1;
+                for (int i = 1; i < inactiveUsersTable.getRowCount(); i++ ) {
+                    if (inactiveUsersTable.getWidget(i, retireColumn).equals(box)) {
+                        currentRow = i;
+                        break;
+                    }
+                }
+                if (currentRow != -1) { //Found row
+                    for (int j = 3; j < retireColumn; j++ ) {
+                        CheckBox cBox = (CheckBox) inactiveUsersTable.getWidget(currentRow, j);
+                        cBox.setValue(false);
+                        cBox.removeStyleName(updateFailure);
+                        cBox.removeStyleName(updated);
+                    }
+                }
             }
 
         });
@@ -369,12 +461,17 @@ public class UserManagementWidget extends Composite {
 
     /**
      * Create a table to host the list of users and the actions available.
-     * 
+     *
      * @return table
      */
     private FlexTable createUsersTable() {
         FlexTable flexTable = new FlexTable();
         flexTable.addStyleName("usersTable");
+
+        return flexTable;
+    }
+
+    private void addHeaders(FlexTable flexTable) {
         // headers
         flexTable.setText(0, 0, "User");
         flexTable.getColumnFormatter().addStyleName(0, "usersTableNameColumn");
@@ -382,15 +479,5 @@ public class UserManagementWidget extends Composite {
         flexTable.getColumnFormatter().addStyleName(1, "usersTableEmailColumn");
         flexTable.setText(0, 2, "Last Login");
         flexTable.getColumnFormatter().addStyleName(2, "usersTableNameColumn");
-        return flexTable;
-    }
-
-    /**
-     * Create page title
-     * 
-     * @return title widget
-     */
-    private Widget createPageTitle() {
-        return new TitlePanel("User Management");
     }
 }

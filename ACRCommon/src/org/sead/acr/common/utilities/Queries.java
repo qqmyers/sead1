@@ -18,7 +18,7 @@ public class Queries {
 			+ " "
 			+ "PREFIX dc: <http://purl.org/dc/elements/1.1/>"
 			+ " "
-			+ "SELECT ?tagID ?title ?abstract ?keywords ?deleted WHERE {"
+			+ "SELECT ?tagID ?title ?abstract ?keywords ?deleted ?doi WHERE {"
 			+ " "
 			+ "?tagID <rdf:type> <cet:Collection> ."
 			+ " "
@@ -27,6 +27,7 @@ public class Queries {
 			+ "?tagID <dc:title> ?title ."
 			+ " "
 			+ "OPTIONAL { ?tagID <http://purl.org/dc/terms/abstract> ?abstract } ."
+			+ "OPTIONAL { ?tagID <http://purl.org/dc/terms/identifier> ?doi } ."
 			+ "OPTIONAL { ?tagID <http://purl.org/dc/terms/isReplacedBy> ?deleted }"
 			+ "}" + "ORDER BY ?title";
 	// + "FILTER (!bound(?deleted)) }"; FILTER (!bound doesn't appear to be
@@ -213,7 +214,7 @@ public class Queries {
 	public static String getItemBibliographicInfo(String tagID) {
 		return ("PREFIX dcterms: <http://purl.org/dc/terms/>"
 				+ " "
-				+ "SELECT ?title ?creator ?contact ?descriptor ?keyword ?location ?abstract"
+				+ "SELECT ?title ?creator ?contact ?descriptor ?keyword ?location ?abstract ?doi"
 				+ " " + "WHERE { " + " " + "<"
 				+ tagID
 				+ "> <http://purl.org/dc/elements/1.1/title> ?title . "
@@ -240,7 +241,10 @@ public class Queries {
 				+ " "
 				+ "OPTIONAL { <"
 				+ tagID
-				+ "> <dcterms:abstract> ?abstract } ." + " " + "}");
+				+ "> <dcterms:abstract> ?abstract } ." 
+				+ "OPTIONAL { <"
+				+ tagID
+				+ "> <dcterms:identifier> ?doi } ." + " " + "}");
 	}
 
 }

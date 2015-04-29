@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
@@ -52,14 +52,13 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.sead.acr.common.MediciProxy;
 import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Foaf;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -71,6 +70,9 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfoResult;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
+import edu.illinois.ncsa.mmdb.web.server.Authentication;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
@@ -78,9 +80,10 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Retrieve Google user info.
- * 
+ *
  * @author Luigi Marini
- * 
+ * @author myersjd@umich.edu
+ *
  */
 public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, GoogleUserInfoResult> {
 
@@ -91,9 +94,14 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
     private static final HttpTransport            HTTP_TRANSPORT = new NetHttpTransport();
 
     private static final ThreadLocal<HttpSession> session        = new ThreadLocal<HttpSession>();
+    private static final ThreadLocal<String>      theServer      = new ThreadLocal<String>();
 
     public static void setSession(HttpSession session) {
         GoogleUserInfoHandler.session.set(session);
+    }
+
+    public static void setServer(String server) {
+        theServer.set(server);
     }
 
     @Override
@@ -103,43 +111,63 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
         log.debug("Getting user information from google using OAuth2, token = " + action.getToken());
 
         try {
-            GoogleCredential credential = new GoogleCredential().setAccessToken(action.getToken());
-            HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(credential);
-            GenericUrl url = new GenericUrl(USER_INFO_URL);
-            HttpRequest request = requestFactory.buildGetRequest(url);
-            request.getHeaders().setContentType("application/json");
-            log.debug("Identity = " + request.execute().parseAsString());
-            String identity = request.execute().parseAsString();
-            String[] info = parseJson(identity);
-            log.debug(info);
-            //            Userinfo userInfo = request.execute().parseAs(Userinfo.class);
-            //            log.debug("User credentials retrieved from Google: " + userInfo.getEmail());
-            boolean created = checkUsersExists(info[0], info[1]);
-            // register user with session
-            //            session.get().setAttribute(AuthenticatedServlet.AUTHENTICATED_AS, userInfo.getEmail());
-            return new GoogleUserInfoResult(created, info[0], info[1]);
+            //First verify token is for us
+            String[] client_ids = new String[1];
+            //Only using interactive client ID, not device ID since this should only be called via the browser
+            client_ids[0] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.GoogleClientId);
+            JSONObject tokenInfo = MediciProxy.getValidatedGoogleToken(client_ids, action.getToken());
+            if (tokenInfo != null) {
+                int ttl = tokenInfo.getInt("expires_in");
+                int exp = ttl + (int) (System.currentTimeMillis() / 1000L);
+
+                //Now get user info, which validates the token in the process
+                GoogleCredential credential = new GoogleCredential().setAccessToken(action.getToken());
+                HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(credential);
+                GenericUrl url = new GenericUrl(USER_INFO_URL);
+                HttpRequest request = requestFactory.buildGetRequest(url);
+                request.getHeaders().setContentType("application/json");
+                String result = request.execute().parseAsString();
+                JSONObject personInfo = new JSONObject(result);
+                log.debug(personInfo.toString());
+                boolean verified = personInfo.getBoolean("email_verified"); //should always be true here since getValidatedGoogleToken tests this
+                if (verified) {
+                    boolean created = false;
+                    boolean exists = checkUsersExists(personInfo.getString("name"), personInfo.getString("email"), action.isAccessRequest());
+                    if (action.isAccessRequest()) {
+                        if (exists) {
+                            //report issue
+                            created = false;
+                        } else {
+                            createUser(personInfo.getString("email"), personInfo.getString("name"));
+                            created = true;
+                            log.debug("User creation requested: result: " + created);
+
+                        }
+                    } else {
+                        if (exists) {
+                            //Create a valid session for authenticated user (as if /api/authentication was called)
+                            AuthenticatedServlet.fillAuthenticatedSession(session.get(), personInfo.getString("email"), exp, theServer.get());
+                            //Record login
+                            Authentication.setLastLogin(Resource.uriRef(PersonBeanUtil.getPersonID(personInfo.getString("email"))));
+                            //Send sessionId to client in an easy to parse form
+                            return new GoogleUserInfoResult(created, personInfo.getString("name"), personInfo.getString("email"), exp, session.get().getId());
+                        } else {
+                            //expected user to exist and no record found
+                            throw new ActionException("user not found");
+                        }
+                    }
+                }
+            }
+            //Something's not right - wrong audience, expired token, email not yet verified by google
+            throw new ActionException("Invalid google user");
+
         } catch (IOException e) {
             log.error("Error retrieving google user info", e);
             throw new ActionException("Error retrieving google user info");
+        } catch (JSONException e) {
+            log.error("Error parsing google tokenInfo", e);
+            throw new ActionException("Error parsing Google tokeninfo");
         }
-    }
-
-    private String[] parseJson(String identity) throws JsonParseException, IOException {
-        JsonFactory jfactory = new JsonFactory();
-        JsonParser jParser = jfactory.createJsonParser(identity);
-        String[] info = new String[2];
-        while (jParser.nextToken() != JsonToken.END_OBJECT) {
-            String fieldname = jParser.getCurrentName();
-            if ("name".equals(fieldname)) {
-                jParser.nextToken();
-                info[0] = jParser.getText();
-            }
-            if ("email".equals(fieldname)) {
-                jParser.nextToken();
-                info[1] = jParser.getText();
-            }
-        }
-        return info;
     }
 
     @Override
@@ -153,7 +181,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
         // TODO Auto-generated method stub
     }
 
-    private boolean checkUsersExists(String name, String email) {
+    private boolean checkUsersExists(String name, String email, boolean accessRequest) {
         log.debug("Checking if user exists " + email);
 
         Context context = TupeloStore.getInstance().getContext();
@@ -168,16 +196,12 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
             List<Resource> uris = u.getFirstColumn();
             if (uris.size() == 1) {
                 log.debug("User in the system " + uris.get(0));
-                PersonBean pb = pbu.get((UriRef) uris.get(0));
+                PersonBean pb = pbu.get(uris.get(0));
                 log.debug("User retrieved " + pb.getUri());
-                return false;
+                return true;
             } else if (uris.size() == 0) {
                 log.debug("User not in the system " + email);
-                PersonBean pb = createUser(email, name);
-                TupeloStore.getInstance().getBeanSession().save(pb);
-                Mail.userAdded(pb);
-                log.debug("User created " + pb.getUri());
-                return true;
+                return false;
             } else {
                 log.error("Query returned too many users with email " + email);
                 return false;
@@ -185,17 +209,23 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
         } catch (Exception e) {
             log.error("Error retrieving information about user "
                     + email, e);
-            return true;
+            return false;
         }
     }
 
-    private PersonBean createUser(String email, String name) {
-        //FixMe - name may be null/blank from Google
+    private void createUser(String email, String name) throws ActionException {
+
         PersonBean pb = new PersonBean();
         pb.setUri(PersonBeanUtil.getPersonID(email));
         pb.setEmail(email);
         pb.setName(name);
-        return pb;
+        try {
+            TupeloStore.getInstance().getBeanSession().save(pb);
+        } catch (OperatorException oe) {
+            log.warn("Could not create user");
+            throw new ActionException("Can't create person");
+        }
+        Mail.userAdded(pb);
+        log.debug("User created " + pb.getUri());
     }
-
 }

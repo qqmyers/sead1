@@ -27,13 +27,16 @@ import javax.ws.rs.Encoded;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.tupeloproject.kernel.Context;
@@ -61,6 +64,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
  * transmission.
  */
 @Path("/collections")
+@NoCache
 public class CollectionsRestService extends ItemServicesImpl {
 
     /** Commons logging **/
@@ -489,7 +493,7 @@ public class CollectionsRestService extends ItemServicesImpl {
     @GET
     @Path("/{id}/unique")
     @Produces("application/json")
-    public Response getCollectionUniqueMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response getCollectionUniqueMetadataAsJSON2(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         //Note - don't currently have extractors that work on collections so this currently just returns
         //the same results as /metadata minus the triples about extractor run start/end times
@@ -561,6 +565,36 @@ public class CollectionsRestService extends ItemServicesImpl {
     public Response uploadMetadata(@PathParam("id") @Encoded String id, MultipartFormDataInput input, @javax.ws.rs.core.Context HttpServletRequest request) {
 
         return super.uploadMetadata(id, input, request);
+    }
+
+    /**
+     * Publish collection.
+     *
+     * This removes the proposed for publication metadata and sets a publication
+     * date
+     *
+     * @param id
+     *            - the URL-encoded ID of the collection
+     * @query date
+     *        - the publication date to be set, as a long (milliseconds
+     *        since January 1, 1970, 00:00:00 GMT) - now by default,
+     *
+     * @query pid
+     *        a persistent identifier for the published item
+     *        required, must be in URI form
+     *
+     * @result - success/failure message: 200 - item published,, 403 -
+     *         permission issue, 409 - item has not been
+     *         "proposed for publication"
+     */
+    @PUT
+    @Path("/{id}/published")
+    public Response uploadMetadata(@PathParam("id") @Encoded String id, @QueryParam("date") Long date, @QueryParam("pid") @Encoded String pid, @javax.ws.rs.core.Context HttpServletRequest request) {
+        long millis = System.currentTimeMillis();
+        if (date != null) {
+            millis = date.longValue();
+        }
+        return super.publishItem(id, CollectionBeanUtil.COLLECTION_TYPE, millis, pid, request);
     }
 
 }

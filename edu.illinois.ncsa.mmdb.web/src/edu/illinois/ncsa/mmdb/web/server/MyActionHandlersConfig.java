@@ -65,6 +65,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteDatasetsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteRelationshipHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.DeleteRoleHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.EditRoleHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.EditUserRetirementHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ExtractionServiceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GeoSearchHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetAccessLevelHandler;
@@ -86,6 +87,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLicenseHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetLikeDislikeHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetMimeTypeCategoriesHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetOauth2ServerFlowStateHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPermissionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPreviewsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRecentActivityHandler;
@@ -113,14 +115,14 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.MintHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.Oauth2ServerFlowTokenRequestHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.Oauth2ServerFlowUserInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ReindexLuceneHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.SearchWithFilterHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetAccessLevelHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetConfigurationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetInfoHandler;
@@ -138,9 +140,9 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
 
 /**
  * Setup registry of action handlers when the servlet context is initialized.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class MyActionHandlersConfig implements ServletContextListener {
     public void contextInitialized(ServletContextEvent evt) {
@@ -177,7 +179,6 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetUserMetadataFieldsHandler());
         DispatchUtil.registerHandler(new ExtractionServiceHandler());
         DispatchUtil.registerHandler(new DeleteAnnotationHandler());
-        DispatchUtil.registerHandler(new SearchHandler());
         DispatchUtil.registerHandler(new RemoveFromCollectionHandler());
         DispatchUtil.registerHandler(new GetAllTagsHandler());
         DispatchUtil.registerHandler(new GetRecentActivityHandler());
@@ -219,7 +220,6 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new Create3DImageHandler());
         DispatchUtil.registerHandler(new GetConfigurationHandler());
         DispatchUtil.registerHandler(new SetConfigurationHandler());
-        DispatchUtil.registerHandler(new SearchWithFilterHandler());
         DispatchUtil.registerHandler(new GetItemsBySetHandler());
         DispatchUtil.registerHandler(new GetDatasetsInCollectionHandler());
         DispatchUtil.registerHandler(new DefaultRoleHandler());
@@ -235,6 +235,10 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new ClearGeoLocationHandler());
         DispatchUtil.registerHandler(new GetServiceTokenHandler());
         DispatchUtil.registerHandler(new UnpackZipHandler());
+        DispatchUtil.registerHandler(new GetOauth2ServerFlowStateHandler());
+        DispatchUtil.registerHandler(new Oauth2ServerFlowTokenRequestHandler());
+        DispatchUtil.registerHandler(new Oauth2ServerFlowUserInfoHandler());
+        DispatchUtil.registerHandler(new EditUserRetirementHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

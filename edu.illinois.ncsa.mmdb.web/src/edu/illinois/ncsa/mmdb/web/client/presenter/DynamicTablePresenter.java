@@ -68,9 +68,9 @@ import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
 
 /**
  * A table widget to allow paging, sorting and ordering of business beans.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  * @param <B>
  *            Server side bean to be shown in the table
  */
@@ -88,7 +88,7 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
     private static String      initialViewType      = DynamicTableView.GRID_VIEW_TYPE;
     private static String      initialSize          = DynamicTableView.PAGE_SIZE_X1;
 
-    protected static Boolean   showTopLevelDatasets = false;
+    public static Boolean      showTopLevelDatasets = false;
     protected BasePresenter<?> viewTypePresenter;
 
     public interface Display {
@@ -140,7 +140,7 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
 
     /**
      * Setup a presenter and view for the inner table visualization.
-     * 
+     *
      * @param dispatch
      * @param eventBus
      * @param display
@@ -202,14 +202,14 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
 
     /**
      * Query to retrieve items server side.
-     * 
+     *
      * @return query sent to server to retrieve items
      */
     protected abstract ListQuery getQuery();
 
     /**
      * Add item to interface.
-     * 
+     *
      * @param event
      *            event to fire to add item to interface
      * @param index
@@ -236,11 +236,12 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
         } else {
             event.setURL("dataset?id=" + item.getUri());
         }
+        event.setHitList(item.getHits());
     }
 
     /**
      * Set the total number of pages.
-     * 
+     *
      * @param numberOfPages
      */
     protected void setNumberOfPages(int numberOfPages) {
@@ -335,7 +336,7 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
     /**
      * Change the view type. Adjust the page according to the current page on
      * the previous view type.
-     * 
+     *
      * @param viewType
      * @param sizeType
      */
@@ -349,7 +350,7 @@ public abstract class DynamicTablePresenter extends BasePresenter<DynamicTablePr
     /**
      * Set the view type. Do not adjust the page according to any existing
      * currentPage value.
-     * 
+     *
      * @param viewType
      */
     protected void setViewType(String viewType, String sizeType) {

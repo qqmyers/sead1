@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
@@ -48,24 +48,18 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
@@ -80,38 +74,34 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
-import edu.illinois.ncsa.mmdb.web.client.presenter.HelpPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.UploadStatusPresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
-import edu.illinois.ncsa.mmdb.web.client.view.HelpDialogView;
 import edu.illinois.ncsa.mmdb.web.client.view.UploadStatusView;
 
 /**
  * A standalone page to upload files.
- * 
+ *
  * @author Luigi Marini
- * 
+ * @author myersjd@umich.edu
+ *
  */
 public class UploadPage extends Page {
 
-    private static final String            TITLE                  = "Upload";
+    private static final String            TITLE                = "Upload";
     private UploadWidget                   uploadWidget;
-    private FlexTable                      tableLayout;
-    private static VerticalPanel           appletStatusPanel;
+    private FlowPanel                      uploadLayout;
+    private static FlowPanel               statusPanel;
     private static UploadStatusPresenter   uploadStatusPresenter;
     private static BatchOperationPresenter batchOperationPresenter;
     private static BatchOperationView      batchOperationView;
     private static UploadStatusView        uploadStatusView;
-    Timer                                  safariWakeupTimer;
     private boolean                        showhtml5;
 
     private static String                  ancestor;
     private static String                  derivationPredicate;
-    private final static String            versionPredicate       = "http://www.w3.org/ns/prov#wasRevisionOf";
-    private final static String            derivedFromPredicate   = "http://www.w3.org/ns/prov#wasDerivedFrom";
+    private final static String            versionPredicate     = "http://www.w3.org/ns/prov#wasRevisionOf";
+    private final static String            derivedFromPredicate = "http://www.w3.org/ns/prov#wasDerivedFrom";
     private static UploadPage              activeUploadPage;
-
-    public static final String             DND_ENABLED_PREFERENCE = "dndAppletEnabled";
 
     /* DispatchAysnc required? UploadPage() appears unused
     public UploadPage() {
@@ -130,161 +120,75 @@ public class UploadPage extends Page {
     @Override
     public void layout() {
         showhtml5 = true;
+        //FixMe - use getBrowserName and getBrowserVersion instead of parsing user agent?
         if (getUserAgent().contains("msie")) {
             if (getUserAgent().matches(".*msie [0-9].[0-9].*")) {
                 showhtml5 = false;
             }
         }
-        if (getUserAgent().contains("opera") || getUserAgent().contains("firefox/23.0")) {
+        if (getUserAgent().contains("firefox/23.0")) {
+            showhtml5 = false;
+        }
+        //Untested - opera should support html5 these days, not clear what the real min version is, but this should let recent ones use html5
+        if (getBrowserName().contains("opera") && Integer.parseInt(getBrowserVersion()) < 18) {
             showhtml5 = false;
         }
 
-        tableLayout = new FlexTable() {
-            @Override
-            protected void onDetach() {
-                super.onDetach();
-                if (uploadStatusPresenter != null) {
-                    uploadStatusPresenter.unbind();
-                }
-                if (batchOperationPresenter != null) {
-                    batchOperationPresenter.unbind();
-                }
-            }
-        };
+        uploadLayout = new FlowPanel();
 
-        tableLayout.addStyleName("uploadPageLayout");
+        uploadLayout.getElement().setId("uploadLeft");
 
-        mainLayoutPanel.add(tableLayout);
+        FlowPanel columnPanel = new FlowPanel();
+        columnPanel.getElement().setId("uploadcolumns");
+        columnPanel.add(uploadLayout);
+        mainLayoutPanel.add(columnPanel);
 
-        final VerticalPanel singleUpload = new VerticalPanel();
-        final HorizontalPanel hp = new HorizontalPanel();
-        Label fileUploadLabel = new Label("Select files you want to upload:");
-        fileUploadLabel.addStyleName("importTitle");
-        hp.add(fileUploadLabel);
-        //Only shown eith DnD applet?
-        Image helpButton = new Image("./images/help-browser.png");
-        helpButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                HelpDialogView view = new HelpDialogView("Upload help");
-                HelpPresenter presenter = new HelpPresenter(view);
-                presenter.bind();
-                view.setWidth("300px");
-                view.setPopupPosition(360, 70);
-                String helpText = "To upload a single file, use the file chooser on the left. " +
-                        "To upload multiple files or a folder, click in the box to the right to load the upload applet. " +
-                        "Once the applet is loaded, you can drag a folder or multiple files from your desktop and drop them on " +
-                        "the disk icon to upload. As files upload you will see information about the upload progress below.";
-                presenter.addContent(new Label(helpText));
-            }
-        });
-        singleUpload.add(hp);
+        if (showhtml5) {
 
-        uploadWidget = new UploadWidget(false);
-        uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
-            public void onDatasetUploaded(DatasetUploadedEvent event) {
-                History.newItem("dataset?id=" + event.getDatasetUri());
-            }
-        });
-        singleUpload.add(uploadWidget);
+            // HTML5 Upload Widgets
+            FlowPanel html5Panel = new FlowPanel();
+            HTML html5Upload = new HTML();
+            //div id=list is an empty div where upload error/abort messages will go
+            html5Upload.setHTML("<div id='box'><div id='drop'>Drag and drop files here!</div></div>");
+            html5Panel.add(html5Upload);
 
-        final VerticalPanel dndPanel = new VerticalPanel();
+            final FlowPanel hp = new FlowPanel();
+            Label fileUploadLabel = new Label("1) Select files:");
+            fileUploadLabel.addStyleName("importTitle");
+            hp.add(fileUploadLabel);
 
-        final boolean dndEnabled = MMDB.getSessionPreference(DND_ENABLED_PREFERENCE) != null;
-        final String disabledMsg = "Click here to upload multiple files. You may be asked by your web browser to accept a security exception.";
-        final String enabledMsg = "Drop files and folders here";
-        final Label dndTooltip = new Label(dndEnabled ? enabledMsg
-                : disabledMsg);
+            FlowPanel html5Form = new FlowPanel();
+            HTML formMultiple = new HTML();
+            formMultiple.setHTML("<input type='file' id='files' name='files[]' multiple='multiple' />");
 
-        final FlowPanel dndApplet = new FlowPanel() {
-            protected void onAttach() {
-                // TODO Auto-generated method stub
-                super.onAttach();
-                if (dndEnabled) {
-                    removeStyleName("hidden");
-                    dndTooltip.removeStyleName("dndTooltip");
-                    deployDndApplet(MMDB.getSessionState().getSessionKey());
-                } else {
-                    addStyleName("hidden");
-                    dndTooltip.addClickHandler(new ClickHandler() {
-                        public void onClick(ClickEvent event) {
-                            if (MMDB.getSessionState().getCurrentUser() == null) {
-                                Window.confirm("Upload not permitted. Please log in");
-                            } else {
-                                removeStyleName("hidden");
-                                dndTooltip.removeStyleName("dndTooltip");
-                                deployDndApplet(MMDB.getSessionState().getSessionKey());
-                                dndTooltip.setText(enabledMsg);
-                                MMDB.setSessionPreference(DND_ENABLED_PREFERENCE, "true");
-                            }
-                        }
-                    });
-                }
-            }
-        };
-        dndApplet.setWidth("150px");
-        dndApplet.setHeight("100px");
-        dndApplet.getElement().setId("dndAppletId");
-        dndPanel.setHorizontalAlignment(HasAlignment.ALIGN_CENTER);
-        dndApplet.addStyleName("dragAndDrop");
-        dndPanel.addStyleName("dndContainer");
-        dndPanel.add(dndApplet);
-        dndTooltip.addStyleName("dndTooltip");
-        dndPanel.add(dndTooltip);
+            html5Form.add(formMultiple);
 
-        // HTML5 Upload Widgets
-        VerticalPanel html5Panel = new VerticalPanel();
-        HTML html5Upload = new HTML();
-        html5Upload.setHTML("<div id='box'><div id='drop'><br><br>Drag and drop files here!</div></div> <div id='list'></div>");
-        html5Panel.add(html5Upload);
+            Label or = new Label("or");
+            or.addStyleName("uploadOrLabel");
+            html5Form.add(or);
+            html5Form.add(html5Panel);
+            html5Form.getElement().setId("html5form");
 
-        VerticalPanel html5Form = new VerticalPanel();
-        HTML formMultiple = new HTML();
-        formMultiple.setHTML("<br><br><input type='file' id='files' name='files[]' multiple='multiple' />");
-        html5Form.add(hp);
-        html5Form.add(formMultiple);
-
-        final HorizontalPanel switchUploader = new HorizontalPanel();
-        switchUploader.addStyleName("pagingButton");
-        Label basicLabel = new Label("For uploading large numbers of files, contact SEAD about our desktop Upload tool.");
-        /*
-         * Anchor basicUploader = new Anchor("Java uploader.");
-        basicUploader.addStyleName("addTagsLink");
-        basicUploader.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                tableLayout.setWidget(0, 0, singleUpload);
-                tableLayout.setWidget(0, 2, dndPanel);
-                tableLayout.remove(switchUploader);
-            }
-        });
-        */
-        switchUploader.add(basicLabel);
-        //switchUploader.add(basicUploader);
-
-        Label or = new Label("OR");
-        or.addStyleName("uploadOrLabel");
-        tableLayout.setWidget(0, 1, or);
+            uploadLayout.add(hp);
+            uploadLayout.add(html5Form);
+        } else {
+            uploadLayout.add(getSingleUploadPanel());
+        }
 
         final FormPanel form = new FormPanel();
         form.setAction("./resteasy/datasets/copy");
         form.setMethod(FormPanel.METHOD_POST);
-        final VerticalPanel panel = new VerticalPanel();
-        panel.setWidth("100%");
+        final FlowPanel panel = new FlowPanel();
         form.setWidget(panel);
 
-        panel.add(new Label("")); //Spacer
-        Label importLabel = new Label("Import Open Data from another project:");
+        Label importLabel = new Label("2) Import Open Data from another Project Space:");
         importLabel.addStyleName("importTitle");
         panel.add(importLabel);
 
         // Create a TextBox, giving it a name so that it will be submitted.
         final TextBox tb = new TextBox();
         tb.setName("url");
-        tb.setWidth("100%");
         panel.add(tb);
-        Label details = new Label("[To import - copy the URL of the datapage in the box above. (Data must be publicly visible at this URL.)]");
-        details.addStyleName("smallText");
-        panel.add(details);
 
         // Add a 'submit' button.
         panel.add(new Button("Copy Dataset", new ClickHandler() {
@@ -298,37 +202,54 @@ public class UploadPage extends Page {
             }
         }));
 
-        panel.add(new Label("")); //Spacer
-        Label captureLabel = new Label("Capture Data From the Web");
+        Label details = new Label("To import - copy the URL of the datapage in the box above and click the \"Copy Dataset\" button. (Data must be publicly visible at this URL.)");
+        details.addStyleName("smallText");
+        panel.add(details);
+
+        uploadLayout.add(form);
+
+        // Add an event handler to the form.
+        form.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+            @Override
+            public void onSubmitComplete(SubmitCompleteEvent event) {
+                String id = tb.getText().replaceAll(".*dataset\\?id=", "");
+                tb.setText("");
+                panel.add(new Hyperlink(id, "dataset?id=" + id));
+            }
+        });
+
+        FlowPanel bmlet = new FlowPanel();
+        bmlet.getElement().setId("bmlet");
+        Label captureLabel = new Label("3) Capture Data From Other Web Pages");
         captureLabel.addStyleName("importTitle");
-        panel.add(captureLabel);
-        Label captureDetails = new Label("To capture: save the following link as a bookmark in your browser. Then, when you're viewing the data, " +
+        bmlet.add(captureLabel);
+        Label captureDetails = new Label("Save the following link as a bookmark in your browser. Then, when you're viewing the data, " +
                 "or on a page with a download link for it, click the bookmark.  Note: The data must be public.");
         captureDetails.addStyleName("smallText");
-        panel.add(captureDetails);
+        bmlet.add(captureDetails);
 
         /* Uncompressed script: Loads 4 files, waits for jquery and main import script to load and calls createPanel to get started:
-         * 
+         *
          * (function(){
          *    var headID=document.getElementsByTagName("head")[0];
          *    var script=document.createElement("script");
          *    script.type="text/javascript";
          *    script.src="//code.jquery.com/jquery-1.8.1.min.js";
          *    headID.appendChild(script);
-         *    
+         *
          *    var cssNode=document.createElement("link");
          *    cssNode.type="text/css";cssNode.rel="stylesheet";
          *    cssNode.href="<Your server>css/seadimport.css";
          *    cssNode.media="screen";
          *    headID.appendChild(cssNode);
-         *    
+         *
          *    var bootstrapNode=document.createElement("link");
          *    bootstrapNode.type="text/css";
          *    bootstrapNode.rel="stylesheet";
          *    bootstrapNode.href="<Your server>css/bootstrap.sead-scope.css";
          *    bootstrapNode.media="screen";
          *    headID.appendChild(bootstrapNode);
-         *    
+         *
          *    var attemptCount=0;
          *    var undef="undefined";
          *    function waitForJQuery() {
@@ -342,17 +263,17 @@ public class UploadPage extends Page {
          *       }
          *       return;
          *    }
-         *    
+         *
          *    waitForJQuery();
-         *    
-         *    function init() { 
+         *
+         *    function init() {
          *      $.getScript("<Your server>js/seadimport.js", function(){
          *         createPanel("<Your server>","<Project Name");
          *      });
          *    }
          *  })();
          */
-        panel.add(new Anchor(MMDB._projectName + " Data Import",
+        bmlet.add(new Anchor(MMDB._projectName + " Data Import",
 
                 "javascript:(function(){function o(){i++;if(typeof jQuery!=s){u();return}if(i<100){setTimeout(o,100)}return}" +
                         "function u(){$.getScript(\"" + GWT.getHostPageBaseURL() + "js/seadimport.js\",function(){" +
@@ -364,62 +285,69 @@ public class UploadPage extends Page {
                         "r.href=\"" + GWT.getHostPageBaseURL() + "css/bootstrap.sead-scope.css\";r.media=\"screen\";" +
                         "e.appendChild(r);var i=0;var s=\"undefined\";o()})()"));
 
-        // Add an event handler to the form.
-        form.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+        uploadLayout.add(bmlet);
+
+        Label desktopLabel = new Label("4) Use Batch Upload Tools");
+        desktopLabel.addStyleName("importTitle");
+        Label desktopDetails = new Label("If you have large amounts of data or whole hierarchies of folders to upload, contact SEAD to learn about the available desktop upload/synchronization tool and/ service APIs.");
+        desktopDetails.addStyleName("smallText");
+        uploadLayout.add(desktopLabel);
+        uploadLayout.add(desktopDetails);
+
+        FlowPanel uploadRight = new FlowPanel() {
             @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
-                String id = tb.getText().replaceAll(".*dataset\\?id=", "");
-                tb.setText("");
-                panel.add(new Hyperlink(id, "dataset?id=" + id));
-            }
-        });
-
-        if (showhtml5) {
-            tableLayout.setWidget(0, 0, html5Form);
-            tableLayout.setWidget(0, 2, html5Panel);
-            tableLayout.setWidget(1, 0, switchUploader);
-            tableLayout.setWidget(2, 0, form);
-        } else {
-            pageTitle.addEast(helpButton);
-            tableLayout.setWidget(0, 0, singleUpload);
-            tableLayout.setWidget(0, 2, dndPanel);
-            tableLayout.setWidget(2, 0, form);
-        }
-
-        tableLayout.getCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
-        tableLayout.getCellFormatter().addStyleName(0, 0, "uploadPageLargeCell");
-        tableLayout.getCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);
-        tableLayout.getCellFormatter().addStyleName(1, 0, "uploadPageLargeCell");
-        tableLayout.getCellFormatter().addStyleName(0, 2, "uploadPageLargeCell");
-        tableLayout.getCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_CENTER);
-
-        // wake the applet up periodically, so it doesn't block on javascript calls
-        safariWakeupTimer = new Timer() {
-            public void run() {
-                pokeApplet(DOM.getElementById("dragdropApplet"));
+            protected void onDetach() {
+                super.onDetach();
+                if (uploadStatusPresenter != null) {
+                    uploadStatusPresenter.unbind();
+                }
+                if (batchOperationPresenter != null) {
+                    batchOperationPresenter.unbind();
+                }
             }
         };
-        safariWakeupTimer.scheduleRepeating(500);
 
         // batch actions
         batchOperationView = new BatchOperationView();
         batchOperationView.addStyleName("hidden");
         batchOperationPresenter = new BatchOperationPresenter(dispatchAsync, MMDB.eventBus, batchOperationView, false);
         batchOperationPresenter.bind();
-        mainLayoutPanel.add(batchOperationView);
+        uploadRight.add(batchOperationView);
+        uploadRight.getElement().setId("uploadRight");
 
-        // applet status
-        appletStatusPanel = new VerticalPanel();
+        // html5 status
+        statusPanel = new FlowPanel();
+        statusPanel.getElement().setId("uploadStatus");
 
         uploadStatusView = new UploadStatusView(dispatchAsync);
         uploadStatusPresenter = new UploadStatusPresenter(dispatchAsync, MMDB.eventBus, uploadStatusView);
         uploadStatusPresenter.bind();
 
-        appletStatusPanel.add(uploadStatusView);
-        mainLayoutPanel.add(appletStatusPanel);
+        statusPanel.add(uploadStatusView);
+        uploadRight.add(statusPanel);
+        columnPanel.add(uploadRight);
 
         // publish js methods outside of gwt code
         publishMethods();
+    }
+
+    private VerticalPanel getSingleUploadPanel() {
+        final VerticalPanel singleUpload = new VerticalPanel();
+        final HorizontalPanel hp = new HorizontalPanel();
+        Label fileUploadLabel = new Label("Select a file you want to upload:");
+        fileUploadLabel.addStyleName("importTitle");
+        hp.add(fileUploadLabel);
+
+        singleUpload.add(hp);
+
+        uploadWidget = new UploadWidget(false);
+        uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
+            public void onDatasetUploaded(DatasetUploadedEvent event) {
+                History.newItem("dataset?id=" + event.getDatasetUri());
+            }
+        });
+        singleUpload.add(uploadWidget);
+        return singleUpload;
     }
 
     private final native void initUploader() /*-{
@@ -428,32 +356,18 @@ public class UploadPage extends Page {
     }-*/;
 
     /**
-     * "poke" the applet. this keeps it awake in WebKit browsers where
-     * javascript callbacks can block it
-     * 
-     * @param applet
-     * @param parameter
-     */
-    public static native void pokeApplet(Element applet) /*-{
-		if ((applet != null) && (applet.isActive())) {
-			applet.poke();
-		}
-    }-*/;
-
-    /**
      * Publish local methods as page level js methods so that the applet can
      * call them.
      */
     private native void publishMethods() /*-{
-        $wnd.dndAppletPoke = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::appletPoke();
-        $wnd.dndAppletFileDropped = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileDropped(Ljava/lang/String;Ljava/lang/String;);
+        $wnd.dndAppletFileDropped = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileDropped(ILjava/lang/String;Ljava/lang/String;);
         $wnd.dndAppletFileUploaded = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileUploaded(Ljava/lang/String;Ljava/lang/String;);
         $wnd.dndAppletProgressIndex = @edu.illinois.ncsa.mmdb.web.client.ui.UploadPage::fileProgressIndex(II);
     }-*/;
 
     // on applet callbacks we need to post-process values with an identity transformations to work around applet-to-Javascript issues
 
-    /** Called by the applet after a file is uploaded. */
+    /** Called by html5 js after a file is uploaded. */
     public static void fileUploaded(String uriUploaded, String offset) {
         String uri = uriUploaded + ""; // identity transform required, do not remove
         GWT.log("applet says " + uri + " uploaded");
@@ -461,70 +375,21 @@ public class UploadPage extends Page {
         uploadStatusPresenter.onComplete(uri, Integer.parseInt(offset + "")); // identity transform required, do not remove
     }
 
-    /** Called by the applet for each file dropped */
-    public static void fileDropped(String filename, String sizeString) {
+    /** Called by html5 js for each file dropped */
+    public static void fileDropped(int count, String filename, String sizeString) {
         batchOperationView.removeStyleName("hidden");
         batchOperationView.addStyleName("titlePanelRightElement");
-        uploadStatusPresenter.onDropped(filename + "", sizeString + ""); // identity transforms required, do not remove
+        uploadStatusPresenter.onDropped(count, filename + "", sizeString + ""); // identity transforms required, do not remove
     }
 
     /**
      * Called by the html5 upload widget to report progress on current batch
-     * 
+     *
      * @param percent
      *            , index
      */
     public static void fileProgressIndex(int index, int percent) {
         uploadStatusPresenter.onProgressIndex(index, percent + 0); // identity transform required, do not remove
-    }
-
-    /**
-     * Called by the applet.
-     * 
-     * @param param
-     */
-    public static void appletPoke() {
-        GWT.log("Applet poked the page");
-        appletStatusPanel.add(new Label("Applet poked the page"));
-    }
-
-    /**
-     * 
-     * @param credentials
-     */
-
-    private native void deployDndApplet(String credentials) /*-{
-		$wnd.LazyLoad
-				.js(
-						'js/deployJava.js',
-						function() {
-							var attributes = {
-								id : 'dragdropApplet',
-								MAYSCRIPT : 'true',
-								code : 'edu.illinois.ncsa.mmdb.web.client.dnd.DropUploader',
-								archive : 'dnd/DropUploader-1801.jar,dnd/lib/commons-codec-1.2.jar,dnd/lib/commons-httpclient-3.0.1.jar,dnd/lib/commons-httpclient-contrib-ssl-3.1.jar,dnd/lib/commons-logging-1.0.4.jar',
-								width : 150,
-								height : 100
-							};
-							var parameters = {
-								jnlp_href : 'dropuploader.jnlp',
-								statusPage : $wnd.document.URL,
-								"credentials" : credentials,
-								background : "0xFFFFFF",
-							};
-							$wnd.deployJava.runApplet(attributes, parameters,
-									'1.5');
-							$wnd.document.getElementById('dndAppletId').innerHTML = $wnd.deployJava
-									.getDocument();
-						});
-    }-*/;
-
-    @Override
-    protected void onDetach() {
-        super.onDetach();
-        if (safariWakeupTimer != null) {
-            safariWakeupTimer.cancel();
-        }
     }
 
     @Override
@@ -537,6 +402,14 @@ public class UploadPage extends Page {
 
     public static native String getUserAgent() /*-{
 		return navigator.userAgent.toLowerCase();
+    }-*/;
+
+    public static native String getBrowserName() /*-{
+		return navigator.appName.toLowerCase();
+    }-*/;
+
+    public static native String getBrowserVersion() /*-{
+		return navigator.appVersion.toLowerCase();
     }-*/;
 
     public void deriveFromDataset(DispatchAsync service, String datasetUri) {
@@ -606,7 +479,7 @@ public class UploadPage extends Page {
 
     }
 
-    //Adds a derivation relationship for the newly uploaded data if there's an ancestor 
+    //Adds a derivation relationship for the newly uploaded data if there's an ancestor
     //(i.e. called from dataset page  with a #upload?id=<ancestor> history tag)
     private static void addDerviationRelationshipIfNeeded(final String uri) {
         if (ancestor != null) {

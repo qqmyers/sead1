@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -64,6 +64,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import edu.illinois.ncsa.mmdb.web.client.MMDB;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
@@ -74,21 +75,21 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
 import edu.illinois.ncsa.mmdb.web.client.event.PreviewSectionShowEvent;
 
 public class UserMetadataWidget extends Composite {
-    String                                 uri;
-    private final DispatchAsync            dispatch;
-    ListBox                                fieldChoice;
-    TextBox                                valueText;
-    VerticalPanel                          thePanel;
-    Label                                  noFields;
-    AddMetadataWidget                      addMetadata;
-    FlexTable                              fieldTable;
-    Map<String, String>                    labels     = new HashMap<String, String>();
-    Map<String, Integer>                   indexLabel = new HashMap<String, Integer>();
-    Map<String, Integer>                   listLabel  = new HashMap<String, Integer>();
-    protected SortedSet<UserMetadataField> availableFields;
-    private final HandlerManager           eventBus;
+    String                                      uri;
+    private final DispatchAsync                 dispatch;
+    ListBox                                     fieldChoice;
+    TextBox                                     valueText;
+    VerticalPanel                               thePanel;
+    Label                                       noFields;
+    AddMetadataWidget                           addMetadata;
+    FlexTable                                   fieldTable;
+    Map<String, String>                         labels                = new HashMap<String, String>();
+    Map<String, Integer>                        indexLabel            = new HashMap<String, Integer>();
+    Map<String, Integer>                        listLabel             = new HashMap<String, Integer>();
+    static private ListUserMetadataFieldsResult availableFieldsResult = null;
+    private final HandlerManager                eventBus;
 
-    public UserMetadataWidget(String uri, final DispatchAsync dispatch, HandlerManager eventBus) {
+    UserMetadataWidget(String uri, final DispatchAsync dispatch, HandlerManager eventBus) {
         this.uri = uri;
         this.dispatch = dispatch;
         this.eventBus = eventBus;
@@ -136,15 +137,13 @@ public class UserMetadataWidget extends Composite {
         // FIXME single get to get fields and values
         addMetadata.showFields(canEdit);
         addMetadata.setVisible(canEdit);
-        dispatch.execute(new ListUserMetadataFields(false), new AsyncCallback<ListUserMetadataFieldsResult>() {
+        initReadableFields(dispatch, new AsyncCallback<ListUserMetadataFieldsResult>() {
             public void onFailure(Throwable caught) {
                 GWT.log("Error retrieving available list of User Specified Metadata fields", caught);
             }
 
             public void onSuccess(ListUserMetadataFieldsResult result) {
-                availableFields = result.getFieldsSortedByName();
-                GWT.log("available fields: " + availableFields);
-                if (availableFields.size() > 0) {
+                if (result.getFields().size() > 0) {
 
                     dispatch.execute(new GetUserMetadataFields(uri), new AsyncCallback<GetUserMetadataFieldsResult>() {
                         public void onFailure(Throwable caught) {
@@ -171,6 +170,42 @@ public class UserMetadataWidget extends Composite {
         });
     }
 
+    /* Read this list once and cache it*/
+
+    public static void initReadableFields(final DispatchAsync dispatch, final AsyncCallback<ListUserMetadataFieldsResult> callback) {
+        if (availableFieldsResult == null) {
+            dispatch.execute(new ListUserMetadataFields(false), new AsyncCallback<ListUserMetadataFieldsResult>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    callback.onFailure(caught);
+                }
+
+                @Override
+                public void onSuccess(ListUserMetadataFieldsResult result) {
+                    availableFieldsResult = result;
+                    GWT.log("available fields: " + result.getFieldsSortedByName());
+                    callback.onSuccess(result);
+                }
+            });
+        } else {
+            callback.onSuccess(availableFieldsResult);
+        }
+    }
+
+    public static String getFieldLabel(String predicate) {
+        String label = null;
+        if (availableFieldsResult != null) {
+            for (UserMetadataField umf : availableFieldsResult.getFields() ) {
+                if (umf.getUri().equals(predicate)) {
+                    label = umf.getLabel();
+                    break;
+                }
+            }
+        }
+        return label;
+    }
+
     private String getDescription(String predicate) {
         return addMetadata.labels_description.get(predicate);
     }
@@ -178,7 +213,7 @@ public class UserMetadataWidget extends Composite {
     /**
      * Given the name of a field, find the first row that has that name in
      * column 0.
-     * 
+     *
      * @param predicate
      * @return
      */
@@ -194,7 +229,7 @@ public class UserMetadataWidget extends Composite {
     }
 
     /**
-     * 
+     *
      * @param predicate
      * @param label
      * @param values
@@ -211,7 +246,7 @@ public class UserMetadataWidget extends Composite {
         int i = 0;
         for (final UserMetadataValue value : values ) {
 
-            //FixMe - probably better/more general way to not show data that duplicates metadata shown elsewhere in display 
+            //FixMe - probably better/more general way to not show data that duplicates metadata shown elsewhere in display
             //Special case - don't show datasets as subcollections (both use dc:hasPart and datasets are shown elsewhere on collection page)
 
             if ((predicate.equals("http://purl.org/dc/terms/hasPart") && (value.getUri() != null) && value.getUri().startsWith("dataset?id="))) {
@@ -241,7 +276,7 @@ public class UserMetadataWidget extends Composite {
                     String val = value.getUri();
 
                     if ((val.startsWith("dataset?id=")) || (val.startsWith("collection?uri="))) {
-                        //Internal link - use history mechanism     
+                        //Internal link - use history mechanism
 
                         Hyperlink namelink = new Hyperlink();
 
@@ -265,7 +300,7 @@ public class UserMetadataWidget extends Composite {
                         //Single line - create a label
                         valueWidget = new Label(valueText);
                     } else {
-                        //Multi-line 
+                        //Multi-line
                         valueText = "<pre>" + SimpleHtmlSanitizer.sanitizeHtml(valueText).asString() + "</pre>";
                         valueWidget = new HTML(valueText);
                     }
@@ -315,7 +350,12 @@ public class UserMetadataWidget extends Composite {
                 //Add a search link
                 Hyperlink searchlink = new Hyperlink();
                 if (value.getUri() != null) {
-                    searchlink.setTargetHistoryToken("search?q=" + value.getUri() + "&f=" + predicate);
+                    if (value.getUri().contains(MMDB._vivoIdentifierUri)) {
+                        //FixMe : VIVO ID special case - storing name and Uri in one triple until we have the list of vivo ids cached on the server
+                        searchlink.setTargetHistoryToken("search?q=" + value.getName() + " : " + value.getUri() + "&f=" + predicate);
+                    } else {
+                        searchlink.setTargetHistoryToken("search?q=" + value.getUri() + "&f=" + predicate);
+                    }
                 } else {
                     searchlink.setTargetHistoryToken("search?q=" + value.getName() + "&f=" + predicate);
                 }

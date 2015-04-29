@@ -19,6 +19,34 @@
 		<url-pattern>/home</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>Spaces</servlet-name>
+		<servlet-class>org.sead.acr.community.Spaces</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>VIVOProxy</servlet-name>
+		<servlet-class>org.sead.acr.community.VIVOProxyServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>Spaces</servlet-name>
+		<url-pattern>/spaces</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>VIVOProxy</servlet-name>
+		<url-pattern>/vivo</url-pattern>
+	</servlet-mapping>
+
+
+	<servlet>
+		<servlet-name>Manage</servlet-name>
+		<servlet-class>org.sead.acr.community.Manage</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Manage</servlet-name>
+		<url-pattern>/exp</url-pattern>
+	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>GetProjectInfo</servlet-name>
@@ -43,6 +71,14 @@
 	<servlet-mapping>
 		<servlet-name>Export</servlet-name>
 		<url-pattern>/export</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>authredirect</servlet-name>
+		<servlet-class>org.sead.acr.community.Oauth2Redirect</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>authredirect</servlet-name>
+		<url-pattern>/authredirect</url-pattern>
 	</servlet-mapping>
 
 </web-app>

@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -44,6 +44,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.constraints.NotNull;
+
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -53,23 +55,25 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.UmbrellaException;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
@@ -88,24 +92,26 @@ import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetSelectedHandler;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedEvent;
 import edu.illinois.ncsa.mmdb.web.client.event.DatasetUnselectedHandler;
-import edu.illinois.ncsa.mmdb.web.client.place.PlaceService;
+import edu.illinois.ncsa.mmdb.web.client.geo.GeoPage;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
+import edu.illinois.ncsa.mmdb.web.client.ui.AboutPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.AccountPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.AuthenticationCallback;
 import edu.illinois.ncsa.mmdb.web.client.ui.CollectionPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.ContentCategory;
+import edu.illinois.ncsa.mmdb.web.client.ui.DashboardPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.DatasetWidget;
-import edu.illinois.ncsa.mmdb.web.client.ui.HomePage;
+import edu.illinois.ncsa.mmdb.web.client.ui.DiscoveryPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.JiraIssuePage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListCollectionsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.ListDatasetsPage;
+import edu.illinois.ncsa.mmdb.web.client.ui.ListSearchResultsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.LoginStatusWidget;
-import edu.illinois.ncsa.mmdb.web.client.ui.MapPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.NotEnabledPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.RequestNewPasswordPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SearchBox;
-import edu.illinois.ncsa.mmdb.web.client.ui.SearchResultsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SelectedItemsPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
 import edu.illinois.ncsa.mmdb.web.client.ui.TagPage;
@@ -121,7 +127,7 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
  * MMDB entry point.
- * 
+ *
  * @author Luigi Marini
  * @author Rob Kooper
  * @author Jim Myers
@@ -153,19 +159,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     /** Event bus for propagating events in the interface **/
     public static final HandlerManager eventBus                         = new HandlerManager(null);
 
-    /** The upload button */
-    private Anchor                     uploadButton;
-
-    /** The upload widget in the upload toolbar */
-    private FlowPanel                  uploadPanel;
-
     /** Main content panel **/
     private static final FlowPanel     mainContainer                    = new FlowPanel();
 
-    /** Place support for history management **/
-    private PlaceService               placeService;
-
     public static LoginStatusWidget    loginStatusWidget;
+
+    public static boolean              credChangeOccuring               = true;
 
     private String                     previousHistoryToken             = new String();
 
@@ -173,16 +172,36 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     private static UserSessionState    sessionState;
 
-    private Label                      debugLabel;
-    private HorizontalPanel            navMenu;
-    private HTML                       adminBbullet;
-    private Hyperlink                  adminLink;
+    private RootPanel                  aboutMenuItem;
+    private RootPanel                  datasetsMenuItem;
+    private RootPanel                  collectionsMenuItem;
+    private RootPanel                  tagsMenuItem;
+    private RootPanel                  geoMenuItem;
+    private RootPanel                  publishedDataMenuItem;
+    private RootPanel                  dashboardMenuItem;
+    private RootPanel                  adminMenuItem;
+    private RootPanel                  uploadMenuItem;
 
     public static String               _sessionCookieName               = "JSESSIONID";
     public static String               _googleClientId                  = null;
+    public static String               _orcidClientId                   = null;
 
     public static String               _projectName                     = "SEAD ACR";
+    public static String               _projectUrl                      = "http://sead-data.net";
+    public static String               _projectDescription              = "A generic SEAD Project Space";
+    public static String               _vivoIdentifierUri               = null;
+    public static String               _vivoQueryUri                    = null;
     public static boolean              bigData                          = false;                              //Server's bigData flag
+
+    private static void reportUmbrellaError(@NotNull Throwable e) {
+        for (Throwable th : ((UmbrellaException) e).getCauses() ) {
+            if (th instanceof UmbrellaException) {
+                reportUmbrellaError(th);
+            } else {
+                Window.alert("Error: " + th.getMessage());
+            }
+        }
+    }
 
     /**
      * This is the entry point method.
@@ -193,6 +212,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             public void onUncaughtException(Throwable e) {
                 String s = "SEAD ACR Error:\n An unexpected error (such as a temporary communications issue or server error) has occurred.\n Please refresh your browser page to continue.\n If the issue persists, please report it to SEAD"; //, including the following message:\n" + e.getMessage();
                 Window.alert(s + e + e.getMessage());
+                reportUmbrellaError(e);
                 GWT.log("uncaught exception", e);
             }
         });
@@ -262,6 +282,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             }
         } catch (Exception e) {
             Window.alert("Initialization error: " + e.getMessage());
+            reportUmbrellaError(e);
             GWT.log("initialization error", e);
         }
 
@@ -272,49 +293,78 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      */
     void initNavMenu() {
 
-        if (RootPanel.get("navMenu") == null) {
-            GWT.log("failed to get rootpanel", null);
-        }
-        RootPanel.get("navMenu").clear();
-        navMenu = new HorizontalPanel();
-        navMenu.addStyleName("navMenu");
-
         RootPanel.get("projectTitle").clear();
 
-        HorizontalPanel mainHeader = new HorizontalPanel();
-        final Anchor projectNameLabel = new Anchor(true);
-        projectNameLabel.setText("");
-        projectNameLabel.setTitle("");
-        projectNameLabel.setHref("");
-        mainHeader.add(projectNameLabel);
-        mainHeader.setStyleName("headerTitle");
-        RootPanel.get("projectTitle").add(mainHeader);
+        final InlineHTML projectNameLabel = new InlineHTML();
+
+        RootPanel.get("projectTitle").add(projectNameLabel);
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
 
-        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName,
-                ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData,
-                ConfigurationKey.UseGoogleDocViewer, ConfigurationKey.PresentationSortOrder,
-                ConfigurationKey.PresentationPageViewType, ConfigurationKey.PresentationDataViewLevel, ConfigurationKey.ProjectHeaderLogo), new AsyncCallback<ConfigurationResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Could not get Names", caught);
-            }
+        LoginPage.setMainWindow(this);
 
-            @Override
-            public void onSuccess(ConfigurationResult result) {
-                bigData = result.getConfiguration(ConfigurationKey.BigData).equalsIgnoreCase("true");
-                _projectName = result.getConfiguration(ConfigurationKey.ProjectName);
-                projectNameLabel.setText(_projectName);
-                projectNameLabel.setTitle(result.getConfiguration(ConfigurationKey.ProjectDescription));
-                projectNameLabel.setHref(result.getConfiguration(ConfigurationKey.ProjectURL));
-                PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
-                DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType), result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true") || bigData);
+        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(),
+                ConfigurationKey.ProjectName,
+                ConfigurationKey.ProjectURL,
+                ConfigurationKey.ProjectDescription,
+                ConfigurationKey.BigData,
+                ConfigurationKey.UseGoogleDocViewer,
+                ConfigurationKey.PresentationSortOrder,
+                ConfigurationKey.PresentationPageViewType,
+                ConfigurationKey.PresentationDataViewLevel,
+                ConfigurationKey.OrcidClientId,
+                ConfigurationKey.ProjectHeaderLogo,
+                ConfigurationKey.ProjectHeaderBackground,
+                ConfigurationKey.ProjectHeaderTitleColor,
+                ConfigurationKey.VIVOIDENTIFIERURL,
+                ConfigurationKey.VIVOQUERYURL
+                ), new AsyncCallback<ConfigurationResult>() {
 
-                // override default logo
-                Document.get().getElementById("logo-img").setAttribute("src", result.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get Config Info", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        bigData = result.getConfiguration(ConfigurationKey.BigData).equalsIgnoreCase("true");
+                        _projectName = result.getConfiguration(ConfigurationKey.ProjectName);
+                        _projectUrl = result.getConfiguration(ConfigurationKey.ProjectURL);
+                        _projectDescription = result.getConfiguration(ConfigurationKey.ProjectDescription);
+                        _orcidClientId = result.getConfiguration(ConfigurationKey.OrcidClientId);
+                        _vivoIdentifierUri = result.getConfiguration(ConfigurationKey.VIVOIDENTIFIERURL);
+                        _vivoQueryUri = result.getConfiguration(ConfigurationKey.VIVOQUERYURL);
+                        projectNameLabel.setHTML(wrapIfNeeded(_projectName));
+
+                        // override default logo, background, title color
+                        Document.get().getElementById("project-logo").getFirstChildElement().getFirstChildElement().setAttribute("src", result.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
+                        com.google.gwt.dom.client.Element background = Document.get().getElementById("project-header");
+                        RootPanel headerPanel = RootPanel.get("project-header");
+                        headerPanel.getElement().getStyle().setBackgroundImage("url('" + result.getConfiguration(ConfigurationKey.ProjectHeaderBackground) + "')");
+                        headerPanel.getElement().getStyle().setProperty("background-repeat", "repeat-x");
+                        projectNameLabel.asWidget().getElement().getStyle().setProperty("color", result.getConfiguration(ConfigurationKey.ProjectHeaderTitleColor));
+
+                        PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
+                        DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType), result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true") || bigData);
+
+                    }
+
+                    //If the title is long (>40 chars), split it at the first space that exists between the 30% and 70% mark. If no spaces are in this range, don't split.
+                    private SafeHtml wrapIfNeeded(String label) {
+                        int len = label.length();
+                        if (len > 40) {
+                            //Wrap close to the half-way point if there's a space
+                            int firstPosible = (int) Math.round((len * 0.4));
+                            int spaceIndex = label.substring(firstPosible).indexOf(' ');
+                            if ((spaceIndex >= 0) && (spaceIndex < (int) Math.round((len * 0.3)))) {
+                                //Replace the space with an html break
+                                return new SafeHtmlBuilder().appendEscaped(label.substring(0, firstPosible + spaceIndex)).appendHtmlConstant("<br/>").appendEscaped(label.substring(firstPosible + spaceIndex + 1)).toSafeHtml();
+                            }
+                        }
+                        return new SafeHtmlBuilder().appendEscaped(label).toSafeHtml();
+                    }
+
+                });
 
         dispatchAsync.execute(new GoogleOAuth2Props(), new AsyncCallback<GoogleOAuth2PropsResult>() {
 
@@ -330,82 +380,26 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             }
         });
 
-        RootPanel.get("navMenu").add(navMenu);
-
-        // datasets
-        final Hyperlink homeLink = new Hyperlink("Home", "home");
-        homeLink.addStyleName("navMenuLink");
-        navMenu.add(homeLink);
-        // bullet
-        HTML bullet = new HTML("&bull;");
-        bullet.addStyleName("navMenuText");
-        navMenu.add(bullet);
-        // datasets
-        Hyperlink listLink = new Hyperlink("Data", "listDatasets");
-        listLink.addStyleName("navMenuLink");
-        navMenu.add(listLink);
-        // bullet
-        bullet = new HTML("&bull;");
-        bullet.addStyleName("navMenuText");
-        navMenu.add(bullet);
-        // collections
-        Hyperlink collectionsLink = new Hyperlink("Collections",
-                "listCollections");
-        collectionsLink.addStyleName("navMenuLink");
-        navMenu.add(collectionsLink);
-        // bullet
-        HTML bullet2 = new HTML("&bull;");
-        bullet2.addStyleName("navMenuText");
-        navMenu.add(bullet2);
-        // tags
-        Hyperlink tagsLink = new Hyperlink("Tags",
-                "tags");
-        tagsLink.addStyleName("navMenuLink");
-        navMenu.add(tagsLink);
-        // bullet
-        HTML bullet3 = new HTML("&bull;");
-        bullet3.addStyleName("navMenuText");
-        navMenu.add(bullet3);
-        // tags
-        Hyperlink mapLink = new Hyperlink("Map",
-                "map");
-        mapLink.addStyleName("navMenuLink");
-        navMenu.add(mapLink);
-        // bullet
-        HTML bullet4 = new HTML("&bull;");
-        bullet4.addStyleName("navMenuText");
-        navMenu.add(bullet4);
-        // upload link
-        final Hyperlink uploadLink = new Hyperlink("Upload", "upload");
-        uploadLink.addStyleName("navMenuLink");
-        navMenu.add(uploadLink);
-
-        adminBbullet = new HTML("&bull;");
-        adminBbullet.addStyleName("navMenuText");
-        adminBbullet.addStyleName("hidden");
-        navMenu.add(adminBbullet);
-
-        // upload link
-        adminLink = new Hyperlink("Administration", "administration");
-        adminLink.addStyleName("navMenuLink");
-        adminLink.addStyleName("hidden");
-        navMenu.add(adminLink);
-
-        // FIXME debug
-        debugLabel = new Label();
-        debugLabel.addStyleName("navMenuText");
-        navMenu.add(debugLabel);
+        // Panels for menu items
+        aboutMenuItem = RootPanel.get("aboutMenuItem");
+        datasetsMenuItem = RootPanel.get("listDatasetsMenuItem");
+        collectionsMenuItem = RootPanel.get("listCollectionsMenuItem");
+        tagsMenuItem = RootPanel.get("tagsMenuItem");
+        geoMenuItem = RootPanel.get("geoMenuItem");
+        publishedDataMenuItem = RootPanel.get("discoveryMenuItem");
+        dashboardMenuItem = RootPanel.get("dashboardMenuItem");
+        adminMenuItem = RootPanel.get("administrationMenuItem");
+        uploadMenuItem = RootPanel.get("uploadMenuItem");
 
         // search box
         SearchBox searchBox = new SearchBox("Search");
         searchBox.setWidth("150px"); // maybe add this as CSS style?
         RootPanel.get("searchMenu").add(searchBox);
-
     }
 
     /**
      * For debugging purposes. Monitor events of interest.
-     * 
+     *
      * @param eventBus
      */
     private void logEvent(HandlerManager eventBus) {
@@ -436,7 +430,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
     /**
      * Parse the parameters in the history token after the '?'
-     * 
+     *
      * @return
      */
     Map<String, String> getParams() {
@@ -447,7 +441,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             for (String paramEntry : paramString.split("&") ) {
                 String[] terms = paramEntry.split("=");
                 if (terms.length == 2) {
-                    params.put(URL.decodeComponent(terms[0]), URL.decodeComponent(terms[1]));
+                    params.put(URL.decodeQueryString(terms[0]), URL.decodeQueryString(terms[1]));
                 }
             }
         }
@@ -503,24 +497,34 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
         final String token = event.getValue();
         GWT.log("History changed: " + event.getValue(), null);
+        changeMenuSelection(previousHistoryToken, token);
 
         if (token.startsWith("logout")) {
             /* logout triggers an implicit attempt to login as anonymous
-             *  (as does checkLogin() if there are no existing credentials). 
+             *  (as does checkLogin() if there are no existing credentials).
              *  It's the success or failure of that login that determines whether the
-             *  user sees the login screen or (if anonymous has view member age privileges),
-             *  the default content screen (currently listDatasets) 
+             *  user sees the login screen or (if anonymous has view member page privileges),
+             *  the default content screen (currently listDatasets)
              */
-            if (!token.startsWith("logout_st")) {
-                History.newItem("listDatasets", false);
-            }
-            LoginPage.authenticate(dispatchAsync, this, "anonymous", "none", new AuthenticationCallback() {
+            credChangeOccuring = true;
+            getSessionState().setCurrentUser(null);
+            getSessionState().setLoginProvider("local");
+            getSessionState().setAnonymous(true);
+
+            LoginPage.authenticate("anonymous", "none", new AuthenticationCallback() {
                 @Override
                 public void onFailure() {
+                    if (!token.startsWith("logout_st")) {
+                        History.newItem("listDatasets", true);
+                    }
                 }
 
                 @Override
                 public void onSuccess(String userUri, String sessionKey) {
+                    setMenuItemVisibility();
+                    if (!token.startsWith("logout_st")) {
+                        History.newItem("listDatasets", true);
+                    }
                 }
             });
 
@@ -528,7 +532,24 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             /*Once the loginpage is shown, it's internal logic determines what happens next.
             * Right now, if the user succeeds, doWithPermissions("login") gets called
             */
-            showLoginPage();
+            credChangeOccuring = true;
+            if (LoginPage.getAutologin()) {
+                //Try to pick up existing credential silently
+                LoginPage.oauth2Login(new AuthenticationCallback() {
+                    @Override
+                    public void onFailure() {
+                        showLoginPage();
+                    }
+
+                    @Override
+                    public void onSuccess(String userUri, String sessionKey) {
+                        GWT.log(userUri + " logged in");
+                    }
+                }, true);
+
+            } else {
+                showLoginPage();
+            }
         } else if (token.startsWith("signup")) {
             showSignupPage();
         } else if (token.startsWith("requestNewPassword")) {
@@ -547,52 +568,82 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         }
     }
 
-    /**
-     * Run the action for the given token, subject to a permission check to see
-     * if user has permission to view member pages. The pages themselves must
-     * check further if additional permissions are needed to see their content.
-     * 
-     * Right now, doWithPermissions gets called via the checkLogin() method, as
-     * well as by the login() method (on success, login and logout tokens only).
-     * Login/logout trigger viewing the default member page (listDatasets), so
-     * the user's permissions need to be checked.
-     * 
-     * @param token
-     */
-    private void doWithPermission(final String token) {
+    //Change the selected menu item to have class = "selected" and remove it from the previous entry
+    //Ignore tokens such as login that don't match a menu item
+    private void changeMenuSelection(String previousHistoryToken, String token) {
 
-        rbac().doIfAllowed(Permission.VIEW_MEMBER_PAGES, new PermissionCallback() {
+        RootPanel oldPanel = getCoreElement(previousHistoryToken);
+        if (oldPanel != null) {
+            oldPanel.removeStyleName("selected");
+        }
+        RootPanel newPanel = getCoreElement(token);
+        if (newPanel != null) {
+            newPanel.addStyleName("selected");
+        }
+    }
+
+    private RootPanel getCoreElement(String token) {
+        String elemString = token;
+        // Map requests for indivudal datasets or collections to the generic datasets and collections menu items
+        if (token.startsWith("dataset")) {
+            elemString = "listDatasetsMenuItem";
+        } else if (token.startsWith("collection")) {
+            elemString = "listCollectionsMenuItem";
+        } else {
+            //Else token should correspond directly to a menu item
+            if (token.contains("_")) {
+                elemString = token.substring(0, token.indexOf("_"));
+            }
+            elemString += "MenuItem";
+        }
+        return RootPanel.get(elemString);
+
+    }
+
+    private void setMenuItemVisibility() {
+        showBasedOnPermission(aboutMenuItem, Permission.VIEW_SYSTEM);
+        showBasedOnPermission(datasetsMenuItem, Permission.VIEW_MEMBER_PAGES);
+        showBasedOnPermission(collectionsMenuItem, Permission.VIEW_MEMBER_PAGES);
+        showBasedOnPermission(tagsMenuItem, Permission.VIEW_MEMBER_PAGES);
+        showBasedOnPermission(geoMenuItem, Permission.VIEW_LOCATION);
+        showBasedOnPermission(publishedDataMenuItem, Permission.VIEW_PUBLISHED);
+        showBasedOnPermission(dashboardMenuItem, Permission.VIEW_MEMBER_PAGES);
+        showBasedOnPermission(adminMenuItem, Permission.VIEW_ADMIN_PAGES);
+        showBasedOnPermission(uploadMenuItem, Permission.UPLOAD_DATA);
+    }
+
+    private void showBasedOnPermission(final RootPanel menuItem, Permission perm) {
+        final String username = MMDB.getUsername();
+        rbac().doIfAllowed(perm, new PermissionCallback() {
             @Override
             public void onAllowed() {
-                parseHistoryToken(token);
-            }
-
-            @Override
-            public void onDenied() {
-                if (getSessionState().isAnonymous()) {
-                    if (token.startsWith("logout_st")) {
-                        showLoginPage(true);
-                    } else {
-                        showLoginPage();
-                    }
+                if (username.equals(MMDB.getUsername())) {
+                    menuItem.removeStyleName("hidden");
                 } else {
-                    showNotEnabledPage();
+                    Window.alert("Server Restarted. Please reload page to restablish session. Contact SEAD if issue persists.");
                 }
             }
-        });
-
-        // admin menu
-        rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new PermissionCallback() {
-            @Override
-            public void onAllowed() {
-                adminBbullet.removeStyleName("hidden");
-                adminLink.removeStyleName("hidden");
-            }
 
             @Override
             public void onDenied() {
-                adminBbullet.addStyleName("hidden");
-                adminLink.addStyleName("hidden");
+                if (username.equals(MMDB.getUsername())) {
+
+                    menuItem.addStyleName("hidden");
+                } else {
+                    Window.alert("Server Restarted. Please reload page to restablish session. Contact SEAD if issue persists.");
+                }
+
+            }
+
+            @Override
+            public void onFailure() {
+                if (username.equals(MMDB.getUsername())) {
+
+                    menuItem.addStyleName("hidden");
+                } else {
+                    Window.alert("Server Restarted. Please reload page to restablish session. Contact SEAD if issue persists.");
+                }
+
             }
         });
     }
@@ -603,12 +654,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * stores it in a local cache of session information, and, if successful,
      * triggers execution
      * of the action for the History token that triggered the call.
-     * 
+     *
      * @param sessionId
-     * 
+     *
      */
-    public void login(final String userId, final String sessionKey) {
-        login(null, userId, sessionKey, new AuthenticationCallback() {
+    public void retrieveUserInfo(final String userId, final String sessionKey) {
+        retrieveUserInfo(null, userId, sessionKey, new AuthenticationCallback() {
             @Override
             public void onFailure() {
             }
@@ -619,12 +670,12 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         });
     }
 
-    public void loginByName(final String username, final String sessionKey, final AuthenticationCallback callback) {
-        login(username, null, sessionKey, callback);
+    public void retrieveUserInfoByName(final String username, final String sessionKey, final AuthenticationCallback callback) {
+        retrieveUserInfo(username, null, sessionKey, callback);
     }
 
     //username or userId needs to be non-null, userId will be used if both are provided
-    private void login(final String username, final String userId, final String sessionKey, final AuthenticationCallback callback) {
+    private void retrieveUserInfo(final String username, final String userId, final String sessionKey, final AuthenticationCallback callback) {
         final UserSessionState state = MMDB.getSessionState();
 
         state.setSessionKey(sessionKey);
@@ -640,20 +691,22 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
             public void onSuccess(GetUserResult result) {
                 PersonBean personBean = result.getPersonBean();
                 state.setCurrentUser(personBean);
+
                 if (result.isAnonymous()) {
                     MMDB.loginStatusWidget.loggedOut();
                     getSessionState().setAnonymous(true);
+                    getSessionState().setToken(null);
+                    //LoginPage.setAutologin(false);
                     GWT.log("Current user is anonymous");
                 } else {
                     MMDB.loginStatusWidget.loggedIn(personBean.getName());
                     getSessionState().setAnonymous(false);
-
+                    getSessionState().setToken(result.getToken());
                     GWT.log("Current user set to " + personBean.getUri());
                 }
-
-                doWithPermission(History.getToken());
-
-                callback.onSuccess(username, sessionKey);
+                parseHistoryToken(History.getToken());
+                //Before doWithPerm? (most/all(?) callbacks are null now, so minor issue
+                callback.onSuccess(personBean.getEmail(), sessionKey);
             }
         };
 
@@ -667,64 +720,142 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     /**
+     * Run the action for the given token, subject to a permission check to see
+     * if user has permission require to view a given pages (most require
+     * VIEW_MEMBER_PAGES).
+     * The pages themselves must check further if additional permissions are
+     * needed to see
+     * their content/parts of their content.
+     *
+     * Right now, parseHistory gets called via the checkLogin() method, as
+     * well as by the login() method (on success, login and logout tokens only).
+     * Login/logout trigger viewing the default member page (listDatasets), so
+     * the user's permissions need to be checked.
+     *
      * Parse history token and show the proper widgets/
      * trigger the appropriate actions.
-     * 
-     * parseHistory should only be called by doWithPermissions!
-     * 
+     *
      * @param token
      *            history token (everything after the #)
      */
     private void parseHistoryToken(String token) {
 
-        if (token.startsWith("dataset")) {
-            showDataset();
-        } else if (token.startsWith("listDatasets") && !previousHistoryToken.startsWith("listDatasets")) {
-            showListDatasetsPage();
-        } else if (token.startsWith("upload")) {
-            showUploadPage();
-        } else if (token.startsWith("tags")) {
-            shosTagsPage();
-        } else if (token.startsWith("tag")) {
-            showTagPage();
-        } else if (token.startsWith("listCollections") && !previousHistoryToken.startsWith("listCollections")) {
-            listCollections();
-        } else if (token.startsWith("listCollections")) {
-            // skip default case!
-        } else if (token.startsWith("collection")) {
-            showCollectionPage();
-        } else if (token.startsWith("search")) {
-            showSearchResultsPage();
-        } else if (token.startsWith("map")) {
-            showMapPage();
-        } else if (token.startsWith("signup")) {
-            showSignupPage();
-        } else if (token.startsWith("home")) {
-            showHomePage();
-        } else if (token.startsWith("viewSelected")) {
-            showSelected(true);
-        } else if (token.startsWith("editRelationships")) {
-            showSelected(true);
-        } else if (token.startsWith("noneSelected")) {
-            showSelected(false);
+        if (token.startsWith("upload")) {
+            rbac().doIfAllowed(Permission.UPLOAD_DATA, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
+                    showUploadPage();
+                }
+            });
+
+        } else if (token.startsWith("about")) {
+            rbac().doIfAllowed(Permission.VIEW_SYSTEM, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
+                    showAboutPage();
+                }
+            });
+        } else if (token.startsWith("geo")) {
+            rbac().doIfAllowed(Permission.VIEW_LOCATION, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
+                    String tag = null;
+                    if (this.token.startsWith("geo_tag_")) {
+                        tag = URL.decode(this.token.substring("geo_tag_".length()));
+                    }
+                    showGeoPage(tag);
+                }
+            });
+        } else if (token.startsWith("discovery")) {
+            rbac().doIfAllowed(Permission.VIEW_PUBLISHED, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
+                    String collection = null;
+                    if (token.startsWith("discovery_")) {
+                        collection = URL.decode(token.substring("discovery_".length()));
+                    }
+                    showDiscoveryPage(collection);
+                }
+            });
         } else if (token.startsWith("administration")) {
-            showAdminPage();
+            rbac().doIfAllowed(Permission.VIEW_ADMIN_PAGES, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
+                    showAdminPage();
+                }
+            });
+        } else {
+            rbac().doIfAllowed(Permission.VIEW_MEMBER_PAGES, new StandardDenialPermissionCallback(token) {
+                @Override
+                public void onAllowed() {
 
-        } else if (token.startsWith("logout_st")) {
-            //Successfully logged in after logout due to timeout/session issue - just go back to where the user was
-            History.back();
-        }
-        else if (token.startsWith("login")) {
-            //just logged in
-            showListDatasetsPage();
-            token = "listDatasets";
-            History.newItem("listDatasets", false);
-
-        } else if (!previousHistoryToken.startsWith("listDatasets")) {
-            //Default page
-            showListDatasetsPage();
+                    if (token.startsWith("dataset")) {
+                        showDataset();
+                    } else if (token.startsWith("listDatasets") /*&& !previousHistoryToken.startsWith("listDatasets")*/) {
+                        showListDatasetsPage();
+                    } else if (token.startsWith("tags")) {
+                        showTagsPage();
+                    } else if (token.startsWith("tag")) {
+                        showTagPage();
+                    } else if (token.startsWith("listCollections") /*&& !previousHistoryToken.startsWith("listCollections")*/) {
+                        listCollections();
+                    } else if (token.startsWith("listCollections")) {
+                        // skip default case!
+                    } else if (token.startsWith("collection")) {
+                        showCollectionPage();
+                    } else if (token.startsWith("search")) {
+                        showSearchResultsPage();
+                    } else if (token.startsWith("dashboard")) {
+                        showDashboardPage();
+                    } else if (token.startsWith("signup")) {
+                        showSignupPage();
+                    } else if (token.startsWith("account")) {
+                        showAccountPage();
+                    } else if (token.startsWith("viewSelected")) {
+                        showSelected(true);
+                    } else if (token.startsWith("editRelationships")) {
+                        showSelected(true);
+                    } else if (token.startsWith("noneSelected")) {
+                        showSelected(false);
+                    } else if (token.startsWith("login")) {
+                        //just logged in
+                        if (!MMDB.getSessionState().isAnonymous()) {
+                            showListDatasetsPage();
+                            token = "listDatasets";
+                            History.newItem("listDatasets", false);
+                        } else {
+                            showLoginPage();
+                        }
+                    } else if (token.startsWith("logout_st")) {
+                        //Successfully logged in after logout due to timeout/session issue - just go back to where the user was
+                        History.back();
+                    } else /*if (!previousHistoryToken.startsWith("listDatasets")) */{
+                        //Default page
+                        showListDatasetsPage();
+                    }
+                }
+            });
         }
         previousHistoryToken = token;
+        setMenuItemVisibility();
+    }
+
+    private void showAboutPage() {
+        GWT.log("Loading Dashboard Page", null);
+        mainContainer.clear();
+        mainContainer.add(new AboutPage(dispatchAsync, eventBus));
+    }
+
+    private void showDashboardPage() {
+        GWT.log("Loading Dashboard Page", null);
+        mainContainer.clear();
+        mainContainer.add(new DashboardPage("Dashboard", dispatchAsync, eventBus));
+    }
+
+    private void showDiscoveryPage(String collection) {
+        GWT.log("Loading Discovery Page", null);
+        mainContainer.clear();
+        mainContainer.add(new DiscoveryPage(collection, "Published Data", dispatchAsync, eventBus));
     }
 
     private void showAdminPage() {
@@ -733,13 +864,13 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         mainContainer.add(new AdminPage(dispatchAsync, eventBus));
     }
 
-    private void showMapPage() {
-        GWT.log("Loading Map Page", null);
+    private void showGeoPage(String tag) {
+        GWT.log("Loading GeoBrowse Page", null);
         mainContainer.clear();
-        mainContainer.add(new MapPage(dispatchAsync, eventBus));
+        mainContainer.add(new GeoPage(tag, dispatchAsync, eventBus));
     }
 
-    private void shosTagsPage() {
+    private void showTagsPage() {
         GWT.log("Loading Tags Page", null);
         mainContainer.clear();
         mainContainer.add(new TagsPage(dispatchAsync));
@@ -748,7 +879,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     private void showSearchResultsPage() {
         GWT.log("Loading Search Results Page", null);
         mainContainer.clear();
-        mainContainer.add(new SearchResultsPage(dispatchAsync, eventBus));
+        mainContainer.add(new ListSearchResultsPage(dispatchAsync, eventBus));
     }
 
     private void showUploadPage() {
@@ -769,9 +900,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         });
     }
 
-    private void showHomePage() {
+    private void showAccountPage() {
         mainContainer.clear();
-        mainContainer.add(new HomePage(dispatchAsync));
+        mainContainer.add(new AccountPage(dispatchAsync));
     }
 
     private void showRequestNewPasswordPage() {
@@ -851,11 +982,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     private void showLoginPage(boolean interrupted) {
-        adminBbullet.addStyleName("hidden");
-        adminLink.addStyleName("hidden");
+        setMenuItemVisibility();
         loginStatusWidget.loggedOut();
         mainContainer.clear();
-        LoginPage lp = new LoginPage(dispatchAsync, this);
+        LoginPage lp = new LoginPage();
         if (interrupted) {
             lp.setFeedback("Session Interrupted/Timed Out. Login again to continue.");
         }
@@ -870,7 +1000,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      * just hit the
      * browser refresh button and restarted the app, this method will
      * try to re-establish the local cache and continue.
-     * 
+     *
      */
     public void checkLogin() {
         boolean loggedIn = false;
@@ -886,34 +1016,35 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
             loggedIn = true;
         }
-
+        final String localKey = state.getSessionKey();
         if (!loggedIn) {
-            //try to log in as anonymous
+            //try to log in as preferred user or anonymous
             GWT.log("not logged in, attempting to login as anonymous");
-            LoginPage.authenticate(dispatchAsync, MMDB.this,
-                    "anonymous", "none", new
+            LoginPage.oauth2Login(new
                     AuthenticationCallback() {
 
                         @Override
                         public void onFailure() {
-                            showLoginPage(true);
+                            showLoginPage(localKey != null);
                         }
 
                         @Override
                         public void onSuccess(String userUri, String
                                 sessionKey) {
-                            GWT.log("logged in as anonymous");
+                            GWT.log("logged in as " + userUri);
+                            credChangeOccuring = false;
+                            setMenuItemVisibility();
                         }
-                    });
+                    }, true);
         } else {
-            String localKey = state.getSessionKey();
+
             if ((localKey != null) && cookieSessionKey.equals(localKey)) {
                 //Assume state.getCurrentUser is correct
                 //localKey should only be null or equal to the cookieSessionKey
-                doWithPermission(History.getToken());
+                parseHistoryToken(History.getToken());
             } else {
                 // Check REST auth and get the userID so we can then go retrieve the PersonBean (in login())
-                // Having a sessionKey and no local key will occur when the user has hit a browser 
+                // Having a sessionKey and no local key will occur when the user has hit a browser
                 // refresh and restarts the app
 
                 checkRestAuth(cookieSessionKey, new
@@ -921,9 +1052,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                             @Override
                             public void onFailure() {
-                                //Start fresh
-                                LoginPage.authenticate(dispatchAsync, MMDB.this,
-                                        "anonymous", "none", new
+                                //Start fresh - login as preferred user if possible or anon if not
+                                LoginPage.oauth2Login(new
                                         AuthenticationCallback() {
 
                                             @Override
@@ -934,18 +1064,48 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                                             @Override
                                             public void onSuccess(String userUri, String
                                                     sessionKey) {
-                                                GWT.log("logged in as anonymous");
+                                                GWT.log("logged in as " + userUri);
                                             }
-                                        });
+                                        }, true);
                             }
 
                             @Override
-                            public void onSuccess(String userUri, String
+                            public void onSuccess(final String userUri, String
                                     sessionKey) {
 
                                 // login menu
                                 //Get the user's info (PersonBean) and store in UserSessionState
-                                login(userUri, sessionKey);
+                                retrieveUserInfo(null, userUri, sessionKey, new AuthenticationCallback() {
+                                    @Override
+                                    public void onFailure() {
+                                    }
+
+                                    @Override
+                                    public void onSuccess(String userName, String sessionKey) {
+                                        /* We've lost info about the provider and session/token expire time:
+                                         * If it has been written to local storage, retrieve and use it to
+                                         * restart the session refresh timer (for Oauth2 providers)
+                                         */
+                                        Storage store = Storage.getLocalStorageIfSupported();
+                                        if (store != null) {
+                                            String provider = store.getItem(userUri);
+                                            if (provider == null) {
+                                                provider = store.getItem(userName);
+                                            }
+                                            if (provider != null) {
+                                                MMDB.getSessionState().setLoginProvider(provider);
+                                                String exp = store.getItem("expires");
+                                                if (exp != null) {
+                                                    int expires_at = Integer.parseInt(exp);
+                                                    LoginPage.refreshCheck(expires_at - (int) (System.currentTimeMillis() / 1000L));
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                });
+                                credChangeOccuring = false;
+
                             }
                         });
 
@@ -954,10 +1114,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     }
 
     /*Call the REST checkLogin endpoint to verify the user is logged in (session cookie is valid)
-     * and return the user's ID for local use. 
+     * and return the user's ID for local use.
      */
     public void checkRestAuth(final String sessionID, final AuthenticationCallback callback) {
-        String restUrl = "./api/checkLogin";
+        String restUrl = GWT.getModuleBaseURL() + "api/checkLogin";
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, restUrl);
         try {
             GWT.log("checking login status @ " + restUrl, null);
@@ -1034,4 +1194,47 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     public static void setSessionPreference(String key, String value) {
         getSessionPreferences().put(key, value);
     }
+
+    public abstract class StandardDenialPermissionCallback extends PermissionCallback {
+
+        protected String token;
+
+        public StandardDenialPermissionCallback(String token) {
+            this.token = token;
+        }
+
+        @Override
+        public abstract void onAllowed();
+
+        @Override
+        public void onDenied() {
+            if (getSessionState().isAnonymous()) {
+                if (token.startsWith("logout_st")) {
+                    showLoginPage(true);
+                } else {
+                    showLoginPage();
+                }
+            } else {
+                showNotEnabledPage();
+            }
+        }
+
+    }
+
+    /* Utility to get handle to current page - caller must check type of page)
+     *
+     */
+    public Widget getPage() {
+        Widget widget = mainContainer.getWidget(0);
+        if (widget != null) {
+            return widget;
+        } else {
+            return null;
+        }
+    }
+
+    public FlowPanel getMainContainer() {
+        return mainContainer;
+    }
+
 }

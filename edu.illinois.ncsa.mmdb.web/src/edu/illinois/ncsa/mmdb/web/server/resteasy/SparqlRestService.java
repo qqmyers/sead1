@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.resteasy.annotations.cache.NoCache;
 import org.tupeloproject.kernel.Operator;
 import org.tupeloproject.kernel.TableProvider;
 import org.tupeloproject.kernel.TripleSetProvider;
@@ -22,9 +23,10 @@ import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
  * @author Rob Kooper <kooper@illinois.edu>
- * 
+ *
  */
 @Path("/sparql")
+@NoCache
 public class SparqlRestService {
 
     /** Commons logging **/

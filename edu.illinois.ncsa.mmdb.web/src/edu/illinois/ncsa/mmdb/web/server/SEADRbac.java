@@ -13,7 +13,9 @@ import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
 
@@ -67,12 +69,16 @@ public class SEADRbac extends RBAC {
         if (accesspredicate != null) {
             Unifier uf = new Unifier();
             uf.addPattern(item, Dc.CREATOR, "creator");
+            uf.addPattern(item, Rdf.TYPE, Cet.DATASET);
             uf.addPattern(item, Resource.uriRef(accesspredicate), "access", true);
             uf.setColumnNames("access", "creator");
             try {
                 getContext().perform(uf);
             } catch (OperatorException e) {
                 log.warn("Could not get roles and access levels.", e);
+            }
+            if (!uf.getResult().iterator().hasNext()) {
+                return true; //Not a dataset, so access is open at present
             }
             for (Tuple<Resource> row : uf.getResult() ) {
                 if (row.get(1).equals(user)) {
@@ -98,13 +104,13 @@ public class SEADRbac extends RBAC {
      * If the user is the dc:creator of the given object, also includes the
      * owner in the
      * DefaultRole.OWNER role.
-     * 
+     *
      * @param person
      *            the person
      * @param object
      *            the object that they might be the dc:creator of
      * @throws
-     * 
+     *
      */
     public Collection<Resource> getRoles(Resource personUri, Resource object) throws RBACException {
         Set<Resource> r = new HashSet<Resource>(getRoles(personUri));
@@ -119,7 +125,7 @@ public class SEADRbac extends RBAC {
 
     /**
      * Check if a given user has the given permission
-     * 
+     *
      * @param userURI
      * @param permission
      * @return if the user owns the permission or not
@@ -134,7 +140,7 @@ public class SEADRbac extends RBAC {
 
     /**
      * Check if a given user has the given permission on the given object
-     * 
+     *
      * @param user
      * @param permission
      * @return if the user owns the permission or not
@@ -196,9 +202,9 @@ public class SEADRbac extends RBAC {
      * first; to do
      * that,
      * simply call {@link initialize}.
-     * 
+     *
      * @throws RBACException
-     * 
+     *
      * @throws Operator
      */
     public void intializePermissions() throws OperatorException {
@@ -244,7 +250,7 @@ public class SEADRbac extends RBAC {
     /**
      * Initialize default roles and permissions and set them to defaults.
      * It will create a set of roles with associated default permissions.
-     * 
+     *
      * @throws OperatorException
      * @throws RBACException
      */

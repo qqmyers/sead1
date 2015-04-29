@@ -11,7 +11,6 @@ public enum ConfigurationKey {
     VIVOQUERYURL("vivo-query.url", "http://sead-vivo.d2i.indiana.edu:3030/SEAD-VIVO/sparql?query="), //$NON-NLS-1$ //$NON-NLS-2$
     VIVOIDENTIFIERURL("vivo-identifier.url", "http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/"),
     VAURL("va.url", "http://bluespruce.pti.indiana.edu:8181/dcs-nced/query/?q=resourceValue:(%s)"), //$NON-NLS-1$ //$NON-NLS-2$
-    DiscoveryURL("discovery.url", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
     // access level
     AccessLevelLabel("access.level.label", "Access Level"), //$NON-NLS-1$ //$NON-NLS-2$
@@ -24,7 +23,7 @@ public enum ConfigurationKey {
     ProjectDescription("project.description", ""), //$NON-NLS-1$
     ProjectURL("project.url", ""), //$NON-NLS-1$
     ProjectHeaderLogo("project.header.logo", "images/logo.png"), //$NON-NLS-1$
-    ProjectHeaderBackground("project.header.background", "none"), //$NON-NLS-1$
+    ProjectHeaderBackground("project.header.background", "images/bkgrnd_repeat_x.png"), //$NON-NLS-1$
     ProjectHeaderTitleColor("project.header.title.color", "#000000"), //$NON-NLS-1$
 
     //presentation defaults
@@ -33,25 +32,29 @@ public enum ConfigurationKey {
     PresentationDataViewLevel("presentation.dataviewlevel", "false"),
 
     // name of medici server
-    MediciName("medici.name", null), //$NON-NLS-1$ 
+    MediciName("medici.name", null), //$NON-NLS-1$
 
     // location of lucene search index
-    SearchPath("search.path", null), //$NON-NLS-1$ 
+    SearchPath("search.path", null), //$NON-NLS-1$
 
     // location of taxonomy file
-    TaxonomyFile("taxonomy.file", "taxonomy.owl"), //$NON-NLS-1$ //$NON-NLS-2$ 
+    TaxonomyFile("taxonomy.file", "taxonomy.owl"), //$NON-NLS-1$ //$NON-NLS-2$
 
     // google map key
     GoogleMapKey("google.mapkey", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
     // remote API key
-    RemoteAPIKey("remoteAPI", ""), //$NON-NLS-1$ //$NON-NLS-2$
+    RemoteAPIKey("remoteAPIKey", ""), //$NON-NLS-1$ //$NON-NLS-2$
 
     // extractor url
     ExtractorUrl("extractor.url", "http://localhost:9856/"), //$NON-NLS-1$ //$NON-NLS-2$
 
     GoogleClientId("google.client_id", ""),
     GoogleDeviceClientId("google.device_client_id", ""),
+
+    // Orcid oAuth
+    OrcidClientId("orcid.client_id", ""),
+    OrcidClientSecret("orcid.client_secret", ""),
 
     //optimizations for big data (many files)
     BigData("bigdata", "false"),

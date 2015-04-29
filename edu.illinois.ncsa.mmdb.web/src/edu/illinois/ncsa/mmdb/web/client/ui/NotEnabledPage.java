@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
@@ -47,9 +47,9 @@ import com.google.gwt.user.client.ui.HTML;
 
 /**
  * For users that haven't been enabled by an admin yet.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class NotEnabledPage extends Composite {
 
@@ -62,12 +62,14 @@ public class NotEnabledPage extends Composite {
         initWidget(mainPanel);
 
         // page title
-        mainPanel.add(new TitlePanel("Account Created, Admin(s) Notified."));
+        mainPanel.add(new TitlePanel("Permission Restriction"));
 
-        HTML message = new HTML("<b>Welcome!</b> Your account has been successfully created!<br/>" +
-                "Since this SEAD Active Content Repository is access controlled, " +
-                "the group administrator(s) have been notified. You will receive an email" +
-                " when your access to this space is approved.");
+        HTML message = new HTML("<p>You do not currently have permission to access this functionality.</p>" +
+                "<p>If you have just requested access to this space - <b>Welcome!</b> " +
+                "The group administrator(s) for this space have been notified. You will receive an email" +
+                " when your access to this space is approved.</p>" +
+                "<p>If you already have access to other functionality in this space, you should contact the administrators to request" +
+                " additional permissions to use this part of the space.</p>");
         // TODO change to more appropriate style
         message.addStyleName("loginForm");
         mainPanel.add(message);

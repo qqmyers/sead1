@@ -64,7 +64,7 @@ public class UnpackZipHandler implements ActionHandler<UnpackZip, UnpackZipResul
     /** Commons logging **/
     private static Log  log                  = LogFactory.getLog(UnpackZipHandler.class);
 
-    static final String seadWasExtractedFrom = "http://sead-data.net/terms/wasExteractedFrom";
+    static final String seadWasExtractedFrom = "http://sead-data.net/terms/wasExtractedFrom";
 
     @Override
     public UnpackZipResult execute(UnpackZip action, ExecutionContext context) throws ActionException {

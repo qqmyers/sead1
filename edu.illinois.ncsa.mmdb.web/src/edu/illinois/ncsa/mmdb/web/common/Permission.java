@@ -6,9 +6,9 @@ import java.util.EnumSet;
  * Represents a permission in SEAD ACR (Medici + related apps). Permissions are
  * associated with roles;
  * everyone who is a member of that role has all the permissions of that role.
- * 
+ *
  * @author futrelle, jim
- * 
+ *
  */
 public enum Permission {
     // old permissions
@@ -73,6 +73,7 @@ public enum Permission {
      * etc.)
      */
     VIEW_SYSTEM("View system information", "System"),
+    VIEW_PUBLISHED("View published collections", "Published"),
     MANAGE_METADATA("Manage Metadata", "ManageMetadata");
 
     private final String label;
@@ -87,7 +88,7 @@ public enum Permission {
 
     /**
      * The human-readable name of the permission
-     * 
+     *
      * @return
      */
     public String getLabel() {
@@ -96,7 +97,7 @@ public enum Permission {
 
     /**
      * The URI of the permission
-     * 
+     *
      * @return
      */
     public String getUri() {
@@ -105,7 +106,7 @@ public enum Permission {
 
     /**
      * All permissions
-     * 
+     *
      * @return
      */
     public static EnumSet<Permission> all() {

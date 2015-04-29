@@ -26,6 +26,7 @@ public class ResteasyApplication extends Application {
         singletons.add(new ImagePyramidRestService());
         singletons.add(new SysInfoRestService());
         singletons.add(new ItemServicesImpl());
+        singletons.add(new URLRestService());
     }
 
     @Override

@@ -9,10 +9,14 @@ fi
 HOSTNAME=$( hostname -f )
 ANONYMOUS="true"
 APIKEY=$( uuidgen -r )
+GOOGLEAPIKEY=""
 GOOGLEID=""
 GOOGLE_DEVID=""
+ORCIDID=""
+ORCIDSECRET=""
 MEDICI_EMAIL="root@localhost"
 MEDICI_PASSWORD="secret"
+VA_PASSWORD="secret"
 GEO_USER="admin"
 GEO_PASSWORD="secret"
 if [ -e config.txt ]; then
@@ -81,7 +85,7 @@ if [ $? -eq 0 ]; then
   fi
 fi
 
-# fix for zoomable images
+# fix for zoomable images - now required for all restful services that encode ids for collections (which have '/' in them)
 if ! grep -Fq "MMDB-1087" /etc/default/tomcat6; then
   echo "Installing fix for zoomable images in tomcat"
   echo "" >> /etc/default/tomcat6
@@ -126,41 +130,14 @@ if [ ! -e /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/libclib_jiio.so ]; the
 fi
 
 # instal web pages
-echo "Installing SEAD webpages"
+echo "Installing SEAD redirect"
 rm -rf /var/lib/tomcat6/webapps/ROOT
 mkdir /var/lib/tomcat6/webapps/ROOT
-cp -r static/* /var/lib/tomcat6/webapps/ROOT
-echo '<Context path="/" docBase="/var/lib/tomcat6/webapps/ROOT"/>' > /etc/tomcat6/Catalina/localhost/ROOT.xml
+echo '<% response.sendRedirect("/acr"); %>' > /var/lib/tomcat6/webapps/ROOT/index.jsp
 
 # install all update scripts
 cp update-*.sh /home/medici
 cp *.log4j /home/medici
-
-# install geobrowse
-echo "Installing geobrowse"
-echo "domain=http://${HOSTNAME}/acr" > /home/medici/geobrowse.properties 
-echo "enableAnonymous=${ANONYMOUS}" >> /home/medici/geobrowse.properties
-echo "remoteAPIKey=${APIKEY}" >> /home/medici/geobrowse.properties
-echo "google.client_id=${GOOGLEID}" >> /home/medici/geobrowse.properties
-echo "geoserver=http://${HOSTNAME}/acr/geoproxy" >> /home/medici/geobrowse.properties
-echo "proxiedgeoserver=http://${HOSTNAME}/geoserver" >> /home/medici/geobrowse.properties
-/home/medici/update-geobrowse.sh
-
-# install discovery
-echo "Installing discovery"
-echo "domain=http://${HOSTNAME}/acr" > /home/medici/discovery.properties 
-echo "enableAnonymous=${ANONYMOUS}" >> /home/medici/discovery.properties
-echo "remoteAPIKey=${APIKEY}" >> /home/medici/discovery.properties
-echo "google.client_id=${GOOGLEID}" >> /home/medici/discovery.properties
-/home/medici/update-discovery.sh
-
-# install dashboard
-echo "Installing dashboard"
-echo "domain=http://${HOSTNAME}/acr" > /home/medici/dashboard.properties 
-echo "enableAnonymous=${ANONYMOUS}" >> /home/medici/dashboard.properties
-echo "remoteAPIKey=${APIKEY}" >> /home/medici/dashboard.properties
-echo "google.client_id=${GOOGLEID}" >> /home/medici/dashboard.properties
-/home/medici/update-dashboard.sh
 
 # install medici extractor
 echo "Installing Medici Extractor"
@@ -177,17 +154,23 @@ sed -e "s#^geoserver.username=.*\$#geoserver.username=${GEO_USER}#" \
     -e "s#^geoserver.owsserver=.*\$#geoserver.owsserver=http://${HOSTNAME}/geoserver/wms#" extractor.properties > /home/medici/extractor.properties
 /home/medici/update-extractor.sh
 
-# install medici web app
-echo "Installing Medici WebApp"
-sed -e "s/^#*remoteAPI=.*$/remoteAPI=${APIKEY}/" \
+# install web app
+echo "Installing WebApp"
+sed -e "s/^#*remoteAPIKey=.*$/remoteAPIKey=${APIKEY}/" \
     -e "s/^#*mail.from=.*$/mail.from=${MEDICI_EMAIL}/" \
     -e "s/^#*user.0.email=.*$/user.0.email=${MEDICI_EMAIL}/" \
     -e "s/^#*user.0.password=.*$/user.0.password=${MEDICI_PASSWORD}/" \
+     -e "s/^#*user.1.password=.*$/user.1.password=${VA_PASSWORD}/" \
+    -e "s/^#*google.api_key=.*$/google.api_key=${GOOGLEAPIKEY}/" \
     -e "s/^#*google.client_id=.*$/google.client_id=${GOOGLEID}/" \
-    -e "s/^#*google.device_client_id=.*$/google.device_client_id=${GOOGLE_DEVID}/" acr.server > /home/medici/acr.server
-echo "geoserver=http://${HOSTNAME}/geoserver" > /home/medici/acr.common
-echo "geouser=${GEO_USER}" >> /home/medici/acr.common
-echo "geopassword=${GEO_PASSWORD}" >> /home/medici/acr.common
+    -e "s/^#*google.device_client_id=.*$/google.device_client_id=${GOOGLE_DEVID}/" \ 
+    -e "s/^#*orcid.client_id=.*$/orcid.client_id=${ORCIDID}/" \
+    -e "s/^#*orcid.client_secret=.*$/orcid.client_secret=${ORCIDSECRET}/" \
+    -e "s/^#*proxiedgeoserver=.*$/proxiedgeoserver=http://${HOSTNAME}/geoserver/" \
+    -e "s/^#*geoserver=.*$/geoserver=http://${HOSTNAME}/acr/geoproxy/" \
+    -e "s/^#*geouser=.*$/geouser=${GEO_USER}/" \ 
+    -e "s/^#*geopassword=.*$/geopassword=${GEO_PASSWORD}/" \ 
+    -e "s/^#*domain=.*$/domain=http://${HOSTNAME}/acr/" acr.server > /home/medici/acr.server
 /home/medici/update-web.sh
 
 # All done

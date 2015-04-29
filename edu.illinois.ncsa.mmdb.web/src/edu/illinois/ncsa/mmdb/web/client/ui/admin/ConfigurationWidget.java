@@ -37,6 +37,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLuceneResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetConfiguration;
+import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
 import edu.illinois.ncsa.mmdb.web.client.view.DynamicTableView;
@@ -81,9 +82,6 @@ public class ConfigurationWidget extends Composite {
         //presentation defaults
         mainPanel.add(createPresentationSection(configuration));
 
-        // google map key
-        mainPanel.add(createMapSection(configuration));
-
         // server updates.
         mainPanel.add(createUpdateSection());
 
@@ -92,9 +90,6 @@ public class ConfigurationWidget extends Composite {
 
         // va configuration.
         mainPanel.add(createVAConfigurationSection(configuration));
-
-        //Pointer to ACR discovery app
-        mainPanel.add(createDiscoveryConfigurationSection(configuration));
 
         // extractor configuration
         mainPanel.add(createExtractorSection(configuration));
@@ -365,7 +360,7 @@ public class ConfigurationWidget extends Composite {
 
         final CheckBox showTopLevelDataBox = new CheckBox();
         showTopLevelDataBox.setValue(configuration.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true"));
-        showTopLevelDataBox.setText("Show top level datasets");
+        showTopLevelDataBox.setText("Only show top-level datasets and collections");
         vp.add(showTopLevelDataBox);
 
         // buttons
@@ -390,6 +385,7 @@ public class ConfigurationWidget extends Composite {
                         sortOptions.setSelected(result.getConfiguration(ConfigurationKey.PresentationSortOrder));
                         pageViewType.setSelected(result.getConfiguration(ConfigurationKey.PresentationPageViewType));
                         showTopLevelDataBox.setValue(result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true"));
+                        DynamicTablePresenter.setInitialKeys(sortOptions.getSelected(), pageViewType.getSelected(), showTopLevelDataBox.getValue() || MMDB.bigData);
                     }
                 });
             }
@@ -399,7 +395,10 @@ public class ConfigurationWidget extends Composite {
         button = new Button("Reset", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername()), new AsyncCallback<ConfigurationResult>() {
+                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(),
+                        ConfigurationKey.PresentationSortOrder,
+                        ConfigurationKey.PresentationPageViewType,
+                        ConfigurationKey.PresentationDataViewLevel), new AsyncCallback<ConfigurationResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Could not get configuration values.", caught);
@@ -419,10 +418,6 @@ public class ConfigurationWidget extends Composite {
 
         return dp;
 
-    }
-
-    private DisclosurePanel createMapSection(ConfigurationResult configuration) {
-        return createSimpleConfigurationSection(configuration, "Map", "GoogleMapKey", ConfigurationKey.GoogleMapKey, true);
     }
 
     private DisclosurePanel createUpdateSection() {
@@ -574,10 +569,6 @@ public class ConfigurationWidget extends Composite {
 
     private DisclosurePanel createVAConfigurationSection(ConfigurationResult configuration) {
         return createSimpleConfigurationSection(configuration, "VA Configuration", "VA End Point", ConfigurationKey.VAURL, false);
-    }
-
-    private DisclosurePanel createDiscoveryConfigurationSection(ConfigurationResult configuration) {
-        return createSimpleConfigurationSection(configuration, "ACR Discovery Configuration", "Discovery App URL", ConfigurationKey.DiscoveryURL, false);
     }
 
     private DisclosurePanel createExtractorSection(ConfigurationResult configuration) {

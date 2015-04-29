@@ -20,6 +20,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -57,6 +58,8 @@ public class RoleAdministrationWidget extends Composite {
     private Map<String, Integer> columnByRole;
     private Map<String, String>  nameByRole;
 
+    private final Button         refresh;
+
     public RoleAdministrationWidget(DispatchAsync dispatchAsync) {
         dispatch = dispatchAsync;
 
@@ -67,6 +70,7 @@ public class RoleAdministrationWidget extends Composite {
         permissionsTable = createPermissionsTable();
         permissionsTable.addStyleName("usersTable"); // TODO: make a new style
         mainPanel.add(permissionsTable);
+        mainPanel.addStyleName("roleManagement");
 
         // set permissions back to defaults
         final Anchor initializeRoles = new Anchor("Set all roles and permissions to defaults");
@@ -98,8 +102,17 @@ public class RoleAdministrationWidget extends Composite {
                 });
             }
         });
-        mainPanel.add(initializeRoles);
+        VerticalPanel vPanel = new VerticalPanel();
+        vPanel.add(initializeRoles);
+        mainPanel.add(vPanel);
+        refresh = new Button("Refresh Table", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                getPermissions();
 
+            }
+        });
+        mainPanel.add(refresh);
         getPermissions();
     }
 
@@ -161,6 +174,7 @@ public class RoleAdministrationWidget extends Composite {
     void getPermissions() {
         permissionsTable.clear(true);
         permissionsTable.removeAllRows();
+        refresh.setFocus(false);
 
         columnByRole = new HashMap<String, Integer>();
         nameByRole = new HashMap<String, String>();
@@ -345,7 +359,7 @@ public class RoleAdministrationWidget extends Composite {
 
     /**
      * Create a checkbox
-     * 
+     *
      * @param setting
      * @return
      */
@@ -363,12 +377,18 @@ public class RoleAdministrationWidget extends Composite {
                     public void onFailure(Throwable caught) {
                         // failed, so toggle checkbox back, without firing an event
                         box.setValue(!event.getValue());
+                        box.addStyleName(UserManagementWidget.updateFailure);
                         new ConfirmDialog("Permission not changed", caught.getMessage(), false);
                     }
 
                     @Override
                     public void onSuccess(SetPermissionsResult result) {
-                        // succeeded, so no action necessary
+                        //Add a style toggle that shows whether this value is different than when the page was loaded
+                        if (box.getStyleName().contains(UserManagementWidget.updated)) {
+                            box.removeStyleName(UserManagementWidget.updated);
+                        } else {
+                            box.addStyleName(UserManagementWidget.updated);
+                        }
                     }
                 });
             }

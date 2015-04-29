@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,15 +32,16 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -69,9 +70,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
  * Get users in the system.
- * 
+ *
  * @author Luigi marini
- * 
+ *
  */
 public class GetUsersHandler implements ActionHandler<GetUsers, GetUsersResult> {
 
@@ -100,6 +101,7 @@ public class GetUsersHandler implements ActionHandler<GetUsers, GetUsersResult> 
                     log.error("Could not get roles for user " + user.id + " " + user.name);
                     throw (new ActionException("Could not get roles for user " + user.id, exc));
                 }
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
                 try {
                     Set<Triple> logins = TupeloStore.getInstance().getContext().match(Resource.uriRef(pb.getUri()), Cet.cet("lastLogin"), null);
                     if (logins.size() == 0) {
@@ -107,10 +109,22 @@ public class GetUsersHandler implements ActionHandler<GetUsers, GetUsersResult> 
                     } else {
                         String date = logins.iterator().next().getObject().getString();
                         Calendar cal = org.tupeloproject.util.Iso8601.string2Date(date);
-                        user.lastlogin = cal.getTime().toLocaleString();
+                        user.lastlogin = sdf.format(cal.getTime());
                     }
                 } catch (OperatorException e) {
                     user.lastlogin = "error";
+                }
+                try {
+                    Set<Triple> logins = TupeloStore.getInstance().getContext().match(Resource.uriRef(pb.getUri()), Cet.cet("retired"), null);
+                    if (logins.size() == 0) {
+                        user.retired = "never";
+                    } else {
+                        String date = logins.iterator().next().getObject().getString();
+                        Calendar cal = org.tupeloproject.util.Iso8601.string2Date(date);
+                        user.retired = sdf.format(cal.getTime());
+                    }
+                } catch (OperatorException e) {
+                    user.retired = "error";
                 }
             }
             // sort users by name

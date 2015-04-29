@@ -321,7 +321,7 @@ public class LocationWidget extends Composite {
             setAnimationEnabled(true);
             FlowPanel mainPanel = new FlowPanel();
             // directions
-            mainPanel.add(new Label("Pick location by clicking on the map or endtering lat/lon"));
+            mainPanel.add(new Label("Pick location by clicking on the map or entering lat/lon"));
             // map
             map = new MapWidget();
             map.setSize("500px", "500px");

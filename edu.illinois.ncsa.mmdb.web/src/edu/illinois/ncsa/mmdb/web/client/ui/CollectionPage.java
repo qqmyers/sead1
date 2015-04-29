@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,14 +32,16 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
+
+import java.util.Map;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
@@ -57,6 +59,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -88,9 +91,9 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
 
 /**
  * A widget showing a collection.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class CollectionPage extends Composite {
 
@@ -99,12 +102,12 @@ public class CollectionPage extends Composite {
     private final PermissionUtil        rbac;
     private final HandlerManager        eventBus;
     private final FlowPanel             mainContent;
-    private final String                PREVIEW_URL = "./api/image/preview/small/";
     private TitlePanel                  pageTitle;
     private Label                       descriptionLabel;
     private Label                       dateLabel;
     private FlowPanel                   infoPanel;
     private FlowPanel                   previewFlowPanel;
+    private Panel                       contextPanel;
     private Label                       numDatasetsLabel;
     private Label                       authorLabel;
     private Anchor                      doiAnchor;
@@ -147,8 +150,7 @@ public class CollectionPage extends Composite {
         final UserMetadataWidget um = new UserMetadataWidget(uri, dispatchasync, eventBus);
         um.setWidth("100%");
 
-        //mainContent.add(createSubcollectionsPanel(um));
-        mainContent.add(createCollectionContextPanel(um));
+        mainContent.add(createCollectionContextPanel());
         mainContent.add(createMetadataPanel(um));
 
         mainContent.add(createSocialAnnotationsPanel());
@@ -163,41 +165,20 @@ public class CollectionPage extends Composite {
         });
     }
 
-    private Widget createCollectionContextPanel(UserMetadataWidget um) {
-        DisclosurePanel userInformationPanel = new DisclosurePanel("Collection Context");
+    private DisclosurePanel createCollectionContextPanel() {
+        DisclosurePanel userInformationPanel = new DisclosurePanel("Is Subcollection Of");
         userInformationPanel.addStyleName("datasetDisclosurePanel");
         userInformationPanel.setOpen(true);
         userInformationPanel.setAnimationEnabled(true);
-
-        VerticalPanel userPanel = new VerticalPanel();
-        userPanel.addStyleName("userSpecifiedBody");
-        userInformationPanel.add(userPanel);
-        collectionContextLink = new Anchor();
-        userPanel.add(collectionContextLink);
-
-        userPanel.add(um);
-
+        contextPanel = new VerticalPanel();
+        contextPanel.addStyleName("userSpecifiedBody");
+        userInformationPanel.add(contextPanel);
         return userInformationPanel;
     }
-
-    Anchor               collectionContextLink  = null;
 
     Anchor               subCollectionLink      = null;
     VerticalPanel        subCollectionLinksPanel;
     private final String subcollectionPredicate = "http://purl.org/dc/terms/hasPart";
-
-    private Widget createSubcollectionsPanel(UserMetadataWidget um) {
-        DisclosurePanel userInformationPanel = new DisclosurePanel("Sub-Collections");
-        userInformationPanel.addStyleName("datasetDisclosurePanel");
-        userInformationPanel.setOpen(true);
-        userInformationPanel.setAnimationEnabled(true);
-
-        subCollectionLinksPanel = new VerticalPanel();
-        subCollectionLinksPanel.addStyleName("userSpecifiedBody");
-        userInformationPanel.add(subCollectionLinksPanel);
-
-        return userInformationPanel;
-    }
 
     private Widget createMetadataPanel(UserMetadataWidget um) {
         DisclosurePanel userInformationPanel = new DisclosurePanel("User Specified Metadata");
@@ -216,7 +197,7 @@ public class CollectionPage extends Composite {
 
     /**
      * A panel with comments on the left and tags on the right.
-     * 
+     *
      * @return the panel
      */
     private Widget createSocialAnnotationsPanel() {
@@ -228,7 +209,7 @@ public class CollectionPage extends Composite {
 
     /**
      * High level information about the dataset.
-     * 
+     *
      * @return the panel
      */
     private Widget createInfoPanel() {
@@ -280,7 +261,7 @@ public class CollectionPage extends Composite {
     }
 
     /**
-     * 
+     *
      * @return
      */
     private Panel createSubcollectionPanel() {
@@ -303,7 +284,7 @@ public class CollectionPage extends Composite {
 
     /**
      * Create the title of the page.
-     * 
+     *
      * @return title widget
      */
     private Widget createPageTitle() {
@@ -333,7 +314,7 @@ public class CollectionPage extends Composite {
 
             @Override
             public void onSuccess(GetCollectionResult result) {
-                showCollection(result.getCollection(), result.getCollectionSize());
+                showCollection(result.getCollection(), result.getCollectionSize(), result.getParents());
                 for (PreviewBean bean : result.getPreviews() ) {
                     if (bean instanceof PreviewGeoPointBean) {
                         initializePreviewPanel(result);
@@ -358,11 +339,12 @@ public class CollectionPage extends Composite {
 
     /**
      * Draw the elements of the collection on the page.
-     * 
+     *
      * @param collection
+     * @param parents
      * @param datasets
      */
-    protected void showCollection(final CollectionBean collection, int collectionSize) {
+    protected void showCollection(final CollectionBean collection, int collectionSize, Map<String, String> parents) {
 
         pageTitle.setText(collection.getTitle());
 
@@ -395,36 +377,16 @@ public class CollectionPage extends Composite {
         }
         descriptionLabel.setText(collection.getDescription());
         if (collection.getCreationDate() != null) {
-            DateTimeFormat formatter = DateTimeFormat.getFullDateFormat();
+            DateTimeFormat formatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL);
+            ;
             dateLabel.setText(formatter.format(collection.getCreationDate()));
         }
         numDatasetsLabel.setText(collectionSize + " dataset(s)");
 
-        service.execute(new GetConfiguration(null, ConfigurationKey.DiscoveryURL), new AsyncCallback<ConfigurationResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-            }
+        for (java.util.Map.Entry<String, String> entry : parents.entrySet() ) {
 
-            @Override
-            public void onSuccess(ConfigurationResult configresult) {
-                String discoveryURL = configresult.getConfiguration(ConfigurationKey.DiscoveryURL);
-                if (!discoveryURL.equals("")) {
-                    discoveryURL = discoveryURL.endsWith("/") ? discoveryURL : discoveryURL + "/";
-
-                    try {
-                        String collectionContextURI = discoveryURL + "contents?i=" + collection.getUri() + "&t=" + collection.getTitle();
-                        String collectionContextText = "View Collection Context in Discovery interface";
-                        collectionContextLink.setHref(collectionContextURI);
-                        collectionContextLink.setTarget("_blank");
-                        collectionContextLink.setText(collectionContextText);
-                    } catch (Exception ex) {
-                        //Handle exception
-                        String exc = ex.getMessage();
-                        System.out.println(exc);
-                    }
-                }
-            }
-        });
+            contextPanel.add(new Hyperlink(entry.getValue(), "collection?uri=" + entry.getKey()));
+        }
     }
 
     private void initializePreviewPanel(final GetCollectionResult result) {

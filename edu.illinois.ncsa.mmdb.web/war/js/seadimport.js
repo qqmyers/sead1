@@ -97,7 +97,6 @@ function multiMe() {
 }
 
 function createPanel(spaceUrl, spaceTitle, jqscript, importcss, bootcss) {
-
 	theSpaceUrl = spaceUrl;
 	theJqscript = jqscript;
 	theImportcss = importcss;
@@ -108,11 +107,11 @@ function createPanel(spaceUrl, spaceTitle, jqscript, importcss, bootcss) {
 
 	$('#sead-panel')
 			.html(
-					'<div class="row-fluid"><div class="span4"><div class="row-fluid"><a href="http://sead-data.net/"><img class="span5" title="SEAD Logo" alt="SEAD" style="height: 32px;" src="http://sead.ncsa.illinois.edu/images/header-image.png"></a><div class="sead-space badge span7"><a href="'
+					'<div class="row-fluid"><div class="span4"><div class="row-fluid"><a href="http://sead-data.net/"><img class="span5" title="SEAD Logo" alt="SEAD" style="width: 400px;" src="http://sead.ncsa.illinois.edu/images/header-image.png"></a></div><form id="dataoption"><div class="addurl"><label class="radio" for="singledata"><input name="dtype" id="singledata" type="radio" value="singleData" >Add this URL as a dataset</label></div><div class="addlink"><label class="radio" for="multipledata"><input name="dtype" id="multipledata" type="radio" value="multiple" >Add a link(s) on this page as a dataset</label></div></form><span class="label label-info" id="multimessage">*Click link(s) in the page below to add them to the import list</span></div><div class="span7"><div class="sead-space badge span7"><a href="'
 							+ spaceUrl
-							+ '">'
+							+ '">You are at: '
 							+ spaceTitle
-							+ '</a></div></div><form id="dataoption"><label class="radio" for="singledata"><input name="dtype" id="singledata" type="radio" value="singleData" >Add this URL as a dataset</label><label class="radio" for="multipledata"><input name="dtype" id="multipledata" type="radio" value="multiple" >Add a link(s) on this page as a dataset</label></form><span class="label label-info" id="multimessage">Click link(s) in the page below to add them to the import list</span></div><div class="span7"><table class="table table-condensed table-bordered" width=100% id="datalist"><thead><th>Label</th><th>URL</th><th>SEAD ID</th></thead></table></div><div class="span1"><button style="float: right;" class="btn close" id="quit">Close</button></div></div>');
+							+ '</a></div><div class="table-label">Selected Import Links:</div><table class="table table-condensed table-bordered" width=100% id="datalist"><thead><th>Label</th><th>URL</th><th>SEAD ID</th></thead></table></div><div class="span1"><button style="float: right;" class="btn close" id="quit">X</button></div></div>');
 
 	$('#multimessage').hide();
 	$('#singledata').change(singleMe);

@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
@@ -50,6 +50,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
@@ -58,17 +59,19 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetTagsResult;
 
 /**
  * A page listing all tags in the system.
- * 
+ *
  * @author Luigi Marini
- * 
+ * @author myersjd@umich.edu
+ *
  */
 public class TagsPage extends Page {
 
     private FlowPanel tagsPanel;
+    private FlowPanel tagCloudPanel;
 
     /**
      * Build the page and retrieve all the tags in the system.
-     * 
+     *
      * @param dispatchAsync
      *            dispatch service
      */
@@ -94,6 +97,7 @@ public class TagsPage extends Page {
                     public void onSuccess(GetTagsResult result) {
                         TreeMap<String, Integer> tags = result.getTags();
                         Iterator<String> iterator = tags.keySet().iterator();
+                        String uListString = "";
                         while (iterator.hasNext()) {
                             FlowPanel tagPanel = new FlowPanel();
                             String tag = iterator.next();
@@ -102,7 +106,7 @@ public class TagsPage extends Page {
                                 if (linkText.length() > 10) {
                                     linkText = linkText.substring(0, 10) + "...";
                                 }
-                                Hyperlink link = new Hyperlink(linkText, "tag?title=" + URL.encodeComponent(tag));
+                                Hyperlink link = new Hyperlink(linkText, "tag?title=" + URL.encodeQueryString(tag));
                                 link.addStyleName("tagLink");
                                 link.setTitle(tag);
                                 tagPanel.add(link);
@@ -111,17 +115,33 @@ public class TagsPage extends Page {
                                 tagPanel.add(tagCount);
                                 tagPanel.addStyleName("tagInPanel");
                                 tagsPanel.add(tagPanel);
+                                uListString = uListString + "<li><a href=\"#" + "tag?title=" + URL.encodeQueryString(tag) + "\" data-weight=\"" + tags.get(tag) + "\">" + tag + "</a></li>";
                             }
                         }
+
+                        HTML list = new HTML();
+                        list.getElement().setId("weightedtaglist");
+                        list.setHTML("<ul>" + uListString + "</ul>");
+                        tagCloudPanel.add(list);
+                        startCloud();
                     }
 
                 });
     }
 
+    public static native void startCloud() /*-{
+		$wnd.startTagCloud();
+    }-*/;
+
     @Override
     public void layout() {
         tagsPanel = new FlowPanel();
         tagsPanel.addStyleName("tagsPanel");
+        tagCloudPanel = new FlowPanel();
+        tagCloudPanel.getElement().setId("tagCloud");
+
+        mainLayoutPanel.add(tagCloudPanel);
         mainLayoutPanel.add(tagsPanel);
+
     }
 }

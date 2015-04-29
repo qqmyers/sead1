@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,18 +32,15 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,8 +50,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilderFactory;
+import java.util.Set;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -64,19 +60,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.ObjectResourceMapping;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+
+import com.hp.hpl.jena.vocabulary.DCTerms;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
@@ -104,9 +100,10 @@ import edu.uiuc.ncsa.cet.bean.tupelo.gis.GeoPointBeanUtil;
 
 /**
  * Get datasets in a paricular collection.
- * 
+ *
  * @author lmarini
- * 
+ * @author myersjd@umich.edu
+ *
  */
 public class GetCollectionHandler implements
         ActionHandler<GetCollection, GetCollectionResult> {
@@ -132,12 +129,31 @@ public class GetCollectionHandler implements
 
             getCollectionPreviews(arg0.getUser(), arg0.getUri(), result);
 
-            getDOI(arg0.getUri(), result);
+            String doiString = getDOI(arg0.getUri());
+            if (doiString != null) {
+                result.setDOI(doiString);
+            }
+
+            getParent(arg0.getUri(), result);
 
             return result;
         } catch (Exception e) {
             throw new ActionException(e);
         }
+    }
+
+    private void getParent(String uri, GetCollectionResult result) throws OperatorException {
+        Unifier u = new Unifier();
+        UriRef collUri = Resource.uriRef(uri);
+        u.addPattern("parent", DcTerms.HAS_PART, collUri);
+        u.addPattern("parent", Dc.TITLE, "title", true);
+        u.setColumnNames("parent", "title");
+        HashMap<String, String> parents = new HashMap<String, String>();
+        TupeloStore.getInstance().unifyExcludeDeleted(u, "parent");
+        for (Tuple<Resource> row : u.getResult() ) {
+            parents.put(row.get(0).toString(), row.get(1).toString());
+        }
+        result.setParents(parents);
     }
 
     // FIXME use Rob's BeanFactory instead of this hardcoded way
@@ -336,7 +352,7 @@ public class GetCollectionHandler implements
                 map.put(row.get(0).getString(), item);
 
                 item.setUri(row.get(0).getString());
-                item.setAuthor(pbu.get((UriRef) row.get(5)).getName());
+                item.setAuthor(pbu.get(row.get(5)).getName());
                 if (row.get(2) != null) {
                     if (row.get(2).asObject() instanceof Date) {
                         item.setDate((Date) row.get(2).asObject());
@@ -376,46 +392,25 @@ public class GetCollectionHandler implements
         }
     }
 
-    private void getDOI(String collectionUri, GetCollectionResult result) {
+    private String getDOI(String collectionUri) {
         try {
-            String vaurl = TupeloStore.getInstance().getConfiguration(ConfigurationKey.VAURL);
-            if (!vaurl.equals("")) {
-                //Fixme - currently required by VA - seems like this would be better handled on that end
-                String escapedUri = collectionUri.replace(":", "\\:");
-                URL url = new URL(String.format(vaurl, URLEncoder.encode(escapedUri, "UTF-8")));
-                URLConnection urlCon = url.openConnection();
-                //Returns json by default - could parse that way instead
-                urlCon.setRequestProperty("Accept", "application/xml");
-
-                Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(urlCon.getInputStream());
-                Element root = doc.getDocumentElement();
-                NodeList nl = root.getElementsByTagName("alternateIdentifier");
-                for (int i = 0; i < nl.getLength(); i++ ) {
-                    Node node = nl.item(i);
-                    NodeList subList = node.getChildNodes();
-                    boolean isDOI = false;
-                    String possibleDOI = null;
-                    for (int j = 0; j < subList.getLength(); j++ ) {
-                        if (((Element) subList.item(j)).getTagName() != null) {
-                            if ((((Element) subList.item(j)).getTagName().equals("typeId")) && (((Element) subList.item(j)).getFirstChild().getNodeValue().equals("doi"))) {
-                                isDOI = true;
-                            }
-                            if (((Element) subList.item(j)).getTagName().equals("idValue")) {
-                                possibleDOI = subList.item(j).getFirstChild().getNodeValue();
-                            }
-                        }
-                    }
-                    if (isDOI) {
-                        result.setDOI(possibleDOI);
-                        log.debug("Found DOI: " + possibleDOI + " for Collection: " + collectionUri);
-                    }
-                }
+            TripleMatcher tm = new TripleMatcher();
+            tm.setSubject(Resource.uriRef(collectionUri));
+            tm.setPredicate(Resource.uriRef(DCTerms.identifier.getURI()));
+            TupeloStore.getInstance().getContext().perform(tm);
+            Set<Triple> results = tm.getResult();
+            //Assuming single value for now/using first returned value
+            if (results.size() > 0) {
+                Iterator<Triple> it = results.iterator();
+                return (it.next().getObject().toString());
+            } else {
+                log.debug("No DOI for " + collectionUri);
+                return null;
             }
-        } catch (java.io.FileNotFoundException fnfe) {
-            log.debug("No DOI for " + collectionUri);
         } catch (Throwable thr) {
             log.debug("Error getting DOI", thr);
         }
+        return null;
     }
 
     @Override

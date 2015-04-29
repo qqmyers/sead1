@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -69,9 +69,9 @@ import edu.illinois.ncsa.mmdb.web.client.event.BatchCompletedEvent;
 
 /**
  * Shows the current license and allows the user to edit the license.
- * 
+ *
  * @author Rob Kooper
- * 
+ *
  */
 // FIXME refactor and provide license-display-only widget that can be separated from the editing code
 // and an editor that fires handleable events
@@ -601,7 +601,7 @@ public class LicenseWidget extends Composite {
             if ((license.getLicense() != null) && license.getLicense().startsWith("http://")) {
                 licenseText.setHref(license.getLicense());
             } else {
-                licenseText.setHref(null);
+                licenseText.setHref((String) null);
             }
 
             // editor panel

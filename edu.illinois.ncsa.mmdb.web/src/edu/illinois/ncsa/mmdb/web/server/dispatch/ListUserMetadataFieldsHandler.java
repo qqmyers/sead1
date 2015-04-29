@@ -47,6 +47,7 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sead.acr.common.utilities.Memoized;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
@@ -61,7 +62,6 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFields;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
-import edu.illinois.ncsa.mmdb.web.server.Memoized;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
@@ -73,9 +73,11 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
 
     public static ListUserMetadataFieldsResult listUserMetadataFields(boolean isForEdit) {
         ListUserMetadataFieldsResult lumfr = null;
-        log.debug("Listing fields, editable = : " + isForEdit);
+        log.trace("Listing fields, editable = : " + isForEdit);
         if (isForEdit) {
             if (editResultCache == null) {
+                log.debug("Initializing field list, editable = : " + isForEdit);
+
                 editResultCache = new Memoized<ListUserMetadataFieldsResult>() {
                     public ListUserMetadataFieldsResult computeValue() {
                         ListUserMetadataFieldsResult result = new ListUserMetadataFieldsResult();
@@ -93,7 +95,7 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
                             log.error("can't list plain metadata fields");
                         }
                         for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
-                            log.debug("Found plain viewable umf :" + entry.getKey() + " : " + entry.getValue() + "desciption: " + r_d.getThingNames().get(entry.getKey()));
+                            log.trace("Found plain viewable umf :" + entry.getKey() + " : " + entry.getValue() + "desciption: " + r_d.getThingNames().get(entry.getKey()));
                             result.addField(new UserMetadataField(entry.getKey(), entry.getValue(), r_d.getThingNames().get(entry.getKey())));
                         }
                         // now run more queries to get user metadata fields of various other types
@@ -138,7 +140,7 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
                         }
                         for (Map.Entry<String, String> entry : r.getThingNames().entrySet() ) {
 
-                            log.debug("Found plain viewable umf :" + entry.getKey() + " : " + entry.getValue() + "desciption: " + r_d.getThingNames().get(entry.getKey()));
+                            log.trace("Found plain viewable umf :" + entry.getKey() + " : " + entry.getValue() + "desciption: " + r_d.getThingNames().get(entry.getKey()));
                             result.addField(new UserMetadataField(entry.getKey(), entry.getValue(), r_d.getThingNames().get(entry.getKey())));
                         }
                         // now run more queries to get user metadata fields of various other types
@@ -182,7 +184,7 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
         u.addPattern("clazz", Rdfs.LABEL, "clazzLabel"); // this is the punning pattern for Individual <-> Class
         TupeloStore.getInstance().getOntologyContext().perform(u);
         for (Tuple<Resource> row : u.getResult() ) {
-            //log.debug("Found class umf " + row.get(1));
+            log.trace("Found class umf " + row.get(1));
             UserMetadataField umf = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
             umf.setType(UserMetadataField.CLASS);
             umf.addToRange(row.get(2).getString(), row.get(3).getString());
@@ -204,12 +206,12 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
             if (!row.get(2).equals(row.get(4))) { // punned: skip
                 UserMetadataField field = fields.get(row.get(0));
                 if (field == null) {
-                    //log.debug("Found enumerated umf " + row.get(1));
+                    log.trace("Found enumerated umf " + row.get(1));
                     field = new UserMetadataField(row.get(0).getString(), row.get(1).getString());
                     field.setType(UserMetadataField.ENUMERATED);
                     fields.put(row.get(0), field);
                 }
-                //log.debug("Enumerated umf " + row.get(1) + " allows value " + row.get(3));
+                log.trace("Enumerated umf " + row.get(1) + " allows value " + row.get(3));
                 field.addToRange(row.get(2).getString(), row.get(3).getString());
             }
         }

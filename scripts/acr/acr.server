@@ -14,11 +14,6 @@ hfc.path=/home/medici/data
 search.path=/home/medici/lucene
 
 #
-# key needed for remote access
-#
-#remoteAPI=
-
-#
 # taxonomy file
 #
 taxonomy.file=/taxonomy.owl
@@ -32,7 +27,7 @@ taxonomy.file=/taxonomy.owl
 # - mail.servername the name/url of the medici server
 #
 mail.host=localhost
-mail.from=root@localhost
+mail.from=sead-acr@googlegroups.com
 mail.fullname=SEAD
 mail.subject=[SEAD]
 #mail.servername=
@@ -48,6 +43,7 @@ extractor.url=http://localhost:9856/
 
 #
 # Access Level/Processing Level
+#See https://opensource.ncsa.illinois.edu/confluence/x/AgDMAQ
 #
 access.level.label=Data Maturity
 access.level.predicate=http://sead-data.net/terms/hasDataMaturityLevel
@@ -57,8 +53,13 @@ access.level.values=Raw, Preliminary Results, Provisional Product, Validated Pro
 
 
 #Google Ouath2
+#google.api_key=
 #google.client_id=
 #google.device_client_id=
+
+#ORCID Oauth2
+#orcid.client_id=
+#orcid.client_secret=
 
 #Optimize for larger repositories - true - index/count weekly, false - hourly, other effects may be added. Default is false
 #bigdata=
@@ -68,21 +69,49 @@ access.level.values=Raw, Preliminary Results, Provisional Product, Validated Pro
 #Tokens last from 1-2 times the key lifetime (the retired key is kept for validation only for an additional lifetime, 
 #so token life depends on where in the cycle it is created). Currently used to allow Google doc viewer to access content.
 #default key lifetime is 5 minutes.
-#token.key.timeout=
+#token.key.lifetime=
 
 #
 #Previewer: Use Google Doc Viewer (google temporarily caches/converts file) - default is true
 #previewer.google_doc_viewer=
 
+#
+#ACR Commons and Geo/Map related properties (examples assume the 'sead.ncsa.illinois.edu' machine)
+#
+
+#ACR URL (used by MediciProxy) - for ACR, should be the URL at which the main app is deployed
+#Note - we appear to use some libs that don't follow a 307 redirect from nginx, so this URL must have the correct scheme
+# and not rely on a redirect when we switch to an https only mode for deployment
+#domain=https://sead.ncsa.illinois.edu/acr
+#
+# key needed for remote access
+#remoteAPIKey=
+#
+#URL to make geoserver calls - currently points to a permission controlled proxy servlet
+#geoserver=https://sead.ncsa.illinois.edu/acr/geoproxy
+#
+#URL base for proxied geoserver - used to obtain relative URLs from geoserver responses (which can be used with the geo proxy
+#proxiedgeoserver=https://sead.ncsa.illinois.edu/geoserver
+#
+#username for geoserver
+#geouser=admin
+#
+#password for geoserver - only used by geoproxy servlet - do not distribute
+#geopassword=
 
 
 #
 # List of automatically created users
 #
-user.0.fullname=Medici Admin
-user.0.password=cookie123
+user.0.fullname=SEAD Admin
+#user.0.password=cookie123
 user.0.email=sead-acr@googlegroups.com
 user.0.roles=ADMIN
+
+user.1.fullname=SEAD-VA Curator
+#user.1.password=cookie123
+user.1.email=sead-va@googlegroups.com
+user.1.roles=VIEWER
 
 #
 # List of userfields
@@ -121,7 +150,7 @@ userfield.10.predicate=http://purl.org/dc/terms/hasPart
 userfield.10.label=Has Subcollection
 userfield.10.definition=A related resource that is included either physically or logically in the described resource.
 userfield.11.predicate=http://purl.org/dc/terms/identifier
-userfield.11.label=Identifier
+userfield.11.label=External Identifier
 userfield.11.definition=An unambiguous reference to the resource within a given context.
 userfield.12.predicate=http://sead-data.net/terms/odm/QualityControlLevel
 userfield.12.label=Quality Control Level

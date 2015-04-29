@@ -117,14 +117,13 @@
 			<exclude name="WEB-INF/lib/gwt-dev-*.jar" />
 			<exclude name="WEB-INF/lib/gwt-servlet.jar" />
 			<exclude name="WEB-INF/lib/commons-logging-*.jar" />
-			<exclude name="WEB-INF/lib/mysql-connector-java-*.jar" />
 			<exclude name="WEB-INF/lib/xercesImpl-*.jar" />
 		</zip>
 	</target>
 
 	<target name="compile" description="compiles Java source files to bytecode">
 		<mkdir dir="war/WEB-INF/classes"/>
-		<javac srcdir="src" includes="**" encoding="utf-8" destdir="war/WEB-INF/classes" source="1.5" target="1.5" deprecation="${deprecation}" debug="${debug}">
+		<javac srcdir="src" includes="**" encoding="utf-8" destdir="war/WEB-INF/classes" source="1.7" target="1.7" deprecation="${deprecation}" debug="${debug}">
 			<classpath refid="classpath" />
 		</javac>
 	</target>
@@ -147,6 +146,7 @@
 
 	<target name="updateversion" description="update version number in html file">
 		<replaceregexp file="war/mmdb.html" flags="m" match="@VERSION@"  replace="${version}"/> 
+		<replaceregexp file="src/edu/illinois/ncsa/mmdb/web/client/MMDB.java" flags="m" match="@VERSION@"  replace="${version}"/>
 	</target>
 
 	<target name="resources" description="Copy all resources to output folder.">

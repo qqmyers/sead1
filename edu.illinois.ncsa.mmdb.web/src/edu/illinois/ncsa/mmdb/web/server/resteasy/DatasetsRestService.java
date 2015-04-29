@@ -46,6 +46,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.tupeloproject.kernel.BlobFetcher;
@@ -86,6 +87,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
  *
  */
 @Path("/datasets")
+@NoCache
 public class DatasetsRestService extends ItemServicesImpl {
 
     private static String[] CopyIgnore  = new String[] {
@@ -311,6 +313,20 @@ public class DatasetsRestService extends ItemServicesImpl {
     }
 
     /**
+     * Get recent datasets (latest 100 datasets are searched)
+     *
+     * @return List of recent datasets that have not been deleted by ID with
+     *         basic metadata as JSON-LD
+     */
+    @GET
+    @Path("/recent")
+    @Produces("application/json")
+    public Response getRecentDatasetsAsJSON(@javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        return getLatestItems(Cet.DATASET, datasetBasics, userId, "Date");
+    }
+
+    /**
      * Get all datasets
      *
      * @return List of all datasets by ID with basic metadata as JSON-LD
@@ -346,6 +362,10 @@ public class DatasetsRestService extends ItemServicesImpl {
     @GET
     @Path("/{id}/file")
     public Response getDatasetBlob(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return getDataFile(id, request);
+    }
+
+    public static Response getDataFile(String id, HttpServletRequest request) {
         Response r = null;
         try {
             final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
@@ -574,7 +594,7 @@ public class DatasetsRestService extends ItemServicesImpl {
     @GET
     @Path("/{id}/unique")
     @Produces("application/json")
-    public Response getDatasetUniqueMetadataAsJSON(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response getDatasetUniqueMetadataAsJSON2(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
 
         return getItemMetadataAsJSON(id, userId, false);

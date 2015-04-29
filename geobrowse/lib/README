@@ -1,4 +1,0 @@
-Only gwt-user and servlet-api jars are needed to compile. The other jars are potentially needed for locally running 
-the app within eclipse from the war dir. (Startup errors related to log4j prevent running locally with the default 
-configuration - a useable local config does not currently exist and the ant build file does not have a target for it
-(TODO...). 

@@ -50,16 +50,15 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
@@ -75,18 +74,22 @@ import edu.illinois.ncsa.mmdb.web.client.ui.TagsWidget;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
 
 public class UploadStatusView extends Composite implements Display {
-    VerticalPanel               thePanel;
-    HorizontalPanel             progressPanel;
-    FlexTable                   statusTable;
+    FlowPanel                   thePanel;
+    FlowPanel                   progressPanel;
+    FlowPanel                   statusTable;
     Map<Integer, CheckBox>      selectionCheckboxes;
     private final DispatchAsync dispatchAsync;
+    private int                 nUploaded = 0;
 
     public UploadStatusView(DispatchAsync dispatchAsync) {
         this.dispatchAsync = dispatchAsync;
-        thePanel = new VerticalPanel();
-        progressPanel = new HorizontalPanel();
+        thePanel = new FlowPanel();
+        progressPanel = new FlowPanel();
+        progressPanel.getElement().setId("progressPanel");
         thePanel.add(progressPanel);
-        statusTable = new FlexTable();
+        statusTable = new FlowPanel();
+        statusTable.clear();
+        statusTable.getElement().setId("uploadstatustable");
         selectionCheckboxes = new HashMap<Integer, CheckBox>();
         thePanel.add(statusTable);
         initWidget(thePanel);
@@ -94,7 +97,12 @@ public class UploadStatusView extends Composite implements Display {
 
     @Override
     public void clear() {
-        statusTable.removeAllRows();
+        statusTable.clear();
+        nUploaded = 0;
+        FlowPanel errorList = new FlowPanel();
+        errorList.getElement().setId("list");
+        statusTable.add(errorList);
+
     }
 
     /*
@@ -110,78 +118,118 @@ public class UploadStatusView extends Composite implements Display {
 
     @Override
     public HasValue<Boolean> onComplete(int ix, String uri, int total) {
+
+        nUploaded++;
         GWT.log("onComplete " + ix + " " + uri);
         Anchor anchor = new Anchor("View", "#dataset?id=" + uri);
         anchor.setTarget("_blank");
         CheckBox selectionCheckbox = new CheckBox();
         selectionCheckboxes.put(ix, selectionCheckbox);
-        statusTable.setWidget(ix, 0, selectionCheckbox);
+        FlowPanel entry = getNthEntry(ix);
+        entry.insert(selectionCheckbox, 0);
         GWT.log("created selection checkbox " + ix); // FIXME debug
-        statusTable.setWidget(ix, 1, anchor);
-        statusTable.setWidget(ix, 3, new Label("Complete"));
-        //
+        entry.insert(anchor, 1);
+        if (entry.getWidgetCount() == 5) {
+            entry.remove(4);//Progress bar
+        }
+        entry.remove(2);//image
+        entry.add(new Label("Complete"));
+        entry.setStyleDependentName("started", false);
+        entry.addStyleDependentName("complete");
+
         if (total > 0) {
-            int n = ix + 1;
             progressPanel.clear();
-            progressPanel.add(new ProgressBar((int) ((float) (n * 100) / (float) total)));
-            progressPanel.add(new Label((ix + 1) + " of " + total + " file(s) uploaded"));
-            progressPanel.setSpacing(20);
+            progressPanel.add(new ProgressBar((int) ((float) (nUploaded * 100) / (float) total)));
+            progressPanel.add(new Label((nUploaded) + " of " + total + " file(s) uploaded"));
         }
         return selectionCheckbox;
     }
 
     @Override
     public void onPostComplete(final int ix, final DatasetBean dataset) {
+
         GWT.log("onPostComplete " + ix + " " + dataset.getFilename());
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             public void execute() {
                 // check pending, but don't initially display
-                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, null/*"dataset?id=" + dataset.getUri()*/, ContentCategory.getCategory(dataset.getMimeType(), dispatchAsync), true, false, dispatchAsync);
-                statusTable.setWidget(ix, 1, preview);
+                PreviewWidget preview = new PreviewWidget(dataset.getUri(), GetPreviews.SMALL, null, ContentCategory.getCategory(dataset.getMimeType(), dispatchAsync), true, false, dispatchAsync);
+                FlowPanel entry = getNthEntry(ix);
+                entry.remove(3);//"Complete"
+
+                entry.remove(2); //Uploading <name>
+                entry.remove(1); //no-preview image
+                entry.add(preview);
                 //
-                statusTable.setWidget(ix, 2, editableDatasetInfo(dataset));
+                entry.add(editableDatasetInfo(dataset));
                 TagsWidget tags = new TagsWidget(dataset.getUri(), dispatchAsync, false);
-                statusTable.setWidget(ix, 3, tags);
+                entry.add(tags);
                 Anchor anchor = new Anchor("View", "#dataset?id=" + dataset.getUri());
                 anchor.setTarget("_blank");
-                statusTable.setWidget(ix, 4, anchor);
-                statusTable.getCellFormatter().addStyleName(ix, 4, "uploadStatusColumn");
+                entry.add(anchor);
                 Anchor hideAnchor = new Anchor("Hide");
                 hideAnchor.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                        statusTable.getRowFormatter().addStyleName(ix, "hidden");
+                        getNthEntry(ix).addStyleDependentName("hidden");
+                        getNthEntry(ix).setStyleDependentName("postcomplete", false);
                     }
                 });
-                statusTable.setWidget(ix, 5, hideAnchor);
-                statusTable.getCellFormatter().addStyleName(ix, 5, "uploadStatusColumn");
+                entry.add(hideAnchor);
+                entry.addStyleDependentName("postcomplete");
+                entry.setStyleDependentName("complete", false);
+
             }
         });
         GWT.log("onPostComplete " + ix);
+
     }
 
     @Override
     public void onDropped(int ix, String filename, String sizeString) {
-        Image image = new Image(PreviewWidget.GRAY_URL.get(GetPreviews.SMALL));
-        statusTable.setWidget(ix, 1, image);
+        extendTableTo(ix);
+        FlowPanel entry = getNthEntry(ix);
+        entry.addStyleDependentName("started");
+        Image image = new Image(PreviewWidget.PENDING_URL.get(GetPreviews.SMALL));
+        image.setStyleName("thumbnail");
+        entry.add(image);
         int size = -1;
         try {
             size = Integer.parseInt(sizeString);
         } catch (NumberFormatException x) {
             // FIXME we don't have support for longs, so now what?
         }
-        statusTable.setWidget(ix, 2, new Label("Uploading \"" + filename + "\" (" + TextFormatter.humanBytes(size) + ") ..."));
+        entry.add(new Label("Uploading \"" + filename + "\" (" + TextFormatter.humanBytes(size) + ") ..."));
+    }
+
+    //Make sure there's a FlowPanel for each entry up to/including the current one (ix)
+    //Using flowPanel to allow css styling and avoid <table> elements from other panels
+    private void extendTableTo(int ix) {
+        int size = statusTable.getWidgetCount();
+        while (ix >= size - 1) {
+            FlowPanel entry = new FlowPanel();
+            entry.setStyleName("uploading");
+            statusTable.add(entry);
+            size++;
+        }
+    }
+
+    private FlowPanel getNthEntry(int n) {
+        return (FlowPanel) statusTable.getWidget(n + 1);
     }
 
     @Override
     public void onProgress(int ix, int percent) {
         GWT.log("onProgress " + ix + " " + percent + "%");
-        statusTable.setWidget(ix, 3, new ProgressBar(percent));
+        FlowPanel entry = getNthEntry(ix);
+        if (entry.getWidgetCount() == 3) {
+            entry.remove(2);
+        }
+        entry.add(new ProgressBar(percent));
     }
 
     public Widget editableDatasetInfo(final DatasetBean ds) {
-        FlexTable layout = new FlexTable();
-        int row = 0;
-        layout.setWidget(row, 0, new Label("Title:"));
+        FlowPanel layout = new FlowPanel();
+        layout.addStyleName("dataset_info");
+
         final EditableLabel titleLabel = new EditableLabel(ds.getTitle());
         // FIXME this contains dispatching logic, and so should be moved to a presenter
         titleLabel.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -198,16 +246,22 @@ public class UploadStatusView extends Composite implements Display {
                 });
             }
         });
-        layout.setWidget(row, 1, titleLabel);
-        row++;
-        layout.setWidget(row, 0, new Label("Size:"));
-        layout.setWidget(row, 1, new Label(TextFormatter.humanBytes(ds.getSize())));
-        row++;
-        layout.setWidget(row, 0, new Label("Type:"));
-        layout.setWidget(row, 1, new Label(ds.getMimeType()));
-        row++;
-        layout.setWidget(row, 0, new Label("Date:"));
-        layout.setWidget(row, 1, new Label(ds.getDate() + ""));
+        FlowPanel row1 = new FlowPanel();
+        row1.add(new Label("Title:"));
+        row1.add(titleLabel);
+        layout.add(row1);
+        FlowPanel row2 = new FlowPanel();
+        row2.add(new Label("Size:"));
+        row2.add(new Label(TextFormatter.humanBytes(ds.getSize())));
+        layout.add(row2);
+        FlowPanel row3 = new FlowPanel();
+        row3.add(new Label("Type:"));
+        row3.add(new Label(ds.getMimeType()));
+        layout.add(row3);
+        FlowPanel row4 = new FlowPanel();
+        row4.add(new Label("Date:"));
+        row4.add(new Label(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_SHORT).format(ds.getDate())));
+        layout.add(row4);
         return layout;
     }
 

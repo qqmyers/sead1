@@ -6,7 +6,7 @@ import java.util.EnumSet;
  * DefaultRole is an enum of roles that are provided as defaults in Medici.
  * Each role is associated with a set of permissions that are enabled for it by
  * default.
- * 
+ *
  * @author futrelle
  */
 public enum DefaultRole {
@@ -40,7 +40,7 @@ public enum DefaultRole {
 
     /**
      * The human-readable name of the role
-     * 
+     *
      * @return
      */
     public String getName() {
@@ -49,7 +49,7 @@ public enum DefaultRole {
 
     /**
      * The role's URI
-     * 
+     *
      * @return
      */
     public String getUri() {
@@ -58,7 +58,7 @@ public enum DefaultRole {
 
     /**
      * The permissions which are enabled by default for this role
-     * 
+     *
      * @return
      */
     public EnumSet<Permission> getPermissions() {
@@ -82,7 +82,8 @@ public enum DefaultRole {
                 Permission.USE_REMOTEAPI,
                 Permission.VIEW_DATA,
                 Permission.VIEW_MEMBER_PAGES,
-                Permission.VIEW_SYSTEM
+                Permission.VIEW_SYSTEM,
+                Permission.VIEW_PUBLISHED
                 );
     }
 
@@ -101,13 +102,15 @@ public enum DefaultRole {
                 Permission.UPLOAD_DATA,
                 Permission.VIEW_DATA,
                 Permission.VIEW_MEMBER_PAGES,
-                Permission.VIEW_SYSTEM);
+                Permission.VIEW_SYSTEM,
+                Permission.VIEW_PUBLISHED);
     }
 
     static EnumSet<Permission> viewer() {
         return EnumSet.of(Permission.ADD_TAG, Permission.DELETE_TAG,
                 Permission.VIEW_DATA, Permission.VIEW_MEMBER_PAGES,
-                Permission.VIEW_SYSTEM);
+                Permission.VIEW_SYSTEM,
+                Permission.VIEW_PUBLISHED);
     }
 
     static EnumSet<Permission> anonymous() {
@@ -133,12 +136,13 @@ public enum DefaultRole {
                 Permission.USE_REMOTEAPI,
                 Permission.VIEW_DATA,
                 Permission.VIEW_MEMBER_PAGES,
-                Permission.VIEW_SYSTEM);
+                Permission.VIEW_SYSTEM,
+                Permission.VIEW_PUBLISHED);
     }
 
     // these are special roles where membership is not controlled by
     // an administrator but is computed based on the authentication state, operation, and object(s) the operation applies to.
-    // 
+    //
 
     /**
      * Special roles are roles whose membership is not controlled by an

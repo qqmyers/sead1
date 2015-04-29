@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -79,7 +79,7 @@ import edu.uiuc.ncsa.cet.bean.PersonBean;
 
 /**
  * Create the panel containing the information about the dataset.
- * 
+ *
  * @return panel with information about the dataset.
  */
 public class InfoWidget extends Composite {
@@ -159,7 +159,7 @@ public class InfoWidget extends Composite {
 
         String date = "";
         if (data.getDate() != null) {
-            date += DateTimeFormat.getShortDateTimeFormat().format(data.getDate());
+            date += DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_SHORT).format(data.getDate());
         }
         addInfo("Uploaded", date, panel, false, Type.NONE);
 
@@ -181,7 +181,7 @@ public class InfoWidget extends Composite {
         initWidget(panel);
     }
 
-    protected void getCreators(final String uri) {
+    private void getCreators(final String uri) {
         //START - Added by Ram on Nov.21, 2011
         //FIXME : Need to refresh automatically on adding creator metadata
         //FIXME - just get creators, not all user metadata for efficiency
@@ -198,9 +198,15 @@ public class InfoWidget extends Composite {
                         if (!values.isEmpty()) {
                             for (UserMetadataValue value : values ) {
                                 try {
-                                    Anchor creator = new Anchor(value.getName(), value.getUri());
-                                    creator.addStyleName("datasetRightColText");
-                                    creatorsListPanel.add(creator);
+                                    if (value.getUri() != null) {
+                                        Anchor creator = new Anchor(value.getName(), value.getUri());
+                                        creator.addStyleName("datasetRightColText");
+                                        creatorsListPanel.add(creator);
+                                    } else {
+                                        Label creatorLabel = new Label(value.getName());
+                                        creatorLabel.addStyleName("datasetRightColText");
+                                        creatorsListPanel.add(creatorLabel);
+                                    }
                                 }
                                 catch (Exception ex) {
                                     GWT.log(ex.getMessage());
@@ -241,7 +247,7 @@ public class InfoWidget extends Composite {
             if (editable) {
                 HorizontalPanel hPanel = new HorizontalPanel();
                 hPanel.addStyleName("datasetRightColText");
-                // \u00a0 = non-breaking space 
+                // \u00a0 = non-breaking space
                 Label lbl = new Label(name + ":\u00a0");
                 lbl.setTitle(lbl.getText());
                 lbl.addStyleName("datasetRightColText");
@@ -300,7 +306,7 @@ public class InfoWidget extends Composite {
     }
 
     private boolean isValidMIMEType(String MIME) {
-        // valid MIME type is X/Y 
+        // valid MIME type is X/Y
         // where X = word that contains only a-z or A-Z
         // and Y = word that contains a-z, A-Z, 0-9, _, -, or .
         RegExp pattern = RegExp.compile("^([a-zA-Z]+)\\/([\\w|\\-|\\.]+)$");

@@ -59,11 +59,28 @@
 		<servlet-class>edu.illinois.ncsa.mmdb.web.rest.ExtractorServlet</servlet-class>
 	</servlet>
 
+	<!-- Can be enabled to support URIQA and webdav calls respectively. Note these do not support fine-grained access control but are controlled via permissions
 	<servlet>
 		<servlet-name>tupelo</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.server.TupeloServlet</servlet-class>
 	</servlet>
-
+	<servlet>
+		<servlet-name>WebDAV Servlet</servlet-name>
+		<servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
+		<init-param>
+			<param-name>resource.factory.class</param-name>
+			<param-value>edu.illinois.ncsa.mmdb.web.server.webdav.MediciResourceFactory</param-value>
+		</init-param>
+	-->		
+		<!-- <init-param> <param-name>response.handler.class</param-name> <param-value>com.bradmcevoy.http.webdav.DefaultWebDavResponseHandler</param-value> 
+			</init-param> -->
+	<!--	<init-param>
+			<param-name>authentication.handler.classes</param-name>
+			<param-value>com.bradmcevoy.http.http11.auth.BasicAuthHandler</param-value>
+		</init-param>
+	</servlet>
+	-->
+	
 	<servlet>
 		<servlet-name>UploadBlob</servlet-name>
 		<servlet-class>edu.illinois.ncsa.mmdb.web.server.UploadBlob</servlet-class>
@@ -74,20 +91,6 @@
 		<servlet-class>edu.illinois.ncsa.mmdb.web.server.BatchDownload</servlet-class>
 	</servlet>
 	
-	<servlet>
-		<servlet-name>WebDAV Servlet</servlet-name>
-		<servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
-		<init-param>
-			<param-name>resource.factory.class</param-name>
-			<param-value>edu.illinois.ncsa.mmdb.web.server.webdav.MediciResourceFactory</param-value>
-		</init-param>
-		<!-- <init-param> <param-name>response.handler.class</param-name> <param-value>com.bradmcevoy.http.webdav.DefaultWebDavResponseHandler</param-value> 
-			</init-param> -->
-		<init-param>
-			<param-name>authentication.handler.classes</param-name>
-			<param-value>com.bradmcevoy.http.http11.auth.BasicAuthHandler</param-value>
-		</init-param>
-	</servlet>
 	
 	<servlet>
         <servlet-name>Resteasy</servlet-name>
@@ -107,10 +110,57 @@
 	    </servlet-class>
 	    <init-param>
 			<param-name>PropertiesFileName</param-name>
-			<param-value>acr_commons.properties</param-value>
+			<param-value>server.properties</param-value>
 		</init-param>
 	    
 	</servlet>
+	
+	<servlet>
+		<servlet-name>wmsProxyImpl</servlet-name>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.server.geo.WmsProxyServiceImpl</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>mediciProxyImpl</servlet-name>
+		<servlet-class>edu.illinois.ncsa.mmdb.web.server.geo.MediciProxyServiceImpl</servlet-class>
+	</servlet>
+	
+	
+	<!-- DisoveryPage servlets-->
+	<servlet>
+    	<servlet-name>GetPublishedCollections</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.GetPublishedCollections</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>CollectionContents</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.CollectionContents</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>GetBibliographicInfo</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.GetBibliographicInfo</servlet-class>
+  	</servlet>
+  
+  <!-- DashboardPage servlets-->
+	<servlet>
+    	<servlet-name>GetCollections</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.dashboard.GetCollections</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>GetAllDatasetsByType</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.dashboard.GetAllDatasetsByType</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>GetTeamMembers</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.dashboard.GetTeamMembers</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>GetWMSLayers</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.dashboard.GetWMSLayers</servlet-class>
+  	</servlet>
+  	<servlet>
+    	<servlet-name>GetRecentUploads</servlet-name>
+    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.dashboard.GetRecentUploads</servlet-class>
+  	</servlet>
+  
 
 	<!-- servlet mapping -->
 	<servlet-mapping>
@@ -143,10 +193,6 @@
 		<url-pattern>/extractor/*</url-pattern>
 	</servlet-mapping>
 
-	<servlet-mapping>
-		<servlet-name>tupelo</servlet-name>
-		<url-pattern>/tupelo/*</url-pattern>
-	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>UploadBlob</servlet-name>
@@ -159,10 +205,17 @@
 		<!-- this additional mapping is kludgy, but necessary for GWT -->
 	</servlet-mapping>
 
+	<!-- URIQA and webdav support - permissions but no fine-grained access control>
+	<servlet-mapping>
+		<servlet-name>tupelo</servlet-name>
+		<url-pattern>/tupelo/*</url-pattern>
+	</servlet-mapping>
+	
 	<servlet-mapping>
 		<servlet-name>WebDAV Servlet</servlet-name>
 		<url-pattern>/webdav/*</url-pattern>
 	</servlet-mapping>
+	<  -->
 
 	<servlet-mapping>
         <servlet-name>Resteasy</servlet-name>
@@ -174,10 +227,57 @@
 		<url-pattern>/BatchDownload</url-pattern>
 	</servlet-mapping>
 	
+	<!-- Geo Page servelet mappings -->
 	<servlet-mapping>
 	    <servlet-name>GeoProxy</servlet-name>
 	    <url-pattern>/geoproxy/*</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>wmsProxyImpl</servlet-name>
+		<url-pattern>/mmdb/wmsProxy</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>mediciProxyImpl</servlet-name>
+		<url-pattern>/mmdb/mediciProxy</url-pattern>
+	</servlet-mapping>
+
+	<!-- DisocveryPage Servlet Mappings -->
+	<servlet-mapping>
+    	<servlet-name>GetPublishedCollections</servlet-name>
+    	<url-pattern>/mmdb/discovery/GetPublishedCollections</url-pattern>
+  	</servlet-mapping>
+  	<servlet-mapping>
+    	<servlet-name>CollectionContents</servlet-name>
+    	<url-pattern>/mmdb/discovery/GetContents</url-pattern>
+  	</servlet-mapping>
+  	<servlet-mapping>
+	    <servlet-name>GetBibliographicInfo</servlet-name>
+    	<url-pattern>/mmdb/discovery/GetBiblio</url-pattern>
+	</servlet-mapping>
+
+
+	<!-- DashboardPage Servlet Mappings -->
+	<servlet-mapping>
+    	<servlet-name>GetCollections</servlet-name>
+    	<url-pattern>/mmdb/dashboard/GetCollections</url-pattern>
+  	</servlet-mapping>
+    <servlet-mapping>
+    	<servlet-name>GetAllDatasetsByType</servlet-name>
+    	<url-pattern>/mmdb/dashboard/GetAllDatasetsByType</url-pattern>
+  	</servlet-mapping>
+  <servlet-mapping>
+    	<servlet-name>GetTeamMembers</servlet-name>
+    	<url-pattern>/mmdb/dashboard/GetTeamMembers</url-pattern>
+  	</servlet-mapping>
+  <servlet-mapping>
+    	<servlet-name>GetWMSLayers</servlet-name>
+    	<url-pattern>/mmdb/dashboard/GetWMSLayers</url-pattern>
+  	</servlet-mapping>
+<servlet-mapping>
+    	<servlet-name>GetRecentUploads</servlet-name>
+    	<url-pattern>/mmdb/dashboard/GetRecentUploads</url-pattern>
+  	</servlet-mapping>
+    
 
 	<!-- Servlet context listener -->
 	<listener>
@@ -242,7 +342,7 @@
     </filter-class>
     <init-param>
       <param-name>PropertiesFileName</param-name>
-      <param-value>/acr_commons.properties</param-value>
+      <param-value>server.properties</param-value>
     </init-param>
     <init-param>
       <param-name>OpenPath</param-name>
@@ -256,6 +356,11 @@
   <filter-mapping>
     <filter-name>AuthFilter</filter-name>
     <url-pattern>/geoproxy/*</url-pattern>
+    <servlet-name>wmsProxyImpl</servlet-name>
+	<servlet-name>mediciProxyImpl</servlet-name>
+	<servlet-name>GetPublishedCollections</servlet-name>
+	<servlet-name>CollectionContents</servlet-name>
+	<servlet-name>GetBibliographicInfo</servlet-name>
   </filter-mapping>
 	
 

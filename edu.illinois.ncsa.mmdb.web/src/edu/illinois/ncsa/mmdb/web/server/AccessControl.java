@@ -45,9 +45,8 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.terms.Dc;
 
+import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 // static utilities for making access control decisions
@@ -87,9 +86,9 @@ public class AccessControl {
             log.warn("isAdmin called with null value");
             return false;
         }
-        RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         try {
-            return rbac.checkPermission(Resource.uriRef(personUri), MMDB.VIEW_ADMIN_PAGES);
+            return rbac.checkPermission(personUri, Permission.VIEW_ADMIN_PAGES);
         } catch (RBACException e) {
             log.error("unable to check if user is admin", e);
             return false;
