@@ -49,6 +49,7 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -291,7 +292,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
         loginStatusWidget = new LoginStatusWidget();
         RootPanel.get("loginMenu").add(loginStatusWidget);
 
-        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName, ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData, ConfigurationKey.UseGoogleDocViewer, ConfigurationKey.PresentationSortOrder, ConfigurationKey.PresentationPageViewType, ConfigurationKey.PresentationDataViewLevel), new AsyncCallback<ConfigurationResult>() {
+        dispatchAsync.execute(new GetConfiguration(MMDB.getUsername(), ConfigurationKey.ProjectName,
+                ConfigurationKey.ProjectURL, ConfigurationKey.ProjectDescription, ConfigurationKey.BigData,
+                ConfigurationKey.UseGoogleDocViewer, ConfigurationKey.PresentationSortOrder,
+                ConfigurationKey.PresentationPageViewType, ConfigurationKey.PresentationDataViewLevel, ConfigurationKey.ProjectHeaderLogo), new AsyncCallback<ConfigurationResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Could not get Names", caught);
@@ -307,6 +311,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 PreviewPanel.setUseGoogleDocViewer(result.getConfiguration(ConfigurationKey.UseGoogleDocViewer).equalsIgnoreCase("true"));
                 DynamicTablePresenter.setInitialKeys(result.getConfiguration(ConfigurationKey.PresentationSortOrder), result.getConfiguration(ConfigurationKey.PresentationPageViewType), result.getConfiguration(ConfigurationKey.PresentationDataViewLevel).equalsIgnoreCase("true") || bigData);
 
+                // override default logo
+                Document.get().getElementById("logo-img").setAttribute("src", result.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
             }
         });
 
