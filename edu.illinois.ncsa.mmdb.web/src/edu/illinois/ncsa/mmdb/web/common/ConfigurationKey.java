@@ -22,7 +22,7 @@ public enum ConfigurationKey {
     ProjectName("project.name", ""), //$NON-NLS-1$
     ProjectDescription("project.description", ""), //$NON-NLS-1$
     ProjectURL("project.url", ""), //$NON-NLS-1$
-    ProjectHeaderLogo("project.header.logo", "images/logo.png"), //$NON-NLS-1$
+    ProjectHeaderLogo("project.header.logo", "images/SEAD-small.png"), //$NON-NLS-1$
     ProjectHeaderBackground("project.header.background", "images/bkgrnd_repeat_x.png"), //$NON-NLS-1$
     ProjectHeaderTitleColor("project.header.title.color", "#000000"), //$NON-NLS-1$
 
