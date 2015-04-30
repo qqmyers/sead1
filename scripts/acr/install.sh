@@ -31,7 +31,7 @@ if [ ! -e "/etc/apt/sources.list.d/ubuntugis-ubuntugis-unstable-`lsb_release -c 
 fi
 
 # make sure we have latest listing of packages
-apt-get -y update
+apt-get -y update > /dev/null
 
 # install rest of packages
 apt-get -y install openjdk-7-jre-headless openjdk-7-jre-lib ffmpeg imagemagick mysql-server poppler-utils tomcat6 ttf-dejavu-core ttf-dejavu-extra ttf-kochi-gothic ttf-kochi-mincho ttf-baekmuk ttf-arphic-gbsn00lp ttf-arphic-bsmi00lp ttf-arphic-gkai00mp ttf-arphic-bkai00mp ttf-sazanami-gothic ttf-kochi-gothic ttf-sazanami-mincho ttf-kochi-mincho ttf-wqy-microhei ttf-wqy-zenhei ttf-indic-fonts-core ttf-telugu-fonts ttf-oriya-fonts ttf-kannada-fonts ttf-bengali-fonts ubuntu-restricted-extras unzip gdal-bin python-gdal proj libgdal-dev nginx p7zip-full
@@ -40,18 +40,11 @@ apt-get -y install openjdk-7-jre-headless openjdk-7-jre-lib ffmpeg imagemagick m
 apt-get -y purge --auto-remove 6-jre*
 
 # setup nginx
-rm /etc/nginx/sites-enabled/default
-cp nginx.conf /etc/nginx/sites-enabled/sead
-if [ -e sead.key -a -e sead.crt ]; then
-  cp sead.key /etc/ssl/sead.key
-  if [ -e intermediate.crt ]; then
-    cat sead.crt intermediate.crt > /etc/ssl/sead.crt
-  else
-    cp sead.crt /etc/ssl/sead.crt
-  fi
-  cat nginx.ssl >> /etc/nginx/sites-enabled/sead
+if [ ! -e /etc/nginx/sites-enabled/sead ]; then
+  rm /etc/nginx/sites-enabled/default
+  cp nginx.conf /etc/nginx/sites-enabled/sead
+  service nginx restart
 fi
-service nginx restart
 
 # create folders
 if [ ! -e /home/medici/data ]; then
@@ -160,18 +153,23 @@ sed -e "s/^#*remoteAPIKey=.*$/remoteAPIKey=${APIKEY}/" \
     -e "s/^#*mail.from=.*$/mail.from=${MEDICI_EMAIL}/" \
     -e "s/^#*user.0.email=.*$/user.0.email=${MEDICI_EMAIL}/" \
     -e "s/^#*user.0.password=.*$/user.0.password=${MEDICI_PASSWORD}/" \
-     -e "s/^#*user.1.password=.*$/user.1.password=${VA_PASSWORD}/" \
+    -e "s/^#*user.1.password=.*$/user.1.password=${VA_PASSWORD}/" \
     -e "s/^#*google.api_key=.*$/google.api_key=${GOOGLEAPIKEY}/" \
     -e "s/^#*google.client_id=.*$/google.client_id=${GOOGLEID}/" \
-    -e "s/^#*google.device_client_id=.*$/google.device_client_id=${GOOGLE_DEVID}/" \ 
+    -e "s/^#*google.device_client_id=.*$/google.device_client_id=${GOOGLE_DEVID}/" \
     -e "s/^#*orcid.client_id=.*$/orcid.client_id=${ORCIDID}/" \
     -e "s/^#*orcid.client_secret=.*$/orcid.client_secret=${ORCIDSECRET}/" \
-    -e "s/^#*proxiedgeoserver=.*$/proxiedgeoserver=http://${HOSTNAME}/geoserver/" \
-    -e "s/^#*geoserver=.*$/geoserver=http://${HOSTNAME}/acr/geoproxy/" \
-    -e "s/^#*geouser=.*$/geouser=${GEO_USER}/" \ 
-    -e "s/^#*geopassword=.*$/geopassword=${GEO_PASSWORD}/" \ 
-    -e "s/^#*domain=.*$/domain=http://${HOSTNAME}/acr/" acr.server > /home/medici/acr.server
+    -e "s/^#*proxiedgeoserver=.*$/proxiedgeoserver=http:\/\/${HOSTNAME}\/geoserver/" \
+    -e "s/^#*geoserver=.*$/geoserver=http:\/\/${HOSTNAME}\/acr\/geoproxy/" \
+    -e "s/^#*geouser=.*$/geouser=${GEO_USER}/" \
+    -e "s/^#*geopassword=.*$/geopassword=${GEO_PASSWORD}/" \
+    -e "s/^#*domain=.*$/domain=http:\/\/${HOSTNAME}\/acr/" acr.server > /home/medici/acr.server
 /home/medici/update-web.sh
+
+# cleanup
+rm -rf /home/medici/dashboard.* /home/medici/installDashboard.sh /home/medici/update-dashboard.sh /var/lib/tomcat6/webapps/dashboard
+rm -rf /home/medici/discovery.* /home/medici/installDiscovery.sh /home/medici/update-discovery.sh /var/lib/tomcat6/webapps/discovery
+rm -rf /home/medici/geobrowse.* /home/medici/installGeobrowser.sh /home/medici/update-geobrowse.sh /var/lib/tomcat6/webapps/geobrowse
 
 # All done
 echo "The complete stack has been installed/updated. You can access SEAD using the following URL:"
