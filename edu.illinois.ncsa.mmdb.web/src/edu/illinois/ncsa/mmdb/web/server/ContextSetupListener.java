@@ -65,6 +65,7 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.kernel.impl.HashFileContext;
 import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.mysql.MysqlContext;
@@ -74,9 +75,11 @@ import org.tupeloproject.postgresql.PostgresqlContext;
 import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.rdf.xml.RdfXml;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.cet.search.impl.LuceneTextIndex;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
@@ -87,9 +90,9 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
+import edu.illinois.ncsa.mmdb.web.server.util.ContextUpdater;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.AuthenticationException;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.ContextAuthentication;
@@ -234,7 +237,7 @@ public class ContextSetupListener implements ServletContextListener {
         // make sure context is up to latest version
         // TODO remove? always false?
         try {
-            ContextConvert.updateContext(TupeloStore.getInstance().getContext());
+            ContextUpdater.updateContext(TupeloStore.getInstance().getContext());
         } catch (OperatorException e) {
             log.warn("Could not update context.", e);
         }
@@ -573,10 +576,8 @@ public class ContextSetupListener implements ServletContextListener {
         int level = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelValues).split("[ ]*,[ ]*").length - 1;
         rbac.associatePermissionsWithRoles(predicate, level);
 
-        //ensure default roles exist
-        for (DefaultRole role : DefaultRole.values() ) {
-            ensureRoleExists(role, rbac);
-        }
+        //ensure admin role exist
+        ensureRoleExists(DefaultRole.ADMINISTRATOR, rbac);
 
         // ensure anonymous user exists
         PersonBean anon = PersonBeanUtil.getAnonymous();
@@ -610,31 +611,64 @@ public class ContextSetupListener implements ServletContextListener {
 
                     // add roles
                     for (String role : props.getProperty(pre + ".roles", "").split("[,\\s]+") ) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                        if ("admin".equalsIgnoreCase(role)) { //$NON-NLS-1$
-                            Resource adminRole = Resource.uriRef(DefaultRole.ADMINISTRATOR.getUri());
-                            Resource viewMemberPages = Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri());
-                            Resource viewAdminPages = Resource.uriRef(Permission.VIEW_ADMIN_PAGES.getUri());
-                            Resource editRoles = Resource.uriRef(Permission.EDIT_ROLES.getUri());
-                            log.info("Adding " + userid + " to Administrator role");
-                            rbac.addRole(userid, adminRole);
-                            // this admin needs to have admin permissions. if they don't, create them
-                            if (!rbac.checkPermission(userid, viewMemberPages) ||
-                                    !rbac.checkPermission(userid, viewAdminPages) ||
-                                    !rbac.checkPermission(userid, editRoles)) {
-                                log.info("User " + userid + " cannot administer access control: adding permissions to Administrator role");
-                                rbac.setPermissionValue(adminRole, viewMemberPages, RBAC.ALLOW);
-                                rbac.setPermissionValue(adminRole, viewAdminPages, RBAC.ALLOW);
-                                rbac.setPermissionValue(adminRole, editRoles, RBAC.ALLOW);
+                        UriRef userRole = findRole(rbac, role);
+                        if (userRole != null) {
+                            rbac.addRole(userid, userRole);
+                            log.info("Adding " + userid + "(" + fullname + ", " + email + ") to role " + userRole.toString());
+                            if (userRole.toString().equals(DefaultRole.ADMINISTRATOR.getUri())) {
+                                Resource viewMemberPages = Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri());
+                                Resource viewAdminPages = Resource.uriRef(Permission.VIEW_ADMIN_PAGES.getUri());
+                                Resource editRoles = Resource.uriRef(Permission.EDIT_ROLES.getUri());
+                                // this admin needs to have admin permissions. if they don't, create them
+                                if (!rbac.checkPermission(userid, viewMemberPages) ||
+                                        !rbac.checkPermission(userid, viewAdminPages) ||
+                                        !rbac.checkPermission(userid, editRoles)) {
+                                    log.info("User " + userid + " cannot administer access control: adding permissions to Administrator role");
+                                    rbac.setPermissionValue(userRole, viewMemberPages, RBAC.ALLOW);
+                                    rbac.setPermissionValue(userRole, viewAdminPages, RBAC.ALLOW);
+                                    rbac.setPermissionValue(userRole, editRoles, RBAC.ALLOW);
+                                }
                             }
-                        }
-                        if ("member".equalsIgnoreCase(role)) { //$NON-NLS-1$
-                            ensureRoleExists(DefaultRole.VIEWER, rbac);
-                            rbac.addRole(userid, Resource.uriRef(DefaultRole.VIEWER.getUri()));
+                        } else {
+                            log.info("Could not add " + userid + "(" + fullname + ", " + email + ") to a role: " + role + " not found.");
                         }
                     }
                 }
             }
         }
+    }
+
+    private UriRef findRole(SEADRbac rbac, String role) throws OperatorException {
+        Unifier u = new Unifier();
+        u.setColumnNames("role", "roleName");
+        u.addPattern("role", Rdf.TYPE, RBAC.ROLE);
+        u.addPattern("role", Rdfs.LABEL, "roleName");
+        try {
+            TupeloStore.getInstance().getContext().perform(u);
+        } catch (OperatorException x) {
+            throw new OperatorException("unable to read existing roles");
+        }
+
+        UriRef userRole = null;
+        if ("admin".equalsIgnoreCase(role)) { //$NON-NLS-1$
+            userRole = Resource.uriRef(DefaultRole.ADMINISTRATOR.getUri());
+        } else {
+            boolean viewerExists = false;
+            for (Tuple<Resource> r : u.getResult() ) {
+                String roleName = r.get(1).toString();
+                if (roleName.equalsIgnoreCase(role)) {
+                    userRole = (UriRef) r.get(0);
+                    break;
+                } else if (roleName.equals(DefaultRole.VIEWER.getName())) {
+                    viewerExists = true;
+                }
+            }
+            if ((userRole == null) && (viewerExists)) {
+                log.info(role + " not found - assigning user to VIEWER role");
+                userRole = Resource.uriRef(DefaultRole.VIEWER.getUri());
+            }
+        }
+        return userRole;
     }
 
     void ensureRoleExists(DefaultRole role, SEADRbac rbac) throws OperatorException, RBACException {
