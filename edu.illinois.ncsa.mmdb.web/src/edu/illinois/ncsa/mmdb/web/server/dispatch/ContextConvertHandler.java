@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -49,13 +49,14 @@ import org.tupeloproject.kernel.OperatorException;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ContextConvert;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.util.ContextUpdater;
 
 /**
  * Delete dataset. Marks dataset as deleted but content still remains in the
  * repository.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class ContextConvertHandler implements ActionHandler<ContextConvert, EmptyResult> {
 
@@ -65,7 +66,7 @@ public class ContextConvertHandler implements ActionHandler<ContextConvert, Empt
     @Override
     public EmptyResult execute(ContextConvert arg0, ExecutionContext arg1) throws ActionException {
         try {
-            edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert.updateContext(TupeloStore.getInstance().getContext(), true);
+            ContextUpdater.updateContext(TupeloStore.getInstance().getContext(), true);
         } catch (OperatorException e) {
             log.warn("Failed to update context.", e);
             throw (new ActionException("Could not update context.", e));
