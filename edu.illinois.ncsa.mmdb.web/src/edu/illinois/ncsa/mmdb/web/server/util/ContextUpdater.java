@@ -37,12 +37,15 @@ package edu.illinois.ncsa.mmdb.web.server.util;
 
 import java.util.Date;
 
+import net.customware.gwt.dispatch.shared.ActionException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Bid;
 import org.tupeloproject.kernel.ContentStoreContext;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Transformer;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
@@ -50,11 +53,16 @@ import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPermissionsHandler;
+import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 
@@ -127,6 +135,7 @@ public class ContextUpdater {
             removeNullUsers(context);
             addPermissionsToDefaultRoles(context);
             fixLabelClash(context);
+            flattenPermissions(context);
         }
 
         // Mark context as updated removing all old versions first.
@@ -269,6 +278,53 @@ public class ContextUpdater {
         rbac.setPermissionValue(admin, manageMetadataPermission, RBAC.ALLOW);
 
         log.info("Updated default roles with new permissions");
+    }
+
+    private static void flattenPermissions(Context c) throws OperatorException {
+        SEADRbac rbac = new SEADRbac(c);
+        //Get current role/permission assignments (flatten through GetPermissionsHandler)
+        try {
+            GetPermissionsResult gpr = new GetPermissionsHandler().execute(null, null);
+            for (PermissionSetting p : gpr.getSettings() ) {
+                log.warn("Role: " + p.getRoleName() + " has " + p.getValue().getName() + " for " + p.getPermission().getLabel());
+            }
+            //Remove role assignments
+            // first, pick up the trash
+            Transformer t = new Transformer();
+            t.addInPattern("role", RBAC.HAS_PERMISSION_VALUE, "pv");
+            t.addInPattern("role", Rdf.TYPE, RBAC.ROLE);
+            t.addOutPattern("role", RBAC.HAS_PERMISSION_VALUE, "pv");
+            c.perform(t);
+            c.removeTriples(t.getResult());
+
+            //Create unique permissionValue set (one per permission)
+            for (Permission p : Permission.values() ) {
+                log.warn("Removing old values for permission " + p.getLabel());
+                rbac.deletePermission(Resource.uriRef(p.getUri())); //removes many permissionValues
+                log.warn("Adding unique values for permission " + p.getLabel());
+                rbac.createPermission(Resource.uriRef(p.getUri()), p.getLabel()); //adds one set of permission Values
+            }
+
+            //Set role/permission assignments on unique permissions.
+            for (PermissionSetting p : gpr.getSettings() ) {
+                log.warn("Setting Role: " + p.getRoleName() + " to have " + p.getValue().getName() + " for " + p.getPermission().getLabel());
+                rbac.setPermissionValue(Resource.uriRef(p.getRoleUri()), Resource.uriRef(p.getPermission().getUri()), getUriRefForPermissionValue(p.getValue()));
+            }
+            log.warn("Permissions Flattened");
+        } catch (ActionException a) {
+            throw new OperatorException("Failed to retrieve Role/Permission settings");
+        }
+    }
+
+    private static Resource getUriRefForPermissionValue(PermissionValue pv) {
+        if (pv.equals(PermissionValue.ALLOW)) {
+            return RBAC.ALLOW;
+        } else if (pv.equals(PermissionValue.DO_NOT_ALLOW)) {
+            return RBAC.DO_NOT_ALLOW;
+        } else if (pv.equals(PermissionValue.DENY)) {
+            return RBAC.DENY;
+        }
+        return null;
     }
 
 }

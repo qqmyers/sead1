@@ -570,10 +570,12 @@ public class ContextSetupListener implements ServletContextListener {
         log.debug("Initializing Medici permission set...");
         rbac.createBaseOntology();
 
-        // ensure Medici permissions exist
-        rbac.intializePermissions();
+        // ensure Medici permissions exist/are current with Permissions enum
+        rbac.updatePermissions();
         String predicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
         int level = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelValues).split("[ ]*,[ ]*").length - 1;
+        // make sure each role has a value for every permission (will give donotallow for all new permissions...)
+        // and an access level setting (set to default level if not yet set)
         rbac.associatePermissionsWithRoles(predicate, level);
 
         //ensure admin role exist
@@ -656,8 +658,9 @@ public class ContextSetupListener implements ServletContextListener {
             boolean viewerExists = false;
             for (Tuple<Resource> r : u.getResult() ) {
                 String roleName = r.get(1).toString();
-                //Shouldn't allow anonymous or owner roles - owner should never be returned here since it is dynamic/not written
-                if (!roleName.equals(DefaultRole.ANONYMOUS.getName())) {
+                //Shouldn't allow anonymous or owner roles
+                if (!roleName.equals(DefaultRole.ANONYMOUS.getName()) &&
+                        (!roleName.equals(DefaultRole.OWNER.getName()))) {
                     if (roleName.equalsIgnoreCase(role)) {
                         userRole = (UriRef) r.get(0);
                         break;

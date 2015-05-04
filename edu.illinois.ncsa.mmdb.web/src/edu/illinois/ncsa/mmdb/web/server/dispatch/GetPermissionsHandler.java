@@ -58,7 +58,7 @@ public class GetPermissionsHandler implements ActionHandler<GetPermissions, GetP
                     }
                 }
 
-                //log.debug("Permission " + p.getLabel() + " is set to " + v.getName() + " for " + roleName);
+                //log.trace("Permission " + p.getLabel() + " is set to " + v.getName() + " for " + roleName);
                 result.addSetting(new PermissionSetting(role.getString(), p, v, roleName));
             }
 

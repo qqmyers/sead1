@@ -13,9 +13,11 @@ import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
+import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
 
@@ -198,21 +200,57 @@ public class SEADRbac extends RBAC {
     }
 
     /**
-     * Create all the permissions available in Medici. Does not initialize RBAC
-     * first; to do
-     * that,
-     * simply call {@link initialize}.
+     * Updates the permissions with any new ones that may have been defined.
+     * Does not replace existing permissions
+     * which may be associated with roles.
      *
-     * @throws RBACException
-     *
-     * @throws Operator
+     * @throws OperatorException
      */
-    public void intializePermissions() throws OperatorException {
+    public void updatePermissions() throws OperatorException {
+        Context c = getContext();
+        Unifier u = new Unifier();
+        u.addPattern("permission", Rdf.TYPE, PERMISSION);
+        u.addPattern("permission", Rdfs.LABEL, "name");
+        u.setColumnNames("permission", "name");
+        c.perform(u);
+        Set<String> l = new HashSet<String>();
+
+        for (Tuple<Resource> t : u.getResult() ) {
+            String s = t.get(1).toString();
+            if (s != null) {
+                l.add(s);
+            }
+        }
         for (Permission p : Permission.values() ) {
             String uri = p.getUri();
             String label = p.getLabel();
-            createPermission(Resource.uriRef(uri), label);
+            if (!l.contains(label)) {
+                createPermission(Resource.uriRef(uri), label);
+            }
         }
+    }
+
+    public void createPermission(UriRef permission, String name) throws OperatorException {
+        Context c = getContext();
+        TripleWriter tw = new TripleWriter();
+        Resource doNotAllow = Resource.uriRef();
+        Resource allow = Resource.uriRef();
+        Resource deny = Resource.uriRef();
+        tw.add(permission, Rdf.TYPE, PERMISSION);
+        tw.add(permission, HAS_PERMISSION_VALUE, doNotAllow);
+        tw.add(doNotAllow, Rdf.TYPE, DO_NOT_ALLOW);
+        tw.add(permission, HAS_PERMISSION_VALUE, allow);
+        tw.add(allow, Rdf.TYPE, ALLOW);
+        tw.add(permission, HAS_PERMISSION_VALUE, deny);
+        tw.add(deny, Rdf.TYPE, DENY);
+        if (name != null) {
+            tw.add(permission, Rdfs.LABEL, name);
+            tw.add(doNotAllow, Rdfs.LABEL, "Do not allow " + name);
+            tw.add(allow, Rdfs.LABEL, "Allow " + name);
+            tw.add(deny, Rdfs.LABEL, "Deny " + name);
+        }
+        c.perform(tw);
+
     }
 
     public void associatePermissionsWithRoles(String accesspredicate, int defaultlevel) throws RBACException, OperatorException {
@@ -269,4 +307,5 @@ public class SEADRbac extends RBAC {
             createRole(roleUri, label, role.getPermissions());
         }
     }
+
 }
