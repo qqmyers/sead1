@@ -656,11 +656,14 @@ public class ContextSetupListener implements ServletContextListener {
             boolean viewerExists = false;
             for (Tuple<Resource> r : u.getResult() ) {
                 String roleName = r.get(1).toString();
-                if (roleName.equalsIgnoreCase(role)) {
-                    userRole = (UriRef) r.get(0);
-                    break;
-                } else if (roleName.equals(DefaultRole.VIEWER.getName())) {
-                    viewerExists = true;
+                //Shouldn't allow anonymous or owner roles - owner should never be returned here since it is dynamic/not written
+                if (!roleName.equals(DefaultRole.ANONYMOUS.getName())) {
+                    if (roleName.equalsIgnoreCase(role)) {
+                        userRole = (UriRef) r.get(0);
+                        break;
+                    } else if (roleName.equals(DefaultRole.VIEWER.getName())) {
+                        viewerExists = true;
+                    }
                 }
             }
             if ((userRole == null) && (viewerExists)) {

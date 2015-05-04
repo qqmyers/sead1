@@ -138,6 +138,12 @@ public class GetUsersHandler implements ActionHandler<GetUsers, GetUsersResult> 
                         return -1;
                     }
                     if (o1.name.equals(o2.name)) {
+                        if (o1.email == null) {
+                            //Should not happen after context v9 except for some bad accounts on test servers
+                            log.warn("Null email for an account with name" + o1.name);
+                            return +1;
+
+                        }
                         return o1.email.compareToIgnoreCase(o2.email);
                     }
                     return o1.name.compareToIgnoreCase(o2.name);
