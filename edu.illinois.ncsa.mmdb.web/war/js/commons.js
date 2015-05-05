@@ -160,11 +160,13 @@ function pageBiblioJsonParser(id, json) {
 		}
 	}
 
-	if(doi!='') {
-		$("#doi" + id).html("<b>DOI: </b><a target = \'blank\' href=\'" + doi + "\'>" + doi + "</a>");
+	if (doi != '') {
+		$("#doi" + id).html(
+				"<b>DOI: </b><a target = \'blank\' href=\'" + doi + "\'>" + doi
+						+ "</a>");
 		$("#doi" + id).css("visibility", "visible");
 	}
-	
+
 	if (creators.length != 0) {
 		var creatorString = creators[0];
 		var datacreatorString = creatornames[0];
@@ -240,82 +242,92 @@ function getBiblioBindingsForPage(jsonBinding) {
 	}
 }
 
+
+var doiAlertSent = false;
+
 function getBiblioAttributesForPage(jsonBinding) {
 
-	$.each(jsonBinding, function(key, value) {
-		if (value == 'creator' || value == 'contact') {
-			var temp = jsonBinding['literal'];
-			var name = temp.substring(0, temp.indexOf(':') - 1);
-			var url = temp.substring(temp.indexOf(':') + 1);
-			var html = "<a href='" + url + "' target=_blank>" + name + "</a> ";
+	$
+			.each(
+					jsonBinding,
+					function(key, value) {
+						if (value == 'creator' || value == 'contact') {
+							var temp = jsonBinding['literal'];
+							var name = temp.substring(0, temp.indexOf(':') - 1);
+							var url = temp.substring(temp.indexOf(':') + 1);
+							var html = "<a href='" + url + "' target=_blank>"
+									+ name + "</a> ";
 
-			if (value == 'creator') {
-				if (creators.indexOf(html) == -1) {
-					creators.push(html);
-					name = name.replace(",", "\\,\\");
-					creatornames.push(name);
-				}
-			} else if (value == 'contact') {
-				if (contacts.indexOf(html) == -1) {
-					contacts.push(html);
-					name = name.replace(",", "\\,\\");
-					contactnames.push(name);
-				}
-			}
-		} else if (value == 'abstract' || value == 'title'
-				|| value == 'location')  {
-			var temp = jsonBinding['literal'];
-			if (value == 'abstract') {
-				if ((abstract.length > 0) && (abstract != temp)) {
-					alert("Multiple abstracts");
-				} else {
-					abstract = temp;
-				}
-			} else if (value == "title") {
-				if ((title.length > 0) && (title != temp)) {
-					alert("Multiple titles");
-				} else {
-					title = temp;
-				}
-			} else {
-				if (coll_location.indexOf(temp) == -1) {
-					coll_location.push(temp);
-				}
-			} 
-		}
+							if (value == 'creator') {
+								if (creators.indexOf(html) == -1) {
+									creators.push(html);
+									name = name.replace(",", "\\,\\");
+									creatornames.push(name);
+								}
+							} else if (value == 'contact') {
+								if (contacts.indexOf(html) == -1) {
+									contacts.push(html);
+									name = name.replace(",", "\\,\\");
+									contactnames.push(name);
+								}
+							}
+						} else if (value == 'abstract' || value == 'title'
+								|| value == 'location') {
+							var temp = jsonBinding['literal'];
+							if (value == 'abstract') {
+								if ((abstract.length > 0) && (abstract != temp)) {
+									alert("Multiple abstracts");
+								} else {
+									abstract = temp;
+								}
+							} else if (value == "title") {
+								if ((title.length > 0) && (title != temp)) {
+									alert("Multiple titles");
+								} else {
+									title = temp;
+								}
+							} else {
+								if (coll_location.indexOf(temp) == -1) {
+									coll_location.push(temp);
+								}
+							}
+						}
 
-		else if (value == 'descriptor') {
-			var tempDescriptor = jsonBinding['uri'];
-			if (tempDescriptor != "undefined") {
-				if (descriptors.indexOf(tempDescriptor) == -1) {
-					descriptors.push(tempDescriptor);
-				}
-			}
-		}
+						else if (value == 'descriptor') {
+							var tempDescriptor = jsonBinding['uri'];
+							if (tempDescriptor != "undefined") {
+								if (descriptors.indexOf(tempDescriptor) == -1) {
+									descriptors.push(tempDescriptor);
+								}
+							}
+						}
 
-		else if (value == 'keyword') {
-			var temp = jsonBinding['uri'];
+						else if (value == 'keyword') {
+							var temp = jsonBinding['uri'];
 
-			temp = temp.substring(temp.indexOf("#") + 1);
+							temp = temp.substring(temp.indexOf("#") + 1);
 
-			temp = decodeURIComponent(temp);
+							temp = decodeURIComponent(temp);
 
-			// replaceAll + from temp
-			while (temp.indexOf("+") != -1) {
-				temp = temp.replace('+', " ");
-			}
+							// replaceAll + from temp
+							while (temp.indexOf("+") != -1) {
+								temp = temp.replace('+', " ");
+							}
 
-			if (keywords.indexOf(temp) == -1)
-				keywords.push(temp);
-		}else if (value == 'doi') {
-			var temp = jsonBinding['uri'];
-				if ((doi.length > 0) && (doi != temp)) {
-					alert("Multiple DOIs");
-				} else {
-					doi = temp;
-				}
-			}
-	});
+							if (keywords.indexOf(temp) == -1)
+								keywords.push(temp);
+						} else if (value == 'doi') {
+							var temp = jsonBinding['uri'];
+							if ((doi.length > 0) && (doi != temp)) {
+								if (doiAlertSent == false) {
+									alert("Collections with Multiple DOIs show up multiple times on this page. See the collections page to view all DOIs assigned to to them.");
+									doiAlertSent = true;
+								}
+							} else {
+								doi = temp;
+							}
+						}
+					});
 }
 
 function createBlock(id, element) {
@@ -341,8 +353,8 @@ function createBlock(id, element) {
 	$("#coll" + id).append(
 			$("<div/>").attr("class", "well").attr("id", "div" + id));
 	$("#div" + id).append(
-			($("<p/>")).attr("id", "doi" + id).css("visibility", "hidden")
-					.css("margin-top", "-5px"));
+			($("<p/>")).attr("id", "doi" + id).css("visibility", "hidden").css(
+					"margin-top", "-5px"));
 	$("#div" + id).append(
 			($("<p/>")).attr("id", "authors" + id).css("visibility", "hidden"));
 	$("#div" + id)
