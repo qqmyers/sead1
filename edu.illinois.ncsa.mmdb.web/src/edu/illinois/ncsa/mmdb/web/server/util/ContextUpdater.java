@@ -48,6 +48,7 @@ import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Transformer;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
@@ -55,6 +56,7 @@ import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
@@ -136,6 +138,7 @@ public class ContextUpdater {
             addPermissionsToDefaultRoles(context);
             fixLabelClash(context);
             flattenPermissions(context);
+            removeEmptyGeoPoints(context);
         }
 
         // Mark context as updated removing all old versions first.
@@ -286,7 +289,7 @@ public class ContextUpdater {
         try {
             GetPermissionsResult gpr = new GetPermissionsHandler().execute(null, null);
             for (PermissionSetting p : gpr.getSettings() ) {
-                log.warn("Role: " + p.getRoleName() + " has " + p.getValue().getName() + " for " + p.getPermission().getLabel());
+                log.info("Role: " + p.getRoleName() + " has " + p.getValue().getName() + " for " + p.getPermission().getLabel());
             }
             //Remove role assignments
             // first, pick up the trash
@@ -299,18 +302,18 @@ public class ContextUpdater {
 
             //Create unique permissionValue set (one per permission)
             for (Permission p : Permission.values() ) {
-                log.warn("Removing old values for permission " + p.getLabel());
+                log.info("Removing old values for permission " + p.getLabel());
                 rbac.deletePermission(Resource.uriRef(p.getUri())); //removes many permissionValues
-                log.warn("Adding unique values for permission " + p.getLabel());
+                log.info("Adding unique values for permission " + p.getLabel());
                 rbac.createPermission(Resource.uriRef(p.getUri()), p.getLabel()); //adds one set of permission Values
             }
 
             //Set role/permission assignments on unique permissions.
             for (PermissionSetting p : gpr.getSettings() ) {
-                log.warn("Setting Role: " + p.getRoleName() + " to have " + p.getValue().getName() + " for " + p.getPermission().getLabel());
+                log.info("Setting Role: " + p.getRoleName() + " to have " + p.getValue().getName() + " for " + p.getPermission().getLabel());
                 rbac.setPermissionValue(Resource.uriRef(p.getRoleUri()), Resource.uriRef(p.getPermission().getUri()), getUriRefForPermissionValue(p.getValue()));
             }
-            log.warn("Permissions Flattened");
+            log.info("Permissions Flattened");
         } catch (ActionException a) {
             throw new OperatorException("Failed to retrieve Role/Permission settings");
         }
@@ -325,6 +328,24 @@ public class ContextUpdater {
             return RBAC.DENY;
         }
         return null;
+    }
+
+    private static void removeEmptyGeoPoints(Context c) throws OperatorException {
+        Unifier uf = new Unifier();
+        UriRef hasGeopoint = Resource.uriRef("tag:tupeloproject.org,2006:/2.0/gis/hasGeoPoint");
+        uf.addPattern("dataset", hasGeopoint, "geopoint");
+        uf.addPattern("geopoint", Resource.uriRef("http://www.w3.org/2003/01/geo/wgs84_pos#long"), "long", true);
+        uf.setColumnNames("dataset", "geopoint", "long");
+        c.perform(uf);
+        TripleWriter tw = new TripleWriter();
+        for (Tuple<Resource> t : uf.getResult() ) {
+            if (t.get(2) == null) {
+                tw.remove(t.get(0), hasGeopoint, t.get(1));
+            }
+        }
+        c.perform(tw);
+        log.info("Empty GeoPoints removed.");
+        return;
     }
 
 }
