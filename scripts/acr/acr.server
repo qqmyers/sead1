@@ -111,7 +111,7 @@ user.0.roles=ADMIN
 user.1.fullname=SEAD-VA Curator
 #user.1.password=cookie123
 user.1.email=sead-va@googlegroups.com
-user.1.roles=VIEWER
+user.1.roles=AUTHOR
 
 #
 # List of userfields
