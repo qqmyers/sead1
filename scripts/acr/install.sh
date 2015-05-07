@@ -149,21 +149,41 @@ sed -e "s#^geoserver.username=.*\$#geoserver.username=${GEO_USER}#" \
 
 # install web app
 echo "Installing WebApp"
-sed -e "s/^#*remoteAPIKey=.*$/remoteAPIKey=${APIKEY}/" \
-    -e "s/^#*mail.from=.*$/mail.from=${MEDICI_EMAIL}/" \
-    -e "s/^#*user.0.email=.*$/user.0.email=${MEDICI_EMAIL}/" \
-    -e "s/^#*user.0.password=.*$/user.0.password=${MEDICI_PASSWORD}/" \
-    -e "s/^#*user.1.password=.*$/user.1.password=${VA_PASSWORD}/" \
-    -e "s/^#*google.api_key=.*$/google.api_key=${GOOGLEAPIKEY}/" \
-    -e "s/^#*google.client_id=.*$/google.client_id=${GOOGLEID}/" \
-    -e "s/^#*google.device_client_id=.*$/google.device_client_id=${GOOGLE_DEVID}/" \
-    -e "s/^#*orcid.client_id=.*$/orcid.client_id=${ORCIDID}/" \
-    -e "s/^#*orcid.client_secret=.*$/orcid.client_secret=${ORCIDSECRET}/" \
-    -e "s/^#*proxiedgeoserver=.*$/proxiedgeoserver=http:\/\/${HOSTNAME}\/geoserver/" \
-    -e "s/^#*geoserver=.*$/geoserver=http:\/\/${HOSTNAME}\/acr\/geoproxy/" \
-    -e "s/^#*geouser=.*$/geouser=${GEO_USER}/" \
-    -e "s/^#*geopassword=.*$/geopassword=${GEO_PASSWORD}/" \
-    -e "s/^#*domain=.*$/domain=http:\/\/${HOSTNAME}\/acr/" acr.server > /home/medici/acr.server
+cp acr.server.common /home/medici/acr.server
+if [ -e acr.server.bigdata.${HOSTNAME} ]; then
+  cat acr.server.bigdata.${HOSTNAME} >> /home/medici/acr.server
+else
+  cat acr.server.bigdata >> /home/medici/acr.server
+fi
+if [ -e acr.server.userfields.${HOSTNAME} ]; then
+  cat acr.server.userfields.${HOSTNAME} >> /home/medici/acr.server
+else
+  cat acr.server.userfields >> /home/medici/acr.server
+fi
+if [ -e acr.server.relationships.${HOSTNAME} ]; then
+  cat acr.server.relationships.${HOSTNAME} >> /home/medici/acr.server
+else
+  cat acr.server.relationships >> /home/medici/acr.server
+fi
+
+sed -i -e "s/^#*remoteAPIKey=.*$/remoteAPIKey=${APIKEY}/" \
+       -e "s/^#*mail.from=.*$/mail.from=${MEDICI_EMAIL}/" \
+       -e "s/^#*user.0.email=.*$/user.0.email=${MEDICI_EMAIL}/" \
+       -e "s/^#*user.0.password=.*$/user.0.password=${MEDICI_PASSWORD}/" \
+       -e "s/^#*user.1.password=.*$/user.1.password=${VA_PASSWORD}/" \
+       -e "s/^#*google.api_key=.*$/google.api_key=${GOOGLEAPIKEY}/" \
+       -e "s/^#*google.client_id=.*$/google.client_id=${GOOGLEID}/" \
+       -e "s/^#*google.device_client_id=.*$/google.device_client_id=${GOOGLE_DEVID}/" \
+       -e "s/^#*orcid.client_id=.*$/orcid.client_id=${ORCIDID}/" \
+       -e "s/^#*orcid.client_secret=.*$/orcid.client_secret=${ORCIDSECRET}/" \
+       -e "s/^#*proxiedgeoserver=.*$/proxiedgeoserver=http:\/\/${HOSTNAME}\/geoserver/" \
+       -e "s/^#*geoserver=.*$/geoserver=http:\/\/${HOSTNAME}\/acr\/geoproxy/" \
+       -e "s/^#*geouser=.*$/geouser=${GEO_USER}/" \
+       -e "s/^#*geopassword=.*$/geopassword=${GEO_PASSWORD}/" \
+       -e "s/^#*domain=.*$/domain=http:\/\/${HOSTNAME}\/acr/" /home/medici/acr.server
+if [ "${HOSTNAME}" == "nced" ]; then
+  sed -i -e "s/^#bigdata=.*$/bigdata=true/" /home/medici/acr.server
+fi
 /home/medici/update-web.sh
 
 # cleanup
