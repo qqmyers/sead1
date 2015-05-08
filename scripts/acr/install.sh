@@ -6,7 +6,7 @@ if [ $UID != 0 ]; then
 fi
 
 # some variables
-HOSTNAME=$( hostname -f )
+FQDN=$( hostname -f )
 ANONYMOUS="true"
 APIKEY=$( uuidgen -r )
 GOOGLEAPIKEY=""
@@ -143,8 +143,8 @@ chmod 755 /etc/init.d/medici
 update-rc.d medici defaults
 sed -e "s#^geoserver.username=.*\$#geoserver.username=${GEO_USER}#" \
     -e "s#^geoserver.password=.*\$#geoserver.password=${GEO_PASSWORD}#" \
-    -e "s#^geoserver.server=.*\$#geoserver.server=http://${HOSTNAME}/geoserver#" \
-    -e "s#^geoserver.owsserver=.*\$#geoserver.owsserver=http://${HOSTNAME}/geoserver/wms#" extractor.properties > /home/medici/extractor.properties
+    -e "s#^geoserver.server=.*\$#geoserver.server=http://${FQDN}/geoserver#" \
+    -e "s#^geoserver.owsserver=.*\$#geoserver.owsserver=http://${FQDN}/geoserver/wms#" extractor.properties > /home/medici/extractor.properties
 /home/medici/update-extractor.sh
 
 # install web app
@@ -176,14 +176,11 @@ sed -i -e "s/^#*remoteAPIKey=.*$/remoteAPIKey=${APIKEY}/" \
        -e "s/^#*google.device_client_id=.*$/google.device_client_id=${GOOGLE_DEVID}/" \
        -e "s/^#*orcid.client_id=.*$/orcid.client_id=${ORCIDID}/" \
        -e "s/^#*orcid.client_secret=.*$/orcid.client_secret=${ORCIDSECRET}/" \
-       -e "s/^#*proxiedgeoserver=.*$/proxiedgeoserver=http:\/\/${HOSTNAME}\/geoserver/" \
-       -e "s/^#*geoserver=.*$/geoserver=http:\/\/${HOSTNAME}\/acr\/geoproxy/" \
+       -e "s/^#*proxiedgeoserver=.*$/proxiedgeoserver=http:\/\/${FQDN}\/geoserver/" \
+       -e "s/^#*geoserver=.*$/geoserver=http:\/\/${FQDN}\/acr\/geoproxy/" \
        -e "s/^#*geouser=.*$/geouser=${GEO_USER}/" \
        -e "s/^#*geopassword=.*$/geopassword=${GEO_PASSWORD}/" \
-       -e "s/^#*domain=.*$/domain=http:\/\/${HOSTNAME}\/acr/" /home/medici/acr.server
-if [ "${HOSTNAME}" == "nced" ]; then
-  sed -i -e "s/^#bigdata=.*$/bigdata=true/" /home/medici/acr.server
-fi
+       -e "s/^#*domain=.*$/domain=http:\/\/${FQDN}\/acr/" /home/medici/acr.server
 /home/medici/update-web.sh
 
 # cleanup
@@ -193,5 +190,5 @@ rm -rf /home/medici/geobrowse.* /home/medici/installGeobrowser.sh /home/medici/u
 
 # All done
 echo "The complete stack has been installed/updated. You can access SEAD using the following URL:"
-echo "http://${HOSTNAME}/"
+echo "http://${FQDN}/"
 
