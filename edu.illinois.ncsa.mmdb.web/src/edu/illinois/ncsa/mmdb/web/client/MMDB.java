@@ -334,6 +334,9 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                         _orcidClientId = result.getConfiguration(ConfigurationKey.OrcidClientId);
                         _vivoIdentifierUri = result.getConfiguration(ConfigurationKey.VIVOIDENTIFIERURL);
                         _vivoQueryUri = result.getConfiguration(ConfigurationKey.VIVOQUERYURL);
+
+                        Document.get().setTitle("SEAD: " + _projectName + " Project Space");
+
                         projectNameLabel.setHTML(wrapIfNeeded(_projectName));
 
                         // override default logo, background, title color
