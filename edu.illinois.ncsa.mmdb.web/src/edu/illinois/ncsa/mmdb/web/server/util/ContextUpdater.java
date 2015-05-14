@@ -253,6 +253,10 @@ public class ContextUpdater {
      */
     private static void addPermissionsToDefaultRoles(Context context) throws OperatorException {
         SEADRbac rbac = new SEADRbac(context);
+        //Must make sure new permissions exist before adding them to roles.
+        //Note: this is called again in the normal startup (after the context update happens), but
+        // this is OK / won't create duplicates.
+        rbac.updatePermissions();
         UriRef admin = Resource.uriRef(DefaultRole.ADMINISTRATOR.getUri());
         UriRef author = Resource.uriRef(DefaultRole.AUTHOR.getUri());
         UriRef viewer = Resource.uriRef(DefaultRole.VIEWER.getUri());
