@@ -68,6 +68,10 @@ table td{
 	border:none; 
 }
 
+.gwt-Button[disabled]:hover {
+    border: 0px outset #CCC;
+}
+
 /* ----------------------------------------------------------------------
  * Helper styles
  * ---------------------------------------------------------------------- */
@@ -2617,4 +2621,9 @@ padding: 0px;
 #weightedtaglist {
 	display: none;
 }
+
+#headercolorlabel {
+margin-left:0px!important;
+}
+
 }

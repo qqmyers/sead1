@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -240,21 +241,66 @@ public class ConfigurationWidget extends Composite {
         final TextBox logo = new TextBox();
         logo.setVisibleLength(40);
         logo.setText(configuration.getConfiguration(ConfigurationKey.ProjectHeaderLogo));
-        table.setText(idx, 0, "Logo URL (max height 100px)");
+        table.setText(idx, 0, "Logo (URL or Dataset): up to 100px x 140px");
         table.setWidget(idx, 1, logo);
+        final Button logoUseSelection = new Button("Use Selected Dataset");
+        if (MMDB.getSessionState().getSelectedItems().size() == 1) {
+            logoUseSelection.setEnabled(true);
+        } else {
+            logoUseSelection.setEnabled(false);
+            logoUseSelection.setTitle("Select a Dataset (on Datasets/Collection pages) to activate this button");
+        }
+        logoUseSelection.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                java.util.Iterator<String> i = MMDB.getSessionState().getSelectedItems().iterator();
+                if (i.hasNext()) {
+                    logo.setText(i.next());
+                } else {
+                    logoUseSelection.setEnabled(false);
+                    logoUseSelection.setTitle("Select a Dataset (on Datasets/Collection pages) to activate this button");
+                }
+            }
+        });
+        table.setWidget(idx, 2, logoUseSelection);
         idx++;
 
         final TextBox background = new TextBox();
         background.setVisibleLength(40);
         background.setText(configuration.getConfiguration(ConfigurationKey.ProjectHeaderBackground));
-        table.setText(idx, 0, "Header background image URL (max height 100px)");
+        table.setText(idx, 0, "Header background image (URL or Dataset): up to 120px x 1200px");
         table.setWidget(idx, 1, background);
+        final Button bannerUseSelection = new Button("Use Selected Dataset");
+        if (MMDB.getSessionState().getSelectedItems().size() == 1) {
+            bannerUseSelection.setEnabled(true);
+        } else {
+            bannerUseSelection.setEnabled(false);
+            bannerUseSelection.setTitle("Select a Dataset (on Datasets/Collection pages) to activate this button");
+
+        }
+        bannerUseSelection.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                java.util.Iterator<String> i = MMDB.getSessionState().getSelectedItems().iterator();
+                if (i.hasNext()) {
+                    background.setText(i.next());
+                } else {
+                    bannerUseSelection.setEnabled(false);
+                    bannerUseSelection.setTitle("Select a Dataset (on Datasets/Collection pages) to activate this button");
+                }
+            }
+        });
+        table.setWidget(idx, 2, bannerUseSelection);
         idx++;
 
         final TextBox titleColor = new TextBox();
         titleColor.setVisibleLength(40);
         titleColor.setText(configuration.getConfiguration(ConfigurationKey.ProjectHeaderTitleColor));
-        table.setText(idx, 0, "Header title color");
+        HTML titleColorHtmlLabel = new HTML("Header title color (use <a href=\"http://www.w3schools.com/html/html_colornames.asp\" target=\"blank\">names or values</a>)");
+        titleColorHtmlLabel.getElement().setId("headercolorlabel");
+        table.setWidget(idx, 0, titleColorHtmlLabel);
         table.setWidget(idx, 1, titleColor);
         idx++;
 

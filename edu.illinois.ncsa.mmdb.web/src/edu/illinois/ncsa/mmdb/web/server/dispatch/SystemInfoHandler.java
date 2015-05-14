@@ -201,7 +201,7 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
             log.debug(re.getMessage());
             throw (new ActionException("Could not count collections."));
         }
-        info.add("Collections ", "" + collCount);
+        info.add("Collections", "" + collCount);
         info.add("Public Preprint Collections", "" + preprintCollCount);
         info.add("Published Collections", "" + publishedCollCount);
 

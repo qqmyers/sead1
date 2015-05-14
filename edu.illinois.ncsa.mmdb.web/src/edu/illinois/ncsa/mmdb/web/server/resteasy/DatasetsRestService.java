@@ -371,7 +371,8 @@ public class DatasetsRestService extends ItemServicesImpl {
             final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
 
             PermissionCheck p = new PermissionCheck(creator, Permission.DOWNLOAD);
-            if (!p.userHasPermission()) {
+            if (!p.userHasPermission() || !dataUsedInHeader(id)) {
+
                 return p.getErrorResponse();
             }
 
@@ -426,6 +427,42 @@ public class DatasetsRestService extends ItemServicesImpl {
             r = Response.status(500).entity(result).build();
         }
         return r;
+    }
+
+    //This allows the raw bytes of any dataset selected as the header logo or background to be downloaded without additional permissions
+    // (i.e. so anonymous can see the logo/background in spaces that don't let anonymous see dataset pages/download data).
+    private static boolean dataUsedInHeader(String id) {
+        Unifier uf = new Unifier();
+        uf.addPattern("background", MMDB.CONFIGURATION_KEY, TupeloStore.getConfigurationKeyURI(ConfigurationKey.ProjectHeaderBackground));
+        uf.addPattern("background", MMDB.CONFIGURATION_VALUE, "bimage");
+        uf.setColumnNames("background", "bimage");
+        try {
+            TupeloStore.getInstance().getContext().perform(uf);
+            Tuple<Resource> tuple = uf.getFirstRow();
+            if (tuple != null) {
+                if (id.equals(tuple.get(1).toString())) {
+                    return true;
+                }
+            }
+        } catch (OperatorException e) {
+            log.error("Unable to retrieve HeaderBackground configuration", e);
+        }
+        uf = new Unifier();
+        uf.addPattern("logo", MMDB.CONFIGURATION_KEY, TupeloStore.getConfigurationKeyURI(ConfigurationKey.ProjectHeaderLogo));
+        uf.addPattern("logo", MMDB.CONFIGURATION_VALUE, "limage");
+        uf.setColumnNames("logo", "limage");
+        try {
+            TupeloStore.getInstance().getContext().perform(uf);
+            Tuple<Resource> tuple = uf.getFirstRow();
+            if (tuple != null) {
+                if (id.equals(tuple.get(1).toString())) {
+                    return true;
+                }
+            }
+        } catch (OperatorException e) {
+            log.error("Unable to retrieve HeaderLogo configuration", e);
+        }
+        return false;
     }
 
     /**

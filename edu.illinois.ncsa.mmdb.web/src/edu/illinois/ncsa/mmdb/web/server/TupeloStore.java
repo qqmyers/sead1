@@ -1146,7 +1146,7 @@ public class TupeloStore {
      */
     public void initializeConfiguration(Properties defaults) throws OperatorException {
         for (ConfigurationKey key : ConfigurationKey.values() ) {
-            Resource rkey = getURI(key);
+            Resource rkey = getConfigurationKeyURI(key);
             if (defaults.containsKey(key.getPropertyKey())) {
                 configuration.put(rkey, defaults.getProperty(key.getPropertyKey()));
             } else if (key.getDefaultValue() != null) {
@@ -1175,16 +1175,16 @@ public class TupeloStore {
     }
 
     public String getConfiguration(ConfigurationKey key) {
-        return configuration.get(getURI(key));
+        return configuration.get(getConfigurationKeyURI(key));
     }
 
     public void setConfiguration(ConfigurationKey key, String value) throws OperatorException {
-        Resource rkey = getURI(key);
+        Resource rkey = getConfigurationKeyURI(key);
         writeConfiguration(rkey, value);
         configuration.put(rkey, value);
     }
 
-    private Resource getURI(ConfigurationKey key) {
+    public static Resource getConfigurationKeyURI(ConfigurationKey key) {
         try {
             return MMDB.medici("configuration/" + URLEncoder.encode(key.toString(), "UTF8")); //$NON-NLS-1$ //$NON-NLS-2$
         } catch (UnsupportedEncodingException e) {
@@ -1206,7 +1206,7 @@ public class TupeloStore {
             tw.remove(row.get(0), MMDB.CONFIGURATION_KEY, key);
             tw.remove(row.get(0), MMDB.CONFIGURATION_VALUE, row.get(1));
         }
-        if (!getURI(ConfigurationKey.RemoteAPIKey).equals(key)) {
+        if (!getConfigurationKeyURI(ConfigurationKey.RemoteAPIKey).equals(key)) {
             Resource x = Resource.uriRef();
             tw.add(x, Rdf.TYPE, MMDB.CONFIGURATION);
             tw.add(x, MMDB.CONFIGURATION_KEY, key);
@@ -1223,7 +1223,7 @@ public class TupeloStore {
         uf.setColumnNames("key", "value");
         getContext().perform(uf);
         for (Tuple<Resource> row : uf.getResult() ) {
-            if (!getURI(ConfigurationKey.RemoteAPIKey).equals(row.get(0))) {
+            if (!getConfigurationKeyURI(ConfigurationKey.RemoteAPIKey).equals(row.get(0))) {
                 configuration.put(row.get(0), row.get(1).getString());
             }
         }
