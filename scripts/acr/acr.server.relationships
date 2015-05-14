@@ -1,0 +1,37 @@
+
+#
+# List of relationships
+#
+relationship.0.predicate=http://cet.ncsa.uiuc.edu/2007/mmdb/relatesTo
+relationship.0.label=relates to
+relationship.0.inverse=http://cet.ncsa.uiuc.edu/2007/mmdb/relatesTo
+relationship.1.predicate=http://cet.ncsa.uiuc.edu/2007/mmdb/duplicates
+relationship.1.label=duplicates
+relationship.1.inverse=http://cet.ncsa.uiuc.edu/2007/mmdb/duplicates
+relationship.2.predicate=http://purl.org/dc/terms/references
+relationship.2.label=references
+relationship.2.inverse=http://purl.org/dc/terms/isReferencedBy
+relationship.3.predicate=http://purl.org/dc/terms/isReferencedBy
+relationship.3.label=is referenced by
+relationship.3.inverse=http://purl.org/dc/terms/references
+relationship.4.predicate=http://cet.ncsa.uiuc.edu/2007/mmdb/describes
+relationship.4.label=describes
+relationship.4.inverse=http://purl.org/dc/terms/description
+relationship.5.predicate=http://purl.org/dc/terms/description
+relationship.5.label=Has Description
+relationship.5.inverse=http://cet.ncsa.uiuc.edu/2007/mmdb/describes
+relationship.6.predicate=http://sead-data.net/terms/odm/method
+relationship.6.label=Experimental Method
+relationship.6.inverse=http://sead-data.net/terms/odm/isUsedToMeasure
+relationship.7.predicate=http://www.w3.org/ns/prov#wasDerivedFrom
+relationship.7.label=is derived from
+relationship.7.inverse=http://www.w3.org/ns/prov/#hadDerivation
+relationship.8.predicate= http://www.w3.org/ns/prov/#hadDerivation
+relationship.8.label=has derivative
+relationship.8.inverse=http://www.w3.org/ns/prov#wasDerivedFrom
+relationship.9.predicate=http://www.w3.org/ns/prov#wasRevisionOf
+relationship.9.label=has prior version
+relationship.9.inverse=http://www.w3.org/ns/prov/#hadRevision
+relationship.10.predicate=http://www.w3.org/ns/prov/#hadRevision
+relationship.10.label=has newer version
+relationship.10.inverse=http://www.w3.org/ns/prov#wasRevisionOf
