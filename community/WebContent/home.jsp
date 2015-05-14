@@ -225,7 +225,7 @@
 			<div class="article entry-content clearfix">
 				<p><h1><span>Project Spaces</span></h1></p>
 				<p>Welcome to SEAD Project Spaces, where you and your team can collect and manage your project's active data. The table below lists all active project spaces in SEAD. Click one of the links to go to a given project's data collections (note: you will need access permission from the space's admins).</p>
-				<p>You can try out Project Spaces features by going to the <a hre="http://sead-demo.ncsa.illinois.edu/">demo space</a> or <a href="http://sead-data.net/contactus/">contact us</a> about setting up a space for your group.</p>
+				<p>You can try out Project Spaces features by going to the <a href="https://sead-demo.ncsa.illinois.edu/">Demo Space</a> or <a href="http://sead-data.net/contactus/">contact us</a> about setting up a space for your group.</p>
 			</div>
 		</article>
 	</div>
