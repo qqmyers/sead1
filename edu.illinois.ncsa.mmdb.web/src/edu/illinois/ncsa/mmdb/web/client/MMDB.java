@@ -341,17 +341,10 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
 
                         // override default logo, background, title color
                         String logo = result.getConfiguration(ConfigurationKey.ProjectHeaderLogo);
-                        if (logo.startsWith("tag:")) {
-                            logo = "resteasy/datasets/" + logo + "/file";
-                        }
                         Document.get().getElementById("project-logo").getFirstChildElement().getFirstChildElement().setAttribute("src", logo);
                         com.google.gwt.dom.client.Element background = Document.get().getElementById("project-header");
                         RootPanel headerPanel = RootPanel.get("project-header");
                         String bImage = result.getConfiguration(ConfigurationKey.ProjectHeaderBackground);
-                        if (bImage.startsWith("tag:")) {
-                            bImage = "resteasy/datasets/" + bImage + "/file";
-                        }
-
                         headerPanel.getElement().getStyle().setBackgroundImage("url('" + bImage + "')");
                         headerPanel.getElement().getStyle().setProperty("background-repeat", "repeat-x");
                         projectNameLabel.asWidget().getElement().getStyle().setProperty("color", result.getConfiguration(ConfigurationKey.ProjectHeaderTitleColor));

@@ -256,7 +256,7 @@ public class ConfigurationWidget extends Composite {
             public void onClick(ClickEvent event) {
                 java.util.Iterator<String> i = MMDB.getSessionState().getSelectedItems().iterator();
                 if (i.hasNext()) {
-                    logo.setText(i.next());
+                    logo.setText("resteasy/datasets/" + i.next() + "/file");
                 } else {
                     logoUseSelection.setEnabled(false);
                     logoUseSelection.setTitle("Select a Dataset (on Datasets/Collection pages) to activate this button");
@@ -285,7 +285,7 @@ public class ConfigurationWidget extends Composite {
             public void onClick(ClickEvent event) {
                 java.util.Iterator<String> i = MMDB.getSessionState().getSelectedItems().iterator();
                 if (i.hasNext()) {
-                    background.setText(i.next());
+                    background.setText("resteasy/datasets/" + i.next() + "/file");
                 } else {
                     bannerUseSelection.setEnabled(false);
                     bannerUseSelection.setTitle("Select a Dataset (on Datasets/Collection pages) to activate this button");
