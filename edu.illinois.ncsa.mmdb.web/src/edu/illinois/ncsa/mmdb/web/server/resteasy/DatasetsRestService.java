@@ -371,7 +371,9 @@ public class DatasetsRestService extends ItemServicesImpl {
             final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
 
             PermissionCheck p = new PermissionCheck(creator, Permission.DOWNLOAD);
-            if (!p.userHasPermission() || !dataUsedInHeader(id)) {
+            log.debug("User can getCombinedContext(logo/banner: " + p.userHasPermission());
+            log.debug("File is logo/banner: " + dataUsedInHeader(id));
+            if (!p.userHasPermission() && !dataUsedInHeader(id)) {
 
                 return p.getErrorResponse();
             }
