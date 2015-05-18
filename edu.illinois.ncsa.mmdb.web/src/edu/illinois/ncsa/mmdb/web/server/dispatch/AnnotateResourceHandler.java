@@ -41,6 +41,10 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.HashSet;
+
+import javax.mail.MessagingException;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -49,9 +53,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.Rdf;
+import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResource;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AnnotateResourceResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsersResult;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.server.Mail;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.AnnotationBeanUtil;
@@ -118,8 +131,71 @@ public class AnnotateResourceHandler implements
         } catch (Exception e) {
             log.error("Error saving and associating an annotation bean", e);
         }
+        //Send a message to any/all mentioned in the comment, cc'ing the comment author
+
+        try {
+            String[] mailRecipients = getMailRecipients(annotation.getDescription());
+            String type = "Collection";
+            String label = "No name";
+            Unifier uf = new Unifier();
+            uf.addPattern(Resource.uriRef(resource), Dc.TITLE, "label");
+            uf.addPattern(Resource.uriRef(resource), Rdf.TYPE, Cet.DATASET, true);
+            uf.setColumnNames("label", "type");
+            TupeloStore.getInstance().getContext().perform(uf);
+            for (Tuple<Resource> t : uf.getResult() ) {
+                label = t.get(0).toString();
+                if (t.get(1) != null) {
+                    type = "Dataset";
+                }
+            }
+            StringBuffer message = new StringBuffer();
+
+            StringBuffer link = new StringBuffer(" <a href=\"http://" + TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName) + "/acr#");
+            if (type.equals("Dataset")) {
+                link.append("dataset?id=" + resource);
+            } else {
+                link.append("collection?uri=" + resource);
+            }
+            link.append("\">" + label + "</a>");
+            message.append(annotation.getCreator().getName());
+            message.append(" has mentioned you in a comment they made on the ");
+            message.append(link);
+            message.append(" " + type + ": \n\n");
+            message.append(annotation.getDescription());
+            message.append("\n\nTo respond, go to the " + link.toString() + " page");
+
+            String[] cc = new String[1];
+            cc[0] = annotation.getCreator().getEmail();
+
+            Mail.sendMessage(mailRecipients, cc, "You've been mentioned!", message.toString());
+
+        } catch (MessagingException e) {
+            log.error("Unable to send mail notification for: " + resource, e);
+        } catch (OperatorException e) {
+            log.error("Unable to send mail notification for: " + resource, e);
+        }
 
         return new AnnotateResourceResult();
+    }
+
+    /* Find the email addresses for everyone mentioned in an "@<name>" part of the comment text.
+     * Note: Currently assumes there are no name collisions/names that are substrings of others
+     * (which would be usual/good practice but is not enforced).
+     */
+    private String[] getMailRecipients(String description) throws ActionException {
+        HashSet<String> recipients = new HashSet<String>();
+        GetUsersResult usersResult = new GetUsersHandler().execute(null, null);
+        int curIndex = 0;
+        int nextIndex = description.indexOf("@", curIndex);
+        while (nextIndex >= 0) {
+            for (GetUsersResult.User u : usersResult.getUsers() ) {
+                if (description.substring(nextIndex + 1).startsWith(u.name)) {
+                    recipients.add(u.email);
+                }
+            }
+            nextIndex = description.indexOf("@", curIndex);
+        }
+        return recipients.toArray(new String[0]);
     }
 
     @Override
