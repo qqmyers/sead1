@@ -189,8 +189,10 @@ public class AnnotateResourceHandler implements
         int nextIndex = description.indexOf("@", curIndex);
         while (nextIndex >= 0) {
             for (GetUsersResult.User u : usersResult.getUsers() ) {
-                if (description.substring(nextIndex + 1).startsWith(u.name)) {
-                    recipients.add(u.email);
+                if ((u.name != null) && (u.name.length() > 0) && (u.email != null) && (u.email.length() > 0)) {
+                    if (description.substring(nextIndex + 1).startsWith(u.name)) {
+                        recipients.add(u.email);
+                    }
                 }
             }
             nextIndex = description.indexOf("@", curIndex);

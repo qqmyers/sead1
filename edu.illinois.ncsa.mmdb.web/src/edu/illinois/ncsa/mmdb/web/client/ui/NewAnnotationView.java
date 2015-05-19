@@ -52,7 +52,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -171,7 +170,6 @@ public class NewAnnotationView extends Composite {
             public void onKeyPress(KeyPressEvent event) {
 
                 if ('@' == event.getCharCode() || (event.getNativeEvent().getCharCode() == '@')) {
-                    Window.alert("Poppin at " + event.getRelativeElement().getAbsoluteRight() + " " + event.getRelativeElement().getAbsoluteTop());
                     colleagues.setPopupPosition(event.getRelativeElement().getAbsoluteRight() - 250,
                             event.getRelativeElement().getAbsoluteTop() - 20);
                     colleagues.show();
@@ -204,9 +202,11 @@ public class NewAnnotationView extends Composite {
                     public void onSuccess(GetUsersResult result) {
                         ArrayList<GetUsersResult.User> users = result.getUsers();
                         for (GetUsersResult.User u : users ) {
-                            userSuggestOracle.add(u.name);
-                            userSuggestOracle.add(u.email);
-                            nameToEmail.put(u.name, u.email);
+                            if ((u.name != null) && (u.name.length() > 0) && (u.email != null) && (u.email.length() > 0)) {
+                                userSuggestOracle.add(u.name);
+                                userSuggestOracle.add(u.email);
+                                nameToEmail.put(u.name, u.email);
+                            }
                         }
                     }
                 });
