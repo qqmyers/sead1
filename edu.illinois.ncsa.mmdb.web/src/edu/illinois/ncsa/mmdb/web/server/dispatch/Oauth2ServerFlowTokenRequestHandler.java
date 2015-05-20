@@ -148,8 +148,8 @@ public class Oauth2ServerFlowTokenRequestHandler implements ActionHandler<Oauth2
                 log.debug("User retrieved " + pb.getUri());
                 return false;
             } else if (uris.size() == 0) {
-                log.debug("User not in the system " + email);
-                if (accessRequest) {
+                log.warn("User not in the system " + email);
+                if (accessRequest && (email != null)) {
                     PersonBean pb = createUser(email, name);
                     TupeloStore.getInstance().getBeanSession().save(pb);
                     Mail.userAdded(pb);

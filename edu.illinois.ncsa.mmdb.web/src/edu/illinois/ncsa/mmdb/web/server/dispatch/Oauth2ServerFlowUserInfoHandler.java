@@ -168,6 +168,9 @@ public class Oauth2ServerFlowUserInfoHandler implements ActionHandler<Oauth2Serv
 
     private void createUser(String email, String name) throws ActionException {
         //FixMe - name may be null/blank from Google
+        if (email == null) {
+            log.warn("Create equest for user without email: " + name);
+        }
         PersonBean pb = new PersonBean();
         pb.setUri(PersonBeanUtil.getPersonID(email));
         pb.setEmail(email);
