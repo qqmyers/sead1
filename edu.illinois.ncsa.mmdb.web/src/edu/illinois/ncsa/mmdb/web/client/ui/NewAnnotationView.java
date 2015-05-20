@@ -91,13 +91,14 @@ public class NewAnnotationView extends Composite {
     private final PopupPanel               colleagues;
 
     private static SuggestOracle           so           = null;
-    private static HashMap<String, String> nameToEmail  = new HashMap<String, String>();
+    private static HashMap<String, String> emailToName  = new HashMap<String, String>();
 
     /**
      * Add new annotation widget.
      *
      * @param service
      */
+    @SuppressWarnings("deprecation")
     public NewAnnotationView(DispatchAsync service) {
 
         initWidget(mainPanel);
@@ -112,16 +113,20 @@ public class NewAnnotationView extends Composite {
         final SuggestBox usersBox = new SuggestBox(so);
         usersBox.getElement().setId("suggestUsers");
         colleagues.setWidget(usersBox);
-        usersBox.addKeyPressHandler(new KeyPressHandler() {
+        //Adding keypresshandler to suggestbox give 2 copies of the event (known GWT issue) - this is one way to fix.
+        usersBox.getTextBox().addKeyPressHandler(new KeyPressHandler() {
 
             @Override
             public void onKeyPress(KeyPressEvent event) {
-                if ((event.getCharCode() == KeyCodes.KEY_ENTER) ||
-                        (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER)) {
+                if ((event.getCharCode() == KeyCodes.KEY_ENTER)
+                //     || (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER)
+                ) {
+                    event.stopPropagation();
                     String name = getNameFromText(usersBox.getText());
                     if (name == null) {
                         //replace with plain text - no match with a user
-                        descriptionTextArea.setText(descriptionTextArea.getText().substring(0, descriptionTextArea.getText().length() - 1) + usersBox.getText());
+                        String currentString = descriptionTextArea.getText().substring(0, descriptionTextArea.getText().length() - 1);
+                        descriptionTextArea.setText(currentString + usersBox.getText());
                     } else {
                         descriptionTextArea.setText(descriptionTextArea.getText() + name);
                     }
@@ -132,14 +137,10 @@ public class NewAnnotationView extends Composite {
             }
 
             private String getNameFromText(String text) {
-                if (nameToEmail.containsValue(text)) {
-                    for (String name : nameToEmail.keySet() ) {
-                        if (nameToEmail.get(name).equals(text)) {
-                            return name;
-                        }
-                    }
+                if (emailToName.containsKey(text)) {
+                    return emailToName.get(text);
 
-                } else if (nameToEmail.containsKey(text)) {
+                } else if (emailToName.containsValue(text)) {
                     return text;
                 }
                 return null;
@@ -189,7 +190,7 @@ public class NewAnnotationView extends Composite {
 
     private SuggestOracle loadOracle(DispatchAsync service) {
         final MultiWordSuggestOracle userSuggestOracle = new MultiWordSuggestOracle();
-        nameToEmail.clear();
+        emailToName.clear();
         service.execute(new GetUsers(),
                 new AsyncCallback<GetUsersResult>() {
 
@@ -205,7 +206,8 @@ public class NewAnnotationView extends Composite {
                             if ((u.name != null) && (u.name.length() > 0) && (u.email != null) && (u.email.length() > 0)) {
                                 userSuggestOracle.add(u.name);
                                 userSuggestOracle.add(u.email);
-                                nameToEmail.put(u.name, u.email);
+                                emailToName.put(u.email, u.name);
+
                             }
                         }
                     }

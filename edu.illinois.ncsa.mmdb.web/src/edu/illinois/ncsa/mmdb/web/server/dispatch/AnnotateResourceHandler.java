@@ -135,40 +135,41 @@ public class AnnotateResourceHandler implements
 
         try {
             String[] mailRecipients = getMailRecipients(annotation.getDescription());
-            String type = "Collection";
-            String label = "No name";
-            Unifier uf = new Unifier();
-            uf.addPattern(Resource.uriRef(resource), Dc.TITLE, "label");
-            uf.addPattern(Resource.uriRef(resource), Rdf.TYPE, Cet.DATASET, true);
-            uf.setColumnNames("label", "type");
-            TupeloStore.getInstance().getContext().perform(uf);
-            for (Tuple<Resource> t : uf.getResult() ) {
-                label = t.get(0).toString();
-                if (t.get(1) != null) {
-                    type = "Dataset";
+            if (mailRecipients.length != 0) {
+                String type = "Collection";
+                String label = "No name";
+                Unifier uf = new Unifier();
+                uf.addPattern(Resource.uriRef(resource), Dc.TITLE, "label");
+                uf.addPattern(Resource.uriRef(resource), Rdf.TYPE, Cet.DATASET, true);
+                uf.setColumnNames("label", "type");
+                TupeloStore.getInstance().getContext().perform(uf);
+                for (Tuple<Resource> t : uf.getResult() ) {
+                    label = t.get(0).toString();
+                    if (t.get(1) != null) {
+                        type = "Dataset";
+                    }
                 }
+                StringBuffer message = new StringBuffer();
+
+                StringBuffer link = new StringBuffer(" <a href=\"http://" + TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName) + "/acr#");
+                if (type.equals("Dataset")) {
+                    link.append("dataset?id=" + resource);
+                } else {
+                    link.append("collection?uri=" + resource);
+                }
+                link.append("\">" + label + "</a>");
+                message.append(annotation.getCreator().getName());
+                message.append(" has mentioned you in a comment they made on the ");
+                message.append(link);
+                message.append(" " + type + ": \n\n");
+                message.append(annotation.getDescription());
+                message.append("\n\nTo respond, go to the " + link.toString() + " page");
+
+                String[] cc = new String[1];
+                cc[0] = annotation.getCreator().getEmail();
+
+                Mail.sendMessage(mailRecipients, cc, "You've been mentioned!", message.toString());
             }
-            StringBuffer message = new StringBuffer();
-
-            StringBuffer link = new StringBuffer(" <a href=\"http://" + TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName) + "/acr#");
-            if (type.equals("Dataset")) {
-                link.append("dataset?id=" + resource);
-            } else {
-                link.append("collection?uri=" + resource);
-            }
-            link.append("\">" + label + "</a>");
-            message.append(annotation.getCreator().getName());
-            message.append(" has mentioned you in a comment they made on the ");
-            message.append(link);
-            message.append(" " + type + ": \n\n");
-            message.append(annotation.getDescription());
-            message.append("\n\nTo respond, go to the " + link.toString() + " page");
-
-            String[] cc = new String[1];
-            cc[0] = annotation.getCreator().getEmail();
-
-            Mail.sendMessage(mailRecipients, cc, "You've been mentioned!", message.toString());
-
         } catch (MessagingException e) {
             log.error("Unable to send mail notification for: " + resource, e);
         } catch (OperatorException e) {
@@ -185,17 +186,19 @@ public class AnnotateResourceHandler implements
     private String[] getMailRecipients(String description) throws ActionException {
         HashSet<String> recipients = new HashSet<String>();
         GetUsersResult usersResult = new GetUsersHandler().execute(null, null);
-        int curIndex = 0;
-        int nextIndex = description.indexOf("@", curIndex);
+
+        int nextIndex = description.indexOf("@");
         while (nextIndex >= 0) {
+            log.debug("Mention index: " + nextIndex);
             for (GetUsersResult.User u : usersResult.getUsers() ) {
                 if ((u.name != null) && (u.name.length() > 0) && (u.email != null) && (u.email.length() > 0)) {
                     if (description.substring(nextIndex + 1).startsWith(u.name)) {
                         recipients.add(u.email);
+                        log.debug("Comment Mention: " + u.email);
                     }
                 }
             }
-            nextIndex = description.indexOf("@", curIndex);
+            nextIndex = description.indexOf("@", nextIndex + 1);
         }
         return recipients.toArray(new String[0]);
     }
