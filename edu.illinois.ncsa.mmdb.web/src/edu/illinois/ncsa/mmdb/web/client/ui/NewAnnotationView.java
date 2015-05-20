@@ -56,6 +56,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -109,10 +110,13 @@ public class NewAnnotationView extends Composite {
 
         colleagues = new PopupPanel();
         colleagues.getElement().setId("userspopup");
-
+        FlowPanel fp = new FlowPanel();
+        Label mentionLabel = new Label("Mention Someone (name or email)");
+        fp.add(mentionLabel);
         final SuggestBox usersBox = new SuggestBox(so);
         usersBox.getElement().setId("suggestUsers");
-        colleagues.setWidget(usersBox);
+        fp.add(usersBox);
+        colleagues.setWidget(fp);
         //Adding keypresshandler to suggestbox give 2 copies of the event (known GWT issue) - this is one way to fix.
         usersBox.getTextBox().addKeyPressHandler(new KeyPressHandler() {
 
@@ -151,7 +155,7 @@ public class NewAnnotationView extends Composite {
 
         mainPanel.add(mainTable);
 
-        Label header = new Label("Write a Comment");
+        Label header = new Label("Write a Comment (use @ to notify others)");
 
         header.addStyleName("newCommentHeader");
 

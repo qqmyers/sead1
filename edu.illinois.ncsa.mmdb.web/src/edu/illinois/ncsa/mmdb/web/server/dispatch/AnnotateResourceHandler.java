@@ -140,12 +140,13 @@ public class AnnotateResourceHandler implements
                 String label = "No name";
                 Unifier uf = new Unifier();
                 uf.addPattern(Resource.uriRef(resource), Dc.TITLE, "label");
-                uf.addPattern(Resource.uriRef(resource), Rdf.TYPE, Cet.DATASET, true);
+                uf.addPattern(Resource.uriRef(resource), Rdf.TYPE, "type");
                 uf.setColumnNames("label", "type");
                 TupeloStore.getInstance().getContext().perform(uf);
+                //Expecting one label, but two types, so two rows
                 for (Tuple<Resource> t : uf.getResult() ) {
                     label = t.get(0).toString();
-                    if (t.get(1) != null) {
+                    if (t.get(1).equals(Cet.DATASET)) {
                         type = "Dataset";
                     }
                 }
@@ -168,7 +169,7 @@ public class AnnotateResourceHandler implements
                 String[] cc = new String[1];
                 cc[0] = annotation.getCreator().getEmail();
 
-                Mail.sendMessage(mailRecipients, cc, "You've been mentioned!", message.toString());
+                Mail.sendMessage(mailRecipients, cc, "You've been mentioned!", message.toString(), true);
             }
         } catch (MessagingException e) {
             log.error("Unable to send mail notification for: " + resource, e);
@@ -188,17 +189,20 @@ public class AnnotateResourceHandler implements
         GetUsersResult usersResult = new GetUsersHandler().execute(null, null);
 
         int nextIndex = description.indexOf("@");
+
         while (nextIndex >= 0) {
             log.debug("Mention index: " + nextIndex);
+            int skip = 0;
             for (GetUsersResult.User u : usersResult.getUsers() ) {
                 if ((u.name != null) && (u.name.length() > 0) && (u.email != null) && (u.email.length() > 0)) {
                     if (description.substring(nextIndex + 1).startsWith(u.name)) {
+                        skip = u.name.length();
                         recipients.add(u.email);
                         log.debug("Comment Mention: " + u.email);
                     }
                 }
             }
-            nextIndex = description.indexOf("@", nextIndex + 1);
+            nextIndex = description.indexOf("@", nextIndex + 1 + skip);
         }
         return recipients.toArray(new String[0]);
     }

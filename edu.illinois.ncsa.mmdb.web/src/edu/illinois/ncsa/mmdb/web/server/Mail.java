@@ -196,6 +196,10 @@ public class Mail {
      * @throws MessagingException
      */
     public static void sendMessage(String[] rcpts, String[] ccList, String subject, String body) throws MessagingException {
+        sendMessage(rcpts, ccList, subject, body, false);
+    }
+
+    public static void sendMessage(String[] rcpts, String[] ccList, String subject, String body, boolean sendHtml) throws MessagingException {
         TupeloStore ts = TupeloStore.getInstance();
         String from = ts.getConfiguration(ConfigurationKey.MailFrom);
         String fullname = ts.getConfiguration(ConfigurationKey.MailFullName);
@@ -218,6 +222,9 @@ public class Mail {
             }
         }
         message.setSubject(subject); //$NON-NLS-1$
+        if (sendHtml) {
+            message.setContent(body, "text/html");
+        }
         message.setText(body);
         Transport.send(message);
         log.debug(String.format("Mail sent to recepients with subject '%s'", subject));
