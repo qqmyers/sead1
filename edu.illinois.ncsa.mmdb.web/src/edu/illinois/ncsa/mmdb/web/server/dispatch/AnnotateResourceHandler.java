@@ -163,7 +163,7 @@ public class AnnotateResourceHandler implements
                 message.append(" has mentioned you in a comment they made on the ");
                 message.append(link);
                 message.append(" " + type + ": \n\n");
-                message.append(annotation.getDescription());
+                message.append("<p>" + annotation.getDescription() + "</p>");
                 message.append("\n\nTo respond, go to the " + link.toString() + " page");
 
                 String[] cc = new String[1];
