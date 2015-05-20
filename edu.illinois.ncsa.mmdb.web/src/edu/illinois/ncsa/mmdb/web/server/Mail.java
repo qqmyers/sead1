@@ -221,7 +221,8 @@ public class Mail {
                 message.addRecipient(MimeMessage.RecipientType.CC, new InternetAddress(cc));
             }
         }
-        message.setSubject(subject); //$NON-NLS-1$
+        String presubj = ts.getConfiguration(ConfigurationKey.MailSubject);
+        message.setSubject(presubj + subject); //$NON-NLS-1$
         if (sendHtml) {
             message.setContent(body, "text/html");
         } else {
