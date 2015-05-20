@@ -37,55 +37,125 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
+import net.customware.gwt.dispatch.client.DispatchAsync;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsers;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsersResult;
 import edu.uiuc.ncsa.cet.bean.AnnotationBean;
 
 /**
  * Add new annotation widget.
- * 
+ *
  * @author Luigi Marini
- * 
+ * @author myersjd@umich.edu
+ *
  */
 public class NewAnnotationView extends Composite {
 
-    private final SimplePanel mainPanel    = new SimplePanel();
+    private final SimplePanel              mainPanel    = new SimplePanel();
 
-    private final FlexTable   mainTable    = new FlexTable();
+    private final FlexTable                mainTable    = new FlexTable();
 
-    private final TextBox     titleTextBox = new TextBox();
+    private final TextBox                  titleTextBox = new TextBox();
 
-    private final TextArea    descriptionTextArea;
+    private final TextArea                 descriptionTextArea;
 
-    private final Button      submitButton;
+    private final Button                   submitButton;
+
+    private final PopupPanel               colleagues;
+
+    private static SuggestOracle           so           = null;
+    private static HashMap<String, String> emailToName  = new HashMap<String, String>();
 
     /**
      * Add new annotation widget.
+     *
+     * @param service
      */
-    public NewAnnotationView() {
+    @SuppressWarnings("deprecation")
+    public NewAnnotationView(DispatchAsync service) {
 
         initWidget(mainPanel);
+
+        if (so == null) {
+            so = loadOracle(service);
+        }
+
+        colleagues = new PopupPanel();
+        colleagues.getElement().setId("userspopup");
+        FlowPanel fp = new FlowPanel();
+        Label mentionLabel = new Label("Mention Someone (name or email)");
+        fp.add(mentionLabel);
+        final SuggestBox usersBox = new SuggestBox(so);
+        usersBox.getElement().setId("suggestUsers");
+        fp.add(usersBox);
+        colleagues.setWidget(fp);
+        //Adding keypresshandler to suggestbox give 2 copies of the event (known GWT issue) - this is one way to fix.
+        usersBox.getTextBox().addKeyPressHandler(new KeyPressHandler() {
+
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if ((event.getCharCode() == KeyCodes.KEY_ENTER)
+                //     || (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER)
+                ) {
+                    event.stopPropagation();
+                    String name = getNameFromText(usersBox.getText());
+                    if (name == null) {
+                        //replace with plain text - no match with a user
+                        String currentString = descriptionTextArea.getText().substring(0, descriptionTextArea.getText().length() - 1);
+                        descriptionTextArea.setText(currentString + usersBox.getText());
+                    } else {
+                        descriptionTextArea.setText(descriptionTextArea.getText() + name);
+                    }
+                    usersBox.setText("");
+                    colleagues.hide();
+                    descriptionTextArea.setFocus(true);
+                }
+            }
+
+            private String getNameFromText(String text) {
+                if (emailToName.containsKey(text)) {
+                    return emailToName.get(text);
+
+                } else if (emailToName.containsValue(text)) {
+                    return text;
+                }
+                return null;
+            }
+        });
 
         mainPanel.addStyleName("newAnnotationMainPanel");
 
         mainPanel.add(mainTable);
 
-        Label header = new Label("Write a Comment");
+        Label header = new Label("Write a Comment (use @ to notify others)");
 
         header.addStyleName("newCommentHeader");
 
@@ -103,7 +173,12 @@ public class NewAnnotationView extends Composite {
 
             @Override
             public void onKeyPress(KeyPressEvent event) {
-                if ("@".equals(String.valueOf(event.getCharCode()))) {
+
+                if ('@' == event.getCharCode() || (event.getNativeEvent().getCharCode() == '@')) {
+                    colleagues.setPopupPosition(event.getRelativeElement().getAbsoluteRight() - 250,
+                            event.getRelativeElement().getAbsoluteTop() - 20);
+                    colleagues.show();
+                    usersBox.setFocus(true);
 
                 }
 
@@ -117,9 +192,37 @@ public class NewAnnotationView extends Composite {
         mainTable.setWidget(2, 0, submitButton);
     }
 
+    private SuggestOracle loadOracle(DispatchAsync service) {
+        final MultiWordSuggestOracle userSuggestOracle = new MultiWordSuggestOracle();
+        emailToName.clear();
+        service.execute(new GetUsers(),
+                new AsyncCallback<GetUsersResult>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error getting users", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(GetUsersResult result) {
+                        ArrayList<GetUsersResult.User> users = result.getUsers();
+                        for (GetUsersResult.User u : users ) {
+                            if ((u.name != null) && (u.name.length() > 0) && (u.email != null) && (u.email.length() > 0)) {
+                                userSuggestOracle.add(u.name);
+                                userSuggestOracle.add(u.email);
+                                emailToName.put(u.email, u.name);
+
+                            }
+                        }
+                    }
+                });
+
+        return userSuggestOracle;
+    }
+
     /**
      * Create an AnnotationBean based on values in widgets.
-     * 
+     *
      * @return
      */
     public AnnotationBean getAnnotationBean() {
@@ -137,7 +240,7 @@ public class NewAnnotationView extends Composite {
 
     /**
      * Add a click handler to the submit button.
-     * 
+     *
      * @param clickHandler
      */
     public void addClickHandler(ClickHandler clickHandler) {
