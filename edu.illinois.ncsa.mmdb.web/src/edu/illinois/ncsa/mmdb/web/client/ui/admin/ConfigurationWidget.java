@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -256,7 +257,7 @@ public class ConfigurationWidget extends Composite {
             public void onClick(ClickEvent event) {
                 java.util.Iterator<String> i = MMDB.getSessionState().getSelectedItems().iterator();
                 if (i.hasNext()) {
-                    logo.setText("resteasy/datasets/" + i.next() + "/file");
+                    logo.setText("resteasy/datasets/" + URL.encode(i.next()) + "/file");
                 } else {
                     logoUseSelection.setEnabled(false);
                     logoUseSelection.setTitle("Select a Dataset (on Datasets/Collection pages) to activate this button");
@@ -285,7 +286,7 @@ public class ConfigurationWidget extends Composite {
             public void onClick(ClickEvent event) {
                 java.util.Iterator<String> i = MMDB.getSessionState().getSelectedItems().iterator();
                 if (i.hasNext()) {
-                    background.setText("resteasy/datasets/" + i.next() + "/file");
+                    background.setText("resteasy/datasets/" + URL.encode(i.next()) + "/file");
                 } else {
                     bannerUseSelection.setEnabled(false);
                     bannerUseSelection.setTitle("Select a Dataset (on Datasets/Collection pages) to activate this button");
