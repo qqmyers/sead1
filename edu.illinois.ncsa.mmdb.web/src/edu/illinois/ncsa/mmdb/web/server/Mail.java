@@ -224,8 +224,9 @@ public class Mail {
         message.setSubject(subject); //$NON-NLS-1$
         if (sendHtml) {
             message.setContent(body, "text/html");
+        } else {
+            message.setText(body);
         }
-        message.setText(body);
         Transport.send(message);
         log.debug(String.format("Mail sent to recepients with subject '%s'", subject));
     }
