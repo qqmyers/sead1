@@ -217,7 +217,11 @@ public class DatasetsRestService extends ItemServicesImpl {
                         Thing t = ts.newThing(s);
 
                         InputStream is = getDataStream(url);
-                        String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
+                        String path = url.getPath();
+                        if (path.endsWith("/")) {
+                            path = path.substring(0, path.length() - 1);
+                        }
+                        String fileName = path.substring(path.lastIndexOf('/') + 1);
                         // mimetype
                         String contentType = TupeloStore.getInstance().getMimeMap().getContentTypeFor(fileName);
                         // update context with new mime-type potentially
