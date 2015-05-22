@@ -70,6 +70,7 @@ import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.util.BeanFiller;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
@@ -235,8 +236,11 @@ public class DatasetsRestService extends ItemServicesImpl {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
+                        //Add as top-level item
+                        ts.addValue(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, s);
                         t.save();
-                        ts.clear();
+                        ts.close();
+
                         log.debug("Created dataset from " + url.getPath());
                     } catch (IOException io) {
                         log.warn("IO error retrieving " + url.toExternalForm() + " for dataset " + id);
@@ -780,8 +784,11 @@ public class DatasetsRestService extends ItemServicesImpl {
                 }
 
             }
+            //Add as top-level item
+            ts.addValue(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, t.getSubject());
             t.save();
-            ts.clear();
+            ts.close();
+
         }
 
         catch (OperatorException oe) {

@@ -136,6 +136,8 @@ public class UnpackZipHandler implements ActionHandler<UnpackZip, UnpackZipResul
                 //FixMe - make this a relationship when relationships can handle collections?
                 TripleWriter tw = new TripleWriter();
                 tw.add(uri, Resource.uriRef(seadWasExtractedFrom), Resource.uriRef(datasetUri));
+                //Mark as top level
+                tw.add(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, uri);
                 c.perform(tw);
             } else {
                 throw new ActionException("Failed to unpack zip file");

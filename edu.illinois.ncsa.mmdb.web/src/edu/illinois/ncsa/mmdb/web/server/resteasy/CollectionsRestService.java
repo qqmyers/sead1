@@ -452,8 +452,12 @@ public class CollectionsRestService extends ItemServicesImpl {
                 }
 
             }
+            //Add as top-level item
+            ts.addValue(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, t.getSubject());
+
             t.save();
             ts.close();
+
         }
 
         catch (OperatorException oe) {
