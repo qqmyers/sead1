@@ -41,6 +41,7 @@
  */
 package edu.illinois.ncsa.mmdb.web.client.ui;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
@@ -71,13 +72,14 @@ import edu.illinois.ncsa.mmdb.web.client.PermissionUtil;
 import edu.illinois.ncsa.mmdb.web.client.PermissionUtil.PermissionCallback;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollection;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.AddToCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ConfigurationResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoPointBean;
@@ -93,6 +95,7 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
  * A widget showing a collection.
  *
  * @author Luigi Marini
+ * @author myersjd@umich.edu
  *
  */
 public class CollectionPage extends Composite {
@@ -442,32 +445,40 @@ public class CollectionPage extends Composite {
 
                             @Override
                             public void onSuccess(AddCollectionResult arg0) {
-                                service.execute(new SetUserMetadata(uri, subcollectionPredicate, collection.getUri(), true), new AsyncCallback<EmptyResult>() {
+                                HashSet<String> resources = new HashSet<String>();
+                                resources.add(collection.getUri());
+                                AddToCollection action = new AddToCollection(uri, resources);
+                                service.execute(action, new AsyncCallback<AddToCollectionResult>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
                                         GWT.log("Error adding collection relationship.", caught);
                                     }
 
                                     @Override
-                                    public void onSuccess(EmptyResult result) {
+                                    public void onSuccess(AddToCollectionResult result) {
                                         GWT.log("Successfully added subcollection.");
                                         addToCollectionDialog.hide();
                                         dynamicTablePresenter.refresh();
                                     }
+
                                 });
 
                             }
                         });
             } else if (existingCollection != null && !existingCollection.equals(uri)) {
                 GWT.log("Adding collection " + existingCollection + " to " + uri);
-                service.execute(new SetUserMetadata(uri, subcollectionPredicate, existingCollection, true), new AsyncCallback<EmptyResult>() {
+                HashSet<String> resources = new HashSet<String>();
+                resources.add(existingCollection);
+                AddToCollection action = new AddToCollection(uri, resources);
+                service.execute(action, new AsyncCallback<AddToCollectionResult>() {
+
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("Error adding collection relationship.", caught);
                     }
 
                     @Override
-                    public void onSuccess(EmptyResult result) {
+                    public void onSuccess(AddToCollectionResult result) {
                         GWT.log("Successfully added subcollection.");
                         addToCollectionDialog.hide();
                         dynamicTablePresenter.refresh();

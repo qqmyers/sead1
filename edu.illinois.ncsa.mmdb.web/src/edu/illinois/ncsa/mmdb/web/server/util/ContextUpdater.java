@@ -54,6 +54,7 @@ import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Dc;
+import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
@@ -63,8 +64,10 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPermissionsHandler;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
+import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 
@@ -79,7 +82,7 @@ public class ContextUpdater {
     private static Log           log                 = LogFactory.getLog(ContextUpdater.class);
 
     public static final Resource CONTEXT_VERSION_URI = Resource.uriRef("tag:cet.ncsa.uiuc.edu,2008:/context/version"); //$NON-NLS-1$
-    public static final int      CONTEXT_VERSION_NO  = 8;
+    public static final int      CONTEXT_VERSION_NO  = 9;
 
     /**
      * This will update the context to version CONTEXT_VERSION_NO. If the
@@ -139,6 +142,10 @@ public class ContextUpdater {
             fixLabelClash(context);
             flattenPermissions(context);
             removeEmptyGeoPoints(context);
+        }
+
+        if (force || (version < 9)) {
+            indexTopLevelItems(context);
         }
 
         // Mark context as updated removing all old versions first.
@@ -350,6 +357,50 @@ public class ContextUpdater {
         c.perform(tw);
         log.info("Empty GeoPoints removed.");
         return;
+    }
+
+    private static void indexTopLevelItems(Context context) throws OperatorException {
+        TripleWriter tw = new TripleWriter();
+
+        //Datasets first
+        Unifier uf = new Unifier();
+        uf.addPattern("item", Rdf.TYPE, Cet.DATASET);
+        uf.addPattern("parent", DcTerms.HAS_PART, "item", true);
+        uf.addPattern("item", Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "_ued", true);
+        uf.setColumnNames("item", "parent", "_ued");
+        context.perform(uf);
+        for (Tuple<Resource> tuple : uf.getResult() ) {
+            if (tuple.get(2) == null) {
+                if (tuple.get(1) == null) {
+                    tw.add(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, tuple.get(0));
+                } else {
+                    //Clean up from testing, otherwise not needed
+                    tw.remove(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, tuple.get(0));
+                }
+            }
+        }
+
+        //Now Collections
+        Unifier uf2 = new Unifier();
+        uf2.addPattern("item", Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
+        uf2.addPattern("parent", DcTerms.HAS_PART, "item", true);
+        uf2.addPattern("item", Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "_ued", true);
+        uf2.setColumnNames("item", "parent", "_ued");
+        context.perform(uf2);
+        for (Tuple<Resource> tuple : uf2.getResult() ) {
+            if (tuple.get(2) == null) {
+                if (tuple.get(1) == null) {
+                    tw.add(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, tuple.get(0));
+                } else {
+                    //Clean up from testing, otherwise not needed
+                    tw.remove(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, tuple.get(0));
+                }
+            }
+        }
+        context.perform(tw);
+
+        log.info("Top level items indexed.");
+
     }
 
 }

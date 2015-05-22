@@ -189,13 +189,9 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
         u.addPattern("s", Resource.uriRef("http://purl.org/dc/terms/isReplacedBy"), "k", true);
         u.addColumnName("k"); // 9
 
-        int parentIndex = -1;
         //if we are looking for top level items (Flag is true and no parent collection set)
         if ((listquery.getShowDataLevel() == true) && (listquery.getCollection() == null)) {
-            u.addColumnName("parent"); //10
-            u.addPattern("parent", DcTerms.HAS_PART, "s", true);
-            List<String> names = u.getColumnNames();
-            parentIndex = names.indexOf("parent");
+            u.addPattern(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, "s");
         }
         // fetch results
         Set<String> keys = new HashSet<String>();
@@ -216,7 +212,7 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
 
                 if (keys.contains(row.get(0).getString())) {
                     //Happens if a metadata field have multiple values when it shouldn't (given the items were asking for)
-                    log.warn("Already contain item for " + row);
+                    log.warn("Already contains item for " + row);
                     continue;
                 }
                 keys.add(row.get(0).getString());
@@ -232,10 +228,6 @@ public class ListQueryHandler implements ActionHandler<ListQuery, ListQueryResul
                     if (datasetlevel < userlevel) {
                         continue;
                     }
-                }
-                //skip items if we are looking for top level collections
-                if (parentIndex >= 0 && row.get(parentIndex) != null) {
-                    continue;
                 }
                 // all items are ok from here forward
                 count++;

@@ -76,6 +76,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandlerNew;
@@ -1029,37 +1030,32 @@ public class ItemServicesImpl
 
             //column 0 must be identifier
             populateUnifier("item", uf, context, null);
-            //Must come after to avoid having no result if row 0, column 0 would be null
-            uf.addColumnName("parent");
-            uf.addPattern("parent", DcTerms.HAS_PART, "item", true);
+            uf.addPattern(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, "item");
             List<String> names = uf.getColumnNames();
-            final int parentIndex = names.indexOf("parent");
-            log.debug("Parent index: " + parentIndex);
             org.tupeloproject.util.Table<Resource> table = null;
             table = TupeloStore.getInstance().unifyExcludeDeleted(uf, "item");
-            names.remove("parent");
 
             result = buildResultMap(table, context, names, true, new FilterCallback() {
                 @Override
                 public boolean include(Tuple<Resource> t) {
-                    if (t.get(parentIndex) == null) {
-                        UriRef id = null;
-                        if (t.get(0) == null) {
-                            log.error("Missing identifier - skipping a dataset");
+
+                    UriRef id = null;
+                    if (t.get(0) == null) {
+                        log.error("Missing identifier - skipping a dataset");
+                    } else {
+                        if (t.get(0).isLiteral()) {
+                            id = Resource.uriRef(t.get(0).toString());
                         } else {
-                            if (t.get(0).isLiteral()) {
-                                id = Resource.uriRef(t.get(0).toString());
-                            } else {
-                                id = (UriRef) t.get(0);
-                                log.warn("UriRef identifier:" + t.get(0).toString());
-                            }
-                            if (isAccessible(userId, id)) {
-                                return true;
-                            } else {
-                                return false;
-                            }
+                            id = (UriRef) t.get(0);
+                            log.warn("UriRef identifier:" + t.get(0).toString());
+                        }
+                        if (isAccessible(userId, id)) {
+                            return true;
+                        } else {
+                            return false;
                         }
                     }
+
                     return false;
                 }
             });
@@ -1244,6 +1240,23 @@ public class ItemServicesImpl
                 r = item.getErrorResponse();
             } else {
                 TripleWriter tw = new TripleWriter();
+
+                //Remove any children
+                TripleMatcher tm = new TripleMatcher();
+                tm.match(itemId, DcTerms.HAS_PART, null);
+                c.perform(tm);
+
+                for (Triple t : tm.getResult() ) {
+                    Resource childId = t.getObject();
+                    tw.remove(itemId, DcTerms.HAS_PART, childId);
+                    //Index as top level if no other parents
+
+                    if (!AddToCollectionHandler.hasMoreParents((UriRef) childId, itemId, c)) {
+                        tw.add(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, childId);
+                    }
+                }
+
+                //Mark as deleted
                 tw.add(itemId, DcTerms.IS_REPLACED_BY, Rdf.NIL);
                 c.perform(tw);
 

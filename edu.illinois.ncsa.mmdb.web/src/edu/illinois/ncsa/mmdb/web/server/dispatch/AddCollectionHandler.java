@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,12 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
@@ -52,7 +52,9 @@ import net.customware.gwt.dispatch.shared.ActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.UriRef;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.AddCollectionResult;
@@ -63,9 +65,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 
 /**
  * Create a new collection.
- * 
+ *
  * @author Luigi Marini
- * 
+ *
  */
 public class AddCollectionHandler implements ActionHandler<AddCollection, AddCollectionResult> {
 
@@ -105,19 +107,26 @@ public class AddCollectionHandler implements ActionHandler<AddCollection, AddCol
             // save to repository
             beanSession.registerAndSave(action.getCollection());
 
+            TripleWriter tw = new TripleWriter();
+            //New collection has no parent
+            tw.add(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, Resource.uriRef(action.getCollection().getUri()));
             // add any members
             if (action.getMembers() != null && action.getMembers().size() > 0) {
                 CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
                 List<Resource> r = new LinkedList<Resource>();
                 for (String uri : action.getMembers() ) {
-                    r.add(Resource.uriRef(uri));
+                    UriRef current = Resource.uriRef(uri);
+                    r.add(current);
+                    //Any added children are no longer top level
+                    tw.remove(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, current);
                 }
                 cbu.addToCollection(collection, r);
                 for (String uri : action.getMembers() ) {
                     TupeloStore.getInstance().changed(uri);
                 }
-            }
 
+            }
+            TupeloStore.getInstance().getContext().perform(tw);
             // FIXME why doesn't update work and we have to use registerAndSave?
             //			CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
             //			CollectionBean collection = cbu.update(arg0.getCollection());

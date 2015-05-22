@@ -75,6 +75,7 @@ import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
+import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Literal;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Beans;
@@ -90,6 +91,7 @@ import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
@@ -300,6 +302,7 @@ public class UploadBlob extends AuthenticatedServlet {
         String uri = null;
         // Parse the request
         try {
+            @SuppressWarnings("unchecked")
             List<FileItem> items = upload.parseRequest(request);
             int nFiles = 0;
             String collectionName = null;
@@ -496,10 +499,22 @@ public class UploadBlob extends AuthenticatedServlet {
                     //
                     x.printStackTrace();
                 }
-            } else if (nFiles == 1) {
-                TupeloStore.getInstance().setHistoryForUpload(sessionKey, "dataset?id=" + uri);
             } else {
-                TupeloStore.getInstance().setHistoryForUpload(sessionKey, "listDatasets?sort=date-desc");
+                if (nFiles == 1) {
+                    TupeloStore.getInstance().setHistoryForUpload(sessionKey, "dataset?id=" + uri);
+                } else {
+                    TupeloStore.getInstance().setHistoryForUpload(sessionKey, "listDatasets?sort=date-desc");
+                }
+                TripleWriter tw = new TripleWriter();
+                for (String itemUri : uris ) {
+                    tw.add(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, Resource.uriRef(itemUri));
+                }
+                try {
+                    TupeloStore.getInstance().getContext().perform(tw);
+                } catch (OperatorException e) {
+                    log.error("Error indexing data as TOP_LEVEL: " + e.getMessage());
+                    throw new ServletException(e);
+                }
             }
             // return list of URI's
             returnList(response, collectionUri, listener.getBlobUris());

@@ -44,9 +44,12 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
+import org.tupeloproject.rdf.UriRef;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 
@@ -67,26 +70,53 @@ public class DeleteDatasetsHandler implements ActionHandler<DeleteDatasets, Batc
         Context context = TupeloStore.getInstance().getContext();
         SEADRbac rbac = new SEADRbac(context);
         Resource userUri = arg0.getUser() == null ? PersonBeanUtil.getAnonymousURI() : Resource.uriRef(arg0.getUser());
+
         for (String datasetUri : arg0.getResources() ) {
             // check for authorization
+            UriRef itemId = Resource.uriRef(datasetUri);
+            TripleMatcher tm = new TripleMatcher();
+            tm.match(itemId, Rdf.TYPE, Cet.DATASET);
             try {
-                if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(userUri, Resource.uriRef(datasetUri))) {
-                    result.setFailure(datasetUri, "no access to dataset");
-                } else if (!rbac.checkPermission(arg0.getUser(), datasetUri, Permission.DELETE_DATA)) {
-                    result.setFailure(datasetUri, "Unauthorized");
-                } else {
-                    mod.add(Triple.create(Resource.uriRef(datasetUri), DcTerms.IS_REPLACED_BY, Rdf.NIL));
-                    result.addSuccess(datasetUri);
+                context.perform(tm);
+                boolean isCollection = false;
+                if (tm.getResult().isEmpty()) {
+                    isCollection = true;
                 }
-            } catch (RBACException x) {
-                result.setFailure(datasetUri, "access control error");
+                try {
+                    if (!isCollection) {
+                        if (!new SEADRbac(TupeloStore.getInstance().getContext()).checkAccessLevel(userUri, itemId)) {
+                            result.setFailure(datasetUri, "no access to dataset");
+                        } else if (!rbac.checkPermission(arg0.getUser(), datasetUri, Permission.DELETE_DATA)) {
+                            result.setFailure(datasetUri, "Unauthorized");
+                        } else {
+                            mod.add(Triple.create(itemId, DcTerms.IS_REPLACED_BY, Rdf.NIL));
+                            result.addSuccess(datasetUri);
+                        }
+                    } else { //Collection
+                        if (!rbac.checkPermission(arg0.getUser(), datasetUri, Permission.DELETE_COLLECTION)) {
+                            result.setFailure(datasetUri, "Unauthorized");
+                        } else {
+                            mod.add(Triple.create(itemId, DcTerms.IS_REPLACED_BY, Rdf.NIL));
+                            TripleMatcher kidsMatcher = new TripleMatcher();
+                            kidsMatcher.match(itemId, DcTerms.HAS_PART, null);
+                            context.perform(kidsMatcher);
+                            mod.setToRemove(kidsMatcher.getResult());
+                            result.addSuccess(datasetUri);
+                        }
+                    }
+                } catch (RBACException x) {
+                    result.setFailure(datasetUri, "access control error");
+                }
+            } catch (OperatorException oe) {
+                result.setFailure(datasetUri, "Unable to determ type");
             }
         }
         try {
-            TupeloStore.getInstance().getContext().perform(mod);
+            context.perform(mod);
         } catch (OperatorException e) {
             throw new ActionException("delete failed completely", e);
         }
+
         return result;
     }
 

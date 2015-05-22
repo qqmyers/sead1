@@ -46,6 +46,7 @@ import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.DcTerms;
@@ -55,6 +56,7 @@ import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.util.BeanFiller;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 
@@ -113,7 +115,7 @@ public class CollectionsRestService extends ItemServicesImpl {
     @DELETE
     @Path("/{id}")
     @Produces("application/json")
-    public Response markDatasetAsDeleted(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response markCollectionAsDeleted(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
         final UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
 
         PermissionCheck p = new PermissionCheck(creator, Permission.DELETE_COLLECTION);
@@ -244,7 +246,7 @@ public class CollectionsRestService extends ItemServicesImpl {
                 } else {
                     TripleWriter tw = new TripleWriter();
                     tw.add(colId, DcTerms.HAS_PART, childId);
-
+                    tw.remove(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, childId);
                     c.perform(tw);
 
                     result.put("Success", childId.toString() + " added to " + colId.toString());
@@ -294,12 +296,25 @@ public class CollectionsRestService extends ItemServicesImpl {
                 r = parent.getErrorResponse();
             } else {
                 TripleMatcher tm = new TripleMatcher();
-                tm.match(parentId, DcTerms.HAS_PART, childId);
+                tm.match(null, DcTerms.HAS_PART, childId);
                 c.perform(tm);
-                if (!tm.getResult().isEmpty()) {
+                boolean hasChild = false;
+                boolean moreParents = false;
+                for (Triple s : tm.getResult() ) {
+                    if (s.getSubject().equals(parentId)) {
+                        hasChild = true;
+                    } else {
+                        moreParents = true;
+                    }
+                }
+                if (hasChild) {
                     if (isAccessible(userId, childId)) {
                         TripleWriter tw = new TripleWriter();
                         tw.remove(parentId, DcTerms.HAS_PART, childId);
+                        if (moreParents == false) {
+                            tw.add(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, childId);
+                        }
+
                         c.perform(tw);
                         Map<String, Object> result = new LinkedHashMap<String, Object>();
                         result.put("Success", childId.toString() + " removed from " + parentId);
