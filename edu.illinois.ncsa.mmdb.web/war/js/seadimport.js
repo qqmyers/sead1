@@ -4,7 +4,7 @@ var theImportcss;
 var theBootcss;
 
 function safeId(myid) {
-	return myid.replace(/(:|\.|\[|\]|\/|\s)/g, "");
+	return myid.replace(/(:|\.|\[|\]|\/|\s|#|,|\?|=|@)/g, "");
 }
 
 function captureLinks() {
