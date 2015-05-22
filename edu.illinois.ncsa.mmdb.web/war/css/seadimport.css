@@ -137,9 +137,29 @@ border-radius: 0;
 }
 
 #sead-panel.sead-scope .table tbody tr.warning > td {
-background: none;
-color: #fff;
+color: #000;
 }
+
+#sead-panel.sead-scope .table tbody tr.warning  a {
+color: #000;
+}
+
+#sead-panel.sead-scope .table tbody tr.success > td {
+color: #000;
+}
+
+#sead-panel.sead-scope .table tbody tr.success  a {
+color: #000;
+}
+#sead-panel.sead-scope .table tbody tr.error > td {
+color: #000;
+}
+
+#sead-panel.sead-scope .table tbody tr.error  a {
+color: #000;
+}
+
+
 
 #sead-panel.sead-scope .btn-primary,
 #sead-panel.sead-scope button {
@@ -155,10 +175,8 @@ border-color:transparent;
 border: none;
 }
 
-#sead-panel.sead-scope .table tbody tr.success > td,
-#sead-panel.sead-scope .table tbody tr.error > td {
-background-color: transparent;
-color: #fff;
+#sead-panel.sead-scope .table td.added-url {
+word-break: break-all;	
 }
 
 #sead-panel.sead-scope a,
