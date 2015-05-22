@@ -57,7 +57,6 @@ import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
 
-import edu.illinois.ncsa.mmdb.web.client.TextFormatter;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfoResult;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
@@ -148,9 +147,9 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
             throw (new ActionException("Could not count datasets."));
         }
         info.add("Datasets", "" + datasetCount);
-        info.add("Bytes from uploaded dataset", TextFormatter.humanBytes(datasetSize));
-        info.add("Bytes from derived data", TextFormatter.humanBytes(derivedSize));
-        info.add("Total number of bytes", TextFormatter.humanBytes(datasetSize + derivedSize));
+        info.add("Bytes from uploaded dataset", "" + datasetSize);
+        info.add("Bytes from derived data", "" + derivedSize);
+        info.add("Total number of bytes", "" + (datasetSize + derivedSize));
 
         Unifier uf2 = new Unifier();
         log.debug("Counting Collections");
