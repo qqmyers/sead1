@@ -286,28 +286,35 @@ public class LocationWidget extends Composite {
             map.setCenter(LatLng.newInstance(point.getLatitude(), point.getLongitude()));
             map.setZoomLevel(5);
         }
+        PermissionUtil rbac = new PermissionUtil(service);
+        rbac.doIfAllowed(Permission.EDIT_METADATA, uri, new PermissionCallback() {
 
-        final Anchor clearLocationAnchor = new Anchor("Clear location(s)");
-        clearLocationAnchor.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent event) {
-                service.execute(new ClearGeoLocation(uri), new AsyncCallback<EmptyResult>() {
-
+            public void onAllowed() {
+                final Anchor clearLocationAnchor = new Anchor("Clear location(s)");
+                clearLocationAnchor.addClickHandler(new ClickHandler() {
                     @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log("Error removing location for " + uri, caught);
-                    }
+                    public void onClick(ClickEvent event) {
+                        service.execute(new ClearGeoLocation(uri), new AsyncCallback<EmptyResult>() {
 
-                    @Override
-                    public void onSuccess(EmptyResult result) {
-                        mainPanel.remove(clearLocationAnchor);
-                        mainPanel.remove(map);
-                        getGeoPoint();
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                GWT.log("Error removing location for " + uri, caught);
+                            }
+
+                            @Override
+                            public void onSuccess(EmptyResult result) {
+                                mainPanel.remove(clearLocationAnchor);
+                                mainPanel.remove(map);
+                                getGeoPoint();
+                            }
+                        });
                     }
                 });
+                mainPanel.add(clearLocationAnchor);
             }
         });
-        mainPanel.add(clearLocationAnchor);
+
     }
 
     private void initialize() {
