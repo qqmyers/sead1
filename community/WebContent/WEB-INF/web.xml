@@ -47,6 +47,15 @@
 		<servlet-name>Manage</servlet-name>
 		<url-pattern>/exp</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>Projectspaces</servlet-name>
+		<servlet-class>org.sead.acr.community.Projectspaces</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Projectspaces</servlet-name>
+		<url-pattern>/projectspaces</url-pattern>
+	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>GetProjectInfo</servlet-name>

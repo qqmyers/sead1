@@ -341,3 +341,158 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 	{
 	color: #f3822a;
 }
+
+
+
+
+
+
+
+
+
+/* Project Spaces */
+
+section {
+margin: auto;
+width: 1200px;
+}
+
+.row-fluid {
+padding: 25px 0;
+}
+
+.project-spaces-dashboard .span4 .space-wrapper {
+border: 1px solid #0b5ca3;
+height: 300px;
+position: relative;
+}
+
+.project-spaces-dashboard h4 {
+margin:10px 5px;
+}
+
+.project-spaces-dashboard h4 a {
+font-size: 1em !important;
+}
+
+.project-spaces-dashboard .span4 .fade-out {
+width: 100%;
+height: 200px;
+background-repeat: no-repeat;
+}
+
+.project-spaces-dashboard ul {
+margin: 2px 5px;
+position: absolute;
+bottom: 4px;
+}
+
+.project-spaces-dashboard li {
+display: inline-block;
+padding-left: 15px;
+line-height: 25px;
+text-transform: uppercase;
+color: #f3882a;
+vertical-align: middle;
+}
+
+.project-spaces-dashboard li:first-child {
+padding-left: 0;
+}
+
+.fade-wrapper {
+position: relative;
+border-bottom: 1px solid #0b5ca3;
+overflow: hidden;
+}
+
+.fade-wrapper .fade-out {
+margin-bottom: 0;
+}
+
+.project-spaces-dashboard .datasets_raw,
+.project-spaces-dashboard .collections_raw,
+.project-spaces-dashboard .bytes_raw,
+.project-spaces-dashboard .views_raw,
+.project-spaces-dashboard .users_raw {
+display: none;
+}
+
+.fade-wrapper .fade-in {
+display: none;
+position: absolute;
+top: 0;
+left: 0;
+z-index: 100;
+width: 100%;
+background: #0b5ca3;
+color: #fff;
+height: 100%;
+opacity: .85;
+font-size: .9em;
+overflow-y: scroll;
+overflow-x: hidden;
+padding-right: 15px;
+}
+
+.space-stats li {
+font-size: .8em;
+}
+
+.fade-wrapper .fade-in .fade-in-content {
+padding: 20px;
+font-size: 1.5em;
+}
+
+.space-wrapper a:hover .fade-in {
+display: block;
+}
+
+.sead-scope .row-fluid .span4 {
+  width: 30.914894%;
+}
+
+.sead-scope .row-fluid [class*="span"],
+.sead-scope .row-fluid [class*="span"]:first-child {
+margin: 10px;
+}
+
+.fade-out {
+background-repeat: no-repeat;
+background-position:center center,bottom left;
+background-size: auto,cover;
+}
+
+
+.project-spaces-dashboard .filters label {
+font-weight: bold;
+padding-top: 10px;
+font-size: 1.1em;
+}
+
+#loading-spinner {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background: #fcfcfc;
+	opacity: .7;
+	z-index: 10000;
+}
+
+.fa-spinner {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+}
+
+button.active {
+	font-weight: bold;
+	background: #6a6a6a;
+}
+
+#exportForm input[type="submit"] {
+	margin-bottom: 0;	
+}
+}
