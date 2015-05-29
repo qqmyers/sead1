@@ -104,10 +104,10 @@ public class LocationWidget extends Composite {
     private final DispatchAsync            service;
     private final String                   uri;
 
-    // popup for locaiton by place name
+    // popup for location by place name
     protected PickLocationByPlaceNamePanel locationByPlaceNamePanel;
 
-    // popup for locaiton on map
+    // popup for location on map
     protected PickLocationOnMapPanel       locationOnMapPanel;
 
     // container panel for anchor for location picking
@@ -184,54 +184,65 @@ public class LocationWidget extends Composite {
                 if (!arg0.getGeoPoints().isEmpty()) {
                     showPoints(arg0.getGeoPoints());
                 } else {
-                    showAddLocation();
+                    PermissionUtil rbac = new PermissionUtil(service);
+                    rbac.doIfAllowed(Permission.EDIT_METADATA, uri, new PermissionCallback() {
+                        @Override
+                        public void onAllowed() {
+                            showNoLocation(true);
+                        }
+
+                        public void onDenied() {
+                            showNoLocation(false);
+                        }
+                    });
                 }
             }
         });
     }
 
-    protected void showAddLocation() {
+    protected void showNoLocation(boolean allowAdd) {
         if (anchorContainer == null) {
             anchorContainer = new VerticalPanel();
             Label noLocationLabel = new Label("No location set");
             anchorContainer.add(noLocationLabel);
 
-            // add location anchor on map
-            Anchor addLocationOnMapAnchor = new Anchor("Set location on map");
-            addLocationOnMapAnchor.addClickHandler(new ClickHandler() {
+            if (allowAdd) {
+                // add location anchor on map
+                Anchor addLocationOnMapAnchor = new Anchor("Set location on map");
+                addLocationOnMapAnchor.addClickHandler(new ClickHandler() {
 
-                @Override
-                public void onClick(ClickEvent event) {
-                    locationOnMapPanel = new PickLocationOnMapPanel();
-                    locationOnMapPanel.center();
-                    locationOnMapPanel.show();
-                    locationOnMapPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        locationOnMapPanel = new PickLocationOnMapPanel();
+                        locationOnMapPanel.center();
+                        locationOnMapPanel.show();
+                        locationOnMapPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
 
-                        @Override
-                        public void onClose(CloseEvent<PopupPanel> event) {
-                            Marker location = locationOnMapPanel.getLocation();
-                            if (location != null) {
-                                submitNewLocation(location.getLatLng());
+                            @Override
+                            public void onClose(CloseEvent<PopupPanel> event) {
+                                Marker location = locationOnMapPanel.getLocation();
+                                if (location != null) {
+                                    submitNewLocation(location.getLatLng());
+                                }
                             }
-                        }
-                    });
-                }
-            });
-            anchorContainer.add(addLocationOnMapAnchor);
+                        });
+                    }
+                });
+                anchorContainer.add(addLocationOnMapAnchor);
 
-            // add location anchor by place name
-            Anchor addLocationByPlaceNameAnchor = new Anchor("Set location by place name");
-            addLocationByPlaceNameAnchor.addClickHandler(new ClickHandler() {
+                // add location anchor by place name
+                Anchor addLocationByPlaceNameAnchor = new Anchor("Set location by place name");
+                addLocationByPlaceNameAnchor.addClickHandler(new ClickHandler() {
 
-                @Override
-                public void onClick(ClickEvent event) {
-                    locationByPlaceNamePanel = new PickLocationByPlaceNamePanel();
-                    locationByPlaceNamePanel.center();
-                    locationByPlaceNamePanel.show();
-                }
-            });
-            anchorContainer.add(addLocationByPlaceNameAnchor);
-
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        locationByPlaceNamePanel = new PickLocationByPlaceNamePanel();
+                        locationByPlaceNamePanel.center();
+                        locationByPlaceNamePanel.show();
+                    }
+                });
+                anchorContainer.add(addLocationByPlaceNameAnchor);
+            }
             mainPanel.add(anchorContainer);
         } else {
             anchorContainer.setVisible(true);
