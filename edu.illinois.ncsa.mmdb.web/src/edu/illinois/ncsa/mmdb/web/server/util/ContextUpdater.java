@@ -146,6 +146,7 @@ public class ContextUpdater {
 
         if (force || (version < 9)) {
             indexTopLevelItems(context);
+            adminRoleNameChange(context);
         }
 
         // Mark context as updated removing all old versions first.
@@ -251,8 +252,7 @@ public class ContextUpdater {
     }
 
     /**
-     * A bug allowed creation of a user with uri
-     * http://cet.ncsa.uiuc.edu/2007/person/null. This removes that user.
+     * Adds newly created permissions to default roles
      *
      * @param context
      *            the context (and its children) that needs updating.
@@ -294,6 +294,15 @@ public class ContextUpdater {
         log.info("Updated default roles with new permissions");
     }
 
+    /**
+     * A bug created many 'blank' permission nodes representing the same thing.
+     * This removes the duplicates
+     *
+     * @param context
+     *            the context (and its children) that needs updating.
+     * @throws OperatorException
+     */
+
     private static void flattenPermissions(Context c) throws OperatorException {
         SEADRbac rbac = new SEADRbac(c);
         //Get current role/permission assignments (flatten through GetPermissionsHandler)
@@ -328,6 +337,50 @@ public class ContextUpdater {
         } catch (ActionException a) {
             throw new OperatorException("Failed to retrieve Role/Permission settings");
         }
+    }
+
+    /**
+     * A bug created many 'blank' permission nodes representing the same thing.
+     * This removes the duplicates
+     *
+     * @param context
+     *            the context (and its children) that needs updating.
+     * @throws OperatorException
+     */
+
+    private static void adminRoleNameChange(Context c) throws OperatorException {
+        SEADRbac rbac = new SEADRbac(c);
+        //Get current Administrator role/permission assignments
+        //Move them to Admin role
+        //Get person-role assignments for "administrator
+        //Move to admin
+        //Create label, type, visibility level settings for admin
+
+        TripleWriter tw = new TripleWriter();
+        Unifier uf = new Unifier();
+        UriRef oldRole = Resource.uriRef("http://medici.ncsa.illinois.edu/ns/Administrator");
+        UriRef newRole = Resource.uriRef(DefaultRole.ADMINISTRATOR.getUri());
+        uf.addPattern(oldRole, "pred", "obj");
+        uf.setColumnNames("pred", "obj");
+        c.perform(uf);
+        for (Tuple<Resource> t : uf.getResult() ) {
+            tw.remove(oldRole, t.get(0), t.get(1));
+            if (!(t.get(0).toString().equals(Rdfs.LABEL.toString()))) {
+                tw.add(newRole, t.get(0), t.get(1));
+            }
+        }
+        tw.add(newRole, Rdfs.LABEL, Resource.literal(DefaultRole.ADMINISTRATOR.getName()));
+        uf = new Unifier();
+        uf.addPattern("sub", "pred", oldRole);
+        uf.setColumnNames("sub", "pred");
+        c.perform(uf);
+        for (Tuple<Resource> t : uf.getResult() ) {
+            tw.remove(t.get(0), t.get(1), oldRole);
+            tw.add(t.get(0), t.get(1), newRole);
+        }
+        c.perform(tw);
+
+        log.info("Administrator role update to Admin");
     }
 
     private static Resource getUriRefForPermissionValue(PermissionValue pv) {
