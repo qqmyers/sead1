@@ -380,15 +380,16 @@ public class DatasetsRestService extends ItemServicesImpl {
 
             PermissionCheck p = new PermissionCheck(creator, Permission.DOWNLOAD);
             log.debug("User can getCombinedContext(logo/banner: " + p.userHasPermission());
-            log.debug("File is logo/banner: " + dataUsedInHeader(id));
-            if (!p.userHasPermission() && !dataUsedInHeader(id)) {
+            boolean dataInHeader = dataUsedInHeader(id);
+            log.debug("File is logo/banner: " + dataInHeader);
+            if (!p.userHasPermission() && !dataInHeader) {
 
                 return p.getErrorResponse();
             }
 
             UriRef itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
             boolean valid = false;
-            if (request.getAttribute("token") != null) {
+            if (dataInHeader || (request.getAttribute("token") != null)) {
                 valid = true;
             } else {
                 //only need user to check permissions - may be null for token exists case (above)
@@ -450,7 +451,7 @@ public class DatasetsRestService extends ItemServicesImpl {
             TupeloStore.getInstance().getContext().perform(uf);
             Tuple<Resource> tuple = uf.getFirstRow();
             if (tuple != null) {
-                if (id.equals(tuple.get(1).toString())) {
+                if ((tuple.get(1).toString()).contains(id)) {
                     return true;
                 }
             }
@@ -465,7 +466,7 @@ public class DatasetsRestService extends ItemServicesImpl {
             TupeloStore.getInstance().getContext().perform(uf);
             Tuple<Resource> tuple = uf.getFirstRow();
             if (tuple != null) {
-                if (id.equals(tuple.get(1).toString())) {
+                if ((tuple.get(1).toString()).contains(id)) {
                     return true;
                 }
             }
