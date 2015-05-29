@@ -192,6 +192,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
     public static String               _vivoIdentifierUri               = null;
     public static String               _vivoQueryUri                    = null;
     public static boolean              bigData                          = false;                              //Server's bigData flag
+    public static boolean              useAdvancedPermissions           = false;
 
     private static void reportUmbrellaError(@NotNull Throwable e) {
         for (Throwable th : ((UmbrellaException) e).getCauses() ) {
@@ -317,7 +318,8 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                 ConfigurationKey.ProjectHeaderBackground,
                 ConfigurationKey.ProjectHeaderTitleColor,
                 ConfigurationKey.VIVOIDENTIFIERURL,
-                ConfigurationKey.VIVOQUERYURL
+                ConfigurationKey.VIVOQUERYURL,
+                ConfigurationKey.UseAdvancedPermissions
                 ), new AsyncCallback<ConfigurationResult>() {
 
                     @Override
@@ -334,6 +336,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
                         _orcidClientId = result.getConfiguration(ConfigurationKey.OrcidClientId);
                         _vivoIdentifierUri = result.getConfiguration(ConfigurationKey.VIVOIDENTIFIERURL);
                         _vivoQueryUri = result.getConfiguration(ConfigurationKey.VIVOQUERYURL);
+                        useAdvancedPermissions = result.getConfiguration(ConfigurationKey.UseAdvancedPermissions).equalsIgnoreCase("true");
 
                         Document.get().setTitle("SEAD: " + _projectName + " Project Space");
 

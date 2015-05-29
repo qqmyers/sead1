@@ -72,7 +72,7 @@ public class SetPermissionsHandler implements ActionHandler<SetPermissions, SetP
     }
 
     // would changing this session lock the authenticated user out of rbac admin?
-    boolean lockout(RBAC rbac, String u, PermissionSetting setting) throws RBACException {
+    boolean lockout(SEADRbac rbac, String u, PermissionSetting setting) throws RBACException {
         if (setting.getValue() == PermissionValue.ALLOW) { // we're allowing, so no prob
             return false;
         }

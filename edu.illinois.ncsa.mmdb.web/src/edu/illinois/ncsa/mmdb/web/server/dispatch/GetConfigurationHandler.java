@@ -84,7 +84,8 @@ public class GetConfigurationHandler implements ActionHandler<GetConfiguration, 
                                                           ConfigurationKey.ProjectHeaderLogo,
                                                           ConfigurationKey.ProjectHeaderBackground,
                                                           ConfigurationKey.OrcidClientId,
-                                                          ConfigurationKey.ProjectHeaderTitleColor
+                                                          ConfigurationKey.ProjectHeaderTitleColor,
+                                                          ConfigurationKey.UseAdvancedPermissions
                                                           });
 
     /** Commons logging **/

@@ -96,6 +96,9 @@ public class ConfigurationWidget extends Composite {
         // extractor configuration
         mainPanel.add(createExtractorSection(configuration));
 
+        //Permissions
+        mainPanel.add(createPermissionsConfigurationSection(configuration));
+
     }
 
     private DisclosurePanel createMailSection(ConfigurationResult configuration) {
@@ -615,7 +618,54 @@ public class ConfigurationWidget extends Composite {
     }
 
     private DisclosurePanel createVAConfigurationSection(ConfigurationResult configuration) {
-        return createSimpleConfigurationSection(configuration, "VA Configuration", "VA End Point", ConfigurationKey.VAURL, false);
+        return createSimpleConfigurationSection(configuration, "Publishing Configuration", "Publication End Point", ConfigurationKey.VAURL, false);
+    }
+
+    private DisclosurePanel createPermissionsConfigurationSection(ConfigurationResult configuration) {
+        DisclosurePanel dp = new DisclosurePanel("Permissions");
+        dp.addStyleName("datasetDisclosurePanel");
+        dp.setOpen(false);
+
+        final VerticalPanel vp = new VerticalPanel();
+        vp.setWidth("100%");
+        vp.addStyleName("permissions");
+        dp.add(vp);
+
+        // Advanced Permissions panel
+        HorizontalPanel hp = new HorizontalPanel();
+        vp.add(hp);
+
+        final CheckBox useAdvancedPermissionsBox = new CheckBox();
+        useAdvancedPermissionsBox.setValue(configuration.getConfiguration(ConfigurationKey.UseAdvancedPermissions).equalsIgnoreCase("true"));
+        useAdvancedPermissionsBox.setText("Use Advanced Permissions");
+        hp.add(useAdvancedPermissionsBox);
+
+        useAdvancedPermissionsBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+            @Override
+            public void onValueChange(final ValueChangeEvent<Boolean> event) {
+                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                query.setConfiguration(ConfigurationKey.UseAdvancedPermissions, useAdvancedPermissionsBox.getValue().toString());
+                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not set configuration value for UseGoogleDocViewer.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        //Shouldn't have to do anything, but confirm by setting checkbox with result
+                        boolean isOn = result.getConfiguration(ConfigurationKey.UseAdvancedPermissions).equalsIgnoreCase("true");
+                        MMDB.useAdvancedPermissions = isOn;
+                        useAdvancedPermissionsBox.setValue(isOn);
+                        vp.add(new Label("Success: Refresh page to update User/Permission panel(s)"));
+                    }
+                });
+
+            }
+        });
+
+        return dp;
     }
 
     private DisclosurePanel createExtractorSection(ConfigurationResult configuration) {

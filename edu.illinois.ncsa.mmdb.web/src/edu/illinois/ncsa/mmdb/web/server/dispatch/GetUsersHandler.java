@@ -62,10 +62,10 @@ import org.tupeloproject.rdf.terms.Cet;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsers;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUsersResult;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.PersonBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
@@ -81,7 +81,7 @@ public class GetUsersHandler implements ActionHandler<GetUsers, GetUsersResult> 
 
     @Override
     public GetUsersResult execute(GetUsers arg0, ExecutionContext arg1) throws ActionException {
-        RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
         PersonBeanUtil personBeanUtil = new PersonBeanUtil(beanSession);
         try {
@@ -95,6 +95,7 @@ public class GetUsersHandler implements ActionHandler<GetUsers, GetUsersResult> 
                 try {
                     for (Resource role : rbac.getRoles(Resource.uriRef(pb.getUri())) ) {
                         user.roles.add(role.getString());
+                        log.debug("Adding: " + user.name + " with role: " + role.getString());
                     }
                     result.addUser(user);
                 } catch (RBACException exc) {

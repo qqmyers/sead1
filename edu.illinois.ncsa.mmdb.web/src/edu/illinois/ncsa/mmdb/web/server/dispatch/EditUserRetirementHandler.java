@@ -22,6 +22,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 /**
@@ -41,7 +42,7 @@ public class EditUserRetirementHandler implements ActionHandler<EditUserRetireme
         log.debug("Retirement request: Retire user = " + action.getTargetUser() + ", admin = " + action.getUser());
         if (action.getUser().equals(action.getTargetUser())) {
             log.debug("Attempt to retire self");
-            throw new ActionException("Cannot retire self");
+            throw new ActionException("Cannot archive/inactivate self");
         }
 
         SEADRbac rbac = TupeloStore.getInstance().getRbac();
@@ -77,10 +78,11 @@ public class EditUserRetirementHandler implements ActionHandler<EditUserRetireme
         return new EmptyResult();
     }
 
-    private void removeRoles(UriRef user) {
+    public static void removeRoles(UriRef user) {
         SEADRbac rbac = TupeloStore.getInstance().getRbac();
         try {
-            Collection<Resource> roles = rbac.getRoles(user);
+            //Need all roles from base class, not primary role from SEADRbac when simple permissions are in use
+            Collection<Resource> roles = ((RBAC) rbac).getRoles(user);
             for (Resource role : roles ) {
                 rbac.removeRole(user, role);
             }

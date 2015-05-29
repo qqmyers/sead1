@@ -14,6 +14,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
+import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
@@ -24,7 +25,7 @@ public class GetPermissionsHandler implements ActionHandler<GetPermissions, GetP
 
     @Override
     public GetPermissionsResult execute(GetPermissions action, ExecutionContext arg1) throws ActionException {
-        RBAC rbac = new RBAC(TupeloStore.getInstance().getContext());
+        SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
 
         try {
             GetPermissionsResult result = new GetPermissionsResult();

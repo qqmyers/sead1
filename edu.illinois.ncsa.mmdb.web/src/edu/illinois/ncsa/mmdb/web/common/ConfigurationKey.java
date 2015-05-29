@@ -1,6 +1,5 @@
 package edu.illinois.ncsa.mmdb.web.common;
 
-
 public enum ConfigurationKey {
     // information when sending email
     MailServer("mail.host", "localhost"), //$NON-NLS-1$ //$NON-NLS-2$
@@ -64,7 +63,9 @@ public enum ConfigurationKey {
     TokenKeyLifetime("token.key.lifetime", "5"),
 
     //Use Google Document Viewer
-    UseGoogleDocViewer("previewer.google_doc_viewer", "true");
+    UseGoogleDocViewer("previewer.google_doc_viewer", "true"),
+
+    UseAdvancedPermissions("advancedPermissions", "false");
 
     private final String propertyKey;
     private final String defaultValue;

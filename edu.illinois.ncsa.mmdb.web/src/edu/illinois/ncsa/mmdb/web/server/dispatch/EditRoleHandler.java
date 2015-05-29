@@ -58,6 +58,9 @@ import org.tupeloproject.util.Tuple;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EditRole;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.ui.admin.SimpleUserManagementWidget;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
+import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.Mail;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
@@ -71,12 +74,14 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
  * Add/remove user permissions.
  *
  * @author Luigi Marini
+ * @author myersjd@umich.edu
  *
  */
 public class EditRoleHandler implements ActionHandler<EditRole, EmptyResult> {
 
     /** Commons logging **/
-    private static Log log = LogFactory.getLog(EditRoleHandler.class);
+    private static Log log                  = LogFactory.getLog(EditRoleHandler.class);
+    private boolean    useSimplePermissions = false;
 
     @Override
     public EmptyResult execute(EditRole action, ExecutionContext arg1) throws ActionException {
@@ -85,44 +90,100 @@ public class EditRoleHandler implements ActionHandler<EditRole, EmptyResult> {
         UriRef role = Resource.uriRef(action.getRole());
         SEADRbac rbac = TupeloStore.getInstance().getRbac();
 
-        log.debug("user = " + user + ", admin = " + admin);
-
         try {
-            switch (action.getType()) {
-                case ADD:
-                    try {
-                        rbac.addRole(user, role);
-                        if (rbac.getRoles(user).size() == 1) {
-                            emailNotification(user);
-                        }
-                    } catch (RBACException x) {
-                        log.error("error adding user to role", x);
-                    }
-                    break;
-                case REMOVE:
-                    if (!(user.equals(admin) && lockout(rbac, user, role))) {
-                        rbac.removeRole(user, role);
-                    } else {
-                        throw new ActionException("Removing yourself from this role would lock you out of the system.");
-                    }
-                    break;
-                default:
-                    log.error("Edit action type not found" + action.getType());
-                    throw new ActionException("Error: unknown permissions setting");
+            if (!rbac.checkPermission(action.getUser(), Permission.EDIT_ROLES)) {
+                log.warn("User doesn't have permission to edit roles");
+                throw new ActionException("Cannot Edit Roles");
+
             }
-        } catch (OperatorException e) {
-            log.error("Error changing permission on user", e);
-            throw new ActionException("Server error: " + e.getMessage(), e);
         } catch (RBACException e) {
-            // TODO Auto-generated catch block
-            throw new ActionException("Access control error: " + e.getMessage(), e);
+            log.error(e);
+            throw new ActionException("Error determining permissions");
         }
 
+        //Refresh on every call
+        useSimplePermissions = !(TupeloStore.getInstance().getConfiguration(ConfigurationKey.UseAdvancedPermissions).equalsIgnoreCase("true"));
+
+        log.debug("user = " + user + ", admin = " + admin);
+        if (useSimplePermissions) {
+            if (user.equals(admin)) {
+                throw new ActionException("An Admin cannot remove their own ability to act as an Admin.");
+            } else if (action.getType().equals(EditRole.ActionType.ADD)) {
+                /*
+                 * Simple only sends ADD actions
+                 * Unassigned = no role
+                 * Admin, Author, Viewer are exclusive and not retired
+                 * Inactive = no role and retired
+                 */
+                String newRole = DefaultRole.getNameFromUri(action.getRole());
+                if (newRole.equals(SimpleUserManagementWidget.UNASSIGNED_ROLE)) {
+                    EditUserRetirementHandler.removeRoles(user);
+                    EditUserRetirementHandler.setRetirement(user, false);
+                    log.debug("User: " + user.toString() + " now unassigned");
+                } else if (newRole.equals(SimpleUserManagementWidget.INACTIVE_ROLE)) {
+                    EditUserRetirementHandler.removeRoles(user);
+                    EditUserRetirementHandler.setRetirement(user, true);
+                    log.debug("User: " + user.toString() + " now inactive/retired");
+                } else {
+                    EditUserRetirementHandler.removeRoles(user);
+                    try {
+                        rbac.addRole(user, role);
+                    } catch (OperatorException e) {
+                        log.error("Error changing permission on user", e);
+                        throw new ActionException("Server error: " + e.getMessage(), e);
+                    }
+                    EditUserRetirementHandler.setRetirement(user, false);
+                    log.debug("User: " + user.toString() + " assigned role: " + newRole);
+                }
+            } else { //A REMOVE - only allowed for anonymous user and anonymous role
+                if (action.getTargetUser().equals(PersonBeanUtil.getAnonymousURI().toString()) && (action.getRole().equals(DefaultRole.ANONYMOUS.getUri()))) {
+                    try {
+                        rbac.removeRole(user, role);
+                    } catch (OperatorException e) {
+                        throw new ActionException("Unable to remove anonymous fron anonymous role");
+                    }
+                } else {
+                    log.warn("Remove action sent while using simple permissions - no action taken");
+                }
+            }
+        } else {
+            try {
+                switch (action.getType()) {
+                    case ADD:
+                        try {
+                            rbac.addRole(user, role);
+                            if (rbac.getRoles(user).size() == 1) {
+                                emailNotification(user);
+                            }
+                        } catch (RBACException x) {
+                            log.error("error adding user to role", x);
+                        }
+                        break;
+                    case REMOVE:
+                        if (!(user.equals(admin) && lockout(rbac, user, role))) {
+                            rbac.removeRole(user, role);
+                        } else {
+                            throw new ActionException("An Admin cannot remove their own ability to act as an Admin.");
+                        }
+                        break;
+                    default:
+                        log.error("Edit action type not found" + action.getType());
+                        throw new ActionException("Error: unknown permissions setting");
+                }
+            } catch (OperatorException e) {
+                log.error("Error changing permission on user", e);
+                throw new ActionException("Server error: " + e.getMessage(), e);
+            } catch (RBACException e) {
+                // TODO Auto-generated catch block
+                throw new ActionException("Access control error: " + e.getMessage(), e);
+            }
+        }
         return new EmptyResult();
     }
 
     // would removing this user from this role make it impossible for them to administer roles?
-    boolean lockout(RBAC rbac, Resource user, Resource role) throws RBACException {
+    boolean lockout(SEADRbac rbac, Resource user, Resource role) throws RBACException {
+
         Collection<Resource> roles = rbac.getRoles(user); // roles the user belongs to
         Set<Resource> neededPermissions = new HashSet<Resource>(); // set of permissions needed to administer roles
         neededPermissions.add(Resource.uriRef(Permission.VIEW_MEMBER_PAGES.getUri())); // get to the home page

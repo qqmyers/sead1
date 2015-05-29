@@ -3,12 +3,14 @@ package edu.illinois.ncsa.mmdb.web.server;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
+import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
@@ -21,6 +23,7 @@ import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
 
+import edu.illinois.ncsa.mmdb.web.client.ui.admin.SimpleUserManagementWidget;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
@@ -120,9 +123,66 @@ public class SEADRbac extends RBAC {
             r.add(Resource.uriRef(DefaultRole.OWNER.getUri()));
         }
         if (personUri.equals(PersonBeanUtil.getAnonymousURI())) {
-            r.add(Resource.uriRef(DefaultRole.ANONYMOUS.getUri()));
+            if (TupeloStore.getInstance().getConfiguration(ConfigurationKey.UseAdvancedPermissions).equalsIgnoreCase("true")) {
+                r.add(Resource.uriRef(DefaultRole.ANONYMOUS.getUri()));
+            }
         }
         return r;
+    }
+
+    /**
+     * Given a user, retrieve all roles that user belongs to. With simple
+     * permissions,
+     * return the most powerful of admin>author>viewer roles or empty set.
+     *
+     * @param user
+     * @return roles
+     * @throws RBACException
+     */
+    public Collection<Resource> getRoles(Resource user) throws RBACException {
+        Collection<Resource> r = super.getRoles(user);
+        if (TupeloStore.getInstance().getConfiguration(ConfigurationKey.UseAdvancedPermissions).equalsIgnoreCase("true")) {
+            return r;
+        } else {
+            Iterator<Resource> itr = r.iterator();
+            while (itr.hasNext()) {
+                log.debug("User: " + user.toString() + " has role: " + itr.next().toString());
+            }
+            Set<Resource> s = new HashSet<Resource>();
+            TripleMatcher tMatcher = new TripleMatcher();
+            tMatcher.match(user, Cet.cet("retired"), null);
+            try {
+                TupeloStore.getInstance().getContext().perform(tMatcher);
+            } catch (OperatorException e) {
+                log.error("Could not check retired flag for user: " + user.toString(), e);
+            }
+            Resource admin = Resource.uriRef(DefaultRole.ADMINISTRATOR.getUri());
+            Resource author = Resource.uriRef(DefaultRole.AUTHOR.getUri());
+            Resource viewer = Resource.uriRef(DefaultRole.VIEWER.getUri());
+            Resource anonRole = Resource.uriRef(DefaultRole.ANONYMOUS.getUri());
+            Resource unassigned = Resource.uriRef(DefaultRole.getUriForName(SimpleUserManagementWidget.UNASSIGNED_ROLE));
+
+            if (!tMatcher.getResult().isEmpty()) {
+                Resource inactive = Resource.uriRef(DefaultRole.getUriForName(SimpleUserManagementWidget.INACTIVE_ROLE));
+                s.add(inactive);
+            } else if (r.contains(admin)) {
+                s.add(admin);
+            } else if (r.contains(author)) {
+                s.add(author);
+            } else if (r.contains(viewer)) {
+                s.add(viewer);
+            } else if (user.toString().equals(PersonBeanUtil.getAnonymousURI().toString())) {
+                if (r.contains(anonRole)) {
+                    s.add(anonRole);
+                } else {
+                    s.add(unassigned);
+                }
+            } else {
+                s.add(unassigned);
+            }
+            log.debug("Primary role: " + s.iterator().next() + " to user: " + user.toString());
+            return s;
+        }
     }
 
     /**
