@@ -335,6 +335,10 @@
         <filter-name>CORS</filter-name>
         <url-pattern>/resteasy/datasets/import/*</url-pattern>
     </filter-mapping>
+        <filter-mapping>
+        <filter-name>CORS</filter-name>
+        <url-pattern>/resteasy/sys/*</url-pattern>
+    </filter-mapping>
 	<filter>
     <filter-name>AuthFilter</filter-name>
     <filter-class>
