@@ -573,7 +573,7 @@ public class ContextSetupListener implements ServletContextListener {
         // ensure Medici permissions exist/are current with Permissions enum
         rbac.updatePermissions();
         String predicate = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelPredicate);
-        int level = TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelValues).split("[ ]*,[ ]*").length - 1;
+        int level = Integer.parseInt(TupeloStore.getInstance().getConfiguration(ConfigurationKey.AccessLevelDefault));
         // make sure each role has a value for every permission (will give donotallow for all new permissions...)
         // and an access level setting (set to default level if not yet set)
         rbac.associatePermissionsWithRoles(predicate, level);
@@ -593,9 +593,11 @@ public class ContextSetupListener implements ServletContextListener {
         TupeloStore.getInstance().getBeanSession().save();
         Resource anonymousRole = Resource.uriRef(DefaultRole.ANONYMOUS.getUri());
         Resource anonymousURI = Resource.uriRef(anon.getUri());
-        rbac.addRole(anonymousURI, anonymousRole);
-        log.debug("User " + anonymousURI + " was given role " + anonymousRole);
-
+        //Anon having role anon is managed via the GUI for simple permissions - should not be reset here on server restart
+        if (TupeloStore.getInstance().getConfiguration(ConfigurationKey.UseAdvancedPermissions).equalsIgnoreCase("true")) {
+            rbac.addRole(anonymousURI, anonymousRole);
+            log.debug("User " + anonymousURI + " was given role " + anonymousRole);
+        }
         // create accounts
         Set<String> keys = new HashSet<String>();
         for (String key : props.stringPropertyNames() ) {

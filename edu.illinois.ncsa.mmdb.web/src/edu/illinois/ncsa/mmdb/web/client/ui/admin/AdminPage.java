@@ -104,11 +104,16 @@ public class AdminPage extends Page {
 
         // Users and permissions
         if (permissions.isPermitted(Permission.EDIT_ROLES)) {
-            // users
-            tabPanel.insert(new UserManagementWidget(dispatchAsync), "Users", 1);
 
-            // Permissions
-            tabPanel.insert(new RoleAdministrationWidget(dispatchAsync), "Permissions", 2);
+            if (MMDB.useAdvancedPermissions) {
+                // users
+                tabPanel.insert(new UserManagementWidget(dispatchAsync), "Users", 1);
+
+                // Permissions
+                tabPanel.insert(new RoleAdministrationWidget(dispatchAsync), "Permissions", 2);
+            } else {
+                tabPanel.insert(new SimpleUserManagementWidget(dispatchAsync), "Users", 1);
+            }
         }
 
         // System information

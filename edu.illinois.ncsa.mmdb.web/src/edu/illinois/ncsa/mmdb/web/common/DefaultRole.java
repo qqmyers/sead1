@@ -14,7 +14,7 @@ public enum DefaultRole {
      * Administrator, with permissions to administer other user's role
      * memberships and permissions
      */
-    ADMINISTRATOR("Administrator", Permission.all()),
+    ADMINISTRATOR("Admin", Permission.all()),
     /** Authors can create content as well as viewing it */
     AUTHOR("Author", author()),
     /**
@@ -36,6 +36,18 @@ public enum DefaultRole {
     private DefaultRole(String name, EnumSet<Permission> permissions) {
         this.name = name;
         this.permissions = permissions;
+    }
+
+    public static String getUriForName(String name) {
+        return PREFIX + name;
+    }
+
+    public static String getNameFromUri(String uri) {
+        if (uri.startsWith(PREFIX)) {
+            return (uri.substring(PREFIX.length()));
+        } else {
+            return null;
+        }
     }
 
     /**
