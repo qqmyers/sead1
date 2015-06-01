@@ -68,6 +68,11 @@
 			<version>1.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+      <groupId>edu.illinois.ncsa.cet</groupId>
+      <artifactId>cet-search</artifactId>
+      <version>1.0.1-SNAPSHOT</version>
+    </dependency>
+		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.1</version>

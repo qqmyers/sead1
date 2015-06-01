@@ -2,54 +2,15 @@ package org.sead.acr.tools.medici;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.tupeloproject.kernel.BeanSession;
-import org.tupeloproject.kernel.BlobWriter;
-import org.tupeloproject.kernel.ContentStoreContext;
-import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleWriter;
-import org.tupeloproject.kernel.Unifier;
-import org.tupeloproject.kernel.impl.HashFileContext;
-import org.tupeloproject.kernel.impl.MemoryContext;
-import org.tupeloproject.mysql.MysqlContext;
-import org.tupeloproject.mysql.NewMysqlContext;
 import org.tupeloproject.rdf.Literal;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
-import org.tupeloproject.rdf.terms.DcTerms;
-import org.tupeloproject.rdf.terms.Rdf;
-import org.tupeloproject.util.Tuple;
-
-import edu.uiuc.ncsa.cet.bean.CollectionBean;
-import edu.uiuc.ncsa.cet.bean.DatasetBean;
-import edu.uiuc.ncsa.cet.bean.PersonBean;
-import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
-import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.DatasetBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
-import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
 /*This class allows read/write of individual triples to an ACR/Medici triple store. It accepts triples in csv format, preceded by the action to be taken:
  * <action>,<s>,<p>,<o>

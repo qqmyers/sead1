@@ -40,6 +40,7 @@ public class MediciToolBase {
 
     protected static boolean     listonly = false;
 
+    protected static final Properties props = new Properties();
     protected static void println(String s) {
         System.out.println(s);
         if (pw != null)
@@ -50,7 +51,7 @@ public class MediciToolBase {
     protected static void init(String prefix, boolean useBeanSession) throws IOException, ClassNotFoundException, OperatorException {
 
         // load properties
-        final Properties props = new Properties();
+        
         props.load(new FileInputStream("server.properties"));
 
         File outputFile = new File(prefix + System.currentTimeMillis() + ".txt");
