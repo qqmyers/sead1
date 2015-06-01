@@ -5,7 +5,7 @@
 	id="WebApp_ID" version="2.5">
 	<display-name>ACR Discovery View</display-name>
 	<welcome-file-list>
-		<welcome-file>home</welcome-file>
+		<welcome-file>project-spaces.html</welcome-file>
 		<welcome-file>index.html</welcome-file>
 
 	</welcome-file-list>
@@ -89,5 +89,21 @@
 		<servlet-name>authredirect</servlet-name>
 		<url-pattern>/authredirect</url-pattern>
 	</servlet-mapping>
-
+<!--  Cross-site -->
+  <filter>
+      <filter-name>CORS</filter-name>
+      <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
+        <init-param>
+           <param-name>cors.allowOrigin</param-name>
+           <param-value>*</param-value>
+        </init-param>
+        <init-param>
+          <param-name>cors.supportedMethods</param-name>
+           <param-value>GET, POST, HEAD, OPTIONS</param-value>
+        </init-param>
+    </filter>
+  <filter-mapping>
+        <filter-name>CORS</filter-name>
+        <url-pattern>/spaces</url-pattern>
+    </filter-mapping>
 </web-app>

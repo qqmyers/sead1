@@ -67,7 +67,7 @@ public class Home extends HttpServlet {
 
 		request.setAttribute("projects", projects);
 		//RequestDispatcher rd = request.getRequestDispatcher("/home.jsp");
-		RequestDispatcher rd = request.getRequestDispatcher("/project-spaces.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("/home.jsp");
 
 		rd.forward(request, response);
 	}
