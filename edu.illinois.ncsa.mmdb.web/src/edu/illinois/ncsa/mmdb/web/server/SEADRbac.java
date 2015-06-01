@@ -162,24 +162,29 @@ public class SEADRbac extends RBAC {
             Resource anonRole = Resource.uriRef(DefaultRole.ANONYMOUS.getUri());
             Resource unassigned = Resource.uriRef(DefaultRole.getUriForName(SimpleUserManagementWidget.UNASSIGNED_ROLE));
 
-            if (!tMatcher.getResult().isEmpty()) {
-                Resource inactive = Resource.uriRef(DefaultRole.getUriForName(SimpleUserManagementWidget.INACTIVE_ROLE));
-                s.add(inactive);
-            } else if (r.contains(admin)) {
-                s.add(admin);
-            } else if (r.contains(author)) {
-                s.add(author);
-            } else if (r.contains(viewer)) {
-                s.add(viewer);
-            } else if (user.toString().equals(PersonBeanUtil.getAnonymousURI().toString())) {
+            if (user.toString().equals(PersonBeanUtil.getAnonymousURI().toString())) {
                 if (r.contains(anonRole)) {
+                    s.clear();
                     s.add(anonRole);
+                } else {
+                    s.clear();
+                    s.add(unassigned);
+                }
+            } else { //Not anonymous
+                if (!tMatcher.getResult().isEmpty()) {
+                    Resource inactive = Resource.uriRef(DefaultRole.getUriForName(SimpleUserManagementWidget.INACTIVE_ROLE));
+                    s.add(inactive);
+                } else if (r.contains(admin)) {
+                    s.add(admin);
+                } else if (r.contains(author)) {
+                    s.add(author);
+                } else if (r.contains(viewer)) {
+                    s.add(viewer);
                 } else {
                     s.add(unassigned);
                 }
-            } else {
-                s.add(unassigned);
             }
+
             log.debug("Primary role: " + s.iterator().next() + " to user: " + user.toString());
             return s;
         }
