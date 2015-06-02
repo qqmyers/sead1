@@ -1,20 +1,23 @@
 var seadSpaces = {};
 
-seadSpaces.doAjax = function(url){
+
+seadSpaces.doInfoAjax = function(url){
 	return $.ajax({
-	url: url,
-    dataType: "jsonp",
-    data: {
-        format: "json"
-    },
-    type: 'GET',
-	success: function(data) {
-		//console.log(data);
-	 },
-	error: function (request, status, error) {
-        console.log(request.responseText);
-    }
-  });	
+		type : "GET",
+		url : "GetSysInfo",
+		data: {server:  url},
+		dataType : "json"
+	});	
+}
+
+
+seadSpaces.doConfigAjax = function(url){
+	return	$.ajax({
+		type : "GET",
+		url : "GetProjectInfo",
+		data: {server:  url},
+		dataType : "json"
+	});
 }
 
 
@@ -114,7 +117,6 @@ seadSpaces.initSort = function(){
     	$('.sort').removeClass('active');
     });
 
-
 	$('#loading-spinner').remove();
 }
 
@@ -188,6 +190,7 @@ seadSpaces.getSpaces = function(url){
 
 
 seadSpaces.init = function(){
+
 	var i = 1;
 	var spaces = '';
    
@@ -196,34 +199,37 @@ seadSpaces.init = function(){
     spaces = spaces.replace('[','');
     spaces = spaces.replace(']','');
     spaces = spaces.split(',');
-    //console.log(spaces);
+    
 	var size = spaces.length;
-	$.each( spaces, function( key, value ) {
-  	// need to bypass single origin policy - remove for production
-  	var configurl = "http://www.whateverorigin.org/get?url="+value+"/resteasy/sys/config";
-  	var infourl = "http://www.whateverorigin.org/get?url="+value+"/resteasy/sys/info";
-  	$.when(seadSpaces.doAjax(configurl), seadSpaces.doAjax(infourl)).done(function(config, info){
-         var projectName = config[0].contents["project.name"];
-		 var projectDescription = config[0].contents["project.description"];
-		 var projectLogo = config[0].contents["project.header.logo"];
-		 var projectColor = config[0].contents["project.header.title.color"];
-		 var projectBg = config[0].contents["project.header.background"];
+	$.each( spaces, function( key, value ) {  	
+  	$.when(seadSpaces.doConfigAjax(value), seadSpaces.doInfoAjax(value)).done(function(config, info){
+
+         var projectName = config[0]["project.name"];
+		 var projectDescription = config[0]["project.description"];
+		 var projectLogo = config[0]["project.header.logo"];
+		 var projectColor = config[0]["project.header.title.color"];
+		 var projectBg = config[0]["project.header.background"];
+		 
 		 if(typeof projectBg !== 'undefined' && projectBg.substring(0, 8) == "resteasy"){
 		 	projectBg = value+'/'+projectBg;
 		 }
+		 if(typeof projectBg !== 'undefined' && projectBg.substring(0, 6) == "images"){
+			    projectBg  = value+'/'+projectBg;
+			 }
 		 if(typeof projectLogo !== 'undefined' && projectLogo.substring(0, 6) == "images"){
 		    projectLogo  = value+'/'+projectLogo;
 		 }
-		 var bytes = info[0].contents["Total number of bytes"];
-         var datasets_display = seadSpaces.abbreviateNumber(info[0].contents["Datasets"]);
-         var datasets_raw = info[0].contents["Datasets"];
-		 var users = seadSpaces.abbreviateNumber(info[0].contents["Number of Users"]);
-		 var users_raw = info[0].contents["Number of Users"];
-         var views = seadSpaces.abbreviateNumber(info[0].contents["Total Views"]);
-         var views_raw = info[0].contents["Total Views"];
-         var collections = seadSpaces.abbreviateNumber(info[0].contents["Collections "]);
-         var collections_raw = info[0].contents["Collections "];
-         var published = seadSpaces.abbreviateNumber(info[0].contents["Published Collections"]);
+		 var bytes = info[0]["Total number of bytes"];
+         var datasets_display = seadSpaces.abbreviateNumber(info[0]["Datasets"]);
+         var datasets_raw = info[0]["Datasets"];
+		 var users = seadSpaces.abbreviateNumber(info[0]["Number of Users"]);
+		 var users_raw = info[0]["Number of Users"];
+         var views = seadSpaces.abbreviateNumber(info[0]["Total Views"]);
+         var views_raw = info[0]["Total Views"];
+         var collections = seadSpaces.abbreviateNumber(info[0]["Collections "]);
+         var collections_raw = info[0]["Collections "];
+         var published = seadSpaces.abbreviateNumber(info[0]["Published Collections"]);
+         
          seadSpaces.buildGrid(size,i,projectName,projectDescription,projectLogo,projectColor,projectBg,datasets_display,datasets_raw,users,users_raw,views,views_raw,collections,collections_raw,published,bytes,value);
          i++;
     });
