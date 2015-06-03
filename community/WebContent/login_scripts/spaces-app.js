@@ -183,8 +183,7 @@ seadSpaces.buildGrid = function(size,i,projectName,projectDescription,projectLog
 	page += '</div>';
 	page += '</div>';
 	$('.project-spaces-dashboard .row-fluid').append(page);
-    
-	console.log(i+'/'+size);
+
 	if(i==size){seadSpaces.initSort();}
     
 }
