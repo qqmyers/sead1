@@ -1,19 +1,21 @@
 var seadSpaces = {};
 
 
-seadSpaces.doInfoAjax = function(url){
-	return $.ajax({
+seadSpaces.doInfoAjax = function(url,i){
+	 return $.ajax({
 		type : "GET",
+		timeout : '2000',
 		url : "GetSysInfo",
 		data: {server:  url},
-		dataType : "json"
-	});	
+		dataType : "json" 
+	  });	
 }
 
 
 seadSpaces.doConfigAjax = function(url){
-	return	$.ajax({
+	return $.ajax({
 		type : "GET",
+		timeout : '2000',
 		url : "GetProjectInfo",
 		data: {server:  url},
 		dataType : "json"
@@ -46,9 +48,6 @@ seadSpaces.initSort = function(){
 	
 	var spaceList = new List('project-spaces-dashboard', options);  
 	spaceList.sort('name', { order: "asc" });
-
-	
-
 
 	$('#views_raw').click(function(){
 		$('.sort').removeClass('active');
@@ -133,7 +132,9 @@ seadSpaces.formatBytes = function(bytes,decimals){
 
 
 seadSpaces.buildGrid = function(size,i,projectName,projectDescription,projectLogo,projectColor,projectBg,datasets_display,datasets_raw,users,users_raw,views,views_raw,collections,collections_raw,published,bytes,value){
-   
+    if(projectName == null){projectName = value+' is currently offline';}
+    
+    if(bytes !== null){
     if(bytes.indexOf('GB')>0 || bytes.indexOf('bytes')>0 || bytes.indexOf('MB')>0 || bytes.indexOf('TB')>0|| bytes.indexOf('KB')>0){
     // hide values that are not being served in bytes
     	bytes = null;
@@ -142,6 +143,8 @@ seadSpaces.buildGrid = function(size,i,projectName,projectDescription,projectLog
     	var bytes_raw = bytes;
     	bytes = seadSpaces.formatBytes(bytes,2);
     }
+    }
+    
 	var page = '';
 	page += '<div class="span4">';
 	page += '<div class="space-wrapper">';
@@ -180,7 +183,10 @@ seadSpaces.buildGrid = function(size,i,projectName,projectDescription,projectLog
 	page += '</div>';
 	page += '</div>';
 	$('.project-spaces-dashboard .row-fluid').append(page);
+    
+	console.log(i+'/'+size);
 	if(i==size){seadSpaces.initSort();}
+    
 }
 
 seadSpaces.getSpaces = function(url){
@@ -200,10 +206,15 @@ seadSpaces.init = function(){
     spaces = spaces.replace(']','');
     spaces = spaces.split(',');
     
+    
+    
+    
+    
+    
 	var size = spaces.length;
 	$.each( spaces, function( key, value ) {  	
-  	$.when(seadSpaces.doConfigAjax(value), seadSpaces.doInfoAjax(value)).done(function(config, info){
-
+  	$.when(seadSpaces.doConfigAjax(value), seadSpaces.doInfoAjax(value)).then(function(config, info){
+      
          var projectName = config[0]["project.name"];
 		 var projectDescription = config[0]["project.description"];
 		 var projectLogo = config[0]["project.header.logo"];
@@ -219,7 +230,9 @@ seadSpaces.init = function(){
 		 if(typeof projectLogo !== 'undefined' && projectLogo.substring(0, 6) == "images"){
 		    projectLogo  = value+'/'+projectLogo;
 		 }
-		 var bytes = info[0]["Total number of bytes"];
+		 
+  	 
+    	     var bytes = info[0]["Total number of bytes"];
          var datasets_display = seadSpaces.abbreviateNumber(info[0]["Datasets"]);
          var datasets_raw = info[0]["Datasets"];
 		 var users = seadSpaces.abbreviateNumber(info[0]["Number of Users"]);
@@ -229,10 +242,13 @@ seadSpaces.init = function(){
          var collections = seadSpaces.abbreviateNumber(info[0]["Collections "]);
          var collections_raw = info[0]["Collections "];
          var published = seadSpaces.abbreviateNumber(info[0]["Published Collections"]);
-         
-         seadSpaces.buildGrid(size,i,projectName,projectDescription,projectLogo,projectColor,projectBg,datasets_display,datasets_raw,users,users_raw,views,views_raw,collections,collections_raw,published,bytes,value);
-         i++;
+         	seadSpaces.buildGrid(size,i,projectName,projectDescription,projectLogo,projectColor,projectBg,datasets_display,datasets_raw,users,users_raw,views,views_raw,collections,collections_raw,published,bytes,value);
+         	i++;
+         }).fail(function (response) {
+        	 	seadSpaces.buildGrid(size,i,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,value);
+        	 	i++;
     });
+	
     });
 
     });
