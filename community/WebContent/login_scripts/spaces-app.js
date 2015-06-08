@@ -4,7 +4,7 @@ var seadSpaces = {};
 seadSpaces.doInfoAjax = function(url,i){
 	 return $.ajax({
 		type : "GET",
-		timeout : '2000',
+		timeout : '10000',
 		url : "GetSysInfo",
 		data: {server:  url},
 		dataType : "json" 
@@ -15,7 +15,7 @@ seadSpaces.doInfoAjax = function(url,i){
 seadSpaces.doConfigAjax = function(url){
 	return $.ajax({
 		type : "GET",
-		timeout : '2000',
+		timeout : '10000',
 		url : "GetProjectInfo",
 		data: {server:  url},
 		dataType : "json"
@@ -132,7 +132,7 @@ seadSpaces.formatBytes = function(bytes,decimals){
 
 
 seadSpaces.buildGrid = function(size,i,projectName,projectDescription,projectLogo,projectColor,projectBg,datasets_display,datasets_raw,users,users_raw,views,views_raw,collections,collections_raw,published,bytes,value){
-    if(projectName == null){projectName = value+' is currently offline';}
+    if(projectName == null){projectName = value+' is currently busy/offline';}
     
     if(bytes !== null){
     if(bytes.indexOf('GB')>0 || bytes.indexOf('bytes')>0 || bytes.indexOf('MB')>0 || bytes.indexOf('TB')>0|| bytes.indexOf('KB')>0){
