@@ -32,11 +32,6 @@ table.treetable tbody tr td:nth-child (2){
 	width: 100px !important;
 }
 
-span.indenter {
-	padding-left: 0px;
-	width: 0px !important;
-}
-
 table.treetable span {
 	word-break: break-all;
 	word-wrap: break-word;
