@@ -73,7 +73,7 @@ public class SysInfoRestService {
     private static Log    log                  = LogFactory.getLog(SysInfoRestService.class);
 
     //Software Version - should be kept in sync with /war/mmdb.html
-    private static String _versionNumberString = "1.5.1";
+    private static String _versionNumberString = "1.5.2";
 
     //Will be replaced with actual build # by bamboo build process
     private static String _buildNumber         = "@VERSION@";
