@@ -151,9 +151,9 @@ $("#datatable").append($('<table/>').addClass("treetable").append( $('<thead/>')
 
 	$.ajax({
 		type : "GET",
-		url : "resteasy/datasets",
+		url : "resteasy/collectionss",
 		dataType : "json",
-		success : datatableJsonDataParser,
+		success : datatableJsonCollectionParser,
 		error : datatableErrorParser
 	});
 
@@ -174,14 +174,9 @@ function datatableJsonDataParser(json) {
 			i++;
 		}
 	});
+	
+	activateTable();
 
-	$.ajax({
-		type : "GET",
-		url : "resteasy/collections",
-		dataType : "json",
-		success : datatableJsonCollectionParser,
-		error : datatableErrorParser
-	});
 }
 
 function datatableJsonCollectionParser(json) {
@@ -196,7 +191,15 @@ function datatableJsonCollectionParser(json) {
 		}
 	});
 
-	activateTable();
+
+	$.ajax({
+		type : "GET",
+		url : "resteasy/datasets",
+		dataType : "json",
+		success : datatableJsonDataParser,
+		error : datatableErrorParser
+	});
+
 }
 
 function getDataRow(parentId, childId, name, uri, size) {
