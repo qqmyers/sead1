@@ -32,7 +32,7 @@
 <script src="login_scripts/spaces-app.js"></script>
 <link rel="stylesheet"
 	href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-
+<script src="login_scripts/csv-export.js"></script>
 </head>
 
 
@@ -217,11 +217,7 @@
 			<div>
 				<section>
 					<article>
-						<form action="export" method="post" id="exportForm">
-							<input type="hidden" name="csv_text" id="csv_text"> <input
-								type="submit" value="Export Statistics as CSV"
-								onclick="getCSVData()">
-						</form>
+					    <button id="csvExport">Export Statistics as CSV</button>
 					</article>
 				</section>
 			</div>
