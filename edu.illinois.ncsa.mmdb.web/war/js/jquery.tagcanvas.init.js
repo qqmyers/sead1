@@ -10,7 +10,9 @@ function startTagCloud() {
             textHeight: 25,
             weight: true,
             weightFrom: 'data-weight',
-			weightSize: 20
+            weightSizeMax: 24,
+            weightSizeMin: 6,
+			weightSize: 10
           },'weightedtaglist')) {
    		   console.log('Error: could not create canvas');
             jQuery('#CanvasContainer').hide();
