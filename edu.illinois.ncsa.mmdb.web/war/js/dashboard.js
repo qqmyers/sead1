@@ -151,7 +151,7 @@ $("#datatable").append($('<table/>').addClass("treetable").append( $('<thead/>')
 
 	$.ajax({
 		type : "GET",
-		url : "resteasy/collectionss",
+		url : "resteasy/collections",
 		dataType : "json",
 		success : datatableJsonCollectionParser,
 		error : datatableErrorParser
