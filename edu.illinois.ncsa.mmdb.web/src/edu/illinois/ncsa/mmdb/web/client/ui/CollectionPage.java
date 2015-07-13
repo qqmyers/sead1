@@ -64,6 +64,7 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -79,7 +80,11 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.IsReadyForPublication;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.IsReadyForPublicationResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoPointBean;
@@ -100,6 +105,8 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
  */
 public class CollectionPage extends Composite {
 
+    static private String               proposedForPublication = "http://sead-data.net/terms/ProposedForPublication";
+
     private final String                uri;
     private final DispatchAsync         service;
     private final PermissionUtil        rbac;
@@ -114,6 +121,7 @@ public class CollectionPage extends Composite {
     private Label                       numDatasetsLabel;
     private Label                       authorLabel;
     private Anchor                      doiAnchor;
+    private ToggleButton                publishButton;
     private AddToCollectionDialog       addToCollectionDialog;
     private PreviewPanel                previewPanel;
     private final DatasetTablePresenter dynamicTablePresenter;
@@ -235,13 +243,70 @@ public class CollectionPage extends Composite {
         authorLabel = new Label("Author");
         infoPanel.add(authorLabel);
         doiAnchor = new Anchor("DOI");
-        infoPanel.add(doiAnchor);
+
         descriptionLabel = new Label("Description");
         infoPanel.add(descriptionLabel);
         dateLabel = new Label("Creation date unavailable");
         infoPanel.add(dateLabel);
         numDatasetsLabel = new Label("Number of datasets");
         infoPanel.add(numDatasetsLabel);
+        infoPanel.add(doiAnchor);
+        publishButton = new ToggleButton("Submit for Publication", "Publication Requested", new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (publishButton.isDown()) {
+                    service.execute(new SetUserMetadata(uri.toString(), proposedForPublication, "true"), new AsyncCallback<EmptyResult>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            publishButton.setDown(false);
+                        }
+
+                        @Override
+                        public void onSuccess(EmptyResult result) {
+                            //Nothing to do
+                        }
+
+                    });
+                } else {
+                    service.execute(new RemoveUserMetadata(uri.toString(), proposedForPublication, "true"), new AsyncCallback<EmptyResult>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            publishButton.setDown(true);
+                        }
+
+                        @Override
+                        public void onSuccess(EmptyResult result) {
+                            //Nothing to do
+                        }
+                    });
+
+                }
+
+            }
+        });
+        publishButton.getElement().setClassName("publishbutton");
+        IsReadyForPublication irfp = new IsReadyForPublication(uri);
+        irfp.setUser(MMDB.getUsername());
+        service.execute(irfp, new AsyncCallback<IsReadyForPublicationResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                // leave as 'up'
+            }
+
+            @Override
+            public void onSuccess(IsReadyForPublicationResult result) {
+                if (result.isReady()) {
+                    publishButton.setDown(true);
+                } else {
+                    publishButton.setDown(false);
+                }
+            }
+        });
+        infoPanel.add(publishButton);
 
         // add subcollection link
         PermissionUtil rbac = new PermissionUtil(service);
@@ -331,6 +396,12 @@ public class CollectionPage extends Composite {
                 String doi = result.getDOI();
                 if (doi == null) {
                     doi = "";
+
+                    //Show publish button
+                    publishButton.setText("Submit for Publication");
+                } else {
+                    //Hide Publish Button
+                    publishButton.setText("Publish New Version");
                 }
                 doiAnchor.setText(doi);
                 doiAnchor.setHref(doi);

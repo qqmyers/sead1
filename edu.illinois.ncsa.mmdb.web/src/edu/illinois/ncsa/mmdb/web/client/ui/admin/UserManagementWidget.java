@@ -89,15 +89,13 @@ import edu.illinois.ncsa.mmdb.web.client.ui.SignupPage;
 import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
 
 /**
- * A page to manage users. Currently only the ability to enable/disable users is
- * implemented.
- *
- * FIXME: Currently permissions are set directly on users. Checkboxes in this
- * page manipulate permissions on users. Instead checkboxes should manipulate
- * roles for specific users. This will remove the awkward manual setting of
- * users as regular members when a user is made an admin.
+ * A page to manage users. Users can be assigned and removed from roles.
+ * Users with no role show up in the inactive list and can be moved from
+ * there to the archived list by marking them as retired.
+ * 
  *
  * @author Luigi Marini
+ * @author myersjd@umich.edu
  *
  */
 public class UserManagementWidget extends Composite {

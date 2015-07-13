@@ -77,6 +77,7 @@ import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.IsReadyForPublicationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandlerNew;
@@ -1298,7 +1299,7 @@ public class ItemServicesImpl
                 } else {
                     TripleMatcher tMatcher = new TripleMatcher();
 
-                    tMatcher.match(itemId, new UriRef("http://sead-data.net/terms/ProposedForPublication"), null);
+                    tMatcher.match(itemId, IsReadyForPublicationHandler.proposedForPublicationRef, null);
                     c.perform(tMatcher);
                     Set<Triple> triples = tMatcher.getResult();
                     TripleWriter tw = new TripleWriter();

@@ -110,6 +110,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleUserInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.HasPermissionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.InitializeRolesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsPreviewPendingHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.IsReadyForPublicationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.JiraIssueHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
@@ -239,6 +240,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new Oauth2ServerFlowTokenRequestHandler());
         DispatchUtil.registerHandler(new Oauth2ServerFlowUserInfoHandler());
         DispatchUtil.registerHandler(new EditUserRetirementHandler());
+        DispatchUtil.registerHandler(new IsReadyForPublicationHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

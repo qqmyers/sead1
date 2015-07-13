@@ -28,10 +28,29 @@ pre {
 /* ----------------------------------------------------------------------
  * Make it all look the same
  * ---------------------------------------------------------------------- */
-table.treetable tbody tr td:nth-child (2){
-	width: 100px !important;
-}
+table
+.treetable
+ 
+tbody
+ 
+tr
+ 
+td
+:nth-child
+ 
+(2){
+width
+:
+ 
+100
+px
+ 
+!
+important
+;
 
+
+}
 table.treetable span {
 	word-break: break-all;
 	word-wrap: break-word;
@@ -736,10 +755,26 @@ a:hover {
 	margin-left: 10px;
 }
 
-.dataset_info>div:nth-child (1)>div:nth-child (1) {
-	height: 18px;
-}
+.dataset_info
+>
+div
+:nth-child
+ 
+(1)>
+div
+:nth-child
+ 
+(1)
+{
+height
+:
+ 
+18
+px
+;
 
+
+}
 .dataset_info>div:nth-child (1)>table {
 	margin-left: 10px;
 }
@@ -2761,4 +2796,19 @@ Simple User Management Page
 
 .permissions .gwt-Label {
 	color: blue;
+}
+
+.publishbutton {
+	background-color: #f3822a;
+	max-width: 145px;
+	padding: 5px;
+	color: white;
+}
+
+.publishbutton:hover {
+	background-color: black;
+}
+
+.publishbutton-down {
+	background-color: #0b5ca3;
 }
