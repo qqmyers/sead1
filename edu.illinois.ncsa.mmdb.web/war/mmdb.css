@@ -29,27 +29,45 @@ pre {
  * Make it all look the same
  * ---------------------------------------------------------------------- */
 table
+
+
 .treetable
+
  
+
 tbody
+
  
+
 tr
+
  
+
 td
+
+
 :nth-child
+
  
+
 (2){
 width
+
+
 :
+
  
+
 100
 px
+
  
+
 !
 important
+
+
 ;
-
-
 }
 table.treetable span {
 	word-break: break-all;
@@ -758,22 +776,34 @@ a:hover {
 .dataset_info
 >
 div
+
+
 :nth-child
+
  
+
 (1)>
 div
+
+
 :nth-child
+
  
+
 (1)
 {
 height
+
+
 :
+
  
+
 18
 px
+
+
 ;
-
-
 }
 .dataset_info>div:nth-child (1)>table {
 	margin-left: 10px;
@@ -2803,6 +2833,8 @@ Simple User Management Page
 	max-width: 145px;
 	padding: 5px;
 	color: white;
+	margin-top: 10px;
+	margin-bottom: 5px;
 }
 
 .publishbutton:hover {
