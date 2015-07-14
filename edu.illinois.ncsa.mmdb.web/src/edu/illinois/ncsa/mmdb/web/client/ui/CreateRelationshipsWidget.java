@@ -147,7 +147,7 @@ public class CreateRelationshipsWidget extends Composite {
         item1.addValueChangeHandler(new ValueChangeHandler<String>() {
             public void onValueChange(ValueChangeEvent<String> event) {
                 fetchItem(event.getValue().substring(1), thumb1);
-                updateRelationShipOptions();
+                updateRelationshipOptions();
             }
         });
 
@@ -157,7 +157,7 @@ public class CreateRelationshipsWidget extends Composite {
         item2.addValueChangeHandler(new ValueChangeHandler<String>() {
             public void onValueChange(ValueChangeEvent<String> event) {
                 fetchItem(event.getValue().substring(1), thumb2);
-                updateRelationShipOptions();
+                updateRelationshipOptions();
             }
         });
 
@@ -170,9 +170,9 @@ public class CreateRelationshipsWidget extends Composite {
         submit.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 if (item1.getSelected().startsWith("D") && item2.getSelected().startsWith("D")) {
-                    addDatashipRelationShip();
+                    addDatasetRelationship();
                 } else if (item1.getSelected().startsWith("C") && item2.getSelected().startsWith("C")) {
-                    addCollectionRelationShip();
+                    addCollectionRelationship();
                 } else if (item1.getSelected().startsWith("C") && item2.getSelected().startsWith("D")) {
                     addToCollection();
                 } else if (item1.getSelected().startsWith("D") && item2.getSelected().startsWith("C")) {
@@ -191,8 +191,8 @@ public class CreateRelationshipsWidget extends Composite {
         });
     }
 
-    private void updateRelationShipOptions() {
-        // remove old relation shipts
+    public void updateRelationshipOptions() {
+        // remove old relationships
         String selected = relationshipsList.getSelected();
         for (String item : items ) {
             relationshipsList.removeItem(item);
@@ -266,7 +266,7 @@ public class CreateRelationshipsWidget extends Composite {
         });
     }
 
-    private void addCollectionRelationShip() {
+    private void addCollectionRelationship() {
         service.execute(new SetUserMetadata(item1.getSelected().substring(1), relationshipsList.getSelected(), item2.getSelected().substring(1), true), new AsyncCallback<EmptyResult>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -280,7 +280,7 @@ public class CreateRelationshipsWidget extends Composite {
         });
     }
 
-    private void addDatashipRelationShip() {
+    private void addDatasetRelationship() {
         //check if relationship already exists
         service.execute(new GetRelationship(item1.getSelected().substring(1), MMDB.getUsername()), new AsyncCallback<GetRelationshipResult>() {
             @Override
@@ -364,7 +364,7 @@ public class CreateRelationshipsWidget extends Composite {
             item1.addItem(name, "D" + value);
             item2.addItem(name, "D" + value);
         }
-        updateRelationShipOptions();
+        updateRelationshipOptions();
     }
 
 }

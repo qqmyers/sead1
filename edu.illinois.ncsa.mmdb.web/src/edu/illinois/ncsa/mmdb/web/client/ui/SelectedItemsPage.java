@@ -191,6 +191,7 @@ public class SelectedItemsPage extends Page {
                                 relationshipWidget.item2.setSelected(1);
                                 relationshipWidget.thumb2.changeImage(collection.getUri(), "Collection");
                                 first = -1;
+                                relationshipWidget.updateRelationshipOptions();
                             }
                         }
                     });
@@ -224,6 +225,7 @@ public class SelectedItemsPage extends Page {
                                 relationshipWidget.item2.setSelected(1);
                                 relationshipWidget.thumb2.changeImage(dataset.getUri(), dataset.getMimeType());
                                 first = -1;
+                                relationshipWidget.updateRelationshipOptions();
                             }
 
                         }
