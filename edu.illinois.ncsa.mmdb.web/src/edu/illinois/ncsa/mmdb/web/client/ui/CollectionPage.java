@@ -303,6 +303,11 @@ public class CollectionPage extends Composite {
                     publishButton.setDown(true);
                 } else {
                     publishButton.setDown(false);
+                    if (doiAnchor.getText().length() == 0) {
+                        publishButton.setText("Submit for Publication");
+                    } else {
+                        publishButton.setText("Publish New Version");
+                    }
                 }
             }
         });
@@ -398,10 +403,14 @@ public class CollectionPage extends Composite {
                     doi = "";
 
                     //Show publish button
-                    publishButton.setText("Submit for Publication");
+                    if (!publishButton.isDown()) {
+                        publishButton.setText("Submit for Publication");
+                    }
                 } else {
                     //Hide Publish Button
-                    publishButton.setText("Publish New Version");
+                    if (!publishButton.isDown()) {
+                        publishButton.setText("Publish New Version");
+                    }
                 }
                 doiAnchor.setText(doi);
                 doiAnchor.setHref(doi);
