@@ -50,7 +50,7 @@ public class DiscoveryPage extends Page {
             search.add(searchHtml);
         }
         left.add(search);
-        HTML projInfo = new HTML("<div class=\"well\"><div id=\"projectDesc\">" +
+        HTML projInfo = new HTML("<div class=\"well\"><h4>Project Description<h4><div id=\"projectDesc\">" +
                 MMDB._projectDescription + "</div></div>");
         left.add(projInfo);
         top.add(left);
@@ -58,7 +58,7 @@ public class DiscoveryPage extends Page {
         bodyHtml.setStyleName("span9");
         top.add(bodyHtml);
         String va_url = RootPanel.get("va").getElement().getAttribute("href");
-        mainLayoutPanel.add(new HTML("This page contains collections of datasets that this project team has published through the" +
+        mainLayoutPanel.add(new HTML("This page contains collections of datasets that this project team has published through the " +
                 "<a href=\"" + va_url + "\">SEAD Virtual Archive</a> (or manually marked as having a publication date)."));
         mainLayoutPanel.add(top);
         if (currentCollection == null) {
