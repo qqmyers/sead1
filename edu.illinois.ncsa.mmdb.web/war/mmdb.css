@@ -21,7 +21,7 @@ pre {
 }
 
 .mainMenu, .mainContainer, .bottomMenu {
-	/*	font-size: 0.9em; */
+	/*  font-size: 0.9em; */
 	width: 1200px !important;
 }
 
@@ -31,40 +31,60 @@ pre {
 table
 
 
+
+
 .treetable
 
+
  
+
 
 tbody
 
+
  
+
 
 tr
 
+
  
+
 
 td
 
 
+
+
 :nth-child
 
+
  
+
 
 (2){
 width
 
 
+
+
 :
 
+
  
+
 
 100
 px
 
+
  
+
 
 !
 important
+
+
 
 
 ;
@@ -580,7 +600,7 @@ a:hover {
 }
 
 .pageHeader {
-	/*	background: #002B55; */ /*background: lightgray;*/
+	/*  background: #002B55; */ /*background: lightgray;*/
 	padding: 0px;
 	margin: 0px;
 	/* border-bottom: #888888 solid 1px; */
@@ -778,29 +798,43 @@ a:hover {
 div
 
 
+
+
 :nth-child
 
+
  
+
 
 (1)>
 div
 
 
+
+
 :nth-child
 
+
  
+
 
 (1)
 {
 height
 
 
+
+
 :
+
 
  
 
+
 18
 px
+
+
 
 
 ;
@@ -1395,6 +1429,24 @@ div.gwt-Label.smallerItalicText.alignRight {
 	padding: 5px;
 }
 
+#addsub {
+	background-color: #f3822a;
+	max-width: 175px;
+	padding: 5px 5px 5px 10px;
+	color: white;
+	margin-top: 53px;
+	margin-bottom: 5px;
+}
+
+#addsub:hover {
+	background-color: black;
+	color: #f3822a;
+}
+
+#addsub>a {
+	color: white;
+}
+
 .collectionImageCollage {
 	margin: 2px 0 0 2px;
 }
@@ -1402,6 +1454,10 @@ div.gwt-Label.smallerItalicText.alignRight {
 .collectionInfo {
 	text-align: left;
 	margin-left: 20px;
+}
+
+#collright {
+	float: right;
 }
 
 .tagsView {
@@ -1791,7 +1847,7 @@ div.gwt-Label.smallerItalicText.alignRight {
 
 .tagCount {
 	/*font-size: 0.9em;
-	vertical-align: super;
+  vertical-align: super;
 */
 	color: #666;
 	zoom: 1;
@@ -1827,6 +1883,7 @@ div.gwt-Label.smallerItalicText.alignRight {
 
 .batchOperationPanel {
 	float: right;
+	background-color: lightgrey;
 }
 
 .batchOperationCountLink {
@@ -1839,11 +1896,10 @@ div.gwt-Label.smallerItalicText.alignRight {
 	color: #444;
 	font-size: 14px;
 	margin: 5px;
-	display: inline-block; *
 	display: inline;
 	zoom: 1;
-	line-height: 0px;
 	padding-bottom: 5px;
+	padding-left: 10px;
 }
 
 #rssIcon {
@@ -1854,16 +1910,16 @@ div.gwt-Label.smallerItalicText.alignRight {
 }
 
 .batchOperationMenu {
-	display: inline-block; *
-	display: inline;
 	zoom: 1;
 	background: none;
 	border: 0px;
 	background-color: #f3822a;
+	padding-bottom: 3px;
 }
 
 .batchOperationMenu:hover {
 	background: #444;
+	color: #f3822a;
 }
 
 .gwt-MenuBar-horizontal .gwt-MenuItem {
@@ -1918,6 +1974,7 @@ div.gwt-Label.smallerItalicText.alignRight {
 
 .batchOperationMenu .gwt-MenuItem:hover {
 	background: #444;
+	color: #f3822a;
 }
 
 .gwt-MenuBar-vertical .subMenuIcon-selected {
@@ -2116,8 +2173,8 @@ input[type="checkbox"] {
 	width: 200px;
 	border: 1px dashed #999;
 	/*-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
-	border-radius: 6px;*/
+  -moz-border-radius: 6px;
+  border-radius: 6px;*/
 	padding-bottom: 10px;
 	text-align: center;
 	vertical-align: middle;
@@ -2315,19 +2372,6 @@ a.zocial.google, a.zocial.google:visited, a.zocial.google:hover {
 	color: #66cc66 !important;
 }
 
-.batchOperationMenu {
-	display: inline-block; *
-	display: inline;
-	zoom: 1;
-	background: none;
-	border: 0px;
-	background-color: #f3822a;
-}
-
-.batchOperationMenu:hover {
-	background: #444;
-}
-
 .gwt-MenuBar-horizontal .gwt-MenuItem {
 	font-weight: normal;
 	color: #fff;
@@ -2372,6 +2416,7 @@ a.zocial.google, a.zocial.google:visited, a.zocial.google:hover {
 
 .batchOperationMenu .gwt-MenuItem:hover {
 	background: #444;
+	color: #f3822a;
 }
 
 .gwt-MenuBar-vertical .subMenuIcon-selected {
@@ -2830,15 +2875,16 @@ Simple User Management Page
 
 .publishbutton {
 	background-color: #f3822a;
-	max-width: 145px;
-	padding: 5px;
+	max-width: 175px;
+	padding: 5px 5px 5px 10px;
 	color: white;
-	margin-top: 10px;
+	margin-top: 0px;
 	margin-bottom: 5px;
 }
 
 .publishbutton:hover {
 	background-color: black;
+	color: #f3822a;
 }
 
 .publishbutton-down {

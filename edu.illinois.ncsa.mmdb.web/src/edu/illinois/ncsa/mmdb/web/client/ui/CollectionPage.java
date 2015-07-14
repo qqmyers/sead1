@@ -311,25 +311,33 @@ public class CollectionPage extends Composite {
                 }
             }
         });
-        infoPanel.add(publishButton);
+
+        final FlowPanel fp = new FlowPanel();
+        fp.getElement().setId("collright");
+        horizontalPanel.add(infoPanel);
+        fp.add(publishButton);
 
         // add subcollection link
         PermissionUtil rbac = new PermissionUtil(service);
         rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
             @Override
             public void onAllowed() {
-                Panel createSubcollectionPanel = createSubcollectionPanel();
-                infoPanel.add(createSubcollectionPanel);
+                Panel subcollectionPanel = createSubcollectionPanel();
+                int c = fp.getWidgetCount();
+                //Adding asynchronously but want it directly after publish button
+                if (c > 1) {
+                    fp.insert(subcollectionPanel, 2);
+                } else {
+                    fp.add(subcollectionPanel);
+                }
             }
         });
-
-        horizontalPanel.add(infoPanel);
 
         // batch operations
         batchOperationView.addStyleName("titlePanelRightElement");
         batchOperationPresenter.bind();
-        horizontalPanel.add(batchOperationView);
-
+        fp.add(batchOperationView);
+        horizontalPanel.add(fp);
         return horizontalPanel;
     }
 
@@ -339,7 +347,8 @@ public class CollectionPage extends Composite {
      */
     private Panel createSubcollectionPanel() {
         SimplePanel panel = new SimplePanel();
-        Anchor link = new Anchor("Add subcollection");
+        panel.getElement().setId("addsub");
+        Anchor link = new Anchor("Add Subcollection");
         panel.add(link);
         link.addClickHandler(new ClickHandler() {
 
