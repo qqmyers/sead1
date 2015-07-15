@@ -339,6 +339,10 @@
         <filter-name>CORS</filter-name>
         <url-pattern>/resteasy/sys/*</url-pattern>
     </filter-mapping>
+            <filter-mapping>
+        <filter-name>CORS</filter-name>
+        <url-pattern>/resteasy/collections/metadata/*</url-pattern>
+    </filter-mapping>
 	<filter>
     <filter-name>AuthFilter</filter-name>
     <filter-class>
