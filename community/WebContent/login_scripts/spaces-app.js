@@ -273,7 +273,7 @@ seadSpaces.init = function() {
 	$
 			.when(
 					seadSpaces
-							.getSpaces("http://sead.ncsa.illinois.edu/projects/spaces"))
+							.getSpaces("//sead.ncsa.illinois.edu/projects/spaces"))
 			.done(
 					function(spaces) {
 						spaces = spaces.replace(/\"/g, '');

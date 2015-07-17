@@ -81,7 +81,7 @@ seadSpaces.init = function() {
 	$
 			.when(
 					seadSpaces
-							.getSpaces("https://sead.ncsa.illinois.edu/projects/spaces"))
+							.getSpaces("//sead.ncsa.illinois.edu/projects/spaces"))
 			.done(
 					function(spaces) {
 
