@@ -176,11 +176,11 @@ sed -i -e "s/^#*remoteAPIKey=.*$/remoteAPIKey=${APIKEY}/" \
        -e "s/^#*google.device_client_id=.*$/google.device_client_id=${GOOGLE_DEVID}/" \
        -e "s/^#*orcid.client_id=.*$/orcid.client_id=${ORCIDID}/" \
        -e "s/^#*orcid.client_secret=.*$/orcid.client_secret=${ORCIDSECRET}/" \
-       -e "s/^#*proxiedgeoserver=.*$/proxiedgeoserver=http:\/\/${FQDN}\/geoserver/" \
-       -e "s/^#*geoserver=.*$/geoserver=http:\/\/${FQDN}\/acr\/geoproxy/" \
+       -e "s/^#*proxiedgeoserver=.*$/proxiedgeoserver=https:\/\/${FQDN}\/geoserver/" \
+       -e "s/^#*geoserver=.*$/geoserver=https:\/\/${FQDN}\/acr\/geoproxy/" \
        -e "s/^#*geouser=.*$/geouser=${GEO_USER}/" \
        -e "s/^#*geopassword=.*$/geopassword=${GEO_PASSWORD}/" \
-       -e "s/^#*domain=.*$/domain=http:\/\/${FQDN}\/acr/" /home/medici/acr.server
+       -e "s/^#*domain=.*$/domain=https:\/\/${FQDN}\/acr/" /home/medici/acr.server
 /home/medici/update-web.sh
 
 # cleanup

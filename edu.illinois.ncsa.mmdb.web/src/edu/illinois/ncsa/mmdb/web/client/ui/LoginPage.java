@@ -122,7 +122,7 @@ public class LoginPage extends Composite {
     static final String          ORCID_SIGNIN_URL         = "https://orcid.org/signin";
     static final String          ORCID_AUTHORIZE_URL      = "https://orcid.org/oauth/authorize";
 
-    static final String          sSEAD_OAUTH_REDIRECT_URL = "http://sead.ncsa.illinois.edu/projects/authredirect?server=";
+    static final String          sSEAD_OAUTH_REDIRECT_URL = "https://sead.ncsa.illinois.edu/projects/authredirect?server=";
 
     private static boolean       autologin                = true;
 

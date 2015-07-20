@@ -188,6 +188,7 @@ public class AuthenticatedServlet extends HttpServlet {
         }
         session = request.getSession(true);
         String server = getServer(request);
+        log.debug("Setting server as : " + server);
 
         fillAuthenticatedSession(session, validUser, expiry, server);
         return session.getId();
