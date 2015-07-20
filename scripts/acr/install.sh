@@ -46,6 +46,15 @@ if [ ! -e /etc/nginx/sites-enabled/sead ]; then
   service nginx restart
 fi
 
+# Configure Tomcat to use forwarded headers from nginx
+sed -i '/.*<Engine name=\"Catalina\" defaultHost=\"localhost\">/a \
+\t<Valve className=\"org.apache.catalina.valves.RemoteIpValve\"  \
+\t\tremoteIpHeader=\"X-Forwarded-For\"   \
+\t\tprotocolHeader=\"X-Forwarded-Proto\"  \
+\t\tprotocolHeaderHttpsValue=\"https\"/>' /var/lib/tomcat6/conf/server.xml
+       
+
+
 # create folders
 if [ ! -e /home/medici/data ]; then
   echo "Creating medici data folders"
