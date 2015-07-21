@@ -40,6 +40,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -47,6 +48,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.annotations.providers.jaxb.Formatted;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.tupeloproject.kernel.BlobFetcher;
@@ -666,6 +668,32 @@ public class DatasetsRestService extends ItemServicesImpl {
 
         return getItemMetadataAsJSON(id, userId, true);
 
+    }
+
+    /**
+     * Export the given dataset (data + unique metadata)
+     *
+     * @param id
+     *            - the URL encoded ID of the dataset
+     *
+     * @return - a zip file with the data and a json-ld metadata file
+     */
+    @GET
+    @Path("/{id}/export")
+    @Produces("application/zip")
+    @Formatted
+    public Response exportDataset(@PathParam("id") @Encoded final String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        final UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        StreamingOutput stream = new StreamingOutput() {
+
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                export(Resource.uriRef(URLDecoder.decode(id, "UTF-8")), userId, output);
+
+            }
+
+        };
+        return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM).header("content-disposition", "attachment; filename=\"temp.zip\"").build();
     }
 
     /**

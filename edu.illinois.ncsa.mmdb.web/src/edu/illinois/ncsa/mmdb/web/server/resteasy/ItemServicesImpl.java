@@ -16,6 +16,9 @@
 package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Encoded;
@@ -41,12 +46,15 @@ import javax.ws.rs.core.Response;
 
 import net.customware.gwt.dispatch.shared.ActionException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+import org.json.JSONObject;
 import org.sead.acr.common.utilities.Memoized;
 import org.tupeloproject.kernel.BeanSession;
+import org.tupeloproject.kernel.BlobFetcher;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
@@ -1334,6 +1342,81 @@ public class ItemServicesImpl
             }
         }
         return r;
+    }
+
+    protected void export(UriRef uri, UriRef userId, OutputStream os) {
+
+        ZipOutputStream zos = new ZipOutputStream(os);
+
+        BlobFetcher bf = new BlobFetcher(uri);
+        try {
+            TupeloStore.getInstance().getContext().perform(bf);
+        } catch (OperatorException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        InputStream is = bf.getInputStream();
+        ZipEntry ze = new ZipEntry("exportedfile.dat");
+        try {
+            zos.putNextEntry(ze);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            IOUtils.copy(is, zos);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        try {
+            is.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        try {
+            zos.closeEntry();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        //metadata...
+        ZipEntry ze2 = new ZipEntry("exportedfile.json-ld");
+        try {
+            zos.putNextEntry(ze2);
+        } catch (IOException e2) {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+        }
+        Response metaResponse = getItemMetadataAsJSON(uri.toString(), userId, false);
+        String metaString = metaResponse.getEntity().toString();
+        JSONObject jsonObject;
+        StringReader metaReader = new StringReader(metaString);
+        try {
+            IOUtils.copy(metaReader, zos);
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        metaReader.close();
+        try {
+            zos.closeEntry();
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        //remember close it
+        try {
+            zos.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
     protected static Set<String> getNormalizedTagSet(String cdl) {

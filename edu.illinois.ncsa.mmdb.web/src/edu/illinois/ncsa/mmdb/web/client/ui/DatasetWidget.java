@@ -49,6 +49,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -273,6 +274,11 @@ public class DatasetWidget extends Composite {
         unpackWidget.addStyleName("inlineBlock");
         actionsPanel.add(unpackWidget);
 
+        // Export (data + metadata) - requires download permission
+        final FlowPanel exportWidget = new FlowPanel();
+        exportWidget.addStyleName("inlineBlock");
+        actionsPanel.add(exportWidget);
+
         Anchor embedAnchor = new Anchor("Embed");
         embedAnchor.addStyleName("datasetActionLink");
         embedAnchor.addClickHandler(new ClickHandler() {
@@ -406,6 +412,13 @@ public class DatasetWidget extends Composite {
                             downloadAnchor.setTarget("_blank");
                             downloadAnchor.addStyleName("datasetActionLink");
                             downloadWidget.add(downloadAnchor);
+                            //Add export anchor as well:
+                            Anchor exportAnchor = new Anchor();
+                            exportAnchor.setHref("./resteasy/datasets/" + URL.encode(uri) + "/export");
+                            exportAnchor.setText("Export");
+                            exportAnchor.setTarget("_blank");
+                            exportAnchor.addStyleName("exportActionLink");
+                            exportWidget.add(exportAnchor);
                         }
                         license.setEditable(isRightsHolder || p.isPermitted(Permission.CHANGE_LICENSE));
                     }
