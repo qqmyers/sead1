@@ -95,7 +95,7 @@
 		 $("#" + index + ">td:eq(3)").html("<div><a href=\"" + current + "/../discovery\">" + json["Published Collections"] + "</div></a>");
 		 $("#" + index + ">td:eq(4)").html("<div>"+json["Total Views"]+"</div>" );
 		 $("#" + index + ">td:eq(5)").html("<div>"+json["Number of Users"] +"</div>");
-		 $("#" + index + ">td:eq(6)").html("<div>"+json["Collections "]+"</div>");
+		 $("#" + index + ">td:eq(6)").html("<div>"+json["Collections"]+"</div>");
 		 $("#" + index + ">td:eq(7)").html("<div>"+ json.Datasets+"</div>");
 		 $("#" + index + ">td:eq(8)").html("<div>"+json["Bytes from uploaded dataset"]+"</div>");
 
