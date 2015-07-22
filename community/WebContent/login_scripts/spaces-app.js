@@ -215,7 +215,7 @@ seadSpaces.buildGrid = function(size, i, projectName, projectDescription,
 		collections_raw = 0;
 	}
 	page += '<li class="collections_raw" title="' + collections_raw
-			+ ' collections"><i class="fa fa-lg fa-folder"></i> '
+			+ ' collections"> '
 			+ collections_raw + '</li>';
 	if (collections) {
 		page += '<li class="collections" title="' + collections
@@ -341,8 +341,8 @@ seadSpaces.init = function() {
 																		.abbreviateNumber(info[0]["Total Views"]);
 																var views_raw = info[0]["Total Views"];
 																var collections = seadSpaces
-																		.abbreviateNumber(info[0]["Collections "]);
-																var collections_raw = info[0]["Collections "];
+																		.abbreviateNumber(info[0]["Collections"]);
+																var collections_raw = info[0]["Collections"];
 																var published = seadSpaces
 																		.abbreviateNumber(info[0]["Published Collections"]);
 																seadSpaces
