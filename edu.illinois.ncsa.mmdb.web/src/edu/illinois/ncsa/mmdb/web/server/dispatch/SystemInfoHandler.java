@@ -74,7 +74,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
  *
  */
 public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoResult> {
-    static private long             UNSIGNED_INT = (long) Math.pow(2, 32);
+    static public long              UNSIGNED_INT = (long) Math.pow(2, 32);
 
     static private long             last         = 0;
     static private SystemInfoResult result       = null;
@@ -95,7 +95,7 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
             return result;
         }
         //if bigdata, return old info and calc new if over time
-        // First time, pending is false and we set a bacground task and return current result
+        // First time, pending is false and we set a background task and return current result
         //Another request before it completes and we skip both the asynch and sync updates and again return the current result
         //Fixme - alert receiver that updates are pending?
         if (bigdata.equals("true") && (result != null) && (!pending)) {

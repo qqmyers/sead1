@@ -616,4 +616,23 @@ public class CollectionsRestService extends ItemServicesImpl {
         return super.publishItem(id, CollectionBeanUtil.COLLECTION_TYPE, millis, pid, request);
     }
 
+    /**
+     * Get stats for this collection and its contents (collections and datasets)
+     * including
+     * total size, {@link #CollectionsRestService()}, #files, max collection
+     * depth, max file size, complete list of mime types included
+     *
+     * @param id
+     *            - URL-encoded identifier for the collection
+     *
+     * @return - a map of stats, as
+     *         JSON-LD
+     */
+    @GET
+    @Path("/{id}/stats")
+    @Produces("application/json")
+    public Response getCollectionStats(@PathParam("id") @Encoded String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return getStats(id, request);
+    }
+
 }

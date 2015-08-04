@@ -43,6 +43,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import net.customware.gwt.dispatch.shared.ActionException;
 
@@ -89,9 +90,12 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.IsReadyForPublicationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandlerNew;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
+import edu.illinois.ncsa.mmdb.web.server.util.CollectionInfo;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.TagEventBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
+import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 public class ItemServicesImpl
 {
@@ -241,6 +245,24 @@ public class ItemServicesImpl
                                                                          comment.put("comment_author", "http://purl.org/dc/elements/1.1/creator");
                                                                          comment.put("comment_date", "http://purl.org/dc/elements/1.1/date");
                                                                          put("Comment", comment);
+                                                                     }
+                                                                 };
+
+    @SuppressWarnings("serial")
+    protected static final Map<String, Object> collectionStats   = new LinkedHashMap<String, Object>() {
+                                                                     /**
+                                                                      *
+                                                                      */
+                                                                     private static final long serialVersionUID = -6902027597159004342L;
+
+                                                                     {
+                                                                         put("Identifier", Dc.IDENTIFIER.toString());
+                                                                         put("Total Size", Files.LENGTH.toString());
+                                                                         put("Number of Collections", "http://sead-data.net/terms/collectioncount");
+                                                                         put("Number of Datasets", "http://sead-data.net/terms/datasetcount");
+                                                                         put("Max Dataset Size", "http://sead-data.net/terms/maxdatasetsize");
+                                                                         put("Max Collection Depth", "http://sead-data.net/terms/maxcollectiondepth");
+                                                                         put("Data Mimetypes", Dc.FORMAT.toString());
                                                                      }
                                                                  };
 
@@ -1419,6 +1441,106 @@ public class ItemServicesImpl
 
     }
 
+    protected static Response getStats(String id, HttpServletRequest request) {
+        Response r;
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        try {
+            if (!rbac.checkPermission(userId, Resource.uriRef(Permission.VIEW_SYSTEM.getUri()))) {
+                return Response.status(401).entity("Access to this endpoint is access controlled.").build();
+            }
+        } catch (RBACException e1) {
+            log.error("Error running sys info: ", e1);
+            return Response.status(500).entity("Error running sys info [" + e1.getMessage() + "]").build();
+        }
+
+        UriRef itemId;
+        try {
+            itemId = Resource.uriRef(URLDecoder.decode(id, "UTF-8"));
+
+            //Get Dataset info
+            CollectionInfo ci = getCollectionInfo(itemId, 0);
+
+            result.put("Identifier", itemId.toString());
+            result.put("Total Size", "" + ci.getSize());
+            result.put("Number of Collections", "" + ci.getNumCollections());
+            result.put("Number of Datasets", "" + ci.getNumDatasets());
+            result.put("Max Dataset Size", "" + ci.getMaxDatasetSize());
+            result.put("Max Collection Depth", "" + ci.getMaxDepth());
+            result.put("Data Mimetypes", ci.getMimetypeSet());
+
+            result.put("@context", collectionStats);
+
+        } catch (UnsupportedEncodingException e) {
+            log.error("Error decoding: " + id, e);
+            return Response.status(Status.BAD_REQUEST).entity("Error decoding id: " + id + " [" + e.getMessage() + "]").build();
+        } catch (ActionException ae) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error retrieiving stats for: " + id + " [" + ae.getMessage() + "]").build();
+        }
+
+        return Response.status(Status.OK).entity(result).build();
+
+    }
+
+    private static CollectionInfo getCollectionInfo(UriRef itemId, int currentDepth) throws ActionException {
+        CollectionInfo info = new CollectionInfo();
+        info.setMaxDepth(currentDepth++);
+        //Get Datasets
+
+        Unifier uf = new Unifier();
+        uf.addPattern("ds", Rdf.TYPE, Cet.DATASET);
+        uf.addPattern("ds", Files.LENGTH, "size");
+        uf.addPattern("ds", Dc.FORMAT, "mimetype");
+        uf.addPattern(itemId, DcTerms.HAS_PART, "ds");
+        uf.setColumnNames("ds", "mimetype", "size");
+        try {
+            TupeloStore.getInstance().unifyExcludeDeleted(uf, "ds");
+            for (Tuple<Resource> row : uf.getResult() ) {
+
+                if (row.get(2) != null) {
+                    long size = Long.parseLong(row.get(2).getString());
+                    if (size < -3) {
+                        size += SystemInfoHandler.UNSIGNED_INT;
+                    }
+                    info.increaseSize(size);
+                    info.setMaxDatasetSize(info.getMaxDatasetSize() >= size ? info.getMaxDatasetSize() : size);
+                } else {
+                    log.error("Dataset without size: " + row.get(0).toString());
+                }
+                info.addMimetype(row.get(1).toString());
+                info.incrementNumDatasets(1);
+            }
+        } catch (OperatorException e) {
+            throw (new ActionException("Could not count datasets."));
+        }
+
+        //Get subcollections
+
+        Unifier uf2 = new Unifier();
+        log.debug("Counting Collections");
+        uf2.addPattern("cl", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/Collection"));
+        uf2.addPattern(itemId, DcTerms.HAS_PART, "cl");
+        uf2.setColumnNames("cl");
+        try {
+            TupeloStore.getInstance().unifyExcludeDeleted(uf2, "ds");
+            for (Tuple<Resource> row : uf2.getResult() ) {
+                CollectionInfo ci = getCollectionInfo((UriRef) row.get(0), currentDepth);
+                info.addMimetypes(ci.getMimetypeSet());
+                info.increaseSize(ci.getSize());
+                info.incrementNumDatasets(ci.getNumDatasets());
+                info.incrementNumCollections(1);
+                info.setMaxDatasetSize(info.getMaxDatasetSize() >= ci.getMaxDatasetSize() ? info.getMaxDatasetSize() : ci.getMaxDatasetSize());
+                info.setMaxDepth(info.getMaxDepth() >= ci.getMaxDepth() ? info.getMaxDepth() : ci.getMaxDepth());
+            }
+        } catch (OperatorException e) {
+            throw (new ActionException("Error counting subcollections of: " + itemId));
+        }
+
+        return info;
+    }
+
     protected static Set<String> getNormalizedTagSet(String cdl) {
         Set<String> tagSet = new HashSet<String>();
         for (String s : cdl.split(",") ) {
@@ -1426,4 +1548,5 @@ public class ItemServicesImpl
         }
         return tagSet;
     }
+
 }

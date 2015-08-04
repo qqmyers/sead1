@@ -6,16 +6,9 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/cet-search-1.0.2-SNAPSHOT.jar" sourcepath="/edu.illinois.ncsa.cet.search/src/main/java"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/ACRCommon.jar" sourcepath="/ACRCommon/src"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-core-asl-1.8.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-jaxrs-1.8.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.8.5.jar" sourcepath="C:/Users/Jim/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.8.5/jackson-mapper-asl-1.8.5-sources.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-xc-1.8.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jaxrs-api-2.3.2.Final.jar" sourcepath="C:/Users/Jim/.m2/repository/org/jboss/resteasy/jaxrs-api/2.3.2.Final/jaxrs-api-2.3.2.Final-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jcip-annotations-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jsr250-api-1.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-jackson-provider-2.3.2.Final.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-jaxrs-2.3.2.Final.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-jettison-provider-2.3.2.Final.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/scannotation-1.0.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
@@ -55,7 +48,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-4.7.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-4.7.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-multipart-provider-2.3.2.Final.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/org.json-20131017.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-io-2.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.6.4.jar"/>
@@ -81,5 +73,14 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-util-2.7.2-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-server-2.7.2-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/tupelo-webdav-2.7.2-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-core-asl-1.8.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-jaxrs-1.8.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.8.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-xc-1.8.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-jackson-provider-2.3.2.Final.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-jaxrs-2.3.2.Final.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-jettison-provider-2.3.2.Final.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-multipart-provider-2.3.2.Final.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-jaxb-provider-2.3.2.Final.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

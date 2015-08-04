@@ -120,7 +120,7 @@ public class SysInfoRestService {
 
         List<ConfigurationKey> keyList = GetConfigurationHandler.getWhitelist();
         //the ORCID Id is not secret (can be seen from a client) but not needed here either
-        //Since keyList doens't support remove()...
+        //Since keyList doesn't support remove()...
         List<ConfigurationKey> newList = new ArrayList<ConfigurationKey>();
         for (ConfigurationKey ck : keyList ) {
             if (ck != ConfigurationKey.OrcidClientId) {
