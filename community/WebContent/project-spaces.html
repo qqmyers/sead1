@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- local copy of UM css that references local fonts -->
+<link rel="shortcut icon" href="http://sead-data.net/wp-content/uploads/2014/06/favicon1.png" type="image/x-icon" />
 <link rel="stylesheet" id="spacious_style-css"
 	href="login_css/um-style.css?ver=3.9.1" type="text/css" media="all">
 <link
@@ -33,6 +34,63 @@
 <link rel="stylesheet"
 	href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="login_scripts/csv-export.js"></script>
+<style>
+
+button {
+	padding: 4px 7px;
+}
+.filter-block {
+	float: left;
+	padding: 5px 9px;
+}
+input[type="text"] {
+	width: 340px;
+	margin-top: 4px;
+}
+.sead-demo {
+	float: right;
+	width: 370px;
+	margin-right: 35px;
+	margin-left: 20px;
+}
+.sead-demo.span4 .space-wrapper {
+	height: 180px;
+}
+.sead-demo.span4 .fade-out  {
+	height: 140px;
+}
+.entry-content .sead-demo ul,
+.entry-content .sead-demo ol {
+    padding: 0;
+}
+.sead-demo h4 {
+	position: absolute;
+	top: 0;
+	background: #0b5ca3;
+	opacity: .85;
+	padding: 10px;
+	left: 55px;
+}
+.sead-demo h4 a:hover,
+.sead-demo h4 a:focus,
+.sead-demo h4 a:visited {
+	color: #fff;
+	
+}
+.project-spaces-dashboard .sead-demo h4 a {
+	font-size: 1.5em !important;
+}
+.sead-demo .fade-out {
+	background-position: bottom left;
+    background-size: cover;
+}
+
+.sead-demo a.name img {
+	vertical-align: middle;
+	height: 80px;
+}
+
+</style>
 </head>
 
 
@@ -174,6 +232,12 @@
 					<h1>
 						<span>Project Spaces</span>
 					</h1>
+					<div class="project-spaces-dashboard">
+					<div class="sead-demo span4">
+					
+					</div>
+					</div>
+					
 					<p>Welcome to SEAD Project Spaces, where you and your team can
 						collect and manage your project's active data. The table below
 						lists all active project spaces in SEAD. Click one of the links to
@@ -195,21 +259,23 @@
 
 				<div class="filters">
 
-
-					<label>Sort by</label>
-					<button class="sort" id="name">Name</button>
-					<button class="sort" id="teammates"># Users</button>
-					<button class="sort" id="views_raw"># Views</button>
-					<button class="sort" id="collections_raw"># Collections</button>
-					<button class="sort" id="datasets_raw"># Datasets</button>
-					<button class="sort" id="bytes_raw">Size (Bytes)</button>
-					<label>Search</label> <input class="search form-control"
-						id="search-field" placeholder="Search" type="text" /> <label>Filter</label>
-					<button class="filter" id="filter-published">Only Show
-						Spaces with Published Datasets</button>
-					<br /> <br />
-					<button id="reset-button">Reset View</button>
-
+					<div class="filter-block">
+						<label>Sort by</label>
+						<button class="sort" id="name">Name</button>
+						<button class="sort" id="teammates"># Users</button>
+						<button class="sort" id="views_raw"># Views</button>
+						<button class="sort" id="collections_raw"># Collections</button>
+						<button class="sort" id="datasets_raw"># Datasets</button>
+						<button class="sort" id="bytes_raw">Size (Bytes)</button>
+					</div>
+					
+					<div class="filter-block">
+						<label>Filter</label>
+						<button class="filter" id="filter-published">Only Spaces with Published Data</button>
+						<button id="reset-button">Reset View</button>
+					</div>
+					
+					<label>Search</label> <input class="search form-control" id="search-field" placeholder="Search" type="text" /> 
 				</div>
 
 				<div class="row-fluid list"></div>

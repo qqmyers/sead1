@@ -155,7 +155,7 @@ seadSpaces.buildGrid = function(size, i, projectName, projectDescription,
 		users, users_raw, views, views_raw, collections, collections_raw,
 		published, bytes, value) {
 	if (projectName == null) {
-		projectName = value + ' is currently busy/offline';
+		projectName = value + ' is currently busy or offline';
 	}
 
 	if (bytes !== null) {
@@ -273,7 +273,7 @@ seadSpaces.init = function() {
 	$
 			.when(
 					seadSpaces
-							.getSpaces("//sead.ncsa.illinois.edu/projects/spaces"))
+							.getSpaces("https://sead.ncsa.illinois.edu/projects/spaces"))
 			.done(
 					function(spaces) {
 						spaces = spaces.replace(/\"/g, '');
@@ -286,6 +286,7 @@ seadSpaces.init = function() {
 								.each(
 										spaces,
 										function(key, value) {
+											if(value == 'https://sead-open.ncsa.illinois.edu/acr'||value == 'https://sead-demo.ncsa.illinois.edu/acr'){i++;return;} // hide SEAD open and SEAD Demo
 											$
 													.when(
 															seadSpaces
@@ -407,4 +408,181 @@ seadSpaces.init = function() {
 
 }
 
+seadSpaces.demoSpace = function(){
+
+    var value = 'https://sead-demo.ncsa.illinois.edu/acr';
+	$
+			.when(
+					seadSpaces
+							.doConfigAjax(value),
+					seadSpaces
+							.doInfoAjax(value))
+			.then(
+					function(config,
+							info) {
+
+						var projectName = config[0]["project.name"];
+						var projectDescription = config[0]["project.description"];
+						var projectLogo = config[0]["project.header.logo"];
+						var projectColor = config[0]["project.header.title.color"];
+						var projectBg = config[0]["project.header.background"];
+
+						if (typeof projectBg !== 'undefined'
+								&& projectBg
+										.substring(
+												0,
+												8) == "resteasy") {
+							projectBg = value
+									+ '/'
+									+ projectBg;
+						}
+						if (typeof projectBg !== 'undefined'
+								&& projectBg
+										.substring(
+												0,
+												6) == "images") {
+							projectBg = value
+									+ '/'
+									+ projectBg;
+						}
+						if (typeof projectLogo !== 'undefined'
+								&& projectLogo
+										.substring(
+												0,
+												6) == "images") {
+							projectLogo = value
+									+ '/'
+									+ projectLogo;
+						}
+
+						var bytes = info[0]["Total number of bytes"];
+						var datasets_display = seadSpaces
+								.abbreviateNumber(info[0]["Datasets"]);
+						var datasets_raw = info[0]["Datasets"];
+						var users = seadSpaces
+								.abbreviateNumber(info[0]["Number of Users"]);
+						var users_raw = info[0]["Number of Users"];
+						var views = seadSpaces
+								.abbreviateNumber(info[0]["Total Views"]);
+						var views_raw = info[0]["Total Views"];
+						var collections = seadSpaces
+								.abbreviateNumber(info[0]["Collections"]);
+						var collections_raw = info[0]["Collections"];
+						var published = seadSpaces
+								.abbreviateNumber(info[0]["Published Collections"]);
+						
+						
+					
+						if (projectName == null) {
+							projectName = value + ' is currently busy or offline';
+						}
+
+						if (bytes !== null) {
+							if (bytes.indexOf('GB') > 0 || bytes.indexOf('bytes') > 0
+									|| bytes.indexOf('MB') > 0 || bytes.indexOf('TB') > 0
+									|| bytes.indexOf('KB') > 0) {
+								// hide values that are not being served in bytes
+								bytes = null;
+							} else {
+								var bytes_raw = bytes;
+								bytes = seadSpaces.formatBytes(bytes, 2);
+							}
+						}
+
+						var page = '';
+					
+						page += '<div class="space-wrapper">';
+						page += '<a href="' + value + '"><div class="fade-wrapper">';
+						if (projectLogo || projectBg) {
+							page += '<div class="fade-out" style="background-image:url(' + projectBg + ');">';
+						} else {
+							page += '<div class="fade-out">';
+						}
+						page += '</div>';
+						/*if (projectDescription) {
+							page += '<div class="fade-in"><div class="fade-in-content">'
+									+ projectDescription.replace(/<(?:.|\n)*?>/gm, '')
+									+ '</div></div>';
+						}*/
+						page += '</div></a>';
+						page += '<div class="space-stats">';
+						page += '<h4><a href="' + value + '" class="name"><img src="' + projectLogo + '" alt="" />' + projectName
+								+ '</a></h4>';
+						page += '<ul>';
+
+						if (!views_raw) {
+							views_raw = 0;
+						}
+						page += '<li class="views_raw">' + views_raw + '</li>';
+						if (views) {
+							page += '<li class="views" title="' + views
+									+ ' views"><i class="fa fa-lg fa-eye"></i> ' + views + '</li>';
+						}
+
+						if (!users_raw) {
+							users_raw = 0;
+						}
+						page += '<li class="users_raw">' + users_raw + '</li>';
+						if (users) {
+							page += '<li class="teammates" title="' + users
+									+ ' contributors"><i class="fa fa-lg fa-user"></i> ' + users
+									+ '</li>';
+						}
+
+						if (!collections_raw) {
+							collections_raw = 0;
+						}
+						page += '<li class="collections_raw" title="' + collections_raw
+								+ ' collections"> '
+								+ collections_raw + '</li>';
+						if (collections) {
+							page += '<li class="collections" title="' + collections
+									+ ' collections"><i class="fa fa-lg fa-folder"></i> '
+									+ collections + '</li>';
+						}
+
+						if (!datasets_raw) {
+							datasets_raw = 0;
+						}
+						page += '<li class="datasets_raw">' + datasets_raw + '</li>';
+						if (datasets_display) {
+							page += '<li class="datasets" title="' + datasets_display
+									+ ' datasets"><i class="fa fa-lg fa-database"></i> '
+									+ datasets_display + '</li>';
+						}
+
+						if (!bytes_raw) {
+							bytes_raw = 0;
+						}
+						page += '<li class="bytes_raw">' + bytes_raw + '</li>';
+						if (bytes) {
+							page += '<li class="bytes" title="' + bytes
+									+ '"><i class="fa fa-lg fa-hdd-o"></i> ' + bytes + '</li>';
+						}
+
+						if (published) {
+							page += '<li title="'
+									+ published
+									+ ' published dataset"><i class="fa fa-lg fa-folder-open"></i> <span class="published">'
+									+ published + '</span></li>';
+						}
+						page += '<ul>';
+						page += '</div>';
+						page += '</div>';
+
+					$('.sead-demo').append(page);
+					console.log(page);
+					
+					
+					
+					
+					})
+			.fail(
+					function(response) {
+						
+					});
+
+}
+
 seadSpaces.init();
+seadSpaces.demoSpace();
