@@ -493,21 +493,22 @@ seadSpaces.demoSpace = function(){
 					
 						page += '<div class="space-wrapper">';
 						page += '<a href="' + value + '"><div class="fade-wrapper">';
+						
 						if (projectLogo || projectBg) {
 							page += '<div class="fade-out" style="background-image:url(' + projectBg + ');">';
 						} else {
 							page += '<div class="fade-out">';
 						}
+						page += '<div class="space-stats"><div class="space-name"><img src="' + projectLogo + '" alt="" />' + projectName + '</div></div>';
 						page += '</div>';
-						/*if (projectDescription) {
+						
+						if (projectDescription) {
 							page += '<div class="fade-in"><div class="fade-in-content">'
 									+ projectDescription.replace(/<(?:.|\n)*?>/gm, '')
 									+ '</div></div>';
-						}*/
+						}
 						page += '</div></a>';
-						page += '<div class="space-stats">';
-						page += '<h4><a href="' + value + '" class="name"><img src="' + projectLogo + '" alt="" />' + projectName
-								+ '</a></h4>';
+
 						page += '<ul>';
 
 						if (!views_raw) {
