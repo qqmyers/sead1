@@ -571,11 +571,7 @@ seadSpaces.demoSpace = function(){
 						page += '</div>';
 
 					$('.sead-demo').append(page);
-					console.log(page);
-					
-					
-					
-					
+
 					})
 			.fail(
 					function(response) {
