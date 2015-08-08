@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -52,8 +53,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.json.JSONObject;
+import org.json.JSONException;
 import org.sead.acr.common.utilities.Memoized;
+import org.sead.acr.common.utilities.PropertiesLoader;
 import org.tupeloproject.kernel.BeanSession;
 import org.tupeloproject.kernel.BlobFetcher;
 import org.tupeloproject.kernel.Context;
@@ -144,7 +146,7 @@ public class ItemServicesImpl
                                                                  };
 
     @SuppressWarnings("serial")
-    protected static final Map<String, Object> collectionBasics  = new LinkedHashMap<String, Object>() {
+    public static final Map<String, Object>    collectionBasics  = new LinkedHashMap<String, Object>() {
                                                                      /**
          *
          */
@@ -503,6 +505,7 @@ public class ItemServicesImpl
 
                     //7 - Don't show hasPart relationships since there are other endpoints for those and we would not be handling
                     //    access control here
+
                     combinedMap.remove("Has Subcollection");
                     return combinedMap;
                 }
@@ -530,6 +533,16 @@ public class ItemServicesImpl
      * and ignoring deleted items.
      */
     protected static Response getMetadataById(String id, Map<String, Object> context, UriRef userId) {
+        Map<String, Object> result = getMetadataMapById(id, context, userId);
+        if (result.containsKey("Error Response")) {
+            return (Response) result.get("Error Response");
+        } else {
+            return Response.status(200).entity(result).build();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> getMetadataMapById(String id, Map<String, Object> context, UriRef userId) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
         try {
@@ -537,13 +550,14 @@ public class ItemServicesImpl
         } catch (UnsupportedEncodingException e1) {
             log.error("Error decoding url for " + id, e1);
             e1.printStackTrace();
-            return Response.status(500).entity("Error decoding id: " + id).build();
+            result.put("Error Response", Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error decoding id: " + id).build());
+
         }
         //Permission to see pages means you can see metadata as well...
 
         PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
         if (!p.userHasPermission()) {
-            return p.getErrorResponse();
+            result.put("Error Response", p.getErrorResponse());
         }
         UriRef itemUri = Resource.uriRef(id);
         try {
@@ -551,7 +565,7 @@ public class ItemServicesImpl
             if (!isAccessible(userId, itemUri)) {
 
                 result.put("Error", "Item not accessible");
-                return Response.status(403).entity(result).build();
+                result.put("Error Response", Response.status(403).entity(result).build());
             }
 
             //Get fields
@@ -565,11 +579,12 @@ public class ItemServicesImpl
             log.debug("Performed");
 
             result = buildResultMap(uf.getResult(), context, names, false, null);
-            return Response.status(200).entity(result).build();
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return Response.status(500).entity("Error processing id: " + id).build();
+            result.put("Error Response", Response.status(500).entity("Error processing id: " + id).build());
         }
+        return result;
 
     }
 
@@ -1344,6 +1359,19 @@ public class ItemServicesImpl
                         tw.add(itemId, issued, Resource.literal(DateFormat.getDateTimeInstance().format(theDate)));
                         tw.add(itemId, identifier, itemPid);
 
+                        //2.0 support
+                        Unifier uf = new Unifier();
+                        uf.addPattern(itemId, DcTerms.HAS_VERSION, "agg");
+
+                        uf.addPattern("agg", identifier, "ext", true);
+                        uf.setColumnNames("agg", "ext");
+                        TupeloStore.getInstance().getContext().perform(uf);
+                        for (Tuple<Resource> row : uf.getResult() ) {
+                            if (row.get(1) == null) {
+                                //Write required triples
+                                tw.add(row.get(0), identifier, itemPid);
+                            }
+                        }
                         c.perform(tw);
 
                         ListUserMetadataFieldsHandler.addViewablePredicate(issued.toString());
@@ -1415,7 +1443,7 @@ public class ItemServicesImpl
         }
         Response metaResponse = getItemMetadataAsJSON(uri.toString(), userId, false);
         String metaString = metaResponse.getEntity().toString();
-        JSONObject jsonObject;
+
         StringReader metaReader = new StringReader(metaString);
         try {
             IOUtils.copy(metaReader, zos);
@@ -1487,6 +1515,7 @@ public class ItemServicesImpl
     private static CollectionInfo getCollectionInfo(UriRef itemId, int currentDepth) throws ActionException {
         CollectionInfo info = new CollectionInfo();
         info.setMaxDepth(currentDepth++);
+        info.incrementNumCollections(1); //For root collection
         //Get Datasets
 
         Unifier uf = new Unifier();
@@ -1547,6 +1576,188 @@ public class ItemServicesImpl
             tagSet.add(s.trim().replaceAll("  +", " ").toLowerCase());
         }
         return tagSet;
+    }
+
+    @SuppressWarnings("unchecked")
+    Response getOREById(String id, UriRef userId, HttpServletRequest request) {
+
+        String url = request.getRequestURL().toString();
+        Map<String, Object> oremap = new HashMap<String, Object>();
+        try {
+
+            oremap.put("@id", url);
+            oremap.put("@type", "ResourceMap");
+            //Add info about map creation
+
+            //Find connect to live objects
+            Unifier uf = new Unifier();
+            uf.addPattern("coll", DcTerms.HAS_VERSION, Resource.uriRef(id));
+            uf.addColumnName("coll");
+
+            TupeloStore.getInstance().unifyExcludeDeleted(uf, "coll");
+            UriRef topCollRef = null;
+            for (Tuple<Resource> row : uf.getResult() ) {
+                topCollRef = (UriRef) row.get(0);
+                break;
+            }
+
+            //Find out how many times published
+            TripleMatcher tMatcher = new TripleMatcher();
+            tMatcher.match(topCollRef, DcTerms.HAS_VERSION, null);
+            TupeloStore.getInstance().getContext().perform(tMatcher);
+            String versionNumber = Integer.toString(tMatcher.getResult().size());
+
+            /*
+            if (topCollRef == null) {
+                log.debug("No pub URI");
+                //Find connect to live objects
+                Unifier uf2 = new Unifier();
+                uf2.addPattern("coll", DcTerms.IS_VERSION_OF, Resource.literal(id));
+                uf2.addColumnName("coll");
+
+                TupeloStore.getInstance().unifyExcludeDeleted(uf2, "coll");
+
+                for (Tuple<Resource> row : uf2.getResult() ) {
+                    topCollRef = (UriRef) row.get(0);
+                    break;
+                }
+
+            }*/
+
+            log.debug("Found Collection: " + topCollRef.toString());
+            Map<String, Object> agg = getMetadataMapById(topCollRef.toString(), getCombinedContext(false), userId);
+            agg.remove("@context");
+            //Munge for static vs live object distinction:
+            agg.put("Identifier", agg.get("Identifier") + "/v" + versionNumber);
+
+            agg.put("@id", url + "#aggregation");
+
+            List<String> types = new ArrayList<String>(2);
+            types.add("Aggregation");
+            types.add("http://cet.ncsa.uiuc.edu/2007/Collection");
+            agg.put("@type", types);
+
+            agg.put("Is Version Of", topCollRef.toString());
+            agg.put("similarTo", url.substring(0, url.indexOf("/researchobjects")) + "/collections/" + URLEncoder.encode(topCollRef.toString(), "UTF-8"));
+            oremap.put("describes", agg);
+            log.debug("OREMAP started: " + oremap.toString());
+            //Now add all the children and their info
+            //Collections
+            agg.put("aggregates", new ArrayList<Object>());
+            addSubCollectionsToAggregation(topCollRef, agg, agg, versionNumber, userId);
+
+            if (((List<Object>) agg.get("aggregates")).isEmpty()) {
+                agg.remove("aggregates");
+            }
+            //Add metadata about map
+            oremap.put("Rights", "This Resource Map is available under the Creative Commons Attribution-Noncommercial Generic license.");
+            oremap.put("Creation Date", DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis())));
+            List<String> creatorsList = new ArrayList<String>();
+            creatorsList.add(userId.toString());
+            creatorsList.add("SEAD Version 1.5, " + PropertiesLoader.getProperties().getProperty("domain"));
+            oremap.put("Creator", creatorsList);
+
+            //add contexts;
+            List<Object> contextList = new ArrayList<Object>();
+            contextList.add("https://w3id.org/ore/context");
+
+            Map<String, Object> seadContext = getCombinedContext(false);
+            seadContext.put("Is Version Of", DcTerms.IS_VERSION_OF.toString());
+            seadContext.put("Has Part", DcTerms.HAS_PART.toString());
+            contextList.add(seadContext);
+            oremap.put("@context", contextList);
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            log.error(e.getLocalizedMessage(), e);
+            Map<String, String> failmsgMap = new HashMap<String, String>();
+            failmsgMap.put("Failure", "Unable to generate ORE Map - see log for details");
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(failmsgMap).build();
+        }
+
+        return Response.ok().entity(oremap).build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void addSubCollectionsToAggregation(UriRef collId, Map<String, Object> agg, Map<String, Object> parent, String version, UriRef userId) throws JSONException, OperatorException {
+        Set<UriRef> subcollections = getSubCollections(collId);
+        log.debug("Adding collection: " + collId.toString());
+        //Should not exist but some space may have this term - so remove it to be safe
+        parent.remove("Has Part");
+        //Handle sub collections
+        for (UriRef collection : subcollections ) {
+
+            Map<String, Object> aggRes = getMetadataMapById(collection.toString(), combinedContext.getValue(), userId);
+            aggRes.remove("@context");
+            //Munge to separate static and live versions
+            aggRes.put("Identifier", collection.toString() + "/v" + version);
+
+            List<String> types = new ArrayList<String>(2);
+            types.add("AggregatedResource");
+            types.add("http://cet.ncsa.uiuc.edu/2007/Collection");
+            aggRes.put("@type", types);
+
+            aggRes.put("Version Of", collection.toString());
+            ((List<Object>) agg.get("aggregates")).add(aggRes);
+
+            if (parent.get("Has Part") == null) {
+                parent.put("Has Part", new ArrayList<String>());
+            }
+            ((List<String>) parent.get("Has Part")).add(collection.toString() + "/v" + version);
+
+            log.debug("Adding subcol: " + collection.toString());
+            addSubCollectionsToAggregation(collection, agg, aggRes, version, userId);
+        }
+        //Handle Datasets
+        Set<UriRef> datasets = getDatasets(collId);
+        for (UriRef dataset : datasets ) {
+            log.debug("Adding dataset: " + dataset.toString());
+
+            Map<String, Object> aggRes = getMetadataMapById(dataset.toString(), combinedContext.getValue(), userId);
+            aggRes.remove("@context");
+            //Munge to separate static and live versions
+            aggRes.put("Identifier", dataset.toString() + "/v" + version);
+
+            aggRes.put("Version Of", dataset.toString());
+
+            List<String> types = new ArrayList<String>(2);
+            types.add("AggregatedResource");
+            types.add(Cet.DATASET.toString());
+            aggRes.put("@type", types);
+
+            ((List<Object>) agg.get("aggregates")).add(aggRes);
+            if (parent.get("Has Part") == null) {
+                parent.put("Has Part", new ArrayList<String>());
+            }
+            ((List<String>) parent.get("Has Part")).add(dataset.toString() + "/v" + version);
+
+        }
+    }
+
+    private Set<UriRef> getSubCollections(UriRef parent) throws OperatorException {
+        Set<UriRef> colls = new HashSet<UriRef>();
+        Unifier uf2 = new Unifier();
+        uf2.addPattern("coll", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/Collection"));
+        uf2.addPattern(parent, DcTerms.HAS_PART, "coll");
+        uf2.setColumnNames("coll");
+
+        for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf2, "coll") ) {
+            colls.add((UriRef) row.get(0));
+        }
+        return colls;
+    }
+
+    private Set<UriRef> getDatasets(UriRef parent) throws OperatorException {
+        Set<UriRef> datasets = new HashSet<UriRef>();
+        Unifier uf2 = new Unifier();
+        uf2.addPattern("ds", Rdf.TYPE, Cet.DATASET);
+        uf2.addPattern(parent, DcTerms.HAS_PART, "ds");
+        uf2.setColumnNames("ds");
+
+        for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf2, "ds") ) {
+            datasets.add((UriRef) row.get(0));
+        }
+        return datasets;
     }
 
 }

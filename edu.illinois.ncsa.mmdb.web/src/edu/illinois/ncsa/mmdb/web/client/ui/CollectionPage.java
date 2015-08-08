@@ -82,9 +82,9 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetCollectionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetConfiguration;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsReadyForPublication;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.IsReadyForPublicationResult;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveUserMetadata;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.RequestPublication;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.RevokePublicationRequest;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetTitle;
-import edu.illinois.ncsa.mmdb.web.client.dispatch.SetUserMetadata;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DatasetTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.preview.PreviewGeoPointBean;
@@ -104,8 +104,6 @@ import edu.uiuc.ncsa.cet.bean.PreviewBean;
  *
  */
 public class CollectionPage extends Composite {
-
-    static private String               proposedForPublication = "http://sead-data.net/terms/ProposedForPublication";
 
     private final String                uri;
     private final DispatchAsync         service;
@@ -256,7 +254,7 @@ public class CollectionPage extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 if (publishButton.isDown()) {
-                    service.execute(new SetUserMetadata(uri.toString(), proposedForPublication, "true"), new AsyncCallback<EmptyResult>() {
+                    service.execute(new RequestPublication(uri.toString()), new AsyncCallback<EmptyResult>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -270,7 +268,7 @@ public class CollectionPage extends Composite {
 
                     });
                 } else {
-                    service.execute(new RemoveUserMetadata(uri.toString(), proposedForPublication, "true"), new AsyncCallback<EmptyResult>() {
+                    service.execute(new RevokePublicationRequest(uri.toString()), new AsyncCallback<EmptyResult>() {
 
                         @Override
                         public void onFailure(Throwable caught) {

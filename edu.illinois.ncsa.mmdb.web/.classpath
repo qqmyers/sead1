@@ -82,5 +82,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-jettison-provider-2.3.2.Final.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-multipart-provider-2.3.2.Final.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/resteasy-jaxb-provider-2.3.2.Final.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/foresite-0.9.jar" sourcepath="C:/Users/Jim/.m2/repository/com/googlecode/foresite-toolkit/foresite/0.9/foresite-0.9-sources.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

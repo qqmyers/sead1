@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -46,6 +46,8 @@ import java.util.Map;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Base64;
+
+import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestPublicationaHandler;
 
 public class RestUriMinter {
     static RestUriMinter singleton;
@@ -76,6 +78,8 @@ public class RestUriMinter {
         if (metadata != null) {
             if (RestService.IMAGE_TYPE.equals(metadata.get(Rdf.TYPE))) {
                 prefix = "img";
+            } else if (RequestPublicationaHandler.Aggregation.equals(metadata.get(Rdf.TYPE))) {
+                prefix = "RO";
             }
             if (metadata.containsKey(RestService.FORMAT_PROPERTY) &&
                     metadata.get(RestService.FORMAT_PROPERTY).toString().startsWith("image/")) {
@@ -90,7 +94,7 @@ public class RestUriMinter {
             byte[] md = messageDigest.digest(seed.getBytes("US-ASCII"));
             String b64 = Base64.encodeBytes(md).replaceAll("/", "_").replaceAll("\\+", "-").replaceFirst("=*$", "");
             seed = b64;
-            return "tag:medici@uiuc.edu,2009:" + prefix + "_" + b64;
+            return "tag:sead-data.net,2015:" + prefix + "_" + b64;
         } catch (UnsupportedEncodingException e) {
             // this should not happen
             e.printStackTrace();

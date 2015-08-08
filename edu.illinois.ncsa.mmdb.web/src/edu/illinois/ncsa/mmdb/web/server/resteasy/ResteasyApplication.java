@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edu.illinois.ncsa.mmdb.web.server.resteasy;
 
@@ -10,7 +10,7 @@ import javax.ws.rs.core.Application;
 
 /**
  * @author Luigi Marini <lmarini@ncsa.illinois.edu>
- * 
+ *
  */
 public class ResteasyApplication extends Application {
 
@@ -27,6 +27,7 @@ public class ResteasyApplication extends Application {
         singletons.add(new SysInfoRestService());
         singletons.add(new ItemServicesImpl());
         singletons.add(new URLRestService());
+        singletons.add(new ResearchObjectsRestService());
     }
 
     @Override

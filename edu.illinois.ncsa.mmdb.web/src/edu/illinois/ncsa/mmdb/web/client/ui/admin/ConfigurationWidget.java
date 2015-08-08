@@ -91,7 +91,7 @@ public class ConfigurationWidget extends Composite {
         mainPanel.add(createVIVOConfigurationSection(configuration));
 
         // va configuration.
-        mainPanel.add(createVAConfigurationSection(configuration));
+        mainPanel.add(createPublicationConfigurationSection(configuration));
 
         // extractor configuration
         mainPanel.add(createExtractorSection(configuration));
@@ -617,8 +617,91 @@ public class ConfigurationWidget extends Composite {
 
     }
 
-    private DisclosurePanel createVAConfigurationSection(ConfigurationResult configuration) {
-        return createSimpleConfigurationSection(configuration, "Publishing Configuration", "Publication End Point", ConfigurationKey.VAURL, false);
+    private DisclosurePanel createPublicationConfigurationSection(ConfigurationResult configuration) {
+
+        DisclosurePanel dp = new DisclosurePanel("2.0 Beta Publication");
+        dp.addStyleName("datasetDisclosurePanel");
+        dp.setOpen(false);
+        VerticalPanel vp = new VerticalPanel();
+        vp.setWidth("100%");
+        dp.add(vp);
+
+        FlexTable table = new FlexTable();
+        vp.add(table);
+
+        int idx = 0;
+
+        final TextBox name = new TextBox();
+        name.setVisibleLength(40);
+        name.setText(configuration.getConfiguration(ConfigurationKey.CPURL));
+        table.setText(idx, 0, "C&P Services End Point");
+        table.setWidget(idx, 1, name);
+        idx++;
+
+        final TextBox repo = new TextBox();
+        repo.setVisibleLength(40);
+        repo.setText(configuration.getConfiguration(ConfigurationKey.DefaultRepository));
+        table.setWidget(idx, 0, new HTML("Respository (orgidentifier - see <a href=\"" + configuration.getConfiguration(ConfigurationKey.CPURL) + "/cp/repositories\" target=\"blank\">list of repositories</a>)"));
+        table.setWidget(idx, 1, repo);
+        idx++;
+
+        final TextArea prefs = new TextArea();
+        prefs.setVisibleLines(5);
+        prefs.setText(configuration.getConfiguration(ConfigurationKey.DefaultCPPreferences));
+        table.setText(idx, 0, "Preferences (JSON object)");
+        table.setWidget(idx, 1, prefs);
+        idx++;
+
+        // buttons
+        HorizontalPanel hp = new HorizontalPanel();
+        vp.add(hp);
+
+        Button button = new Button("Submit", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                SetConfiguration query = new SetConfiguration(MMDB.getUsername());
+                query.setConfiguration(ConfigurationKey.CPURL, name.getText());
+                query.setConfiguration(ConfigurationKey.DefaultRepository, repo.getText());
+                query.setConfiguration(ConfigurationKey.DefaultCPPreferences, prefs.getText());
+                dispatchAsync.execute(query, new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        name.setText(result.getConfiguration(ConfigurationKey.CPURL));
+                        repo.setText(result.getConfiguration(ConfigurationKey.DefaultRepository));
+                        prefs.setText(result.getConfiguration(ConfigurationKey.DefaultCPPreferences));
+                    }
+                });
+            }
+        });
+        hp.add(button);
+        //only resets changes before "submit" button is clicked. i.e. does not have memory of previously submitted changes.
+        button = new Button("Reset", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                dispatchAsync.execute(new GetConfiguration(MMDB.getUsername()), new AsyncCallback<ConfigurationResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Could not get configuration values.", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(ConfigurationResult result) {
+                        name.setText(result.getConfiguration(ConfigurationKey.CPURL));
+                        repo.setText(result.getConfiguration(ConfigurationKey.DefaultRepository));
+                        prefs.setText(result.getConfiguration(ConfigurationKey.DefaultCPPreferences).replace("&#34;", "\"").replace("&#39;", "'"));
+                    }
+                });
+            }
+        });
+        button.addStyleName("multiAnchor");
+        hp.add(button);
+
+        return dp;
     }
 
     private DisclosurePanel createPermissionsConfigurationSection(ConfigurationResult configuration) {
