@@ -499,7 +499,7 @@ seadSpaces.demoSpace = function(){
 						} else {
 							page += '<div class="fade-out">';
 						}
-						page += '<div class="space-stats"><div class="space-name"><img src="' + projectLogo + '" alt="" />' + projectName + '</div></div>';
+						page += '<div class="space-stats"><div class="space-name"><img src="' + projectLogo + '" alt="" /><div class="projectName">' + projectName + '</div></div></div>';
 						page += '</div>';
 						
 						if (projectDescription) {
