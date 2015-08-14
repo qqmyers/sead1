@@ -325,7 +325,7 @@ public class LoginPage extends Composite {
 
                 StringBuilder sb = new StringBuilder();
                 sb.append("client_id=" + MMDB._orcidClientId + "&");
-                sb.append("scope=" + URL.encodeQueryString("/authenticate") + "&");
+                sb.append("scope=" + URL.encodeQueryString("/orcid-profile/read-limited") + "&");
                 sb.append("response_type=" + "code&");
                 sb.append("redirect_uri=" + URL.encodeQueryString(redirect_uri) + "&");
                 sb.append("state=" + result.getState());
