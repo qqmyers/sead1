@@ -45,11 +45,15 @@ extractor.url=http://localhost:9856/
 # Access Level/Processing Level
 #See https://opensource.ncsa.illinois.edu/confluence/x/AgDMAQ
 #
-access.level.label=Data Maturity
-access.level.predicate=http://sead-data.net/terms/hasDataMaturityLevel
+#access.level.label=Data Maturity
+#access.level.predicate=http://sead-data.net/terms/hasDataMaturityLevel
 #access.level.predicate=http://www.linkedearth.org/RSIV/ns#hasLevelOfProcessing
-access.level.default=0
-access.level.values=Raw, Preliminary Results, Provisional Product, Validated Product, Group Product
+#access.level.default=0
+#access.level.values=Raw, Preliminary Results, Provisional Product, Validated Product, Group Product
+access.level.label=Data Access
+access.level.predicate=http://sead-data.net/terms/accessLevel
+access.level.default=1
+access.level.values=Private,Public
 
 
 #Google Ouath2
