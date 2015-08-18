@@ -527,7 +527,8 @@ public class ContextSetupListener implements ServletContextListener {
                     if (props.containsKey(pre + ".label")) { //$NON-NLS-1$
                         Resource r = Resource.uriRef(props.getProperty(key));
                         //if the field already exists in the triplestore don't update through server.properties config file.
-                        if (context.match(r, Rdf.TYPE, null) != null) {
+                        Set<Triple> matches = context.match(r, Rdf.TYPE, null);
+                        if ((matches != null) && !matches.isEmpty()) {
                             log.debug("User Metadata: " + r.toString() + " already exists - skipping");
                             continue;
                         }
@@ -537,7 +538,7 @@ public class ContextSetupListener implements ServletContextListener {
                         if (props.containsKey(pre + ".label")) {
                             // remove existing label
                             Set<Triple> labelsSet = context.match(r, Rdfs.LABEL, null);
-                            if (labelsSet != null) {
+                            if ((labelsSet != null) && !labelsSet.isEmpty()) {
                                 context.removeTriples(labelsSet);
                             } else {
                                 log.debug("No existing labels");
@@ -549,7 +550,7 @@ public class ContextSetupListener implements ServletContextListener {
                         if (props.containsKey(pre + ".definition")) {
                             // remove existing definition
                             Set<Triple> definitionsSet = context.match(r, Rdfs.COMMENT, null);
-                            if (definitionsSet != null) {
+                            if ((definitionsSet != null) && !definitionsSet.isEmpty()) {
                                 context.removeTriples();
                             } else {
                                 log.debug("No existing descriptions");
