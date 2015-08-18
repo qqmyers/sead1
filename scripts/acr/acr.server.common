@@ -52,7 +52,7 @@ extractor.url=http://localhost:9856/
 #access.level.values=Raw, Preliminary Results, Provisional Product, Validated Product, Group Product
 access.level.label=Data Access
 access.level.predicate=http://sead-data.net/terms/accessLevel
-access.level.default=1
+access.level.default=0
 access.level.values=Private,Public
 
 
