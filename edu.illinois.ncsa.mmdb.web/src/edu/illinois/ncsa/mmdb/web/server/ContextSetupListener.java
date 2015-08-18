@@ -513,6 +513,7 @@ public class ContextSetupListener implements ServletContextListener {
 
         Context context = TupeloStore.getInstance().getContext();
 
+        log.debug("Reading user metadata fields from properties file");
         //reset(context, MMDB.USER_METADATA_FIELD, GetUserMetadataFieldsHandler.VIEW_METADATA);
         TripleWriter tw = new TripleWriter();
 
@@ -527,6 +528,7 @@ public class ContextSetupListener implements ServletContextListener {
                         Resource r = Resource.uriRef(props.getProperty(key));
                         //if the field already exists in the triplestore don't update through server.properties config file.
                         if (context.match(r, Rdf.TYPE, null) != null) {
+                            log.debug("User Metadata: " + r.toString() + " already exists - skipping");
                             continue;
                         }
                         // this code should never be executed other than the first time after setting up the database.
@@ -534,16 +536,27 @@ public class ContextSetupListener implements ServletContextListener {
                         tw.add(r, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
                         if (props.containsKey(pre + ".label")) {
                             // remove existing label
-                            context.removeTriples(context.match(r, Rdfs.LABEL, null));
+                            Set<Triple> labelsSet = context.match(r, Rdfs.LABEL, null);
+                            if (labelsSet != null) {
+                                context.removeTriples(labelsSet);
+                            } else {
+                                log.debug("No existing labels");
+                            }
                             String l = props.getProperty(pre + ".label");
                             tw.add(r, Rdfs.LABEL, l);
                             log.debug("Adding user metadata field '" + l + "' (" + r + ")");
                         }
                         if (props.containsKey(pre + ".definition")) {
                             // remove existing definition
-                            context.removeTriples(context.match(r, Rdfs.COMMENT, null));
+                            Set<Triple> definitionsSet = context.match(r, Rdfs.COMMENT, null);
+                            if (definitionsSet != null) {
+                                context.removeTriples();
+                            } else {
+                                log.debug("No existing descriptions");
+                            }
                             String def = props.getProperty(pre + ".definition");
                             tw.add(r, Rdfs.COMMENT, def);
+                            log.debug("Adding definition for " + r.toString() + " : " + def);
                         }
                     }
                 }
