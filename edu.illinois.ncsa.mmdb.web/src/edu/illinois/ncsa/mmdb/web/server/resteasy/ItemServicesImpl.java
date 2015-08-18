@@ -1720,6 +1720,9 @@ public class ItemServicesImpl
 
             aggRes.put("Version Of", dataset.toString());
 
+            String urlString = PropertiesLoader.getProperties().getProperty("domain");
+            aggRes.put("similarTo", urlString + "/resteasy/datasets/" + dataset.toString() + "/file");
+
             List<String> types = new ArrayList<String>(2);
             types.add("AggregatedResource");
             types.add(Cet.DATASET.toString());
