@@ -1271,11 +1271,13 @@ input.gwt-SuggestBox {
 	padding-bottom: 5px;
 }
 
-#discovery {
-	font-family: "lato";
-	font-size: 14px;
-	line-height: 18px;
-	color: #444;
+
+#discovery, #projectDesc {
+        font-family: "lato";
+        font-size: 14px;
+        font-weight: normal;
+        line-height: 18px;
+        color: #444;
 }
 
 #discovery h1 {
