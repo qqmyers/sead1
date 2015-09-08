@@ -186,7 +186,7 @@ public class LoginPage extends Composite {
         socialTable.getFlexCellFormatter().setColSpan(1, 0, 2);
 
         // Google Oauth2 link
-        Anchor googleLogin = new Anchor("Sign in with Google");
+        Anchor googleLogin = new Anchor("Login via Google");
         googleLogin.setStylePrimaryName("zocial");
         googleLogin.setStyleName("google", true);
         googleLogin.addClickHandler(new ClickHandler() {
@@ -211,7 +211,7 @@ public class LoginPage extends Composite {
         socialTable.getFlexCellFormatter().setColSpan(2, 0, 2);
 
         // Orcid Oauth2 link
-        Anchor orcidLogin = new Anchor("Sign in with ORCID");
+        Anchor orcidLogin = new Anchor("Login via ORCID");
         orcidLogin.setStylePrimaryName("zocial");
         orcidLogin.setStyleName("orcid", true);
 
@@ -377,7 +377,7 @@ public class LoginPage extends Composite {
 
                         } else if ("user not found".equals(caught.getMessage())) {
                             if ((widget != null) && (widget instanceof LoginPage)) {
-                                ((LoginPage) widget).fail("To request access to a space, use \"Sign up\" or contact the owner(s) for an invite");
+                                ((LoginPage) widget).fail("To request access to a space, use \"Request Access\" or contact the owner(s) for an invite");
                             }
                         } else {
                             if ((widget != null) && (widget instanceof LoginPage)) {
@@ -579,7 +579,7 @@ public class LoginPage extends Composite {
                 Widget widget = mainWindow.getPage();
                 if ("user not found".equals(caught.getMessage())) {
                     if ((widget != null) && (widget instanceof LoginPage)) {
-                        ((LoginPage) widget).fail("To request access to a space, use \"Sign up\" or contact the owner(s) for an invite");
+                        ((LoginPage) widget).fail("To request access to a space, use \"Request Access\" or contact the owner(s) for an invite");
                     } else {
                         callback.onFailure();
                     }

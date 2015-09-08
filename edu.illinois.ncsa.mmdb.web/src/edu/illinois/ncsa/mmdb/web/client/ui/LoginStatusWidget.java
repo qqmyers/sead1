@@ -64,7 +64,7 @@ import edu.illinois.ncsa.mmdb.web.client.MMDB;
  *
  * @author Luigi Marini
  * @author Rob Kooper
- *         #author myersjd@umich.edu
+ * @author myersjd@umich.edu
  *
  */
 public class LoginStatusWidget extends Composite {
@@ -182,6 +182,6 @@ public class LoginStatusWidget extends Composite {
     public void loggedOut() {
         mainPanel.clear();
         mainPanel.add(hyperlink("Login", "login"));
-        mainPanel.add(hyperlink("Sign up", "signup"));
+        mainPanel.add(hyperlink("Request Access", "signup"));
     }
 }

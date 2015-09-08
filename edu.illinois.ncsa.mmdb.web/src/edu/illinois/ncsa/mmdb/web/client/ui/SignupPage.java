@@ -418,6 +418,6 @@ public class SignupPage extends Composite {
      * @return title widget
      */
     private Widget createPageTitle() {
-        return new TitlePanel("Sign up");
+        return new TitlePanel("Request Access");
     }
 }
