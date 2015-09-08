@@ -321,6 +321,15 @@ seadSpaces.init = function() {
 																			+ projectBg;
 																}
 																if (typeof projectLogo !== 'undefined'
+																	&& projectLogo
+																			.substring(
+																					0,
+																					8) == "resteasy") {
+																projectLogo = value
+																		+ '/'
+																		+ projectLogo;
+																}
+																if (typeof projectLogo !== 'undefined'
 																		&& projectLogo
 																				.substring(
 																						0,
