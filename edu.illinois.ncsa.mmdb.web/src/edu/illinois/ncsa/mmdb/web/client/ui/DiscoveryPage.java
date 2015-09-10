@@ -59,7 +59,9 @@ public class DiscoveryPage extends Page {
         top.add(bodyHtml);
         String va_url = RootPanel.get("va").getElement().getAttribute("href");
         mainLayoutPanel.add(new HTML("This page contains collections of datasets that this project team has published through the " +
-                "<a href=\"" + va_url + "\">SEAD Virtual Archive</a> (or manually marked as having a publication date)."));
+                "<a href=\"" + va_url + "\">SEAD Virtual Archive</a> (or manually marked as having a publication date). <b>Note:</b> The links to Collections and Datasets" +
+                "shown on this page go to <i>live</i> versions of these objects which may have been modified since publication. To retrieve the data <i>as published</i>, click the" +
+                " \"Archived Version DOI\" link and download the data from there."));
         mainLayoutPanel.add(top);
         if (currentCollection == null) {
             loadCollections();

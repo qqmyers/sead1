@@ -162,7 +162,7 @@ function pageBiblioJsonParser(id, json) {
 
 	if (doi != '') {
 		$("#doi" + id).html(
-				"<b>DOI: </b><a target = \'blank\' href=\'" + doi + "\'>" + doi
+				"<b>Archived Version DOI: </b><a target = \'blank\' href=\'" + doi + "\'>" + doi
 						+ "</a>");
 		$("#doi" + id).css("visibility", "visible");
 	}
@@ -171,7 +171,7 @@ function pageBiblioJsonParser(id, json) {
 		var creatorString = creators[0];
 		var datacreatorString = creatornames[0];
 		for (var i = 1; i < creators.length; i++) {
-			creatorString += "," + creators[i];
+			creatorString += "; " + creators[i];
 			datacreatorString += ", " + creatornames[i];
 		}
 
@@ -183,7 +183,7 @@ function pageBiblioJsonParser(id, json) {
 		var contactString = contacts[0];
 		var datacontactString = contactnames[0];
 		for (var i = 1; i < contacts.length; i++) {
-			contactString += "," + contacts[i];
+			contactString += "; " + contacts[i];
 			datacontactString += ", " + contactnames[i];
 		}
 		$("#contacts" + id).html("<b>Contacts: </b>" + contactString);
@@ -253,11 +253,17 @@ function getBiblioAttributesForPage(jsonBinding) {
 					function(key, value) {
 						if (value == 'creator' || value == 'contact') {
 							var temp = jsonBinding['literal'];
-							var name = temp.substring(0, temp.indexOf(':') - 1);
+							var html ='';
+							var name ='';
+							if(temp.indexOf(':')!=-1) {
+							name = temp.substring(0, temp.indexOf(':') - 1);
 							var url = temp.substring(temp.indexOf(':') + 1);
-							var html = "<a href='" + url + "' target=_blank>"
-									+ name + "</a> ";
-
+							html = "<a href='" + url + "' target=_blank>"
+									+ name + "</a>";
+							} else {
+								html = temp;
+								name = temp;
+							}
 							if (value == 'creator') {
 								if (creators.indexOf(html) == -1) {
 									creators.push(html);
