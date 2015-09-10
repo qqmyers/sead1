@@ -164,12 +164,16 @@ public class CollectionPage extends Composite {
 
         mainContent.add(createSocialAnnotationsPanel());
 
-        rbac.doIfAllowed(Permission.EDIT_METADATA, uri, new PermissionCallback() {
+        rbac.doIfAllowed(Permission.EDIT_USER_METADATA, uri, new PermissionCallback() {
             @Override
             public void onAllowed() {
 
                 um.showTableFields(true);
 
+            }
+
+            public void onDenied() {
+                um.showTableFields(false);
             }
         });
     }
