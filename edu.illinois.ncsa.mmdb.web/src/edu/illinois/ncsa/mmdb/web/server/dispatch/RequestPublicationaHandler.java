@@ -63,6 +63,7 @@ import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl;
+import edu.illinois.ncsa.mmdb.web.server.util.CollectionInfo;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
 public class RequestPublicationaHandler implements ActionHandler<RequestPublication, EmptyResult> {
@@ -137,14 +138,33 @@ public class RequestPublicationaHandler implements ActionHandler<RequestPublicat
             aggJsonObject.put("similarTo", this_space + "/resteasy/collections/" + URLEncoder.encode(subject.toString(), "UTF-8"));
 
             JSONObject contextObject = aggJsonObject.getJSONObject("@context");
-            aggJsonObject.remove("@context");
-            requestJsonObject.accumulate("@context", contextObject);
-            requestJsonObject.accumulate("@context", "https://w3id.org/ore/context");
             requestJsonObject.put("Aggregation", aggJsonObject);
             requestJsonObject.put("Repository", TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultRepository));
 
             JSONObject preferencesJsonObject = new JSONObject(TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultCPPreferences));
             requestJsonObject.put("Preferences", preferencesJsonObject);
+
+            //Now add stats
+            CollectionInfo ci = ItemServicesImpl.getCollectionInfo((UriRef) subject, 0);
+            JSONObject stats = new JSONObject();
+
+            stats.put("Total Size", "" + ci.getSize());
+            stats.put("Number of Collections", "" + ci.getNumCollections());
+            stats.put("Number of Datasets", "" + ci.getNumDatasets());
+            stats.put("Max Dataset Size", "" + ci.getMaxDatasetSize());
+            stats.put("Max Collection Depth", "" + ci.getMaxDepth());
+            stats.put("Data Mimetypes", ci.getMimetypeSet());
+            requestJsonObject.put("Aggregation Statistics", stats);
+            for (String key : ItemServicesImpl.collectionStats.keySet() ) {
+                contextObject.put(key, ItemServicesImpl.collectionStats.get(key));
+            }
+            contextObject.put("Preferences", "http://sead-data.net/terms/publicationpreferences");
+            contextObject.put("Repository", "http://sead-data.net/terms/requestedrepository");
+            contextObject.put("Aggregation Statistics", "http://sead-data.net/terms/publicationstatistics");
+
+            aggJsonObject.remove("@context");
+            requestJsonObject.accumulate("@context", contextObject);
+            requestJsonObject.accumulate("@context", "https://w3id.org/ore/context");
 
             log.debug("JSON" + requestJsonObject.toString());
 

@@ -251,7 +251,7 @@ public class ItemServicesImpl
                                                                  };
 
     @SuppressWarnings("serial")
-    protected static final Map<String, Object> collectionStats   = new LinkedHashMap<String, Object>() {
+    public static final Map<String, Object>    collectionStats   = new LinkedHashMap<String, Object>() {
                                                                      /**
                                                                       *
                                                                       */
@@ -1612,7 +1612,7 @@ public class ItemServicesImpl
 
     }
 
-    private static CollectionInfo getCollectionInfo(UriRef itemId, int currentDepth) throws ActionException {
+    public static CollectionInfo getCollectionInfo(UriRef itemId, int currentDepth) throws ActionException {
         CollectionInfo info = new CollectionInfo();
         info.setMaxDepth(currentDepth++);
         info.incrementNumCollections(1); //For root collection
