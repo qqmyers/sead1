@@ -606,6 +606,8 @@ public class CollectionsRestService extends ItemServicesImpl {
      *         permission issue, 409 - item has not been
      *         "proposed for publication"
      */
+    @Deprecated
+    //1.5
     @PUT
     @Path("/{id}/published")
     public Response uploadMetadata(@PathParam("id") @Encoded String id, @QueryParam("date") Long date, @QueryParam("pid") @Encoded String pid, @javax.ws.rs.core.Context HttpServletRequest request) {
@@ -614,6 +616,27 @@ public class CollectionsRestService extends ItemServicesImpl {
             millis = date.longValue();
         }
         return super.publishItem(id, CollectionBeanUtil.COLLECTION_TYPE, millis, pid, request);
+    }
+
+    /**
+     * Get publish collections.
+     *
+     * This retrieves all collections that have been published via
+     * 1.5 - and have a DOI(s) as metadata, and
+     * 2.0 - that are associated with an ORE Aggregation(s) that has a
+     * persistent identifier associated along with pub date and version #
+     *
+     *
+     * @result - success/failure message: 200 - JSON-LD list of collections with
+     *         DOIs/versions, 403 -
+     *         permission issue
+     */
+
+    @GET
+    @Path("/published")
+    @Produces("application/json")
+    public Response getPublishedCollections(@javax.ws.rs.core.Context HttpServletRequest request) {
+        return super.getPublishedROsByCollection(request);
     }
 
     /**

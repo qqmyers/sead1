@@ -268,6 +268,22 @@ public class ItemServicesImpl
                                                                      }
                                                                  };
 
+    protected static final Map<String, Object> publishedVersions = new LinkedHashMap<String, Object>() {
+                                                                     /**
+     *
+     */
+                                                                     private static final long serialVersionUID = 6200945234224918100L;
+
+                                                                     {
+                                                                         Map<String, String> version = new HashMap<String, String>();
+                                                                         version.put("@id", DcTerms.HAS_VERSION.toString());
+                                                                         version.put("version number", "http://sead-data.net/vocab/hasVersionNumber");
+                                                                         version.put("External Identifier", DCTerms.identifier.getURI());
+                                                                         version.put("publication_date", DCTerms.issued.getURI());
+                                                                         put("Published Version", version);
+                                                                     }
+                                                                 };
+
     static Context                             c                 = TupeloStore.getInstance().getContext();
     static protected SEADRbac                  rbac              = new SEADRbac(TupeloStore.getInstance().getContext());
 
@@ -1366,10 +1382,14 @@ public class ItemServicesImpl
                         uf.addPattern("agg", identifier, "ext", true);
                         uf.setColumnNames("agg", "ext");
                         TupeloStore.getInstance().getContext().perform(uf);
+
+                        //Should only be the latest version that has yet to get a pid
                         for (Tuple<Resource> row : uf.getResult() ) {
                             if (row.get(1) == null) {
                                 //Write required triples
                                 tw.add(row.get(0), identifier, itemPid);
+                                //Fixme - legacy use of date as string
+                                tw.add(row.get(0), issued, Resource.literal(DateFormat.getDateTimeInstance().format(theDate)));
                             }
                         }
                         c.perform(tw);
@@ -1388,6 +1408,86 @@ public class ItemServicesImpl
             } catch (Exception e) {
                 result = new LinkedHashMap<String, Object>();
                 result.put("Error", "Server error while publishing " + encoded_id);
+                r = Response.status(500).entity(result).build();
+            }
+        }
+        return r;
+    }
+
+    /* Publish a version (SEAD 2.0) - used to return the final success message and persistent ID assigned to the
+     * published version. The agg_id is for the version - it is used to find the corresponding live collection.
+     *
+     * For 2.0, the persistent ID and publication date are assigned to the version rather than the collection itself.
+     */
+    protected Response publishVersion(String agg_id, long date, String pid, HttpServletRequest request) {
+        Response r;
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+
+        if (pid == null) {
+            result.put("Missing", "pid");
+            r = Response.status(400).entity(result).build();
+
+        } else {
+
+            UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+            PermissionCheck p = new PermissionCheck(userId, Permission.EDIT_METADATA);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
+
+            try {
+
+                //Find underlying collection - make sure it can be edited by user
+                TripleMatcher tm1 = new TripleMatcher();
+                tm1.match(null, DcTerms.HAS_VERSION, Resource.uriRef(agg_id));
+                c.perform(tm1);
+                Set<Triple> colTripleSet = tm1.getResult();
+                UriRef itemId = (UriRef) colTripleSet.iterator().next().getSubject();
+
+                ValidItem item = new ValidItem(itemId, CollectionBeanUtil.COLLECTION_TYPE, userId);
+                if (!item.isValid()) {
+                    r = item.getErrorResponse();
+                } else {
+                    TripleMatcher tMatcher = new TripleMatcher();
+
+                    tMatcher.match(itemId, IsReadyForPublicationHandler.proposedForPublicationRef, null);
+                    c.perform(tMatcher);
+                    Set<Triple> triples = tMatcher.getResult();
+                    TripleWriter tw = new TripleWriter();
+                    if (triples.size() >= 1) {
+                        //Remove proposedForPub flag
+                        tw.remove((Triple) triples.toArray()[0]);
+
+                        //2.0 support
+                        Date theDate = new Date(date);
+                        UriRef issued = Resource.uriRef(DCTerms.issued.getURI());
+                        UriRef identifier = Resource.uriRef(DCTerms.identifier.getURI());
+                        //Fixme - we can't delete non-string literals from the GUI since we lose type info along the way...
+                        //So - using a string here
+                        tw.add(agg_id, issued, Resource.literal(DateFormat.getDateTimeInstance().format(theDate)));
+                        tw.add(agg_id, identifier, Resource.uriRef(pid));
+
+                        //To DO? Add published_as_part_of links
+                        //FixMe - should not assume that collection has the same contents as when published and should
+                        // retrieve final list from authoritative OREMap (wherever that ends up), or call a service dynamically
+                        //rather than caching this info as a triple.
+
+                        c.perform(tw);
+
+                        ListUserMetadataFieldsHandler.addViewablePredicate(issued.toString());
+
+                        result.put("Item Published", itemId.toString());
+                        r = Response.status(200).entity(result).build();
+
+                    } else {
+                        result.put("Item Not Proposed For Publication", itemId.toString());
+                        r = Response.status(409).entity(result).build();
+                    }
+
+                }
+            } catch (Exception e) {
+                result = new LinkedHashMap<String, Object>();
+                result.put("Error", "Server error while publishing " + agg_id);
                 r = Response.status(500).entity(result).build();
             }
         }
@@ -1763,4 +1863,106 @@ public class ItemServicesImpl
         return datasets;
     }
 
+    //Return JSON-LD with basic biblio for any collection that has been published via 1.5 or 2.0
+    public Response getPublishedROsByCollection(HttpServletRequest request) {
+
+        //Check Perms:
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        try {
+            if (!rbac.checkPermission(userId, Resource.uriRef(Permission.VIEW_PUBLISHED.getUri()))) {
+                return Response.status(401).entity("Access to this endpoint is access controlled.").build();
+            }
+        } catch (RBACException e1) {
+            log.error("Error running sys info: ", e1);
+            return Response.status(500).entity("Error running sys info [" + e1.getMessage() + "]").build();
+        }
+
+        Map<String, Map<String, Object>> collMap = new HashMap<String, Map<String, Object>>();
+        /*
+
+
+                //Find 1.5 pubs
+                //Any collection with a DOI(s) as dcterms identifier
+                Unifier uf = new Unifier();
+                uf.addPattern("coll", Resource.uriRef(DCTerms.identifier.toString()), "doi");
+                uf.addPattern("coll", Resource.uriRef(DCTerms.issued.toString()), "date");
+                uf.setColumnNames("coll", "doi", "date");
+
+                try {
+                    TupeloStore.getInstance().getContext().perform(uf);
+                } catch (Throwable e1) {
+                    log.error("Error getting published collections", e1);
+                    e1.printStackTrace();
+                    return Response.status(500).entity("Error getting published collections").build();
+                }
+                //FixMe - trat deleted ones differently (i.e. don't try to show live versions, so need to send isdeleted flag...)
+                for(Tuple tu: uf.getResult()) {
+                    String coll =  tu.get(0).toString();
+                    String doi = tu.get(1).toString();
+                    String date = tu.get(2).toString();
+                    if(collMap.containsKey(coll)) {
+                        //Add version
+                        addVersionToCollection(collMap.get(coll), doi, -1, "<=" + date);
+                    } else {
+                        //First time - add collection and its metadata
+                        addCollectionAndVersion(collMap.get("coll"), doi, 1, "<=" + date);
+                    }
+                }
+          */
+
+        //Find collections with published versions
+        //collections with a version
+        TripleMatcher tm = new TripleMatcher();
+        tm.setPredicate(DcTerms.HAS_VERSION);
+
+        Map<String, Object> contextMap = new LinkedHashMap<String, Object>();
+        //Needed to preserve insertion order (id first)
+        for (String key : itemBiblio.keySet() ) {
+            contextMap.put(key, itemBiblio.get(key));
+        }
+
+        contextMap.putAll(publishedVersions);
+
+        Set<UriRef> collections = new HashSet<UriRef>();
+        try {
+            TupeloStore.getInstance().getContext().perform(tm);
+            for (Triple triple : tm.getResult() ) {
+                collections.add((UriRef) triple.getSubject());
+
+            }
+
+            for (UriRef coll : collections ) {
+                Map<String, Object> nextResultMap = getMetadataMapById(coll.toString(), contextMap, userId);
+                //Only need one at the top
+                nextResultMap.remove("@context");
+                collMap.put(coll.toString(), nextResultMap);
+            }
+        } catch (Throwable e1) {
+            log.error("Error getting published collections", e1);
+            e1.printStackTrace();
+            return Response.status(500).entity("Error getting published collections").build();
+        }
+
+        //Any collection with an Aggregation that has dcterms identifier entry (an external persistent identifier)
+
+        //Add version stuff to context
+        collMap.put("@context", contextMap);
+        return Response.ok().entity(collMap).build();
+    }
+    /*
+        private void addCollectionAndVersion(String coll, Map<String, Object> map, String doi, int v, String date) {
+           map = new HashMap<String, Object>();
+           map.put("Identifier",  coll);
+           Map<String, String> newVersionMap = new HashMap<String, String>();
+           newVersionMap.put("@id",doi);
+
+
+        }
+
+        private void addVersionToCollection(String coll, Map<String, Object> map, String doi, int v, String date) {
+            // TODO Auto-generated method stub
+
+        }
+    */
 }

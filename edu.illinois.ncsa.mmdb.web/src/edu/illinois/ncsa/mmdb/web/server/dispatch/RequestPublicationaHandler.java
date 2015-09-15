@@ -47,10 +47,13 @@ import org.json.JSONObject;
 import org.sead.acr.common.utilities.PropertiesLoader;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
+
+import com.hp.hpl.jena.vocabulary.DCTerms;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RequestPublication;
@@ -73,7 +76,7 @@ public class RequestPublicationaHandler implements ActionHandler<RequestPublicat
     public EmptyResult execute(RequestPublication action, ExecutionContext context) throws ActionException {
 
         log.debug("Requesting pub of " + action.getUri().toString());
-        // only allow user to edit user metadata fields
+        // only allow if user can edit user metadata fields
         SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         try {
             if (!rbac.checkPermission(action.getUser(), action.getUri(), Permission.EDIT_USER_METADATA)) {
@@ -95,10 +98,16 @@ public class RequestPublicationaHandler implements ActionHandler<RequestPublicat
             //2.0 publication
 
             //Find out how many times published
+            //via 2.0
             TripleMatcher tMatcher = new TripleMatcher();
             tMatcher.match(subject, DcTerms.HAS_VERSION, null);
             TupeloStore.getInstance().getContext().perform(tMatcher);
-            String versionNumber = Integer.toString(tMatcher.getResult().size() + 1);
+            //via 1.5
+            Unifier uf = new Unifier();
+            TripleMatcher tm2 = new TripleMatcher();
+            tm2.match(subject, Resource.uriRef(DCTerms.identifier.toString()), null);
+            TupeloStore.getInstance().getContext().perform(tm2);
+            String versionNumber = Integer.toString(tMatcher.getResult().size() + tm2.getResult().size() + 1);
 
             //Generate ID for published version
             Map<Resource, Object> md = new HashMap<Resource, Object>();

@@ -44,7 +44,6 @@ import javax.ws.rs.Encoded;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -104,8 +103,7 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
     }
 
     /**
-     * Get Basic metadata for {id} : ( Identifier, Title, Date, Uploaded By,
-     * Abstract, Contact(s), Creator(s) )
+     * Get OREMap for Aggregation
      *
      * @param id
      *            - the ID of RO
@@ -612,11 +610,12 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
     /**
      * Publish collection.
      *
-     * This removes the proposed for publication metadata and sets a publication
-     * date
+     * This removes the proposed for publication metadata and sets version
+     * publication information
+     * *
      *
      * @param id
-     *            - the URL-encoded ID of the collection
+     *            - the URL-encoded ID of the aggregation
      * @query date
      *        - the publication date to be set, as a long (milliseconds
      *        since January 1, 1970, 00:00:00 GMT) - now by default,
@@ -629,14 +628,14 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
      *         permission issue, 409 - item has not been
      *         "proposed for publication"
      */
-    @PUT
-    @Path("/{id}/published")
-    public Response uploadMetadata(@PathParam("id") @Encoded String id, @QueryParam("date") Long date, @QueryParam("pid") @Encoded String pid, @javax.ws.rs.core.Context HttpServletRequest request) {
+    @POST
+    @Path("/{id}/publication")
+    public Response uploadMetadata(@PathParam("id") String agg_id, @QueryParam("date") Long date, @QueryParam("pid") String pid, @javax.ws.rs.core.Context HttpServletRequest request) {
         long millis = System.currentTimeMillis();
         if (date != null) {
             millis = date.longValue();
         }
-        return super.publishItem(id, CollectionBeanUtil.COLLECTION_TYPE, millis, pid, request);
+        return super.publishVersion(agg_id, millis, pid, request);
     }
 
     /**

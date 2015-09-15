@@ -82,7 +82,7 @@ public class RevokePublicationRequestHandler implements ActionHandler<RevokePubl
     @Override
     public EmptyResult execute(RevokePublicationRequest action, ExecutionContext arg1)
             throws ActionException {
-        // only allow user to edit user metadata fields
+        // only allow if user can edit user metadata fields
         SEADRbac rbac = new SEADRbac(TupeloStore.getInstance().getContext());
         try {
             if (!rbac.checkPermission(action.getUser(), action.getUri(), Permission.EDIT_USER_METADATA)) {
