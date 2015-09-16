@@ -296,6 +296,8 @@ public class ItemServicesImpl
         labelsArrayList.addAll(featureBasics.keySet());
         labelsArrayList.addAll(commentBasics.keySet());
         labelsArrayList.addAll(URLRestService.doiBasics.keySet());
+        labelsArrayList.addAll(URLRestService.collectionStats.keySet());
+        labelsArrayList.addAll(URLRestService.publishedVersions.keySet());
         return labelsArrayList;
     }
 
@@ -492,6 +494,7 @@ public class ItemServicesImpl
                 public Map<String, Object> computeValue() {
 
                     Map<String, Object> combinedMap = new LinkedHashMap<String, Object>();
+                    //FixME - use labels that are custom to this space (changed by an admin in the GUI)?
 
                     //1) Biblio triples
                     combinedMap.putAll(itemBiblio);

@@ -11,6 +11,8 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -75,13 +77,22 @@ public class ManageMetadataWidget extends Composite {
         table.setWidget(idx, 1, listbox);
         idx++;
 
-        TextBox textbox = new TextBox();
-        textbox.setVisibleLength(40);
+        final TextBox labeltextbox = new TextBox();
+        labeltextbox.setVisibleLength(40);
         table.setText(idx, 0, "Label");
-        table.setWidget(idx, 1, textbox);
+        table.setWidget(idx, 1, labeltextbox);
+        labeltextbox.addKeyPressHandler(new KeyPressHandler() {
+            public void onKeyPress(KeyPressEvent event) {
+                //Don't allow '.' chars which are bad for json/bson/mongodb
+                if (".".contains(String.valueOf(event.getCharCode()))) {
+                    labeltextbox.cancelKey();
+
+                }
+            }
+        });
         idx++;
 
-        textbox = new TextBox();
+        TextBox textbox = new TextBox();
         textbox.setVisibleLength(80);
         table.setText(idx, 0, "Description");
         table.setWidget(idx, 1, textbox);
@@ -285,13 +296,22 @@ public class ManageMetadataWidget extends Composite {
 
         int idx = 0;
 
-        TextBox textbox = new TextBox();
-        textbox.setVisibleLength(40);
+        final TextBox labeltextbox = new TextBox();
+        labeltextbox.setVisibleLength(40);
+        labeltextbox.addKeyPressHandler(new KeyPressHandler() {
+            public void onKeyPress(KeyPressEvent event) {
+                //Don't allow '.' chars which are bad for json/bson/mongodb
+                if (".".contains(String.valueOf(event.getCharCode()))) {
+                    labeltextbox.cancelKey();
+
+                }
+            }
+        });
         table.setText(idx, 0, "Label");
-        table.setWidget(idx, 1, textbox);
+        table.setWidget(idx, 1, labeltextbox);
         idx++;
 
-        textbox = new TextBox();
+        TextBox textbox = new TextBox();
         textbox.setVisibleLength(80);
         table.setText(idx, 0, "URI");
         table.setWidget(idx, 1, textbox);

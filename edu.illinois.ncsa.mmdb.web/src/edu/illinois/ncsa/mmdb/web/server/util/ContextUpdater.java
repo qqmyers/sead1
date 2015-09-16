@@ -148,6 +148,9 @@ public class ContextUpdater {
             indexTopLevelItems(context);
             adminRoleNameChange(context);
         }
+        if (force || (version < 10)) {
+            removeProblemMetadataLabels(context);
+        }
 
         // Mark context as updated removing all old versions first.
         TripleWriter tw = new TripleWriter();
@@ -456,4 +459,26 @@ public class ContextUpdater {
 
     }
 
+    private static void removeProblemMetadataLabels(Context context) throws OperatorException {
+        TripleWriter tw = new TripleWriter();
+
+        //Datasets first
+        Unifier uf = new Unifier();
+        uf.addPattern("meta", Rdf.TYPE, Resource.uriRef("http://sead-data.net/terms/acr/Viewable_Metadata"));
+        uf.addPattern("meta", Rdfs.LABEL, "label");
+
+        uf.setColumnNames("meta", "label");
+        context.perform(uf);
+        for (Tuple<Resource> tuple : uf.getResult() ) {
+            String labelString = tuple.get(1).toString();
+            if (labelString.contains(".")) {
+                labelString.replace('.', '_');
+            }
+            tw.remove(tuple.get(0), Rdfs.LABEL, tuple.get(1));
+            tw.add(tuple.get(0), Rdfs.LABEL, Resource.literal(labelString));
+        }
+        context.perform(tw);
+
+        log.info("Problem labels with ',' modified.");
+    }
 }

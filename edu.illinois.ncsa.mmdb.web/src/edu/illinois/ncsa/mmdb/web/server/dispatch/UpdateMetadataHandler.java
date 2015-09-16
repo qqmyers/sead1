@@ -43,6 +43,7 @@ public class UpdateMetadataHandler implements ActionHandler<UpdateMetadata, Meta
 
             // remove existing label
             context.removeTriples(context.match(uri, Rdfs.LABEL, null));
+            label = label.replace('.', '_'); //avoid labels that are a problem for MOngoDB/bson/json
             tw.add(uri, Rdfs.LABEL, label);
 
             // remove existing definition

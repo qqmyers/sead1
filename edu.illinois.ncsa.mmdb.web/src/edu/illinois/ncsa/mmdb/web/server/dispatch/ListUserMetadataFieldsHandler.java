@@ -260,7 +260,9 @@ public class ListUserMetadataFieldsHandler implements ActionHandler<ListUserMeta
             TripleWriter tw = new TripleWriter();
             UriRef u = Resource.uriRef(pred);
             tw.add(u, Rdf.TYPE, GetUserMetadataFieldsHandler.VIEW_METADATA); //$NON-NLS-1$
-            tw.add(u, Rdfs.LABEL, pred);
+            String label = pred.replace('.', '_'); //'.' in labels is not valid in json (or just MongoDB/BSON?), so avoid generating problem labels
+
+            tw.add(u, Rdfs.LABEL, label);
             try {
                 TupeloStore.getInstance().getContext().perform(tw);
             } catch (OperatorException e) {
