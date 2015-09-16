@@ -47,7 +47,8 @@ if [ ! -e /etc/nginx/sites-enabled/sead ]; then
 fi
 
 # Configure Tomcat to use forwarded headers from nginx
-sed -i '/.*<Engine name=\"Catalina\" defaultHost=\"localhost\">/a \
+#assume it exists if the RemoteIPValve is already in the file
+grep -q "org.apache.catalina.valves.RemoteIpValve" /var/lib/tomcat6/conf/server.xml || sed -i '/.*<Engine name=\"Catalina\" defaultHost=\"localhost\">/a \
 \t<Valve className=\"org.apache.catalina.valves.RemoteIpValve\"  \
 \t\tremoteIpHeader=\"X-Forwarded-For\"   \
 \t\tprotocolHeader=\"X-Forwarded-Proto\"  \
