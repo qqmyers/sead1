@@ -1727,8 +1727,8 @@ public class ItemServicesImpl
             log.debug("Found Collection: " + topCollRef.toString());
             Map<String, Object> agg = getMetadataMapById(topCollRef.toString(), getCombinedContext(false), userId);
             agg.remove("@context");
-            //Munge for static vs live object distinction:
-            agg.put("Identifier", agg.get("Identifier") + "/v" + versionNumber);
+            //The aggregation has an ID in the space, don't need to create a <collectionid>/v<x> styple identifier as we do for aggregated things
+            agg.put("Identifier", id);
 
             agg.put("@id", url + "#aggregation");
 
