@@ -38,6 +38,8 @@
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.Set;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -100,7 +102,18 @@ public class DeleteDatasetsHandler implements ActionHandler<DeleteDatasets, Batc
                             TripleMatcher kidsMatcher = new TripleMatcher();
                             kidsMatcher.match(itemId, DcTerms.HAS_PART, null);
                             context.perform(kidsMatcher);
-                            mod.setToRemove(kidsMatcher.getResult());
+                            Set<Triple> kidsTriples = kidsMatcher.getResult();
+                            //Mark kids as top level if they have no other parents
+                            for (Triple t : kidsTriples ) {
+                                Resource kid = t.getObject();
+                                TripleMatcher rentsMatcher = new TripleMatcher();
+                                rentsMatcher.match(null, DcTerms.HAS_PART, kid);
+                                context.perform(rentsMatcher);
+                                if (rentsMatcher.getResult().size() == 0) {
+                                    mod.add(AddToCollectionHandler.TOP_LEVEL, DcTerms.HAS_PART, kid);
+                                }
+                            }
+                            mod.setToRemove(kidsTriples);
                             result.addSuccess(datasetUri);
                         }
                     }
