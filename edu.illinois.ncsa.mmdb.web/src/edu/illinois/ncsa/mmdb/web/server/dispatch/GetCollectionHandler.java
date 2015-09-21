@@ -114,7 +114,7 @@ public class GetCollectionHandler implements
     @Override
     public GetCollectionResult execute(GetCollection arg0, ExecutionContext arg1)
             throws ActionException {
-
+        log.trace("Getting " + arg0.getUri());
         BeanSession beanSession = TupeloStore.getInstance().getBeanSession();
 
         CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
@@ -169,7 +169,9 @@ public class GetCollectionHandler implements
         u.addPattern(uri, DcTerms.DATE_MODIFIED, "dateModified", true);
         u.setColumnNames("creator", "title", "description", "dateCreated", "dateModified");
         CollectionBean colBean = new CollectionBean();
+        log.trace("Retrieving info");
         TupeloStore.getInstance().getContext().perform(u);
+
         for (Tuple<Resource> row : u.getResult() ) {
             log.debug(row);
             int r = 0;
