@@ -122,6 +122,7 @@ public class GetCollectionsHandler implements
         CollectionBeanUtil cbu = new CollectionBeanUtil(beanSession);
         PersonBeanUtil pbu = new PersonBeanUtil(beanSession);
 
+        log.debug("Getting Collections");
         int limit = query.getLimit();
         int offset = query.getOffset();
         ArrayList<CollectionBean> collections = new ArrayList<CollectionBean>();
@@ -129,6 +130,7 @@ public class GetCollectionsHandler implements
         try {
             int dups = 1;
             while (dups > 0) {
+                log.debug("Dups" + dups);
                 int news = 0;
                 dups = 0;
 
@@ -137,6 +139,7 @@ public class GetCollectionsHandler implements
                 Table<Resource> result = TupeloStore.getInstance().unifyExcludeDeleted(uf, "collection");
 
                 for (Tuple<Resource> row : result ) {
+                    log.debug(row);
                     int r = 0;
                     UriRef subject = (UriRef) row.get(r++);
                     UriRef creator = (UriRef) row.get(r++);
@@ -179,6 +182,8 @@ public class GetCollectionsHandler implements
                 if (limit > 0 && dups > 0) {
                     limit = dups;
                     offset += news; // FIXME: wow, this is a hack
+                } else {
+                    dups = 0;//if limit was 0, we got everything already
                 }
             }
         } catch (OperatorException e1) {
