@@ -13,10 +13,8 @@ function homePageJsonParser(json) {
 	var displayTitle = '';
 	var jsonString = JSON.stringify(json);
 	var obj = jQuery.parseJSON(jsonString);
-
-	if (obj != null) {
-		if (obj.sparql != null) {
-			if (obj.sparql.results.result == null) {
+	var publishedColls = Object.keys(obj);
+	if (publishedColls.length == 0) {
 				// No collections to display
 				div_html += "<div class='well'><h4 style='margin-top:-10px;' class='page-header'>"
 						+ "<h4>No Published Collections to Display</h4>"
@@ -28,25 +26,12 @@ function homePageJsonParser(json) {
 				$("#home-loading").hide();
 				$("#xmlBody").html(div_html);
 				return;
-			}
-		}
 	}
 
-	var singleCollection = true;
-	try {
-		// if we can reference result[0], it is an array and we have multiple
-		// collections
-		var jsonBinding = obj.sparql.results.result[0].binding;
-		singleCollection = false;
-	} catch (err) {
-	}
-
-	if (singleCollection) {
-		writeCollection('0', json, obj.sparql.results.result, true);
-	} else {
-		for (var i = 0; i < obj.sparql.results.result.length; i++) {
-			writeCollection(i, json, obj.sparql.results.result[i], true);
-		}
+	for (var i = 0; i < publishedColls.length; i++) {
+	if(publishedColls[i] != '@context') {
+			writeCollection(i, json, obj[publishedColls[i]], true);
+}
 	}
 	$("#home-loading").hide();
 	ft = $.filtrify("xmlBody", "facetedSearch", {
@@ -86,36 +71,14 @@ function homePageJsonParser(json) {
 	// $("#xmlBody").append(($("<div/>")).html(div_html));
 }
 
-function writeCollection(id, json, result, topLevel) {
-	var uri = '';
-	var abs = '';
-	var displayTitle = '';
-	var isDeleted = false;
+function writeCollection(id, json, pub, topLevel) {
+	var uri = pub.Identifier;
+	var abs = pub.Abstract;
+	var displayTitle = pub.Title;
+	createBlock(id, "#xmlBody");
 
-	var jsonBinding = result.binding;
-	for (var j = 0; j < jsonBinding.length; j++) {
-		$.each(jsonBinding[j], function(key, value) {
-			if (value == 'tagID') {
-				uri = jsonBinding[j]['uri'];
-			} else if (value == 'title') {
-				title = jsonBinding[j]['literal'];
-				displayTitle = title;
-				if (title.indexOf("/") != -1) {
-					displayTitle = title.substring(title.lastIndexOf("/") + 1);
-				}
-			} else if (value == 'abstract') {
-				abs = jsonBinding[j]['literal'];
-			} else if (value == 'deleted') {
-				isDeleted = jsonBinding[j]['uri'];
-			}
-		});
-	}
-	if (isDeleted == false) {
-
-		createBlock(id, "#xmlBody");
-		$("#collectionTitle" + id + ">a").html(displayTitle).attr("href", collection_Path + uri);
-		
-		if (abs) {
+	$("#collectionTitle" + id + ">div").html(displayTitle);
+	if (abs) {
 			var summary = abs.substring(0, 750);
 
 			if (abs.length > 750) {
@@ -134,17 +97,7 @@ function writeCollection(id, json, result, topLevel) {
 			$("#contents" + id + ">a").hide();
 		}
 
-		$.ajax({
-			type : "GET",
-			url : "mmdb/discovery/GetBiblio",
-			dataType : "json",
-			data : "tagID=" + uri,
-			success : function(json) {
-				pageBiblioJsonParser(id, json);
-			},
-			async : false
-		});
-	}
+				pageBiblioJsonParser(id, pub);
 }
 
 function filterreset() {

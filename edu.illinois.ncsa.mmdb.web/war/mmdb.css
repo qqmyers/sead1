@@ -28,87 +28,10 @@ pre {
 /* ----------------------------------------------------------------------
  * Make it all look the same
  * ---------------------------------------------------------------------- */
-table
-
-
-
-
-
-
-.treetable
-
-
-
- 
-
-
-
-tbody
-
-
-
- 
-
-
-
-tr
-
-
-
- 
-
-
-
-td
-
-
-
-
-
-
-:nth-child
-
-
-
- 
-
-
-
-(2){
-width
-
-
-
-
-
-
-:
-
-
-
- 
-
-
-
-100
-px
-
-
-
- 
-
-
-
-!
-important
-
-
-
-
-
-
-;
+table .treetable tbody tr td:nth-child (2){
+	width: 100px !important;
 }
+
 table.treetable span {
 	word-break: break-all;
 	word-wrap: break-word;
@@ -822,11 +745,19 @@ div
 
 
 
+
+
+
+
 :nth-child
 
 
 
+
+
  
+
+
 
 
 
@@ -838,11 +769,19 @@ div
 
 
 
+
+
+
+
 :nth-child
 
 
 
+
+
  
+
+
 
 
 
@@ -855,7 +794,13 @@ height
 
 
 
+
+
+
+
 :
+
+
 
 
 
@@ -863,8 +808,14 @@ height
 
 
 
+
+
 18
 px
+
+
+
+
 
 
 
@@ -1271,58 +1222,6 @@ input.gwt-SuggestBox {
 	padding-bottom: 5px;
 }
 
-
-#discovery, #projectDesc {
-        font-family: "lato";
-        font-size: 14px;
-        font-weight: normal;
-        line-height: 18px;
-        color: #444;
-}
-
-#discovery h1 {
-	font-size: 18px;
-	line-height: 24px;
-	margin-left: 14px;
-	font-weight: 400;
-}
-
-#discovery h3 {
-	font-size: 18px;
-	line-height: 24px;
-	font-weight: 400;
-}
-
-#discovery .well {
-	-webkit-border-radius: 0px;
-	-moz-border-radius: 0px;
-	border-radius: 0px;
-	border-color: #f5f5f5;
-}
-
-#discovery .well p:last-child a {
-	padding: 4px 8px;
-	background-color: #f3822a;
-	color: #fff !important;
-}
-
-#discovery .well p:last-child a:hover {
-	color: #0b5ca3 !important;
-}
-
-#discovery .well p:last-child {
-	text-align: right;
-	margin-top: 20px;
-}
-
-#discovery .well p b {
-	font-weight: 400;
-}
-
-#discovery .well p i {
-	font-style: normal;
-}
-
 #xmlbody pre {
 	background-color: #f5f5f5 !important;
 	font-size: 14px;
@@ -1334,10 +1233,6 @@ input.gwt-SuggestBox {
 	width: 80%;
 	margin-left: 60px;
 	margin-top: -18px;
-}
-
-#discovery .span3 .well {
-	background-color: white;
 }
 
 #abouttop .well {

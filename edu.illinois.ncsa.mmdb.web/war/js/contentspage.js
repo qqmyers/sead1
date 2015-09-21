@@ -103,7 +103,6 @@ function contentsPageJsonParser(jsonObj) {
 
 
 	createBlock(0, "#xmlBody");
-	$("#collectionTitle0>a").attr("href", collection_Path + tagID);
 	$("#contents0>a").hide();
 
 	$("#search").empty();
@@ -135,9 +134,8 @@ function contentsPageJsonParser(jsonObj) {
 
 	$.ajax({
 		type : "GET",
-		url : "mmdb/discovery/GetBiblio",
+		url : "resteasy/collections/published/" + encodeURIComponent(tagID),
 		dataType : "json",
-		data : "tagID=" + tagID,
 		success : function(json) {
 			pageBiblioJsonParser(0, json);
 		},

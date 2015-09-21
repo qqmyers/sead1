@@ -179,8 +179,11 @@ public class ItemServicesImpl
                                                                          put("Creation Date", Namespaces.dcTerms("created"));
                                                                          put("Size", Files.LENGTH.toString());
                                                                          put("Label", Namespaces.rdfs("label"));
+                                                                         put("Location", "http://sead-data.net/terms/generatedAt");
                                                                          put("Mimetype", Dc.FORMAT.toString());
-                                                                         put("Description", org.tupeloproject.rdf.terms.Dc.DESCRIPTION.toString());
+                                                                         put("Description", org.tupeloproject.rdf.terms.Dc.DESCRIPTION.toString()); //user metadata
+                                                                         put("Descriptor", DCTerms.description.toString()); //relationship
+                                                                         put("Keyword", Tags.TAGGED_WITH_TAG.toString());
                                                                          put("Title", Dc.TITLE.toString());
                                                                          put("Uploaded By", Dc.CREATOR.toString());
                                                                          put("Abstract", Namespaces.dcTerms("abstract"));
@@ -1866,6 +1869,88 @@ public class ItemServicesImpl
         return datasets;
     }
 
+    private Map<String, Object> getPubContext() {
+        Map<String, Object> contextMap = new LinkedHashMap<String, Object>();
+        //Needed to preserve insertion order (id first)
+        for (String key : itemBiblio.keySet() ) {
+            contextMap.put(key, itemBiblio.get(key));
+        }
+        contextMap.putAll(publishedVersions);
+        return contextMap;
+    }
+
+    //Return JSON-LD with basic biblio for a single collection that has been published via 1.5 or 2.0
+    public Response getPublishedROsByCollection(String id, HttpServletRequest request) {
+
+        //Check Perms:
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+
+        try {
+            if (!rbac.checkPermission(userId, Resource.uriRef(Permission.VIEW_PUBLISHED.getUri()))) {
+                return Response.status(401).entity("Access to this endpoint is access controlled.").build();
+            }
+        } catch (RBACException e1) {
+            log.error("Error running sys info: ", e1);
+            return Response.status(500).entity("Error running sys info [" + e1.getMessage() + "]").build();
+        }
+
+        //Verify that this is a published collection
+        try {
+            TripleMatcher tm = new TripleMatcher();
+            tm.setPredicate(DcTerms.HAS_VERSION);
+            tm.setSubject(Resource.uriRef(id));
+            TupeloStore.getInstance().getContext().perform(tm);
+            if (tm.getResult().isEmpty()) {
+                if (!haveParentsBeenPublished(id)) {
+                    return Response.status(Status.BAD_REQUEST).entity(id + "has not been published").build();
+                }
+            }
+        } catch (Throwable e) {
+            log.error("Error getting published collection: " + id, e);
+            e.printStackTrace();
+            return Response.status(500).entity("Error getting published collection" + id).build();
+        }
+
+        Map<String, Object> collMap = getMetadataMapById(id, getPubContext(), userId);
+
+        return Response.ok().entity(collMap).build();
+    }
+
+    private boolean haveParentsBeenPublished(String id) {
+        //Recurse up through parents, check for version, add new ancestors to list and repeat - ignore top level
+        //Return true at first published ancestor
+        HashSet<UriRef> ancestorsHashSet = new HashSet<UriRef>();
+        ancestorsHashSet.add(Resource.uriRef(id));
+        while (!ancestorsHashSet.isEmpty()) {
+            for (UriRef resource : ancestorsHashSet ) {
+                Unifier uf = new Unifier();
+                uf.addPattern("parent", DcTerms.HAS_PART, resource);
+                uf.addPattern("parent", DcTerms.HAS_VERSION, "ver", true);
+                uf.setColumnNames("parent", "ver");
+                try {
+                    Table<Resource> results = TupeloStore.getInstance().unifyExcludeDeleted(uf, "parent");
+                    for (Tuple<Resource> tuple : results ) {
+                        if (tuple.get(1) != null) {
+                            return true;
+                        } else {
+                            UriRef rent = (UriRef) tuple.get(0);
+                            if (!rent.equals(AddToCollectionHandler.TOP_LEVEL)) {
+                                ancestorsHashSet.add(rent);
+                            }
+                        }
+                    }
+                    ancestorsHashSet.remove(resource);
+
+                } catch (OperatorException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return false;
+    }
+
     //Return JSON-LD with basic biblio for any collection that has been published via 1.5 or 2.0
     public Response getPublishedROsByCollection(HttpServletRequest request) {
 
@@ -1919,14 +2004,7 @@ public class ItemServicesImpl
         TripleMatcher tm = new TripleMatcher();
         tm.setPredicate(DcTerms.HAS_VERSION);
 
-        Map<String, Object> contextMap = new LinkedHashMap<String, Object>();
-        //Needed to preserve insertion order (id first)
-        for (String key : itemBiblio.keySet() ) {
-            contextMap.put(key, itemBiblio.get(key));
-        }
-
-        contextMap.putAll(publishedVersions);
-
+        Map<String, Object> contextMap = getPubContext();
         Set<UriRef> collections = new HashSet<UriRef>();
         try {
             TupeloStore.getInstance().getContext().perform(tm);
@@ -1953,19 +2031,4 @@ public class ItemServicesImpl
         collMap.put("@context", contextMap);
         return Response.ok().entity(collMap).build();
     }
-    /*
-        private void addCollectionAndVersion(String coll, Map<String, Object> map, String doi, int v, String date) {
-           map = new HashMap<String, Object>();
-           map.put("Identifier",  coll);
-           Map<String, String> newVersionMap = new HashMap<String, String>();
-           newVersionMap.put("@id",doi);
-
-
-        }
-
-        private void addVersionToCollection(String coll, Map<String, Object> map, String doi, int v, String date) {
-            // TODO Auto-generated method stub
-
-        }
-    */
 }

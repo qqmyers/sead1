@@ -640,6 +640,27 @@ public class CollectionsRestService extends ItemServicesImpl {
     }
 
     /**
+     * Get single publish collection
+     *
+     * This retrieves all collections that have been published via
+     * 1.5 - and have a DOI(s) as metadata, and
+     * 2.0 - that are associated with an ORE Aggregation(s) that has a
+     * persistent identifier associated along with pub date and version #
+     *
+     * @param id
+     *            - the URLEnconded id of the collection
+     * @result - success/failure message: 200 - JSON-LD list of collections with
+     *         DOIs/versions, 403 -
+     *         permission issue
+     */
+    @GET
+    @Path("/published/{id}")
+    @Produces("application/json")
+    public Response getPublishedCollection(@PathParam(value = "id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+        return super.getPublishedROsByCollection(id, request);
+    }
+
+    /**
      * Get stats for this collection and its contents (collections and datasets)
      * including
      * total size, {@link #CollectionsRestService()}, #files, max collection

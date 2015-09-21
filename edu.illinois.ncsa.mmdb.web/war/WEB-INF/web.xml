@@ -126,19 +126,12 @@
 	
 	
 	<!-- DisoveryPage servlets-->
-	<servlet>
-    	<servlet-name>GetPublishedCollections</servlet-name>
-    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.GetPublishedCollections</servlet-class>
-  	</servlet>
+	
   	<servlet>
     	<servlet-name>CollectionContents</servlet-name>
     	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.CollectionContents</servlet-class>
   	</servlet>
-  	<servlet>
-    	<servlet-name>GetBibliographicInfo</servlet-name>
-    	<servlet-class>edu.illinois.ncsa.mmdb.web.server.discovery.GetBibliographicInfo</servlet-class>
-  	</servlet>
-  
+  	
   <!-- DashboardPage servlets-->
 	<servlet>
     	<servlet-name>GetCollections</servlet-name>
@@ -243,17 +236,10 @@
 
 	<!-- DisocveryPage Servlet Mappings -->
 	<servlet-mapping>
-    	<servlet-name>GetPublishedCollections</servlet-name>
-    	<url-pattern>/mmdb/discovery/GetPublishedCollections</url-pattern>
-  	</servlet-mapping>
-  	<servlet-mapping>
     	<servlet-name>CollectionContents</servlet-name>
     	<url-pattern>/mmdb/discovery/GetContents</url-pattern>
   	</servlet-mapping>
-  	<servlet-mapping>
-	    <servlet-name>GetBibliographicInfo</servlet-name>
-    	<url-pattern>/mmdb/discovery/GetBiblio</url-pattern>
-	</servlet-mapping>
+  	
 
 
 	<!-- DashboardPage Servlet Mappings -->
