@@ -291,6 +291,7 @@ function getBiblioAttributesForPage(pub) {
 	parsePeople(pub.Contact, "contact");
 	abstract = getIf(pub.Abstract);
 	title = getIf(pub.Title);
+	uri = pub.Identifier;
 	if (pub.Location != null) {
 		if (jQuery.isArray(pub.Location)) {
 			coll_location = pub.Location;
@@ -299,7 +300,7 @@ function getBiblioAttributesForPage(pub) {
 		}
 	}
 
-	// DcTerms - the once and future way to do this
+	// DcTerms - the 'right' way to do this
 	if (pub.Descriptor != null) {
 		if (jQuery.isArray(pub.Descriptor)) {
 			descriptors = pub.Descriptor;
@@ -308,8 +309,7 @@ function getBiblioAttributesForPage(pub) {
 		}
 	}
 	// Also pick up dc:elements description (user metadata) that is a
-	// dataset ID (since we can't currently create collection -dataset
-	// relationships for dcterms:description
+	// dataset ID (since we can add a dataset as metadata)
 	if (pub.Description != null) {
 		if (jQuery.isArray(pub.Description)) {
 			for (var i = 0; i < pub.Description.length; i++) {
