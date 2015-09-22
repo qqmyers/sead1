@@ -1707,6 +1707,10 @@ public class ItemServicesImpl
                 break;
             }
 
+            if (topCollRef == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+
             //Find out how many times published
             TripleMatcher tMatcher = new TripleMatcher();
             tMatcher.match(topCollRef, DcTerms.HAS_VERSION, null);
