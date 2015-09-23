@@ -248,7 +248,7 @@ seadSpaces.buildGrid = function(size, i, projectName, projectDescription,
 				+ ' published dataset"><i class="fa fa-lg fa-folder-open"></i> <span class="published">'
 				+ published + '</span></li>';
 	}
-	page += '<ul>';
+	page += '</ul>';
 	page += '</div>';
 	page += '</div>';
 	page += '</div>';
