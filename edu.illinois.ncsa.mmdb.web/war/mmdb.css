@@ -60,7 +60,7 @@ table td {
 	background-color: #f3822a;
 }
 
-.gwt-button:hover, .gwt-button:focus {
+.gwt-button:hover {
 	background-color: #666;
 	color: #f3822a;
 	border: none;
