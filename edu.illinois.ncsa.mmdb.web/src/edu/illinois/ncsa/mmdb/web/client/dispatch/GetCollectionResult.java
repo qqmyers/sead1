@@ -58,7 +58,7 @@ public class GetCollectionResult implements Result {
     private CollectionBean          collection;
     private int                     collectionSize;
     private Collection<PreviewBean> previews;
-    private String                  doi;
+    private String[]                pids;
     private Map<String, String>     parents;
 
     public GetCollectionResult() {
@@ -92,12 +92,12 @@ public class GetCollectionResult implements Result {
         this.previews = previews;
     }
 
-    public String getDOI() {
-        return doi;
+    public String[] getPIDs() {
+        return pids;
     }
 
-    public void setDOI(String doi) {
-        this.doi = doi;
+    public void setPIDs(String[] pids) {
+        this.pids = pids;
     }
 
     public Map<String, String> getParents() {

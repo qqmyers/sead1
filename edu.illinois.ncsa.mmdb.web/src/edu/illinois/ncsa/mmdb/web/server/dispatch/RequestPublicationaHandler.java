@@ -140,7 +140,7 @@ public class RequestPublicationaHandler implements ActionHandler<RequestPublicat
             JSONObject contextObject = aggJsonObject.getJSONObject("@context");
             requestJsonObject.put("Aggregation", aggJsonObject);
             requestJsonObject.put("Repository", TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultRepository));
-
+            requestJsonObject.put("Publication Callback", this_space + "/resteasy/researchobjects/" + aggId.toString() + "/pid");
             JSONObject preferencesJsonObject = new JSONObject(TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultCPPreferences));
             requestJsonObject.put("Preferences", preferencesJsonObject);
 
@@ -161,6 +161,7 @@ public class RequestPublicationaHandler implements ActionHandler<RequestPublicat
             contextObject.put("Preferences", "http://sead-data.net/terms/publicationpreferences");
             contextObject.put("Repository", "http://sead-data.net/terms/requestedrepository");
             contextObject.put("Aggregation Statistics", "http://sead-data.net/terms/publicationstatistics");
+            contextObject.put("Publication Callback", "http://sead-data.net/terms/publicationcallback");
 
             aggJsonObject.remove("@context");
             requestJsonObject.accumulate("@context", contextObject);

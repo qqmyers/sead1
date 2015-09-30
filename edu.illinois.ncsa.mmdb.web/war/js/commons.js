@@ -149,7 +149,7 @@ function pageBiblioJsonParser(id, json) {
 	if (pubversions.length != 0) {
 
 		for (var i = 0; i < pubversions.length; i++) {
-			var doi = pubversions[i]['External Identifier'];
+			var pid = pubversions[i]['External Identifier'];
 			var versionnum = pubversions[i]['version number'];
 			var pubdate = pubversions[i]['publication_date'];
 			if (versionnum != null) {
@@ -158,10 +158,10 @@ function pageBiblioJsonParser(id, json) {
 				if (pubdate != null) {
 					versionHtml = versionHtml + " " + pubdate + ",";
 				}
-				if (doi != null) {
+				if (pid != null) {
 					versionHtml = versionHtml
-							+ " DOI = <a target = \'blank\' href=\'" + doi
-							+ "\'>" + doi + "</a></div>";
+							+ " PID = <a target = \'blank\' href=\'" + pid
+							+ "\'>" + pid + "</a></div>";
 				} else {
 					versionHtml = versionHtml
 							+ " <i>Publication in process</i>";

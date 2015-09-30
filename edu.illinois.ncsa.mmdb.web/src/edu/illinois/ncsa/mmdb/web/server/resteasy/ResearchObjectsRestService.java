@@ -53,6 +53,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -85,6 +86,20 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 @Path("/researchobjects")
 @NoCache
 public class ResearchObjectsRestService extends ItemServicesImpl {
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PIDBean {
+        private String uri;
+
+        public String getUri() {
+            return uri;
+        }
+
+        public void setUri(String uri) {
+            this.uri = uri;
+        }
+
+    }
 
     /** Commons logging **/
     private static Log log = LogFactory.getLog(ResearchObjectsRestService.class);
@@ -123,6 +138,30 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
             return Response.status(Status.BAD_REQUEST).entity(result).build();
         }
         return getOREById(id, userId, request);
+    }
+
+    @POST
+    @Path("/{id}/pid")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response setPid(@PathParam("id") String agg_id, PIDBean pid, @javax.ws.rs.core.Context HttpServletRequest request) {
+        String identifierUriString = null;
+        try {
+
+            identifierUriString = pid.getUri();
+            if (identifierUriString == null) {
+                Map<String, String> result = new HashMap<String, String>(1);
+                result.put("Failure", "Could not find \"uri\" in json object");
+                return Response.status(Status.BAD_REQUEST).entity(result).build();
+            }
+        } catch (Exception e) {
+            Map<String, String> result = new HashMap<String, String>(1);
+            result.put("Failure", e.getMessage());
+            return Response.status(Status.BAD_REQUEST).entity(result).build();
+
+        }
+        return publishVersion(agg_id, System.currentTimeMillis(), identifierUriString, request);
+
     }
 
     /**

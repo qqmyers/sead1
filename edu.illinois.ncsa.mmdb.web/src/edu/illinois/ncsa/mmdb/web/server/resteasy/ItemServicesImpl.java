@@ -1470,8 +1470,9 @@ public class ItemServicesImpl
                         UriRef identifier = Resource.uriRef(DCTerms.identifier.getURI());
                         //Fixme - we can't delete non-string literals from the GUI since we lose type info along the way...
                         //So - using a string here
-                        tw.add(agg_id, issued, Resource.literal(DateFormat.getDateTimeInstance().format(theDate)));
-                        tw.add(agg_id, identifier, Resource.uriRef(pid));
+                        UriRef aggRef = Resource.uriRef(agg_id);
+                        tw.add(aggRef, issued, Resource.literal(DateFormat.getDateTimeInstance().format(theDate)));
+                        tw.add(aggRef, identifier, Resource.uriRef(pid));
 
                         //To DO? Add published_as_part_of links
                         //FixMe - should not assume that collection has the same contents as when published and should
@@ -1482,16 +1483,17 @@ public class ItemServicesImpl
 
                         ListUserMetadataFieldsHandler.addViewablePredicate(issued.toString());
 
-                        result.put("Item Published", itemId.toString());
+                        result.put("Version of Collection Published", itemId.toString());
                         r = Response.status(200).entity(result).build();
 
                     } else {
-                        result.put("Item Not Proposed For Publication", itemId.toString());
+                        result.put("Collection Not Proposed For Publication", itemId.toString());
                         r = Response.status(409).entity(result).build();
                     }
 
                 }
             } catch (Exception e) {
+                log.debug(e.getMessage());
                 result = new LinkedHashMap<String, Object>();
                 result.put("Error", "Server error while publishing " + agg_id);
                 r = Response.status(500).entity(result).build();

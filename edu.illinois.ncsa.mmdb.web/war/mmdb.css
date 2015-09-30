@@ -2825,3 +2825,8 @@ Simple User Management Page
 .publishbutton-down {
 	background-color: #0b5ca3;
 }
+
+.pidpanel a {
+    display: block;
+    margin-left: 5px;
+}

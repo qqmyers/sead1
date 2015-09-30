@@ -47,6 +47,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -129,9 +130,9 @@ public class GetCollectionHandler implements
 
             getCollectionPreviews(arg0.getUser(), arg0.getUri(), result);
 
-            String doiString = getDOI(arg0.getUri());
-            if (doiString != null) {
-                result.setDOI(doiString);
+            String[] pids = getPIDs(arg0.getUri());
+            if (pids != null) {
+                result.setPIDs(pids);
             }
 
             getParent(arg0.getUri(), result);
@@ -394,25 +395,39 @@ public class GetCollectionHandler implements
         }
     }
 
-    private String getDOI(String collectionUri) {
+    private String[] getPIDs(String collectionUri) {
+        HashSet<String> pidsStrings = new HashSet<String>();
+
+        //old style first
         try {
             TripleMatcher tm = new TripleMatcher();
             tm.setSubject(Resource.uriRef(collectionUri));
             tm.setPredicate(Resource.uriRef(DCTerms.identifier.getURI()));
             TupeloStore.getInstance().getContext().perform(tm);
             Set<Triple> results = tm.getResult();
-            //Assuming single value for now/using first returned value
             if (results.size() > 0) {
                 Iterator<Triple> it = results.iterator();
-                return (it.next().getObject().toString());
+                pidsStrings.add(it.next().getObject().toString());
             } else {
-                log.debug("No DOI for " + collectionUri);
-                return null;
+                log.debug("No PID for " + collectionUri);
             }
         } catch (Throwable thr) {
-            log.debug("Error getting DOI", thr);
+            log.debug("Error getting PID", thr);
         }
-        return null;
+        //New Style
+        try {
+            Unifier uf = new Unifier();
+            uf.addPattern(Resource.uriRef(collectionUri), DcTerms.HAS_VERSION, "ver");
+            uf.addPattern("ver", Resource.uriRef(DCTerms.identifier.getURI()), "id");
+            uf.setColumnNames("id");
+            TupeloStore.getInstance().getContext().perform(uf);
+            for (Tuple tu : uf.getResult() ) {
+                pidsStrings.add(tu.get(0).toString());
+            }
+        } catch (Throwable thr) {
+            log.debug("Error getting PID", thr);
+        }
+        return pidsStrings.toArray(new String[pidsStrings.size()]);
     }
 
     @Override

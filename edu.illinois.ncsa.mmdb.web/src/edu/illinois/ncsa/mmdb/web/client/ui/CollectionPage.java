@@ -118,7 +118,7 @@ public class CollectionPage extends Composite {
     private Panel                       contextPanel;
     private Label                       numDatasetsLabel;
     private Label                       authorLabel;
-    private Anchor                      doiAnchor;
+    private FlowPanel                   pidFlowPanel;
     private ToggleButton                publishButton;
     private AddToCollectionDialog       addToCollectionDialog;
     private PreviewPanel                previewPanel;
@@ -244,15 +244,19 @@ public class CollectionPage extends Composite {
         infoPanel.addStyleName("collectionInfo");
         authorLabel = new Label("Author");
         infoPanel.add(authorLabel);
-        doiAnchor = new Anchor("DOI");
+        pidFlowPanel = new FlowPanel();
+        pidFlowPanel.setStyleName("pidpanel");
 
+        Label publishedLabel = new Label("Published As:");
+        pidFlowPanel.add(publishedLabel);
+        pidFlowPanel.setVisible(false);
         descriptionLabel = new Label("Description");
         infoPanel.add(descriptionLabel);
         dateLabel = new Label("Creation date unavailable");
         infoPanel.add(dateLabel);
         numDatasetsLabel = new Label("Number of datasets");
         infoPanel.add(numDatasetsLabel);
-        infoPanel.add(doiAnchor);
+        infoPanel.add(pidFlowPanel);
         publishButton = new ToggleButton("Submit for Publication", "Publication Requested", new ClickHandler() {
 
             @Override
@@ -305,7 +309,7 @@ public class CollectionPage extends Composite {
                     publishButton.setDown(true);
                 } else {
                     publishButton.setDown(false);
-                    if (doiAnchor.getText().length() == 0) {
+                    if (pidFlowPanel.isVisible()) {
                         publishButton.setText("Submit for Publication");
                     } else {
                         publishButton.setText("Publish New Version");
@@ -408,11 +412,20 @@ public class CollectionPage extends Composite {
 
                 previewPanel.drawPreview(result, previewFlowPanel, result.getCollection().getUri());
 
-                //DOI
-                String doi = result.getDOI();
-                if (doi == null) {
-                    doi = "";
+                //PIDs
+                String[] pids = result.getPIDs();
+                if ((pids != null)) {
+                    if (pids.length != 0) {
+                        pidFlowPanel.setVisible(true);
+                    }
 
+                    for (int i = 0; i < pids.length; i++ ) {
+                        Anchor pidAnchor = new Anchor();
+                        pidAnchor.setText(pids[i]);
+                        pidAnchor.setHref(pids[i]);
+                        pidAnchor.setTarget("_blank");
+                        pidFlowPanel.add(pidAnchor);
+                    }
                     //Show publish button
                     if (!publishButton.isDown()) {
                         publishButton.setText("Submit for Publication");
@@ -423,10 +436,6 @@ public class CollectionPage extends Composite {
                         publishButton.setText("Publish New Version");
                     }
                 }
-                doiAnchor.setText(doi);
-                doiAnchor.setHref(doi);
-                doiAnchor.setTarget("_blank");
-
             }
         });
     }
