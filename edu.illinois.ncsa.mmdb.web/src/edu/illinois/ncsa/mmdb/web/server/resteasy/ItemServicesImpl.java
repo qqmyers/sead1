@@ -288,7 +288,7 @@ public class ItemServicesImpl
                                                                  };
 
     static Context                             c                 = TupeloStore.getInstance().getContext();
-    static protected SEADRbac                  rbac              = new SEADRbac(TupeloStore.getInstance().getContext());
+    static protected SEADRbac                  rbac              = new SEADRbac(c);
 
     static public List<String> getReservedLabels() {
         ArrayList<String> labelsArrayList = new ArrayList<String>();
@@ -457,7 +457,7 @@ public class ItemServicesImpl
                     uf.setColumnNames("label", "predicate"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
                     try {
-                        TupeloStore.getInstance().getContext().perform(uf);
+                        c.perform(uf);
 
                         for (Tuple<Resource> row : uf.getResult() ) {
                             if (row.get(0) != null) {
@@ -1387,7 +1387,7 @@ public class ItemServicesImpl
 
                         uf.addPattern("agg", identifier, "ext", true);
                         uf.setColumnNames("agg", "ext");
-                        TupeloStore.getInstance().getContext().perform(uf);
+                        c.perform(uf);
 
                         //Should only be the latest version that has yet to get a pid
                         for (Tuple<Resource> row : uf.getResult() ) {
@@ -1508,7 +1508,7 @@ public class ItemServicesImpl
 
         BlobFetcher bf = new BlobFetcher(uri);
         try {
-            TupeloStore.getInstance().getContext().perform(bf);
+            c.perform(bf);
         } catch (OperatorException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -1716,7 +1716,7 @@ public class ItemServicesImpl
             //Find out how many times published
             TripleMatcher tMatcher = new TripleMatcher();
             tMatcher.match(topCollRef, DcTerms.HAS_VERSION, null);
-            TupeloStore.getInstance().getContext().perform(tMatcher);
+            c.perform(tMatcher);
             String versionNumber = Integer.toString(tMatcher.getResult().size());
 
             /*
@@ -1905,7 +1905,7 @@ public class ItemServicesImpl
             TripleMatcher tm = new TripleMatcher();
             tm.setPredicate(DcTerms.HAS_VERSION);
             tm.setSubject(Resource.uriRef(id));
-            TupeloStore.getInstance().getContext().perform(tm);
+            c.perform(tm);
             if (tm.getResult().isEmpty()) {
                 if (!haveParentsBeenPublished(id)) {
                     return Response.status(Status.BAD_REQUEST).entity(id + "has not been published").build();
@@ -1984,7 +1984,7 @@ public class ItemServicesImpl
                 uf.setColumnNames("coll", "doi", "date");
 
                 try {
-                    TupeloStore.getInstance().getContext().perform(uf);
+                    c.perform(uf);
                 } catch (Throwable e1) {
                     log.error("Error getting published collections", e1);
                     e1.printStackTrace();
@@ -2013,7 +2013,7 @@ public class ItemServicesImpl
         Map<String, Object> contextMap = getPubContext();
         Set<UriRef> collections = new HashSet<UriRef>();
         try {
-            TupeloStore.getInstance().getContext().perform(tm);
+            c.perform(tm);
             for (Triple triple : tm.getResult() ) {
                 collections.add((UriRef) triple.getSubject());
 
