@@ -169,7 +169,7 @@ public class RequestPublicationaHandler implements ActionHandler<RequestPublicat
 
             log.debug("JSON" + requestJsonObject.toString());
 
-            URL url = new URL(server + "/cp/researchobjects");
+            URL url = new URL(server + "/researchobjects");
             log.debug("URL = " + url.toString());
             try {
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();

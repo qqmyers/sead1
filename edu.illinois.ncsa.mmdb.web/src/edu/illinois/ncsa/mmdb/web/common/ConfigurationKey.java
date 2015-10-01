@@ -12,7 +12,7 @@ public enum ConfigurationKey {
     VIVOIDENTIFIERURL("vivo-identifier.url", "http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/"),
 
     //2.0 Publication Beta
-    CPURL("cp.url", "https://sead-test.ncsa.illinois.edu/sead-cp"), //$NON-NLS-1$ //$NON-NLS-2$
+    CPURL("cp.url", "https://sead-test.ncsa.illinois.edu/sead-cp/cp"), //$NON-NLS-1$ //$NON-NLS-2$
     DefaultRepository("cp.repo", "sda"), //$NON-NLS-1$ //$NON-NLS-2$
     DefaultCPPreferences("va.prefs", "{ \"key1\":\"val1\", \"key2\":\"val2\" }"), //$NON-NLS-1$ //$NON-NLS-2$
 

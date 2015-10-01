@@ -641,7 +641,7 @@ public class ConfigurationWidget extends Composite {
         final TextBox repo = new TextBox();
         repo.setVisibleLength(40);
         repo.setText(configuration.getConfiguration(ConfigurationKey.DefaultRepository));
-        table.setWidget(idx, 0, new HTML("Respository (orgidentifier - see <a href=\"" + configuration.getConfiguration(ConfigurationKey.CPURL) + "/cp/repositories\" target=\"blank\">list of repositories</a>)"));
+        table.setWidget(idx, 0, new HTML("Respository (orgidentifier - see <a href=\"" + configuration.getConfiguration(ConfigurationKey.CPURL) + "/repositories\" target=\"blank\">list of repositories</a>)"));
         table.setWidget(idx, 1, repo);
         idx++;
 

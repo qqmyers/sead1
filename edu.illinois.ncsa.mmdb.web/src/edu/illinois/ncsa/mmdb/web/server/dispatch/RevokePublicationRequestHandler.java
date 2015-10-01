@@ -122,7 +122,7 @@ public class RevokePublicationRequestHandler implements ActionHandler<RevokePubl
                     try {
                         //Send notice to service
                         String server = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);
-                        URL url = new URL(server + "/cp/researchobjects/" + aggId);
+                        URL url = new URL(server + "/researchobjects/" + aggId);
                         log.debug("URL = " + url.toString());
                         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
