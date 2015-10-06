@@ -1493,7 +1493,9 @@ public class ItemServicesImpl
 
                 }
             } catch (Exception e) {
-                log.debug(e.getMessage());
+
+                log.error("Error assigning pid: " + pid + " to " + agg_id);
+                log.error(e.getMessage());
                 result = new LinkedHashMap<String, Object>();
                 result.put("Error", "Server error while publishing " + agg_id);
                 r = Response.status(500).entity(result).build();
