@@ -522,10 +522,8 @@ public class ItemServicesImpl
                     } catch (ActionException e1) {
                         log.error("Error retrieving relationship predicates" + e1);
                     }
-                    //6 tags http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag
-                    combinedMap.put("keyword", "http://www.holygoat.co.uk/owl/redwood/0.1/tags/taggedWithTag");
 
-                    //7 - Don't show hasPart relationships since there are other endpoints for those and we would not be handling
+                    //6 - Don't show hasPart relationships since there are other endpoints for those and we would not be handling
                     //    access control here
 
                     combinedMap.remove("Has Subcollection");
