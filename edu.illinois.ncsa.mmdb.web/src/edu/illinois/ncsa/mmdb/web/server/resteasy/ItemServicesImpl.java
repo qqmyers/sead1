@@ -86,11 +86,13 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
+import edu.illinois.ncsa.mmdb.web.server.TokenStore;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.IsReadyForPublicationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListRelationshipTypesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.ListUserMetadataFieldsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestPublicationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetRelationshipHandlerNew;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.util.CollectionInfo;
@@ -563,32 +565,40 @@ public class ItemServicesImpl
 
     @SuppressWarnings("unchecked")
     public static Map<String, Object> getMetadataMapById(String id, Map<String, Object> context, UriRef userId) {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
 
+        //Permission to see pages means you can see metadata as well...
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            result.put("Error Response", p.getErrorResponse());
+            return result;
+        }
         try {
             id = URLDecoder.decode(id, "UTF-8");
         } catch (UnsupportedEncodingException e1) {
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
             log.error("Error decoding url for " + id, e1);
             e1.printStackTrace();
             result.put("Error Response", Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error decoding id: " + id).build());
+            return result;
 
-        }
-        //Permission to see pages means you can see metadata as well...
-
-        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
-        if (!p.userHasPermission()) {
-            result.put("Error Response", p.getErrorResponse());
         }
         UriRef itemUri = Resource.uriRef(id);
-        try {
+        if (!isAccessible(userId, itemUri)) {
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
 
-            if (!isAccessible(userId, itemUri)) {
+            result.put("Error", "Item not accessible");
+            result.put("Error Response", Response.status(403).entity(result).build());
+            return result;
+        }
 
-                result.put("Error", "Item not accessible");
-                result.put("Error Response", Response.status(403).entity(result).build());
-            }
+        return getMetadataMapById(itemUri, context);
+    }
 
-            //Get fields
+    public static Map<String, Object> getMetadataMapById(UriRef itemUri, Map<String, Object> context) {
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+
+        try { //Get fields
             Unifier uf = new Unifier();
             uf = populateUnifier(itemUri, uf, context, null);
             //Get columns to put in result (all in this case)
@@ -602,7 +612,7 @@ public class ItemServicesImpl
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            result.put("Error Response", Response.status(500).entity("Error processing id: " + id).build());
+            result.put("Error Response", Response.status(500).entity("Error processing id: " + itemUri.toString()).build());
         }
         return result;
 
@@ -1422,6 +1432,8 @@ public class ItemServicesImpl
      * published version. The agg_id is for the version - it is used to find the corresponding live collection.
      *
      * For 2.0, the persistent ID and publication date are assigned to the version rather than the collection itself.
+     *
+     * Access is controlled by token, and publication should succeed even if the live collection has been deleted.
      */
     protected Response publishVersion(String agg_id, long date, String pid, HttpServletRequest request) {
         Response r;
@@ -1434,10 +1446,6 @@ public class ItemServicesImpl
         } else {
 
             UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
-            PermissionCheck p = new PermissionCheck(userId, Permission.EDIT_METADATA);
-            if (!p.userHasPermission()) {
-                return p.getErrorResponse();
-            }
 
             try {
 
@@ -1448,48 +1456,52 @@ public class ItemServicesImpl
                 Set<Triple> colTripleSet = tm1.getResult();
                 UriRef itemId = (UriRef) colTripleSet.iterator().next().getSubject();
 
-                ValidItem item = new ValidItem(itemId, CollectionBeanUtil.COLLECTION_TYPE, userId);
-                if (!item.isValid()) {
-                    r = item.getErrorResponse();
-                } else {
-                    TripleMatcher tMatcher = new TripleMatcher();
+                TripleMatcher tMatcher = new TripleMatcher();
 
-                    tMatcher.match(itemId, IsReadyForPublicationHandler.proposedForPublicationRef, null);
-                    c.perform(tMatcher);
-                    Set<Triple> triples = tMatcher.getResult();
-                    TripleWriter tw = new TripleWriter();
-                    if (triples.size() >= 1) {
-                        //Remove proposedForPub flag
-                        tw.remove((Triple) triples.toArray()[0]);
+                tMatcher.match(itemId, IsReadyForPublicationHandler.proposedForPublicationRef, null);
+                c.perform(tMatcher);
+                Set<Triple> triples = tMatcher.getResult();
+                TripleMatcher saltMatcher = new TripleMatcher();
 
-                        //2.0 support
-                        Date theDate = new Date(date);
-                        UriRef issued = Resource.uriRef(DCTerms.issued.getURI());
-                        UriRef identifier = Resource.uriRef(DCTerms.identifier.getURI());
-                        //Fixme - we can't delete non-string literals from the GUI since we lose type info along the way...
-                        //So - using a string here
-                        UriRef aggRef = Resource.uriRef(agg_id);
-                        tw.add(aggRef, issued, Resource.literal(DateFormat.getDateTimeInstance().format(theDate)));
-                        tw.add(aggRef, identifier, Resource.uriRef(pid));
+                saltMatcher.match(itemId, RequestPublicationHandler.hasSalt, null);
+                c.perform(saltMatcher);
+                Set<Triple> saltTriple = saltMatcher.getResult();
 
-                        //To DO? Add published_as_part_of links
-                        //FixMe - should not assume that collection has the same contents as when published and should
-                        // retrieve final list from authoritative OREMap (wherever that ends up), or call a service dynamically
-                        //rather than caching this info as a triple.
+                TripleWriter tw = new TripleWriter();
+                if (triples.size() >= 1) {
+                    //Remove proposedForPub flag
+                    tw.remove((Triple) triples.toArray()[0]);
 
-                        c.perform(tw);
-
-                        ListUserMetadataFieldsHandler.addViewablePredicate(issued.toString());
-
-                        result.put("Version of Collection Published", itemId.toString());
-                        r = Response.status(200).entity(result).build();
-
-                    } else {
-                        result.put("Collection Not Proposed For Publication", itemId.toString());
-                        r = Response.status(409).entity(result).build();
+                    //2.0 support
+                    if (saltTriple.size() == 1) {
+                        tw.remove((Triple) saltTriple.toArray()[1]);
                     }
+                    Date theDate = new Date(date);
+                    UriRef issued = Resource.uriRef(DCTerms.issued.getURI());
+                    UriRef identifier = Resource.uriRef(DCTerms.identifier.getURI());
+                    //Fixme - we can't delete non-string literals from the GUI since we lose type info along the way...
+                    //So - using a string here
+                    UriRef aggRef = Resource.uriRef(agg_id);
+                    tw.add(aggRef, issued, Resource.literal(DateFormat.getDateTimeInstance().format(theDate)));
+                    tw.add(aggRef, identifier, Resource.uriRef(pid));
 
+                    //To DO? Add published_as_part_of links
+                    //FixMe - should not assume that collection has the same contents as when published and should
+                    // retrieve final list from authoritative OREMap (wherever that ends up), or call a service dynamically
+                    //rather than caching this info as a triple.
+
+                    c.perform(tw);
+
+                    ListUserMetadataFieldsHandler.addViewablePredicate(issued.toString());
+
+                    result.put("Version of Collection Published", itemId.toString());
+                    r = Response.status(200).entity(result).build();
+
+                } else {
+                    result.put("Collection Not Proposed For Publication", itemId.toString());
+                    r = Response.status(409).entity(result).build();
                 }
+
             } catch (Exception e) {
 
                 log.error("Error assigning pid: " + pid + " to " + agg_id);
@@ -1687,7 +1699,7 @@ public class ItemServicesImpl
     }
 
     @SuppressWarnings("unchecked")
-    Response getOREById(String id, UriRef userId, HttpServletRequest request) {
+    Response getOREById(String id, HttpServletRequest request) {
 
         String url = request.getRequestURL().toString();
         Map<String, Object> oremap = new HashMap<String, Object>();
@@ -1702,7 +1714,7 @@ public class ItemServicesImpl
             uf.addPattern("coll", DcTerms.HAS_VERSION, Resource.uriRef(id));
             uf.addColumnName("coll");
 
-            TupeloStore.getInstance().unifyExcludeDeleted(uf, "coll");
+            c.perform(uf);
             UriRef topCollRef = null;
             for (Tuple<Resource> row : uf.getResult() ) {
                 topCollRef = (UriRef) row.get(0);
@@ -1719,25 +1731,14 @@ public class ItemServicesImpl
             c.perform(tMatcher);
             String versionNumber = Integer.toString(tMatcher.getResult().size());
 
-            /*
-            if (topCollRef == null) {
-                log.debug("No pub URI");
-                //Find connect to live objects
-                Unifier uf2 = new Unifier();
-                uf2.addPattern("coll", DcTerms.IS_VERSION_OF, Resource.literal(id));
-                uf2.addColumnName("coll");
-
-                TupeloStore.getInstance().unifyExcludeDeleted(uf2, "coll");
-
-                for (Tuple<Resource> row : uf2.getResult() ) {
-                    topCollRef = (UriRef) row.get(0);
-                    break;
-                }
-
-            }*/
+            //Find salt for acccess pubtokens
+            tMatcher = new TripleMatcher();
+            tMatcher.match(Resource.uriRef(id), RequestPublicationHandler.hasSalt, null);
+            c.perform(tMatcher);
+            String salt = tMatcher.getResult().iterator().next().getObject().toString();
 
             log.debug("Found Collection: " + topCollRef.toString());
-            Map<String, Object> agg = getMetadataMapById(topCollRef.toString(), getCombinedContext(false), userId);
+            Map<String, Object> agg = getMetadataMapById(topCollRef, getCombinedContext(false));
             agg.remove("@context");
             //The aggregation has an ID in the space, don't need to create a <collectionid>/v<x> styple identifier as we do for aggregated things
             agg.put("Identifier", id);
@@ -1756,7 +1757,7 @@ public class ItemServicesImpl
             //Now add all the children and their info
             //Collections
             agg.put("aggregates", new ArrayList<Object>());
-            addSubCollectionsToAggregation(topCollRef, agg, agg, versionNumber, userId);
+            addSubCollectionsToAggregation(topCollRef, agg, agg, versionNumber, salt);
 
             if (((List<Object>) agg.get("aggregates")).isEmpty()) {
                 agg.remove("aggregates");
@@ -1765,7 +1766,6 @@ public class ItemServicesImpl
             oremap.put("Rights", "This Resource Map is available under the Creative Commons Attribution-Noncommercial Generic license.");
             oremap.put("Creation Date", DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis())));
             List<String> creatorsList = new ArrayList<String>();
-            creatorsList.add(userId.toString());
             creatorsList.add("SEAD Version 1.5, " + PropertiesLoader.getProperties().getProperty("domain"));
             oremap.put("Creator", creatorsList);
 
@@ -1791,7 +1791,7 @@ public class ItemServicesImpl
     }
 
     @SuppressWarnings("unchecked")
-    private void addSubCollectionsToAggregation(UriRef collId, Map<String, Object> agg, Map<String, Object> parent, String version, UriRef userId) throws JSONException, OperatorException {
+    private void addSubCollectionsToAggregation(UriRef collId, Map<String, Object> agg, Map<String, Object> parent, String version, String salt) throws JSONException, OperatorException {
         Set<UriRef> subcollections = getSubCollections(collId);
         log.debug("Adding collection: " + collId.toString());
         //Should not exist but some space may have this term - so remove it to be safe
@@ -1799,7 +1799,7 @@ public class ItemServicesImpl
         //Handle sub collections
         for (UriRef collection : subcollections ) {
 
-            Map<String, Object> aggRes = getMetadataMapById(collection.toString(), combinedContext.getValue(), userId);
+            Map<String, Object> aggRes = getMetadataMapById(collection, combinedContext.getValue());
             aggRes.remove("@context");
             //Munge to separate static and live versions
             aggRes.put("Identifier", collection.toString() + "/v" + version);
@@ -1818,14 +1818,14 @@ public class ItemServicesImpl
             ((List<String>) parent.get("Has Part")).add(collection.toString() + "/v" + version);
 
             log.debug("Adding subcol: " + collection.toString());
-            addSubCollectionsToAggregation(collection, agg, aggRes, version, userId);
+            addSubCollectionsToAggregation(collection, agg, aggRes, version, salt);
         }
         //Handle Datasets
         Set<UriRef> datasets = getDatasets(collId);
         for (UriRef dataset : datasets ) {
             log.debug("Adding dataset: " + dataset.toString());
 
-            Map<String, Object> aggRes = getMetadataMapById(dataset.toString(), combinedContext.getValue(), userId);
+            Map<String, Object> aggRes = getMetadataMapById(dataset, combinedContext.getValue());
             aggRes.remove("@context");
             //Munge to separate static and live versions
             aggRes.put("Identifier", dataset.toString() + "/v" + version);
@@ -1833,7 +1833,8 @@ public class ItemServicesImpl
             aggRes.put("Version Of", dataset.toString());
 
             String urlString = PropertiesLoader.getProperties().getProperty("domain");
-            aggRes.put("similarTo", urlString + "/resteasy/datasets/" + dataset.toString() + "/file");
+            String path = "/researchobjects/" + agg.get("Identifier") + "/files/" + dataset.toString();
+            aggRes.put("similarTo", urlString + "/resteasy" + path + "?pubtoken=" + TokenStore.generateToken(path, salt));
 
             List<String> types = new ArrayList<String>(2);
             types.add("AggregatedResource");

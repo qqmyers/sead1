@@ -36,6 +36,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
@@ -61,17 +62,19 @@ import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
+import edu.illinois.ncsa.mmdb.web.server.TokenStore;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl;
 import edu.illinois.ncsa.mmdb.web.server.util.CollectionInfo;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 
-public class RequestPublicationaHandler implements ActionHandler<RequestPublication, EmptyResult> {
+public class RequestPublicationHandler implements ActionHandler<RequestPublication, EmptyResult> {
 
     /** Commons logging **/
-    private static Log     log         = LogFactory.getLog(RequestPublicationaHandler.class);
+    private static Log   log         = LogFactory.getLog(RequestPublicationHandler.class);
 
-    public static Resource Aggregation = Resource.uriRef("http://www.openarchives.org/ore/terms/Aggregation");
+    public static UriRef Aggregation = Resource.uriRef("http://www.openarchives.org/ore/terms/Aggregation");
+    public static UriRef hasSalt     = Resource.uriRef("http://sead-data.net/vocab/hasSalt");
 
     @Override
     public EmptyResult execute(RequestPublication action, ExecutionContext context) throws ActionException {
@@ -119,6 +122,9 @@ public class RequestPublicationaHandler implements ActionHandler<RequestPublicat
             tw.add(aggId, Rdf.TYPE, Aggregation);
             tw.add(subject, DcTerms.HAS_VERSION, aggId);
             tw.add(aggId, Resource.uriRef("http://sead-data.net/vocab/hasVersionNumber"), Resource.literal(versionNumber));
+            //Used to generate unique keys for file retrieval
+            String salt = UUID.randomUUID().toString();
+            tw.add(aggId, hasSalt, Resource.literal(salt));
 
             log.debug("Agg: " + aggId.toString() + " is version: " + versionNumber);
 
@@ -132,7 +138,7 @@ public class RequestPublicationaHandler implements ActionHandler<RequestPublicat
             JSONObject requestJsonObject = new JSONObject();
             JSONObject aggJsonObject = new JSONObject(ItemServicesImpl.getMetadataMapById(subject.toString(), ItemServicesImpl.collectionBasics, Resource.uriRef(action.getUser())));
             aggJsonObject.put("Identifier", aggId.toString());
-            aggJsonObject.put("@id", this_space + "/resteasy/researchobjects/" + aggId.toString() + "#aggregation");
+            aggJsonObject.put("@id", this_space + "/resteasy/researchobjects/" + aggId.toString() + "?pubtoken=" + TokenStore.generateToken("/researchobjects/" + aggId.toString(), salt) + "#aggregation");
             aggJsonObject.put("@type", "Aggregation");
             //Collection ids must be encoded
             aggJsonObject.put("similarTo", this_space + "/resteasy/collections/" + URLEncoder.encode(subject.toString(), "UTF-8"));
@@ -140,7 +146,8 @@ public class RequestPublicationaHandler implements ActionHandler<RequestPublicat
             JSONObject contextObject = aggJsonObject.getJSONObject("@context");
             requestJsonObject.put("Aggregation", aggJsonObject);
             requestJsonObject.put("Repository", TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultRepository));
-            requestJsonObject.put("Publication Callback", this_space + "/resteasy/researchobjects/" + aggId.toString() + "/pid");
+            String method = "/researchobjects/" + aggId.toString() + "/pid";
+            requestJsonObject.put("Publication Callback", this_space + "/resteasy" + method + "?pubtoken=" + TokenStore.generateToken(method, salt));
             JSONObject preferencesJsonObject = new JSONObject(TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultCPPreferences));
             requestJsonObject.put("Preferences", preferencesJsonObject);
 
@@ -164,6 +171,7 @@ public class RequestPublicationaHandler implements ActionHandler<RequestPublicat
             contextObject.put("Publication Callback", "http://sead-data.net/terms/publicationcallback");
 
             aggJsonObject.remove("@context");
+
             requestJsonObject.accumulate("@context", contextObject);
             requestJsonObject.accumulate("@context", "https://w3id.org/ore/context");
 

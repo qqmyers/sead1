@@ -106,19 +106,22 @@ public class RevokePublicationRequestHandler implements ActionHandler<RevokePubl
             Unifier uf = new Unifier();
             uf.addPattern(subject, DcTerms.HAS_VERSION, "agg");
             uf.addPattern("agg", Resource.uriRef("http://sead-data.net/vocab/hasVersionNumber"), "ver");
+            uf.addPattern("agg", RequestPublicationHandler.hasSalt, "salt", true);
 
             uf.addPattern("agg", Resource.uriRef(DCTerms.identifier.getURI()), "ext", true);
-            uf.setColumnNames("agg", "ver", "ext");
+            uf.setColumnNames("agg", "ver", "ext", "salt");
             TupeloStore.getInstance().getContext().perform(uf);
             for (Tuple<Resource> row : uf.getResult() ) {
                 if (row.get(2) == null) {
                     //Removing any request that does not yet have an ext id (isn't complete) since we only want one open at a time
                     //Write required triples
                     UriRef aggId = (UriRef) row.get(0);
-                    tw.remove(aggId, Rdf.TYPE, RequestPublicationaHandler.Aggregation);
+                    tw.remove(aggId, Rdf.TYPE, RequestPublicationHandler.Aggregation);
                     tw.remove(subject, DcTerms.HAS_VERSION, aggId);
                     tw.remove(aggId, Resource.uriRef("http://sead-data.net/vocab/hasVersionNumber"), Resource.literal(row.get(1).toString()));
-
+                    if (row.get(3) != null) {
+                        tw.remove(aggId, RequestPublicationHandler.hasSalt, Resource.literal(row.get(3).toString()));
+                    }
                     try {
                         //Send notice to service
                         String server = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);

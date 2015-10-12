@@ -73,6 +73,7 @@ import org.tupeloproject.rdf.terms.Rdf;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
+import edu.illinois.ncsa.mmdb.web.server.TokenStore;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.util.BeanFiller;
@@ -128,23 +129,82 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
     @GET
     @Path("/{id}")
     @Produces("application/json")
-    public Response getROAsORE_JSON_LD(@PathParam("id") String id, @javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response getROAsORE_JSON_LD(@PathParam("id") String id, @QueryParam("pubtoken") String token, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
         try {
             id = URLDecoder.decode(id, "UTF-8");
+            TripleMatcher tMatcher = new TripleMatcher();
+            tMatcher.setSubject(Resource.uriRef(id));
+            tMatcher.setPredicate(Resource.uriRef("http://sead-data.net/vocab/hasSalt"));
+            c.perform(tMatcher);
+            String salt = tMatcher.getResult().iterator().next().getObject().toString();
+
+            if ((token == null) || (!TokenStore.isValidToken(token, "/researchobjects/" + id, salt))) {
+                log.debug("Invalid pubtoken: " + token);
+                Map<String, String> result = new HashMap<String, String>(1);
+                result.put("Failure", "Invalid pubtoken");
+                return Response.status(Status.FORBIDDEN).entity(result).build();
+            }
+
         } catch (UnsupportedEncodingException e) {
             Map<String, String> result = new HashMap<String, String>(1);
             result.put("Failure", "Could not decode resource id");
             return Response.status(Status.BAD_REQUEST).entity(result).build();
+        } catch (OperatorException e) {
+            Map<String, String> result = new HashMap<String, String>(1);
+            log.error("Error Processing " + id, e);
+            result.put("Failure", e.getMessage());
+            return Response.status(Status.BAD_REQUEST).entity(result).build();
         }
-        return getOREById(id, userId, request);
+        return getOREById(id, request);
+    }
+
+    /**
+     * Get a file for Aggregation
+     *
+     * @param id
+     *            - the ID of the file
+     *
+     * @return - The ORE map in json-ld
+     */
+    @GET
+    @Path("/{aggId}/files/{id}")
+    @Produces("application/json")
+    public Response getDataFile(@PathParam("aggId") String aggId, @PathParam("id") String id, @QueryParam("pubtoken") String token, @javax.ws.rs.core.Context HttpServletRequest request) {
+        try {
+            id = URLDecoder.decode(id, "UTF-8");
+            TripleMatcher tMatcher = new TripleMatcher();
+            tMatcher.setSubject(Resource.uriRef(aggId));
+            tMatcher.setPredicate(Resource.uriRef("http://sead-data.net/vocab/hasSalt"));
+            c.perform(tMatcher);
+            String salt = tMatcher.getResult().iterator().next().getObject().toString();
+
+            if ((token == null) || (!TokenStore.isValidToken(token, "/researchobjects/" + aggId + "/files/" + id, salt))) {
+                log.debug("Invalid pubtoken: " + token);
+                Map<String, String> result = new HashMap<String, String>(1);
+                result.put("Failure", "Invalid pubtoken");
+                return Response.status(Status.FORBIDDEN).entity(result).build();
+            }
+
+        } catch (UnsupportedEncodingException e) {
+            Map<String, String> result = new HashMap<String, String>(1);
+            result.put("Failure", "Could not decode resource id");
+            return Response.status(Status.BAD_REQUEST).entity(result).build();
+        } catch (OperatorException e) {
+            Map<String, String> result = new HashMap<String, String>(1);
+            log.error("Error Processing " + id, e);
+            result.put("Failure", e.getMessage());
+            return Response.status(Status.BAD_REQUEST).entity(result).build();
+        }
+        return DatasetsRestService.getDataFileBytes(Resource.uriRef(id));
+
     }
 
     @POST
     @Path("/{id}/pid")
     @Consumes("application/json")
     @Produces("application/json")
-    public Response setPid(@PathParam("id") String agg_id, PIDBean pid, @javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response setPid(@PathParam("id") String agg_id, @QueryParam("pubtoken") String token, PIDBean pid, @javax.ws.rs.core.Context HttpServletRequest request) {
         String identifierUriString = null;
         try {
 
@@ -154,8 +214,21 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
                 result.put("Failure", "Could not find \"uri\" in json object");
                 return Response.status(Status.BAD_REQUEST).entity(result).build();
             }
+            TripleMatcher tMatcher = new TripleMatcher();
+            tMatcher.setSubject(Resource.uriRef(agg_id));
+            tMatcher.setPredicate(Resource.uriRef("http://sead-data.net/vocab/hasSalt"));
+            c.perform(tMatcher);
+            String salt = tMatcher.getResult().iterator().next().getObject().toString();
+
+            if ((token == null) || (!TokenStore.isValidToken(token, "/researchobjects/" + agg_id + "/pid", salt))) {
+                log.debug("Invalid pubtoken: " + token);
+                Map<String, String> result = new HashMap<String, String>(1);
+                result.put("Failure", "Invalid pubtoken");
+                return Response.status(Status.FORBIDDEN).entity(result).build();
+            }
         } catch (Exception e) {
             Map<String, String> result = new HashMap<String, String>(1);
+            log.error("Error Processing " + agg_id, e);
             result.put("Failure", e.getMessage());
             return Response.status(Status.BAD_REQUEST).entity(result).build();
 

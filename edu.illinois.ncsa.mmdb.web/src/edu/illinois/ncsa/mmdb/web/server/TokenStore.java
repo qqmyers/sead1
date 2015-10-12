@@ -47,6 +47,8 @@ public class TokenStore {
         return generateToken(method, newSalt);
     }
 
+    //Used to generate unique tokens from a secret salt value. Used in timed token mechanism (where salts are good for a set time),
+    // and 2.0 publication, where a salt is good for a given publication request
     public static String generateToken(String method, String salt) {
 
         String token = null;
@@ -78,6 +80,19 @@ public class TokenStore {
         method = method.replaceAll("@", "%40");
         method = method.replaceAll(",", "%2C");
         if (token.equals(generateToken(method, newSalt)) || token.equals(generateToken(method, oldSalt))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean isValidToken(String token, String method, String salt) {
+
+        if ((salt == null) || salt.length() == 0) {
+            log.debug("Bad salt.");
+            return false;
+        }
+        if (token.equals(generateToken(method, salt))) {
             return true;
         } else {
             return false;

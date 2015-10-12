@@ -405,31 +405,8 @@ public class DatasetsRestService extends ItemServicesImpl {
             }
             if (valid) {
 
-                //Get file metadata
-                Unifier uf = new Unifier();
-                uf.addPattern(itemId, Dc.FORMAT, "mimetype");
-                uf.addPattern(itemId, Dc.TITLE, "title");
-                uf.setColumnNames("mimetype", "title");
-                TupeloStore.getInstance().getContext().perform(uf);
-                Tuple<Resource> metadata = uf.getResult().iterator().next();
-                String mimetype = metadata.get(0).toString();
-                String title = metadata.get(1).toString();
+                r = getDataFileBytes(itemId);
 
-                //Get Bytes
-                final BlobFetcher bf = new BlobFetcher();
-                bf.setSubject(itemId);
-                TupeloStore.getInstance().getContext().perform(bf);
-
-                //Build output
-                StreamingOutput streamingResult = new StreamingOutput() {
-
-                    @Override
-                    public void write(OutputStream output) throws IOException, WebApplicationException {
-                        IOUtils.copyLarge(bf.getInputStream(), output);
-                    }
-                };
-
-                r = Response.ok(streamingResult, mimetype).header("content-disposition", "attachement; filename = " + title).build();
             }
 
         } catch (Exception e) {
@@ -440,6 +417,45 @@ public class DatasetsRestService extends ItemServicesImpl {
             r = Response.status(500).entity(result).build();
         }
         return r;
+    }
+
+    protected static Response getDataFileBytes(UriRef itemId) {
+        Response r = null;
+        //Get file metadata
+        Unifier uf = new Unifier();
+        uf.addPattern(itemId, Dc.FORMAT, "mimetype");
+        uf.addPattern(itemId, Dc.TITLE, "title");
+        uf.setColumnNames("mimetype", "title");
+        try {
+            TupeloStore.getInstance().getContext().perform(uf);
+            Tuple<Resource> metadata = uf.getResult().iterator().next();
+            String mimetype = metadata.get(0).toString();
+            String title = metadata.get(1).toString();
+
+            //Get Bytes
+            final BlobFetcher bf = new BlobFetcher();
+            bf.setSubject(itemId);
+            TupeloStore.getInstance().getContext().perform(bf);
+
+            //Build output
+            StreamingOutput streamingResult = new StreamingOutput() {
+
+                @Override
+                public void write(OutputStream output) throws IOException, WebApplicationException {
+                    IOUtils.copyLarge(bf.getInputStream(), output);
+                }
+            };
+
+            r = Response.ok(streamingResult, mimetype).header("content-disposition", "attachement; filename = " + title).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.debug(e.getMessage());
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            result.put("Error", "Server error: " + e.getMessage() + " while retrieving content for " + itemId.toString());
+            r = Response.status(500).entity(result).build();
+        }
+        return r;
+
     }
 
     //This allows the raw bytes of any dataset selected as the header logo or background to be downloaded without additional permissions

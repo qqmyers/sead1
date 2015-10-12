@@ -47,7 +47,7 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Base64;
 
-import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestPublicationaHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestPublicationHandler;
 
 public class RestUriMinter {
     static RestUriMinter singleton;
@@ -78,7 +78,7 @@ public class RestUriMinter {
         if (metadata != null) {
             if (RestService.IMAGE_TYPE.equals(metadata.get(Rdf.TYPE))) {
                 prefix = "img";
-            } else if (RequestPublicationaHandler.Aggregation.equals(metadata.get(Rdf.TYPE))) {
+            } else if (RequestPublicationHandler.Aggregation.equals(metadata.get(Rdf.TYPE))) {
                 prefix = "RO";
             }
             if (metadata.containsKey(RestService.FORMAT_PROPERTY) &&

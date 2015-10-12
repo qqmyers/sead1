@@ -123,7 +123,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveFromCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RemoveUserMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestNewPasswordHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestPublicationaHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.RequestPublicationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RevokePublicationRequestHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.RunSparqlQueryHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SetAccessLevelHandler;
@@ -243,7 +243,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new Oauth2ServerFlowUserInfoHandler());
         DispatchUtil.registerHandler(new EditUserRetirementHandler());
         DispatchUtil.registerHandler(new IsReadyForPublicationHandler());
-        DispatchUtil.registerHandler(new RequestPublicationaHandler());
+        DispatchUtil.registerHandler(new RequestPublicationHandler());
         DispatchUtil.registerHandler(new RevokePublicationRequestHandler());
     }
 
