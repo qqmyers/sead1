@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.BeanSession;
@@ -37,9 +37,9 @@ public class DatasourceBeanPreprocessor implements SaveBeanPreprocessor {
             datasource.setDriverClassName("com.mysql.jdbc.Driver"); //$NON-NLS-1$
             datasource.setUsername(c.getUser());
             datasource.setPassword(c.getPassword());
-            datasource.setRemoveAbandoned(true);
+            datasource.setRemoveAbandonedOnBorrow(true);
             datasource.setRemoveAbandonedTimeout(10);
-            datasource.setMaxActive(10);
+            datasource.setMaxTotal(10);
             datasource.setUrl(String.format("jdbc:mysql://%s:%d/%s?characterEncoding=utf8", c.getHost(), c.getPort(), c.getSchema())); //$NON-NLS-1$
 
             try {
@@ -60,9 +60,9 @@ public class DatasourceBeanPreprocessor implements SaveBeanPreprocessor {
             datasource.setDriverClassName("com.mysql.jdbc.Driver"); //$NON-NLS-1$
             datasource.setUsername(c.getUsername());
             datasource.setPassword(c.getPassword());
-            datasource.setRemoveAbandoned(true);
+            datasource.setRemoveAbandonedOnBorrow(true);
             datasource.setRemoveAbandonedTimeout(10);
-            datasource.setMaxActive(10);
+            datasource.setMaxTotal(10);
             datasource.setUrl(String.format("jdbc:mysql://%s:%d/%s?characterEncoding=utf8", c.getHostname(), c.getPort(), c.getDatabase())); //$NON-NLS-1$
 
             try {

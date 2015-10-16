@@ -2,10 +2,12 @@
 <classpath>
 	<classpathentry kind="src" output="target/classes" path="src/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
-	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER"/>
 	<classpathentry kind="src" path="/edu.illinois.ncsa.mmdb.web"/>
 	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/tupelo-kernel-2.7.2-SNAPSHOT.jar" sourcepath="/org.tupeloproject.core/tupelo-kernel/src/main/java"/>
 	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/lucene-core-4.7.0.jar"/>
 	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/cet-search-1.0.2-SNAPSHOT.jar" sourcepath="/edu.illinois.ncsa.cet.search/src/main/java"/>
+	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/cet-bean-tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo/src/main/java"/>
+	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/cet-bean.jar"/>
+	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/tupelo-util-2.7.2-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

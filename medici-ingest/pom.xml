@@ -11,6 +11,11 @@
 			<id>NCSA OpenSource</id>
 			<url>https://opensource.ncsa.illinois.edu/nexus/content/repositories/snapshots/</url>
 		</repository>
+		<repository>
+			<id>medici-ingest.local</id>
+			<name>medici-ingest</name>
+			<url>file:${project.basedir}/repo</url>
+		</repository>
 	</repositories>
 
 	<build>
@@ -47,36 +52,66 @@
 	</build>
 
 	<dependencies>
+
 		<dependency>
 			<groupId>org.tupeloproject</groupId>
 			<artifactId>tupelo-kernel</artifactId>
-			<version>2.7.0-SNAPSHOT</version>
+			<version>2.7.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.tupeloproject</groupId>
 			<artifactId>tupelo-mysql</artifactId>
-			<version>2.7.0-SNAPSHOT</version>
+			<version>2.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.tupeloproject</groupId>
+			<artifactId>tupelo-util</artifactId>
+			<version>2.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.tupeloproject</groupId>
+			<artifactId>tupelo-sql</artifactId>
+			<version>2.7.2</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.illinois.ncsa.cet</groupId>
 			<artifactId>cet-bean</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.illinois.ncsa.cet</groupId>
 			<artifactId>cet-bean-tupelo</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.2</version>
 		</dependency>
 		<dependency>
-      <groupId>edu.illinois.ncsa.cet</groupId>
-      <artifactId>cet-search</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
-    </dependency>
+			<groupId>edu.illinois.ncsa.cet</groupId>
+			<artifactId>cet-search</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.1</version>
 		</dependency>
+		    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-dbcp2</artifactId>
+      <version>2.1.1</version>
+    </dependency>
+        <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.0.4</version>
+    </dependency>
+        <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>4.7.0</version>
+
+      
+    </dependency>
+
+		
 	</dependencies>
 	<description>Command-line Tools for working with Medici/ACR for bulk ingests, modifications, verfications, and statistical analyses.</description>
 	<organization>

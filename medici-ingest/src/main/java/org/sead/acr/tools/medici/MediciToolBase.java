@@ -1,5 +1,6 @@
 package org.sead.acr.tools.medici;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,6 +28,9 @@ import edu.uiuc.ncsa.cet.bean.tupelo.CETBeans;
 import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
+/*Minimal setup required to run tools local to a medici instance
+ * 
+ */
 public class MediciToolBase {
 
     private static Log           log      = LogFactory.getLog(FileCollectionIngester.class);
