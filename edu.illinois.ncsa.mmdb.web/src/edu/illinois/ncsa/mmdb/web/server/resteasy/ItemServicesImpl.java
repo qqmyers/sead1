@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -246,7 +247,7 @@ public class ItemServicesImpl
                                                                      private static final long serialVersionUID = 6200945234224918100L;
 
                                                                      {
-                                                                         Map<String, String> comment = new HashMap<String, String>();
+                                                                         Map<String, String> comment = new LinkedHashMap<String, String>();
                                                                          comment.put("@id", "http://cet.ncsa.uiuc.edu/2007/annotation/hasAnnotation");
                                                                          comment.put("comment_body", "http://purl.org/dc/elements/1.1/description");
                                                                          comment.put("comment_author", "http://purl.org/dc/elements/1.1/creator");
@@ -280,7 +281,7 @@ public class ItemServicesImpl
                                                                      private static final long serialVersionUID = 6200945234224918100L;
 
                                                                      {
-                                                                         Map<String, String> version = new HashMap<String, String>();
+                                                                         Map<String, String> version = new LinkedHashMap<String, String>();
                                                                          version.put("@id", DcTerms.HAS_VERSION.toString());
                                                                          version.put("version number", "http://sead-data.net/vocab/hasVersionNumber");
                                                                          version.put("External Identifier", DCTerms.identifier.getURI());
@@ -597,25 +598,156 @@ public class ItemServicesImpl
 
     public static Map<String, Object> getMetadataMapById(UriRef itemUri, Map<String, Object> context) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Map<String, Object> inverseContext = getInverseContext(context);
+        Map<String, Object> finalContext = new LinkedHashMap<String, Object>();
+        Map<String, Object> finalResult = new LinkedHashMap<String, Object>();
 
         try { //Get fields
-            Unifier uf = new Unifier();
-            uf = populateUnifier(itemUri, uf, context, null);
-            //Get columns to put in result (all in this case)
-            List<String> names = uf.getColumnNames();
-            log.debug("names: " + names);
+            TripleMatcher tm = new TripleMatcher();
+            tm.setSubject(itemUri);
+            c.perform(tm);
+            for (Triple t : tm.getResult() ) {
 
-            c.perform(uf);
-            log.debug("Performed");
+                if (context.containsValue(t.getPredicate().toString())) {
+                    //We have a string value (not an object with structure)
+                    log.debug("Adding: " + t.getPredicate().toString() + " : " + t.getObject().toString());
+                    addTuple(result, t.getPredicate().toString(), t.getObject().toString());
+                }
+                //Check for subobjects
+                //Fixme - make recursive
+                for (Object object : context.values() ) {
+                    if (object instanceof Map) {
+                        if (((Map<String, Object>) object).get("@id").equals((t.getPredicate().toString()))) {
+                            Map<String, Object> subresult = new LinkedHashMap<String, Object>();
+                            subresult.put(Dc.IDENTIFIER.toString(), t.getObject().toString());
+                            TripleMatcher tm2 = new TripleMatcher();
+                            tm2.setSubject(t.getObject());
+                            c.perform(tm2);
+                            for (Triple t2 : tm2.getResult() ) {
+                                if (((Map<String, Object>) object).containsValue(t2.getPredicate().toString())) {
+                                    log.debug("Adding object field: " + t2.getPredicate().toString() + " : " + t2.getObject().toString());
+                                    addTuple(subresult, t2.getPredicate().toString(), t2.getObject().toString());
+                                }
+                            }
+                            log.debug("Adding object for: " + t.getPredicate().toString());
+                            addObjectTuple(result, t.getPredicate().toString(), subresult, Dc.IDENTIFIER.toString());
+                        }
+                    }
+                }
+            }
+            //The code above builds a result that uses the predicates as keys
+            //The section below replaces the predicates with the labels and adds the label-predicate mapping into the context
+            log.debug("Swapping labels for predicates");
+            for (Entry<String, Object> e : result.entrySet() ) {
 
-            result = buildResultMap(uf.getResult(), context, names, false, null);
+                if (e.getValue() instanceof String) {
+                    //Strings get mapped directly, using the new key (the label from the context)
+                    log.debug("Adding string for key: " + e.getKey() + " " + inverseContext.get(e.getKey()));
+                    finalResult.put((String) inverseContext.get(e.getKey()), e.getValue());
 
+                } else if (e.getValue() instanceof Map) {
+                    //Maps get rebuilt using labels internally and then mapped with the label into the final result
+                    Map<String, Object> newSubResultMap = new LinkedHashMap<String, Object>();
+                    for (Entry<String, Object> se : ((Map<String, Object>) e.getValue()).entrySet() ) {
+                        if (!(se.getKey().equals("@id"))) {
+                            log.debug("Adding string in sub-object for key: " + se.getKey() + " " + inverseContext.get(se.getKey()));
+                            //Find the label who's key is the object's predicate, and then get the context object who's key is that label
+                            Map<String, Object> subContext = (Map<String, Object>) inverseContext.get(inverseContext.get(e.getKey()));
+                            newSubResultMap.put((String) (subContext.get(se.getKey())), se.getValue());
+                            //Each predicate is mapped into the top level of the context
+                            finalContext.put((String) (subContext.get(se.getKey())), se.getKey());
+                        }
+                    }
+                    log.debug("Adding object for key: " + e.getKey() + " " + inverseContext.get(e.getKey()));
+                    finalResult.put((String) inverseContext.get(e.getKey()), newSubResultMap);
+                } else if (e.getValue() instanceof List) {
+                    //Handle each entry in the list and then map the new list into the final result
+                    List l = (List) e.getValue();
+                    ListIterator i = l.listIterator();
+                    ArrayList<Object> subArrayList = new ArrayList<Object>();
+                    while (i.hasNext()) {
+                        Object o = i.next();
+                        if (o instanceof String) {
+                            //Just copy a string into the new list
+                            subArrayList.add(o);
+
+                        } else if (o instanceof Map) { //An object
+                            //Internally map to use labels and then add to new list
+                            Map<String, Object> newSubResultMap = new LinkedHashMap<String, Object>();
+                            for (Entry<String, Object> se : ((Map<String, Object>) o).entrySet() ) {
+                                if (!(se.getKey().equals("@id"))) {
+                                    log.debug("Adding string for sub-object in list for key: " + se.getKey() + " " + inverseContext.get(se.getKey()));
+                                    //Find the label who's key is the object's predicate, and then get the context object who's key is that label
+                                    Map<String, Object> subContext = (Map<String, Object>) inverseContext.get(inverseContext.get(e.getKey()));
+                                    newSubResultMap.put((String) (subContext.get(se.getKey())), se.getValue());
+                                    finalContext.put((String) (subContext.get(se.getKey())), se.getKey());
+                                }
+                            }
+                            subArrayList.add(newSubResultMap);
+
+                        }
+                    }
+                    //Now add new list into result
+                    log.debug("Adding list for key: " + inverseContext.get(e.getKey()));
+                    finalResult.put((String) inverseContext.get(e.getKey()), subArrayList);
+
+                }
+                //Regardless of value type, put label/predicate into final context
+                finalContext.put((String) inverseContext.get(e.getKey()), e.getKey());
+            }
+            /*
+             Unifier uf = new Unifier();
+             uf = populateUnifier(itemUri, uf, context, null);
+             //Get columns to put in result (all in this case)
+             List<String> names = uf.getColumnNames();
+             log.debug("names: " + names);
+
+             c.perform(uf);
+             log.debug("Performed");
+
+             result = buildResultMap(uf.getResult(), context, names, false, null);
+            */
+            if (finalResult.isEmpty()) {
+                log.debug("Empty result");
+            } else {
+                finalResult.put("@context", finalContext);
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            result.put("Error Response", Response.status(500).entity("Error processing id: " + itemUri.toString()).build());
+            finalResult.put("Error Response", Response.status(500).entity("Error processing id: " + itemUri.toString()).build());
         }
-        return result;
 
+        return finalResult;
+
+    }
+
+    private static Map<String, Object> getInverseContext(Map<String, Object> context) {
+        Map<String, Object> inverseMap = new HashMap<String, Object>();
+        for (Entry<String, Object> e : context.entrySet() ) {
+            if (e.getValue() instanceof String) {
+                log.debug("Map: " + e.getValue() + e.getKey());
+                inverseMap.put((String) e.getValue(), e.getKey());
+            } else {
+                //For objects put an entry mapping the predicate used for the "@id" to the label for the object
+                //and create an object who's key is the label that contains the predicate to label maps used within the objects
+                Map<String, Object> subMap = new HashMap<String, Object>();
+                for (Entry<String, Object> se : ((Map<String, Object>) e.getValue()).entrySet() ) {
+                    if (se.getKey().equals("@id")) {
+                        log.debug("Map: " + se.getValue() + e.getKey());
+                        inverseMap.put((String) se.getValue(), e.getKey());
+                        //FixMe - use '@id'?
+                        subMap.put(Dc.IDENTIFIER.toString(), "Identifier");
+                    } else {
+                        log.debug("Map: " + se.getValue() + se.getKey());
+                        subMap.put((String) se.getValue(), se.getKey());
+                    }
+                }
+                inverseMap.put(e.getKey(), subMap);
+
+            }
+        }
+
+        return inverseMap;
     }
 
     /* Adds patterns corresponding to each entry in the context to the Unifier prior to evaluation
@@ -688,7 +820,7 @@ public class ItemServicesImpl
         for (Tuple<Resource> tu : table ) {
 
             if ((filter == null) || filter.include(tu)) {
-                Map<String, Map<String, String>> currentRowObjects = new LinkedHashMap<String, Map<String, String>>();
+                Map<String, Map<String, Object>> currentRowObjects = new LinkedHashMap<String, Map<String, Object>>();
                 for (int i = 0; i < names.size(); i++ ) {
                     String key = names.get(i);
                     Resource o = tu.get(i);
@@ -724,7 +856,7 @@ public class ItemServicesImpl
         return result;
     }
 
-    private static void addToResult(Map<String, Object> resultItem, String key, String obj, Map<String, Object> context, Map<String, Map<String, String>> currentRowObjects, Map<String, String> partsMap) {
+    private static void addToResult(Map<String, Object> resultItem, String key, String obj, Map<String, Object> context, Map<String, Map<String, Object>> currentRowObjects, Map<String, String> partsMap) {
         if (context.get(key) != null) {
             //top level item
             if (context.get(key) instanceof String) {
@@ -732,17 +864,17 @@ public class ItemServicesImpl
                 addTuple(resultItem, key, obj);
             } else {
                 //an object with structure - add an id field and be ready to find other parts
-                Map<String, String> newObj = new HashMap<String, String>();
+                Map<String, Object> newObj = new LinkedHashMap<String, Object>();
                 newObj.put("Identifier", obj);
                 currentRowObjects.put(key, newObj);
-
-                addObjectTuple(resultItem, key, newObj);
+                //Fixme - change to "@id"?
+                addObjectTuple(resultItem, key, newObj, "Identifier");
 
             }
         } else {
             //entry is from a sub object - find where it goes and add it there
             String objectName = partsMap.get(key);
-            Map<String, String> objectMap = currentRowObjects.get(objectName);
+            Map<String, Object> objectMap = currentRowObjects.get(objectName);
             objectMap.put(key, obj);
         }
 
@@ -789,12 +921,12 @@ public class ItemServicesImpl
 
     }
 
-    private static void addObjectTuple(Map<String, Object> map, String key, Map<String, String> newObj) {
+    private static void addObjectTuple(Map<String, Object> map, String key, Map<String, Object> newObj, String idKey) {
         if (!map.containsKey(key)) {
             map.put(key, newObj);
         } else {
             if (map.get(key) instanceof Map<?, ?>) {
-                if (!newObj.get("Identifier").equals(((Map<String, String>) map.get(key)).get("Identifier"))) {
+                if (!newObj.get(idKey).equals(((Map<String, String>) map.get(key)).get(idKey))) {
                     //switch to array
                     List<Object> list = new ArrayList<Object>();
                     list.add(map.get(key));
@@ -805,7 +937,7 @@ public class ItemServicesImpl
                 List<Object> list = (List<Object>) map.get(key);
                 boolean isNew = true;
                 for (Object o : list ) {
-                    if (((Map<String, String>) o).get("Identifier").equals(newObj.get("Identifier"))) {
+                    if (((Map<String, String>) o).get(idKey).equals(newObj.get(idKey))) {
                         isNew = false;
                         break;
                     }
@@ -1526,7 +1658,7 @@ public class ItemServicesImpl
             e1.printStackTrace();
         }
         InputStream is = bf.getInputStream();
-        ZipEntry ze = new ZipEntry("exportedfile.dat");
+        ZipEntry ze = new ZipEntry("exportedfile).dat");
         try {
             zos.putNextEntry(ze);
         } catch (IOException e) {
@@ -1702,7 +1834,7 @@ public class ItemServicesImpl
     Response getOREById(String id, HttpServletRequest request) {
 
         String url = request.getRequestURL().toString();
-        Map<String, Object> oremap = new HashMap<String, Object>();
+        Map<String, Object> oremap = new LinkedHashMap<String, Object>();
         try {
 
             oremap.put("@id", url);
@@ -1973,7 +2105,7 @@ public class ItemServicesImpl
             return Response.status(500).entity("Error running sys info [" + e1.getMessage() + "]").build();
         }
 
-        Map<String, Map<String, Object>> collMap = new HashMap<String, Map<String, Object>>();
+        Map<String, Map<String, Object>> collMap = new LinkedHashMap<String, Map<String, Object>>();
         /*
 
 
