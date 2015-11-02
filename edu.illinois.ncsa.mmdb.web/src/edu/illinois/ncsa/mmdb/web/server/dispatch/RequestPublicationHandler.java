@@ -36,6 +36,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import net.customware.gwt.dispatch.server.ActionHandler;
@@ -50,6 +51,7 @@ import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
@@ -57,6 +59,7 @@ import org.tupeloproject.rdf.terms.Rdf;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.GetUserPID;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RequestPublication;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
@@ -151,6 +154,18 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
             JSONObject preferencesJsonObject = new JSONObject(TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultCPPreferences));
             requestJsonObject.put("Preferences", preferencesJsonObject);
 
+            String rHolderString = action.getUser();
+
+            TripleMatcher idMatcher = new TripleMatcher();
+            idMatcher.setSubject(Resource.uriRef(rHolderString));
+            idMatcher.setPredicate(Resource.uriRef(GetUserPID.userPIDPredicate));
+            TupeloStore.getInstance().getContext().perform(idMatcher);
+            Set<Triple> idSet = idMatcher.getResult();
+            if (idSet.size() > 0) {
+                rHolderString = idSet.iterator().next().getObject().toString();
+            }
+            requestJsonObject.put("Rights Holder", rHolderString);
+
             //Now add stats
             CollectionInfo ci = ItemServicesImpl.getCollectionInfo((UriRef) subject, 0);
             JSONObject stats = new JSONObject();
@@ -169,6 +184,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
             contextObject.put("Repository", "http://sead-data.net/terms/requestedrepository");
             contextObject.put("Aggregation Statistics", "http://sead-data.net/terms/publicationstatistics");
             contextObject.put("Publication Callback", "http://sead-data.net/terms/publicationcallback");
+            contextObject.put("Rights Holder", DCTerms.rightsHolder.toString());
 
             aggJsonObject.remove("@context");
 
