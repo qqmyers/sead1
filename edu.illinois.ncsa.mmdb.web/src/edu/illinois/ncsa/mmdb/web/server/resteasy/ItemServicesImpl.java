@@ -1837,10 +1837,27 @@ public class ItemServicesImpl
 
     }
 
+    public static void startMap(String id) {
+        pendingOREMaps.put(id, "pending");
+
+    }
+
     @SuppressWarnings("unchecked")
     Response getOREById(String id, HttpServletRequest request) {
+        log.debug("OREMap request for ID: " + id);
         Object o = pendingOREMaps.get(id);
         //One shot
+
+        //Testing - try to let small maps finish until services can handle 503 response
+        if ((o instanceof String) && ((String) o).equals("pending")) {
+            try {
+                wait(20000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            o = pendingOREMaps.get(id);
+        }
 
         if (o == null) {
             return Response.status(Status.NOT_FOUND).build();
@@ -1854,7 +1871,7 @@ public class ItemServicesImpl
     }
 
     public static void generateOREById(String id, String idUri) {
-        pendingOREMaps.put(id, "pending");
+        log.debug("Generating map for ID: " + id);
         Map<String, Object> oremap = new LinkedHashMap<String, Object>();
         try {
 

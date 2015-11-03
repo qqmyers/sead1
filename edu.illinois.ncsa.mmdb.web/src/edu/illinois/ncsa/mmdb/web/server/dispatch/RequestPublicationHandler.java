@@ -136,6 +136,9 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
             //Start oremap generation
             String this_space = PropertiesLoader.getProperties().getProperty("domain");
             final String idUri = this_space + "/resteasy/researchobjects/" + aggId.toString();
+
+            ItemServicesImpl.startMap(aggId.toString());
+
             Thread oreThread = new Thread()
             {
                 public void run() {
