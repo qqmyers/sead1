@@ -119,7 +119,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
             //Generate ID for published version
             Map<Resource, Object> md = new HashMap<Resource, Object>();
             md.put(Rdf.TYPE, Aggregation);
-            UriRef aggId = Resource.uriRef(RestUriMinter.getInstance().mintUri(md));
+            final UriRef aggId = Resource.uriRef(RestUriMinter.getInstance().mintUri(md));
 
             //Write required triples
             tw.add(aggId, Rdf.TYPE, Aggregation);
@@ -133,16 +133,26 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
 
             TupeloStore.getInstance().getContext().perform(tw);
 
+            //Start oremap generation
+            String this_space = PropertiesLoader.getProperties().getProperty("domain");
+            final String idUri = this_space + "/resteasy/researchobjects/" + aggId.toString();
+            Thread oreThread = new Thread()
+            {
+                public void run() {
+                    ItemServicesImpl.generateOREById(aggId.toString(), idUri);
+                }
+            };
+            oreThread.start();
+
             //Send notice to service
             String server = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);
-
-            String this_space = PropertiesLoader.getProperties().getProperty("domain");
 
             JSONObject requestJsonObject = new JSONObject();
             JSONObject aggJsonObject = new JSONObject(ItemServicesImpl.getMetadataMapById(subject.toString(), ItemServicesImpl.collectionBasics, Resource.uriRef(action.getUser())));
             aggJsonObject.put("Identifier", aggId.toString());
-            aggJsonObject.put("@id", this_space + "/resteasy/researchobjects/" + aggId.toString() + "?pubtoken=" + TokenStore.generateToken("/researchobjects/" + aggId.toString(), salt) + "#aggregation");
+            aggJsonObject.put("@id", idUri + "?pubtoken=" + TokenStore.generateToken("/researchobjects/" + aggId.toString(), salt) + "#aggregation");
             aggJsonObject.put("@type", "Aggregation");
+
             //Collection ids must be encoded
             aggJsonObject.put("similarTo", this_space + "/resteasy/collections/" + URLEncoder.encode(subject.toString(), "UTF-8"));
 
@@ -220,6 +230,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                 rd.close();
             } catch (IOException io) {
                 log.warn("2.0 Pub request call failed for " + aggId.toString(), io);
+                ItemServicesImpl.stopMap(aggId.toString());
             }
             return new EmptyResult();
         } catch (Exception x) {

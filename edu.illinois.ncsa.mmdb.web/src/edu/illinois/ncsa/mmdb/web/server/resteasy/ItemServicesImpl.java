@@ -1830,14 +1830,35 @@ public class ItemServicesImpl
         return tagSet;
     }
 
+    static private volatile HashMap<String, Object> pendingOREMaps = new HashMap<String, Object>();
+
+    public static void stopMap(String id) {
+        pendingOREMaps.put(id, "stop");
+
+    }
+
     @SuppressWarnings("unchecked")
     Response getOREById(String id, HttpServletRequest request) {
+        Object o = pendingOREMaps.get(id);
+        //One shot
 
-        String url = request.getRequestURL().toString();
+        if (o == null) {
+            return Response.status(Status.NOT_FOUND).build();
+
+        } else if ((o instanceof String) && ((String) o).equals("pending")) {
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
+        } else {
+            pendingOREMaps.remove(id);
+            return (Response) o;
+        }
+    }
+
+    public static void generateOREById(String id, String idUri) {
+        pendingOREMaps.put(id, "pending");
         Map<String, Object> oremap = new LinkedHashMap<String, Object>();
         try {
 
-            oremap.put("@id", url);
+            oremap.put("@id", idUri);
             oremap.put("@type", "ResourceMap");
             //Add info about map creation
 
@@ -1854,7 +1875,8 @@ public class ItemServicesImpl
             }
 
             if (topCollRef == null) {
-                return Response.status(Status.NOT_FOUND).build();
+                pendingOREMaps.put(id, Response.status(Status.NOT_FOUND).build());
+                return;
             }
 
             //Find out how many times published
@@ -1872,10 +1894,10 @@ public class ItemServicesImpl
             log.debug("Found Collection: " + topCollRef.toString());
             Map<String, Object> agg = getMetadataMapById(topCollRef, getCombinedContext(false));
             agg.remove("@context");
-            //The aggregation has an ID in the space, don't need to create a <collectionid>/v<x> styple identifier as we do for aggregated things
+            //The aggregation has an ID in the space, don't need to create a <collectionid>/v<x> style identifier as we do for aggregated things
             agg.put("Identifier", id);
 
-            agg.put("@id", url + "#aggregation");
+            agg.put("@id", idUri + "#aggregation");
 
             List<String> types = new ArrayList<String>(2);
             types.add("Aggregation");
@@ -1883,7 +1905,7 @@ public class ItemServicesImpl
             agg.put("@type", types);
 
             agg.put("Is Version Of", topCollRef.toString());
-            agg.put("similarTo", url.substring(0, url.indexOf("/researchobjects")) + "/collections/" + URLEncoder.encode(topCollRef.toString(), "UTF-8"));
+            agg.put("similarTo", idUri.substring(0, idUri.indexOf("/researchobjects")) + "/collections/" + URLEncoder.encode(topCollRef.toString(), "UTF-8"));
             oremap.put("describes", agg);
             log.debug("OREMAP started: " + oremap.toString());
             //Now add all the children and their info
@@ -1910,20 +1932,30 @@ public class ItemServicesImpl
             seadContext.put("Has Part", DcTerms.HAS_PART.toString());
             contextList.add(seadContext);
             oremap.put("@context", contextList);
+
+        } catch (InterruptedException ie) {
+            pendingOREMaps.put(id, Response.status(Status.NOT_FOUND).build());
+            return;
+
         } catch (Exception e) {
+
             e.printStackTrace();
 
             log.error(e.getLocalizedMessage(), e);
             Map<String, String> failmsgMap = new HashMap<String, String>();
             failmsgMap.put("Failure", "Unable to generate ORE Map - see log for details");
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(failmsgMap).build();
+            pendingOREMaps.put(id, Response.status(Status.INTERNAL_SERVER_ERROR).entity(failmsgMap).build());
+            return;
         }
 
-        return Response.ok().entity(oremap).build();
+        pendingOREMaps.put(id, Response.ok().entity(oremap).build());
     }
 
     @SuppressWarnings("unchecked")
-    private void addSubCollectionsToAggregation(UriRef collId, Map<String, Object> agg, Map<String, Object> parent, String version, String salt) throws JSONException, OperatorException {
+    private static void addSubCollectionsToAggregation(UriRef collId, Map<String, Object> agg, Map<String, Object> parent, String version, String salt) throws JSONException, OperatorException, InterruptedException {
+        if (pendingOREMaps.get(agg.get("Identifier")).equals("stop")) {
+            throw new InterruptedException("Stop requested");
+        }
         Set<UriRef> subcollections = getSubCollections(collId);
         log.debug("Adding collection: " + collId.toString());
         //Should not exist but some space may have this term - so remove it to be safe
@@ -1982,7 +2014,7 @@ public class ItemServicesImpl
         }
     }
 
-    private Set<UriRef> getSubCollections(UriRef parent) throws OperatorException {
+    private static Set<UriRef> getSubCollections(UriRef parent) throws OperatorException {
         Set<UriRef> colls = new HashSet<UriRef>();
         Unifier uf2 = new Unifier();
         uf2.addPattern("coll", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/Collection"));
@@ -1995,7 +2027,7 @@ public class ItemServicesImpl
         return colls;
     }
 
-    private Set<UriRef> getDatasets(UriRef parent) throws OperatorException {
+    private static Set<UriRef> getDatasets(UriRef parent) throws OperatorException {
         Set<UriRef> datasets = new HashSet<UriRef>();
         Unifier uf2 = new Unifier();
         uf2.addPattern("ds", Rdf.TYPE, Cet.DATASET);
@@ -2170,4 +2202,5 @@ public class ItemServicesImpl
         collMap.put("@context", contextMap);
         return Response.ok().entity(collMap).build();
     }
+
 }

@@ -131,6 +131,7 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
     @Produces("application/json")
     public Response getROAsORE_JSON_LD(@PathParam("id") String id, @QueryParam("pubtoken") String token, @javax.ws.rs.core.Context HttpServletRequest request) {
         UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        //Hash key based access check:
         try {
             id = URLDecoder.decode(id, "UTF-8");
             TripleMatcher tMatcher = new TripleMatcher();
@@ -156,6 +157,7 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
             result.put("Failure", e.getMessage());
             return Response.status(Status.BAD_REQUEST).entity(result).build();
         }
+
         return getOREById(id, request);
     }
 
