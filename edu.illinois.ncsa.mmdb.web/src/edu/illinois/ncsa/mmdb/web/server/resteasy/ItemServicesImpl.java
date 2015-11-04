@@ -491,7 +491,9 @@ public class ItemServicesImpl
         return getMetadataById(id, combinedContext, userId);
     }
 
-    private static Memoized<Map<String, Object>> combinedContext = null;
+    private static Memoized<Map<String, Object>> combinedContext              = null;
+    //Calculated when combinedContext is updated - does not include extracted props
+    private static Map<String, Object>           inverseUniqueCombinedContext = null;
 
     public static Map<String, Object> getCombinedContext(boolean includeExtracted) {
 
@@ -531,6 +533,7 @@ public class ItemServicesImpl
                     //    access control here
 
                     combinedMap.remove("Has Subcollection");
+                    inverseUniqueCombinedContext = getInverseContext(combinedMap);
                     return combinedMap;
                 }
             };
@@ -598,8 +601,15 @@ public class ItemServicesImpl
     }
 
     public static Map<String, Object> getMetadataMapById(UriRef itemUri, Map<String, Object> context) {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
+
         Map<String, Object> inverseContext = getInverseContext(context);
+        return getMetadataMapById(itemUri, context, inverseContext);
+    }
+
+    public static Map<String, Object> getMetadataMapById(UriRef itemUri, Map<String, Object> context, Map<String, Object> inverseContext) {
+
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+
         Map<String, Object> finalContext = new LinkedHashMap<String, Object>();
         Map<String, Object> finalResult = new LinkedHashMap<String, Object>();
 
@@ -611,7 +621,7 @@ public class ItemServicesImpl
 
                 if (context.containsValue(t.getPredicate().toString())) {
                     //We have a string value (not an object with structure)
-                    log.debug("Adding: " + t.getPredicate().toString() + " : " + t.getObject().toString());
+                    log.trace("Adding: " + t.getPredicate().toString() + " : " + t.getObject().toString());
                     addTuple(result, t.getPredicate().toString(), t.getObject().toString());
                 }
                 //Check for subobjects
@@ -626,11 +636,11 @@ public class ItemServicesImpl
                             c.perform(tm2);
                             for (Triple t2 : tm2.getResult() ) {
                                 if (((Map<String, Object>) object).containsValue(t2.getPredicate().toString())) {
-                                    log.debug("Adding object field: " + t2.getPredicate().toString() + " : " + t2.getObject().toString());
+                                    log.trace("Adding object field: " + t2.getPredicate().toString() + " : " + t2.getObject().toString());
                                     addTuple(subresult, t2.getPredicate().toString(), t2.getObject().toString());
                                 }
                             }
-                            log.debug("Adding object for: " + t.getPredicate().toString());
+                            log.trace("Adding object for: " + t.getPredicate().toString());
                             addObjectTuple(result, t.getPredicate().toString(), subresult, Dc.IDENTIFIER.toString());
                         }
                     }
@@ -638,12 +648,12 @@ public class ItemServicesImpl
             }
             //The code above builds a result that uses the predicates as keys
             //The section below replaces the predicates with the labels and adds the label-predicate mapping into the context
-            log.debug("Swapping labels for predicates");
+            log.trace("Swapping labels for predicates");
             for (Entry<String, Object> e : result.entrySet() ) {
 
                 if (e.getValue() instanceof String) {
                     //Strings get mapped directly, using the new key (the label from the context)
-                    log.debug("Adding string for key: " + e.getKey() + " " + inverseContext.get(e.getKey()));
+                    log.trace("Adding string for key: " + e.getKey() + " " + inverseContext.get(e.getKey()));
                     finalResult.put((String) inverseContext.get(e.getKey()), e.getValue());
 
                 } else if (e.getValue() instanceof Map) {
@@ -651,7 +661,7 @@ public class ItemServicesImpl
                     Map<String, Object> newSubResultMap = new LinkedHashMap<String, Object>();
                     for (Entry<String, Object> se : ((Map<String, Object>) e.getValue()).entrySet() ) {
                         if (!(se.getKey().equals("@id"))) {
-                            log.debug("Adding string in sub-object for key: " + se.getKey() + " " + inverseContext.get(se.getKey()));
+                            log.trace("Adding string in sub-object for key: " + se.getKey() + " " + inverseContext.get(se.getKey()));
                             //Find the label who's key is the object's predicate, and then get the context object who's key is that label
                             Map<String, Object> subContext = (Map<String, Object>) inverseContext.get(inverseContext.get(e.getKey()));
                             newSubResultMap.put((String) (subContext.get(se.getKey())), se.getValue());
@@ -659,7 +669,7 @@ public class ItemServicesImpl
                             finalContext.put((String) (subContext.get(se.getKey())), se.getKey());
                         }
                     }
-                    log.debug("Adding object for key: " + e.getKey() + " " + inverseContext.get(e.getKey()));
+                    log.trace("Adding object for key: " + e.getKey() + " " + inverseContext.get(e.getKey()));
                     finalResult.put((String) inverseContext.get(e.getKey()), newSubResultMap);
                 } else if (e.getValue() instanceof List) {
                     //Handle each entry in the list and then map the new list into the final result
@@ -677,7 +687,7 @@ public class ItemServicesImpl
                             Map<String, Object> newSubResultMap = new LinkedHashMap<String, Object>();
                             for (Entry<String, Object> se : ((Map<String, Object>) o).entrySet() ) {
                                 if (!(se.getKey().equals("@id"))) {
-                                    log.debug("Adding string for sub-object in list for key: " + se.getKey() + " " + inverseContext.get(se.getKey()));
+                                    log.trace("Adding string for sub-object in list for key: " + se.getKey() + " " + inverseContext.get(se.getKey()));
                                     //Find the label who's key is the object's predicate, and then get the context object who's key is that label
                                     Map<String, Object> subContext = (Map<String, Object>) inverseContext.get(inverseContext.get(e.getKey()));
                                     newSubResultMap.put((String) (subContext.get(se.getKey())), se.getValue());
@@ -689,7 +699,7 @@ public class ItemServicesImpl
                         }
                     }
                     //Now add new list into result
-                    log.debug("Adding list for key: " + inverseContext.get(e.getKey()));
+                    log.trace("Adding list for key: " + inverseContext.get(e.getKey()));
                     finalResult.put((String) inverseContext.get(e.getKey()), subArrayList);
 
                 }
@@ -726,7 +736,7 @@ public class ItemServicesImpl
         Map<String, Object> inverseMap = new HashMap<String, Object>();
         for (Entry<String, Object> e : context.entrySet() ) {
             if (e.getValue() instanceof String) {
-                log.debug("Map: " + e.getValue() + e.getKey());
+                log.trace("Map: " + e.getValue() + e.getKey());
                 inverseMap.put((String) e.getValue(), e.getKey());
             } else {
                 //For objects put an entry mapping the predicate used for the "@id" to the label for the object
@@ -734,12 +744,12 @@ public class ItemServicesImpl
                 Map<String, Object> subMap = new HashMap<String, Object>();
                 for (Entry<String, Object> se : ((Map<String, Object>) e.getValue()).entrySet() ) {
                     if (se.getKey().equals("@id")) {
-                        log.debug("Map: " + se.getValue() + e.getKey());
+                        log.trace("Map: " + se.getValue() + e.getKey());
                         inverseMap.put((String) se.getValue(), e.getKey());
                         //FixMe - use '@id'?
                         subMap.put(Dc.IDENTIFIER.toString(), "Identifier");
                     } else {
-                        log.debug("Map: " + se.getValue() + se.getKey());
+                        log.trace("Map: " + se.getValue() + se.getKey());
                         subMap.put((String) se.getValue(), se.getKey());
                     }
                 }
@@ -1858,7 +1868,7 @@ public class ItemServicesImpl
         log.debug("Generating map for ID: " + id);
         Map<String, Object> oremap = new LinkedHashMap<String, Object>();
         try {
-
+            log.debug("Generating OREMap for : " + id);
             oremap.put("@id", idUri);
             oremap.put("@type", "ResourceMap");
             //Add info about map creation
@@ -1893,7 +1903,7 @@ public class ItemServicesImpl
             String salt = tMatcher.getResult().iterator().next().getObject().toString();
 
             log.debug("Found Collection: " + topCollRef.toString());
-            Map<String, Object> agg = getMetadataMapById(topCollRef, getCombinedContext(false));
+            Map<String, Object> agg = getMetadataMapById(topCollRef, getCombinedContext(false), inverseUniqueCombinedContext);
             agg.remove("@context");
             //The aggregation has an ID in the space, don't need to create a <collectionid>/v<x> style identifier as we do for aggregated things
             agg.put("Identifier", id);
@@ -1961,7 +1971,7 @@ public class ItemServicesImpl
         //Handle sub collections
         for (UriRef collection : subcollections ) {
 
-            Map<String, Object> aggRes = getMetadataMapById(collection, combinedContext.getValue());
+            Map<String, Object> aggRes = getMetadataMapById(collection, combinedContext.getValue(), inverseUniqueCombinedContext);
             aggRes.remove("@context");
             //Munge to separate static and live versions
             aggRes.put("Identifier", collection.toString() + "/v" + version);
@@ -1987,7 +1997,7 @@ public class ItemServicesImpl
         for (UriRef dataset : datasets ) {
             log.debug("Adding dataset: " + dataset.toString());
 
-            Map<String, Object> aggRes = getMetadataMapById(dataset, combinedContext.getValue());
+            Map<String, Object> aggRes = getMetadataMapById(dataset, combinedContext.getValue(), inverseUniqueCombinedContext);
             aggRes.remove("@context");
             //Munge to separate static and live versions
             aggRes.put("Identifier", dataset.toString() + "/v" + version);
