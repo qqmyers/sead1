@@ -1954,9 +1954,6 @@ public class ItemServicesImpl
 
     @SuppressWarnings("unchecked")
     private static void addSubCollectionsToAggregation(UriRef collId, Map<String, Object> agg, Map<String, Object> parent, String version, String salt) throws JSONException, OperatorException, InterruptedException {
-        if (pendingOREMaps.get(agg.get("Identifier")).equals("stop")) {
-            throw new InterruptedException("Stop requested");
-        }
         Set<UriRef> subcollections = getSubCollections(collId);
         log.debug("Adding collection: " + collId.toString());
         //Should not exist but some space may have this term - so remove it to be safe
