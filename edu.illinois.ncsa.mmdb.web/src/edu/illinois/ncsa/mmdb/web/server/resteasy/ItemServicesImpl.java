@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -608,10 +609,10 @@ public class ItemServicesImpl
 
     public static Map<String, Object> getMetadataMapById(UriRef itemUri, Map<String, Object> context, Map<String, Object> inverseContext) {
 
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Map<String, Object> result = new Hashtable<String, Object>();
 
-        Map<String, Object> finalContext = new LinkedHashMap<String, Object>();
-        Map<String, Object> finalResult = new LinkedHashMap<String, Object>();
+        Map<String, Object> finalContext = new Hashtable<String, Object>();
+        Map<String, Object> finalResult = new Hashtable<String, Object>();
 
         try { //Get fields
             TripleMatcher tm = new TripleMatcher();
@@ -629,7 +630,7 @@ public class ItemServicesImpl
                 for (Object object : context.values() ) {
                     if (object instanceof Map) {
                         if (((Map<String, Object>) object).get("@id").equals((t.getPredicate().toString()))) {
-                            Map<String, Object> subresult = new LinkedHashMap<String, Object>();
+                            Map<String, Object> subresult = new Hashtable<String, Object>();
                             subresult.put(Dc.IDENTIFIER.toString(), t.getObject().toString());
                             TripleMatcher tm2 = new TripleMatcher();
                             tm2.setSubject(t.getObject());
@@ -658,7 +659,7 @@ public class ItemServicesImpl
 
                 } else if (e.getValue() instanceof Map) {
                     //Maps get rebuilt using labels internally and then mapped with the label into the final result
-                    Map<String, Object> newSubResultMap = new LinkedHashMap<String, Object>();
+                    Map<String, Object> newSubResultMap = new Hashtable<String, Object>();
                     for (Entry<String, Object> se : ((Map<String, Object>) e.getValue()).entrySet() ) {
                         if (!(se.getKey().equals("@id"))) {
                             log.trace("Adding string in sub-object for key: " + se.getKey() + " " + inverseContext.get(se.getKey()));
@@ -684,7 +685,7 @@ public class ItemServicesImpl
 
                         } else if (o instanceof Map) { //An object
                             //Internally map to use labels and then add to new list
-                            Map<String, Object> newSubResultMap = new LinkedHashMap<String, Object>();
+                            Map<String, Object> newSubResultMap = new Hashtable<String, Object>();
                             for (Entry<String, Object> se : ((Map<String, Object>) o).entrySet() ) {
                                 if (!(se.getKey().equals("@id"))) {
                                     log.trace("Adding string for sub-object in list for key: " + se.getKey() + " " + inverseContext.get(se.getKey()));
@@ -1866,7 +1867,7 @@ public class ItemServicesImpl
 
     public static void generateOREById(String id, String idUri) {
         log.debug("Generating map for ID: " + id);
-        Map<String, Object> oremap = new LinkedHashMap<String, Object>();
+        Map<String, Object> oremap = new Hashtable<String, Object>();
         try {
             log.debug("Generating OREMap for : " + id);
             oremap.put("@id", idUri);
@@ -1971,7 +1972,7 @@ public class ItemServicesImpl
         //Handle sub collections
         for (UriRef collection : subcollections ) {
 
-            Map<String, Object> aggRes = getMetadataMapById(collection, combinedContext.getValue(), inverseUniqueCombinedContext);
+            Map<String, Object> aggRes = getMetadataMapById(collection, getCombinedContext(false), inverseUniqueCombinedContext);
             aggRes.remove("@context");
             //Munge to separate static and live versions
             aggRes.put("Identifier", collection.toString() + "/v" + version);
