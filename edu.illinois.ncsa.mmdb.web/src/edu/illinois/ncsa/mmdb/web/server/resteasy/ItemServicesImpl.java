@@ -1833,44 +1833,22 @@ public class ItemServicesImpl
 
     static private ConcurrentHashMap<String, Object> pendingOREMaps = new ConcurrentHashMap<String, Object>();
 
-    public static void stopMap(String id) {
-        log.debug("Stop for ID: " + id);
-        pendingOREMaps.put(id, "stop");
-
-    }
-
-    public static void startMap(String id) {
-        log.debug("Setting pending for ID: " + id);
-        pendingOREMaps.put(id, "pending");
-
+    public static void removeMap(String id) {
+        log.debug("Remove map for ID: " + id);
+        pendingOREMaps.remove(id);
     }
 
     @SuppressWarnings("unchecked")
     Response getOREById(String id, HttpServletRequest request) {
         log.debug("OREMap request for ID: " + id);
         Object o = pendingOREMaps.get(id);
-        //One shot
-
-        //Testing - try to let small maps finish until services can handle 503 response
-        if ((o instanceof String) && ((String) o).equals("pending")) {
-            log.debug("Found pending for ID: " + id);
-            try {
-                wait(20000);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            o = pendingOREMaps.get(id);
-        }
 
         if (o == null) {
             log.debug("Null for ID: " + id);
             return Response.status(Status.NOT_FOUND).build();
 
-        } else if ((o instanceof String) && ((String) o).equals("pending")) {
-            return Response.status(Status.SERVICE_UNAVAILABLE).build();
         } else {
-            log.debug("Clearing ID: " + id);
+            log.debug("OREMap requested, clearing ID: " + id);
             pendingOREMaps.remove(id);
             return (Response) o;
         }

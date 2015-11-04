@@ -72,6 +72,7 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
  * TODO Add comments
  *
  * @author Luis Mendez
+ * @author myersjd@uimich.edu
  *
  */
 public class RevokePublicationRequestHandler implements ActionHandler<RevokePublicationRequest, EmptyResult> {

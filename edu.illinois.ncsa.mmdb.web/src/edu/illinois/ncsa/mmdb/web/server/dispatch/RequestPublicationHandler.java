@@ -80,7 +80,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
     public static UriRef hasSalt     = Resource.uriRef("http://sead-data.net/vocab/hasSalt");
 
     @Override
-    public EmptyResult execute(RequestPublication action, ExecutionContext context) throws ActionException {
+    public EmptyResult execute(final RequestPublication action, ExecutionContext context) throws ActionException {
 
         log.debug("Requesting pub of " + action.getUri().toString());
         // only allow if user can edit user metadata fields
@@ -96,7 +96,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
             TripleWriter tw = new TripleWriter();
 
             //1.5
-            Resource subject = Resource.uriRef(action.getUri());
+            final Resource subject = Resource.uriRef(action.getUri());
             Resource predicate = IsReadyForPublicationHandler.proposedForPublicationRef;
             Resource value = Resource.literal("true"); //Value is not used - just checking the existence of the triple for 1.5 publication
             log.debug("Writing 1.5 triple");
@@ -114,7 +114,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
             TripleMatcher tm2 = new TripleMatcher();
             tm2.match(subject, Resource.uriRef(DCTerms.identifier.toString()), null);
             TupeloStore.getInstance().getContext().perform(tm2);
-            String versionNumber = Integer.toString(tMatcher.getResult().size() + tm2.getResult().size() + 1);
+            final String versionNumber = Integer.toString(tMatcher.getResult().size() + tm2.getResult().size() + 1);
 
             //Generate ID for published version
             Map<Resource, Object> md = new HashMap<Resource, Object>();
@@ -126,115 +126,134 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
             tw.add(subject, DcTerms.HAS_VERSION, aggId);
             tw.add(aggId, Resource.uriRef("http://sead-data.net/vocab/hasVersionNumber"), Resource.literal(versionNumber));
             //Used to generate unique keys for file retrieval
-            String salt = UUID.randomUUID().toString();
+            final String salt = UUID.randomUUID().toString();
             tw.add(aggId, hasSalt, Resource.literal(salt));
 
             log.debug("Agg: " + aggId.toString() + " is version: " + versionNumber);
 
             TupeloStore.getInstance().getContext().perform(tw);
 
-            //Start oremap generation
-            String this_space = PropertiesLoader.getProperties().getProperty("domain");
-            final String idUri = this_space + "/resteasy/researchobjects/" + aggId.toString();
-
-            ItemServicesImpl.startMap(aggId.toString());
+            //Start pub request and oremap generation as a background process
 
             Thread oreThread = new Thread()
             {
                 public void run() {
+                    String this_space = PropertiesLoader.getProperties().getProperty("domain");
+                    final String idUri = this_space + "/resteasy/researchobjects/" + aggId.toString();
+
                     ItemServicesImpl.generateOREById(aggId.toString(), idUri);
+
+                    //Send notice to service
+                    String server = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);
+                    try {
+                        JSONObject requestJsonObject = new JSONObject();
+                        JSONObject aggJsonObject = new JSONObject(ItemServicesImpl.getMetadataMapById(subject.toString(), ItemServicesImpl.collectionBasics, Resource.uriRef(action.getUser())));
+                        aggJsonObject.put("Identifier", aggId.toString());
+                        aggJsonObject.put("@id", idUri + "?pubtoken=" + TokenStore.generateToken("/researchobjects/" + aggId.toString(), salt) + "#aggregation");
+                        aggJsonObject.put("@type", "Aggregation");
+
+                        //Collection ids must be encoded
+                        aggJsonObject.put("similarTo", this_space + "/resteasy/collections/" + URLEncoder.encode(subject.toString(), "UTF-8"));
+
+                        JSONObject contextObject = aggJsonObject.getJSONObject("@context");
+                        requestJsonObject.put("Aggregation", aggJsonObject);
+                        requestJsonObject.put("Repository", TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultRepository));
+                        String method = "/researchobjects/" + aggId.toString() + "/pid";
+                        requestJsonObject.put("Publication Callback", this_space + "/resteasy" + method + "?pubtoken=" + TokenStore.generateToken(method, salt));
+                        JSONObject preferencesJsonObject = new JSONObject(TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultCPPreferences));
+                        requestJsonObject.put("Preferences", preferencesJsonObject);
+
+                        String rHolderString = action.getUser();
+
+                        TripleMatcher idMatcher = new TripleMatcher();
+                        idMatcher.setSubject(Resource.uriRef(rHolderString));
+                        idMatcher.setPredicate(Resource.uriRef(GetUserPID.userPIDPredicate));
+                        TupeloStore.getInstance().getContext().perform(idMatcher);
+                        Set<Triple> idSet = idMatcher.getResult();
+                        if (idSet.size() > 0) {
+                            rHolderString = idSet.iterator().next().getObject().toString();
+                        }
+                        requestJsonObject.put("Rights Holder", rHolderString);
+
+                        //Now add stats
+                        CollectionInfo ci = ItemServicesImpl.getCollectionInfo((UriRef) subject, 0);
+                        JSONObject stats = new JSONObject();
+
+                        stats.put("Total Size", "" + ci.getSize());
+                        stats.put("Number of Collections", "" + ci.getNumCollections());
+                        stats.put("Number of Datasets", "" + ci.getNumDatasets());
+                        stats.put("Max Dataset Size", "" + ci.getMaxDatasetSize());
+                        stats.put("Max Collection Depth", "" + ci.getMaxDepth());
+                        stats.put("Data Mimetypes", ci.getMimetypeSet());
+                        requestJsonObject.put("Aggregation Statistics", stats);
+                        for (String key : ItemServicesImpl.collectionStats.keySet() ) {
+                            contextObject.put(key, ItemServicesImpl.collectionStats.get(key));
+                        }
+                        contextObject.put("Preferences", "http://sead-data.net/terms/publicationpreferences");
+                        contextObject.put("Repository", "http://sead-data.net/terms/requestedrepository");
+                        contextObject.put("Aggregation Statistics", "http://sead-data.net/terms/publicationstatistics");
+                        contextObject.put("Publication Callback", "http://sead-data.net/terms/publicationcallback");
+                        contextObject.put("Rights Holder", DCTerms.rightsHolder.toString());
+
+                        aggJsonObject.remove("@context");
+
+                        requestJsonObject.accumulate("@context", contextObject);
+                        requestJsonObject.accumulate("@context", "https://w3id.org/ore/context");
+
+                        log.debug("JSON: " + requestJsonObject.toString());
+
+                        URL url = new URL(server + "/researchobjects");
+                        log.debug("URL = " + url.toString());
+                        try {
+                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+                            // send post
+                            conn.setDoOutput(true);
+                            conn.setRequestProperty("Accept", "application/json");
+                            conn.setRequestProperty("Content-type", "application/json");
+                            conn.setRequestMethod("POST");
+                            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                            wr.write(requestJsonObject.toString());
+                            wr.flush();
+                            wr.close();
+
+                            // Get the response
+                            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                            String line;
+                            StringBuilder sb = new StringBuilder();
+                            while ((line = rd.readLine()) != null) {
+                                log.debug(line);
+                                sb.append(line);
+                                sb.append("\n"); //$NON-NLS-1$
+                            }
+                            rd.close();
+                        } catch (IOException io) {
+                            log.warn("2.0 Pub request call failed for " + aggId.toString(), io);
+                            ItemServicesImpl.removeMap(aggId.toString());
+                        }
+                    }
+                    catch (Exception e) {
+                        log.debug("Pub Request Failed", e);
+                        //Remove triples about this request
+                        TripleWriter tw = new TripleWriter();
+                        tw.remove(aggId, Rdf.TYPE, RequestPublicationHandler.Aggregation);
+                        tw.remove(subject, DcTerms.HAS_VERSION, aggId);
+                        tw.remove(aggId, Resource.uriRef("http://sead-data.net/vocab/hasVersionNumber"), Resource.literal(versionNumber));
+                        tw.remove(aggId, hasSalt, Resource.literal(salt));
+                        //Remove map if it was created
+                        ItemServicesImpl.removeMap(aggId.toString());
+
+                        try {
+                            TupeloStore.getInstance().getContext().perform(tw);
+                            log.debug("Removed RO: " + aggId);
+                        } catch (Exception pe) {
+                            log.debug("Failed to remove RO with ID: " + aggId, pe);
+                        }
+                    }
                 }
             };
             oreThread.start();
 
-            //Send notice to service
-            String server = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);
-
-            JSONObject requestJsonObject = new JSONObject();
-            JSONObject aggJsonObject = new JSONObject(ItemServicesImpl.getMetadataMapById(subject.toString(), ItemServicesImpl.collectionBasics, Resource.uriRef(action.getUser())));
-            aggJsonObject.put("Identifier", aggId.toString());
-            aggJsonObject.put("@id", idUri + "?pubtoken=" + TokenStore.generateToken("/researchobjects/" + aggId.toString(), salt) + "#aggregation");
-            aggJsonObject.put("@type", "Aggregation");
-
-            //Collection ids must be encoded
-            aggJsonObject.put("similarTo", this_space + "/resteasy/collections/" + URLEncoder.encode(subject.toString(), "UTF-8"));
-
-            JSONObject contextObject = aggJsonObject.getJSONObject("@context");
-            requestJsonObject.put("Aggregation", aggJsonObject);
-            requestJsonObject.put("Repository", TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultRepository));
-            String method = "/researchobjects/" + aggId.toString() + "/pid";
-            requestJsonObject.put("Publication Callback", this_space + "/resteasy" + method + "?pubtoken=" + TokenStore.generateToken(method, salt));
-            JSONObject preferencesJsonObject = new JSONObject(TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultCPPreferences));
-            requestJsonObject.put("Preferences", preferencesJsonObject);
-
-            String rHolderString = action.getUser();
-
-            TripleMatcher idMatcher = new TripleMatcher();
-            idMatcher.setSubject(Resource.uriRef(rHolderString));
-            idMatcher.setPredicate(Resource.uriRef(GetUserPID.userPIDPredicate));
-            TupeloStore.getInstance().getContext().perform(idMatcher);
-            Set<Triple> idSet = idMatcher.getResult();
-            if (idSet.size() > 0) {
-                rHolderString = idSet.iterator().next().getObject().toString();
-            }
-            requestJsonObject.put("Rights Holder", rHolderString);
-
-            //Now add stats
-            CollectionInfo ci = ItemServicesImpl.getCollectionInfo((UriRef) subject, 0);
-            JSONObject stats = new JSONObject();
-
-            stats.put("Total Size", "" + ci.getSize());
-            stats.put("Number of Collections", "" + ci.getNumCollections());
-            stats.put("Number of Datasets", "" + ci.getNumDatasets());
-            stats.put("Max Dataset Size", "" + ci.getMaxDatasetSize());
-            stats.put("Max Collection Depth", "" + ci.getMaxDepth());
-            stats.put("Data Mimetypes", ci.getMimetypeSet());
-            requestJsonObject.put("Aggregation Statistics", stats);
-            for (String key : ItemServicesImpl.collectionStats.keySet() ) {
-                contextObject.put(key, ItemServicesImpl.collectionStats.get(key));
-            }
-            contextObject.put("Preferences", "http://sead-data.net/terms/publicationpreferences");
-            contextObject.put("Repository", "http://sead-data.net/terms/requestedrepository");
-            contextObject.put("Aggregation Statistics", "http://sead-data.net/terms/publicationstatistics");
-            contextObject.put("Publication Callback", "http://sead-data.net/terms/publicationcallback");
-            contextObject.put("Rights Holder", DCTerms.rightsHolder.toString());
-
-            aggJsonObject.remove("@context");
-
-            requestJsonObject.accumulate("@context", contextObject);
-            requestJsonObject.accumulate("@context", "https://w3id.org/ore/context");
-
-            log.debug("JSON: " + requestJsonObject.toString());
-
-            URL url = new URL(server + "/researchobjects");
-            log.debug("URL = " + url.toString());
-            try {
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-                // send post
-                conn.setDoOutput(true);
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("Content-type", "application/json");
-                conn.setRequestMethod("POST");
-                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-                wr.write(requestJsonObject.toString());
-                wr.flush();
-                wr.close();
-
-                // Get the response
-                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                StringBuilder sb = new StringBuilder();
-                while ((line = rd.readLine()) != null) {
-                    log.debug(line);
-                    sb.append(line);
-                    sb.append("\n"); //$NON-NLS-1$
-                }
-                rd.close();
-            } catch (IOException io) {
-                log.warn("2.0 Pub request call failed for " + aggId.toString(), io);
-                ItemServicesImpl.stopMap(aggId.toString());
-            }
             return new EmptyResult();
         } catch (Exception x) {
             log.error("Error publishing on " + action.getUri(), x);
