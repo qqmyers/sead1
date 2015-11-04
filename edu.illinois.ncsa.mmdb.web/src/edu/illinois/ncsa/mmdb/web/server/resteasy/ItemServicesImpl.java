@@ -36,6 +36,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -1830,7 +1831,7 @@ public class ItemServicesImpl
         return tagSet;
     }
 
-    static private volatile HashMap<String, Object> pendingOREMaps = new HashMap<String, Object>();
+    static private ConcurrentHashMap<String, Object> pendingOREMaps = new ConcurrentHashMap<String, Object>();
 
     public static void stopMap(String id) {
         pendingOREMaps.put(id, "stop");
