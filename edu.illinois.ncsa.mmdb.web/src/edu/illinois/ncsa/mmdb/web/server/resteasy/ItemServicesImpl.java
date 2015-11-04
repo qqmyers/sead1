@@ -1834,11 +1834,13 @@ public class ItemServicesImpl
     static private ConcurrentHashMap<String, Object> pendingOREMaps = new ConcurrentHashMap<String, Object>();
 
     public static void stopMap(String id) {
+        log.debug("Stop for ID: " + id);
         pendingOREMaps.put(id, "stop");
 
     }
 
     public static void startMap(String id) {
+        log.debug("Setting pending for ID: " + id);
         pendingOREMaps.put(id, "pending");
 
     }
@@ -1851,6 +1853,7 @@ public class ItemServicesImpl
 
         //Testing - try to let small maps finish until services can handle 503 response
         if ((o instanceof String) && ((String) o).equals("pending")) {
+            log.debug("Found pending for ID: " + id);
             try {
                 wait(20000);
             } catch (InterruptedException e) {
@@ -1861,11 +1864,13 @@ public class ItemServicesImpl
         }
 
         if (o == null) {
+            log.debug("Null for ID: " + id);
             return Response.status(Status.NOT_FOUND).build();
 
         } else if ((o instanceof String) && ((String) o).equals("pending")) {
             return Response.status(Status.SERVICE_UNAVAILABLE).build();
         } else {
+            log.debug("Clearing ID: " + id);
             pendingOREMaps.remove(id);
             return (Response) o;
         }

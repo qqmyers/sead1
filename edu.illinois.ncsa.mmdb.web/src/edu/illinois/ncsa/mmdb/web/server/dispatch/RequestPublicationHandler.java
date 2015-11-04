@@ -204,7 +204,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
             requestJsonObject.accumulate("@context", contextObject);
             requestJsonObject.accumulate("@context", "https://w3id.org/ore/context");
 
-            log.debug("JSON" + requestJsonObject.toString());
+            log.debug("JSON: " + requestJsonObject.toString());
 
             URL url = new URL(server + "/researchobjects");
             log.debug("URL = " + url.toString());
