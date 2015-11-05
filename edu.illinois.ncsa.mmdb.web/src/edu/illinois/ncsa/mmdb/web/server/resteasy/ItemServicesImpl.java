@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -493,8 +492,8 @@ public class ItemServicesImpl
     }
 
     private static Memoized<Map<String, Object>> combinedContext              = null;
-    //Calculated when combinedContext is updated - does not include extracted props
-    private static Map<String, Object>           inverseUniqueCombinedContext = null;
+
+    private static Memoized<Map<String, Object>> inverseUniqueCombinedContext = null;
 
     public static Map<String, Object> getCombinedContext(boolean includeExtracted) {
 
@@ -534,7 +533,8 @@ public class ItemServicesImpl
                     //    access control here
 
                     combinedMap.remove("Has Subcollection");
-                    inverseUniqueCombinedContext = getInverseContext(combinedMap);
+                    //Force inverse to refresh if/when called
+                    inverseUniqueCombinedContext = null;
                     return combinedMap;
                 }
             };
@@ -544,6 +544,29 @@ public class ItemServicesImpl
         Map<String, Object> fullMap = combinedContext.getValue();
         if (includeExtracted) {
             fullMap.putAll(listExtractedMetadataFields2());
+        }
+        return fullMap;
+    }
+
+    public static Map<String, Object> getCombinedInverseContext(boolean includeExtracted) {
+
+        if (inverseUniqueCombinedContext == null) {
+            inverseUniqueCombinedContext = new Memoized<Map<String, Object>>() {
+                @SuppressWarnings("unchecked")
+                public Map<String, Object> computeValue() {
+
+                    Map<String, Object> combinedMap = getCombinedContext(false);
+                    combinedMap.remove("Has Subcollection");
+                    return getInverseContext(combinedMap);
+                }
+            };
+            inverseUniqueCombinedContext.setTtl(60 * 60 * 1000); // 1 hour
+        }
+        // extracted fields are memoized/cached separately, just assemble here if needed
+        // the inverse of the combo is the combo of the inverses (true if lists don't overlap)
+        Map<String, Object> fullMap = inverseUniqueCombinedContext.getValue();
+        if (includeExtracted) {
+            fullMap.putAll(getInverseContext(listExtractedMetadataFields2()));
         }
         return fullMap;
     }
@@ -609,10 +632,10 @@ public class ItemServicesImpl
 
     public static Map<String, Object> getMetadataMapById(UriRef itemUri, Map<String, Object> context, Map<String, Object> inverseContext) {
 
-        Map<String, Object> result = new Hashtable<String, Object>();
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
 
-        Map<String, Object> finalContext = new Hashtable<String, Object>();
-        Map<String, Object> finalResult = new Hashtable<String, Object>();
+        Map<String, Object> finalContext = new LinkedHashMap<String, Object>();
+        Map<String, Object> finalResult = new LinkedHashMap<String, Object>();
 
         try { //Get fields
             TripleMatcher tm = new TripleMatcher();
@@ -630,7 +653,7 @@ public class ItemServicesImpl
                 for (Object object : context.values() ) {
                     if (object instanceof Map) {
                         if (((Map<String, Object>) object).get("@id").equals((t.getPredicate().toString()))) {
-                            Map<String, Object> subresult = new Hashtable<String, Object>();
+                            Map<String, Object> subresult = new LinkedHashMap<String, Object>();
                             subresult.put(Dc.IDENTIFIER.toString(), t.getObject().toString());
                             TripleMatcher tm2 = new TripleMatcher();
                             tm2.setSubject(t.getObject());
@@ -659,7 +682,7 @@ public class ItemServicesImpl
 
                 } else if (e.getValue() instanceof Map) {
                     //Maps get rebuilt using labels internally and then mapped with the label into the final result
-                    Map<String, Object> newSubResultMap = new Hashtable<String, Object>();
+                    Map<String, Object> newSubResultMap = new LinkedHashMap<String, Object>();
                     for (Entry<String, Object> se : ((Map<String, Object>) e.getValue()).entrySet() ) {
                         if (!(se.getKey().equals("@id"))) {
                             log.trace("Adding string in sub-object for key: " + se.getKey() + " " + inverseContext.get(se.getKey()));
@@ -685,7 +708,7 @@ public class ItemServicesImpl
 
                         } else if (o instanceof Map) { //An object
                             //Internally map to use labels and then add to new list
-                            Map<String, Object> newSubResultMap = new Hashtable<String, Object>();
+                            Map<String, Object> newSubResultMap = new LinkedHashMap<String, Object>();
                             for (Entry<String, Object> se : ((Map<String, Object>) o).entrySet() ) {
                                 if (!(se.getKey().equals("@id"))) {
                                     log.trace("Adding string for sub-object in list for key: " + se.getKey() + " " + inverseContext.get(se.getKey()));
@@ -1867,7 +1890,7 @@ public class ItemServicesImpl
 
     public static void generateOREById(String id, String idUri) {
         log.debug("Generating map for ID: " + id);
-        Map<String, Object> oremap = new Hashtable<String, Object>();
+        Map<String, Object> oremap = new LinkedHashMap<String, Object>();
         try {
             log.debug("Generating OREMap for : " + id);
             oremap.put("@id", idUri);
@@ -1904,7 +1927,8 @@ public class ItemServicesImpl
             String salt = tMatcher.getResult().iterator().next().getObject().toString();
 
             log.debug("Found Collection: " + topCollRef.toString());
-            Map<String, Object> agg = getMetadataMapById(topCollRef, getCombinedContext(false), inverseUniqueCombinedContext);
+            Map<String, Object> combined = getCombinedContext(false); //may refresh inverse
+            Map<String, Object> agg = getMetadataMapById(topCollRef, combined, getCombinedInverseContext(false));
             agg.remove("@context");
             //The aggregation has an ID in the space, don't need to create a <collectionid>/v<x> style identifier as we do for aggregated things
             agg.put("Identifier", id);
@@ -1971,8 +1995,8 @@ public class ItemServicesImpl
         parent.remove("Has Part");
         //Handle sub collections
         for (UriRef collection : subcollections ) {
-
-            Map<String, Object> aggRes = getMetadataMapById(collection, getCombinedContext(false), inverseUniqueCombinedContext);
+            Map<String, Object> combined = getCombinedContext(false); //may refresh inverse
+            Map<String, Object> aggRes = getMetadataMapById(collection, combined, getCombinedInverseContext(false));
             aggRes.remove("@context");
             //Munge to separate static and live versions
             aggRes.put("Identifier", collection.toString() + "/v" + version);
@@ -1997,8 +2021,8 @@ public class ItemServicesImpl
         Set<UriRef> datasets = getDatasets(collId);
         for (UriRef dataset : datasets ) {
             log.debug("Adding dataset: " + dataset.toString());
-
-            Map<String, Object> aggRes = getMetadataMapById(dataset, combinedContext.getValue(), inverseUniqueCombinedContext);
+            Map<String, Object> combined = getCombinedContext(false); //may refresh inverse
+            Map<String, Object> aggRes = getMetadataMapById(dataset, combined, getCombinedInverseContext(false));
             aggRes.remove("@context");
             //Munge to separate static and live versions
             aggRes.put("Identifier", dataset.toString() + "/v" + version);
