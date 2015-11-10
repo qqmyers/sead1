@@ -352,7 +352,7 @@ public class DatasetWidget extends Composite {
                     titleLabel.setEditable(true);
                 }
                 if (p.isPermitted(Permission.RERUN_EXTRACTION)) {
-                    Anchor extractAnchor = new Anchor("Rerun Extraction");
+                    Anchor extractAnchor = new Anchor("Reprocess Dataset");
                     extractAnchor.addStyleName("datasetActionLink");
                     extractAnchor.addClickHandler(new ClickHandler() {
                         public void onClick(ClickEvent event) {
@@ -435,7 +435,7 @@ public class DatasetWidget extends Composite {
     }
 
     protected void showRerunExtraction() {
-        ConfirmDialog dialog = new ConfirmDialog("Rerun Extraction", "Are you sure you want to rerun the extraction on this dataset? Results can take a few seconds to minutes to show up.");
+        ConfirmDialog dialog = new ConfirmDialog("Reprocess Dataset", "This will remove existing previews and extracted information and recreate them based on the current mimetype.Results can take a few seconds to minutes to show up. Proceed?");
 
         dialog.addConfirmHandler(new ConfirmHandler() {
             public void onConfirm(ConfirmEvent event) {
