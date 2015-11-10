@@ -32,9 +32,22 @@
 
 package org.sead.acr.tools.medici;
 
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.tupeloproject.kernel.BlobChecker;
 import org.tupeloproject.kernel.BlobRemover;
 import org.tupeloproject.kernel.OperatorException;
@@ -52,22 +65,28 @@ import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
 
+import edu.uiuc.ncsa.cet.bean.CETBean;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 
 public class NodeProcessorBase extends MediciToolBase {
 
-    static long         totalBytes         = 0l;
-    static long         totalTriples       = 0l;
-    static long         totalBlobs         = 0l;
+    static long           totalBytes         = 0l;
+    static long           totalTriples       = 0l;
+    static long           totalBlobs         = 0l;
     protected static long max                = 9223372036854775807l;
     protected static long numberProcessed    = 0l;
 
-    static Set<UriRef>  processedNodeRefs  = new HashSet<UriRef>();
-    static Set<UriRef>  predicatesFollowed = new HashSet<UriRef>();
+    static Set<UriRef>    processedNodeRefs  = new HashSet<UriRef>();
+    static Set<UriRef>    predicatesFollowed = new HashSet<UriRef>();
 
-    static boolean      verbose            = false;
-    static boolean      doDelete           = false;
-    static boolean      processActiveData  = false;
+    static boolean        verbose            = false;
+    static boolean        doDelete           = false;
+    static boolean        processActiveData  = false;
+
+    static final String   GEOWORKSPACE       = "medici";             // used to
+                                                                      // remove
+                                                                      // geo
+                                                                      // preview
 
     protected static boolean process(UriRef node) {
 
@@ -111,12 +130,34 @@ public class NodeProcessorBase extends MediciToolBase {
             return "TopLevelMarker";
         } else if ((predicate != null) && isRelationship(node, triples)) {
             return "Relationship";
-        } else {
-            // No predicate is top-level and we only process if it is deleted or
+        }  else {
+
+            // No predicate means top-level and we only process if it is deleted
+            // or
             // the processactive flag is set
-            if ((predicate == null) &&!(processActiveData || triples.contains(new Triple(node, DcTerms.IS_REPLACED_BY, Rdf.NIL)))) {
+            if ((predicate == null) && !(processActiveData || triples.contains(new Triple(node, DcTerms.IS_REPLACED_BY, Rdf.NIL)))) {
                 return "Not processed";
             }
+            
+            if ((predicate == null) && (isGeoPreview(node, triples))) {
+                println("geoserver entry may exist");
+                if (doDelete) {
+                    TripleMatcher parentMatcher = new TripleMatcher();
+                    parentMatcher.setPredicate(Cet.cet("hasPreview"));
+                    parentMatcher.setObject(node);
+                    context.perform(parentMatcher);
+                    if (!parentMatcher.getResult().isEmpty()) {
+                        UriRef dataset = (UriRef) parentMatcher.getResult().iterator().next().getSubject();
+                        if (deleteGeoserverDataStore(dataset)) {
+                            println("Deleted geoserver entry for :" + dataset.toString());
+                        } else {
+                            println("Failed to remove geoserver entry for :" + dataset.toString());
+                        }
+                    }
+                }
+
+            }
+            
             // Assure node itself exists and has a size - add it's size to
             // the
             // total
@@ -219,6 +260,11 @@ public class NodeProcessorBase extends MediciToolBase {
         return null;
     }
 
+    private static boolean isGeoPreview(UriRef node, Set<Triple> triples) {
+        return triples.contains(new Triple(node, Resource.uriRef("tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyValueImplementationClassName"), Resource
+                .literal("edu.uiuc.ncsa.cet.bean.PreviewGeoserverBean")));
+    }
+
     private static boolean isCollection(UriRef node, Set<Triple> triples) {
         return triples.contains(new Triple(node, Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE));
     }
@@ -262,4 +308,63 @@ public class NodeProcessorBase extends MediciToolBase {
         return sBuffer.toString();
     }
 
+    /**
+     * Modified from
+     * edu.illinois.ncsa.medici.extractor.geoserver.GeoserverExtractor by Jong
+     * Lee Delete geoserver datastore via geoserver rest api
+     * 
+     * @param geoserver
+     * @param username
+     * @param password
+     * @param worksapce
+     * @param storeName
+     * @return
+     * @throws IOException
+     * @throws HttpException
+     */
+    public static boolean deleteGeoserverDataStore(UriRef dataset) {
+        CloseableHttpResponse response = null;
+        try {
+            // create geoserver rest publisher
+            String geoserver = props.getProperty("proxiedgeoserver");
+            if (geoserver == null) {
+                geoserver = "http://localhost:8080/geoserver";
+            }
+            println("GEOSERVER: " + geoserver);
+
+            String username = props.getProperty("geouser");
+            if (username == null) {
+                username = "admin";
+            }
+            println("USER: " + username);
+            String password = props.getProperty("geopassword");
+            if (password == null) {
+                println("password was null");
+                password = "admin";
+            }
+
+            String storeName = URLEncoder.encode(dataset.toString(), "UTF-8");
+            println("Store: " + storeName);
+            URL urlp = new URL(geoserver);
+            println("URLP: " + urlp.toExternalForm());
+            String url = geoserver + "/rest/workspaces/" + GEOWORKSPACE + "/datastores/" + storeName + ".html?recurse=true";
+            System.out.println("Calling: " + url);
+
+            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(new AuthScope(urlp.getHost(), urlp.getPort()), new UsernamePasswordCredentials(username, password));
+            CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build();
+
+            HttpDelete delete = new HttpDelete(url);
+
+            response = httpClient.execute(delete);
+        } catch (Exception e) {
+            if (verbose) {
+                println(e.getMessage());
+            }
+        }
+        if ((response != null) && (response.getStatusLine().getStatusCode() == 200))
+            return true;
+        else
+            return false;
+    }
 }

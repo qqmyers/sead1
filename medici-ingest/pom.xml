@@ -111,7 +111,12 @@
       
     </dependency>
 
-		
+
+        <dependency>
+        	<groupId>org.apache.httpcomponents</groupId>
+        	<artifactId>httpclient</artifactId>
+        	<version>4.4</version>
+        </dependency>
 	</dependencies>
 	<description>Command-line Tools for working with Medici/ACR for bulk ingests, modifications, verfications, and statistical analyses.</description>
 	<organization>

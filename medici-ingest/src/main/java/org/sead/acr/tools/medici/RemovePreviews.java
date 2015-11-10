@@ -44,14 +44,13 @@ import java.util.Set;
 import org.tupeloproject.kernel.TripleFetcher;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.Unifier;
-import org.tupeloproject.rdf.Literal;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
-import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
+
 
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
@@ -87,42 +86,52 @@ public class RemovePreviews extends NodeProcessorBase {
         processActiveData = true; // Don't expect to want to delete previews of
                                   // deleted items (without just removing them
                                   // altogether)
+        //Get all dataset args or all eligible datasets - don't know how many have previews so can't truncate until we start processing
+        boolean global = true;
+        Set<UriRef> datasetsRefs = new HashSet<UriRef>();
+        for (String arg : args) {
+            if ((!(arg.equalsIgnoreCase("-verbose")) && (!arg.equalsIgnoreCase("-dodelete")) && (!arg.equalsIgnoreCase("-includesmall")) && (!arg.equalsIgnoreCase("-includeviewed")) && (!arg
+                    .startsWith("-limit")))) {
+                global = false;
 
-        Set<Literal> typeSet = new HashSet<Literal>();
-        typeSet.add(Resource.literal("edu.uiuc.ncsa.cet.bean.PreviewVideoBean"));
-        typeSet.add(Resource.literal("edu.uiuc.ncsa.cet.bean.PreviewImageBean"));
-        typeSet.add(Resource.literal("edu.uiuc.ncsa.cet.bean.PreviewTabularDataBean"));
-        typeSet.add(Resource.literal("edu.uiuc.ncsa.cet.bean.PreviewMultiTabularDataBean"));
-        typeSet.add(Resource.literal("edu.uiuc.ncsa.cet.bean.PreviewPyramidBean"));
-        typeSet.add(Resource.literal("edu.uiuc.ncsa.cet.bean.PreviewMultiVideoBean"));
-        typeSet.add(Resource.literal("edu.uiuc.ncsa.cet.bean.PreviewDocumentBean"));
-        typeSet.add(Resource.literal("edu.uiuc.ncsa.cet.bean.PreviewMultiImageBean"));
-        // FixMe - Ignoring edu.uiuc.ncsa.cet.bean.PreviewGeoserverBean until we
-        // add code to remove the geoserver entries
-
-        UriRef classnameRef = Resource.uriRef("tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyValueImplementationClassName");
-
-        Unifier uf = new Unifier();
-        uf.addPattern("d", Rdf.TYPE, Cet.DATASET);
-        uf.setColumnNames("d");
-        context.perform(uf);
-
-        // Find all datasets
-        for (Tuple<Resource> row : uf.getResult()) {
-            // Filter out those with views if desired
-            if (!includeViewed) {
-                TripleMatcher tm = new TripleMatcher();
-                tm.setSubject(row.get(0));
-                tm.setPredicate(MMDB.VIEWED_BY);
-                context.perform(tm);
-                if (!(tm.getResult().isEmpty())) {
-                    // Skip any datasets that have been viewed
-                    continue;
+                try {
+                    UriRef ds = Resource.uriRef(arg);
+                    datasetsRefs.add(ds);
+                } catch (Exception e) {
+                    println("Could not parse arg: " + arg);
+                    e.printStackTrace();
                 }
             }
+        }
+
+        UriRef classnameRef = Resource.uriRef("tag:tupeloproject.org,2006:/2.0/beans/2.0/propertyValueImplementationClassName");
+        if (global) {
+            Unifier uf = new Unifier();
+            uf.addPattern("d", Rdf.TYPE, Cet.DATASET);
+            uf.setColumnNames("d");
+            context.perform(uf);
+
+            // Find all datasets
+            for (Tuple<Resource> row : uf.getResult()) {
+                // Filter out those with views if desired
+                if (!includeViewed) {
+                    TripleMatcher tm = new TripleMatcher();
+                    tm.setSubject(row.get(0));
+                    tm.setPredicate(MMDB.VIEWED_BY);
+                    context.perform(tm);
+                    if (!(tm.getResult().isEmpty())) {
+                        // Skip any datasets that have been viewed
+                        continue;
+                    }
+                }
+                datasetsRefs.add((UriRef) row.get(0));
+            }
+        }
+
+        for (UriRef dataset : datasetsRefs) {
             // Now get Previews
             Unifier previews = new Unifier();
-            previews.addPattern(row.get(0), Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/hasPreview"), "prev");
+            previews.addPattern(dataset, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/hasPreview"), "prev");
             previews.addPattern("prev", classnameRef, "type");
             previews.setColumnNames("prev", "type");
             context.perform(previews);
@@ -155,7 +164,7 @@ public class RemovePreviews extends NodeProcessorBase {
                 // Have one we should process
                 if (numberProcessed < max) {
 
-                    println("Processing " + prev.get(1).toString() + " for dataset: " + row.get(0) + " : " + prev.get(0));
+                    println("Processing " + prev.get(1).toString() + " for dataset: " + dataset.toString() + " : " + prev.get(0).toString());
 
                     process((UriRef) prev.get(0));
                     numberProcessed++;

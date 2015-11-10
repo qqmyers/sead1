@@ -9,5 +9,7 @@
 	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/cet-bean-tupelo.jar" sourcepath="/edu.uiuc.ncsa.cet.bean.tupelo/src/main/java"/>
 	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/cet-bean.jar"/>
 	<classpathentry kind="lib" path="/edu.illinois.ncsa.mmdb.web/war/WEB-INF/lib/tupelo-util-2.7.2-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="httpclient-4.4.jar"/>
+	<classpathentry kind="lib" path="httpcore-4.4.4.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
