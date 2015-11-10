@@ -87,6 +87,7 @@ import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.SecureHashMinter;
 
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
 import edu.illinois.ncsa.mmdb.web.rest.RestService;
@@ -451,7 +452,9 @@ public class UploadBlob extends AuthenticatedServlet {
 
                     // submit to extraction service
                     try {
-                        TupeloStore.getInstance().extractPreviews(uri);
+                        if (!TupeloStore.getInstance().getConfiguration(ConfigurationKey.BigData).equals("true")) {
+                            TupeloStore.getInstance().extractPreviews(uri);
+                        }
                     } catch (Exception e) {
                         log.info("Could not submit uri to extraction service, is it down?", e);
                     }
