@@ -172,9 +172,8 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
     @GET
     @Path("/{aggId}/files/{id}")
     @Produces("application/json")
-    public Response getDataFile(@PathParam("aggId") String aggId, @PathParam("id") String id, @QueryParam("pubtoken") String token, @javax.ws.rs.core.Context HttpServletRequest request) {
+    public Response getDataFile(@PathParam("aggId") String aggId, @Encoded @PathParam("id") String id, @QueryParam("pubtoken") String token, @javax.ws.rs.core.Context HttpServletRequest request) {
         try {
-            id = URLDecoder.decode(id, "UTF-8");
             TripleMatcher tMatcher = new TripleMatcher();
             tMatcher.setSubject(Resource.uriRef(aggId));
             tMatcher.setPredicate(Resource.uriRef("http://sead-data.net/vocab/hasSalt"));
@@ -187,6 +186,7 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
                 result.put("Failure", "Invalid pubtoken");
                 return Response.status(Status.FORBIDDEN).entity(result).build();
             }
+            id = URLDecoder.decode(id, "UTF-8");
 
         } catch (UnsupportedEncodingException e) {
             Map<String, String> result = new HashMap<String, String>(1);

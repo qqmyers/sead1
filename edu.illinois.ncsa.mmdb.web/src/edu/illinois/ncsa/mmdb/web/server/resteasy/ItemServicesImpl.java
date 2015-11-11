@@ -1990,7 +1990,7 @@ public class ItemServicesImpl
     }
 
     @SuppressWarnings("unchecked")
-    private static void addSubCollectionsToAggregation(UriRef collId, Map<String, Object> agg, Map<String, Object> parent, String version, String salt) throws JSONException, OperatorException, InterruptedException {
+    private static void addSubCollectionsToAggregation(UriRef collId, Map<String, Object> agg, Map<String, Object> parent, String version, String salt) throws JSONException, OperatorException, InterruptedException, UnsupportedEncodingException {
         Set<UriRef> subcollections = getSubCollections(collId);
         log.debug("Adding collection: " + collId.toString());
         //Should not exist but some space may have this term - so remove it to be safe
@@ -2032,7 +2032,8 @@ public class ItemServicesImpl
             aggRes.put("Version Of", dataset.toString());
 
             String urlString = PropertiesLoader.getProperties().getProperty("domain");
-            String path = "/researchobjects/" + agg.get("Identifier") + "/files/" + dataset.toString();
+            String path = "/researchobjects/" + agg.get("Identifier") + "/files/" + URLEncoder.encode(dataset.toString(), "UTF-8");
+
             aggRes.put("similarTo", urlString + "/resteasy" + path + "?pubtoken=" + TokenStore.generateToken(path, salt));
 
             List<String> types = new ArrayList<String>(2);
