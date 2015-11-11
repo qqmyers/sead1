@@ -556,7 +556,6 @@ public class ItemServicesImpl
                 public Map<String, Object> computeValue() {
 
                     Map<String, Object> combinedMap = getCombinedContext(false);
-                    combinedMap.remove("Has Subcollection");
                     return getInverseContext(combinedMap);
                 }
             };
@@ -756,6 +755,7 @@ public class ItemServicesImpl
 
     }
 
+    //TBD - consider apache BidiMaps...
     private static Map<String, Object> getInverseContext(Map<String, Object> context) {
         Map<String, Object> inverseMap = new HashMap<String, Object>();
         for (Entry<String, Object> e : context.entrySet() ) {
@@ -1927,8 +1927,11 @@ public class ItemServicesImpl
             String salt = tMatcher.getResult().iterator().next().getObject().toString();
 
             log.debug("Found Collection: " + topCollRef.toString());
-            Map<String, Object> combined = getCombinedContext(false); //may refresh inverse
-            Map<String, Object> agg = getMetadataMapById(topCollRef, combined, getCombinedInverseContext(false));
+            Map<String, Object> combined = getCombinedContext(false);
+            combined.put("Has Part", DcTerms.HAS_PART.toString());
+            Map<String, Object> inverseMap = getCombinedInverseContext(false);
+            inverseMap.put(DcTerms.HAS_PART.toString(), "Has Part");
+            Map<String, Object> agg = getMetadataMapById(topCollRef, combined, inverseMap);
             agg.remove("@context");
             //The aggregation has an ID in the space, don't need to create a <collectionid>/v<x> style identifier as we do for aggregated things
             agg.put("Identifier", id);
@@ -1983,7 +1986,6 @@ public class ItemServicesImpl
             pendingOREMaps.put(id, Response.status(Status.INTERNAL_SERVER_ERROR).entity(failmsgMap).build());
             return;
         }
-
         pendingOREMaps.put(id, Response.ok().entity(oremap).build());
     }
 
