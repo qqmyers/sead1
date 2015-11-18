@@ -732,13 +732,18 @@ seadSpaces.loadSlowSpaces = function(){
 												spaceWrapper.find('.views').attr('title',views+' views');
 												spaceWrapper.find('.users_raw').text(users_raw);
 												spaceWrapper.find('.teammates').append(users);
+												spaceWrapper.find('.teammates').attr('title',users+' contributors');
 												spaceWrapper.find('.collections_raw').text(collections_raw);
 												spaceWrapper.find('.collections').append(collections);
+												spaceWrapper.find('.collections').attr('title',collections+' collections');
 												spaceWrapper.find('.datasets_raw').text(datasets_raw);
 												spaceWrapper.find('.datasets').append(datasets_display);
+												spaceWrapper.find('.datasets').attr('title',datasets_display+' datasets');
 												spaceWrapper.find('.bytes_raw').text(bytes);
 												spaceWrapper.find('.bytes').append(bytes_display);
+												spaceWrapper.find('.bytes').attr('title',bytes_display);
 												spaceWrapper.find('.published').text(published);
+												spaceWrapper.find('li.published').attr('title',published+' published datasets');
 												spaceWrapper.find('.fade-out').css('background-image',img);
 												
 												spaceWrapper.find('.loading-spinner').remove();
@@ -755,4 +760,4 @@ seadSpaces.loadSlowSpaces = function(){
 
 seadSpaces.init();
 seadSpaces.demoSpace();
-var checkLoading = setInterval(seadSpaces.loadSlowSpaces, 1000);
+var checkLoading = setInterval(seadSpaces.loadSlowSpaces, 800);
