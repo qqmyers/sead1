@@ -484,8 +484,12 @@ font-size: 1.1em;
 
 .fa-spinner {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left: 40%;
+  top: 40%;
+}
+
+.hidden-space-url {
+	display: none;
 }
 
 button.active {
