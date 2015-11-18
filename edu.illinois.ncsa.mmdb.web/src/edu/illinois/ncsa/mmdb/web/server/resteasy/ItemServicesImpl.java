@@ -118,7 +118,8 @@ public class ItemServicesImpl
                                                                          Dc.DATE.toString(),
                                                                          Namespaces.dcTerms("created"),
                                                                          Files.LENGTH.toString(),
-                                                                         Namespaces.rdfs("label")
+                                                                         Namespaces.rdfs("label"),
+                                                                         "http://sead-data.net/terms/hasSHA1Digest"
                                                                          ));
 
     //FixME - the labels used here should come from the database, but only user and extracted metadata have such labels right now (not all basic/biblio) -
@@ -188,6 +189,7 @@ public class ItemServicesImpl
                                                                          put("Description", org.tupeloproject.rdf.terms.Dc.DESCRIPTION.toString()); //user metadata
                                                                          put("Descriptor", DCTerms.description.toString()); //relationship
                                                                          put("Keyword", Tags.TAGGED_WITH_TAG.toString());
+                                                                         put("SHA1 Hash", "http://sead-data.net/terms/hasSHA1Digest");
                                                                          put("Title", Dc.TITLE.toString());
                                                                          put("Uploaded By", Dc.CREATOR.toString());
                                                                          put("Abstract", Namespaces.dcTerms("abstract"));
@@ -597,6 +599,7 @@ public class ItemServicesImpl
         //Permission to see pages means you can see metadata as well...
         PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
         if (!p.userHasPermission()) {
+            log.debug("Insufficient permission: " + userId.toString());
             Map<String, Object> result = new LinkedHashMap<String, Object>();
             result.put("Error Response", p.getErrorResponse());
             return result;
@@ -613,10 +616,13 @@ public class ItemServicesImpl
         }
         UriRef itemUri = Resource.uriRef(id);
         if (!isAccessible(userId, itemUri)) {
+            log.debug("Not accessible: " + userId.toString());
+
+            Map<String, Object> responseMap = new LinkedHashMap<String, Object>();
             Map<String, Object> result = new LinkedHashMap<String, Object>();
 
-            result.put("Error", "Item not accessible");
-            result.put("Error Response", Response.status(403).entity(result).build());
+            responseMap.put("Error", "Item not accessible");
+            result.put("Error Response", Response.status(403).entity(responseMap).build());
             return result;
         }
 
