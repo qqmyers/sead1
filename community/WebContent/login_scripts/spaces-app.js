@@ -664,6 +664,7 @@ seadSpaces.loadSlowSpaces = function(){
 
 												var projectName = config[0]["project.name"];
 												var projectDescription = config[0]["project.description"];
+												projectDescription = projectDescription.replace(/<(?:.|\n)*?>/gm, '');
 												var projectLogo = config[0]["project.header.logo"];
 												var projectColor = config[0]["project.header.title.color"];
 												var projectBg = config[0]["project.header.background"];
