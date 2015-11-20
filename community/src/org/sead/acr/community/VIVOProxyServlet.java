@@ -48,7 +48,7 @@ public class VIVOProxyServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = -8642016544488942571L;
 
-	protected static Log log = LogFactory.getLog(Oauth2Redirect.class);
+	protected static Log log = LogFactory.getLog(VIVOProxyServlet.class);
 
 	/** query response by query (memoized) */
 	private final Map<String, Memoized<String>> queryResponses = new HashMap<String, Memoized<String>>();
