@@ -117,6 +117,7 @@ public class GeoProxyServlet extends org.mitre.dsmiley.httpproxy.ProxyServlet {
 				MediciProxy mediciProxy = (MediciProxy) session.getAttribute("proxy");
 				if(mediciProxy!=null) {
 					log("MP found: anon =  " + mediciProxy.isAnonymous());
+					allow=true;
 				}
 			}
 			
