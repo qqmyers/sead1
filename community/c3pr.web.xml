@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>SEAD C3PR Services Proxy</display-name>
+<servlet>
+<servlet-name>Login</servlet-name>
+<servlet-class>org.sead.acr.community.Login</servlet-class>
+</servlet>
+	<servlet>
+      <servlet-name>C3PRProxy</servlet-name>
+      <servlet-class>
+          org.mitre.dsmiley.httpproxy.GeoProxyServlet
+      </servlet-class> 
+<init-param>
+			<param-name>log</param-name>
+			<param-value>true</param-value>
+		</init-param>
+      <init-param>
+      <param-name>PropertiesFileName</param-name>
+      <param-value>c3pr.properties</param-value>
+    </init-param>
+      
+  </servlet>
+    <servlet-mapping>
+      <servlet-name>C3PRProxy</servlet-name>
+      <url-pattern>/proxy/*</url-pattern>
+  </servlet-mapping>
+<servlet-mapping>
+<servlet-name>Login</servlet-name>
+<url-pattern>/login</url-pattern>
+</servlet-mapping>
+<!--  Cross-site -->
+  <filter>
+      <filter-name>CORS</filter-name>
+      <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
+        <init-param>
+           <param-name>cors.allowOrigin</param-name>
+           <param-value>*</param-value>
+        </init-param>
+        <init-param>
+          <param-name>cors.supportedMethods</param-name>
+           <param-value>GET, POST, HEAD, OPTIONS</param-value>
+        </init-param>
+    </filter>
+  <filter-mapping>
+        <filter-name>CORS</filter-name>
+        <url-pattern>/spaces</url-pattern>
+    </filter-mapping>
+    <filter>
+    <filter-name>AuthFilter</filter-name>
+    <filter-class>
+       org.sead.acr.common.auth.AuthFilter
+    </filter-class>
+    <init-param>
+      <param-name>PropertiesFileName</param-name>
+      <param-value>c3pr.properties</param-value>
+    </init-param>
+    <init-param>
+      <param-name>OpenPath</param-name>
+      <param-value>/login_img</param-value>
+    </init-param>
+    <init-param>
+      <param-name>LoginPage</param-name>
+      <param-value>/login</param-value>
+    </init-param>     
+      <!--init-param>
+      <param-name>WebAuthPath</param-name>
+      <param-value>/sead-c3pr</param-value>
+    </init-param-->     
+  </filter>
+  <filter-mapping>
+    <filter-name>AuthFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+</web-app>
