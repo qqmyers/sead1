@@ -1,0 +1,2 @@
+# Optimize for larger repositories - true - index/count weekly, false - hourly, other effects may be added. Default is false
+bigdata=true
