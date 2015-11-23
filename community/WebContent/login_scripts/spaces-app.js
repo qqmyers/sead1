@@ -196,7 +196,7 @@ seadSpaces.buildGrid = function(size, i, projectName, projectDescription,
 	if (projectDescription  || timeout == true) {
 		if( timeout == true){page += '<div class="fade-in"><div class="fade-in-content">' + '</div></div>';}
 		else{page += '<div class="fade-in"><div class="fade-in-content">'
-				+ projectDescription.replace(/<(?:.|\n)*?>/gm, '')
+				+ projectDescription
 				+ '</div></div>';
 		}
 	}
@@ -533,7 +533,7 @@ seadSpaces.demoSpace = function(){
 							if( timeout == true){page += '<div class="fade-in"><div class="fade-in-content">' + '</div></div>';}
 
 							page += '<div class="fade-in"><div class="fade-in-content">'
-									+ projectDescription.replace(/<(?:.|\n)*?>/gm, '')
+									+ projectDescription
 									+ '</div></div>';
 						}
 						page += '</div></a>';
@@ -664,6 +664,7 @@ seadSpaces.loadSlowSpaces = function(){
 
 												var projectName = config[0]["project.name"];
 												var projectDescription = config[0]["project.description"];
+												projectDescription = projectDescription.replace(/<(?:.|\n)*?>/gm, '');
 												var projectLogo = config[0]["project.header.logo"];
 												var projectColor = config[0]["project.header.title.color"];
 												var projectBg = config[0]["project.header.background"];
@@ -724,7 +725,7 @@ seadSpaces.loadSlowSpaces = function(){
 												var bytes_display = seadSpaces.formatBytes(bytes, 2);
 												var img = 'url('+projectLogo+'),url('+projectBg+')';
 												if(projectName == 'SEAD Demo Space'){var img = 'url('+projectBg+')';}
-												spaceWrapper.find('.fade-in-content').text(projectDescription);
+												spaceWrapper.find('.fade-in-content').html(projectDescription);
 												if(projectDescription == ''){spaceWrapper.find('.fade-in').remove();}
 												spaceWrapper.find('.name').text(projectName);
 												spaceWrapper.find('.views_raw').text(views_raw);
