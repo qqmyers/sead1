@@ -2014,7 +2014,7 @@ public class ItemServicesImpl
             types.add("http://cet.ncsa.uiuc.edu/2007/Collection");
             aggRes.put("@type", types);
 
-            aggRes.put("Version Of", collection.toString());
+            aggRes.put("Is Version Of", collection.toString());
             ((List<Object>) agg.get("aggregates")).add(aggRes);
 
             if (parent.get("Has Part") == null) {
@@ -2035,7 +2035,7 @@ public class ItemServicesImpl
             //Munge to separate static and live versions
             aggRes.put("Identifier", dataset.toString() + "/v" + version);
 
-            aggRes.put("Version Of", dataset.toString());
+            aggRes.put("Is Version Of", dataset.toString());
 
             String urlString = PropertiesLoader.getProperties().getProperty("domain");
             String path = "/researchobjects/" + agg.get("Identifier") + "/files/" + URLEncoder.encode(dataset.toString(), "UTF-8");
