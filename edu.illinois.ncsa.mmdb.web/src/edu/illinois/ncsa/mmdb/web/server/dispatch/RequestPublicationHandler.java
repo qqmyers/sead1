@@ -161,6 +161,10 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                         String method = "/researchobjects/" + aggId.toString() + "/pid";
                         requestJsonObject.put("Publication Callback", this_space + "/resteasy" + method + "?pubtoken=" + TokenStore.generateToken(method, salt));
                         JSONObject preferencesJsonObject = new JSONObject(TupeloStore.getInstance().getConfiguration(ConfigurationKey.DefaultCPPreferences));
+                        Object prefContextObject = null;
+                        if (preferencesJsonObject.has("@context")) {
+                            prefContextObject = preferencesJsonObject.get("@context");
+                        }
                         requestJsonObject.put("Preferences", preferencesJsonObject);
 
                         String rHolderString = action.getUser();
@@ -194,11 +198,15 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                         contextObject.put("Aggregation Statistics", "http://sead-data.net/terms/publicationstatistics");
                         contextObject.put("Publication Callback", "http://sead-data.net/terms/publicationcallback");
                         contextObject.put("Rights Holder", DCTerms.rightsHolder.toString());
+                        contextObject.put("Affiliations", "http://sead-data.net/terms/affiliations");
 
                         aggJsonObject.remove("@context");
 
                         requestJsonObject.accumulate("@context", contextObject);
                         requestJsonObject.accumulate("@context", "https://w3id.org/ore/context");
+                        if (prefContextObject != null) {
+                            requestJsonObject.accumulate("@context", prefContextObject);
+                        }
 
                         log.debug("JSON: " + requestJsonObject.toString());
 
