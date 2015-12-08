@@ -702,8 +702,8 @@ public class ItemServicesImpl
                     finalResult.put((String) inverseContext.get(e.getKey()), newSubResultMap);
                 } else if (e.getValue() instanceof List) {
                     //Handle each entry in the list and then map the new list into the final result
-                    List l = (List) e.getValue();
-                    ListIterator i = l.listIterator();
+                    List<?> l = (List<?>) e.getValue();
+                    ListIterator<?> i = l.listIterator();
                     ArrayList<Object> subArrayList = new ArrayList<Object>();
                     while (i.hasNext()) {
                         Object o = i.next();
@@ -1950,6 +1950,10 @@ public class ItemServicesImpl
             agg.put("@type", types);
 
             agg.put("Is Version Of", topCollRef.toString());
+
+            //Further Munge - return tags as strings, not uris
+            recreateTagStrings(agg);
+
             agg.put("similarTo", idUri.substring(0, idUri.indexOf("/researchobjects")) + "/collections/" + URLEncoder.encode(topCollRef.toString(), "UTF-8"));
             oremap.put("describes", agg);
             log.debug("OREMAP started: " + oremap.toString());
@@ -2009,6 +2013,9 @@ public class ItemServicesImpl
             //Munge to separate static and live versions
             aggRes.put("Identifier", collection.toString() + "/v" + version);
 
+            // Further Munge - return tags as strings, not uris
+            recreateTagStrings(aggRes);
+
             List<String> types = new ArrayList<String>(2);
             types.add("AggregatedResource");
             types.add("http://cet.ncsa.uiuc.edu/2007/Collection");
@@ -2035,6 +2042,9 @@ public class ItemServicesImpl
             //Munge to separate static and live versions
             aggRes.put("Identifier", dataset.toString() + "/v" + version);
 
+            //Further Munge - return tags as strings, not uris
+            recreateTagStrings(aggRes);
+
             aggRes.put("Is Version Of", dataset.toString());
 
             String urlString = PropertiesLoader.getProperties().getProperty("domain");
@@ -2054,6 +2064,32 @@ public class ItemServicesImpl
             ((List<String>) parent.get("Has Part")).add(dataset.toString() + "/v" + version);
 
         }
+    }
+
+    // - should go find the
+    // http://www.holygoat.co.uk/owl/redwood/0.1/tags/name, but we know that tag uris just prepend
+    // tag:cet.ncsa.uiuc.edu,2008:/tag# and swap ' ' with '+', so we can reverse that here
+    //without another call
+    private static void recreateTagStrings(Map<String, Object> aggRes) {
+        Object o = aggRes.get("Keyword");
+        if (o instanceof String) {
+            aggRes.put("Keyword", tagString((String) o));
+        } else if (o instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<String> l = ((List<String>) o);
+            for (int i = 0; i < l.size(); i++ ) {
+                l.set(i, tagString((l.get(i))));
+            }
+        }
+    }
+
+    private static String tagString(String tagUri) {
+        String tagString = tagUri;
+        if (tagUri.startsWith("tag:cet.ncsa.uiuc.edu,2008:/tag#")) {
+            tagString = tagUri.substring("tag:cet.ncsa.uiuc.edu,2008:/tag#".length());
+            tagString = tagString.replaceAll("\\+", " ");
+        }
+        return tagString;
     }
 
     private static Set<UriRef> getSubCollections(UriRef parent) throws OperatorException {
