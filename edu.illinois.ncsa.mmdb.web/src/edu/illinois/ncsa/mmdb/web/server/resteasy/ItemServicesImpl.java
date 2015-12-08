@@ -2012,6 +2012,8 @@ public class ItemServicesImpl
             aggRes.remove("@context");
             //Munge to separate static and live versions
             aggRes.put("Identifier", collection.toString() + "/v" + version);
+            //Duplicate as @id which is used by jsonld to rdf converters as the node ID
+            aggRes.put("@id", collection.toString() + "/v" + version);
 
             // Further Munge - return tags as strings, not uris
             recreateTagStrings(aggRes);
@@ -2041,6 +2043,8 @@ public class ItemServicesImpl
             aggRes.remove("@context");
             //Munge to separate static and live versions
             aggRes.put("Identifier", dataset.toString() + "/v" + version);
+            //Duplicate as @id which is used by jsonld to rdf converters as the node ID
+            aggRes.put("@id", dataset.toString() + "/v" + version);
 
             //Further Munge - return tags as strings, not uris
             recreateTagStrings(aggRes);
