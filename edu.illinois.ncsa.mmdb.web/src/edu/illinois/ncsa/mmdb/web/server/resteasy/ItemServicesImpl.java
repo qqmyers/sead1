@@ -1818,8 +1818,8 @@ public class ItemServicesImpl
         uf.addPattern(itemId, DcTerms.HAS_PART, "ds");
         uf.setColumnNames("ds", "mimetype", "size");
         try {
-            TupeloStore.getInstance().unifyExcludeDeleted(uf, "ds");
-            for (Tuple<Resource> row : uf.getResult() ) {
+            ;
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf, "ds") ) {
 
                 if (row.get(2) != null) {
                     long size = Long.parseLong(row.get(2).getString());
