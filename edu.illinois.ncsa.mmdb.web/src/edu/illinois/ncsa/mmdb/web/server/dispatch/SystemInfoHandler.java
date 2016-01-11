@@ -102,7 +102,10 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
             pending = true;
             ContextSetupListener.updateSysInfoInBackground();
         } else if (!pending) {
-            updateInfo();
+            pending = true;
+            updateInfo(); //Will set pending = false if it completes successfully
+        } else {
+            log.warn("System info update request received while prior request was pending");
         }
         return result;
     }
@@ -144,6 +147,7 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
                 }
             }
         } catch (OperatorException e) {
+            log.error(e.getLocalizedMessage());
             throw (new ActionException("Could not count datasets."));
         }
         info.add("Datasets", "" + datasetCount);
