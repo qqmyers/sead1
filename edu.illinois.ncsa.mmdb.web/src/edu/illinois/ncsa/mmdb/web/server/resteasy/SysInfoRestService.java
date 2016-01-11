@@ -98,7 +98,10 @@ public class SysInfoRestService {
         try {
             SystemInfoHandler sih = new SystemInfoHandler();
             SystemInfoResult sir = sih.execute(null, null);
-
+            if (sir == null) {
+                log.warn("Null Sys Info Results");
+                return Response.status(503).entity("System info is being recalculated.").build();
+            }
             Map<String, String> map = sir.getMap();
 
             //Add software version/build info
