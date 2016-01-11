@@ -596,14 +596,6 @@ public class ItemServicesImpl
     @SuppressWarnings("unchecked")
     public static Map<String, Object> getMetadataMapById(String id, Map<String, Object> context, UriRef userId) {
 
-        //Permission to see pages means you can see metadata as well...
-        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
-        if (!p.userHasPermission()) {
-            log.debug("Insufficient permission: " + userId.toString());
-            Map<String, Object> result = new LinkedHashMap<String, Object>();
-            result.put("Error Response", p.getErrorResponse());
-            return result;
-        }
         try {
             id = URLDecoder.decode(id, "UTF-8");
         } catch (UnsupportedEncodingException e1) {
@@ -614,6 +606,28 @@ public class ItemServicesImpl
             return result;
 
         }
+
+        //Permission to see pages means you can see metadata as well...
+        PermissionCheck p = new PermissionCheck(userId, Permission.VIEW_MEMBER_PAGES);
+        if (!p.userHasPermission()) {
+            //See if this is a published item and user has view published
+            String version = "1";
+            try {
+                //Will be > 1 if any prior versions exist
+                version = RequestPublicationHandler.getVersionNumber(Resource.uriRef(id));
+            } catch (OperatorException e) {
+                log.warn(e);
+            }
+            PermissionCheck p2 = new PermissionCheck(userId, Permission.VIEW_PUBLISHED);
+            if (!((version.equals("1")) && p2.userHasPermission())) {
+
+                log.debug("Insufficient permission: " + userId.toString());
+                Map<String, Object> result = new LinkedHashMap<String, Object>();
+                result.put("Error Response", p.getErrorResponse());
+                return result;
+            }
+        }
+
         UriRef itemUri = Resource.uriRef(id);
         if (!isAccessible(userId, itemUri)) {
             log.debug("Not accessible: " + userId.toString());

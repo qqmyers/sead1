@@ -47,9 +47,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.sead.acr.common.utilities.PropertiesLoader;
+import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
-import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
@@ -104,17 +104,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
 
             //2.0 publication
 
-            //Find out how many times published
-            //via 2.0
-            TripleMatcher tMatcher = new TripleMatcher();
-            tMatcher.match(subject, DcTerms.HAS_VERSION, null);
-            TupeloStore.getInstance().getContext().perform(tMatcher);
-            //via 1.5
-            Unifier uf = new Unifier();
-            TripleMatcher tm2 = new TripleMatcher();
-            tm2.match(subject, Resource.uriRef(DCTerms.identifier.toString()), null);
-            TupeloStore.getInstance().getContext().perform(tm2);
-            final String versionNumber = Integer.toString(tMatcher.getResult().size() + tm2.getResult().size() + 1);
+            final String versionNumber = getVersionNumber(subject);
 
             //Generate ID for published version
             Map<Resource, Object> md = new HashMap<Resource, Object>();
@@ -267,6 +257,20 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
             log.error("Error publishing on " + action.getUri(), x);
             throw new ActionException("failed", x);
         }
+    }
+
+    public static String getVersionNumber(Resource subject) throws OperatorException {
+        //Find out how many times published
+        //via 2.0
+        TripleMatcher tMatcher = new TripleMatcher();
+        tMatcher.match(subject, DcTerms.HAS_VERSION, null);
+        TupeloStore.getInstance().getContext().perform(tMatcher);
+        //via 1.5
+
+        TripleMatcher tm2 = new TripleMatcher();
+        tm2.match(subject, Resource.uriRef(DCTerms.identifier.toString()), null);
+        TupeloStore.getInstance().getContext().perform(tm2);
+        return Integer.toString(tMatcher.getResult().size() + tm2.getResult().size() + 1);
     }
 
     @Override
