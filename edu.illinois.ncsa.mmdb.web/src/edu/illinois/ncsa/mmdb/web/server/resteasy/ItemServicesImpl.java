@@ -619,7 +619,7 @@ public class ItemServicesImpl
                 log.warn(e);
             }
             PermissionCheck p2 = new PermissionCheck(userId, Permission.VIEW_PUBLISHED);
-            if (!((version.equals("1")) && p2.userHasPermission())) {
+            if (!((!version.equals("1")) && p2.userHasPermission())) {
 
                 log.debug("Insufficient permission: " + userId.toString());
                 Map<String, Object> result = new LinkedHashMap<String, Object>();
