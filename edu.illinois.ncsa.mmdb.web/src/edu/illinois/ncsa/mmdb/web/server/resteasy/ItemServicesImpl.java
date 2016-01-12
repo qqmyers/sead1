@@ -1832,7 +1832,7 @@ public class ItemServicesImpl
         uf.addPattern(itemId, DcTerms.HAS_PART, "ds");
         uf.setColumnNames("ds", "mimetype", "size");
         try {
-            ;
+
             for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf, "ds") ) {
 
                 if (row.get(2) != null) {
@@ -1860,8 +1860,8 @@ public class ItemServicesImpl
         uf2.addPattern(itemId, DcTerms.HAS_PART, "cl");
         uf2.setColumnNames("cl");
         try {
-            TupeloStore.getInstance().unifyExcludeDeleted(uf2, "ds");
-            for (Tuple<Resource> row : uf2.getResult() ) {
+
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf2, "ds") ) {
                 CollectionInfo ci = getCollectionInfo((UriRef) row.get(0), currentDepth);
                 info.addMimetypes(ci.getMimetypeSet());
                 info.increaseSize(ci.getSize());

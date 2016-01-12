@@ -150,8 +150,8 @@ public class GetCollectionHandler implements
         u.addPattern("parent", Dc.TITLE, "title", true);
         u.setColumnNames("parent", "title");
         HashMap<String, String> parents = new HashMap<String, String>();
-        TupeloStore.getInstance().unifyExcludeDeleted(u, "parent");
-        for (Tuple<Resource> row : u.getResult() ) {
+
+        for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(u, "parent") ) {
             parents.put(row.get(0).toString(), row.get(1).toString());
         }
         result.setParents(parents);
