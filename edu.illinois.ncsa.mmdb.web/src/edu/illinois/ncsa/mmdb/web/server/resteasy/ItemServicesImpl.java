@@ -1861,7 +1861,7 @@ public class ItemServicesImpl
         uf2.setColumnNames("cl");
         try {
 
-            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf2, "ds") ) {
+            for (Tuple<Resource> row : TupeloStore.getInstance().unifyExcludeDeleted(uf2, "cl") ) {
                 CollectionInfo ci = getCollectionInfo((UriRef) row.get(0), currentDepth);
                 info.addMimetypes(ci.getMimetypeSet());
                 info.increaseSize(ci.getSize());
