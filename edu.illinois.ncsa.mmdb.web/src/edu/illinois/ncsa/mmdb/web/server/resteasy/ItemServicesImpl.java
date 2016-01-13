@@ -1866,7 +1866,7 @@ public class ItemServicesImpl
                 info.addMimetypes(ci.getMimetypeSet());
                 info.increaseSize(ci.getSize());
                 info.incrementNumDatasets(ci.getNumDatasets());
-                info.incrementNumCollections(1);
+                info.incrementNumCollections(ci.getNumCollections());
                 info.setMaxDatasetSize(info.getMaxDatasetSize() >= ci.getMaxDatasetSize() ? info.getMaxDatasetSize() : ci.getMaxDatasetSize());
                 info.setMaxDepth(info.getMaxDepth() >= ci.getMaxDepth() ? info.getMaxDepth() : ci.getMaxDepth());
             }
