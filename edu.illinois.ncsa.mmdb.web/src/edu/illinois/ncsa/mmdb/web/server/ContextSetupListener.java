@@ -88,6 +88,7 @@ import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRelationshipHandlerNew;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.SystemInfoHandler;
+import edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingIdGetter;
 import edu.illinois.ncsa.mmdb.web.server.search.SearchableThingTextExtractor;
 import edu.illinois.ncsa.mmdb.web.server.util.ContextUpdater;
@@ -443,17 +444,22 @@ public class ContextSetupListener implements ServletContextListener {
                         }
                         Resource r = Resource.uriRef(props.getProperty(key));
                         String l = props.getProperty(pre + ".label");
-                        tw.add(r, Rdf.TYPE, MMDB.USER_RELATIONSHIP); //$NON-NLS-1$
-                        tw.add(r, Rdf.TYPE, GetRelationshipHandlerNew.VIEW_RELATIONSHIP); //$NON-NLS-1$
-                        // remove existing label
-                        context.removeTriples(context.match(r, Rdfs.LABEL, null));
+                        if (!(BlacklistedPredicates.GetResources().contains(r) || ItemServicesImpl.getReservedLabels().contains(l))) {
 
-                        tw.add(r, Rdfs.LABEL, l);
-                        if (i != null) {
-                            tw.add(r, Resource.uriRef(Namespaces.owl("inverseOf")), i);
-                            tw.add(i, Resource.uriRef(Namespaces.owl("inverseOf")), r);
+                            tw.add(r, Rdf.TYPE, MMDB.USER_RELATIONSHIP); //$NON-NLS-1$
+                            tw.add(r, Rdf.TYPE, GetRelationshipHandlerNew.VIEW_RELATIONSHIP); //$NON-NLS-1$
+                            // remove existing label
+                            context.removeTriples(context.match(r, Rdfs.LABEL, null));
+
+                            tw.add(r, Rdfs.LABEL, l);
+                            if (i != null) {
+                                tw.add(r, Resource.uriRef(Namespaces.owl("inverseOf")), i);
+                                tw.add(i, Resource.uriRef(Namespaces.owl("inverseOf")), r);
+                            }
+                            log.debug("Adding user relationship '" + l + "' (" + r + ")");
+                        } else {
+                            log.warn("User relationship '" + l + "' (" + r + ") conflicts with reserved/blacklisted labels/predicates - not added");
                         }
-                        log.debug("Adding user relationship '" + l + "' (" + r + ")");
                     }
                 }
             }
