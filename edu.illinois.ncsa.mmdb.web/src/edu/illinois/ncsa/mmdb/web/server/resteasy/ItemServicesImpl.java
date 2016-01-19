@@ -293,6 +293,22 @@ public class ItemServicesImpl
                                                                      }
                                                                  };
 
+    /* Only used for blacklisting predicates and reserving labels...
+     *
+     */
+    public static final Map<String, String>    oreTerms          = new LinkedHashMap<String, String>() {
+                                                                     {
+
+                                                                         put("describes", "http://www.openarchives.org/ore/terms/describes");
+                                                                         put("aggregates", "http://www.openarchives.org/ore/terms/aggregates");
+                                                                         put("Aggregation", "http://www.openarchives.org/ore/terms/Aggregation");
+                                                                         put("similarTo", "http://www.openarchives.org/ore/terms/similarTo");
+                                                                         put("AggregatedResource", "http://www.openarchives.org/ore/terms/AggregatedResource");
+                                                                         put("ResourceMap", "http://www.openarchives.org/ore/terms/ResourceMap");
+
+                                                                     }
+
+                                                                 };
     static Context                             c                 = TupeloStore.getInstance().getContext();
     static protected SEADRbac                  rbac              = new SEADRbac(c);
 
@@ -307,6 +323,7 @@ public class ItemServicesImpl
         labelsArrayList.addAll(URLRestService.doiBasics.keySet());
         labelsArrayList.addAll(URLRestService.collectionStats.keySet());
         labelsArrayList.addAll(URLRestService.publishedVersions.keySet());
+        labelsArrayList.addAll(oreTerms.keySet());
         return labelsArrayList;
     }
 

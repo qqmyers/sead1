@@ -1,11 +1,14 @@
 package edu.illinois.ncsa.mmdb.web.server;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.Rdfs;
+
+import edu.illinois.ncsa.mmdb.web.server.resteasy.ItemServicesImpl;
 
 public final class BlacklistedPredicates {
     private BlacklistedPredicates() {
@@ -24,9 +27,17 @@ public final class BlacklistedPredicates {
             blacklistedPredicates.add(Dc.IDENTIFIER);
             blacklistedPredicates.add(Dc.CONTRIBUTOR); // should whitelist once we have multi-valued user properties
             blacklistedPredicates.add(Rdfs.LABEL);
-
+            blacklistedPredicates.addAll(convertToResources(ItemServicesImpl.oreTerms.values()));
         }
         return blacklistedPredicates;
+    }
+
+    private static Collection<Resource> convertToResources(Collection<String> values) {
+        HashSet<Resource> resources = new HashSet<Resource>();
+        for (String uriString : values ) {
+            resources.add(Resource.uriRef(uriString));
+        }
+        return resources;
     }
 
 }
