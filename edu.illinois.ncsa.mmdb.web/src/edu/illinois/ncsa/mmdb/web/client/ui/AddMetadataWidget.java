@@ -50,6 +50,8 @@ import java.util.SortedSet;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -597,7 +599,7 @@ public class AddMetadataWidget extends Composite {
             }
         };
 
-        inputField.setValue(currentVal);
+        inputField.setValue(StringEscapeUtils.unescapeHtml(currentVal));
 
         inputField.addAnchor.setText("Update");
         inputField.setEnterHandler(editPressEnter);
