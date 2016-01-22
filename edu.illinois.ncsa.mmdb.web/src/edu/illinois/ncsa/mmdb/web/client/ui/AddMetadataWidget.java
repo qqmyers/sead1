@@ -50,8 +50,6 @@ import java.util.SortedSet;
 
 import net.customware.gwt.dispatch.client.DispatchAsync;
 
-import org.apache.commons.lang.StringEscapeUtils;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -413,7 +411,6 @@ public class AddMetadataWidget extends Composite {
         // Only MultiField inputs will display as HTML right now (in the MEdiciinterface to the data),
         // but should avoid storing problematic values that may be displayed as HTML in other javascript apps
         final String text = SimpleHtmlSanitizer.sanitizeHtml(theValue).asString();
-
         if (text.isEmpty() || text.equals("Select...")) {
             PopupPanel popupPanel = new PopupPanel(true);
             popupPanel.add(new Label("Please enter a value"));
@@ -599,7 +596,7 @@ public class AddMetadataWidget extends Composite {
             }
         };
 
-        inputField.setValue(StringEscapeUtils.unescapeHtml(currentVal));
+        inputField.setValue(currentVal);
 
         inputField.addAnchor.setText("Update");
         inputField.setEnterHandler(editPressEnter);
