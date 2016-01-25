@@ -255,7 +255,7 @@ function parsePerson(person, type) {
 
 	var html = '';
 	var name = '';
-	if (person.indexOf(':') != -1) {
+	if ((person.indexOf(':') != -1)&&(person.indexOf('vivo') != -1)) {
 		name = person.substring(0, person.indexOf(':') - 1);
 		var url = person.substring(person.indexOf(':') + 1);
 		html = "<a href='" + url + "' target=_blank>" + name + "</a>";
