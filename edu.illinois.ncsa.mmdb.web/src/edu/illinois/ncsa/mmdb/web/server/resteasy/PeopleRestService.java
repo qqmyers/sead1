@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import javax.ws.rs.Encoded;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -70,7 +71,7 @@ public class PeopleRestService {
     @GET
     @Path("/{id}")
     @Produces("application/json")
-    public Response getPersonAsJSON(@PathParam("id") String id) {
+    public Response getPersonAsJSON(@PathParam("id") @Encoded String id) {
         try {
             URL url = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people/" + id);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
