@@ -28,6 +28,7 @@ public class ResteasyApplication extends Application {
         singletons.add(new ItemServicesImpl());
         singletons.add(new URLRestService());
         singletons.add(new ResearchObjectsRestService());
+        singletons.add(new PeopleRestService());
     }
 
     @Override
