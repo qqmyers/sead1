@@ -255,14 +255,28 @@ function parsePerson(person, type) {
 
 	var html = '';
 	var name = '';
-	if ((person.indexOf(':') != -1)&&(person.indexOf('vivo') != -1)) {
+	if ((person.indexOf(':') != -1) && (person.indexOf('vivo') != -1)) {
 		name = person.substring(0, person.indexOf(':') - 1);
 		var url = person.substring(person.indexOf(':') + 1);
 		html = "<a href='" + url + "' target=_blank>" + name + "</a>";
 	} else {
-		html = person;
-		name = person;
+		$.ajax({
+			type : "GET",
+			url : "resteasy/people/" + encodeURIComponent(person),
+			dataType : "json",
+			async : false,
+			success : function(data) {
+				name = data.familyName + ", " + data.givenName;
+				html = "<a href='" + data['@id'] + "' target=_blank>" + name
+						+ "</a>";
+			},
+			error : function() {
+				html = person;
+				name = person;
+			}
+		});
 	}
+
 	if (type == 'creator') {
 		if (creators.indexOf(html) == -1) {
 			creators.push(html);
