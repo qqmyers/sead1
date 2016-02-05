@@ -66,9 +66,11 @@ import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetPermissionsHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetRelationshipHandlerNew;
 import edu.uiuc.ncsa.cet.bean.rbac.medici.PermissionValue;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.context.ContextConvert;
+import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBAC;
 
 /**
@@ -82,7 +84,7 @@ public class ContextUpdater {
     private static Log           log                 = LogFactory.getLog(ContextUpdater.class);
 
     public static final Resource CONTEXT_VERSION_URI = Resource.uriRef("tag:cet.ncsa.uiuc.edu,2008:/context/version"); //$NON-NLS-1$
-    public static final int      CONTEXT_VERSION_NO  = 9;
+    public static final int      CONTEXT_VERSION_NO  = 10;
 
     /**
      * This will update the context to version CONTEXT_VERSION_NO. If the
@@ -152,6 +154,10 @@ public class ContextUpdater {
             removeProblemMetadataLabels(context);
         }
 
+        if (force || (version < 11)) {
+            removeProblemRelationship(context);
+        }
+
         // Mark context as updated removing all old versions first.
         TripleWriter tw = new TripleWriter();
         TripleMatcher tm = new TripleMatcher();
@@ -166,6 +172,17 @@ public class ContextUpdater {
         updateVersion(context, tw);
 
         log.info("Context is updated to version " + CONTEXT_VERSION_NO);
+    }
+
+    private static void removeProblemRelationship(Context context) throws OperatorException {
+        UriRef idRef = Resource.uriRef("http://sead-data.net/terms/odm/method");
+        TripleWriter tWriter = new TripleWriter();
+        tWriter.remove(new Triple(idRef, Rdf.TYPE, GetRelationshipHandlerNew.VIEW_RELATIONSHIP));
+        tWriter.add(new Triple(idRef, Rdf.TYPE, MMDB.USER_RELATIONSHIP));
+        tWriter.add(new Triple(idRef, Resource.uriRef("http://www.w3.org/2002/07/owl#inverseOf"), Resource.uriRef("http://sead-data.net/terms/odm/isUsedToMeasure")));
+        context.perform(tWriter);
+        log.info("Removed metadata/relationship conflict for ODM exp. method");
+
     }
 
     /**
