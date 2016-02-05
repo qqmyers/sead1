@@ -17,6 +17,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
@@ -72,6 +74,7 @@ public class PeopleRestService {
     @Path("/{id}")
     @Produces("application/json")
     public Response getPersonAsJSON(@PathParam("id") @Encoded String id) {
+
         try {
             URL url = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people/" + id);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -91,5 +94,27 @@ public class PeopleRestService {
             log.error("Error retrieving /people/" + id + " from c3pr: ", e);
         }
         return Response.status(404).build();
+    }
+
+    public static JSONObject getPersonJSON(String id) {
+        try {
+            URL url = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people/" + id);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(10000);
+            conn.addRequestProperty("Accept", "application/json");
+
+            int status = conn.getResponseCode();
+            if (status == HttpURLConnection.HTTP_OK) {
+
+                return new JSONObject(org.apache.commons.io.IOUtils.toString(conn.getInputStream()));
+
+            }
+        } catch (IOException e) {
+            log.error("Error retrieving /people/" + id + " from c3pr: ", e);
+        } catch (JSONException e) {
+            log.warn(e);
+        }
+        return null;
+
     }
 }

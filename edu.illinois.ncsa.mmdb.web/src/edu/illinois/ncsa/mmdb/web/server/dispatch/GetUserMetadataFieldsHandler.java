@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,12 +32,14 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -49,6 +51,8 @@ import net.customware.gwt.dispatch.shared.ActionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Thing;
 import org.tupeloproject.kernel.ThingSession;
@@ -68,13 +72,14 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataValue;
 import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.resteasy.PeopleRestService;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 /**
  * TODO Add comments
- * 
+ *
  * @author Joe Futrelle
- * 
+ *
  */
 public class GetUserMetadataFieldsHandler implements
         ActionHandler<GetUserMetadataFields, GetUserMetadataFieldsResult> {
@@ -110,7 +115,7 @@ public class GetUserMetadataFieldsHandler implements
         return uri.getString();
     }
 
-    /* For URIs, if the URI is really a tagId of some ACR resource, modify it to be the full 
+    /* For URIs, if the URI is really a tagId of some ACR resource, modify it to be the full
      * relative URL required to access the resource.
      */
     private String rewrite(Resource uri) throws OperatorException {
@@ -172,8 +177,26 @@ public class GetUserMetadataFieldsHandler implements
                     val = val.substring(separator + 3, val.length());
                     umv = new UserMetadataValue(val, name);
                 } else {
+                    //Only check for person for creator or contact fields
+                    if (predicate.toString().equals(org.tupeloproject.rdf.Namespaces.dcTerms("creator")) ||
+                            predicate.toString().equals("http://sead-data.net/terms/contact")) {
+                        try {
+                            JSONObject person = PeopleRestService.getPersonJSON(URLEncoder.encode(value.toString(), "UTF-8"));
+                            if (person != null) {
+                                umv = new UserMetadataValue(person.getString("@id"), person.getString("familyName") + ", " + person.getString("givenName"));
+                            }
+                        } catch (UnsupportedEncodingException e) {
+                            //Shouldn't happen...
+                            log.error(e);
+                        } catch (JSONException e) {
+                            //Log the issue and keep going to process the person name as a string
+                            log.warn(e);
 
-                    umv = new UserMetadataValue(null, value.toString());
+                        }
+                    }
+                    if (umv == null) {
+                        umv = new UserMetadataValue(null, value.toString());
+                    }
                 }
 
             }
