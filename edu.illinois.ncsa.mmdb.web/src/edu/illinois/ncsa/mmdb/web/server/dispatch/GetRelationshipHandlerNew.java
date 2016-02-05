@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
@@ -39,6 +40,7 @@ public class GetRelationshipHandlerNew implements ActionHandler<GetRelationship,
             u.setColumnNames("label", "dataset", "type");
             u.addPattern("type", Rdf.TYPE, VIEW_RELATIONSHIP); // only fetch current/past user relationship triples
             u.addPattern(subject, "type", "dataset"); // determine the target dataset uri from the relationship triple
+            u.addPattern("dataset", Rdf.TYPE, Cet.DATASET); //If non datasets get returned, the fetchDataset call below causes an error in the session!
             u.addPattern("type", Rdfs.LABEL, "label");
             // don't fetch the reified stuff (the date and creator of the relationship) because these are not returned by this dispatch
 

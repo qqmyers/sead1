@@ -178,8 +178,8 @@ public class ContextUpdater {
         UriRef idRef = Resource.uriRef("http://sead-data.net/terms/odm/method");
         TripleWriter tWriter = new TripleWriter();
         tWriter.remove(new Triple(idRef, Rdf.TYPE, GetRelationshipHandlerNew.VIEW_RELATIONSHIP));
-        tWriter.add(new Triple(idRef, Rdf.TYPE, MMDB.USER_RELATIONSHIP));
-        tWriter.add(new Triple(idRef, Resource.uriRef("http://www.w3.org/2002/07/owl#inverseOf"), Resource.uriRef("http://sead-data.net/terms/odm/isUsedToMeasure")));
+        tWriter.remove(new Triple(idRef, Rdf.TYPE, MMDB.USER_RELATIONSHIP));
+        tWriter.remove(new Triple(idRef, Resource.uriRef("http://www.w3.org/2002/07/owl#inverseOf"), Resource.uriRef("http://sead-data.net/terms/odm/isUsedToMeasure")));
         context.perform(tWriter);
         log.info("Removed metadata/relationship conflict for ODM exp. method");
 

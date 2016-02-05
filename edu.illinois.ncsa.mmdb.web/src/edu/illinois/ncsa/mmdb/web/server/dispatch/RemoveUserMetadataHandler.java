@@ -97,6 +97,7 @@ public class RemoveUserMetadataHandler implements ActionHandler<RemoveUserMetada
                         log.warn(value + " sent as URI value");
 
                     } else {
+                        log.debug("Removing URI: " + value);
                         ts.removeValue(subject, predicate, Resource.uriRef(value));
                     }
                 } else {
