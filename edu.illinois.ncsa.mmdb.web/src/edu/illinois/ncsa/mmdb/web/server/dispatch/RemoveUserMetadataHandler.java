@@ -48,7 +48,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.rdf.Resource;
-import org.tupeloproject.rdf.terms.DcTerms;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.RemoveUserMetadata;
@@ -93,9 +92,12 @@ public class RemoveUserMetadataHandler implements ActionHandler<RemoveUserMetada
             ThingSession ts = new ThingSession(TupeloStore.getInstance().getContext());
             for (String value : values ) {
                 if (action.isUriType()) {
-                    ts.removeValue(subject, predicate, Resource.uriRef(value));
-                    if (predicate.equals(DcTerms.HAS_PART)) {
+                    if (!(value.startsWith("http://") || value.startsWith("https://") || value.startsWith("ftp://") || value.startsWith("tag:"))) {
+                        ts.removeValue(subject, predicate, value);
+                        log.warn(value + " sent as URI value");
 
+                    } else {
+                        ts.removeValue(subject, predicate, Resource.uriRef(value));
                     }
                 } else {
                     ts.removeValue(subject, predicate, value);
@@ -109,7 +111,7 @@ public class RemoveUserMetadataHandler implements ActionHandler<RemoveUserMetada
             try {
                 TupeloStore.refetch(action.getUri());
             } catch (Exception x) {
-                x.printStackTrace();
+                log.error("Bad metadata value was written", x);
             }
 
             TupeloStore.getInstance().changed(action.getUri());
