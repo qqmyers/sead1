@@ -74,10 +74,11 @@ import edu.uiuc.ncsa.cet.bean.tupelo.rbac.RBACException;
 public class RequestPublicationHandler implements ActionHandler<RequestPublication, EmptyResult> {
 
     /** Commons logging **/
-    private static Log   log         = LogFactory.getLog(RequestPublicationHandler.class);
+    private static Log   log           = LogFactory.getLog(RequestPublicationHandler.class);
 
-    public static UriRef Aggregation = Resource.uriRef("http://www.openarchives.org/ore/terms/Aggregation");
-    public static UriRef hasSalt     = Resource.uriRef("http://sead-data.net/vocab/hasSalt");
+    public static UriRef Aggregation   = Resource.uriRef("http://www.openarchives.org/ore/terms/Aggregation");
+    public static UriRef hasSalt       = Resource.uriRef("http://sead-data.net/vocab/hasSalt");
+    public static UriRef hasVersionNum = Resource.uriRef("http://sead-data.net/vocab/hasVersionNumber");
 
     @Override
     public EmptyResult execute(final RequestPublication action, ExecutionContext context) throws ActionException {
@@ -114,7 +115,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
             //Write required triples
             tw.add(aggId, Rdf.TYPE, Aggregation);
             tw.add(subject, DcTerms.HAS_VERSION, aggId);
-            tw.add(aggId, Resource.uriRef("http://sead-data.net/vocab/hasVersionNumber"), Resource.literal(versionNumber));
+            tw.add(aggId, hasVersionNum, Resource.literal(versionNumber));
             //Used to generate unique keys for file retrieval
             final String salt = UUID.randomUUID().toString();
             tw.add(aggId, hasSalt, Resource.literal(salt));

@@ -39,6 +39,7 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.HasPermissionResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLucene;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ReindexLuceneResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetConfiguration;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.VersionCleaner;
 import edu.illinois.ncsa.mmdb.web.client.presenter.DynamicTablePresenter;
 import edu.illinois.ncsa.mmdb.web.client.ui.ConfirmDialog;
 import edu.illinois.ncsa.mmdb.web.client.ui.LabeledListBox;
@@ -524,6 +525,29 @@ public class ConfigurationWidget extends Composite {
             }
         });
         vp.add(updateAnchor);
+
+        final Anchor versionAnchor = new Anchor("Remove Old Test Versions");
+        versionAnchor.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                versionAnchor.setEnabled(false);
+                versionAnchor.setText("Removing Old Versions...");
+                dispatchAsync.execute(new VersionCleaner(), new AsyncCallback<EmptyResult>() {
+
+                    public void onFailure(Throwable caught) {
+                        versionAnchor.setText("Test Version Removal Failed");
+                        versionAnchor.setEnabled(true);
+                    }
+
+                    @Override
+                    public void onSuccess(EmptyResult result) {
+                        versionAnchor.setText("Old Test Versions Removed");
+                        versionAnchor.setEnabled(true);
+                    }
+                });
+            }
+        });
+
+        vp.add(versionAnchor);
 
         return dp;
     }

@@ -140,6 +140,7 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.TagResourceHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UnpackZipHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UpdateMetadataHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.UserGroupMembershipHandler;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.VersionCleanerHandler;
 
 /**
  * Setup registry of action handlers when the servlet context is initialized.
@@ -245,6 +246,7 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new IsReadyForPublicationHandler());
         DispatchUtil.registerHandler(new RequestPublicationHandler());
         DispatchUtil.registerHandler(new RevokePublicationRequestHandler());
+        DispatchUtil.registerHandler(new VersionCleanerHandler());
     }
 
     public void contextDestroyed(ServletContextEvent evt) {

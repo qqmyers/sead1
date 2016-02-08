@@ -14,7 +14,8 @@ public enum ConfigurationKey {
     //2.0 Publication Beta
     CPURL("cp.url", "https://sead-test.ncsa.illinois.edu/sead-cp/cp"), //$NON-NLS-1$ //$NON-NLS-2$
     DefaultRepository("cp.repo", "sda"), //$NON-NLS-1$ //$NON-NLS-2$
-    DefaultCPPreferences("va.prefs", "{ \"key1\":\"val1\", \"key2\":\"val2\" }"), //$NON-NLS-1$ //$NON-NLS-2$
+    DefaultCPPreferences("va.prefs", "{ \"Affiliations\":[\"SEAD\"], \"Purpose\":\"Testing-Only\",\"Delete Preference\": \"Delete from project space\",\"@context\": {\"Delete Preference\":\"http://sead-data.net/vocab/demo#DeletePreference\",\"Purpose\":\"http://sead-data.net/vocab/publishing#Purpose\"} }"), //$NON-NLS-1$ //$NON-NLS-2$
+    DefaultTestPIDShoulders("pid.test.shoulders", "10.5072/,seadtest.ideals"),
 
     // access level
     AccessLevelLabel("access.level.label", "Access Level"), //$NON-NLS-1$ //$NON-NLS-2$
