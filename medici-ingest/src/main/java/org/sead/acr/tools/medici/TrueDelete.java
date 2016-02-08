@@ -44,6 +44,20 @@ import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
 
+/** Deletes the metadata and blob associated with deleted datasets, along with metadata for which deleted datasets are RDF objects
+ *  Flags:
+ *  verbose - provides details of what's found/processed
+ *  dodelete - only delete if this flag is present
+ *  processactivedata - will calculate stats for non-deleted data - cannot be used with dodelete (which would cause active data to be deleted if allowed)
+ *  limit<x> - only process X entries before stopping
+ *  
+ *  Will process a list of datasets or, if none are given, will scan for all deleted datasets (or all datasets if processactivedata is set)
+ *  
+ *  ToDo: Does not delete collections marked as deleted. If/when this is implemented, it should not truly delete collections that have versions (i.e. that have been published)
+ * 
+ * @author myersjd@umich.edu
+ *
+ */
 public class TrueDelete extends NodeProcessorBase {
 
     public static void main(String[] args) throws Exception {
