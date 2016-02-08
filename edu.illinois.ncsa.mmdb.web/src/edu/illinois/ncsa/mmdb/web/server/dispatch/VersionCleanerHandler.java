@@ -48,6 +48,7 @@ import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.DcTerms;
+import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
 
 import com.hp.hpl.jena.vocabulary.DCTerms;
@@ -65,7 +66,7 @@ public class VersionCleanerHandler implements ActionHandler<VersionCleaner, Empt
     @Override
     public EmptyResult execute(final VersionCleaner action, ExecutionContext context) throws ActionException {
 
-        log.debug("Cleaning up old test versions");
+        log.info("Cleaning up old test versions");
 
         //Get List of Versions
         TripleMatcher tMatcher = new TripleMatcher();
@@ -120,15 +121,16 @@ public class VersionCleanerHandler implements ActionHandler<VersionCleaner, Empt
                             Date cutoffDate = new Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 14l); //2 weeks
                             if (date.before(cutoffDate)) {
                                 bad = true;
-                                log.debug("Removing version " + t.get(1).toString() + ": " + t.get(0).toString());
-                                log.debug("         Created: " + t.get(2).toString());
-                                log.debug("      Identifier: " + t.get(3).toString());
+                                log.info("Removing version " + t.get(1).toString() + ": " + t.get(0).toString());
+                                log.info("         Created: " + t.get(2).toString());
+                                log.info("      Identifier: " + t.get(3).toString());
 
                                 TripleWriter tw = new TripleWriter();
                                 tw.remove(subject, DcTerms.HAS_VERSION, t.get(0));
                                 tw.remove(t.get(0), RequestPublicationHandler.hasVersionNum, t.get(1));
                                 tw.remove(t.get(0), issued, t.get(2));
                                 tw.remove(t.get(0), identifier, t.get(3));
+                                tw.remove(t.get(0), Rdf.TYPE, RequestPublicationHandler.Aggregation);
                                 TupeloStore.getInstance().getContext().perform(tw);
                             }
                         } catch (ParseException e) {
