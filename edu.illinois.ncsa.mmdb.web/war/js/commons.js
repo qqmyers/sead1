@@ -126,7 +126,10 @@ function pageBiblioJsonParser(id, json) {
 	coll_location = new Array();
 	pubversions = new Array();
 	getBiblioAttributesForPage(json);
-
+	var deleted = false;
+	if(json.IsReplacedBy != null) {
+		deleted=true;
+	}
 	$("#collectionTitle" + id + ">div").html(title);
 
 	if (document.title == "Contents: ")
@@ -171,9 +174,11 @@ function pageBiblioJsonParser(id, json) {
 		}
 	}
 
-	$("#versions" + id).html(
-			"<div><a href = '" + collection_Path + uri
-					+ "'>Current Version</a></div>" + versionHtml);
+	if(!deleted) {
+		versionHtml = "<div><a href = '" + collection_Path + uri
+		+ "'>Current Version</a></div>" + versionHtml;
+	}
+	$("#versions" + id).html(versionHtml);
 	if (creators.length != 0) {
 		var creatorString = creators[0];
 		var datacreatorString = creatornames[0];

@@ -2289,6 +2289,8 @@ public class ItemServicesImpl
         tm.setPredicate(DcTerms.HAS_VERSION);
 
         Map<String, Object> contextMap = getPubContext();
+        contextMap.put("IsReplacedBy", "http://purl.org/dc/terms/isReplacedBy");
+
         Set<UriRef> collections = new HashSet<UriRef>();
         try {
             c.perform(tm);

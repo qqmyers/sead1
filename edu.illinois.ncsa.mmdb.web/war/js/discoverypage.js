@@ -90,7 +90,7 @@ function writeCollection(id, json, pub, topLevel) {
 			$("#abstract" + id).css("visibility", "visible");
 			
 		}
-		if(topLevel==true) {
+		if((topLevel==true)&& (pub.IsReplacedBy == null)) {
 		$("#contents" + id + ">a").attr("href", "#discovery_" + uri)
 			.html("View Contents Listing ...");
 		} else {
