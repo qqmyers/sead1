@@ -16,6 +16,8 @@
 <script src="login_scripts/jquery-cookie.js"></script>
 <script src="login_scripts/jquery.tablesorter.min.js"></script>
 <script src="login_scripts/table2CSV.js"></script>
+<script src="login_scripts/filesize.min.js"></script>
+
 <link rel="stylesheet" id="um_style_sheet" href="login_css/um-style.css" type="text/css" media="all">
 <link rel="stylesheet" id="spacious_style-css" href="login_css/project-space.css" type="text/css" media="all">
 
@@ -67,45 +69,47 @@
 
 		if((serversLeft==0)&&(statsLeft==0)) {
 			$("#home-loading").hide();
-			$("#projects").tablesorter({
-        		// sort on the first column , order asc
-		        sortList: [[0,0]]
-		    });
-		}
-	}
+  
+  $("#projects").tablesorter({
+                        textExtraction:  function(node) { var x = node; x = x.childNodes[0]; return x.innerHTML},
+                        // sort on the first column , order asc
+                        sortList: [[0,0]]
+                    });
+                }
+        }
 
-	
-	function projInfoJsonParser(json) {
-		var current = decodeURIComponent(this.url.substr(this.url.indexOf("http")));
-		var index = jQuery.inArray(current, ${projects});
-		 $("#" + index + ">td:eq(0)").html("<div ><a href=\"" + current + "/..\">" + json['project.name'] + "</div></a>");
-		 if(json['project.url']) {
-		   $("#" + index + ">td:eq(8)").html( "<div><a href=\"" + json['project.url'] + "\">" + json['project.url'] + "</div></a>");
-		 } else {
-		   $("#" + index + ">td:eq(8)").html("<div/>");
-		 }
-		serversLeft = serversLeft-1;
-		checkDone();
-	}
-	
-	function sysInfoJsonParser(json) {
 
-		var jstring = JSON.stringify(json);
-		var current = decodeURIComponent(this.url.substr(this.url.indexOf("http")));
-		var index = jQuery.inArray(current, ${projects});
-	 
-		 $("#" + index + ">td:eq(1)").html("<div ><a href=\"" + current + "/#listCollections\">" + json["Public Preprint Collections"] + "</a></div>");
-		 $("#" + index + ">td:eq(2)").html("<div><a href=\"" + current + "/../discovery\">" + json["Published Collections"] + "</div></a>");
-		 $("#" + index + ">td:eq(3)").html("<div>"+json["Total Views"]+"</div>" );
-		 $("#" + index + ">td:eq(4)").html("<div>"+json["Number of Users"] +"</div>");
-		 $("#" + index + ">td:eq(5)").html("<div>"+json["Collections"]+"</div>");
-		 $("#" + index + ">td:eq(6)").html("<div>"+ json.Datasets+"</div>");
-		 $("#" + index + ">td:eq(7)").html("<div>"+json["Bytes from uploaded dataset"]+"</div>");
- 		 $("#" + index + ">td:eq(9)").html("<div>"+json['Version'] + "-" + json['Build'] + "</div>");
+        function projInfoJsonParser(json) {
+                var current = decodeURIComponent(this.url.substr(this.url.indexOf("http")));
+                var index = jQuery.inArray(current, ${projects});
+                 $("#" + index + ">td:eq(0)").html("<div ><a href=\"" + current + "/..\">" + json['project.name'] + "</div></a>");
+                 if(json['project.url']) {
+                   $("#" + index + ">td:eq(8)").html( "<div><a href=\"" + json['project.url'] + "\">" + json['project.url'] + "</div></a>");
+                 } else {
+                   $("#" + index + ">td:eq(8)").html("<div/>");
+                 }
+                serversLeft = serversLeft-1;
+                checkDone();
+        }
 
-		statsLeft = statsLeft-1;
-		checkDone();
-	}
+        function sysInfoJsonParser(json) {
+
+                var jstring = JSON.stringify(json);
+                var current = decodeURIComponent(this.url.substr(this.url.indexOf("http")));
+                var index = jQuery.inArray(current, ${projects});
+
+                 $("#" + index + ">td:eq(1)").html("<div class='sortkey' style='visibility:hidden;float:right;width:0px'>" + json["Public Preprint Collections"] + "</div><div ><a href=\"" + current + "/#listCollections\">" + json["Public Preprint Collections"] + "</a></div>");
+                 $("#" + index + ">td:eq(2)").html("<div class='sortkey' style='visibility:hidden;float:right;width:0px'>" + json["Published Collections"] + "</div><div><a href=\"" + current + "/../discovery\">" + json["Published Collections"] + "</div></a>");
+                 $("#" + index + ">td:eq(3)").html("<div>"+json["Total Views"]+"</div>" );
+                 $("#" + index + ">td:eq(4)").html("<div>"+json["Number of Users"] +"</div>");
+                 $("#" + index + ">td:eq(5)").html("<div>"+json["Collections"]+"</div>");
+                 $("#" + index + ">td:eq(6)").html("<div>"+ json.Datasets+"</div>");
+                 $("#" + index + ">td:eq(7)").html("<div class='sortkey' style='visibility:hidden;float:right;width:0px'>" + json["Bytes from uploaded dataset"] + "</div><div>"+filesize(parseInt(json["Bytes from uploaded dataset"]))+"</div>");
+                 $("#" + index + ">td:eq(9)").html("<div>"+json['Version'] + "-" + json['Build'] + "</div>");
+
+                statsLeft = statsLeft-1;
+                checkDone();
+        }
 
 
 	function projInfoErrorParser(jqXHR, textStatus, errorThrown) {
