@@ -52,6 +52,8 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -64,6 +66,12 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -90,8 +98,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.ParentJson;
-import edu.illinois.ncsa.mmdb.web.client.Results;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.EmptyResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSection;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetSectionResult;
@@ -127,10 +133,14 @@ public class AddMetadataWidget extends Composite {
     private final HandlerManager           eventBus;
     UserMetadataField                      userMetadataField;
 
+    static private MultiWordSuggestOracle  peopleOracle       = null;
+    static private MultiWordSuggestOracle  itemOracle         = null;
+
     public AddMetadataWidget(String uri, final DispatchAsync dispatch, HandlerManager events) {
         this(new HashSet<String>(), dispatch, events);
         this.resources.add(uri);
         this.uri = uri;
+        cachePeopleEntries();
     }
 
     public AddMetadataWidget(Collection<String> batch, final DispatchAsync dispatch, HandlerManager eventBus) {
@@ -166,7 +176,74 @@ public class AddMetadataWidget extends Composite {
             }
         });
 
+        cachePeopleEntries();
         initWidget(thePanel);
+    }
+
+    private void cachePeopleEntries() {
+
+        if (peopleOracle == null) {
+
+            String url = GWT.getHostPageBaseURL() + "resteasy/people/";
+            RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
+
+            try {
+                peopleOracle = new MultiWordSuggestOracle(" ,/:@");
+                builder.setHeader("Accept", "application/json");
+                Request request = builder.sendRequest(null, new RequestCallback() {
+                    public void onError(Request request, Throwable exception) {
+                        // Couldn't connect to server (could be timeout, SOP violation, etc.)
+                        GWT.log(exception.getLocalizedMessage());
+                    }
+
+                    public void onResponseReceived(Request request, Response response) {
+                        if (200 == response.getStatusCode()) {
+                            String text = response.getText();
+                            //Unpack array from returned object.
+                            text = text.substring("{ \"persons\" : ".length());
+                            text = text.substring(0, text.indexOf(", \"@context\" :"));
+                            JsArray<PersonInfo> people = JsonUtils.<JsArray<PersonInfo>> safeEval(text);
+                            for (int i = 0; i < people.length(); i++ ) {
+                                StringBuilder sBuilder = new StringBuilder();
+                                sBuilder.append(people.get(i).getName());
+                                if (people.get(i).getID() != null) {
+                                    sBuilder.append(", id:" + people.get(i).getID());
+                                }
+                                if (people.get(i).getEmail() != null) {
+                                    sBuilder.append(", " + people.get(i).getEmail());
+                                }
+                                peopleOracle.add(sBuilder.toString());
+                            }
+
+                        } else {
+                            //Leave the oracle empty
+                        }
+                    }
+                });
+            } catch (RequestException e) {
+                // Couldn't connect to server
+                Window.alert(e.getLocalizedMessage());
+            }
+        }
+    }
+
+    class PersonInfo extends JavaScriptObject {
+        // Overlay types always have protected, zero argument constructors.
+        protected PersonInfo() {
+        }
+
+        // JSNI methods to get parts.
+        public final native String getName() /*-{
+			return this.familyName + ',' + this.givenName;
+        }-*/;
+
+        public final native String getEmail() /*-{
+			return this.email;
+        }-*/;
+
+        public final native String getID() /*-{
+			return this['@id'];
+        }-*/;
     }
 
     /**
@@ -203,7 +280,7 @@ public class AddMetadataWidget extends Composite {
 
                 }
             };
-            String query = "";
+
             // add input widget based on type
             userMetadataField = availableFields.toArray(new UserMetadataField[0])[index - 1];
             switch (userMetadataField.getType()) {
@@ -229,20 +306,10 @@ public class AddMetadataWidget extends Composite {
                 case UserMetadataField.VIVO_CONTACT:
                     inputField = new CreatorField(userMetadataField, addHandler, clearHandler);
                     newFieldPanel.add(inputField);
-                    //Initialize the connection to VIVO
-
-                    //FIXME : Change this hard coded URL using some ORM-like implementation available for SPARQL in Jena
-                    query = "PREFIX+foaf%3A+<http%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2F>%0D%0APREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0APREFIX+rdfs%3A+<http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23>%0D%0ASELECT+distinct+%3FURL+%3FLabel%0D%0AWHERE%7B%0D%0A%3FURL+rdf%3Atype+foaf%3APerson+.%0D%0A%3FURL+rdfs%3Alabel+%3FLabel+.%0D%0A%7D%0D%0A&output=json"
-                            + "&callback=";
-                    InitializeVIVOConnection(query);
                     break;
                 case UserMetadataField.VIVO_PART_OF:
                     inputField = new PartOfField(userMetadataField, addHandler, clearHandler);
                     newFieldPanel.add(inputField);
-                    //Initialize the connection to VIVO
-                    query = "PREFIX+bibo%3A+<http%3A%2F%2Fpurl.org%2Fontology%2Fbibo%2F>%0D%0APREFIX+rdf%3A+<http%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23>%0D%0APREFIX+rdfs%3A+<http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23>%0D%0A%0D%0A%0D%0ASELECT+distinct+%3FURL+%3FLabel%0D%0AWHERE{%0D%0A%3FURL+rdf%3Atype+bibo%3AAcademicArticle+.%0D%0A%3FURL+rdfs%3Alabel+%3FLabel+.%0D%0A}%0D%0A&output=json"
-                            + "&callback=";
-                    InitializeVIVOConnection(query);
                     break;
 
                 case UserMetadataField.MULTILINE_TEXT:
@@ -258,97 +325,6 @@ public class AddMetadataWidget extends Composite {
         }
 
     }
-
-    //START - ADDED BY RAM
-    private static final String    SERVER_ERROR = "Couldn't retrieve required details. "
-                                                        + "This may be as a result of a faulty internet connection or the server "
-                                                        + "is experiencing a down time. Please check your network connection and try again.";
-    Results                        results;
-
-    private MultiWordSuggestOracle oracle       = null;
-
-    /**
-     * Make call to remote server to get the required JSON object.
-     */
-    public native static void getJson(int requestId, String url, AddMetadataWidget handler) /*-{
-		var callback = "callback" + requestId;
-
-		// [1] Create a script element.
-		var script = document.createElement("script");
-		script.setAttribute("src", url + callback);
-		script.setAttribute("type", "text/javascript");
-
-		// [2] Define the callback function on the window object.
-		window[callback] = function(jsonObj) {
-			// [3]
-			handler.@edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataWidget::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(jsonObj);
-			window[callback + "done"] = true;
-		}
-
-		// [4] JSON download has 3-second timeout.
-		setTimeout(
-				function() {
-					if (!window[callback + "done"]) {
-						handler.@edu.illinois.ncsa.mmdb.web.client.ui.AddMetadataWidget::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(null);
-					}
-
-					// [5] Cleanup. Remove script and callback elements.
-					document.body.removeChild(script);
-					delete window[callback];
-					delete window[callback + "done"];
-				}, 3000);
-
-		// [6] Attach the script element to the document body.
-		document.body.appendChild(script);
-
-    }-*/;
-
-    //Called when the getJson method hits the server and a response is obtained
-    public void handleJsonResponse(JavaScriptObject jso) {
-
-        if (jso == null) {
-
-            displayMessage(SERVER_ERROR);
-            refresh();
-            return;
-        }
-
-        try {
-
-            ParentJson pJsons = getParentJson(jso);
-            results = pJsons.getResults();
-            if (results != null) {
-
-                oracle = (MultiWordSuggestOracle) ((SuggestBox) inputField.inputWidget).getSuggestOracle();
-            }
-            for (int i = 0; i < results.getBindings().length(); i++ ) {
-                String name = results.getBindings().get(i).getLabel().getValue();
-                String userVivoURL = results.getBindings().get(i).getURL().getValue();
-
-                oracle.add(name + " : " + userVivoURL);
-            }
-        } catch (Exception e) {
-
-        }
-    }
-
-    private void displayMessage(String errorMessage) {
-        // TODO Auto-generated method stub
-        Window.alert(errorMessage);
-    }
-
-    private final native ParentJson getParentJson(JavaScriptObject jso) /*-{
-		return jso;
-    }-*/;
-
-    private void InitializeVIVOConnection(String query) {
-        // Send request to server to get the json object.
-        if (!MMDB._vivoQueryUri.equals("")) {
-            getJson(1, MMDB._vivoQueryUri + query, this);
-        }
-    }
-
-    //END - ADDED BY RAM
 
     public void showFields(final boolean canEdit) {
         // FIXME single get to get fields and values
@@ -766,7 +742,7 @@ public class AddMetadataWidget extends Composite {
         @Override
         String getUri() {
             String val = getValue();
-            boolean isUri = false;
+
             if (val.startsWith("tag:") || val.startsWith("http:") || val.startsWith("https:") || val.startsWith("ftp:")) {
                 return val;
             } else {
@@ -814,7 +790,6 @@ public class AddMetadataWidget extends Composite {
         }
     }
 
-    //START - ADDED BY RAM
     //Inherit input field class to build a creator field - contains a suggest box instead of a text box
     class CreatorField extends InputField {
 
@@ -828,7 +803,16 @@ public class AddMetadataWidget extends Composite {
 
         @Override
         public String getValue() {
-            return vivoCreatorSuggestBox.getValue();
+            String v = vivoCreatorSuggestBox.getValue();
+            //Parse id from oracle suggestion string
+            int i = v.indexOf(", id:");
+            if (i != -1) {
+                v = v.substring(i + 5);
+                if (v.indexOf(", ") != -1) {
+                    v = v.substring(0, v.indexOf(", "));
+                }
+            }
+            return v;
         }
 
         @Override
@@ -840,7 +824,7 @@ public class AddMetadataWidget extends Composite {
         @Override
         Widget createInputWidget() {
 
-            vivoCreatorSuggestBox = new SuggestBox();
+            vivoCreatorSuggestBox = new SuggestBox(peopleOracle);
 
             // HACK : https://code.google.com/p/google-web-toolkit/issues/detail?id=3533
             pressEnterHandler = vivoCreatorSuggestBox.getTextBox().addKeyUpHandler(pressEnter);
@@ -850,8 +834,12 @@ public class AddMetadataWidget extends Composite {
 
         @Override
         String getUri() {
-            // TODO Auto-generated method stub
-            return null;
+            String val = getValue();
+            if (val.startsWith("tag:") || val.startsWith("http:") || val.startsWith("https:") || val.startsWith("ftp:")) {
+                return val;
+            } else {
+                return null;
+            }
         }
 
         @Override
@@ -884,8 +872,11 @@ public class AddMetadataWidget extends Composite {
 
         @Override
         Widget createInputWidget() {
-
-            partOfSuggestBox = new SuggestBox();
+            //ToDo - itemOracle should be populated once we have a source of papers again...
+            if (itemOracle == null) {
+                itemOracle = new MultiWordSuggestOracle(" ,");
+            }
+            partOfSuggestBox = new SuggestBox(itemOracle);
 
             pressEnterHandler = partOfSuggestBox.getTextBox().addKeyUpHandler(pressEnter);
             partOfSuggestBox.setWidth("500px");
@@ -904,8 +895,6 @@ public class AddMetadataWidget extends Composite {
             pressEnterHandler = partOfSuggestBox.getTextBox().addKeyUpHandler(pressEnter);
         }
     }
-
-    //END - ADDED BY RAM
 
     class ListField extends InputField {
 

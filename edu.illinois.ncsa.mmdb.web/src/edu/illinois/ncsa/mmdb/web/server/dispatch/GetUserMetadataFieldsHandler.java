@@ -159,7 +159,29 @@ public class GetUserMetadataFieldsHandler implements
             if (value instanceof Resource) {
                 Resource v = (Resource) value;
                 if (v instanceof UriRef) {
-                    umv = new UserMetadataValue(rewrite(v), nameOf(v));
+                    //Only check for person for creator or contact fields
+                    if (predicate.toString().equals(org.tupeloproject.rdf.Namespaces.dcTerms("creator")) ||
+                            predicate.toString().equals("http://sead-data.net/terms/contact")) {
+                        try {
+                            JSONObject person = PeopleRestService.getPersonJSON(URLEncoder.encode(value.toString(), "UTF-8"));
+                            if (person != null) {
+                                if (value.toString().equals(person.getString("@id"))) {
+                                    umv = new UserMetadataValue(person.getString("@id"), person.getString("familyName") + ", " + person.getString("givenName"));
+                                }
+                            }
+                        } catch (UnsupportedEncodingException e) {
+                            //Shouldn't happen...
+                            log.error(e);
+                        } catch (JSONException e) {
+                            //Log the issue and keep going to process the person name as a string
+                            log.warn(e);
+
+                        }
+                    }
+                    if (umv == null) {
+
+                        umv = new UserMetadataValue(rewrite(v), nameOf(v));
+                    }
                 } else {
                     umv = new UserMetadataValue(null, v.getString());
                 }
@@ -177,26 +199,7 @@ public class GetUserMetadataFieldsHandler implements
                     val = val.substring(separator + 3, val.length());
                     umv = new UserMetadataValue(val, name);
                 } else {
-                    //Only check for person for creator or contact fields
-                    if (predicate.toString().equals(org.tupeloproject.rdf.Namespaces.dcTerms("creator")) ||
-                            predicate.toString().equals("http://sead-data.net/terms/contact")) {
-                        try {
-                            JSONObject person = PeopleRestService.getPersonJSON(URLEncoder.encode(value.toString(), "UTF-8"));
-                            if (person != null) {
-                                umv = new UserMetadataValue(person.getString("@id"), person.getString("familyName") + ", " + person.getString("givenName"));
-                            }
-                        } catch (UnsupportedEncodingException e) {
-                            //Shouldn't happen...
-                            log.error(e);
-                        } catch (JSONException e) {
-                            //Log the issue and keep going to process the person name as a string
-                            log.warn(e);
-
-                        }
-                    }
-                    if (umv == null) {
-                        umv = new UserMetadataValue(null, value.toString());
-                    }
+                    umv = new UserMetadataValue(null, value.toString());
                 }
 
             }

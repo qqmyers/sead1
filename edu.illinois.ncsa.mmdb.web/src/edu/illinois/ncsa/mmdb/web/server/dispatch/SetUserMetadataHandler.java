@@ -85,6 +85,8 @@ public class SetUserMetadataHandler implements ActionHandler<SetUserMetadata, Em
                 subject = Resource.uriRef(action.getSectionUri());
             }
             Resource predicate = Resource.uriRef(action.getPropertyUri());
+            log.debug("Adding metadata to: " + subject.toString());
+            log.debug("With predicate : " + predicate.toString());
             Collection<String> values = action.getValues();
 
             //
@@ -92,8 +94,10 @@ public class SetUserMetadataHandler implements ActionHandler<SetUserMetadata, Em
             for (String value : values ) {
                 if (action.isUriType()) {
                     ts.addValue(subject, predicate, Resource.uriRef(value));
+                    log.debug("Adding a URI value: " + value);
                 } else {
                     ts.addValue(subject, predicate, value);
+                    log.debug("Adding literal value: " + value);
                 }
             }
             ts.save();

@@ -59,7 +59,7 @@ public class PeopleRestService {
                 }
                 return Response.status(status).build();
             } else {
-
+                log.debug("Returning people json from c3pr");
                 return Response.ok(conn.getInputStream()).build();
 
             }
@@ -87,10 +87,14 @@ public class PeopleRestService {
 
             int status = conn.getResponseCode();
             if (status != HttpURLConnection.HTTP_OK) {
-                log.warn("Received " + status + " from c3pr /people/" + id + " service");
+                if (status != HttpURLConnection.HTTP_NOT_FOUND) {
+                    log.warn("Received " + status + " from c3pr /people service");
+                } else {
+                    log.debug("Received " + status + " from c3pr /people service");
+                }
                 return Response.status(status).build();
             } else {
-
+                log.debug("Returning JSON for : " + id);
                 return Response.ok(conn.getInputStream()).build();
 
             }
