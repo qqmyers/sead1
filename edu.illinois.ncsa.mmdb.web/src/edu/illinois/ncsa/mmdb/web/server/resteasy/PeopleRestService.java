@@ -5,8 +5,11 @@ package edu.illinois.ncsa.mmdb.web.server.resteasy;
  */
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 
 import javax.ws.rs.Encoded;
 import javax.ws.rs.GET;
@@ -105,6 +108,51 @@ public class PeopleRestService {
     }
 
     public static JSONObject getPersonJSON(String id) {
+        JSONObject person = getPersonJSONForID(id);
+        log.debug("Checking for person: " + id);
+        if (person != null) {
+            log.debug("Found person: " + person.toString(2));
+            return person;
+        } else {
+            //Never fail! - if the person's identifier is valid but not in pdt, request that it be added
+
+            try {
+                URL url2 = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people");
+                HttpURLConnection post = (HttpURLConnection) url2.openConnection();
+                post.setReadTimeout(15000);
+                post.setConnectTimeout(15000);
+                post.setRequestMethod("POST");
+                post.addRequestProperty("Accept", "application/json");
+                post.addRequestProperty("Content-type", "application/json");
+                post.setDoInput(true);
+                post.setDoOutput(true);
+
+                OutputStream os = post.getOutputStream();
+                OutputStreamWriter writer =
+                        new OutputStreamWriter(os, "UTF-8");
+                writer.write("{\"identifier\":\"" + URLDecoder.decode(id, "UTF-8") + "\"}");
+
+                writer.flush();
+                writer.close();
+                os.close();
+                int responseCode = post.getResponseCode();
+                log.debug("Adding :" + id + ", response is " + responseCode);
+
+                if (responseCode == HttpURLConnection.HTTP_CREATED) {
+                    JSONObject newPerson = new JSONObject(org.apache.commons.io.IOUtils.toString(post.getInputStream()));
+                    person = getPersonJSONForID(newPerson.getString("identifier"));
+                    log.debug("Created person: " + person.toString(2));
+
+                }
+            } catch (IOException io) {
+                log.warn(io.getLocalizedMessage());
+            }
+        }
+        return person;
+
+    }
+
+    private static JSONObject getPersonJSONForID(String id) {
         try {
             URL url = new URL(TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL) + "/people/" + id);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -123,6 +171,5 @@ public class PeopleRestService {
             log.warn(e);
         }
         return null;
-
     }
 }
