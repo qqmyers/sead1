@@ -181,6 +181,9 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                         stats.put("Max Collection Depth", "" + ci.getMaxDepth());
                         stats.put("Data Mimetypes", ci.getMimetypeSet());
                         requestJsonObject.put("Aggregation Statistics", stats);
+
+                        aggJsonObject.put("Publishing Project", getProjectID());
+
                         for (String key : ItemServicesImpl.collectionStats.keySet() ) {
                             contextObject.put(key, ItemServicesImpl.collectionStats.get(key));
                         }
@@ -190,6 +193,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                         contextObject.put("Publication Callback", "http://sead-data.net/terms/publicationcallback");
                         contextObject.put("Rights Holder", DCTerms.rightsHolder.toString());
                         contextObject.put("Affiliations", "http://sead-data.net/terms/affiliations");
+                        contextObject.put("Publishing Project", "http://sead-data.net/terms/publishingProject");
 
                         aggJsonObject.remove("@context");
 
@@ -250,6 +254,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                         }
                     }
                 }
+
             };
             oreThread.start();
 
@@ -258,6 +263,19 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
             log.error("Error publishing on " + action.getUri(), x);
             throw new ActionException("failed", x);
         }
+    }
+
+    public static String getProjectID() {
+        String projID;
+        try {
+            projID = new URL(PropertiesLoader.getProperties().getProperty("domain")).getHost();
+            projID = projID.substring(0, projID.indexOf("."));
+            projID = "http://sead-data.net/projects/" + projID;
+        } catch (Exception e) {
+            projID = "http://sead-data.net/projects/unknown";
+            log.error("Unable to determine project name: " + e.getLocalizedMessage());
+        }
+        return projID;
     }
 
     public static String getVersionNumber(Resource subject) throws OperatorException {

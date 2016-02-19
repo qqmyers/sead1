@@ -1982,6 +1982,8 @@ public class ItemServicesImpl
 
             agg.put("Is Version Of", topCollRef.toString());
 
+            agg.put("Publishing Project", RequestPublicationHandler.getProjectID());
+
             //Further Munge - return tags as strings, not uris
             recreateTagStrings(agg);
 
@@ -2010,6 +2012,7 @@ public class ItemServicesImpl
             Map<String, Object> seadContext = getCombinedContext(false);
             seadContext.put("Is Version Of", DcTerms.IS_VERSION_OF.toString());
             seadContext.put("Has Part", DcTerms.HAS_PART.toString());
+            seadContext.put("Publishing Project", "http://sead-data.net/terms/publishingProject");
             contextList.add(seadContext);
             oremap.put("@context", contextList);
 
