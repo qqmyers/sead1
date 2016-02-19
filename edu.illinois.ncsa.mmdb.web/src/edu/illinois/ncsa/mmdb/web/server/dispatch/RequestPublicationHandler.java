@@ -184,6 +184,8 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
 
                         aggJsonObject.put("Publishing Project", getProjectID());
 
+                        aggJsonObject.put("Publishing Project Name", TupeloStore.getInstance().getConfiguration(ConfigurationKey.ProjectName));
+
                         for (String key : ItemServicesImpl.collectionStats.keySet() ) {
                             contextObject.put(key, ItemServicesImpl.collectionStats.get(key));
                         }
@@ -194,6 +196,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                         contextObject.put("Rights Holder", DCTerms.rightsHolder.toString());
                         contextObject.put("Affiliations", "http://sead-data.net/terms/affiliations");
                         contextObject.put("Publishing Project", "http://sead-data.net/terms/publishingProject");
+                        contextObject.put("Publishing Project Name", "http://sead-data.net/terms/publishingProjectName");
 
                         aggJsonObject.remove("@context");
 

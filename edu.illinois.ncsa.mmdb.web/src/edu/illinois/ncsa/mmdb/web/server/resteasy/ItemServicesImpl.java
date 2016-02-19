@@ -86,6 +86,7 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListNamedThingsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.ListUserMetadataFieldsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.UserMetadataField;
+import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.server.SEADRbac;
 import edu.illinois.ncsa.mmdb.web.server.TokenStore;
@@ -1983,6 +1984,7 @@ public class ItemServicesImpl
             agg.put("Is Version Of", topCollRef.toString());
 
             agg.put("Publishing Project", RequestPublicationHandler.getProjectID());
+            agg.put("Publishing Project Name", TupeloStore.getInstance().getConfiguration(ConfigurationKey.ProjectName));
 
             //Further Munge - return tags as strings, not uris
             recreateTagStrings(agg);
@@ -2013,6 +2015,8 @@ public class ItemServicesImpl
             seadContext.put("Is Version Of", DcTerms.IS_VERSION_OF.toString());
             seadContext.put("Has Part", DcTerms.HAS_PART.toString());
             seadContext.put("Publishing Project", "http://sead-data.net/terms/publishingProject");
+            seadContext.put("Publishing Project Name", "http://sead-data.net/terms/publishingProjectName");
+
             contextList.add(seadContext);
             oremap.put("@context", contextList);
 
