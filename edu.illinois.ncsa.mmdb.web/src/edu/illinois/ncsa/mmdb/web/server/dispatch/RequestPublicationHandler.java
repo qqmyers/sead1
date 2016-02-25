@@ -50,6 +50,7 @@ import org.sead.acr.common.utilities.PropertiesLoader;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
+import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
@@ -138,7 +139,16 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                     String server = TupeloStore.getInstance().getConfiguration(ConfigurationKey.CPURL);
                     try {
                         JSONObject requestJsonObject = new JSONObject();
-                        JSONObject aggJsonObject = new JSONObject(ItemServicesImpl.getMetadataMapById(subject.toString(), ItemServicesImpl.collectionBasics, Resource.uriRef(action.getUser())));
+                        //Kludge - change label for dc terms created to be consistent with 2.0 and with the item biblio map
+                        //Will make the change here rather than changing in the basic collection map to avoid side affects other places that's used.
+                        //FWIW - root cause is that datasets and collections use dc elements date and dc terms created respectively
+                        //and we've tried to manage that with different labels, except wieh lists may mix both datasets and collections...
+                        //rather than go back adn fix all existing datasets and every place the different labels are expected....
+                        //NB. The metadata has been correctly reported, it's just an issue of consistent labels
+                        Map<String, Object> newColBasicsMap = ItemServicesImpl.collectionBasics;
+                        newColBasicsMap.remove("Date");
+                        newColBasicsMap.put("Creation Date", Namespaces.dcTerms("created"));
+                        JSONObject aggJsonObject = new JSONObject(ItemServicesImpl.getMetadataMapById(subject.toString(), newColBasicsMap, Resource.uriRef(action.getUser())));
                         aggJsonObject.put("Identifier", aggId.toString());
                         aggJsonObject.put("@id", idUri + "?pubtoken=" + TokenStore.generateToken("/researchobjects/" + aggId.toString(), salt) + "#aggregation");
                         aggJsonObject.put("@type", "Aggregation");
