@@ -145,6 +145,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                         //and we've tried to manage that with different labels, except wieh lists may mix both datasets and collections...
                         //rather than go back adn fix all existing datasets and every place the different labels are expected....
                         //NB. The metadata has been correctly reported, it's just an issue of consistent labels
+
                         Map<String, Object> newColBasicsMap = ItemServicesImpl.collectionBasics;
                         newColBasicsMap.remove("Date");
                         newColBasicsMap.put("Creation Date", Namespaces.dcTerms("created"));
