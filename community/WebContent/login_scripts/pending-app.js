@@ -24,7 +24,7 @@ seadSpaces.buildPendingGrid = function(size, i, projectName,
 		projectDescription, projectLogo, projectColor, projectBg, value,
 		pendingRequests) {
 	if (projectName == null) {
-		projectName = value + ' is currently busy/offline';
+		projectName = 'Security settings for ' + value + ' prevent anonymous viewing pending requests';
 	}
 
 	var page = '';
