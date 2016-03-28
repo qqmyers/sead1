@@ -12,7 +12,8 @@
 	href="images/icons/favicon.ico">
 
 <!-- no-popup token refresh when logged in-->
-<script type="text/javascript" src="https://apis.google.com/js/client.js"></script>
+<script type="text/javascript"
+	src="https://apis.google.com/js/client.js"></script>
 
 <!--                                           -->
 <!-- This script loads your compiled module.   -->
@@ -50,7 +51,11 @@
 
 
 <!-- hack to create an array in the main window -->
-<script type="text/javascript">function createAnArray(){return [];}</script>
+<script type="text/javascript">
+	function createAnArray() {
+		return [];
+	}
+</script>
 
 <link rel="stylesheet" type="text/css" href="css/zocial.css">
 
@@ -83,8 +88,7 @@
 <script type="text/javascript" src="js/dashboard.js"></script>
 
 <!--  ol2 styles -->
-<link rel="stylesheet"
-	href="css/openlayers.org.style.css"
+<link rel="stylesheet" href="css/openlayers.org.style.css"
 	type="text/css">
 <link href="css/dashboard.css" rel="stylesheet">
 
@@ -94,9 +98,11 @@
 
 <title>SEAD Project Space</title>
 <link rel="stylesheet" type="text/css" href="css/header.css">
-<link href='//fonts.googleapis.com/css?family=Raleway'
+<link href='//fonts.googleapis.com/css?family=Raleway' rel='stylesheet'
+	type='text/css'>
+<link
+	href='//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext'
 	rel='stylesheet' type='text/css'>
-<link href='//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
 <script rel="stylesheet" type="text/javascript" src="js/dropdown.js"></script>
 <!--End SEAD-MAIN-MENU requirements-->
 
@@ -135,10 +141,15 @@
 							onmouseout="mclosetime()">
 							<a href="http://sead-data.net/about/sead-team/">Project Team</a>
 							<a href="http://sead-data.net/about/advisory-board/">Advisory
-								Board</a> <a
+								Board</a> 
+							<a href="http://sead-data.net/partners/">Partners</a> 
+							<a
 								href="http://sead-data.net/about/publicationspresentations/">Publications
-								& Presentations</a> <a href="http://sead-data.net/about/newsevents/">News
+								& Presentations</a> 
+							<a href="http://sead-data.net/about/newsevents/">News
 								& Events</a>
+							<a href="http://sead-data.net/subscribe-to-sead-updates/">Subscribe to SEAD Updates</a>
+							<a href="http://sead-data.net/about/contactus/">Contact Us</a>
 						</div></li>
 					<li class="has-submenu"><a
 						href="http://sead-data.net/feature-tour/"
@@ -146,26 +157,12 @@
 							Tour</a>
 						<div id="m2" onmouseover="mcancelclosetime()"
 							onmouseout="mclosetime()">
-							<a href="http://sead-data.net/feature-tour/tools-in-development/">Tools
-								in Development</a>
+							<a href="http://sead-data.net/feature-tour/all-features/">All Features</a>
+              <a href="http://sead-data.net/feature-tour/sead-support-for-data-management-plans/">Data Mgmt Plan (DMP) Support</a>
+              <a href="http://sead-data.net/feature-tour/tools-in-development/">Tools in Development</a>
 						</div></li>
-					<li class="selected"><a href="http://sead.ncsa.illinois.edu/projects/">Project
-							Spaces</a></li>
-					<li><a href="http://seadva.d2i.indiana.edu:8181/sead-access/" id="va">Virtual
-							Archive</a></li>
-					<li class="has-submenu"><a
-						href="http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/"
-						onmouseover="mopen('m3')" onmouseout="mclosetime()">Research
-							Network</a>
-						<div id="m3" onmouseover="mcancelclosetime()"
-							onmouseout="mclosetime()">
-							<a href="http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/people">People</a>
-							<a
-								href="http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/organizations">Organizations</a>
-							<a
-								href="http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/research">Research</a>
-							<a href="http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/events">Events</a>
-						</div></li>
+					<li class="selected"><a
+						href="http://sead.ncsa.illinois.edu/projects/">Project Spaces</a></li>
 					<li class="has-submenu"><a href="http://sead-data.net/help/"
 						onmouseover="mopen('m4')" onmouseout="mclosetime()">Help</a>
 						<div id="m4" onmouseover="mcancelclosetime()"
@@ -175,10 +172,11 @@
 
 				</ul>
 			</div>
+			
+			
 			<div id="project-header">
 				<div id="project-logo">
-					<a href="#about">
-					<img src="images/SEAD-small.png"></img></a>
+					<a href="#about"> <img src="images/SEAD-small.png"></img></a>
 				</div>
 				<div id="projectTitle"></div>
 				<div id="loginMenu">
