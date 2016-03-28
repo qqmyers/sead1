@@ -1679,7 +1679,7 @@ public class ItemServicesImpl
 
                     //2.0 support
                     if (saltTriple.size() == 1) {
-                        tw.remove((Triple) saltTriple.toArray()[1]);
+                        tw.remove((Triple) saltTriple.toArray()[0]);
                     }
                     Date theDate = new Date(date);
                     UriRef issued = Resource.uriRef(DCTerms.issued.getURI());
