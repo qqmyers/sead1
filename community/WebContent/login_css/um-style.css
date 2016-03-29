@@ -85,7 +85,7 @@ blockquote, q {
          text-decoration: underline;
 }
 .entry-content a:hover, .entry-content p a:hover{
-	color:#F3882A;
+	color:#cb4f00;
         text-decoration: underline;
 }
 .entry-content a:visited, .entry-content p a:visited{
@@ -98,11 +98,11 @@ blockquote, q {
 .textwidget a{
          color:#FFFFFF;
          padding:0.5rem 0.75rem;
-         background-color:#f3882a;
+         background-color:#cb4f00;
          font-family:'Lato',sans-serif;
 }
 .textwidget a:hover{
-        color:#F3822A;
+        color:#cb4f00;
 	background-color: #666666;
 }
 a:focus {
@@ -124,7 +124,7 @@ embed, iframe, object {
 	max-width: 100%;
 }
 #menu-item-112 a: hover{
-        color:#F3822A;
+        color:#cb4f00;
 }
 /* =GENERICONS
 ----------------------------------------------- */
@@ -307,7 +307,7 @@ blockquote cite {
         margin-top:-40px;
 }
 article h1 span{
-        border-bottom: 2px solid #f3882a;
+        border-bottom: 2px solid #cb4f00;
         padding-bottom: 5px;
 }
 .team-group{
@@ -315,7 +315,7 @@ article h1 span{
         overflow: hidden;
 }
 .team-group h2{
-        color:#f3822a;
+        color:#cb4f00;
 }
 #FAQ-p{
         margin-top:20px;
@@ -397,7 +397,7 @@ button:hover {
 	-webkit-box-shadow:0 0 2px rgba(0, 0, 0, 0.6);
 	-moz-box-shadow:0 0 2px rgba(0, 0, 0, 0.6);
 	box-shadow:0 0 2px rgba(0, 0, 0, 0.6);
-        color: #F3822a;
+        color: #cb4f00;
         background-color: #666666;
 }
 .wpcf7-submit{
@@ -438,7 +438,7 @@ a:focus, a:active, a:hover {
          text-decoration:none;
 }
 .crpw-title:hover{
-	color: #f3822a;
+	color: #cb4f00;
         text-decoration: none;
 }
 
@@ -531,7 +531,7 @@ img#wpstats {
       padding:20px;
       border-width:2px 1px 1px 1px;
       border-style:solid dashed dashed dashed;
-      border-color:#f3882a #EAEAEA #EAEAEA #EAEAEA;
+      border-color:#cb4f00 #EAEAEA #EAEAEA #EAEAEA;
       margin-top:10px;
       margin-bottom: 30px;
       display:block;
@@ -883,7 +883,7 @@ li.default-menu {
 .main-navigation ul li.current_page_item a,
 .main-navigation ul li:hover > a,
 .main-navigation ul li:hover > a:after {
-	color: #f3882a;
+	color: #cb4f00;
 }
 .main-navigation ul li.current-menu-item a{
         font-style:bold
@@ -895,7 +895,7 @@ li.default-menu {
 
 .main-navigation li > a:hover:after {
     content: ' ▾';
-    color:#f3882a;
+    color:#cb4f00;
 }
 
 .main-navigation li > a:only-child:after {
@@ -921,7 +921,7 @@ li.default-menu {
 }
 .main-navigation ul li ul {
 	position: absolute;
-	background-color: #F3882A;
+	background-color: #cb4f00;
 	border-top: 1px solid #0FBE7C;
 	top: 48px;
 	left: 25px;
@@ -979,7 +979,7 @@ li.default-menu {
 }
 .site-header .menu-toggle:hover {
         padding: 5px 22px;
-        background: #0F3822A;
+        background: #0cb4f00;
 }
 .site-header .menu-toggle:before {
   content: '\2261';
@@ -1018,7 +1018,7 @@ li.default-menu {
   background: #0FBE7C;
 }
 #colophon .small-menu a:hover{
-     color:#F3822A;
+     color:#cb4f00;
 }
 /* =SECONDARY MENUS 
 ----------------------------------------------- */
@@ -1117,7 +1117,7 @@ li.default-menu {
 	font-size: 20px;
 }
 #featured-slider .slider-read-more-button:hover {
-        color: #F3822A;
+        color: #cb4f00;
 	background-color: #666666;
 }
 /*Team Member*/
@@ -1125,10 +1125,10 @@ li.default-menu {
         padding-bottom:0px;
 }
 .team-info p em{
- 	/*color:#F3882A;*/
+ 	/*color:#cb4f00;*/
 }
 .investigator p em{
-        /*color:#F3882A;*/
+        /*color:#cb4f00;*/
 }
 /*Help*/
 
@@ -1157,7 +1157,7 @@ li.default-menu {
 }
 #create-account h2:before, #establish h2:before, #setting-up h2:before, #administration h2:before, #working h2:before, #publish h2:before, #find-data h2:before, #network h2:before{
         font: normal 18px/1 'Genericons';
-	background-color: #F3882A;
+	background-color: #cb4f00;
 	padding: 0.5rem 0.5rem;
 	border-radius: 50%;
 	color: #fff;
@@ -2186,7 +2186,7 @@ a#scroll-up:hover {
 .entry-meta {
 	/*border: 1px solid #EAEAEA;*/
 	font-size: 14px;
-	color: #f3882a;
+	color: #cb4f00;
 	font-family: 'Lato', sans-serif;
 	margin:-15px 0 5px -2px;
 }
@@ -2269,7 +2269,7 @@ a#scroll-up:hover {
 /*#SEAD-contact-h1 span:before{
         font: normal 24px/1 'Genericons';
         content: '\f413';
-        color: #F3882A;
+        color: #cb4f00;
 }*/
 
 .single #content .tags {

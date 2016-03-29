@@ -305,7 +305,10 @@ seadSpaces.init = function() {
 								.each(
 										spaces,
 										function(key, value) {
-											if(value == 'https://sead-open.ncsa.illinois.edu/acr'||value == 'https://sead-demo.ncsa.illinois.edu/acr'){i++;return;} // hide SEAD open and SEAD Demo
+/*											if(value == 'https://sead-open.ncsa.illinois.edu/acr'||value == 'https://sead-demo.ncsa.illinois.edu/acr'){i++;return;} // hide SEAD open and SEAD Demo
+ */ 
+  											if(value == 'https://sead-demo.ncsa.illinois.edu/acr'){i++;return;} // hide SEAD Demo - open is used by CanopyDB
+ 
 											$
 													.when(
 															seadSpaces
