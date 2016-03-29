@@ -108,7 +108,7 @@ blockquote, .um q {
 
 .um
 .entry-content a:hover, .um .entry-content p a:hover{
-	color:#F3882A;
+	color:#cb4f00;
 }
 
 .um
@@ -125,7 +125,7 @@ blockquote, .um q {
 .textwidget a{
          color:#FFFFFF;
          padding:0.5rem 0.75rem;
-         background-color:#f3882a;
+         background-color:#cb4f00;
          font-family:'Lato', .umsans-serif;
 }
 
@@ -423,7 +423,7 @@ blockquote cite {
 
 .um 
 article h1 span{
-        border-bottom: 2px solid #f3882a;
+        border-bottom: 2px solid #cb4f00;
         padding-bottom: 5px;
 }
 
@@ -723,7 +723,7 @@ img#wpstats {
       padding:20px;
       border-width:2px 1px 1px 1px;
       border-style:solid dashed dashed dashed;
-      border-color:#f3882a #EAEAEA #EAEAEA #EAEAEA;
+      border-color:#cb4f00 #EAEAEA #EAEAEA #EAEAEA;
       margin-top:10px;
       margin-bottom: 30px;
       display:block;
@@ -1224,7 +1224,7 @@ li.default-menu {
 .main-navigation ul li.current_page_item a, .um
 .main-navigation ul li:hover > a, .um
 .main-navigation ul li:hover > a:after {
-	color: #f3882a;
+	color: #cb4f00;
 }
 
 .um
@@ -1242,7 +1242,7 @@ li.default-menu {
 
 .main-navigation li > a:hover:after {
     content: ' ▾';
-    color:#f3882a;
+    color:#cb4f00;
 }
 
 .um
@@ -1276,7 +1276,7 @@ li.default-menu {
 .um
 .main-navigation ul li ul {
 	position: absolute;
-	background-color: #F3882A;
+	background-color: #cb4f00;
 	border-top: 1px solid #0FBE7C;
 	top: 28px;
 	left: 25px;
@@ -1562,12 +1562,12 @@ li.default-menu {
 
 .um
 .team-info p em{
- 	/*color:#F3882A;*/
+ 	/*color:#cb4f00;*/
 }
 
 .um
 .investigator p em{
-        /*color:#F3882A;*/
+        /*color:#cb4f00;*/
 }
 
 .um
@@ -1603,7 +1603,7 @@ li.default-menu {
 .um
 #create-account h2:before, .um #establish h2:before, .um #setting-up h2:before, .um #administration h2:before, .um #working h2:before, .um #publish h2:before, .um #find-data h2:before, .um #network h2:before{
         font: normal 18px/1 'Genericons';
-	background-color: #F3882A;
+	background-color: #cb4f00;
 	padding: 0.5rem 0.5rem;
 	border-radius: 50%;
 	color: #fff;
@@ -3089,7 +3089,7 @@ a#scroll-up:hover {
 .entry-meta {
 	/*border: 1px solid #EAEAEA;*/
 	font-size: 14px;
-	color: #f3882a;
+	color: #cb4f00;
 	font-family: 'Lato', .um sans-serif;
 	margin:-15px 0 5px -2px;
 }
@@ -3201,7 +3201,7 @@ a#scroll-up:hover {
 /*#SEAD-contact-h1 span:before{
         font: normal 24px/1 'Genericons';
         content: '\f413';
-        color: #F3882A;
+        color: #cb4f00;
 }
 
 .um*/

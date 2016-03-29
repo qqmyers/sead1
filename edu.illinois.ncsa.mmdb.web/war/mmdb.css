@@ -57,12 +57,12 @@ table td {
 	color: #fff;
 	background: none;
 	border: 0px outset #ccc;
-	background-color: #f3822a;
+	background-color: #cb4f00;
 }
 
 .gwt-button:hover {
 	background-color: #666;
-	color: #f3822a;
+	color: #cb4f00;
 	border: none;
 }
 
@@ -174,7 +174,7 @@ a, a:link, a:hover, a:visited, a:active {
 }
 
 a:hover {
-	color: #f3822a !important;
+	color: #cb4f00 !important;
 }
 
 .deadlink {
@@ -314,7 +314,7 @@ a:hover {
 
 .hitslabel {
 	font-size: 32px;
-	color: #f3822a;
+	color: #cb4f00;
 	margin-left: -12px;
 }
 
@@ -1218,7 +1218,7 @@ input.gwt-SuggestBox {
 	font-size: 24px;
 	line-height: 28px;
 	color: #222;
-	border-bottom: 2px solid #f3822a;
+	border-bottom: 2px solid #cb4f00;
 	padding-bottom: 5px;
 }
 
@@ -1365,7 +1365,7 @@ div.gwt-Label.smallerItalicText.alignRight {
 }
 
 #addsub {
-	background-color: #f3822a;
+	background-color: #cb4f00;
 	max-width: 175px;
 	padding: 5px 5px 5px 10px;
 	color: white;
@@ -1375,7 +1375,7 @@ div.gwt-Label.smallerItalicText.alignRight {
 
 #addsub:hover {
 	background-color: black;
-	color: #f3822a;
+	color: #cb4f00;
 }
 
 #addsub>a {
@@ -1443,7 +1443,7 @@ div.gwt-Label.smallerItalicText.alignRight {
 	font-size: 1.5em;
 	color: #222;
 	text-align: left;
-	border-bottom: 2px solid #f3822a;
+	border-bottom: 2px solid #cb4f00;
 	padding-bottom: 5px;
 	word-break: break-all;
 }
@@ -1750,7 +1750,7 @@ div.gwt-Label.smallerItalicText.alignRight {
 	padding: 5px;
 	zoom: 1; *
 	display: inline;
-	/*background-color:#f3822a;*/
+	/*background-color:#cb4f00;*/
 }
 
 .tagInPanel a {
@@ -1758,7 +1758,7 @@ div.gwt-Label.smallerItalicText.alignRight {
 }
 
 .tagInPanel a:hover {
-	color: #f3822a;
+	color: #cb4f00;
 }
 
 .tagLink {
@@ -1848,13 +1848,13 @@ div.gwt-Label.smallerItalicText.alignRight {
 	zoom: 1;
 	background: none;
 	border: 0px;
-	background-color: #f3822a;
+	background-color: #cb4f00;
 	padding-bottom: 3px;
 }
 
 .batchOperationMenu:hover {
 	background: #444;
-	color: #f3822a;
+	color: #cb4f00;
 }
 
 .gwt-MenuBar-horizontal .gwt-MenuItem {
@@ -1886,7 +1886,7 @@ div.gwt-Label.smallerItalicText.alignRight {
 }
 
 .gwt-MenuBar .gwt-MenuItem-selected {
-	background: #f3822a;
+	background: #cb4f00;
 	z-index: 3;
 	color: #fff;
 }
@@ -1909,11 +1909,11 @@ div.gwt-Label.smallerItalicText.alignRight {
 
 .batchOperationMenu .gwt-MenuItem:hover {
 	background: #444;
-	color: #f3822a;
+	color: #cb4f00;
 }
 
 .gwt-MenuBar-vertical .subMenuIcon-selected {
-	background: #f3822a;
+	background: #cb4f00;
 	color: #fff;
 	z-index: 3;
 }
@@ -2328,7 +2328,7 @@ a.zocial.google, a.zocial.google:visited, a.zocial.google:hover {
 }
 
 .gwt-MenuBar .gwt-MenuItem-selected {
-	background: #f3822a;
+	background: #cb4f00;
 	z-index: 3;
 	color: #fff;
 }
@@ -2351,11 +2351,11 @@ a.zocial.google, a.zocial.google:visited, a.zocial.google:hover {
 
 .batchOperationMenu .gwt-MenuItem:hover {
 	background: #444;
-	color: #f3822a;
+	color: #cb4f00;
 }
 
 .gwt-MenuBar-vertical .subMenuIcon-selected {
-	background: #f3822a;
+	background: #cb4f00;
 	color: #fff;
 	z-index: 3;
 }
@@ -2809,7 +2809,7 @@ Simple User Management Page
 }
 
 .publishbutton {
-	background-color: #f3822a;
+	background-color: #cb4f00;
 	max-width: 175px;
 	padding: 5px 5px 5px 10px;
 	color: white;
@@ -2819,7 +2819,7 @@ Simple User Management Page
 
 .publishbutton:hover {
 	background-color: black;
-	color: #f3822a;
+	color: #cb4f00;
 }
 
 .publishbutton-down {

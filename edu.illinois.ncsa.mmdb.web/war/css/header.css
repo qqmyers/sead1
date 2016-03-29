@@ -93,11 +93,11 @@ li {
 }
 
 .loginPanel a:hover ,.loginPanel a:active{
-	color: #f3882a !important;
+	color: #cb4f00 !important;
 }
 
 .droparrow:hover, .droparrow:active{
-	color: #f3882a !important;
+	color: #cb4f00 !important;
 }
 
 .loginPanel .gwt-Hyperlink,.loginPanel .gwt-Anchor {
@@ -154,7 +154,7 @@ li {
 }
 
 #sead-menu li a:hover {
-	color: #f3882a !important;
+	color: #cb4f00 !important;
 }
 
 #sead-menu div {
@@ -162,7 +162,7 @@ li {
 	visibility: hidden;
 	margin: 0;
 	padding: 0;
-	background: #f3882a;
+	background: #cb4f00;
 	margin-top: 2px;
 }
 
@@ -177,7 +177,7 @@ li {
 	white-space: nowrap;
 	text-align: left;
 	text-decoration: none;
-	background: #f3882a;
+	background: #cb4f00;
 	color: #fff !important;
 	font: 10px lato;
 	border-bottom: 1px solid #fff;
@@ -185,7 +185,7 @@ li {
 
 #sead-menu div a:hover {
 	background: #fff;
-	color: #f3882a !important;
+	color: #cb4f00 !important;
 }
 
 #logo-sead {
@@ -253,10 +253,10 @@ li {
 }
 
 .navMenu li a:hover ,.navMenu li a:active{
-	color: #f3882a !important;
+	color: #cb4f00 !important;
 }
 .navMenu .selected{
-	color:#f3822a;
+	color:#cb4f00;
 }
 
 /*footer*/
@@ -330,7 +330,7 @@ li {
 
 
 .selected a {
-	color: #f3882a !important;
+	color: #cb4f00 !important;
 }
 table td{
 	font-family:"lato" !important;

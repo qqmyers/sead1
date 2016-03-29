@@ -3,7 +3,7 @@ function startTagCloud() {
 
           if(!jQuery('#tagCanvas').tagcanvas({
             textColour: '#0b5ca3',
-            outlineColour: '#f3882a',
+            outlineColour: '#cb4f00',
             reverse: true,
             depth: 0.8,
             maxSpeed: 0.05,
