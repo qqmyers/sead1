@@ -51,6 +51,7 @@ import org.jboss.resteasy.annotations.cache.NoCache;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.rdf.Resource;
+import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.UriRef;
 
 import edu.illinois.ncsa.mmdb.web.server.TokenStore;
@@ -155,7 +156,11 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
             tMatcher.setSubject(Resource.uriRef(aggId));
             tMatcher.setPredicate(Resource.uriRef("http://sead-data.net/vocab/hasSalt"));
             c.perform(tMatcher);
-            String salt = tMatcher.getResult().iterator().next().getObject().toString();
+            String salt = null;
+            Triple t = tMatcher.getResult().iterator().next();
+            if (t != null) {
+                salt = tMatcher.getResult().iterator().next().getObject().toString();
+            }
 
             if ((token == null) || (!TokenStore.isValidToken(token, "/researchobjects/" + aggId + "/files/" + id, salt))) {
                 log.debug("Invalid pubtoken: " + token);
