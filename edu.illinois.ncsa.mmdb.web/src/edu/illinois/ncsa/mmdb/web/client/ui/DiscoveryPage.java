@@ -8,7 +8,6 @@ import net.customware.gwt.dispatch.client.DispatchAsync;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.RootPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
 
@@ -57,9 +56,8 @@ public class DiscoveryPage extends Page {
         HTML bodyHtml = new HTML("<div id=\"xmlBody\"></div>");
         bodyHtml.setStyleName("span9");
         top.add(bodyHtml);
-        String va_url = RootPanel.get("va").getElement().getAttribute("href");
         mainLayoutPanel.add(new HTML("This page contains collections of datasets that this project team has published through " +
-                "<a href=\"" + va_url + "\">SEAD</a> (or manually marked as having a publication date). <b>Note:</b>" +
+                "<a href = \"http://sead-data.net/\">SEAD</a>. <b>Note:</b>" +
                 " The \"Current Version\" links to Collections, and the Dataset links in the Contents Listing" +
                 " shown on this page go to <i>live</i> versions of these objects which may have been modified since publication. To retrieve the data <i>as published</i>, click the" +
                 " \"Archived Version DOI\" link and download the data from there."));
