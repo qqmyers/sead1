@@ -76,7 +76,7 @@ public class RemoveFromCollectionHandler implements ActionHandler<RemoveFromColl
         try {
             CollectionBean collectionBean = cbu.get(action.getCollectionUri(), true);
             cbu.removeFromCollection(collectionBean, resources);
-            TupeloStore.getInstance().extractPreviews(action.getCollectionUri(), true); //rerun the extraction(s).
+
             TripleWriter tw = new TripleWriter();
             Context c = TupeloStore.getInstance().getContext();
             for (Resource r : resources ) {
@@ -86,6 +86,8 @@ public class RemoveFromCollectionHandler implements ActionHandler<RemoveFromColl
                 }
             }
             c.perform(tw);
+            //Extract last so any error does not affect removal or top-level assignment
+            TupeloStore.getInstance().extractPreviews(action.getCollectionUri(), true); //rerun the extraction(s).
         } catch (OperatorException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
