@@ -295,174 +295,172 @@ public class BatchOperationPresenter extends BasePresenter<BatchOperationPresent
 
         display.addMenuSeparator();
 
-        if (!collections) {
-            display.addMenuAction("Create collection", new Command() {
-                @Override
-                public void execute() {
-                    if (selectionEmpty()) {
-                        return;
-                    }
-                    CreateCollectionDialogView view = new CreateCollectionDialogView(title("Create collection containing %s"));
-                    CreateCollectionDialogPresenter presenter = new CreateCollectionDialogPresenter(service, eventBus, view);
-                    presenter.bind();
-                    presenter.setSelectedResources(sessionState.getSelectedItems());
-                    view.show();
+        display.addMenuAction("Create collection", new Command() {
+            @Override
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
                 }
-            });
-            display.addMenuAction("Add to collection", new Command() {
-                @Override
-                public void execute() {
-                    if (selectionEmpty()) {
-                        return;
-                    }
-                    final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Add %s to collection"), true);
-                    atc.addClickHandler(new ClickHandler() {
-                        public void onClick(ClickEvent event) {
-
-                            PermissionUtil rbac = new PermissionUtil(service);
-                            rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
-                                @Override
-                                public void onAllowed() {
-                                    final String collectionUri = atc.getSelectedValue();
-                                    final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedItems());
-                                    final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "added");
-                                    service.execute(new AddToCollection(collectionUri, selectedDatasets),
-                                            new AsyncCallback<AddToCollectionResult>() {
-
-                                                @Override
-                                                public void onFailure(Throwable arg0) {
-                                                    GWT.log("Error adding dataset(s) to collection", arg0);
-                                                    done.setFailure(selectedDatasets, arg0);
-                                                    eventBus.fireEvent(done);
-                                                }
-
-                                                @Override
-                                                public void onSuccess(AddToCollectionResult arg0) {
-                                                    // FIXME AddToCollectionResult doesn't tell us how many were actually added
-                                                    GWT.log("Dataset(s) successfully added to collection", null);
-                                                    done.addSuccesses(selectedDatasets);
-                                                    eventBus.fireEvent(done);
-                                                    atc.hide();
-                                                }
-                                            });
-                                }
-
-                                @Override
-                                public void onDenied() {
-                                    ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to add datasets to a collection", false);
-                                    okay.getOkText().setText("OK");
-                                }
-                            });
-
-                        }
-                    });
+                CreateCollectionDialogView view = new CreateCollectionDialogView(title("Create collection containing %s"));
+                CreateCollectionDialogPresenter presenter = new CreateCollectionDialogPresenter(service, eventBus, view);
+                presenter.bind();
+                presenter.setSelectedResources(sessionState.getSelectedItems());
+                view.show();
+            }
+        });
+        display.addMenuAction("Add to collection", new Command() {
+            @Override
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
                 }
-            });
-            display.addMenuAction("Remove from collection", new Command() {
-                // FIXME tile
-                @Override
-                public void execute() {
-                    if (selectionEmpty()) {
-                        return;
+                final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Add %s to collection"), true);
+                atc.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
+
+                        PermissionUtil rbac = new PermissionUtil(service);
+                        rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
+                            @Override
+                            public void onAllowed() {
+                                final String collectionUri = atc.getSelectedValue();
+                                final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedItems());
+                                final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "added");
+                                service.execute(new AddToCollection(collectionUri, selectedDatasets),
+                                        new AsyncCallback<AddToCollectionResult>() {
+
+                                            @Override
+                                            public void onFailure(Throwable arg0) {
+                                                GWT.log("Error adding dataset(s) to collection", arg0);
+                                                done.setFailure(selectedDatasets, arg0);
+                                                eventBus.fireEvent(done);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(AddToCollectionResult arg0) {
+                                                // FIXME AddToCollectionResult doesn't tell us how many were actually added
+                                                GWT.log("Dataset(s) successfully added to collection", null);
+                                                done.addSuccesses(selectedDatasets);
+                                                eventBus.fireEvent(done);
+                                                atc.hide();
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void onDenied() {
+                                ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to add datasets to a collection", false);
+                                okay.getOkText().setText("OK");
+                            }
+                        });
+
                     }
-                    final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Remove %s from collection"), true);
-                    atc.addClickHandler(new ClickHandler() {
-                        public void onClick(ClickEvent event) {
-
-                            PermissionUtil rbac = new PermissionUtil(service);
-                            rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
-                                @Override
-                                public void onAllowed() {
-                                    final String collectionUri = atc.getSelectedValue();
-                                    final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedItems());
-                                    final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "removed");
-                                    service.execute(new RemoveFromCollection(collectionUri, selectedDatasets),
-                                            new AsyncCallback<RemoveFromCollectionResult>() {
-
-                                                @Override
-                                                public void onFailure(Throwable arg0) {
-                                                    GWT.log("Error adding dataset(s) to collection", arg0);
-                                                    done.setFailure(selectedDatasets, arg0);
-                                                    eventBus.fireEvent(done);
-                                                }
-
-                                                @Override
-                                                public void onSuccess(RemoveFromCollectionResult result) {
-                                                    // FIXME AddToCollectionResult doesn't tell us how many were actually removed
-                                                    GWT.log("Dataset(s) successfully removed from collection", null);
-                                                    done.addSuccesses(selectedDatasets);
-                                                    atc.hide();
-                                                    eventBus.fireEvent(done);
-                                                }
-                                            });
-                                }
-
-                                @Override
-                                public void onDenied() {
-                                    ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to remove datasets from a collection", false);
-                                    okay.getOkText().setText("OK");
-                                }
-                            });
-
-                        }
-                    });
+                });
+            }
+        });
+        display.addMenuAction("Remove from collection", new Command() {
+            // FIXME tile
+            @Override
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
                 }
-            });
+                final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Remove %s from collection"), true);
+                atc.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
 
-            display.addMenuAction("Describes Collection", new Command() {
-                @Override
-                public void execute() {
-                    if (selectionEmpty()) {
-                        return;
+                        PermissionUtil rbac = new PermissionUtil(service);
+                        rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
+                            @Override
+                            public void onAllowed() {
+                                final String collectionUri = atc.getSelectedValue();
+                                final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedItems());
+                                final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "removed");
+                                service.execute(new RemoveFromCollection(collectionUri, selectedDatasets),
+                                        new AsyncCallback<RemoveFromCollectionResult>() {
+
+                                            @Override
+                                            public void onFailure(Throwable arg0) {
+                                                GWT.log("Error adding dataset(s) to collection", arg0);
+                                                done.setFailure(selectedDatasets, arg0);
+                                                eventBus.fireEvent(done);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(RemoveFromCollectionResult result) {
+                                                // FIXME AddToCollectionResult doesn't tell us how many were actually removed
+                                                GWT.log("Dataset(s) successfully removed from collection", null);
+                                                done.addSuccesses(selectedDatasets);
+                                                atc.hide();
+                                                eventBus.fireEvent(done);
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void onDenied() {
+                                ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to remove datasets from a collection", false);
+                                okay.getOkText().setText("OK");
+                            }
+                        });
+
                     }
-                    final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Set %s as collection description/preview dataset(s)"), true);
-                    atc.addClickHandler(new ClickHandler() {
-                        public void onClick(ClickEvent event) {
+                });
+            }
+        });
 
-                            PermissionUtil rbac = new PermissionUtil(service);
-                            rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
-                                @Override
-                                public void onAllowed() {
-                                    final String collectionUri = atc.getSelectedValue();
-                                    final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedItems());
-
-                                    //DCTERMS:description is being overloaded - the user message is 'describes collection' but we will also be using this to select a collection preview image
-                                    SetUserMetadata sum = new SetUserMetadata(collectionUri, "http://purl.org/dc/terms/description", selectedDatasets, true);
-                                    final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "set");
-                                    service.execute(sum,
-                                            new AsyncCallback<EmptyResult>() {
-
-                                                @Override
-                                                public void onFailure(Throwable arg0) {
-                                                    GWT.log("Error setting dataset(s) as collection desciptions", arg0);
-                                                    done.setFailure(selectedDatasets, arg0);
-                                                    eventBus.fireEvent(done);
-                                                }
-
-                                                @Override
-                                                public void onSuccess(EmptyResult arg0) {
-                                                    GWT.log("Dataset(s) successfully set as collection descriptions", null);
-                                                    done.addSuccesses(selectedDatasets);
-                                                    eventBus.fireEvent(done);
-                                                    atc.hide();
-                                                }
-                                            });
-                                }
-
-                                @Override
-                                public void onDenied() {
-                                    ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to set datasets as collection descriptions", false);
-                                    okay.getOkText().setText("OK");
-                                }
-                            });
-
-                        }
-                    });
+        display.addMenuAction("Describes Collection", new Command() {
+            @Override
+            public void execute() {
+                if (selectionEmpty()) {
+                    return;
                 }
-            });
+                final AddToCollectionDialog atc = new AddToCollectionDialog(service, title("Set %s as collection description/preview dataset(s)"), true);
+                atc.addClickHandler(new ClickHandler() {
+                    public void onClick(ClickEvent event) {
 
-            display.addMenuSeparator();
-        }
+                        PermissionUtil rbac = new PermissionUtil(service);
+                        rbac.doIfAllowed(Permission.EDIT_COLLECTION, new PermissionCallback() {
+                            @Override
+                            public void onAllowed() {
+                                final String collectionUri = atc.getSelectedValue();
+                                final Set<String> selectedDatasets = new HashSet<String>(sessionState.getSelectedItems());
+
+                                //DCTERMS:description is being overloaded - the user message is 'describes collection' but we will also be using this to select a collection preview image
+                                SetUserMetadata sum = new SetUserMetadata(collectionUri, "http://purl.org/dc/terms/description", selectedDatasets, true);
+                                final BatchCompletedEvent done = new BatchCompletedEvent(selectedDatasets.size(), "set");
+                                service.execute(sum,
+                                        new AsyncCallback<EmptyResult>() {
+
+                                            @Override
+                                            public void onFailure(Throwable arg0) {
+                                                GWT.log("Error setting dataset(s) as collection desciptions", arg0);
+                                                done.setFailure(selectedDatasets, arg0);
+                                                eventBus.fireEvent(done);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(EmptyResult arg0) {
+                                                GWT.log("Dataset(s) successfully set as collection descriptions", null);
+                                                done.addSuccesses(selectedDatasets);
+                                                eventBus.fireEvent(done);
+                                                atc.hide();
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void onDenied() {
+                                ConfirmDialog okay = new ConfirmDialog("Error", "You do not have permission to set datasets as collection descriptions", false);
+                                okay.getOkText().setText("OK");
+                            }
+                        });
+
+                    }
+                });
+            }
+        });
+
+        display.addMenuSeparator();
 
         display.addMenuAction("Select all on page", new Command() {
             @Override
