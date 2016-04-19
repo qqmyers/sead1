@@ -2,7 +2,7 @@
  * University of Illinois/NCSA
  * Open Source License
  *
- * Copyright (c) 2010, NCSA.  All rights reserved.
+ * Copyright (c) 2010, NCSA, 2014,2016 University of Michigan  All rights reserved.
  *
  * Developed by:
  * Cyberenvironments and Technologies (CET)
@@ -12,7 +12,7 @@
  * http://www.ncsa.illinois.edu/
  *
  * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the 
+ * a copy of this software and associated documentation files (the
  * "Software"), to deal with the Software without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to
@@ -32,7 +32,7 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
  *******************************************************************************/
@@ -55,10 +55,11 @@ import edu.illinois.ncsa.mmdb.web.server.Mail;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
 
 /**
- * Send email to jira to enter a new jira issue.
- * 
+ * Send email to sead contact list to report feedback (used to go to Jira)
+ *
  * @author Rob Kooper
- * 
+ * @author Jim Myers
+ *
  */
 public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
     /** Commons logging **/
@@ -94,7 +95,8 @@ public class JiraIssueHandler implements ActionHandler<JiraIssue, EmptyResult> {
                 "From: " + email + "\n" +
                 "Subj: " + summary + "\n\n" +
                 description;
-
-        Mail.sendMessage(Mail.getAdminEmail(), null, subj, body);
+        String[] seadcontacts = new String[1];
+        seadcontacts[0] = TupeloStore.getInstance().getConfiguration(ConfigurationKey.MailFrom);
+        Mail.sendMessage(seadcontacts, null, subj, body);
     }
 }
