@@ -61,15 +61,14 @@ public class EmailAdminsHandler implements ActionHandler<EmailAdmins, EmptyResul
     @Override
     public EmptyResult execute(EmailAdmins arg0, ExecutionContext arg1) throws ActionException {
         try {
-            log.debug("Preparing Email");
-            String host = TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName);
             String email = arg0.getUser(); //default to full ID if we can't get email
-            log.debug("User is " + email);
+            log.debug("Preparing Email from " + email);
+            String host = TupeloStore.getInstance().getConfiguration(ConfigurationKey.MediciName);
             PersonBeanUtil pbu = new PersonBeanUtil(TupeloStore.getInstance().getBeanSession());
             try {
                 PersonBean pb = pbu.get(arg0.getUser());
                 email = pb.getEmail();
-                log.debug("User email is " + email);
+                log.trace("User email is " + email);
             } catch (Exception e) {
                 log.warn("Could not retrieve user email for " + arg0.getUser(), e);
             }
@@ -80,8 +79,10 @@ public class EmailAdminsHandler implements ActionHandler<EmailAdmins, EmptyResul
                     "You may also wish to respond directly to this person via email - there is no automated reposnse form the system.\n\n" +
                     "From: " + email + "\n\n" +
                     arg0.getMessage();
-            log.debug("Email to admins prepared");
-            Mail.sendMessage(Mail.getAdminEmail(), null, subj, body);
+            log.trace("Email to admins prepared");
+            String[] admins = Mail.getAdminEmail();
+            log.trace("Sending to " + admins.length + " admins");
+            Mail.sendMessage(admins, null, subj, body);
             log.debug("Email to admins successfully sent.");
         } catch (MessagingException e) {
             log.warn("Failed to send email.", e);

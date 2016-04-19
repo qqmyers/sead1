@@ -213,10 +213,12 @@ public class Mail {
             throw (new MessagingException("Could not encode from address.", e));
         }
         for (String rcpt : rcpts ) {
+            log.trace("Adding mail recipient: " + rcpt);
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(rcpt));
         }
         if (ccList != null) {
             for (String cc : ccList ) {
+                log.trace("Adding mail cc: " + cc);
                 message.addRecipient(MimeMessage.RecipientType.CC, new InternetAddress(cc));
             }
         }
