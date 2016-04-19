@@ -143,6 +143,7 @@ public class GoogleUserInfoHandler implements ActionHandler<GoogleUserInfo, Goog
                             log.debug("User creation requested: result: " + created);
 
                         }
+                        return new GoogleUserInfoResult(created, personInfo.getString("name"), personInfo.getString("email"), exp, session.get().getId());
                     } else {
                         if (exists) {
                             //Create a valid session for authenticated user (as if /api/authentication was called)
