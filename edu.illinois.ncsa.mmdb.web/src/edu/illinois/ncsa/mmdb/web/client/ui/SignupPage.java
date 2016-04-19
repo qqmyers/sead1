@@ -277,8 +277,8 @@ public class SignupPage extends Composite {
 
                         if (result.getPersonBean() != null) {
                             // user already in the system
-                            showFeedbackMessage("The email address you have specified is already in the system. " +
-                                    "Please chose a different email address.");
+                            showFeedbackMessage("You (" + result.getPersonBean().getEmail() + ") already have an account. " +
+                                    "Please <a href=\"#login\">Login</a> instead.");
                         } else {
                             if (provider.equals(LoginPage.LOCAL_PROVIDER)) {
                                 submit();
@@ -365,8 +365,8 @@ public class SignupPage extends Composite {
 
                 } else {
                     GWT.log("User already exists: " + result.getUserName() + " " + result.getEmail());
-                    showFeedbackMessage("The email address you have specified is already in the system. " +
-                            "Please use a different email address.");
+                    showFeedbackMessage("You (" + result.getEmail() + ") already have an account. " +
+                            "Please <a href=\"#login\">Login</a> instead.");
 
                 }
             }
@@ -392,7 +392,7 @@ public class SignupPage extends Composite {
             showFeedbackMessage("Password field cannot be left empty");
         } else if (!passwordBox.getValue()
                 .equals(confirmPasswordBox.getValue())) {
-            showFeedbackMessage("Password and confirmed password fields need to be the same");
+            showFeedbackMessage("Password and Confirm Password fields need to be the same");
         } else if (passwordBox.getValue().length() < 5) {
             showFeedbackMessage("Please specify a password that is at least 5 characters long");
         } else {
@@ -406,7 +406,7 @@ public class SignupPage extends Composite {
      */
 
     protected void showFeedbackMessage(String message) {
-        Label messageLabel = new Label(message);
+        HTML messageLabel = new HTML(message);
         messageLabel.addStyleName("loginError");
         feedbackPanel.clear();
         feedbackPanel.add(messageLabel);

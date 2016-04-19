@@ -63,9 +63,12 @@ import edu.illinois.ncsa.mmdb.web.client.dispatch.GetMimeTypeCategories;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetOauth2ServerFlowState;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleOAuth2Props;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GoogleUserInfo;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.JiraIssue;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Oauth2ServerFlowTokenRequest;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.Oauth2ServerFlowUserInfo;
+import edu.illinois.ncsa.mmdb.web.client.dispatch.RequestNewPassword;
 import edu.illinois.ncsa.mmdb.web.rest.AuthenticatedServlet;
+import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GoogleUserInfoHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.Oauth2ServerFlowTokenRequestHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.Oauth2ServerFlowUserInfoHandler;
@@ -129,8 +132,11 @@ public class MyDispatchServiceServlet extends DispatchServiceServlet {
             if (!((action instanceof GoogleOAuth2Props) ||
                     (action instanceof GetConfiguration) ||
                     (action instanceof GoogleUserInfo) ||
+                    (action instanceof GetUserHandler) ||
                     (action instanceof GetMimeTypeCategories) ||
                     (action instanceof GetOauth2ServerFlowState) ||
+                    (action instanceof RequestNewPassword) ||
+                    (action instanceof JiraIssue) ||
                     (action instanceof Oauth2ServerFlowTokenRequest) || (action instanceof Oauth2ServerFlowUserInfo))) {
                 log.debug("Refusing a dispatch request due to lack of credentials: " + action.getClass().getName());
 
