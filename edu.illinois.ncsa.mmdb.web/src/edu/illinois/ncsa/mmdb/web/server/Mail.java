@@ -140,7 +140,7 @@ public class Mail {
         String body = String.format("%s [%s] has requested access to the %s SEAD " +
                 "Project Space. Please visit the \"inactive users\" list at %s to assign %s " +
                 "a role with appropriate permissions. If this person should not have access, it's not necessary to take " +
-                "any further action." + "\n", user.getName(), user.getEmail(), projName, "http://" + server + "/acr/#administration", user.getName());
+                "any further action." + "\n", user.getName(), user.getEmail(), projName, "https://" + server + "/acr/#administration", user.getName());
         try {
             sendMessage(getAdminEmail(), null, subject, body); //$NON-NLS-1$
         } catch (MessagingException e) {
@@ -164,11 +164,10 @@ public class Mail {
                 "A user account at %s has been created using your email address. If this email is associated with a Google account, you can login " +
                 "using your Google password. Otherwise, use the temporary password %s to login (after logging in, change your password " +
                 "by going to Home > Profile). The full list of your project spaces's services can be accessed via %s." + "\n\n" +
-                "We also encourage you to create a SEAD Research Network profile: http://sead-vivo.d2i.indiana.edu:8080/sead-vivo/." + "\n\n" +
                 "-- The SEAD Project Team" + "\n" +
                 "seaddatanet@umich.edu" + "\n" +
                 "http://sead-data.net" + "\n" +
-                "@SEADdatanet" + "\n", projName, "http://" + server + "/acr", password, "http://" + server);
+                "@SEADdatanet" + "\n", projName, "https://" + server + "/acr", password, "https://" + server);
         try {
             String adminEmail = null;
             if (admin != null) {
