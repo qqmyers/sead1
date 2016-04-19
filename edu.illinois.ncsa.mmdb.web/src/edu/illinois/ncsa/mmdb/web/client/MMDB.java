@@ -939,7 +939,7 @@ public class MMDB implements EntryPoint, ValueChangeHandler<String> {
      */
     private void showNotEnabledPage() {
         mainContainer.clear();
-        mainContainer.add(new NotEnabledPage());
+        mainContainer.add(new NotEnabledPage(dispatchAsync));
     }
 
     /**
