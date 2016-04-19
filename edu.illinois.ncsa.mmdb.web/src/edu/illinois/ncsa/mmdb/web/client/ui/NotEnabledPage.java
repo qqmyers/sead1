@@ -183,6 +183,8 @@ public class NotEnabledPage extends Composite {
                             @Override
                             public void onSuccess(EmptyResult result) {
                                 descriptionTextArea.setText("");
+                                Label sent = new Label("Email has been sent");
+                                mainTable.setWidget(4, 0, sent);
 
                             }
                         });
