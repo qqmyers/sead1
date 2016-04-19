@@ -166,6 +166,7 @@ public class RequestPublicationHandler implements ActionHandler<RequestPublicati
                         Object prefContextObject = null;
                         if (preferencesJsonObject.has("@context")) {
                             prefContextObject = preferencesJsonObject.get("@context");
+                            preferencesJsonObject.remove("@context");
                         }
                         requestJsonObject.put("Preferences", preferencesJsonObject);
 
