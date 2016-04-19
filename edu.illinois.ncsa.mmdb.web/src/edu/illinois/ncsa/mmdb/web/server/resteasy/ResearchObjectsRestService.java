@@ -157,9 +157,9 @@ public class ResearchObjectsRestService extends ItemServicesImpl {
             tMatcher.setPredicate(Resource.uriRef("http://sead-data.net/vocab/hasSalt"));
             c.perform(tMatcher);
             String salt = null;
-            Triple t = tMatcher.getResult().iterator().next();
-            if (t != null) {
-                salt = tMatcher.getResult().iterator().next().getObject().toString();
+            java.util.Iterator<Triple> iter = tMatcher.getResult().iterator();
+            if (iter.hasNext()) {
+                salt = iter.next().getObject().toString();
             }
 
             if ((token == null) || (!TokenStore.isValidToken(token, "/researchobjects/" + aggId + "/files/" + id, salt))) {
