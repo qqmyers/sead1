@@ -41,6 +41,8 @@
  */
 package edu.illinois.ncsa.mmdb.web.server.dispatch;
 
+import java.util.Iterator;
+
 import net.customware.gwt.dispatch.server.ActionHandler;
 import net.customware.gwt.dispatch.server.ExecutionContext;
 import net.customware.gwt.dispatch.shared.ActionException;
@@ -52,10 +54,13 @@ import org.tupeloproject.kernel.Unifier;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.terms.Beans;
 import org.tupeloproject.rdf.terms.Cet;
+import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Files;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.ListTable;
 import org.tupeloproject.util.Tuple;
+
+import com.hp.hpl.jena.vocabulary.DCTerms;
 
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfo;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SystemInfoResult;
@@ -159,8 +164,7 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
         log.debug("Counting Collections");
         uf2.addPattern("cl", Rdf.TYPE, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/Collection"));
         uf2.addPattern("parent", Resource.uriRef("http://purl.org/dc/terms/hasPart"), "cl", true);
-        uf2.addPattern("cl", Resource.uriRef("http://purl.org/dc/terms/issued"), "date", true);
-        uf2.setColumnNames("cl", "parent", "date");
+        uf2.setColumnNames("cl", "parent");
         long collCount = 0;
         long preprintCollCount = 0;
         int publishedCollCount = 0;
@@ -189,12 +193,27 @@ public class SystemInfoHandler implements ActionHandler<SystemInfo, SystemInfoRe
                         }
                     }
                 }
+            }
+            //Now scan deleted and undeleted collections for published versions
+            for (Tuple<Resource> row : uf2.getResult() ) {
+
                 //Published collections can have parents and we should report them regardless of whether anon can view their data
                 // based on permissions and access control - nominally pub means data is available elsewhere (though it would be somewhat odd
                 // to not allow anon to see published data)
-                if (row.get(2) != null) {
-                    log.debug("Adding published: " + row.get(0));
-                    publishedCollCount++;
+                Unifier uf3 = new Unifier();
+                uf3.addPattern(row.get(0), DcTerms.HAS_VERSION, "ver");
+                uf3.addPattern("ver", Resource.uriRef(DCTerms.identifier.getURI()), "pid");
+                uf3.setColumnNames("ver", "pid");
+                try {
+                    TupeloStore.getInstance().getContext().perform(uf3);
+                    Iterator<Tuple<Resource>> i = uf3.getResult().iterator();
+                    while (i.hasNext()) {
+                        publishedCollCount++;
+                        i.next();
+                    }
+                } catch (OperatorException e) {
+                    log.debug(e.getMessage());
+                    throw (new ActionException("Could not count publications for collection: " + row.get(0)));
                 }
             }
         } catch (OperatorException e) {
