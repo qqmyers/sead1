@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -67,6 +68,7 @@ import org.tupeloproject.kernel.ThingSession;
 import org.tupeloproject.kernel.TripleMatcher;
 import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.rdf.Literal;
 import org.tupeloproject.rdf.Namespaces;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
@@ -1638,6 +1640,8 @@ public class ItemServicesImpl
      *
      * For 2.0, the persistent ID and publication date are assigned to the version rather than the collection itself.
      *
+     * If the PID has already been used for a prior version, this one is considered as a replacement for the prior one
+     *
      * Access is controlled by token, and publication should succeed even if the live collection has been deleted.
      */
     protected Response publishVersion(String agg_id, long date, String pid, HttpServletRequest request) {
@@ -1656,7 +1660,8 @@ public class ItemServicesImpl
 
                 //Find underlying collection - make sure it can be edited by user
                 TripleMatcher tm1 = new TripleMatcher();
-                tm1.match(null, DcTerms.HAS_VERSION, Resource.uriRef(agg_id));
+                UriRef newVersion = Resource.uriRef(agg_id);
+                tm1.match(null, DcTerms.HAS_VERSION, newVersion);
                 c.perform(tm1);
                 Set<Triple> colTripleSet = tm1.getResult();
                 UriRef itemId = (UriRef) colTripleSet.iterator().next().getSubject();
@@ -1674,32 +1679,91 @@ public class ItemServicesImpl
 
                 TripleWriter tw = new TripleWriter();
                 if (triples.size() >= 1) {
-                    //Remove proposedForPub flag
+                    //Remove proposedForPub flag - we've completed publishing
                     tw.remove((Triple) triples.toArray()[0]);
 
                     //2.0 support
+
+                    //Remove the salt to block further access to the keyed endpoints for getting data files and setting the pid
                     if (saltTriple.size() == 1) {
                         tw.remove((Triple) saltTriple.toArray()[0]);
                     }
-                    Date theDate = new Date(date);
-                    UriRef issued = Resource.uriRef(DCTerms.issued.getURI());
+
                     UriRef identifier = Resource.uriRef(DCTerms.identifier.getURI());
+                    UriRef issued = Resource.uriRef(DCTerms.issued.getURI());
+
+                    Date theDate = new Date(date);
                     //Fixme - we can't delete non-string literals from the GUI since we lose type info along the way...
                     //So - using a string here
-                    UriRef aggRef = Resource.uriRef(agg_id);
-                    tw.add(aggRef, issued, Resource.literal(DateFormat.getDateTimeInstance().format(theDate)));
-                    tw.add(aggRef, identifier, Resource.uriRef(pid));
+                    Literal now = Resource.literal(DateFormat.getDateTimeInstance().format(theDate));
+
+                    //Determine if this is a new version or replaces an existing one
+                    Unifier uf = new Unifier();
+                    uf.addPattern(itemId, DcTerms.HAS_VERSION, "ver");
+                    uf.addPattern("ver", identifier, "id");
+                    uf.addPattern("ver", issued, "issued");
+                    uf.addPattern("ver", RequestPublicationHandler.hasVersionNum, "num");
+                    uf.setColumnNames("ver", "id", "issued", "num");
+                    c.perform(uf);
+                    Table<Resource> ROTable = uf.getResult();
+                    Iterator<Tuple<Resource>> ROsIterator = ROTable.iterator();
+                    boolean replacesExisting = false;
+                    while (ROsIterator.hasNext() && !replacesExisting) {
+                        Tuple<Resource> tuple = ROsIterator.next();
+                        //if the pid MatchesPattern and we're not looking at the new RO
+                        Resource oldVer = tuple.get(0);
+
+                        if (tuple.get(1).toString().equals(pid) && (!(oldVer.toString().equals(agg_id)))) {
+                            replacesExisting = true;
+
+                            //Then replace the old RO with this one
+
+                            //1) current date becomes the modified date
+                            tw.add(newVersion, DcTerms.DATE_MODIFIED, now);
+
+                            //2) the original RO's issued data becomes the issued date for the new one
+                            tw.add(newVersion, issued, tuple.get(2));
+
+                            //3)existing version # is removed
+                            TripleMatcher numMatcher = new TripleMatcher();
+                            numMatcher.match(newVersion, RequestPublicationHandler.hasVersionNum, null);
+                            c.perform(numMatcher);
+                            Set<Triple> numTriple = numMatcher.getResult();
+                            if (numTriple.size() == 1) {
+                                tw.remove((Triple) saltTriple.toArray()[0]);
+                            }
+
+                            //4) the old versions number becomes this versions #
+                            tw.add(newVersion, RequestPublicationHandler.hasVersionNum, tuple.get(3));
+
+                            //5) the old version is removed from the Collection and re-attaches as this RO replaces the old one
+                            tw.remove(itemId, DcTerms.HAS_VERSION, oldVer);
+                            tw.add(newVersion, Resource.uriRef(DCTerms.replaces.getURI()), oldVer);
+
+                        }
+                    }
+                    //For new versions with a new ID, set the issued date
+                    if (!replacesExisting) {
+                        tw.add(newVersion, issued, now);
+                    }
+                    //For all cases, set the PID
+                    tw.add(newVersion, identifier, Resource.uriRef(pid));
 
                     //To DO? Add published_as_part_of links
                     //FixMe - should not assume that collection has the same contents as when published and should
                     // retrieve final list from authoritative OREMap (wherever that ends up), or call a service dynamically
                     //rather than caching this info as a triple.
 
+                    //Now perform all add/removes...
                     c.perform(tw);
 
                     ListUserMetadataFieldsHandler.addViewablePredicate(issued.toString());
+                    if (!replacesExisting) {
 
-                    result.put("Version of Collection Published", itemId.toString());
+                        result.put("Version of Collection Published", itemId.toString());
+                    } else {
+                        result.put("Version of Collection Updated", itemId.toString());
+                    }
                     r = Response.status(200).entity(result).build();
 
                 } else {
