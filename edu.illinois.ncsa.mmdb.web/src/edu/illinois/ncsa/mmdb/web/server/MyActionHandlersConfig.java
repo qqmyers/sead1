@@ -99,7 +99,6 @@ import edu.illinois.ncsa.mmdb.web.server.dispatch.GetSectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetServiceTokenHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetSubclassesHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetTagsHandler;
-import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUploadDestinationHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserActionsHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserHandler;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.GetUserMetadataFieldsHandler;
@@ -168,7 +167,6 @@ public class MyActionHandlersConfig implements ServletContextListener {
         DispatchUtil.registerHandler(new GetCollectionHandler());
         DispatchUtil.registerHandler(new AddToCollectionHandler());
         DispatchUtil.registerHandler(new GetPreviewsHandler());
-        DispatchUtil.registerHandler(new GetUploadDestinationHandler());
         DispatchUtil.registerHandler(new DeleteDatasetHandler());
         DispatchUtil.registerHandler(new GetUsersHandler());
         DispatchUtil.registerHandler(new UserGroupMembershipHandler());

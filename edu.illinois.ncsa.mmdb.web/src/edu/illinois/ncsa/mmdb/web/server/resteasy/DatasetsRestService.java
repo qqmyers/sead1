@@ -40,6 +40,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -65,6 +66,7 @@ import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
+import org.tupeloproject.util.SecureHashMinter;
 import org.tupeloproject.util.Tuple;
 import org.tupeloproject.util.UnicodeTranscoder;
 
@@ -72,9 +74,11 @@ import edu.illinois.ncsa.mmdb.web.common.ConfigurationKey;
 import edu.illinois.ncsa.mmdb.web.common.Permission;
 import edu.illinois.ncsa.mmdb.web.rest.RestUriMinter;
 import edu.illinois.ncsa.mmdb.web.server.TupeloStore;
+import edu.illinois.ncsa.mmdb.web.server.UploadBlob;
 import edu.illinois.ncsa.mmdb.web.server.dispatch.AddToCollectionHandler;
 import edu.illinois.ncsa.mmdb.web.server.util.BeanFiller;
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
+import edu.uiuc.ncsa.cet.bean.tupelo.PersonBeanUtil;
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 import edu.uiuc.ncsa.cet.bean.tupelo.util.MimeMap;
 
@@ -745,6 +749,40 @@ public class DatasetsRestService extends ItemServicesImpl {
     }
 
     /**
+     * Get an uploadKey to allow long uploads (> session timeout) when nignx
+     * buffering may delay the request
+     * FixMe - nginx proxy_buffering off might be a better option when using
+     * later versions of nginx
+     *
+     * @return - an upload key (named "session"
+     */
+    @GET
+    @Path("/uploadKey")
+    @Produces("application/json")
+    public Response getUploadKey(@javax.ws.rs.core.Context HttpServletRequest request) {
+        UriRef userId = Resource.uriRef((String) request.getAttribute("userid"));
+        try {
+
+            PermissionCheck p = new PermissionCheck(userId, Permission.UPLOAD_DATA);
+            if (!p.userHasPermission()) {
+                return p.getErrorResponse();
+            }
+            String sessionKey = SecureHashMinter.getMinter().mint(); // mint an upload key
+            UploadBlob.setKeyForUpload(sessionKey, userId.toString());
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            result.put("uploadkey", sessionKey);
+            //Don't cache - dynamic value
+            CacheControl instance = new CacheControl();
+            instance.setNoStore(true);
+            return Response.status(200).entity(result).cacheControl(instance).build();
+        } catch (Exception e) {
+            log.error("Error creating upload Keyr ", e);
+            e.printStackTrace();
+            return Response.status(500).entity("Error creating upload key").build();
+        }
+    }
+
+    /**
      * Upload dataset including blob and metadata. Basic metadata and SHA1
      * digest are generated from the file stats and session username
      * (dc:creator/uploader)
@@ -771,7 +809,19 @@ public class DatasetsRestService extends ItemServicesImpl {
         String uri = RestUriMinter.getInstance().mintUri(null); // Create dataset uri
         ThingSession ts = c.getThingSession();
         Thing t = ts.newThing(Resource.uriRef(uri));
-        UriRef creator = Resource.uriRef((String) request.getAttribute("userid"));
+        String user = (String) request.getAttribute("userid");
+        String storedUser = null;
+        String uploadKey = request.getParameter("uploadkey");
+        //Use key if it exists
+        if (uploadKey != null) {
+            log.trace("Found uploadKey: " + uploadKey);
+            storedUser = UploadBlob.useUploadKey(uploadKey);
+        }
+        if ((user == null) || user.equals(PersonBeanUtil.getAnonymousURI().toString())) {
+            //Either an invalid upload attempt or a case where the user's auth token has timed out.
+            user = storedUser;
+        } // else - if storedUser!=null and !=user ... should not happen
+        UriRef creator = Resource.uriRef(user);
 
         try {
 

@@ -48,6 +48,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -610,7 +611,7 @@ public class SEADUploader {
 	}
 
 	public static String uploadDataset(File file, String path, String dataId) {
-
+		long startTime = System.currentTimeMillis();
 		println("\nPROCESSING(D): " + file.getPath());
 		if (dataId != null) {
 			println("              Found as: " + dataId);
@@ -626,15 +627,58 @@ public class SEADUploader {
 		if (!listonly) {
 			if (dataId == null) { // doesn't exist or we don't care (!merge)
 				CloseableHttpClient httpclient = HttpClients.createDefault();
-				try {
 
-					HttpPost httppost = new HttpPost(server
-							+ "/resteasy/datasets");
+				
+				try {
+					//To support long uploads, request a key to allow the upload to complete even if the session has timed out
+					String uploadKey=null;
+					println("Getting Key");
+					HttpGet httpget= new HttpGet(server + "/resteasy/datasets/uploadKey");
+					CloseableHttpResponse response = httpclient.execute(
+							httpget, localContext);
+					println("Getting Key Response");
+					
+					try {
+						if (response.getStatusLine().getStatusCode() == 200) {
+							HttpEntity resEntity = response.getEntity();
+							if (resEntity != null) {
+								String json = EntityUtils.toString(resEntity);
+								Map<String, Object> mapObject = new ObjectMapper()
+										.readValue(
+												json,
+												new TypeReference<Map<String, Object>>() {
+												});
+								uploadKey = (String)mapObject.get("uploadkey");
+								println("Got upload Key for "
+										+ file.getAbsolutePath()
+										+ " : "
+										+ uploadKey);
+								
+							}
+						} else {
+							println("Unable to get upload Key for "
+									+ file.getAbsolutePath()
+									+ " : "
+									+ response.getStatusLine()
+											.getReasonPhrase());
+
+						}
+					} finally {
+						response.close();
+					}
+					//Now post data
+					String urlString = server + "/resteasy/datasets";
+					if(uploadKey!=null) {
+						urlString=urlString+"?uploadkey="+ uploadKey;
+					}
+					HttpPost httppost = new HttpPost(urlString);
 
 					FileBody bin = new FileBody(file);
 					MultipartEntityBuilder meb = MultipartEntityBuilder
 							.create();
 					meb.addPart("datablob", bin);
+					
+					
 
 					addLiteralMetadata(meb, FRBR_EO, path);
 					// addLiteralMetadata(meb, "http://purl.org/dc/terms/title",
@@ -652,7 +696,7 @@ public class SEADUploader {
 
 					httppost.setEntity(reqEntity);
 
-					CloseableHttpResponse response = httpclient.execute(
+					response = httpclient.execute(
 							httppost, localContext);
 					try {
 						if (response.getStatusLine().getStatusCode() == 200) {
@@ -697,6 +741,13 @@ public class SEADUploader {
 			}
 			dataId = null; // listonly mode - we report that we did not create
 							// anything
+		}
+		//If this took a while, try to reauthenticate
+		if((System.currentTimeMillis()-startTime)/1000l >3540) { //59 minutes - a session started by google auth is currently good for 1 hour with SEAD
+		if (!authenticate(server)) {
+			println("Authentication failure - exiting.");
+			System.exit(0);
+		}
 		}
 		return dataId;
 	}

@@ -61,7 +61,7 @@ function drop(evt) {
 	console.log("Uploading " + files.length + " files");
 	if (files.length == 0) {
 		console.log("Found folder");
-		alert("The HTML5 drag and drop currently does not surport folders. Please try the Java uploader.");
+		alert("The HTML5 drag and drop currently does not surport folders. Please try the Batch Upload Tools.");
 	}
 	for (var i = 0; i < count; i++) {
 		console.log("file type" + files[i].type + " | " + files[i].size + " | "
@@ -97,6 +97,18 @@ function drop(evt) {
 function addFileToQueue(file) {
 	var name = file.name.toString();
 	var size = file.size.toString();
+	var uploadKey = null;
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+	    if (xhttp.readyState == 4 && xhttp.status == 200) {
+	      var keyObj = JSON.parse(xhttp.responseText);
+	      uploadKey = keyObj.uploadkey;
+	      
+	    }
+	  };
+	  xhttp.open("GET", "UploadBlob", false);
+	  xhttp.send();
+	  
 	// Anonymous function to create 'closure' (pass num by value)
 	(function(num) {
 		// Add to presenter interface
@@ -107,6 +119,9 @@ function addFileToQueue(file) {
 
 		var fd = new FormData();
 		fd.append(name, file);
+		if(uploadKey!=null) {
+		  fd.append("uploadkey",uploadKey);
+		}
 
 		var xhr = new XMLHttpRequest();
 		xhr.upload.count = num;

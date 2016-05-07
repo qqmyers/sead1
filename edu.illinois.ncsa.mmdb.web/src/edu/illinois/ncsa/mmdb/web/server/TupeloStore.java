@@ -833,19 +833,6 @@ public class TupeloStore {
         return new FilteredTable<Resource>(u.getResult(), cix);
     }
 
-    Map<String, String> uploadHistory = new HashMap<String, String>();
-
-    public void setHistoryForUpload(String sessionKey, String history) {
-        uploadHistory.put(sessionKey, history);
-    }
-
-    // only call this once.
-    public String getHistoryForUpload(String sessionKey) {
-        String history = uploadHistory.get(sessionKey);
-        uploadHistory.put(sessionKey, null);
-        return history;
-    }
-
     // full-text
 
     /**

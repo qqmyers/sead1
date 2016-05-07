@@ -41,7 +41,6 @@
  */
 package edu.illinois.ncsa.mmdb.web.server;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -65,7 +64,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.ProgressListener;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
@@ -105,7 +103,7 @@ public class UploadBlob extends AuthenticatedServlet {
     private static final long  serialVersionUID     = 6448203283400080791L;
     public static final String UPLOAD_LISTENER_NAME = "uploadListener";
 
-    Log                        log                  = LogFactory.getLog(UploadBlob.class);
+    static Log                 log                  = LogFactory.getLog(UploadBlob.class);
 
     class UploadInfo {
         URI     uri;
@@ -125,145 +123,6 @@ public class UploadBlob extends AuthenticatedServlet {
     }
 
     /**
-     * A listener for file upload progress
-     */
-    class FileUploadListener implements ProgressListener {
-        private volatile long               bytesRead     = 0L;
-        private volatile long               bytesWritten  = 0L;
-        private volatile long               contentLength = 0L;
-        private volatile long               itemsLength   = 0L;
-        private volatile long               item          = 0L;
-        private volatile Vector<UploadInfo> uploadInfo    = new Vector<UploadInfo>();
-
-        public FileUploadListener() {
-            super();
-        }
-
-        int debugPrune = 0;
-
-        public void update(long aBytesRead, long aContentLength, int anItem) {
-            bytesRead = aBytesRead;
-            contentLength = aContentLength;
-            item = anItem;
-        }
-
-        public void wrote(long aBytesWritten) {
-            bytesWritten += aBytesWritten;
-        }
-
-        public long getBytesRead() {
-            return bytesRead;
-        }
-
-        public long getBytesWritten() {
-            return bytesWritten;
-        }
-
-        public long getContentLength() {
-            return contentLength;
-        }
-
-        public long getItem() {
-            return item;
-        }
-
-        public void addUploadInfo(UploadInfo info) {
-            uploadInfo.add(info);
-        }
-
-        public UploadInfo addUploadInfo(URI uri, String filename, long length) {
-            UploadInfo u = new UploadInfo(uri, filename);
-            uploadInfo.add(u);
-            itemsLength += length;
-            return u;
-        }
-
-        public Vector<UploadInfo> getUploadInfo() {
-            return uploadInfo;
-        }
-
-        public Vector<URI> getBlobUris() {
-            Vector<URI> v = new Vector<URI>(uploadInfo.size());
-            for (UploadInfo u : uploadInfo ) {
-                v.add(u.uri);
-            }
-            return v;
-        }
-
-        public Vector<String> getFilenames() {
-            Vector<String> v = new Vector<String>(uploadInfo.size());
-            for (UploadInfo u : uploadInfo ) {
-                v.add(u.filename);
-            }
-            return v;
-        }
-
-        public Vector<Boolean> getIsUploaded() {
-            Vector<Boolean> v = new Vector<Boolean>(uploadInfo.size());
-            for (UploadInfo u : uploadInfo ) {
-                v.add(u.isUploaded);
-            }
-            return v;
-        }
-
-        public boolean allDone() {
-            if (percentComplete() >= 100) {
-                for (UploadInfo u : uploadInfo ) {
-                    if (!u.isUploaded) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            return false;
-        }
-
-        public int percentComplete() {
-            long pct = (int) (contentLength == 0L ? 0 : ((bytesRead * 100) / contentLength));
-            //if(pct < 99) {
-            //        		log.trace(bytesRead +" read / "+bytesWritten+" written = "+pct+"%");
-            //}
-            return (int) pct;
-        }
-    }
-
-    Map<String, FileUploadListener> listeners = new HashMap<String, FileUploadListener>();
-
-    void debug(String s) {
-        log.trace(s);
-    }
-
-    void log(Object o) {
-        log.info(o);
-    }
-
-    /**
-     * Trim path information from a filename
-     */
-    private String trimFilename(String fullname) {
-        int beginIndex = fullname.lastIndexOf('/');
-        if (beginIndex < 0) {
-            beginIndex = fullname.lastIndexOf('\\');
-        }
-        if (beginIndex >= 0) {
-            fullname = fullname.substring(beginIndex + 1);
-        }
-        return fullname.trim();
-    }
-
-    FileUploadListener trackProgress(ServletFileUpload upload, String sessionKey) {
-        if (sessionKey != null && listeners.containsKey(sessionKey)) {
-            return listeners.get(sessionKey); // shouldn't happen, but this is safe
-        }
-        FileUploadListener listener = new FileUploadListener();
-        upload.setProgressListener(listener);
-        if (sessionKey != null) {
-            listeners.put(sessionKey, listener);
-        }
-        return listener;
-    }
-
-    /**
      * Handle POST request.<br>
      * A post should only be be the initial upload request, i.e., a form with
      * multipart content
@@ -275,12 +134,30 @@ public class UploadBlob extends AuthenticatedServlet {
     public void doPost(HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
         String userId = getUserUri(request);
+        String storedUser = null;
+        //In either case, check to see if there's  a valid upload Key and use the userId stored there to assess whether to accept the upload
+        String uploadKey = request.getParameter("uploadkey");
+        if (uploadKey != null) {
+            log.trace("Found uploadKey: " + uploadKey);
+            storedUser = useUploadKey(uploadKey);
+        }
         if (userId == null) {
-            return;
+            //Either an invalid upload attempt or a case where the user's auth token has timed out.
+            userId = storedUser;
         }
+        if (userId == null) {
+            //Don't think this should be possible, but this will make sure anonymous is listed as the uploader
+            // rather than the field being missing and causing the data not to display.
+            log.warn("Null user!");
+            userId = PersonBeanUtil.getPersonID("anonymous");
+        }
+
         if (!isAllowed(userId, Permission.UPLOAD_DATA)) {
+            log.warn("Upload attempt by: " + userId);
             return;
+
         }
+
         Context c = TupeloStore.getInstance().getContext();
 
         if (c == null) {
@@ -296,8 +173,6 @@ public class UploadBlob extends AuthenticatedServlet {
         // Create a factory for disk-based file items
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
-        String sessionKey = request.getParameter("session");
-        FileUploadListener listener = trackProgress(upload, sessionKey);
 
         List<String> uris = new LinkedList<String>();
         String uri = null;
@@ -305,20 +180,16 @@ public class UploadBlob extends AuthenticatedServlet {
         try {
             @SuppressWarnings("unchecked")
             List<FileItem> items = upload.parseRequest(request);
-            int nFiles = 0;
             String collectionName = null;
             String collectionUri = null;
+
             for (FileItem item : items ) {
                 // process a file
                 String fieldName = item.getFieldName();
 
                 // check to see if this a form field, if so remember for later
                 if (item.isFormField()) {
-                    if (fieldName.equals("session") && (listener == null)) {
-                        sessionKey = item.getString();
-                        listener = trackProgress(upload, sessionKey);
-                        log.trace("POST: upload session key (part) = " + sessionKey);
-                    } else if (fieldName.equals("collection")) {
+                    if (fieldName.equals("collection")) {
                         collectionName = item.getString();
                         log.trace("POST: upload collection name = " + collectionName);
                     } else if (fieldName.equals("collectionUri")) {
@@ -358,12 +229,6 @@ public class UploadBlob extends AuthenticatedServlet {
                     // create the blobwriter that will write the actual data
                     BlobWriter bw = new BlobWriter();
                     bw.setUri(URI.create(uri));
-                    UploadInfo u = null;
-                    if (listener != null) {
-                        u = listener.addUploadInfo(URI.create(uri), trimFilename(fileName), item.getSize());
-                        log.debug("Added upload info with uri=" + uri + " for filename " + fileName); // FIXME debug
-                    }
-                    final FileUploadListener _listener = listener;
                     MessageDigest sha1 = null;
                     InputStream is = item.getInputStream();
                     try {
@@ -373,30 +238,7 @@ public class UploadBlob extends AuthenticatedServlet {
                         log.error("No SHA1 algorithm!");
                     }
 
-                    bw.setInputStream(new FilterInputStream(is) {
-                        int wrote(int written) {
-                            if (written > 0 && _listener != null) {
-                                _listener.wrote(written);
-                            }
-                            return written;
-                        }
-
-                        @Override
-                        public int read() throws IOException {
-                            return wrote(super.read());
-                        }
-
-                        @Override
-                        public int read(byte[] arg0, int arg1, int arg2) throws IOException {
-                            return wrote(super.read(arg0, arg1, arg2));
-                        }
-
-                        @Override
-                        public int read(byte[] arg0) throws IOException {
-                            return wrote(super.read(arg0));
-                        }
-                    });
-
+                    bw.setInputStream(is);
                     try {
                         // write the blob
                         log.trace("writing " + fileName + " to " + uri);
@@ -419,7 +261,8 @@ public class UploadBlob extends AuthenticatedServlet {
                         t.setValue(RestService.LABEL_PROPERTY, caption);
                         t.setValue(RestService.FILENAME_PROPERTY, fileName);
                         t.setValue(RestService.DATE_PROPERTY, new Date());
-                        createdByUser(t, request);
+                        t.setValue(Dc.CREATOR, Resource.uriRef(userId));
+                        t.setValue(Dc.CREATOR, Resource.uriRef(userId));
                         t.setValue(Files.LENGTH, bw.getSize());
                         byte[] digest = sha1.digest();
                         t.addValue(edu.illinois.ncsa.mmdb.web.server.util.BeanFiller.SHA1_DIGEST, edu.illinois.ncsa.mmdb.web.server.util.BeanFiller.asHex(digest));
@@ -435,15 +278,9 @@ public class UploadBlob extends AuthenticatedServlet {
                         }
                         t.save();
                         ts.close();
-                        nFiles++;
-
                         log.debug("user uploaded " + fileName + " (" + bw.getSize() + " bytes), uri=" + uri);
 
                         uris.add(uri);
-
-                        if (u != null) {
-                            u.setUploaded(true);
-                        }
 
                     } catch (OperatorException e) {
                         log.error("Error writing blob/label: " + e.getMessage());
@@ -467,13 +304,12 @@ public class UploadBlob extends AuthenticatedServlet {
                     ThingSession ts = TupeloStore.getInstance().getContext().getThingSession();
                     Thing t = ts.newThing(Resource.uriRef(collectionUri));
                     t.setValue(DcTerms.DATE_MODIFIED, new Date());
-                    createdByUser(t, request);
+                    t.setValue(Dc.CREATOR, Resource.uriRef(userId));
                     for (String itemUri : uris ) {
                         log.debug("added " + itemUri + " to collection " + collectionUri);
                         t.addValue(RestService.HAS_MEMBER, Resource.uriRef(itemUri));
                     }
                     ts.save();
-                    TupeloStore.getInstance().setHistoryForUpload(sessionKey, "collection?uri=" + collectionUri);
                 } catch (OperatorException x) {
                     x.printStackTrace();
                 }
@@ -490,24 +326,18 @@ public class UploadBlob extends AuthenticatedServlet {
                     t.setValue(Dc.TITLE, collectionName);
                     t.setValue(DcTerms.DATE_CREATED, new Date());
                     t.setValue(DcTerms.DATE_MODIFIED, new Date());
-                    createdByUser(t, request);
+                    t.setValue(Dc.CREATOR, Resource.uriRef(userId));
                     log.debug("created collection '" + collectionName + "' @ " + collectionUri);
                     for (String itemUri : uris ) {
                         log.debug("added " + itemUri + " to collection " + collectionUri);
                         t.addValue(RestService.HAS_MEMBER, Resource.uriRef(itemUri));
                     }
                     ts.save();
-                    TupeloStore.getInstance().setHistoryForUpload(sessionKey, "collection?uri=" + collectionUri);
                 } catch (OperatorException x) {
                     //
                     x.printStackTrace();
                 }
             } else {
-                if (nFiles == 1) {
-                    TupeloStore.getInstance().setHistoryForUpload(sessionKey, "dataset?id=" + uri);
-                } else {
-                    TupeloStore.getInstance().setHistoryForUpload(sessionKey, "listDatasets?sort=date-desc");
-                }
                 TripleWriter tw = new TripleWriter();
                 for (String itemUri : uris ) {
                     tw.add(AddToCollectionHandler.TOP_LEVEL, AddToCollectionHandler.INCLUDES, Resource.uriRef(itemUri));
@@ -520,7 +350,7 @@ public class UploadBlob extends AuthenticatedServlet {
                 }
             }
             // return list of URI's
-            returnList(response, collectionUri, listener.getBlobUris());
+            returnList(response, collectionUri, uris);
         } catch (FileUploadException e1) {
             log.error("file upload error: " + e1.getLocalizedMessage());
             e1.printStackTrace();
@@ -544,14 +374,14 @@ public class UploadBlob extends AuthenticatedServlet {
      *
      * @param response
      * @param collectionUri
-     * @param blobUris
+     * @param uris
      */
-    private void returnList(HttpServletResponse response, String collectionUri, Vector<URI> blobUris) throws IOException {
+    private void returnList(HttpServletResponse response, String collectionUri, List<String> uris) throws IOException {
         response.setContentType("text/html"); // do not allow browsers to parse and rewrite this response!
         // produce HTML the good old-fashioned way; println.
         PrintWriter pw = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
         pw.println("<ol>");
-        for (URI datasetUri : blobUris ) {
+        for (String datasetUri : uris ) {
             pw.println("  <li class=\"dataset\">" + datasetUri + "</li>");
         }
         if (collectionUri != null) {
@@ -603,57 +433,6 @@ public class UploadBlob extends AuthenticatedServlet {
     }
 
     /**
-     * Create a JSON string from the state variables.
-     *
-     * @param req
-     * @return a JSON representation of state variables
-     */
-    public String stateToJSON(boolean hasStarted, FileUploadListener listener, HttpServletRequest req) {
-        StringBuffer buffer = new StringBuffer("{");
-        long bytesRead = 0L;
-        long contentLength = 0L;
-        boolean isFinished = false;
-
-        buffer.append("\"serverUrl\":\"" + getBaseUrl(req) + "/tupelo" + "\",");
-        buffer.append("\"hasStarted\":" + hasStarted + ",");
-        int percentComplete = 0;
-        if (listener == null) {
-            buffer.append("\"uris\":[],");
-            buffer.append("\"filenames\":[],");
-            buffer.append("\"isUploaded\":[],");
-        } else {
-            bytesRead = listener.getBytesRead();
-            contentLength = listener.getContentLength();
-            isFinished = listener.allDone();
-            buffer.append(toJsonArray("uris", listener.getBlobUris()) + ",");
-            buffer.append(toJsonArray("filenames", listener.getFilenames()) + ",");
-            buffer.append(toJsonArray("isUploaded", listener.getIsUploaded()) + ",");
-            percentComplete = listener.percentComplete();
-        }
-        buffer.append("\"bytesRead\":" + bytesRead + ",");
-        buffer.append("\"contentLength\":" + contentLength + ",");
-        buffer.append("\"isFinished\":" + isFinished + ",");
-
-        buffer.append("\"percentComplete\":" + percentComplete);
-        buffer.append("}");
-
-        return buffer.toString();
-    }
-
-    /**
-     * Set response to a JSON string with all zero or null values.
-     *
-     * @param response
-     * @throws IOException
-     */
-    public void returnZeroedJSON(HttpServletResponse response) throws IOException {
-        PrintWriter out = response.getWriter();
-        out.print(stateToJSON(false, null, null));
-        out.flush();
-        out.close();
-    }
-
-    /**
      * The GET request is used to check the listener object for file upload
      * stats
      *
@@ -663,58 +442,27 @@ public class UploadBlob extends AuthenticatedServlet {
     @Override
     public void doGet(HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
-        // allow clients with a session key in hand to continue unauthenticated
-        if (request.getParameterMap().containsKey("uploadComplete")) { // need to redirect after completion
-            TupeloStore t = TupeloStore.getInstance();
-            String sessionKey = request.getParameter("uploadComplete");
-            String historyToken = t.getHistoryForUpload(sessionKey);
-            if (historyToken != null) {
-                String redirectUrl = request.getContextPath() + TupeloStore.MMDB_WEBAPP_PATH + "#" + historyToken;
-                response.getOutputStream().print(redirectUrl);
-                response.getOutputStream().flush();
-            }
+        // allow clients to request a key that will allow upload to complete without valid authentication
+        //(e.g. to support upload times that are longer than the lifetime of auth tokens)
+
+        // Authenticate to get a key
+        String userId = getUserUri(request);
+        if (userId == null) {
             return;
         }
-        if (!request.getParameterMap().containsKey("session")) { // no session?
-            // then you'd better authenticate to get one
-            String userId = getUserUri(request);
-            if (userId == null) {
-                return;
-            }
-            if (!isAllowed(userId, Permission.UPLOAD_DATA)) {
-                return;
-            }
-            String sessionKey = SecureHashMinter.getMinter().mint(); // mint a session key
-            // OK, we REALLY don't want IE to cache this. For reals
-            response.addHeader("cache-control", "no-store, no-cache"); // don't cache
-            response.addHeader("cache-control", "post-check=0, pre-check=0, false"); // really don't cache
-            response.addHeader("Pragma", "no-cache"); // no, we mean it, really don't cache
-            // report
-            PrintWriter out = response.getWriter();
-            out.println("{\"session\":\"" + sessionKey + "\"}");
-            log.trace("GET: minted session key = " + sessionKey);
-        } else {
-            String sessionKey = request.getParameter("session");
-            log.trace("GET: session key = " + sessionKey);
-            // return if there's no progress yet
-            if (listeners.get(sessionKey) == null) {
-                log("GET: no upload for session key " + sessionKey);
-                returnZeroedJSON(response);
-                return;
-            }
-            // get the listener
-            FileUploadListener listener = listeners.get(sessionKey);
-            // are we done?
-            if (listener.allDone()) {
-                // FIXME need to clean up, but only when client has the info it needs
-                //listeners.put(sessionKey, null);
-            }
-            // report progress
-            response.setContentType("application/json");
-            PrintWriter out = response.getWriter();
-            out.print(stateToJSON(true, listener, request));
-            log.trace("GET: reported " + stateToJSON(true, listener, request));
+        if (!isAllowed(userId, Permission.UPLOAD_DATA)) {
+            return;
         }
+        String sessionKey = SecureHashMinter.getMinter().mint(); // mint a session key
+        setKeyForUpload(sessionKey, userId);
+        // OK, we REALLY don't want IE to cache this. For reals
+        response.addHeader("cache-control", "no-store, no-cache"); // don't cache
+        response.addHeader("cache-control", "post-check=0, pre-check=0, false"); // really don't cache
+        response.addHeader("Pragma", "no-cache"); // no, we mean it, really don't cache
+        // report
+        PrintWriter out = response.getWriter();
+        out.println("{\"uploadkey\":\"" + sessionKey + "\"}");
+        log.trace("GET: minted session key = " + sessionKey);
     }
 
     /**
@@ -752,10 +500,20 @@ public class UploadBlob extends AuthenticatedServlet {
         }
     }
 
-    void createdByUser(Thing t, HttpServletRequest request) throws OperatorException {
-        String username = getHttpSessionUser(request);
-        if (username != null) {
-            t.setValue(Dc.CREATOR, Resource.uriRef(PersonBeanUtil.getPersonID(username)));
+    static Map<String, String> uploadKeys = new HashMap<String, String>();
+
+    public static void setKeyForUpload(String sessionKey, String userId) {
+        uploadKeys.put(sessionKey, userId);
+        log.trace("Registering Upload Key: " + sessionKey + " for " + userId);
+        if (uploadKeys.size() > 200) {
+            log.warn("Active Upload Keys >200 (" + uploadKeys.size() + ")");
         }
     }
+
+    // only call this once per key
+    public static String useUploadKey(String sessionKey) {
+        log.trace("Using Upload Key: " + sessionKey + " for " + uploadKeys.get(sessionKey));
+        return uploadKeys.remove(sessionKey);
+    }
+
 }

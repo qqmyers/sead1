@@ -48,7 +48,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -66,13 +65,10 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.illinois.ncsa.mmdb.web.client.MMDB;
-import edu.illinois.ncsa.mmdb.web.client.UploadWidget;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDataset;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetDatasetResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationship;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.SetRelationshipResult;
-import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedEvent;
-import edu.illinois.ncsa.mmdb.web.client.event.DatasetUploadedHandler;
 import edu.illinois.ncsa.mmdb.web.client.presenter.BatchOperationPresenter;
 import edu.illinois.ncsa.mmdb.web.client.presenter.UploadStatusPresenter;
 import edu.illinois.ncsa.mmdb.web.client.view.BatchOperationView;
@@ -88,7 +84,6 @@ import edu.illinois.ncsa.mmdb.web.client.view.UploadStatusView;
 public class UploadPage extends Page {
 
     private static final String            TITLE                = "Upload";
-    private UploadWidget                   uploadWidget;
     private FlowPanel                      uploadLayout;
     private static FlowPanel               statusPanel;
     private static UploadStatusPresenter   uploadStatusPresenter;
@@ -172,7 +167,7 @@ public class UploadPage extends Page {
             uploadLayout.add(hp);
             uploadLayout.add(html5Form);
         } else {
-            uploadLayout.add(getSingleUploadPanel());
+            Window.alert("Upload through this interface requires HTML5 support in your browser.");
         }
 
         final FormPanel form = new FormPanel();
@@ -329,25 +324,6 @@ public class UploadPage extends Page {
 
         // publish js methods outside of gwt code
         publishMethods();
-    }
-
-    private VerticalPanel getSingleUploadPanel() {
-        final VerticalPanel singleUpload = new VerticalPanel();
-        final HorizontalPanel hp = new HorizontalPanel();
-        Label fileUploadLabel = new Label("Select a file you want to upload:");
-        fileUploadLabel.addStyleName("importTitle");
-        hp.add(fileUploadLabel);
-
-        singleUpload.add(hp);
-
-        uploadWidget = new UploadWidget(false);
-        uploadWidget.addDatasetUploadedHandler(new DatasetUploadedHandler() {
-            public void onDatasetUploaded(DatasetUploadedEvent event) {
-                History.newItem("dataset?id=" + event.getDatasetUri());
-            }
-        });
-        singleUpload.add(uploadWidget);
-        return singleUpload;
     }
 
     private final native void initUploader() /*-{
