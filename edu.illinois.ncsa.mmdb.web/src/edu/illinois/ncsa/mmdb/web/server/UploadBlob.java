@@ -55,6 +55,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -500,7 +501,7 @@ public class UploadBlob extends AuthenticatedServlet {
         }
     }
 
-    static Map<String, String> uploadKeys = new HashMap<String, String>();
+    static Map<String, String> uploadKeys = new ConcurrentHashMap<String, String>();
 
     public static void setKeyForUpload(String sessionKey, String userId) {
         uploadKeys.put(sessionKey, userId);

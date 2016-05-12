@@ -147,7 +147,11 @@ function datatypesJsonParser(json) {
 }
 
 function loadTableContent() {
-$("#datatable").append($('<table/>').addClass("treetable").append( $('<thead/>').append($('<tr/>').html('<th>Name</th><th>Size</th>'))).append($('<tbody/>')));
+	$("#datatable").append(
+			$('<table/>').addClass("treetable").append(
+					$('<thead/>').append(
+							$('<tr/>').html('<th>Name</th><th>Size</th>')))
+					.append($('<tbody/>')));
 
 	$.ajax({
 		type : "GET",
@@ -169,12 +173,13 @@ function datatableJsonDataParser(json) {
 	$.each(obj, function(item, props) {
 		if (item != '@context') {
 
-			$('#datatable tbody').append(getDataRow(null, i, props['Title'],
-					props['Identifier'], props['Size(Bytes)']));
+			$('#datatable tbody').append(
+					getDataRow(null, i, props['Title'], props['Identifier'],
+							props['Size(Bytes)']));
 			i++;
 		}
 	});
-	
+
 	activateTable();
 
 }
@@ -185,12 +190,12 @@ function datatableJsonCollectionParser(json) {
 	var i = 0;
 	$.each(obj, function(item, props) {
 		if (item != '@context') {
-			$('#datatable tbody').append(getCollectionRow(null, i, props['Title'],
-					props['Identifier']));
+			$('#datatable tbody').append(
+					getCollectionRow(null, i, props['Title'],
+							props['Identifier']));
 			i++;
 		}
 	});
-
 
 	$.ajax({
 		type : "GET",
@@ -214,9 +219,11 @@ function getDataRow(parentId, childId, name, uri, size) {
 		newRow.attr('data-tt-parent-id', parentId);
 	}
 
-	newRow.append($('<td/>').append($('<span/>').addClass('file').append($('<a/>').attr('href', '#dataset?id=' + uri).html(name))));
+	newRow.append($('<td/>').append(
+			$('<span/>').addClass('file').append(
+					$('<a/>').attr('href', '#dataset?id=' + uri).html(name))));
 	newRow.append($('<td/>').html(roundNumber((size / 1024), 2) + ' KB'));
-return (newRow);
+	return (newRow);
 }
 
 function getCollectionRow(parentId, childId, name, uri, size) {
@@ -228,11 +235,15 @@ function getCollectionRow(parentId, childId, name, uri, size) {
 	if (parentId != null) {
 		newRow.attr('data-tt-parent-id', parentId);
 	}
-	newRow.append($('<td/>').append($('<span/>').addClass('folder').append($('<a/>').attr(
-			'href', '#collection?uri=' + uri).html(name))));
+	newRow.append($('<td/>').append(
+			$('<span/>').addClass('folder')
+					.append(
+							$('<a/>').attr('href', '#collection?uri=' + uri)
+									.html(name))));
 	newRow.append($('<td/>').html('--'));
-//return newRow;
-	return newRow.add( $('<tr/>').attr('data-tt-id',childId + "-0").attr('data-tt-parent-id', childId));
+	// return newRow;
+	return newRow.add($('<tr/>').attr('data-tt-id', childId + "-0").attr(
+			'data-tt-parent-id', childId));
 }
 
 function activateTable() {
@@ -252,9 +263,8 @@ function activateTable() {
 
 					datasetDistribution = new Object();
 
-
-table .treetable("unloadBranch", node);
-var rows=$();
+					table.treetable("unloadBranch", node);
+					var rows = $();
 					// Render loader/spinner while loading
 					$
 							.ajax(
@@ -264,7 +274,8 @@ var rows=$();
 										// loadBranch happens after
 										// showChildren?
 										type : "GET",
-										url : "resteasy/collections/" + encodeURIComponent(tagID)
+										url : "resteasy/collections/"
+												+ encodeURIComponent(tagID)
 												+ "/datasets",
 										dataType : "json",
 									})
@@ -280,12 +291,13 @@ var rows=$();
 														obj,
 														function(item, props) {
 															if (item != '@context') {
-																rows = rows.add(getDataRow(
-																		node.id,
-																		i,
-																		props['Title'],
-																		props['Identifier'],
-																		props['Size(Bytes)']));
+																rows = rows
+																		.add(getDataRow(
+																				node.id,
+																				i,
+																				props['Title'],
+																				props['Identifier'],
+																				props['Size(Bytes)']));
 																var category = FindCategoryFromType(props['Mimetype']);
 																if (datasetDistribution[category]) {
 																	datasetDistribution[category] = datasetDistribution[category] + 1;
@@ -295,8 +307,6 @@ var rows=$();
 																i++;
 															}
 														});
-
-		
 
 										$
 												.ajax(
@@ -329,21 +339,30 @@ var rows=$();
 																					item,
 																					props) {
 																				if (item != '@context') {
-																									rows = 	rows.add(									getCollectionRow(
-																							node.id,
-																							i,
-																							props['Title'],
-																							props
-['Identifier']));
+																					rows = rows
+																							.add(getCollectionRow(
+																									node.id,
+																									i,
+																									props['Title'],
+																									props['Identifier']));
 																					i++;
 																				}
 																			});
 
-$('#datatable table tr[data-tt-id="'+node.id +'"]').after(rows);
+															$(
+																	'#datatable table tr[data-tt-id="'
+																			+ node.id
+																			+ '"]')
+																	.after(rows);
 
-$('#datatable table') .treetable("loadBranch", node, rows);
-		
-													try {
+															$(
+																	'#datatable table')
+																	.treetable(
+																			"loadBranch",
+																			node,
+																			rows);
+
+															try {
 																drawChart();
 															} catch (err) {
 																// Google chart
