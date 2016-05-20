@@ -155,15 +155,11 @@ public class FixityCheck extends MediciToolBase {
             if(addMissingHashes) {
                 uf.addPattern("data", hasSHA1, "sha1", true);
             }
-            uf.addColumnName("hash");
+            uf.addColumnName("sha1");
             
             context.perform(uf);
             for (Tuple t : uf.getResult()) {
-                if(addMissingHashes) {
-                    if(t.get(2)!=null) {
-                        
-                    }
-                }
+                
                 if ((deletedonly || t.get(1) == null)&&((!addMissingHashes || t.get(2)==null))) {
                     processCount++;
 
