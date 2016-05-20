@@ -51,7 +51,6 @@ import org.tupeloproject.rdf.terms.Cet;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
 
-
 import edu.uiuc.ncsa.cet.bean.tupelo.mmdb.MMDB;
 
 public class RemovePreviews extends NodeProcessorBase {
@@ -86,7 +85,8 @@ public class RemovePreviews extends NodeProcessorBase {
         processActiveData = true; // Don't expect to want to delete previews of
                                   // deleted items (without just removing them
                                   // altogether)
-        //Get all dataset args or all eligible datasets - don't know how many have previews so can't truncate until we start processing
+        // Get all dataset args or all eligible datasets - don't know how many
+        // have previews so can't truncate until we start processing
         boolean global = true;
         Set<UriRef> datasetsRefs = new HashSet<UriRef>();
         for (String arg : args) {
@@ -129,6 +129,10 @@ public class RemovePreviews extends NodeProcessorBase {
         }
 
         for (UriRef dataset : datasetsRefs) {
+
+            if (numberProcessed >= max) {
+                break;
+            }
             // Now get Previews
             Unifier previews = new Unifier();
             previews.addPattern(dataset, Resource.uriRef("http://cet.ncsa.uiuc.edu/2007/hasPreview"), "prev");
@@ -172,6 +176,7 @@ public class RemovePreviews extends NodeProcessorBase {
                     println("Stats after " + numberProcessed + " previews: " + totalBlobs + " blobs, " + totalBytes + " bytes, " + totalTriples + " triples");
                 }
             }
+            flushLog();
         }
 
         if (verbose) {

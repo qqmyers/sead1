@@ -32,7 +32,9 @@ import java.util.HashSet;
 import org.tupeloproject.kernel.BlobFetcher;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.TripleMatcher;
+import org.tupeloproject.kernel.TripleWriter;
 import org.tupeloproject.kernel.Unifier;
+import org.tupeloproject.kernel.events.TriplesWrittenEvent;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.UriRef;
 import org.tupeloproject.rdf.terms.Cet;
@@ -40,6 +42,7 @@ import org.tupeloproject.rdf.terms.Dc;
 import org.tupeloproject.rdf.terms.DcTerms;
 import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.util.Tuple;
+
 import edu.uiuc.ncsa.cet.bean.tupelo.CollectionBeanUtil;
 
 /*Verifies that metadata related to Dataset content and the content itself match. Currently this means:
@@ -68,6 +71,7 @@ public class FixityCheck extends MediciToolBase {
     private static long    processCount        = 0l;
     private static boolean metadataonly        = false;
     private static boolean deletedonly       = false;
+    private static boolean addMissingHashes       = false;
 
     // Stats:
     private static long    totalMissingHash    = 0l;
@@ -90,19 +94,22 @@ public class FixityCheck extends MediciToolBase {
                 println("Metadata Only Mode");
             } else if (arg.equalsIgnoreCase("-deletedonly")) {
                 deletedonly = true;
-                println("Ignore Deleted Mode");
+                println("Only Check Deleted Mode");
             } else if (arg.startsWith("-limit")) {
                 max = Long.parseLong(arg.substring(6));
                 println("Max dataset count: " + max);
             } else if (arg.startsWith("-skip")) {
                 skip = Long.parseLong(arg.substring(5));
                 println("Skip dataset count: " + skip);
+            } else if (arg.equalsIgnoreCase("-addmissinghashes")) {
+                addMissingHashes=true;
+                println("Add Missing Hashes: On");
             }
         }
 
         // go through arguments
         for (String arg : args) {
-            if (!((arg.equalsIgnoreCase("-metadataonly")) || (arg.startsWith("-limit")) || (arg.startsWith("-skip")) || arg.equalsIgnoreCase("-deletedonly"))) {
+            if (!((arg.equalsIgnoreCase("-metadataonly")) || (arg.startsWith("-limit")) || (arg.startsWith("-skip")) || arg.equalsIgnoreCase("-deletedonly") || arg.equalsIgnoreCase("-addmissinghashes"))) {
                 if (arg.equalsIgnoreCase("All")) {
                     addToDatasetList(null);
                 } else {
@@ -140,13 +147,15 @@ public class FixityCheck extends MediciToolBase {
             uf.addPattern("data", Rdf.TYPE, Cet.DATASET);
             uf.addColumnName("data");
             if (deletedonly == true) {
+                uf.addPattern("data", DcTerms.IS_REPLACED_BY, "del", false);
+            } else {
                 uf.addPattern("data", DcTerms.IS_REPLACED_BY, "del", true);
-                uf.addColumnName("del");
             }
+            uf.addColumnName("del");
 
             context.perform(uf);
             for (Tuple t : uf.getResult()) {
-                if (!deletedonly || t.get(1) != null) {
+                if (deletedonly || t.get(1) == null) {
                     processCount++;
 
                     if (processCount > skip) {
@@ -189,14 +198,26 @@ public class FixityCheck extends MediciToolBase {
 
         uf.addColumnName("data");
         if (deletedonly == true) {
+            uf.addPattern("data", DcTerms.IS_REPLACED_BY, "del", false);
+        } else {
             uf.addPattern("data", DcTerms.IS_REPLACED_BY, "del", true);
-            uf.addColumnName("del");
         }
+        uf.addColumnName("del");
+
+        
         try {
             context.perform(uf);
             for (Tuple<Resource> data : uf.getResult()) {
-                if (!deletedonly || data.get(1) != null) {
-                    datasets.add((UriRef) data.get(0));
+                if (deletedonly || data.get(1) == null) {
+                    processCount++;
+
+                    if (processCount > skip) {
+                        addCount++;
+                        if (addCount <= max) {
+                            datasets.add((UriRef) data.get(0));
+                        }
+                    }
+
                 }
             }
             Unifier uf2 = new Unifier();
@@ -205,13 +226,15 @@ public class FixityCheck extends MediciToolBase {
             uf2.addPattern("coll", Rdf.TYPE, CollectionBeanUtil.COLLECTION_TYPE);
             uf2.addColumnName("coll");
             if (deletedonly == true) {
+                uf2.addPattern("coll", DcTerms.IS_REPLACED_BY, "del", false);
+            } else {
                 uf2.addPattern("coll", DcTerms.IS_REPLACED_BY, "del", true);
-                uf2.addColumnName("del");
             }
+            uf2.addColumnName("del");
             context.perform(uf2);
 
             for (Tuple<Resource> coll : uf2.getResult()) {
-                if (!deletedonly || coll.get(1) != null) {
+                if (deletedonly || coll.get(1) == null) {
 
                     addDatasetsForCollection((UriRef) coll.get(0));
                 }
@@ -229,6 +252,7 @@ public class FixityCheck extends MediciToolBase {
 
         for (UriRef ds : datasets) {
             println("Processing: " + ds.toString());
+            boolean missinghash=false;
             Unifier uf = new Unifier();
             uf.addPattern(ds, Dc.IDENTIFIER, "id");
             uf.addPattern(ds, Dc.TITLE, "title", true);
@@ -281,6 +305,7 @@ public class FixityCheck extends MediciToolBase {
                 if (hashes.size() != 1) {
                     if (hashes.isEmpty()) {
                         totalMissingHash++;
+                        missinghash=true;
                         println("BAD METADATA: Missing sha1 hash.");
                     } else {
                         totalMultipleHash++;
@@ -290,7 +315,7 @@ public class FixityCheck extends MediciToolBase {
                     println("SHA1: " + hashes.get(0));
                 }
                 // Now check actual dataset bytes:
-                if (!metadataonly) {
+                if (!metadataonly||(addMissingHashes&&missinghash)) {
                     BlobFetcher bf = new BlobFetcher(ds);
                     context.perform(bf);
                     MessageDigest sha1 = null;
@@ -318,6 +343,11 @@ public class FixityCheck extends MediciToolBase {
                     if ((!hashes.isEmpty()) && !(hashes.contains(actualHash))) {
                         totalHashMismatch++;
                         println("CORRUPT FILE: hash as stored is " + actualHash);
+                    }
+                    if(hashes.isEmpty()&&addMissingHashes) {
+                        TripleWriter tw = new TripleWriter();
+                        tw.add(ds,hasSHA1, actualHash );
+                        context.perform(tw);
                     }
 
                 }
