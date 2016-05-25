@@ -2040,6 +2040,47 @@ public class ItemServicesImpl
 
             agg.put("@id", idUri + "#aggregation");
 
+            /*Manage versions - when the live object (DCterms.HAS_VERSION) has versions,
+             * this Aggregation should (http://www.w3.org/ns/prov#wasRevisionOf) have prior versions,
+             * and this list should not include itself, or test pubs if we can catch them
+             */
+            Object ver = agg.get("Version");
+            List<String> priorVersions = new ArrayList<String>();
+            if (ver != null) {
+                if (ver instanceof String) {
+                    //Should be the ID of this version - just needs to be dropped
+                    if (!((String) ver).equals(id)) {
+                        log.warn("Unexpected Version: " + ver);
+                    }
+                } else if (ver instanceof Map) {
+                    for (int i = 0; i < ((List<String>) ver).size(); i++ ) {
+                        String aVersion = ((List<String>) ver).get(i);
+                        if (!aVersion.equals(id)) {
+                            //Look for pid and use it if it exists and is not a test DOI:
+                            TripleMatcher pidMatcher = new TripleMatcher();
+                            pidMatcher.match(Resource.uriRef(id), Resource.uriRef(DCTerms.identifier.getURI()), null);
+                            c.perform(pidMatcher);
+                            Set<Triple> triples = pidMatcher.getResult();
+                            if (!triples.isEmpty()) {
+                                String pid = triples.iterator().next().getObject().toString();
+                                if (!pid.startsWith("http://dx.doi.org/10.5072/FK")) {
+                                    priorVersions.add(pid);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            agg.remove("Version");
+            if (priorVersions.size() > 0) {
+                agg.put("has prior version", priorVersions);
+                //Also need to add this term to the context below: seadContext.put("has prior version", "http://www.w3.org/ns/prov#wasRevisionOf");
+            }
+
+            //Remove Proposed For Publication metadata, which also applies only to the live version
+
+            agg.remove("Proposed for Publication");
+
             List<String> types = new ArrayList<String>(2);
             types.add("Aggregation");
             types.add("http://cet.ncsa.uiuc.edu/2007/Collection");
@@ -2080,6 +2121,12 @@ public class ItemServicesImpl
             seadContext.put("Has Part", DcTerms.HAS_PART.toString());
             seadContext.put("Publishing Project", "http://sead-data.net/terms/publishingProject");
             seadContext.put("Publishing Project Name", "http://sead-data.net/terms/publishingProjectName");
+
+            //Version is only for live object
+            seadContext.remove("Version");
+            seadContext.put("has prior version", "http://www.w3.org/ns/prov#wasRevisionOf");
+            //Proposed for Publication is only for the live object
+            seadContext.remove("Proposed for Publication");
 
             contextList.add(seadContext);
             oremap.put("@context", contextList);
