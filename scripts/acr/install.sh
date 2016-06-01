@@ -34,10 +34,9 @@ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 16126D3A3E5C1192
 # make sure we have latest listing of packages
 apt-get -qq -y update
 
-# install rest of packages 
-#apt-get -y install openjdk-7-jre-headless openjdk-7-jre-lib imagemagick mysql-server poppler-utils tomcat6 ttf-dejavu-core ttf-dejavu-extra ttf-kochi-gothic ttf-kochi-mincho ttf-baekmuk ttf-kochi-gothic ttf-kochi-mincho ttf-wqy-microhei ttf-wqy-zenhei ttf-indic-fonts-core ttf-telugu-fonts ttf-oriya-fonts ttf-kannada-fonts ttf-bengali-fonts ubuntu-restricted-extras unzip gdal-bin python-gdal libgdal-dev nginx p7zip-full
-#apt-get -y install libav-tools
-apt-get -y install openjdk-7-jre-headless openjdk-7-jre-lib ffmpeg imagemagick mysql-server poppler-utils tomcat6 ttf-dejavu-core ttf-dejavu-extra ttf-kochi-gothic ttf-kochi-mincho ttf-baekmuk ttf-arphic-gbsn00lp ttf-arphic-bsmi00lp ttf-arphic-gkai00mp ttf-arphic-bkai00mp ttf-sazanami-gothic ttf-kochi-gothic ttf-sazanami-mincho ttf-kochi-mincho ttf-wqy-microhei ttf-wqy-zenhei ttf-indic-fonts-core ttf-telugu-fonts ttf-oriya-fonts ttf-kannada-fonts ttf-bengali-fonts ubuntu-restricted-extras unzip gdal-bin python-gdal proj libgdal-dev nginx p7zip-full
+# install rest of packages - appropriate for Ubuntu 14.04 
+apt-get -y install openjdk-7-jre-headless openjdk-7-jre-lib imagemagick mysql-server poppler-utils tomcat6 ttf-dejavu-core ttf-dejavu-extra ttf-kochi-gothic ttf-kochi-mincho ttf-baekmuk ttf-kochi-gothic ttf-kochi-mincho ttf-wqy-microhei ttf-wqy-zenhei ttf-indic-fonts-core ttf-telugu-fonts ttf-oriya-fonts ttf-kannada-fonts ttf-bengali-fonts ubuntu-restricted-extras unzip gdal-bin python-gdal libgdal-dev nginx p7zip-full
+apt-get -y install libav-tools
 
 # remove java-6
 apt-get -y purge --auto-remove 6-jre*
