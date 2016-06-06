@@ -242,14 +242,14 @@ public class UploadBlob extends AuthenticatedServlet {
                     bw.setInputStream(is);
                     try {
                         // write the blob
-                        log.trace("writing " + fileName + " to " + uri);
+                        log.info("writing " + fileName + " to " + uri);
                         c.perform(bw);
 
                         log.trace("writing metadata for " + uri);
                         // add metadata
                         ThingSession ts = c.getThingSession();
                         Literal id = Resource.literal(uri);
-                        log.info("Uploading: " + id);
+
                         Thing t = ts.newThing(Resource.uriRef(uri));
                         //DatasetBean-related metadata
                         t.addType(Cet.DATASET);
