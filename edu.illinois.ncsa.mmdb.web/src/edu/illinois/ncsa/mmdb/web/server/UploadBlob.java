@@ -249,7 +249,7 @@ public class UploadBlob extends AuthenticatedServlet {
                         // add metadata
                         ThingSession ts = c.getThingSession();
                         Literal id = Resource.literal(uri);
-
+                        log.info("Uploading: " + id);
                         Thing t = ts.newThing(Resource.uriRef(uri));
                         //DatasetBean-related metadata
                         t.addType(Cet.DATASET);
@@ -277,14 +277,15 @@ public class UploadBlob extends AuthenticatedServlet {
                             // update context with new mime-type potentially
                             TupeloStore.getInstance().getMimeMap().checkMimeType(contentType);
                         }
-                        t.save();
+                        ts.save();
                         ts.close();
                         log.debug("user uploaded " + fileName + " (" + bw.getSize() + " bytes), uri=" + uri);
 
                         uris.add(uri);
 
                     } catch (OperatorException e) {
-                        log.error("Error writing blob/label: " + e.getMessage());
+                        log.error("Error writing blob/label for id: " + e.getMessage());
+                        log.error(e.getStackTrace().toString());
                         throw new ServletException(e);
                     }
 
