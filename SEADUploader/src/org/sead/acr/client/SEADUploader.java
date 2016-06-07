@@ -223,7 +223,8 @@ public class SEADUploader {
 						authenticated = true;
 					}
 				} else {
-					//Seems to occur when google device id is not set on server - with a Not Found response...
+					// Seems to occur when google device id is not set on server
+					// - with a Not Found response...
 					println("Error response from " + server + " : "
 							+ response.getStatusLine().getReasonPhrase());
 				}
@@ -628,16 +629,17 @@ public class SEADUploader {
 			if (dataId == null) { // doesn't exist or we don't care (!merge)
 				CloseableHttpClient httpclient = HttpClients.createDefault();
 
-				
 				try {
-					//To support long uploads, request a key to allow the upload to complete even if the session has timed out
-					String uploadKey=null;
+					// To support long uploads, request a key to allow the
+					// upload to complete even if the session has timed out
+					String uploadKey = null;
 					println("Getting Key");
-					HttpGet httpget= new HttpGet(server + "/resteasy/datasets/uploadKey");
+					HttpGet httpget = new HttpGet(server
+							+ "/resteasy/datasets/uploadKey");
 					CloseableHttpResponse response = httpclient.execute(
 							httpget, localContext);
 					println("Getting Key Response");
-					
+
 					try {
 						if (response.getStatusLine().getStatusCode() == 200) {
 							HttpEntity resEntity = response.getEntity();
@@ -648,12 +650,11 @@ public class SEADUploader {
 												json,
 												new TypeReference<Map<String, Object>>() {
 												});
-								uploadKey = (String)mapObject.get("uploadkey");
+								uploadKey = (String) mapObject.get("uploadkey");
 								println("Got upload Key for "
-										+ file.getAbsolutePath()
-										+ " : "
+										+ file.getAbsolutePath() + " : "
 										+ uploadKey);
-								
+
 							}
 						} else {
 							println("Unable to get upload Key for "
@@ -666,10 +667,10 @@ public class SEADUploader {
 					} finally {
 						response.close();
 					}
-					//Now post data
+					// Now post data
 					String urlString = server + "/resteasy/datasets";
-					if(uploadKey!=null) {
-						urlString=urlString+"?uploadkey="+ uploadKey;
+					if (uploadKey != null) {
+						urlString = urlString + "?uploadkey=" + uploadKey;
 					}
 					HttpPost httppost = new HttpPost(urlString);
 
@@ -677,8 +678,6 @@ public class SEADUploader {
 					MultipartEntityBuilder meb = MultipartEntityBuilder
 							.create();
 					meb.addPart("datablob", bin);
-					
-					
 
 					addLiteralMetadata(meb, FRBR_EO, path);
 					// addLiteralMetadata(meb, "http://purl.org/dc/terms/title",
@@ -696,8 +695,7 @@ public class SEADUploader {
 
 					httppost.setEntity(reqEntity);
 
-					response = httpclient.execute(
-							httppost, localContext);
+					response = httpclient.execute(httppost, localContext);
 					try {
 						if (response.getStatusLine().getStatusCode() == 200) {
 							HttpEntity resEntity = response.getEntity();
@@ -735,19 +733,25 @@ public class SEADUploader {
 
 			}
 		} else {
-			//Increment count if we would have uploaded (dataId==null)
-			if(dataId==null) {
-				globalFileCount++;	
+			// Increment count if we would have uploaded (dataId==null)
+			if (dataId == null) {
+				globalFileCount++;
 			}
 			dataId = null; // listonly mode - we report that we did not create
 							// anything
 		}
-		//If this took a while, try to reauthenticate
-		if((System.currentTimeMillis()-startTime)/1000l >3540) { //59 minutes - a session started by google auth is currently good for 1 hour with SEAD
-		if (!authenticate(server)) {
-			println("Authentication failure - exiting.");
-			System.exit(0);
-		}
+		// If this took a while, try to reauthenticate
+		// 30 minutes - a session started by google auth is currently good for 1
+		// hour with SEAD, but the JSESSION cookie will timeout if no activity
+		// for 30 minutes
+		// so this timeout at 29 minutes including some internal processing time
+		// should always catch any potential timeout and cause a
+		// reauthentication
+		if ((System.currentTimeMillis() - startTime) / 1000l > 1740) {
+			if (!authenticate(server)) {
+				println("Authentication failure - exiting.");
+				System.exit(0);
+			}
 		}
 		return dataId;
 	}
@@ -757,13 +761,13 @@ public class SEADUploader {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		String sourcepath = path + item.getName();
 		String servicePrefix = server + "/resteasy/";
-		if(item.isDirectory()) {
+		if (item.isDirectory()) {
 			servicePrefix = servicePrefix + "collections/metadata/";
 		} else {
 			servicePrefix = servicePrefix + "datasets/metadata/";
 		}
 		try {
-			String serviceUrl = servicePrefix 
+			String serviceUrl = servicePrefix
 					+ URLEncoder.encode(FRBR_EO, "UTF-8") + "/" + "literal/"
 					+ URLEncoder.encode(sourcepath, "UTF-8");
 			HttpGet httpget = new HttpGet(serviceUrl);
