@@ -109,7 +109,8 @@ public class DeleteDatasetsHandler implements ActionHandler<DeleteDatasets, Batc
                                 TripleMatcher rentsMatcher = new TripleMatcher();
                                 rentsMatcher.match(null, DcTerms.HAS_PART, kid);
                                 context.perform(rentsMatcher);
-                                if (rentsMatcher.getResult().size() == 0) {
+                                //1 parent == the current parent - we haven't removed it yet...
+                                if (rentsMatcher.getResult().size() == 1) {
                                     mod.add(AddToCollectionHandler.TOP_LEVEL, DcTerms.HAS_PART, kid);
                                 }
                             }
