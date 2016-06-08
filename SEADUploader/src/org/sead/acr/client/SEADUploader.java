@@ -76,6 +76,7 @@ public class SEADUploader {
 
 	private static long max = 9223372036854775807l;
 	private static boolean merge = false;
+	private static boolean repairFlag = false;
 
 	private static long globalFileCount = 0l;
 	private static long totalBytes = 0L;
@@ -115,7 +116,9 @@ public class SEADUploader {
 			} else if (arg.equals("-merge")) {
 				merge = true;
 				println("Merge mode ON");
-
+			} else if (arg.equals("-repair")) {
+				repairFlag = true;
+				println("Repair mode ON");
 			} else if (arg.startsWith("-limit")) {
 				max = Long.parseLong(arg.substring(6));
 				println("Max ingest file count: " + max);
@@ -129,7 +132,9 @@ public class SEADUploader {
 
 		// go through arguments
 		for (String arg : args) {
-			if (!((arg.equalsIgnoreCase("-listonly")) || (arg.equals("-merge"))
+			if (!((arg.equalsIgnoreCase("-listonly"))
+					|| (arg.equalsIgnoreCase("-merge"))
+					|| (arg.equalsIgnoreCase("-repair"))
 					|| (arg.startsWith("-limit")) || (arg.startsWith("-ex")))) {
 				// First non-flag arg is the server URL
 				if (server == null) {
@@ -336,17 +341,28 @@ public class SEADUploader {
 										+ file);
 							}
 						}
-					} else if (collectionId != null) { // Child did exist, and
-														// parent (current
-														// focus) does
-						// Need to check existing children and add any missing
-						// ones that aren't new (those were already added)
+					} else {
+						// Need to check existing children (if collection already exists) and add any missing
+						// colls and datasets that aren't new (those were already added but were not children of the current collection )
 						if (existingDatasetChildren == null) {
-							existingDatasetChildren = getDatasetChildren(collectionId);
+							if (collectionId != null) {
+								existingDatasetChildren = getDatasetChildren(collectionId);
+							} else {
+								// collection doesn't exist yet - get an empty
+								// list
+								existingDatasetChildren = new HashSet<String>();
+							}
 						}
 						if (existingCollectionChildren == null) {
-							existingCollectionChildren = getCollectionChildren(collectionId);
+							if (collectionId != null) {
+								existingCollectionChildren = getCollectionChildren(collectionId);
+							} else {
+								// collection doesn't exist yet - get an empty
+								// list
+								existingCollectionChildren = new HashSet<String>();
+							}
 						}
+
 						if (file.isDirectory()) {
 							if (!existingCollectionChildren
 									.contains(existingUri)) {
