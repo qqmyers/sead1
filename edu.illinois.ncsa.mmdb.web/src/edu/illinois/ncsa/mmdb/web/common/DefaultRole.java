@@ -46,7 +46,7 @@ public enum DefaultRole {
         if (uri.startsWith(PREFIX)) {
             return (uri.substring(PREFIX.length()));
         } else {
-            return null;
+            return "Custom";
         }
     }
 
