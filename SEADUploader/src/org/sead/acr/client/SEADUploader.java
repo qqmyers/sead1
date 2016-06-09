@@ -90,6 +90,8 @@ public class SEADUploader {
 	static PrintWriter pw = null;
 	private static HttpClientContext localContext = HttpClientContext.create();
 
+	private static long authTime;
+
 	public static void main(String args[]) throws Exception {
 
 		// Create a local instance of cookie store
@@ -248,6 +250,12 @@ public class SEADUploader {
 		// may expire, in which case,
 		// re-authentication using the refresh token to get a new google token
 		// to allow SEAD login again may be required
+
+		// also need to watch the 60 minutes google token timeout - project
+		// spaces will invalidate the session at 60 minutes even if there is
+		// activity
+		authTime = System.currentTimeMillis();
+		
 		return authenticated;
 	}
 
@@ -342,8 +350,11 @@ public class SEADUploader {
 							}
 						}
 					} else {
-						// Need to check existing children (if collection already exists) and add any missing
-						// colls and datasets that aren't new (those were already added but were not children of the current collection )
+						// Need to check existing children (if collection
+						// already exists) and add any missing
+						// colls and datasets that aren't new (those were
+						// already added but were not children of the current
+						// collection )
 						if (existingDatasetChildren == null) {
 							if (collectionId != null) {
 								existingDatasetChildren = getDatasetChildren(collectionId);
@@ -760,10 +771,12 @@ public class SEADUploader {
 		// 30 minutes - a session started by google auth is currently good for 1
 		// hour with SEAD, but the JSESSION cookie will timeout if no activity
 		// for 30 minutes
-		// so this timeout at 29 minutes including some internal processing time
-		// should always catch any potential timeout and cause a
-		// reauthentication
-		if ((System.currentTimeMillis() - startTime) / 1000l > 1740) {
+		// so we check both for session inactivity > 30 min and google token expiration > 60 min
+		// these should always catch any potential timeout and reuathenticate
+		//Current values give the Uploader a 100 second window for the next upload to start
+		
+		long curTime = System.currentTimeMillis();
+		if (((curTime - startTime) / 1000l > 1700)|| ((curTime-authTime)/1000l >3500)) {
 			if (!authenticate(server)) {
 				println("Authentication failure - exiting.");
 				System.exit(0);
