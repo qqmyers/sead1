@@ -1673,7 +1673,7 @@ public class ItemServicesImpl
                 Set<Triple> triples = tMatcher.getResult();
                 TripleMatcher saltMatcher = new TripleMatcher();
 
-                saltMatcher.match(itemId, RequestPublicationHandler.hasSalt, null);
+                saltMatcher.match(newVersion, RequestPublicationHandler.hasSalt, null);
                 c.perform(saltMatcher);
                 Set<Triple> saltTriple = saltMatcher.getResult();
 
