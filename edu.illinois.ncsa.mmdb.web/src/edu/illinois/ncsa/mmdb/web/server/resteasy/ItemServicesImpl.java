@@ -1715,13 +1715,13 @@ public class ItemServicesImpl
 
                         if (tuple.get(1).toString().equals(pid) && (!(oldVer.toString().equals(agg_id)))) {
                             replacesExisting = true;
-
+                            log.info(agg_id + " is replacing " + oldVer.toString());
                             //Then replace the old RO with this one
 
                             //1) current date becomes the modified date
                             tw.add(newVersion, DcTerms.DATE_MODIFIED, now);
 
-                            //2) the original RO's issued data becomes the issued date for the new one
+                            //2) the original RO's issued date becomes the issued date for the new one
                             tw.add(newVersion, issued, tuple.get(2));
 
                             //3)existing version # is removed
@@ -1730,7 +1730,7 @@ public class ItemServicesImpl
                             c.perform(numMatcher);
                             Set<Triple> numTriple = numMatcher.getResult();
                             if (numTriple.size() == 1) {
-                                tw.remove((Triple) saltTriple.toArray()[0]);
+                                tw.remove((Triple) numTriple.toArray()[0]);
                             }
 
                             //4) the old versions number becomes this versions #
@@ -1775,6 +1775,7 @@ public class ItemServicesImpl
 
                 log.error("Error assigning pid: " + pid + " to " + agg_id);
                 log.error(e.getMessage());
+                e.printStackTrace();
                 result = new LinkedHashMap<String, Object>();
                 result.put("Error", "Server error while publishing " + agg_id);
                 r = Response.status(500).entity(result).build();
