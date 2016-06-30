@@ -89,7 +89,7 @@ public class URLRestService extends ItemServicesImpl {
             return Response.status(500).entity(result).build();
         }
         if (uri.startsWith("doi:")) {
-            String url = "http://dx.doi.org/" + uri.substring(4);
+            String url = "http://doi.org/" + uri.substring(4);
             //      log.error("Getting  " + url);
             IDMediator.getMetadata(url, tempResult);
         } else if (uri.startsWith("tag:")) {
@@ -152,7 +152,7 @@ public class URLRestService extends ItemServicesImpl {
         if (uri.startsWith("doi:")) {
             final InputStream is;
             try {
-                is = IDMediator.getDataStream(new URL("http://dx.doi.org/" + uri.substring(4)));
+                is = IDMediator.getDataStream(new URL("http://doi.org/" + uri.substring(4)));
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 //      log.warn(e);

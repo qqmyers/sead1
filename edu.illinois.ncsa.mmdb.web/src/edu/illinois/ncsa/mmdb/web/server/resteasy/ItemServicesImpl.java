@@ -2064,7 +2064,8 @@ public class ItemServicesImpl
                             Set<Triple> triples = pidMatcher.getResult();
                             if (!triples.isEmpty()) {
                                 String pid = triples.iterator().next().getObject().toString();
-                                if (!pid.startsWith("http://dx.doi.org/10.5072/FK")) {
+                                //Check for old and new styles
+                                if (!(pid.startsWith("http://dx.doi.org/10.5072/FK") || pid.startsWith("http://doi.org/10.5072/FK"))) {
                                     priorVersions.add(pid);
                                 }
                             }

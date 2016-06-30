@@ -59,6 +59,8 @@ import org.tupeloproject.rdf.terms.Rdf;
 import org.tupeloproject.rdf.terms.Rdfs;
 import org.tupeloproject.util.Tuple;
 
+import com.hp.hpl.jena.vocabulary.DCTerms;
+
 import edu.illinois.ncsa.mmdb.web.client.dispatch.GetPermissionsResult;
 import edu.illinois.ncsa.mmdb.web.client.dispatch.PermissionSetting;
 import edu.illinois.ncsa.mmdb.web.common.DefaultRole;
@@ -84,7 +86,7 @@ public class ContextUpdater {
     private static Log           log                 = LogFactory.getLog(ContextUpdater.class);
 
     public static final Resource CONTEXT_VERSION_URI = Resource.uriRef("tag:cet.ncsa.uiuc.edu,2008:/context/version"); //$NON-NLS-1$
-    public static final int      CONTEXT_VERSION_NO  = 10;
+    public static final int      CONTEXT_VERSION_NO  = 11;
 
     /**
      * This will update the context to version CONTEXT_VERSION_NO. If the
@@ -157,6 +159,9 @@ public class ContextUpdater {
         if (force || (version < 11)) {
             removeProblemRelationship(context);
         }
+        if (force || (version < 12)) {
+            updateDOIs(context);
+        }
 
         // Mark context as updated removing all old versions first.
         TripleWriter tw = new TripleWriter();
@@ -172,6 +177,23 @@ public class ContextUpdater {
         updateVersion(context, tw);
 
         log.info("Context is updated to version " + CONTEXT_VERSION_NO);
+    }
+
+    private static void updateDOIs(Context context) throws OperatorException {
+        TripleMatcher tm = new TripleMatcher();
+        tm.match(null, Resource.uriRef(DCTerms.identifier.getURI()), null);
+        context.perform(tm);
+        TripleWriter tw = new TripleWriter();
+        for (Triple t : tm.getResult() ) {
+            String pid = t.getObject().toString();
+            if (pid.startsWith("http://dx.doi.org/")) {
+                pid = "http://doi.org/" + pid.substring("http://dx.doi.org/".length());
+                tw.remove(t);
+                tw.add(new Triple(t.getSubject(), t.getPredicate(), pid));
+            }
+        }
+        context.perform(tw);
+        log.info("DOIs updated to use newer doi.org resolver");
     }
 
     private static void removeProblemRelationship(Context context) throws OperatorException {

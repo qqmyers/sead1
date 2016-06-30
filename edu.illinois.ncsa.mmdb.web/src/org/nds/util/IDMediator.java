@@ -27,15 +27,15 @@ public class IDMediator {
         InputStream is;
         try {
             is = getMetadataStream(new URL(
-                    "http://dx.doi.org/10.13012/J8MW2F2Q"));
+                    "http://doi.org/10.13012/J8MW2F2Q"));
             File f = new File("temp.ttl");
             writeFile(f, is);
             Map<String, Object> result = new LinkedHashMap<String, Object>();
             getMetadata(
-                    "http://dx.doi.org/10.13012/J8MW2F2Q", result);
+                    "http://doi.org/10.13012/J8MW2F2Q", result);
             System.out.println(result.toString());
             InputStream is2 = getDataStream(new URL(
-                    "http://dx.doi.org/10.13012/J8MW2F2Q"));
+                    "http://doi.org/10.13012/J8MW2F2Q"));
             File f2 = new File("data.bin");
             writeFile(f2, is2);
         } catch (MalformedURLException e) {
