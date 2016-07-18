@@ -15,24 +15,54 @@ function homePageJsonParser(json) {
 	var obj = jQuery.parseJSON(jsonString);
 	var publishedColls = Object.keys(obj);
 	if (publishedColls.length == 0) {
-				// No collections to display
-				div_html += "<div class='well'><h4 style='margin-top:-10px;' class='page-header'>"
-						+ "<h4>No Published Collections to Display</h4>"
-						+ "<div><p>Collections are considered published when their "
-						+ "<i>Publication Date</i> attribute is set. This occurs automatically "
-						+ "when data is published through the SEAD Virtual Archive. For more "
-						+ "information, see the documentation at <a href = 'http://sead-data.net'>"
-						+ "http://sead-data.net</a></p>" + "</div></div>";
-				$("#home-loading").hide();
-				$("#xmlBody").html(div_html);
-				return;
+		// No collections to display
+		div_html += "<div class='well'><h4 style='margin-top:-10px;' class='page-header'>"
+				+ "<h4>No Published Collections to Display</h4>"
+				+ "<div><p>Collections are considered published when their "
+				+ "<i>Publication Date</i> attribute is set. This occurs automatically "
+				+ "when data is published through the SEAD Virtual Archive. For more "
+				+ "information, see the documentation at <a href = 'http://sead-data.net'>"
+				+ "http://sead-data.net</a></p>" + "</div></div>";
+		$("#home-loading").hide();
+		$("#xmlBody").html(div_html);
+		return;
 	}
 
 	for (var i = 0; i < publishedColls.length; i++) {
-	if(publishedColls[i] != '@context') {
+		if (publishedColls[i] != '@context') {
 			writeCollection(i, json, obj[publishedColls[i]], true);
-}
+		}
 	}
+	tinysort($('#xmlBody').children());
+
+	$("#discovery>.span3").prepend($('<div/>').attr('id', 'sort'));
+	$('#sort').attr('class', 'well');
+	$('#sort').append(
+			$('<div/>').append($('<form/>').attr('id', 'sortorder')).attr(
+					'class', 'well'));
+	$('#sortorder').append($('<h3/>').text("Sort Order"));
+	$('#sortorder').append(
+			$('<div/>').append(
+					$('<input/>').attr('type', 'radio').attr('name', 'sortBy')
+							.attr('value', 'alpha')).append(
+					$('<span/>').text('Alphabetical')));
+	$('#sortorder').append(
+			$('<div/>').append(
+					$('<input/>').attr('type', 'radio').attr('name', 'sortBy')
+							.attr('value', 'mostRecent').attr('checked',
+									'checked')).append(
+					$('<span/>').text('Most Recent')));
+	$('#sortorder input').on('change', function() {
+		if ($('input[name="sortBy"]:checked', '#sortorder').val() === 'alpha') {
+			tinysort($('#xmlBody').children());
+		} else {
+			tinysort($('#xmlBody').children(), {
+				attr : 'date',
+				order : 'desc'
+			});
+		}
+	});
+
 	$("#home-loading").hide();
 	ft = $.filtrify("xmlBody", "facetedSearch", {
 		close : true,
@@ -79,25 +109,25 @@ function writeCollection(id, json, pub, topLevel) {
 
 	$("#collectionTitle" + id + ">div").html(displayTitle);
 	if (abs) {
-			var summary = abs.substring(0, 750);
+		var summary = abs.substring(0, 750);
 
-			if (abs.length > 750) {
-				summary += "...";
-				$("#abstract" + id + ">a").attr("href", "#discovery_" + uri)
-						.html("more ...");
-			}
-			$("#abstract" + id + ">pre").html(summary);
-			$("#abstract" + id).css("visibility", "visible");
-			
+		if (abs.length > 750) {
+			summary += "...";
+			$("#abstract" + id + ">a").attr("href", "#discovery_" + uri).html(
+					"more ...");
 		}
-		if((topLevel==true)&& (pub.IsReplacedBy == null)) {
-		$("#contents" + id + ">a").attr("href", "#discovery_" + uri)
-			.html("View Contents Listing ...");
-		} else {
-			$("#contents" + id + ">a").hide();
-		}
+		$("#abstract" + id + ">pre").html(summary);
+		$("#abstract" + id).css("visibility", "visible");
 
-				pageBiblioJsonParser(id, pub);
+	}
+	if ((topLevel == true) && (pub.IsReplacedBy == null)) {
+		$("#contents" + id + ">a").attr("href", "#discovery_" + uri).html(
+				"View Contents Listing ...");
+	} else {
+		$("#contents" + id + ">a").hide();
+	}
+
+	pageBiblioJsonParser(id, pub);
 }
 
 function filterreset() {

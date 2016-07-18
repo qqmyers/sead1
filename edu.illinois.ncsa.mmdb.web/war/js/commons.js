@@ -148,24 +148,32 @@ function pageBiblioJsonParser(id, json) {
 		}
 	}
 	var versionHtml = '';
-
+	var latest = -1;
 	if (pubversions.length != 0) {
 
 		for (var i = 0; i < pubversions.length; i++) {
 			var pid = pubversions[i]['External Identifier'];
 			var versionnum = pubversions[i]['version number'];
 			var pubdate = pubversions[i]['publication_date'];
-			var prefix = "<div>Archived Version: ";
+			var prefix = " class='archivalversion'>Archived Version: ";
 			if(pid!=null) {
-				if(pid.contains("doi.org/10.5072/FK")) {
-					prefix = "<div class='testversion'>Test Version (valid for 2 weeks): ";
+				if(pid.includes("doi.org/10.5072/FK")) {
+					prefix = " class='testversion'>Test Version (valid for 2 weeks): ";
 				}
+			} else {
+				prefix = " class='inprocess'>Version: ";
+				latest = Number.MAX_SAFE_INTEGER;
 			}
 			if (versionnum != null) {
-				versionHtml = versionHtml + prefix
-						+ versionnum + ",";
+				versionHtml = versionHtml + "<div ";
 				if (pubdate != null) {
-					versionHtml = versionHtml + " " + pubdate + ",";
+					var verDate = new Date(pubdate);
+					if(verDate.getTime()> latest) {
+						latest = verDate.getTime();
+					}
+					versionHtml = versionHtml + " date='" + verDate.getTime() + "'" + prefix + versionnum + ", " + pubdate + ",";
+				} else {
+					versionHtml = versionHtml + prefix	+ versionnum + ",";
 				}
 				if (pid != null) {
 					versionHtml = versionHtml
@@ -179,12 +187,19 @@ function pageBiblioJsonParser(id, json) {
 			}
 		}
 	}
-
+    if(latest ==-1) {
+    	latest = Number.MAX_SAFE_INTEGER;
+    }
+    $("#coll"+ id).attr('date',latest);
+    
 	if(!deleted) {
 		versionHtml = "<div><a href = '" + collection_Path + uri
 		+ "'>Current Version</a></div>" + versionHtml;
 	}
 	$("#versions" + id).html(versionHtml);
+    tinysort($("#versions"+id).children(), {attr:'date',order:'desc'});
+    
+    
 	if (creators.length != 0) {
 		var creatorString = creators[0];
 		var datacreatorString = creatornames[0];

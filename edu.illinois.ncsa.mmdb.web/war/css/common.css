@@ -209,3 +209,17 @@ table.tablesorter tbody tr td:last-child {
 #discovery .archivalversion {
         color: green;
 }
+#sort {
+margin-bottom: 0px;
+}
+
+#sort .well {
+margin-bottom: 0px;
+}
+
+#sortorder input{
+vertical-align: text-bottom;
+}
+#sortorder span {
+margin: 5px;
+}
