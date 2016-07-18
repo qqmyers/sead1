@@ -44,13 +44,13 @@ function homePageJsonParser(json) {
 	$('#sortorder').append(
 			$('<div/>').append(
 					$('<input/>').attr('type', 'radio').attr('name', 'sortBy')
-							.attr('value', 'alpha')).append(
+							.attr('value', 'alpha').attr('checked',
+							'checked')).append(
 					$('<span/>').text('Alphabetical')));
 	$('#sortorder').append(
 			$('<div/>').append(
 					$('<input/>').attr('type', 'radio').attr('name', 'sortBy')
-							.attr('value', 'mostRecent').attr('checked',
-									'checked')).append(
+							.attr('value', 'mostRecent')).append(
 					$('<span/>').text('Most Recent')));
 	$('#sortorder input').on('change', function() {
 		if ($('input[name="sortBy"]:checked', '#sortorder').val() === 'alpha') {
