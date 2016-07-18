@@ -155,8 +155,14 @@ function pageBiblioJsonParser(id, json) {
 			var pid = pubversions[i]['External Identifier'];
 			var versionnum = pubversions[i]['version number'];
 			var pubdate = pubversions[i]['publication_date'];
+			var prefix = "<div>Archived Version: ";
+			if(pid!=null) {}
+				if(pid.contains("doi.org/10.5072/FK")) {
+					prefix = "<div class='testversion'>Test Version (valid for 2 weeks): ";
+				}
+			}
 			if (versionnum != null) {
-				versionHtml = versionHtml + "<div>Archived Version: "
+				versionHtml = versionHtml + prefix
 						+ versionnum + ",";
 				if (pubdate != null) {
 					versionHtml = versionHtml + " " + pubdate + ",";

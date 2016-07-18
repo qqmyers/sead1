@@ -202,3 +202,10 @@ table.tablesorter tbody tr td:last-child {
 	font-weight: 400;
 	margin-left: 10px;
 }
+
+#discovery .testversion {
+        color: brown;
+}
+#discovery .archivalversion {
+        color: green;
+}
