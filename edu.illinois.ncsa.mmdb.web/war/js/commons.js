@@ -127,8 +127,8 @@ function pageBiblioJsonParser(id, json) {
 	pubversions = new Array();
 	getBiblioAttributesForPage(json);
 	var deleted = false;
-	if(json.IsReplacedBy != null) {
-		deleted=true;
+	if (json.IsReplacedBy != null) {
+		deleted = true;
 	}
 	$("#collectionTitle" + id + ">div").html(title);
 
@@ -156,9 +156,9 @@ function pageBiblioJsonParser(id, json) {
 			var versionnum = pubversions[i]['version number'];
 			var pubdate = pubversions[i]['publication_date'];
 			var prefix = " class='archivalversion'>Archived Version: ";
-			if(pid!=null) {
-				if(pid.includes("doi.org/10.5072/FK")) {
-					prefix = " class='testversion'>Test Version (valid for 2 weeks): ";
+			if (pid != null) {
+				if (pid.includes("doi.org/10.5072/FK")) {
+					prefix = " class='testversion'>Test Version: ";
 				}
 			} else {
 				prefix = " class='inprocess'>Version: ";
@@ -168,17 +168,24 @@ function pageBiblioJsonParser(id, json) {
 				versionHtml = versionHtml + "<div ";
 				if (pubdate != null) {
 					var verDate = new Date(pubdate);
-					if(verDate.getTime()> latest) {
+					if (verDate.getTime() > latest) {
 						latest = verDate.getTime();
 					}
-					versionHtml = versionHtml + " date='" + verDate.getTime() + "'" + prefix + versionnum + ", " + pubdate + ",";
+					versionHtml = versionHtml + " date='" + verDate.getTime()
+							+ "'" + prefix + versionnum + ", " + pubdate + ",";
 				} else {
-					versionHtml = versionHtml + prefix	+ versionnum + ",";
+					versionHtml = versionHtml + prefix + versionnum + ",";
 				}
 				if (pid != null) {
 					versionHtml = versionHtml
 							+ " PID = <a target = \'blank\' href=\'" + pid
-							+ "\'>" + pid + "</a></div>";
+							+ "\'>" + pid + "</a>";
+					if (pid.includes("doi.org/10.5072/FK")) {
+						versionHtml = versionHtml
+								+ "<p class=red-rectangle>Temporary DOI</p>";
+					}
+					versionHtml = versionHtml + "</div>";
+
 				} else {
 					versionHtml = versionHtml
 							+ " <i>Publication in process</i>";
@@ -187,19 +194,21 @@ function pageBiblioJsonParser(id, json) {
 			}
 		}
 	}
-    if(latest ==-1) {
-    	latest = Number.MAX_SAFE_INTEGER;
-    }
-    $("#coll"+ id).attr('date',latest);
-    
-	if(!deleted) {
+	if (latest == -1) {
+		latest = Number.MAX_SAFE_INTEGER;
+	}
+	$("#coll" + id).attr('date', latest);
+
+	if (!deleted) {
 		versionHtml = "<div><a href = '" + collection_Path + uri
-		+ "'>Current Version</a></div>" + versionHtml;
+				+ "'>Current Version</a></div>" + versionHtml;
 	}
 	$("#versions" + id).html(versionHtml);
-    tinysort($("#versions"+id).children(), {attr:'date',order:'desc'});
-    
-    
+	tinysort($("#versions" + id).children(), {
+		attr : 'date',
+		order : 'desc'
+	});
+
 	if (creators.length != 0) {
 		var creatorString = creators[0];
 		var datacreatorString = creatornames[0];
